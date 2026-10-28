@@ -33,6 +33,7 @@ native-ui = [
   "system-font-discovery",
   "bevy/audio",
   "bevy/wav",
+  "dep:mir2-crystal-gdi-text",
 ]
 system-font-discovery = ["bevy/system_font_discovery"]
 
@@ -51,6 +52,7 @@ mir2-client-core = { path = "../client-core" }
 mir2-game-data = { path = "../../../packages/game-data", optional = true }
 mir2-protocol = { path = "../../../packages/protocol" }
 mir2-ui-core = { path = "../ui-core" }
+mir2-crystal-gdi-text = { path = "../crystal-gdi-text", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 unicode-width = "0.2"

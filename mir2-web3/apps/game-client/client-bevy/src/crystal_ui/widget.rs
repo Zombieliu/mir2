@@ -407,6 +407,34 @@ pub fn spawn_crystal_image_button<T: Bundle>(
     focused: bool,
     enabled: bool,
 ) {
+    spawn_crystal_image_button_impl(parent, asset_server, spec, assets, action, focused, enabled, true);
+}
+
+/// Preserve Crystal's baked caption pixels when the caller needs original art.
+/// The hit target and visual-state handling are identical to ordinary buttons.
+pub(crate) fn spawn_original_crystal_image_button<T: Bundle>(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    spec: CrystalButtonSpec,
+    assets: CrystalButtonAssetSet,
+    action: T,
+    focused: bool,
+    enabled: bool,
+) {
+    spawn_crystal_image_button_impl(parent, asset_server, spec, assets, action, focused, enabled, false);
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_crystal_image_button_impl<T: Bundle>(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    spec: CrystalButtonSpec,
+    assets: CrystalButtonAssetSet,
+    action: T,
+    focused: bool,
+    enabled: bool,
+    localize: bool,
+) {
     let (image_left, image_top) = button_image_offset(spec);
     let path = resolve_button_visual_state(None, focused, enabled)
         .asset_path(&assets)
@@ -436,7 +464,7 @@ pub fn spawn_crystal_image_button<T: Bundle>(
     }
 
     entity.with_children(|button| {
-        if crate::native_i18n::active() {
+        if localize && crate::native_i18n::active() {
             if let Some(caption) = crystal_button_caption(spec) {
                 let caption = match (spec.library, spec.normal) {
                     ("Title", 774 | 775) => crate::native_i18n::key("game.extra.035", caption),

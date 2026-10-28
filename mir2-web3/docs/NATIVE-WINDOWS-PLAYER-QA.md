@@ -1,5 +1,9 @@
 # Windows 原生可玩闭环验收清单
 
+## 行会公告／统计页：英文96 DPI文字与原版区域像素对照通过（2026-10-28）
+
+修正统计栏右对齐、原8pt字体/GDI边距、原版标题页签及招人按钮尺寸；补齐原库中有效但漏导出的Prguse2/424。最终客户端构建通过，Guild86项及共享widget20项通过，素材42项无差异；显式主窗口GPU测试通过，六个文字纹理与六个画面区域均零差异。已启动独立本地客户端，保留现有角色与行会。[截图、独立C#参考、源码及检查记录](generated/player-qa/guild-pixel-native-20261028/README.md)。范围仅公告／统计页、英文、96 DPI；其他页、编辑状态、其他语言／DPI和真人Accepted仍开放。
+
 > 2026-10-15 runtime配置补充：Root默认318通过（原2项忽略），Native economy/shared UI启用521通过（原4项忽略）。28项既有Native正例转至启用配置真实执行，默认拒绝与结构负例保留；CI覆盖两配置及WASM检查。仅修测试配置，产品guard未改，GUI/发布/人类验收仍开放。详见[本轮集成记录](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
 
 

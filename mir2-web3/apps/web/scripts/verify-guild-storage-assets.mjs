@@ -15,7 +15,7 @@ if (!dataDir || process.argv.length !== 3) {
 const publicDir = path.resolve(import.meta.dirname, "../public/original-ui");
 const groups = {
   Prguse: [1851, 917, 918, 238],
-  Prguse2: [197, 198, 199, 207, 208, 209, 206, 360, 361, 362],
+  Prguse2: [424, 197, 198, 199, 207, 208, 209, 206, 360, 361, 362],
   Title: [93, 94, 99, 100, 101, 102, 105, 106, 200, 201, 202, 203, 204, 205],
   Items: [0, 116, 3660, 3661, 3662, 3673, 3674, 2960, 3675, 3670, 3671, 2961, 3672],
 };
@@ -120,4 +120,4 @@ for (const [name, indices] of Object.entries(groups)) {
 }
 
 console.log(JSON.stringify(report, null, 2));
-if (report.frameCount !== 41 || report.mismatchCount !== 0) process.exitCode = 1;
+if (report.frameCount !== 42 || report.mismatchCount !== 0) process.exitCode = 1;

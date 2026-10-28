@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "scope": "One real canonical frame424 export and required-asset repair; no substitute pixels",
+  "source": {
+    "file": "E:/mir2/Crystal/Build/Client/Debug/Data/Prguse2.Lib",
+    "bytes": 3557648,
+    "sha256": "510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861"
+  },
+  "decoder": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\crystal-library.mjs",
+    "bytes": 11061,
+    "sha256": "68f2893b237a652c3c7a685c486c8451f79b32bc3e2f1c4ff1e51fc7d8316a4b"
+  },
+  "generatedAt": "2026-10-28T11:35:44.533Z",
+  "sourceFrame": {
+    "index": 424,
+    "width": 260,
+    "height": 22,
+    "x": 0,
+    "y": 0,
+    "shadowX": 0,
+    "shadowY": 0,
+    "shadow": 0,
+    "dataOffset": 1017703,
+    "dataLength": 976,
+    "maskRgba": false
+  },
+  "png": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse2\\424.png",
+    "bytes": 1514,
+    "sha256": "8143accb57ff42aae2c8a757e76f32a0e229603240c433d92015d25f50f4253d"
+  },
+  "overlayCopy": {
+    "file": "C:\\mir2-build\\guild-pixel-parity-20261028\\mir2-assets\\original-ui\\Prguse2\\424.png",
+    "bytes": 1514,
+    "sha256": "8143accb57ff42aae2c8a757e76f32a0e229603240c433d92015d25f50f4253d"
+  },
+  "rgbaSha256": "3bd107c31ce9cad9b5a91b4731aca16a899a835c25ea432f235c601a8d8d83f3",
+  "independentSharpDecodeExact": true,
+  "otherExistingPngsUnchanged": 401,
+  "originalManifestExportedAtUnchanged": "2026-10-11T20:03:08.968Z",
+  "strictIndexRetainsSameLibraryKeys": true,
+  "changes": [
+    {
+      "key": "allowlist",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\crystal-ui-export-manifest.json",
+      "before": {
+        "bytes": 48579,
+        "sha256": "1758ec3916d93d2737ff77ec02500396d958e59893a6f0b0300cc2bc080bbb9c",
+        "preimage": "C:\\mir2-build\\guild-pixel-parity-20261028\\assets-export-v1\\actual-v1\\allowlist.before"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\crystal-ui-export-manifest.json",
+        "bytes": 48592,
+        "sha256": "cbedb1ac2acb9240666251f1727611df126542dfaa8c60dd60e5b8c240d6918c"
+      }
+    },
+    {
+      "key": "libraryMeta",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse2\\meta.json",
+      "before": {
+        "bytes": 176553,
+        "sha256": "db31438e7516e77dc57769d2ab1796ef151f5bbec9d3d29ec313acb53a5027a1",
+        "preimage": "C:\\mir2-build\\guild-pixel-parity-20261028\\assets-export-v1\\actual-v1\\libraryMeta.before"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse2\\meta.json",
+        "bytes": 177013,
+        "sha256": "52ff33c696a8b04d576bddcc7b8f14d94aa5b3b35cd8e0d31f379295e9a635cd"
+      }
+    },
+    {
+      "key": "manifest",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\manifest.generated.json",
+      "before": {
+        "bytes": 45316197,
+        "sha256": "cea2c3044f370c442ab15bac3488da2c1f0c111551ef1a3f050bd7c7a2a1ed6f",
+        "preimage": "C:\\mir2-build\\guild-pixel-parity-20261028\\assets-export-v1\\actual-v1\\manifest.before"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\manifest.generated.json",
+        "bytes": 45316721,
+        "sha256": "d8c033ec690dd96a1c9520b3b857501fa212d3ac501bb4e6498d2e7cae3c3606"
+      }
+    },
+    {
+      "key": "strictIndex",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\original_scene_sprite_library_keys.json",
+      "before": {
+        "bytes": 2660,
+        "sha256": "8120445f37f14e8f7bd5aaa736c5a04f4b1f7a6ec6669e3c5723e2e3ad71db0f",
+        "preimage": "C:\\mir2-build\\guild-pixel-parity-20261028\\assets-export-v1\\actual-v1\\strictIndex.before"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\original_scene_sprite_library_keys.json",
+        "bytes": 2660,
+        "sha256": "0db10b8be7f6f1c86f1c35c9a6dec99b2b479fde3b388f14469f7a60e2b31107"
+      }
+    },
+    {
+      "key": "validator",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\verify-guild-storage-assets.mjs",
+      "before": {
+        "bytes": 5111,
+        "sha256": "0e3e2c002521dc75e93e7c8c31632f769921691651d04e939c8aeeac9d4b3992",
+        "preimage": "C:\\mir2-build\\guild-pixel-parity-20261028\\assets-export-v1\\actual-v1\\validator.before"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\verify-guild-storage-assets.mjs",
+        "bytes": 5121,
+        "sha256": "4a5ad84d88968691c33d363ac527ff32a7d16e2b57b93ff1119268060704872d"
+      }
+    },
+    {
+      "key": "packageStrict",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\package-windows-candidate.ps1",
+      "before": {
+        "bytes": 121213,
+        "sha256": "6f0a85d93a57521beac4ea076c016f7b7497e5c6725b4191c46298bd6690f6e3",
+        "preimage": "C:\\mir2-build\\guild-pixel-parity-20261028\\assets-export-v1\\actual-v1\\packageStrict.before"
+      },
+      "after": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\scripts\\package-windows-candidate.ps1",
+        "bytes": 121217,
+        "sha256": "e38d8c505f4c2d134f89ce3cbcdf4dac0b7585b698d7a6cfe49e65acf8ee0b06"
+      }
+    }
+  ],
+  "inverseOnly424Added": true,
+  "newDecoderWritten": false,
+  "rustModified": false,
+  "fullPackageReexported": false,
+  "installedDModified": false
+}

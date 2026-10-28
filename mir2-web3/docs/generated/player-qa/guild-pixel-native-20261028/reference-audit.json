@@ -1,0 +1,2574 @@
+{
+  "schemaVersion": 1,
+  "scope": "Source/GDI reference audit only; no native/Crystal screenshot comparison or acceptance",
+  "sourcePins": [
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\MirScenes\\Dialogs\\GuildDialog.cs",
+      "bytes": 85536,
+      "sha256": "5a4f5e7e55ee83c20492a06d8f3216be4938be06ff7c782263ea8be4907eac5e"
+    },
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\MirControls\\MirLabel.cs",
+      "bytes": 8797,
+      "sha256": "4a3932f085e671c872fdfbfc8324a6c71e2355fd5313ed56605098ac950e003c"
+    },
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\MirControls\\MirTextBox.cs",
+      "bytes": 13073,
+      "sha256": "ee6fac00ee5c5a321d8ae015d1a97d3e145f65a9b8738502e09bc2424bb1bcec"
+    },
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\MirControls\\MirControl.cs",
+      "bytes": 32912,
+      "sha256": "6356acf1fd91ad8f38bd9f2d25f1e33c62dab1d9072bcbfef60a8b2e5e82bd26"
+    },
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\MirControls\\MirImageControl.cs",
+      "bytes": 6309,
+      "sha256": "e0805305c2762f9b503a10cd052970a8af4a26ba0daddcf56fe70fe82d3569cc"
+    },
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\MirGraphics\\MLibrary.cs",
+      "bytes": 39444,
+      "sha256": "afda6ebb7a163d745d6398ea5c92ce80524daa6fb85c6167a09514867cf6f8c8"
+    },
+    {
+      "file": "E:\\mir2-player-journey\\Crystal\\Client\\Settings.cs",
+      "bytes": 20209,
+      "sha256": "122091c11208e8aafbd65b69ee9ee25d356857928862c2414ada98e2f5ce965a"
+    }
+  ],
+  "exportedAssetManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\manifest.generated.json",
+    "bytes": 45316197,
+    "sha256": "cea2c3044f370c442ab15bac3488da2c1f0c111551ef1a3f050bd7c7a2a1ed6f"
+  },
+  "coordinateConvention": "All windowRelativeControlOrigin coordinates must be added to actual GuildDialog.DisplayLocation. Screen-global origin is not known from source because Center/drag depends on runtime screen; do not claim absolute screenshot pixels.",
+  "originalDrawRules": {
+    "labelFont": "Settings.FontName default Arial; Settings.cs72 default and255 INI override",
+    "labelPt": 8,
+    "memberNameStatusPt": 7,
+    "textBoxDefaultPt": 10,
+    "scaleFont": "font.Size * 96f / MirControl.FontDpiX; getter uses CMain.Graphics.DpiX, fallback96",
+    "autoSize": "MirLabel false unless explicitly true; true uses TextRenderer.MeasureText and adds2 to each size if outline",
+    "labelForegroundRectangle": {
+      "x": 1,
+      "y": 1,
+      "width": "control width",
+      "height": "control height"
+    },
+    "outlineOffsets": [
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    "outlineColour": "Black",
+    "defaultTextFlags": "WordBreak; GDI default glyph padding retained; no NoPadding; Headers override Right; experience label overrides VerticalCenter|HorizontalCenter",
+    "graphics": {
+      "SmoothingMode": "AntiAlias",
+      "TextRenderingHint": "AntiAliasGridFit",
+      "CompositingQuality": "HighQuality",
+      "InterpolationMode": "NearestNeighbor",
+      "PixelOffsetMode": "HighQuality",
+      "TextContrast": 0
+    },
+    "textBox": "WinForms TextBox.BorderStyle.None, AutoSize default true; DrawToBitmap, not TextRenderer label. Actual10pt96DPI TextBox height16 while Mir wrapper requested21. Notice explicit8pt multiline, separate from recruit10pt single line.",
+    "sprite": "MirImageControl.UseOffSet default false and MLibrary.Draw offSet=false; manifest x/y are not automatically added. Image Size default AutoSize uses alpha GetTrueSize dimensions but draw still uses full bitmap at control origin; no automatic alpha-bound origin subtraction."
+  },
+  "staticAndFormulaControls": [
+    {
+      "name": "TitleLabel",
+      "type": "MirImageControl",
+      "sourceLine": 130,
+      "parent": "this",
+      "locationExpression": "new Point(18, 9)",
+      "location": {
+        "x": 18,
+        "y": 9
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "25",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 18,
+        "y": 9
+      }
+    },
+    {
+      "name": "NoticeButton",
+      "type": "MirButton",
+      "sourceLine": 138,
+      "parent": "this",
+      "locationExpression": "new Point(20, 38)",
+      "location": {
+        "x": 20,
+        "y": 38
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "93",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 20,
+        "y": 38
+      }
+    },
+    {
+      "name": "MembersButton",
+      "type": "MirButton",
+      "sourceLine": 148,
+      "parent": "this",
+      "locationExpression": "new Point(91, 38)",
+      "location": {
+        "x": 91,
+        "y": 38
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "99",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 91,
+        "y": 38
+      }
+    },
+    {
+      "name": "StorageButton",
+      "type": "MirButton",
+      "sourceLine": 158,
+      "parent": "this",
+      "locationExpression": "new Point(162, 38)",
+      "location": {
+        "x": 162,
+        "y": 38
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "105",
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 162,
+        "y": 38
+      }
+    },
+    {
+      "name": "RankButton",
+      "type": "MirButton",
+      "sourceLine": 169,
+      "parent": "this",
+      "locationExpression": "new Point(233, 38)",
+      "location": {
+        "x": 233,
+        "y": 38
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "101",
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 233,
+        "y": 38
+      }
+    },
+    {
+      "name": "StatusButton",
+      "type": "MirButton",
+      "sourceLine": 180,
+      "parent": "this",
+      "locationExpression": "new Point(501, 38)",
+      "location": {
+        "x": 501,
+        "y": 38
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "103",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 501,
+        "y": 38
+      }
+    },
+    {
+      "name": "BuffButton",
+      "type": "MirButton",
+      "sourceLine": 190,
+      "parent": "this",
+      "locationExpression": "new Point(430, 38)",
+      "location": {
+        "x": 430,
+        "y": 38
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "95",
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 430,
+        "y": 38
+      }
+    },
+    {
+      "name": "CloseButton",
+      "type": "MirButton",
+      "sourceLine": 201,
+      "parent": "this",
+      "locationExpression": "new Point(565, 4)",
+      "location": {
+        "x": 565,
+        "y": 4
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "360",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 565,
+        "y": 4
+      }
+    },
+    {
+      "name": "NoticePage",
+      "type": "MirImageControl",
+      "sourceLine": 215,
+      "parent": "this",
+      "locationExpression": "new Point(0, 60)",
+      "location": {
+        "x": 0,
+        "y": 60
+      },
+      "declaredSize": {
+        "width": 352,
+        "height": 372
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 0,
+        "y": 60
+      }
+    },
+    {
+      "name": "Notice",
+      "type": "MirTextBox",
+      "sourceLine": 222,
+      "parent": "NoticePage",
+      "locationExpression": "new Point(13, 1)",
+      "location": {
+        "x": 13,
+        "y": 1
+      },
+      "declaredSize": {
+        "width": 322,
+        "height": 330
+      },
+      "explicitFont": "new Font(Settings.FontName, 8F)",
+      "effectiveDefaultFont": "Settings.FontName 10pt scaled96/DpiX",
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "Color.White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 13,
+        "y": 61
+      }
+    },
+    {
+      "name": "NoticeEditButton",
+      "type": "MirButton",
+      "sourceLine": 234,
+      "parent": "NoticePage",
+      "locationExpression": "new Point(20, 342)",
+      "location": {
+        "x": 20,
+        "y": 342
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "560",
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 20,
+        "y": 402
+      }
+    },
+    {
+      "name": "NoticeSaveButton",
+      "type": "MirButton",
+      "sourceLine": 247,
+      "parent": "NoticePage",
+      "locationExpression": "new Point(20, 342)",
+      "location": {
+        "x": 20,
+        "y": 342
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "554",
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 20,
+        "y": 402
+      }
+    },
+    {
+      "name": "NoticeUpButton",
+      "type": "MirButton",
+      "sourceLine": 260,
+      "parent": "NoticePage",
+      "locationExpression": "new Point(337, 1)",
+      "location": {
+        "x": 337,
+        "y": 1
+      },
+      "declaredSize": {
+        "width": 16,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "197",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 61
+      }
+    },
+    {
+      "name": "NoticeDownButton",
+      "type": "MirButton",
+      "sourceLine": 280,
+      "parent": "NoticePage",
+      "locationExpression": "new Point(337, 318)",
+      "location": {
+        "x": 337,
+        "y": 318
+      },
+      "declaredSize": {
+        "width": 16,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "207",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 378
+      }
+    },
+    {
+      "name": "NoticePositionBar",
+      "type": "MirButton",
+      "sourceLine": 301,
+      "parent": "NoticePage",
+      "locationExpression": "new Point(337, 16)",
+      "location": {
+        "x": 337,
+        "y": 16
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "206",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 76
+      }
+    },
+    {
+      "name": "MembersPage",
+      "type": "MirImageControl",
+      "sourceLine": 318,
+      "parent": "this",
+      "locationExpression": "new Point(0, 60)",
+      "location": {
+        "x": 0,
+        "y": 60
+      },
+      "declaredSize": {
+        "width": 352,
+        "height": 372
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 0,
+        "y": 60
+      }
+    },
+    {
+      "name": "MembersPageBase",
+      "type": "MirImageControl",
+      "sourceLine": 325,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(13, 1)",
+      "location": {
+        "x": 13,
+        "y": 1
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1852",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 13,
+        "y": 61
+      }
+    },
+    {
+      "name": "MembersRanks[i]",
+      "type": "MirDropDownBox",
+      "sourceLine": 343,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(24, 30 + (i * 15))",
+      "location": null,
+      "declaredSize": {
+        "width": 100,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "Color.White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "false",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "MembersName[i]",
+      "type": "MirLabel",
+      "sourceLine": 358,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(125, 30 + (i * 15))",
+      "location": null,
+      "declaredSize": {
+        "width": 100,
+        "height": 14
+      },
+      "explicitFont": "new Font(Settings.FontName, 7F)",
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "Color.White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "false",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "MembersStatus[i]",
+      "type": "MirLabel",
+      "sourceLine": 374,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(225, 30 + (i * 15))",
+      "location": null,
+      "declaredSize": {
+        "width": 100,
+        "height": 14
+      },
+      "explicitFont": "new Font(Settings.FontName, 7F)",
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "Color.White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "false",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "MembersDelete[i]",
+      "type": "MirButton",
+      "sourceLine": 390,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(210, 30 + (i * 15))",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "917",
+      "visible": "true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "MembersUpButton",
+      "type": "MirButton",
+      "sourceLine": 402,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(337, 1)",
+      "location": {
+        "x": 337,
+        "y": 1
+      },
+      "declaredSize": {
+        "width": 16,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "197",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 61
+      }
+    },
+    {
+      "name": "MembersDownButton",
+      "type": "MirButton",
+      "sourceLine": 421,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(337, 318)",
+      "location": {
+        "x": 337,
+        "y": 318
+      },
+      "declaredSize": {
+        "width": 16,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "207",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 378
+      }
+    },
+    {
+      "name": "MembersPositionBar",
+      "type": "MirButton",
+      "sourceLine": 441,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(337, 16)",
+      "location": {
+        "x": 337,
+        "y": 16
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "206",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 76
+      }
+    },
+    {
+      "name": "MembersShowOfflineButton",
+      "type": "MirButton",
+      "sourceLine": 452,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(230, 310)",
+      "location": {
+        "x": 230,
+        "y": 310
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1346",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 230,
+        "y": 370
+      }
+    },
+    {
+      "name": "MembersShowOfflineStatus",
+      "type": "MirImageControl",
+      "sourceLine": 463,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(230, 310)",
+      "location": {
+        "x": 230,
+        "y": 310
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1347",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 230,
+        "y": 370
+      }
+    },
+    {
+      "name": "MembersShowOffline",
+      "type": "MirLabel",
+      "sourceLine": 473,
+      "parent": "MembersPage",
+      "locationExpression": "new Point(245, 309)",
+      "location": {
+        "x": 245,
+        "y": 309
+      },
+      "declaredSize": {
+        "width": 150,
+        "height": 12
+      },
+      "explicitFont": "new Font(Settings.FontName, 7F)",
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "Color.White",
+      "textExpression": "GameLanguage.ClientTextMap.GetLocalization(ClientTextKeys.ShowOffline)",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 245,
+        "y": 369
+      }
+    },
+    {
+      "name": "StatusPage",
+      "type": "MirImageControl",
+      "sourceLine": 489,
+      "parent": "this",
+      "locationExpression": "new Point(355, 60)",
+      "location": {
+        "x": 355,
+        "y": 60
+      },
+      "declaredSize": {
+        "width": 230,
+        "height": 372
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 355,
+        "y": 60
+      }
+    },
+    {
+      "name": "StatusPageBase",
+      "type": "MirImageControl",
+      "sourceLine": 496,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(10, 2)",
+      "location": {
+        "x": 10,
+        "y": 2
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1850",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 365,
+        "y": 62
+      }
+    },
+    {
+      "name": "StatusHeaders",
+      "type": "MirLabel",
+      "sourceLine": 519,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(7, 47)",
+      "location": {
+        "x": 7,
+        "y": 47
+      },
+      "declaredSize": {
+        "width": 75,
+        "height": 300
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "TextFormatFlags.Right",
+      "autoSize": "false",
+      "foreColour": "Color.Gray",
+      "textExpression": "GameLanguage.ClientTextMap.GetLocalization(ClientTextKeys.GuildNameLevelMembers)",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 362,
+        "y": 107
+      }
+    },
+    {
+      "name": "StatusGuildName",
+      "type": "MirLabel",
+      "sourceLine": 530,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(82, 47)",
+      "location": {
+        "x": 82,
+        "y": 47
+      },
+      "declaredSize": {
+        "width": 120,
+        "height": 200
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"\"",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 437,
+        "y": 107
+      }
+    },
+    {
+      "name": "StatusLevel",
+      "type": "MirLabel",
+      "sourceLine": 539,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(82, 73)",
+      "location": {
+        "x": 82,
+        "y": 73
+      },
+      "declaredSize": {
+        "width": 120,
+        "height": 200
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"\"",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 437,
+        "y": 133
+      }
+    },
+    {
+      "name": "StatusMembers",
+      "type": "MirLabel",
+      "sourceLine": 548,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(82, 99)",
+      "location": {
+        "x": 82,
+        "y": 99
+      },
+      "declaredSize": {
+        "width": 120,
+        "height": 200
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"\"",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 437,
+        "y": 159
+      }
+    },
+    {
+      "name": "StatusExpBar",
+      "type": "MirImageControl",
+      "sourceLine": 557,
+      "parent": "this",
+      "locationExpression": "new Point(322, 403)",
+      "location": {
+        "x": 322,
+        "y": 403
+      },
+      "declaredSize": {
+        "width": 260,
+        "height": 15
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "423",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 322,
+        "y": 403
+      }
+    },
+    {
+      "name": "StatusExpLabel",
+      "type": "MirLabel",
+      "sourceLine": 569,
+      "parent": "this",
+      "locationExpression": "new Point(322, 405)",
+      "location": {
+        "x": 322,
+        "y": 405
+      },
+      "declaredSize": {
+        "width": 260,
+        "height": 15
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 322,
+        "y": 405
+      }
+    },
+    {
+      "name": "MembersRecruitName",
+      "type": "MirTextBox",
+      "sourceLine": 578,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(40, 300)",
+      "location": {
+        "x": 40,
+        "y": 300
+      },
+      "declaredSize": {
+        "width": 130,
+        "height": 21
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 10pt scaled96/DpiX",
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"\"",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 395,
+        "y": 360
+      }
+    },
+    {
+      "name": "RecruitMemberButton",
+      "type": "MirButton",
+      "sourceLine": 591,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(170, 298)",
+      "location": {
+        "x": 170,
+        "y": 298
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "356",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 525,
+        "y": 358
+      }
+    },
+    {
+      "name": "RecruitMemberLabel",
+      "type": "MirLabel",
+      "sourceLine": 604,
+      "parent": "StatusPage",
+      "locationExpression": "new Point(36, 283)",
+      "location": {
+        "x": 36,
+        "y": 283
+      },
+      "declaredSize": {
+        "width": 150,
+        "height": 15
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "GameLanguage.ClientTextMap.GetLocalization(ClientTextKeys.RecruitMember)",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 391,
+        "y": 343
+      }
+    },
+    {
+      "name": "StoragePage",
+      "type": "MirImageControl",
+      "sourceLine": 617,
+      "parent": "this",
+      "locationExpression": "new Point(0, 60)",
+      "location": {
+        "x": 0,
+        "y": 60
+      },
+      "declaredSize": {
+        "width": 352,
+        "height": 372
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 0,
+        "y": 60
+      }
+    },
+    {
+      "name": "StoragePageBase",
+      "type": "MirImageControl",
+      "sourceLine": 624,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(30, 19)",
+      "location": {
+        "x": 30,
+        "y": 19
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1851",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 30,
+        "y": 79
+      }
+    },
+    {
+      "name": "StorageGoldText",
+      "type": "MirLabel",
+      "sourceLine": 641,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(194, 312)",
+      "location": {
+        "x": 194,
+        "y": 312
+      },
+      "declaredSize": {
+        "width": 125,
+        "height": 12
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"0\"",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 194,
+        "y": 372
+      }
+    },
+    {
+      "name": "StorageGoldAdd",
+      "type": "MirButton",
+      "sourceLine": 650,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(158, 313)",
+      "location": {
+        "x": 158,
+        "y": 313
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "918",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 158,
+        "y": 373
+      }
+    },
+    {
+      "name": "StorageGoldRemove",
+      "type": "MirButton",
+      "sourceLine": 661,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(142, 313)",
+      "location": {
+        "x": 142,
+        "y": 313
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "917",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 142,
+        "y": 373
+      }
+    },
+    {
+      "name": "StorageGrid[idx]",
+      "type": "MirItemCell",
+      "sourceLine": 679,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(x * 35 + 31 + x, y * 35 + 20 + y)",
+      "location": null,
+      "declaredSize": {
+        "width": 35,
+        "height": 35
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Items",
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "StorageUpButton",
+      "type": "MirButton",
+      "sourceLine": 694,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(337, 1)",
+      "location": {
+        "x": 337,
+        "y": 1
+      },
+      "declaredSize": {
+        "width": 16,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "197",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 61
+      }
+    },
+    {
+      "name": "StorageDownButton",
+      "type": "MirButton",
+      "sourceLine": 714,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(337, 318)",
+      "location": {
+        "x": 337,
+        "y": 318
+      },
+      "declaredSize": {
+        "width": 16,
+        "height": 14
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "207",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 378
+      }
+    },
+    {
+      "name": "StoragePositionBar",
+      "type": "MirButton",
+      "sourceLine": 734,
+      "parent": "StoragePage",
+      "locationExpression": "new Point(337, 16)",
+      "location": {
+        "x": 337,
+        "y": 16
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "206",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 337,
+        "y": 76
+      }
+    },
+    {
+      "name": "RankPage",
+      "type": "MirImageControl",
+      "sourceLine": 752,
+      "parent": "this",
+      "locationExpression": "new Point(0, 60)",
+      "location": {
+        "x": 0,
+        "y": 60
+      },
+      "declaredSize": {
+        "width": 352,
+        "height": 372
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 0,
+        "y": 60
+      }
+    },
+    {
+      "name": "RanksSelectTextL",
+      "type": "MirLabel",
+      "sourceLine": 760,
+      "parent": "RankPage",
+      "locationExpression": "new Point(42, 18)",
+      "location": {
+        "x": 42,
+        "y": 18
+      },
+      "declaredSize": {
+        "width": 150,
+        "height": 20
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "Color.White",
+      "textExpression": "GameLanguage.ClientTextMap.GetLocalization(ClientTextKeys.EditRank)",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 42,
+        "y": 78
+      }
+    },
+    {
+      "name": "RanksSelectTextR",
+      "type": "MirLabel",
+      "sourceLine": 770,
+      "parent": "RankPage",
+      "locationExpression": "new Point(198, 18)",
+      "location": {
+        "x": 198,
+        "y": 18
+      },
+      "declaredSize": {
+        "width": 150,
+        "height": 20
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "false",
+      "foreColour": "Color.White",
+      "textExpression": "GameLanguage.ClientTextMap.GetLocalization(ClientTextKeys.SelectRank)",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 198,
+        "y": 78
+      }
+    },
+    {
+      "name": "RanksSelectBox",
+      "type": "MirDropDownBox",
+      "sourceLine": 780,
+      "parent": "RankPage",
+      "locationExpression": "new Point(198, 36)",
+      "location": {
+        "x": 198,
+        "y": 36
+      },
+      "declaredSize": {
+        "width": 130,
+        "height": 16
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "Color.White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 198,
+        "y": 96
+      }
+    },
+    {
+      "name": "RanksName",
+      "type": "MirTextBox",
+      "sourceLine": 793,
+      "parent": "RankPage",
+      "locationExpression": "new Point(42, 36)",
+      "location": {
+        "x": 42,
+        "y": 36
+      },
+      "declaredSize": {
+        "width": 130,
+        "height": 16
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 10pt scaled96/DpiX",
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"\"",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 42,
+        "y": 96
+      }
+    },
+    {
+      "name": "RanksSaveName",
+      "type": "MirButton",
+      "sourceLine": 808,
+      "parent": "RankPage",
+      "locationExpression": "new Point(155, 290)",
+      "location": {
+        "x": 155,
+        "y": 290
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Title",
+      "index": "90",
+      "visible": "true",
+      "windowRelativeControlOrigin": {
+        "x": 155,
+        "y": 350
+      }
+    },
+    {
+      "name": "RanksOptionsButtons[i]",
+      "type": "MirButton",
+      "sourceLine": 830,
+      "parent": "RankPage",
+      "locationExpression": "new Point(i % 2 == 0 ? 42 : 202, i % 2 == 0 ? 120 + (i * 20) : 120 + ((i - 1) * 20))",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1346",
+      "visible": "true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "RanksOptionsStatus[i]",
+      "type": "MirImageControl",
+      "sourceLine": 845,
+      "parent": "RankPage",
+      "locationExpression": "new Point(i % 2 == 0 ? 42 : 202, i % 2 == 0 ? 120 + (i * 20) : 120 + ((i - 1) * 20))",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1347",
+      "visible": "false",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "RanksOptionsTexts[i]",
+      "type": "MirLabel",
+      "sourceLine": 859,
+      "parent": "RankPage",
+      "locationExpression": "new Point(17 + (i % 2 == 0 ? 42 : 202), i % 2 == 0 ? 118 + (i * 20) : 118 + ((i - 1) * 20))",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "Options[i]",
+      "library": null,
+      "index": null,
+      "visible": "true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "BuffPage",
+      "type": "MirImageControl",
+      "sourceLine": 874,
+      "parent": "this",
+      "locationExpression": "new Point(360, 61)",
+      "location": {
+        "x": 360,
+        "y": 61
+      },
+      "declaredSize": {
+        "width": 352,
+        "height": 372
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse",
+      "index": "1853",
+      "visible": "false",
+      "windowRelativeControlOrigin": {
+        "x": 360,
+        "y": 61
+      }
+    },
+    {
+      "name": "PointsLeft",
+      "type": "MirLabel",
+      "sourceLine": 895,
+      "parent": "BuffPage",
+      "locationExpression": "new Point(118, 3)",
+      "location": {
+        "x": 118,
+        "y": 3
+      },
+      "declaredSize": {
+        "width": 100,
+        "height": 20
+      },
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "TextFormatFlags.HorizontalCenter",
+      "autoSize": "false",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 478,
+        "y": 64
+      }
+    },
+    {
+      "name": "UpButton",
+      "type": "MirButton",
+      "sourceLine": 904,
+      "parent": "BuffPage",
+      "locationExpression": "new Point(203, 24)",
+      "location": {
+        "x": 203,
+        "y": 24
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "197",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 563,
+        "y": 85
+      }
+    },
+    {
+      "name": "DownButton",
+      "type": "MirButton",
+      "sourceLine": 921,
+      "parent": "BuffPage",
+      "locationExpression": "new Point(203, 317)",
+      "location": {
+        "x": 203,
+        "y": 317
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "207",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 563,
+        "y": 378
+      }
+    },
+    {
+      "name": "PositionBar",
+      "type": "MirButton",
+      "sourceLine": 940,
+      "parent": "BuffPage",
+      "locationExpression": "new Point(203, 39)",
+      "location": {
+        "x": 203,
+        "y": 39
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.Prguse2",
+      "index": "205",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 563,
+        "y": 100
+      }
+    },
+    {
+      "name": "GuildBuffLabel",
+      "type": "MirControl",
+      "sourceLine": 1171,
+      "parent": "GameScene.Scene",
+      "locationExpression": null,
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": null,
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "HintName",
+      "type": "MirLabel",
+      "sourceLine": 1185,
+      "parent": "GameScene.Scene.GuildBuffLabel",
+      "locationExpression": "new Point(4, 4)",
+      "location": {
+        "x": 4,
+        "y": 4
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "Color.White",
+      "textExpression": "Buff.Name",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "RequiredLabel",
+      "type": "MirLabel",
+      "sourceLine": 1216,
+      "parent": "GameScene.Scene.GuildBuffLabel",
+      "locationExpression": "new Point(4, GameScene.Scene.GuildBuffLabel.DisplayRectangle.Bottom)",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "Color.White",
+      "textExpression": "ReqText",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "TimeLabel",
+      "type": "MirLabel",
+      "sourceLine": 1243,
+      "parent": "GameScene.Scene.GuildBuffLabel",
+      "locationExpression": "new Point(4, GameScene.Scene.GuildBuffLabel.DisplayRectangle.Bottom)",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "Color.White",
+      "textExpression": "text",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "InfoLabel",
+      "type": "MirLabel",
+      "sourceLine": 1258,
+      "parent": "GameScene.Scene.GuildBuffLabel",
+      "locationExpression": "new Point(4, GameScene.Scene.GuildBuffLabel.DisplayRectangle.Bottom)",
+      "location": null,
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "Color.White",
+      "textExpression": "Buff.ShowStats()",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": null
+    },
+    {
+      "name": "Icon",
+      "type": "MirImageControl",
+      "sourceLine": 2197,
+      "parent": "this",
+      "locationExpression": "new Point(1, 0)",
+      "location": {
+        "x": 1,
+        "y": 0
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": null,
+      "drawFormat": null,
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": "Libraries.GuildSkill",
+      "index": "0",
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 1,
+        "y": 0
+      }
+    },
+    {
+      "name": "Name",
+      "type": "MirLabel",
+      "sourceLine": 2206,
+      "parent": "this",
+      "locationExpression": "new Point(35, 1)",
+      "location": {
+        "x": 35,
+        "y": 1
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 35,
+        "y": 1
+      }
+    },
+    {
+      "name": "Info",
+      "type": "MirLabel",
+      "sourceLine": 2213,
+      "parent": "this",
+      "locationExpression": "new Point(35, 17)",
+      "location": {
+        "x": 35,
+        "y": 17
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "WordBreak",
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": null,
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 35,
+        "y": 17
+      }
+    },
+    {
+      "name": "Obtained",
+      "type": "MirLabel",
+      "sourceLine": 2220,
+      "parent": "this",
+      "locationExpression": "new Point(140, 17)",
+      "location": {
+        "x": 140,
+        "y": 17
+      },
+      "declaredSize": null,
+      "explicitFont": null,
+      "effectiveDefaultFont": "Settings.FontName 8pt scaled96/DpiX",
+      "drawFormat": "TextFormatFlags.Right",
+      "autoSize": "true",
+      "foreColour": "inherited MirControl default White",
+      "textExpression": "\"\"",
+      "library": null,
+      "index": null,
+      "visible": "default true",
+      "windowRelativeControlOrigin": {
+        "x": 140,
+        "y": 17
+      }
+    }
+  ],
+  "expandedLoops": {
+    "memberRows": {
+      "count": 18,
+      "rank": {
+        "x": 24,
+        "y": "90+15*i",
+        "width": 100,
+        "height": 14
+      },
+      "name": {
+        "x": 125,
+        "y": "90+15*i",
+        "width": 100,
+        "height": 14,
+        "fontPt": 7
+      },
+      "status": {
+        "x": 225,
+        "y": "90+15*i",
+        "width": 100,
+        "height": 14,
+        "fontPt": 7
+      },
+      "delete": {
+        "x": 210,
+        "y": "90+15*i"
+      },
+      "i": "0..17"
+    },
+    "storage": {
+      "count": 112,
+      "visibleRows": 8,
+      "totalRows": 14,
+      "columns": 8,
+      "slot": "8*y+x",
+      "windowX": "31+36*x",
+      "windowY": "80+36*y",
+      "cellWidth": 35,
+      "cellHeight": 35
+    },
+    "rankOptions": {
+      "count": 8,
+      "buttonX": "i%2==0?42:202",
+      "buttonWindowY": "180+40*floor(i/2)",
+      "textX": "buttonX+17",
+      "textWindowY": "178+40*floor(i/2)",
+      "textAutoSize": true
+    }
+  },
+  "frames": [
+    {
+      "library": "Prguse",
+      "index": 180,
+      "width": 590,
+      "height": 432,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "8767c4a7175df85b4a2ef92a41bd3ac4e71996b174f685fbfe44e38bd2dc7fe4",
+      "pngSha256": "4824c231c6b2a6c6e31e718bd6116ecc13ed58ada5bc64362e5b9104d7e912cf",
+      "path": "/original-ui/Prguse/180.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse\\180.png",
+        "bytes": 51239,
+        "sha256": "4824c231c6b2a6c6e31e718bd6116ecc13ed58ada5bc64362e5b9104d7e912cf"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 590,
+        "height": 432,
+        "x": 0
+      }
+    },
+    {
+      "library": "Prguse",
+      "index": 1850,
+      "width": 208,
+      "height": 316,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "d6b068403c67f1b1ab176bdb6a7517888ddf88256568a058ec4e9b1e38c0fb2e",
+      "pngSha256": "2c3226afc86d587fb206966267f2c90d07265341b3db1c8b3e373dc0236ccee4",
+      "path": "/original-ui/Prguse/1850.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse\\1850.png",
+        "bytes": 3703,
+        "sha256": "2c3226afc86d587fb206966267f2c90d07265341b3db1c8b3e373dc0236ccee4"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 11,
+        "width": 186,
+        "height": 102,
+        "x": 11
+      }
+    },
+    {
+      "library": "Prguse",
+      "index": 1851,
+      "width": 292,
+      "height": 308,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "3953156da4bd90d7775d69087e06fcd249e7adb4717a22865aeda0d1d5853e56",
+      "pngSha256": "8eef7b4cd022a2b7f60072d7d307eff63b23ca10acbf24cd0e07809d416047ea",
+      "path": "/original-ui/Prguse/1851.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse\\1851.png",
+        "bytes": 5395,
+        "sha256": "8eef7b4cd022a2b7f60072d7d307eff63b23ca10acbf24cd0e07809d416047ea"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 289,
+        "height": 308,
+        "x": 0
+      }
+    },
+    {
+      "library": "Prguse",
+      "index": 1852,
+      "width": 324,
+      "height": 332,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "03806568b07de94d1b2539fedad68d847c1307b7d5abfb089ac19d006dc91fe3",
+      "pngSha256": "dc277d18dc3a371ea1fb6a47999bd68775771622fe405ad4c0941dbdd5f03ac1",
+      "path": "/original-ui/Prguse/1852.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse\\1852.png",
+        "bytes": 4079,
+        "sha256": "dc277d18dc3a371ea1fb6a47999bd68775771622fe405ad4c0941dbdd5f03ac1"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 324,
+        "height": 332,
+        "x": 0
+      }
+    },
+    {
+      "library": "Prguse",
+      "index": 1853,
+      "width": 216,
+      "height": 332,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "47808167043c7aace51ff6174f634a3efe195affdaa34d8b9544cc9f561842ed",
+      "pngSha256": "49c0fbb822a7306d008df93da65353187acb5d1b56f1933f8a2afbe4c064205e",
+      "path": "/original-ui/Prguse/1853.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse\\1853.png",
+        "bytes": 5543,
+        "sha256": "49c0fbb822a7306d008df93da65353187acb5d1b56f1933f8a2afbe4c064205e"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 216,
+        "height": 330,
+        "x": 0
+      }
+    },
+    {
+      "library": "Title",
+      "index": 25,
+      "width": 49,
+      "height": 15,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "bc19fa02f41092c0924333651d86e7f36f9e5f4c77bb92628d03629a5cf6c1fe",
+      "pngSha256": "edbfd63b8f9bc11d81c8ae32724a261c709de5eb9077a92129b8411d28a6e764",
+      "path": "/original-ui/Title/25.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\25.png",
+        "bytes": 664,
+        "sha256": "edbfd63b8f9bc11d81c8ae32724a261c709de5eb9077a92129b8411d28a6e764"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 45,
+        "height": 11,
+        "x": 2
+      }
+    },
+    {
+      "library": "Title",
+      "index": 93,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "4f1c779478bc9456a9efe881fd0cbe740953411dc171f272fe330d09a75137bf",
+      "pngSha256": "95791e91cdcedec77b82f9fe111c6a6e83d8e30efa7d16849562afe8f0708f16",
+      "path": "/original-ui/Title/93.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\93.png",
+        "bytes": 1307,
+        "sha256": "95791e91cdcedec77b82f9fe111c6a6e83d8e30efa7d16849562afe8f0708f16"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 94,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "675bbe7b0dccd499701024adfdc955bf6ed23ec26abb4836a7b31388b6844a24",
+      "pngSha256": "3e5f46f12c8304c935bdde702c4a48d74df90cf2ccdbe035517b84307dadc756",
+      "path": "/original-ui/Title/94.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\94.png",
+        "bytes": 2647,
+        "sha256": "3e5f46f12c8304c935bdde702c4a48d74df90cf2ccdbe035517b84307dadc756"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 99,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "70d05564cc025b26ffefc0e57468c3734ea3a6c5fbcbfcab323aff048e5163ce",
+      "pngSha256": "0af14bac522df03ccd31e52c57e108acac6b4a3f16973e81e5776116f80bbe7f",
+      "path": "/original-ui/Title/99.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\99.png",
+        "bytes": 1406,
+        "sha256": "0af14bac522df03ccd31e52c57e108acac6b4a3f16973e81e5776116f80bbe7f"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 100,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "dbca60db233b3b335fc1f569f52fb283aae682e35945405549b64854fa88ebdb",
+      "pngSha256": "f17aa6c80b79676f48625209ff7200cbb3198ec5d4006d0e49b98a19867b583a",
+      "path": "/original-ui/Title/100.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\100.png",
+        "bytes": 2516,
+        "sha256": "f17aa6c80b79676f48625209ff7200cbb3198ec5d4006d0e49b98a19867b583a"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 105,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "5663cbbfb721bf5f98ff0eab9292850aa89085deee67034e70c91948e7c8cc5d",
+      "pngSha256": "231df7eba263e592fc083c15bd632ca1e481d0469bd6e9146a018deee0533589",
+      "path": "/original-ui/Title/105.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\105.png",
+        "bytes": 1375,
+        "sha256": "231df7eba263e592fc083c15bd632ca1e481d0469bd6e9146a018deee0533589"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 106,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "e601bd88557ebff4b8a7cb36bc18523bb53aab6c4c083c1a8d8e66ccea0d8e4b",
+      "pngSha256": "18eeee05a6d87ff3921bf57024b52d6a70cd268d298f614f6b7e7e1392b29511",
+      "path": "/original-ui/Title/106.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\106.png",
+        "bytes": 2588,
+        "sha256": "18eeee05a6d87ff3921bf57024b52d6a70cd268d298f614f6b7e7e1392b29511"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 101,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "c5fb0a49f1b5f1692474df5bc7b93f74a84a7c06c86aed8d0a069b77aa56891b",
+      "pngSha256": "639cb8723342f97083b2005cbc81d9f4071a6cca2ce7868ac1b97e2d8aff23cb",
+      "path": "/original-ui/Title/101.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\101.png",
+        "bytes": 1270,
+        "sha256": "639cb8723342f97083b2005cbc81d9f4071a6cca2ce7868ac1b97e2d8aff23cb"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 103,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "d94ee2354f260d046848d49db8a23c9db70125eb5e76e716d57f54be12c2def0",
+      "pngSha256": "d5577412a5706cf40ead7d9b0f63e50cea3225e7012d25a833e50b3b96607af1",
+      "path": "/original-ui/Title/103.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\103.png",
+        "bytes": 1133,
+        "sha256": "d5577412a5706cf40ead7d9b0f63e50cea3225e7012d25a833e50b3b96607af1"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 104,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "662db0dcfe0a5fbd86fc0a8b9d5db1086f0931cdc1beaf70a27deb67cb0b0e11",
+      "pngSha256": "cebc91ed42e99863f6f15e27a415ef0547b956f4d18d804d4e3f124f9e84f362",
+      "path": "/original-ui/Title/104.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\104.png",
+        "bytes": 2604,
+        "sha256": "cebc91ed42e99863f6f15e27a415ef0547b956f4d18d804d4e3f124f9e84f362"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 95,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "e93e4263c8402f6bac04d0774b24151815400aeb9d63d3e15348b91f62ef1144",
+      "pngSha256": "470307fb0e9df9aa7e4d46283abd9d1fcc1c27849b2fd76aa2456cbe2a83affc",
+      "path": "/original-ui/Title/95.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\95.png",
+        "bytes": 1177,
+        "sha256": "470307fb0e9df9aa7e4d46283abd9d1fcc1c27849b2fd76aa2456cbe2a83affc"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 96,
+      "width": 72,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "6998932cc237ca803cb1957d823c8b702bbb0f64768f1dbc5620a3ab94d86f1a",
+      "pngSha256": "8cea5edb2ed2cb420596221b005e179b8ff6cc7e9ebe4e857d95d8a08816cf39",
+      "path": "/original-ui/Title/96.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\96.png",
+        "bytes": 2587,
+        "sha256": "8cea5edb2ed2cb420596221b005e179b8ff6cc7e9ebe4e857d95d8a08816cf39"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 2,
+        "width": 68,
+        "height": 21,
+        "x": 1
+      }
+    },
+    {
+      "library": "Title",
+      "index": 356,
+      "width": 24,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "ee51505a554087f9087c0cc62c93282a4629a7299b2df18cef7141e5b4c37419",
+      "pngSha256": "bb3bce698113e5ae7083de74ef8471eae1d886d7c46cfb36c830e991cc6a2130",
+      "path": "/original-ui/Title/356.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\356.png",
+        "bytes": 1136,
+        "sha256": "bb3bce698113e5ae7083de74ef8471eae1d886d7c46cfb36c830e991cc6a2130"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 24,
+        "height": 21,
+        "x": 0
+      }
+    },
+    {
+      "library": "Title",
+      "index": 357,
+      "width": 24,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "1591697190cba3c533850a86ce08f67bdf938a75ad6248533f5205136cdd169a",
+      "pngSha256": "9f559c14e7fdcd9fd9722777a5d105b2c3dbdf5e19ab2d9ddc32dfd6e72bfc15",
+      "path": "/original-ui/Title/357.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\357.png",
+        "bytes": 1111,
+        "sha256": "9f559c14e7fdcd9fd9722777a5d105b2c3dbdf5e19ab2d9ddc32dfd6e72bfc15"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 24,
+        "height": 21,
+        "x": 0
+      }
+    },
+    {
+      "library": "Title",
+      "index": 358,
+      "width": 24,
+      "height": 24,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "f3dc2cab2aa35011342c4dcea9c92f4b13408b55fd55fef32720a4a17246c9e0",
+      "pngSha256": "80bae7c81e580afd26fc585a102835cd44ab359dca76c96508485de71c592b56",
+      "path": "/original-ui/Title/358.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Title\\358.png",
+        "bytes": 1129,
+        "sha256": "80bae7c81e580afd26fc585a102835cd44ab359dca76c96508485de71c592b56"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 24,
+        "height": 22,
+        "x": 0
+      }
+    },
+    {
+      "library": "Prguse2",
+      "index": 360,
+      "width": 24,
+      "height": 21,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "7bacfd35f4ceb0d0c78bcea0f98edca8532b458d7ee05f4aa28a46e651f8348b",
+      "pngSha256": "4e481bca194a082812caa01c6e4fdee387c016cf520b68b5fbb5fa2635d04675",
+      "path": "/original-ui/Prguse2/360.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse2\\360.png",
+        "bytes": 681,
+        "sha256": "4e481bca194a082812caa01c6e4fdee387c016cf520b68b5fbb5fa2635d04675"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 21,
+        "height": 21,
+        "x": 0
+      }
+    },
+    {
+      "library": "Prguse2",
+      "index": 361,
+      "width": 24,
+      "height": 21,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "f082a9de2c9b0de55cb12d8ca24d5c9647a605c83df69f4cbeab98acc7a321c1",
+      "pngSha256": "2a25918cd9b5acde7b9acc5b67fd0fddb537cd018dc7e2695436ab0bf7095238",
+      "path": "/original-ui/Prguse2/361.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse2\\361.png",
+        "bytes": 684,
+        "sha256": "2a25918cd9b5acde7b9acc5b67fd0fddb537cd018dc7e2695436ab0bf7095238"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 21,
+        "height": 21,
+        "x": 0
+      }
+    },
+    {
+      "library": "Prguse2",
+      "index": 362,
+      "width": 24,
+      "height": 21,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "b89fb05149ebdb0cde56aa8b5e374dd8b4e26f026d797f009457ee74d1eda443",
+      "pngSha256": "98614f07962fedc5722113a213ea0c6b89695680dc8cc91f708e5eb65f24fed2",
+      "path": "/original-ui/Prguse2/362.png",
+      "maskPath": null,
+      "png": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\original-ui\\Prguse2\\362.png",
+        "bytes": 686,
+        "sha256": "98614f07962fedc5722113a213ea0c6b89695680dc8cc91f708e5eb65f24fed2"
+      },
+      "sourceTrueVisibleBounds": {
+        "y": 0,
+        "width": 21,
+        "height": 21,
+        "x": 0
+      }
+    }
+  ],
+  "gdiRenderer": {
+    "file": "C:\\mir2-build\\guild-pixel-parity-20261028\\render-crystal-guild-reference.cs",
+    "bytes": 6825,
+    "sha256": "6e2c553e2a6ff4642c646e3c8c2ff67dba527b50790083d514bc79c2519ca589"
+  },
+  "gdiReference": {
+    "file": "C:\\mir2-build\\guild-pixel-parity-20261028\\gdi-reference-v1\\glyphbounds.json",
+    "bytes": 4238,
+    "sha256": "832e50668217615fdf4655615d14f2be425dbb7ae49b6ef44c454c540a20f032"
+  },
+  "limitations": [
+    "Actual Settings.ini FontName, font rasterizer version, Graphics.DpiX and Crystal window screen origin were not measured; reference explicitly Arial/96DPI.",
+    "Original library source raw Lib files not re-decoded here; exported PNG hashes verified against pinned manifest; alpha true bounds derived from those exact PNGs.",
+    "No claim of current native screenshot pixel equality; no gameplay or service launched."
+  ]
+}

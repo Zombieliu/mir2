@@ -3315,6 +3315,7 @@ dependencies = [
  "bevy",
  "chrono",
  "mir2-client-core",
+ "mir2-crystal-gdi-text",
  "mir2-game-data",
  "mir2-protocol",
  "mir2-ui-core",
@@ -3336,6 +3337,10 @@ dependencies = [
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "mir2-crystal-gdi-text"
+version = "0.1.0"
 
 [[package]]
 name = "mir2-game-data"

@@ -35,6 +35,295 @@ use std::{
 const WIDTH: u32 = 1024;
 const HEIGHT: u32 = 768;
 
+#[cfg(target_os = "windows")]
+fn read_guild_pixel_reference_png(path: &Path) -> Image {
+    Image::from_buffer(
+        &fs::read(path).expect("read existing Guild reference PNG"),
+        bevy::image::ImageType::Extension("png"),
+        bevy::image::CompressedImageFormats::NONE,
+        true,
+        bevy::image::ImageSampler::nearest(),
+        bevy::asset::RenderAssetUsages::default(),
+    )
+    .expect("decode Guild reference through Bevy's existing PNG support")
+}
+
+#[cfg(target_os = "windows")]
+fn warm_guild_pixel_images(app: &mut App, report: &Path) {
+    use crate::crystal_ui::guild_pixel_text_view::{GuildPixelLabel, GuildPixelTextRendering};
+    let began = Instant::now();
+    loop {
+        i18n_step(app);
+        let handles: Vec<_> = app
+            .world_mut()
+            .query::<&ImageNode>()
+            .iter(app.world())
+            .map(|node| node.image.clone())
+            .collect();
+        let labels: Vec<_> = app.world_mut().query::<(&GuildPixelLabel, Option<&GuildPixelTextRendering>)>()
+            .iter(app.world()).map(|(label, status)| json!({"text":label.text,
+                "gdi":matches!(status,Some(GuildPixelTextRendering::Gdi96Dpi)),"status":format!("{status:?}")})).collect();
+        let images = app.world().resource::<Assets<Image>>();
+        let server = app.world().resource::<AssetServer>();
+        let states: Vec<_> = handles
+            .iter()
+            .map(|handle| {
+                let path = handle.path().map(ToString::to_string);
+                let contains = images.contains(handle.id());
+                let dependencies =
+                    handle.path().is_none() || server.is_loaded_with_dependencies(handle.id());
+                json!({"id":format!("{:?}",handle.id()),"path":path,"contains":contains,
+                "loadedWithDependencies":dependencies,"ready":contains&&dependencies})
+            })
+            .collect();
+        let required = [
+            "original-ui/Prguse/180.png",
+            "original-ui/Prguse/1850.png",
+            "original-ui/Title/25.png",
+            "original-ui/Title/94.png",
+            "original-ui/Title/104.png",
+        ];
+        let missing: Vec<_> = required
+            .into_iter()
+            .filter(|path| {
+                !states
+                    .iter()
+                    .any(|row| row["path"].as_str() == Some(*path) && row["ready"] == true)
+            })
+            .collect();
+        // This fixture creates only the real Guild renderer. Login/character
+        // preview readiness is not a Guild asset gate; do not borrow the
+        // generic nine-language fixture's unrelated preview-layer condition.
+        let ready = !states.is_empty()
+            && missing.is_empty()
+            && states.iter().all(|row| row["ready"] == true)
+            && labels.len() >= 6
+            && labels.iter().all(|row| row["gdi"] == true);
+        if ready {
+            break;
+        }
+        if began.elapsed() >= Duration::from_secs(30) {
+            let diagnostics = json!({"passed":false,"complete":false,"phase":"Guild asset warmup",
+                "elapsedMs":began.elapsed().as_millis(),"missingRequiredGuildAssets":missing,
+                "imageNodeCount":states.len(),"imageStates":states.into_iter().take(128).collect::<Vec<_>>(),
+                "guildLabels":labels.into_iter().take(32).collect::<Vec<_>>(),"timeoutExtended":false});
+            fs::write(report, serde_json::to_vec_pretty(&diagnostics).unwrap()).unwrap();
+            panic!("Guild-only assets did not load; exact handle/path/contains/dependency status: {diagnostics}");
+        }
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    for _ in 0..8 {
+        i18n_step(app);
+    }
+}
+
+/// The production Guild renderer, not a reconstruction of its label positions.
+#[cfg(target_os = "windows")]
+fn spawn_guild_pixel_main_window(mut commands: Commands, assets: Res<AssetServer>) {
+    let mut social = crate::social::SocialModel::default();
+    social.guild = crate::social::GuildModel {
+        name: Some("hahah".into()),
+        level: 0,
+        member_count: 1,
+        max_members: 5,
+        max_experience: 100,
+        my_options: 0xff,
+        permissions: vec!["recruit".into(), "notice".into()],
+        notice: vec![],
+        ..default()
+    };
+    let mut state = crate::crystal_ui::NativePlayerUiState::default();
+    state.guild_panel.sync_recruit("");
+    let player = crate::read_model::PlayerStats::default();
+    commands
+        .spawn(Node {
+            width: Val::Px(WIDTH as f32),
+            height: Val::Px(HEIGHT as f32),
+            position_type: PositionType::Absolute,
+            ..default()
+        })
+        .with_children(|parent| {
+            crate::crystal_ui::overlays::render_guild_panel(
+                parent,
+                Some(&assets),
+                &social,
+                &state,
+                &player,
+            );
+        });
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+#[ignore = "explicit real-asset Guild main-window GPU/GDI pixel comparison; run alone with fresh output and independent C# reference"]
+fn guild_main_window_matches_independent_crystal_gdi_reference_96dpi() {
+    use crate::crystal_ui::guild_pixel_text_view::{
+        GuildPixelLabel, GuildPixelTextPlugin, GuildPixelTextRendering,
+    };
+    let assets = PathBuf::from(
+        std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("real packaged assets"),
+    )
+    .canonicalize()
+    .unwrap();
+    let reference = PathBuf::from(
+        std::env::var_os("MIR2_GUILD_GDI_REFERENCE_ROOT")
+            .expect("independent C# 96DPI reference directory"),
+    )
+    .canonicalize()
+    .unwrap();
+    let output = PathBuf::from(
+        std::env::var_os("MIR2_GUILD_PIXEL_VISUAL_OUTPUT")
+            .expect("new Guild pixel evidence directory"),
+    );
+    assert!(
+        output.is_absolute() && !output.starts_with(&assets) && !output.starts_with(&reference)
+    );
+    fs::create_dir_all(&output).unwrap();
+    let report = output.join("guild-main-window-pixel-report.json");
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&report)
+        .unwrap();
+    fs::write(&report, b"{\"passed\":false,\"complete\":false}").unwrap();
+    struct RestoreGuildLocale(Locale);
+    impl Drop for RestoreGuildLocale {
+        fn drop(&mut self) {
+            native_i18n::activate(self.0);
+        }
+    }
+    let _restore = RestoreGuildLocale(native_i18n::locale());
+    native_i18n::activate(Locale::English);
+    let (mut app, target, _) = i18n_offscreen_app_configured(&assets, false, |app| {
+        app.add_plugins(GuildPixelTextPlugin)
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Startup, spawn_guild_pixel_main_window);
+    });
+    warm_guild_pixel_images(&mut app, &report);
+    let screenshot = output.join("guild-main-window-english-1024x768.png");
+    capture_i18n(&mut app, &target, &screenshot);
+    let actual = read_guild_pixel_reference_png(&screenshot)
+        .try_into_dynamic()
+        .unwrap()
+        .to_rgba8();
+    let expected = read_guild_pixel_reference_png(
+        &reference.join("guild-notice-statistics-label-reference.png"),
+    )
+    .try_into_dynamic()
+    .unwrap()
+    .to_rgba8();
+    assert_eq!(expected.dimensions(), (590, 432));
+    let reference_rows: Value =
+        serde_json::from_slice(&fs::read(reference.join("glyphbounds.json")).unwrap()).unwrap();
+    assert_eq!(reference_rows["dpi"], 96);
+    let labels: Vec<_> = app
+        .world_mut()
+        .query::<(
+            &GuildPixelLabel,
+            Option<&ImageNode>,
+            Option<&GuildPixelTextRendering>,
+        )>()
+        .iter(app.world())
+        .map(|(label, image, backend)| {
+            (
+                label.text.clone(),
+                label.rect,
+                image.map(|i| i.image.clone()),
+                matches!(backend, Some(GuildPixelTextRendering::Gdi96Dpi)),
+            )
+        })
+        .collect();
+    let mut checks = Vec::new();
+    for row in reference_rows["labels"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|r| r["kind"] == "MirLabel")
+    {
+        let text = row["text"].as_str().unwrap();
+        let x = row["windowX"].as_f64().unwrap() as f32 + 217.;
+        let y = row["windowY"].as_f64().unwrap() as f32 + 168.;
+        let found = labels
+            .iter()
+            .find(|(t, rect, _, _)| t == text && rect.left == x && rect.top == y);
+        let png = read_guild_pixel_reference_png(&reference.join(row["file"].as_str().unwrap()))
+            .try_into_dynamic()
+            .unwrap()
+            .to_rgba8();
+        let mut mismatches = None;
+        let mut correct_size = false;
+        let mut gdi = false;
+        if let Some((_, _, Some(handle), is_gdi)) = found {
+            gdi = *is_gdi;
+            if let Some(image) = app.world().resource::<Assets<Image>>().get(handle) {
+                correct_size = image.width() == png.width() && image.height() == png.height();
+                if let Some(data) = image.data.as_ref() {
+                    if correct_size && data.len() == png.as_raw().len() {
+                        mismatches = Some(
+                            data.iter()
+                                .zip(png.as_raw())
+                                .filter(|(a, b)| a != b)
+                                .count(),
+                        );
+                    }
+                }
+            }
+        }
+        checks.push(json!({"kind":"independent_csharp_gdi_texture","id":row["id"],"text":text,
+            "stageOrigin":[x,y],"expectedGlyphBounds":row["foregroundNonBlackBounds"],"gdi":gdi,
+            "sizeMatches":correct_size,"differentRgbaBytes":mismatches,"passed":gdi && correct_size && mismatches==Some(0)}));
+    }
+    // Compare real GPU output for primary statistics and baked original tab
+    // art. Recruit input is a separate 10pt editor and not falsely compared
+    // against the independent label-only composition. The experience reference
+    // includes the real source-library 424 frame, not a synthetic empty bar.
+    for (id, x, y, width, height) in [
+        ("source-title", 18, 9, 49, 15),
+        ("source-notice-tab", 20, 38, 72, 24),
+        ("source-statistics-tab", 501, 38, 72, 24),
+        ("primary-statistics", 362, 107, 200, 70),
+        ("recruit-label", 391, 343, 150, 15),
+        ("source-experience-zero-percent", 322, 403, 260, 22),
+    ] {
+        let mut mismatches = 0u64;
+        let mut compared = 0u64;
+        let mut maximum = 0u8;
+        for dy in 0..height {
+            for dx in 0..width {
+                let e = expected.get_pixel(x + dx, y + dy);
+                if e.0[3] != 255 {
+                    continue;
+                }
+                let a = actual.get_pixel(217 + x + dx, 168 + y + dy);
+                compared += 1;
+                let delta = (0..4).map(|i| a.0[i].abs_diff(e.0[i])).max().unwrap();
+                maximum = maximum.max(delta);
+                if delta != 0 {
+                    mismatches += 1;
+                }
+            }
+        }
+        checks.push(json!({"kind":"actual_gpu_against_original_bitmap_and_gdi","id":id,
+            "windowRect":[x,y,width,height],"opaquePixelsCompared":compared,"differentPixels":mismatches,
+            "maxChannelDifference":maximum,"passed":compared>0 && mismatches==0}));
+    }
+    let passed = checks.iter().all(|row| row["passed"] == true);
+    fs::write(&report,serde_json::to_vec_pretty(&json!({"schemaVersion":1,"passed":passed,"complete":true,
+        "scope":"English 96DPI 1024x768 actual production Guild main window; independent Crystal GDI reference",
+        "gameplayPerformed":false,"serverConnected":false,"liveAcceptance":false,"screenshot":screenshot,
+        "referenceDirectory":reference,"checks":checks,
+        "limitations":["No non-English or other-DPI equality claim","Editor IME and recruit input are separate from MirLabel",
+            "Comparison covers named primary regions and every independent label raster, not every page or all window pixels"]})).unwrap()).unwrap();
+    assert!(
+        passed,
+        "Guild pixel mismatch; retain actual screenshot and report at {}",
+        report.display()
+    );
+}
+
 #[derive(Resource, Default)]
 struct CapturedI18nImage(Option<Image>);
 
