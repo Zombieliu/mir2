@@ -125,10 +125,46 @@ fn monsters_route_around_a_wall_with_deterministic_shared_state() {
     spawn(&mut zone, 9_100, 14, 20);
     spawn(&mut replay, 9_100, 14, 20);
 
+    // Separate runtimes intentionally mint distinct admission namespaces.
+    // Verify that this is their only identity difference before comparing
+    // deterministic gameplay under each runtime's own authority.
+    let owner = SessionId::new("owner");
+    let primary_owner = zone.owner_health_cursor(&owner).unwrap().online_owner;
+    let replay_owner = replay.owner_health_cursor(&owner).unwrap().online_owner;
+    let mut primary_identity: serde_json::Value = serde_json::from_str(&primary_owner).unwrap();
+    let mut replay_identity: serde_json::Value = serde_json::from_str(&replay_owner).unwrap();
+    let primary_namespace = primary_identity
+        .as_object_mut()
+        .unwrap()
+        .remove("namespace")
+        .unwrap();
+    let replay_namespace = replay_identity
+        .as_object_mut()
+        .unwrap()
+        .remove("namespace")
+        .unwrap();
+    assert_ne!(primary_namespace, replay_namespace);
+    assert_eq!(primary_identity, replay_identity);
+
     let mut previous = position(&zone, 9_100);
     for now_ms in (0..12).map(|tick| tick * 2_000) {
         let out = zone.tick(now_ms);
-        assert_eq!(out, replay.tick(now_ms), "detour replay at {now_ms}");
+        for event in &out {
+            if let ZoneOutbound::OwnerHealthChanged { change } = event {
+                assert_eq!(change.cursor.online_owner, primary_owner);
+            }
+        }
+        let replay_out = replay.tick(now_ms);
+        // Normalize only a comparison clone, after proving every receipt is
+        // stamped by its actual runtime. The nonce must never cross authority.
+        let mut comparable_replay = replay_out.clone();
+        for event in &mut comparable_replay {
+            if let ZoneOutbound::OwnerHealthChanged { change } = event {
+                assert_eq!(change.cursor.online_owner, replay_owner);
+                change.cursor.online_owner = primary_owner.clone();
+            }
+        }
+        assert_eq!(out, comparable_replay, "detour replay at {now_ms}");
         let current = position(&zone, 9_100);
         assert!(!blocked.contains(&current), "monster entered wall");
         assert!(distance(&previous, &current) <= 1, "monster skipped a tile");
@@ -222,13 +258,16 @@ fn owned_summon_and_monster_pet_target_both_detour_around_blockers() {
         cooldown_ms: 1_000,
         now_ms: 10,
     });
-    zone.tick(510);
+    let birth = zone.tick(510);
     let pet = zone
         .native_monster_snapshots()
         .into_iter()
         .find(|monster| !monster.hostile_to_player)
         .expect("real owned skeleton summon");
     assert_eq!(pet.position, Point { x: 21, y: 20 });
+    assert!(owner_packets(&birth).any(|packet| matches!(packet,
+        ServerPacket::ObjectMonster { info }
+            if info.object_id == pet.object_id && info.master_object_id == 100)));
 
     // The pet is nearer than its owner, so AI0 uses the typed entity-target
     // pursuit path. Its direct left step is blocked by a static map cell.
@@ -236,14 +275,87 @@ fn owned_summon_and_monster_pet_target_both_detour_around_blockers() {
     zone.tick(511);
     assert_eq!(position(&zone, 9_100), Point { x: 25, y: 19 });
 
-    // The owned summon must also move around its own wall while chasing that
-    // monster. Check several ticks without requiring a particular rotation side.
-    for now_ms in [811, 1_500, 2_500] {
-        zone.tick(now_ms);
+    // Establish an actual accepted owner attack in Focus mode. Merely spawning
+    // a nearby monster does not authorize a pet attack, and an idle summon
+    // already beside its owner legitimately has no reason to move.
+    let owner = SessionId::new("owner");
+    let mut profile = zone.player_chat_profile(&owner).unwrap();
+    profile.pet_mode = 4;
+    zone.handle(ZoneCommand::UpdateChatProfile {
+        session_id: owner.clone(),
+        profile,
+    });
+    zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner.clone(),
+        position: Point { x: 25, y: 18 },
+        direction: MirDirection::Down,
+    });
+    // Join/render state grants no combat authority. Mirror the owner's real
+    // class/life admission through the public trusted Zone command first.
+    zone.handle(ZoneCommand::sync_player_combat_state(
+        owner.clone(),
+        MirClass::Taoist,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+    ));
+    let attack = zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: owner.clone(),
+        object_id: 9_100,
+        direction: MirDirection::Down,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 1,
+        now_ms: 1_500,
+    });
+    assert!(
+        owner_packets(&attack).any(|packet| matches!(packet,
+        ServerPacket::ObjectAttack { info } if info.object_id == 100)),
+        "focused owner attack must be admitted: {attack:?}"
+    );
+    zone.handle(ZoneCommand::SyncPlayerTransform {
+        session_id: owner,
+        position: PLAYER,
+        direction: MirDirection::Down,
+    });
+
+    // Both pursuit paths remain collision/occupancy bounded. Check actual pet
+    // walks without requiring a particular valid rotation around the wall.
+    let mut previous = pet.position.clone();
+    let mut pet_walked = false;
+    for now_ms in [1_501, 2_101, 3_101] {
+        let out = zone.tick(now_ms);
         let pet_position = position(&zone, pet.object_id);
         assert!(!blocked.contains(&pet_position));
         assert_ne!(pet_position, PLAYER);
+        assert!(
+            distance(&previous, &pet_position) <= 1,
+            "pet skipped a tile"
+        );
+        pet_walked |= owner_packets(&out).any(|packet| {
+            matches!(packet,
+            ServerPacket::ObjectWalk { movement } if movement.object_id == pet.object_id)
+        });
+        if let Some(target) = zone
+            .native_monster_snapshots()
+            .iter()
+            .find(|m| m.object_id == 9_100 && !m.dead)
+        {
+            assert_ne!(
+                pet_position, target.position,
+                "pet entered its target's occupied tile"
+            );
+        }
+        previous = pet_position;
     }
+    assert!(
+        pet_walked,
+        "a focused summon must actually pursue around its wall"
+    );
     assert_ne!(position(&zone, pet.object_id), pet.position);
 }
 

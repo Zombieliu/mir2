@@ -6,6 +6,39 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      native_delivery_operation:
+        description: Native delivery operation; off preserves the Web release workflow
+        required: false
+        default: 'off'
+        type: choice
+        options:
+          - 'off'
+          - probe
+          - verify
+          - stage
+          - promote
+      native_stage_run_id:
+        description: Successful stage run in this workflow; required only for promote
+        required: false
+        type: string
+      native_updater_sequence:
+        description: Fixed signed native publication; 13/14 R17, 15 R19, 16 R20, 17 R22, 18 R23, 19 R24, 20 R25
+        required: false
+        default: '13'
+        type: choice
+        options:
+          - '13'
+          - '14'
+          - '15'
+          - '16'
+          - '17'
+          - '18'
+          - '19'
+          - '20'
+      native_stage_sha256:
+        description: Exact SHA256 of the retained stage receipt; required only for promote
+        required: false
+        type: string
       run_id:
         description: Optional generated release id
         required: false
@@ -77,8 +110,285 @@ jobs:
           echo "R2 asset release is manual-only."
           echo "Use workflow_dispatch with publish_r2/deploy_worker/deploy_vercel inputs to run the release chain."
 
+  native-download-authority-probe:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'probe' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout probe source without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Probe existing authority with read-only requests
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$RUNNER_TEMP/mir2-native-authority"
+          python3 -B scripts/cloudflare_read_authority_probe.py --receipt "$RUNNER_TEMP/mir2-native-authority/receipt.json"
+
+      - name: Retain safe authority receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-download-authority-${{ github.run_id }}
+          path: ${{ runner.temp }}/mir2-native-authority/receipt.json
+          if-no-files-found: error
+          retention-days: 7
+
+  native-download-tooling-check:
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == 'verify' || inputs.native_delivery_operation == 'stage' || inputs.native_delivery_operation == 'promote') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout native tooling without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Use Python 3.13 for the bounded offline checks
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Use the root-verified Node version for native Worker checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+
+      - name: Check immutable imports, stream cancellation and pointer CAS
+        working-directory: mir2-web3
+        run: node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs
+
+      - name: Check fixed routes, stream bounds, receipts and POSIX permissions
+        working-directory: mir2-web3
+        run: python3 -B scripts/test_native_r17_r2_delivery.py
+
+      - name: Check SIGINT termination retains uncertain write receipts
+        working-directory: mir2-web3
+        run: python3 -B scripts/test_native_r17_interrupt.py
+
+      - name: Check the separate signed14 fixed table and transport policies
+        working-directory: mir2-web3
+        run: |
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-s14-publication.test.mjs
+          python3 -B scripts/test_native_r17_s14_r2_delivery.py
+          python3 -B scripts/test_native_r17_s14_interrupt.py
+
+      - name: Check signed15 R19 admission, bounded transport and cancellation
+        working-directory: mir2-web3
+        run: |
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r19-s15-publication.test.mjs
+          python3 -B scripts/test_native_r19_s15_r2_delivery.py
+          python3 -B scripts/test_native_r19_s15_interrupt.py
+
+      - name: Check signed16 R20 admission, unchanged s15 engine and bounded transport
+        if: ${{ inputs.native_updater_sequence == '16' || inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r20_s16_fixed.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r20-s16-publication.test.mjs
+          python3 -B scripts/test_native_r20_s16_r2_delivery.py
+          python3 -B scripts/test_native_r20_s16_interrupt.py
+
+      - name: Check signed17 R22 admission and original immutable predecessor
+        if: ${{ inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r22_s17_offline.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r22-s17-publication.test.mjs
+          python3 -B scripts/test_native_r22_s17_r2_delivery.py
+          python3 -B scripts/test_native_r22_s17_interrupt.py
+
+      - name: Check signed18 R23 admission and original immutable predecessor
+        if: ${{ inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r23_s18_offline.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r23-s18-publication.test.mjs
+          python3 -B scripts/test_native_r23_s18_r2_delivery.py
+          python3 -B scripts/test_native_r23_s18_interrupt.py
+
+      - name: Check signed19 R24 admission and original immutable predecessor
+        if: ${{ inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r24_s19_offline.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r24-s19-publication.test.mjs
+          python3 -B scripts/test_native_r24_s19_r2_delivery.py
+          python3 -B scripts/test_native_r24_s19_interrupt.py
+
+      - name: Check signed20 R25 admission and original immutable predecessor
+        if: ${{ inputs.native_updater_sequence == '20' }}
+        working-directory: mir2-web3
+        run: |
+          python3 -B scripts/test_prepare_native_r25_s20_offline.py
+          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r25-s20-publication.test.mjs
+          python3 -B scripts/test_native_r25_s20_r2_delivery.py
+          python3 -B scripts/test_native_r25_s20_interrupt.py
+
+      - name: Retain raw offline checks
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-r17-tooling-${{ github.run_id }}
+          path: |
+            mir2-web3/evidence/
+            mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/
+            mir2-web3/scripts/fixtures/native-r20-s16/qa-runs/
+            mir2-web3/scripts/fixtures/native-r22-s17/qa-runs/
+            mir2-web3/scripts/fixtures/native-r23-s18/qa-runs/
+            mir2-web3/scripts/fixtures/native-r24-s19/qa-runs/
+            mir2-web3/scripts/fixtures/native-r25-s20/qa-runs/
+          if-no-files-found: error
+          retention-days: 7
+
+  native-download-stage:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'stage' }}
+    needs: native-download-tooling-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout fixed native publication source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Use the verified Node version for authenticated upload Worker deployment
+        if: ${{ (inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20') && inputs.deploy_upload_worker }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+
+      - name: Deploy the reviewed signed19 or signed20 upload route after offline gates
+        if: ${{ (inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20') && inputs.deploy_upload_worker }}
+        working-directory: mir2-web3
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          npx --yes wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-bulk-upload/wrangler.jsonc
+
+      - name: Stage immutable objects and verify complete public bytes
+        working-directory: mir2-web3
+        timeout-minutes: 345
+        env:
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$RUNNER_TEMP/mir2-native-r17-stage"
+          # Whole-stage budget is separate from per-object budgets. Interrupt
+          # first so Python can retain unknown outcomes before the hard cap.
+          case "$MIR2_NATIVE_SEQUENCE" in
+            13) native_driver=scripts/native_r17_r2_delivery.py ;;
+            14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
+            15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
+            16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
+            17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
+            18) native_driver=scripts/native_r23_s18_r2_delivery.py ;;
+            19) native_driver=scripts/native_r24_s19_r2_delivery.py ;;
+            20) native_driver=scripts/native_r25_s20_r2_delivery.py ;;
+            *) exit 1 ;;
+          esac
+          timeout --signal=INT --kill-after=30s 330m python3 -B "$native_driver" --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
+          sha256sum "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json" > "$RUNNER_TEMP/mir2-native-r17-stage/receipt.sha256"
+
+      - name: Retain the stage receipt including failures
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-r17-stage-${{ github.run_id }}
+          path: ${{ runner.temp }}/mir2-native-r17-stage/
+          if-no-files-found: error
+          retention-days: 7
+
+  native-download-promote:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'promote' }}
+    needs: native-download-tooling-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Validate the separate successful stage run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MIR2_NATIVE_STAGE_RUN: ${{ inputs.native_stage_run_id }}
+          MIR2_NATIVE_STAGE_SHA: ${{ inputs.native_stage_sha256 }}
+          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
+        run: |
+          set -euo pipefail
+          [[ "$MIR2_NATIVE_STAGE_RUN" =~ ^[1-9][0-9]{0,19}$ ]]
+          [[ "$MIR2_NATIVE_STAGE_SHA" =~ ^[0-9a-f]{64}$ ]]
+          install -d -m 700 "$RUNNER_TEMP/mir2-native-r17-promote"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$MIR2_NATIVE_STAGE_RUN" --jq '{workflow_id,event,conclusion,head_branch,head_sha}' > "$RUNNER_TEMP/mir2-native-r17-promote/stage-run.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          value = json.loads((Path(os.environ['RUNNER_TEMP']) / 'mir2-native-r17-promote/stage-run.json').read_bytes())
+          assert value['workflow_id'] == 284517107
+          assert value['event'] == 'workflow_dispatch' and value['conclusion'] == 'success'
+          assert value['head_branch'] == os.environ['GITHUB_REF_NAME']
+          if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16', '17', '18', '19', '20'):
+              assert value['head_sha'] == os.environ['GITHUB_SHA']
+          PY
+
+      - name: Download the retained stage artifact from this repository
+        uses: actions/download-artifact@v4
+        with:
+          name: native-r17-stage-${{ inputs.native_stage_run_id }}
+          path: ${{ runner.temp }}/mir2-native-r17-promote/stage
+          run-id: ${{ inputs.native_stage_run_id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+
+      - name: Checkout fixed native publication source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Promote the verified stage once and check public aliases
+        working-directory: mir2-web3
+        timeout-minutes: 9
+        env:
+          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
+          MIR2_NATIVE_STAGE_SHA: ${{ inputs.native_stage_sha256 }}
+          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
+        run: |
+          set -euo pipefail
+          chmod 600 "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json"
+          case "$MIR2_NATIVE_SEQUENCE" in
+            13) native_driver=scripts/native_r17_r2_delivery.py ;;
+            14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
+            15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
+            16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
+            17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
+            18) native_driver=scripts/native_r23_s18_r2_delivery.py ;;
+            19) native_driver=scripts/native_r24_s19_r2_delivery.py ;;
+            20) native_driver=scripts/native_r25_s20_r2_delivery.py ;;
+            *) exit 1 ;;
+          esac
+          timeout --signal=INT --kill-after=30s 8m python3 -B "$native_driver" --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"
+
+      - name: Retain promotion and unknown-outcome receipts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-r17-promote-${{ github.run_id }}
+          path: ${{ runner.temp }}/mir2-native-r17-promote/
+          if-no-files-found: error
+          retention-days: 7
+
   build-web-assets:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == '' || inputs.native_delivery_operation == 'off') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

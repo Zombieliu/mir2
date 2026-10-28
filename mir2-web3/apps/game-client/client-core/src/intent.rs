@@ -177,8 +177,16 @@ mod tests {
     #[test]
     fn crystal_inventory_capacity_keeps_native_fallback_and_excludes_six_belt_cells() {
         for (capacity, bag_cells) in [
-            (46, 40), (54, 48), (58, 52), (62, 56), (66, 60),
-            (70, 64), (74, 68), (78, 72), (82, 76), (86, 80),
+            (46, 40),
+            (54, 48),
+            (58, 52),
+            (62, 56),
+            (66, 60),
+            (70, 64),
+            (74, 68),
+            (78, 72),
+            (82, 76),
+            (86, 80),
         ] {
             assert_eq!(canonical_inventory_capacity(capacity), capacity);
             assert_eq!(inventory_bag_capacity(capacity), Some(bag_cells));
@@ -192,19 +200,37 @@ mod tests {
     #[test]
     fn bag_to_belt_preserves_raw_endpoint_goldens_and_zero_identity() {
         for (capacity, slot, unique_id, target, from) in [
-            (46, 0, 0, 0, 6), (46, 2, 7001, 0, 8), (46, 39, 42, 5, 45),
-            (54, 40, 43, 0, 46), (54, 47, 44, 5, 53), (86, 79, u64::MAX, 5, 85),
+            (46, 0, 0, 0, 6),
+            (46, 2, 7001, 0, 8),
+            (46, 39, 42, 5, 45),
+            (54, 40, 43, 0, 46),
+            (54, 47, 44, 5, 53),
+            (86, 79, u64::MAX, 5, 85),
         ] {
-            let source = InventoryPlacement { unique_id: Some(unique_id), container: 0, slot };
-            assert_eq!(plan_bag_to_belt_move(capacity, source, target),
-                Some(BagToBeltMovePlan { unique_id, from, to: i32::from(target) }));
+            let source = InventoryPlacement {
+                unique_id: Some(unique_id),
+                container: 0,
+                slot,
+            };
+            assert_eq!(
+                plan_bag_to_belt_move(capacity, source, target),
+                Some(BagToBeltMovePlan {
+                    unique_id,
+                    from,
+                    to: i32::from(target)
+                })
+            );
             assert_eq!(source.slot, slot, "planning cannot rewrite a placement");
         }
     }
 
     #[test]
     fn bag_to_belt_rejects_locked_expansion_and_unrepresentable_endpoints() {
-        let place = |slot| InventoryPlacement { unique_id: Some(0), container: 0, slot };
+        let place = |slot| InventoryPlacement {
+            unique_id: Some(0),
+            container: 0,
+            slot,
+        };
         assert_eq!(plan_bag_to_belt_move(46, place(40), 0), None);
         assert_eq!(plan_bag_to_belt_move(47, place(40), 0), None);
         assert_eq!(plan_bag_to_belt_move(54, place(48), 0), None);
@@ -212,9 +238,29 @@ mod tests {
         assert_eq!(plan_bag_to_belt_move(86, place(u32::MAX), 0), None);
         assert_eq!(plan_bag_to_belt_move(46, place(0), 6), None);
         assert_eq!(plan_bag_to_belt_move(46, place(0), u8::MAX), None);
-        assert_eq!(plan_bag_to_belt_move(46, InventoryPlacement { unique_id: None, ..place(0) }, 0), None);
+        assert_eq!(
+            plan_bag_to_belt_move(
+                46,
+                InventoryPlacement {
+                    unique_id: None,
+                    ..place(0)
+                },
+                0
+            ),
+            None
+        );
         for container in [1, 2, 3, 4, u8::MAX] {
-            assert_eq!(plan_bag_to_belt_move(46, InventoryPlacement { container, ..place(0) }, 0), None);
+            assert_eq!(
+                plan_bag_to_belt_move(
+                    46,
+                    InventoryPlacement {
+                        container,
+                        ..place(0)
+                    },
+                    0
+                ),
+                None
+            );
         }
     }
 }

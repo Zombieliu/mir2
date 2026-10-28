@@ -4,10 +4,7 @@ use mir2_protocol::{GuildBuff, UserItemStat};
 
 // Domain step only. The server clock/lease driver owns when a minute is admitted;
 // session ticks must never call this independently for each connected member.
-pub(crate) fn advance_minutes(
-    guild: &mut SharedGuildRecord,
-    minutes: u64,
-) -> Vec<GuildBuff> {
+pub(crate) fn advance_minutes(guild: &mut SharedGuildRecord, minutes: u64) -> Vec<GuildBuff> {
     advance_minutes_with_definitions(
         guild,
         minutes,

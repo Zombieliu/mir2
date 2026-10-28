@@ -199,12 +199,30 @@ mod tests {
     }
     #[test]
     fn hero_rules_match_original_creation_item_and_luck_configuration() {
-        let settings=crystal_hero_settings();let rules=&settings.rules;
-        assert_eq!((rules.minimum_level,rules.maximum_count,rules.maximum_seal_count,rules.max_luck),(22,1,5,10));
-        assert!(rules.allow_new);assert_eq!(rules.can_create_classes,[true,true,true,true,false]);
-        assert_eq!((&*rules.seal_item_name,&*rules.fire_ring_spell,&*rules.heal_ring_spell,&*rules.blink_spell),("SealedHero","FireBall","Healing","Blink"));
-        let mut invalid=serde_json::to_value(settings).unwrap();invalid["rules"]["max_luck"]=256.into();
+        let settings = crystal_hero_settings();
+        let rules = &settings.rules;
+        assert_eq!(
+            (
+                rules.minimum_level,
+                rules.maximum_count,
+                rules.maximum_seal_count,
+                rules.max_luck
+            ),
+            (22, 1, 5, 10)
+        );
+        assert!(rules.allow_new);
+        assert_eq!(rules.can_create_classes, [true, true, true, true, false]);
+        assert_eq!(
+            (
+                &*rules.seal_item_name,
+                &*rules.fire_ring_spell,
+                &*rules.heal_ring_spell,
+                &*rules.blink_spell
+            ),
+            ("SealedHero", "FireBall", "Healing", "Blink")
+        );
+        let mut invalid = serde_json::to_value(settings).unwrap();
+        invalid["rules"]["max_luck"] = 256.into();
         assert!(serde_json::from_value::<CrystalHeroSettings>(invalid).is_err());
     }
-
 }

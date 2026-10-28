@@ -735,7 +735,11 @@ mod tests {
             chord_event(&mut app, window, key, pressed, false);
         }
         app.update();
-        assert_eq!(chord_banks(&app), (false, false), "mode change removes Ctrl");
+        assert_eq!(
+            chord_banks(&app),
+            (false, false),
+            "mode change removes Ctrl"
+        );
 
         for (key, pressed) in [
             (KeyCode::Backquote, true),
@@ -746,7 +750,11 @@ mod tests {
             chord_event(&mut app, window, key, pressed, false);
         }
         app.update();
-        assert_eq!(chord_banks(&app), (false, true), "mode change enables tilde");
+        assert_eq!(
+            chord_banks(&app),
+            (false, true),
+            "mode change enables tilde"
+        );
 
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();

@@ -1,0 +1,5 @@
+error: unexpected argument 'mentor_reward_tests' found
+
+Usage: cargo.exe test [OPTIONS] [TESTNAME] [-- [ARGS]...]
+
+For more information, try '--help'.

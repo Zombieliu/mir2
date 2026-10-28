@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mir2:prepared-dense-network-receipt:v2",
+  "title": "Prepared-state exact ELF mechanics receipt; never full player acceptance",
+  "type": "object",
+  "required": ["schema", "fullP1Accepted", "nativeInputAccepted", "nativeVisualAccepted", "humanAccepted", "ordinaryProgressionAccepted", "loadAccepted"],
+  "properties": {
+    "schema": {"type": "string"},
+    "fullP1Accepted": {"const": false},
+    "nativeInputAccepted": {"const": false},
+    "nativeVisualAccepted": {"const": false},
+    "humanAccepted": {"const": false},
+    "ordinaryProgressionAccepted": {"const": false},
+    "loadAccepted": {"const": false},
+    "preparedState": {"type": "boolean"},
+    "unsafeQaEnabled": {"const": false},
+    "binarySha256": {"const": "1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab"},
+    "sourceRevision": {"const": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b"},
+    "normalProcessCompletion": {"type": "boolean"},
+    "sevenMonsterMechanicsAccepted": {"type": "boolean"},
+    "mechanicsAllCasesPassed": {"type": "boolean"},
+    "rawFailuresPreserved": {"const": true},
+    "classes": {"type": "array", "items": {"$ref": "#/$defs/class"}},
+    "r16Comparison": {"type": "object", "required": ["status", "reason"]}
+  },
+  "$defs": {
+    "status": {"enum": ["passed", "failed", "inconclusive", "blocked", "qualified", "not-applicable", "completed", "running"]},
+    "class": {
+      "type": "object",
+      "required": ["className", "status"],
+      "properties": {
+        "className": {"enum": ["Warrior", "Wizard", "Taoist"]},
+        "status": {"$ref": "#/$defs/status"},
+        "cases": {"type": "array", "items": {"$ref": "#/$defs/case"}},
+        "persistenceMatched": {"type": "boolean"},
+        "death": {"type": "object", "properties": {"deadActions": {"$ref": "#/$defs/deadActions"}, "castBarrierVerified": {"type": "boolean"}}}
+      }
+    },
+    "case": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["attackEscape", "castEscape", "heldStop", "prematureRecast", "fullSurround"]},
+        "status": {"$ref": "#/$defs/status"},
+        "trial": {"type": "integer", "minimum": 1},
+        "result": {"type": "object", "properties": {"castCommit": {"$ref": "#/$defs/castCommit"}, "castBarrier": {"$ref": "#/$defs/castBarrier"}}},
+        "formation": {"type": "object"}
+      }
+    },
+    "castCommit": {
+      "type": "object",
+      "required": ["status", "spell", "actualMagicInputSequence", "castAckSequence", "ownerCastSequence", "mpReceiptSequence", "commitmentWindow", "baselineExact"],
+      "properties": {
+        "status": {"enum": ["qualified", "inconclusive"]},
+        "spell": {"enum": ["FireBall", "Healing"]},
+        "actualMagicInputSequence": {"type": ["integer", "null"]},
+        "castAckSequence": {"type": ["integer", "null"]},
+        "ownerCastSequence": {"type": ["integer", "null"]},
+        "mpReceiptSequence": {"type": ["integer", "null"]},
+        "baselineExact": {"type": "boolean"},
+        "commitmentWindow": {"type": "object", "required": ["castSentSequence", "castSentMs", "commitEndMs", "ownerId"]}
+      },
+      "allOf": [{"if": {"properties": {"status": {"const": "qualified"}}}, "then": {"properties": {"actualMagicInputSequence": {"type": "integer", "minimum": 1}, "castAckSequence": {"type": "integer", "minimum": 1}, "ownerCastSequence": {"type": "integer", "minimum": 1}, "mpReceiptSequence": {"type": "integer", "minimum": 1}, "baselineExact": {"const": true}}}}]
+    },
+    "castBarrier": {
+      "type": "object",
+      "required": ["status", "verified", "actualMagicInputSequence", "baselineSnapshotSequence", "eligibility", "matchingTargetInput"],
+      "properties": {"status": {"enum": ["passed", "failed", "inconclusive", "not-applicable"]}, "verified": {"type": "boolean"}},
+      "allOf": [{"if": {"properties": {"verified": {"const": true}}}, "then": {"properties": {"status": {"const": "passed"}, "actualMagicInputSequence": {"type": "integer", "minimum": 1}, "baselineSnapshotSequence": {"type": "integer", "minimum": 1}, "matchingTargetInput": {"const": true}, "eligibility": {"type": "object", "required": ["status", "enoughMp", "validTarget", "mpCostKnown"], "properties": {"status": {"const": "eligible"}, "enoughMp": {"const": true}, "validTarget": {"const": true}, "mpCostKnown": {"const": true}}}}}}]
+    },
+    "deadActions": {
+      "type": "object",
+      "required": ["status", "castBarrier", "castBarrierVerified", "window"],
+      "properties": {"castBarrier": {"$ref": "#/$defs/castBarrier"}, "castBarrierVerified": {"type": "boolean"}}
+    },
+    "absoluteVitalProvenance": {
+      "type": "object",
+      "required": ["ownerId", "absolute", "source"],
+      "properties": {
+        "ownerId": {"type": "integer", "minimum": 1},
+        "absolute": {"const": true},
+        "source": {"enum": ["worldSnapshot", "UserInformation", "HealthChanged", "Death"]},
+        "observedMs": {"type": "number"}
+      }
+    }
+  },
+  "additionalProperties": true
+}

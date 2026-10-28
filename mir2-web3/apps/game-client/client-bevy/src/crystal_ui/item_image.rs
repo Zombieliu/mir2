@@ -69,7 +69,14 @@ pub(super) fn spawn_original_item_image(
     cell_width: i32,
     cell_height: i32,
 ) {
-    spawn_original_item_image_tinted(parent, asset_server, index, cell_width, cell_height, Color::WHITE);
+    spawn_original_item_image_tinted(
+        parent,
+        asset_server,
+        index,
+        cell_width,
+        cell_height,
+        Color::WHITE,
+    );
 }
 
 /// Crystal applies locked-cell colour and opacity to the bitmap itself;
@@ -82,19 +89,20 @@ pub(super) fn spawn_original_item_image_tinted(
     cell_height: i32,
     color: Color,
 ) {
-    let (cell, node, mut image) = original_item_image_bundle(
-        asset_server,
-        Some(index),
-        cell_width,
-        cell_height,
-    );
+    let (cell, node, mut image) =
+        original_item_image_bundle(asset_server, Some(index), cell_width, cell_height);
     image.color = color;
     parent.spawn((cell, node, image));
 }
 
 pub fn layout_original_item_images(
     images: Option<Res<Assets<Image>>>,
-    mut icons: Query<(&OriginalItemImage, &ImageNode, Option<&OriginalItemPaintScale>, &mut Node)>,
+    mut icons: Query<(
+        &OriginalItemImage,
+        &ImageNode,
+        Option<&OriginalItemPaintScale>,
+        &mut Node,
+    )>,
     mut true_sizes: Local<
         std::collections::HashMap<bevy::asset::AssetId<Image>, Option<(i32, i32)>>,
     >,
@@ -216,10 +224,18 @@ mod tests {
     #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
     fn add_portable_item_surface(app: &mut App, index: usize) {
         match index {
-            0 => { app.add_plugins(crate::portable_bag_ui::Mir2PortableBagUiPlugin); }
-            1 => { app.add_plugins(crate::portable_hero_ui::Mir2PortableHeroUiPlugin); }
-            2 => { app.add_plugins(crate::portable_storage_ui::Mir2PortableStorageUiPlugin); }
-            3 => { app.add_plugins(crate::portable_npc_shop_ui::Mir2PortableNpcShopUiPlugin); }
+            0 => {
+                app.add_plugins(crate::portable_bag_ui::Mir2PortableBagUiPlugin);
+            }
+            1 => {
+                app.add_plugins(crate::portable_hero_ui::Mir2PortableHeroUiPlugin);
+            }
+            2 => {
+                app.add_plugins(crate::portable_storage_ui::Mir2PortableStorageUiPlugin);
+            }
+            3 => {
+                app.add_plugins(crate::portable_npc_shop_ui::Mir2PortableNpcShopUiPlugin);
+            }
             _ => unreachable!(),
         }
     }
@@ -227,10 +243,15 @@ mod tests {
     #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
     fn assert_single_layout_schedule(app: &mut App) {
         app.world_mut().schedule_scope(Update, |world, schedule| {
-            schedule.initialize(world).expect("portable item surfaces must start together");
+            schedule
+                .initialize(world)
+                .expect("portable item surfaces must start together");
             assert_eq!(
-                schedule.graph().systems_in_set(OriginalItemImageLayoutSet.intern())
-                    .expect("shared item layout must be installed").len(),
+                schedule
+                    .graph()
+                    .systems_in_set(OriginalItemImageLayoutSet.intern())
+                    .expect("shared item layout must be installed")
+                    .len(),
                 1,
                 "all item surfaces must share one layout pass",
             );
@@ -277,7 +298,9 @@ mod tests {
             .add_systems(Update, layout_original_item_images);
         let image = Image::new_fill(
             bevy::render::render_resource::Extent3d {
-                width: 32, height: 30, depth_or_array_layers: 1,
+                width: 32,
+                height: 30,
+                depth_or_array_layers: 1,
             },
             bevy::render::render_resource::TextureDimension::D2,
             &[255, 255, 255, 255],
@@ -285,21 +308,46 @@ mod tests {
             bevy::asset::RenderAssetUsages::default(),
         );
         let handle = app.world_mut().resource_mut::<Assets<Image>>().add(image);
-        let default_icon = app.world_mut().spawn((
-            OriginalItemImage { cell_width: 36, cell_height: 32 },
-            ImageNode { image: handle.clone(), ..default() }, Node::default(),
-        )).id();
-        let touch_icon = app.world_mut().spawn((
-            OriginalItemImage { cell_width: 96, cell_height: 85 },
-            OriginalItemPaintScale(2.67),
-            ImageNode { image: handle, ..default() }, Node::default(),
-        )).id();
+        let default_icon = app
+            .world_mut()
+            .spawn((
+                OriginalItemImage {
+                    cell_width: 36,
+                    cell_height: 32,
+                },
+                ImageNode {
+                    image: handle.clone(),
+                    ..default()
+                },
+                Node::default(),
+            ))
+            .id();
+        let touch_icon = app
+            .world_mut()
+            .spawn((
+                OriginalItemImage {
+                    cell_width: 96,
+                    cell_height: 85,
+                },
+                OriginalItemPaintScale(2.67),
+                ImageNode {
+                    image: handle,
+                    ..default()
+                },
+                Node::default(),
+            ))
+            .id();
         app.update();
         let original = app.world().get::<Node>(default_icon).unwrap();
-        assert_eq!((original.left, original.top, original.width, original.height),
-            (Val::Px(2.0), Val::Px(1.0), Val::Px(32.0), Val::Px(30.0)));
+        assert_eq!(
+            (original.left, original.top, original.width, original.height),
+            (Val::Px(2.0), Val::Px(1.0), Val::Px(32.0), Val::Px(30.0))
+        );
         let touch = app.world().get::<Node>(touch_icon).unwrap();
-        assert_eq!((touch.width, touch.height), (Val::Px(32.0 * 2.67), Val::Px(30.0 * 2.67)));
+        assert_eq!(
+            (touch.width, touch.height),
+            (Val::Px(32.0 * 2.67), Val::Px(30.0 * 2.67))
+        );
         assert!(matches!(touch.left, Val::Px(left) if left > 5.0));
         assert!(matches!(touch.top, Val::Px(top) if top > 2.0));
     }

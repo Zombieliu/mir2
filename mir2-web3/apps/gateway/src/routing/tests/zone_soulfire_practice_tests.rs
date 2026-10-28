@@ -257,18 +257,24 @@ fn zone_soulfire_practice_stale_queued_receipt_cannot_follow_reconnect_or_revive
             let mut state = runtime.zone_state.lock().unwrap();
             if revive {
                 let (_, max_hp, mp) = state.zone_manager.player_vitals(&hit.session_id).unwrap();
-                state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
-                    session_id: hit.session_id.clone(),
-                    hp: 0,
-                    max_hp,
-                    mp,
-                });
-                state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
-                    session_id: hit.session_id.clone(),
-                    hp: max_hp,
-                    max_hp,
-                    mp,
-                });
+                state
+                    .zone_manager
+                    .handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                        session_id: hit.session_id.clone(),
+                        hp: 0,
+                        max_hp,
+                        mp,
+                        dead: true,
+                    });
+                state
+                    .zone_manager
+                    .handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                        session_id: hit.session_id.clone(),
+                        hp: max_hp,
+                        max_hp,
+                        mp,
+                        dead: false,
+                    });
             } else {
                 // A reconnect must use a new authenticated online incarnation,
                 // even if its account/character and display name are unchanged.
@@ -502,12 +508,15 @@ fn zone_fireball_practice_invalid_unlearned_and_stale_queued_life_are_rejected()
                 let mut state = runtime.zone_state.lock().unwrap();
                 let (_, max_hp, mp) = state.zone_manager.player_vitals(&hit.session_id).unwrap();
                 for hp in [0, max_hp] {
-                    state.zone_manager.handle(ZoneCommand::SyncPlayerVitals {
-                        session_id: hit.session_id.clone(),
-                        hp,
-                        max_hp,
-                        mp,
-                    });
+                    state
+                        .zone_manager
+                        .handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                            session_id: hit.session_id.clone(),
+                            hp,
+                            max_hp,
+                            mp,
+                            dead: hp == 0,
+                        });
                 }
             }
             assert!(

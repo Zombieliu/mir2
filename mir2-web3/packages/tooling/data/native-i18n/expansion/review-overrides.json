@@ -1,0 +1,1186 @@
+{
+  "server.SummonedCreatureNotExist": {
+    "ru": "{0}: SummonedCreature больше не существует?!?. {1}",
+    "hi": "{0}: SummonedCreature अब मौजूद नहीं है?!?. {1}",
+    "id": "{0}: SummonedCreature sudah tidak ada?!?. {1}",
+    "vi": "{0}: SummonedCreature không còn tồn tại?!?. {1}",
+    "th": "{0}: SummonedCreature ไม่มีอยู่แล้ว?!?. {1}",
+    "ar": "{0}: لم يعد SummonedCreature موجودًا؟!؟. {1}"
+  },
+  "client.EmailAddressDescription": {
+    "ru": " Описание: адрес электронной почты.\n Формат: Example@Example.Com.\n Максимальная длина: 50 символов.\n Необязательное поле.",
+    "hi": " विवरण: ई-मेल पता।\n प्रारूप: Example@Example.Com.\n अधिकतम लंबाई: 50 वर्ण।\n वैकल्पिक फ़ील्ड।",
+    "id": " Keterangan: alamat email.\n Format: Example@Example.Com.\n Panjang maksimum: 50 karakter.\n Kolom opsional.",
+    "vi": " Mô tả: địa chỉ email.\n Định dạng: Example@Example.Com.\n Độ dài tối đa: 50 ký tự.\n Trường không bắt buộc.",
+    "th": " คำอธิบาย: ที่อยู่อีเมล\n รูปแบบ: Example@Example.Com.\n ความยาวสูงสุด: 50 ตัวอักษร\n ช่องที่ไม่จำเป็นต้องกรอก",
+    "ar": " الوصف: عنوان البريد الإلكتروني.\n التنسيق: Example@Example.Com.\n الحد الأقصى للطول: 50 حرفًا.\n حقل اختياري."
+  },
+  "client.ReducesArmourRatePerTick": {
+    "ru": "Снижает показатель брони на 10% каждые {0} {1}.\n",
+    "hi": "हर {0} {1} में कवच दर को 10% कम करता है।\n",
+    "id": "Mengurangi tingkat pertahanan sebesar 10% setiap {0} {1}.\n",
+    "vi": "Giảm tỷ lệ giáp đi 10% sau mỗi {0} {1}.\n",
+    "th": "ลดอัตราเกราะลง 10% ทุก {0} {1}\n",
+    "ar": "يخفض معدل الدرع بنسبة 10% كل {0} {1}.\n"
+  },
+  "client.NotEnoughGold": {
+    "ru": "Недостаточно золота.",
+    "hi": "पर्याप्त सोना नहीं है।",
+    "id": "Emas tidak cukup.",
+    "vi": "Không đủ vàng.",
+    "th": "ทองไม่เพียงพอ",
+    "ar": "الذهب غير كافٍ."
+  },
+  "log.realmInfo": {
+    "ru": "Мир {0} · {1} v{2}",
+    "hi": "जगत {0} · {1} v{2}",
+    "id": "Dunia {0} · {1} v{2}",
+    "vi": "Thế giới {0} · {1} v{2}",
+    "th": "โลก {0} · {1} v{2}",
+    "ar": "العالم {0} · {1} v{2}"
+  },
+  "ui.targetDistance": {
+    "ru": "{0} · клеток: {1}",
+    "hi": "{0} · {1} खाने",
+    "id": "{0} · {1} petak",
+    "vi": "{0} · {1} ô",
+    "th": "{0} · {1} ช่อง",
+    "ar": "{0} · {1} خانات"
+  },
+  "client.AwakeningWithValue": {
+    "ru": "{0} Пробуждение({1})",
+    "hi": "{0} जागरण({1})",
+    "id": "{0} Kebangkitan({1})",
+    "vi": "{0} Thức tỉnh({1})",
+    "th": "{0} ปลุกพลัง({1})",
+    "ar": "{0} إيقاظ({1})"
+  },
+  "client.EndDate": {
+    "ru": "ДАТА ОКОНЧАНИЯ",
+    "hi": "समाप्ति तिथि",
+    "id": "TANGGAL BERAKHIR",
+    "vi": "NGÀY KẾT THÚC",
+    "th": "วันที่สิ้นสุด",
+    "ar": "تاريخ الانتهاء"
+  },
+  "client.HPDrainRate": {
+    "ru": "Скорость истощения HP: {0}%",
+    "hi": "HP क्षय दर: {0}%",
+    "id": "Laju Pengurasan HP: {0}%",
+    "vi": "Tỷ lệ rút HP: {0}%",
+    "th": "อัตราการสูญเสีย HP: {0}%",
+    "ar": "معدل استنزاف HP: {0}%"
+  },
+  "client.NPCInfoLoading": {
+    "ru": "Загружается информация о NPC...",
+    "hi": "NPC की जानकारी लोड हो रही है...",
+    "id": "Informasi NPC sedang dimuat...",
+    "vi": "Đang tải thông tin NPC...",
+    "th": "กำลังโหลดข้อมูล NPC...",
+    "ar": "جارٍ تحميل معلومات NPC..."
+  },
+  "client.NPCTooltipCoordinates": {
+    "ru": "Координаты: ({0}, {1})",
+    "hi": "निर्देशांक: ({0}, {1})",
+    "id": "Koordinat: ({0}, {1})",
+    "vi": "Tọa độ: ({0}, {1})",
+    "th": "พิกัด: ({0}, {1})",
+    "ar": "الإحداثيات: ({0}, {1})"
+  },
+  "client.PlayerDonatedGoldToGuildFunds": {
+    "ru": "{0} внёс {1} золота в казну гильдии.",
+    "hi": "{0} ने गिल्ड कोष में {1} सोना दान किया।",
+    "id": "{0} menyumbangkan {1} emas ke dana guild.",
+    "vi": "{0} đã đóng góp {1} vàng vào quỹ bang hội.",
+    "th": "{0} บริจาคทอง {1} ให้กองทุนกิลด์",
+    "ar": "تبرع {0} بمقدار {1} من الذهب لصندوق النقابة."
+  },
+  "client.PlayerRetrievedGoldFromGuildFunds": {
+    "ru": "{0} забрал {1} золота из казны гильдии.",
+    "hi": "{0} ने गिल्ड कोष से {1} सोना निकाला।",
+    "id": "{0} mengambil {1} emas dari dana guild.",
+    "vi": "{0} đã rút {1} vàng từ quỹ bang hội.",
+    "th": "{0} ถอนทอง {1} จากกองทุนกิลด์",
+    "ar": "سحب {0} مقدار {1} من الذهب من صندوق النقابة."
+  },
+  "client.RentItemDurationQuestion": {
+    "ru": "На какой срок вы хотите сдать {0} в аренду игроку {1}? (От 1 до 30 дней).",
+    "hi": "आप {0} को {1} को कितने समय के लिए किराए पर देना चाहते हैं? (1 से 30 दिन)।",
+    "id": "Berapa lama Anda ingin menyewakan {0} kepada {1}? (1 hingga 30 hari).",
+    "vi": "Bạn muốn cho {1} thuê {0} trong bao lâu? (1 đến 30 ngày).",
+    "th": "คุณต้องการให้ {1} เช่า {0} นานเท่าใด? (1 ถึง 30 วัน)",
+    "ar": "ما المدة التي تريد تأجير {0} فيها إلى {1}؟ (من 1 إلى 30 يومًا)."
+  },
+  "content.quest.huntForButcher.description": {
+    "ru": "Охотьтесь на оленей для мясника John и принесите ему пять кусков оленины. Нажмите H, чтобы открыть исходную справку по разделке.",
+    "hi": "कसाई John के लिए हिरनों का शिकार करें और उसे हिरन के मांस के पाँच टुकड़े लाएँ। मूल मांस निकालने की सहायता के लिए H दबाएँ।",
+    "id": "Buru Rusa untuk Tukang Daging John dan bawakan lima potong Daging Rusa. Tekan H untuk bantuan pemotongan daging asli.",
+    "vi": "Săn Hươu cho người bán thịt John và mang cho ông ấy năm miếng Thịt Hươu. Nhấn H để xem hướng dẫn xẻ thịt gốc.",
+    "th": "ล่ากวางให้คนขายเนื้อ John และนำเนื้อกวางห้าชิ้นมาให้เขา กด H เพื่อดูวิธีชำแหละดั้งเดิม",
+    "ar": "اصطد الأيائل للجزار John وأحضر له خمس قطع من لحم الأيل. اضغط H لعرض مساعدة السلخ الأصلية."
+  },
+  "content.quest.huntForButcher.summary": {
+    "ru": "Мяснику John нужны пять кусков оленины.",
+    "hi": "कसाई John को हिरन के मांस के पाँच टुकड़े चाहिए।",
+    "id": "Tukang Daging John membutuhkan lima potong Daging Rusa.",
+    "vi": "Người bán thịt John cần năm miếng Thịt Hươu.",
+    "th": "คนขายเนื้อ John ต้องการเนื้อกวางห้าชิ้น",
+    "ar": "يحتاج الجزار John إلى خمس قطع من لحم الأيل."
+  },
+  "server.ConditionError": {
+    "ru": "{0} : Ошибка условия.",
+    "hi": "{0} : शर्त में त्रुटि।",
+    "id": "{0} : Kesalahan kondisi.",
+    "vi": "{0} : Lỗi điều kiện.",
+    "th": "{0} : ข้อผิดพลาดของเงื่อนไข",
+    "ar": "{0} : خطأ في الشرط."
+  },
+  "server.GuildNoticeMaxLines": {
+    "ru": "Объявление гильдии не может быть длиннее 200 строк!",
+    "hi": "गिल्ड सूचना 200 पंक्तियों से अधिक नहीं हो सकती!",
+    "id": "Pengumuman guild tidak boleh melebihi 200 baris!",
+    "vi": "Thông báo bang hội không được dài quá 200 dòng!",
+    "th": "ประกาศกิลด์ต้องไม่เกิน 200 บรรทัด!",
+    "ar": "لا يمكن أن يتجاوز إعلان النقابة 200 سطر!"
+  },
+  "server.GuildSparePointsInsufficient": {
+    "ru": "Недостаточно свободных очков гильдии (требуется {0}).",
+    "hi": "गिल्ड के उपलब्ध अंक पर्याप्त नहीं हैं ({0} आवश्यक)।",
+    "id": "Poin guild yang tersedia tidak cukup (perlu {0}).",
+    "vi": "Không đủ điểm bang hội chưa sử dụng (cần {0}).",
+    "th": "แต้มกิลด์ที่เหลือไม่เพียงพอ (ต้องการ {0})",
+    "ar": "نقاط النقابة المتاحة غير كافية (المطلوب {0})."
+  },
+  "server.IPAddressDisconnectedInvalidPacket": {
+    "ru": "{0} Отключён: недопустимый пакет.",
+    "hi": "{0} डिस्कनेक्ट हुआ: अमान्य पैकेट।",
+    "id": "{0} Terputus, paket tidak valid.",
+    "vi": "{0} Đã ngắt kết nối, gói tin không hợp lệ.",
+    "th": "{0} ถูกตัดการเชื่อมต่อ แพ็กเก็ตไม่ถูกต้อง",
+    "ar": "{0} تم قطع الاتصال، الحزمة غير صالحة."
+  },
+  "server.ObtainedNewCreature": {
+    "ru": "Получено новое существо {{{0}}}.",
+    "hi": "नया जीव {{{0}}} प्राप्त हुआ।",
+    "id": "Mendapatkan makhluk baru {{{0}}}.",
+    "vi": "Đã nhận được sinh vật mới {{{0}}}.",
+    "th": "ได้รับสิ่งมีชีวิตใหม่ {{{0}}}",
+    "ar": "تم الحصول على مخلوق جديد {{{0}}}."
+  },
+  "server.OnlyOneActiveStoneAlive": {
+    "ru": "Одновременно может существовать только 1 активный {0}.",
+    "hi": "एक समय में केवल 1 सक्रिय {0} जीवित रह सकता है।",
+    "id": "Anda hanya dapat memiliki 1 {0} aktif yang hidup.",
+    "vi": "Bạn chỉ có thể có 1 {0} đang hoạt động còn sống.",
+    "th": "คุณมี {0} ที่ทำงานอยู่และยังมีชีวิตได้เพียง 1 ตัว",
+    "ar": "يمكنك امتلاك 1 فقط من {0} نشطًا وعلى قيد الحياة."
+  },
+  "server.PlayerArchivedAfterInactivityMonths": {
+    "ru": "Игрок {0} отправлен в архив из-за отсутствия активности в течение {1} месяцев.",
+    "hi": "{1} महीनों की निष्क्रियता के कारण खिलाड़ी {0} को संग्रहित कर दिया गया है।",
+    "id": "Pemain {0} telah diarsipkan karena tidak aktif selama {1} bulan.",
+    "vi": "Người chơi {0} đã được lưu trữ do không hoạt động trong {1} tháng.",
+    "th": "ผู้เล่น {0} ถูกเก็บเข้าคลังเนื่องจากไม่ได้ใช้งานเป็นเวลา {1} เดือน",
+    "ar": "تمت أرشفة اللاعب {0} بسبب عدم النشاط لمدة {1} شهرًا."
+  },
+  "server.SkillRemovedByGM": {
+    "ru": "{0} Навык {1} удалён GM: {2}",
+    "hi": "{0} कौशल {1} को GM ने हटाया: {2}",
+    "id": "{0} Keterampilan {1} dihapus oleh GM: {2}",
+    "vi": "{0} Kỹ năng {1} đã bị GM xóa: {2}",
+    "th": "{0} วิชา {1} ถูกลบโดย GM: {2}",
+    "ar": "{0} أزال GM المهارة {1}: {2}"
+  },
+  "server.SpellChangedByGM": {
+    "ru": "{0} Заклинание {1} изменено на уровень {2}; GM: {3}",
+    "hi": "{0} मंत्र {1} का स्तर {2} किया गया; GM: {3}",
+    "id": "{0} Sihir {1} diubah ke tingkat {2} oleh GM: {3}",
+    "vi": "{0} Phép {1} được GM đổi thành cấp {2}: {3}",
+    "th": "{0} เวท {1} ถูกเปลี่ยนเป็นระดับ {2} โดย GM: {3}",
+    "ar": "{0} غيّر GM التعويذة {1} إلى المستوى {2}: {3}"
+  },
+  "ui.languageChinese": {
+    "ru": "Упрощённый китайский",
+    "hi": "सरलीकृत चीनी",
+    "id": "Mandarin Sederhana",
+    "vi": "Tiếng Trung giản thể",
+    "th": "ภาษาจีนตัวย่อ",
+    "ar": "الصينية المبسطة"
+  },
+  "client.CanPickupItems": {
+    "ru": "Может подбирать предметы ({0}{1}).",
+    "hi": "वस्तुएँ उठा सकता है ({0}{1})।",
+    "id": "Dapat mengambil barang ({0}{1}).",
+    "vi": "Có thể nhặt vật phẩm ({0}{1}).",
+    "th": "สามารถเก็บไอเทมได้ ({0}{1})",
+    "ar": "يمكنه التقاط الأدوات ({0}{1})."
+  },
+  "client.RotateBelt": {
+    "ru": "Переключить пояс",
+    "hi": "बेल्ट बदलें",
+    "id": "Putar Sabuk",
+    "vi": "Chuyển đai",
+    "th": "สลับเข็มขัด",
+    "ar": "تبديل الحزام"
+  },
+  "content.quest.smithSecondTest.title": {
+    "ru": "2-е испытание кузнеца",
+    "hi": "लोहार की परीक्षा 2",
+    "id": "Ujian Pandai Besi ke-2",
+    "vi": "Thử thách thứ 2 của thợ rèn",
+    "th": "การทดสอบครั้งที่ 2 ของช่างตีเหล็ก",
+    "ar": "اختبار الحداد رقم 2"
+  },
+  "content.quest.toBichon.stage.inProgress.tracker": {
+    "ru": "Отправляйтесь к проводнику Mir Peter в Бичоне.",
+    "hi": "Bichon में Mir मार्गदर्शक Peter के पास जाएँ।",
+    "id": "Pergi ke Pemandu Mir Peter di Bichon.",
+    "vi": "Đến gặp người hướng dẫn Mir Peter tại Bichon.",
+    "th": "เดินทางไปหา Peter ผู้นำทาง Mir ที่ Bichon",
+    "ar": "اذهب إلى مرشد Mir Peter في Bichon."
+  },
+  "server.ChatBanRemainingTimeByDay": {
+    "ru": "Вам запрещён чат ещё на {0} дн., {1} ч., {2} мин. и {3} сек.",
+    "hi": "आपके चैट प्रतिबंध में {0} दिन, {1} घंटे, {2} मिनट और {3} सेकंड शेष हैं।",
+    "id": "Anda masih dilarang mengobrol selama {0} hari, {1} jam, {2} menit, dan {3} detik.",
+    "vi": "Bạn còn bị cấm trò chuyện trong {0} ngày, {1} giờ, {2} phút và {3} giây.",
+    "th": "คุณถูกห้ามแชตอีก {0} วัน {1} ชั่วโมง {2} นาที และ {3} วินาที",
+    "ar": "ما زلت ممنوعًا من الدردشة لمدة {0} يومًا و{1} ساعة و{2} دقيقة و{3} ثانية."
+  },
+  "server.LevelNotEnoughCreateGuild": {
+    "ru": "Ваш уровень недостаточен для создания гильдии, требуется: {0}",
+    "hi": "गिल्ड बनाने के लिए आपका स्तर पर्याप्त नहीं है, आवश्यक स्तर: {0}",
+    "id": "Tingkat Anda belum cukup untuk membuat guild, perlu: {0}",
+    "vi": "Cấp của bạn chưa đủ để tạo bang hội, yêu cầu: {0}",
+    "th": "ระดับของคุณยังไม่สูงพอที่จะสร้างกิลด์ ต้องการ: {0}",
+    "ar": "مستواك غير كافٍ لإنشاء نقابة، المطلوب: {0}"
+  },
+  "npc.prose.e76d0bc0e98b2ad5": {
+    "ru": "‎",
+    "hi": "‎",
+    "id": "‎",
+    "vi": "‎",
+    "th": "‎",
+    "ar": "‎"
+  },
+  "npc.prose.565d240f5343e625": {
+    "ru": "||",
+    "hi": "||",
+    "id": "||",
+    "vi": "||",
+    "th": "||",
+    "ar": "||"
+  },
+  "npc.prose.cbe5cfdf7c2118a9": {
+    "ru": "|",
+    "hi": "|",
+    "id": "|",
+    "vi": "|",
+    "th": "|",
+    "ar": "|"
+  },
+  "npc.prose.f6a16e6570270f61": {
+    "ru": "|  |",
+    "hi": "|  |",
+    "id": "|  |",
+    "vi": "|  |",
+    "th": "|  |",
+    "ar": "|  |"
+  },
+  "npc.prose.0595111d69b4e1a2": {
+    "ru": "//////////////////////////////////////////////////////////////////// Пещера вурдалаков",
+    "hi": "//////////////////////////////////////////////////////////////////// गूल गुफा",
+    "id": "//////////////////////////////////////////////////////////////////// Gua Ghoul",
+    "vi": "//////////////////////////////////////////////////////////////////// Hang quỷ ăn xác",
+    "th": "//////////////////////////////////////////////////////////////////// ถ้ำกูล",
+    "ar": "//////////////////////////////////////////////////////////////////// كهف الغيلان"
+  },
+  "npc.prose.0eb7ecb5599b0a50": {
+    "ru": "Атака ужасным пламенем по квадрату 5x5. (Не более 24 врагов одновременно)",
+    "hi": "भयावह ज्वाला से 5x5 वर्गाकार क्षेत्र में आक्रमण। (एक साथ अधिकतम 24 शत्रु)",
+    "id": "Serangan api mengerikan dalam area persegi 5x5. (Maks. 24 musuh sekaligus)",
+    "vi": "Tấn công bằng ngọn lửa đáng sợ trong vùng vuông 5x5. (Tối đa 24 kẻ địch cùng lúc)",
+    "th": "โจมตีด้วยเปลวไฟอันน่ากลัวในพื้นที่สี่เหลี่ยม 5x5 (ศัตรูสูงสุด 24 ตัวพร้อมกัน)",
+    "ar": "هجوم بلهب مروع في نطاق مربع 5x5. (بحد أقصى 24 عدوًا في وقت واحد)"
+  },
+  "npc.prose.2b454e85aa08d764.runtime-empty.9cf77af6": {
+    "ru": "За запрос нужно заплатить  золота.",
+    "hi": "अनुरोध शुल्क के रूप में  सोना देना होगा।",
+    "id": "Anda harus membayar  emas sebagai biaya permintaan.",
+    "vi": "Bạn phải trả  vàng làm phí yêu cầu.",
+    "th": "คุณต้องจ่ายทอง  เป็นค่าธรรมเนียมคำขอ",
+    "ar": "عليك دفع  من الذهب كرسوم للطلب."
+  },
+  "npc.prose.ad828c27ce4dcca8": {
+    "ru": "\"Я могу  вам золото, чтобы вы меня пропустили.\"",
+    "hi": "\"मैं आपको सोना  ताकि आप मुझे आगे जाने दें।\"",
+    "id": "\"Aku bisa  kamu emas agar kau mengizinkanku lewat.\"",
+    "vi": "\"Tôi có thể  vàng cho bạn để được đi qua.\"",
+    "th": "\"ฉันสามารถ  ทองให้คุณเพื่อให้ฉันผ่านไปได้\"",
+    "ar": "\"يمكنني  لك ذهبًا لتسمح لي بالمرور.\""
+  },
+  "npc.prose.c042e91b257e0a45": {
+    "ru": "Вижу, у вас {npc_arg0} | {npc_arg1} HP и {npc_arg2} | {npc_arg3} MP",
+    "hi": "मैं देख रहा हूँ कि आपके पास {npc_arg0} | {npc_arg1} HP और {npc_arg2} | {npc_arg3} MP हैं",
+    "id": "Saya melihat Anda memiliki {npc_arg0} | {npc_arg1} HP dan {npc_arg2} | {npc_arg3} MP",
+    "vi": "Tôi thấy bạn có {npc_arg0} | {npc_arg1} HP và {npc_arg2} | {npc_arg3} MP",
+    "th": "ฉันเห็นว่าคุณมี HP {npc_arg0} | {npc_arg1} และ MP {npc_arg2} | {npc_arg3}",
+    "ar": "أرى أن لديك {npc_arg0} | {npc_arg1} HP و{npc_arg2} | {npc_arg3} MP"
+  },
+  "npc.prose.c042e91b257e0a45.runtime-empty.83fcd9f0": {
+    "ru": "Вижу, у вас  |  HP и  |  MP",
+    "hi": "मैं देख रहा हूँ कि आपके पास  |  HP और  |  MP हैं",
+    "id": "Saya melihat Anda memiliki  |  HP dan  |  MP",
+    "vi": "Tôi thấy bạn có  |  HP và  |  MP",
+    "th": "ฉันเห็นว่าคุณมี HP  |  และ MP  |  ",
+    "ar": "أرى أن لديك  |  HP و  |  MP"
+  },
+  "npc.prose.d5b6b03c3de86be2": {
+    "ru": "Уровень 32: TwinDragonBlade",
+    "hi": "स्तर 32: TwinDragonBlade",
+    "id": "Tingkat 32: TwinDragonBlade",
+    "vi": "Cấp 32: TwinDragonBlade",
+    "th": "ระดับ 32: TwinDragonBlade",
+    "ar": "المستوى 32: TwinDragonBlade"
+  },
+  "npc.prose.e58840a3d1d0af97": {
+    "ru": "(Сбор средств/http://www.lost-hours.co.uk/fundraising/luanthompson2022?fbclid=IwAR3i4257oBmQtlvLksYhwSS3kJiEn8JjZyZaaEpB29c75DyYDiNeveHou2Q)",
+    "hi": "(धन जुटाने का अभियान/http://www.lost-hours.co.uk/fundraising/luanthompson2022?fbclid=IwAR3i4257oBmQtlvLksYhwSS3kJiEn8JjZyZaaEpB29c75DyYDiNeveHou2Q)",
+    "id": "(Kampanye Penggalangan Dana/http://www.lost-hours.co.uk/fundraising/luanthompson2022?fbclid=IwAR3i4257oBmQtlvLksYhwSS3kJiEn8JjZyZaaEpB29c75DyYDiNeveHou2Q)",
+    "vi": "(Chiến dịch gây quỹ/http://www.lost-hours.co.uk/fundraising/luanthompson2022?fbclid=IwAR3i4257oBmQtlvLksYhwSS3kJiEn8JjZyZaaEpB29c75DyYDiNeveHou2Q)",
+    "th": "(การรณรงค์ระดมทุน/http://www.lost-hours.co.uk/fundraising/luanthompson2022?fbclid=IwAR3i4257oBmQtlvLksYhwSS3kJiEn8JjZyZaaEpB29c75DyYDiNeveHou2Q)",
+    "ar": "(حملة جمع التبرعات/http://www.lost-hours.co.uk/fundraising/luanthompson2022?fbclid=IwAR3i4257oBmQtlvLksYhwSS3kJiEn8JjZyZaaEpB29c75DyYDiNeveHou2Q)"
+  },
+  "npc.prose.07faa947163d2da2": {
+    "ru": "Здравствуйте, {npc_arg0},",
+    "hi": "नमस्ते {npc_arg0},",
+    "id": "Halo {npc_arg0},",
+    "vi": "Xin chào {npc_arg0},",
+    "th": "สวัสดี {npc_arg0},",
+    "ar": "مرحبًا {npc_arg0}،"
+  },
+  "npc.prose.0e9102fa2730f254": {
+    "ru": "Нажмите на их труп (Alt+левая кнопка мыши), чтобы после разделки получить мясо.",
+    "hi": "उनके शव पर क्लिक करें (Alt+बायाँ क्लिक) और काटने की क्रिया के बाद मांस प्राप्त करें।",
+    "id": "Klik bangkai mereka (Alt+klik kiri) untuk memperoleh daging setelah proses pemotongan.",
+    "vi": "Nhấp vào xác của chúng (Alt+nhấp chuột trái) để lấy thịt sau thao tác xẻ thịt.",
+    "th": "คลิกที่ซากของพวกมัน (Alt+คลิกซ้าย) แล้วรับเนื้อหลังจากชำแหละ",
+    "ar": "انقر على جثثها (Alt+نقرة بالزر الأيسر) لتحصل على اللحم بعد التقطيع."
+  },
+  "npc.prose.220d86dbcb038a58": {
+    "ru": "комиссионной торговли. Мы находимся в пяти местах",
+    "hi": "कमीशन पर बिक्री का। हम पाँच स्थानों पर हैं",
+    "id": "penjualan komisi. Kami berada di lima lokasi di",
+    "vi": "việc bán hàng ký gửi. Chúng tôi có mặt tại năm địa điểm của",
+    "th": "ของการขายฝาก เราตั้งอยู่ในห้าแห่งของ",
+    "ar": "من البيع بالعمولة. نحن موجودون في خمسة مواقع من"
+  },
+  "npc.prose.324cd7ebe9537289": {
+    "ru": "//////////////////////////////////////////////////////////////////// WhiteDragonPassage *Переходы отсутствуют*",
+    "hi": "//////////////////////////////////////////////////////////////////// WhiteDragonPassage *आवागमन अनुपलब्ध*",
+    "id": "//////////////////////////////////////////////////////////////////// WhiteDragonPassage *Perpindahan tidak tersedia*",
+    "vi": "//////////////////////////////////////////////////////////////////// WhiteDragonPassage *Thiếu di chuyển*",
+    "th": "//////////////////////////////////////////////////////////////////// WhiteDragonPassage *ไม่มีการเคลื่อนที่*",
+    "ar": "//////////////////////////////////////////////////////////////////// WhiteDragonPassage *الحركات مفقودة*"
+  },
+  "npc.prose.37f3ec59f056eebb": {
+    "ru": "заклинания «Калечащий выстрел» и «Единение с природой».",
+    "hi": "पंगु बाण और प्रकृति से एकत्व मंत्र।",
+    "id": "sihir Tembakan Pelumpuh dan Menyatu dengan Alam.",
+    "vi": "các phép Tiễn gây tàn phế và Hòa cùng thiên nhiên.",
+    "th": "เวทศรพิการและเป็นหนึ่งกับธรรมชาติ",
+    "ar": "تعويذتي طلقة الإعاقة واتحاد مع الطبيعة."
+  },
+  "npc.prose.7d3b37aeadedba3c": {
+    "ru": "А ограничение по времени — два часа",
+    "hi": "और समय सीमा दो घंटे है",
+    "id": "Dan batas waktunya dua jam",
+    "vi": "Và thời hạn là hai giờ",
+    "th": "และจำกัดเวลาไว้สองชั่วโมง",
+    "ar": "والمدة المحددة ساعتان"
+  },
+  "npc.prose.8228fcf0106b7512": {
+    "ru": "два одинаковых дракона, взмывающих в небо.",
+    "hi": "आकाश में उठते दो एक जैसे ड्रैगन।",
+    "id": "dua naga serupa yang melesat ke langit.",
+    "vi": "hai con rồng giống hệt nhau bay lên trời.",
+    "th": "มังกรสองตัวที่เหมือนกันทะยานขึ้นสู่ท้องฟ้า",
+    "ar": "تنينان متماثلان يرتفعان إلى السماء."
+  },
+  "npc.prose.9757dd54fa92b1dc": {
+    "ru": "2) Дважды щёлкните по книге навыка в сумке.",
+    "hi": "2) अपनी वस्तुसूची में कौशल पुस्तक पर दो बार क्लिक करें।",
+    "id": "2) Klik dua kali buku keterampilan di tas Anda.",
+    "vi": "2) Nhấp đúp vào sách kỹ năng trong túi đồ.",
+    "th": "2) ดับเบิลคลิกหนังสือวิชาในช่องเก็บของ",
+    "ar": "2) انقر مرتين على كتاب المهارة في حقيبتك."
+  },
+  "npc.prose.ddb9f70c248bd28e": {
+    "ru": "Усиление заклинаний «Калечащий выстрел» и «Единение с природой».",
+    "hi": "पंगु बाण और प्रकृति से एकत्व मंत्रों को बढ़ाने वाला प्रभाव।",
+    "id": "Penguatan yang meningkatkan sihir Tembakan Pelumpuh dan Menyatu dengan Alam.",
+    "vi": "Hiệu ứng cường hóa các phép Tiễn gây tàn phế và Hòa cùng thiên nhiên.",
+    "th": "บัฟที่เสริมพลังเวทศรพิการและเป็นหนึ่งกับธรรมชาติ",
+    "ar": "تعزيز يقوّي تعويذتي طلقة الإعاقة واتحاد مع الطبيعة."
+  },
+  "npc.prose.ed2e98f55cf7844b": {
+    "ru": "Сначала повысьте уровень, а затем приходите ко мне.",
+    "hi": "पहले स्तर बढ़ाएँ, फिर मुझसे मिलने आएँ।",
+    "id": "Naikkan tingkat terlebih dahulu, lalu temui saya.",
+    "vi": "Hãy tăng cấp trước rồi đến gặp tôi.",
+    "th": "เพิ่มระดับก่อนแล้วค่อยมาพบฉัน",
+    "ar": "ارفع مستواك أولًا ثم تعال لمقابلتي."
+  },
+  "npc.prose.f160bd6bf1e486f9": {
+    "ru": "1) Найдите книгу навыка своего уровня. (Книги начального или среднего уровня продаются в",
+    "hi": "1) अपने स्तर की कौशल पुस्तक प्राप्त करें। (प्रारंभिक या मध्यम स्तर की कौशल पुस्तक यहाँ बिकती है",
+    "id": "1) Dapatkan buku keterampilan sesuai tingkat Anda. (Buku keterampilan tingkat pemula atau menengah dijual di",
+    "vi": "1) Lấy sách kỹ năng phù hợp với cấp của bạn. (Sách kỹ năng sơ cấp hoặc trung cấp được bán tại",
+    "th": "1) หาหนังสือวิชาที่เหมาะกับระดับของคุณ (หนังสือวิชาระดับเริ่มต้นหรือระดับกลางมีขายที่",
+    "ar": "1) احصل على كتاب مهارة يناسب مستواك. (يُباع كتاب المهارة للمستوى المبتدئ أو المتوسط في"
+  },
+  "npc.prose.bd5551beab90558a": {
+    "ru": "на трупе в течение нескольких секунд.",
+    "hi": "शव पर कुछ सेकंड के लिए।",
+    "id": "pada bangkai selama beberapa detik.",
+    "vi": "trên xác trong vài giây.",
+    "th": "บนซากเป็นเวลาสองสามวินาที",
+    "ar": "على الجثة لبضع ثوانٍ."
+  },
+  "npc.prose.d622e796bd50dbce": {
+    "ru": "воскрешаясь несколько раз.",
+    "hi": "कुछ बार पुनर्जीवित होते हुए।",
+    "id": "bangkit kembali beberapa kali.",
+    "vi": "hồi sinh vài lần.",
+    "th": "ฟื้นคืนชีพสองสามครั้ง",
+    "ar": "بإحياء نفسك بضع مرات."
+  },
+  "npc.prose.03415c02acbdde77": {
+    "ru": "Вижу, на вас: {npc_arg0}",
+    "hi": "मैं देख रहा हूँ कि आपने पहना है: {npc_arg0}",
+    "id": "Saya melihat Anda mengenakan: {npc_arg0}",
+    "vi": "Tôi thấy bạn đang mặc: {npc_arg0}",
+    "th": "ฉันเห็นว่าคุณสวมใส่: {npc_arg0}",
+    "ar": "أرى أنك ترتدي: {npc_arg0}"
+  },
+  "npc.prose.63ea0d5f9f0dfa38": {
+    "ru": "=== Особая награда ===",
+    "hi": "=== विशेष इनाम ===",
+    "id": "=== Hadiah Khusus ===",
+    "vi": "=== Treo thưởng đặc biệt ===",
+    "th": "=== ค่าหัวพิเศษ ===",
+    "ar": "=== مكافأة خاصة ==="
+  },
+  "npc.prose.b54794d90eb472f6": {
+    "ru": "Выпускает стрелу, которая взрывается в радиусе 5×5 вокруг цели.",
+    "hi": "ऐसा बाण छोड़ता है जो लक्ष्य के चारों ओर 5×5 दायरे में फटता है।",
+    "id": "Menembakkan panah yang meledak dalam radius 5×5 di sekitar target.",
+    "vi": "Bắn một mũi tên phát nổ trong phạm vi 5×5 quanh mục tiêu.",
+    "th": "ยิงศรที่ระเบิดในรัศมี 5×5 รอบเป้าหมาย",
+    "ar": "يطلق سهمًا ينفجر في نطاق 5×5 حول الهدف."
+  },
+  "npc.prose.ded0bfbc875c7848": {
+    "ru": "=== Сброс возможностей ===",
+    "hi": "=== सुविधाएँ रीसेट करना ===",
+    "id": "=== Mengatur Ulang Fitur ===",
+    "vi": "=== Đặt lại tính năng ===",
+    "th": "=== การรีเซ็ตคุณสมบัติ ===",
+    "ar": "=== إعادة ضبط الخصائص ==="
+  },
+  "npc.prose.34364c9e815eb1d8": {
+    "ru": "Лучник Два                         Лучник Пять",
+    "hi": "धनुर्धर दो                         धनुर्धर पाँच",
+    "id": "Pemanah Dua                         Pemanah Lima",
+    "vi": "Cung thủ Hai                         Cung thủ Năm",
+    "th": "นักธนู สอง                         นักธนู ห้า",
+    "ar": "رامي السهام الثاني                         رامي السهام الخامس"
+  },
+  "npc.prose.4dc603d1b951a828": {
+    "ru": "Лучник Один                         Лучник Четыре",
+    "hi": "धनुर्धर एक                         धनुर्धर चार",
+    "id": "Pemanah Satu                         Pemanah Empat",
+    "vi": "Cung thủ Một                         Cung thủ Bốn",
+    "th": "นักธนู หนึ่ง                         นักธนู สี่",
+    "ar": "رامي السهام الأول                         رامي السهام الرابع"
+  },
+  "npc.prose.4f59b71b6aa05135": {
+    "ru": "Лучник Три                         Лучник Шесть",
+    "hi": "धनुर्धर तीन                         धनुर्धर छह",
+    "id": "Pemanah Tiga                         Pemanah Enam",
+    "vi": "Cung thủ Ba                         Cung thủ Sáu",
+    "th": "นักธนู สาม                         นักธนู หก",
+    "ar": "رامي السهام الثالث                         رامي السهام السادس"
+  },
+  "npc.prose.d77b53cf1f934c82": {
+    "ru": "Лучник Девять                         Лучник Двенадцать",
+    "hi": "धनुर्धर नौ                         धनुर्धर बारह",
+    "id": "Pemanah Sembilan                         Pemanah Dua Belas",
+    "vi": "Cung thủ Chín                         Cung thủ Mười hai",
+    "th": "นักธนู เก้า                         นักธนู สิบสอง",
+    "ar": "رامي السهام التاسع                         رامي السهام الثاني عشر"
+  },
+  "npc.prose.d7d3a0aab6e71c20": {
+    "ru": "Лучник Восемь                         Лучник Одиннадцать",
+    "hi": "धनुर्धर आठ                         धनुर्धर ग्यारह",
+    "id": "Pemanah Delapan                         Pemanah Sebelas",
+    "vi": "Cung thủ Tám                         Cung thủ Mười một",
+    "th": "นักธนู แปด                         นักธนู สิบเอ็ด",
+    "ar": "رامي السهام الثامن                         رامي السهام الحادي عشر"
+  },
+  "npc.prose.ad02c20f46bbb310": {
+    "ru": "Лучник Семь                         Лучник Десять",
+    "hi": "धनुर्धर सात                         धनुर्धर दस",
+    "id": "Pemanah Tujuh                         Pemanah Sepuluh",
+    "vi": "Cung thủ Bảy                         Cung thủ Mười",
+    "th": "นักธนู เจ็ด                         นักธนู สิบ",
+    "ar": "رامي السهام السابع                         رامي السهام العاشر"
+  },
+  "npc.menu.b4ea8c0495ac4491": {
+    "ru": "Удалить героя",
+    "hi": "नायक हटाएँ",
+    "id": "Hapus Pahlawan",
+    "vi": "Xóa anh hùng",
+    "th": "ลบฮีโร่",
+    "ar": "حذف البطل"
+  },
+  "npc.menu.0f442cdee2efeda4": {
+    "ru": "Изгнание нежити 32",
+    "hi": "मृतजीव निष्कासन 32",
+    "id": "Usir Mayat Hidup 32",
+    "vi": "Thánh ngôn 32",
+    "th": "ขับไล่อันเดด 32",
+    "ar": "طرد الموتى الأحياء 32"
+  },
+  "npc.menu.b6c33f2c1ee43f1d": {
+    "ru": "Быстрые ноги 40",
+    "hi": "तीव्र चरण 40",
+    "id": "Langkah Cepat 40",
+    "vi": "Tật hành 40",
+    "th": "เท้าว่องไว 40",
+    "ar": "أقدام سريعة 40"
+  },
+  "content.item.1134.name": {
+    "ru": "Голова скелета",
+    "hi": "कंकाल का सिर",
+    "id": "Kepala Kerangka",
+    "vi": "Đầu khô lâu",
+    "th": "หัวโครงกระดูก",
+    "ar": "رأس هيكل عظمي"
+  },
+  "content.item.1271.name": {
+    "ru": "Магический напиток 1",
+    "hi": "जादुई मदिरा 1",
+    "id": "Minuman Ajaib 1",
+    "vi": "Rượu ma pháp 1",
+    "th": "สุรามนตรา 1",
+    "ar": "شراب سحري 1"
+  },
+  "content.item.1272.name": {
+    "ru": "Магический напиток 3",
+    "hi": "जादुई मदिरा 3",
+    "id": "Minuman Ajaib 3",
+    "vi": "Rượu ma pháp 3",
+    "th": "สุรามนตรา 3",
+    "ar": "شراب سحري 3"
+  },
+  "content.item.1273.name": {
+    "ru": "Магический напиток 5",
+    "hi": "जादुई मदिरा 5",
+    "id": "Minuman Ajaib 5",
+    "vi": "Rượu ma pháp 5",
+    "th": "สุรามนตรา 5",
+    "ar": "شراب سحري 5"
+  },
+  "content.item.1295.name": {
+    "ru": "Факел DC [3ч]",
+    "hi": "DC मशाल [3घं]",
+    "id": "Obor DC [3j]",
+    "vi": "Đuốc DC [3 giờ]",
+    "th": "คบเพลิง DC [3ชม.]",
+    "ar": "مشعل DC [3س]"
+  },
+  "content.item.1296.name": {
+    "ru": "Факел MC [3ч]",
+    "hi": "MC मशाल [3घं]",
+    "id": "Obor MC [3j]",
+    "vi": "Đuốc MC [3 giờ]",
+    "th": "คบเพลิง MC [3ชม.]",
+    "ar": "مشعل MC [3س]"
+  },
+  "content.item.1297.name": {
+    "ru": "Факел SC [3ч]",
+    "hi": "SC मशाल [3घं]",
+    "id": "Obor SC [3j]",
+    "vi": "Đuốc SC [3 giờ]",
+    "th": "คบเพลิง SC [3ชม.]",
+    "ar": "مشعل SC [3س]"
+  },
+  "content.item.1298.name": {
+    "ru": "Факел DC [2ч]",
+    "hi": "DC मशाल [2घं]",
+    "id": "Obor DC [2j]",
+    "vi": "Đuốc DC [2 giờ]",
+    "th": "คบเพลิง DC [2ชม.]",
+    "ar": "مشعل DC [2س]"
+  },
+  "content.item.1299.name": {
+    "ru": "Факел MC [2ч]",
+    "hi": "MC मशाल [2घं]",
+    "id": "Obor MC [2j]",
+    "vi": "Đuốc MC [2 giờ]",
+    "th": "คบเพลิง MC [2ชม.]",
+    "ar": "مشعل MC [2س]"
+  },
+  "content.item.1300.name": {
+    "ru": "Факел SC [2ч]",
+    "hi": "SC मशाल [2घं]",
+    "id": "Obor SC [2j]",
+    "vi": "Đuốc SC [2 giờ]",
+    "th": "คบเพลิง SC [2ชม.]",
+    "ar": "مشعل SC [2س]"
+  },
+  "content.item.1542.name": {
+    "ru": "Двойной цветок Gonryun (сокровище) 1",
+    "hi": "Gonryun दोहरा फूल (खज़ाना) 1",
+    "id": "Bunga Ganda Gonryun (Harta) 1",
+    "vi": "Hoa kép Gonryun (Báu vật) 1",
+    "th": "ดอกไม้คู่ Gonryun (สมบัติ) 1",
+    "ar": "زهرة Gonryun المزدوجة (كنز) 1"
+  },
+  "content.item.1543.name": {
+    "ru": "Двойной цветок Gonryun (сокровище) 2",
+    "hi": "Gonryun दोहरा फूल (खज़ाना) 2",
+    "id": "Bunga Ganda Gonryun (Harta) 2",
+    "vi": "Hoa kép Gonryun (Báu vật) 2",
+    "th": "ดอกไม้คู่ Gonryun (สมบัติ) 2",
+    "ar": "زهرة Gonryun المزدوجة (كنز) 2"
+  },
+  "content.item.1544.name": {
+    "ru": "Двойной цветок Gonryun (сокровище) 3",
+    "hi": "Gonryun दोहरा फूल (खज़ाना) 3",
+    "id": "Bunga Ganda Gonryun (Harta) 3",
+    "vi": "Hoa kép Gonryun (Báu vật) 3",
+    "th": "ดอกไม้คู่ Gonryun (สมบัติ) 3",
+    "ar": "زهرة Gonryun المزدوجة (كنز) 3"
+  },
+  "content.item.1545.name": {
+    "ru": "Двойной цветок Gonryun (сокровище) 4",
+    "hi": "Gonryun दोहरा फूल (खज़ाना) 4",
+    "id": "Bunga Ganda Gonryun (Harta) 4",
+    "vi": "Hoa kép Gonryun (Báu vật) 4",
+    "th": "ดอกไม้คู่ Gonryun (สมบัติ) 4",
+    "ar": "زهرة Gonryun المزدوجة (كنز) 4"
+  },
+  "content.item.1546.name": {
+    "ru": "Двойной цветок Gonryun (сокровище) 5",
+    "hi": "Gonryun दोहरा फूल (खज़ाना) 5",
+    "id": "Bunga Ganda Gonryun (Harta) 5",
+    "vi": "Hoa kép Gonryun (Báu vật) 5",
+    "th": "ดอกไม้คู่ Gonryun (สมบัติ) 5",
+    "ar": "زهرة Gonryun المزدوجة (كنز) 5"
+  },
+  "content.item.1626.name": {
+    "ru": "Кольцо ядовитого демона 1",
+    "hi": "विष दानव की अंगूठी 1",
+    "id": "Cincin Iblis Racun 1",
+    "vi": "Nhẫn Quỷ Độc 1",
+    "th": "แหวนอสูรพิษ 1",
+    "ar": "خاتم شيطان السم 1"
+  },
+  "content.item.1627.name": {
+    "ru": "Кольцо ядовитого демона 2",
+    "hi": "विष दानव की अंगूठी 2",
+    "id": "Cincin Iblis Racun 2",
+    "vi": "Nhẫn Quỷ Độc 2",
+    "th": "แหวนอสูรพิษ 2",
+    "ar": "خاتم شيطان السم 2"
+  },
+  "content.item.1628.name": {
+    "ru": "Кольцо ядовитого демона 3",
+    "hi": "विष दानव की अंगूठी 3",
+    "id": "Cincin Iblis Racun 3",
+    "vi": "Nhẫn Quỷ Độc 3",
+    "th": "แหวนอสูรพิษ 3",
+    "ar": "خاتم شيطان السم 3"
+  },
+  "content.item.1629.name": {
+    "ru": "Кольцо ядовитого демона 4",
+    "hi": "विष दानव की अंगूठी 4",
+    "id": "Cincin Iblis Racun 4",
+    "vi": "Nhẫn Quỷ Độc 4",
+    "th": "แหวนอสูรพิษ 4",
+    "ar": "خاتم شيطان السم 4"
+  },
+  "content.item.1630.name": {
+    "ru": "Кольцо ядовитого демона 5",
+    "hi": "विष दानव की अंगूठी 5",
+    "id": "Cincin Iblis Racun 5",
+    "vi": "Nhẫn Quỷ Độc 5",
+    "th": "แหวนอสูรพิษ 5",
+    "ar": "خاتم شيطان السم 5"
+  },
+  "content.item.383.name": {
+    "ru": "Одеяние короля Oma (М)",
+    "hi": "Oma राजा का चोगा (पुरुष)",
+    "id": "Jubah Raja Oma (Pria)",
+    "vi": "Áo choàng Vua Oma (Nam)",
+    "th": "เสื้อคลุมราชา Oma (ชาย)",
+    "ar": "رداء ملك Oma (ذكر)"
+  },
+  "content.item.389.name": {
+    "ru": "Одеяние короля Oma (Ж)",
+    "hi": "Oma राजा का चोगा (महिला)",
+    "id": "Jubah Raja Oma (Wanita)",
+    "vi": "Áo choàng Vua Oma (Nữ)",
+    "th": "เสื้อคลุมราชา Oma (หญิง)",
+    "ar": "رداء ملك Oma (أنثى)"
+  },
+  "content.item.58.name": {
+    "ru": "Шлем Mir 1",
+    "hi": "Mir शिरस्त्राण 1",
+    "id": "Helm Mir 1",
+    "vi": "Mũ Mir 1",
+    "th": "หมวกเกราะ Mir 1",
+    "ar": "خوذة Mir 1"
+  },
+  "content.item.59.name": {
+    "ru": "Шлем Mir 2",
+    "hi": "Mir शिरस्त्राण 2",
+    "id": "Helm Mir 2",
+    "vi": "Mũ Mir 2",
+    "th": "หมวกเกราะ Mir 2",
+    "ar": "خوذة Mir 2"
+  },
+  "content.item.60.name": {
+    "ru": "Шлем Mir 3",
+    "hi": "Mir शिरस्त्राण 3",
+    "id": "Helm Mir 3",
+    "vi": "Mũ Mir 3",
+    "th": "หมวกเกราะ Mir 3",
+    "ar": "خوذة Mir 3"
+  },
+  "content.item.61.name": {
+    "ru": "Шлем Mir 4",
+    "hi": "Mir शिरस्त्राण 4",
+    "id": "Helm Mir 4",
+    "vi": "Mũ Mir 4",
+    "th": "หมวกเกราะ Mir 4",
+    "ar": "خوذة Mir 4"
+  },
+  "content.item.62.name": {
+    "ru": "Шлем Mir 5",
+    "hi": "Mir शिरस्त्राण 5",
+    "id": "Helm Mir 5",
+    "vi": "Mũ Mir 5",
+    "th": "หมวกเกราะ Mir 5",
+    "ar": "خوذة Mir 5"
+  },
+  "content.item.70.name": {
+    "ru": "Колесо Mir 1",
+    "hi": "Mir चक्र 1",
+    "id": "Roda Mir 1",
+    "vi": "Luân Mir 1",
+    "th": "จักร Mir 1",
+    "ar": "عجلة Mir 1"
+  },
+  "content.item.71.name": {
+    "ru": "Колесо Mir 2",
+    "hi": "Mir चक्र 2",
+    "id": "Roda Mir 2",
+    "vi": "Luân Mir 2",
+    "th": "จักร Mir 2",
+    "ar": "عجلة Mir 2"
+  },
+  "content.item.72.name": {
+    "ru": "Колесо Mir 3",
+    "hi": "Mir चक्र 3",
+    "id": "Roda Mir 3",
+    "vi": "Luân Mir 3",
+    "th": "จักร Mir 3",
+    "ar": "عجلة Mir 3"
+  },
+  "content.item.73.name": {
+    "ru": "Колесо Mir 4",
+    "hi": "Mir चक्र 4",
+    "id": "Roda Mir 4",
+    "vi": "Luân Mir 4",
+    "th": "จักร Mir 4",
+    "ar": "عجلة Mir 4"
+  },
+  "content.item.74.name": {
+    "ru": "Колесо Mir 5",
+    "hi": "Mir चक्र 5",
+    "id": "Roda Mir 5",
+    "vi": "Luân Mir 5",
+    "th": "จักร Mir 5",
+    "ar": "عجلة Mir 5"
+  },
+  "content.item.700.name": {
+    "ru": "Мясной суп",
+    "hi": "मांस का सूप",
+    "id": "Sup Daging",
+    "vi": "Súp thịt",
+    "th": "ซุปเนื้อ",
+    "ar": "حساء اللحم"
+  },
+  "content.item.888.name": {
+    "ru": "Сфера сосредоточения",
+    "hi": "एकाग्रता मणि",
+    "id": "Kelereng Fokus",
+    "vi": "Viên châu tập trung",
+    "th": "ลูกแก้วสมาธิ",
+    "ar": "كرة التركيز"
+  },
+  "content.item.913.name": {
+    "ru": "Глиф отваги 0",
+    "hi": "साहस चिह्न 0",
+    "id": "Glif Keberanian 0",
+    "vi": "Ấn dũng khí 0",
+    "th": "อักขระกล้าหาญ 0",
+    "ar": "نقش الشجاعة 0"
+  },
+  "content.item.914.name": {
+    "ru": "Глиф отваги 1",
+    "hi": "साहस चिह्न 1",
+    "id": "Glif Keberanian 1",
+    "vi": "Ấn dũng khí 1",
+    "th": "อักขระกล้าหาญ 1",
+    "ar": "نقش الشجاعة 1"
+  },
+  "content.item.915.name": {
+    "ru": "Глиф отваги 2",
+    "hi": "साहस चिह्न 2",
+    "id": "Glif Keberanian 2",
+    "vi": "Ấn dũng khí 2",
+    "th": "อักขระกล้าหาญ 2",
+    "ar": "نقش الشجاعة 2"
+  },
+  "content.item.916.name": {
+    "ru": "Глиф отваги 3",
+    "hi": "साहस चिह्न 3",
+    "id": "Glif Keberanian 3",
+    "vi": "Ấn dũng khí 3",
+    "th": "อักขระกล้าหาญ 3",
+    "ar": "نقش الشجاعة 3"
+  },
+  "content.item.941.name": {
+    "ru": "Яйцо поросёнка",
+    "hi": "नन्हे सूअर का अंडा",
+    "id": "Telur Anak Babi",
+    "vi": "Trứng heo con",
+    "th": "ไข่ลูกหมู",
+    "ar": "بيضة خنزير صغير"
+  },
+  "content.item.942.name": {
+    "ru": "Яйцо цыплёнка",
+    "hi": "चूज़े का अंडा",
+    "id": "Telur Anak Ayam",
+    "vi": "Trứng gà con",
+    "th": "ไข่ลูกไก่",
+    "ar": "بيضة كتكوت"
+  },
+  "content.item.943.name": {
+    "ru": "Яйцо котёнка",
+    "hi": "बिलौटे का अंडा",
+    "id": "Telur Anak Kucing",
+    "vi": "Trứng mèo con",
+    "th": "ไข่ลูกแมว",
+    "ar": "بيضة هرة صغيرة"
+  },
+  "content.item.944.name": {
+    "ru": "Яйцо скелета",
+    "hi": "कंकाल का अंडा",
+    "id": "Telur Kerangka",
+    "vi": "Trứng khô lâu",
+    "th": "ไข่โครงกระดูก",
+    "ar": "بيضة هيكل عظمي"
+  },
+  "content.item.947.name": {
+    "ru": "Яйцо чёрного котёнка",
+    "hi": "काले बिलौटे का अंडा",
+    "id": "Telur Anak Kucing Hitam",
+    "vi": "Trứng mèo con đen",
+    "th": "ไข่ลูกแมวดำ",
+    "ar": "بيضة هرة سوداء صغيرة"
+  },
+  "content.map.320.name": {
+    "ru": "Ущелье Oma",
+    "hi": "Oma दर्रा",
+    "id": "Ngarai Oma",
+    "vi": "Hẻm núi Oma",
+    "th": "ช่องเขา Oma",
+    "ar": "مضيق Oma"
+  },
+  "content.monster.341.name": {
+    "ru": "Ядовитый вурдалак",
+    "hi": "विषैला गूल",
+    "id": "Ghoul Beracun",
+    "vi": "Quỷ ăn xác độc",
+    "th": "กูลพิษ",
+    "ar": "غول سام"
+  },
+  "content.monster.354.name": {
+    "ru": "Древний ядовитый вурдалак",
+    "hi": "प्राचीन विषैला गूल",
+    "id": "Ghoul Beracun Kuno",
+    "vi": "Quỷ ăn xác độc cổ đại",
+    "th": "กูลพิษโบราณ",
+    "ar": "غول سام قديم"
+  },
+  "content.monster.355.name": {
+    "ru": "Древний вурдалак-ронин",
+    "hi": "प्राचीन रोनिन गूल",
+    "id": "Ghoul Ronin Kuno",
+    "vi": "Quỷ ăn xác lãng nhân cổ đại",
+    "th": "กูลโรนินโบราณ",
+    "ar": "غول رونين قديم"
+  },
+  "content.monster.362.name": {
+    "ru": "Минотавр 0",
+    "hi": "मिनोटॉर 0",
+    "id": "Minotaur 0",
+    "vi": "Ngưu ma 0",
+    "th": "มิโนทอร์ 0",
+    "ar": "مينوتور 0"
+  },
+  "content.monster.386.name": {
+    "ru": "Страж Oma",
+    "hi": "Oma रक्षक",
+    "id": "Penjaga Oma",
+    "vi": "Vệ binh Oma",
+    "th": "ยาม Oma",
+    "ar": "حارس Oma"
+  },
+  "content.monster.391.name": {
+    "ru": "Дух короля Oma",
+    "hi": "Oma राजा की आत्मा",
+    "id": "Roh Raja Oma",
+    "vi": "Linh hồn Vua Oma",
+    "th": "วิญญาณราชา Oma",
+    "ar": "روح ملك Oma"
+  },
+  "content.monster.570.name": {
+    "ru": "Стена дворца 1",
+    "hi": "महल की दीवार 1",
+    "id": "Tembok Istana 1",
+    "vi": "Tường cung điện 1",
+    "th": "กำแพงวัง 1",
+    "ar": "جدار القصر 1"
+  },
+  "content.monster.571.name": {
+    "ru": "Стена дворца 2",
+    "hi": "महल की दीवार 2",
+    "id": "Tembok Istana 2",
+    "vi": "Tường cung điện 2",
+    "th": "กำแพงวัง 2",
+    "ar": "جدار القصر 2"
+  },
+  "content.monster.79.name": {
+    "ru": "Гигантский Keratoid 1",
+    "hi": "विशाल Keratoid 1",
+    "id": "Keratoid Raksasa 1",
+    "vi": "Keratoid khổng lồ 1",
+    "th": "Keratoid ยักษ์ 1",
+    "ar": "Keratoid عملاق 1"
+  },
+  "content.monster.80.name": {
+    "ru": "Гигантский Keratoid 2",
+    "hi": "विशाल Keratoid 2",
+    "id": "Keratoid Raksasa 2",
+    "vi": "Keratoid khổng lồ 2",
+    "th": "Keratoid ยักษ์ 2",
+    "ar": "Keratoid عملاق 2"
+  },
+  "content.monster.98.name": {
+    "ru": "Древний скелет с топором",
+    "hi": "प्राचीन कुल्हाड़ीधारी कंकाल",
+    "id": "Kerangka Kapak Kuno",
+    "vi": "Khô lâu cầm rìu cổ đại",
+    "th": "โครงกระดูกถือขวานโบราณ",
+    "ar": "هيكل عظمي قديم بفأس"
+  },
+  "content.monster.99.name": {
+    "ru": "Древний скелет с топором 0",
+    "hi": "प्राचीन कुल्हाड़ीधारी कंकाल 0",
+    "id": "Kerangka Kapak Kuno 0",
+    "vi": "Khô lâu cầm rìu cổ đại 0",
+    "th": "โครงกระดูกถือขวานโบราณ 0",
+    "ar": "هيكل عظمي قديم بفأس 0"
+  },
+  "content.quest.46.name": {
+    "ru": "Кости скелетов",
+    "hi": "कंकाल की हड्डियाँ",
+    "id": "Tulang Kerangka",
+    "vi": "Xương khô lâu",
+    "th": "กระดูกโครงกระดูก",
+    "ar": "عظام الهياكل العظمية"
+  },
+  "content.item.311.name": {
+    "ru": "Лук ужаса",
+    "hi": "भय धनुष",
+    "id": "Busur Kengerian",
+    "vi": "Cung kinh hoàng",
+    "th": "ธนูสยอง",
+    "ar": "قوس الرعب"
+  },
+  "content.item.513.name": {
+    "ru": "Талисман пяти стихий",
+    "hi": "पाँच तत्वों का ताबीज़",
+    "id": "Jimat Lima Unsur",
+    "vi": "Bùa ngũ hành",
+    "th": "เครื่องรางห้าธาตุ",
+    "ar": "تعويذة العناصر الخمسة"
+  },
+  "content.item.729.name": {
+    "ru": "Прочный факел (L)",
+    "hi": "मज़बूत मशाल (L)",
+    "id": "Obor Kuat (L)",
+    "vi": "Đuốc bền chắc (L)",
+    "th": "คบเพลิงทนทาน (L)",
+    "ar": "مشعل صلب (L)"
+  },
+  "content.item.732.name": {
+    "ru": "Факел знаний (L)",
+    "hi": "ज्ञान मशाल (L)",
+    "id": "Obor Pengetahuan (L)",
+    "vi": "Đuốc tri thức (L)",
+    "th": "คบเพลิงความรู้ (L)",
+    "ar": "مشعل المعرفة (L)"
+  },
+  "content.item.977.description": {
+    "ru": "Сделайте рывок к цели, отталкивая её назад",
+    "hi": "लक्ष्य की ओर धावा बोलकर उसे पीछे धकेलें",
+    "id": "Terjang target dan dorong mundur",
+    "vi": "Lao vào mục tiêu và đẩy lùi chúng",
+    "th": "พุ่งเข้าหาเป้าหมายและผลักให้ถอยหลัง",
+    "ar": "اندفع نحو الهدف وادفعه إلى الخلف"
+  },
+  "content.item.1290.description": {
+    "ru": "Свиток, позволяющий призвать одного стража.\r\n-Призывает одного стража.\r\n-Длительность: 7 дней.\r\n-Команда @GuardsHelp",
+    "hi": "एक रक्षक बुलाने वाला स्क्रॉल।\r\n-एक रक्षक बुलाता है।\r\n-अवधि 7 दिन।\r\n-कमांड @GuardsHelp",
+    "id": "Gulungan yang memungkinkan Anda memanggil satu penjaga.\r\n-Memanggil satu penjaga.\r\n-Durasi 7 hari.\r\n-Perintah @GuardsHelp",
+    "vi": "Cuộn giấy cho phép triệu hồi một vệ binh.\r\n-Triệu hồi một vệ binh.\r\n-Thời hạn 7 ngày.\r\n-Lệnh @GuardsHelp",
+    "th": "ม้วนคัมภีร์ที่ทำให้คุณอัญเชิญยามหนึ่งคนได้\r\n-อัญเชิญยามหนึ่งคน\r\n-ระยะเวลา 7 วัน\r\n-คำสั่ง @GuardsHelp",
+    "ar": "لفافة تتيح لك استدعاء حارس واحد.\r\n-تستدعي حارسًا واحدًا.\r\n-المدة 7 أيام.\r\n-الأمر @GuardsHelp"
+  },
+  "content.item.1301.description": {
+    "ru": "Дополнительный опыт в течение определённого времени.\r\n-Дополнительный опыт 30%\r\n-Длительность 1 час\r\n-Не суммируется",
+    "hi": "सीमित समय के लिए अतिरिक्त अनुभव मिलता है।\r\n-अतिरिक्त अनुभव 30%\r\n-अवधि 1 घंटा\r\n-एक साथ नहीं जुड़ता",
+    "id": "Memperoleh pengalaman tambahan selama jangka waktu tertentu.\r\n-Pengalaman tambahan 30%\r\n-Durasi 1 jam\r\n-Tidak dapat ditumpuk",
+    "vi": "Nhận thêm kinh nghiệm trong một khoảng thời gian.\r\n-Kinh nghiệm bổ sung 30%\r\n-Thời hạn 1 giờ\r\n-Không cộng dồn",
+    "th": "ได้รับประสบการณ์เพิ่มในช่วงเวลาหนึ่ง\r\n-ประสบการณ์เพิ่มเติม 30%\r\n-ระยะเวลา 1 ชั่วโมง\r\n-ไม่สามารถซ้อนทับได้",
+    "ar": "اكتساب خبرة إضافية لفترة محددة.\r\n-خبرة إضافية 30%\r\n-المدة 1 ساعة\r\n-لا يتراكم"
+  },
+  "content.item.1305.description": {
+    "ru": "Дополнительный опыт в течение определённого времени.\r\n-Дополнительный опыт 50%\r\n-Длительность 1 час\r\n-Не суммируется",
+    "hi": "सीमित समय के लिए अतिरिक्त अनुभव मिलता है।\r\n-अतिरिक्त अनुभव 50%\r\n-अवधि 1 घंटा\r\n-एक साथ नहीं जुड़ता",
+    "id": "Memperoleh pengalaman tambahan selama jangka waktu tertentu.\r\n-Pengalaman tambahan 50%\r\n-Durasi 1 jam\r\n-Tidak dapat ditumpuk",
+    "vi": "Nhận thêm kinh nghiệm trong một khoảng thời gian.\r\n-Kinh nghiệm bổ sung 50%\r\n-Thời hạn 1 giờ\r\n-Không cộng dồn",
+    "th": "ได้รับประสบการณ์เพิ่มในช่วงเวลาหนึ่ง\r\n-ประสบการณ์เพิ่มเติม 50%\r\n-ระยะเวลา 1 ชั่วโมง\r\n-ไม่สามารถซ้อนทับได้",
+    "ar": "اكتساب خبرة إضافية لفترة محددة.\r\n-خبرة إضافية 50%\r\n-المدة 1 ساعة\r\n-لا يتراكم"
+  },
+  "content.item.1319.description": {
+    "ru": "Повышает точность на определённое время.\r\n-Длительность 1 час\r\n-Не суммируется",
+    "hi": "सीमित समय के लिए आपकी सटीकता बढ़ाता है।\r\n-अवधि 1 घंटा\r\n-एक साथ नहीं जुड़ता",
+    "id": "Meningkatkan akurasi Anda selama jangka waktu tertentu.\r\n-Durasi 1 jam\r\n-Tidak dapat ditumpuk",
+    "vi": "Tăng độ chính xác trong một khoảng thời gian.\r\n-Thời hạn 1 giờ\r\n-Không cộng dồn",
+    "th": "เพิ่มความแม่นยำของคุณในช่วงเวลาหนึ่ง\r\n-ระยะเวลา 1 ชั่วโมง\r\n-ไม่สามารถซ้อนทับได้",
+    "ar": "يحسن دقتك لفترة محددة.\r\n-المدة 1 ساعة\r\n-لا يتراكم"
+  },
+  "content.item.1320.description": {
+    "ru": "Набор для физической охоты содержит:\r\n-Опыт + 30%\r\n-MAXHP + 180\r\n-Сила разрушения + 9\r\n-Факел DC\r\n-Скорость атаки + 8\r\n-Свиток воскрешения *ВСЁ НА 30 МИНУТ*",
+    "hi": "शारीरिक शिकार पैक में शामिल हैं।\r\n-अनुभव + 30%\r\n-MAXHP + 180\r\n-विनाश शक्ति + 9\r\n-DC मशाल\r\n-आक्रमण गति + 8\r\n-पुनर्जीवन स्क्रॉल *सभी 30 मिनट के लिए*",
+    "id": "Paket Berburu Fisik terdiri dari:\r\n-Pengalaman + 30%\r\n-MAXHP + 180\r\n-Daya Hancur + 9\r\n-Obor DC\r\n-Kecepatan Serangan + 8\r\n-Gulungan Kebangkitan *SEMUA SELAMA 30 MENIT*",
+    "vi": "Gói săn bắn vật lý bao gồm:\r\n-Kinh nghiệm + 30%\r\n-MAXHP + 180\r\n-Sức phá hủy + 9\r\n-Đuốc DC\r\n-Tốc độ đánh + 8\r\n-Cuộn hồi sinh *TẤT CẢ KÉO DÀI 30 PHÚT*",
+    "th": "แพ็กล่าทางกายภาพประกอบด้วย\r\n-ประสบการณ์ + 30%\r\n-MAXHP + 180\r\n-พลังทำลาย + 9\r\n-คบเพลิง DC\r\n-ความเร็วโจมตี + 8\r\n-ม้วนคืนชีพ *ทั้งหมดมีระยะเวลา 30 นาที*",
+    "ar": "تتضمن حزمة الصيد البدني:\r\n-الخبرة + 30%\r\n-MAXHP + 180\r\n-قوة التدمير + 9\r\n-مشعل DC\r\n-سرعة الهجوم + 8\r\n-لفافة الإحياء *كلها لمدة 30 دقيقة*"
+  },
+  "content.item.1321.description": {
+    "ru": "Набор для магической охоты содержит:\r\n-Опыт + 30%\r\n-MAXHP + 180\r\n-Магия + 7\r\n-Факел MC\r\n-Свиток воскрешения *ВСЁ НА 30 МИНУТ*",
+    "hi": "जादुई शिकार पैक में शामिल हैं।\r\n-अनुभव + 30%\r\n-MAXHP + 180\r\n-जादुई शक्ति + 7\r\n-MC मशाल\r\n-पुनर्जीवन स्क्रॉल *सभी 30 मिनट के लिए*",
+    "id": "Paket Berburu Sihir terdiri dari:\r\n-Pengalaman + 30%\r\n-MAXHP + 180\r\n-Sihir + 7\r\n-Obor MC\r\n-Gulungan Kebangkitan *SEMUA SELAMA 30 MENIT*",
+    "vi": "Gói săn bắn ma pháp bao gồm:\r\n-Kinh nghiệm + 30%\r\n-MAXHP + 180\r\n-Ma pháp + 7\r\n-Đuốc MC\r\n-Cuộn hồi sinh *TẤT CẢ KÉO DÀI 30 PHÚT*",
+    "th": "แพ็กล่าเวทมนตร์ประกอบด้วย\r\n-ประสบการณ์ + 30%\r\n-MAXHP + 180\r\n-เวทมนตร์ + 7\r\n-คบเพลิง MC\r\n-ม้วนคืนชีพ *ทั้งหมดมีระยะเวลา 30 นาที*",
+    "ar": "تتضمن حزمة الصيد السحري:\r\n-الخبرة + 30%\r\n-MAXHP + 180\r\n-السحر + 7\r\n-مشعل MC\r\n-لفافة الإحياء *كلها لمدة 30 دقيقة*"
+  },
+  "content.item.1322.description": {
+    "ru": "Набор для духовной охоты содержит:\r\n-Опыт + 30%\r\n-MAXHP + 180\r\n-Дух + 7\r\n-Факел SC\r\n-Свиток воскрешения *ВСЁ НА 30 МИНУТ*",
+    "hi": "आत्मिक शिकार पैक में शामिल हैं।\r\n-अनुभव + 30%\r\n-MAXHP + 180\r\n-आत्मिक शक्ति + 7\r\n-SC मशाल\r\n-पुनर्जीवन स्क्रॉल *सभी 30 मिनट के लिए*",
+    "id": "Paket Berburu Roh terdiri dari:\r\n-Pengalaman + 30%\r\n-MAXHP + 180\r\n-Roh + 7\r\n-Obor SC\r\n-Gulungan Kebangkitan *SEMUA SELAMA 30 MENIT*",
+    "vi": "Gói săn bắn linh lực bao gồm:\r\n-Kinh nghiệm + 30%\r\n-MAXHP + 180\r\n-Linh lực + 7\r\n-Đuốc SC\r\n-Cuộn hồi sinh *TẤT CẢ KÉO DÀI 30 PHÚT*",
+    "th": "แพ็กล่าวิญญาณประกอบด้วย\r\n-ประสบการณ์ + 30%\r\n-MAXHP + 180\r\n-พลังวิญญาณ + 7\r\n-คบเพลิง SC\r\n-ม้วนคืนชีพ *ทั้งหมดมีระยะเวลา 30 นาที*",
+    "ar": "تتضمن حزمة الصيد الروحي:\r\n-الخبرة + 30%\r\n-MAXHP + 180\r\n-الروح + 7\r\n-مشعل SC\r\n-لفافة الإحياء *كلها لمدة 30 دقيقة*"
+  },
+  "content.item.1361.description": {
+    "ru": "Особый факел, купленный в игровом магазине.\r\n-Сила разрушения +3\r\n-Длительность 30 минут",
+    "hi": "गेम की दुकान से खरीदी गई प्रीमियम मशाल।\r\n-विनाश शक्ति +3\r\n-अवधि 30 मिनट",
+    "id": "Obor premium yang dibeli di Toko Game.\r\n-Daya Hancur +3\r\n-Durasi 30 menit",
+    "vi": "Đuốc cao cấp mua từ cửa hàng trò chơi.\r\n-Sức phá hủy +3\r\n-Thời hạn 30 phút",
+    "th": "คบเพลิงพรีเมียมที่ซื้อจากร้านค้าเกม\r\n-พลังทำลาย +3\r\n-ระยะเวลา 30 นาที",
+    "ar": "مشعل مميز تم شراؤه من متجر اللعبة.\r\n-قوة التدمير +3\r\n-المدة 30 دقيقة"
+  },
+  "content.item.1362.description": {
+    "ru": "Особый факел, купленный в игровом магазине.\r\n-Магическая сила +1\r\n-Длительность 30 минут",
+    "hi": "गेम की दुकान से खरीदी गई प्रीमियम मशाल।\r\n-जादुई शक्ति +1\r\n-अवधि 30 मिनट",
+    "id": "Obor premium yang dibeli di Toko Game.\r\n-Kekuatan Sihir +1\r\n-Durasi 30 menit",
+    "vi": "Đuốc cao cấp mua từ cửa hàng trò chơi.\r\n-Sức mạnh ma pháp +1\r\n-Thời hạn 30 phút",
+    "th": "คบเพลิงพรีเมียมที่ซื้อจากร้านค้าเกม\r\n-พลังเวทมนตร์ +1\r\n-ระยะเวลา 30 นาที",
+    "ar": "مشعل مميز تم شراؤه من متجر اللعبة.\r\n-القوة السحرية +1\r\n-المدة 30 دقيقة"
+  },
+  "content.item.1363.description": {
+    "ru": "Особый факел, купленный в игровом магазине.\r\n-Сила духа +3\r\n-Длительность 30 минут",
+    "hi": "गेम की दुकान से खरीदी गई प्रीमियम मशाल।\r\n-आत्मिक शक्ति +3\r\n-अवधि 30 मिनट",
+    "id": "Obor premium yang dibeli di Toko Game.\r\n-Kekuatan Roh +3\r\n-Durasi 30 menit",
+    "vi": "Đuốc cao cấp mua từ cửa hàng trò chơi.\r\n-Linh lực +3\r\n-Thời hạn 30 phút",
+    "th": "คบเพลิงพรีเมียมที่ซื้อจากร้านค้าเกม\r\n-พลังวิญญาณ +3\r\n-ระยะเวลา 30 นาที",
+    "ar": "مشعل مميز تم شراؤه من متجر اللعبة.\r\n-القوة الروحية +3\r\n-المدة 30 دقيقة"
+  },
+  "content.item.965.description": {
+    "ru": "Увеличивает MaxHP на 50 на 1 час.",
+    "hi": "MaxHP को 1 घंटे के लिए 50 बढ़ाता है।",
+    "id": "Meningkatkan MaxHP sebesar 50 selama 1 jam.",
+    "vi": "Tăng MaxHP thêm 50 trong 1 giờ.",
+    "th": "เพิ่ม MaxHP ขึ้น 50 เป็นเวลา 1 ชั่วโมง",
+    "ar": "يزيد MaxHP بمقدار 50 لمدة 1 ساعة."
+  },
+  "content.item.966.description": {
+    "ru": "Увеличивает MaxMP на 50 на 1 час.",
+    "hi": "MaxMP को 1 घंटे के लिए 50 बढ़ाता है।",
+    "id": "Meningkatkan MaxMP sebesar 50 selama 1 jam.",
+    "vi": "Tăng MaxMP thêm 50 trong 1 giờ.",
+    "th": "เพิ่ม MaxMP ขึ้น 50 เป็นเวลา 1 ชั่วโมง",
+    "ar": "يزيد MaxMP بمقدار 50 لمدة 1 ساعة."
+  },
+  "content.item.978.description": {
+    "ru": "Оружие выполняет 2 взмаха одним движением.\r\nЦель может быть оглушена,\r\nчто позволяет нанести больше урона.",
+    "hi": "हथियार एक क्रिया में 2 बार झूलता है।\r\nलक्ष्य के स्तब्ध होने की संभावना होती है,\r\nजिससे अधिक क्षति पहुँचाई जा सकती है।",
+    "id": "Senjata melakukan 2 ayunan dalam satu gerakan.\r\nTarget berpeluang terkena stun\r\nsehingga memungkinkan kerusakan lebih besar.",
+    "vi": "Vũ khí thực hiện 2 nhát vung trong một động tác.\r\nMục tiêu có khả năng bị choáng,\r\ncho phép gây thêm sát thương.",
+    "th": "อาวุธเหวี่ยง 2 ครั้งในการเคลื่อนไหวเดียว\r\nเป้าหมายมีโอกาสมึนงง\r\nทำให้สร้างความเสียหายได้มากขึ้น",
+    "ar": "ينفذ السلاح 2 من الضربات بحركة واحدة.\r\nقد يصاب الهدف بالذهول\r\nمما يسمح بإلحاق ضرر أكبر."
+  },
+  "content.quest.52.description": {
+    "ru": "Вы хотели, чтобы я приготовил CanniTea? Хм... \nУ меня закончились ингредиенты. Не могли бы вы \nдобыть для меня 10 CannibalLeaf и 10 CannibalSeed?",
+    "hi": "क्या आप चाहते थे कि मैं आपके लिए CanniTea बनाऊँ? हम्म... \nमेरी सामग्री समाप्त हो गई है। क्या आप मेरे लिए \n10 CannibalLeaf और 10 CannibalSeed ला सकते हैं?",
+    "id": "Apakah Anda ingin saya membuatkan CanniTea? Hmm... \nBahan-bahan saya habis. Bisakah Anda \nmembawakan 10 CannibalLeaf dan 10 CannibalSeed?",
+    "vi": "Bạn muốn tôi pha CanniTea sao? Ừm... \nTôi đã hết nguyên liệu. Bạn có thể \nlấy giúp tôi 10 CannibalLeaf và 10 CannibalSeed không?",
+    "th": "คุณอยากให้ฉันทำ CanniTea ให้หรือ? อืม... \nวัตถุดิบของฉันหมดแล้ว คุณช่วย \nหา CannibalLeaf 10 ชิ้นและ CannibalSeed 10 ชิ้นให้ฉันได้ไหม?",
+    "ar": "هل أردت مني أن أعد لك CanniTea؟ همم... \nلقد نفدت المكونات. هل يمكنك \nإحضار 10 من CannibalLeaf و10 من CannibalSeed لي؟"
+  },
+  "content.quest.109.task": {
+    "ru": "Вернитесь к Скрытому входу \nи найдите тома 1 и 2.",
+    "hi": "कृपया छिपे हुए प्रवेश द्वार पर वापस जाएँ \nऔर खंड 1 तथा 2 वापस लाएँ।",
+    "id": "Kembalilah ke Pintu Masuk Tersembunyi \ndan ambil jilid 1 dan 2.",
+    "vi": "Hãy quay lại Lối vào ẩn \nvà lấy quyển 1 và 2.",
+    "th": "โปรดกลับไปยังทางเข้าลับ \nและนำเล่ม 1 กับ 2 กลับมา",
+    "ar": "يرجى العودة إلى المدخل المخفي \nواستعادة المجلدين 1 و2."
+  },
+  "content.quest.83.description": {
+    "ru": "Рад снова видеть вас, путник. Не могли бы вы \nотнести этот заказ торговцу тканями Sam в \nTaoVillage?",
+    "hi": "यात्री, आपको फिर देखकर अच्छा लगा। कृपया क्या आप \nयह आदेश कपड़ा व्यापारी Sam तक पहुँचा सकते हैं, जो \nTaoVillage में है?",
+    "id": "Senang bertemu lagi, pengelana. Bisakah Anda \nmengantarkan pesanan ini kepada Sam, Pedagang Kain di \nTaoVillage?",
+    "vi": "Rất vui được gặp lại bạn, lữ khách. Bạn có thể \nmang đơn hàng này đến cho Sam, người bán vải tại \nTaoVillage không?",
+    "th": "ดีใจที่ได้พบคุณอีก นักเดินทาง คุณช่วย \nนำคำสั่งซื้อนี้ไปให้ Sam พ่อค้าผ้าใน \nTaoVillage ได้ไหม?",
+    "ar": "يسرني رؤيتك مجددًا أيها المسافر. هل يمكنك \nأخذ هذا الطلب إلى Sam تاجر الأقمشة في \nTaoVillage؟"
+  }
+}

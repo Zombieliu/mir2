@@ -38,7 +38,7 @@ use mir2_client_bevy::quest_ui::{
     QuestUiIntentQueue, QuestUiState,
 };
 use mir2_client_bevy::read_model::UiReadModel;
-use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
+use mir2_client_bevy::social::{GuildRankRenameRequest, SocialModel, SocialPendingOperation};
 use serde_json::Value;
 
 use crate::gateway::GatewayCommand;
@@ -46,7 +46,11 @@ use crate::input::{
     native_input_trace_enabled, GatewayCommands, NativeKeyboardInput, WorldPointerMovementState,
 };
 use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
+#[cfg(test)]
+#[path = "guild_rank_wire_tests.rs"]
+mod guild_rank_wire_tests;
 use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate};
+use mir2_client_bevy::crystal_ui::overlays::social_bond_dialog::GuildCreationContext;
 use mir2_client_bevy::crystal_ui::overlays::{
     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
 };
@@ -72,9 +76,9 @@ struct QuestDefinition {
 /// are intentionally retained across periodic world snapshots.
 #[derive(Debug, Default)]
 pub struct NativeGameplayAdapter {
-    pub(crate) command_fence:Option<crate::gateway::NativeCommandFence>,
-    pub(crate) last_full_producer_stamp:Option<crate::gateway::NativeCommandStamp>,
-    pub(crate) last_full_producer_models:Option<NativeProducerModels>,
+    pub(crate) command_fence: Option<crate::gateway::NativeCommandFence>,
+    pub(crate) last_full_producer_stamp: Option<crate::gateway::NativeCommandStamp>,
+    pub(crate) last_full_producer_models: Option<NativeProducerModels>,
     quest_definitions: HashMap<i32, QuestDefinition>,
     completed_quests: CompletedQuestTracker,
     completed_quest_character_name: Option<String>,
@@ -87,12 +91,16 @@ pub struct NativeGameplayAdapter {
     damage_events: VecDeque<NativeDamageEvent>,
     effect_sequence: u64,
     effect_events: VecDeque<NativeEffectEvent>,
+    owner_struck: Option<NativeOwnerStruck>,
     notice_sequence: u64,
     notice_update: Option<NoticePacketUpdate>,
     /// Latest authoritative actor payloads used only to resolve Crystal's
     /// client-owned player sound family when a later packet contains ids but
     /// not class/gender/equipment/mount presentation fields.
     actor_sound_contexts: HashMap<u32, Value>,
+    /// Crystal HasElements/ElementCasted used only to choose the sourced
+    /// ElementalShot body action. Only typed arrival packets update this cache.
+    elemental_animation_state: HashMap<u32, NativeElementalAnimationState>,
     latest_player_object_id: Option<u32>,
     /// Compatibility runtimes may echo a source-complete `ObjectMagic`
     /// immediately after the owner's compact `Magic` acknowledgement. Keep
@@ -122,6 +130,12 @@ struct AuthoritativePlayerTransform {
 struct NativeAnimationHint {
     sequence: u64,
     action: &'static str,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct NativeElementalAnimationState {
+    enabled: bool,
+    casted: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -258,6 +272,16 @@ pub struct NativeEffectEvent {
     pub payload: Value,
 }
 
+/// Receipt of Crystal's compact owner-only Struck packet. This is kept apart
+/// from the retained VFX buffer: replaying a snapshot must not extend NextRunTime.
+#[derive(Debug, Clone)]
+pub(crate) struct NativeOwnerStruck {
+    pub generation: u64,
+    pub sequence: u64,
+    pub object_id: u32,
+    pub received_at: std::time::Instant,
+}
+
 /// Upper bound on buffered transient effect events. Too many simultaneous
 /// casts could otherwise grow the queue without limit; the newest events are
 /// kept and the oldest dropped.
@@ -266,6 +290,8 @@ pub const MAX_BUFFERED_EFFECT_EVENTS: usize = 96;
 /// One complete replacement of native gameplay presentation state.
 #[derive(Debug, Clone, Default)]
 pub struct NativeGameplaySnapshot {
+    pub refine_packet: Option<mir2_protocol::ServerPacket>,
+    pub refine_custody: Option<mir2_client_bevy::crystal_ui::overlays::refine_dialog::RefineCustodyReadback>,
     pub(crate) command_stamp:Option<crate::gateway::NativeCommandStamp>,
     pub(crate) producer_models:Option<NativeProducerModels>,
     pub player_inspect: Option<mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback>,
@@ -299,6 +325,7 @@ pub struct NativeGameplaySnapshot {
     pub damage_events: Vec<NativeDamageEvent>,
     /// Monotonic authoritative effect events since the last drain, in order.
     pub effect_events: Vec<NativeEffectEvent>,
+    pub(crate) owner_struck: Option<NativeOwnerStruck>,
     /// Authoritative objectId -> (x, y) tile map for effect anchoring (caster,
     /// projectile source/destination, ObjectEffect target tiles). Derived from
     /// zone packets, never fabricated by the client.
@@ -532,7 +559,7 @@ impl NativeGameplayAdapter {
                     }
                     true
                 }
-                "UserDashAttack" => {
+                "UserDashAttack" | "UserBackStep" => {
                     let Some(transform) = transform_from_payload(payload) else {
                         return false;
                     };
@@ -553,8 +580,26 @@ impl NativeGameplayAdapter {
                         };
                         self.authoritative_player_transform = Some(transform);
                         self.authoritative_player_animation =
-                            Some(self.next_animation_hint("dashAttack"));
+                            Some(self.next_animation_hint(if packet == "UserBackStep" {
+                                "jump"
+                            } else {
+                                "dashAttack"
+                            }));
                         self.big_map.set_player_location(None, location);
+                        if packet == "UserBackStep" {
+                            let mut effect = payload.clone();
+                            if let (Some(body), Some(id)) =
+                                (effect.as_object_mut(), self.latest_player_object_id)
+                            {
+                                body.insert("objectId".to_owned(), Value::from(id));
+                            }
+                            self.record_actor_effect(
+                                packet,
+                                &effect,
+                                self.latest_player_object_id,
+                                self.latest_player_object_id,
+                            );
+                        }
                         true
                     }
                 }
@@ -604,6 +649,9 @@ impl NativeGameplayAdapter {
                     self.authoritative_player_dead = Some(true);
                     self.authoritative_player_animation = Some(self.next_animation_hint("die"));
                     let player_object_id = self.latest_player_object_id;
+                    if let Some(object_id) = player_object_id {
+                        self.elemental_animation_state.remove(&object_id);
+                    }
                     self.record_actor_effect("Death", payload, player_object_id, None);
                     true
                 }
@@ -615,12 +663,40 @@ impl NativeGameplayAdapter {
                     self.authoritative_player_animation =
                         Some(self.next_animation_hint("standing"));
                     let player_object_id = self.latest_player_object_id;
+                    if let Some(object_id) = player_object_id {
+                        // Move the current self overlay into the same revived
+                        // life. Its old ObjectDied must not discard the next
+                        // ObjectHealth before the personal snapshot catches up.
+                        self.patch_zone_entity_death(
+                            &serde_json::json!({"objectId": object_id}),
+                            false,
+                            false,
+                        );
+                    }
                     self.record_actor_effect("Revived", payload, player_object_id, None);
                     true
                 }
                 "ObjectMonster" | "NewMonsterInfo" => self.upsert_zone_entity(payload, "monster"),
                 "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc"),
-                "ObjectPlayer" | "ObjectHero" => self.upsert_zone_entity(payload, "player"),
+                "ObjectPlayer" | "ObjectHero" => {
+                    let changed = self.upsert_zone_entity(payload, "player");
+                    if changed && packet == "ObjectPlayer" {
+                        self.restore_elemental_animation_state(payload);
+                        self.record_actor_effect(
+                            packet,
+                            payload,
+                            packet_object_id(payload),
+                            packet_object_id(payload),
+                        );
+                    }
+                    changed
+                }
+                "ColourChanged" => {
+                    self.patch_zone_name_colour(payload, self.latest_player_object_id)
+                }
+                "ObjectColourChanged" => {
+                    self.patch_zone_name_colour(payload, packet_object_id(payload))
+                }
                 "MountUpdate" => self.patch_zone_entity_mount(payload),
                 "ObjectWalk" | "ObjectRun" => {
                     let changed = self.patch_zone_entity_transform(
@@ -642,6 +718,18 @@ impl NativeGameplayAdapter {
                     changed
                 }
                 "ObjectDashAttack" => self.patch_zone_entity_transform(payload, Some("dashAttack")),
+                "ObjectBackStep" => {
+                    let changed = self.patch_zone_entity_transform(payload, Some("jump"));
+                    if changed {
+                        self.record_actor_effect(
+                            packet,
+                            payload,
+                            packet_object_id(payload),
+                            packet_object_id(payload),
+                        );
+                    }
+                    changed
+                }
                 "ObjectTurn" => {
                     let pet = packet_object_id(payload)
                         .and_then(|id| self.zone_entities.get(&id))
@@ -689,6 +777,16 @@ impl NativeGameplayAdapter {
                         }
                     };
                     let changed = self.patch_zone_entity_action(payload, action, true);
+                    if is_player {
+                        if let (Some(id), Some(spell)) =
+                            (object_id, packet_body(payload).get("spell"))
+                        {
+                            self.zone_entities
+                                .entry(id)
+                                .or_default()
+                                .insert("_nativeAnimationSpell".into(), spell.clone());
+                        }
+                    }
                     // Most attacks are ignored by the effect consumer. Preserve
                     // the typed packet so spell-bearing Attack1 overlays such
                     // as FlamingSword and source-owned monster audio can be
@@ -733,9 +831,14 @@ impl NativeGameplayAdapter {
                     // AttackRange2. The gateway projects the typed Spell enum
                     // by name, so this is an authoritative discriminator and
                     // does not infer from class, distance, or target state.
-                    let action = object_magic_animation_action(payload);
+                    let action = self.source_object_magic_animation_action(payload);
                     let changed = self.patch_zone_entity_action(payload, action, false);
-                    self.record_effect("ObjectMagic", payload);
+                    self.record_actor_effect(
+                        "ObjectMagic",
+                        payload,
+                        packet_body(payload).get("targetId").and_then(value_u32),
+                        packet_object_id(payload),
+                    );
                     changed
                 }
                 "ObjectSpell" => {
@@ -745,6 +848,25 @@ impl NativeGameplayAdapter {
                 }
                 "ObjectProjectile" => {
                     self.record_effect("ObjectProjectile", payload);
+                    true
+                }
+                "SetElemental" => {
+                    self.observe_elemental_animation_state(payload);
+                    self.record_actor_effect(
+                        packet,
+                        payload,
+                        packet_object_id(payload),
+                        packet_object_id(payload),
+                    );
+                    true
+                }
+                "SetConcentration" | "SetBindingShot" | "RemoveDelayedExplosion" => {
+                    self.record_actor_effect(
+                        packet,
+                        payload,
+                        packet_object_id(payload),
+                        packet_object_id(payload),
+                    );
                     true
                 }
                 "ObjectEffect" => {
@@ -778,6 +900,14 @@ impl NativeGameplayAdapter {
                         player_object_id,
                         packet_body(payload).get("attackerId").and_then(value_u32),
                     );
+                    if let Some(object_id) = player_object_id.filter(|id| *id != 0) {
+                        self.owner_struck = Some(NativeOwnerStruck {
+                            generation: self.generation,
+                            sequence: self.effect_sequence,
+                            object_id,
+                            received_at: std::time::Instant::now(),
+                        });
+                    }
                     true
                 }
                 "IntelligentCreaturePickup" => {
@@ -795,6 +925,12 @@ impl NativeGameplayAdapter {
                 }
                 "ObjectHealth" => self.patch_zone_entity_health(payload),
                 "ObjectDied" => {
+                    // Crystal kind=2 is the DarkBody clone smoke/removal, not a death pose.
+                    // Capture the real tile and actor before applying its tombstone.
+                    if packet_body(payload).get("kind").and_then(value_i32) == Some(2) {
+                        self.record_actor_effect(packet, payload, packet_object_id(payload), None);
+                        return self.remove_zone_object(payload);
+                    }
                     let animate = packet_object_id(payload) != self.latest_player_object_id;
                     let changed = self.patch_zone_entity_death(payload, true, animate);
                     self.record_actor_effect(
@@ -869,6 +1005,28 @@ impl NativeGameplayAdapter {
     /// transform until save/disconnect.
     pub fn apply_authoritative_overlay(&self, payload: &mut Value) {
         let player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        // Read typed life/HP authority before a display-only health overlay
+        // approximates the self entity's fields. Actual Revived/new-life
+        // packets still take precedence over an older personal snapshot.
+        let snapshot_player =
+            payload
+                .get("entities")
+                .and_then(Value::as_array)
+                .and_then(|entities| {
+                    entities.iter().find(|entity| {
+                        entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                            || (player_object_id.is_some()
+                                && entity.get("objectId").and_then(value_u32) == player_object_id)
+                    })
+                });
+        let snapshot_dead = snapshot_player
+            .and_then(|player| player.get("dead"))
+            .and_then(Value::as_bool);
+        let snapshot_zero_hp = payload.get("playerHp").and_then(value_i32) == Some(0)
+            || snapshot_player
+                .and_then(|player| player.get("hp"))
+                .and_then(value_i32)
+                == Some(0);
 
         if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
             entities.retain(|entity| {
@@ -937,6 +1095,8 @@ impl NativeGameplayAdapter {
             player_object_id,
             self.authoritative_player_dead,
             player_object_id.and_then(|object_id| self.zone_entities.get(&object_id)),
+            snapshot_dead,
+            snapshot_zero_hp,
         );
 
         if let Some(hint) = &self.authoritative_player_animation {
@@ -991,7 +1151,9 @@ impl NativeGameplayAdapter {
         self.zone_tombstones.clear();
         self.damage_events.clear();
         self.effect_events.clear();
+        self.owner_struck = None;
         self.actor_sound_contexts.clear();
+        self.elemental_animation_state.clear();
         self.latest_player_object_id = None;
         self.pending_local_magic_echo = None;
     }
@@ -1001,6 +1163,7 @@ impl NativeGameplayAdapter {
     /// boundary: clearing the self object id/animation here leaves a valid name
     /// and HP bar with no body until a later full personal snapshot arrives.
     fn clear_zone_state_for_map_change(&mut self) {
+        self.elemental_animation_state.clear();
         let player_object_id = self.latest_player_object_id;
         self.zone_entities.retain(|object_id, overlay| {
             player_object_id == Some(*object_id)
@@ -1074,10 +1237,15 @@ impl NativeGameplayAdapter {
         );
         body.insert("direction".to_owned(), Value::from(direction));
 
-        let action = object_magic_animation_action(&enriched);
+        let action = self.source_object_magic_animation_action(&enriched);
         self.authoritative_player_animation = Some(self.next_animation_hint(action));
         self.pending_local_magic_echo = Some(enriched.clone());
-        self.record_effect("ObjectMagic", &enriched);
+        self.record_actor_effect(
+            "ObjectMagic",
+            &enriched,
+            packet_body(&enriched).get("targetId").and_then(value_u32),
+            Some(object_id),
+        );
         true
     }
 
@@ -1172,8 +1340,112 @@ impl NativeGameplayAdapter {
             None
         } else {
             context_map.insert("objectId".to_owned(), Value::from(object_id));
+            if self.latest_player_object_id == Some(object_id) {
+                context_map.insert("_nativeSelf".to_owned(), Value::Bool(true));
+            }
             Some(context)
         }
+    }
+
+    fn elemental_animation_actor_is_known(&self, object_id: u32) -> bool {
+        if self.zone_tombstones.contains(&object_id)
+            || (self.latest_player_object_id == Some(object_id)
+                && self.authoritative_player_dead == Some(true))
+        {
+            return false;
+        }
+        self.actor_sound_context(object_id).is_some_and(|actor| {
+            matches!(
+                actor.get("kind").and_then(Value::as_str),
+                Some("selfPlayer" | "player" | "self" | "hero")
+            ) && (actor
+                .get("class")
+                .and_then(Value::as_str)
+                .is_some_and(|class| class.eq_ignore_ascii_case("Archer"))
+                || actor
+                    .get("classKey")
+                    .and_then(Value::as_str)
+                    .is_some_and(|class| class.eq_ignore_ascii_case("archer")))
+                && actor.get("dead").and_then(Value::as_bool) != Some(true)
+        })
+    }
+
+    fn observe_elemental_animation_state(&mut self, payload: &Value) {
+        let Some(object_id) = packet_object_id(payload) else {
+            return;
+        };
+        let body = packet_body(payload);
+        let (Some(enabled), Some(casted)) = (
+            body.get("enabled").and_then(Value::as_bool),
+            body.get("casted").and_then(Value::as_bool),
+        ) else {
+            return;
+        };
+        if !self.elemental_animation_actor_is_known(object_id) {
+            return;
+        }
+        self.elemental_animation_state.insert(
+            object_id,
+            NativeElementalAnimationState {
+                enabled,
+                // GameScene.SetElemental does not set ElementCasted for User.
+                casted: casted && self.latest_player_object_id != Some(object_id),
+            },
+        );
+    }
+
+    fn restore_elemental_animation_state(&mut self, payload: &Value) {
+        let Some(object_id) = packet_object_id(payload) else {
+            return;
+        };
+        // An AOI arrival restores initial state. It must not replay retained
+        // orb fields over a later SetElemental disable for this incarnation.
+        if self.elemental_animation_state.contains_key(&object_id)
+            || !self.elemental_animation_actor_is_known(object_id)
+        {
+            return;
+        }
+        let body = packet_body(payload);
+        let (Some(effect), Some(_level), Some(_max)) = (
+            body.get("elementOrbEffect").and_then(value_u32),
+            body.get("elementOrbLevel").and_then(value_u32),
+            body.get("elementOrbMax").and_then(value_u32),
+        ) else {
+            return;
+        };
+        if effect > 4 {
+            return;
+        }
+        self.elemental_animation_state.insert(
+            object_id,
+            NativeElementalAnimationState {
+                enabled: effect > 0,
+                casted: false,
+            },
+        );
+    }
+
+    fn source_object_magic_animation_action(&mut self, payload: &Value) -> &'static str {
+        if packet_body(payload).get("spell").and_then(Value::as_str) != Some("ElementalShot") {
+            return object_magic_animation_action(payload);
+        }
+        let Some(object_id) = packet_object_id(payload) else {
+            return "spell";
+        };
+        if !self.elemental_animation_actor_is_known(object_id) {
+            return "spell";
+        }
+        let Some(state) = self.elemental_animation_state.get_mut(&object_id) else {
+            return "spell";
+        };
+        let action = if state.enabled && !state.casted {
+            "attackRange2"
+        } else {
+            "spell"
+        };
+        // PlayerObject.SetAction consumes the observer's ElementCasted latch.
+        state.casted = false;
+        action
     }
 
     fn upsert_zone_entity(&mut self, payload: &Value, kind: &str) -> bool {
@@ -1261,6 +1533,25 @@ impl NativeGameplayAdapter {
             }
         }
         patch_location_fields(body, overlay);
+        true
+    }
+
+    fn patch_zone_name_colour(&mut self, payload: &Value, object_id: Option<u32>) -> bool {
+        let Some(object_id) = object_id.filter(|id| !self.zone_tombstones.contains(id)) else {
+            return false;
+        };
+        let Some(colour) = packet_body(payload)
+            .get("nameColourArgb")
+            .and_then(value_i32)
+        else {
+            return false;
+        };
+        let overlay = self.zone_entities.entry(object_id).or_default();
+        if overlay.get("nameColourArgb").and_then(value_i32) == Some(colour) {
+            return false;
+        }
+        overlay.insert("objectId".into(), Value::from(object_id));
+        overlay.insert("nameColourArgb".into(), Value::from(colour));
         true
     }
 
@@ -1359,6 +1650,13 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        if self
+            .zone_entities
+            .get(&object_id)
+            .is_some_and(|entity| entity.get("dead").and_then(Value::as_bool) == Some(true))
+        {
+            return true;
+        }
         self.health_sequence = self.health_sequence.saturating_add(1);
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
@@ -1386,7 +1684,6 @@ impl NativeGameplayAdapter {
                 "_packetHealthPercent".to_owned(),
                 Value::from(percent.clamp(0, 100)),
             );
-            overlay.insert("dead".to_owned(), Value::from(percent <= 0));
         }
         true
     }
@@ -1396,6 +1693,9 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        if dead {
+            self.elemental_animation_state.remove(&object_id);
+        }
         let hint = animate.then(|| self.next_animation_hint(if dead { "die" } else { "revive" }));
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
@@ -1476,6 +1776,7 @@ impl NativeGameplayAdapter {
             return false;
         };
         self.zone_entities.remove(&object_id);
+        self.elemental_animation_state.remove(&object_id);
         self.zone_ground_drops.remove(&object_id);
         self.zone_tombstones.insert(object_id);
         true
@@ -1542,6 +1843,53 @@ impl NativeGameplayAdapter {
         }
     }
 
+    /// Called only for a raw, current-map network worldSnapshot, before any
+    /// overlay. Packet-first replay uses apply_authoritative_overlay alone.
+    pub fn observe_world_snapshot_life(&mut self, payload: &Value) {
+        let Some(player_object_id) = payload.get("playerObjectId").and_then(value_u32) else {
+            return;
+        };
+        let player = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .and_then(|entities| {
+                entities.iter().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || entity.get("objectId").and_then(value_u32) == Some(player_object_id)
+                })
+            });
+        let confirms_live = player
+            .and_then(|player| player.get("dead"))
+            .and_then(Value::as_bool)
+            == Some(false)
+            && payload
+                .get("playerHp")
+                .and_then(value_i32)
+                .is_some_and(|hp| hp > 0)
+            && player
+                .and_then(|player| player.get("hp"))
+                .and_then(value_i32)
+                .is_some_and(|hp| hp > 0);
+        if !confirms_live {
+            return;
+        }
+        // A raw typed live snapshot acknowledges the packet's new incarnation.
+        // Retire only alive precedence; real Death still rejects stale live data.
+        if self.authoritative_player_dead == Some(false) {
+            self.authoritative_player_dead = None;
+        }
+        if let Some(overlay) = self
+            .zone_entities
+            .get_mut(&player_object_id)
+            .filter(|overlay| overlay.get("dead").and_then(Value::as_bool) == Some(false))
+        {
+            overlay.remove("dead");
+            if overlay.get("hp").and_then(value_i32) == Some(0) {
+                overlay.remove("hp");
+            }
+        }
+    }
+
     pub fn observe_world_snapshot(&mut self, payload: &Value) {
         if let Some(ids) = completed_quest_ids_from_snapshot(payload) {
             self.completed_quests.replace_authoritative(ids);
@@ -1568,7 +1916,13 @@ impl NativeGameplayAdapter {
                     .set_player_location(map_index, BigMapPoint { x, y });
             }
         }
-        self.latest_player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        let player_object_id = payload.get("playerObjectId").and_then(value_u32);
+        if self.latest_player_object_id.is_some()
+            && player_object_id != self.latest_player_object_id
+        {
+            self.elemental_animation_state.clear();
+        }
+        self.latest_player_object_id = player_object_id;
         self.actor_sound_contexts.clear();
         if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
             for entity in entities {
@@ -1584,7 +1938,8 @@ impl NativeGameplayAdapter {
         let mut world_click_state = world_click_state_from_payload(payload);
         world_click_state.observe_allowed = self.authoritative_observe_allowed;
         NativeGameplaySnapshot {
-            command_stamp:None,producer_models:None,
+            command_stamp: None,
+            producer_models: None,
             generation: self.generation,
             big_map_only: false,
             quests: transform_quest_tracker(payload, &self.quest_definitions),
@@ -1598,11 +1953,14 @@ impl NativeGameplayAdapter {
             entity_render_payload: Some(payload.clone()),
             damage_events: self.damage_events.iter().cloned().collect(),
             effect_events: self.effect_events.iter().cloned().collect(),
+            owner_struck: self.owner_struck.clone(),
             zone_entity_tiles: self.zone_entity_tiles(payload),
             big_map: self.big_map.clone(),
             authoritative_self_movement: None,
             notice_update: self.notice_update.clone(),
             equipment_creature_packet: None,
+            refine_packet: None,
+            refine_custody: None,
             equipment_owner_id: None,
             ranking_packet: None,
             friend_packet: None,
@@ -1619,7 +1977,10 @@ impl NativeGameplayAdapter {
         NativeGameplaySnapshot {
             generation: self.generation,
             big_map_only: true,
-            command_stamp:self.command_fence.as_ref().and_then(crate::gateway::NativeCommandFence::stamp),
+            command_stamp: self
+                .command_fence
+                .as_ref()
+                .and_then(crate::gateway::NativeCommandFence::stamp),
             big_map: self.big_map.clone(),
             ..Default::default()
         }
@@ -1655,209 +2016,461 @@ impl NativeGameplayAdapter {
     }
 }
 
-
 /// Normalized values produced alongside the full snapshot. Display names or
 /// coincidentally equal actor/map positions are not a readiness token.
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub(crate) struct NativeProducerModels {
-    pub(crate) ui:Value,
-    pub(crate) entities:Value,
-    pub(crate) map:Value,
-    pub(crate) skills:Option<Value>,
+    pub(crate) ui: Value,
+    pub(crate) entities: Value,
+    pub(crate) map: Value,
+    pub(crate) skills: Option<Value>,
 }
 
-#[derive(Resource,Default)]
-pub(crate) struct NativeWorldProducerStamp(Option<crate::gateway::NativeCommandStamp>,bool,bool);
+#[derive(Resource, Default)]
+pub(crate) struct NativeWorldProducerStamp(Option<crate::gateway::NativeCommandStamp>, bool, bool);
 
 #[derive(SystemParam)]
-pub(crate) struct NativeWorldProducerState<'w>{
-    movement:Option<ResMut<'w,WorldPointerMovementState>>,
-    ui:Option<ResMut<'w,NativePlayerUiState>>,
-    quests:Option<ResMut<'w,QuestUiIntentQueue>>,
-    routes:Option<ResMut<'w,mir2_client_bevy::quest_ui::QuestRouteNavigationIntentQueue>>,
-    big_map:Option<ResMut<'w,BigMapGatewayIntentQueue>>,
-    player_intents:Option<ResMut<'w,NativePlayerUiIntentQueue>>,
-    pending:Option<ResMut<'w,PendingOperations>>,
-    game_shop:Option<ResMut<'w,GameShopModel>>,
+pub(crate) struct NativeWorldProducerState<'w> {
+    movement: Option<ResMut<'w, WorldPointerMovementState>>,
+    ui: Option<ResMut<'w, NativePlayerUiState>>,
+    quests: Option<ResMut<'w, QuestUiIntentQueue>>,
+    routes: Option<ResMut<'w, mir2_client_bevy::quest_ui::QuestRouteNavigationIntentQueue>>,
+    big_map: Option<ResMut<'w, BigMapGatewayIntentQueue>>,
+    player_intents: Option<ResMut<'w, NativePlayerUiIntentQueue>>,
+    pending: Option<ResMut<'w, PendingOperations>>,
+    game_shop: Option<ResMut<'w, GameShopModel>>,
 }
-impl NativeWorldProducerState<'_>{
-    fn reset(&mut self,preserve_personal:bool,commands:&GatewayCommands){
-        if let Some(movement)=self.movement.as_deref_mut(){movement.reset_controller(0.0,"commandProvenanceChanged");}
-        if let Some(ui)=self.ui.as_deref_mut(){ui.skill_bars.pending_casts.clear();}
-        if let Some(routes)=self.routes.as_deref_mut(){routes.clear();}
-        if let Some(big_map)=self.big_map.as_deref_mut(){let _=big_map.drain_intents();}
-        if let Some(quests)=self.quests.as_deref_mut(){
-            for intent in quests.drain_intents(){
-                if preserve_personal&&matches!(intent,QuestUiIntent::AbandonQuest {..}|QuestUiIntent::ShareQuest {..}){quests.push_intent(intent);}
-                else if let (Some(pending),Some(key))=(self.pending.as_deref_mut(),intent.pending_key()){pending.release(&key);}
+impl NativeWorldProducerState<'_> {
+    fn reset(&mut self, preserve_personal: bool, commands: &GatewayCommands) {
+        if let Some(movement) = self.movement.as_deref_mut() {
+            movement.reset_controller(0.0, "commandProvenanceChanged");
+        }
+        if let Some(ui) = self.ui.as_deref_mut() {
+            ui.skill_bars.pending_casts.clear();
+        }
+        if let Some(routes) = self.routes.as_deref_mut() {
+            routes.clear();
+        }
+        if let Some(big_map) = self.big_map.as_deref_mut() {
+            let _ = big_map.drain_intents();
+        }
+        if let Some(quests) = self.quests.as_deref_mut() {
+            for intent in quests.drain_intents() {
+                if preserve_personal
+                    && matches!(
+                        intent,
+                        QuestUiIntent::AbandonQuest { .. } | QuestUiIntent::ShareQuest { .. }
+                    )
+                {
+                    quests.push_intent(intent);
+                } else if let (Some(pending), Some(key)) =
+                    (self.pending.as_deref_mut(), intent.pending_key())
+                {
+                    pending.release(&key);
+                }
             }
         }
-        if let Some(queue)=self.player_intents.as_deref_mut(){
-            for intent in queue.drain_intents(){
-                let world=match &intent{
-                    NativePlayerUiIntent::EquipmentCreaturePacket(packet)=>crate::equipment_creature_wire::command(packet).is_some_and(|wire|crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))==crate::gateway::NativeCommandScope::World),
-                    NativePlayerUiIntent::HeroPacket(packet)=>crate::hero_wire::command(packet).is_some_and(|wire|crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))==crate::gateway::NativeCommandScope::World),
-                    NativePlayerUiIntent::SocialBondPacket(packet)=>crate::social_bond_wire::command(packet).is_some_and(|wire|crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))==crate::gateway::NativeCommandScope::World),
-                    NativePlayerUiIntent::DropItem {..}|NativePlayerUiIntent::Chat {..}|NativePlayerUiIntent::BuyItem {..}|NativePlayerUiIntent::NpcGoldBuy {..}|NativePlayerUiIntent::SellItem {..}|NativePlayerUiIntent::RepairItem {..}|NativePlayerUiIntent::SRepairItem {..}|NativePlayerUiIntent::StoreItem {..}|NativePlayerUiIntent::TakeBackItem {..}|NativePlayerUiIntent::UnlockStorage {..}|NativePlayerUiIntent::SetStoragePassword {..}|NativePlayerUiIntent::RemoveStoragePassword {..}|NativePlayerUiIntent::ExpandStorage|NativePlayerUiIntent::ObservePlayer {..}|NativePlayerUiIntent::GuildStorageGoldChange {..}|NativePlayerUiIntent::GuildStorageItemChange {..}|NativePlayerUiIntent::TradeRequest|NativePlayerUiIntent::TradeReply {..}|NativePlayerUiIntent::TradeGold {..}|NativePlayerUiIntent::TradeDepositItem {..}|NativePlayerUiIntent::TradeRetrieveItem {..}|NativePlayerUiIntent::TradeConfirm {..}|NativePlayerUiIntent::TradeCancel=>true,
-                    _=>false,
+        if let Some(queue) = self.player_intents.as_deref_mut() {
+            for intent in queue.drain_intents() {
+                let world = match &intent {
+                    NativePlayerUiIntent::EquipmentCreaturePacket(packet) => {
+                        crate::equipment_creature_wire::command(packet).is_some_and(|wire| {
+                            crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))
+                                == crate::gateway::NativeCommandScope::World
+                        })
+                    }
+                    NativePlayerUiIntent::HeroPacket(packet) => crate::hero_wire::command(packet)
+                        .is_some_and(|wire| {
+                            crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))
+                                == crate::gateway::NativeCommandScope::World
+                        }),
+                    NativePlayerUiIntent::SocialBondPacket(packet) => {
+                        crate::social_bond_wire::command(packet).is_some_and(|wire| {
+                            crate::gateway::native_command_scope(&GatewayCommand::Wire(wire))
+                                == crate::gateway::NativeCommandScope::World
+                        })
+                    }
+                    NativePlayerUiIntent::DropItem { .. }
+                    | NativePlayerUiIntent::Chat { .. }
+                    | NativePlayerUiIntent::BuyItem { .. }
+                    | NativePlayerUiIntent::NpcGoldBuy { .. }
+                    | NativePlayerUiIntent::SellItem { .. }
+                    | NativePlayerUiIntent::RepairItem { .. }
+                    | NativePlayerUiIntent::SRepairItem { .. }
+                    | NativePlayerUiIntent::StoreItem { .. }
+                    | NativePlayerUiIntent::TakeBackItem { .. }
+                    | NativePlayerUiIntent::UnlockStorage { .. }
+                    | NativePlayerUiIntent::SetStoragePassword { .. }
+                    | NativePlayerUiIntent::RemoveStoragePassword { .. }
+                    | NativePlayerUiIntent::ExpandStorage
+                    | NativePlayerUiIntent::ObservePlayer { .. }
+                    | NativePlayerUiIntent::GuildStorageGoldChange { .. }
+                    | NativePlayerUiIntent::GuildStorageItemChange { .. }
+                    | NativePlayerUiIntent::TradeRequest
+                    | NativePlayerUiIntent::TradeReply { .. }
+                    | NativePlayerUiIntent::TradeGold { .. }
+                    | NativePlayerUiIntent::TradeDepositItem { .. }
+                    | NativePlayerUiIntent::TradeRetrieveItem { .. }
+                    | NativePlayerUiIntent::TradeConfirm { .. }
+                    | NativePlayerUiIntent::TradeCancel => true,
+                    _ => false,
                 };
-                if !world&&preserve_personal{queue.push_intent(intent);}
-                else{
-                    let key=intent.pending_key();
-                    if key.as_ref().is_some_and(|key|commands.has_transport_operation(key)){continue;}
-                    let mut release=true;
-                    match &intent{
-                        NativePlayerUiIntent::StoreItem {request_id,from,to,..}|NativePlayerUiIntent::TakeBackItem {request_id,from,to,..}=>{
-                            let operation=if matches!(intent,NativePlayerUiIntent::StoreItem {..}){mir2_ui_core::storage::StorageOperation::StoreItem}else{mir2_ui_core::storage::StorageOperation::TakeBackItem};
-                            if let Some(ui)=self.ui.as_deref_mut(){
-                                if ui.core.storage_pending.as_ref().is_some_and(|request|request.request_id==*request_id&&request.operation==operation&&request.from==*from&&request.to==*to){ui.core.storage_pending=None;}
-                            }
+                if !world && preserve_personal {
+                    queue.push_intent(intent);
+                } else {
+                    let key = intent.pending_key();
+                    if key
+                        .as_ref()
+                        .is_some_and(|key| commands.has_transport_operation(key))
+                    {
+                        continue;
+                    }
+                    let mut release = true;
+                    match &intent {
+                        NativePlayerUiIntent::StoreItem {
+                            request_id,
+                            from,
+                            to,
+                            ..
                         }
-                        NativePlayerUiIntent::GameShopBuy {request_id,g_index,quantity,price_type}=>{
-                            let request=crate::gateway::game_shop_request_from_wire(&NativeOutboundCommand::GameShopBuy {request_id:request_id.clone(),g_index:*g_index,quantity:*quantity,price_type:*price_type});
-                            if let Some(request)=request.as_ref(){
-                                let core_conflict=self.ui.as_deref().and_then(|ui|ui.core.game_shop_pending.as_ref()).is_some_and(|pending|pending!=request);
-                                let model_conflict=self.game_shop.as_deref().and_then(|model|model.pending_purchase.as_ref()).is_some_and(|pending|pending!=request);
-                                release=!(core_conflict||model_conflict);
-                                if release{
-                                    if let Some(ui)=self.ui.as_deref_mut(){if ui.core.game_shop_pending.as_ref()==Some(request){ui.core.cancel_game_shop_purchase(request_id);}}
-                                    if let Some(model)=self.game_shop.as_deref_mut(){if model.pending_purchase.as_ref()==Some(request){model.cancel_purchase_reservation(request_id);}}
+                        | NativePlayerUiIntent::TakeBackItem {
+                            request_id,
+                            from,
+                            to,
+                            ..
+                        } => {
+                            let operation =
+                                if matches!(intent, NativePlayerUiIntent::StoreItem { .. }) {
+                                    mir2_ui_core::storage::StorageOperation::StoreItem
+                                } else {
+                                    mir2_ui_core::storage::StorageOperation::TakeBackItem
+                                };
+                            if let Some(ui) = self.ui.as_deref_mut() {
+                                if ui.core.storage_pending.as_ref().is_some_and(|request| {
+                                    request.request_id == *request_id
+                                        && request.operation == operation
+                                        && request.from == *from
+                                        && request.to == *to
+                                }) {
+                                    ui.core.storage_pending = None;
                                 }
                             }
                         }
-                        _=>{},
+                        NativePlayerUiIntent::GameShopBuy {
+                            request_id,
+                            g_index,
+                            quantity,
+                            price_type,
+                        } => {
+                            let request = crate::gateway::game_shop_request_from_wire(
+                                &NativeOutboundCommand::GameShopBuy {
+                                    request_id: request_id.clone(),
+                                    g_index: *g_index,
+                                    quantity: *quantity,
+                                    price_type: *price_type,
+                                },
+                            );
+                            if let Some(request) = request.as_ref() {
+                                let core_conflict = self
+                                    .ui
+                                    .as_deref()
+                                    .and_then(|ui| ui.core.game_shop_pending.as_ref())
+                                    .is_some_and(|pending| pending != request);
+                                let model_conflict = self
+                                    .game_shop
+                                    .as_deref()
+                                    .and_then(|model| model.pending_purchase.as_ref())
+                                    .is_some_and(|pending| pending != request);
+                                release = !(core_conflict || model_conflict);
+                                if release {
+                                    if let Some(ui) = self.ui.as_deref_mut() {
+                                        if ui.core.game_shop_pending.as_ref() == Some(request) {
+                                            ui.core.cancel_game_shop_purchase(request_id);
+                                        }
+                                    }
+                                    if let Some(model) = self.game_shop.as_deref_mut() {
+                                        if model.pending_purchase.as_ref() == Some(request) {
+                                            model.cancel_purchase_reservation(request_id);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        _ => {}
                     }
-                    if release{if let (Some(pending),Some(key))=(self.pending.as_deref_mut(),key){pending.release(&key);}}
+                    if release {
+                        if let (Some(pending), Some(key)) = (self.pending.as_deref_mut(), key) {
+                            pending.release(&key);
+                        }
+                    }
                 }
             }
         }
     }
 }
-pub(crate) fn withdraw_invalid_native_world_producers(commands:Res<GatewayCommands>,mut seen:ResMut<NativeWorldProducerStamp>,mut state:NativeWorldProducerState,mut target:Option<ResMut<CombatTargetModel>>,mut nearby:Option<ResMut<NearbyNpcModel>>,mut pickups:Option<ResMut<GroundPickupModel>>,mut click:Option<ResMut<NativeWorldClickState>>,inbox:Res<GameplayEventInbox>){
-    let Some(fence)=commands.ownership_fence() else{return;};
-    let current=commands.applied_world_stamp().filter(|stamp|fence.accepts(*stamp,true));
-    if let Some(stamp)=current {
-        if seen.0!=Some(stamp)||seen.1{state.reset(seen.0.is_some_and(|old|old.same_owner(stamp)),&commands);}
-        seen.0=Some(stamp);seen.1=false;seen.2=false;
-    }else{
+pub(crate) fn withdraw_invalid_native_world_producers(
+    commands: Res<GatewayCommands>,
+    mut seen: ResMut<NativeWorldProducerStamp>,
+    mut state: NativeWorldProducerState,
+    mut target: Option<ResMut<CombatTargetModel>>,
+    mut nearby: Option<ResMut<NearbyNpcModel>>,
+    mut pickups: Option<ResMut<GroundPickupModel>>,
+    mut click: Option<ResMut<NativeWorldClickState>>,
+    inbox: Res<GameplayEventInbox>,
+) {
+    let Some(fence) = commands.ownership_fence() else {
+        return;
+    };
+    let current = commands
+        .applied_world_stamp()
+        .filter(|stamp| fence.accepts(*stamp, true));
+    if let Some(stamp) = current {
+        if seen.0 != Some(stamp) || seen.1 {
+            state.reset(seen.0.is_some_and(|old| old.same_owner(stamp)), &commands);
+        }
+        seen.0 = Some(stamp);
+        seen.1 = false;
+        seen.2 = false;
+    } else {
         // Retain the last applied owner while withdrawn. A scene-only gap
         // must not turn into an apparent owner change at later activation.
-        let preserve=seen.0.zip(fence.stamp()).is_some_and(|(old,current)|old.same_owner(current));
-        if !seen.1||(!preserve&&!seen.2){state.reset(preserve,&commands);}
-        seen.1=true;if !preserve{seen.2=true;}
+        let preserve = seen
+            .0
+            .zip(fence.stamp())
+            .is_some_and(|(old, current)| old.same_owner(current));
+        if !seen.1 || (!preserve && !seen.2) {
+            state.reset(preserve, &commands);
+        }
+        seen.1 = true;
+        if !preserve {
+            seen.2 = true;
+        }
     }
-    if current.is_none(){
+    if current.is_none() {
         commands.withdraw_world_stamp();
         // Full source models may arrive before their actual Skill authority.
         // Keep that source across empty-inbox frames, but never across an
         // owner/scene/connection/cancellation boundary or a retired fence.
-        if let Ok(mut pending)=commands.pending_provenance.lock(){
-            if pending.as_ref().is_some_and(|(stamp,_)|!fence.accepts(*stamp,true)){*pending=None;}
+        if let Ok(mut pending) = commands.pending_provenance.lock() {
+            if pending
+                .as_ref()
+                .is_some_and(|(stamp, _)| !fence.accepts(*stamp, true))
+            {
+                *pending = None;
+            }
         }
-        if let Some(target)=target.as_deref_mut(){*target=Default::default();}
-        if let Some(nearby)=nearby.as_deref_mut(){*nearby=Default::default();}
-        if let Some(pickups)=pickups.as_deref_mut(){*pickups=Default::default();}
-        if let Some(click)=click.as_deref_mut(){*click=Default::default();}
+        if let Some(target) = target.as_deref_mut() {
+            *target = Default::default();
+        }
+        if let Some(nearby) = nearby.as_deref_mut() {
+            *nearby = Default::default();
+        }
+        if let Some(pickups) = pickups.as_deref_mut() {
+            *pickups = Default::default();
+        }
+        if let Some(click) = click.as_deref_mut() {
+            *click = Default::default();
+        }
         inbox.clear_movement_acks();
     }
 }
 
 pub(crate) fn activate_native_command_provenance(
-    commands:Res<GatewayCommands>,
-    ui:Option<ResMut<mir2_client_bevy::read_model::UiReadModel>>,
-    entities:Option<ResMut<mir2_client_bevy::entities::EntityModelSet>>,
-    map:Option<ResMut<mir2_client_bevy::map::MapModel>>,
-    skills:Option<ResMut<mir2_client_bevy::skill_model::SkillModel>>,
-    mut seen:ResMut<NativeWorldProducerStamp>,mut producer_state:NativeWorldProducerState,
-    shop:Option<Res<mir2_client_bevy::shop::ShopModel>>,
-    inventory:Option<Res<InventoryModel>>,
+    commands: Res<GatewayCommands>,
+    ui: Option<ResMut<mir2_client_bevy::read_model::UiReadModel>>,
+    entities: Option<ResMut<mir2_client_bevy::entities::EntityModelSet>>,
+    map: Option<ResMut<mir2_client_bevy::map::MapModel>>,
+    skills: Option<ResMut<mir2_client_bevy::skill_model::SkillModel>>,
+    mut seen: ResMut<NativeWorldProducerStamp>,
+    mut producer_state: NativeWorldProducerState,
+    shop: Option<Res<mir2_client_bevy::shop::ShopModel>>,
+    inventory: Option<Res<InventoryModel>>,
 ) {
-    let Some(fence)=commands.ownership_fence() else{return;};
+    let Some(fence) = commands.ownership_fence() else {
+        return;
+    };
 
     // Ordinary purchases require the exact gateway-observed full models to be
     // actually present in the shared resources. Owner readiness alone is insufficient.
-    if let Some(queue)=producer_state.player_intents.as_deref_mut() {
-        let source=fence.npc_gold_buy_source();
-        let actual=shop.as_deref().zip(inventory.as_deref()).and_then(|(shop,inventory)|
-            mir2_client_bevy::npc_gold_buy_attempt::npc_gold_buy_model_authority(shop,inventory));
-        if let Some(source)=source.filter(|source|commands.applied_world_stamp()==Some(source.stamp)
-            && actual.as_deref()==Some(source.model.as_str())) {
-            let open=producer_state.ui.as_deref().is_some_and(|ui|ui.npc_shop_open()
-                && (ui.npc_shop_buy_tab||shop.as_deref().is_some_and(|shop|!shop.allows_sell())));
-            let mutations=producer_state.pending.as_deref().is_some_and(|pending|pending.len()>0);
-            let owner=format!("{:?}",source.stamp);
-            let alive=ui.as_deref().is_some_and(|ui|ui.player.hp>0);
+    if let Some(queue) = producer_state.player_intents.as_deref_mut() {
+        let source = fence.npc_gold_buy_source();
+        let actual = shop
+            .as_deref()
+            .zip(inventory.as_deref())
+            .and_then(|(shop, inventory)| {
+                mir2_client_bevy::npc_gold_buy_attempt::npc_gold_buy_model_authority(
+                    shop, inventory,
+                )
+            });
+        if let Some(source) = source.filter(|source| {
+            commands.applied_world_stamp() == Some(source.stamp)
+                && actual.as_deref() == Some(source.model.as_str())
+        }) {
+            let open = producer_state.ui.as_deref().is_some_and(|ui| {
+                ui.npc_shop_open()
+                    && (ui.npc_shop_buy_tab
+                        || shop.as_deref().is_some_and(|shop| !shop.allows_sell()))
+            });
+            let mutations = producer_state
+                .pending
+                .as_deref()
+                .is_some_and(|pending| pending.len() > 0);
+            let owner = format!("{:?}", source.stamp);
+            let alive = ui.as_deref().is_some_and(|ui| ui.player.hp > 0);
             if queue.observe_npc_gold_buy_connection(source.connection) {
-                queue.observe_npc_gold_buy(&owner,source.revision,&source.model,open&&alive&&!mutations);
-            } else {queue.withdraw_npc_gold_buy();}
-        } else {queue.withdraw_npc_gold_buy();}
+                queue.observe_npc_gold_buy(
+                    &owner,
+                    source.revision,
+                    &source.model,
+                    open && alive && !mutations,
+                );
+            } else {
+                queue.withdraw_npc_gold_buy();
+            }
+        } else {
+            queue.withdraw_npc_gold_buy();
+        }
     }
-    let Ok(mut pending)=commands.pending_provenance.lock() else {commands.withdraw_world_stamp();return;};
-    let Some((stamp,models))=pending.as_ref() else{return;};
-    if !fence.accepts(*stamp,true){*pending=None;return;}
-    let (Some(mut ui),Some(mut entities),Some(mut map))=(ui,entities,map) else{return;};
-    let (Ok(next_ui),Ok(next_entities),Ok(next_map))=(
-        serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(models.ui.clone()),
-        serde_json::from_value::<mir2_client_bevy::entities::EntityModelSet>(models.entities.clone()),
-        serde_json::from_value::<mir2_client_bevy::map::MapModel>(models.map.clone()),
-    ) else{return;};
-    let next_skills=match models.skills.as_ref(){
-        Some(expected)=>{let Ok(value)=serde_json::from_value::<mir2_client_bevy::skill_model::SkillModel>(expected.clone()) else{return;};Some(value)},
-        None=>None,
+    let Ok(mut pending) = commands.pending_provenance.lock() else {
+        commands.withdraw_world_stamp();
+        return;
     };
-    if let Some(expected)=next_skills.as_ref(){
-        let Some(actual)=skills.as_deref() else{return;};
+    let Some((stamp, models)) = pending.as_ref() else {
+        return;
+    };
+    if !fence.accepts(*stamp, true) {
+        *pending = None;
+        return;
+    }
+    let (Some(mut ui), Some(mut entities), Some(mut map)) = (ui, entities, map) else {
+        return;
+    };
+    let (Ok(next_ui), Ok(next_entities), Ok(next_map)) = (
+        serde_json::from_value::<mir2_client_bevy::read_model::UiReadModel>(models.ui.clone()),
+        serde_json::from_value::<mir2_client_bevy::entities::EntityModelSet>(
+            models.entities.clone(),
+        ),
+        serde_json::from_value::<mir2_client_bevy::map::MapModel>(models.map.clone()),
+    ) else {
+        return;
+    };
+    let next_skills = match models.skills.as_ref() {
+        Some(expected) => {
+            let Ok(value) = serde_json::from_value::<mir2_client_bevy::skill_model::SkillModel>(
+                expected.clone(),
+            ) else {
+                return;
+            };
+            Some(value)
+        }
+        None => None,
+    };
+    if let Some(expected) = next_skills.as_ref() {
+        let Some(actual) = skills.as_deref() else {
+            return;
+        };
         // The shared ingest may already include a later MagicCast/Delay or
         // exact receipt. Never rewind that live model to the earlier snapshot.
-        if actual.authority.session_epoch!=expected.authority.session_epoch
-            || actual.authority.player_object_id!=expected.authority.player_object_id
-            || actual.authority.snapshot_serial<expected.authority.snapshot_serial
-            || !actual.has_same_learned_descriptors(expected){return;}
+        if actual.authority.session_epoch != expected.authority.session_epoch
+            || actual.authority.player_object_id != expected.authority.player_object_id
+            || actual.authority.snapshot_serial < expected.authority.snapshot_serial
+            || !actual.has_same_learned_descriptors(expected)
+        {
+            return;
+        }
     }
     // Actual source-model application, even if all serialized values happen to
     // equal the previous scene. No packet-only/receipt-only snapshot gets here.
-    if seen.0!=Some(*stamp)||seen.1{*ui=next_ui;*entities=next_entities;*map=next_map;}
-    let matches=serde_json::to_value(&*ui).ok().as_ref()==Some(&models.ui)
-        && serde_json::to_value(&*entities).ok().as_ref()==Some(&models.entities)
-        && serde_json::to_value(&*map).ok().as_ref()==Some(&models.map);
+    if seen.0 != Some(*stamp) || seen.1 {
+        *ui = next_ui;
+        *entities = next_entities;
+        *map = next_map;
+    }
+    let matches = serde_json::to_value(&*ui).ok().as_ref() == Some(&models.ui)
+        && serde_json::to_value(&*entities).ok().as_ref() == Some(&models.entities)
+        && serde_json::to_value(&*map).ok().as_ref() == Some(&models.map);
     if matches {
-        if seen.0!=Some(*stamp)||seen.1{producer_state.reset(seen.0.is_some_and(|old|old.same_owner(*stamp)),&commands);seen.0=Some(*stamp);seen.1=false;seen.2=false;}
-        if commands.activate_world_stamp(*stamp){*pending=None;}
+        if seen.0 != Some(*stamp) || seen.1 {
+            producer_state.reset(seen.0.is_some_and(|old| old.same_owner(*stamp)), &commands);
+            seen.0 = Some(*stamp);
+            seen.1 = false;
+            seen.2 = false;
+        }
+        if commands.activate_world_stamp(*stamp) {
+            *pending = None;
+        }
     }
 }
 
 /// Local DefinitelyUnsent completion. It is never a fabricated server receipt.
 /// Pending provenance survives a resume when personal UI pending survives it.
 pub(crate) fn settle_native_command_terminals(
-    commands:Res<GatewayCommands>,mut shell:ResMut<NativeShellModel>,
-    mut pending:ResMut<PendingOperations>,
-    mut player_ui:Option<ResMut<NativePlayerUiState>>,mut game_shop:Option<ResMut<GameShopModel>>,
-){
-    let Some(fence)=commands.ownership_fence() else{return;};
-    for (stamp,sequence,command) in fence.take_terminals(){
-        let Some(key)=commands.claim_local_terminal(stamp,sequence,&command) else {continue;};
-        if let Some(key)=key{pending.release(&key);}
+    commands: Res<GatewayCommands>,
+    mut shell: ResMut<NativeShellModel>,
+    mut pending: ResMut<PendingOperations>,
+    mut player_ui: Option<ResMut<NativePlayerUiState>>,
+    mut game_shop: Option<ResMut<GameShopModel>>,
+) {
+    let Some(fence) = commands.ownership_fence() else {
+        return;
+    };
+    for (stamp, sequence, command) in fence.take_terminals() {
+        let Some(key) = commands.claim_local_terminal(stamp, sequence, &command) else {
+            continue;
+        };
+        if let Some(key) = key {
+            pending.release(&key);
+        }
         match &command {
-            NativeOutboundCommand::GameShopBuy {request_id,..}=>{
-                let request=crate::gateway::game_shop_request_from_wire(&command);
-                if let (Some(model),Some(request))=(game_shop.as_deref_mut(),request.as_ref()){
-                    if model.pending_purchase.as_ref()==Some(request){model.cancel_purchase_reservation(request_id);}
+            NativeOutboundCommand::GameShopBuy { request_id, .. } => {
+                let request = crate::gateway::game_shop_request_from_wire(&command);
+                if let (Some(model), Some(request)) = (game_shop.as_deref_mut(), request.as_ref()) {
+                    if model.pending_purchase.as_ref() == Some(request) {
+                        model.cancel_purchase_reservation(request_id);
+                    }
                 }
-                if let (Some(ui),Some(request))=(player_ui.as_deref_mut(),request.as_ref()){
-                    if ui.core.game_shop_pending.as_ref()==Some(request){ui.core.cancel_game_shop_purchase(request_id);}
-                }
-            }
-            NativeOutboundCommand::StoreItem {request_id,from,to}|NativeOutboundCommand::TakeBackItem {request_id,from,to}=>{
-                let operation=if matches!(&command,NativeOutboundCommand::StoreItem {..}) {mir2_ui_core::storage::StorageOperation::StoreItem}else{mir2_ui_core::storage::StorageOperation::TakeBackItem};
-                if let Some(ui)=player_ui.as_deref_mut(){
-                    if ui.core.storage_pending.as_ref().is_some_and(|r|r.request_id==*request_id&&r.from==*from&&r.to==*to&&r.operation==operation){ui.core.storage_pending=None;}
+                if let (Some(ui), Some(request)) = (player_ui.as_deref_mut(), request.as_ref()) {
+                    if ui.core.game_shop_pending.as_ref() == Some(request) {
+                        ui.core.cancel_game_shop_purchase(request_id);
+                    }
                 }
             }
-            _=>crate::shell_bridge::apply_local_control_not_sent(&mut shell,&command),
+            NativeOutboundCommand::StoreItem {
+                request_id,
+                from,
+                to,
+            }
+            | NativeOutboundCommand::TakeBackItem {
+                request_id,
+                from,
+                to,
+            } => {
+                let operation = if matches!(&command, NativeOutboundCommand::StoreItem { .. }) {
+                    mir2_ui_core::storage::StorageOperation::StoreItem
+                } else {
+                    mir2_ui_core::storage::StorageOperation::TakeBackItem
+                };
+                if let Some(ui) = player_ui.as_deref_mut() {
+                    if ui.core.storage_pending.as_ref().is_some_and(|r| {
+                        r.request_id == *request_id
+                            && r.from == *from
+                            && r.to == *to
+                            && r.operation == operation
+                    }) {
+                        ui.core.storage_pending = None;
+                    }
+                }
+            }
+            _ => crate::shell_bridge::apply_local_control_not_sent(&mut shell, &command),
         }
     }
     // Retire completed correlation metadata, without touching any actual pending operation.
-    if let Ok(mut bindings)=commands.transport_bindings.lock(){bindings.retain(|identity,(_,_,key)|identity.starts_with("control:")||key.as_ref().is_some_and(|key|pending.contains(key)));}
+    if let Ok(mut bindings) = commands.transport_bindings.lock() {
+        bindings.retain(|identity, (_, _, key)| {
+            identity.starts_with("control:")
+                || key.as_ref().is_some_and(|key| pending.contains(key))
+        });
+    }
 }
 
 /// Thread-safe receiver wrapper consumed by Bevy on its main thread.
@@ -2000,9 +2613,66 @@ fn apply_authoritative_observe_state(
     debug_assert!(transition.effects.is_empty());
 }
 
+fn native_guild_creation_context(
+    dialog: Option<&NpcDialogModel>,
+    big_map: Option<&BigMapModel>,
+) -> Option<GuildCreationContext> {
+    let dialog = dialog?;
+    if !dialog.is_open
+        || !dialog
+            .options
+            .iter()
+            .any(|option| option.enabled && option.option_id.eq_ignore_ascii_case("@CREATEGUILD"))
+    {
+        return None;
+    }
+    let npc_object_id = dialog.npc_object_id.filter(|id| *id != 0)?;
+    let big_map = big_map?;
+    big_map.current_map_index?;
+    Some(GuildCreationContext {
+        npc_object_id,
+        map_epoch: big_map.reset_epoch,
+    })
+}
+
+fn observe_native_social_snapshot(ui: &mut NativePlayerUiState, snapshot: &NativeGameplaySnapshot) {
+    ui.refine.retain_context(
+        (!snapshot.big_map_only)
+            .then_some(snapshot.dialog.npc_object_id)
+            .flatten(),
+        snapshot.big_map.reset_epoch,
+    );
+    if !ui.accepts_npc_service_reply() {
+        ui.refine.invalidate_service();
+    }
+    if let Some(custody) = &snapshot.refine_custody {
+        ui.refine.observe_custody(custody);
+    }
+    if let Some(packet) = &snapshot.refine_packet {
+        ui.refine.observe(packet);
+    }
+    // Fold boundaries in network order. A later NPC/map change in the same
+    // drain must retire an earlier GuildNameRequest before presentation.
+    if !ui.accepts_npc_service_reply() {
+        ui.social_bonds.invalidate_guild_creation();
+    } else if snapshot.big_map_only {
+        ui.social_bonds
+            .retain_guild_creation_map(snapshot.big_map.reset_epoch);
+    } else {
+        ui.social_bonds
+            .retain_guild_creation_context(native_guild_creation_context(
+                Some(&snapshot.dialog),
+                Some(&snapshot.big_map),
+            ));
+    }
+    if let Some(packet) = snapshot.social_bond_packet.as_ref() {
+        ui.social_bonds.observe(packet);
+    }
+}
+
 #[derive(SystemParam)]
 pub(crate) struct GameplayDrainModels<'w> {
-    gateway_commands:Option<Res<'w,GatewayCommands>>,
+    gateway_commands: Option<Res<'w, GatewayCommands>>,
     chat: Option<ResMut<'w, mir2_client_bevy::chat::ChatModel>>,
     player_ui: Option<ResMut<'w, NativePlayerUiState>>,
     quests: ResMut<'w, QuestTracker>,
@@ -2019,6 +2689,7 @@ pub(crate) struct GameplayDrainModels<'w> {
     revisions: ResMut<'w, AuthoritativeModelRevisions>,
     pending: ResMut<'w, PendingOperations>,
     click_state: Option<ResMut<'w, NativeWorldClickState>>,
+    movement: Option<ResMut<'w, crate::input::WorldPointerMovementState>>,
 }
 
 pub fn drain_gameplay_events(
@@ -2027,22 +2698,39 @@ pub fn drain_gameplay_events(
     mut models: GameplayDrainModels,
     mut ecs_commands: Commands,
     time: Res<bevy::prelude::Time>,
+    real_time: Option<Res<bevy::prelude::Time<bevy::time::Real>>>,
 ) {
     let (mut snapshots, transport_advanced) = inbox.drain();
-    if let Some(commands)=models.gateway_commands.as_deref() {
-        if let Some(fence)=commands.ownership_fence() {
-            if commands.applied_world_stamp().is_some_and(|stamp|!fence.accepts(stamp,true)) {
+    if let Some(commands) = models.gateway_commands.as_deref() {
+        if let Some(fence) = commands.ownership_fence() {
+            if commands
+                .applied_world_stamp()
+                .is_some_and(|stamp| !fence.accepts(stamp, true))
+            {
                 commands.clear_world_stamp();
-                *models.nearby_npcs=NearbyNpcModel::default();*models.combat_target=CombatTargetModel::default();
-                *models.ground_pickups=GroundPickupModel::default();
-                if let Some(click)=models.click_state.as_deref_mut(){*click=NativeWorldClickState::default();}
+                *models.nearby_npcs = NearbyNpcModel::default();
+                *models.combat_target = CombatTargetModel::default();
+                *models.ground_pickups = GroundPickupModel::default();
+                if let Some(click) = models.click_state.as_deref_mut() {
+                    *click = NativeWorldClickState::default();
+                }
                 inbox.clear_movement_acks();
             }
-            snapshots.retain(|snapshot|snapshot.command_stamp.is_some_and(|stamp|fence.is_current(stamp)));
+            snapshots.retain(|snapshot| {
+                snapshot
+                    .command_stamp
+                    .is_some_and(|stamp| fence.is_current(stamp))
+            });
         }
+    }
+    let movement_now_ms = crate::input::movement_now_ms(Some(&time), real_time.as_deref());
+    if let (Some(movement), Some(latest)) = (models.movement.as_deref_mut(), snapshots.last()) {
+        movement.observe_gameplay_generation(latest.generation, movement_now_ms);
     }
     if transport_advanced {
         if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.refine = Default::default();
+            ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
             ui.creature = Default::default();
@@ -2060,7 +2748,12 @@ pub fn drain_gameplay_events(
         models.completed_quests.reset();
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
+        if let Some(movement) = models.movement.as_deref_mut() {
+            movement.clear_owner_struck_guard();
+        }
         if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.refine = Default::default();
+            ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
             ui.creature = Default::default();
@@ -2086,8 +2779,23 @@ pub fn drain_gameplay_events(
         models.notice.reset_session();
         return;
     }
+    if let Some(ui) = models.player_ui.as_deref_mut() {
+        // A missing receipt is an unknown outcome, never proof that the server
+        // rolled back. Retire this connection's request lease so the player
+        // can explicitly reopen the same NPC and read authoritative custody.
+        ui.refine.expire_request_outcome(
+            std::time::Instant::now(),
+            std::time::Duration::from_secs(15),
+        );
+    }
     if snapshots.is_empty() {
         return;
+    }
+    if let Some(movement) = models.movement.as_deref_mut() {
+        let receipt_now = std::time::Instant::now();
+        for snapshot in &snapshots {
+            movement.observe_owner_struck_snapshot(snapshot, movement_now_ms, receipt_now);
+        }
     }
     if let Some(ui) = models.player_ui.as_deref_mut() {
         ui.creature.bootstrap_allowed = true;
@@ -2133,11 +2841,8 @@ pub fn drain_gameplay_events(
                     .apply_packet(*remove, active_buffs, guild_buffs);
             }
         }
-        for packet in snapshots
-            .iter()
-            .filter_map(|s| s.social_bond_packet.as_ref())
-        {
-            ui.social_bonds.observe(packet);
+        for snapshot in &snapshots {
+            observe_native_social_snapshot(ui, snapshot);
         }
         for packet in snapshots
             .iter()
@@ -2196,8 +2901,14 @@ pub fn drain_gameplay_events(
     else {
         return;
     };
-    if let (Some(commands),Some(stamp),Some(producer_models))=(models.gateway_commands.as_deref(),snapshot.command_stamp,snapshot.producer_models.as_ref()) {
-        if let Ok(mut pending)=commands.pending_provenance.lock(){*pending=Some((stamp,producer_models.clone()));}
+    if let (Some(commands), Some(stamp), Some(producer_models)) = (
+        models.gateway_commands.as_deref(),
+        snapshot.command_stamp,
+        snapshot.producer_models.as_ref(),
+    ) {
+        if let Ok(mut pending) = commands.pending_provenance.lock() {
+            *pending = Some((stamp, producer_models.clone()));
+        }
     }
     reconcile_quest_refresh(&mut models.pending, &models.quests, &snapshot.quests);
     mark_authoritative_refresh(&mut models.revisions, AuthoritativeModelDomain::Quest);
@@ -2324,7 +3035,9 @@ pub struct NativeQuestWorldInput<'w> {
     quest_ui_state: Option<Res<'w, QuestUiState>>,
     map: Option<Res<'w, MapModel>>,
     big_map: Option<Res<'w, BigMapModel>>,
+    big_map_ui: Option<Res<'w, mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
     movement: Option<ResMut<'w, WorldPointerMovementState>>,
+    presentation: Option<ResMut<'w, crate::entity_presentation::NativeEntityPresentation>>,
 }
 
 /// Crystal's mail target accepts `MirGridType.Inventory`, which covers Bag1
@@ -2356,6 +3069,58 @@ fn mail_attachment_indices(inventory: &InventoryModel, ids: &[u64]) -> Option<[u
     Some(indices)
 }
 
+fn queued_guild_rank_rename(
+    intent: &NativePlayerUiIntent,
+    social: Option<&SocialModel>,
+) -> Option<GuildRankRenameRequest> {
+    let NativePlayerUiIntent::GuildEditMember {
+        change_type: 3,
+        rank_index,
+        name,
+        rank_name,
+    } = intent
+    else {
+        return None;
+    };
+    if !name.is_empty() {
+        return None;
+    }
+    social?.pending.iter().find_map(|pending| match pending {
+        SocialPendingOperation::GuildRankRename(request)
+            if request.rank_index == *rank_index && request.rank_name == *rank_name =>
+        {
+            Some(request.clone())
+        }
+        _ => None,
+    })
+}
+
+fn release_unsent_guild_rank_rename(
+    request: &GuildRankRenameRequest,
+    social: Option<&mut SocialModel>,
+    ui: Option<&mut NativePlayerUiState>,
+) {
+    if let Some(social) = social {
+        social.pending.retain(|pending| {
+            !matches!(pending,
+            SocialPendingOperation::GuildRankRename(current) if current == request)
+        });
+    }
+    if let Some(ui) = ui {
+        if ui.guild_panel.rank_name_submission.as_ref() == Some(request) {
+            ui.guild_panel.rank_name_submission = None;
+            ui.guild_panel.rank_name_ready_ms = 0;
+            ui.guild_panel.rank_name_unconfirmed = ui.guild_panel.now_ms > request.deadline_ms;
+            if ui.selected_guild_rank == Some(request.rank_index)
+                && ui.guild_rank_name_draft == request.rank_name
+            {
+                ui.guild_rank_name_focused = true;
+                ui.guild_panel.rank_editor.editor_focused = true;
+            }
+        }
+    }
+}
+
 pub fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
     mut intents: ResMut<QuestUiIntentQueue>,
@@ -2379,15 +3144,40 @@ pub fn forward_quest_ui_intents(
         quest_ui_state,
         map,
         big_map,
+        big_map_ui,
         mut movement,
+        mut presentation,
     } = world;
     let pending = intents.drain_intents();
-    let player_pending = player_ui_intents.as_deref_mut()
+    let player_pending = player_ui_intents
+        .as_deref_mut()
         .map(|queue| queue.drain_for_gateway_with_npc_gold_buy())
         .unwrap_or_default();
     if shell.screen != NativeShellScreen::InGame {
-        if let Some(queue)=player_ui_intents.as_deref_mut(){for (_,quote,send,buy) in &player_pending{if let Some(token)=quote{queue.reject_unpublished_mail_quote(*token);}if let Some(token)=send{queue.reject_unpublished_mail_send(*token);}if let Some(token)=buy{queue.reject_unpublished_npc_gold_buy(*token);}}}
+        if let Some(queue) = player_ui_intents.as_deref_mut() {
+            for (_, quote, send, buy) in &player_pending {
+                if let Some(token) = quote {
+                    queue.reject_unpublished_mail_quote(*token);
+                }
+                if let Some(token) = send {
+                    queue.reject_unpublished_mail_send(*token);
+                }
+                if let Some(token) = buy {
+                    queue.reject_unpublished_npc_gold_buy(*token);
+                }
+            }
+        }
+        for (intent, _, _, _) in &player_pending {
+            if let Some(request) = queued_guild_rank_rename(intent, social.as_deref()) {
+                release_unsent_guild_rank_rename(
+                    &request,
+                    social.as_deref_mut(),
+                    player_ui_state.as_deref_mut(),
+                );
+            }
+        }
         if let Some(ui) = player_ui_state.as_deref_mut() {
+            ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
             ui.creature = Default::default();
@@ -2395,14 +3185,14 @@ pub fn forward_quest_ui_intents(
             ui.hero_buffs = Default::default();
         }
         if let Some(social) = social.as_deref_mut() {
-            for (intent,_,_,_) in &player_pending {
+            for (intent, _, _, _) in &player_pending {
                 if let Some(operation) = trade_item_pending_operation(intent) {
                     social.pending.retain(|entry| entry != &operation);
                 }
             }
         }
         if let Some(operation_pending) = operation_pending.as_deref_mut() {
-            for (intent,_,_,_) in &player_pending {
+            for (intent, _, _, _) in &player_pending {
                 if let Some(key) = intent.pending_key() {
                     operation_pending.release(&key);
                 }
@@ -2427,7 +3217,25 @@ pub fn forward_quest_ui_intents(
     let dead = read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
-    let world_actions_blocked = notice.as_deref().is_some_and(NoticeDialogState::is_open)
+    if let Some(ui) = player_ui_state.as_deref_mut() {
+        let context = if dead
+            || !ui.accepts_npc_service_reply()
+            || social
+                .as_deref()
+                .is_some_and(|model| model.guild.name.is_some())
+        {
+            None
+        } else {
+            native_guild_creation_context(dialog.as_deref(), big_map.as_deref())
+        };
+        ui.social_bonds.retain_guild_creation_context(context);
+    }
+    let quest_modal = quest_ui_state
+        .as_deref()
+        .is_some_and(QuestUiState::blocks_world_input);
+    let world_actions_blocked = quest_modal
+        || big_map_ui.as_deref().is_some_and(|map| map.search_focused)
+        || notice.as_deref().is_some_and(NoticeDialogState::is_open)
         || player_ui_state
             .as_deref()
             .map(|state| state.blocks_world_action(dialog_open, dead))
@@ -2437,12 +3245,17 @@ pub fn forward_quest_ui_intents(
     // Combat selection expresses the latest target, not a FIFO of attacks.
     // A burst of UI/world input can cross this bridge in one batch; only the
     // most recent target is still the player's selected intent.
-    let latest_attack_index = pending
-        .iter()
-        .rposition(|intent| matches!(intent, QuestUiIntent::AttackTarget { .. }));
+    let latest_attack_index = pending.iter().rposition(|intent| {
+        matches!(
+            intent,
+            QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+        )
+    });
     for (index, intent) in pending.into_iter().enumerate() {
-        if matches!(&intent, QuestUiIntent::AttackTarget { .. })
-            && Some(index) != latest_attack_index
+        if matches!(
+            &intent,
+            QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+        ) && Some(index) != latest_attack_index
         {
             continue;
         }
@@ -2598,6 +3411,56 @@ pub fn forward_quest_ui_intents(
                     direction: direction.to_owned(),
                 }
             }
+            QuestUiIntent::AttackDirection {
+                direction,
+                mining,
+                gesture_id,
+            } => {
+                if world_actions_blocked
+                    || !read_model
+                        .as_deref()
+                        .is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)
+                    || !click_state.as_deref().is_some_and(|state| {
+                        state.riding_mount == Some(false)
+                            && state.dazed == Some(false)
+                            && state.fishing == Some(false)
+                    })
+                {
+                    continue;
+                }
+                let Some(gesture) = movement
+                    .as_deref()
+                    .and_then(WorldPointerMovementState::current_directional_attack)
+                else {
+                    continue;
+                };
+                let current_map = presentation
+                    .as_deref()
+                    .and_then(|model| model.current_map_file_name());
+                let Some(current_origin) = entities.as_deref().and_then(|model| {
+                    model
+                        .entities
+                        .iter()
+                        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                        .map(|entity| (entity.x, entity.y))
+                }) else {
+                    continue;
+                };
+                if gesture.id != gesture_id
+                    || gesture.direction != direction
+                    || gesture.mining() != mining
+                    || !gesture.remains_current(current_map, current_origin, inventory.as_deref())
+                {
+                    continue;
+                }
+                let Some(direction) = crystal_harvest_direction(&direction) else {
+                    continue;
+                };
+                NativeOutboundCommand::AttackDirection {
+                    direction: direction.to_owned(),
+                    spell: None,
+                }
+            }
             QuestUiIntent::AttackTarget { object_id } => {
                 // Passive HUD hover can occur while a selected monster is
                 // still being pursued. Only a real modal/drag or a different
@@ -2607,6 +3470,7 @@ pub fn forward_quest_ui_intents(
                     .is_some_and(|state| state.attack_target() == Some(object_id));
                 let attack_actions_blocked =
                     notice.as_deref().is_some_and(NoticeDialogState::is_open)
+                        || quest_modal
                         || dialog_open
                         || dead
                         || player_ui_state.as_deref().is_some_and(|ui| {
@@ -2732,7 +3596,94 @@ pub fn forward_quest_ui_intents(
             }
         }
         let command_type = command.command_type();
+        let begins_npc_service = matches!(&command, NativeOutboundCommand::Interact { .. })
+            || matches!(&command, NativeOutboundCommand::SelectNpcDialog { target } if !target.eq_ignore_ascii_case("@exit"));
+        let exits_npc_service = matches!(&command,
+            NativeOutboundCommand::SelectNpcDialog { target } if target.eq_ignore_ascii_case("@exit"));
+        let guild_creation_request = if matches!(&command,
+            NativeOutboundCommand::SelectNpcDialog { target } if target.eq_ignore_ascii_case("@CREATEGUILD"))
+        {
+            let Some(context) =
+                native_guild_creation_context(dialog.as_deref(), big_map.as_deref())
+            else {
+                continue;
+            };
+            if dead
+                || !player_ui_state
+                    .as_deref()
+                    .is_some_and(|ui| ui.social_bonds.can_request_guild_creation(context))
+            {
+                continue;
+            }
+            Some(context)
+        } else {
+            None
+        };
+        let refine_service_request = match &command {
+            NativeOutboundCommand::SelectNpcDialog { target } => dialog
+                .as_deref()
+                .and_then(|d| d.npc_object_id)
+                .zip(big_map.as_deref())
+                .map(|(npc_object_id, map)| {
+                    (
+                        mir2_client_bevy::crystal_ui::overlays::refine_dialog::RefineContext {
+                            npc_object_id,
+                            map_epoch: map.reset_epoch,
+                        },
+                        target.clone(),
+                    )
+                }),
+            _ => None,
+        };
         let sent = commands.send_command(GatewayCommand::Wire(command));
+        if sent
+            && matches!(
+                &retry_intent,
+                QuestUiIntent::AttackDirection { mining: true, .. }
+            )
+        {
+            if let (Some(gesture), Some(presentation), Some(object_id)) = (
+                movement
+                    .as_deref()
+                    .and_then(WorldPointerMovementState::current_directional_attack),
+                presentation.as_deref_mut(),
+                entities.as_deref().and_then(|model| {
+                    model
+                        .entities
+                        .iter()
+                        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                        .map(|entity| entity.object_id.as_str())
+                }),
+            ) {
+                presentation.mark_local_mining_request(
+                    object_id,
+                    gesture.origin,
+                    gesture.direction,
+                    crate::entity_presentation::native_motion_clock_ms(),
+                );
+            }
+        }
+        if let Some(ui) = player_ui_state.as_deref_mut() {
+            if sent {
+                if let Some((context, key)) = refine_service_request {
+                    ui.refine.begin_service_request(context, &key);
+                }
+            }
+            if exits_npc_service {
+                ui.social_bonds.invalidate_guild_creation();
+                // Exit was already accepted by the local FIFO. Preserve it
+                // after an older successful service retry, even if sending
+                // this exit fails. A later accepted request may reopen it.
+                ui.request_npc_service_exit();
+            } else if sent && begins_npc_service {
+                ui.begin_npc_service_request();
+                if let Some(context) = guild_creation_request {
+                    ui.social_bonds.begin_guild_creation_request(context);
+                } else {
+                    ui.social_bonds.invalidate_guild_creation();
+                }
+            }
+        }
         if let Some(object_id) = traced_attack_target {
             crate::movement_trace::record(serde_json::json!({
                 "type": "attackForwarded",
@@ -2754,7 +3705,12 @@ pub fn forward_quest_ui_intents(
                 );
             }
         }
-        if !sent && !matches!(&retry_intent, QuestUiIntent::AttackTarget { .. }) {
+        if !sent
+            && !matches!(
+                &retry_intent,
+                QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+            )
+        {
             retry_intents.push(retry_intent);
         }
     }
@@ -2771,8 +3727,38 @@ pub fn forward_quest_ui_intents(
         eprintln!("[gateway-client] unsent native UI intent dropped after retry saturation");
     }
 
-    for (intent,quote_token,send_token,buy_token) in player_pending {
-        let legacy_buy_pending=if buy_token.is_none()&&matches!(&intent,NativePlayerUiIntent::BuyItem{..}){intent.pending_key()}else{None};
+    for (intent, quote_token, send_token, buy_token) in player_pending {
+        let legacy_buy_pending =
+            if buy_token.is_none() && matches!(&intent, NativePlayerUiIntent::BuyItem { .. }) {
+                intent.pending_key()
+            } else {
+                None
+            };
+        let guild_rank_rename = queued_guild_rank_rename(&intent, social.as_deref());
+        if matches!(
+            &intent,
+            NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }
+        ) {
+            let can_dispatch = guild_rank_rename.as_ref().is_some_and(|request| {
+                social
+                    .as_deref()
+                    .is_some_and(|social| social.guild.rank_rename_scope_matches(request))
+                    && player_ui_state.as_deref().is_some_and(|ui| {
+                        ui.guild_panel.owner_name == request.requester
+                            && ui.guild_panel.now_ms <= request.deadline_ms
+                    })
+            });
+            if !can_dispatch {
+                if let Some(request) = guild_rank_rename.as_ref() {
+                    release_unsent_guild_rank_rename(
+                        request,
+                        social.as_deref_mut(),
+                        player_ui_state.as_deref_mut(),
+                    );
+                }
+                continue;
+            }
+        }
         let bond_request = match &intent {
             NativePlayerUiIntent::SocialBondPacket(packet) => Some(packet.clone()),
             _ => None,
@@ -2783,6 +3769,10 @@ pub fn forward_quest_ui_intents(
         };
         let equipment_request = match &intent {
             NativePlayerUiIntent::EquipmentCreaturePacket(packet) => Some(packet.clone()),
+            _ => None,
+        };
+        let refine_request = match &intent {
+            NativePlayerUiIntent::RefinePacket(packet) => Some(packet.clone()),
             _ => None,
         };
         let trade_item_pending = trade_item_pending_operation(&intent);
@@ -2815,6 +3805,30 @@ pub fn forward_quest_ui_intents(
             _ => None,
         };
         let command = match intent {
+            NativePlayerUiIntent::RefinePacket(packet) => {
+                let can_dispatch = inventory
+                    .as_deref()
+                    .zip(player_ui_state.as_deref())
+                    .zip(big_map.as_deref())
+                    .is_some_and(|((inventory, ui), map)| {
+                        ui.refine.can_dispatch(
+                            &packet,
+                            inventory,
+                            dialog.as_deref().and_then(|d| d.npc_object_id),
+                            map.reset_epoch,
+                        )
+                    });
+                let command = can_dispatch
+                    .then(|| crate::refine_wire::command(&packet))
+                    .flatten();
+                let Some(command) = command else {
+                    if let Some(ui) = player_ui_state.as_deref_mut() {
+                        ui.refine.release_unsent(&packet);
+                    }
+                    continue;
+                };
+                command
+            }
             NativePlayerUiIntent::GuildBuffUpdate(request) => {
                 NativeOutboundCommand::GuildBuffUpdate {
                     action: request.action,
@@ -2822,6 +3836,13 @@ pub fn forward_quest_ui_intents(
                 }
             }
             NativePlayerUiIntent::SocialBondPacket(packet) => {
+                if matches!(packet, mir2_protocol::ClientPacket::GuildNameReturn { .. })
+                    && !player_ui_state
+                        .as_deref()
+                        .is_some_and(|ui| ui.social_bonds.can_dispatch_guild_name(&packet))
+                {
+                    continue;
+                }
                 let Some(command) = crate::social_bond_wire::command(&packet) else {
                     continue;
                 };
@@ -2912,7 +3933,10 @@ pub fn forward_quest_ui_intents(
                 count,
             },
             NativePlayerUiIntent::Chat { message } => NativeOutboundCommand::Chat { message },
-            NativePlayerUiIntent::BuyItem { item_index, count } | NativePlayerUiIntent::NpcGoldBuy {item_index,count,..} => NativeOutboundCommand::BuyItem {
+            NativePlayerUiIntent::BuyItem { item_index, count }
+            | NativePlayerUiIntent::NpcGoldBuy {
+                item_index, count, ..
+            } => NativeOutboundCommand::BuyItem {
                 item_index,
                 count,
                 panel_type: 0,
@@ -2927,6 +3951,19 @@ pub fn forward_quest_ui_intents(
                 g_index,
                 quantity,
                 price_type,
+            },
+            NativePlayerUiIntent::GameShopGift {
+                request_id,
+                g_index,
+                quantity,
+                price_type,
+                recipient_name,
+            } => NativeOutboundCommand::GameShopGift {
+                request_id,
+                g_index,
+                quantity,
+                price_type,
+                recipient_name,
             },
             NativePlayerUiIntent::SellItem { unique_id, count } => {
                 NativeOutboundCommand::SellItem { unique_id, count }
@@ -2993,12 +4030,20 @@ pub fn forward_quest_ui_intents(
                 stamped,
             } => {
                 let Some(inventory) = inventory.as_deref() else {
-                    if let (Some(token),Some(queue))=(quote_token,player_ui_intents.as_deref_mut()){queue.reject_unpublished_mail_quote(token);}
+                    if let (Some(token), Some(queue)) =
+                        (quote_token, player_ui_intents.as_deref_mut())
+                    {
+                        queue.reject_unpublished_mail_quote(token);
+                    }
                     continue;
                 };
                 let Some(items_idx) = mail_attachment_indices(inventory, &attachment_unique_ids)
                 else {
-                    if let (Some(token),Some(queue))=(quote_token,player_ui_intents.as_deref_mut()){queue.reject_unpublished_mail_quote(token);}
+                    if let (Some(token), Some(queue)) =
+                        (quote_token, player_ui_intents.as_deref_mut())
+                    {
+                        queue.reject_unpublished_mail_quote(token);
+                    }
                     continue;
                 };
                 NativeOutboundCommand::MailCost {
@@ -3024,12 +4069,20 @@ pub fn forward_quest_ui_intents(
                 stamped,
             } => {
                 let Some(inventory) = inventory.as_deref() else {
-                    if let (Some(token),Some(queue))=(send_token,player_ui_intents.as_deref_mut()){queue.reject_unpublished_mail_send(token);}
+                    if let (Some(token), Some(queue)) =
+                        (send_token, player_ui_intents.as_deref_mut())
+                    {
+                        queue.reject_unpublished_mail_send(token);
+                    }
                     continue;
                 };
                 let Some(items_idx) = mail_attachment_indices(inventory, &attachment_unique_ids)
                 else {
-                    if let (Some(token),Some(queue))=(send_token,player_ui_intents.as_deref_mut()){queue.reject_unpublished_mail_send(token);}
+                    if let (Some(token), Some(queue)) =
+                        (send_token, player_ui_intents.as_deref_mut())
+                    {
+                        queue.reject_unpublished_mail_send(token);
+                    }
                     continue;
                 };
                 NativeOutboundCommand::SendMail {
@@ -3154,7 +4207,8 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::TradeCancel => NativeOutboundCommand::TradeCancel,
         };
         let game_shop_request_id = match &command {
-            NativeOutboundCommand::GameShopBuy { request_id, .. } => Some(request_id.clone()),
+            NativeOutboundCommand::GameShopBuy { request_id, .. }
+            | NativeOutboundCommand::GameShopGift { request_id, .. } => Some(request_id.clone()),
             _ => None,
         };
         let ranking_request = match &command {
@@ -3248,21 +4302,67 @@ pub fn forward_quest_ui_intents(
             &command,
             NativeOutboundCommand::Inspect { ranking: true, .. }
         );
-        let transported_command=command.clone();
-        let sent = if matches!(&command,NativeOutboundCommand::MailCost{..}) {
-            if let (Some(token),Some(queue))=(quote_token,player_ui_intents.as_deref_mut()){commands.send_mail_quote(command,token,queue)}
-            else {
+        let transported_command = command.clone();
+        let sent = if matches!(&command, NativeOutboundCommand::MailCost { .. }) {
+            if let (Some(token), Some(queue)) = (quote_token, player_ui_intents.as_deref_mut()) {
+                commands.send_mail_quote(command, token, queue)
+            } else {
                 // Plain receiver fixtures are an explicit test-only seam.
-                #[cfg(test)] {if commands.ownership_fence().is_none(){commands.send_command(GatewayCommand::Wire(command))}else{false}}
-                #[cfg(not(test))] {false}
+                #[cfg(test)]
+                {
+                    if commands.ownership_fence().is_none() {
+                        commands.send_command(GatewayCommand::Wire(command))
+                    } else {
+                        false
+                    }
+                }
+                #[cfg(not(test))]
+                {
+                    false
+                }
             }
-        }else if matches!(&command,NativeOutboundCommand::SendMail{..}){
-            if let (Some(token),Some(queue),Some(pending))=(send_token,player_ui_intents.as_deref_mut(),operation_pending.as_deref_mut()){commands.send_mail_send(command,token,queue,pending)}
-            else{if let (Some(token),Some(queue))=(send_token,player_ui_intents.as_deref_mut()){queue.reject_unpublished_mail_send(token);}false}
-        }else if let Some(token)=buy_token{
-            if let Some(queue)=player_ui_intents.as_deref_mut(){commands.send_npc_gold_buy(command,token,queue)}else{false}
-        }else{commands.send_command(GatewayCommand::Wire(command))};
-        if sent {if let Some(key)=storage_pending_key.as_ref(){commands.bind_transport_operation(&transported_command,key.clone());}}
+        } else if matches!(&command, NativeOutboundCommand::SendMail { .. }) {
+            if let (Some(token), Some(queue), Some(pending)) = (
+                send_token,
+                player_ui_intents.as_deref_mut(),
+                operation_pending.as_deref_mut(),
+            ) {
+                commands.send_mail_send(command, token, queue, pending)
+            } else {
+                if let (Some(token), Some(queue)) = (send_token, player_ui_intents.as_deref_mut()) {
+                    queue.reject_unpublished_mail_send(token);
+                }
+                false
+            }
+        } else if let Some(token) = buy_token {
+            if let Some(queue) = player_ui_intents.as_deref_mut() {
+                commands.send_npc_gold_buy(command, token, queue)
+            } else {
+                false
+            }
+        } else {
+            commands.send_command(GatewayCommand::Wire(command))
+        };
+        if sent {
+            if let Some(key) = storage_pending_key.as_ref() {
+                commands.bind_transport_operation(&transported_command, key.clone());
+            }
+        }
+        if let (Some(ui), Some(packet)) = (player_ui_state.as_deref_mut(), refine_request.as_ref())
+        {
+            if sent {
+                ui.refine.mark_sent(packet);
+            } else {
+                ui.refine.release_unsent(packet);
+            }
+        }
+        if sent {
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), bond_request.as_ref())
+            {
+                ui.social_bonds.guild_name_dispatched(packet);
+            }
+        }
         if let (Some((request_id, spell, key, old_key)), Some(ui)) =
             (magic_key_request, player_ui_state.as_deref_mut())
         {
@@ -3273,7 +4373,22 @@ pub fn forward_quest_ui_intents(
                 .transport_result(request_id, &spell, key, old_key, sent);
         }
         if !sent {
-            if let (Some(pending),Some(key))=(operation_pending.as_deref_mut(),legacy_buy_pending.as_ref()){pending.release(key);}
+            if let (Some(pending), Some(key)) = (
+                operation_pending.as_deref_mut(),
+                legacy_buy_pending.as_ref(),
+            ) {
+                pending.release(key);
+            }
+            if refine_request.is_some() {
+                continue;
+            }
+            if let Some(request) = guild_rank_rename.as_ref() {
+                release_unsent_guild_rank_rename(
+                    request,
+                    social.as_deref_mut(),
+                    player_ui_state.as_deref_mut(),
+                );
+            }
             if let Some(notice) = guild_notice_request {
                 if let Some(ui) = player_ui_state.as_deref_mut() {
                     if ui.guild_notice_submission.as_ref() == Some(&notice) {
@@ -3285,25 +4400,20 @@ pub fn forward_quest_ui_intents(
                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildNotice{notice:pending} if pending==&notice));
                 }
             }
-            if let Some((change_type, rank_index, name, rank_name)) = guild_edit_request {
+            if let Some((change_type, rank_index, name, _rank_name)) = guild_edit_request {
                 if let Some(social) = social.as_deref_mut() {
                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildMember{change_type:t,rank_index:i,name:n} if *t==change_type && *i==rank_index && n==&name));
                 }
                 if let Some(ui) = player_ui_state.as_deref_mut() {
-                    ui.guild_panel.create_ready_ms = 0;
+                    if change_type != 3 {
+                        ui.guild_panel.create_ready_ms = 0;
+                    }
                     match change_type {
                         0 if ui.guild_recruit_draft.is_empty() => {
                             ui.guild_recruit_draft = name;
                             ui.guild_recruit_focused = true;
                             let draft = ui.guild_recruit_draft.clone();
                             ui.guild_panel.sync_recruit(&draft);
-                        }
-                        3 if ui.selected_guild_rank == Some(rank_index)
-                            && ui.guild_rank_name_draft == rank_name =>
-                        {
-                            ui.guild_panel.rank_name_ready_ms = 0;
-                            ui.guild_rank_name_focused = true;
-                            ui.guild_panel.rank_editor.editor_focused = true;
                         }
                         5 => ui.guild_panel.rank_option_ready_ms = 0,
                         _ => {}
@@ -3437,9 +4547,8 @@ fn object_magic_animation_action(payload: &Value) -> &'static str {
             | "VampireShot" | "SummonToad" | "PoisonShot" | "CrippleShot" | "SummonSnakes"
             | "NapalmShot" | "BindingShot",
         ) => "attackRange2",
-        // Crystal gates ElementalShot's range-two pose on client-local
-        // HasElements/ElementCasted state that the current authoritative
-        // snapshot does not expose. Fail closed to the generic Spell pose.
+        // ElementalShot is resolved by the adapter's typed arrival state.
+        // This state-free helper must keep an unknown state fail-closed.
         _ => "spell",
     }
 }
@@ -3551,9 +4660,9 @@ fn ensure_zone_entity_disposition(entity: &mut Value, snapshot_disposition: Opti
     entity["disposition"] = Value::from(snapshot_disposition.unwrap_or(fallback));
 }
 
-/// `ObjectHealth` always carries an authoritative percentage, while exact HP
-/// fields are optional. Preserve exact max HP when known; otherwise expose the
-/// authoritative percentage on a normalized 0..100 scale to the UI.
+/// `ObjectHealth` carries display percentage, while exact HP fields are optional.
+/// Positive percentages retain the existing approximation for the UI; zero
+/// leaves exact HP and life state alone and renders through `_healthPercent`.
 fn normalize_packet_health(entity: &mut Value) {
     let Some(object) = entity.as_object_mut() else {
         return;
@@ -3565,6 +4674,11 @@ fn normalize_packet_health(entity: &mut Value) {
     else {
         return;
     };
+    // ObjectHealth contains a rounded percentage, not exact HP or a life event.
+    // Preserve actual HP0/death as well as positive HP behind a displayed0%.
+    if percent <= 0 || object.get("dead").and_then(Value::as_bool) == Some(true) {
+        return;
+    }
     let max_hp = object.get("maxHp").and_then(value_i32).unwrap_or(0);
     if max_hp > 0 {
         object.insert(
@@ -3575,18 +4689,19 @@ fn normalize_packet_health(entity: &mut Value) {
         object.insert("hp".to_owned(), Value::from(percent));
         object.insert("maxHp".to_owned(), Value::from(100));
     }
-    object.insert("dead".to_owned(), Value::from(percent <= 0));
 }
 
 /// Fold shared-Zone self health/death packets into the personal snapshot fields
 /// consumed by the HUD. The personal session snapshot can lag behind Zone
-/// combat, while `ObjectHealth` and `Death` are already authoritative on the
-/// WebSocket. Without this overlay a dead player can still render as full HP.
+/// combat. Death is a life event; ObjectHealth only supplies a rounded display
+/// percentage and cannot establish exact HP0 or revive an actor.
 fn apply_authoritative_player_vitals(
     payload: &mut Value,
     player_object_id: Option<u32>,
     explicit_dead: Option<bool>,
     overlay: Option<&serde_json::Map<String, Value>>,
+    snapshot_dead: Option<bool>,
+    snapshot_zero_hp: bool,
 ) {
     let packet_percent = overlay
         .and_then(|overlay| overlay.get("_packetHealthPercent"))
@@ -3595,16 +4710,22 @@ fn apply_authoritative_player_vitals(
     let overlay_dead = overlay
         .and_then(|overlay| overlay.get("dead"))
         .and_then(Value::as_bool);
-    let dead = explicit_dead.or(overlay_dead);
+    let packet_dead = explicit_dead.or(overlay_dead);
+    let dead = packet_dead.or(snapshot_dead);
     let max_hp = payload
         .get("playerMaxHp")
         .and_then(value_i32)
         .unwrap_or(0)
         .max(0);
-    let hp = if dead == Some(true) {
+    // HP0 alone does not create death. Preserve exact typed zero unless an
+    // actual life packet says this is a revived/new incarnation; a positive
+    // display percentage has neither death nor revival authority.
+    let hp = if dead == Some(true) || (snapshot_zero_hp && packet_dead != Some(false)) {
         Some(0)
     } else {
-        packet_percent.map(|percent| health_from_percent(max_hp, percent))
+        packet_percent
+            .filter(|percent| *percent > 0)
+            .map(|percent| health_from_percent(max_hp, percent))
     };
 
     if let Some(hp) = hp {
@@ -3632,7 +4753,7 @@ fn apply_authoritative_player_vitals(
     if max_hp > 0 {
         player["maxHp"] = Value::from(max_hp);
     }
-    if let Some(dead) = dead.or_else(|| packet_percent.map(|percent| percent <= 0)) {
+    if let Some(dead) = dead {
         player["dead"] = Value::from(dead);
     }
 }
@@ -3643,6 +4764,10 @@ fn health_from_percent(max_hp: i32, percent: i32) -> i32 {
     }
     (max_hp.saturating_mul(percent).saturating_add(99) / 100).clamp(1, max_hp)
 }
+
+#[cfg(test)]
+#[path = "health_zero_authority_tests.rs"]
+mod health_zero_authority_tests;
 
 fn parse_quest_definition(payload: &Value) -> QuestDefinition {
     let info = payload.get("info");
@@ -4349,73 +5474,341 @@ fn strip_crystal_markup(text: &str) -> String {
 }
 
 #[cfg(test)]
+#[path = "guild_creation_tests.rs"]
+mod guild_creation_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     #[test]
-    fn native_mail_send_actual_bridge_prebind_and_every_preentry_mapping_rejection_are_exact(){
+    fn native_mail_send_actual_bridge_prebind_and_every_preentry_mapping_rejection_are_exact() {
         use bevy::ecs::system::RunSystemOnce;
-        use mir2_client_bevy::crystal_ui::overlays::{Mir2NativeMailParcelServicePlugin,MailComposeUi};
-        use mir2_client_bevy::mail_service::{MailServiceInbox,MailServiceStreamStarted};
-        use mir2_client_bevy::crystal_ui::overlays::{MailSendDraft,prepare_native_mail_send as prepare_send};
-        let _guard=crate::gateway::native_queue_test_guard();
-        for case in 0..7{
-            let (sender,mut receiver)=crate::gateway::command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);let commands=GatewayCommands::new(sender);assert!(commands.activate_world_stamp(stamp));
-            let inventory=InventoryModel{capacity:86,items:vec![mir2_client_bevy::inventory::ItemModel{unique_id:Some(41),slot:40,container:0,quantity:1,..Default::default()}],..Default::default()};
-            let mut app=App::new();app.add_plugins((mir2_bevy_runtime::Mir2NativeSessionBoundaryPlugin,mir2_bevy_runtime::Mir2NativeMailServiceIngestPlugin,Mir2NativeMailParcelServicePlugin));app.insert_resource(commands);app.init_resource::<QuestUiIntentQueue>();app.insert_resource(inventory.clone());
-            assert!(mir2_bevy_runtime::native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:stamp.test_mail_epoch()}));app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;app.update();
-            let generation={let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(mir2_ui_core::state::MailComposeDraft{recipient:" R ".into(),message:" body\r\n ".into(),attachment_unique_ids:vec![41],..Default::default()});state.mail_draft_clock.generation().unwrap()};
-            let snapshot=MailSendDraft{recipient:" R ".into(),message:" body\r\n ".into(),gold:0,attachment_unique_ids:vec![41],stamped:false,parcel:false,generation};let payload=prepare_send(&snapshot.recipient,&snapshot.message,0,&[41]).unwrap();
-            let mut queue=app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();assert!(queue.push_mail_send(&mut app.world_mut().resource_mut::<PendingOperations>(),stamp.test_mail_epoch(),0,snapshot,payload,NativePlayerUiIntent::SendMail{recipient:"R".into(),message:"body".into(),gold:0,attachment_unique_ids:vec![41],stamped:false}));app.insert_resource(queue);let token=app.world().resource::<NativePlayerUiIntentQueue>().mail_send_token().unwrap();
-            match case{0=>app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::StartingGame,1=>{app.world_mut().remove_resource::<InventoryModel>();},2=>app.world_mut().resource_mut::<InventoryModel>().items.clear(),3=>app.world().resource::<GatewayCommands>().withdraw_world_stamp(),4=>{fence.test_owner_change(8,0);},5=>{for unique_id in 100..108{assert!(app.world().resource::<GatewayCommands>().send_command(GatewayCommand::Wire(NativeOutboundCommand::MailLockedItem{unique_id,locked:true})));}},_=>{}}
-            app.world_mut().run_system_once(forward_quest_ui_intents).unwrap();
-            if case<6{
-                assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),None);
-                while let Ok(command)=receiver.try_recv_for_test(){assert!(!matches!(command,GatewayCommand::Owned(ref owned) if crate::gateway::is_test_mail_send(owned)));}
-                app.insert_resource(inventory);app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;app.update();assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_token(),None);
-                assert!(!app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().reject_unpublished_mail_send(token));
-            }else{
-                let ticket=app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket().unwrap();assert_eq!(ticket.local_send_token,token.value());assert_eq!(ticket.epoch(),stamp.test_mail_epoch());
-                let command=receiver.try_recv_for_test().unwrap();assert!(matches!(command,GatewayCommand::Owned(ref owned) if crate::gateway::is_test_mail_send(owned)&&crate::gateway::test_owned_wire(owned)==Some(NativeOutboundCommand::SendMail{name:"R".into(),message:"body".into(),gold:0,items_idx:[41,0,0,0,0],stamped:false})));
-                assert!(!app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().reject_unpublished_mail_send(token));drop(command);app.update();assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());
+        use mir2_client_bevy::crystal_ui::overlays::{
+            prepare_native_mail_send as prepare_send, MailSendDraft,
+        };
+        use mir2_client_bevy::crystal_ui::overlays::{
+            MailComposeUi, Mir2NativeMailParcelServicePlugin,
+        };
+        use mir2_client_bevy::mail_service::{MailServiceInbox, MailServiceStreamStarted};
+        let _guard = crate::gateway::native_queue_test_guard();
+        for case in 0..7 {
+            let (sender, mut receiver) = crate::gateway::command_channel(8);
+            let fence = sender.ownership_fence().unwrap();
+            let stamp = fence.test_world_ready(7, 0);
+            let commands = GatewayCommands::new(sender);
+            assert!(commands.activate_world_stamp(stamp));
+            let inventory = InventoryModel {
+                capacity: 86,
+                items: vec![mir2_client_bevy::inventory::ItemModel {
+                    unique_id: Some(41),
+                    slot: 40,
+                    container: 0,
+                    quantity: 1,
+                    ..Default::default()
+                }],
+                ..Default::default()
+            };
+            let mut app = App::new();
+            app.add_plugins((
+                mir2_bevy_runtime::Mir2NativeSessionBoundaryPlugin,
+                mir2_bevy_runtime::Mir2NativeMailServiceIngestPlugin,
+                Mir2NativeMailParcelServicePlugin,
+            ));
+            app.insert_resource(commands);
+            app.init_resource::<QuestUiIntentQueue>();
+            app.insert_resource(inventory.clone());
+            assert!(
+                mir2_bevy_runtime::native_ingest::push_native_mail_service_stream_started(
+                    MailServiceStreamStarted {
+                        epoch: stamp.test_mail_epoch()
+                    }
+                )
+            );
+            app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::InGame;
+            app.update();
+            let generation = {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+                state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+                    recipient: " R ".into(),
+                    message: " body\r\n ".into(),
+                    attachment_unique_ids: vec![41],
+                    ..Default::default()
+                });
+                state.mail_draft_clock.generation().unwrap()
+            };
+            let snapshot = MailSendDraft {
+                recipient: " R ".into(),
+                message: " body\r\n ".into(),
+                gold: 0,
+                attachment_unique_ids: vec![41],
+                stamped: false,
+                parcel: false,
+                generation,
+            };
+            let payload = prepare_send(&snapshot.recipient, &snapshot.message, 0, &[41]).unwrap();
+            let mut queue = app
+                .world_mut()
+                .remove_resource::<NativePlayerUiIntentQueue>()
+                .unwrap();
+            assert!(queue.push_mail_send(
+                &mut app.world_mut().resource_mut::<PendingOperations>(),
+                stamp.test_mail_epoch(),
+                0,
+                snapshot,
+                payload,
+                NativePlayerUiIntent::SendMail {
+                    recipient: "R".into(),
+                    message: "body".into(),
+                    gold: 0,
+                    attachment_unique_ids: vec![41],
+                    stamped: false
+                }
+            ));
+            app.insert_resource(queue);
+            let token = app
+                .world()
+                .resource::<NativePlayerUiIntentQueue>()
+                .mail_send_token()
+                .unwrap();
+            match case {
+                0 => {
+                    app.world_mut().resource_mut::<NativeShellModel>().screen =
+                        NativeShellScreen::StartingGame
+                }
+                1 => {
+                    app.world_mut().remove_resource::<InventoryModel>();
+                }
+                2 => app
+                    .world_mut()
+                    .resource_mut::<InventoryModel>()
+                    .items
+                    .clear(),
+                3 => app
+                    .world()
+                    .resource::<GatewayCommands>()
+                    .withdraw_world_stamp(),
+                4 => {
+                    fence.test_owner_change(8, 0);
+                }
+                5 => {
+                    for unique_id in 100..108 {
+                        assert!(app.world().resource::<GatewayCommands>().send_command(
+                            GatewayCommand::Wire(NativeOutboundCommand::MailLockedItem {
+                                unique_id,
+                                locked: true
+                            })
+                        ));
+                    }
+                }
+                _ => {}
             }
-            let _=app.world().resource::<MailComposeUi>();let _=app.world().resource::<MailServiceInbox>();
+            app.world_mut()
+                .run_system_once(forward_quest_ui_intents)
+                .unwrap();
+            if case < 6 {
+                assert_eq!(
+                    app.world()
+                        .resource::<NativePlayerUiIntentQueue>()
+                        .mail_send_ticket(),
+                    None
+                );
+                while let Ok(command) = receiver.try_recv_for_test() {
+                    assert!(
+                        !matches!(command,GatewayCommand::Owned(ref owned) if crate::gateway::is_test_mail_send(owned))
+                    );
+                }
+                app.insert_resource(inventory);
+                app.world_mut().resource_mut::<NativeShellModel>().screen =
+                    NativeShellScreen::InGame;
+                app.update();
+                assert!(!app
+                    .world()
+                    .resource::<PendingOperations>()
+                    .has_pending_mail_send());
+                assert_eq!(
+                    app.world()
+                        .resource::<NativePlayerUiIntentQueue>()
+                        .mail_send_token(),
+                    None
+                );
+                assert!(!app
+                    .world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .reject_unpublished_mail_send(token));
+            } else {
+                let ticket = app
+                    .world()
+                    .resource::<NativePlayerUiIntentQueue>()
+                    .mail_send_ticket()
+                    .unwrap();
+                assert_eq!(ticket.local_send_token, token.value());
+                assert_eq!(ticket.epoch(), stamp.test_mail_epoch());
+                let command = receiver.try_recv_for_test().unwrap();
+                assert!(
+                    matches!(command,GatewayCommand::Owned(ref owned) if crate::gateway::is_test_mail_send(owned)&&crate::gateway::test_owned_wire(owned)==Some(NativeOutboundCommand::SendMail{name:"R".into(),message:"body".into(),gold:0,items_idx:[41,0,0,0,0],stamped:false}))
+                );
+                assert!(!app
+                    .world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .reject_unpublished_mail_send(token));
+                drop(command);
+                app.update();
+                assert!(!app
+                    .world()
+                    .resource::<PendingOperations>()
+                    .has_pending_mail_send());
+            }
+            let _ = app.world().resource::<MailComposeUi>();
+            let _ = app.world().resource::<MailServiceInbox>();
         }
     }
     #[test]
-    fn native_mail_quote_actual_bridge_rejects_shell_inventory_indices_and_sender_exactly(){
+    fn native_mail_quote_actual_bridge_rejects_shell_inventory_indices_and_sender_exactly() {
         use bevy::ecs::system::RunSystemOnce;
-        use mir2_client_bevy::crystal_ui::overlays::{Mir2NativeMailParcelServicePlugin,MailComposeUi,MailComposeKind};
-        use mir2_client_bevy::mail_service::{MailServiceInbox,MailServiceStreamStarted};
-        use mir2_client_bevy::inventory::{CrystalItemTooltipSourceModel,CrystalItemInfoModel,CrystalUserItemModel,ItemModel};
+        use mir2_client_bevy::crystal_ui::overlays::{
+            MailComposeKind, MailComposeUi, Mir2NativeMailParcelServicePlugin,
+        };
+        use mir2_client_bevy::inventory::{
+            CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,
+        };
+        use mir2_client_bevy::mail_service::{MailServiceInbox, MailServiceStreamStarted};
         for case in 0..7 {
-            let (sender,mut receiver)=crate::gateway::command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);
-            let commands=GatewayCommands::new(sender);assert!(commands.activate_world_stamp(stamp));
-            let inventory=InventoryModel{capacity:86,items:vec![ItemModel{unique_id:Some(41),slot:40,container:0,quantity:1,tooltip_source:Some(CrystalItemTooltipSourceModel{info:CrystalItemInfoModel{item_index:77,stack_size:1,..Default::default()},user_item:Some(CrystalUserItemModel{unique_id:41,item_index:77,count:1,..Default::default()}),..Default::default()}),..Default::default()}],..Default::default()};
-            let mut app=App::new();app.add_plugins(Mir2NativeMailParcelServicePlugin);app.insert_resource(commands);app.init_resource::<QuestUiIntentQueue>();app.insert_resource(inventory.clone());
-            app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;
-            {let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(mir2_ui_core::state::MailComposeDraft{gold:700,attachment_unique_ids:vec![41],..Default::default()});}
-            app.world_mut().resource_mut::<MailComposeUi>().kind=MailComposeKind::Parcel;
-            assert!(app.world_mut().resource_mut::<MailServiceInbox>().start_stream(MailServiceStreamStarted{epoch:stamp.test_mail_epoch()}));app.update();
-            let token=app.world().resource::<NativePlayerUiIntentQueue>().mail_quote_token().unwrap();
-            match case {
-                0=>app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::StartingGame,
-                1=>{app.world_mut().remove_resource::<InventoryModel>();}
-                2=>app.world_mut().resource_mut::<InventoryModel>().items.clear(),
-                3=>{app.world().resource::<GatewayCommands>().withdraw_world_stamp();}
-                4=>{fence.test_owner_change(8,0);}
-                5=>{for unique_id in 100..108 {assert!(app.world().resource::<GatewayCommands>().send_command(crate::gateway::GatewayCommand::Wire(NativeOutboundCommand::MailLockedItem{unique_id,locked:true})));}}
-                _=>{}
+            let (sender, mut receiver) = crate::gateway::command_channel(8);
+            let fence = sender.ownership_fence().unwrap();
+            let stamp = fence.test_world_ready(7, 0);
+            let commands = GatewayCommands::new(sender);
+            assert!(commands.activate_world_stamp(stamp));
+            let inventory = InventoryModel {
+                capacity: 86,
+                items: vec![ItemModel {
+                    unique_id: Some(41),
+                    slot: 40,
+                    container: 0,
+                    quantity: 1,
+                    tooltip_source: Some(CrystalItemTooltipSourceModel {
+                        info: CrystalItemInfoModel {
+                            item_index: 77,
+                            stack_size: 1,
+                            ..Default::default()
+                        },
+                        user_item: Some(CrystalUserItemModel {
+                            unique_id: 41,
+                            item_index: 77,
+                            count: 1,
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }],
+                ..Default::default()
+            };
+            let mut app = App::new();
+            app.add_plugins(Mir2NativeMailParcelServicePlugin);
+            app.insert_resource(commands);
+            app.init_resource::<QuestUiIntentQueue>();
+            app.insert_resource(inventory.clone());
+            app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::InGame;
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+                state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+                    gold: 700,
+                    attachment_unique_ids: vec![41],
+                    ..Default::default()
+                });
             }
-            app.world_mut().run_system_once(forward_quest_ui_intents).unwrap();
-            if case<6 {
-                assert!(app.world().resource::<NativePlayerUiIntentQueue>().mail_quote_ticket().is_none());
+            app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Parcel;
+            assert!(app
+                .world_mut()
+                .resource_mut::<MailServiceInbox>()
+                .start_stream(MailServiceStreamStarted {
+                    epoch: stamp.test_mail_epoch()
+                }));
+            app.update();
+            let token = app
+                .world()
+                .resource::<NativePlayerUiIntentQueue>()
+                .mail_quote_token()
+                .unwrap();
+            match case {
+                0 => {
+                    app.world_mut().resource_mut::<NativeShellModel>().screen =
+                        NativeShellScreen::StartingGame
+                }
+                1 => {
+                    app.world_mut().remove_resource::<InventoryModel>();
+                }
+                2 => app
+                    .world_mut()
+                    .resource_mut::<InventoryModel>()
+                    .items
+                    .clear(),
+                3 => {
+                    app.world()
+                        .resource::<GatewayCommands>()
+                        .withdraw_world_stamp();
+                }
+                4 => {
+                    fence.test_owner_change(8, 0);
+                }
+                5 => {
+                    for unique_id in 100..108 {
+                        assert!(app.world().resource::<GatewayCommands>().send_command(
+                            crate::gateway::GatewayCommand::Wire(
+                                NativeOutboundCommand::MailLockedItem {
+                                    unique_id,
+                                    locked: true
+                                }
+                            )
+                        ));
+                    }
+                }
+                _ => {}
+            }
+            app.world_mut()
+                .run_system_once(forward_quest_ui_intents)
+                .unwrap();
+            if case < 6 {
+                assert!(app
+                    .world()
+                    .resource::<NativePlayerUiIntentQueue>()
+                    .mail_quote_ticket()
+                    .is_none());
                 // Drain unrelated lock traffic, then prove no quote was published.
-                while let Ok(command)=receiver.try_recv_for_test(){assert!(!matches!(command,GatewayCommand::Owned(ref owned) if crate::gateway::is_test_mail_quote(owned)));}
-                app.insert_resource(inventory);app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;app.update();
-                let next=app.world().resource::<NativePlayerUiIntentQueue>().mail_quote_token().unwrap();assert_ne!(next,token);assert!(!app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().reject_unpublished_mail_quote(token));
-            }else {
-                let ticket=app.world().resource::<NativePlayerUiIntentQueue>().mail_quote_ticket().unwrap();assert_eq!(ticket.local_quote_token,token.value());assert_eq!(ticket.epoch(),stamp.test_mail_epoch());assert_ne!(ticket.sequence,0);
-                assert!(!app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().reject_unpublished_mail_quote(token));
+                while let Ok(command) = receiver.try_recv_for_test() {
+                    assert!(
+                        !matches!(command,GatewayCommand::Owned(ref owned) if crate::gateway::is_test_mail_quote(owned))
+                    );
+                }
+                app.insert_resource(inventory);
+                app.world_mut().resource_mut::<NativeShellModel>().screen =
+                    NativeShellScreen::InGame;
+                app.update();
+                let next = app
+                    .world()
+                    .resource::<NativePlayerUiIntentQueue>()
+                    .mail_quote_token()
+                    .unwrap();
+                assert_ne!(next, token);
+                assert!(!app
+                    .world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .reject_unpublished_mail_quote(token));
+            } else {
+                let ticket = app
+                    .world()
+                    .resource::<NativePlayerUiIntentQueue>()
+                    .mail_quote_ticket()
+                    .unwrap();
+                assert_eq!(ticket.local_quote_token, token.value());
+                assert_eq!(ticket.epoch(), stamp.test_mail_epoch());
+                assert_ne!(ticket.sequence, 0);
+                assert!(!app
+                    .world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .reject_unpublished_mail_quote(token));
             }
         }
     }
@@ -4524,7 +5917,13 @@ mod tests {
                 }),
             ]
         ));
-        assert!(commands.iter().all(|command|!matches!(command,GatewayCommand::Wire(NativeOutboundCommand::SendMail{..}))),"production untracked SendMail has no exact ticket and cannot enter");
+        assert!(
+            commands.iter().all(|command| !matches!(
+                command,
+                GatewayCommand::Wire(NativeOutboundCommand::SendMail { .. })
+            )),
+            "production untracked SendMail has no exact ticket and cannot enter"
+        );
     }
 
     #[test]
@@ -4761,33 +6160,52 @@ mod tests {
             drop(receiver);
             let mut app = App::new();
             let mut shell = NativeShellModel::default();
-            if in_game { shell.screen = NativeShellScreen::InGame; }
+            if in_game {
+                shell.screen = NativeShellScreen::InGame;
+            }
             app.insert_resource(shell)
                 .init_resource::<QuestUiIntentQueue>()
                 .init_resource::<NativePlayerUiIntentQueue>()
                 .init_resource::<PendingOperations>()
                 .insert_resource(GatewayCommands::new(sender))
                 .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
-            let exact = PendingOperationKey::Buy { item_index: 658, count: 2 };
-            let other = PendingOperationKey::Buy { item_index: 999, count: 1 };
+            let exact = PendingOperationKey::Buy {
+                item_index: 658,
+                count: 2,
+            };
+            let other = PendingOperationKey::Buy {
+                item_index: 999,
+                count: 1,
+            };
             {
                 let mut pending = app.world_mut().resource_mut::<PendingOperations>();
                 assert!(pending.try_begin(exact.clone()));
                 assert!(pending.try_begin(other.clone()));
             }
-            assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
-                .push_intent(NativePlayerUiIntent::BuyItem { item_index: 658, count: 2 }));
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .push_intent(NativePlayerUiIntent::BuyItem {
+                    item_index: 658,
+                    count: 2
+                }));
             app.update();
             let pending = app.world().resource::<PendingOperations>();
             assert!(!pending.contains(&exact));
             assert!(pending.contains(&other));
             assert_eq!(pending.len(), 1);
-            assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
-                .drain_for_gateway_with_npc_gold_buy().is_empty());
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_for_gateway_with_npc_gold_buy()
+                .is_empty());
             app.update();
             assert_eq!(app.world().resource::<PendingOperations>().len(), 1);
-            assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
-                .drain_for_gateway_with_npc_gold_buy().is_empty());
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_for_gateway_with_npc_gold_buy()
+                .is_empty());
         }
     }
 
@@ -5095,6 +6513,90 @@ mod tests {
         .insert_resource(GatewayCommands::new(sender))
         .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
         (app, receiver)
+    }
+
+    #[test]
+    fn npc_service_request_batches_preserve_the_last_exit_even_when_sending_fails() {
+        for exit_last in [true, false] {
+            for send_succeeds in [true, false] {
+                let mut ui = NativePlayerUiState::default();
+                ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                ui.close_windows();
+                // The UI has accepted an exit; the older service retry is
+                // still ahead of it in the same outbound FIFO batch.
+                ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                let (mut app, receiver) = quest_gate_app(ui, NpcDialogModel::default());
+                let receiver = send_succeeds.then_some(receiver);
+                let targets = if exit_last {
+                    ["@BuySell", "@Exit"]
+                } else {
+                    ["@Exit", "@BuySell"]
+                };
+                for target in targets {
+                    app.world_mut()
+                        .resource_mut::<QuestUiIntentQueue>()
+                        .push_intent(QuestUiIntent::SelectNpcDialog {
+                            target: target.into(),
+                        });
+                }
+                app.update();
+                assert_eq!(
+                    app.world()
+                        .resource::<NativePlayerUiState>()
+                        .accepts_npc_service_reply(),
+                    send_succeeds && !exit_last,
+                    "exit_last={exit_last}, send_succeeds={send_succeeds}",
+                );
+                if let Some(receiver) = receiver {
+                    for expected in targets {
+                        assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Wire(
+                            NativeOutboundCommand::SelectNpcDialog { target }
+                        )) if target == expected));
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn npc_service_reopen_requires_an_accepted_new_outbound_request() {
+        for (intent, allows_reply) in [
+            (QuestUiIntent::InteractNpc { npc_object_id: 7 }, true),
+            (
+                QuestUiIntent::SelectNpcDialog {
+                    target: "@BuySell".into(),
+                },
+                true,
+            ),
+            (
+                QuestUiIntent::SelectNpcDialog {
+                    target: "@Exit".into(),
+                },
+                false,
+            ),
+        ] {
+            for send_succeeds in [true, false] {
+                let mut ui = NativePlayerUiState::default();
+                ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                ui.close_windows();
+                assert!(!ui.accepts_npc_service_reply());
+                let (mut app, receiver) = quest_gate_app(ui, NpcDialogModel::default());
+                let receiver = send_succeeds.then_some(receiver);
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .push_intent(intent.clone());
+                app.update();
+                assert_eq!(
+                    app.world()
+                        .resource::<NativePlayerUiState>()
+                        .accepts_npc_service_reply(),
+                    send_succeeds && allows_reply
+                );
+                if let Some(receiver) = receiver {
+                    assert!(receiver.try_recv().is_ok());
+                }
+            }
+        }
     }
 
     fn ready_detail_turn_in_app() -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
@@ -5990,7 +7492,27 @@ mod tests {
             .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
-        assert!(receiver.try_recv().is_err(), "a modal still blocks combat");
+        assert!(
+            matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                    object_id: 42
+                }))
+            ),
+            "the ordinary options view must preserve combat"
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .skill_assign
+            .open = true;
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        app.update();
+        assert!(
+            receiver.try_recv().is_err(),
+            "a real assignment prompt still blocks combat"
+        );
     }
 
     #[test]
@@ -6095,6 +7617,84 @@ mod tests {
             },
             "groundDrops": [{"objectId":9001,"name":"GingerTea","quantity":1,"x":288,"y":616,"sourceMonster":"Scarecrow"}]
         })
+    }
+
+    #[test]
+    fn name_colour_packets_update_self_and_brown_expiry_without_stale_snapshot_override() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.latest_player_object_id = Some(1000);
+        for colour in [-5952982_i32, -65536, -1] {
+            assert!(adapter.observe_packet(&PacketEvent::Other {
+                packet: "ColourChanged".into(),
+                payload: json!({"nameColourArgb":colour}),
+            }));
+            let mut payload = gameplay_payload();
+            payload["entities"][0]["nameColourArgb"] = json!(-1);
+            adapter.apply_authoritative_overlay(&mut payload);
+            assert_eq!(payload["entities"][0]["nameColourArgb"], json!(colour));
+        }
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "ColourChanged".into(),
+            payload: json!({"nameColourArgb":-1}),
+        }));
+    }
+
+    #[test]
+    fn name_colour_remote_delta_keeps_body_and_never_resurrects_removed_objects() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let delta = PacketEvent::Other {
+            packet: "ObjectColourChanged".into(),
+            payload: json!({"objectId":2001,"nameColourArgb":-5952982}),
+        };
+        assert!(adapter.observe_packet(&delta));
+        let mut payload = gameplay_payload();
+        let count = payload["entities"].as_array().unwrap().len();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"].as_array().unwrap().len(), count);
+        assert_eq!(payload["entities"][3]["nameColourArgb"], json!(-5952982));
+        assert_eq!(
+            payload["entities"][3]["sprite"]["bodyLibrary"],
+            json!("Monster/005")
+        );
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectRemove".into(),
+            payload: json!({"objectId":2001}),
+        });
+        assert!(!adapter.observe_packet(&delta));
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert!(!payload["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|e| e["objectId"] == json!(2001)));
+    }
+
+    #[test]
+    fn name_colour_map_and_generation_boundaries_preserve_only_current_owner() {
+        let mut adapter = NativeGameplayAdapter::default();
+        adapter.latest_player_object_id = Some(1000);
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ColourChanged".into(),
+            payload: json!({"nameColourArgb":-65536}),
+        });
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectColourChanged".into(),
+            payload: json!({"objectId":2001,"nameColourArgb":-5952982}),
+        });
+        adapter.clear_zone_state_for_map_change();
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert_eq!(payload["entities"][0]["nameColourArgb"], json!(-65536));
+        assert!(payload["entities"][3].get("nameColourArgb").is_none());
+        adapter.set_generation(2);
+        assert!(!adapter.observe_packet(&PacketEvent::Other {
+            packet: "ColourChanged".into(),
+            payload: json!({"nameColourArgb":-65536})
+        }));
+        let mut payload = gameplay_payload();
+        adapter.apply_authoritative_overlay(&mut payload);
+        assert!(payload["entities"][0].get("nameColourArgb").is_none());
     }
 
     fn definition_packet() -> PacketEvent {
@@ -7298,6 +8898,11 @@ mod tests {
                 "dead": true
             }),
         }));
+        // Admission is retained in the bounded event history. The normal
+        // renderer consumes by sequence rather than draining this buffer.
+        assert_eq!(adapter.effect_events.len(), 1);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectPlayer");
+        let admission_sequence = adapter.effect_events[0].sequence;
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "ObjectRevived".to_owned(),
             payload: json!({"objectId": 2001, "effect": false}),
@@ -7305,9 +8910,16 @@ mod tests {
         let remote = adapter.zone_entities.get(&2001).expect("remote player");
         assert_eq!(remote.get("dead"), Some(&json!(false)));
         assert_eq!(remote.get("_nativeAnimationAction"), Some(&json!("revive")));
-        assert_eq!(adapter.effect_events.len(), 1);
-        assert_eq!(adapter.effect_events[0].packet, "ObjectRevived");
-        assert_eq!(adapter.effect_events[0].payload["effect"], false);
+        let revived_events = adapter
+            .effect_events
+            .iter()
+            .filter(|event| event.sequence > admission_sequence)
+            .collect::<Vec<_>>();
+        assert_eq!(revived_events.len(), 1);
+        assert_eq!(revived_events[0].packet, "ObjectRevived");
+        assert_eq!(revived_events[0].payload["effect"], false);
+        assert_eq!(adapter.effect_events[0].packet, "ObjectPlayer");
+        assert_eq!(adapter.effect_events[0].sequence, admission_sequence);
     }
 
     #[test]
@@ -7463,7 +9075,7 @@ mod tests {
                 "objectId": 2010,
                 "location": {"x": 286, "y": 615},
                 "direction": "Right",
-                "kind": 2
+                "kind": 0
             }),
         }));
         adapter.apply_authoritative_overlay(&mut payload);
@@ -7478,7 +9090,7 @@ mod tests {
         assert_eq!(plant["x"], json!(286));
         assert_eq!(plant["y"], json!(615));
         assert_eq!(plant["direction"], json!("Right"));
-        assert_eq!(plant["deathKind"], json!(2));
+        assert_eq!(plant["deathKind"], json!(0));
     }
 
     #[test]
@@ -7658,6 +9270,7 @@ mod tests {
         let mut payload = gameplay_payload();
         payload["playerHp"] = json!(18);
         payload["playerMaxHp"] = json!(18);
+        payload["entities"][0]["dead"] = json!(false);
         adapter.apply_authoritative_overlay(&mut payload);
 
         assert_eq!(payload["playerHp"], json!(9));
@@ -8766,3 +10379,7 @@ mod status_buff_order_tests {
         assert!(ui.buffs[0].paused);
     }
 }
+
+#[cfg(test)]
+#[path = "five_class_bridge_tests.rs"]
+mod five_class_bridge_tests;

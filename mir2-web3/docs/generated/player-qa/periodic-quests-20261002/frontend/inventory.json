@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "file": "client-periodic-canonical.log",
+      "bytes": 28621,
+      "sha256": "59e37474e57aea798432215774a0591606db9ce1098408da02a5d4145cff2490"
+    },
+    {
+      "file": "frontend-source-hashes.json",
+      "bytes": 14188,
+      "sha256": "188c5ae8af58921a79215bd3673c24adaac29c4dc56100c9bbcfd3db3e5d7795"
+    },
+    {
+      "file": "integration-review.json",
+      "bytes": 5336,
+      "sha256": "19fda1e77fab079d0c06c87b5d37872a211bb3807f3e7fbf4c9a6279e0e0731e"
+    },
+    {
+      "file": "offscreen-r1.log",
+      "bytes": 92412,
+      "sha256": "9ec74562e3c75bf80834c07b9edef4711ce3e0dae1d8547a7bdaf4ce77cebc18"
+    },
+    {
+      "file": "offscreen-r2.log",
+      "bytes": 27170,
+      "sha256": "2b8e41b5915d6a7cf92f964bdb962389afaa75a835ee56f2ea0eadd1db1903ce"
+    },
+    {
+      "file": "offscreen-r3.log",
+      "bytes": 27011,
+      "sha256": "f3dc6ef62b7e5e581f71288ea5872077f03ac83fe91cb4afd93e6d46a20ddf5c"
+    },
+    {
+      "file": "regression-native_i18n--tests.log",
+      "bytes": 27899,
+      "sha256": "6a083a9d9aa8a28702e08ae36538eb4c108d55aa976fa55f7eeb2605e2b81538"
+    },
+    {
+      "file": "regression-quest_.log",
+      "bytes": 48507,
+      "sha256": "401b8698920e4c03658a08dcd5a1ff9fd233808eb8c44c63521286db5f7d7dca"
+    },
+    {
+      "file": "regression-shop.log",
+      "bytes": 34212,
+      "sha256": "fa6d7e0a199f7d3363a8702e8e34e20dd52529f30c6831d5e58a2edbc7e4e108"
+    },
+    {
+      "file": "visual-r1/periodic-i18n-layouts.json",
+      "bytes": 491910,
+      "sha256": "41f2f106e13ec3af94f114cb2edc44c54d756fdcd89267d9a758d469c8211b8e"
+    },
+    {
+      "file": "visual-r1/pt-BR-diary-weekly.png",
+      "bytes": 342057,
+      "sha256": "6e033b9de251a36e79479dd226d3eed7ceb2ff7e7fbf3dc88415087f33d42628"
+    },
+    {
+      "file": "visual-r3/ar-npc-list-finish.png",
+      "bytes": 346381,
+      "sha256": "0db52cb7bd1348fe562ba3f5a9c76ee9fe4e59bd8dc93034c7fc3f1f36f327b2"
+    },
+    {
+      "file": "visual-r3/periodic-i18n-layouts.json",
+      "bytes": 627106,
+      "sha256": "a219df31484e044d238e73805c008f3aa262bb28a7e39632909c6df6de153350"
+    },
+    {
+      "file": "visual-r3/pt-BR-npc-list-accept.png",
+      "bytes": 346475,
+      "sha256": "63c89c6b72896f58acedb5e5ceb0f4560ba3ba9041e3a49258856cf8dce7dfe4"
+    },
+    {
+      "file": "visual-r3/zh-TW-ready-2180.png",
+      "bytes": 49238,
+      "sha256": "104b69d983f5e19cd13c9b47894a08678999b6b4dd7d78dbc5d3ce24f80c3f22"
+    },
+    {
+      "file": "windows-route-final.log",
+      "bytes": 47115,
+      "sha256": "b6559b466e8a112005673be3c19762c4d8c323215091d1bcb338fbb808c55648"
+    }
+  ]
+}

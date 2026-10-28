@@ -1,5 +1,5 @@
 import { questCoordinate, sameQuestWorldStamp, type QuestWorldStamp } from "./bevy-quest-world-context";
-import type { QuestRouteAction } from "./bevy-quest-world-actions";
+import { parseQuestWorldAction, type QuestRouteAction } from "./bevy-quest-world-actions";
 import type { QuestCollisionGeometry } from "./quest-collision-cache";
 
 export type QuestRoutePoint = Readonly<{ x: number; y: number }>;
@@ -27,7 +27,7 @@ export function planBevyQuestRoute(
   occupiedTiles: readonly QuestRoutePoint[],
   rejectedEdges: readonly QuestRouteEdge[],
 ): QuestRoutePlan | null {
-  if (!runtime.getMir2QuestRoutePlan || geometry.mapFileName !== action.mapFileName
+  if (!parseQuestWorldAction(action) || !runtime.getMir2QuestRoutePlan || geometry.mapFileName !== action.mapFileName
     || !Number.isInteger(geometry.width) || !Number.isInteger(geometry.height)
     || geometry.width <= 0 || geometry.height <= 0 || geometry.width > 65535 || geometry.height > 65535
     || geometry.width * geometry.height > 16_777_216
@@ -50,6 +50,7 @@ export function planBevyQuestRoute(
       || !inside(result.destination) || !Array.isArray(result.steps) || result.steps.length > 250_000
       || !questCoordinate(result.radius) || result.radius < 0 || result.radius > Math.max(geometry.width, geometry.height)) return null;
     if (action.routeTarget.type === "entrance" && result.radius !== 0
+      || (action.routeTarget.type === "taskNpc" || action.routeTarget.type === "mapNpc") && result.radius !== 2
       || action.routeTarget.type === "huntRegion" && result.radius !== action.routeTarget.radius
       || action.routeTarget.type === "supply" && result.radius !== 0 && result.radius !== 2) return null;
     let previous = origin;

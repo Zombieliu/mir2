@@ -1,0 +1,6 @@
+{
+  "selector": "mir2-simulation --test shared_cross_map_drop_lifecycle",
+  "utc": "2026-10-04T16:06:59.0183842Z",
+  "exitCode": 0,
+  "log": "C:\\mir2-playtest-releases\\20261004-native-r18\\cross-map-drop-implementation-01\\green-simulation-attempt-06.log"
+}

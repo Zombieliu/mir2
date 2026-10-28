@@ -98,10 +98,7 @@ fn lightweight_map_projection_tracks_transfer_without_building_world_snapshot() 
         password: "demo".into(),
     });
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    session.force_authoritative_player_transform(
-        Point { x: 340, y: 269 },
-        MirDirection::Down,
-    );
+    session.force_authoritative_player_transform(Point { x: 340, y: 269 }, MirDirection::Down);
     session.transfer_map("test-to-map2");
     assert_lightweight_matches_full(&session);
     assert_eq!(session.current_map_file_name().as_deref(), Some("2"));
@@ -185,7 +182,10 @@ fn lightweight_active_intelligent_creature_matches_full_snapshot_selection() {
             .app
             .world_mut()
             .resource_mut::<Stage5SystemsResource>();
-        stage5.stage5_systems.intelligent_creatures.push(creature.clone());
+        stage5
+            .stage5_systems
+            .intelligent_creatures
+            .push(creature.clone());
         stage5.stage5_systems.summoned_intelligent_creature_type = Some(creature.pet_type);
     }
 

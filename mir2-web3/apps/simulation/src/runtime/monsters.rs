@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
@@ -34,9 +34,10 @@ use super::drops::PendingHarvestDrops;
 use super::map::{
     collision_data_for_map_or_config, is_static_spawnable_point_with_collision,
     runtime_full_map_collision_data, runtime_world_map_collision_data,
-    walkable_point_count_in_rect, walkable_points_in_rect,
+    walkable_point_count_in_rect, walkable_points_in_rect, RuntimeMapCollisionData,
 };
 use super::movement::{direction_toward, offset_point, runtime_position_exists, tile_distance};
+use super::movement::{point_in_bounds, tile_key};
 use super::packets::object_movement;
 use super::resources::{
     runtime_tick, MapRuntimeResource, ObjectIdAllocatorResource, RuntimeConfigResource,
@@ -251,12 +252,18 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
         return MonsterSpawnTable { rules };
     }
 
+    let mut geometry_cache = VisibleRespawnGeometryCache::default();
     for respawn in config.crystal_respawns_for_map(map_file_name) {
         if !config.monster_is_allowed(&respawn.monster_name) {
             continue;
         }
-        let visible_spawns =
-            start_game_visible_respawn_spawns(map_file_name, &respawn, player_position);
+        let visible_spawns = start_game_visible_respawn_spawns_with_geometry_cache(
+            map_file_name,
+            &respawn,
+            player_position,
+            Some(&mut geometry_cache),
+            runtime_full_map_collision_data,
+        );
         if visible_spawns.is_empty() {
             continue;
         }
@@ -430,6 +437,9 @@ fn append_platinum_176_sabuk_battlefield_rules(
     map_file_name: &str,
     rules: &mut Vec<MonsterSpawnRule>,
 ) {
+    if !config.conquest_policies.is_empty() {
+        return;
+    }
     let normalized_map = map_file_name
         .trim()
         .trim_end_matches(".map")
@@ -1245,6 +1255,37 @@ pub(super) fn spawn_runtime_monster(
     )
 }
 
+/// The Source script Spawn(Map, Point) uses Map.ValidPoint, so several monsters
+/// may be born on the same valid cell. Walking/ordinary respawn occupancy
+/// remains separate. The compatibility factory does not implement shared NPC
+/// outbox consumption or every Source Spawned override/hook.
+pub(super) fn spawn_runtime_monster_on_source_script_cell(
+    world: &mut World,
+    template: &CrystalRespawnTemplate,
+    position: Point,
+) -> Option<Entity> {
+    let map = world.resource::<MapRuntimeResource>();
+    if !point_in_bounds(&map.map_region_bounds, &position)
+        || map.blocked_cells.contains(&tile_key(&position))
+    {
+        return None;
+    }
+    // MonsterObject.Spawn invokes base Spawned after NPCSegment's +1000;
+    // the final ordinary Source activation time is +2000 milliseconds.
+    spawn_runtime_monster_with_position_policy(
+        world,
+        template,
+        position,
+        MirDirection::Up,
+        None,
+        None,
+        None,
+        None,
+        crystal_speed_to_ticks(2_000),
+        true,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn spawn_runtime_monster_with_position_policy(
     world: &mut World,
@@ -1988,10 +2029,64 @@ pub(super) fn patrol_target(origin: &Point, tick: u64, salt: u32) -> Point {
     pattern[((tick + u64::from(salt)) as usize / 2) % pattern.len()].clone()
 }
 
+type RespawnRectangle = (i32, i32, i32, i32);
+
+/// Only shared by the respawns in one visible spawn-table rebuild. Counts are
+/// specific to an immutable collision allocation and the exact inclusive bounds;
+/// overlapping rectangles or another map/door image cannot reuse them.
+#[derive(Default)]
+struct VisibleRespawnGeometryCache {
+    counts: BTreeMap<RespawnRectangle, Vec<(Arc<RuntimeMapCollisionData>, usize)>>,
+    #[cfg(test)]
+    walkable_count_computations: usize,
+}
+
+impl VisibleRespawnGeometryCache {
+    fn walkable_count(
+        &mut self,
+        collision: &Arc<RuntimeMapCollisionData>,
+        rectangle: RespawnRectangle,
+    ) -> usize {
+        let entries = self.counts.entry(rectangle).or_default();
+        if let Some((_, count)) = entries
+            .iter()
+            .find(|(previous, _)| Arc::ptr_eq(previous, collision))
+        {
+            return *count;
+        }
+        let (min_x, max_x, min_y, max_y) = rectangle;
+        let count = walkable_point_count_in_rect(collision, min_x, max_x, min_y, max_y);
+        // Keep the allocation alive for this rebuild, including between calls
+        // to the loader, so address reuse cannot turn a different image into a hit.
+        entries.push((Arc::clone(collision), count));
+        #[cfg(test)]
+        {
+            self.walkable_count_computations += 1;
+        }
+        count
+    }
+}
+
 pub(super) fn start_game_visible_respawn_spawns(
     map_file_name: &str,
     respawn: &CrystalRespawnTemplate,
     player_position: &Point,
+) -> Vec<(usize, Point, MirDirection)> {
+    start_game_visible_respawn_spawns_with_geometry_cache(
+        map_file_name,
+        respawn,
+        player_position,
+        None,
+        runtime_full_map_collision_data,
+    )
+}
+
+fn start_game_visible_respawn_spawns_with_geometry_cache(
+    map_file_name: &str,
+    respawn: &CrystalRespawnTemplate,
+    player_position: &Point,
+    geometry_cache: Option<&mut VisibleRespawnGeometryCache>,
+    collision_loader: impl FnOnce(&str) -> Option<Arc<RuntimeMapCollisionData>>,
 ) -> Vec<(usize, Point, MirDirection)> {
     if respawn.count == 0 {
         return Vec::new();
@@ -2026,7 +2121,7 @@ pub(super) fn start_game_visible_respawn_spawns(
         return Vec::new();
     }
 
-    let full_collision = runtime_full_map_collision_data(map_file_name);
+    let full_collision = collision_loader(map_file_name);
     let visible_candidates = full_collision.as_ref().map(|collision| {
         walkable_points_in_rect(collision, min_x, max_x, min_y, max_y)
             .into_iter()
@@ -2034,13 +2129,20 @@ pub(super) fn start_game_visible_respawn_spawns(
             .collect::<Vec<_>>()
     });
     let spawn_candidate_count = full_collision.as_ref().map(|collision| {
-        walkable_point_count_in_rect(
-            collision,
-            spawn_min_x,
-            spawn_max_x,
-            spawn_min_y,
-            spawn_max_y,
-        )
+        if let Some(cache) = geometry_cache {
+            cache.walkable_count(
+                collision,
+                (spawn_min_x, spawn_max_x, spawn_min_y, spawn_max_y),
+            )
+        } else {
+            walkable_point_count_in_rect(
+                collision,
+                spawn_min_x,
+                spawn_max_x,
+                spawn_min_y,
+                spawn_max_y,
+            )
+        }
     });
     let (visible_count, visible_cells, width) =
         if let (Some(visible_candidates), Some(spawn_candidate_count)) =
@@ -2116,6 +2218,10 @@ pub(super) fn start_game_visible_respawn_spawns(
 
     spawns
 }
+
+#[cfg(test)]
+#[path = "monsters/respawn_geometry_cache_tests.rs"]
+mod respawn_geometry_cache_tests;
 
 pub(super) fn crystal_respawn_object_id(
     respawn: &CrystalRespawnTemplate,

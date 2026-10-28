@@ -1,12 +1,12 @@
 //! Ordinary player/hero transfer gestures; never changes local item custody.
 #[cfg(feature = "native-ui")]
 use super::super::*;
-use bevy::prelude::*;
-use crate::inventory::{InventoryModel, ItemModel};
+use super::*;
 #[cfg(feature = "native-ui")]
 use crate::crystal_ui::spec::CrystalRect;
-use super::*;
 use crate::hero_model::HeroModel;
+use crate::inventory::{InventoryModel, ItemModel};
+use bevy::prelude::*;
 use mir2_protocol::{ClientPacket as C, MirGridType as G};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Cell {

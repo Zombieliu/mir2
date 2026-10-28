@@ -238,7 +238,7 @@ pub fn prompt_hit(
     local: Vec2,
     dimensions: impl Fn(&str, u16) -> Option<Vec2>,
 ) -> Option<BondAnswer> {
-    let input = matches!(prompt.kind, BondPromptKind::MentorName { .. });
+    let input = prompt.has_name_editor();
     for (index, x, y, accept) in if input {
         [(200, 60., 123., true), (203, 160., 123., false)]
     } else {
@@ -264,7 +264,7 @@ pub fn render_prompt(
     input_ui: &super::super::friend_dialog::FriendDialogUi,
     dimensions: impl Fn(&str, u16) -> Option<Vec2>,
 ) -> bool {
-    let input = matches!(prompt.kind, BondPromptKind::MentorName { .. });
+    let input = prompt.has_name_editor();
     let frame = if input { 660 } else { 360 };
     let Some(size) = dimensions("Prguse", frame) else {
         return false;

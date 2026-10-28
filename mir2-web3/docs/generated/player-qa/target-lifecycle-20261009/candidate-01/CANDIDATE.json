@@ -1,0 +1,1200 @@
+{
+  "schema": "mir2.classic.target-lifecycle-candidate.v1",
+  "createdUtc": "2026-10-09T03:17:33.326552+00:00",
+  "sourceBase": "88a36e7a2f79b54163fc3849fb48d00d498d4cda",
+  "sourceFiles": [
+    {
+      "file": ".github/workflows/gateway-release.yml",
+      "bytes": 6895,
+      "sha256": "435758cfad148df158101c3df2a45853fbe118abb1dcdbf51eb44a578a939199"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/package-assets.sh",
+      "bytes": 7139,
+      "sha256": "1d569becb4d1f39c8fa94416c75fad37dc490f8ee6705b31a55df3063ba9db97"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "bytes": 194237,
+      "sha256": "a13552d343be9a312464267e0f30e6b2223347973db4253ab7aea3ef964432bd"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 508027,
+      "sha256": "1ea0cf04027751849ef4a55f326d3e1472063d6ef3c23d4ae762a2599f6d224c"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs",
+      "bytes": 22825,
+      "sha256": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "bytes": 350232,
+      "sha256": "8751e870a2a32a468e70c793b70cb447c9ea3b9c32939eb8a63f99a34a262cb0"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing.rs",
+      "bytes": 1229896,
+      "sha256": "0c77c64a68b45372533aab0ab8933f7d64bfcb44e00ef462398f70627f274c7e"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/native_target_lifecycle_transport_tests.rs",
+      "bytes": 14980,
+      "sha256": "376d8b49e5cc3d30ff8eea44da85e4325c5177acb7ebea4cea75c3c5777e9cef"
+    },
+    {
+      "file": "mir2-web3/apps/gateway/src/routing/tests/unavailable_combat_target_tests.rs",
+      "bytes": 9484,
+      "sha256": "59f1f4d20c297b443a9f9b665a6e8e25f8bdb4cc080c89121a7e95603e62c5a1"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/movement_deadline_tests.rs",
+      "bytes": 5202,
+      "sha256": "a206a1bf57c246e7eed398e3f5aacaeccfe7fc927955ce6094a88f216026e757"
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 686091,
+      "sha256": "ca2fc26c042c7c3246b1d252362cde3217829b4cbfd0a91d3ea9a4491e759929"
+    },
+    {
+      "file": "mir2-web3/apps/web/public/original-ui/Sound/91.wav",
+      "bytes": 164642,
+      "sha256": "ebcb5e32521cdf7256c334be1951064edd21e080264823b327bc6803acdd38f1"
+    }
+  ],
+  "currentLocalGates": {
+    "31-native-full-artifact.log.json": {
+      "suite": "native-full",
+      "run": "31",
+      "startedUtc": "2026-10-09T03:13:41.9650276Z",
+      "completedUtc": "2026-10-09T03:13:47.9314803Z",
+      "exitCode": 0,
+      "sourceSha256": {
+        "apps/gateway/src/routing/tests/native_target_lifecycle_transport_tests.rs": "376d8b49e5cc3d30ff8eea44da85e4325c5177acb7ebea4cea75c3c5777e9cef",
+        "apps/game-client/platform-windows/src/entity_presentation.rs": "a13552d343be9a312464267e0f30e6b2223347973db4253ab7aea3ef964432bd",
+        "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020",
+        "apps/game-client/platform-windows/src/gateway.rs": "1ea0cf04027751849ef4a55f326d3e1472063d6ef3c23d4ae762a2599f6d224c",
+        "apps/gateway/src/routing.rs": "0c77c64a68b45372533aab0ab8933f7d64bfcb44e00ef462398f70627f274c7e",
+        "apps/simulation/src/runtime/zone/runtime.rs": "ca2fc26c042c7c3246b1d252362cde3217829b4cbfd0a91d3ea9a4491e759929",
+        "apps/game-client/platform-windows/src/input.rs": "8751e870a2a32a468e70c793b70cb447c9ea3b9c32939eb8a63f99a34a262cb0",
+        "apps/gateway/src/routing/tests/unavailable_combat_target_tests.rs": "59f1f4d20c297b443a9f9b665a6e8e25f8bdb4cc080c89121a7e95603e62c5a1",
+        "apps/simulation/src/runtime/zone/movement_deadline_tests.rs": "a206a1bf57c246e7eed398e3f5aacaeccfe7fc927955ce6094a88f216026e757"
+      },
+      "buildReceipt": "27-native-focused.log.json",
+      "executable": "C:\\mir2-build\\p1-native-20261007\\debug\\deps\\mir2_platform_windows-7423cdc31b2373e4.exe",
+      "executableSha256": "205052c0272072f9e39f278fc0e819849511ad4ebb820811c8b2a38b90935c3c",
+      "arguments": [
+        "--test-threads=1"
+      ],
+      "audioFixture": null,
+      "log": "C:\\mir2-build\\p1-target-lifecycle-20261009-01\\31-native-full-artifact.log",
+      "logSha256": "f83e54e824ad784c2c93c5c19e54484806d3cc87ccaa75f251cf21e54c179b1d"
+    },
+    "29-gateway-adjacent-artifact.log.json": {
+      "suite": "gateway-adjacent",
+      "run": "29",
+      "startedUtc": "2026-10-09T02:57:22.0289096Z",
+      "completedUtc": "2026-10-09T02:58:15.9829668Z",
+      "exitCode": 0,
+      "sourceSha256": {
+        "apps/game-client/platform-windows/src/gateway.rs": "1ea0cf04027751849ef4a55f326d3e1472063d6ef3c23d4ae762a2599f6d224c",
+        "apps/game-client/platform-windows/src/entity_presentation.rs": "f502e1b20504e4934b9bfbe634f6a18da7c88ab466d99c44c0c3f5f9332a1a82",
+        "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020",
+        "apps/game-client/platform-windows/src/input.rs": "bfc4189a46bd3d75500c89266e8959bacd1c1ec89390c72d6f85740afa4791c8",
+        "apps/simulation/src/runtime/zone/runtime.rs": "ca2fc26c042c7c3246b1d252362cde3217829b4cbfd0a91d3ea9a4491e759929",
+        "apps/gateway/src/routing/tests/native_target_lifecycle_transport_tests.rs": "376d8b49e5cc3d30ff8eea44da85e4325c5177acb7ebea4cea75c3c5777e9cef",
+        "apps/gateway/src/routing.rs": "0c77c64a68b45372533aab0ab8933f7d64bfcb44e00ef462398f70627f274c7e",
+        "apps/gateway/src/routing/tests/unavailable_combat_target_tests.rs": "59f1f4d20c297b443a9f9b665a6e8e25f8bdb4cc080c89121a7e95603e62c5a1",
+        "apps/simulation/src/runtime/zone/movement_deadline_tests.rs": "a206a1bf57c246e7eed398e3f5aacaeccfe7fc927955ce6094a88f216026e757"
+      },
+      "buildReceipt": "24-gateway-bridge-build.log.json",
+      "executable": "C:\\mir2-build\\p1-gateway-lifecycle-target-20261009-01\\debug\\deps\\mir2_gateway-5994e509dc1806cd.exe",
+      "executableSha256": "1595721be304c256d3a12bff15d7bcce91cf7da03379851d255173a3c6cf69f3",
+      "arguments": [
+        "--test-threads=1",
+        "unavailable_combat_target",
+        "owner_location_order",
+        "owner_attack_animation",
+        "movement_deadline",
+        "crowded_escape_tests"
+      ],
+      "log": "C:\\mir2-build\\p1-target-lifecycle-20261009-01\\29-gateway-adjacent-artifact.log",
+      "logSha256": "6708e41205e5a915b34a843a4645113cb0cffc9ff3d99e79b6a2949e815413da"
+    },
+    "27-native-focused.log.json": {
+      "suite": "native-focused",
+      "run": "27",
+      "startedUtc": "2026-10-09T02:52:11.3822585Z",
+      "completedUtc": "2026-10-09T02:53:58.1489157Z",
+      "exitCode": 0,
+      "executable": "cargo",
+      "arguments": [
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "2",
+        "--config",
+        "profile.test.package.mir2-platform-windows.debug=\"line-tables-only\"",
+        "--config",
+        "profile.test.package.mir2-platform-windows.codegen-units=177",
+        "--manifest-path",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "selected_monster_",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "project": "E:\\mir2-player-journey\\tmp\\gateway-lifecycle-20261008-01\\mir2-web3",
+      "target": "C:/mir2-build/p1-native-20261007",
+      "sourceSha256": {
+        "apps/gateway/src/routing/tests/native_target_lifecycle_transport_tests.rs": "376d8b49e5cc3d30ff8eea44da85e4325c5177acb7ebea4cea75c3c5777e9cef",
+        "apps/game-client/platform-windows/src/entity_presentation.rs": "a13552d343be9a312464267e0f30e6b2223347973db4253ab7aea3ef964432bd",
+        "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020",
+        "apps/game-client/platform-windows/src/gateway.rs": "1ea0cf04027751849ef4a55f326d3e1472063d6ef3c23d4ae762a2599f6d224c",
+        "apps/gateway/src/routing.rs": "0c77c64a68b45372533aab0ab8933f7d64bfcb44e00ef462398f70627f274c7e",
+        "apps/simulation/src/runtime/zone/runtime.rs": "ca2fc26c042c7c3246b1d252362cde3217829b4cbfd0a91d3ea9a4491e759929",
+        "apps/game-client/platform-windows/src/input.rs": "8751e870a2a32a468e70c793b70cb447c9ea3b9c32939eb8a63f99a34a262cb0",
+        "apps/gateway/src/routing/tests/unavailable_combat_target_tests.rs": "59f1f4d20c297b443a9f9b665a6e8e25f8bdb4cc080c89121a7e95603e62c5a1",
+        "apps/simulation/src/runtime/zone/movement_deadline_tests.rs": "a206a1bf57c246e7eed398e3f5aacaeccfe7fc927955ce6094a88f216026e757"
+      },
+      "freeBytesBefore": 129209946112,
+      "freeBytesAfter": 127438180352,
+      "log": "C:\\mir2-build\\p1-target-lifecycle-20261009-01\\27-native-focused.log",
+      "logSha256": "33e7b2fb3090697b4598f1df1bcbdf2e1b4f61ed44101aa3ff936858c0a2105f"
+    },
+    "07-native-gateway-network.log.json": {
+      "run": "07",
+      "startedUtc": "2026-10-09T02:55:18.8277931Z",
+      "completedUtc": "2026-10-09T02:56:20.8150819Z",
+      "exitCode": 0,
+      "sourceSha256": {
+        "apps/gateway/src/routing/tests/native_target_lifecycle_transport_tests.rs": "376d8b49e5cc3d30ff8eea44da85e4325c5177acb7ebea4cea75c3c5777e9cef",
+        "apps/game-client/platform-windows/src/entity_presentation.rs": "a13552d343be9a312464267e0f30e6b2223347973db4253ab7aea3ef964432bd",
+        "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020",
+        "apps/game-client/platform-windows/src/gateway.rs": "1ea0cf04027751849ef4a55f326d3e1472063d6ef3c23d4ae762a2599f6d224c",
+        "apps/gateway/src/routing.rs": "0c77c64a68b45372533aab0ab8933f7d64bfcb44e00ef462398f70627f274c7e",
+        "apps/simulation/src/runtime/zone/runtime.rs": "ca2fc26c042c7c3246b1d252362cde3217829b4cbfd0a91d3ea9a4491e759929",
+        "apps/game-client/platform-windows/src/input.rs": "8751e870a2a32a468e70c793b70cb447c9ea3b9c32939eb8a63f99a34a262cb0",
+        "apps/gateway/src/routing/tests/unavailable_combat_target_tests.rs": "59f1f4d20c297b443a9f9b665a6e8e25f8bdb4cc080c89121a7e95603e62c5a1",
+        "apps/simulation/src/runtime/zone/movement_deadline_tests.rs": "a206a1bf57c246e7eed398e3f5aacaeccfe7fc927955ce6094a88f216026e757"
+      },
+      "nativeTestExe": "C:\\mir2-build\\p1-native-20261007\\debug\\deps\\mir2_platform_windows-7423cdc31b2373e4.exe",
+      "nativeExeSha256": "205052c0272072f9e39f278fc0e819849511ad4ebb820811c8b2a38b90935c3c",
+      "gatewayTestExe": "C:\\mir2-build\\p1-gateway-lifecycle-target-20261009-01\\debug\\deps\\mir2_gateway-5994e509dc1806cd.exe",
+      "gatewayExeSha256": "1595721be304c256d3a12bff15d7bcce91cf7da03379851d255173a3c6cf69f3",
+      "arguments": [
+        "--exact",
+        "routing::tests::native_target_lifecycle_transport_tests::native_target_lifecycle_real_gateway_three_class_cohort",
+        "--ignored",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "ownedOutput": "C:/mir2-playtest-releases/20261009-p1-target-lifecycle-network-07",
+      "log": "C:\\mir2-build\\p1-target-lifecycle-20261009-01\\07-native-gateway-network.log",
+      "logSha256": "9ab484890bafd0420ebc254ea5299ea5cd4aeefcbc2250553002621cf50d9d8f",
+      "rendererStarted": false,
+      "humanAcceptance": false
+    },
+    "32-shell-and-native-format.log.json": {
+      "nodeExit": 0,
+      "formatExit": 0,
+      "completedUtc": "2026-10-09T03:13:42.9397843Z",
+      "log": "C:\\mir2-build\\p1-target-lifecycle-20261009-01\\32-shell-and-native-format.log",
+      "logSha256": "878c7ca1adfb73879a1990daf1d606705365cf059cc77e0e6e85f9844651402c",
+      "assetSha256": "ebcb5e32521cdf7256c334be1951064edd21e080264823b327bc6803acdd38f1",
+      "packageScriptSha256": "1d569becb4d1f39c8fa94416c75fad37dc490f8ee6705b31a55df3063ba9db97"
+    }
+  },
+  "native": {
+    "passed": 900,
+    "failed": 0,
+    "ignored": 7,
+    "rendererStarted": false,
+    "humanAcceptance": false
+  },
+  "realNativeGatewayCohort": {
+    "classes": [
+      "Warrior",
+      "Wizard",
+      "Taoist"
+    ],
+    "rejectedAckMs": [
+      68,
+      68,
+      71
+    ],
+    "normalLogouts": 3,
+    "realSocketPackets": true,
+    "pendingMoveWasProducedNormally": true,
+    "noSyntheticAck": true,
+    "noticeClosedThroughOrdinaryOkModel": true,
+    "guiClickClaimed": false
+  },
+  "zoneBroadGate": {
+    "currentPassed": 198,
+    "currentFailed": 11,
+    "clean7feaPassed": 198,
+    "clean7feaFailed": 11,
+    "baselineFullyGreen": false,
+    "audit": "CLASSIC-ZONE-BASELINE-AUDIT-20261009.md"
+  },
+  "publishedByThisSlice": false,
+  "humanAccepted": false,
+  "fullGoalComplete": false,
+  "archive": {
+    "file": "original-evidence.zip",
+    "bytes": 1012038,
+    "sha256": "72b95dac413e0c4e953d9b1e632d99f17d460dde3d6eb98b49537a561a6873ac",
+    "entries": [
+      {
+        "file": "assets/91-wav-provenance.json",
+        "bytes": 288,
+        "sha256": "128148e64f033f2398bce55129c41a15667452bbc9d8ce815c6a221c806ab508"
+      },
+      {
+        "file": "network-02/Taoist/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "d6adc125535c6927d83986870adaec8cb00f5b5c22e9dc7f1e1fee2bb7882e7f"
+      },
+      {
+        "file": "network-02/Taoist/native-report.json",
+        "bytes": 273,
+        "sha256": "9e5e3db306999badfa21e70fe1fdbdec1cbc5533a6e8cc80348c1792b9fb6bf8"
+      },
+      {
+        "file": "network-02/Taoist/native-stderr.log",
+        "bytes": 627,
+        "sha256": "1221131c3ee5298a7a836e40b47c5f8eb84632c909369071c6e1ff64eb315cb8"
+      },
+      {
+        "file": "network-02/Taoist/native-stdout.log",
+        "bytes": 341,
+        "sha256": "c39bce7e2b79e210b9138443a623f810a2edd8501577cf0d66477d6a050997e7"
+      },
+      {
+        "file": "network-02/Taoist/wire-trace.json",
+        "bytes": 87519,
+        "sha256": "40200a834d95a572a8cfdc4afe88b873c2f48b3727325e84b8b6aa1877babe63"
+      },
+      {
+        "file": "network-02/Warrior/gateway-checks.json",
+        "bytes": 263,
+        "sha256": "0a727547228ad6cd3fa6d9861944f6c950d60d98f16809755f59c52632e896ea"
+      },
+      {
+        "file": "network-02/Warrior/native-report.json",
+        "bytes": 274,
+        "sha256": "9f30c913a3dfd33ad1f4f7fe081ccdb29dd6eee2243b4221616d760539642d2b"
+      },
+      {
+        "file": "network-02/Warrior/native-stderr.log",
+        "bytes": 627,
+        "sha256": "035ea2a5b5aec37d63c5589dbfb88e9a5d0a216319e62034b4fdb8862ba056e6"
+      },
+      {
+        "file": "network-02/Warrior/native-stdout.log",
+        "bytes": 341,
+        "sha256": "75a790b94ab70b6b87003ea95597d022966aa202fba534f5deb7efb529cb2091"
+      },
+      {
+        "file": "network-02/Warrior/wire-trace.json",
+        "bytes": 87519,
+        "sha256": "c16ff1ade4b38b1138a3fc88322455870935884b2b7a738d1704138614ed659e"
+      },
+      {
+        "file": "network-02/Wizard/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "e5e5d2f31074da7fb0f4132dc08d0c3a416e20ee5dce30b0e4b8c4887b025c4c"
+      },
+      {
+        "file": "network-02/Wizard/native-report.json",
+        "bytes": 273,
+        "sha256": "bcb9f88abde681aa1b91fe64147aa6ce3aa0a1b329c072a345ffdfebc6c9d3d9"
+      },
+      {
+        "file": "network-02/Wizard/native-stderr.log",
+        "bytes": 627,
+        "sha256": "bc2795efc767fa1f87d367bddd3a0b33c06868d6bda0730bcec47a432167c758"
+      },
+      {
+        "file": "network-02/Wizard/native-stdout.log",
+        "bytes": 341,
+        "sha256": "6b7ea186e260c9f0605edadc60a19626bc4954dc0959d54213e64600b3acf7d3"
+      },
+      {
+        "file": "network-02/Wizard/wire-trace.json",
+        "bytes": 87757,
+        "sha256": "e67f2d680aa5725d32c46c50684ea1399694775236dd6ae802a3bd55c4813305"
+      },
+      {
+        "file": "network-02/cohort.json",
+        "bytes": 440,
+        "sha256": "3ade9ed8460ad804072c0100f3c62c8b6045ae8a7e049718015c5c2f62389e58"
+      },
+      {
+        "file": "network-03/Taoist/attack-ack.json",
+        "bytes": 98,
+        "sha256": "75d142f67c3836ddd994937f8e1ae90f7e017c1697cb0d3e6ed552647f8417d5"
+      },
+      {
+        "file": "network-03/Taoist/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "d6adc125535c6927d83986870adaec8cb00f5b5c22e9dc7f1e1fee2bb7882e7f"
+      },
+      {
+        "file": "network-03/Taoist/native-report.json",
+        "bytes": 566,
+        "sha256": "4ed9462054e0993804e2ef9b4c88d6b383219283b469dfb31d6e67441433b297"
+      },
+      {
+        "file": "network-03/Taoist/native-stderr.log",
+        "bytes": 812,
+        "sha256": "4bdcdb1685e5be5b74b97dca8cc82e6b12009ea81efe117b7e336203dcd7a8b0"
+      },
+      {
+        "file": "network-03/Taoist/native-stdout.log",
+        "bytes": 341,
+        "sha256": "770641fc3baaaddf1f0f09951aa0279d60eefba8eca032af69290e643faeb937"
+      },
+      {
+        "file": "network-03/Taoist/wire-trace.json",
+        "bytes": 88640,
+        "sha256": "c453de89bf55e3ab1a903f97ef608054addff919c48bf9198371190f3695fdda"
+      },
+      {
+        "file": "network-03/Warrior/attack-ack.json",
+        "bytes": 98,
+        "sha256": "55a69cc72a2e7191337c1ace322cbf0f07af6f4c64e4deaf5c8fdf7b58426fc8"
+      },
+      {
+        "file": "network-03/Warrior/gateway-checks.json",
+        "bytes": 263,
+        "sha256": "0a727547228ad6cd3fa6d9861944f6c950d60d98f16809755f59c52632e896ea"
+      },
+      {
+        "file": "network-03/Warrior/native-report.json",
+        "bytes": 567,
+        "sha256": "7a9e68f9d16b91772dc4b8681b50c6aa110fc3cf8599c59f008ff355e9642997"
+      },
+      {
+        "file": "network-03/Warrior/native-stderr.log",
+        "bytes": 812,
+        "sha256": "e55774b851247863167d9413fbe4e95eb752233e302a70f0fd55edac7b09b615"
+      },
+      {
+        "file": "network-03/Warrior/native-stdout.log",
+        "bytes": 341,
+        "sha256": "2cf15196e2298fc55d86ee0efc2561d7179232d6f4e99392cbcdc79cf2f58eff"
+      },
+      {
+        "file": "network-03/Warrior/wire-trace.json",
+        "bytes": 88877,
+        "sha256": "ad6a569bb832b8fe37f9525fd337b95b975678558bd65d7df6dafc0ac1521efb"
+      },
+      {
+        "file": "network-03/Wizard/attack-ack.json",
+        "bytes": 98,
+        "sha256": "75d142f67c3836ddd994937f8e1ae90f7e017c1697cb0d3e6ed552647f8417d5"
+      },
+      {
+        "file": "network-03/Wizard/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "e5e5d2f31074da7fb0f4132dc08d0c3a416e20ee5dce30b0e4b8c4887b025c4c"
+      },
+      {
+        "file": "network-03/Wizard/native-report.json",
+        "bytes": 566,
+        "sha256": "3040f13e9bde11d0759a953e3fa11fd99531151c569835eb4eeb35b67a68856e"
+      },
+      {
+        "file": "network-03/Wizard/native-stderr.log",
+        "bytes": 812,
+        "sha256": "268206d07474ec7c2481edc4bd9a984f9e4882ab948e8dc60e6dd6ddd7d8ceae"
+      },
+      {
+        "file": "network-03/Wizard/native-stdout.log",
+        "bytes": 341,
+        "sha256": "1a43edcb8ad8611ebf0775c90977f5731708c49fe134d9fcafd4177dc491713a"
+      },
+      {
+        "file": "network-03/Wizard/wire-trace.json",
+        "bytes": 89115,
+        "sha256": "041fcdef032651d603be0533d457cec01fde3e0eba2f9267fbfa6f6b1135050b"
+      },
+      {
+        "file": "network-03/cohort.json",
+        "bytes": 440,
+        "sha256": "3ade9ed8460ad804072c0100f3c62c8b6045ae8a7e049718015c5c2f62389e58"
+      },
+      {
+        "file": "network-04/Taoist/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "d6adc125535c6927d83986870adaec8cb00f5b5c22e9dc7f1e1fee2bb7882e7f"
+      },
+      {
+        "file": "network-04/Taoist/native-report.json",
+        "bytes": 490,
+        "sha256": "67d08fe3c6611d04c31aa24384f5bdb0f348295f380e88922d8b21ca3246ad3a"
+      },
+      {
+        "file": "network-04/Taoist/native-stderr.log",
+        "bytes": 811,
+        "sha256": "3324957c02c3edc1f577b4116a5b7f93e547f01fed5c2519c39caf3fa4e8db68"
+      },
+      {
+        "file": "network-04/Taoist/native-stdout.log",
+        "bytes": 341,
+        "sha256": "ed49fd8b42d51f7d679604738b4f8a914f9037a154c5a41c6e8045aad3d44cd6"
+      },
+      {
+        "file": "network-04/Taoist/wire-trace.json",
+        "bytes": 88307,
+        "sha256": "76fc448ab6910b3c6c96605fdbfe9859b0a9cf6bb1083b3747ba1ccc9fde281d"
+      },
+      {
+        "file": "network-04/Warrior/gateway-checks.json",
+        "bytes": 263,
+        "sha256": "0a727547228ad6cd3fa6d9861944f6c950d60d98f16809755f59c52632e896ea"
+      },
+      {
+        "file": "network-04/Warrior/native-report.json",
+        "bytes": 491,
+        "sha256": "45e6f1adfcf80a37bd41a586dd30855d47c2247a19233a1b93d31889a1a13c62"
+      },
+      {
+        "file": "network-04/Warrior/native-stderr.log",
+        "bytes": 811,
+        "sha256": "399dd8c1dc6202f43ed615f42fb74689f5d2f015d3231c76a3961b364cd10474"
+      },
+      {
+        "file": "network-04/Warrior/native-stdout.log",
+        "bytes": 341,
+        "sha256": "ffc1cc23e52648dba84e2976d6d66159a04e524967e79e2366c268582b1d0314"
+      },
+      {
+        "file": "network-04/Warrior/wire-trace.json",
+        "bytes": 88307,
+        "sha256": "0f967fd5a0836c70084eccbf61d077871cfe1ae3fb4b4b16566e5ed0c50a9381"
+      },
+      {
+        "file": "network-04/Wizard/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "e5e5d2f31074da7fb0f4132dc08d0c3a416e20ee5dce30b0e4b8c4887b025c4c"
+      },
+      {
+        "file": "network-04/Wizard/native-report.json",
+        "bytes": 494,
+        "sha256": "4bb85367ded05bc592063244a2cc28c3da7c094ac766531fbd2b17178736771d"
+      },
+      {
+        "file": "network-04/Wizard/native-stderr.log",
+        "bytes": 811,
+        "sha256": "8b2ef9e734e4b8e27f9c9932c5a40d00c8e253a205a3fad36c4072b6c6e9219e"
+      },
+      {
+        "file": "network-04/Wizard/native-stdout.log",
+        "bytes": 341,
+        "sha256": "0c1949787dc9bc642ecc9ef26d1d3bcd3563b97b8654409d6f5395b9dbeee68e"
+      },
+      {
+        "file": "network-04/Wizard/wire-trace.json",
+        "bytes": 88071,
+        "sha256": "aa6c03c7e7c3b2951ff6456315f5fb1ee306adc736319b25e6539eab9912b475"
+      },
+      {
+        "file": "network-04/cohort.json",
+        "bytes": 440,
+        "sha256": "3ade9ed8460ad804072c0100f3c62c8b6045ae8a7e049718015c5c2f62389e58"
+      },
+      {
+        "file": "network-05/Taoist/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "d6adc125535c6927d83986870adaec8cb00f5b5c22e9dc7f1e1fee2bb7882e7f"
+      },
+      {
+        "file": "network-05/Taoist/native-report.json",
+        "bytes": 2657,
+        "sha256": "ce476dc7e1a8dc5c3ac85bdabaf4cf21dd84fc876cf71adf3e4a7458d0015d47"
+      },
+      {
+        "file": "network-05/Taoist/native-stderr.log",
+        "bytes": 811,
+        "sha256": "16b9ca6219e6eddff3532b31fb6fd4e491c37b8861f8090f79b48624da46d205"
+      },
+      {
+        "file": "network-05/Taoist/native-stdout.log",
+        "bytes": 341,
+        "sha256": "122bdf9ceae0c3f7d8a0bfe5d64ef9bac9132fb4ee971b79daf1c52cefa244e8"
+      },
+      {
+        "file": "network-05/Taoist/wire-trace.json",
+        "bytes": 88068,
+        "sha256": "11b56dc4ae998afa76f6f9aa2c9eba95caa7c9cb605e7e86ab5586ff537fa2f4"
+      },
+      {
+        "file": "network-05/Warrior/gateway-checks.json",
+        "bytes": 263,
+        "sha256": "0a727547228ad6cd3fa6d9861944f6c950d60d98f16809755f59c52632e896ea"
+      },
+      {
+        "file": "network-05/Warrior/native-report.json",
+        "bytes": 2658,
+        "sha256": "1670cf64d02e4b9eaa0efcbdc623299cc689357c58ba317b22f2d3ae5ad730c6"
+      },
+      {
+        "file": "network-05/Warrior/native-stderr.log",
+        "bytes": 811,
+        "sha256": "48bcebd5418b7e7855089db8a1bec0af748568bb65961165256cc74c044eb20b"
+      },
+      {
+        "file": "network-05/Warrior/native-stdout.log",
+        "bytes": 341,
+        "sha256": "617eb0b5e98b6ab4f73f266f7577b9ec2c65c91cd428ff0986d163b9c80d97ac"
+      },
+      {
+        "file": "network-05/Warrior/wire-trace.json",
+        "bytes": 88068,
+        "sha256": "7d20aadd814de8c25132571a39aa3aef9702536e8ba0decd2390c88bfc656483"
+      },
+      {
+        "file": "network-05/Wizard/gateway-checks.json",
+        "bytes": 262,
+        "sha256": "e5e5d2f31074da7fb0f4132dc08d0c3a416e20ee5dce30b0e4b8c4887b025c4c"
+      },
+      {
+        "file": "network-05/Wizard/native-report.json",
+        "bytes": 2657,
+        "sha256": "98b4c6b179bfcbf27e4a6a950ec4089ae73284813363836ef8f04366338a1764"
+      },
+      {
+        "file": "network-05/Wizard/native-stderr.log",
+        "bytes": 811,
+        "sha256": "da9d7db7e072a070026c840ed3873c8450949022829bfac1915979dbc0952f3c"
+      },
+      {
+        "file": "network-05/Wizard/native-stdout.log",
+        "bytes": 341,
+        "sha256": "78a3924e62ccc408aa1e207296136ecc7fe96c2e1eddd58a394318e991a4440f"
+      },
+      {
+        "file": "network-05/Wizard/wire-trace.json",
+        "bytes": 88070,
+        "sha256": "fe51fbf3eddfb83405f4a67b9daae4e910c4f2915f03a2d1b459460e4800fdcf"
+      },
+      {
+        "file": "network-05/cohort.json",
+        "bytes": 440,
+        "sha256": "3ade9ed8460ad804072c0100f3c62c8b6045ae8a7e049718015c5c2f62389e58"
+      },
+      {
+        "file": "network-06/PREFLIGHT-NO-EXECUTION.txt",
+        "bytes": 174,
+        "sha256": "733105a7c8ef3a50fe0911a8bbe94355c5a6b8fcfd6a5fd8df96b2183434d5d7"
+      },
+      {
+        "file": "network-07/Taoist/attack-ack.json",
+        "bytes": 98,
+        "sha256": "75d142f67c3836ddd994937f8e1ae90f7e017c1697cb0d3e6ed552647f8417d5"
+      },
+      {
+        "file": "network-07/Taoist/gateway-checks.json",
+        "bytes": 259,
+        "sha256": "aae089e0767eaf267113d1f4eea2ff0b718e3decc0e17597457b80103b4d7633"
+      },
+      {
+        "file": "network-07/Taoist/native-report.json",
+        "bytes": 3316,
+        "sha256": "626e6179a8fdb8b676f24e163faaf8dda384766ca944f9efb3b57319c3f56517"
+      },
+      {
+        "file": "network-07/Taoist/native-stderr.log",
+        "bytes": 474,
+        "sha256": "58ee23ed178afd9500b74558796087ae9c2b3c423a5a77c62c319fc09b15a255"
+      },
+      {
+        "file": "network-07/Taoist/native-stdout.log",
+        "bytes": 217,
+        "sha256": "bb393e598ebf7afb4806e097dd507908ad4c779ab15476b449191b9a4b517db0"
+      },
+      {
+        "file": "network-07/Taoist/wire-trace.json",
+        "bytes": 89430,
+        "sha256": "ae507f75bbb379e8702025277d2ac29964d4790cc83776002e8822b54744a5b0"
+      },
+      {
+        "file": "network-07/Warrior/attack-ack.json",
+        "bytes": 98,
+        "sha256": "75d142f67c3836ddd994937f8e1ae90f7e017c1697cb0d3e6ed552647f8417d5"
+      },
+      {
+        "file": "network-07/Warrior/gateway-checks.json",
+        "bytes": 260,
+        "sha256": "7b5e52101ade07edaac45cf2aed6f26851ea57d0b52b5bf700d1cc34e070ebd5"
+      },
+      {
+        "file": "network-07/Warrior/native-report.json",
+        "bytes": 3317,
+        "sha256": "040bbf6a94af66054050037e041b3cd3b54b8ac551b3d1b6802701b329d55eea"
+      },
+      {
+        "file": "network-07/Warrior/native-stderr.log",
+        "bytes": 474,
+        "sha256": "58ee23ed178afd9500b74558796087ae9c2b3c423a5a77c62c319fc09b15a255"
+      },
+      {
+        "file": "network-07/Warrior/native-stdout.log",
+        "bytes": 217,
+        "sha256": "3103781a974c105d642443726edfdc67ad39f35f03b1d25d0d31825edb9bed7e"
+      },
+      {
+        "file": "network-07/Warrior/wire-trace.json",
+        "bytes": 89428,
+        "sha256": "d53cf0126b3969754097c58426d4ddd5099a3e554efc82ed3214700de29b1ef9"
+      },
+      {
+        "file": "network-07/Wizard/attack-ack.json",
+        "bytes": 98,
+        "sha256": "75d142f67c3836ddd994937f8e1ae90f7e017c1697cb0d3e6ed552647f8417d5"
+      },
+      {
+        "file": "network-07/Wizard/gateway-checks.json",
+        "bytes": 259,
+        "sha256": "0e969782bb9bb9d2008bd0195ba5de52c083607c9c505267b29d77564524e0d2"
+      },
+      {
+        "file": "network-07/Wizard/native-report.json",
+        "bytes": 3316,
+        "sha256": "b2761e468eaaf5ca5541163afe500df30ecc4722db89d3f9dc58bcecbef88f61"
+      },
+      {
+        "file": "network-07/Wizard/native-stderr.log",
+        "bytes": 474,
+        "sha256": "58ee23ed178afd9500b74558796087ae9c2b3c423a5a77c62c319fc09b15a255"
+      },
+      {
+        "file": "network-07/Wizard/native-stdout.log",
+        "bytes": 217,
+        "sha256": "297236ef4497a421ff7a5e38a5c2b3e2219ec8f6b28c8a6dc4d4c28795343bb3"
+      },
+      {
+        "file": "network-07/Wizard/wire-trace.json",
+        "bytes": 89428,
+        "sha256": "4295b325c8a41bba7fa4ebdf73705d156d8dd133a49d0de8d16f9a9690ca9020"
+      },
+      {
+        "file": "network-07/cohort.json",
+        "bytes": 94,
+        "sha256": "747f2422009e55e79ade2d247ded057860c3e2863d5e0632c88bc173fef46802"
+      },
+      {
+        "file": "raw/01-gateway-focused.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "raw/01-native-focused.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "raw/01-native-gateway-network.log",
+        "bytes": 806,
+        "sha256": "e7a39ad296e090170d5b34801bf3f598c145a7fbce0a3df98cf0abea4a9a2fb8"
+      },
+      {
+        "file": "raw/01-native-gateway-network.log.json",
+        "bytes": 2181,
+        "sha256": "ca8bbfec8d555c5cd0864f25ddbc9956bf77f156096b647a124095a0dd23b563"
+      },
+      {
+        "file": "raw/02-gateway-focused.log",
+        "bytes": 40571,
+        "sha256": "22d4b72cb1049c54a588f21e5f63aee0fe8eb5bff04e9d6f9a28140360a6e977"
+      },
+      {
+        "file": "raw/02-gateway-focused.log.json",
+        "bytes": 1466,
+        "sha256": "4a34aac999185cbed103f6f19a64c2a1319b682e592692aafc9ec183c5089e07"
+      },
+      {
+        "file": "raw/02-native-focused.log",
+        "bytes": 44061,
+        "sha256": "97582fbe546067af9c7324895ea89c712601cd3c0e9b6982c4e70606e2c1fea2"
+      },
+      {
+        "file": "raw/02-native-focused.log.json",
+        "bytes": 1544,
+        "sha256": "89d557284080355ea5ad506bfffcc106318516589d392387c9bab7668c0b53de"
+      },
+      {
+        "file": "raw/02-native-gateway-network.log",
+        "bytes": 5860,
+        "sha256": "dff54110ee72611d282ed061abfeeb672d143f06ba210c723b3066bb34864f95"
+      },
+      {
+        "file": "raw/02-native-gateway-network.log.json",
+        "bytes": 2181,
+        "sha256": "c89d88d318adefac2c837aa0864d3893094cdec64e0cd01e7b5c816f80b1baee"
+      },
+      {
+        "file": "raw/03-build-cache-copy.log",
+        "bytes": 1259,
+        "sha256": "d783b2ee0433578e6fce473ed40f6a92a94f0259adf7ab55984eb91b0d9451ac"
+      },
+      {
+        "file": "raw/03-gateway-focused.log",
+        "bytes": 35484,
+        "sha256": "3b5e6d398003d2267ef4d3e4f15063f601a17f774b568e52fac6e89de5a572dc"
+      },
+      {
+        "file": "raw/03-gateway-focused.log.json",
+        "bytes": 1464,
+        "sha256": "f46bb9ecad9f4651be6e4face050c6dadc65ea947d3c5ef660abdf3f04ba321c"
+      },
+      {
+        "file": "raw/03-native-focused.log",
+        "bytes": 42605,
+        "sha256": "3d09b999025a8dfd1e82b08e88f18a4831b5a9fe223a0fbe88c8a4131dcbdadb"
+      },
+      {
+        "file": "raw/03-native-focused.log.json",
+        "bytes": 1542,
+        "sha256": "a1ade4a06bbcf44d9618748d8cbfbda18bd1ec27603b198e2c23fc46ea82260b"
+      },
+      {
+        "file": "raw/03-native-gateway-network.log",
+        "bytes": 5771,
+        "sha256": "c0d6c0bd7846e92febe4dac799a00f59c3cd98c23040d4978ac00051a728364f"
+      },
+      {
+        "file": "raw/03-native-gateway-network.log.json",
+        "bytes": 2328,
+        "sha256": "fad53d4275c151da080154d96b0d1da85120a5d91902d368fb8ec55f59285562"
+      },
+      {
+        "file": "raw/04-gateway-focused.log",
+        "bytes": 32207,
+        "sha256": "3a34c4943f9d9a872ffcd7f2001d72063e94599781756a8b67492332174b2dfd"
+      },
+      {
+        "file": "raw/04-gateway-focused.log.json",
+        "bytes": 1462,
+        "sha256": "4e54f912cee661efb5973a8c9410bd2b28d0961182db8a41ef3d909ca965ae75"
+      },
+      {
+        "file": "raw/04-native-adjacent.log",
+        "bytes": 61016,
+        "sha256": "6c0cc102c973fcff3aaca19d1169cf5ddd6afbe1b2f196635210afc807719557"
+      },
+      {
+        "file": "raw/04-native-adjacent.log.json",
+        "bytes": 1547,
+        "sha256": "f10b125221c9245c21730b4ff6c7d5e1e391473236e75bd4535db924fbbb93cf"
+      },
+      {
+        "file": "raw/04-native-gateway-network.log",
+        "bytes": 5611,
+        "sha256": "a988219b4e4320a35bb618bb2769f921e1e71057b5f0affb102755aeccb6b426"
+      },
+      {
+        "file": "raw/04-native-gateway-network.log.json",
+        "bytes": 2328,
+        "sha256": "6caf1c4b0907c11f42b967b1ef86548855e08aa258e3573aecbf1994a6be0de1"
+      },
+      {
+        "file": "raw/05-gateway-adjacent.log",
+        "bytes": 34122,
+        "sha256": "adf542fac0c5917109cdd583573f96225c37df529a4c1ba38b3639d5ae61f16b"
+      },
+      {
+        "file": "raw/05-gateway-adjacent.log.json",
+        "bytes": 1579,
+        "sha256": "7ec5c67e180f3fd19ceaaf6b1f8ffa32b21d7e8e1ab52925515f96cfae8ce11e"
+      },
+      {
+        "file": "raw/05-native-gateway-network.log",
+        "bytes": 5851,
+        "sha256": "5022054f1dbb416a15e0f4cbc917df94359e2880d3fd8cf816ebaed090c9db17"
+      },
+      {
+        "file": "raw/05-native-gateway-network.log.json",
+        "bytes": 2328,
+        "sha256": "6f2b16e8dff0b2efc2ea4bd4a063850afbbcc11c364143c3fe0b0a5c486f47ef"
+      },
+      {
+        "file": "raw/06-zone-focused.log",
+        "bytes": 40170,
+        "sha256": "87a27b8e5b6d0986b3b4f401c1d58355995ca642a6a82d2118e7b6d27048db44"
+      },
+      {
+        "file": "raw/06-zone-focused.log.json",
+        "bytes": 1457,
+        "sha256": "c7a5d9276c9c4c2ef8b768f5c67c36c76445ed699d33f96a733894e0d6d56c18"
+      },
+      {
+        "file": "raw/07-gateway-focused.log",
+        "bytes": 35745,
+        "sha256": "13cc24bb07d2099af839c3479114db9958005ff2785fd0d045e0de3d816f06d8"
+      },
+      {
+        "file": "raw/07-gateway-focused.log.json",
+        "bytes": 1464,
+        "sha256": "8da890187883157591aab0e664082e9ed641133e585760ec8533867276ca67b0"
+      },
+      {
+        "file": "raw/07-native-gateway-network.log",
+        "bytes": 5026,
+        "sha256": "9ab484890bafd0420ebc254ea5299ea5cd4aeefcbc2250553002621cf50d9d8f"
+      },
+      {
+        "file": "raw/07-native-gateway-network.log.json",
+        "bytes": 2326,
+        "sha256": "a975ed60bca1ebbe26a07ad8c08050f1d95a1b01111ed846bd04eb277cbf8a6d"
+      },
+      {
+        "file": "raw/08-gateway-focused.log",
+        "bytes": 40395,
+        "sha256": "d5d75c911d4634ce7eeaa90da9d89ed8ac26302fec4701a827f92cffa1395d09"
+      },
+      {
+        "file": "raw/08-gateway-focused.log.json",
+        "bytes": 1464,
+        "sha256": "32714293c27cec9f6e0d81e9ab12597df4c6b45d6a2845f7632356f2bbb064a0"
+      },
+      {
+        "file": "raw/09-gateway-adjacent.log",
+        "bytes": 40395,
+        "sha256": "345f717a21c069f177ee9406b70593be46247dfcae6a92b7d2e975a24e3ff759"
+      },
+      {
+        "file": "raw/09-gateway-adjacent.log.json",
+        "bytes": 1648,
+        "sha256": "c6a0526f22c9bc961d3e5ecfd557c32ad7aa1f2470618009f8c3205d71d059e7"
+      },
+      {
+        "file": "raw/10-gateway-adjacent.log",
+        "bytes": 34362,
+        "sha256": "eb3663f94b5e6985e320a4bf2f264cd38d0b778e666ccbefb77cac560304e151"
+      },
+      {
+        "file": "raw/10-gateway-adjacent.log.json",
+        "bytes": 1646,
+        "sha256": "2120e35d09d32b06606c24f94f62c904e24129648f53da8dc5c6b133a614ce2c"
+      },
+      {
+        "file": "raw/11-native-adjacent.log",
+        "bytes": 61163,
+        "sha256": "3dd1219f2798e4dc51a04d9a003a22fe8a11e44fe42e40af2ac319653367fbd0"
+      },
+      {
+        "file": "raw/11-native-adjacent.log.json",
+        "bytes": 1621,
+        "sha256": "3b444255f0283987dd990ee463373b17cc200ccd641ef45c5836e33c504bd291"
+      },
+      {
+        "file": "raw/12-native-adjacent.log",
+        "bytes": 61322,
+        "sha256": "b5ad3224b9fe78f3016251a66046cc37868771f1234b5f56bfca42fd6cee5d4b"
+      },
+      {
+        "file": "raw/12-native-adjacent.log.json",
+        "bytes": 2064,
+        "sha256": "0dd62c934c6df68e86e820e9476c7f306aace5440159170589dc2c4f0061c32b"
+      },
+      {
+        "file": "raw/13-gateway-adjacent.log",
+        "bytes": 35584,
+        "sha256": "b76acb4c0e6280f273a769a38e919447fa123e21788bc7f1a0a0531854065242"
+      },
+      {
+        "file": "raw/13-gateway-adjacent.log.json",
+        "bytes": 2125,
+        "sha256": "11370c98e948595d7a6a688e4e2d5f35a28f6a2c4724a8d59226d5fa11767c2d"
+      },
+      {
+        "file": "raw/14-native-adjacent.log",
+        "bytes": 61322,
+        "sha256": "f32e47c29a7e7a4bba8eac4232713b81a3229e030d22f8e1775a7f209f944549"
+      },
+      {
+        "file": "raw/14-native-adjacent.log.json",
+        "bytes": 2082,
+        "sha256": "15b2f5fd48640f2290423a2b5400d6cb9ee7acc0a709bc6e98ca2af92ae48bf4"
+      },
+      {
+        "file": "raw/15-gateway-bridge-build.log",
+        "bytes": 31806,
+        "sha256": "c19e26e26358f0b49ba20cd89a5a66be9389d8dc9201e77a0bec84fafd00f318"
+      },
+      {
+        "file": "raw/15-gateway-bridge-build.log.json",
+        "bytes": 1945,
+        "sha256": "1e46ca70097fb396b0afc9de8336750221be7cf3f9291d511060f10e6f80cc91"
+      },
+      {
+        "file": "raw/16-zone-adjacent.log",
+        "bytes": 73269,
+        "sha256": "01648efb76029a6e6245cf2236df9745acc281c6658894fbd21359a1d4254bd5"
+      },
+      {
+        "file": "raw/16-zone-adjacent.log.json",
+        "bytes": 1890,
+        "sha256": "5292735c20bc03ee548b36c8021f0ce12f19fbe5584c127b0d94188d39b235ab"
+      },
+      {
+        "file": "raw/17-zone-baseline.log",
+        "bytes": 73273,
+        "sha256": "f2582c419c54820e4c3949550c540dedd0c42599a65b3841a3d005e736bb4868"
+      },
+      {
+        "file": "raw/17-zone-baseline.log.json",
+        "bytes": 1214,
+        "sha256": "6d45baa10c1f08f5db5610fb40d02e03bfa39ed8cb3fb81b978664d362abdcbc"
+      },
+      {
+        "file": "raw/18-native-focused.log",
+        "bytes": 43428,
+        "sha256": "732716b7f950372ca9dfa4b1efd144d481360b9354e58c667da8efe4c3178aa7"
+      },
+      {
+        "file": "raw/18-native-focused.log.json",
+        "bytes": 2266,
+        "sha256": "5da320eb2196de4b47de68a7dd93c5a26da91b62b17796039ef711baac1cdd37"
+      },
+      {
+        "file": "raw/19-native-adjacent.log",
+        "bytes": 66257,
+        "sha256": "c118e53838ccab71d9dc3036a08c05f77341f6bd44fc5d0441dc6b485a97a5f2"
+      },
+      {
+        "file": "raw/19-native-adjacent.log.json",
+        "bytes": 2342,
+        "sha256": "3563f668faacd996db76c2e4fe79e3ab1daad1804fb38b6836f8b2e4da9c1824"
+      },
+      {
+        "file": "raw/20-native-adjacent.log",
+        "bytes": 66257,
+        "sha256": "24f53582b032deba8cecc8fcc047a545118f3946a3ea3909b24a214f3c98b0a0"
+      },
+      {
+        "file": "raw/20-native-adjacent.log.json",
+        "bytes": 2342,
+        "sha256": "0726ee1ab99623f65b3a4dd2011369cd2fcd58692aee265e166bfd8c79e682b6"
+      },
+      {
+        "file": "raw/21-native-adjacent.log",
+        "bytes": 66257,
+        "sha256": "26367bd8f101dbb71e4307186f1055905a364bda5bc5f337d907bdab48f343f8"
+      },
+      {
+        "file": "raw/21-native-adjacent.log.json",
+        "bytes": 2342,
+        "sha256": "7b8f6361609f5ea322b77503de69feb8843e6742bbbaa758679c439a84cbd8f7"
+      },
+      {
+        "file": "raw/22-native-format-check.log",
+        "bytes": 28820,
+        "sha256": "840c5c8c8c5edcc4cbfe6713e9aaa7a29bd466a0103c978e8ef3b47cc7ba8f15"
+      },
+      {
+        "file": "raw/23-native-format-check.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "file": "raw/24-gateway-bridge-build.log",
+        "bytes": 31753,
+        "sha256": "c753619aaf6df439926987625b5bbcdd7aa8f87364d880391151551543fe9f7f"
+      },
+      {
+        "file": "raw/24-gateway-bridge-build.log.json",
+        "bytes": 2159,
+        "sha256": "45743a29d55224632bf572f932f1a3b4b5128d88105f8d45a41bcab85e0419a5"
+      },
+      {
+        "file": "raw/25-native-adjacent.log",
+        "bytes": 66523,
+        "sha256": "b1da223f0f1ee6fcacabbbe3f0d39021a91e32e26e67c3a3c8e47caa4f7c62c2"
+      },
+      {
+        "file": "raw/25-native-adjacent.log.json",
+        "bytes": 2343,
+        "sha256": "c05293e6a1cbd9eb0846adbc18e34dd8d9244b6c2d04a4bce9662200c36d3f9e"
+      },
+      {
+        "file": "raw/26-native-focused.log",
+        "bytes": 43324,
+        "sha256": "73c6c6fdd3e169077fcf668f517ca18af8fdd8a4a920ee1c729f092ae1932741"
+      },
+      {
+        "file": "raw/26-native-focused.log.json",
+        "bytes": 2296,
+        "sha256": "08c092e11b284d5940a8102334717c0493b9ca0059b731481ce25135a4a7b9a3"
+      },
+      {
+        "file": "raw/27-native-focused.log",
+        "bytes": 43258,
+        "sha256": "33e7b2fb3090697b4598f1df1bcbdf2e1b4f61ed44101aa3ff936858c0a2105f"
+      },
+      {
+        "file": "raw/27-native-focused.log.json",
+        "bytes": 2286,
+        "sha256": "2b9ccc461977e21d9ca8c4a596e34056e3bb4fee088ce7abb9f78b5303189e43"
+      },
+      {
+        "file": "raw/28-native-full-artifact.log",
+        "bytes": 90481,
+        "sha256": "9a4d5285635370b9bef5c1cda880c796f9af197571d23b9460ea96e933adafcd"
+      },
+      {
+        "file": "raw/28-native-full-artifact.log.json",
+        "bytes": 1861,
+        "sha256": "6517e57ef97c0bd64d98c15a0f86f75f93a4e46f82aa8f7b6dc2cfb699ac72e9"
+      },
+      {
+        "file": "raw/29-gateway-adjacent-artifact.log",
+        "bytes": 2768,
+        "sha256": "6708e41205e5a915b34a843a4645113cb0cffc9ff3d99e79b6a2949e815413da"
+      },
+      {
+        "file": "raw/29-gateway-adjacent-artifact.log.json",
+        "bytes": 2036,
+        "sha256": "3eb8963c06fc006387f8f5a0fbc85146ef9ee69c349985799520a4aeae05b7cb"
+      },
+      {
+        "file": "raw/30-native-full-artifact.log",
+        "bytes": 90047,
+        "sha256": "adeef2258e19bbe9bcdbc9a8484cc3d000c0a67067d3ea345adf65d0b8a06f24"
+      },
+      {
+        "file": "raw/30-native-full-artifact.log.json",
+        "bytes": 2342,
+        "sha256": "306b0a929a66ea59e4fa6fdbb87f11cc3b880c5bbf324fcccee6419886f60a96"
+      },
+      {
+        "file": "raw/31-native-full-artifact.log",
+        "bytes": 90047,
+        "sha256": "f83e54e824ad784c2c93c5c19e54484806d3cc87ccaa75f251cf21e54c179b1d"
+      },
+      {
+        "file": "raw/31-native-full-artifact.log.json",
+        "bytes": 1884,
+        "sha256": "cea2109aaed3b842dbbddcc82dcc179fa17fe5cf3b1a0fad242ba69d0061149f"
+      },
+      {
+        "file": "raw/32-shell-and-native-format.log",
+        "bytes": 43,
+        "sha256": "878c7ca1adfb73879a1990daf1d606705365cf059cc77e0e6e85f9844651402c"
+      },
+      {
+        "file": "raw/32-shell-and-native-format.log.json",
+        "bytes": 451,
+        "sha256": "386d36b1f8a24d1e7974f1e51912bf413a4621cfbef8921ac6dad37005ff2210"
+      },
+      {
+        "file": "runners/Archive-P1TargetLifecycleCandidate.py",
+        "bytes": 10156,
+        "sha256": "6608345408c2a044e532708734a7bee82479be01a8e5d24c10f223a673a99ccc"
+      },
+      {
+        "file": "runners/Run-P1CompiledArtifactChecks.ps1",
+        "bytes": 3572,
+        "sha256": "28660e24385ef7148e1f74a4e83706acba8c7fed8e7b2937e049f8e568ddbd31"
+      },
+      {
+        "file": "runners/Run-P1NativeGatewayBridge.ps1",
+        "bytes": 3745,
+        "sha256": "4c50db785b76a9a7b3cd5f40e807d9e3f96bda59b9f3cafdacedb208eab7f50b"
+      },
+      {
+        "file": "runners/Run-P1TargetLifecycleChecks.ps1",
+        "bytes": 4780,
+        "sha256": "92924d8840a3af35bff6bccc3e0fe574e18acad91c52721a1e6534e9e0a09cdf"
+      },
+      {
+        "file": "runners/Run-P1ZoneBaseline.ps1",
+        "bytes": 1600,
+        "sha256": "4d992729e706da778231b120d5015d30b5d9bfcd21de47280533bea22cd58756"
+      },
+      {
+        "file": "source/current/.github/workflows/gateway-release.yml",
+        "bytes": 6895,
+        "sha256": "435758cfad148df158101c3df2a45853fbe118abb1dcdbf51eb44a578a939199"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/game-client/platform-windows/package-assets.sh",
+        "bytes": 7139,
+        "sha256": "1d569becb4d1f39c8fa94416c75fad37dc490f8ee6705b31a55df3063ba9db97"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+        "bytes": 194237,
+        "sha256": "a13552d343be9a312464267e0f30e6b2223347973db4253ab7aea3ef964432bd"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+        "bytes": 508027,
+        "sha256": "1ea0cf04027751849ef4a55f326d3e1472063d6ef3c23d4ae762a2599f6d224c"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs",
+        "bytes": 22825,
+        "sha256": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/game-client/platform-windows/src/input.rs",
+        "bytes": 350232,
+        "sha256": "8751e870a2a32a468e70c793b70cb447c9ea3b9c32939eb8a63f99a34a262cb0"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/gateway/src/routing.rs",
+        "bytes": 1229896,
+        "sha256": "0c77c64a68b45372533aab0ab8933f7d64bfcb44e00ef462398f70627f274c7e"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/gateway/src/routing/tests/native_target_lifecycle_transport_tests.rs",
+        "bytes": 14980,
+        "sha256": "376d8b49e5cc3d30ff8eea44da85e4325c5177acb7ebea4cea75c3c5777e9cef"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/gateway/src/routing/tests/unavailable_combat_target_tests.rs",
+        "bytes": 9484,
+        "sha256": "59f1f4d20c297b443a9f9b665a6e8e25f8bdb4cc080c89121a7e95603e62c5a1"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/simulation/src/runtime/zone/movement_deadline_tests.rs",
+        "bytes": 5202,
+        "sha256": "a206a1bf57c246e7eed398e3f5aacaeccfe7fc927955ce6094a88f216026e757"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+        "bytes": 686091,
+        "sha256": "ca2fc26c042c7c3246b1d252362cde3217829b4cbfd0a91d3ea9a4491e759929"
+      },
+      {
+        "file": "source/current/mir2-web3/apps/web/public/original-ui/Sound/91.wav",
+        "bytes": 164642,
+        "sha256": "ebcb5e32521cdf7256c334be1951064edd21e080264823b327bc6803acdd38f1"
+      },
+      {
+        "file": "source/tracked.patch",
+        "bytes": 41966,
+        "sha256": "6198d15bdb75992f0eef87b68c901e6fbcdc4c5b7debc2da8a95ea9e29cf6275"
+      }
+    ]
+  },
+  "limits": [
+    "Headless loopback real native/Gateway lifecycle, not GPU/native-human or public production acceptance.",
+    "Unknown-target network story plus bounded dead/removed Direct/Live/LiveFull server matrix; not full seven-monster pressure.",
+    "Source clocks, cooldowns, damage and collision guards are unchanged.",
+    "Failed runs, fixture clock OOM and missing source clip attempt are retained and excluded from passing results.",
+    "Public last verified pair remains R22/feed17/Gateway536 until separate exact-source CI and paired rollout.",
+    "P4 Totem owner chain, P7 ordered shared-world outbox and natural P2/P3/P5/P6/Mentor acceptance remain open."
+  ]
+}

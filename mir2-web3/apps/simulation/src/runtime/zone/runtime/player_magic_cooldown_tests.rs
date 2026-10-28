@@ -160,11 +160,11 @@ fn cooldown_getter_includes_global_gate_without_cross_owner_leakage() {
     ));
     assert_eq!(
         zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 0),
-        Some(300),
+        Some(1_800),
         "a different spell remains gated by the shared Crystal action delay",
     );
     assert_eq!(
-        zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 300),
+        zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 1_800),
         Some(0),
     );
     assert_eq!(

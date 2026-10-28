@@ -10,7 +10,7 @@ use mir2_protocol::{ClientQuestInfo, MirClass, MirGender, QuestItemReward};
 use serde::Deserialize;
 
 use super::super::items::item_info_from_crystal_template;
-use super::super::resources::{QuestResource, SessionResource};
+use super::super::resources::{QuestResource, RuntimeConfigResource, SessionResource};
 
 const CONFIG_JSON: &str =
     include_str!("../../../../config/quest-guidance/newcomer-journey-v2.json");
@@ -101,6 +101,8 @@ struct ClassRequirements {
     warrior: Vec<String>,
     wizard: Vec<String>,
     taoist: Vec<String>,
+    assassin: Vec<String>,
+    archer: Vec<String>,
 }
 
 impl ClassRequirements {
@@ -109,12 +111,17 @@ impl ClassRequirements {
             MirClass::Warrior => &self.warrior,
             MirClass::Wizard => &self.wizard,
             MirClass::Taoist => &self.taoist,
-            MirClass::Assassin | MirClass::Archer => &[],
+            MirClass::Assassin => &self.assassin,
+            MirClass::Archer => &self.archer,
         }
     }
 
     fn valid(&self) -> bool {
-        !self.warrior.is_empty() && !self.wizard.is_empty() && !self.taoist.is_empty()
+        !self.warrior.is_empty()
+            && !self.wizard.is_empty()
+            && !self.taoist.is_empty()
+            && !self.assassin.is_empty()
+            && !self.archer.is_empty()
     }
 }
 
@@ -129,6 +136,10 @@ struct RewardSet {
     wizard: Vec<RewardItem>,
     #[serde(default)]
     taoist: Vec<RewardItem>,
+    #[serde(default)]
+    assassin: Vec<RewardItem>,
+    #[serde(default)]
+    archer: Vec<RewardItem>,
 }
 
 impl RewardSet {
@@ -137,7 +148,8 @@ impl RewardSet {
             MirClass::Warrior => &self.warrior,
             MirClass::Wizard => &self.wizard,
             MirClass::Taoist => &self.taoist,
-            MirClass::Assassin | MirClass::Archer => &[],
+            MirClass::Assassin => &self.assassin,
+            MirClass::Archer => &self.archer,
         }
     }
 
@@ -147,6 +159,8 @@ impl RewardSet {
             .chain(self.warrior.iter())
             .chain(self.wizard.iter())
             .chain(self.taoist.iter())
+            .chain(self.assassin.iter())
+            .chain(self.archer.iter())
     }
 }
 
@@ -279,10 +293,10 @@ pub(in crate::runtime) fn can_accept(world: &World, quest_id: i32) -> bool {
     let Some(character) = selected_character(world) else {
         return false;
     };
-    if !matches!(
-        character.class,
-        MirClass::Warrior | MirClass::Wizard | MirClass::Taoist
-    ) {
+    if world
+        .get_resource::<RuntimeConfigResource>()
+        .is_some_and(|runtime| !runtime.config.class_is_allowed(character.class))
+    {
         return false;
     }
     let level = i32::from(character.level);
@@ -665,3 +679,7 @@ fn reward_packet(reward: &RewardItem, gender: MirGender) -> Option<QuestItemRewa
 #[cfg(test)]
 #[path = "newcomer_v2_tests.rs"]
 mod newcomer_v2_tests;
+
+#[cfg(test)]
+#[path = "newcomer_v2_fiveclass_tests.rs"]
+mod newcomer_v2_fiveclass_tests;

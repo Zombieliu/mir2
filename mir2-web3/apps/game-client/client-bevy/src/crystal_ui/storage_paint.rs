@@ -187,18 +187,24 @@ fn label(
     } else {
         JustifyContent::FlexStart
     };
-    parent.spawn((node, FocusPolicy::Pass)).with_children(|parent| {
-        parent.spawn((
-            Text::new(text),
-            font.clone(),
-            TextColor(color),
-            TextLayout::new(
-                if centered { Justify::Center } else { Justify::Left },
-                LineBreak::NoWrap,
-            ),
-            FocusPolicy::Pass,
-        ));
-    });
+    parent
+        .spawn((node, FocusPolicy::Pass))
+        .with_children(|parent| {
+            parent.spawn((
+                Text::new(text),
+                font.clone(),
+                TextColor(color),
+                TextLayout::new(
+                    if centered {
+                        Justify::Center
+                    } else {
+                        Justify::Left
+                    },
+                    LineBreak::NoWrap,
+                ),
+                FocusPolicy::Pass,
+            ));
+        });
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -238,7 +244,11 @@ fn item_cell<B: Bundle>(
                 Color::srgba(0.412, 0.412, 0.412, 0.8)
             };
             cell.spawn((
-                image_marker, node, image, OriginalItemPaintScale(scale), FocusPolicy::Pass,
+                image_marker,
+                node,
+                image,
+                OriginalItemPaintScale(scale),
+                FocusPolicy::Pass,
             ));
         }
         let count = item.crystal_stack_label();
@@ -258,7 +268,13 @@ pub fn paint_storage<B: Bundle>(
     map: impl FnMut(StoragePaintAction) -> B,
 ) {
     paint_storage_with_layout(
-        parent, assets, storage, player, options, StoragePaintLayout::default(), map,
+        parent,
+        assets,
+        storage,
+        player,
+        options,
+        StoragePaintLayout::default(),
+        map,
     );
 }
 
@@ -280,122 +296,245 @@ pub fn paint_storage_with_layout<B: Bundle>(
         return;
     }
     let page = storage.page(options.page);
-    let mut font = options.font.clone()
+    let mut font = options
+        .font
+        .clone()
         .unwrap_or_else(|| super::typography::crystal_text_font(10.0));
     // Hosts supply a fixed pixel font so text and measured touch cells scale together.
     let FontSize::Px(font_size) = font.font_size else {
         return;
     };
     font.font_size = FontSize::Px(font_size * layout.scale);
-    let panel = layout.rect(CrystalRect::new(0.0, 0.0, STORAGE_PANEL_WIDTH, STORAGE_PANEL_HEIGHT));
-    parent.spawn((
-        StoragePaintPanel,
-        absolute_node(panel),
-        FocusPolicy::Block,
-        ImageNode { image: assets.load("original-ui/Prguse/586.png"), ..default() },
-    )).with_children(|parent| {
-        parent.spawn((
-            absolute_node(layout.rect(CrystalRect::new(18.0, 8.0, 71.0, 15.0))),
-            FocusPolicy::Pass,
-            ImageNode { image: assets.load("original-ui/Title/0.png"), ..default() },
-        ));
-        image_button(parent, assets, "Title",
-            if page.page == 0 { [743, 743, 744] } else { [744, 744, 744] },
-            layout.rect(CrystalRect::new(8.0, 36.0, 72.0, 20.0)),
-            StoragePaintAction::Page(0), map(StoragePaintAction::Page(0)));
-        image_button(parent, assets, "Title",
-            if page.page == 1 { [745, 745, 746] } else { [746, 746, 746] },
-            layout.rect(CrystalRect::new(80.0, 36.0, 72.0, 20.0)),
-            StoragePaintAction::Page(1), map(StoragePaintAction::Page(1)));
-        image_button(parent, assets, "Prguse2", [360, 361, 362],
-            layout.rect(CrystalRect::new(363.0, 3.0, 24.0, 21.0)),
-            StoragePaintAction::Close, map(StoragePaintAction::Close));
-
-        let mut grid_node = absolute_node(panel);
-        if page.rental_locked {
-            grid_node.display = Display::None;
-        }
-        parent.spawn((StoragePaintGrid, grid_node, FocusPolicy::Pass)).with_children(|grid| {
-            for (offset, slot) in page.slots.iter().enumerate() {
-                let rect = layout.rect(CrystalRect::new(
-                    9.0 + (offset % 10) as f32 * 37.0,
-                    60.0 + (offset / 10) as f32 * 33.0,
-                    36.0, 32.0,
-                ));
-                let enabled = !page.locked && !page.rental_locked && !slot.locked
-                    && (slot.item.is_none() || slot.unique_id.is_some());
-                let marker = StoragePaintCell { slot: slot.slot, unique_id: slot.unique_id, enabled };
-                let action = StoragePaintAction::Cell { slot: slot.slot, unique_id: slot.unique_id };
-                if let Some(item) = slot.item {
-                    if enabled {
-                        item_cell(grid, assets, item, rect, marker, (action, map(action)), player, &font, layout.scale);
-                    } else {
-                        item_cell(grid, assets, item, rect, marker, (), player, &font, layout.scale);
-                    }
-                    if let Some(unique_id) = slot.unique_id.filter(|unique_id| {
-                        options.selection == Some(StorageItemSelection { slot: slot.slot, unique_id: *unique_id })
-                    }) {
-                        grid.spawn((
-                            StoragePaintSelection { slot: slot.slot, unique_id },
-                            Node { overflow: Overflow::clip(), ..absolute_node(rect) },
-                            Text::new("▶"), font.clone(),
-                            TextColor(Color::srgb(0.94, 0.78, 0.28)),
-                            TextLayout::new(Justify::Left, LineBreak::NoWrap), FocusPolicy::Pass,
-                        ));
-                    }
+    let panel = layout.rect(CrystalRect::new(
+        0.0,
+        0.0,
+        STORAGE_PANEL_WIDTH,
+        STORAGE_PANEL_HEIGHT,
+    ));
+    parent
+        .spawn((
+            StoragePaintPanel,
+            absolute_node(panel),
+            FocusPolicy::Block,
+            ImageNode {
+                image: assets.load("original-ui/Prguse/586.png"),
+                ..default()
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                absolute_node(layout.rect(CrystalRect::new(18.0, 8.0, 71.0, 15.0))),
+                FocusPolicy::Pass,
+                ImageNode {
+                    image: assets.load("original-ui/Title/0.png"),
+                    ..default()
+                },
+            ));
+            image_button(
+                parent,
+                assets,
+                "Title",
+                if page.page == 0 {
+                    [743, 743, 744]
                 } else {
-                    let mut cell = grid.spawn((
-                        marker, absolute_node(rect), FocusPolicy::Block,
-                        BackgroundColor(if slot.locked {
-                            Color::srgba(0.20, 0.16, 0.11, 0.70)
+                    [744, 744, 744]
+                },
+                layout.rect(CrystalRect::new(8.0, 36.0, 72.0, 20.0)),
+                StoragePaintAction::Page(0),
+                map(StoragePaintAction::Page(0)),
+            );
+            image_button(
+                parent,
+                assets,
+                "Title",
+                if page.page == 1 {
+                    [745, 745, 746]
+                } else {
+                    [746, 746, 746]
+                },
+                layout.rect(CrystalRect::new(80.0, 36.0, 72.0, 20.0)),
+                StoragePaintAction::Page(1),
+                map(StoragePaintAction::Page(1)),
+            );
+            image_button(
+                parent,
+                assets,
+                "Prguse2",
+                [360, 361, 362],
+                layout.rect(CrystalRect::new(363.0, 3.0, 24.0, 21.0)),
+                StoragePaintAction::Close,
+                map(StoragePaintAction::Close),
+            );
+
+            let mut grid_node = absolute_node(panel);
+            if page.rental_locked {
+                grid_node.display = Display::None;
+            }
+            parent
+                .spawn((StoragePaintGrid, grid_node, FocusPolicy::Pass))
+                .with_children(|grid| {
+                    for (offset, slot) in page.slots.iter().enumerate() {
+                        let rect = layout.rect(CrystalRect::new(
+                            9.0 + (offset % 10) as f32 * 37.0,
+                            60.0 + (offset / 10) as f32 * 33.0,
+                            36.0,
+                            32.0,
+                        ));
+                        let enabled = !page.locked
+                            && !page.rental_locked
+                            && !slot.locked
+                            && (slot.item.is_none() || slot.unique_id.is_some());
+                        let marker = StoragePaintCell {
+                            slot: slot.slot,
+                            unique_id: slot.unique_id,
+                            enabled,
+                        };
+                        let action = StoragePaintAction::Cell {
+                            slot: slot.slot,
+                            unique_id: slot.unique_id,
+                        };
+                        if let Some(item) = slot.item {
+                            if enabled {
+                                item_cell(
+                                    grid,
+                                    assets,
+                                    item,
+                                    rect,
+                                    marker,
+                                    (action, map(action)),
+                                    player,
+                                    &font,
+                                    layout.scale,
+                                );
+                            } else {
+                                item_cell(
+                                    grid,
+                                    assets,
+                                    item,
+                                    rect,
+                                    marker,
+                                    (),
+                                    player,
+                                    &font,
+                                    layout.scale,
+                                );
+                            }
+                            if let Some(unique_id) = slot.unique_id.filter(|unique_id| {
+                                options.selection
+                                    == Some(StorageItemSelection {
+                                        slot: slot.slot,
+                                        unique_id: *unique_id,
+                                    })
+                            }) {
+                                grid.spawn((
+                                    StoragePaintSelection {
+                                        slot: slot.slot,
+                                        unique_id,
+                                    },
+                                    Node {
+                                        overflow: Overflow::clip(),
+                                        ..absolute_node(rect)
+                                    },
+                                    Text::new("▶"),
+                                    font.clone(),
+                                    TextColor(Color::srgb(0.94, 0.78, 0.28)),
+                                    TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                                    FocusPolicy::Pass,
+                                ));
+                            }
                         } else {
-                            Color::srgba(0.06, 0.04, 0.02, 0.35)
-                        }),
-                    ));
-                    if enabled {
-                        cell.insert((Button, action, map(action)));
+                            let mut cell = grid.spawn((
+                                marker,
+                                absolute_node(rect),
+                                FocusPolicy::Block,
+                                BackgroundColor(if slot.locked {
+                                    Color::srgba(0.20, 0.16, 0.11, 0.70)
+                                } else {
+                                    Color::srgba(0.06, 0.04, 0.02, 0.35)
+                                }),
+                            ));
+                            if enabled {
+                                cell.insert((Button, action, map(action)));
+                            }
+                        }
                     }
+                });
+
+            if page.rental_locked {
+                parent.spawn((
+                    StoragePaintBlocker::Rental,
+                    Button,
+                    FocusPolicy::Block,
+                    absolute_node(layout.rect(CrystalRect::new(8.0, 59.0, 372.0, 265.0))),
+                    ImageNode {
+                        image: assets.load("original-ui/Prguse/2443.png"),
+                        ..default()
+                    },
+                    ZIndex(1),
+                ));
+                label(
+                    parent,
+                    options.labels.rental_locked.clone(),
+                    layout.rect(CrystalRect::new(40.0, 322.0, 300.0, 16.0)),
+                    &font,
+                    Color::srgb(0.95, 0.20, 0.20),
+                    true,
+                );
+            } else if page.locked {
+                parent
+                    .spawn((
+                        StoragePaintBlocker::Password,
+                        Button,
+                        FocusPolicy::Block,
+                        absolute_node(layout.rect(CrystalRect::new(8.0, 59.0, 372.0, 265.0))),
+                        BackgroundColor(Color::srgba(0.06, 0.04, 0.02, 0.90)),
+                        ZIndex(1),
+                    ))
+                    .with_children(|cover| {
+                        label(
+                            cover,
+                            options.labels.password_locked.clone(),
+                            layout.rect(CrystalRect::new(0.0, 120.0, 372.0, 24.0)),
+                            &font,
+                            Color::srgb(0.95, 0.92, 0.82),
+                            true,
+                        );
+                    });
+            }
+            if page.page == 1 {
+                image_button(
+                    parent,
+                    assets,
+                    "Title",
+                    [483, 484, 485],
+                    layout.rect(CrystalRect::new(283.0, 33.0, 48.0, 25.0)),
+                    StoragePaintAction::Rent,
+                    map(StoragePaintAction::Rent),
+                );
+                if !page.rental_locked {
+                    let text = storage_expiry_label(page.expiry)
+                        .map(|expiry| format!("{}{expiry}", options.labels.expiry_prefix))
+                        .unwrap_or_else(|| options.labels.expiry_prefix.clone());
+                    label(
+                        parent,
+                        text,
+                        layout.rect(CrystalRect::new(40.0, 322.0, 300.0, 16.0)),
+                        &font,
+                        Color::srgb(0.95, 0.92, 0.82),
+                        true,
+                    );
                 }
             }
+            image_button(
+                parent,
+                assets,
+                "Title",
+                [113, 114, 115],
+                layout.rect(CrystalRect::new(328.0, 33.0, 48.0, 25.0)),
+                StoragePaintAction::Password,
+                map(StoragePaintAction::Password),
+            );
         });
-
-        if page.rental_locked {
-            parent.spawn((
-                StoragePaintBlocker::Rental, Button, FocusPolicy::Block,
-                absolute_node(layout.rect(CrystalRect::new(8.0, 59.0, 372.0, 265.0))),
-                ImageNode { image: assets.load("original-ui/Prguse/2443.png"), ..default() },
-                ZIndex(1),
-            ));
-            label(parent, options.labels.rental_locked.clone(),
-                layout.rect(CrystalRect::new(40.0, 322.0, 300.0, 16.0)),
-                &font, Color::srgb(0.95, 0.20, 0.20), true);
-        } else if page.locked {
-            parent.spawn((
-                StoragePaintBlocker::Password, Button, FocusPolicy::Block,
-                absolute_node(layout.rect(CrystalRect::new(8.0, 59.0, 372.0, 265.0))),
-                BackgroundColor(Color::srgba(0.06, 0.04, 0.02, 0.90)), ZIndex(1),
-            )).with_children(|cover| {
-                label(cover, options.labels.password_locked.clone(),
-                    layout.rect(CrystalRect::new(0.0, 120.0, 372.0, 24.0)),
-                    &font, Color::srgb(0.95, 0.92, 0.82), true);
-            });
-        }
-        if page.page == 1 {
-            image_button(parent, assets, "Title", [483, 484, 485],
-                layout.rect(CrystalRect::new(283.0, 33.0, 48.0, 25.0)),
-                StoragePaintAction::Rent, map(StoragePaintAction::Rent));
-            if !page.rental_locked {
-                let text = storage_expiry_label(page.expiry)
-                    .map(|expiry| format!("{}{expiry}", options.labels.expiry_prefix))
-                    .unwrap_or_else(|| options.labels.expiry_prefix.clone());
-                label(parent, text, layout.rect(CrystalRect::new(40.0, 322.0, 300.0, 16.0)),
-                    &font, Color::srgb(0.95, 0.92, 0.82), true);
-            }
-        }
-        image_button(parent, assets, "Title", [113, 114, 115],
-            layout.rect(CrystalRect::new(328.0, 33.0, 48.0, 25.0)),
-            StoragePaintAction::Password, map(StoragePaintAction::Password));
-    });
 }
 
 /// Safely decodes the .NET DateTime binary value carried by ResizeStorage.
@@ -417,7 +556,9 @@ pub fn storage_expiry_label(binary_datetime: i64) -> Option<String> {
     }
     let unix_ticks = ticks - DOTNET_UNIX_EPOCH_TICKS;
     let seconds = unix_ticks.div_euclid(DOTNET_TICKS_PER_SECOND);
-    let nanos = unix_ticks.rem_euclid(DOTNET_TICKS_PER_SECOND).saturating_mul(100);
+    let nanos = unix_ticks
+        .rem_euclid(DOTNET_TICKS_PER_SECOND)
+        .saturating_mul(100);
     let (Ok(seconds), Ok(nanos)) = (i64::try_from(seconds), u32::try_from(nanos)) else {
         return None;
     };

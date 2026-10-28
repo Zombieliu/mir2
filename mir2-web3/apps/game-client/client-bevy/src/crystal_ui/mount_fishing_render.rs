@@ -119,6 +119,17 @@ fn image(
         frame.width,
         frame.height,
     );
+    if crate::native_i18n::active() {
+        let caption = match (lib, index) {
+            ("Title", 149) => Some("Fishing"),
+            ("Title", 45) => Some("Esc to exit"),
+            _ => None,
+        };
+        if let Some(caption) = caption {
+            localized_art_label(parent, caption, rect, 9.0);
+            return;
+        }
+    }
     spawn_static_overlay_sprite(
         parent,
         assets,
@@ -287,7 +298,7 @@ pub fn render(
                     let text_width = if four { 208.0 } else { 260.0 };
                     overlay_centered_text_at(
                         p,
-                        &host.item.name,
+                        &crate::native_i18n::tr(&host.item.name),
                         CrystalRect::new(30.0, 10.0, text_width, 15.0),
                         32.0 / 3.0,
                         TEXT,
@@ -300,7 +311,10 @@ pub fn render(
                         .unwrap();
                     overlay_centered_text_at(
                         p,
-                        &format!("{} / {} Loyalty", raw.current_dura, raw.max_dura),
+                        &crate::native_i18n::tr(&format!(
+                            "{} / {} Loyalty",
+                            raw.current_dura, raw.max_dura
+                        )),
                         CrystalRect::new(30.0, 30.0, text_width, 15.0),
                         32.0 / 3.0,
                         TEXT,
@@ -393,7 +407,7 @@ pub fn render(
                     image(p, assets, "Prguse", 1340, 0.0, 0.0, bg, false);
                     overlay_centered_text_at(
                         p,
-                        &host.item.name,
+                        &crate::native_i18n::tr(&host.item.name),
                         CrystalRect::new(10.0, 4.0, 180.0, 20.0),
                         32.0 / 3.0,
                         TEXT,
@@ -469,7 +483,7 @@ pub fn render(
                 bar(p, assets, 1349, 14.0, 79.0, 8.0, model.progress);
                 overlay_centered_text_at(
                     p,
-                    &format!("{}%", model.chance),
+                    &crate::native_i18n::tr(&format!("{}%", model.chance)),
                     CrystalRect::new(14.0, 62.0, 216.0, 12.0),
                     32.0 / 3.0,
                     TEXT,

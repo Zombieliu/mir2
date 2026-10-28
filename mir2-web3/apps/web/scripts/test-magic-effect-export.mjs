@@ -108,7 +108,7 @@ function buildSyntheticLib(frameIndices) {
 function completeMetaFetch() {
   const metas = Object.fromEntries([...allRequiredIndices()].map(([library, indices]) => [library, syntheticUiMeta([...indices])]));
   const fetchImpl = async (url) => {
-    const match = String(url).match(/\/original-ui\/([^/]+)\/meta\.json$/);
+    const match = String(url).match(/\/original-ui\/(.+)\/meta\.json$/);
     const meta = metas[match?.[1]];
     return { ok: Boolean(meta), status: meta ? 200 : 404, json: async () => meta ?? {} };
   };
@@ -120,7 +120,7 @@ async function testAssembleMode() {
   const outputDir = path.join(root, "original-effects");
   const { fetchImpl } = completeMetaFetch();
   const summary = await assembleMagicEffectsFromMeta({ assetBaseUrl: "https://r2.example/v/x", outputDir, fetchImpl });
-  assert.deepEqual(summary.available, ["Effect", "Magic", "Magic2", "Magic3"]);
+  assert.deepEqual(summary.available, [...allRequiredIndices().keys()].sort());
 
   const manifestPath = path.join(outputDir, "effects.generated.json");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
@@ -398,10 +398,14 @@ async function testLibMode() {
   const outputDir = path.join(root, "original-effects");
   const fs = nodeRequire("node:fs");
   fs.mkdirSync(dataDir, { recursive: true });
-  for (const [library, indices] of allRequiredIndices()) fs.writeFileSync(path.join(dataDir, `${library}.Lib`), buildSyntheticLib(indices));
+  for (const [library, indices] of allRequiredIndices()) {
+    const sourcePath = path.join(dataDir, `${library}.Lib`);
+    fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
+    fs.writeFileSync(sourcePath, buildSyntheticLib(indices));
+  }
 
   const summary = await runCrystalMagicEffectExport({ dataDir, outputDir, deflateLevel: 0 });
-  assert.deepEqual(summary.available, ["Effect", "Magic", "Magic2", "Magic3"]);
+  assert.deepEqual(summary.available, [...allRequiredIndices().keys()].sort());
   const png = readFileSync(path.join(outputDir, "Magic", "0.png"));
   assert.ok(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])));
   const assets = await effects.loadEffectAssets(effectsFetch(outputDir));

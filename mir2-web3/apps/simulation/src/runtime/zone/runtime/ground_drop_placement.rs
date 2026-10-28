@@ -90,7 +90,7 @@ mod tests {
         assert_eq!((drops[0].x, drops[0].y), (10, 10));
         assert!(drops.iter().all(|drop| {
             drop.owner_object_id == Some(101)
-                && drop.ownership_remaining_ticks == Some(100)
+                && drop.ownership_remaining_ticks == Some(200)
                 && drop.source_monster == "Field Wasp"
                 && matches!(drop.loot, GroundDropLootSnapshot::Gold { amount: 25 })
                 && (drop.x - 10).abs() <= 1

@@ -680,7 +680,7 @@ test("actual Page restores only a successful full current-owner snapshot and ref
 
 test("actual Page full snapshot and every Native inventory invalidator revoke Web availability at ingress", () => {
   const native=source("../../game-client/platform-windows/src/gateway.rs");
-  const start=native.indexOf('                "GainedGold" | "LoseGold" | "UserInformation"');
+  const start=/"GainedGold"\s*\|\s*"LoseGold"\s*\|\s*"UserInformation"/.exec(native)?.index ?? -1;
   assert(start>=0); const end=native.indexOf("=> {",start); assert(end>start);
   const packets=[...native.slice(start,end).matchAll(/"([A-Za-z0-9]+)"/g)].map(m=>m[1]);
   assert(packets.length>=45); for(const packet of packets)assert.equal(npcGoldBuyInventoryMutationPacket(packet),true,packet);

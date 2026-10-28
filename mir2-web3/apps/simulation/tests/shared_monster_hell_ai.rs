@@ -4,8 +4,30 @@ use mir2_simulation::{
     ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 use serde_json::Value;
+
+// Ordinary D024 terrain contains the translated Hell-Lord/bomb neighbourhood;
+// the owned-bomb fixture uses its own ordinary D022 terrain and translation.
+const MAP: &str = "D024";
+const OWNED_MAP: &str = "D022";
+
 fn p(x: i32, y: i32) -> Point {
-    Point { x, y }
+    Point {
+        x: x + 16,
+        y: y - 8,
+    }
+}
+
+fn owned_p(x: i32, y: i32) -> Point {
+    Point {
+        x: x + 214,
+        y: y + 172,
+    }
+}
+
+fn ordinary_zone(map: &str) -> ZoneRuntime {
+    let zone = ZoneRuntime::new(ZoneKey::for_map(map));
+    assert!(zone.has_available_collision(), "ordinary terrain {map}");
+    zone
 }
 fn join_resist(z: &mut ZoneRuntime, name: &str, id: u32, pos: Point, resist: i32) {
     z.handle(ZoneCommand::Join(ZoneJoin {
@@ -20,7 +42,7 @@ fn join_resist(z: &mut ZoneRuntime, name: &str, id: u32, pos: Point, resist: i32
         hp: 1000000,
         max_hp: 1000000,
         mp: 100,
-        map_file_name: "hell-shared-fixture".into(),
+        map_file_name: MAP.into(),
         position: pos,
         direction: MirDirection::Up,
         chat_profile: Default::default(),
@@ -75,7 +97,7 @@ fn spawn(ai: u8, name: &str, pos: Point) -> ZoneMonsterSpawn {
     }
 }
 fn fixture(ai: u8, name: &str) -> ZoneRuntime {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join(&mut z, "a", 101, p(40, 41));
     join(&mut z, "b", 102, p(42, 42));
     z.spawn_world_event_monster(&spawn(ai, name, p(40, 40)), 0);
@@ -94,6 +116,84 @@ fn packets(out: &[ZoneOutbound]) -> Vec<&ServerPacket> {
         })
         .collect()
 }
+fn assert_checkpoint_tick(
+    original: &mut ZoneRuntime,
+    restored: &mut ZoneRuntime,
+    now_ms: u64,
+) -> Vec<ZoneOutbound> {
+    let out = original.tick(now_ms);
+    let replay = restored.tick(now_ms);
+    // A checkpoint restores gameplay, not ownership of a live socket. Keep
+    // every gameplay output and the complete durable state comparison, while
+    // checking live health receipts against the original owner separately.
+    for name in ["a", "b"] {
+        let session = SessionId::new(name);
+        assert!(original.owner_health_cursor(&session).is_some());
+        assert!(restored.owner_health_cursor(&session).is_none());
+        assert_eq!(
+            original.player_vitals(&session),
+            restored.player_vitals(&session)
+        );
+    }
+    for event in &out {
+        if let ZoneOutbound::OwnerHealthChanged { change } = event {
+            let owner = original
+                .owner_health_cursor(&change.cursor.session_id)
+                .unwrap();
+            assert_eq!(change.cursor.online_owner, owner.online_owner);
+            assert_eq!(change.cursor.object_id, owner.object_id);
+            assert_eq!(change.cursor.life_generation, owner.life_generation);
+            assert!(change.cursor.health_sequence > 0);
+            assert!(change.cursor.health_sequence <= owner.health_sequence);
+        }
+        if let ZoneOutbound::PlayerDamaged {
+            session_id,
+            damage,
+            settlement: Some(receipt),
+        } = event
+        {
+            assert_eq!(receipt.hp_before - receipt.hp_after, *damage);
+            assert!(out.iter().any(|candidate| matches!(candidate,
+                ZoneOutbound::OwnerHealthChanged { change }
+                    if change.cursor.session_id == *session_id
+                    && change.cursor.object_id == receipt.object_id
+                    && change.cursor.life_generation == receipt.life_generation
+                    && change.hp_before == receipt.hp_before
+                    && change.hp == receipt.hp_after)));
+        }
+    }
+    assert!(!replay
+        .iter()
+        .any(|event| matches!(event, ZoneOutbound::OwnerHealthChanged { .. })));
+    let gameplay = |events: &[ZoneOutbound]| {
+        events
+            .iter()
+            .filter(|event| !matches!(event, ZoneOutbound::OwnerHealthChanged { .. }))
+            .cloned()
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(gameplay(&out), gameplay(&replay));
+    let before = state(original);
+    let after = state(restored);
+    assert_eq!(before["online_presence"].as_object().unwrap().len(), 2);
+    assert!(after["online_presence"].as_object().unwrap().is_empty());
+    // Live retaliation ownership also expires at restore. Compare the Hell
+    // gameplay state explicitly; a restored instance cannot inherit sockets
+    // or their owner-bound PK records merely by loading world state.
+    for key in [
+        "players",
+        "native_monsters",
+        "native_monster_respawns",
+        "pending_native_hits",
+        "pending_native_projectiles",
+        "pending_native_player_hits",
+        "native_periodic_player_poisons",
+        "hell_world",
+    ] {
+        assert_eq!(before[key], after[key], "checkpoint field {key}");
+    }
+    out
+}
 #[test]
 fn bomb_expires_strictly_after_ten_seconds_and_explodes_after_death_once() {
     let mut z = fixture(99, "HellBomb1");
@@ -109,9 +209,8 @@ fn bomb_expires_strictly_after_ten_seconds_and_explodes_after_death_once() {
         .iter()
         .any(|p| matches!(p,ServerPacket::ObjectDied{info}if info.object_id==9999)));
     let mut restored = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
-    assert_eq!(z.tick(10500), restored.tick(10500));
-    let out = z.tick(10501);
-    assert_eq!(out, restored.tick(10501));
+    assert_checkpoint_tick(&mut z, &mut restored, 10500);
+    let out = assert_checkpoint_tick(&mut z, &mut restored, 10501);
     for name in ["a", "b"] {
         assert!(out.iter().any(|o|matches!(o,ZoneOutbound::PlayerDamaged { session_id, damage, .. }if *session_id==SessionId::new(name)&&*damage>0)));
     }
@@ -164,13 +263,12 @@ fn lord_delayed_knight_and_quakes_are_shared_checkpoint_state() {
         .unwrap()
         .is_empty());
     let mut restored = ZoneRuntime::restore_checkpoint(&z.checkpoint_bytes().unwrap()).unwrap();
-    assert_eq!(z.tick(501), restored.tick(501));
+    assert_checkpoint_tick(&mut z, &mut restored, 501);
     assert!(!z
         .native_monster_snapshots()
         .iter()
         .any(|m| m.name == "HellKnight1"));
-    let out = z.tick(502);
-    assert_eq!(out, restored.tick(502));
+    assert_checkpoint_tick(&mut z, &mut restored, 502);
     assert!(z
         .native_monster_snapshots()
         .iter()
@@ -183,8 +281,7 @@ fn lord_delayed_knight_and_quakes_are_shared_checkpoint_state() {
         .min_by_key(|q| q["start"].as_u64().unwrap())
         .unwrap();
     let start = quake["start"].as_u64().unwrap().max(503);
-    let out = z.tick(start);
-    assert_eq!(out, restored.tick(start));
+    let out = assert_checkpoint_tick(&mut z, &mut restored, start);
     // A quake already started at 502 is retained for late observers too.
     let late = z.handle(ZoneCommand::Join(ZoneJoin {
         session_id: SessionId::new("late"),
@@ -198,11 +295,11 @@ fn lord_delayed_knight_and_quakes_are_shared_checkpoint_state() {
         hp: 100,
         max_hp: 100,
         mp: 10,
-        map_file_name: "hell-shared-fixture".into(),
-        position: p(
-            quake["position"]["x"].as_i64().unwrap() as i32,
-            quake["position"]["y"].as_i64().unwrap() as i32,
-        ),
+        map_file_name: MAP.into(),
+        position: Point {
+            x: quake["position"]["x"].as_i64().unwrap() as i32,
+            y: quake["position"]["y"].as_i64().unwrap() as i32,
+        },
         direction: MirDirection::Up,
         chat_profile: Default::default(),
         combat_stats: Default::default(),
@@ -223,7 +320,10 @@ fn knight_death_advances_lord_once_and_empty_map_resets_the_stage() {
         &mut z,
         "killer",
         104,
-        p(knight.position.x, knight.position.y + 1),
+        Point {
+            x: knight.position.x,
+            y: knight.position.y + 1,
+        },
     );
     z.handle(ZoneCommand::PlayerAttackObject {
         session_id: SessionId::new("killer"),
@@ -298,7 +398,10 @@ fn hell_knight_parent_life_survives_checkpoint_without_binding_reused_lord_id() 
                 runtime,
                 "killer",
                 104,
-                p(child.position.x, child.position.y + 1),
+                Point {
+                    x: child.position.x,
+                    y: child.position.y + 1,
+                },
             );
             runtime.handle(ZoneCommand::PlayerAttackObject {
                 session_id: SessionId::new("killer"),
@@ -356,7 +459,7 @@ fn hell_map_spawn_outlives_removed_parent_without_a_replacement() {
 
 #[test]
 fn bomb_bleeding_ticks_on_next_update_and_does_not_cross_player_lives() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     z.spawn_world_event_monster(&spawn(99, "HellBomb3", p(40, 40)), 0);
     z.tick(10001);
@@ -385,7 +488,7 @@ fn bomb_bleeding_ticks_on_next_update_and_does_not_cross_player_lives() {
 
 #[test]
 fn bomb_poison_counted_end_clears_all_legacy_projections_without_reappearing() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     z.spawn_world_event_monster(&spawn(99, "HellBomb3", p(40, 40)), 0);
     z.tick(10001);
@@ -416,7 +519,7 @@ fn bomb_poison_counted_end_clears_all_legacy_projections_without_reappearing() {
 
 #[test]
 fn bomb_source_replacement_with_same_id_cannot_keep_the_old_poison_lease() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     z.spawn_world_event_monster(&spawn(99, "HellBomb3", p(40, 40)), 0);
     z.tick(10001);
@@ -443,7 +546,7 @@ fn bomb_source_replacement_with_same_id_cannot_keep_the_old_poison_lease() {
 // Explicit nonzero SC fixture: AI99 behavior with ArcherGuard's DC/SC=255,
 // while the retained image selects Bleeding. This does not alter live data.
 fn active_nonzero_bleed() -> ZoneRuntime {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join_resist(&mut z, "a", 101, p(40, 41), 0);
     let mut bomb = spawn(99, "ArcherGuard", p(40, 40));
     bomb.image = 905;
@@ -521,6 +624,21 @@ fn purification_then_same_bit_reapplication_starts_a_fresh_counted_lease() {
         cooldown_ms: 500,
         now_ms: 10503,
     });
+    assert!(!packets(&clean)
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));
+    let before = z.tick(11002);
+    assert!(!packets(&before)
+        .iter()
+        .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));
+    assert_eq!(
+        state(&z)["native_periodic_player_poisons"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    let clean = z.tick(11003);
     assert!(packets(&clean)
         .iter()
         .any(|p| matches!(p,ServerPacket::ObjectPoisoned{object_id:101,poison}if poison&128==0)));
@@ -562,7 +680,7 @@ fn positive_bleeding_and_green_periodic_damage_never_emits_object_struck() {
     }
     let mut green = None;
     for id in 9157..9189 {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+        let mut z = ordinary_zone(MAP);
         join_resist(&mut z, "a", 101, p(40, 41), 0);
         let mut hugger = spawn(69, "ArcherGuard", p(40, 40));
         hugger.object_id = id;
@@ -607,7 +725,7 @@ fn canonical_checkpoint_rejects_modified_periodic_and_hell_world_state() {
 }
 
 fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-owned-fixture"));
+    let mut z = ordinary_zone(OWNED_MAP);
     z.handle(ZoneCommand::Join(ZoneJoin {
         session_id: SessionId::new("owner"),
         account_id: "owner".into(),
@@ -620,8 +738,8 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         hp: 100000,
         max_hp: 100000,
         mp: 100,
-        map_file_name: "hell-owned-fixture".into(),
-        position: p(20, 24),
+        map_file_name: OWNED_MAP.into(),
+        position: owned_p(20, 24),
         direction: MirDirection::Up,
         chat_profile: Default::default(),
         combat_stats: ZonePlayerCombatStats::default(),
@@ -631,7 +749,7 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         object_id: 0,
         spell: Spell::SummonToad,
         direction: MirDirection::Up,
-        target: p(20, 20),
+        target: owned_p(20, 20),
         cast: true,
         level: 3,
         damage: 0,
@@ -651,7 +769,10 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         .expect("real owned toad");
     z.handle(ZoneCommand::SyncPlayerTransform {
         session_id: SessionId::new("owner"),
-        position: p(pos.x + 10, pos.y),
+        position: Point {
+            x: pos.x + 10,
+            y: pos.y,
+        },
         direction: MirDirection::Up,
     });
     let mut profile = z.player_chat_profile(&SessionId::new("owner")).unwrap();
@@ -660,7 +781,14 @@ fn owned_hell_fixture(id: u32, image: u16) -> (ZoneRuntime, u32, Point) {
         session_id: SessionId::new("owner"),
         profile,
     });
-    let mut source = spawn(99, "Guard", p(pos.x, pos.y - 1));
+    let mut source = spawn(
+        99,
+        "Guard",
+        Point {
+            x: pos.x,
+            y: pos.y - 1,
+        },
+    );
     source.object_id = id;
     source.image = image;
     source.hp = 100000;
@@ -712,7 +840,14 @@ fn hell_bomb_removed_source_does_not_transfer_queued_blast_to_reused_id() {
     z.tick(11501);
     let old = state(&z)["native_monsters"]["98799"]["incarnation"].clone();
     z.despawn_world_event_monster(98799, 11502);
-    let mut replacement = spawn(99, "Guard", p(pos.x, pos.y - 1));
+    let mut replacement = spawn(
+        99,
+        "Guard",
+        Point {
+            x: pos.x,
+            y: pos.y - 1,
+        },
+    );
     replacement.object_id = 98799;
     replacement.max_hp = 100000;
     replacement.hp = 100000;
@@ -765,7 +900,7 @@ fn hell_bomb_native_dazed_and_bleeding_are_real_periodic_statuses() {
 
 #[test]
 fn hell_map_quake_strikes_unowned_native_without_caster_and_survives_restore() {
-    let mut z = ZoneRuntime::new(ZoneKey::for_map("hell-shared-fixture"));
+    let mut z = ordinary_zone(MAP);
     join(&mut z, "a", 101, p(40, 41));
     let mut lord = spawn(98, "Guard", p(40, 40));
     lord.attack_speed_ms = 100000;

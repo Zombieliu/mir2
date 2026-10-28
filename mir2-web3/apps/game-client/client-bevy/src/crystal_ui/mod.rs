@@ -29,12 +29,10 @@ pub mod item_image;
 pub mod item_tooltip;
 #[cfg(feature = "native-ui")]
 pub mod login;
-pub mod metrics;
-pub mod mail_page_shared;
-#[path = "friend_text_editor.rs"]
-pub mod text_editor;
-pub mod mail_editor;
 pub mod mail_compose_shared;
+pub mod mail_editor;
+pub mod mail_page_shared;
+pub mod metrics;
 #[cfg(feature = "native-ui")]
 pub mod minimap;
 pub mod notice;
@@ -42,6 +40,8 @@ pub mod notice;
 pub(crate) mod npc_item_quote;
 #[cfg(feature = "native-ui")]
 pub mod overlays;
+#[path = "friend_text_editor.rs"]
+pub mod text_editor;
 #[cfg(feature = "native-ui")]
 pub use overlays::hero_dialog;
 #[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
@@ -58,10 +58,10 @@ pub mod quest_targets;
 #[cfg(feature = "native-ui")]
 pub mod select;
 pub mod shared_hud;
+pub mod shop_paint;
 pub mod skill_page_shared;
 pub mod spec;
 pub mod storage_paint;
-pub mod shop_paint;
 #[cfg(feature = "native-ui")]
 pub(crate) mod storage_password;
 pub mod typography;

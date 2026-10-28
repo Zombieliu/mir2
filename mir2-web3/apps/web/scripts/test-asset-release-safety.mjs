@@ -782,13 +782,107 @@ await test("Cloudflare OAuth API honors Retry-After on rate limits", async () =>
   });
 });
 
-await test("immutable runtime workflow serializes and retries R2 uploads", async () => {
+function namedWorkflowBlocks(source, pattern) {
+  const headers = [...source.matchAll(pattern)];
+  const blocks = new Map(headers.map((entry, index) => [
+    entry[1], source.slice(entry.index, headers[index + 1]?.index ?? source.length),
+  ]));
+  assert.equal(blocks.size, headers.length, "workflow blocks must have unique names");
+  return blocks;
+}
+
+function assertControlledUploadCredentials(workflow) {
+  const source = workflow.replaceAll("\r\n", "\n");
+  const jobsStart = source.indexOf("\njobs:\n");
+  assert.ok(jobsStart >= 0, "workflow must have a jobs block");
+  const jobs = namedWorkflowBlocks(source.slice(jobsStart + 7), /^  ([a-z0-9-]+):\n/gm);
+  const stage = "native-download-stage/Stage immutable objects and verify complete public bytes";
+  const promote = "native-download-promote/Promote the verified stage once and check public aliases";
+  const web = "build-web-assets/Publish Web assets to R2";
+  const bevy = "build-web-assets/Publish immutable Bevy runtime to R2";
+  const scopes = { MIR2_R2_UPLOAD_SECRET: [], MIR2_R2_UPLOAD_WORKER_URL: [] };
+  const steps = new Map();
+  for (const [jobId, job] of jobs) {
+    for (const [name, step] of namedWorkflowBlocks(job, /^      - name: (.+)\n/gm)) {
+      const scope = `${jobId}/${name}`;
+      steps.set(scope, step);
+      const env = step.match(/^        env:\n((?: {10}[^\n]*(?:\n|$))+)/m)?.[1] ?? "";
+      for (const key of Object.keys(scopes)) {
+        const bindings = [...env.matchAll(new RegExp(`^          ${key}:([^\\n]*)$`, "gm"))];
+        assert.ok(bindings.length <= 1, `duplicate credential binding in ${scope}`);
+        if (bindings.length) {
+          if (key === "MIR2_R2_UPLOAD_SECRET") {
+            assert.ok(/^\s*\$\{\{\s*secrets\.[A-Z0-9_]+\s*\}\}\s*$/.test(bindings[0][1]),
+              `upload credential must use a secret reference in ${scope}`);
+          }
+          scopes[key].push(scope);
+        }
+      }
+    }
+  }
+  for (const [key, allowed] of [["MIR2_R2_UPLOAD_SECRET", [stage, promote, web, bevy]],
+    ["MIR2_R2_UPLOAD_WORKER_URL", [web, bevy]]]) {
+    assert.equal((source.match(new RegExp(`\\b${key}:`, "g")) ?? []).length, scopes[key].length,
+      `${key} must be scoped to a named step env, never a job/global binding`);
+    assert.deepEqual(scopes[key].sort(), allowed.sort(), `${key} controlled contexts changed`);
+  }
+  for (const [jobId, operations] of [["native-download-stage", ["stage"]],
+    ["native-download-promote", ["promote"]], ["native-download-tooling-check", ["verify", "stage", "promote"]],
+    ["build-web-assets", ["", "off"]]]) {
+    const header = jobs.get(jobId)?.split("    steps:\n")[0] ?? "";
+    const operation = operations.map((value) => `inputs.native_delivery_operation == '${value}'`).join(" || ");
+    const expected = "${{ github.event_name == 'workflow_dispatch' && "
+      + (operations.length > 1 ? `(${operation})` : operation) + " }}";
+    assert.equal(header.match(/^    if: (.+)$/m)?.[1], expected, `${jobId} must remain dispatch-only`);
+    if (jobId === "native-download-stage" || jobId === "native-download-promote") {
+      assert.match(header, /^    needs: native-download-tooling-check$/m, "publication requires offline tooling gates");
+    }
+  }
+  const tooling = jobs.get("native-download-tooling-check");
+  assert.doesNotMatch(tooling, /^\s+continue-on-error:\s*(true|\$\{\{)/m);
+  for (const stem of ["native_r17", "native_r17_s14", "native_r19_s15", "native_r20_s16",
+    "native_r22_s17", "native_r23_s18", "native_r24_s19", "native_r25_s20"]) {
+    for (const kind of ["r2_delivery", "interrupt"]) {
+      assert.match(tooling, new RegExp(`^\\s+(?:run: )?python3 -B scripts/test_${stem}_${kind}\\.py$`, "m"),
+        `offline ${stem} ${kind} guard is missing`);
+    }
+    assert.match(tooling, new RegExp(`^\\s+(?:run: )?node --experimental-strip-types --test infra/cloudflare/`
+      + `mir2-r2-bulk-upload/test/${stem.replaceAll("_", "-")}-publication\\.test\\.mjs$`, "m"),
+    `offline ${stem} publication guard is missing`);
+  }
+  const promotion = jobs.get("native-download-promote");
+  for (const guard of [
+    '[[ "$MIR2_NATIVE_STAGE_RUN" =~ ^[1-9][0-9]{0,19}$ ]]',
+    '[[ "$MIR2_NATIVE_STAGE_SHA" =~ ^[0-9a-f]{64}$ ]]',
+    "assert value['workflow_id'] == 284517107",
+    "assert value['event'] == 'workflow_dispatch' and value['conclusion'] == 'success'",
+    "assert value['head_branch'] == os.environ['GITHUB_REF_NAME']",
+    "if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16', '17', '18', '19', '20'):",
+    "assert value['head_sha'] == os.environ['GITHUB_SHA']",
+    '--stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"',
+  ]) assert.ok(promotion.includes(guard), "promotion must retain verified run/branch/SHA binding");
+  assert.match(steps.get(bevy), /MIR2_R2_UPLOAD_CONCURRENCY:\s*"1"/);
+  assert.match(steps.get(bevy), /MIR2_R2_UPLOAD_ATTEMPTS:\s*"6"/);
+  assert.match(source, /upload_driver:[\s\S]*?default:\s*worker/);
+}
+
+await test("immutable runtime workflow limits credentials to gated stage/promote/web/Bevy publication", async () => {
   const workflow = await fs.readFile(R2_RELEASE_WORKFLOW, "utf8");
-  assert.match(workflow, /MIR2_R2_UPLOAD_CONCURRENCY:\s*"1"/);
-  assert.match(workflow, /MIR2_R2_UPLOAD_ATTEMPTS:\s*"6"/);
-  assert.match(workflow, /upload_driver:[\s\S]*?default:\s*worker/);
-  assert.equal((workflow.match(/MIR2_R2_UPLOAD_WORKER_URL:/g) ?? []).length, 2);
-  assert.equal((workflow.match(/MIR2_R2_UPLOAD_SECRET:/g) ?? []).length, 2);
+  assertControlledUploadCredentials(workflow);
+  const mutations = [
+    (source) => source.replace("github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'stage'", "always()"),
+    (source) => source.replace("    needs: native-download-tooling-check", "    needs: []"),
+    (source) => source.replace("assert value['head_branch'] == os.environ['GITHUB_REF_NAME']", "pass"),
+    (source) => source.replace('--stage-sha256 "$MIR2_NATIVE_STAGE_SHA"', ""),
+    (source) => source + "\n  unreviewed-upload:\n    steps:\n      - name: Unreviewed publication\n        env:\n"
+      + "          MIR2_R2_UPLOAD_SECRET: ${{ secrets.FIXTURE }}\n        run: true\n",
+    (source) => source.replace("\njobs:\n", "\nenv:\n  MIR2_R2_UPLOAD_SECRET: ${{ secrets.FIXTURE }}\njobs:\n"),
+  ];
+  for (const mutate of mutations) {
+    const changed = mutate(workflow);
+    assert.notEqual(changed, workflow, "negative policy fixture must alter the workflow");
+    assert.throws(() => assertControlledUploadCredentials(changed));
+  }
 });
 
 await test("Vercel release can verify a pre-deployed Worker", async () => {

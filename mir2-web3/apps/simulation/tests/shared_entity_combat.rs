@@ -131,10 +131,27 @@ fn wild_attack_lands_on_real_pet_after_300ms_and_checkpoints_the_pending_life() 
     let mut restored = ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
     let out = zone.tick(900);
     assert_eq!(out, restored.tick(900));
-    assert_eq!(
-        zone.checkpoint_bytes().unwrap(),
-        restored.checkpoint_bytes().unwrap()
+    let mut live_state: serde_json::Value =
+        serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
+    let mut cold_state: serde_json::Value =
+        serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
+    assert!(live_state["online_presence"]
+        .as_object()
+        .is_some_and(|p| p.len() == 2));
+    assert!(
+        cold_state["online_presence"]
+            .as_object()
+            .is_some_and(|p| p.is_empty()),
+        "cold restore revokes online identities"
     );
+    // Wild pending life, sequence, all native state and outputs still match.
+    // Only explicitly revoked online presence and its derived root differ.
+    for state in [&mut live_state, &mut cold_state] {
+        let object = state.as_object_mut().unwrap();
+        object.remove("online_presence");
+        object.remove("state_root");
+    }
+    assert_eq!(live_state, cold_state);
     assert_eq!(
         hp(&zone, pet),
         0,
@@ -164,6 +181,15 @@ fn wild_attack_lands_on_real_pet_after_300ms_and_checkpoints_the_pending_life() 
             .iter()
             .any(|out| matches!(out, ZoneOutbound::MonsterKillAward { .. })));
     }
+    assert!(!packets_for(&zone.tick(180_899), "owner").iter().any(
+        |packet| matches!(packet, ServerPacket::ObjectRemove { object_id } if *object_id == pet)
+    ));
+    assert!(
+        packets_for(&zone.tick(180_900), "owner").iter().any(
+            |packet| matches!(packet, ServerPacket::ObjectRemove { object_id } if *object_id == pet)
+        ),
+        "a wild-killed pet uses the same source corpse expiry"
+    );
 }
 
 #[test]

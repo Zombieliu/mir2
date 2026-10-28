@@ -25,6 +25,16 @@ impl Pair {
                 y: 100 + index as i32 * distance,
             };
             let map = "live-aoi-order-fixture".to_string();
+            // This transport test owns a synthetic arena. Missing production
+            // terrain remains fail-closed; give this fixture explicit collision.
+            if index == 0 {
+                assert!(state.zone_manager.install_empty_zone(
+                    mir2_simulation::ZoneRuntime::new_with_collision(
+                        mir2_simulation::ZoneKey::for_map(&map),
+                        mir2_simulation::ZoneCollision::unbounded(),
+                    ),
+                ));
+            }
             ids[index] = state.upsert_player(
                 keys[index].clone(),
                 &name,
@@ -524,7 +534,7 @@ fn live_aoi_order_new_map_bootstrap_drops_old_viewport_only_and_stays_synchronou
 }
 
 #[test]
-fn live_aoi_order_monster_lifecycle_and_personal_rewards_keep_the_existing_direct_path() {
+fn live_aoi_order_monster_lifecycle_uses_viewport_fifo_while_personal_rewards_stay_direct() {
     let pair = Pair::new(15);
     let mut live = pair.live(8);
     let monster_id = 9_910_011;
@@ -549,8 +559,8 @@ fn live_aoi_order_monster_lifecycle_and_personal_rewards_keep_the_existing_direc
             Some(&pair.keys[0]),
         )
         .0;
-    assert_eq!(direct, expected);
-    assert!(drain_live(&mut live).is_empty());
+    assert_eq!(direct, vec![ServerPacket::GainExperience { amount: 17 }]);
+    assert_eq!(drain_live(&mut live), expected[..2]);
 }
 
 #[test]
@@ -678,16 +688,14 @@ fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_f
         .lock()
         .unwrap()
         .register_live_zone_outbound(pair.keys[0].clone(), transport.clone());
-    let personal = vec![
-        ServerPacket::GainExperience { amount: 17 },
-        ServerPacket::ObjectHealth {
-            info: ObjectHealthInfo {
-                object_id: 1000,
-                percent: 87,
-                expire: 5,
-            },
+    let personal = vec![ServerPacket::GainExperience { amount: 17 }];
+    let viewport_health = ServerPacket::ObjectHealth {
+        info: ObjectHealthInfo {
+            object_id: pair.ids[0],
+            percent: 87,
+            expire: 5,
         },
-    ];
+    };
     {
         let mut state = pair.shared.lock().unwrap();
         state.queue_zone_packets(
@@ -697,6 +705,9 @@ fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_f
             }],
         );
         state.queue_zone_packets(pair.keys[0].clone(), personal.clone());
+        // Raw health is a viewport projection. A rebuilt registration must
+        // obtain current health instead of replaying this pre-overflow value.
+        state.queue_zone_packets(pair.keys[0].clone(), vec![viewport_health]);
         for index in 0..crate::routing::MAX_PENDING_ZONE_PACKETS_PER_PLAYER + 20 {
             state.queue_zone_packets(
                 pair.keys[0].clone(),

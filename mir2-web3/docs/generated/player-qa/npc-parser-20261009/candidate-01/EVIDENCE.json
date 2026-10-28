@@ -1,0 +1,394 @@
+{
+  "utc": "2026-10-09T15:24:18.011288+00:00",
+  "baseSource": "4baa66e99374cb6752906f94c6a264e2f0f1416b",
+  "implemented": true,
+  "locallyTested": true,
+  "newSourcePublishedToGit": false,
+  "gatewayPublished": false,
+  "publicGateway": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "publicClient": "R23/sourcefaef/signedfeed18",
+  "humanAccepted": false,
+  "originalRootAndExecutionAnd26SourcesUnchanged": true,
+  "original45OmissionsPreserved": true,
+  "oneAdditionalOriginalOmission": [
+    {
+      "section_label": "@_OnAcceptQuest(149)",
+      "line_number": 518,
+      "line": "CHECKHUM 1 D10071",
+      "reason": "missing-original-checkhum-arguments"
+    }
+  ],
+  "newParserContractSha256": "44f92fb3f80c8fb939f442c62781685a45033bd0392d2aeb7cf5526857832e51",
+  "localTests": {
+    "07-parser-and-default-regression": {
+      "passed": 30,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "declaredPaths": 17,
+      "beforeAfterStableAndCurrent": true
+    },
+    "08-adjacent-original-npc-source-refine-pet": {
+      "passed": 104,
+      "failed": 2,
+      "ignored": 0,
+      "exitCode": 101,
+      "declaredPaths": 17,
+      "beforeAfterStableAndCurrent": true
+    },
+    "09-gateway-real-scroll-release": {
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "exitCode": 0,
+      "declaredPaths": 22,
+      "beforeAfterStableAndCurrent": true
+    },
+    "10-frozen-4baa-adjacent-baseline": {
+      "passed": 0,
+      "failed": 2,
+      "ignored": 0,
+      "exitCode": 101,
+      "declaredPaths": 16,
+      "beforeAfterStableAndCurrent": true
+    }
+  },
+  "nodeCompiler": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sameTwoBaselineFailures": [
+    "runtime::session::tests::crystal_npc_buy_item_dead_player_is_silent_and_preserves_state",
+    "runtime::session::tests::crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execute"
+  ],
+  "originalFailedCi": {
+    "runId": 37941832277,
+    "source": "4baa66e99374cb6752906f94c6a264e2f0f1416b",
+    "failedJob": 113857901032,
+    "reason": "strict real scroll chain ended48ms past original500ms precondition",
+    "originalLogSha256": "ea947c8de7e8353198537459a2acb04ca3d5813db5ac661204c38f173170231a"
+  },
+  "localRealScrollTiming": [
+    {
+      "targetFirst": false,
+      "deadline": 1791558959459,
+      "before": 1791558958984,
+      "between": 1791558959156,
+      "after": 1791558959306,
+      "headroomMs": 153
+    },
+    {
+      "targetFirst": true,
+      "deadline": 1791558965512,
+      "before": 1791558965037,
+      "between": 1791558965185,
+      "after": 1791558965333,
+      "headroomMs": 179
+    }
+  ],
+  "limits": [
+    "declared source subsets, not full Cargo/toolchain closure",
+    "prepared genuine MissMi normal packets; not natural travel or rendered Windows",
+    "149 trusted hook and Source CAS; not ordinary AcceptQuest network story",
+    "Linux exact-source CI still required; former failed run retained",
+    "shared population/instances/reservations/ordered durable world outbox remain open"
+  ],
+  "archive": {
+    "file": "original-evidence.zip",
+    "entries": 72,
+    "bytes": 392791,
+    "sha256": "3aa7f0bf05ddf96411cb9ba3b45a702d4343263c6eee52e34326888a6a0aafdf",
+    "everyOriginalEntryByteVerified": true
+  },
+  "entries": {
+    "local/01-source-parser-red-after.json": {
+      "bytes": 4493,
+      "sha256": "a6f2bd6b96cefd34e0b4de1c0e7c7c62c814285d834cb0f9e55d230727c4b8f6"
+    },
+    "local/01-source-parser-red-before.json": {
+      "bytes": 4494,
+      "sha256": "f8a4cfee305f937762d19bf3607d4164a0d2c325ab1afe4f477193cf6644f27c"
+    },
+    "local/01-source-parser-red-result.json": {
+      "bytes": 208,
+      "sha256": "ead5f92df07b8f849b6bf5946d35d7eb1abe7cb870afff1718359440d297a6d8"
+    },
+    "local/01-source-parser-red.log": {
+      "bytes": 7464,
+      "sha256": "89e00e9a8d4bd5654460475d5324c4c7e4a3bf86191d2722e2f5c727d667201f"
+    },
+    "local/02-generator-red-after.json": {
+      "bytes": 4353,
+      "sha256": "5db6d5337f16b79262fc7b5d019a8e64a1f3bee5827fe2584a9ac4fee917a2ee"
+    },
+    "local/02-generator-red-before.json": {
+      "bytes": 4354,
+      "sha256": "40750a4db1bc0cb45bdcdfd1a8348fae4a3bdb6048e7208cf31effa59fab875a"
+    },
+    "local/02-generator-red-result.json": {
+      "bytes": 202,
+      "sha256": "a4a1f830a4a75c6759cb9eaf259656662aa33b39002d4f208dfcb1727b537fbc"
+    },
+    "local/02-generator-red.log": {
+      "bytes": 3832,
+      "sha256": "6badbc3da80f1b83a557f4842c49f035af8d1789bee344d9bafa7d7cb951c47d"
+    },
+    "local/03-source-parser-red-after.json": {
+      "bytes": 4493,
+      "sha256": "f944c1b153d898771667e4ac7a6779f0b30db786f5ea5b7477de45548ea6adf1"
+    },
+    "local/03-source-parser-red-before.json": {
+      "bytes": 4494,
+      "sha256": "f53d2b1f49f84fee0556af3d41722cbde4557049144f472dbf77032232be22d1"
+    },
+    "local/03-source-parser-red-result.json": {
+      "bytes": 208,
+      "sha256": "3e29eca6479e21d3ec081cdb3e93b19c8c64c7e39277c9affb2a937ff8349d76"
+    },
+    "local/03-source-parser-red.log": {
+      "bytes": 44458,
+      "sha256": "6a5b064e4a31794ba252ace7de7a5ec0255baa4ab5f5279b09ef1fcfac6f10a2"
+    },
+    "local/04-regenerate-original-default-after.json": {
+      "bytes": 4472,
+      "sha256": "4c2ee7ddc5c7c323738b3ea835563214a7923bc521d09c8d6d3ad2eeb882466e"
+    },
+    "local/04-regenerate-original-default-before.json": {
+      "bytes": 4473,
+      "sha256": "f33daa9053fc280414d392dc4ff328f9184007534e64bf2da28a6c8dbb75925c"
+    },
+    "local/04-regenerate-original-default-result.json": {
+      "bytes": 216,
+      "sha256": "a7938f5f5eb9c4577be3f0b05420f05e8cdce4952def88ac1c19403b55927d7c"
+    },
+    "local/04-regenerate-original-default.log": {
+      "bytes": 378,
+      "sha256": "d189a4aa54f8d8db994e2aabc8fffa8236ec27e873767cf08e6f40e51056c657"
+    },
+    "local/05-parser-green-after.json": {
+      "bytes": 4493,
+      "sha256": "871e954f2be95afa7d0ae29b03d2c1519a608716c0af4fc321dfb5b4605d0d2c"
+    },
+    "local/05-parser-green-before.json": {
+      "bytes": 4494,
+      "sha256": "c85f4d2d116a11c4abd8341bff410201e431a00676ec206fa396be460495d0b5"
+    },
+    "local/05-parser-green-result.json": {
+      "bytes": 203,
+      "sha256": "57cc6ceadc32dbea6ac3a36d2c1f5de28b28963f8b33a1c10584850f180f2529"
+    },
+    "local/05-parser-green.log": {
+      "bytes": 76788,
+      "sha256": "d3bf7edf98f8051e6ce6fbea2fff3168457699a9aaf0c3d2c59de960293a91c5"
+    },
+    "local/06-generator-green-after.json": {
+      "bytes": 4353,
+      "sha256": "c8505b9a0604e5cca2ff2961cdf7eb11a4d939ae339b9b1a0259396ad67a041a"
+    },
+    "local/06-generator-green-before.json": {
+      "bytes": 4354,
+      "sha256": "d56c00f7fca7b60b4f2da9286392d41341f5dca0210fb41377cc39a351590ddb"
+    },
+    "local/06-generator-green-result.json": {
+      "bytes": 204,
+      "sha256": "6b4f8461af216397190f15da51bdc905526ab03d4fe29f703ea2dedae291deeb"
+    },
+    "local/06-generator-green.log": {
+      "bytes": 1420,
+      "sha256": "3a5a33b6566404da5ee178ab7c2243a25d382dd30595908e56af6e017728cb8e"
+    },
+    "local/07-parser-and-default-regression-after.json": {
+      "bytes": 4495,
+      "sha256": "02f1a2153716e366898ab2fd9d900aee07ac7fff35decb921e4fa03c95d81041"
+    },
+    "local/07-parser-and-default-regression-before.json": {
+      "bytes": 4496,
+      "sha256": "a9919b4034f26586dc19002e2bf2319e06e2bee36a127e07ad259e0f04df889a"
+    },
+    "local/07-parser-and-default-regression-result.json": {
+      "bytes": 218,
+      "sha256": "70accc816cc18a46d207c9aa6ef405f527a0d94626d0058f761aa9567e1180bc"
+    },
+    "local/07-parser-and-default-regression.log": {
+      "bytes": 44696,
+      "sha256": "e590af3eb09c8e14af9e99fa03d11956100dccb9de055705de1d5c774352e5c1"
+    },
+    "local/08-adjacent-original-npc-source-refine-pet-after.json": {
+      "bytes": 4578,
+      "sha256": "becfaf671a6be811b5f311a0b13e3df558931f0e0bbec359877bc18a2e89ec4e"
+    },
+    "local/08-adjacent-original-npc-source-refine-pet-before.json": {
+      "bytes": 4579,
+      "sha256": "bc55325dff5a9ece4dbc4e13ba9a36e790ae83a0ba1893abf1f68346bbcecdf2"
+    },
+    "local/08-adjacent-original-npc-source-refine-pet-result.json": {
+      "bytes": 230,
+      "sha256": "c7a0090e7fffe39d3b920aa2c4e5386f6d3d768a112f7f285211c1e329971be2"
+    },
+    "local/08-adjacent-original-npc-source-refine-pet.log": {
+      "bytes": 53620,
+      "sha256": "27eb8260ec6d5cf325a770256f4bfe2d66c6e51d0f23ab615b819be8de3e0ddf"
+    },
+    "local/09-gateway-real-scroll-release-after.json": {
+      "bytes": 5656,
+      "sha256": "f72c1b1d0a60ea5ef18cfed73df9c2e1045ed51db8260608406a08664277c01e"
+    },
+    "local/09-gateway-real-scroll-release-before.json": {
+      "bytes": 5657,
+      "sha256": "dfd505fbd8745988a15c5f927a9f52e6f2fb68bd0b6b4e1053ee3e8e0a33093e"
+    },
+    "local/09-gateway-real-scroll-release-result.json": {
+      "bytes": 216,
+      "sha256": "cd4df28fdc301eefd479b8d0c5bdda440f99dfb1edd3c5ec23b3d39950ee1479"
+    },
+    "local/09-gateway-real-scroll-release.log": {
+      "bytes": 50804,
+      "sha256": "badb162b457587bdf73e556d44ec3170c5d628149f2569cdb11e036a992c1ec4"
+    },
+    "local/10-frozen-4baa-adjacent-baseline-after.json": {
+      "bytes": 4959,
+      "sha256": "be33d3ca574e15883abbd3a2473bc2d082d83dfd394ca2a812cfeaffdcedbcce"
+    },
+    "local/10-frozen-4baa-adjacent-baseline-before.json": {
+      "bytes": 4960,
+      "sha256": "47e9af526acfc67798fe7175b31146a1e006727dc55d0ce1070028d9da85e7ab"
+    },
+    "local/10-frozen-4baa-adjacent-baseline-result.json": {
+      "bytes": 220,
+      "sha256": "f569228242757f661b12d149bcb38977a35fd90fa250e7ea6283fb018753fbef"
+    },
+    "local/10-frozen-4baa-adjacent-baseline.log": {
+      "bytes": 42754,
+      "sha256": "c29148942b2b66c1dd9e7c42e8044d1a7fdce8eb92534fecba584028e77a516f"
+    },
+    "failed-ci/jobs.raw": {
+      "bytes": 6554,
+      "sha256": "ab6c114e9429d0a65edb6296e663f314e0fca735683430ded3b1c9e4c0bc3ee8"
+    },
+    "failed-ci/jobs.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "failed-ci/linux-job-attempt02.raw": {
+      "bytes": 1201511,
+      "sha256": "ea947c8de7e8353198537459a2acb04ca3d5813db5ac661204c38f173170231a"
+    },
+    "failed-ci/linux-job-attempt02.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "failed-ci/linux-job.raw": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "failed-ci/linux-job.stderr.log": {
+      "bytes": 100,
+      "sha256": "c77ae4790afadf7ecb4c5d64fd6e112dcd35d76a868990ebe94eaffde9fe39ff"
+    },
+    "failed-ci/LOG-ATTEMPT02.json": {
+      "bytes": 282,
+      "sha256": "69908227113241650798ded21273f79cebd2048b6444fbe1b085b3780ad83f7d"
+    },
+    "failed-ci/run.raw": {
+      "bytes": 11930,
+      "sha256": "17c970a7843f97bd943766995cb5cc141633bc82a76d8bd64b8ed875ddcbc94c"
+    },
+    "failed-ci/run.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "failed-ci/DISPATCH-REQUEST.json": {
+      "bytes": 436,
+      "sha256": "9341f9e3b1c5d927c0c0b3babcf1913591f8762570687168c27accf3b1791cf1"
+    },
+    "failed-ci/DISPATCH-RESULT.json": {
+      "bytes": 460,
+      "sha256": "e9a01701aae7eb24add01a0a92b87cbc1e1d944ccbf6e0b60d990a23589a3587"
+    },
+    "failed-ci/RUN-IDENTIFIED.json": {
+      "bytes": 400,
+      "sha256": "6c93099b1b37f5259dee7334ee7dd08ac31d003adcaf5f0390ff340e5a81c0b5"
+    },
+    "failed-ci/run-initial.json": {
+      "bytes": 11927,
+      "sha256": "6838719eeab3b4ac64304f5c3424e88ab83562b3458dbbd46c7feb071cdb5ab4"
+    },
+    "failed-ci/run-initial.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "previous-git/REF-REQUEST.json": {
+      "bytes": 249,
+      "sha256": "8c657d02c85a1bb84d7e33ed4573996c9d862a64b8389023d94c5c86ec09b7a5"
+    },
+    "previous-git/REF-RESULT.json": {
+      "bytes": 163,
+      "sha256": "8ac05e5d8376c6a7d797cc32aec1db3c740735d7a1e330cde4250c3f78083578"
+    },
+    "previous-git/PUBLISHED-VERIFIED.json": {
+      "bytes": 617,
+      "sha256": "4b67b4a8db504c1f9191ec9054735ce7cd51f7e88394d2be80579c5ccae3f41d"
+    },
+    "final-source/.github/workflows/gateway-release.yml": {
+      "bytes": 8897,
+      "sha256": "8c1f46c0e856491b3c2befa8b7b28eb8354efeda6c2a5237a025c5d5b7e59894"
+    },
+    "final-source/mir2-web3/apps/gateway/tests/shared_purification_map_transfer.rs": {
+      "bytes": 26378,
+      "sha256": "7a2a513d43f9874fb0a4530e7b36269b3bad1cf677b9531d97e966a849f2f4f7"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/mod.rs": {
+      "bytes": 7091,
+      "sha256": "a13651427b4ee76e9a4080e59f0be5662c3065e0316d7696d8fadb2dd1f5d14d"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/npc_script.rs": {
+      "bytes": 147290,
+      "sha256": "761521207b0341bfe6efcc051554da437b49d346b9c1415a9dd0971b8365e9c1"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/npc_parser_omission_tests.rs": {
+      "bytes": 5920,
+      "sha256": "7ed14233eacbdc8dbbec5fb0a75a3ffab14c1eb17c1c0be8766b4b833027df1c"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/default_npc_events.rs": {
+      "bytes": 27332,
+      "sha256": "d582eca63484d18e8adb8057f99cdd1f8e9b5c0d2131e44408d652045c52eb1b"
+    },
+    "final-source/mir2-web3/apps/simulation/src/runtime/default_npc_events_tests.rs": {
+      "bytes": 34900,
+      "sha256": "507a487369c7bde48305903dbc9e47adbcaabde6b7d9bdd90a5c649c0f7361be"
+    },
+    "final-source/mir2-web3/tools/generate-crystal-default-npc-scripts.mjs": {
+      "bytes": 11016,
+      "sha256": "351b7ee544df4531431b10deeb575eece5d45278fff9c62564f916eb60129441"
+    },
+    "final-source/mir2-web3/tools/generate-crystal-default-npc-scripts.test.mjs": {
+      "bytes": 5395,
+      "sha256": "2d1de1f92f2c49bcc9aedb23df911361dcc33423fed600fe1d59934882592478"
+    },
+    "final-source/mir2-web3/packages/game-data/data/generated/crystal_default_npc_scripts.json": {
+      "bytes": 343455,
+      "sha256": "dc1fd97565b69b189165c9fe84708bfb2145a9ee1fa677b2338c9b903b0b1197"
+    },
+    "runners/Run-NpcParserRoot.ps1": {
+      "bytes": 2504,
+      "sha256": "c98bf1a977fa75d310513d01fd141b9b2fb2b959b8bc681fc5f5661b9f9abfde"
+    },
+    "runners/Run-NpcGatewayRelease.ps1": {
+      "bytes": 2683,
+      "sha256": "564eb4ce803b377f8449f42aeb65953f8b48e71a3f7f94c62b4fc4b6efcb9c84"
+    },
+    "runners/Run-NpcAdjacentBaseline.ps1": {
+      "bytes": 2945,
+      "sha256": "466bfba65a91cc1fbc2c423f84c4c9a4b41290fc3275207897153abcd85dc172"
+    },
+    "runners/Capture-NpcGatewayFailure.py": {
+      "bytes": 1823,
+      "sha256": "01208c68a2fbd23f0b8b8c401dbe6e8d0ee86876e9ef412370e08bda770a406e"
+    },
+    "runners/Capture-NpcGatewayFailureLog02.py": {
+      "bytes": 1516,
+      "sha256": "57c4a4e55c952cbbcc64e3988b155b468dc8eeb868eb44c847dc6f96d97a2c5b"
+    }
+  }
+}

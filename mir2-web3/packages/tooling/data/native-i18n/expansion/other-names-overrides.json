@@ -1,0 +1,505 @@
+{
+  "content.item.390.name": {
+    "ru": "Одеяние короля Oma (Ж) 1"
+  },
+  "content.item.391.name": {
+    "ru": "Одеяние короля Oma (Ж) 2"
+  },
+  "content.item.392.name": {
+    "ru": "Одеяние короля Oma (Ж) 3"
+  },
+  "content.item.393.name": {
+    "ru": "Одеяние короля Oma (Ж) 4"
+  },
+  "content.item.394.name": {
+    "ru": "Одеяние короля Oma (Ж) 5"
+  },
+  "content.item.52.name": {
+    "ru": "Доспехи Mir (Ж) 1"
+  },
+  "content.item.53.name": {
+    "ru": "Доспехи Mir (Ж) 2"
+  },
+  "content.item.54.name": {
+    "ru": "Доспехи Mir (Ж) 3"
+  },
+  "content.item.55.name": {
+    "ru": "Доспехи Mir (Ж) 4"
+  },
+  "content.item.56.name": {
+    "ru": "Доспехи Mir (Ж) 5"
+  },
+  "content.item.970.name": {
+    "ru": "Рюкзак (S)",
+    "hi": "थैला (S)",
+    "vi": "Ba lô (S)"
+  },
+  "content.item.971.name": {
+    "ru": "Рюкзак (M)",
+    "hi": "थैला (M)",
+    "vi": "Ba lô (M)"
+  },
+  "content.item.972.name": {
+    "ru": "Рюкзак (L)",
+    "hi": "थैला (L)",
+    "vi": "Ba lô (L)"
+  },
+  "content.map.406.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.407.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.408.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.409.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.410.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.411.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.412.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.413.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.414.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.415.name": {
+    "ru": "GT · этаж 1F",
+    "hi": "GT · मंज़िल 1F",
+    "vi": "GT · tầng 1F"
+  },
+  "content.map.416.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.417.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.418.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.419.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.420.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.421.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.422.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.423.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.424.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.425.name": {
+    "ru": "GT · этаж 2F",
+    "hi": "GT · मंज़िल 2F",
+    "vi": "GT · tầng 2F"
+  },
+  "content.map.426.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.427.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.428.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.429.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.430.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.431.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.432.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.433.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.434.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.map.435.name": {
+    "ru": "GT · этаж 3F",
+    "hi": "GT · मंज़िल 3F",
+    "vi": "GT · tầng 3F"
+  },
+  "content.npc.273.name": {
+    "ru": "Задание GM"
+  },
+  "content.item.1092.name": {
+    "hi": "जलता उत्परिवर्ती"
+  },
+  "content.item.1403.name": {
+    "hi": "ह्योनचॉन माशिओक",
+    "vi": "Ma thạch Hyeoncheon"
+  },
+  "content.item.1454.name": {
+    "hi": "Gonryun Eunhyung (खज़ाना)"
+  },
+  "content.item.1456.name": {
+    "hi": "Gonryun Eunhyung (दिव्य)"
+  },
+  "content.item.1457.name": {
+    "hi": "Gonryun Sanggwan (खज़ाना)"
+  },
+  "content.item.1459.name": {
+    "hi": "Gonryun Sanggwan (दिव्य)"
+  },
+  "content.item.1460.name": {
+    "hi": "Gonryun Yeoseonru (खज़ाना)"
+  },
+  "content.item.1462.name": {
+    "hi": "Gonryun Yeoseonru (दिव्य)"
+  },
+  "content.item.1508.name": {
+    "hi": "Gonryun Eunhyung (खज़ाना) 1"
+  },
+  "content.item.1509.name": {
+    "hi": "Gonryun Eunhyung (खज़ाना) 2"
+  },
+  "content.item.1510.name": {
+    "hi": "Gonryun Eunhyung (खज़ाना) 3"
+  },
+  "content.item.1511.name": {
+    "hi": "Gonryun Eunhyung (खज़ाना) 4"
+  },
+  "content.item.1512.name": {
+    "hi": "Gonryun Eunhyung (खज़ाना) 5"
+  },
+  "content.item.1523.name": {
+    "hi": "Gonryunpasackle (खज़ाना)"
+  },
+  "content.item.1530.name": {
+    "hi": "Gonryunpasackle (पवित्र) 1"
+  },
+  "content.item.1531.name": {
+    "hi": "Gonryunpasackle (पवित्र) 2"
+  },
+  "content.item.1532.name": {
+    "hi": "Gonryunpasackle (पवित्र) 3"
+  },
+  "content.item.1533.name": {
+    "hi": "Gonryunpasackle (पवित्र) 4"
+  },
+  "content.item.1534.name": {
+    "hi": "Gonryunpasackle (पवित्र) 5"
+  },
+  "content.item.1535.name": {
+    "hi": "Gonryunpasackle (दिव्य)"
+  },
+  "content.item.1536.name": {
+    "hi": "Gonryunpasackle (दिव्य) 1"
+  },
+  "content.item.1537.name": {
+    "hi": "Gonryunpasackle (दिव्य) 2"
+  },
+  "content.item.1538.name": {
+    "hi": "Gonryunpasackle (दिव्य) 3"
+  },
+  "content.item.1539.name": {
+    "hi": "Gonryunpasackle (दिव्य) 4"
+  },
+  "content.item.1540.name": {
+    "hi": "Gonryunpasackle (दिव्य) 5"
+  },
+  "content.item.1565.name": {
+    "hi": "लाल पुनर्बहाली जल"
+  },
+  "content.item.1566.name": {
+    "hi": "नीला पुनर्बहाली जल"
+  },
+  "content.item.1581.name": {
+    "hi": "Gonryunyongdrama (खज़ाना) (पुरुष)"
+  },
+  "content.item.314.name": {
+    "hi": "Apus धनुष"
+  },
+  "content.item.606.name": {
+    "hi": "Tao मुकुटिका"
+  },
+  "content.item.672.name": {
+    "hi": "जिनसेंग"
+  },
+  "content.item.747.name": {
+    "hi": "साहस गोला"
+  },
+  "content.item.829.name": {
+    "hi": "जमुनिया",
+    "vi": "Thạch anh tím"
+  },
+  "content.item.833.name": {
+    "hi": "एडमिन्टाइन अयस्क"
+  },
+  "content.item.835.name": {
+    "hi": "ओलिवीन अयस्क"
+  },
+  "content.item.848.name": {
+    "hi": "Bichon चिह्न"
+  },
+  "content.item.900.name": {
+    "hi": "नरभक्षी विष"
+  },
+  "content.map.110.name": {
+    "hi": "आदरणीय Tao का कार्यालय"
+  },
+  "content.map.449.name": {
+    "hi": "DY हथियार"
+  },
+  "content.map.91.name": {
+    "hi": "ह्वान मा जिन"
+  },
+  "content.map.94.name": {
+    "hi": "ह्वान मा जिन"
+  },
+  "content.monster.238.name": {
+    "hi": "बैंगनी Kek Tal 0"
+  },
+  "content.monster.283.name": {
+    "hi": "अवतारी WT"
+  },
+  "content.monster.284.name": {
+    "hi": "अवतारी ZT"
+  },
+  "content.monster.402.name": {
+    "hi": "मानेक्ट्रिक ब्लेस्ट"
+  },
+  "content.monster.406.name": {
+    "hi": "भयावह रक्तचूषक"
+  },
+  "content.monster.409.name": {
+    "hi": "हरितनील प्रेत"
+  },
+  "content.monster.414.name": {
+    "hi": "नरकीय नरभक्षी"
+  },
+  "content.monster.461.name": {
+    "hi": "आवारा बिल्ली"
+  },
+  "content.monster.470.name": {
+    "hi": "अंतड़ियों का कीड़ा 2"
+  },
+  "content.monster.475.name": {
+    "hi": "Tucson जादूगर"
+  },
+  "content.monster.493.name": {
+    "hi": "Sinseok खनिक"
+  },
+  "content.npc.223.name": {
+    "hi": "अराजकता केंद्र"
+  },
+  "content.npc.265.name": {
+    "hi": "GM किराना"
+  },
+  "content.item.1085.name": {
+    "vi": "Ninja (Nam)"
+  },
+  "content.item.1086.name": {
+    "vi": "Ninja (Nữ)"
+  },
+  "content.item.1087.name": {
+    "vi": "Ông già Noel"
+  },
+  "content.item.1088.name": {
+    "vi": "Rudolph"
+  },
+  "content.item.1225.name": {
+    "vi": "Giáp Tao (Nam)"
+  },
+  "content.item.1353.description": {
+    "vi": "Trang phục uy quyền (Nữ)"
+  },
+  "content.item.1353.name": {
+    "vi": "Trang phục uy quyền (Nữ)"
+  },
+  "content.item.337.name": {
+    "vi": "Giáp ngọc trai (Nam)"
+  },
+  "content.item.470.name": {
+    "vi": "Nhẫn rồng R"
+  },
+  "content.item.593.description": {
+    "vi": "Chưa có mô tả hợp lệ."
+  },
+  "content.item.709.description": {
+    "vi": "Chưa có mô tả hợp lệ."
+  },
+  "content.item.811.name": {
+    "vi": "Cá bống"
+  },
+  "content.monster.125.name": {
+    "vi": "Thây ma Cl 0"
+  },
+  "content.monster.127.name": {
+    "vi": "Thây ma Nd 0"
+  },
+  "content.monster.217.name": {
+    "vi": "Người cáo đen"
+  },
+  "content.monster.296.name": {
+    "vi": "Thây ma Shi"
+  },
+  "content.monster.297.name": {
+    "vi": "Thây ma Shi 0"
+  },
+  "content.monster.37.name": {
+    "vi": "Dã nhân"
+  },
+  "content.monster.38.name": {
+    "vi": "Dã nhân 0"
+  },
+  "content.monster.432.name": {
+    "vi": "Hydra"
+  },
+  "content.monster.438.name": {
+    "vi": "Lamia"
+  },
+  "content.monster.468.name": {
+    "vi": "Tatu"
+  },
+  "content.monster.71.name": {
+    "vi": "Ruồi sừng 0"
+  },
+  "content.npc.230.name": {
+    "vi": "Thợ khai quật Stuart"
+  },
+  "content.npc.307.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.314.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.321.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.328.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.335.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.342.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.349.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.356.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.363.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.npc.370.name": {
+    "vi": "Cửa hàng GT Mira"
+  },
+  "content.item.1093.name": {
+    "th": "ชุดทางการ (ชาย)"
+  },
+  "content.item.325.name": {
+    "th": "เสื้อคลุมเวทมนตร์ (ชาย)"
+  },
+  "content.item.376.name": {
+    "th": "เกราะสวรรค์ (ชาย) 1"
+  },
+  "content.item.377.name": {
+    "th": "เกราะสวรรค์ (ชาย) 2"
+  },
+  "content.item.378.name": {
+    "th": "เกราะสวรรค์ (ชาย) 3"
+  },
+  "content.item.46.name": {
+    "th": "เกราะ Mir (ชาย) 1"
+  },
+  "content.item.47.name": {
+    "th": "เกราะ Mir (ชาย) 2"
+  },
+  "content.item.48.name": {
+    "th": "เกราะ Mir (ชาย) 3"
+  },
+  "content.item.49.name": {
+    "th": "เกราะ Mir (ชาย) 4"
+  },
+  "content.item.50.name": {
+    "th": "เกราะ Mir (ชาย) 5"
+  },
+  "content.item.637.name": {
+    "th": "หินพลัง (S)"
+  },
+  "content.item.638.name": {
+    "th": "หินพลัง (M)"
+  },
+  "content.item.640.name": {
+    "th": "หินพลัง (XL)"
+  }
+}

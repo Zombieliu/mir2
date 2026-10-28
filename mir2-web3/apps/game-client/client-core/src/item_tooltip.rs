@@ -5,7 +5,9 @@
 //! native renderer reproduce that structure without flattening it into an
 //! invented generic tooltip string.
 
-use crate::item_tooltip_types::{*, ItemTooltipItem as ItemModel, ItemTooltipPlayer as PlayerStats};
+use crate::item_tooltip_types::{
+    ItemTooltipItem as ItemModel, ItemTooltipPlayer as PlayerStats, *,
+};
 const DOTNET_TICKS_PER_SECOND: i64 = 10_000_000;
 #[cfg(test)]
 const DOTNET_TICKS_AT_UNIX_EPOCH: i64 = 621_355_968_000_000_000;
@@ -46,6 +48,15 @@ pub enum CrystalItemTooltipColour {
 pub struct CrystalItemTooltipLine {
     pub text: String,
     pub colour: CrystalItemTooltipColour,
+    /// Explicit source slots for native localization; Core output stays renderer-neutral.
+    pub format: Option<CrystalItemTooltipFormat>,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CrystalItemTooltipFormat {
+    pub key: String,
+    pub fallback: String,
+    pub args: Vec<(String, String)>,
+    pub suffix: String,
 }
 
 impl CrystalItemTooltipLine {
@@ -53,6 +64,7 @@ impl CrystalItemTooltipLine {
         Self {
             text: text.into(),
             colour,
+            format: None,
         }
     }
 
@@ -81,6 +93,40 @@ impl CrystalItemTooltipSection {
 
     fn push_white(&mut self, text: impl Into<String>) {
         self.lines.push(CrystalItemTooltipLine::white(text));
+    }
+    fn push_formatted(
+        &mut self,
+        text: String,
+        key: &str,
+        fallback: &str,
+        args: &[(&str, &str)],
+        colour: CrystalItemTooltipColour,
+    ) {
+        self.push_formatted_with_suffix(text, key, fallback, args, "", colour);
+    }
+    fn push_formatted_with_suffix(
+        &mut self,
+        mut text: String,
+        key: &str,
+        fallback: &str,
+        args: &[(&str, &str)],
+        suffix: &str,
+        colour: CrystalItemTooltipColour,
+    ) {
+        text.push_str(suffix);
+        self.lines.push(CrystalItemTooltipLine {
+            text,
+            colour,
+            format: Some(CrystalItemTooltipFormat {
+                key: key.into(),
+                fallback: fallback.into(),
+                args: args
+                    .iter()
+                    .map(|(key, value)| ((*key).into(), (*value).into()))
+                    .collect(),
+                suffix: suffix.into(),
+            }),
+        });
     }
 }
 
@@ -131,7 +177,12 @@ pub fn crystal_item_tooltip_document(
     player: &PlayerStats,
     now_dotnet_ticks: i64,
 ) -> CrystalItemTooltipDocument {
-    crystal_item_tooltip_document_with_options(item, player, now_dotnet_ticks, CrystalItemTooltipOptions::default())
+    crystal_item_tooltip_document_with_options(
+        item,
+        player,
+        now_dotnet_ticks,
+        CrystalItemTooltipOptions::default(),
+    )
 }
 
 pub fn crystal_item_tooltip_document_with_options(
@@ -248,7 +299,10 @@ fn crystal_item_tooltip_document_at_with_options(
         &mut sections,
         bind_section(info, user, now_dotnet_ticks, options.hide_added_stats),
     );
-    push_nonempty(&mut sections, overlap_section(real_info, options.stack_split_hint));
+    push_nonempty(
+        &mut sections,
+        overlap_section(real_info, options.stack_split_hint),
+    );
     push_nonempty(&mut sections, story_section(info, real_info));
     push_nonempty(&mut sections, gm_section(user));
 
@@ -477,18 +531,36 @@ fn attack_section(
     let added_luck = total_added_stat(user, source, 15, hide_added_stats);
     if luck != 0 || added_luck != 0 {
         let total = luck + added_luck;
-        let text = if info.item_type == 36 && info.shape == 28 {
-            format!("BagWeight + {total}%")
+        let percentage = if info.item_type == 36 && info.shape == 28 {
+            Some((
+                "client.BagWeightPercent",
+                "BagWeight + {0}%",
+                "BagWeight + ",
+            ))
         } else if info.item_type == 13 && info.shape == 4 {
-            format!("Exp + {total}%")
+            Some(("client.ExpPercent", "Exp + {0}%", "Exp + "))
         } else if info.item_type == 13 && info.shape == 5 {
-            format!("Drop + {total}%")
-        } else if total > 0 {
-            format!("Luck + {total}")
+            Some(("client.DropPercent", "Drop + {0}%", "Drop + "))
         } else {
-            format!("Curse + {}", total.unsigned_abs())
+            None
         };
-        section.push(text, added_colour(added_luck));
+        if let Some((key, fallback, prefix)) = percentage {
+            let value = total.to_string();
+            section.push_formatted(
+                format!("{prefix}{value}%"),
+                key,
+                fallback,
+                &[("0", &value)],
+                added_colour(added_luck),
+            );
+        } else {
+            let text = if total > 0 {
+                format!("Luck + {total}")
+            } else {
+                format!("Curse + {}", total.unsigned_abs())
+            };
+            section.push(text, added_colour(added_luck));
+        }
     }
     push_single_stat_variant(
         &mut section,
@@ -509,16 +581,22 @@ fn attack_section(
     let added_attack_speed = total_added_stat(user, source, 14, hide_added_stats);
     if attack_speed != 0 || added_attack_speed != 0 {
         let total = attack_speed + added_attack_speed;
-        let text = if gem {
-            format!("Adds +{total} A.Speed")
+        if gem {
+            section.push(
+                format!("Adds +{total} A.Speed"),
+                added_colour(added_attack_speed),
+            );
         } else {
-            format!(
-                "A.Speed: {}{total}{}",
-                if total < 0 { "" } else { "+" },
-                signed_added_suffix(added_attack_speed)
-            )
-        };
-        section.push(text, added_colour(added_attack_speed));
+            let sign = if total < 0 { "" } else { "+" };
+            let value = format!("{total}{}", signed_added_suffix(added_attack_speed));
+            section.push_formatted(
+                format!("A.Speed: {sign}{value}"),
+                "client.AttackSpeedValue",
+                "A.Speed: {0}{1}",
+                &[("0", sign), ("1", &value)],
+                added_colour(added_attack_speed),
+            );
+        }
     }
 
     push_single_stat_variant(
@@ -1265,16 +1343,25 @@ fn push_rate_stat(
     let added = total_added_stat(user, source, stat, hide_added_stats);
     if base != 0 || added != 0 {
         let total = base + added;
-        section.push(
-            format!(
-                "{label}{}{total}%{}",
-                if total >= 0 { "+" } else { "" },
-                if added == 0 {
-                    String::new()
-                } else {
-                    format!(" ({added:+}%)")
-                }
-            ),
+        let key = match stat {
+            100 => "client.ExpRate",
+            101 => "client.DropRate",
+            102 => "client.GoldRate",
+            _ => "",
+        };
+        let suffix = if added == 0 {
+            String::new()
+        } else {
+            format!(" ({added:+}%)")
+        };
+        let sign = if total >= 0 { "+" } else { "" };
+        let value = total.to_string();
+        section.push_formatted_with_suffix(
+            format!("{label}{sign}{value}%"),
+            key,
+            &format!("{label}{{0}}{{1}}%"),
+            &[("0", sign), ("1", &value)],
+            &suffix,
             added_colour(added),
         );
     }
@@ -1645,18 +1732,30 @@ fn required_class_label(required_class: u8) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::item_tooltip_types::CrystalItemStatModel as CrystalPlayerStatModel;
     use crate::item_tooltip_types::{
         CrystalItemTooltipSourceModel, CrystalUserItemExpireModel, CrystalUserItemModel,
         CrystalUserItemRentalModel, CrystalUserItemSealedModel,
     };
-    use crate::item_tooltip_types::CrystalItemStatModel as CrystalPlayerStatModel;
 
     // Fixed time keeps all original golden assertions deterministic.
-    fn crystal_item_tooltip_document(item: &ItemModel, player: &PlayerStats) -> CrystalItemTooltipDocument {
+    fn crystal_item_tooltip_document(
+        item: &ItemModel,
+        player: &PlayerStats,
+    ) -> CrystalItemTooltipDocument {
         super::crystal_item_tooltip_document(item, player, DOTNET_TICKS_AT_UNIX_EPOCH)
     }
-    fn crystal_item_tooltip_document_with_options(item: &ItemModel, player: &PlayerStats, options: CrystalItemTooltipOptions) -> CrystalItemTooltipDocument {
-        super::crystal_item_tooltip_document_with_options(item, player, DOTNET_TICKS_AT_UNIX_EPOCH, options)
+    fn crystal_item_tooltip_document_with_options(
+        item: &ItemModel,
+        player: &PlayerStats,
+        options: CrystalItemTooltipOptions,
+    ) -> CrystalItemTooltipDocument {
+        super::crystal_item_tooltip_document_with_options(
+            item,
+            player,
+            DOTNET_TICKS_AT_UNIX_EPOCH,
+            options,
+        )
     }
 
     fn potion() -> ItemModel {
@@ -1697,14 +1796,131 @@ mod tests {
     }
 
     #[test]
+    fn formatted_stat_lines_match_legacy_replacement_text_and_metadata() {
+        fn legacy_line(
+            key: &str,
+            fallback: &str,
+            args: &[(&str, &str)],
+            suffix: &str,
+            colour: CrystalItemTooltipColour,
+        ) -> CrystalItemTooltipLine {
+            let mut text = fallback.to_owned();
+            for (slot, value) in args {
+                text = text.replace(&format!("{{{slot}}}"), value);
+            }
+            text.push_str(suffix);
+            CrystalItemTooltipLine {
+                text,
+                colour,
+                format: Some(CrystalItemTooltipFormat {
+                    key: key.into(),
+                    fallback: fallback.into(),
+                    args: args
+                        .iter()
+                        .map(|(slot, value)| ((*slot).into(), (*value).into()))
+                        .collect(),
+                    suffix: suffix.into(),
+                }),
+            }
+        }
+
+        for (item_type, shape, key, fallback) in [
+            (36, 28, "client.BagWeightPercent", "BagWeight + {0}%"),
+            (13, 4, "client.ExpPercent", "Exp + {0}%"),
+            (13, 5, "client.DropPercent", "Drop + {0}%"),
+        ] {
+            for (base, added) in [
+                (5, 2),
+                (-5, -2),
+                (1, -1),
+                (-1, 1),
+                (3, 0),
+                (i32::MAX, 0),
+                (i32::MIN, 0),
+                (0, i32::MAX),
+                (0, i32::MIN),
+            ] {
+                let mut item = potion();
+                let source = item.tooltip_source.as_mut().unwrap();
+                source.info.item_type = item_type;
+                source.info.shape = shape;
+                source.info.stats = [15, 14, 100, 101, 102]
+                    .map(|stat| CrystalItemStatModel { stat, value: base })
+                    .into();
+                source.user_item.as_mut().unwrap().added_stats = [15, 14, 100, 101, 102]
+                    .map(|stat| CrystalItemStatModel { stat, value: added })
+                    .into();
+                let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
+                let actual = document
+                    .sections
+                    .iter()
+                    .flat_map(|section| &section.lines)
+                    .filter(|line| line.format.is_some())
+                    .cloned()
+                    .collect::<Vec<_>>();
+                let total = base + added;
+                let value = total.to_string();
+                let sign = if total < 0 { "" } else { "+" };
+                let colour = if added > 0 {
+                    CrystalItemTooltipColour::Cyan
+                } else {
+                    CrystalItemTooltipColour::White
+                };
+                let speed = format!("{total}{}", signed_added_suffix(added));
+                let mut expected = vec![
+                    legacy_line(key, fallback, &[("0", &value)], "", colour),
+                    legacy_line(
+                        "client.AttackSpeedValue",
+                        "A.Speed: {0}{1}",
+                        &[("0", sign), ("1", &speed)],
+                        "",
+                        colour,
+                    ),
+                ];
+                let suffix = if added == 0 {
+                    String::new()
+                } else {
+                    format!(" ({added:+}%)")
+                };
+                for (rate_key, rate_fallback) in [
+                    ("client.ExpRate", "Exp Rate: {0}{1}%"),
+                    ("client.DropRate", "Drop Rate: {0}{1}%"),
+                    ("client.GoldRate", "Gold Rate: {0}{1}%"),
+                ] {
+                    expected.push(legacy_line(
+                        rate_key,
+                        rate_fallback,
+                        &[("0", sign), ("1", &value)],
+                        &suffix,
+                        colour,
+                    ));
+                }
+                assert_eq!(
+                    actual, expected,
+                    "type={item_type} shape={shape} base={base} added={added}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn localized_item_names_keep_instance_count_refine_prefix_and_source_identity() {
         let mut item = potion();
         item.name = "(MP)DrugSmall".to_owned();
-        item.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap().refine_added = 1;
+        item.tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
+            .refine_added = 1;
         let before = item.clone();
         let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
         assert_eq!(document.sections[0].lines[0].text, "(*)小型蓝药 (5)");
-        assert_eq!(item, before, "display translation cannot rewrite carried item data");
+        assert_eq!(
+            item, before,
+            "display translation cannot rewrite carried item data"
+        );
 
         let mut socket = CrystalItemInfoModel {
             name: "Amulet[Practice]12".to_owned(),
@@ -1719,7 +1935,10 @@ mod tests {
         item.tooltip_source = None;
         item.name.clear();
         item.key = "GreenPoison".to_owned();
-        assert_eq!(crystal_item_tooltip_document(&item, &PlayerStats::default()).sections[0].lines[0].text, "绿毒粉");
+        assert_eq!(
+            crystal_item_tooltip_document(&item, &PlayerStats::default()).sections[0].lines[0].text,
+            "绿毒粉"
+        );
     }
 
     #[test]
@@ -2120,10 +2339,17 @@ mod tests {
         info.required_type = 3;
         info.required_amount = 20;
         let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
-        let need = document.sections.iter().find(|s| s.kind == CrystalItemTooltipSectionKind::Need).unwrap();
+        let need = document
+            .sections
+            .iter()
+            .find(|s| s.kind == CrystalItemTooltipSectionKind::Need)
+            .unwrap();
         assert_eq!(need.lines[0].colour, CrystalItemTooltipColour::White);
         assert_eq!(need.lines[1].colour, CrystalItemTooltipColour::White);
-        assert_eq!(player_meets_crystal_stat(&PlayerStats::default(), 5, 20), None);
+        assert_eq!(
+            player_meets_crystal_stat(&PlayerStats::default(), 5, 20),
+            None
+        );
         assert_eq!(class_flag("unknown"), None);
     }
 
@@ -2136,10 +2362,26 @@ mod tests {
         assert!(text.contains("Selling Price : 35 Gold"));
         assert!(!text.contains("4,294,967,295"));
         item.sell_value = 0;
-        assert!(!crystal_item_tooltip_document(&item, &PlayerStats::default()).plain_text().contains("Selling Price"));
+        assert!(
+            !crystal_item_tooltip_document(&item, &PlayerStats::default())
+                .plain_text()
+                .contains("Selling Price")
+        );
         item.sell_value = u32::MAX;
-        item.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap().count = u16::MAX;
-        assert!(crystal_item_tooltip_document(&item, &PlayerStats::default()).plain_text().contains(&grouped_decimal(u64::from(u32::MAX).saturating_mul(u64::from(u16::MAX)))));
+        item.tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
+            .count = u16::MAX;
+        assert!(
+            crystal_item_tooltip_document(&item, &PlayerStats::default())
+                .plain_text()
+                .contains(&grouped_decimal(
+                    u64::from(u32::MAX).saturating_mul(u64::from(u16::MAX))
+                ))
+        );
     }
 
     #[test]
@@ -2148,37 +2390,96 @@ mod tests {
         assert_eq!(remaining_binary_datetime_seconds(now + 1, now), Some(0));
         assert_eq!(remaining_binary_datetime_seconds(now, now), None);
         assert_eq!(remaining_binary_datetime_seconds(now - 1, now), None);
-        assert_eq!(remaining_binary_datetime_seconds(DOTNET_MAX_TICKS, i64::MIN), Some(u64::try_from((i128::from(DOTNET_MAX_TICKS)-i128::from(i64::MIN))/i128::from(DOTNET_TICKS_PER_SECOND)).unwrap()));
-        assert_eq!(binary_datetime_ticks(DOTNET_MAX_TICKS | i64::MIN), DOTNET_MAX_TICKS);
+        assert_eq!(
+            remaining_binary_datetime_seconds(DOTNET_MAX_TICKS, i64::MIN),
+            Some(
+                u64::try_from(
+                    (i128::from(DOTNET_MAX_TICKS) - i128::from(i64::MIN))
+                        / i128::from(DOTNET_TICKS_PER_SECOND)
+                )
+                .unwrap()
+            )
+        );
+        assert_eq!(
+            binary_datetime_ticks(DOTNET_MAX_TICKS | i64::MIN),
+            DOTNET_MAX_TICKS
+        );
         assert_eq!(binary_datetime_ticks(DOTNET_TICKS_MASK as i64), -1);
         let mut item = potion();
-        let user=item.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap();
-        user.expire_info=Some(CrystalUserItemExpireModel { expiry_binary_datetime: now+1 });
-        user.sealed_info=Some(CrystalUserItemSealedModel { expiry_binary_datetime: now, next_seal_binary_datetime: 0 });
-        user.rental_information=Some(CrystalUserItemRentalModel { owner_name: "Owner".into(), expiry_binary_datetime: now, rental_locked: true, ..Default::default() });
-        let text=crystal_item_tooltip_document_at(&item, &PlayerStats::default(), now).plain_text();
+        let user = item
+            .tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap();
+        user.expire_info = Some(CrystalUserItemExpireModel {
+            expiry_binary_datetime: now + 1,
+        });
+        user.sealed_info = Some(CrystalUserItemSealedModel {
+            expiry_binary_datetime: now,
+            next_seal_binary_datetime: 0,
+        });
+        user.rental_information = Some(CrystalUserItemRentalModel {
+            owner_name: "Owner".into(),
+            expiry_binary_datetime: now,
+            rental_locked: true,
+            ..Default::default()
+        });
+        let text =
+            crystal_item_tooltip_document_at(&item, &PlayerStats::default(), now).plain_text();
         assert!(text.contains("Expires in 0s"));
         assert!(!text.contains("Sealed for"));
         assert!(!text.contains("Rental lock expires"));
-        item.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap().rental_information.as_mut().unwrap().rental_locked=false;
-        let text=crystal_item_tooltip_document_at(&item, &PlayerStats::default(), now).plain_text();
+        item.tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
+            .rental_information
+            .as_mut()
+            .unwrap()
+            .rental_locked = false;
+        let text =
+            crystal_item_tooltip_document_at(&item, &PlayerStats::default(), now).plain_text();
         assert!(text.contains("Item rented from: Owner"));
         assert!(text.contains("Rental expired"));
     }
 
     #[test]
     fn socket_holes_preserve_physical_indices_and_friendly_unicode_digits() {
-        let mut item=potion();
-        let source=item.tooltip_source.as_mut().unwrap();
-        source.info.stats=vec![CrystalItemStatModel { stat:5,value:4 }];
-        source.user_item.as_mut().unwrap().slots=vec![None,Some(CrystalUserItemModel { count:2,current_dura:1000,max_dura:1000,..Default::default() })];
-        source.socket_infos=vec![None,Some(CrystalItemInfoModel { name:"Amulet[Practice]１２".into(),stats:vec![CrystalItemStatModel { stat:5,value:3 }],..Default::default() })];
-        source.real_socket_infos=vec![None,Some(CrystalItemInfoModel { stats:vec![CrystalItemStatModel { stat:5,value:7 }],..Default::default() })];
-        let document=crystal_item_tooltip_document(&item,&PlayerStats::default());
+        let mut item = potion();
+        let source = item.tooltip_source.as_mut().unwrap();
+        source.info.stats = vec![CrystalItemStatModel { stat: 5, value: 4 }];
+        source.user_item.as_mut().unwrap().slots = vec![
+            None,
+            Some(CrystalUserItemModel {
+                count: 2,
+                current_dura: 1000,
+                max_dura: 1000,
+                ..Default::default()
+            }),
+        ];
+        source.socket_infos = vec![
+            None,
+            Some(CrystalItemInfoModel {
+                name: "Amulet[Practice]１２".into(),
+                stats: vec![CrystalItemStatModel { stat: 5, value: 3 }],
+                ..Default::default()
+            }),
+        ];
+        source.real_socket_infos = vec![
+            None,
+            Some(CrystalItemInfoModel {
+                stats: vec![CrystalItemStatModel { stat: 5, value: 7 }],
+                ..Default::default()
+            }),
+        ];
+        let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
         assert!(document.source_complete);
         assert!(document.plain_text().contains("DC + 0~11 (+7)"));
         assert!(document.plain_text().contains("Socket : 护身符 (2)"));
-        assert_eq!(crystal_info_friendly_name("Amulet[Practice]１２"),"Amulet");
+        assert_eq!(crystal_info_friendly_name("Amulet[Practice]１２"), "Amulet");
     }
-
 }

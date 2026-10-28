@@ -87,3 +87,45 @@ fn movement_deadline_cancel_leave_and_frozen_poison_do_not_leave_due_work() {
     zone.handle(ZoneCommand::Leave { session_id: id });
     assert_eq!(zone.next_pending_movement_deadline_ms(), None);
 }
+
+#[test]
+fn empty_movement_cancellation_acknowledges_owner_without_mutating_action_state() {
+    let (mut zone, id) = fixture();
+    walk(&mut zone, &id, 1, 301);
+    assert!(zone.players[&id].movement_actions.is_empty());
+    assert!(zone.players[&id].run_step_until_ms > 301);
+    // Non-default private witnesses make clearing unrelated action clocks
+    // observable. This unit fixture does not alter any live encounter.
+    {
+        let player = zone.players.get_mut(&id).unwrap();
+        player.next_attack_ready_at_ms = 851;
+        player.next_spell_ready_at_ms = 2101;
+        player.magic_ready_at_ms.insert(Spell::FireBall as u8, 1801);
+        player.native_struck_ready_at_ms = Some(801);
+    }
+    let before = serde_json::to_value(&zone.players[&id]).unwrap();
+    for _ in 0..3 {
+        let outbounds = zone.handle(ZoneCommand::CancelPendingMovement {
+            session_id: id.clone(),
+        });
+        assert!(matches!(outbounds.as_slice(),
+            [ZoneOutbound::ToSession { session_id, packets }]
+                if session_id == &id && matches!(packets.as_slice(),
+                    [ServerPacket::UserLocation { location }]
+                        if location.position == Point { x: 11, y: 10 }
+                            && location.direction == MirDirection::Right)
+        ));
+        assert_eq!(
+            serde_json::to_value(&zone.players[&id]).unwrap(),
+            before,
+            "ACK-only cancellation must preserve the entire actor, clocks, life and seq"
+        );
+        assert_eq!(zone.next_pending_movement_deadline_ms(), None);
+    }
+    assert!(zone
+        .handle(ZoneCommand::CancelPendingMovement {
+            session_id: SessionId::new("absent-owner"),
+        })
+        .is_empty());
+    assert_eq!(serde_json::to_value(&zone.players[&id]).unwrap(), before);
+}

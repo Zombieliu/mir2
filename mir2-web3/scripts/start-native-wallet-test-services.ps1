@@ -3,6 +3,7 @@ param(
     [ValidateRange(1024, 65535)][int]$GatewayPort = 7110,
     [ValidateRange(1024, 65535)][int]$AuthPort = 3192,
     [ValidateRange(1024, 65535)][int]$GatewayTcpPort = 7130,
+    [string]$SeedFromRunDirectory,
     [switch]$CheckOnly
 )
 
@@ -147,11 +148,34 @@ try {
     Assert-PlainDirectory $taskDataRoot
     $taskTestRoot = Join-Path $taskDataRoot 'dubhe-wallet-local-test'
     Assert-PlainDirectory $taskTestRoot
+    $taskSeedFiles = @()
+    if ($SeedFromRunDirectory) {
+        $taskSeedRoot = (Resolve-Path -LiteralPath $SeedFromRunDirectory -ErrorAction Stop).Path
+        if ([IO.Path]::GetDirectoryName($taskSeedRoot) -ne $taskTestRoot -or
+            [IO.Path]::GetFileName($taskSeedRoot) -notmatch '^\d{8}-\d{6}-[a-f0-9]{32}$' -or
+            ((Get-Item -LiteralPath $taskSeedRoot).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw '只能从本项目已停止的独立钱包测试目录复制存档。'
+        }
+        foreach ($taskSeedName in @('accounts.json', 'channel-identities.json')) {
+            $taskSeedFile = Get-Item -LiteralPath (Join-Path $taskSeedRoot $taskSeedName) -ErrorAction Stop
+            if ($taskSeedFile.PSIsContainer -or
+                ($taskSeedFile.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+                throw '测试存档必须是普通文件，不能是链接。'
+            }
+            $taskSeedFiles += $taskSeedFile
+        }
+    }
     $taskRunId = (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N')
     $taskRunRoot = Join-Path $taskTestRoot $taskRunId
     Assert-PlainDirectory $taskRunRoot
     $taskRecoveryRoot = Join-Path $taskRunRoot 'save-recovery'
     Assert-PlainDirectory $taskRecoveryRoot
+    foreach ($taskSeedFile in $taskSeedFiles) {
+        [IO.File]::Copy($taskSeedFile.FullName, (Join-Path $taskRunRoot $taskSeedFile.Name), $false)
+    }
+    if ($taskSeedFiles.Count) {
+        Write-Host '已将旧测试账号与角色复制到本轮独立目录；旧目录保留，登录会话需重新验证。'
+    }
     $taskSecret = New-RandomHex
     $taskRecoveryKey = New-RandomHex
     $taskIdentitySessionSecret = New-RandomHex

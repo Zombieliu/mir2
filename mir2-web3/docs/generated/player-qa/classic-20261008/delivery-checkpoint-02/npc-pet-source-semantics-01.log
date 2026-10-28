@@ -1,0 +1,22 @@
+   Compiling cfg-if v1.0.4
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+error: linking with `C:\Users\Administrator\.rustup\toolchains\1.95.0-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\bin\gcc-ld\lld-link.exe` failed: exit code: 1
+  |
+  = note: "C:\\Users\\Administrator\\.rustup\\toolchains\\1.95.0-x86_64-pc-windows-msvc\\lib\\rustlib\\x86_64-pc-windows-msvc\\bin\\gcc-ld\\lld-link.exe" "-flavor" "link" "/NOLOGO" "C:/mir2-build/npc-pet-source-semantics-20261008\\debug\\build\\quote-a6c5800c905b0d24\\rustcqtDWC3\\symbols.o" "<2 object files omitted>" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/npc-pet-source-semantics-20261008\\debug\\build\\quote-a6c5800c905b0d24\\build_script_build-a6c5800c905b0d24.exe" "/OPT:REF,NOICF" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: warning: ignoring unknown argument '-flavor'
+          rust-lld: error: could not open 'link': no such file or directory; did you mean '/link'
+          
+
+error: linking with `C:\Users\Administrator\.rustup\toolchains\1.95.0-x86_64-pc-windows-msvc\lib\rustlib\x86_64-pc-windows-msvc\bin\gcc-ld\lld-link.exe` failed: exit code: 1
+  |
+  = note: "C:\\Users\\Administrator\\.rustup\\toolchains\\1.95.0-x86_64-pc-windows-msvc\\lib\\rustlib\\x86_64-pc-windows-msvc\\bin\\gcc-ld\\lld-link.exe" "-flavor" "link" "/NOLOGO" "C:/mir2-build/npc-pet-source-semantics-20261008\\debug\\build\\proc-macro2-9d9c18cb70820edf\\rustcJcU9uN\\symbols.o" "<3 object files omitted>" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/npc-pet-source-semantics-20261008\\debug\\build\\proc-macro2-9d9c18cb70820edf\\build_script_build-9d9c18cb70820edf.exe" "/OPT:REF,NOICF" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: warning: ignoring unknown argument '-flavor'
+          rust-lld: error: could not open 'link': no such file or directory; did you mean '/link'
+          
+
+error: could not compile `quote` (build script) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `proc-macro2` (build script) due to 1 previous error

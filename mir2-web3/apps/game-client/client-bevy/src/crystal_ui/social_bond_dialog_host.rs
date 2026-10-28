@@ -119,11 +119,7 @@ pub(in super::super) fn process(
         return;
     };
     if let Some(prompt) = state.social_bonds.prompt.clone() {
-        let frame = if matches!(prompt.kind, BondPromptKind::MentorName { .. }) {
-            660
-        } else {
-            360
-        };
+        let frame = if prompt.has_name_editor() { 660 } else { 360 };
         if let Some(size) = host.size("Prguse", frame) {
             let local = cursor - (Vec2::new(1024., 768.) - size) / 2.;
             if mouse.just_pressed(MouseButton::Left) {
@@ -238,6 +234,45 @@ mod tests {
             text: None,
             repeat: false,
             window: Entity::PLACEHOLDER,
+        }
+    }
+    #[test]
+    fn guild_creation_keyboard_enter_is_one_shot_and_escape_sends_no_name() {
+        for cancel in [false, true] {
+            let mut state = NativePlayerUiState::default();
+            let mut queue = NativePlayerUiIntentQueue::default();
+            state
+                .social_bonds
+                .begin_guild_creation_request(GuildCreationContext {
+                    npc_object_id: 427,
+                    map_epoch: 1,
+                });
+            state.social_bonds.observe(&ServerPacket::GuildNameRequest);
+            let revision = state.social_bonds.prompt.as_ref().unwrap().revision;
+            state.social_bonds.input_name(revision, "Knights");
+            assert!(state.blocks_gameplay_keys());
+            assert!(state.blocks_world_click());
+            keyboard(
+                &mut state,
+                &mut queue,
+                &[key(if cancel {
+                    KeyCode::Escape
+                } else {
+                    KeyCode::Enter
+                })],
+            );
+            assert!(state.social_bonds.prompt.is_none());
+            let intents = queue.drain_intents();
+            if cancel {
+                assert!(intents.is_empty());
+                assert!(state.social_bonds.input.editor.is_none());
+            } else {
+                assert!(
+                    matches!(intents.as_slice(), [NativePlayerUiIntent::SocialBondPacket(ClientPacket::GuildNameReturn { name })] if name == "Knights")
+                );
+                keyboard(&mut state, &mut queue, &[key(KeyCode::Enter)]);
+                assert!(queue.drain_intents().is_empty());
+            }
         }
     }
     #[test]

@@ -1,5 +1,4 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -8,8 +7,7 @@ use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{With, Without, World};
 use mir2_game_data::{
     crystal_map_respawns_by_index, crystal_map_respawns_ref, crystal_npc_info_manifest,
-    localized_text_or_fallback, starter_map_collision, BlockedMapCellTemplate, DecorKind,
-    DecorObjectTemplate, DoorMapCellTemplate, FishingCellTemplate, MapBounds, MapCellAttribute,
+    localized_text_or_fallback, starter_map_collision, DecorKind, DecorObjectTemplate, MapBounds,
     SceneView, StarterMapCollision, TerrainKind, TerrainPatchTemplate,
 };
 use mir2_protocol::{ChatType, MapInformation, MirDirection, Point, ServerPacket};
@@ -156,6 +154,7 @@ pub(super) fn is_safe_zone_point(
 /// player happened to occupy. The Zone calls this through its authoritative
 /// transform projection after an accepted step.
 pub(super) fn refresh_player_bind_at_position(world: &mut World, position: &Point) {
+    let _ = super::buffs::refresh_player_safe_duration_buffs(world, position);
     let map_file_name = world
         .resource::<MapRuntimeResource>()
         .current_map
@@ -362,9 +361,34 @@ pub(super) fn is_current_map_transfer_source(world: &World, point: &Point) -> bo
             .any(|transfer| point_in_bounds(&transfer.from_bounds, point))
         || crystal_map_coordinate_source_cells(&map.current_map.file_name)
             .any(|(x, y)| point.x == x && point.y == y)
+        || super::default_npc_events::is_active_map_coord(&map.current_map.file_name, point)
 }
 
 pub(super) fn apply_current_player_position_map_transfer(world: &mut World) -> Vec<ServerPacket> {
+    let map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let position = player_entity(world).and_then(|player| entity_position(world, player));
+    if let Some(position) = position
+        .filter(|position| super::default_npc_events::is_active_map_coord(&map_file_name, position))
+    {
+        let source_need_move = crystal_map_respawns_ref(&map_file_name).is_some_and(|map| {
+            map.movements.iter().any(|movement| {
+                movement.source == position && movement.need_move && !movement.need_hole
+            })
+        });
+        if source_need_move {
+            if super::default_npc_events::has_coordinate_ticket(world, &map_file_name, &position) {
+                // Only a newly accepted entry owns a pending coordinate hook.
+                // A failed script condition must let the next step leave the
+                // entrance rather than locking the character on that cell.
+                return vec![ServerPacket::NPCUpdate { npc_id: 0 }];
+            }
+            return Vec::new();
+        }
+    }
     let Some(transfer) = transfer_for_current_player_position(world) else {
         return Vec::new();
     };
@@ -440,6 +464,36 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
     if conquest_index <= 0 {
         return true;
     }
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    if config
+        .conquest_policies
+        .iter()
+        .any(|p| p.index == conquest_index)
+    {
+        let Ok(Some(record)) = config.shared_conquest_snapshot_checked(conquest_index) else {
+            return false;
+        };
+        let session = world.resource::<SessionResource>();
+        let Some((account_id, character)) = session
+            .account_id
+            .as_ref()
+            .zip(session.selected_character.as_ref())
+        else {
+            return false;
+        };
+        let identity = crate::config::Stage5FriendIdentity {
+            account_id: account_id.clone(),
+            character_index: character.index,
+        };
+        let Ok(store) = config.account_store.lock() else {
+            return false;
+        };
+        return record
+            .owner_guild_id
+            .as_ref()
+            .and_then(|id| store.shared_guilds.get(id))
+            .is_some_and(|g| g.member(&identity).is_some());
+    }
     let guild = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -461,21 +515,37 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
 pub(crate) fn crystal_direct_movement_transfer_source_cells(
     map_file_name: &str,
 ) -> BTreeSet<(i32, i32)> {
-    crystal_movement_transfer_records_for_map(map_file_name)
+    let mut cells: BTreeSet<(i32, i32)> = crystal_movement_transfer_records_for_map(map_file_name)
         .into_iter()
         .flat_map(|transfer| {
             (transfer.from_bounds.min_y..=transfer.from_bounds.max_y).flat_map(move |y| {
                 (transfer.from_bounds.min_x..=transfer.from_bounds.max_x).map(move |x| (x, y))
             })
         })
-        .collect()
+        .collect();
+    if let Some(map) = crystal_map_respawns_ref(map_file_name) {
+        cells.extend(
+            map.movements
+                .iter()
+                .filter(|movement| {
+                    movement.need_move
+                        && !movement.need_hole
+                        && super::default_npc_events::is_active_map_coord(
+                            map_file_name,
+                            &movement.source,
+                        )
+                })
+                .map(|movement| (movement.source.x, movement.source.y)),
+        );
+    }
+    cells
 }
 
 fn crystal_manifest_movement_destination_is_valid(
     map_file_name: &str,
     destination: &Point,
 ) -> bool {
-    runtime_full_map_collision_data(map_file_name)
+    runtime_world_map_collision_data(map_file_name)
         .map(|collision| {
             // Crystal's `Map.ValidPoint` checks the map cell's terrain validity
             // before a movement completes. A closed door is a separate dynamic
@@ -487,7 +557,7 @@ fn crystal_manifest_movement_destination_is_valid(
             point_in_bounds(&collision.collision.region_bounds, destination)
                 && !collision.blocked_set.contains(&tile_key(destination))
         })
-        .unwrap_or(true)
+        .unwrap_or(false)
 }
 
 pub(super) fn crystal_movement_transfer_key(
@@ -712,6 +782,7 @@ pub(super) fn relocate_player_to_map(
         player_runtime.player_position = position.clone();
         player_runtime.player_direction = direction;
     }
+    super::npc_input::invalidate(world);
     world.resource_mut::<NpcStateResource>().active_npc_dialog = None;
     world
         .resource_mut::<RuntimeQueueResource>()
@@ -761,6 +832,17 @@ pub(super) fn relocate_player_to_map(
     // re-broadcast their stage on every swing — chain veins only update on a chain
     // settlement, so entering their map mid-session must seed the last known tier.
     packets.extend(super::onchain::onchain_mine_node_state_packets(world));
+    if super::resources::is_in_world(world) {
+        let map_file_name = world
+            .resource::<MapRuntimeResource>()
+            .current_map
+            .file_name
+            .clone();
+        let _ = super::default_npc_events::enqueue(
+            world,
+            super::default_npc_events::DefaultNpcEvent::MapEnter { map_file_name },
+        );
+    }
     packets
 }
 
@@ -937,6 +1019,60 @@ fn materialize_monster_slot(
     entity
 }
 
+/// Disclosed test preparation: activate dormant original source slots without
+/// changing their IDs, spawn positions, templates, policies or runtime ticks.
+/// No normal client command calls this; respawning/dead pools are rejected.
+#[cfg(feature = "test-support")]
+pub(super) fn materialize_cold_source_pool_for_test(world: &mut World) -> Result<usize, String> {
+    if !is_in_world(world)
+        || world
+            .resource::<RuntimeConfigResource>()
+            .config
+            .monster_spawn_source
+            != MonsterSpawnSource::CrystalWorld
+    {
+        return Err("cold source pool requires an entered original world".into());
+    }
+    let mut table = world
+        .remove_resource::<MonsterSpawnTable>()
+        .ok_or("missing original spawn pool")?;
+    let unavailable = table.rules.iter().flat_map(|rule| &rule.slots).any(|slot| {
+        slot.next_respawn_tick.is_some()
+            || slot.entity.is_some_and(|entity| {
+                world
+                    .get::<MonsterAgent>(entity)
+                    .is_none_or(|agent| agent.dead)
+                    || world
+                        .get::<MonsterVitals>(entity)
+                        .is_none_or(|vitals| vitals.hp <= 0)
+            })
+    });
+    if unavailable {
+        world.insert_resource(table);
+        return Err("cold source pool cannot resurrect or replace existing actors".into());
+    }
+    let mut activated = 0;
+    for rule_index in 0..table.rules.len() {
+        for slot_index in 0..table.rules[rule_index].slots.len() {
+            if table.rules[rule_index].slots[slot_index].entity.is_some() {
+                continue;
+            }
+            let rule = &table.rules[rule_index];
+            let entity = materialize_monster_slot(
+                world,
+                rule_index,
+                rule,
+                slot_index,
+                &rule.slots[slot_index],
+            );
+            table.rules[rule_index].slots[slot_index].entity = Some(entity);
+            activated += 1;
+        }
+    }
+    world.insert_resource(table);
+    Ok(activated)
+}
+
 /// On-demand monster pool reconciliation for the fully-activated world: keep the
 /// ECS holding only the monsters around the player. Slots within activation
 /// range are materialised (fresh and alive); slots that have drifted beyond the
@@ -1073,8 +1209,13 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
     };
     for entity in existing {
         if let Some(vitals) = world.get::<PlayerVitals>(entity) {
-            let saved=crate::config::HeroVitalsState {hp:vitals.hp,mp:vitals.mp};
-            world.resource_mut::<super::resources::HeroInventoryResource>().saved_vitals=Some(saved);
+            let saved = crate::config::HeroVitalsState {
+                hp: vitals.hp,
+                mp: vitals.mp,
+            };
+            world
+                .resource_mut::<super::resources::HeroInventoryResource>()
+                .saved_vitals = Some(saved);
         }
         let _ = world.despawn(entity);
     }
@@ -1101,13 +1242,19 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
         .map(|facing| facing.0)?;
     let spawn_position =
         summon_spawn_position_near(world, &player_position, player_direction, 1, Some(player));
-    let max_hp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_HP).max(0);
-    let max_mp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_MP).max(0);
-    let saved=world.resource::<super::resources::HeroInventoryResource>().saved_vitals;
-    let hp=saved.map_or(max_hp,|v|v.hp.min(max_hp));
-    let mp=saved.map_or(max_mp,|v|v.mp.min(max_mp));
+    let max_hp =
+        super::hero_ai::hero_authoritative_stat(world, super::crystal_compat::CRYSTAL_STAT_HP)
+            .max(0);
+    let max_mp =
+        super::hero_ai::hero_authoritative_stat(world, super::crystal_compat::CRYSTAL_STAT_MP)
+            .max(0);
+    let saved = world
+        .resource::<super::resources::HeroInventoryResource>()
+        .saved_vitals;
+    let hp = saved.map_or(max_hp, |v| v.hp.min(max_hp));
+    let mp = saved.map_or(max_mp, |v| v.mp.min(max_mp));
 
-    let looks=super::hero_inventory::appearance(world);
+    let looks = super::hero_inventory::appearance(world);
     Some(
         world
             .spawn((
@@ -1186,21 +1333,33 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
     let quest_ids_by_npc = super::npc::crystal_quest_ids_by_npc();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
 
-    for npc in crystal_npc_info_manifest().npcs {
+    for npc in crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
+    {
         let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
         if npc_map_file_name.as_deref() != Some(map_file_name.as_str()) {
             continue;
         }
-        if !config.npc_script_is_allowed(&npc.script_key) {
+        if !npc
+            .loaded_object_id
+            .is_some_and(|id| mir2_game_data::periodic_quests::npc(id).is_some())
+            && !config.npc_script_is_allowed(&npc.script_key)
+        {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
             continue;
         };
-        let quest_ids = quest_ids_by_npc
-            .get(&object_id)
-            .map(|ids| ids.iter().copied().collect())
-            .unwrap_or_default();
+        let quest_ids = super::quests::effective_quest_ids_for_npc(
+            world,
+            object_id,
+            &quest_ids_by_npc
+                .get(&object_id)
+                .map(|ids| ids.iter().copied().collect::<Vec<_>>())
+                .unwrap_or_default(),
+        );
 
         world.spawn((
             WorldObject,
@@ -1213,7 +1372,7 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
                 image: npc.image,
                 colour_argb: 0,
                 quest_ids,
-                script_key: Some(npc.script_key),
+                script_key: (!npc.script_key.is_empty()).then_some(npc.script_key),
             },
         ));
     }
@@ -1261,9 +1420,16 @@ pub(super) fn runtime_map_collision_data_uncached(
         return Some(runtime_map_collision_from_template(starter_map_collision()));
     }
 
-    let bytes = crystal_map_path(normalized)
-        .and_then(|path| fs::read(path).ok())
-        .or_else(|| read_crystal_map_pack_bytes(normalized))?;
+    let bytes = match crystal_map_path(normalized) {
+        Some(path) => match super::source_map_io::read_raw_map_file_checked(&path) {
+            Ok(bytes) => bytes,
+            Err(error) if error.can_try_pack() => read_crystal_map_pack_bytes(normalized)?,
+            // A raw file outside the decoder's existing byte domain must not
+            // turn into a new gzip fallback merely because I/O stops early.
+            Err(_) => return None,
+        },
+        None => read_crystal_map_pack_bytes(normalized)?,
+    };
     let collision = parse_runtime_map_collision(normalized, &bytes)?;
     Some(runtime_map_collision_from_template(collision))
 }
@@ -1283,13 +1449,8 @@ fn crystal_map_pack_dir() -> Option<PathBuf> {
 
 /// Decompress a map's raw `.map` bytes from `{pack}/{name}.map.gz`.
 fn read_crystal_map_pack_bytes(normalized: &str) -> Option<Vec<u8>> {
-    use std::io::Read;
     let gz_path = crystal_map_pack_dir()?.join(format!("{normalized}.map.gz"));
-    let gz = fs::read(gz_path).ok()?;
-    let mut decoder = flate2::read::GzDecoder::new(gz.as_slice());
-    let mut bytes = Vec::new();
-    decoder.read_to_end(&mut bytes).ok()?;
-    Some(bytes)
+    super::source_map_io::read_gzip_map_file(&gz_path)
 }
 
 pub(super) fn runtime_map_collision_from_template(
@@ -1349,515 +1510,10 @@ pub(super) fn parse_runtime_map_collision(
     map_file_name: &str,
     bytes: &[u8],
 ) -> Option<StarterMapCollision> {
-    let map_type = detect_runtime_map_type(bytes)?;
-    match map_type {
-        0 => parse_runtime_map_collision_v0(map_file_name, bytes),
-        1 => parse_runtime_map_collision_v1(map_file_name, bytes),
-        2 => parse_runtime_map_collision_v2(map_file_name, bytes),
-        3 => parse_runtime_map_collision_v3(map_file_name, bytes),
-        4 => parse_runtime_map_collision_v4(map_file_name, bytes),
-        5 => parse_runtime_map_collision_v5(map_file_name, bytes),
-        6 => parse_runtime_map_collision_v6(map_file_name, bytes),
-        7 => parse_runtime_map_collision_v7(map_file_name, bytes),
-        100 => parse_runtime_map_collision_v100(map_file_name, bytes),
-        _ => None,
-    }
-}
-
-pub(super) fn detect_runtime_map_type(bytes: &[u8]) -> Option<u8> {
-    if bytes.len() < 8 {
-        return None;
-    }
-    if bytes.get(2) == Some(&0x43) && bytes.get(3) == Some(&0x23) {
-        return Some(100);
-    }
-    if bytes.first() == Some(&0) {
-        return Some(5);
-    }
-    if bytes.first() == Some(&0x0F) && bytes.get(5) == Some(&0x53) && bytes.get(14) == Some(&0x33) {
-        return Some(6);
-    }
-    if bytes.first() == Some(&0x15)
-        && bytes.get(4) == Some(&0x32)
-        && bytes.get(6) == Some(&0x41)
-        && bytes.get(19) == Some(&0x31)
-    {
-        return Some(4);
-    }
-    if bytes.first() == Some(&0x10)
-        && bytes.get(2) == Some(&0x61)
-        && bytes.get(7) == Some(&0x31)
-        && bytes.get(14) == Some(&0x31)
-    {
-        return Some(1);
-    }
-    if (bytes.get(4) == Some(&0x0F) || bytes.get(4) == Some(&0x03))
-        && bytes.get(18) == Some(&0x0D)
-        && bytes.get(19) == Some(&0x0A)
-    {
-        let width = i32::from(read_i16_le(bytes, 0)?);
-        let height = i32::from(read_i16_le(bytes, 2)?);
-        let expected_v2 = 52 + width * height * 14;
-        return Some(if i32::try_from(bytes.len()).ok()? > expected_v2 {
-            3
-        } else {
-            2
-        });
-    }
-    if bytes.first() == Some(&0x0D)
-        && bytes.get(1) == Some(&0x4C)
-        && bytes.get(7) == Some(&0x20)
-        && bytes.get(11) == Some(&0x6D)
-    {
-        return Some(7);
-    }
-    Some(0)
-}
-
-pub(super) fn parse_runtime_map_collision_v100(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    if bytes.first() != Some(&1) || bytes.get(1) != Some(&0) {
-        return None;
-    }
-    let width = u16::try_from(read_i16_le(bytes, 4)?).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 6)?).ok()?;
-    let mut offset = 8usize;
-    let mut blocked_cells = Vec::new();
-    let mut doors = Vec::new();
-    let mut fishing_cells = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            offset += 2;
-            let high_wall = (read_i32_le(bytes, offset)? & 0x2000_0000) != 0;
-            offset += 10;
-            let low_wall = (read_i16_le(bytes, offset)? & i16::MIN) != 0;
-            offset += 2;
-            let door = *bytes.get(offset)?;
-            if high_wall || low_wall {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            if door > 0 {
-                doors.push(DoorMapCellTemplate {
-                    x,
-                    y,
-                    index: door & 0x7F,
-                    closed: true,
-                });
-            }
-            push_fishing_cell(bytes, offset + 11, x, y, &mut fishing_cells);
-            offset += 12;
-        }
-    }
-
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        doors,
-        fishing_cells,
-    ))
-}
-
-pub(super) fn parse_runtime_map_collision_v0(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    parse_runtime_map_collision_fixed(map_file_name, bytes, 52, 12, 0)
-}
-
-pub(super) fn parse_runtime_map_collision_v2(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    parse_runtime_map_collision_fixed(map_file_name, bytes, 52, 14, 2)
-}
-
-pub(super) fn parse_runtime_map_collision_v3(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    parse_runtime_map_collision_fixed(map_file_name, bytes, 52, 36, 3)
-}
-
-pub(super) fn parse_runtime_map_collision_v4(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    let xor = read_i16_le(bytes, 33)?;
-    let width = u16::try_from(read_i16_le(bytes, 31)? ^ xor).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 35)? ^ xor).ok()?;
-    let mut offset = 64usize;
-    let mut blocked_cells = Vec::new();
-    let mut doors = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            let high_wall = (read_i16_le(bytes, offset)? & i16::MIN) != 0;
-            offset += 2;
-            let low_wall = (read_i16_le(bytes, offset)? & i16::MIN) != 0;
-            offset += 4;
-            let door = *bytes.get(offset)?;
-            if high_wall || low_wall {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            if door > 0 {
-                doors.push(DoorMapCellTemplate {
-                    x,
-                    y,
-                    index: door & 0x7F,
-                    closed: true,
-                });
-            }
-            offset += 7;
-        }
-    }
-
-    // Crystal `LoadMapCellsv4` does not read a fishing attribute.
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        doors,
-        Vec::new(),
-    ))
-}
-
-pub(super) fn parse_runtime_map_collision_v5(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    let width = u16::try_from(read_i16_le(bytes, 22)?).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 24)?).ok()?;
-    let mut offset =
-        28usize + (3usize * usize::from((width / 2) + (width % 2)) * usize::from(height / 2));
-    let mut blocked_cells = Vec::new();
-    let mut fishing_cells = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            let flags = *bytes.get(offset)?;
-            let high_wall = (flags & 0x01) != 1;
-            let low_wall = !high_wall && (flags & 0x02) != 2;
-            if high_wall || low_wall {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            push_fishing_cell(bytes, offset + 13, x, y, &mut fishing_cells);
-            offset += 14;
-        }
-    }
-
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        Vec::new(),
-        fishing_cells,
-    ))
-}
-
-pub(super) fn parse_runtime_map_collision_v6(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    let width = u16::try_from(read_i16_le(bytes, 16)?).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 18)?).ok()?;
-    let mut offset = 40usize;
-    let mut blocked_cells = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            let flags = *bytes.get(offset)?;
-            let high_wall = (flags & 0x01) != 1;
-            let low_wall = !high_wall && (flags & 0x02) != 2;
-            if high_wall || low_wall {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            offset += 20;
-        }
-    }
-
-    // Crystal `LoadMapCellsv6` does not read a fishing attribute.
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        Vec::new(),
-        Vec::new(),
-    ))
-}
-
-pub(super) fn parse_runtime_map_collision_v7(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    let width = u16::try_from(read_i16_le(bytes, 21)?).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 25)?).ok()?;
-    let mut offset = 54usize;
-    let mut blocked_cells = Vec::new();
-    let mut doors = Vec::new();
-    let mut fishing_cells = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            let high_wall = (read_i16_le(bytes, offset)? & i16::MIN) != 0;
-            offset += 6;
-            let low_wall = (read_i16_le(bytes, offset)? & i16::MIN) != 0;
-            offset += 2;
-            let door = *bytes.get(offset)?;
-            if high_wall || low_wall {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            if door > 0 {
-                doors.push(DoorMapCellTemplate {
-                    x,
-                    y,
-                    index: door & 0x7F,
-                    closed: true,
-                });
-            }
-            // Light byte (fishing attribute) sits 4 bytes past the door byte.
-            push_fishing_cell(bytes, offset + 4, x, y, &mut fishing_cells);
-            offset += 7;
-        }
-    }
-
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        doors,
-        fishing_cells,
-    ))
-}
-
-pub(super) fn parse_runtime_map_collision_v1(
-    map_file_name: &str,
-    bytes: &[u8],
-) -> Option<StarterMapCollision> {
-    let xor = read_i16_le(bytes, 23)?;
-    let width = u16::try_from(read_i16_le(bytes, 21)? ^ xor).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 25)? ^ xor).ok()?;
-    let mut offset = 54usize;
-    let mut blocked_cells = Vec::new();
-    let mut doors = Vec::new();
-    let mut fishing_cells = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            let high_wall =
-                ((read_i32_le(bytes, offset)? ^ 0xAA38_AA38_u32 as i32) & 0x2000_0000) != 0;
-            offset += 6;
-            let low_wall = ((read_i16_le(bytes, offset)? ^ xor) & i16::MIN) != 0;
-            offset += 2;
-            let door = *bytes.get(offset)?;
-            if high_wall || low_wall {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            if door > 0 {
-                doors.push(DoorMapCellTemplate {
-                    x,
-                    y,
-                    index: door & 0x7F,
-                    closed: true,
-                });
-            }
-            // Light byte (fishing attribute) sits 5 bytes past the door byte.
-            push_fishing_cell(bytes, offset + 5, x, y, &mut fishing_cells);
-            offset += 7;
-        }
-    }
-
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        doors,
-        fishing_cells,
-    ))
-}
-
-pub(super) fn parse_runtime_map_collision_fixed(
-    map_file_name: &str,
-    bytes: &[u8],
-    start_offset: usize,
-    stride: usize,
-    _map_type: u8,
-) -> Option<StarterMapCollision> {
-    let width = u16::try_from(read_i16_le(bytes, 0)?).ok()?;
-    let height = u16::try_from(read_i16_le(bytes, 2)?).ok()?;
-    let mut offset = start_offset;
-    let mut blocked_cells = Vec::new();
-    let mut doors = Vec::new();
-    let mut fishing_cells = Vec::new();
-
-    for x in 0..i32::from(width) {
-        for y in 0..i32::from(height) {
-            let high_wall = (read_i16_le(bytes, offset)? & i16::MIN) != 0;
-            let low_wall = (read_i16_le(bytes, offset + 2)? & i16::MIN) != 0;
-            let no_floor = (read_i16_le(bytes, offset + 4)? & i16::MIN) != 0;
-            let door_offset = match stride {
-                12 => offset + 8,
-                14 => offset + 6,
-                36 => offset + 6,
-                _ => offset + 6,
-            };
-            // Light byte (fishing attribute): v0 door+3, v2 door+5, v3 door+12.
-            let light_offset = match stride {
-                12 => offset + 11,
-                14 => offset + 11,
-                36 => offset + 18,
-                _ => offset + 11,
-            };
-            let door = *bytes.get(door_offset)?;
-            if high_wall || low_wall || no_floor {
-                blocked_cells.push(BlockedMapCellTemplate {
-                    x,
-                    y,
-                    attribute: if low_wall {
-                        MapCellAttribute::LowWall
-                    } else {
-                        MapCellAttribute::HighWall
-                    },
-                });
-            }
-            if door > 0 {
-                doors.push(DoorMapCellTemplate {
-                    x,
-                    y,
-                    index: door & 0x7F,
-                    closed: true,
-                });
-            }
-            push_fishing_cell(bytes, light_offset, x, y, &mut fishing_cells);
-            offset += stride;
-        }
-    }
-
-    Some(build_runtime_collision_output(
-        map_file_name,
-        width,
-        height,
-        blocked_cells,
-        doors,
-        fishing_cells,
-    ))
-}
-
-pub(super) fn build_runtime_collision_output(
-    map_file_name: &str,
-    map_width: u16,
-    map_height: u16,
-    blocked_cells: Vec<BlockedMapCellTemplate>,
-    doors: Vec<DoorMapCellTemplate>,
-    fishing_cells: Vec<FishingCellTemplate>,
-) -> StarterMapCollision {
-    StarterMapCollision {
-        map_file_name: format!("{}.map", normalize_map_file_name(map_file_name)),
-        map_width,
-        map_height,
-        region_bounds: MapBounds {
-            min_x: 0,
-            max_x: i32::from(map_width.saturating_sub(1)),
-            min_y: 0,
-            max_y: i32::from(map_height.saturating_sub(1)),
-        },
-        play_bounds: MapBounds {
-            min_x: 0,
-            max_x: i32::from(map_width.saturating_sub(1)),
-            min_y: 0,
-            max_y: i32::from(map_height.saturating_sub(1)),
-        },
-        blocked_cells,
-        doors,
-        fishing_cells,
-    }
-}
-
-/// Record a fishing cell when the map's per-cell light byte falls in Crystal's
-/// fishable range (100..=119 → attribute 0..=19).
-fn push_fishing_cell(
-    bytes: &[u8],
-    light_offset: usize,
-    x: i32,
-    y: i32,
-    fishing_cells: &mut Vec<FishingCellTemplate>,
-) {
-    if let Some(&light) = bytes.get(light_offset) {
-        if (100..=119).contains(&light) {
-            fishing_cells.push(FishingCellTemplate {
-                x,
-                y,
-                attribute: (light - 100) as i8,
-            });
-        }
-    }
-}
-
-pub(super) fn read_i16_le(bytes: &[u8], offset: usize) -> Option<i16> {
-    let slice = bytes.get(offset..offset + 2)?;
-    Some(i16::from_le_bytes([slice[0], slice[1]]))
-}
-
-pub(super) fn read_i32_le(bytes: &[u8], offset: usize) -> Option<i32> {
-    let slice = bytes.get(offset..offset + 4)?;
-    Some(i32::from_le_bytes([slice[0], slice[1], slice[2], slice[3]]))
+    let normalized = normalize_map_file_name(map_file_name);
+    // Collision availability is not a successful Source Map.Load receipt.
+    // Share the bounded Source cell decoder; preserve the existing cache key.
+    super::source_map_loading::decode_runtime_map_collision(&normalized, bytes).ok()
 }
 
 pub(super) fn runtime_full_map_collision_data(
@@ -1878,7 +1534,7 @@ pub(super) fn runtime_full_map_collision_data(
     }
 
     let parsed = crystal_map_path(&normalized)
-        .and_then(|map_path| fs::read(map_path).ok())
+        .and_then(|map_path| super::source_map_io::read_raw_map_file(&map_path))
         .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
         .map(runtime_map_collision_from_template)
         .map(Arc::new);
@@ -2073,6 +1729,7 @@ pub(super) fn full_map_collision_walkable(
 }
 
 pub(super) fn rebuild_world(world: &mut World) {
+    super::npc_input::invalidate(world);
     clear_world_entities(world);
 
     let player_runtime = world.resource::<PlayerRuntimeResource>().clone();
@@ -2230,6 +1887,10 @@ mod map_collision_source_tests;
 #[cfg(test)]
 #[path = "map_transfer_metadata_tests.rs"]
 mod map_transfer_metadata_tests;
+
+#[cfg(test)]
+#[path = "map_transfer_availability_tests.rs"]
+mod map_transfer_availability_tests;
 
 pub(super) fn current_map_disallows_intelligent_creatures(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();

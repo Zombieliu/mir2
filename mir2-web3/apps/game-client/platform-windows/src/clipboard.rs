@@ -68,7 +68,13 @@ fn paste_shortcut_pressed<'a>(
 /// keyboard input.  This helper is platform-neutral so its safety properties
 /// can be tested without accessing the host clipboard.
 pub fn apply_shell_clipboard(shell: &mut NativeShellModel, clipboard: &str) -> bool {
-    match shell.screen {
+    if shell.screen == NativeShellScreen::CharacterSelect && shell.monthly_card.open {
+        return shell.monthly_card.append(clipboard);
+    }
+    if shell.screen == NativeShellScreen::Registration && shell.register_request_in_flight {
+        return false;
+    }
+    let changed = match shell.screen {
         NativeShellScreen::Login => match shell.login.focus {
             LoginFocus::Account => append_filtered(
                 &mut shell.login.account,
@@ -176,10 +182,17 @@ pub fn apply_shell_clipboard(shell: &mut NativeShellModel, clipboard: &str) -> b
         // SafeKey is a button grid, not a text field.  In particular, never
         // paste a secret into the account/password preview used by that panel.
         _ => false,
+    };
+    if changed && shell.screen == NativeShellScreen::Registration {
+        shell.notice = None;
     }
+    changed
 }
 
 fn shell_has_clipboard_target(shell: &NativeShellModel) -> bool {
+    if shell.screen == NativeShellScreen::Registration && shell.register_request_in_flight {
+        return false;
+    }
     match shell.screen {
         NativeShellScreen::Login => {
             matches!(
@@ -301,6 +314,7 @@ pub fn paste_system(
         ui.creature.sync_input_editor();
         ui.social_bonds.sync_editor();
         ui.game_shop_dialog.sync_search_editor();
+        ui.game_shop_dialog.sync_gift_editor();
         if ui.ime_frame_consumed {
             pending.0 = None;
             mail_pending.0 = None;
@@ -579,6 +593,76 @@ mod tests {
     }
 
     #[test]
+    fn registration_clipboard_blocks_every_field_while_the_request_is_in_flight() {
+        let mut shell = NativeShellModel {
+            screen: NativeShellScreen::Registration,
+            register_request_in_flight: true,
+            notice: Some(mir2_client_bevy::native_shell::ShellNotice::error(
+                "注册请求正在处理中，请稍候。",
+            )),
+            ..Default::default()
+        };
+        shell.registration.account_id = "newhero".to_owned();
+        shell.registration.password = "ValidPass42".to_owned();
+        shell.registration.confirm_password = "ValidPass42".to_owned();
+        let notice = shell.notice.clone();
+        for focus in [
+            RegistrationFocus::AccountId,
+            RegistrationFocus::Password,
+            RegistrationFocus::ConfirmPassword,
+            RegistrationFocus::UserName,
+            RegistrationFocus::BirthDate,
+            RegistrationFocus::SecretQuestion,
+            RegistrationFocus::SecretAnswer,
+            RegistrationFocus::EmailAddress,
+        ] {
+            shell.registration.focus = focus;
+            let before = shell.registration.clone();
+            assert!(!shell_has_clipboard_target(&shell));
+            assert!(!apply_shell_clipboard(&mut shell, "123"));
+            assert_eq!(shell.registration, before);
+            assert_eq!(shell.notice, notice);
+        }
+        shell.register_request_in_flight = false;
+        shell.registration.focus = RegistrationFocus::AccountId;
+        assert!(shell_has_clipboard_target(&shell));
+        assert!(apply_shell_clipboard(&mut shell, "2"));
+        assert_eq!(shell.registration.account_id, "newhero2");
+        assert!(shell.notice.is_none());
+    }
+
+    #[test]
+    fn registration_clipboard_clears_an_old_notice_only_after_actual_content_changes() {
+        let mut shell = NativeShellModel {
+            screen: NativeShellScreen::Registration,
+            notice: Some(mir2_client_bevy::native_shell::ShellNotice::error(
+                "旧的注册错误",
+            )),
+            ..Default::default()
+        };
+        shell.registration.focus = RegistrationFocus::Password;
+        shell.registration.password = "ValidPass42".to_owned();
+        let notice = shell.notice.clone();
+        for text in ["", "!\r\n", "密码"] {
+            assert!(!apply_shell_clipboard(&mut shell, text));
+            assert_eq!(shell.registration.password, "ValidPass42");
+            assert_eq!(shell.notice, notice);
+        }
+        shell.registration.password = "Alpha1234567890".to_owned();
+        assert!(!apply_shell_clipboard(&mut shell, "more"));
+        assert_eq!(shell.notice, notice);
+        shell.registration.focus = RegistrationFocus::SubmitButton;
+        assert!(!shell_has_clipboard_target(&shell));
+        assert!(!apply_shell_clipboard(&mut shell, "text"));
+        assert_eq!(shell.notice, notice);
+        shell.registration.focus = RegistrationFocus::EmailAddress;
+        shell.registration.email_address = "hero@".to_owned();
+        assert!(apply_shell_clipboard(&mut shell, "example.test"));
+        assert_eq!(shell.registration.email_address, "hero@example.test");
+        assert!(shell.notice.is_none());
+    }
+
+    #[test]
     fn paste_is_ignored_for_unfocused_shell_controls() {
         let mut shell = NativeShellModel {
             screen: NativeShellScreen::Login,
@@ -678,18 +762,29 @@ mod tests {
         };
         assert!(mail_paste_is_current(&target, Some(&target)));
         for stale in [
-            MailTextTarget { recipient: "Other".into(), ..target.clone() },
+            MailTextTarget {
+                recipient: "Other".into(),
+                ..target.clone()
+            },
             MailTextTarget {
                 kind: mir2_client_bevy::crystal_ui::overlays::MailComposeKind::Parcel,
                 ..target.clone()
             },
-            MailTextTarget { draft_epoch: 8, ..target.clone() },
-            MailTextTarget { editor_revision: 12, ..target.clone() },
-            MailTextTarget { session_revision: 4, ..target.clone() },
+            MailTextTarget {
+                draft_epoch: 8,
+                ..target.clone()
+            },
+            MailTextTarget {
+                editor_revision: 12,
+                ..target.clone()
+            },
+            MailTextTarget {
+                session_revision: 4,
+                ..target.clone()
+            },
         ] {
             assert!(!mail_paste_is_current(&target, Some(&stale)));
         }
         assert!(!mail_paste_is_current(&target, None));
     }
-
 }

@@ -7,20 +7,32 @@
 //! - full quest log covers selection/detail/tracking/accept/deliver/reward/close
 //! - NPC dialog covers clickable links, service return, close and input flow
 
-
 #[path = "quest_multi_guidance.rs"]
 mod multi_guidance;
+#[cfg(all(test, feature = "native-ui"))]
+#[path = "quest_multilingual_visual_tests.rs"]
+mod multilingual_visual_tests;
+#[cfg(all(test, feature = "native-ui"))]
+#[path = "quest_nonmodal_input_tests.rs"]
+mod nonmodal_input_tests;
+#[cfg(all(test, feature = "native-ui"))]
+#[path = "periodic_quest_ui_tests.rs"]
+mod periodic_quest_ui_tests;
 #[path = "quest_route.rs"]
 pub(crate) mod route;
-#[path = "quest_turn_in.rs"]
-mod turn_in;
 #[cfg(all(test, feature = "native-ui"))]
 #[path = "quest_supply_visual_tests.rs"]
 mod supply_visual_tests;
-pub use turn_in::{PendingQuestTurnIn, begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
-    quest_turn_in_ui_allows_interaction};
-pub use multi_guidance::primary_quest_index;
+#[path = "quest_turn_in.rs"]
+mod turn_in;
 
+pub use multi_guidance::primary_quest_index;
+pub use turn_in::{
+    begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
+    quest_turn_in_ui_allows_interaction, PendingQuestTurnIn,
+};
+
+pub use crate::quest_intents::{QuestUiIntent, QuestUiIntentQueue, MAX_QUEUED_INTENTS};
 use crate::quest_presentation_text::{QuestPresentationLocale, QuestRenderText};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -31,21 +43,19 @@ use bevy::ui::{
 };
 use mir2_client_core::quest::{
     diary_endpoint_authorized, evaluate_quest_action, QuestAction, QuestActionDecision,
-    QuestActionFacts, QuestActionRejection, QuestActionRequest, QuestActionSource, QuestActionStatus,
-    QuestProfile,
+    QuestActionFacts, QuestActionRejection, QuestActionRequest, QuestActionSource,
+    QuestActionStatus, QuestProfile,
 };
-pub use crate::quest_intents::{QuestUiIntent, QuestUiIntentQueue, MAX_QUEUED_INTENTS};
 
 use crate::crystal_ui::hud::HUD_Z_INDEX;
 use crate::crystal_ui::item_tooltip::crystal_item_tooltip_document_from_source;
-use crate::crystal_ui::overlays::{
-    NativePlayerUiSet, NativePlayerUiState, UiEffectQueue,
-};
 #[cfg(feature = "native-ui")]
 use crate::crystal_ui::overlays::dispatch_native_ui_action as dispatch_quest_panel_action;
+use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState, UiEffectQueue};
 #[cfg(not(feature = "native-ui"))]
 fn dispatch_quest_panel_action(
-    state: &mut NativePlayerUiState, effects: &mut UiEffectQueue,
+    state: &mut NativePlayerUiState,
+    effects: &mut UiEffectQueue,
     action: mir2_ui_core::action::UiAction,
 ) -> mir2_ui_core::reducer::Transition {
     crate::crystal_ui::overlays::dispatch_ui_action(&mut state.core, effects, action)
@@ -122,18 +132,40 @@ const QUEST_MESSAGE_OK_ASSET: &str = "original-ui/Title/200.png";
 /// Chrome required before a portable host reports the shared Quest surface
 /// visually ready. Item icons remain authoritative, dynamic asset requests.
 pub const PORTABLE_QUEST_REQUIRED_SKINS: &[&str] = &[
-    QUEST_DIARY_FRAME_ASSET, QUEST_DIARY_TITLE_ASSET, QUEST_DIARY_EXPANDED_ASSET,
-    QUEST_DIARY_COLLAPSED_ASSET, QUEST_DIARY_SELECTED_ASSET, QUEST_DIARY_TRACKED_ASSET,
-    NPC_DIALOG_FRAME_ASSET, QUEST_DIARY_TOP_CLOSE_ASSET, QUEST_DIARY_BOTTOM_CLOSE_ASSET,
-    QUEST_DETAIL_FRAME_ASSET, QUEST_DETAIL_TITLE_ASSET, QUEST_DETAIL_SECTION_ASSET,
-    QUEST_DETAIL_EXP_ASSET, QUEST_DETAIL_GOLD_ASSET, QUEST_DETAIL_FIXED_REWARD_ASSET,
-    QUEST_DETAIL_SELECTED_REWARD_ASSET, QUEST_DETAIL_SELECT_REWARD_ASSET,
-    QUEST_DETAIL_SCROLL_UP_ASSET, QUEST_DETAIL_SCROLL_THUMB_ASSET,
-    QUEST_DETAIL_SCROLL_DOWN_ASSET, QUEST_DETAIL_SHARE_ASSET, QUEST_DETAIL_CANCEL_ASSET,
-    QUEST_LIST_FRAME_ASSET, QUEST_LIST_TITLE_ASSET, QUEST_LIST_UP_ASSET,
-    QUEST_LIST_DOWN_ASSET, QUEST_LIST_ACCEPT_ASSET, QUEST_LIST_FINISH_ASSET,
-    QUEST_LIST_LEAVE_ASSET, NPC_QUEST_BUTTON_ASSET, QUEST_CONFIRM_FRAME_ASSET,
-    QUEST_CONFIRM_YES_ASSET, QUEST_CONFIRM_NO_ASSET, QUEST_MESSAGE_OK_ASSET,
+    QUEST_DIARY_FRAME_ASSET,
+    QUEST_DIARY_TITLE_ASSET,
+    QUEST_DIARY_EXPANDED_ASSET,
+    QUEST_DIARY_COLLAPSED_ASSET,
+    QUEST_DIARY_SELECTED_ASSET,
+    QUEST_DIARY_TRACKED_ASSET,
+    NPC_DIALOG_FRAME_ASSET,
+    QUEST_DIARY_TOP_CLOSE_ASSET,
+    QUEST_DIARY_BOTTOM_CLOSE_ASSET,
+    QUEST_DETAIL_FRAME_ASSET,
+    QUEST_DETAIL_TITLE_ASSET,
+    QUEST_DETAIL_SECTION_ASSET,
+    QUEST_DETAIL_EXP_ASSET,
+    QUEST_DETAIL_GOLD_ASSET,
+    QUEST_DETAIL_FIXED_REWARD_ASSET,
+    QUEST_DETAIL_SELECTED_REWARD_ASSET,
+    QUEST_DETAIL_SELECT_REWARD_ASSET,
+    QUEST_DETAIL_SCROLL_UP_ASSET,
+    QUEST_DETAIL_SCROLL_THUMB_ASSET,
+    QUEST_DETAIL_SCROLL_DOWN_ASSET,
+    QUEST_DETAIL_SHARE_ASSET,
+    QUEST_DETAIL_CANCEL_ASSET,
+    QUEST_LIST_FRAME_ASSET,
+    QUEST_LIST_TITLE_ASSET,
+    QUEST_LIST_UP_ASSET,
+    QUEST_LIST_DOWN_ASSET,
+    QUEST_LIST_ACCEPT_ASSET,
+    QUEST_LIST_FINISH_ASSET,
+    QUEST_LIST_LEAVE_ASSET,
+    NPC_QUEST_BUTTON_ASSET,
+    QUEST_CONFIRM_FRAME_ASSET,
+    QUEST_CONFIRM_YES_ASSET,
+    QUEST_CONFIRM_NO_ASSET,
+    QUEST_MESSAGE_OK_ASSET,
 ];
 const ASK_CANCEL_QUEST_TEXT: &str = "Are you sure you want to cancel this quest?";
 const SELECT_REWARD_TEXT: &str = "You must select a reward item.";
@@ -187,10 +219,21 @@ struct MobileQuestLayout {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum MobileQuestSheet { Confirmation, NpcList, Dialog, Detail, Diary, None }
+enum MobileQuestSheet {
+    Confirmation,
+    NpcList,
+    Dialog,
+    Detail,
+    Diary,
+    None,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub(crate) enum CompactQuestPage { #[default] Text, Rewards }
+pub(crate) enum CompactQuestPage {
+    #[default]
+    Text,
+    Rewards,
+}
 
 fn mobile_sheet(
     confirmation_open: bool,
@@ -199,12 +242,19 @@ fn mobile_sheet(
     detail_open: bool,
     diary_open: bool,
 ) -> MobileQuestSheet {
-    if confirmation_open { MobileQuestSheet::Confirmation }
-    else if npc_list_open { MobileQuestSheet::NpcList }
-    else if dialog_open { MobileQuestSheet::Dialog }
-    else if detail_open { MobileQuestSheet::Detail }
-    else if diary_open { MobileQuestSheet::Diary }
-    else { MobileQuestSheet::None }
+    if confirmation_open {
+        MobileQuestSheet::Confirmation
+    } else if npc_list_open {
+        MobileQuestSheet::NpcList
+    } else if dialog_open {
+        MobileQuestSheet::Dialog
+    } else if detail_open {
+        MobileQuestSheet::Detail
+    } else if diary_open {
+        MobileQuestSheet::Diary
+    } else {
+        MobileQuestSheet::None
+    }
 }
 
 fn place_mobile_sheet(node: &mut Node, layout: MobileQuestLayout) {
@@ -220,12 +270,20 @@ fn place_mobile_sheet(node: &mut Node, layout: MobileQuestLayout) {
 
 impl QuestUiPresentation {
     pub fn supports_world_tracker(self) -> bool {
-        [self.logical_width, self.logical_height, self.stage_css_scale].into_iter()
-            .all(|value| value.is_finite() && value > 0.0) && self.mobile_layout().is_none()
+        [
+            self.logical_width,
+            self.logical_height,
+            self.stage_css_scale,
+        ]
+        .into_iter()
+        .all(|value| value.is_finite() && value > 0.0)
+            && self.mobile_layout().is_none()
     }
     /// Whether this touch viewport can use the readable single-sheet layout.
     /// Hosts can reject smaller viewports instead of showing desktop geometry.
-    pub fn supports_mobile_layout(self) -> bool { self.mobile_layout().is_some() }
+    pub fn supports_mobile_layout(self) -> bool {
+        self.mobile_layout().is_some()
+    }
 
     fn mobile_layout(self) -> Option<MobileQuestLayout> {
         let valid = self.logical_width.is_finite()
@@ -239,8 +297,7 @@ impl QuestUiPresentation {
         }
         let css_width = self.logical_width * self.stage_css_scale;
         let css_height = self.logical_height * self.stage_css_scale;
-        if css_width > 1100.0 || css_height > 600.0
-            || css_width / css_height < 1.5 {
+        if css_width > 1100.0 || css_height > 600.0 || css_width / css_height < 1.5 {
             return None;
         }
         let margin = 12.0 / self.stage_css_scale;
@@ -268,33 +325,65 @@ impl QuestUiPresentation {
 }
 
 impl MobileQuestLayout {
-    fn px(self, css_px: f32) -> f32 { css_px / self.css_scale }
+    fn px(self, css_px: f32) -> f32 {
+        css_px / self.css_scale
+    }
     fn rect(self, left: f32, top: f32, width: f32, height: f32) -> QuestLogRect {
         QuestLogRect::new(self.px(left), self.px(top), self.px(width), self.px(height))
     }
-    fn width_css(self) -> f32 { self.panel.width * self.css_scale }
-    fn height_css(self) -> f32 { self.panel.height * self.css_scale }
-    fn body_rows(self, start_css: f32, end_css: f32, row_css: f32) -> usize {
-        ((self.height_css() - start_css - end_css) / row_css).floor().max(1.0) as usize
+    fn width_css(self) -> f32 {
+        self.panel.width * self.css_scale
     }
-    fn diary_rows(self) -> usize { self.body_rows(102.0, 56.0, 48.0) }
-    fn dialog_rows(self) -> usize { self.body_rows(54.0, 58.0, 44.0) }
-    fn npc_quest_rows(self) -> usize { 1 }
-    fn message_rows(self) -> usize { if self.compact { 5 } else { self.body_rows(102.0, 194.0, 24.0) } }
-    fn detail_rows(self) -> usize { if self.compact { 7 } else { self.body_rows(52.0, 195.0, 24.0) } }
+    fn height_css(self) -> f32 {
+        self.panel.height * self.css_scale
+    }
+    fn body_rows(self, start_css: f32, end_css: f32, row_css: f32) -> usize {
+        ((self.height_css() - start_css - end_css) / row_css)
+            .floor()
+            .max(1.0) as usize
+    }
+    fn diary_rows(self) -> usize {
+        self.body_rows(102.0, 56.0, 48.0)
+    }
+    fn dialog_rows(self) -> usize {
+        self.body_rows(54.0, 58.0, 44.0)
+    }
+    fn npc_quest_rows(self) -> usize {
+        1
+    }
+    fn message_rows(self) -> usize {
+        if self.compact {
+            5
+        } else {
+            self.body_rows(102.0, 194.0, 24.0)
+        }
+    }
+    fn detail_rows(self) -> usize {
+        if self.compact {
+            7
+        } else {
+            self.body_rows(52.0, 195.0, 24.0)
+        }
+    }
     fn dialog_footer_button_width(self, count: usize) -> f32 {
-        ((self.width_css() - 24.0 - (count.saturating_sub(1) as f32 * 8.0))
-            / count.max(1) as f32).min(92.0)
+        ((self.width_css() - 24.0 - (count.saturating_sub(1) as f32 * 8.0)) / count.max(1) as f32)
+            .min(92.0)
     }
     fn detail_footer_rects(self) -> [(f32, f32, f32, f32); 3] {
         let y = self.height_css() - 49.0;
-        [(16.0, y, 120.0, 44.0), (144.0, y, 92.0, 44.0),
-            (self.width_css() - 128.0, y, 112.0, 44.0)]
+        [
+            (16.0, y, 120.0, 44.0),
+            (144.0, y, 92.0, 44.0),
+            (self.width_css() - 128.0, y, 112.0, 44.0),
+        ]
     }
     fn npc_footer_rects(self) -> [(f32, f32, f32, f32); 3] {
         let y = self.height_css() - 49.0;
-        [(16.0, y, 112.0, 44.0), (self.width_css() - 212.0, y, 112.0, 44.0),
-            (self.width_css() - 92.0, y, 76.0, 44.0)]
+        [
+            (16.0, y, 112.0, 44.0),
+            (self.width_css() - 212.0, y, 112.0, 44.0),
+            (self.width_css() - 92.0, y, 76.0, 44.0),
+        ]
     }
 }
 
@@ -383,6 +472,21 @@ pub fn quest_detail_layout(scale: f32) -> QuestDetailLayout {
         rewards: QuestLogRect::new(5.0, 307.0, 306.0, 130.0).scaled(scale),
         share: QuestLogRect::new(40.0, 436.0, 76.0, 25.0).scaled(scale),
         cancel: QuestLogRect::new(200.0, 436.0, 76.0, 25.0).scaled(scale),
+    }
+}
+
+fn quest_detail_rendered_title_rect(layout: QuestDetailLayout, localized: bool) -> QuestLogRect {
+    if !localized {
+        return layout.title;
+    }
+    // Title/16's 55 px is the original bitmap width, not the available
+    // heading space. This detail window has no diary count/chapter in its
+    // header. Use the empty strip up to the close button, keeping its
+    // hitbox and every body/reward rectangle in the Crystal layout intact.
+    let scale = layout.frame.width / QUEST_DETAIL_DESIGN_WIDTH;
+    QuestLogRect {
+        width: layout.top_close.left - layout.title.left - 8.0 * scale,
+        ..layout.title
     }
 }
 
@@ -477,14 +581,27 @@ const CRYSTAL_TARGET_PANEL_VISIBLE: bool = false;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuestRouteTarget {
     Entrance,
-    HuntRegion { monster_index: i32, radius: i32 },
-    Supply { vendor: crate::quest_supplies::SupplyVendor },
+    TaskNpc {
+        object_id: u32,
+    },
+    MapNpc {
+        object_id: u32,
+    },
+    HuntRegion {
+        monster_index: i32,
+        radius: i32,
+    },
+    Supply {
+        vendor: crate::quest_supplies::SupplyVendor,
+    },
 }
 
 impl QuestRouteTarget {
     pub fn label(self) -> &'static str {
         match self {
             Self::Entrance => "入口",
+            Self::TaskNpc { .. } => "Task Steward",
+            Self::MapNpc { .. } => "NPC",
             Self::HuntRegion { .. } => "狩猎区域",
             Self::Supply { .. } => "补给地点",
         }
@@ -505,23 +622,89 @@ pub struct QuestRouteNavigationIntent {
 }
 
 impl QuestRouteNavigationIntent {
+    /// Big Map GO TO shares the ordinary movement controller. The selected
+    /// server-provided NPC and coordinates must still match when it is used.
+    pub fn matches_big_map_npc_destination(self, model: &crate::big_map::BigMapModel) -> bool {
+        let QuestRouteTarget::MapNpc { object_id } = self.target else {
+            return false;
+        };
+        self.quest_index == 0
+            && model.reset_epoch == self.reset_epoch
+            && model.current_map_index == Some(self.map_index)
+            && model.selected_navigation_npc().is_some_and(|npc| {
+                npc.object_id == object_id
+                    && npc.map_index == self.map_index
+                    && npc.location.x == self.x
+                    && npc.location.y == self.y
+            })
+    }
+
+    /// A town approach is valid only for a displayed periodic task endpoint.
+    /// This never authorizes accepting or granting a reward remotely.
+    pub fn matches_task_npc_destination(self, tracker: &QuestTracker) -> bool {
+        let QuestRouteTarget::TaskNpc { object_id } = self.target else {
+            return false;
+        };
+        let Some(quest) = tracker
+            .active_quests
+            .iter()
+            .find(|quest| quest.quest_index == self.quest_index)
+        else {
+            return false;
+        };
+        mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
+            && turn_in::destination_on_map(quest, Some(self.map_index)).is_some_and(|npc| {
+                npc.object_id == object_id
+                    && npc.map_index == self.map_index
+                    && npc.x == self.x
+                    && npc.y == self.y
+            })
+    }
+
     pub fn matches_supply_destination(self) -> bool {
-        let QuestRouteTarget::Supply { vendor } = self.target else { return false; };
-        self.quest_index == 0 && vendor.route(self.map_index).is_some_and(|route| route.x == self.x && route.y == self.y)
+        let QuestRouteTarget::Supply { vendor } = self.target else {
+            return false;
+        };
+        self.quest_index == 0
+            && vendor
+                .route(self.map_index)
+                .is_some_and(|route| route.x == self.x && route.y == self.y)
     }
 
     /// Shared UI/host validation against one specific unfinished kill and its
     /// imported area. Coordinates or a remaining unrelated flag are not enough.
     pub fn matches_active_hunt_region(self, tracker: &QuestTracker) -> bool {
-        let QuestRouteTarget::HuntRegion { monster_index, radius } = self.target else { return false; };
-        let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == self.quest_index) else {
+        let QuestRouteTarget::HuntRegion {
+            monster_index,
+            radius,
+        } = self.target
+        else {
+            return false;
+        };
+        let Some(quest) = tracker
+            .active_quests
+            .iter()
+            .find(|quest| quest.quest_index == self.quest_index)
+        else {
             return false;
         };
         crate::quest_hunt_regions::active_hunt_regions(
-            &QuestTracker { active_quests: vec![quest.clone()] }, self.map_index,
-            crate::big_map::BigMapPoint { x: self.x, y: self.y },
-        ).iter().any(|region| region.monster_index == monster_index && region.radius == radius
-            && region.center.x == self.x && region.center.y == self.y)
+            &QuestTracker {
+                active_quests: vec![quest.clone()],
+            },
+            self.map_index,
+            crate::big_map::BigMapPoint {
+                x: self.x,
+                y: self.y,
+            },
+        )
+        .iter()
+        .any(|region| {
+            region.monster_index == monster_index
+                && region.radius == radius
+                && region.center.x == self.x
+                && region.center.y == self.y
+        })
     }
 }
 
@@ -564,11 +747,18 @@ pub fn quest_route_intent_is_current(
     let Some(big_map) = big_map else {
         return false;
     };
-    if big_map.reset_epoch != intent.reset_epoch || big_map.current_map_index != Some(intent.map_index) {
+    if big_map.reset_epoch != intent.reset_epoch
+        || big_map.current_map_index != Some(intent.map_index)
+    {
         return false;
     }
+    if matches!(intent.target, QuestRouteTarget::MapNpc { .. }) {
+        return intent.matches_big_map_npc_destination(big_map);
+    }
     if let QuestRouteTarget::Supply { vendor } = intent.target {
-        return state.supply_open && state.supply_vendor == Some(vendor) && intent.matches_supply_destination();
+        return state.supply_open
+            && state.supply_vendor == Some(vendor)
+            && intent.matches_supply_destination();
     }
     if primary_quest_index(tracker, state, journey) != Some(intent.quest_index) {
         return false;
@@ -576,7 +766,28 @@ pub fn quest_route_intent_is_current(
     if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
         return intent.matches_active_hunt_region(tracker);
     }
-    let targets = crate::quest_destination::authored_target_map_indices(intent.quest_index);
+    if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {
+        return intent.matches_task_npc_destination(tracker);
+    }
+    let Some(quest) = tracker
+        .active_quests
+        .iter()
+        .find(|quest| quest.quest_index == intent.quest_index)
+    else {
+        return false;
+    };
+    let targets = if mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
+        && matches!(
+            quest.status,
+            crate::quest_model::QuestStatus::NotStarted
+                | crate::quest_model::QuestStatus::ReadyToTurnIn
+        ) {
+        turn_in::destination_on_map(quest, big_map.current_map_index)
+            .map(|npc| vec![npc.map_index])
+            .unwrap_or_default()
+    } else {
+        crate::quest_destination::active_target_map_indices(quest)
+    };
     let crate::quest_ui::route::QuestRoute::NextStep(step) =
         crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
     else {
@@ -596,6 +807,8 @@ pub struct QuestFeedback {
 
 #[derive(Resource, Debug, Default, Clone)]
 pub struct QuestUiState {
+    /// Local tracker viewport, retained across authoritative movement redraws.
+    pub guidance_scroll_y: f32,
     /// Local view only; opening it never changes the active quest or buys items.
     pub supply_open: bool,
     pub supply_vendor: Option<crate::quest_supplies::SupplyVendor>,
@@ -662,17 +875,38 @@ pub enum GuidedDiaryTab {
     Main,
     Ready,
     Side,
+    Daily,
+    Weekly,
 }
 
 impl GuidedDiaryTab {
-    const ALL: [Self; 3] = [Self::Main, Self::Ready, Self::Side];
+    const ALL: [Self; 5] = [
+        Self::Main,
+        Self::Ready,
+        Self::Side,
+        Self::Daily,
+        Self::Weekly,
+    ];
 
     const fn label(self) -> &'static str {
         match self {
             Self::Main => "主线",
             Self::Ready => "可交付",
             Self::Side => "支线",
+            Self::Daily => "Daily Tasks",
+            Self::Weekly => "Weekly Tasks",
         }
+    }
+
+    fn localized_label(self) -> String {
+        let fallback = crate::player_text::text(self.label());
+        let key = match self {
+            Self::Main => "periodic.diary.tab.main",
+            Self::Ready => "periodic.diary.tab.ready",
+            Self::Side => "periodic.diary.tab.side",
+            Self::Daily | Self::Weekly => return fallback,
+        };
+        crate::native_i18n::key(key, &fallback)
     }
 }
 
@@ -695,6 +929,20 @@ impl QuestStageFilter {
         }
     }
 
+    fn display_label(self) -> String {
+        if !crate::native_i18n::active() {
+            return crate::player_text::text(self.label());
+        }
+        let key = match self {
+            Self::All => "ui.questFilter.all",
+            Self::InProgress => "ui.questFilter.active",
+            Self::ReadyToTurnIn => "ui.questFilter.ready",
+            Self::NotStarted => "ui.questFilter.new",
+            Self::Completed => "ui.questFilter.done",
+        };
+        crate::native_i18n::key(key, self.label())
+    }
+
     pub fn matches(self, quest: &Quest) -> bool {
         match self {
             Self::All => true,
@@ -707,6 +955,30 @@ impl QuestStageFilter {
 }
 
 impl QuestUiState {
+    /// Crystal's Diary and independent Detail are ordinary view windows.
+    /// Only their explicit `MirMessageBox` prompts own gameplay keys and an
+    /// established route; NPC services retain their separate input guard.
+    pub fn blocks_world_input(&self) -> bool {
+        self.abandon_confirmation_quest_index.is_some() || self.quest_alert_message.is_some()
+    }
+
+    /// Captures a pointer in the unscaled 1024x768 logical UI stage. Closing
+    /// the Diary does not hide its independently opened Detail window.
+    pub fn captures_world_pointer_at(&self, x: f32, y: f32, diary_open: bool) -> bool {
+        let contains = |rect: QuestLogRect| {
+            x >= rect.left
+                && x < rect.left + rect.width
+                && y >= rect.top
+                && y < rect.top + rect.height
+        };
+        !x.is_finite()
+            || !y.is_finite()
+            || self.blocks_world_input()
+            || self.npc_quest_list_open
+            || (diary_open && contains(quest_diary_layout(1.0).frame))
+            || (self.detail_quest_index.is_some() && contains(quest_detail_layout(1.0).frame))
+    }
+
     pub fn select_quest(&mut self, quest_index: i32) {
         self.pending_turn_in = None;
         self.selected_quest_index = Some(quest_index);
@@ -889,7 +1161,12 @@ impl QuestUiState {
         self.move_npc_quest_selection_with_rows(quest_indices, delta, QUEST_LIST_VISIBLE_ROWS);
     }
 
-    fn move_npc_quest_selection_with_rows(&mut self, quest_indices: &[i32], delta: isize, rows: usize) {
+    fn move_npc_quest_selection_with_rows(
+        &mut self,
+        quest_indices: &[i32],
+        delta: isize,
+        rows: usize,
+    ) {
         if quest_indices.is_empty() {
             self.close_npc_quest_list();
             return;
@@ -930,6 +1207,26 @@ impl QuestUiState {
     pub fn detail_quest<'a>(&self, tracker: &'a QuestTracker) -> Option<&'a Quest> {
         self.detail_quest_index
             .and_then(|idx| tracker.active_quests.iter().find(|q| q.quest_index == idx))
+    }
+
+    fn reconcile_quest_windows(&mut self, tracker: &QuestTracker) {
+        // Completion/abandon can remove a quest through an authoritative
+        // snapshot without a local Close click. Keep pointer capture aligned
+        // with the same presence check used by the Detail renderer.
+        if self.detail_quest_index.is_some() && self.detail_quest(tracker).is_none() {
+            self.close_detail();
+        }
+        if self.selected_quest_index.is_some() && self.selected_quest(tracker).is_none() {
+            self.clear_diary_selection();
+        }
+        if self.abandon_confirmation_quest_index.is_some_and(|index| {
+            !tracker
+                .active_quests
+                .iter()
+                .any(|quest| quest.quest_index == index)
+        }) {
+            self.close_abandon_confirmation();
+        }
     }
 
     pub fn reset(&mut self) {
@@ -1040,13 +1337,18 @@ pub struct QuestCompactReadiness {
 
 #[cfg(not(feature = "native-ui"))]
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum QuestCompactObservationSet { Observe }
+pub enum QuestCompactObservationSet {
+    Observe,
+}
 
 #[cfg(not(feature = "native-ui"))]
 #[derive(Resource, Default)]
 // Host resources may be written with the same values on every renderer frame.
 // Compare the authority and visibility values instead of their ECS dirty flag.
-struct QuestCompactLastBuild(Option<QuestCompactStamp>, Option<(u64, u64, bool, bool, bool)>);
+struct QuestCompactLastBuild(
+    Option<QuestCompactStamp>,
+    Option<(u64, u64, bool, bool, bool)>,
+);
 
 #[cfg(not(feature = "native-ui"))]
 fn compact_expected_stamp(
@@ -1060,27 +1362,52 @@ fn compact_expected_stamp(
     locale: QuestPresentationLocale,
 ) -> Option<QuestCompactStamp> {
     let layout = presentation.mobile_layout()?;
-    if !layout.compact || !context.in_game { return None; }
-    let npc_open = state.npc_quest_list_open && dialog.is_open
+    if !layout.compact || !context.in_game {
+        return None;
+    }
+    let npc_open = state.npc_quest_list_open
+        && dialog.is_open
         && !npc_available_quests(dialog, tracker, Some(guidance)).is_empty();
     let detail = state.detail_quest(tracker);
     let sheet = mobile_sheet(
         state.abandon_confirmation_quest_index.is_some() || state.quest_alert_message.is_some(),
-        npc_open, dialog.is_open, detail.is_some(), player_ui.quest_open());
+        npc_open,
+        dialog.is_open,
+        detail.is_some(),
+        player_ui.quest_open(),
+    );
     let (quest_index, page, reward_page, text_top) = match sheet {
-        MobileQuestSheet::Detail => (detail.map(|quest| quest.quest_index),
-            state.compact_detail_page, state.compact_detail_reward_page, state.detail_scroll_top),
-        MobileQuestSheet::NpcList => (state.npc_quest_selected_index,
-            state.compact_npc_page, state.compact_npc_reward_page, state.npc_quest_message_scroll_top),
-        MobileQuestSheet::Confirmation => (state.abandon_confirmation_quest_index,
-            CompactQuestPage::Text, 0, state.compact_confirmation_page),
+        MobileQuestSheet::Detail => (
+            detail.map(|quest| quest.quest_index),
+            state.compact_detail_page,
+            state.compact_detail_reward_page,
+            state.detail_scroll_top,
+        ),
+        MobileQuestSheet::NpcList => (
+            state.npc_quest_selected_index,
+            state.compact_npc_page,
+            state.compact_npc_reward_page,
+            state.npc_quest_message_scroll_top,
+        ),
+        MobileQuestSheet::Confirmation => (
+            state.abandon_confirmation_quest_index,
+            CompactQuestPage::Text,
+            0,
+            state.compact_confirmation_page,
+        ),
         _ => (None, CompactQuestPage::Text, 0, 0),
     };
     Some(QuestCompactStamp {
         locale,
-        generation: context.generation, revision: context.revision,
-        open_revision: context.open_revision, presentation: *presentation, sheet,
-        quest_index, page, reward_page, text_top,
+        generation: context.generation,
+        revision: context.revision,
+        open_revision: context.open_revision,
+        presentation: *presentation,
+        sheet,
+        quest_index,
+        page,
+        reward_page,
+        text_top,
         reward_selection: match sheet {
             MobileQuestSheet::Detail => state.selected_reward_index,
             MobileQuestSheet::NpcList => state.npc_selected_reward_index,
@@ -1088,7 +1415,10 @@ fn compact_expected_stamp(
         },
         graduation_choice: state.selected_graduation_direction,
         diary_page: if guidance.profile_name() == Some("newcomer-v2") {
-            state.diary_page } else { state.page },
+            state.diary_page
+        } else {
+            state.page
+        },
         diary_tab: state.diary_tab,
         dialog_top: state.dialog_scroll_top,
         view_epoch: state.compact_view_epoch,
@@ -1152,8 +1482,12 @@ pub(crate) enum QuestUiButton {
     ToggleSupplies,
     ShowSupplyInventory,
     SelectSupplyVendor(crate::quest_supplies::SupplyVendor),
-    PrepareQuestFinish { quest_index: i32 },
-    MakePrimary { quest_index: i32 },
+    PrepareQuestFinish {
+        quest_index: i32,
+    },
+    MakePrimary {
+        quest_index: i32,
+    },
     OpenDestinationMap,
     NavigateQuestRoute(QuestRouteNavigationIntent),
     SelectNpcDialog {
@@ -1427,6 +1761,28 @@ fn quest_belongs_to_current_npc(dialog: &NpcDialogModel, quest: &Quest) -> bool 
     let Some(npc_index) = dialog.npc_object_id else {
         return false;
     };
+    if mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
+        && mir2_game_data::periodic_quests::npc(npc_index).is_some()
+    {
+        return dialog.options.iter().any(|option| {
+            option.enabled
+                && match quest.status {
+                    crate::quest_model::QuestStatus::NotStarted => option
+                        .option_id
+                        .trim()
+                        .eq_ignore_ascii_case(&format!("@quest:accept:{}", quest.quest_index)),
+                    crate::quest_model::QuestStatus::InProgress => option
+                        .option_id
+                        .trim()
+                        .eq_ignore_ascii_case(&format!("@quest:show:{}", quest.quest_index)),
+                    crate::quest_model::QuestStatus::ReadyToTurnIn => option
+                        .option_id
+                        .trim()
+                        .eq_ignore_ascii_case(&format!("@quest:finish:{}", quest.quest_index)),
+                    _ => false,
+                }
+        });
+    }
     match &quest.status {
         crate::quest_model::QuestStatus::NotStarted => quest.accept_npc_index == Some(npc_index),
         crate::quest_model::QuestStatus::InProgress
@@ -1499,14 +1855,25 @@ fn npc_accept_offered_by_current_dialog(
     dialog.is_open
         && dialog.npc_object_id == Some(npc_index)
         && npc_index != 0
-        && (quest.accept_npc_index == Some(npc_index)
-            || dialog_exposes_quest_operation(
-                dialog,
-                Some(npc_index),
-                quest.quest_index,
-                false,
-                None,
-            ))
+        && if mir2_game_data::periodic_quests::is_periodic(quest.quest_index) {
+            mir2_game_data::periodic_quests::npc(npc_index).is_some()
+                && dialog_exposes_quest_operation(
+                    dialog,
+                    Some(npc_index),
+                    quest.quest_index,
+                    false,
+                    None,
+                )
+        } else {
+            quest.accept_npc_index == Some(npc_index)
+                || dialog_exposes_quest_operation(
+                    dialog,
+                    Some(npc_index),
+                    quest.quest_index,
+                    false,
+                    None,
+                )
+        }
 }
 
 fn selectable_reward_indices(quest: &Quest) -> impl Iterator<Item = i32> + '_ {
@@ -1549,22 +1916,12 @@ pub fn blocks_gameplay_input(
     player_ui: Option<&NativePlayerUiState>,
     dialog: &NpcDialogModel,
 ) -> bool {
-    // Modal quest log or NPC dialog blocks world T/F/R shortcuts.
+    // Ordinary view windows keep keyboard actions and established travel.
+    // NPC services and native prompts/transactions retain their own guard.
     if dialog.is_open {
         return true;
     }
-    if is_quest_log_open_state(player_ui) {
-        return true;
-    }
-    if let Some(ui) = player_ui {
-        if ui.blocks_gameplay_keys() {
-            return true;
-        }
-        if ui.blocks_world_click() {
-            return true;
-        }
-    }
-    false
+    player_ui.is_some_and(|ui| ui.blocks_world_action(false, false))
 }
 
 pub fn is_world_click_blocked_for_quest(
@@ -1612,6 +1969,7 @@ impl Plugin for Mir2QuestUiPlugin {
             .init_resource::<NpcDialogNav>()
             .init_resource::<NativePlayerUiState>()
             .init_resource::<UiEffectQueue>()
+            .add_message::<bevy::input::mouse::MouseWheel>()
             .configure_sets(
                 Update,
                 NativePlayerUiSet::Mutate.before(NativePlayerUiSet::Read),
@@ -1624,36 +1982,63 @@ impl Plugin for Mir2QuestUiPlugin {
             .add_systems(Update, render_quest_ui.in_set(NativePlayerUiSet::Read))
             .add_systems(
                 Update,
+                multi_guidance::scroll_tracker
+                    .before(render_quest_ui)
+                    .in_set(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
                 sync_quest_ui_button_visuals
                     .after(render_quest_ui)
                     .in_set(NativePlayerUiSet::Read),
             );
         #[cfg(feature = "native-ui")]
         app.init_resource::<crate::pending_operations::QuestResetTracker>()
-            .add_systems(Update, crate::pending_operations::apply_quest_session_reset.in_set(PendingLifecycleSet::UiReset))
-            .add_systems(Update, process_quest_ui_input
-                .after(crate::crystal_ui::overlays::process_overlay_keyboard)
-                .in_set(NativePlayerUiSet::Mutate));
+            .add_systems(
+                Update,
+                crate::pending_operations::apply_quest_session_reset
+                    .in_set(PendingLifecycleSet::UiReset),
+            )
+            .add_systems(
+                Update,
+                process_quest_ui_input
+                    .after(crate::crystal_ui::overlays::process_overlay_keyboard)
+                    .in_set(NativePlayerUiSet::Mutate),
+            );
         #[cfg(not(feature = "native-ui"))]
         app.init_resource::<QuestCompactReadiness>()
             .init_resource::<QuestCompactLastBuild>()
-            .add_systems(Update, normalize_compact_quest_state
-                .before(process_quest_ui_input).in_set(NativePlayerUiSet::Mutate))
-            .add_systems(Update, process_quest_ui_input.in_set(NativePlayerUiSet::Mutate))
-            .add_systems(PostUpdate, observe_compact_quest_tree
-                .after(bevy::ui::UiSystems::Layout)
-                .in_set(QuestCompactObservationSet::Observe));
+            .add_systems(
+                Update,
+                normalize_compact_quest_state
+                    .before(process_quest_ui_input)
+                    .in_set(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
+                process_quest_ui_input.in_set(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                PostUpdate,
+                observe_compact_quest_tree
+                    .after(bevy::ui::UiSystems::Layout)
+                    .in_set(QuestCompactObservationSet::Observe),
+            );
     }
 }
 
 fn spawn_quest_ui_panels(
     mut commands: Commands,
     asset_server: Option<Res<AssetServer>>,
-    #[cfg(not(feature = "native-ui"))]
-    target_camera: Option<Res<crate::portable_quest_ui::QuestUiTargetCamera>>,
+    #[cfg(not(feature = "native-ui"))] target_camera: Option<
+        Res<crate::portable_quest_ui::QuestUiTargetCamera>,
+    >,
 ) {
     #[cfg(not(feature = "native-ui"))]
-    let Some(target_camera) = target_camera else { return; };
+    let Some(target_camera) = target_camera
+    else {
+        return;
+    };
     let panel_skin = asset_server
         .as_ref()
         .map(|server| server.load::<Image>(NPC_DIALOG_FRAME_ASSET));
@@ -1669,9 +2054,31 @@ fn spawn_quest_ui_panels(
     let quest_confirmation_skin = asset_server
         .as_ref()
         .map(|server| server.load::<Image>(QUEST_CONFIRM_FRAME_ASSET));
-    let mut quest_root = commands
-        .spawn((
-            QuestUiRoot,
+    let mut quest_root = commands.spawn((
+        QuestUiRoot,
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            display: Display::None,
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::FlexStart,
+            align_items: AlignItems::FlexStart,
+            ..default()
+        },
+        BackgroundColor(Color::NONE),
+        GlobalZIndex(980),
+    ));
+    #[cfg(not(feature = "native-ui"))]
+    quest_root.insert(bevy::ui::UiTargetCamera(target_camera.0));
+    quest_root.with_children(|root| {
+        // Full-stage modal capture. Actual quest/dialog controls are
+        // spawned after this sibling and therefore remain clickable.
+        root.spawn((
+            QuestUiModalBlocker,
+            Button,
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(0.0),
@@ -1679,306 +2086,282 @@ fn spawn_quest_ui_panels(
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 display: Display::None,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::FlexStart,
+                ..default()
+            },
+            // Only NPC dialog services use this world capture. Keep it
+            // below the persistent HUD; ordinary Diary/Detail windows
+            // capture their own rectangles at the parent layer instead.
+            GlobalZIndex(HUD_Z_INDEX - 1),
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
+            FocusPolicy::Block,
+        ));
+
+        root.spawn((
+            QuestTrackerPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(100.0),
+                width: Val::Px(320.0),
+                height: Val::Px(520.0),
+                max_width: Val::Px(320.0),
+                min_width: Val::Px(220.0),
+                display: Display::Flex,
                 ..default()
             },
             BackgroundColor(Color::NONE),
-            GlobalZIndex(980),
         ));
-    #[cfg(not(feature = "native-ui"))]
-    quest_root.insert(bevy::ui::UiTargetCamera(target_camera.0));
-    quest_root.with_children(|root| {
-            // Full-stage modal capture. Actual quest/dialog controls are
-            // spawned after this sibling and therefore remain clickable.
-            root.spawn((
-                QuestUiModalBlocker,
-                Button,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.0),
-                    top: Val::Px(0.0),
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    display: Display::None,
-                    ..default()
-                },
-                // Crystal's quest diary is a sorted movable window, not a
-                // modal screen. Keep world capture below the persistent HUD
-                // so every bottom-bar control remains reachable while the
-                // diary is open; the quest panels themselves stay at 980.
-                GlobalZIndex(HUD_Z_INDEX - 1),
-                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
-                FocusPolicy::Block,
-            ));
 
-            root.spawn((
-                QuestTrackerPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.0),
-                    top: Val::Px(100.0),
-                    width: Val::Px(320.0),
-                    height: Val::Px(520.0),
-                    max_width: Val::Px(320.0),
-                    min_width: Val::Px(220.0),
-                    display: Display::Flex,
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-            ));
+        let mut dialog_panel = root.spawn((
+            NpcDialogPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Px(440.0),
+                height: Val::Px(224.0),
+                min_height: Val::Px(224.0),
+                max_height: Val::Px(224.0),
+                min_width: Val::Px(440.0),
+                max_width: Val::Px(440.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                padding: UiRect::ZERO,
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+            FocusPolicy::Block,
+        ));
+        if let Some(panel_skin) = panel_skin.as_ref() {
+            dialog_panel.insert(ImageNode {
+                image: panel_skin.clone(),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            });
+        }
 
-            let mut dialog_panel = root.spawn((
-                NpcDialogPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.0),
-                    top: Val::Px(0.0),
-                    width: Val::Px(440.0),
-                    height: Val::Px(224.0),
-                    min_height: Val::Px(224.0),
-                    max_height: Val::Px(224.0),
-                    min_width: Val::Px(440.0),
-                    max_width: Val::Px(440.0),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::ZERO,
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-                FocusPolicy::Block,
-            ));
-            if let Some(panel_skin) = panel_skin.as_ref() {
-                dialog_panel.insert(ImageNode {
-                    image: panel_skin.clone(),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                });
-            }
+        root.spawn((
+            CombatTargetPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(COMBAT_TARGET_PANEL_LEFT),
+                top: Val::Px(COMBAT_TARGET_PANEL_TOP),
+                width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
+                min_height: Val::Px(COMBAT_TARGET_PANEL_MIN_HEIGHT),
+                min_width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
+                max_width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(2.0),
+                padding: UiRect::all(Val::Px(COMBAT_TARGET_PANEL_PADDING)),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ));
 
-            root.spawn((
-                CombatTargetPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(COMBAT_TARGET_PANEL_LEFT),
-                    top: Val::Px(COMBAT_TARGET_PANEL_TOP),
-                    width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
-                    min_height: Val::Px(COMBAT_TARGET_PANEL_MIN_HEIGHT),
-                    min_width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
-                    max_width: Val::Px(COMBAT_TARGET_PANEL_WIDTH),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(2.0),
-                    padding: UiRect::all(Val::Px(COMBAT_TARGET_PANEL_PADDING)),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-            ));
+        root.spawn((
+            PickupFeedbackPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(352.0),
+                bottom: Val::Px(96.0),
+                width: Val::Px(320.0),
+                min_height: Val::Px(70.0),
+                min_width: Val::Px(220.0),
+                max_width: Val::Px(320.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(6.0),
+                padding: UiRect::all(Val::Px(8.0)),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ));
 
-            root.spawn((
-                PickupFeedbackPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(352.0),
-                    bottom: Val::Px(96.0),
-                    width: Val::Px(320.0),
-                    min_height: Val::Px(70.0),
-                    min_width: Val::Px(220.0),
-                    max_width: Val::Px(320.0),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(6.0),
-                    padding: UiRect::all(Val::Px(8.0)),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-            ));
+        root.spawn((
+            NativePlayerHudPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(12.0),
+                bottom: Val::Px(12.0),
+                width: Val::Px(270.0),
+                min_height: Val::Px(82.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.0),
+                padding: UiRect::all(Val::Px(8.0)),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ));
 
-            root.spawn((
-                NativePlayerHudPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(12.0),
-                    bottom: Val::Px(12.0),
-                    width: Val::Px(270.0),
-                    min_height: Val::Px(82.0),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.0),
-                    padding: UiRect::all(Val::Px(8.0)),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-            ));
+        root.spawn((
+            NativeControlHintPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(294.0),
+                bottom: Val::Px(12.0),
+                width: Val::Px(420.0),
+                min_height: Val::Px(82.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.0),
+                padding: UiRect::all(Val::Px(8.0)),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ));
 
-            root.spawn((
-                NativeControlHintPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(294.0),
-                    bottom: Val::Px(12.0),
-                    width: Val::Px(420.0),
-                    min_height: Val::Px(82.0),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.0),
-                    padding: UiRect::all(Val::Px(8.0)),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-            ));
+        root.spawn((
+            NativeQuickBagPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                right: Val::Px(12.0),
+                bottom: Val::Px(12.0),
+                width: Val::Px(286.0),
+                min_height: Val::Px(82.0),
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(4.0),
+                padding: UiRect::all(Val::Px(8.0)),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ));
 
-            root.spawn((
-                NativeQuickBagPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    right: Val::Px(12.0),
-                    bottom: Val::Px(12.0),
-                    width: Val::Px(286.0),
-                    min_height: Val::Px(82.0),
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    row_gap: Val::Px(4.0),
-                    padding: UiRect::all(Val::Px(8.0)),
-                    ..default()
-                },
-                BackgroundColor(PANEL_BG),
-            ));
+        let mut quest_log_panel = root.spawn((
+            QuestLogPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(QUEST_DIARY_DESIGN_LEFT),
+                top: Val::Px(QUEST_DIARY_DESIGN_TOP),
+                width: Val::Px(QUEST_DIARY_DESIGN_WIDTH),
+                height: Val::Px(QUEST_DIARY_DESIGN_HEIGHT),
+                min_width: Val::Px(QUEST_DIARY_DESIGN_WIDTH),
+                max_width: Val::Px(QUEST_DIARY_DESIGN_WIDTH),
+                min_height: Val::Px(QUEST_DIARY_DESIGN_HEIGHT),
+                max_height: Val::Px(QUEST_DIARY_DESIGN_HEIGHT),
+                display: Display::None,
+                flex_direction: FlexDirection::Column,
+                padding: UiRect::all(Val::Px(0.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+            FocusPolicy::Block,
+        ));
+        if let Some(panel_skin) = quest_diary_skin.as_ref() {
+            quest_log_panel.insert(ImageNode {
+                image: panel_skin.clone(),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            });
+        }
 
-            let mut quest_log_panel = root.spawn((
-                QuestLogPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(QUEST_DIARY_DESIGN_LEFT),
-                    top: Val::Px(QUEST_DIARY_DESIGN_TOP),
-                    width: Val::Px(QUEST_DIARY_DESIGN_WIDTH),
-                    height: Val::Px(QUEST_DIARY_DESIGN_HEIGHT),
-                    min_width: Val::Px(QUEST_DIARY_DESIGN_WIDTH),
-                    max_width: Val::Px(QUEST_DIARY_DESIGN_WIDTH),
-                    min_height: Val::Px(QUEST_DIARY_DESIGN_HEIGHT),
-                    max_height: Val::Px(QUEST_DIARY_DESIGN_HEIGHT),
-                    display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(0.0)),
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-                FocusPolicy::Block,
-            ));
-            if let Some(panel_skin) = quest_diary_skin.as_ref() {
-                quest_log_panel.insert(ImageNode {
-                    image: panel_skin.clone(),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                });
-            }
+        let mut quest_detail_panel = root.spawn((
+            QuestDetailPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(QUEST_DETAIL_DESIGN_LEFT),
+                top: Val::Px(QUEST_DETAIL_DESIGN_TOP),
+                width: Val::Px(QUEST_DETAIL_DESIGN_WIDTH),
+                height: Val::Px(QUEST_DETAIL_DESIGN_HEIGHT),
+                min_width: Val::Px(QUEST_DETAIL_DESIGN_WIDTH),
+                max_width: Val::Px(QUEST_DETAIL_DESIGN_WIDTH),
+                min_height: Val::Px(QUEST_DETAIL_DESIGN_HEIGHT),
+                max_height: Val::Px(QUEST_DETAIL_DESIGN_HEIGHT),
+                display: Display::None,
+                padding: UiRect::all(Val::Px(0.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+            FocusPolicy::Block,
+        ));
+        if let Some(panel_skin) = quest_detail_skin.as_ref() {
+            quest_detail_panel.insert(ImageNode {
+                image: panel_skin.clone(),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            });
+        }
 
-            let mut quest_detail_panel = root.spawn((
-                QuestDetailPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(QUEST_DETAIL_DESIGN_LEFT),
-                    top: Val::Px(QUEST_DETAIL_DESIGN_TOP),
-                    width: Val::Px(QUEST_DETAIL_DESIGN_WIDTH),
-                    height: Val::Px(QUEST_DETAIL_DESIGN_HEIGHT),
-                    min_width: Val::Px(QUEST_DETAIL_DESIGN_WIDTH),
-                    max_width: Val::Px(QUEST_DETAIL_DESIGN_WIDTH),
-                    min_height: Val::Px(QUEST_DETAIL_DESIGN_HEIGHT),
-                    max_height: Val::Px(QUEST_DETAIL_DESIGN_HEIGHT),
-                    display: Display::None,
-                    padding: UiRect::all(Val::Px(0.0)),
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-                FocusPolicy::Block,
-            ));
-            if let Some(panel_skin) = quest_detail_skin.as_ref() {
-                quest_detail_panel.insert(ImageNode {
-                    image: panel_skin.clone(),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                });
-            }
+        let mut npc_quest_list_panel = root.spawn((
+            NpcQuestListPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(QUEST_LIST_DESIGN_LEFT),
+                top: Val::Px(QUEST_LIST_DESIGN_TOP),
+                width: Val::Px(QUEST_LIST_DESIGN_WIDTH),
+                height: Val::Px(QUEST_LIST_DESIGN_HEIGHT),
+                min_width: Val::Px(QUEST_LIST_DESIGN_WIDTH),
+                max_width: Val::Px(QUEST_LIST_DESIGN_WIDTH),
+                min_height: Val::Px(QUEST_LIST_DESIGN_HEIGHT),
+                max_height: Val::Px(QUEST_LIST_DESIGN_HEIGHT),
+                display: Display::None,
+                padding: UiRect::all(Val::Px(0.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+            FocusPolicy::Block,
+            GlobalZIndex(990),
+        ));
+        if let Some(panel_skin) = quest_list_skin.as_ref() {
+            npc_quest_list_panel.insert(ImageNode {
+                image: panel_skin.clone(),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            });
+        }
 
-            let mut npc_quest_list_panel = root.spawn((
-                NpcQuestListPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(QUEST_LIST_DESIGN_LEFT),
-                    top: Val::Px(QUEST_LIST_DESIGN_TOP),
-                    width: Val::Px(QUEST_LIST_DESIGN_WIDTH),
-                    height: Val::Px(QUEST_LIST_DESIGN_HEIGHT),
-                    min_width: Val::Px(QUEST_LIST_DESIGN_WIDTH),
-                    max_width: Val::Px(QUEST_LIST_DESIGN_WIDTH),
-                    min_height: Val::Px(QUEST_LIST_DESIGN_HEIGHT),
-                    max_height: Val::Px(QUEST_LIST_DESIGN_HEIGHT),
-                    display: Display::None,
-                    padding: UiRect::all(Val::Px(0.0)),
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-                FocusPolicy::Block,
-                GlobalZIndex(990),
-            ));
-            if let Some(panel_skin) = quest_list_skin.as_ref() {
-                npc_quest_list_panel.insert(ImageNode {
-                    image: panel_skin.clone(),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                });
-            }
+        root.spawn((
+            QuestConfirmationBlocker,
+            Button,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                display: Display::None,
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
+            FocusPolicy::Block,
+            GlobalZIndex(1099),
+        ));
 
-            root.spawn((
-                QuestConfirmationBlocker,
-                Button,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(0.0),
-                    top: Val::Px(0.0),
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    display: Display::None,
-                    ..default()
-                },
-                BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
-                FocusPolicy::Block,
-                GlobalZIndex(1099),
-            ));
-
-            let mut confirmation_panel = root.spawn((
-                QuestConfirmationPanel,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(QUEST_CONFIRM_DESIGN_LEFT),
-                    top: Val::Px(QUEST_CONFIRM_DESIGN_TOP),
-                    width: Val::Px(QUEST_CONFIRM_DESIGN_WIDTH),
-                    height: Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT),
-                    min_width: Val::Px(QUEST_CONFIRM_DESIGN_WIDTH),
-                    max_width: Val::Px(QUEST_CONFIRM_DESIGN_WIDTH),
-                    min_height: Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT),
-                    max_height: Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT),
-                    display: Display::None,
-                    padding: UiRect::all(Val::Px(0.0)),
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-                FocusPolicy::Block,
-                GlobalZIndex(1100),
-            ));
-            if let Some(panel_skin) = quest_confirmation_skin.as_ref() {
-                confirmation_panel.insert(ImageNode {
-                    image: panel_skin.clone(),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                });
-            }
-        });
+        let mut confirmation_panel = root.spawn((
+            QuestConfirmationPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(QUEST_CONFIRM_DESIGN_LEFT),
+                top: Val::Px(QUEST_CONFIRM_DESIGN_TOP),
+                width: Val::Px(QUEST_CONFIRM_DESIGN_WIDTH),
+                height: Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT),
+                min_width: Val::Px(QUEST_CONFIRM_DESIGN_WIDTH),
+                max_width: Val::Px(QUEST_CONFIRM_DESIGN_WIDTH),
+                min_height: Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT),
+                max_height: Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT),
+                display: Display::None,
+                padding: UiRect::all(Val::Px(0.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+            FocusPolicy::Block,
+            GlobalZIndex(1100),
+        ));
+        if let Some(panel_skin) = quest_confirmation_skin.as_ref() {
+            confirmation_panel.insert(ImageNode {
+                image: panel_skin.clone(),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            });
+        }
+    });
 }
 
 #[derive(SystemParam)]
@@ -1989,7 +2372,8 @@ pub(crate) struct QuestInputModels<'w> {
     #[cfg(not(feature = "native-ui"))]
     world_context: Option<Res<'w, crate::portable_quest_ui::QuestWorldContext>>,
     #[cfg(not(feature = "native-ui"))]
-    presentation_actions: Option<ResMut<'w, crate::portable_quest_ui::QuestPresentationActionQueue>>,
+    presentation_actions:
+        Option<ResMut<'w, crate::portable_quest_ui::QuestPresentationActionQueue>>,
     #[cfg(not(feature = "native-ui"))]
     route_stamp: Option<ResMut<'w, crate::portable_quest_ui::QuestRouteWorldStamp>>,
     #[cfg(not(feature = "native-ui"))]
@@ -2049,27 +2433,52 @@ struct CompactActionReadModel<'a> {
 
 #[cfg(not(feature = "native-ui"))]
 impl<'a> CompactActionReadModel<'a> {
-    fn new(host: Option<&crate::portable_quest_ui::QuestUiHostContext>,
-        world: Option<&'a crate::portable_quest_ui::QuestWorldContext>) -> Self {
-        Self { world: host.zip(world).filter(|(host, world)| world.current(host)).map(|(_, world)| world) }
+    fn new(
+        host: Option<&crate::portable_quest_ui::QuestUiHostContext>,
+        world: Option<&'a crate::portable_quest_ui::QuestWorldContext>,
+    ) -> Self {
+        Self {
+            world: host
+                .zip(world)
+                .filter(|(host, world)| world.current(host))
+                .map(|(_, world)| world),
+        }
     }
-    fn map(&self) -> Option<&'a MapModel> { self.world.and_then(|world| world.map.as_ref()) }
-    fn big_map(&self) -> Option<&'a crate::big_map::BigMapModel> { self.world.and_then(|world| world.big_map.as_ref()) }
-    fn entities(&self) -> Option<&'a EntityModelSet> { self.world.map(|world| &world.entities) }
+    fn map(&self) -> Option<&'a MapModel> {
+        self.world.and_then(|world| world.map.as_ref())
+    }
+    fn big_map(&self) -> Option<&'a crate::big_map::BigMapModel> {
+        self.world.and_then(|world| world.big_map.as_ref())
+    }
+    fn entities(&self) -> Option<&'a EntityModelSet> {
+        self.world.map(|world| &world.entities)
+    }
 }
 
 #[cfg(not(feature = "native-ui"))]
-pub(crate) fn portable_world_action(action: &QuestUiButton,
-    world: &crate::portable_quest_ui::QuestWorldContext, tracker: &QuestTracker,
+pub(crate) fn portable_world_action(
+    action: &QuestUiButton,
+    world: &crate::portable_quest_ui::QuestWorldContext,
+    tracker: &QuestTracker,
 ) -> Option<crate::portable_quest_ui::QuestPresentationAction> {
     use crate::portable_quest_ui::QuestPresentationAction as Action;
     let stamp = world.stamp.clone()?;
     let action = match *action {
         QuestUiButton::AttackTarget { object_id } => Action::AttackTarget { stamp, object_id },
-        QuestUiButton::AttackQuestTarget { object_id } => Action::AttackQuestTarget { stamp, object_id },
+        QuestUiButton::AttackQuestTarget { object_id } => {
+            Action::AttackQuestTarget { stamp, object_id }
+        }
         QuestUiButton::PickUpObject { object_id } => {
-            let row = world.ground_drops.iter().find(|row| row.object_id == object_id)?;
-            Action::PickUpObject { stamp, object_id, x: row.x, y: row.y }
+            let row = world
+                .ground_drops
+                .iter()
+                .find(|row| row.object_id == object_id)?;
+            Action::PickUpObject {
+                stamp,
+                object_id,
+                x: row.x,
+                y: row.y,
+            }
         }
         QuestUiButton::PickUpTile => {
             let (x, y) = world.self_tile()?;
@@ -2092,12 +2501,28 @@ fn compact_input_current(
     readiness: Option<&QuestCompactReadiness>,
     locale: QuestPresentationLocale,
 ) -> bool {
-    if !presentation.and_then(|value| value.mobile_layout()).is_some_and(|layout| layout.compact) {
+    if !presentation
+        .and_then(|value| value.mobile_layout())
+        .is_some_and(|layout| layout.compact)
+    {
         return true;
     }
-    let expected = presentation.zip(context).zip(guidance)
-        .and_then(|((presentation, context), guidance)| compact_expected_stamp(
-            presentation, context, player_ui, state, tracker, dialog, guidance, locale));
+    let expected =
+        presentation
+            .zip(context)
+            .zip(guidance)
+            .and_then(|((presentation, context), guidance)| {
+                compact_expected_stamp(
+                    presentation,
+                    context,
+                    player_ui,
+                    state,
+                    tracker,
+                    dialog,
+                    guidance,
+                    locale,
+                )
+            });
     readiness.is_some_and(|ready| ready.current && ready.stamp == expected && expected.is_some())
 }
 
@@ -2113,45 +2538,85 @@ fn normalize_compact_quest_state(
     locale: Res<QuestPresentationLocale>,
     mut state: ResMut<QuestUiState>,
 ) {
-    let Some(layout) = presentation.as_deref().and_then(|value| value.mobile_layout()) else { return; };
-    if !layout.compact { return; }
+    let Some(layout) = presentation
+        .as_deref()
+        .and_then(|value| value.mobile_layout())
+    else {
+        return;
+    };
+    if !layout.compact {
+        return;
+    }
     let journey = catalog.derive(&guidance, &tracker, &completed, &read_model.player);
     let guided = guidance.profile_name() == Some("newcomer-v2");
     let quest_count = if guided {
         guided_diary_quests(&tracker, Some(&guidance), journey.as_ref(), state.diary_tab).len()
     } else {
-        quest_diary_groups(&tracker, Some(&guidance)).iter()
-            .map(|group| group.quests.len()).sum()
+        quest_diary_groups(&tracker, Some(&guidance))
+            .iter()
+            .map(|group| group.quests.len())
+            .sum()
     };
     let graduation_options = if !guided || state.diary_tab == GuidedDiaryTab::Main {
-        journey.as_ref().and_then(|view| view.graduation.as_ref())
+        journey
+            .as_ref()
+            .and_then(|view| view.graduation.as_ref())
             .map_or(0, |graduation| graduation.options.len())
-    } else { 0 };
-    let last_diary_page = mobile_diary_page_count(quest_count, graduation_options,
-        layout.diary_rows()).saturating_sub(1);
+    } else {
+        0
+    };
+    let last_diary_page =
+        mobile_diary_page_count(quest_count, graduation_options, layout.diary_rows())
+            .saturating_sub(1);
     if guided {
-        if state.diary_page > last_diary_page { state.diary_page = last_diary_page; }
-    } else if state.page > last_diary_page { state.page = last_diary_page; }
-    if state.detail_quest_index.is_some_and(|index|
-        !tracker.active_quests.iter().any(|quest| quest.quest_index == index)) {
+        if state.diary_page > last_diary_page {
+            state.diary_page = last_diary_page;
+        }
+    } else if state.page > last_diary_page {
+        state.page = last_diary_page;
+    }
+    if state.detail_quest_index.is_some_and(|index| {
+        !tracker
+            .active_quests
+            .iter()
+            .any(|quest| quest.quest_index == index)
+    }) {
         state.close_detail();
         state.selected_quest_index = None;
     }
     if let Some(quest) = state.detail_quest(&tracker) {
         let max_page = compact_reward_pages(quest, Some(&guidance)).saturating_sub(1);
-        let lines = mobile_wrap_quest_lines(quest_detail_lines_with_wrap(quest, Some(&guidance),
-            read_model.player.class_name.as_deref().unwrap_or(""), false, QuestRenderText { locale: *locale }), layout.width_css() - 32.0);
-        if state.compact_detail_reward_page > max_page { state.compact_detail_reward_page = max_page; }
+        let lines = mobile_wrap_quest_lines(
+            quest_detail_lines_with_wrap(
+                quest,
+                Some(&guidance),
+                read_model.player.class_name.as_deref().unwrap_or(""),
+                false,
+                QuestRenderText { locale: *locale },
+            ),
+            layout.width_css() - 32.0,
+        );
+        if state.compact_detail_reward_page > max_page {
+            state.compact_detail_reward_page = max_page;
+        }
         let max_text_top = lines.len().saturating_sub(layout.detail_rows());
-        if state.detail_scroll_top > max_text_top { state.detail_scroll_top = max_text_top; }
+        if state.detail_scroll_top > max_text_top {
+            state.detail_scroll_top = max_text_top;
+        }
     }
     if state.npc_quest_list_open {
         let quests = npc_available_quests(&dialog, &tracker, Some(&guidance));
         if !dialog.is_open || quests.is_empty() {
             state.close_npc_quest_list();
         } else {
-            let selected = state.npc_quest_selected_index
-                .and_then(|index| quests.iter().copied().find(|quest| quest.quest_index == index))
+            let selected = state
+                .npc_quest_selected_index
+                .and_then(|index| {
+                    quests
+                        .iter()
+                        .copied()
+                        .find(|quest| quest.quest_index == index)
+                })
                 .unwrap_or(quests[0]);
             if state.npc_quest_selected_index != Some(selected.quest_index) {
                 state.select_npc_quest(selected.quest_index);
@@ -2160,8 +2625,16 @@ fn normalize_compact_quest_state(
             if state.compact_npc_reward_page > max_reward_page {
                 state.compact_npc_reward_page = max_reward_page;
             }
-            let lines = mobile_wrap_quest_lines(quest_list_message_lines_with_wrap(selected,
-                &dialog, Some(&guidance), false, QuestRenderText { locale: *locale }), layout.width_css() - 32.0);
+            let lines = mobile_wrap_quest_lines(
+                quest_list_message_lines_with_wrap(
+                    selected,
+                    &dialog,
+                    Some(&guidance),
+                    false,
+                    QuestRenderText { locale: *locale },
+                ),
+                layout.width_css() - 32.0,
+            );
             let max_text_top = lines.len().saturating_sub(layout.message_rows());
             if state.npc_quest_message_scroll_top > max_text_top {
                 state.npc_quest_message_scroll_top = max_text_top;
@@ -2169,9 +2642,19 @@ fn normalize_compact_quest_state(
         }
     }
     if state.quest_alert_message.is_some() || state.abandon_confirmation_quest_index.is_some() {
-        let pages = compact_confirmation_lines(state.quest_alert_message.as_deref()
-            .unwrap_or(ASK_CANCEL_QUEST_TEXT), layout).len().div_ceil(5).max(1);
-        if state.compact_confirmation_page >= pages { state.compact_confirmation_page = pages - 1; }
+        let pages = compact_confirmation_lines(
+            state
+                .quest_alert_message
+                .as_deref()
+                .unwrap_or(ASK_CANCEL_QUEST_TEXT),
+            layout,
+        )
+        .len()
+        .div_ceil(5)
+        .max(1);
+        if state.compact_confirmation_page >= pages {
+            state.compact_confirmation_page = pages - 1;
+        }
     }
 }
 
@@ -2211,16 +2694,31 @@ pub(crate) fn process_quest_ui_input(
     // Consume this frame's interaction changes without resetting the view or
     // allowing a hidden button/key to emit an intent.
     #[cfg(not(feature = "native-ui"))]
-    if models.host_context.as_deref().is_some_and(|host| !host.host_visible) {
+    if models
+        .host_context
+        .as_deref()
+        .is_some_and(|host| !host.host_visible)
+    {
         return;
     }
 
     #[cfg(not(feature = "native-ui"))]
-    let action_models = CompactActionReadModel::new(models.host_context.as_deref(), models.world_context.as_deref());
+    let action_models = CompactActionReadModel::new(
+        models.host_context.as_deref(),
+        models.world_context.as_deref(),
+    );
     #[cfg(not(feature = "native-ui"))]
-    let (world_map, world_entities, world_big_map) = (action_models.map(), action_models.entities(), action_models.big_map());
+    let (world_map, world_entities, world_big_map) = (
+        action_models.map(),
+        action_models.entities(),
+        action_models.big_map(),
+    );
     #[cfg(feature = "native-ui")]
-    let (world_map, world_entities, world_big_map) = (models.map.as_deref(), models.entities.as_deref(), models.big_map.as_deref());
+    let (world_map, world_entities, world_big_map) = (
+        models.map.as_deref(),
+        models.entities.as_deref(),
+        models.big_map.as_deref(),
+    );
 
     if quest_state.supply_open {
         let epoch = world_big_map.map(|map| map.reset_epoch);
@@ -2239,33 +2737,67 @@ pub(crate) fn process_quest_ui_input(
     }
 
     let quest_log_open = player_ui.quest_open();
-    let mobile = models.presentation.as_deref().and_then(|value| value.mobile_layout());
+    let mobile = models
+        .presentation
+        .as_deref()
+        .and_then(|value| value.mobile_layout());
     #[cfg(not(feature = "native-ui"))]
-    if !compact_input_current(models.presentation.as_deref(), models.host_context.as_deref(),
-        models.guidance.as_deref(), &player_ui, &quest_state, &models.tracker, &dialog,
-        models.compact_readiness.as_deref(), *models.locale) { return; }
+    if !compact_input_current(
+        models.presentation.as_deref(),
+        models.host_context.as_deref(),
+        models.guidance.as_deref(),
+        &player_ui,
+        &quest_state,
+        &models.tracker,
+        &dialog,
+        models.compact_readiness.as_deref(),
+        *models.locale,
+    ) {
+        return;
+    }
     let dialog_open = dialog.is_open;
-    let blocks_gameplay_keys = player_ui.blocks_gameplay_keys();
     let turn_in_blocked = !quest_turn_in_ui_allows_interaction(Some(&player_ui))
-        || models.notice.as_deref().is_some_and(crate::crystal_ui::notice::NoticeDialogState::is_open)
-        || models.read_model.as_deref().is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+        || models
+            .notice
+            .as_deref()
+            .is_some_and(crate::crystal_ui::notice::NoticeDialogState::is_open)
+        || models
+            .read_model
+            .as_deref()
+            .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let mut route_navigation = models.route_navigation;
     let guidance = models.guidance.as_deref();
     let tracker: &QuestTracker = &models.tracker;
-    let journey = models.catalog.as_deref().zip(guidance)
-        .zip(models.completed.as_deref()).zip(models.read_model.as_deref())
+    quest_state.reconcile_quest_windows(tracker);
+    let journey = models
+        .catalog
+        .as_deref()
+        .zip(guidance)
+        .zip(models.completed.as_deref())
+        .zip(models.read_model.as_deref())
         .and_then(|(((catalog, guidance), completed), read_model)| {
             catalog.derive(guidance, tracker, completed, &read_model.player)
         });
     if let Some(navigation) = route_navigation.as_deref_mut() {
-        if navigation.pending.is_some_and(|intent| !quest_route_intent_is_current(
-            intent, tracker, &quest_state, journey.as_ref(), world_big_map,
-        )) {
+        if navigation.pending.is_some_and(|intent| {
+            !quest_route_intent_is_current(
+                intent,
+                tracker,
+                &quest_state,
+                journey.as_ref(),
+                world_big_map,
+            )
+        }) {
             navigation.clear();
             quest_state.set_feedback("任务导航已更新，请重新选择目标", true);
         }
     }
-    if quest_state.pinned_primary_quest_index.is_some_and(|id| !tracker.active_quests.iter().any(|q| q.quest_index == id && q.status.is_active())) {
+    if quest_state.pinned_primary_quest_index.is_some_and(|id| {
+        !tracker
+            .active_quests
+            .iter()
+            .any(|q| q.quest_index == id && q.status.is_active())
+    }) {
         quest_state.pinned_primary_quest_index = None;
     }
     let npc_quest_indices = npc_available_quest_indices(&dialog, tracker, guidance);
@@ -2298,9 +2830,19 @@ pub(crate) fn process_quest_ui_input(
 
     for (interaction, action) in button_events.iter() {
         #[cfg(not(feature = "native-ui"))]
-        if !compact_input_current(models.presentation.as_deref(), models.host_context.as_deref(),
-            models.guidance.as_deref(), &player_ui, &quest_state, &models.tracker, &dialog,
-            models.compact_readiness.as_deref(), *models.locale) { break; }
+        if !compact_input_current(
+            models.presentation.as_deref(),
+            models.host_context.as_deref(),
+            models.guidance.as_deref(),
+            &player_ui,
+            &quest_state,
+            &models.tracker,
+            &dialog,
+            models.compact_readiness.as_deref(),
+            *models.locale,
+        ) {
+            break;
+        }
         if *interaction != Interaction::Pressed {
             continue;
         }
@@ -2313,30 +2855,57 @@ pub(crate) fn process_quest_ui_input(
             continue;
         }
         #[cfg(not(feature = "native-ui"))]
-        if matches!(action, QuestUiButton::SelectSupplyVendor(_) | QuestUiButton::OpenDestinationMap)
-            || matches!(action, QuestUiButton::ToggleSupplies) && !quest_state.supply_open {
-            if !models.host_context.as_deref().zip(models.world_context.as_deref())
-                .is_some_and(|(host, world)| world.current(host)) {
+        if matches!(
+            action,
+            QuestUiButton::SelectSupplyVendor(_) | QuestUiButton::OpenDestinationMap
+        ) || matches!(action, QuestUiButton::ToggleSupplies) && !quest_state.supply_open
+        {
+            if !models
+                .host_context
+                .as_deref()
+                .zip(models.world_context.as_deref())
+                .is_some_and(|(host, world)| world.current(host))
+            {
                 quest_state.set_feedback("Quest supplies are waiting for current world data", true);
                 continue;
             }
         }
-        if !matches!(action, QuestUiButton::PrepareQuestFinish { .. }
-            | QuestUiButton::CompactDetailPage(_) | QuestUiButton::CompactNpcPage(_)
-            | QuestUiButton::CompactDetailRewardPrevious | QuestUiButton::CompactDetailRewardNext
-            | QuestUiButton::CompactNpcRewardPrevious | QuestUiButton::CompactNpcRewardNext
-            | QuestUiButton::CompactConfirmationPrevious | QuestUiButton::CompactConfirmationNext) {
+        if !matches!(
+            action,
+            QuestUiButton::PrepareQuestFinish { .. }
+                | QuestUiButton::CompactDetailPage(_)
+                | QuestUiButton::CompactNpcPage(_)
+                | QuestUiButton::CompactDetailRewardPrevious
+                | QuestUiButton::CompactDetailRewardNext
+                | QuestUiButton::CompactNpcRewardPrevious
+                | QuestUiButton::CompactNpcRewardNext
+                | QuestUiButton::CompactConfirmationPrevious
+                | QuestUiButton::CompactConfirmationNext
+        ) {
             quest_state.pending_turn_in = None;
         }
         #[cfg(not(feature = "native-ui"))]
-        if matches!(action, QuestUiButton::AttackTarget { .. } | QuestUiButton::AttackQuestTarget { .. }
-            | QuestUiButton::PickUpObject { .. } | QuestUiButton::PickUpTile) {
-            let candidate = action_models.world.and_then(|world| portable_world_action(action, world, tracker));
-            if candidate.is_some_and(|action| models.presentation_actions.as_deref_mut()
-                .is_some_and(|queue| queue.push(action))) {
-                quest_state.set_feedback("Quest world action is waiting for the current host", false);
+        if matches!(
+            action,
+            QuestUiButton::AttackTarget { .. }
+                | QuestUiButton::AttackQuestTarget { .. }
+                | QuestUiButton::PickUpObject { .. }
+                | QuestUiButton::PickUpTile
+        ) {
+            let candidate = action_models
+                .world
+                .and_then(|world| portable_world_action(action, world, tracker));
+            if candidate.is_some_and(|action| {
+                models
+                    .presentation_actions
+                    .as_deref_mut()
+                    .is_some_and(|queue| queue.push(action))
+            }) {
+                quest_state
+                    .set_feedback("Quest world action is waiting for the current host", false);
             } else {
-                quest_state.set_feedback("Quest world action is unavailable or already pending", true);
+                quest_state
+                    .set_feedback("Quest world action is unavailable or already pending", true);
             }
             continue;
         }
@@ -2356,17 +2925,27 @@ pub(crate) fn process_quest_ui_input(
             QuestUiButton::PrepareQuestFinish { quest_index } => {
                 if turn_in_blocked {
                     quest_state.pending_turn_in = None;
-                    quest_state.set_feedback("当前状态无法交付，请关闭其他弹窗并确认角色存活", true);
+                    quest_state
+                        .set_feedback("当前状态无法交付，请关闭其他弹窗并确认角色存活", true);
                     continue;
                 }
                 if pending.has_pending_quest_finish(quest_index) {
                     quest_state.set_feedback("Quest request is already pending", true);
                     continue;
                 }
-                turn_in::begin(quest_index, &turn_in::TurnInContext {
-                    tracker, dialog: &dialog, map: world_map,
-                    entities: world_entities, big_map: world_big_map,
-                }, &mut quest_state, &mut queue, &mut pending);
+                turn_in::begin(
+                    quest_index,
+                    &turn_in::TurnInContext {
+                        tracker,
+                        dialog: &dialog,
+                        map: world_map,
+                        entities: world_entities,
+                        big_map: world_big_map,
+                    },
+                    &mut quest_state,
+                    &mut queue,
+                    &mut pending,
+                );
             }
             QuestUiButton::ToggleQuestGroup { group } => {
                 quest_state.toggle_group(group);
@@ -2381,25 +2960,38 @@ pub(crate) fn process_quest_ui_input(
                 quest_state.clear_diary_selection();
             }
             QuestUiButton::GuidedDiaryNext => {
-                let quest_count = guided_diary_quests(
-                    tracker, guidance, journey.as_ref(), quest_state.diary_tab,
-                )
-                    .len();
+                let quest_count =
+                    guided_diary_quests(tracker, guidance, journey.as_ref(), quest_state.diary_tab)
+                        .len();
                 let page_count = if let Some(layout) = mobile {
-                    mobile_diary_page_count(quest_count,
+                    mobile_diary_page_count(
+                        quest_count,
                         if quest_state.diary_tab == GuidedDiaryTab::Main {
-                            journey.as_ref().and_then(|view| view.graduation.as_ref())
+                            journey
+                                .as_ref()
+                                .and_then(|view| view.graduation.as_ref())
                                 .map_or(0, |graduation| graduation.options.len())
-                        } else { 0 }, layout.diary_rows())
-                } else { quest_count.div_ceil(GUIDED_DIARY_PAGE_SIZE) };
-                quest_state.diary_page = (quest_state.diary_page + 1)
-                    .min(page_count.saturating_sub(1));
+                        } else {
+                            0
+                        },
+                        layout.diary_rows(),
+                    )
+                } else {
+                    quest_count.div_ceil(GUIDED_DIARY_PAGE_SIZE)
+                };
+                quest_state.diary_page =
+                    (quest_state.diary_page + 1).min(page_count.saturating_sub(1));
                 quest_state.clear_diary_selection();
             }
             QuestUiButton::SelectGraduationDirection { direction } => {
                 if quest_state.toggle_graduation_direction(direction) {
-                    quest_state
-                        .set_feedback(format!("Goal selected: {}", direction.label()), false);
+                    quest_state.set_feedback(
+                        format!(
+                            "Goal selected: {}",
+                            crate::player_text::text(direction.label())
+                        ),
+                        false,
+                    );
                 } else {
                     quest_state.set_feedback("Goal cleared", false);
                 }
@@ -2417,14 +3009,23 @@ pub(crate) fn process_quest_ui_input(
             QuestUiButton::QuestPageNext => {
                 let page_count = if let Some(layout) = mobile {
                     mobile_diary_page_count(
-                        quest_diary_groups(tracker, guidance).iter().map(|group| group.quests.len()).sum(),
-                        journey.as_ref().and_then(|view| view.graduation.as_ref())
+                        quest_diary_groups(tracker, guidance)
+                            .iter()
+                            .map(|group| group.quests.len())
+                            .sum(),
+                        journey
+                            .as_ref()
+                            .and_then(|view| view.graduation.as_ref())
                             .map_or(0, |graduation| graduation.options.len()),
                         layout.diary_rows(),
                     )
                 } else {
-                    tracker.active_quests.iter().filter(|quest| quest_state.stage_filter.matches(quest))
-                        .count().div_ceil(MAX_QUEST_LOG_ROWS)
+                    tracker
+                        .active_quests
+                        .iter()
+                        .filter(|quest| quest_state.stage_filter.matches(quest))
+                        .count()
+                        .div_ceil(MAX_QUEST_LOG_ROWS)
                 };
                 let page = quest_state.page;
                 quest_state.set_page((page + 1).min(page_count.saturating_sub(1)));
@@ -2450,7 +3051,15 @@ pub(crate) fn process_quest_ui_input(
                         }) {
                             #[cfg(feature = "native-ui")]
                             player_ui.withdraw_bound_npc_gold_buy();
-                            npc_nav.push(dialog.clone());
+                            if target.eq_ignore_ascii_case("@exit") {
+                                dialog.close();
+                                #[cfg(feature = "native-ui")]
+                                player_ui.request_npc_service_exit();
+                                npc_nav.clear();
+                                quest_state.close_npc_quest_list();
+                            } else {
+                                npc_nav.push(dialog.clone());
+                            }
                             quest_state.dialog_scroll_top = 0;
                             quest_state.feedback = None;
                         } else {
@@ -2475,6 +3084,8 @@ pub(crate) fn process_quest_ui_input(
                     #[cfg(feature = "native-ui")]
                     player_ui.withdraw_bound_npc_gold_buy();
                     dialog.close();
+                    #[cfg(feature = "native-ui")]
+                    player_ui.request_npc_service_exit();
                     npc_nav.clear();
                     quest_state.dialog_scroll_top = 0;
                     quest_state.close_npc_quest_list();
@@ -2494,6 +3105,8 @@ pub(crate) fn process_quest_ui_input(
                         #[cfg(feature = "native-ui")]
                         player_ui.withdraw_bound_npc_gold_buy();
                         dialog.close();
+                        #[cfg(feature = "native-ui")]
+                        player_ui.request_npc_service_exit();
                         npc_nav.clear();
                     } else {
                         quest_state.set_feedback("Connection busy; try again", true);
@@ -2512,6 +3125,8 @@ pub(crate) fn process_quest_ui_input(
                     #[cfg(feature = "native-ui")]
                     player_ui.withdraw_bound_npc_gold_buy();
                     dialog.close();
+                    #[cfg(feature = "native-ui")]
+                    player_ui.request_npc_service_exit();
                     npc_nav.clear();
                 } else {
                     quest_state.set_feedback("Connection busy; try again", true);
@@ -2528,12 +3143,18 @@ pub(crate) fn process_quest_ui_input(
                 }
             }
             QuestUiButton::NpcQuestPrevious => {
-                quest_state.move_npc_quest_selection_with_rows(&npc_quest_indices, -1,
-                    mobile.map_or(QUEST_LIST_VISIBLE_ROWS, MobileQuestLayout::npc_quest_rows));
+                quest_state.move_npc_quest_selection_with_rows(
+                    &npc_quest_indices,
+                    -1,
+                    mobile.map_or(QUEST_LIST_VISIBLE_ROWS, MobileQuestLayout::npc_quest_rows),
+                );
             }
             QuestUiButton::NpcQuestNext => {
-                quest_state.move_npc_quest_selection_with_rows(&npc_quest_indices, 1,
-                    mobile.map_or(QUEST_LIST_VISIBLE_ROWS, MobileQuestLayout::npc_quest_rows));
+                quest_state.move_npc_quest_selection_with_rows(
+                    &npc_quest_indices,
+                    1,
+                    mobile.map_or(QUEST_LIST_VISIBLE_ROWS, MobileQuestLayout::npc_quest_rows),
+                );
             }
             QuestUiButton::NpcQuestMessageScrollUp => {
                 quest_state.scroll_npc_quest_message_up();
@@ -2545,13 +3166,27 @@ pub(crate) fn process_quest_ui_input(
                         .iter()
                         .find(|quest| quest.quest_index == selected)
                 }) {
-                    let lines = quest_list_message_lines_with_wrap(quest, &dialog, guidance,
-                        mobile.is_none(), QuestRenderText { locale: *models.locale });
+                    let lines = quest_list_message_lines_with_wrap(
+                        quest,
+                        &dialog,
+                        guidance,
+                        mobile.is_none(),
+                        QuestRenderText {
+                            locale: *models.locale,
+                        },
+                    );
                     let line_count = if let Some(layout) = mobile {
                         mobile_wrap_quest_lines(lines, layout.width_css() - 32.0).len()
-                    } else { lines.len() };
-                    quest_state.scroll_npc_quest_message_down_with_rows(line_count,
-                        mobile.map_or(QUEST_LIST_MESSAGE_LINE_COUNT, MobileQuestLayout::message_rows));
+                    } else {
+                        lines.len()
+                    };
+                    quest_state.scroll_npc_quest_message_down_with_rows(
+                        line_count,
+                        mobile.map_or(
+                            QUEST_LIST_MESSAGE_LINE_COUNT,
+                            MobileQuestLayout::message_rows,
+                        ),
+                    );
                 }
             }
             QuestUiButton::NpcQuestHelp => {
@@ -2570,20 +3205,26 @@ pub(crate) fn process_quest_ui_input(
                 }
             }
             QuestUiButton::NpcDialogScrollUp => {
-                quest_state.dialog_scroll_top = quest_state
-                    .dialog_scroll_top
-                    .saturating_sub(mobile.map_or(NPC_DIALOG_VISIBLE_ROWS, MobileQuestLayout::dialog_rows));
+                quest_state.dialog_scroll_top = quest_state.dialog_scroll_top.saturating_sub(
+                    mobile.map_or(NPC_DIALOG_VISIBLE_ROWS, MobileQuestLayout::dialog_rows),
+                );
             }
             QuestUiButton::NpcDialogScrollDown => {
-                let count = mobile.map_or_else(|| npc_dialog_rows(&dialog).len(),
-                    |layout| mobile_npc_dialog_rows(&dialog, layout.width_css() - 32.0).len());
+                let count = mobile.map_or_else(
+                    || npc_dialog_rows(&dialog).len(),
+                    |layout| mobile_npc_dialog_rows(&dialog, layout.width_css() - 32.0).len(),
+                );
                 let rows = mobile.map_or(NPC_DIALOG_VISIBLE_ROWS, MobileQuestLayout::dialog_rows);
                 if quest_state.dialog_scroll_top + rows < count {
                     quest_state.dialog_scroll_top += rows;
                 }
             }
             QuestUiButton::MakePrimary { quest_index } => {
-                if tracker.active_quests.iter().any(|q| q.quest_index == quest_index && q.status.is_active()) {
+                if tracker
+                    .active_quests
+                    .iter()
+                    .any(|q| q.quest_index == quest_index && q.status.is_active())
+                {
                     quest_state.pinned_primary_quest_index = Some(quest_index);
                     quest_state.set_feedback("已设为当前引导任务", false);
                 }
@@ -2607,41 +3248,71 @@ pub(crate) fn process_quest_ui_input(
             QuestUiButton::QuestDetailScrollUp => {
                 quest_state.scroll_detail_up();
             }
-            QuestUiButton::CompactDetailPage(page) if mobile.is_some_and(|layout| layout.compact) => {
+            QuestUiButton::CompactDetailPage(page)
+                if mobile.is_some_and(|layout| layout.compact) =>
+            {
                 quest_state.compact_detail_page = page;
             }
             QuestUiButton::CompactNpcPage(page) if mobile.is_some_and(|layout| layout.compact) => {
                 quest_state.compact_npc_page = page;
             }
-            QuestUiButton::CompactDetailRewardPrevious if mobile.is_some_and(|layout| layout.compact) => {
-                quest_state.compact_detail_reward_page = quest_state.compact_detail_reward_page.saturating_sub(1);
+            QuestUiButton::CompactDetailRewardPrevious
+                if mobile.is_some_and(|layout| layout.compact) =>
+            {
+                quest_state.compact_detail_reward_page =
+                    quest_state.compact_detail_reward_page.saturating_sub(1);
             }
-            QuestUiButton::CompactDetailRewardNext if mobile.is_some_and(|layout| layout.compact) => {
+            QuestUiButton::CompactDetailRewardNext
+                if mobile.is_some_and(|layout| layout.compact) =>
+            {
                 if let Some(quest) = quest_state.detail_quest(tracker) {
-                    quest_state.compact_detail_reward_page = (quest_state.compact_detail_reward_page + 1)
-                        .min(compact_reward_pages(quest, guidance).saturating_sub(1));
+                    quest_state.compact_detail_reward_page =
+                        (quest_state.compact_detail_reward_page + 1)
+                            .min(compact_reward_pages(quest, guidance).saturating_sub(1));
                 }
             }
-            QuestUiButton::CompactNpcRewardPrevious if mobile.is_some_and(|layout| layout.compact) => {
-                quest_state.compact_npc_reward_page = quest_state.compact_npc_reward_page.saturating_sub(1);
+            QuestUiButton::CompactNpcRewardPrevious
+                if mobile.is_some_and(|layout| layout.compact) =>
+            {
+                quest_state.compact_npc_reward_page =
+                    quest_state.compact_npc_reward_page.saturating_sub(1);
             }
             QuestUiButton::CompactNpcRewardNext if mobile.is_some_and(|layout| layout.compact) => {
-                if let Some(quest) = quest_state.npc_quest_selected_index.and_then(|index|
-                    tracker.active_quests.iter().find(|quest| quest.quest_index == index)) {
+                if let Some(quest) = quest_state.npc_quest_selected_index.and_then(|index| {
+                    tracker
+                        .active_quests
+                        .iter()
+                        .find(|quest| quest.quest_index == index)
+                }) {
                     quest_state.compact_npc_reward_page = (quest_state.compact_npc_reward_page + 1)
                         .min(compact_reward_pages(quest, guidance).saturating_sub(1));
                 }
             }
             QuestUiButton::QuestDetailScrollDown => {
                 if let Some(quest) = quest_state.detail_quest(tracker) {
-                    let class_name = models.read_model.as_deref().and_then(|model| model.player.class_name.as_deref()).unwrap_or("");
-                    let lines = quest_detail_lines_with_wrap(quest, guidance, class_name,
-                        mobile.is_none(), QuestRenderText { locale: *models.locale });
+                    let class_name = models
+                        .read_model
+                        .as_deref()
+                        .and_then(|model| model.player.class_name.as_deref())
+                        .unwrap_or("");
+                    let lines = quest_detail_lines_with_wrap(
+                        quest,
+                        guidance,
+                        class_name,
+                        mobile.is_none(),
+                        QuestRenderText {
+                            locale: *models.locale,
+                        },
+                    );
                     let line_count = if let Some(layout) = mobile {
                         mobile_wrap_quest_lines(lines, layout.width_css() - 32.0).len()
-                    } else { lines.len() };
-                    quest_state.scroll_detail_down_with_rows(line_count,
-                        mobile.map_or(QUEST_DETAIL_LINE_COUNT, MobileQuestLayout::detail_rows));
+                    } else {
+                        lines.len()
+                    };
+                    quest_state.scroll_detail_down_with_rows(
+                        line_count,
+                        mobile.map_or(QUEST_DETAIL_LINE_COUNT, MobileQuestLayout::detail_rows),
+                    );
                 }
             }
             QuestUiButton::ShareQuest { quest_index } => {
@@ -2770,7 +3441,8 @@ pub(crate) fn process_quest_ui_input(
                             },
                         ) {
                             if let Some(quest) = quest {
-                                quest_state.set_feedback(format!("Accepting {}", quest.title), false);
+                                quest_state
+                                    .set_feedback(format!("Accepting {}", quest.title), false);
                             }
                         } else if queue_full {
                             quest_state.set_feedback("Connection busy; try again", true);
@@ -2782,7 +3454,8 @@ pub(crate) fn process_quest_ui_input(
                         quest_state.set_feedback("Quest request is already pending", true);
                     }
                     QuestActionDecision::Rejected(_) => {
-                        quest_state.set_feedback("Quest is no longer available from this NPC", true);
+                        quest_state
+                            .set_feedback("Quest is no longer available from this NPC", true);
                     }
                 }
             }
@@ -2833,14 +3506,17 @@ pub(crate) fn process_quest_ui_input(
                                     selected_item_index,
                                 },
                             ) {
-                                quest_state.set_feedback(format!("Delivering {}", quest.title), false);
+                                quest_state
+                                    .set_feedback(format!("Delivering {}", quest.title), false);
                             } else if queue_full {
                                 quest_state.set_feedback("Connection busy; try again", true);
                             } else {
                                 quest_state.set_feedback("Quest request is already pending", true);
                             }
                         }
-                        QuestActionDecision::Rejected(QuestActionRejection::RewardSelectionRequired) => {
+                        QuestActionDecision::Rejected(
+                            QuestActionRejection::RewardSelectionRequired,
+                        ) => {
                             quest_state.show_quest_alert(SELECT_REWARD_TEXT);
                         }
                         QuestActionDecision::Rejected(QuestActionRejection::Pending) => {
@@ -2883,14 +3559,28 @@ pub(crate) fn process_quest_ui_input(
             QuestUiButton::CloseQuestAlert => {
                 quest_state.close_quest_alert();
             }
-            QuestUiButton::CompactConfirmationPrevious if mobile.is_some_and(|layout| layout.compact) => {
-                quest_state.compact_confirmation_page = quest_state.compact_confirmation_page.saturating_sub(1);
+            QuestUiButton::CompactConfirmationPrevious
+                if mobile.is_some_and(|layout| layout.compact) =>
+            {
+                quest_state.compact_confirmation_page =
+                    quest_state.compact_confirmation_page.saturating_sub(1);
             }
-            QuestUiButton::CompactConfirmationNext if mobile.is_some_and(|layout| layout.compact) => {
+            QuestUiButton::CompactConfirmationNext
+                if mobile.is_some_and(|layout| layout.compact) =>
+            {
                 if let Some(layout) = mobile {
-                    let pages = compact_confirmation_lines(quest_state.quest_alert_message.as_deref()
-                        .unwrap_or(ASK_CANCEL_QUEST_TEXT), layout).len().div_ceil(5).max(1);
-                    quest_state.compact_confirmation_page = (quest_state.compact_confirmation_page + 1).min(pages - 1);
+                    let pages = compact_confirmation_lines(
+                        quest_state
+                            .quest_alert_message
+                            .as_deref()
+                            .unwrap_or(ASK_CANCEL_QUEST_TEXT),
+                        layout,
+                    )
+                    .len()
+                    .div_ceil(5)
+                    .max(1);
+                    quest_state.compact_confirmation_page =
+                        (quest_state.compact_confirmation_page + 1).min(pages - 1);
                 }
             }
             QuestUiButton::SelectReward {
@@ -2955,11 +3645,16 @@ pub(crate) fn process_quest_ui_input(
             QuestUiButton::OpenDestinationMap => {
                 #[cfg(feature = "native-ui")]
                 dispatch_quest_panel_action(
-                    &mut player_ui, &mut effects,
+                    &mut player_ui,
+                    &mut effects,
                     mir2_ui_core::action::UiAction::OpenBigMap,
                 );
                 #[cfg(not(feature = "native-ui"))]
-                if let Some(stamp) = models.world_context.as_deref().and_then(|world| world.stamp.clone()) {
+                if let Some(stamp) = models
+                    .world_context
+                    .as_deref()
+                    .and_then(|world| world.stamp.clone())
+                {
                     if !models.presentation_actions.as_deref_mut().is_some_and(|actions|
                         actions.push(crate::portable_quest_ui::QuestPresentationAction::OpenDestinationMap(stamp))) {
                         quest_state.set_feedback("The map action is already pending", true);
@@ -2968,11 +3663,14 @@ pub(crate) fn process_quest_ui_input(
             }
             QuestUiButton::NavigateQuestRoute(intent) => {
                 #[cfg(not(feature = "native-ui"))]
-                let portable_stamp = action_models.world.filter(|world| world.self_tile().is_some())
+                let portable_stamp = action_models
+                    .world
+                    .filter(|world| world.self_tile().is_some())
                     .and_then(|world| world.stamp.clone());
                 #[cfg(not(feature = "native-ui"))]
                 if portable_stamp.is_none() || models.route_stamp.is_none() {
-                    quest_state.set_feedback("Quest navigation is waiting for current world data", true);
+                    quest_state
+                        .set_feedback("Quest navigation is waiting for current world data", true);
                     continue;
                 }
                 if !quest_route_intent_is_current(
@@ -2982,13 +3680,26 @@ pub(crate) fn process_quest_ui_input(
                     journey.as_ref(),
                     world_big_map,
                 ) {
-                    quest_state.set_feedback(format!("{}引导已更新，请使用当前任务路线", intent.target.label()), true);
+                    quest_state.set_feedback(
+                        format!(
+                            "{}引导已更新，请使用当前任务路线",
+                            crate::player_text::text(intent.target.label())
+                        ),
+                        true,
+                    );
                 } else if let Some(route_navigation) = route_navigation.as_deref_mut() {
                     if route_navigation.push(intent) {
                         #[cfg(not(feature = "native-ui"))]
-                        if let Some(stamp) = models.route_stamp.as_deref_mut() { stamp.0 = portable_stamp; }
+                        if let Some(stamp) = models.route_stamp.as_deref_mut() {
+                            stamp.0 = portable_stamp;
+                        }
                         quest_state.set_feedback(
-                            format!("前往{} ({},{})", intent.target.label(), intent.x, intent.y),
+                            format!(
+                                "前往{} ({},{})",
+                                crate::player_text::text(intent.target.label()),
+                                intent.x,
+                                intent.y
+                            ),
                             false,
                         );
                     } else {
@@ -3059,9 +3770,19 @@ pub(crate) fn process_quest_ui_input(
     }
 
     #[cfg(not(feature = "native-ui"))]
-    if !compact_input_current(models.presentation.as_deref(), models.host_context.as_deref(),
-        models.guidance.as_deref(), &player_ui, &quest_state, &models.tracker, &dialog,
-        models.compact_readiness.as_deref(), *models.locale) { return; }
+    if !compact_input_current(
+        models.presentation.as_deref(),
+        models.host_context.as_deref(),
+        models.guidance.as_deref(),
+        &player_ui,
+        &quest_state,
+        &models.tracker,
+        &dialog,
+        models.compact_readiness.as_deref(),
+        *models.locale,
+    ) {
+        return;
+    }
 
     if keys.just_pressed(KeyCode::Escape) || turn_in_blocked {
         if quest_state.pending_turn_in.is_some() {
@@ -3071,10 +3792,18 @@ pub(crate) fn process_quest_ui_input(
         // A no-pending call takes mutable QuestUiState even though advance()
         // immediately returns. That marks the resource changed and rebuilds
         // an otherwise idle compact Diary's measured text subtree.
-        turn_in::advance(&turn_in::TurnInContext {
-            tracker, dialog: &dialog, map: world_map,
-            entities: world_entities, big_map: world_big_map,
-        }, &mut quest_state, &mut queue, &mut pending);
+        turn_in::advance(
+            &turn_in::TurnInContext {
+                tracker,
+                dialog: &dialog,
+                map: world_map,
+                entities: world_entities,
+                big_map: world_big_map,
+            },
+            &mut quest_state,
+            &mut queue,
+            &mut pending,
+        );
     }
 
     // Crystal `MirMessageBox` owns Escape/Enter while visible. It is the only
@@ -3094,30 +3823,35 @@ pub(crate) fn process_quest_ui_input(
         return;
     }
 
-    // Input blocking: when quest log or dialog is open, gameplay shortcuts are suppressed.
-    // Escape handling for those surfaces takes precedence.
-    let is_modal = quest_log_open || dialog_open || blocks_gameplay_keys;
+    // Ordinary Diary close keys retain the shared action boundary; unrelated
+    // gameplay keys follow the actual prompt/service modal below.
+    if quest_log_open
+        && (keys.just_pressed(KeyCode::Escape)
+            || crate::crystal_ui::quest_key_triggered(&player_ui, &keys, "Quests"))
+    {
+        dispatch_quest_panel_action(
+            &mut player_ui,
+            &mut effects,
+            mir2_ui_core::action::UiAction::ClosePanel,
+        );
+        quest_state.clear_diary_selection();
+        quest_state.clear_feedback();
+        return;
+    }
+
+    let is_modal = blocks_gameplay_input(Some(&player_ui), &dialog);
 
     if is_modal {
-        if keys.just_pressed(KeyCode::Escape)
-            || (quest_log_open
-                && crate::crystal_ui::quest_key_triggered(&player_ui, &keys, "Quests"))
-        {
-            if quest_log_open {
-                dispatch_quest_panel_action(
-                    &mut player_ui,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::ClosePanel,
-                );
-                quest_state.clear_diary_selection();
-                quest_state.clear_feedback();
-            } else if dialog_open {
+        if keys.just_pressed(KeyCode::Escape) {
+            if dialog_open {
                 if queue.push_intent(QuestUiIntent::SelectNpcDialog {
                     target: "@Exit".to_owned(),
                 }) {
                     #[cfg(feature = "native-ui")]
                     player_ui.withdraw_bound_npc_gold_buy();
                     dialog.close();
+                    #[cfg(feature = "native-ui")]
+                    player_ui.request_npc_service_exit();
                     npc_nav.clear();
                     quest_state.close_npc_quest_list();
                     quest_state.set_feedback("Dialog closed", false);
@@ -3137,7 +3871,7 @@ pub(crate) fn process_quest_ui_input(
                 }
             }
         }
-        // Block T/F/R and other gameplay keys while modal is open.
+        // Keep gameplay shortcuts captured by NPC services and real prompts.
         return;
     }
 
@@ -3147,9 +3881,13 @@ pub(crate) fn process_quest_ui_input(
         #[cfg(feature = "native-ui")]
         queue.push_intent(QuestUiIntent::PickUpTile);
         #[cfg(not(feature = "native-ui"))]
-        if let Some(action) = action_models.world.and_then(|world|
-            portable_world_action(&QuestUiButton::PickUpTile, world, tracker)) {
-            if let Some(actions) = models.presentation_actions.as_deref_mut() { actions.push(action); }
+        if let Some(action) = action_models
+            .world
+            .and_then(|world| portable_world_action(&QuestUiButton::PickUpTile, world, tracker))
+        {
+            if let Some(actions) = models.presentation_actions.as_deref_mut() {
+                actions.push(action);
+            }
         }
     }
 
@@ -3181,13 +3919,22 @@ pub(crate) fn process_quest_ui_input(
 }
 
 #[cfg(not(feature = "native-ui"))]
-fn set_compact_panel_stamp(commands: &mut Commands, entity: Entity,
-    stamp: Option<QuestCompactStamp>, sheet: MobileQuestSheet) {
+fn set_compact_panel_stamp(
+    commands: &mut Commands,
+    entity: Entity,
+    stamp: Option<QuestCompactStamp>,
+    sheet: MobileQuestSheet,
+) {
     if let Some(stamp) = stamp.filter(|stamp| stamp.sheet == sheet) {
         // CSS margins can map to fractional logical pixels (600/1440 gives a
         // declared 710.4px panel). Rounding the whole compact subtree first
         // would shrink its measured CSS height below the supported 296px.
-        commands.entity(entity).insert((stamp, bevy::ui::LayoutConfig { use_rounding: false }));
+        commands.entity(entity).insert((
+            stamp,
+            bevy::ui::LayoutConfig {
+                use_rounding: false,
+            },
+        ));
     } else {
         commands.entity(entity).remove::<QuestCompactStamp>();
         commands.entity(entity).remove::<bevy::ui::LayoutConfig>();
@@ -3246,7 +3993,9 @@ fn render_quest_ui(
         Query<&mut Node, With<QuestConfirmationBlocker>>,
     )>,
 ) {
-    let render_text = QuestRenderText { locale: *journey_models.locale };
+    let render_text = QuestRenderText {
+        locale: *journey_models.locale,
+    };
     let Some(shell) = shell else {
         return;
     };
@@ -3254,8 +4003,10 @@ fn render_quest_ui(
     let in_game = shell.screen == NativeShellScreen::InGame;
     #[cfg(not(feature = "native-ui"))]
     let in_game = in_game
-        && !journey_models.host_context.as_deref().is_some_and(|host|
-            !host.host_visible && !host.layout_preparing);
+        && !journey_models
+            .host_context
+            .as_deref()
+            .is_some_and(|host| !host.host_visible && !host.layout_preparing);
 
     let became_visible = {
         let mut roots = all.p0();
@@ -3276,26 +4027,55 @@ fn render_quest_ui(
     }
 
     let quest_log_open = is_quest_log_open_state(Some(&player_ui));
-    let mobile = journey_models.presentation.as_deref().and_then(|value| value.mobile_layout());
-    let workshop_rect = crate::stone_workshop_ui::sidebar_rect(&dialog,
-        journey_models.workshop_geometry.presentation(journey_models.presentation.as_deref().copied()));
+    let mobile = journey_models
+        .presentation
+        .as_deref()
+        .and_then(|value| value.mobile_layout());
+    let workshop_rect = crate::stone_workshop_ui::sidebar_rect(
+        &dialog,
+        journey_models
+            .workshop_geometry
+            .presentation(journey_models.presentation.as_deref().copied()),
+    );
     let workshop_layout_changed = *journey_models.workshop_layout != Some(workshop_rect);
     #[cfg(not(feature = "native-ui"))]
-    let compact_stamp = journey_models.presentation.as_deref()
+    let compact_stamp = journey_models
+        .presentation
+        .as_deref()
         .zip(journey_models.host_context.as_deref())
-        .and_then(|(presentation, context)| compact_expected_stamp(presentation, context,
-            &player_ui, &quest_state, &tracker, &dialog, &journey_models.guidance, *journey_models.locale));
+        .and_then(|(presentation, context)| {
+            compact_expected_stamp(
+                presentation,
+                context,
+                &player_ui,
+                &quest_state,
+                &tracker,
+                &dialog,
+                &journey_models.guidance,
+                *journey_models.locale,
+            )
+        });
     #[cfg(not(feature = "native-ui"))]
     let compact_stamp_changed = compact_stamp != journey_models.compact_last_build.0;
     #[cfg(feature = "native-ui")]
     let compact_stamp_changed = false;
     #[cfg(not(feature = "native-ui"))]
-    let host_stamp = journey_models.host_context.as_deref().map(|host|
-        (host.generation, host.revision, host.in_game, host.host_visible, host.layout_preparing));
+    let host_stamp = journey_models.host_context.as_deref().map(|host| {
+        (
+            host.generation,
+            host.revision,
+            host.in_game,
+            host.host_visible,
+            host.layout_preparing,
+        )
+    });
     #[cfg(not(feature = "native-ui"))]
     let host_stamp_changed = host_stamp != journey_models.compact_last_build.1;
     #[cfg(not(feature = "native-ui"))]
-    let world_context_changed = journey_models.world_context.as_ref().is_some_and(|model| model.is_changed())
+    let world_context_changed = journey_models
+        .world_context
+        .as_ref()
+        .is_some_and(|model| model.is_changed())
         || host_stamp_changed;
     #[cfg(feature = "native-ui")]
     let world_context_changed = false;
@@ -3312,8 +4092,14 @@ fn render_quest_ui(
         && !target.is_changed()
         && !journey_models.entities.is_changed()
         && !journey_models.map.is_changed()
-        && !journey_models.big_map.as_ref().is_some_and(|model| model.is_changed())
-        && !journey_models.skills.as_ref().is_some_and(|model| model.is_changed())
+        && !journey_models
+            .big_map
+            .as_ref()
+            .is_some_and(|model| model.is_changed())
+        && !journey_models
+            .skills
+            .as_ref()
+            .is_some_and(|model| model.is_changed())
         && !world_context_changed
         && !pickups.is_changed()
         && !ui_model.is_changed()
@@ -3323,7 +4109,10 @@ fn render_quest_ui(
         && !quest_state.is_changed()
         && !npc_nav.is_changed()
         && !player_ui.is_changed()
-        && !journey_models.presentation.as_ref().is_some_and(|value| value.is_changed())
+        && !journey_models
+            .presentation
+            .as_ref()
+            .is_some_and(|value| value.is_changed())
         && !workshop_layout_changed
         && !compact_stamp_changed
     {
@@ -3332,9 +4121,13 @@ fn render_quest_ui(
 
     *journey_models.workshop_layout = Some(workshop_rect);
     #[cfg(not(feature = "native-ui"))]
-    if compact_stamp_changed { journey_models.compact_last_build.0 = compact_stamp; }
+    if compact_stamp_changed {
+        journey_models.compact_last_build.0 = compact_stamp;
+    }
     #[cfg(not(feature = "native-ui"))]
-    if host_stamp_changed { journey_models.compact_last_build.1 = host_stamp; }
+    if host_stamp_changed {
+        journey_models.compact_last_build.1 = host_stamp;
+    }
 
     let has_dialog_content = dialog.is_open;
     let journey = journey_models.catalog.derive(
@@ -3344,17 +4137,37 @@ fn render_quest_ui(
         &ui_model.player,
     );
     #[cfg(feature = "native-ui")]
-    let supply_plan = Some(crate::quest_supplies::plan(&ui_model.player, &inventory,
-        journey_models.skills.as_deref(), primary_quest_index(&tracker, &quest_state, journey.as_ref())));
+    let supply_plan = Some(crate::quest_supplies::plan(
+        &ui_model.player,
+        &inventory,
+        journey_models.skills.as_deref(),
+        primary_quest_index(&tracker, &quest_state, journey.as_ref()),
+    ));
     #[cfg(not(feature = "native-ui"))]
-    let supply_plan = journey_models.host_context.as_deref()
+    let supply_plan = journey_models
+        .host_context
+        .as_deref()
         .zip(journey_models.world_context.as_deref())
         .filter(|(host, world)| world.current(host))
-        .and_then(|(_, world)| world.player.as_ref().zip(world.inventory.as_ref()).map(|(player, inventory)|
-            crate::quest_supplies::plan(player, inventory, world.skills.as_ref(),
-                primary_quest_index(&tracker, &quest_state, journey.as_ref()))));
+        .and_then(|(_, world)| {
+            world
+                .player
+                .as_ref()
+                .zip(world.inventory.as_ref())
+                .map(|(player, inventory)| {
+                    crate::quest_supplies::plan(
+                        player,
+                        inventory,
+                        world.skills.as_ref(),
+                        primary_quest_index(&tracker, &quest_state, journey.as_ref()),
+                    )
+                })
+        });
     #[cfg(not(feature = "native-ui"))]
-    let action_models = CompactActionReadModel::new(journey_models.host_context.as_deref(), journey_models.world_context.as_deref());
+    let action_models = CompactActionReadModel::new(
+        journey_models.host_context.as_deref(),
+        journey_models.world_context.as_deref(),
+    );
     #[cfg(not(feature = "native-ui"))]
     let empty_entities = EntityModelSet::default();
     #[cfg(not(feature = "native-ui"))]
@@ -3365,26 +4178,44 @@ fn render_quest_ui(
     let empty_pickups = GroundPickupModel::default();
     #[cfg(not(feature = "native-ui"))]
     let (world_entities, world_map, world_big_map, world_target, world_pickups) = (
-        action_models.world.map(|world| &world.guidance_entities).unwrap_or(&empty_entities),
-        action_models.map().unwrap_or(&empty_map), action_models.big_map(),
-        action_models.world.map(|world| &world.target).unwrap_or(&empty_target),
-        action_models.world.map(|world| &world.pickups).unwrap_or(&empty_pickups));
+        action_models
+            .world
+            .map(|world| &world.guidance_entities)
+            .unwrap_or(&empty_entities),
+        action_models.map().unwrap_or(&empty_map),
+        action_models.big_map(),
+        action_models
+            .world
+            .map(|world| &world.target)
+            .unwrap_or(&empty_target),
+        action_models
+            .world
+            .map(|world| &world.pickups)
+            .unwrap_or(&empty_pickups),
+    );
     #[cfg(feature = "native-ui")]
     let (world_entities, world_map, world_big_map, world_target, world_pickups) = (
-        &*journey_models.entities, &*journey_models.map, journey_models.big_map.as_deref(), &*target, &*pickups);
+        &*journey_models.entities,
+        &*journey_models.map,
+        journey_models.big_map.as_deref(),
+        &*target,
+        &*pickups,
+    );
     let available_npc_quests =
         npc_available_quests(&dialog, &tracker, Some(&journey_models.guidance));
     let has_npc_quests = !available_npc_quests.is_empty();
     let confirmation_open = quest_state.abandon_confirmation_quest_index.is_some()
         || quest_state.quest_alert_message.is_some();
     let detail_quest = quest_state.detail_quest(&tracker);
-    let mobile_sheet = mobile.map(|_| mobile_sheet(
-        confirmation_open,
-        quest_state.npc_quest_list_open && has_npc_quests && dialog.is_open,
-        dialog.is_open,
-        detail_quest.is_some(),
-        quest_log_open,
-    ));
+    let mobile_sheet = mobile.map(|_| {
+        mobile_sheet(
+            confirmation_open,
+            quest_state.npc_quest_list_open && has_npc_quests && dialog.is_open,
+            dialog.is_open,
+            detail_quest.is_some(),
+            quest_log_open,
+        )
+    });
 
     for (
         panel_entity,
@@ -3400,15 +4231,21 @@ fn render_quest_ui(
     ) in all.p1().iter_mut()
     {
         let visible = if is_modal_blocker.is_some() {
-            quest_log_open || has_dialog_content
+            has_dialog_content
         } else if is_dialog.is_some() {
-            mobile_sheet.map_or(has_dialog_content, |sheet| sheet == MobileQuestSheet::Dialog)
+            mobile_sheet.map_or(has_dialog_content, |sheet| {
+                sheet == MobileQuestSheet::Dialog
+            })
         } else if is_tracker.is_some() {
             #[cfg(not(feature = "native-ui"))]
-            let current_world = action_models.world.is_some_and(|world| world.self_tile().is_some());
+            let current_world = action_models
+                .world
+                .is_some_and(|world| world.self_tile().is_some());
             #[cfg(feature = "native-ui")]
             let current_world = true;
-            mobile.is_none() && current_world && journey_tracker_visible(journey.is_some(), player_ui.core.panel)
+            mobile.is_none()
+                && current_world
+                && journey_tracker_visible(journey.is_some(), player_ui.core.panel)
         } else if is_target.is_some() {
             mobile.is_none() && CRYSTAL_TARGET_PANEL_VISIBLE && world_target.target.is_some()
         } else if is_pickup.is_some() {
@@ -3424,8 +4261,9 @@ fn render_quest_ui(
             Display::None
         };
         if is_dialog.is_some() {
-            if let Some(layout) = mobile { place_mobile_sheet(&mut panel_node, layout); }
-            else {
+            if let Some(layout) = mobile {
+                place_mobile_sheet(&mut panel_node, layout);
+            } else {
                 let rect = workshop_rect.unwrap_or(QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
                 panel_node.left = Val::Px(rect.left);
                 panel_node.top = Val::Px(rect.top);
@@ -3437,7 +4275,12 @@ fn render_quest_ui(
                 panel_node.max_height = Val::Px(rect.height);
             }
             #[cfg(not(feature = "native-ui"))]
-            set_compact_panel_stamp(&mut commands, panel_entity, compact_stamp, MobileQuestSheet::Dialog);
+            set_compact_panel_stamp(
+                &mut commands,
+                panel_entity,
+                compact_stamp,
+                MobileQuestSheet::Dialog,
+            );
         }
         commands.entity(panel_entity).despawn_children();
         if !visible {
@@ -3455,14 +4298,31 @@ fn render_quest_ui(
                     world_map,
                     world_big_map,
                     ui_model.player.class_name.as_deref().unwrap_or(""),
-                    supply_plan.as_ref(), render_text);
+                    supply_plan.as_ref(),
+                    render_text,
+                );
             } else if is_dialog.is_some() {
                 if let Some(layout) = mobile {
-                    render_mobile_dialog_panel(panel, layout, &dialog, &npc_nav, &quest_state, has_npc_quests, render_text);
+                    render_mobile_dialog_panel(
+                        panel,
+                        layout,
+                        &dialog,
+                        &npc_nav,
+                        &quest_state,
+                        has_npc_quests,
+                        render_text,
+                    );
                 } else {
                     render_dialog_panel(
-                        panel, &dialog, &npc_nav, &quest_state, &pending, has_npc_quests,
-                        asset_server.as_ref().map(|server| &**server), render_text);
+                        panel,
+                        &dialog,
+                        &npc_nav,
+                        &quest_state,
+                        &pending,
+                        has_npc_quests,
+                        asset_server.as_ref().map(|server| &**server),
+                        render_text,
+                    );
                 }
             } else if is_target.is_some() {
                 render_combat_target_panel(panel, world_target.target.as_ref());
@@ -3481,7 +4341,12 @@ fn render_quest_ui(
     // Crystal Q surface: current-quest diary at the source default location.
     for (entity, mut node) in all.p2().iter_mut() {
         #[cfg(not(feature = "native-ui"))]
-        set_compact_panel_stamp(&mut commands, entity, compact_stamp, MobileQuestSheet::Diary);
+        set_compact_panel_stamp(
+            &mut commands,
+            entity,
+            compact_stamp,
+            MobileQuestSheet::Diary,
+        );
         if let Some(layout) = mobile {
             place_mobile_sheet(&mut node, layout);
         } else if quest_log_open {
@@ -3511,11 +4376,26 @@ fn render_quest_ui(
         if visible {
             commands.entity(entity).with_children(|panel| {
                 if let Some(layout) = mobile {
-                    render_mobile_diary_panel(panel, layout, &tracker, &journey_models.guidance, journey.as_ref(), &quest_state, render_text);
+                    render_mobile_diary_panel(
+                        panel,
+                        layout,
+                        &tracker,
+                        &journey_models.guidance,
+                        journey.as_ref(),
+                        &quest_state,
+                        render_text,
+                    );
                 } else {
                     render_quest_diary_panel(
-                        panel, &tracker, &journey_models.guidance, journey.as_ref(), &quest_state,
-                        &pending, asset_server.as_ref().map(|server| &**server), render_text);
+                        panel,
+                        &tracker,
+                        &journey_models.guidance,
+                        journey.as_ref(),
+                        &quest_state,
+                        &pending,
+                        asset_server.as_ref().map(|server| &**server),
+                        render_text,
+                    );
                 }
             });
         }
@@ -3525,17 +4405,26 @@ fn render_quest_ui(
     // `(ScreenWidth / 2 + 20, 60)`. Hiding the Q-key Diary does not hide it.
     for (entity, mut node) in all.p3().iter_mut() {
         #[cfg(not(feature = "native-ui"))]
-        set_compact_panel_stamp(&mut commands, entity, compact_stamp, MobileQuestSheet::Detail);
-        let visible = mobile_sheet.map_or(detail_quest.is_some(), |sheet| sheet == MobileQuestSheet::Detail);
-        if let Some(layout) = mobile { place_mobile_sheet(&mut node, layout); }
-        else { node.left = Val::Px(QUEST_DETAIL_DESIGN_LEFT);
-        node.top = Val::Px(QUEST_DETAIL_DESIGN_TOP);
-        node.width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
-        node.height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
-        node.min_width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
-        node.max_width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
-        node.min_height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
-        node.max_height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
+        set_compact_panel_stamp(
+            &mut commands,
+            entity,
+            compact_stamp,
+            MobileQuestSheet::Detail,
+        );
+        let visible = mobile_sheet.map_or(detail_quest.is_some(), |sheet| {
+            sheet == MobileQuestSheet::Detail
+        });
+        if let Some(layout) = mobile {
+            place_mobile_sheet(&mut node, layout);
+        } else {
+            node.left = Val::Px(QUEST_DETAIL_DESIGN_LEFT);
+            node.top = Val::Px(QUEST_DETAIL_DESIGN_TOP);
+            node.width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
+            node.height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
+            node.min_width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
+            node.max_width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
+            node.min_height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
+            node.max_height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
         }
         node.display = if visible {
             Display::Flex
@@ -3544,19 +4433,34 @@ fn render_quest_ui(
         };
         commands.entity(entity).despawn_children();
         if let Some(quest) = detail_quest {
-            if !visible { continue; }
+            if !visible {
+                continue;
+            }
             commands.entity(entity).with_children(|panel| {
                 if let Some(layout) = mobile {
-                    render_mobile_detail_panel(panel, layout, quest, &journey_models.guidance, &quest_state,
-                        &pending, &ui_model.player, asset_server.as_ref().map(|server| &**server), render_text);
-                } else { render_quest_detail_panel_with_text(
-                    panel,
-                    quest,
-                    &journey_models.guidance,
-                    &quest_state,
-                    &pending,
-                    asset_server.as_ref().map(|server| &**server),
-                    &ui_model.player, render_text) }
+                    render_mobile_detail_panel(
+                        panel,
+                        layout,
+                        quest,
+                        &journey_models.guidance,
+                        &quest_state,
+                        &pending,
+                        &ui_model.player,
+                        asset_server.as_ref().map(|server| &**server),
+                        render_text,
+                    );
+                } else {
+                    render_quest_detail_panel_with_text(
+                        panel,
+                        quest,
+                        &journey_models.guidance,
+                        &quest_state,
+                        &pending,
+                        asset_server.as_ref().map(|server| &**server),
+                        &ui_model.player,
+                        render_text,
+                    )
+                }
             });
         }
     }
@@ -3565,14 +4469,23 @@ fn render_quest_ui(
     // `NPCDialog.Width + 47, 0` and remains linked to the NPC dialog lifecycle.
     for (entity, mut node) in all.p4().iter_mut() {
         #[cfg(not(feature = "native-ui"))]
-        set_compact_panel_stamp(&mut commands, entity, compact_stamp, MobileQuestSheet::NpcList);
-        let visible = mobile_sheet.map_or(quest_state.npc_quest_list_open && has_npc_quests && dialog.is_open,
-            |sheet| sheet == MobileQuestSheet::NpcList);
-        if let Some(layout) = mobile { place_mobile_sheet(&mut node, layout); }
-        else { node.left = Val::Px(QUEST_LIST_DESIGN_LEFT);
-        node.top = Val::Px(QUEST_LIST_DESIGN_TOP);
-        node.width = Val::Px(QUEST_LIST_DESIGN_WIDTH);
-        node.height = Val::Px(QUEST_LIST_DESIGN_HEIGHT);
+        set_compact_panel_stamp(
+            &mut commands,
+            entity,
+            compact_stamp,
+            MobileQuestSheet::NpcList,
+        );
+        let visible = mobile_sheet.map_or(
+            quest_state.npc_quest_list_open && has_npc_quests && dialog.is_open,
+            |sheet| sheet == MobileQuestSheet::NpcList,
+        );
+        if let Some(layout) = mobile {
+            place_mobile_sheet(&mut node, layout);
+        } else {
+            node.left = Val::Px(QUEST_LIST_DESIGN_LEFT);
+            node.top = Val::Px(QUEST_LIST_DESIGN_TOP);
+            node.width = Val::Px(QUEST_LIST_DESIGN_WIDTH);
+            node.height = Val::Px(QUEST_LIST_DESIGN_HEIGHT);
         }
         node.display = if visible {
             Display::Flex
@@ -3583,32 +4496,54 @@ fn render_quest_ui(
         if visible {
             commands.entity(entity).with_children(|panel| {
                 if let Some(layout) = mobile {
-                    render_mobile_npc_quest_list_panel(panel, layout, &available_npc_quests, &dialog,
-                        &journey_models.guidance, &quest_state, &pending, &ui_model.player,
-                        asset_server.as_ref().map(|server| &**server), render_text);
-                } else { render_npc_quest_list_panel(
-                    panel,
-                    &available_npc_quests,
-                    &dialog,
-                    &journey_models.guidance,
-                    &quest_state,
-                    &pending,
-                    asset_server.as_ref().map(|server| &**server),
-                    &ui_model.player, render_text) }
+                    render_mobile_npc_quest_list_panel(
+                        panel,
+                        layout,
+                        &available_npc_quests,
+                        &dialog,
+                        &journey_models.guidance,
+                        &quest_state,
+                        &pending,
+                        &ui_model.player,
+                        asset_server.as_ref().map(|server| &**server),
+                        render_text,
+                    );
+                } else {
+                    render_npc_quest_list_panel(
+                        panel,
+                        &available_npc_quests,
+                        &dialog,
+                        &journey_models.guidance,
+                        &quest_state,
+                        &pending,
+                        asset_server.as_ref().map(|server| &**server),
+                        &ui_model.player,
+                        render_text,
+                    )
+                }
             });
         }
     }
 
     for (entity, mut node) in all.p5().iter_mut() {
         #[cfg(not(feature = "native-ui"))]
-        set_compact_panel_stamp(&mut commands, entity, compact_stamp, MobileQuestSheet::Confirmation);
-        if let Some(layout) = mobile { place_mobile_sheet(&mut node, layout); }
-        else { node.left = Val::Px(QUEST_CONFIRM_DESIGN_LEFT);
-        node.top = Val::Px(QUEST_CONFIRM_DESIGN_TOP);
-        node.width = Val::Px(QUEST_CONFIRM_DESIGN_WIDTH);
-        node.height = Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT);
+        set_compact_panel_stamp(
+            &mut commands,
+            entity,
+            compact_stamp,
+            MobileQuestSheet::Confirmation,
+        );
+        if let Some(layout) = mobile {
+            place_mobile_sheet(&mut node, layout);
+        } else {
+            node.left = Val::Px(QUEST_CONFIRM_DESIGN_LEFT);
+            node.top = Val::Px(QUEST_CONFIRM_DESIGN_TOP);
+            node.width = Val::Px(QUEST_CONFIRM_DESIGN_WIDTH);
+            node.height = Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT);
         }
-        let visible = mobile_sheet.map_or(confirmation_open, |sheet| sheet == MobileQuestSheet::Confirmation);
+        let visible = mobile_sheet.map_or(confirmation_open, |sheet| {
+            sheet == MobileQuestSheet::Confirmation
+        });
         node.display = if visible {
             Display::Flex
         } else {
@@ -3618,7 +4553,12 @@ fn render_quest_ui(
         if visible {
             commands.entity(entity).with_children(|panel| {
                 if let Some(layout) = mobile {
-                    render_mobile_confirmation(panel, layout, quest_state.quest_alert_message.as_deref(), &quest_state);
+                    render_mobile_confirmation(
+                        panel,
+                        layout,
+                        quest_state.quest_alert_message.as_deref(),
+                        &quest_state,
+                    );
                 } else if let Some(message) = quest_state.quest_alert_message.as_deref() {
                     render_quest_alert(
                         panel,
@@ -3649,14 +4589,21 @@ fn compact_rect(node: &ComputedNode, transform: &bevy::ui::UiGlobalTransform) ->
     let scale = node.inverse_scale_factor;
     let center = transform.affine().translation * scale;
     let half = node.size() * scale * 0.5;
-    bevy::math::Rect { min: center - half, max: center + half }
+    bevy::math::Rect {
+        min: center - half,
+        max: center + half,
+    }
 }
 
 #[cfg(not(feature = "native-ui"))]
 fn compact_descends_from(mut entity: Entity, ancestor: Entity, parents: &Query<&ChildOf>) -> bool {
     for _ in 0..32 {
-        if entity == ancestor { return true; }
-        let Ok(parent) = parents.get(entity) else { return false; };
+        if entity == ancestor {
+            return true;
+        }
+        let Ok(parent) = parents.get(entity) else {
+            return false;
+        };
         entity = parent.parent();
     }
     false
@@ -3678,23 +4625,37 @@ fn compact_sheet_label(sheet: MobileQuestSheet) -> &'static str {
 fn compact_action_label(action: &QuestUiButton) -> &'static str {
     match action {
         QuestUiButton::CompactDetailPage(_) | QuestUiButton::CompactNpcPage(_) => "pageTab",
-        QuestUiButton::CompactDetailRewardPrevious | QuestUiButton::CompactNpcRewardPrevious => "rewardPrevious",
-        QuestUiButton::CompactDetailRewardNext | QuestUiButton::CompactNpcRewardNext => "rewardNext",
+        QuestUiButton::CompactDetailRewardPrevious | QuestUiButton::CompactNpcRewardPrevious => {
+            "rewardPrevious"
+        }
+        QuestUiButton::CompactDetailRewardNext | QuestUiButton::CompactNpcRewardNext => {
+            "rewardNext"
+        }
         QuestUiButton::CompactConfirmationPrevious => "confirmationPrevious",
         QuestUiButton::CompactConfirmationNext => "confirmationNext",
-        QuestUiButton::CloseQuestDetail | QuestUiButton::CloseQuestLog
-            | QuestUiButton::CloseNpcDialog | QuestUiButton::CloseNpcQuestList
-            | QuestUiButton::CloseQuestAlert => "close",
+        QuestUiButton::CloseQuestDetail
+        | QuestUiButton::CloseQuestLog
+        | QuestUiButton::CloseNpcDialog
+        | QuestUiButton::CloseNpcQuestList
+        | QuestUiButton::CloseQuestAlert => "close",
         QuestUiButton::ReturnToNpcDialog | QuestUiButton::ReturnNpcService => "back",
         QuestUiButton::SelectQuest { .. } | QuestUiButton::SelectNpcQuest { .. } => "questRow",
         QuestUiButton::SelectGuidedDiaryTab(_) => "diaryTab",
-        QuestUiButton::GuidedDiaryPrevious | QuestUiButton::QuestPagePrevious
-            | QuestUiButton::NpcQuestPrevious => "pagePrevious",
-        QuestUiButton::GuidedDiaryNext | QuestUiButton::QuestPageNext
-            | QuestUiButton::NpcQuestNext => "pageNext",
-        QuestUiButton::QuestDetailScrollUp | QuestUiButton::NpcQuestMessageScrollUp => "textPrevious",
-        QuestUiButton::QuestDetailScrollDown | QuestUiButton::NpcQuestMessageScrollDown => "textNext",
-        QuestUiButton::SelectReward { .. } | QuestUiButton::SelectNpcQuestReward { .. } => "selectReward",
+        QuestUiButton::GuidedDiaryPrevious
+        | QuestUiButton::QuestPagePrevious
+        | QuestUiButton::NpcQuestPrevious => "pagePrevious",
+        QuestUiButton::GuidedDiaryNext
+        | QuestUiButton::QuestPageNext
+        | QuestUiButton::NpcQuestNext => "pageNext",
+        QuestUiButton::QuestDetailScrollUp | QuestUiButton::NpcQuestMessageScrollUp => {
+            "textPrevious"
+        }
+        QuestUiButton::QuestDetailScrollDown | QuestUiButton::NpcQuestMessageScrollDown => {
+            "textNext"
+        }
+        QuestUiButton::SelectReward { .. } | QuestUiButton::SelectNpcQuestReward { .. } => {
+            "selectReward"
+        }
         QuestUiButton::AbandonQuest { .. } => "abandon",
         QuestUiButton::ConfirmAbandonQuest => "confirmAbandon",
         QuestUiButton::CancelAbandonQuest => "cancelAbandon",
@@ -3714,136 +4675,233 @@ fn observe_compact_quest_tree(
     tracker: Res<QuestTracker>,
     dialog: Res<NpcDialogModel>,
     guidance: Res<QuestGuidance>,
-    roots: Query<(Entity, &ComputedNode, &bevy::ui::UiGlobalTransform, &InheritedVisibility), With<QuestUiRoot>>,
-    panels: Query<(Entity, &QuestCompactStamp, &Node, &ComputedNode,
-        &bevy::ui::UiGlobalTransform, &InheritedVisibility)>,
-    actions: Query<(Entity, &QuestUiButton, &ComputedNode, &bevy::ui::UiGlobalTransform,
-        &InheritedVisibility), (With<Button>, With<QuestUiButton>)>,
-    texts: Query<(Entity, &Text, &TextFont, &ComputedNode,
-        &bevy::ui::UiGlobalTransform, &InheritedVisibility)>,
+    roots: Query<
+        (
+            Entity,
+            &ComputedNode,
+            &bevy::ui::UiGlobalTransform,
+            &InheritedVisibility,
+        ),
+        With<QuestUiRoot>,
+    >,
+    panels: Query<(
+        Entity,
+        &QuestCompactStamp,
+        &Node,
+        &ComputedNode,
+        &bevy::ui::UiGlobalTransform,
+        &InheritedVisibility,
+    )>,
+    actions: Query<
+        (
+            Entity,
+            &QuestUiButton,
+            &ComputedNode,
+            &bevy::ui::UiGlobalTransform,
+            &InheritedVisibility,
+        ),
+        (With<Button>, With<QuestUiButton>),
+    >,
+    texts: Query<(
+        Entity,
+        &Text,
+        &TextFont,
+        &ComputedNode,
+        &bevy::ui::UiGlobalTransform,
+        &InheritedVisibility,
+    )>,
     parents: Query<&ChildOf>,
     mut observed: ResMut<QuestCompactReadiness>,
 ) {
     *observed = QuestCompactReadiness::default();
     observed.first_failure = Some("presentation");
-    let Some((presentation, context)) = presentation.as_deref().zip(context.as_deref()) else { return; };
-    let Some(expected) = compact_expected_stamp(presentation, context, &player_ui,
-        &state, &tracker, &dialog, &guidance, *locale) else { return; };
+    let Some((presentation, context)) = presentation.as_deref().zip(context.as_deref()) else {
+        return;
+    };
+    let Some(expected) = compact_expected_stamp(
+        presentation,
+        context,
+        &player_ui,
+        &state,
+        &tracker,
+        &dialog,
+        &guidance,
+        *locale,
+    ) else {
+        return;
+    };
     observed.generation = Some(expected.generation);
     observed.revision = Some(expected.revision);
     observed.sheet = Some(compact_sheet_label(expected.sheet));
-    observed.page = Some(match expected.page { CompactQuestPage::Text => "text",
-        CompactQuestPage::Rewards => "rewards" });
+    observed.page = Some(match expected.page {
+        CompactQuestPage::Text => "text",
+        CompactQuestPage::Rewards => "rewards",
+    });
     observed.quest_index = expected.quest_index;
     observed.reward_page = Some(expected.reward_page);
     observed.text_top = Some(expected.text_top);
     observed.diary_page = Some(expected.diary_page);
     observed.first_failure = Some("rootLayout");
-    let Ok((root, root_node, root_transform, root_visibility)) = roots.single() else { return; };
-    if !root_visibility.get() || root_node.size().min_element() <= 0.0 { return; }
+    let Ok((root, root_node, root_transform, root_visibility)) = roots.single() else {
+        return;
+    };
+    if !root_visibility.get() || root_node.size().min_element() <= 0.0 {
+        return;
+    }
     let stage = bevy::math::Rect {
         min: Vec2::ZERO,
         max: Vec2::new(presentation.logical_width, presentation.logical_height),
     };
     let root_rect = compact_rect(root_node, root_transform);
     let tolerance = 1.0 / presentation.stage_css_scale;
-    if root_rect.min.x < stage.min.x - tolerance || root_rect.min.y < stage.min.y - tolerance
-        || root_rect.max.x > stage.max.x + tolerance || root_rect.max.y > stage.max.y + tolerance {
+    if root_rect.min.x < stage.min.x - tolerance
+        || root_rect.min.y < stage.min.y - tolerance
+        || root_rect.max.x > stage.max.x + tolerance
+        || root_rect.max.y > stage.max.y + tolerance
+    {
         return;
     }
     if expected.sheet == MobileQuestSheet::None {
-        if panels.iter().any(|(_, stamp, _, _, _, visible)|
-            stamp.generation == expected.generation && visible.get()) { return; }
+        if panels.iter().any(|(_, stamp, _, _, _, visible)| {
+            stamp.generation == expected.generation && visible.get()
+        }) {
+            return;
+        }
         observed.stamp = Some(expected);
         observed.current = true;
         observed.first_failure = None;
         return;
     }
     observed.first_failure = Some("currentPanelStamp");
-    let mut current = panels.iter().filter(|(entity, stamp, node, _, _, visibility)|
-        **stamp == expected && node.display != Display::None && visibility.get()
-            && compact_descends_from(*entity, root, &parents));
-    let Some((panel, _, _, panel_node, panel_transform, _)) = current.next() else { return; };
-    if current.next().is_some() { return; }
+    let mut current = panels
+        .iter()
+        .filter(|(entity, stamp, node, _, _, visibility)| {
+            **stamp == expected
+                && node.display != Display::None
+                && visibility.get()
+                && compact_descends_from(*entity, root, &parents)
+        });
+    let Some((panel, _, _, panel_node, panel_transform, _)) = current.next() else {
+        return;
+    };
+    if current.next().is_some() {
+        return;
+    }
     let panel_rect = compact_rect(panel_node, panel_transform);
-    let panel_css = panel_node.size() * panel_node.inverse_scale_factor * presentation.stage_css_scale;
+    let panel_css =
+        panel_node.size() * panel_node.inverse_scale_factor * presentation.stage_css_scale;
     observed.panel_css_bounds = Some(QuestCompactPanelRect {
         left: panel_rect.min.x * presentation.stage_css_scale,
         top: panel_rect.min.y * presentation.stage_css_scale,
-        width: panel_css.x, height: panel_css.y,
+        width: panel_css.x,
+        height: panel_css.y,
     });
     observed.first_failure = Some("panelBounds");
-    if panel_css.x + 0.01 < 400.0 || panel_css.y + 0.01 < 296.0
-        || panel_rect.min.x < stage.min.x - tolerance || panel_rect.min.y < stage.min.y - tolerance
-        || panel_rect.max.x > stage.max.x + tolerance || panel_rect.max.y > stage.max.y + tolerance {
+    if panel_css.x + 0.01 < 400.0
+        || panel_css.y + 0.01 < 296.0
+        || panel_rect.min.x < stage.min.x - tolerance
+        || panel_rect.min.y < stage.min.y - tolerance
+        || panel_rect.max.x > stage.max.x + tolerance
+        || panel_rect.max.y > stage.max.y + tolerance
+    {
         return;
     }
-    let inside_panel = |rect: bevy::math::Rect| rect.min.x >= panel_rect.min.x - tolerance
-        && rect.min.y >= panel_rect.min.y - tolerance
-        && rect.max.x <= panel_rect.max.x + tolerance
-        && rect.max.y <= panel_rect.max.y + tolerance;
+    let inside_panel = |rect: bevy::math::Rect| {
+        rect.min.x >= panel_rect.min.x - tolerance
+            && rect.min.y >= panel_rect.min.y - tolerance
+            && rect.max.x <= panel_rect.max.x + tolerance
+            && rect.max.y <= panel_rect.max.y + tolerance
+    };
     let mut action_rects = Vec::new();
     observed.first_failure = Some("actionLayout");
     for (entity, action, node, transform, visibility) in &actions {
-        if !compact_descends_from(entity, panel, &parents) { continue; }
-        if !visibility.get() { return; }
+        if !compact_descends_from(entity, panel, &parents) {
+            continue;
+        }
+        if !visibility.get() {
+            return;
+        }
         let rect = compact_rect(node, transform);
         let size = (rect.max - rect.min) * presentation.stage_css_scale;
-        observed.min_css_hit_width = Some(observed.min_css_hit_width.map_or(size.x,
-            |minimum| minimum.min(size.x)));
-        observed.min_css_hit_height = Some(observed.min_css_hit_height.map_or(size.y,
-            |minimum| minimum.min(size.y)));
+        observed.min_css_hit_width = Some(
+            observed
+                .min_css_hit_width
+                .map_or(size.x, |minimum| minimum.min(size.x)),
+        );
+        observed.min_css_hit_height = Some(
+            observed
+                .min_css_hit_height
+                .map_or(size.y, |minimum| minimum.min(size.y)),
+        );
         if observed.actions.len() < 24 {
             observed.actions.push(QuestCompactActionRect {
                 label: compact_action_label(action),
                 left: rect.min.x * presentation.stage_css_scale,
                 top: rect.min.y * presentation.stage_css_scale,
-                width: size.x, height: size.y,
+                width: size.x,
+                height: size.y,
             });
         }
-        if !inside_panel(rect) || size.x < 39.9 || size.y < 39.9 { return; }
+        if !inside_panel(rect) || size.x < 39.9 || size.y < 39.9 {
+            return;
+        }
         for prior in &action_rects {
             let prior: &bevy::math::Rect = prior;
-            let overlap = (rect.max.min(prior.max) - rect.min.max(prior.min))
-                * presentation.stage_css_scale;
-            if overlap.x > 0.5 && overlap.y > 0.5 { return; }
+            let overlap =
+                (rect.max.min(prior.max) - rect.min.max(prior.min)) * presentation.stage_css_scale;
+            if overlap.x > 0.5 && overlap.y > 0.5 {
+                return;
+            }
         }
         action_rects.push(rect);
     }
     let mut text_count = 0;
     observed.first_failure = Some("textLayout");
     for (entity, text, font, node, transform, visibility) in &texts {
-        if text.0.is_empty() || !compact_descends_from(entity, panel, &parents) { continue; }
+        if text.0.is_empty() || !compact_descends_from(entity, panel, &parents) {
+            continue;
+        }
         let FontSize::Px(font_px) = font.font_size else {
-            observed.first_failure = Some("textFontUnit"); return;
+            observed.first_failure = Some("textFontUnit");
+            return;
         };
         let rect = compact_rect(node, transform);
         let css_font = font_px * presentation.stage_css_scale;
-        observed.min_css_text_size = Some(observed.min_css_text_size.map_or(css_font,
-            |minimum| minimum.min(css_font)));
+        observed.min_css_text_size = Some(
+            observed
+                .min_css_text_size
+                .map_or(css_font, |minimum| minimum.min(css_font)),
+        );
         if !visibility.get() || css_font < 13.9 {
-            observed.first_failure = Some("textVisibilityOrFont"); return;
+            observed.first_failure = Some("textVisibilityOrFont");
+            return;
         }
         if node.size().min_element() <= 0.0 {
-            observed.first_failure = Some("textUnlaidOut"); return;
+            observed.first_failure = Some("textUnlaidOut");
+            return;
         }
         if !inside_panel(rect) {
-            observed.first_failure = Some("textOutsidePanel"); return;
+            observed.first_failure = Some("textOutsidePanel");
+            return;
         }
-        if !actions.iter().any(|(action_entity, _, _, _, _)|
-            compact_descends_from(entity, action_entity, &parents)) {
+        if !actions.iter().any(|(action_entity, _, _, _, _)| {
+            compact_descends_from(entity, action_entity, &parents)
+        }) {
             for action in &action_rects {
                 let action: &bevy::math::Rect = action;
                 let overlap = (rect.max.min(action.max) - rect.min.max(action.min))
                     * presentation.stage_css_scale;
                 if overlap.x > 0.5 && overlap.y > 0.5 {
-                    observed.first_failure = Some("textActionOverlap"); return;
+                    observed.first_failure = Some("textActionOverlap");
+                    return;
                 }
             }
         }
         text_count += 1;
     }
-    if action_rects.is_empty() || text_count == 0 { return; }
+    if action_rects.is_empty() || text_count == 0 {
+        return;
+    }
     observed.stamp = Some(expected);
     observed.current = true;
     observed.first_failure = None;
@@ -3871,7 +4929,11 @@ fn render_quest_tracker_panel(
         multi_guidance::render_supplies(parent, state, big_map, supplies);
         return;
     }
-    if journey.is_some() && multi_guidance::render(parent, tracker, state, journey, entities, map_model, big_map, class_name, supplies) {
+    if journey.is_some()
+        && multi_guidance::render(
+            parent, tracker, state, journey, entities, map_model, big_map, class_name, supplies,
+        )
+    {
         return;
     }
     if primary_quest_index(tracker, state, journey) == Some(2_110_005)
@@ -3891,7 +4953,11 @@ fn render_quest_tracker_panel(
         let journey_text_size = 10.0;
         quest_log_text_at_raw(
             parent,
-            &format!("{}级  {}", journey.level_range, crate::player_text::text(&journey.chapter_title)),
+            &format!(
+                "{}级  {}",
+                journey.level_range,
+                crate::player_text::text(&journey.chapter_title)
+            ),
             QuestLogRect::new(5.0, 20.0, 300.0, 15.0),
             journey_text_size,
             PANEL_HIGHLIGHT,
@@ -3908,7 +4974,10 @@ fn render_quest_tracker_panel(
         if let Some(next) = &journey.next {
             quest_log_text_at_raw(
                 parent,
-                &format!("下一步：{}", truncate_chars(&render_text.title(next.quest_id, &next.title), 38)),
+                &format!(
+                    "下一步：{}",
+                    truncate_chars(&render_text.title(next.quest_id, &next.title), 38)
+                ),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
                 Color::srgb(0.20, 1.0, 0.10),
@@ -3916,7 +4985,10 @@ fn render_quest_tracker_panel(
             );
             quest_log_text_at_raw(
                 parent,
-                &format!("   {}", truncate_chars(&crate::player_text::text(&next.action), 42)),
+                &format!(
+                    "   {}",
+                    truncate_chars(&crate::player_text::text(&next.action), 42)
+                ),
                 QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
                 journey_text_size,
                 Color::WHITE,
@@ -3938,7 +5010,10 @@ fn render_quest_tracker_panel(
             if let Some(objective) = &next.objective {
                 quest_log_text_at_raw(
                     parent,
-                    &format!("   {}", truncate_chars(&render_text.objective(objective), 42)),
+                    &format!(
+                        "   {}",
+                        truncate_chars(&render_text.objective(objective), 42)
+                    ),
                     QuestLogRect::new(5.0, 80.0 + detail_offset, 300.0, 15.0),
                     journey_text_size,
                     Color::WHITE,
@@ -3963,7 +5038,7 @@ fn render_quest_tracker_panel(
                     QuestLogRect::new(25.0, 95.0 + detail_offset, 205.0, 18.0),
                     &format!(
                         "▶ {} · {} tiles",
-                        truncate_chars(&target.entity.name, 21),
+                        truncate_chars(&crate::player_text::name(&target.entity.name), 21),
                         target.distance
                     ),
                     QuestUiButton::AttackQuestTarget { object_id },
@@ -3980,7 +5055,10 @@ fn render_quest_tracker_panel(
             if !reward.trim().is_empty() {
                 quest_log_text_at_raw(
                     parent,
-                    &format!("   奖励：{}", truncate_chars(&crate::player_text::text(reward), 32)),
+                    &format!(
+                        "   奖励：{}",
+                        truncate_chars(&crate::player_text::text(reward), 32)
+                    ),
                     QuestLogRect::new(5.0, 95.0 + detail_offset + target_offset, 300.0, 15.0),
                     journey_text_size,
                     PANEL_TEXT,
@@ -3999,7 +5077,10 @@ fn render_quest_tracker_panel(
         } else {
             quest_log_text_at_raw(
                 parent,
-                &format!("下一步：{}", truncate_chars(&crate::player_text::text(&journey.goal), 38)),
+                &format!(
+                    "下一步：{}",
+                    truncate_chars(&crate::player_text::text(&journey.goal), 38)
+                ),
                 QuestLogRect::new(5.0, 50.0, 300.0, 15.0),
                 journey_text_size,
                 Color::srgb(0.20, 1.0, 0.10),
@@ -4033,7 +5114,7 @@ fn render_quest_tracker_panel(
                 );
                 quest_log_text_at_raw(
                     parent,
-                    &truncate_chars(&option.instruction, 48),
+                    &truncate_chars(&crate::player_text::text(&option.instruction), 48),
                     QuestLogRect::new(5.0, 80.0, 300.0, 15.0),
                     journey_text_size,
                     PANEL_TEXT,
@@ -4079,7 +5160,10 @@ fn render_quest_tracker_panel(
         if let Some(class_hint) = &journey.class_hint {
             quest_log_text_at_raw(
                 parent,
-                &format!("   提示：{}", truncate_chars(&crate::player_text::text(class_hint), 38)),
+                &format!(
+                    "   提示：{}",
+                    truncate_chars(&crate::player_text::text(class_hint), 38)
+                ),
                 QuestLogRect::new(
                     5.0,
                     110.0 + graduation_offset + location_offset + target_offset,
@@ -4107,7 +5191,10 @@ fn render_quest_tracker_panel(
         if let Some(optional) = journey.optional.first() {
             quest_log_text_at_raw(
                 parent,
-                &format!("可选任务：{}", truncate_chars(&render_text.title(optional.quest_id, &optional.title), 34)),
+                &format!(
+                    "可选任务：{}",
+                    truncate_chars(&render_text.title(optional.quest_id, &optional.title), 34)
+                ),
                 QuestLogRect::new(
                     5.0,
                     125.0 + graduation_offset + location_offset + target_offset,
@@ -4135,7 +5222,7 @@ fn render_quest_tracker_panel(
                 ),
                 &format!(
                     "▶ {} · {} tiles",
-                    truncate_chars(&target.entity.name, 21),
+                    truncate_chars(&crate::player_text::name(&target.entity.name), 21),
                     target.distance
                 ),
                 QuestUiButton::AttackQuestTarget { object_id },
@@ -4146,8 +5233,13 @@ fn render_quest_tracker_panel(
             0.0
         };
         y = 135.0 + graduation_offset + location_offset + target_offset + optional_target_offset;
-        quest_log_text_button_at_raw(parent, QuestLogRect::new(8.0, y + 20.0, 286.0, 25.0),
-            "补给检查与购买地点", QuestUiButton::ToggleSupplies, true);
+        quest_log_text_button_at_raw(
+            parent,
+            QuestLogRect::new(8.0, y + 20.0, 286.0, 25.0),
+            "补给检查与购买地点",
+            QuestUiButton::ToggleSupplies,
+            true,
+        );
         y += 30.0;
     }
     let tracked_limit = if compact_journey {
@@ -4165,11 +5257,11 @@ fn render_quest_tracker_panel(
             Justify::Left,
         );
         let objective_limit = if compact_journey { 1 } else { usize::MAX };
-        for objective in quest.objectives.iter().take(objective_limit) {
+        for (index, objective) in quest.objectives.iter().take(objective_limit).enumerate() {
             y += 15.0;
             quest_log_text_at_raw(
                 parent,
-                &quest_objective_detail_text(objective, render_text),
+                &quest_objective_detail_text(quest.quest_index, index, objective, render_text),
                 QuestLogRect::new(25.0, 20.0 + y, 290.0, 15.0),
                 8.0,
                 Color::WHITE,
@@ -4194,7 +5286,7 @@ fn render_quest_tracker_panel(
                 QuestLogRect::new(25.0, 20.0 + y, 205.0, 18.0),
                 &format!(
                     "▶ {} · {} tiles",
-                    truncate_chars(&target.entity.name, 21),
+                    truncate_chars(&crate::player_text::name(&target.entity.name), 21),
                     target.distance
                 ),
                 QuestUiButton::AttackQuestTarget { object_id },
@@ -4213,42 +5305,88 @@ fn render_bichon_arrival_tracker(parent: &mut ChildSpawnerCommands, map: &MapMod
         font_size: FontSize::Px(14.0),
         ..default()
     };
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
-            flex_direction: FlexDirection::Column,
-            row_gap: Val::Px(5.0), padding: UiRect::all(Val::Px(12.0)),
-            border: UiRect::all(Val::Px(1.0)), ..default()
-        },
-        BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.88)),
-        BorderColor::all(PANEL_HIGHLIGHT),
-    )).with_children(|card| {
-        for (text, color) in [
-            ("主线 · 前往比奇城".to_owned(), PANEL_HIGHLIGHT),
-            ("目的地：比奇城安全区".to_owned(), Color::srgb(0.3, 1.0, 0.3)),
-            (format!("比奇省 · 坐标 ({},{})", crate::quest_destination::BICHON_SAFE_X, crate::quest_destination::BICHON_SAFE_Y), Color::WHITE),
-            ("从新手村向北，前往北部大城。".to_owned(), Color::WHITE),
-            ("进入城内安全区后，任务进度会更新。".to_owned(), Color::WHITE),
-            ("注意：新手村安全区不算此任务目标。".to_owned(), PANEL_HIGHLIGHT),
-            (format!("当前位置：({},{})", map.center_x, map.center_y), PANEL_TEXT),
-            ("路途较长，出发前补充血药。".to_owned(), PANEL_TEXT),
-        ] {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(8.0),
+                top: Val::Px(16.0),
+                width: Val::Px(304.0),
+                flex_direction: FlexDirection::Column,
+                row_gap: Val::Px(5.0),
+                padding: UiRect::all(Val::Px(12.0)),
+                border: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.88)),
+            BorderColor::all(PANEL_HIGHLIGHT),
+        ))
+        .with_children(|card| {
+            for (text, color) in [
+                ("主线 · 前往比奇城".to_owned(), PANEL_HIGHLIGHT),
+                (
+                    "目的地：比奇城安全区".to_owned(),
+                    Color::srgb(0.3, 1.0, 0.3),
+                ),
+                (
+                    format!(
+                        "比奇省 · 坐标 ({},{})",
+                        crate::quest_destination::BICHON_SAFE_X,
+                        crate::quest_destination::BICHON_SAFE_Y
+                    ),
+                    Color::WHITE,
+                ),
+                ("从新手村向北，前往北部大城。".to_owned(), Color::WHITE),
+                (
+                    "进入城内安全区后，任务进度会更新。".to_owned(),
+                    Color::WHITE,
+                ),
+                (
+                    "注意：新手村安全区不算此任务目标。".to_owned(),
+                    PANEL_HIGHLIGHT,
+                ),
+                (
+                    format!("当前位置：({},{})", map.center_x, map.center_y),
+                    PANEL_TEXT,
+                ),
+                ("路途较长，出发前补充血药。".to_owned(), PANEL_TEXT),
+            ] {
+                card.spawn((
+                    Node {
+                        width: Val::Percent(100.0),
+                        min_height: Val::Px(20.0),
+                        flex_shrink: 0.0,
+                        ..default()
+                    },
+                    Text::new(crate::player_text::text(&text)),
+                    font.clone(),
+                    TextColor(color),
+                    TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+                ));
+            }
             card.spawn((
-                Node { width: Val::Percent(100.0), min_height: Val::Px(20.0), flex_shrink: 0.0, ..default() },
-                Text::new(text), font.clone(), TextColor(color),
-                TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
-            ));
-        }
-        card.spawn((
-            Button, QuestUiButton::OpenDestinationMap, QuestUiButtonVisual { enabled: true },
-            Node { height: Val::Px(30.0), width: Val::Percent(100.0), align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center, flex_shrink: 0.0, ..default() },
-            BackgroundColor(BUTTON_BG), FocusPolicy::Block,
-        )).with_children(|button| {
-            button.spawn((Text::new("打开大地图 · 查看目的地"), font, TextColor(PANEL_HIGHLIGHT)));
+                Button,
+                QuestUiButton::OpenDestinationMap,
+                QuestUiButtonVisual { enabled: true },
+                Node {
+                    height: Val::Px(30.0),
+                    width: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BackgroundColor(BUTTON_BG),
+                FocusPolicy::Block,
+            ))
+            .with_children(|button| {
+                button.spawn((
+                    Text::new(crate::player_text::text("打开大地图 · 查看目的地")),
+                    font,
+                    TextColor(PANEL_HIGHLIGHT),
+                ));
+            });
         });
-    });
 }
 
 fn npc_dialog_weighted_width(text: &str) -> usize {
@@ -4335,7 +5473,12 @@ fn npc_dialog_rows(dialog: &NpcDialogModel) -> Vec<(String, Option<String>, bool
         {
             continue;
         }
-        for line in npc_dialog_wrap(&line.text) {
+        let display = if crate::native_i18n::active() {
+            crate::native_i18n::npc_text(&line.text)
+        } else {
+            line.text.clone()
+        };
+        for line in npc_dialog_wrap(&display) {
             rows.push((line, None, false));
         }
     }
@@ -4344,7 +5487,12 @@ fn npc_dialog_rows(dialog: &NpcDialogModel) -> Vec<(String, Option<String>, bool
         .iter()
         .filter(|option| !is_quest_dialog_operation_target(&option.option_id))
     {
-        for line in npc_dialog_wrap(&option.label) {
+        let display = if crate::native_i18n::active() {
+            crate::native_i18n::npc_text(&option.label)
+        } else {
+            option.label.clone()
+        };
+        for line in npc_dialog_wrap(&display) {
             rows.push((line, Some(option.option_id.clone()), option.enabled));
         }
     }
@@ -4359,8 +5507,14 @@ fn mobile_text(
     size_css: f32,
     color: Color,
 ) {
-    quest_log_text_at(parent, text, layout.rect(rect.0, rect.1, rect.2, rect.3),
-        layout.px(size_css), color, Justify::Left);
+    quest_log_text_at(
+        parent,
+        text,
+        layout.rect(rect.0, rect.1, rect.2, rect.3),
+        layout.px(size_css),
+        color,
+        Justify::Left,
+    );
 }
 
 fn mobile_text_raw(
@@ -4371,8 +5525,14 @@ fn mobile_text_raw(
     size_css: f32,
     color: Color,
 ) {
-    quest_log_text_at_raw(parent, text, layout.rect(rect.0, rect.1, rect.2, rect.3),
-        layout.px(size_css), color, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        text,
+        layout.rect(rect.0, rect.1, rect.2, rect.3),
+        layout.px(size_css),
+        color,
+        Justify::Left,
+    );
 }
 
 fn mobile_button(
@@ -4383,8 +5543,14 @@ fn mobile_button(
     action: QuestUiButton,
     enabled: bool,
 ) {
-    quest_log_text_button_at_sized(parent, layout.rect(rect.0, rect.1, rect.2, rect.3),
-        text, action, enabled, layout.px(15.0));
+    quest_log_text_button_at_sized(
+        parent,
+        layout.rect(rect.0, rect.1, rect.2, rect.3),
+        text,
+        action,
+        enabled,
+        layout.px(15.0),
+    );
 }
 
 fn mobile_button_raw(
@@ -4395,8 +5561,14 @@ fn mobile_button_raw(
     action: QuestUiButton,
     enabled: bool,
 ) {
-    quest_log_text_button_at_sized_raw(parent, layout.rect(rect.0, rect.1, rect.2, rect.3),
-        text, action, enabled, layout.px(15.0));
+    quest_log_text_button_at_sized_raw(
+        parent,
+        layout.rect(rect.0, rect.1, rect.2, rect.3),
+        text,
+        action,
+        enabled,
+        layout.px(15.0),
+    );
 }
 
 fn mobile_chrome(
@@ -4409,33 +5581,85 @@ fn mobile_chrome(
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
-            left: Val::Px(0.0), top: Val::Px(0.0),
-            width: Val::Percent(100.0), height: Val::Percent(100.0),
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
             ..default()
         },
         BackgroundColor(Color::srgba(0.07, 0.055, 0.04, 0.97)),
         FocusPolicy::Pass,
     ));
-    mobile_text_raw(parent, layout, title, (16.0, 12.0, layout.width_css() - 100.0, 30.0),
-        18.0, PANEL_HIGHLIGHT);
-    mobile_button_raw(parent, layout, render_text.chrome("ui.close", "Close"), (layout.width_css() - 62.0, 4.0, 54.0, 44.0),
-        close, true);
+    mobile_text_raw(
+        parent,
+        layout,
+        title,
+        (16.0, 12.0, layout.width_css() - 100.0, 30.0),
+        18.0,
+        PANEL_HIGHLIGHT,
+    );
+    mobile_button_raw(
+        parent,
+        layout,
+        render_text.chrome("ui.close", "Close"),
+        (layout.width_css() - 62.0, 4.0, 54.0, 44.0),
+        close,
+        true,
+    );
 }
 
-fn compact_quest_tabs(parent: &mut ChildSpawnerCommands, layout: MobileQuestLayout,
-    page: CompactQuestPage, npc: bool,
+fn compact_quest_tabs(
+    parent: &mut ChildSpawnerCommands,
+    layout: MobileQuestLayout,
+    page: CompactQuestPage,
+    npc: bool,
     render_text: QuestRenderText,
 ) {
-    mobile_chrome(parent, layout, "", if npc { QuestUiButton::ReturnToNpcDialog }
-        else { QuestUiButton::CloseQuestDetail }, render_text);
-    let text = if npc { QuestUiButton::CompactNpcPage(CompactQuestPage::Text) }
-        else { QuestUiButton::CompactDetailPage(CompactQuestPage::Text) };
-    let rewards = if npc { QuestUiButton::CompactNpcPage(CompactQuestPage::Rewards) }
-        else { QuestUiButton::CompactDetailPage(CompactQuestPage::Rewards) };
-    mobile_button_raw(parent, layout, if page == CompactQuestPage::Text { "● 正文" } else { "正文" },
-        (16.0, 4.0, 92.0, 44.0), text, true);
-    mobile_button_raw(parent, layout, if page == CompactQuestPage::Rewards { "● 奖励" } else { "奖励" },
-        (116.0, 4.0, 92.0, 44.0), rewards, true);
+    mobile_chrome(
+        parent,
+        layout,
+        "",
+        if npc {
+            QuestUiButton::ReturnToNpcDialog
+        } else {
+            QuestUiButton::CloseQuestDetail
+        },
+        render_text,
+    );
+    let text = if npc {
+        QuestUiButton::CompactNpcPage(CompactQuestPage::Text)
+    } else {
+        QuestUiButton::CompactDetailPage(CompactQuestPage::Text)
+    };
+    let rewards = if npc {
+        QuestUiButton::CompactNpcPage(CompactQuestPage::Rewards)
+    } else {
+        QuestUiButton::CompactDetailPage(CompactQuestPage::Rewards)
+    };
+    mobile_button_raw(
+        parent,
+        layout,
+        if page == CompactQuestPage::Text {
+            "● 正文"
+        } else {
+            "正文"
+        },
+        (16.0, 4.0, 92.0, 44.0),
+        text,
+        true,
+    );
+    mobile_button_raw(
+        parent,
+        layout,
+        if page == CompactQuestPage::Rewards {
+            "● 奖励"
+        } else {
+            "奖励"
+        },
+        (116.0, 4.0, 92.0, 44.0),
+        rewards,
+        true,
+    );
 }
 
 fn mobile_pager(
@@ -4448,19 +5672,42 @@ fn mobile_pager(
     render_text: QuestRenderText,
 ) {
     let y = layout.height_css() - 49.0;
-    mobile_button_raw(parent, layout, render_text.chrome("ui.previous", "Previous"), (12.0, y, 88.0, 44.0), previous, page > 0);
-    mobile_text_raw(parent, layout, &format!("{}/{}", page + 1, page_count),
-        (layout.width_css() / 2.0 - 28.0, y + 10.0, 60.0, 28.0), 14.0, PANEL_TEXT);
-    mobile_button_raw(parent, layout, render_text.chrome("ui.next", "Next"), (layout.width_css() - 100.0, y, 88.0, 44.0),
-        next, page + 1 < page_count);
+    mobile_button_raw(
+        parent,
+        layout,
+        render_text.chrome("ui.previous", "Previous"),
+        (12.0, y, 88.0, 44.0),
+        previous,
+        page > 0,
+    );
+    mobile_text_raw(
+        parent,
+        layout,
+        &format!("{}/{}", page + 1, page_count),
+        (layout.width_css() / 2.0 - 28.0, y + 10.0, 60.0, 28.0),
+        14.0,
+        PANEL_TEXT,
+    );
+    mobile_button_raw(
+        parent,
+        layout,
+        render_text.chrome("ui.next", "Next"),
+        (layout.width_css() - 100.0, y, 88.0, 44.0),
+        next,
+        page + 1 < page_count,
+    );
 }
 
 fn mobile_diary_page_count(quest_count: usize, graduation_options: usize, rows: usize) -> usize {
     (quest_count.div_ceil(rows) + graduation_options.div_ceil(rows)).max(1)
 }
 
-fn mobile_graduation_page<'a>(options: &'a [crate::quest_journey::GraduationOption],
-    quest_count: usize, rows: usize, page: usize) -> Option<&'a [crate::quest_journey::GraduationOption]> {
+fn mobile_graduation_page<'a>(
+    options: &'a [crate::quest_journey::GraduationOption],
+    quest_count: usize,
+    rows: usize,
+    page: usize,
+) -> Option<&'a [crate::quest_journey::GraduationOption]> {
     let quest_pages = quest_count.div_ceil(rows);
     let graduation_page = page.checked_sub(quest_pages)?;
     let start = graduation_page.saturating_mul(rows);
@@ -4468,13 +5715,20 @@ fn mobile_graduation_page<'a>(options: &'a [crate::quest_journey::GraduationOpti
 }
 
 fn mobile_text_columns(character: char) -> usize {
-    let width = unicode_width::UnicodeWidthChar::width(character).unwrap_or(1).max(1);
+    let width = unicode_width::UnicodeWidthChar::width(character)
+        .unwrap_or(1)
+        .max(1);
     if character.is_ascii_uppercase() || matches!(character, 'm' | 'w' | '@' | '#' | '%' | '&') {
         width.max(2)
-    } else { width }
+    } else {
+        width
+    }
 }
 
-fn mobile_wrap_quest_lines(lines: Vec<QuestDetailLine>, content_width_css: f32) -> Vec<QuestDetailLine> {
+fn mobile_wrap_quest_lines(
+    lines: Vec<QuestDetailLine>,
+    content_width_css: f32,
+) -> Vec<QuestDetailLine> {
     let max_columns = (content_width_css / 7.0).floor().max(8.0) as usize;
     let mut wrapped = Vec::new();
     for line in lines {
@@ -4488,26 +5742,38 @@ fn mobile_wrap_quest_lines(lines: Vec<QuestDetailLine>, content_width_css: f32) 
             for character in source_line.chars() {
                 let character_width = mobile_text_columns(character);
                 if width + character_width > max_columns && !text.is_empty() {
-                    wrapped.push(QuestDetailLine { text: std::mem::take(&mut text), kind: line.kind });
+                    wrapped.push(QuestDetailLine {
+                        text: std::mem::take(&mut text),
+                        kind: line.kind,
+                    });
                     width = 0;
                 }
                 text.push(character);
                 width += character_width;
             }
-            wrapped.push(QuestDetailLine { text, kind: line.kind });
+            wrapped.push(QuestDetailLine {
+                text,
+                kind: line.kind,
+            });
         }
     }
     wrapped
 }
 
 fn compact_confirmation_lines(message: &str, layout: MobileQuestLayout) -> Vec<QuestDetailLine> {
-    mobile_wrap_quest_lines(vec![QuestDetailLine {
-        text: message.to_owned(), kind: QuestDetailLineKind::Body,
-    }], layout.width_css() - 32.0)
+    mobile_wrap_quest_lines(
+        vec![QuestDetailLine {
+            text: message.to_owned(),
+            kind: QuestDetailLineKind::Body,
+        }],
+        layout.width_css() - 32.0,
+    )
 }
 
-fn mobile_npc_dialog_rows(dialog: &NpcDialogModel, content_width_css: f32)
-    -> Vec<(String, Option<String>, bool)> {
+fn mobile_npc_dialog_rows(
+    dialog: &NpcDialogModel,
+    content_width_css: f32,
+) -> Vec<(String, Option<String>, bool)> {
     let max_columns = (content_width_css / 7.0).floor().max(8.0) as usize;
     let mut wrapped = Vec::new();
     for (line, target, enabled) in npc_dialog_rows(dialog) {
@@ -4536,7 +5802,13 @@ fn render_mobile_diary_panel(
     state: &QuestUiState,
     render_text: QuestRenderText,
 ) {
-    mobile_chrome(parent, layout, render_text.chrome("ui.quest", "Quest"), QuestUiButton::CloseQuestLog, render_text);
+    mobile_chrome(
+        parent,
+        layout,
+        render_text.chrome("ui.quest", "Quest"),
+        QuestUiButton::CloseQuestLog,
+        render_text,
+    );
     let guided = guidance.profile_name() == Some("newcomer-v2");
     let rows = layout.diary_rows();
     let graduation = (!guided || state.diary_tab == GuidedDiaryTab::Main)
@@ -4544,31 +5816,86 @@ fn render_mobile_diary_panel(
     let (quests, page, previous, next): (Vec<(&Quest, String)>, usize, _, _) = if guided {
         let tab_width = (layout.width_css() - 32.0) / 3.0;
         for (index, tab) in GuidedDiaryTab::ALL.into_iter().enumerate() {
-            let text = format!("{} {}", tab.label(), guided_diary_quests(tracker, Some(guidance), journey, tab).len());
-            mobile_button_raw(parent, layout, &text,
+            let text = format!(
+                "{} {}",
+                tab.label(),
+                guided_diary_quests(tracker, Some(guidance), journey, tab).len()
+            );
+            mobile_button_raw(
+                parent,
+                layout,
+                &text,
                 (16.0 + index as f32 * tab_width, 50.0, tab_width - 4.0, 44.0),
-                QuestUiButton::SelectGuidedDiaryTab(tab), true);
+                QuestUiButton::SelectGuidedDiaryTab(tab),
+                true,
+            );
         }
-        (guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab)
-            .into_iter().map(|quest| (quest, quest.group.clone().unwrap_or_default())).collect(),
-            state.diary_page, QuestUiButton::GuidedDiaryPrevious, QuestUiButton::GuidedDiaryNext)
+        (
+            guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab)
+                .into_iter()
+                .map(|quest| (quest, quest.group.clone().unwrap_or_default()))
+                .collect(),
+            state.diary_page,
+            QuestUiButton::GuidedDiaryPrevious,
+            QuestUiButton::GuidedDiaryNext,
+        )
     } else {
-        (quest_diary_groups(tracker, Some(guidance)).into_iter()
-            .flat_map(|group| group.quests.into_iter().map(move |quest| (quest, group.name.clone())))
-            .collect(), state.page, QuestUiButton::QuestPagePrevious, QuestUiButton::QuestPageNext)
+        (
+            quest_diary_groups(tracker, Some(guidance))
+                .into_iter()
+                .flat_map(|group| {
+                    group
+                        .quests
+                        .into_iter()
+                        .map(move |quest| (quest, group.name.clone()))
+                })
+                .collect(),
+            state.page,
+            QuestUiButton::QuestPagePrevious,
+            QuestUiButton::QuestPageNext,
+        )
     };
-    let graduation_options = if graduation { journey.and_then(|view| view.graduation.as_ref())
-        .map_or(0, |graduation| graduation.options.len()) } else { 0 };
+    let graduation_options = if graduation {
+        journey
+            .and_then(|view| view.graduation.as_ref())
+            .map_or(0, |graduation| graduation.options.len())
+    } else {
+        0
+    };
     let pages = mobile_diary_page_count(quests.len(), graduation_options, rows);
     let page = page.min(pages - 1);
     let row_start = if guided { 103.0 } else { 54.0 };
     if graduation_options > 0 && page >= quests.len().div_ceil(rows) {
         if let Some(graduation) = journey.and_then(|view| view.graduation.as_ref()) {
-            for (index, option) in mobile_graduation_page(&graduation.options,
-                quests.len(), rows, page).unwrap_or_default().iter().enumerate() {
-                mobile_button_raw(parent, layout, &format!("{} {}", if state.selected_graduation_direction == Some(option.direction) { "●" } else { "+" }, option.title),
-                    (16.0, row_start + index as f32 * 48.0, layout.width_css() - 32.0, 44.0),
-                    QuestUiButton::SelectGraduationDirection { direction: option.direction }, true);
+            for (index, option) in
+                mobile_graduation_page(&graduation.options, quests.len(), rows, page)
+                    .unwrap_or_default()
+                    .iter()
+                    .enumerate()
+            {
+                mobile_button_raw(
+                    parent,
+                    layout,
+                    &format!(
+                        "{} {}",
+                        if state.selected_graduation_direction == Some(option.direction) {
+                            "●"
+                        } else {
+                            "+"
+                        },
+                        option.title
+                    ),
+                    (
+                        16.0,
+                        row_start + index as f32 * 48.0,
+                        layout.width_css() - 32.0,
+                        44.0,
+                    ),
+                    QuestUiButton::SelectGraduationDirection {
+                        direction: option.direction,
+                    },
+                    true,
+                );
             }
         }
     } else {
@@ -4577,17 +5904,37 @@ fn render_mobile_diary_panel(
             let status = quest_diary_status_label(quest, render_text);
             let title = render_text.title(quest.quest_index, &quest.title);
             let label = format!("{} · {} · {}", group, title, status);
-            mobile_button_raw(parent, layout, &label,
+            mobile_button_raw(
+                parent,
+                layout,
+                &label,
                 (16.0, y, layout.width_css() - 130.0, 44.0),
-                QuestUiButton::SelectQuest { quest_index: quest.quest_index }, true);
-            mobile_button_raw(parent, layout, &render_text.track(state.is_tracked(quest.quest_index)),
+                QuestUiButton::SelectQuest {
+                    quest_index: quest.quest_index,
+                },
+                true,
+            );
+            mobile_button_raw(
+                parent,
+                layout,
+                &render_text.track(state.is_tracked(quest.quest_index)),
                 (layout.width_css() - 108.0, y, 92.0, 44.0),
-                QuestUiButton::TrackQuest { quest_index: quest.quest_index }, true);
+                QuestUiButton::TrackQuest {
+                    quest_index: quest.quest_index,
+                },
+                true,
+            );
         }
     }
     if quests.is_empty() && !graduation {
-        mobile_text_raw(parent, layout, render_text.chrome("ui.questEmpty", "No quests"), (16.0, row_start + 16.0, layout.width_css() - 32.0, 44.0),
-            15.0, PANEL_TEXT);
+        mobile_text_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.questEmpty", "No quests"),
+            (16.0, row_start + 16.0, layout.width_css() - 32.0, 44.0),
+            15.0,
+            PANEL_TEXT,
+        );
     }
     mobile_pager(parent, layout, page, pages, previous, next, render_text);
 }
@@ -4601,38 +5948,77 @@ fn render_mobile_dialog_panel(
     has_npc_quests: bool,
     render_text: QuestRenderText,
 ) {
-    mobile_chrome(parent, layout, dialog.npc_name.as_deref().unwrap_or("NPC"),
-        QuestUiButton::CloseNpcDialog, render_text);
+    mobile_chrome(
+        parent,
+        layout,
+        dialog.npc_name.as_deref().unwrap_or("NPC"),
+        QuestUiButton::CloseNpcDialog,
+        render_text,
+    );
     let rows = mobile_npc_dialog_rows(dialog, layout.width_css() - 32.0);
     let visible_rows = layout.dialog_rows();
     let max_page = rows.len().saturating_sub(1) / visible_rows * visible_rows;
     let top = state.dialog_scroll_top.min(max_page);
     for (index, (text, target, enabled)) in rows.iter().skip(top).take(visible_rows).enumerate() {
-        let rect = (16.0, 54.0 + index as f32 * 44.0, layout.width_css() - 32.0, 44.0);
+        let rect = (
+            16.0,
+            54.0 + index as f32 * 44.0,
+            layout.width_css() - 32.0,
+            44.0,
+        );
         if let Some(target) = target {
-            mobile_button_raw(parent, layout, text, rect,
-                QuestUiButton::SelectNpcDialog { target: target.clone() }, *enabled);
+            mobile_button_raw(
+                parent,
+                layout,
+                text,
+                rect,
+                QuestUiButton::SelectNpcDialog {
+                    target: target.clone(),
+                },
+                *enabled,
+            );
         } else {
             mobile_text_raw(parent, layout, text, rect, 15.0, PANEL_TEXT);
         }
     }
     let mut footer = Vec::new();
     if rows.len() > visible_rows {
-        footer.push((render_text.chrome("ui.previous", "Previous"), QuestUiButton::NpcDialogScrollUp, top > 0));
-        footer.push((render_text.chrome("ui.next", "Next"), QuestUiButton::NpcDialogScrollDown,
-            top + visible_rows < rows.len()));
+        footer.push((
+            render_text.chrome("ui.previous", "Previous"),
+            QuestUiButton::NpcDialogScrollUp,
+            top > 0,
+        ));
+        footer.push((
+            render_text.chrome("ui.next", "Next"),
+            QuestUiButton::NpcDialogScrollDown,
+            top + visible_rows < rows.len(),
+        ));
     }
     if nav.can_return() {
         footer.push(("返回", QuestUiButton::ReturnNpcService, true));
     }
     if has_npc_quests {
-        footer.push((render_text.chrome("ui.quest", "Quest"), QuestUiButton::ToggleNpcQuestList, true));
+        footer.push((
+            render_text.chrome("ui.quest", "Quest"),
+            QuestUiButton::ToggleNpcQuestList,
+            true,
+        ));
     }
     let footer_width = layout.dialog_footer_button_width(footer.len());
     for (index, (text, action, enabled)) in footer.into_iter().enumerate() {
-        mobile_button_raw(parent, layout, text,
-            (12.0 + index as f32 * (footer_width + 8.0), layout.height_css() - 49.0,
-                footer_width, 44.0), action, enabled);
+        mobile_button_raw(
+            parent,
+            layout,
+            text,
+            (
+                12.0 + index as f32 * (footer_width + 8.0),
+                layout.height_css() - 49.0,
+                footer_width,
+                44.0,
+            ),
+            action,
+            enabled,
+        );
     }
 }
 
@@ -4735,7 +6121,9 @@ fn render_dialog_panel(
             NPC_QUEST_BUTTON_ASSET,
             QuestLogRect::new(172.0, 194.0, 96.0, 25.0),
             QuestUiButton::ToggleNpcQuestList,
-            true, render_text.chrome("ui.quest", "Quest"), render_text,
+            true,
+            render_text.chrome("ui.quest", "Quest"),
+            render_text,
         );
     }
     if nav.can_return() {
@@ -4844,14 +6232,17 @@ fn render_quest_log_panel_legacy(
         let selected = state.selected_quest_index == Some(quest.quest_index);
         let marker = if selected { "▶" } else { " " };
         let tracking = if state.is_tracked(quest.quest_index) {
-            " [Tracking]"
+            crate::player_text::text(" [Tracking]")
         } else {
-            ""
+            String::new()
         };
         let label = format!(
             "{marker} {} [{}]{tracking}",
-            truncate_chars(&crate::player_text::quest_title(quest.quest_index, &quest.title), 28),
-            quest.status.label()
+            truncate_chars(
+                &crate::player_text::quest_title(quest.quest_index, &quest.title),
+                28
+            ),
+            crate::player_text::text(&quest.status.label())
         );
         action_button(
             parent,
@@ -4875,14 +6266,17 @@ fn render_quest_log_panel_legacy(
             BackgroundColor(PANEL_HIGHLIGHT),
         ));
 
-        detail_title(parent, &crate::player_text::quest_title(quest.quest_index, &quest.title));
+        detail_title(
+            parent,
+            &crate::player_text::quest_title(quest.quest_index, &quest.title),
+        );
         body_line(parent, &format!("Status: {}", quest.status.label()));
         if let Some(npc) = &quest.npc_name {
-            body_line(parent, &format!("NPC: {npc}"));
+            body_line(parent, &format!("NPC: {}", crate::player_text::name(npc)));
         }
         if let Some(text) = &quest.unknown_text {
             if !text.trim().is_empty() {
-                body_line(parent, &truncate_chars(text, 72));
+                body_line(parent, &truncate_chars(&crate::player_text::text(text), 72));
             }
         }
         if quest.objectives.is_empty() {
@@ -4893,7 +6287,7 @@ fn render_quest_log_panel_legacy(
                     parent,
                     &format!(
                         "- {} ({})",
-                        truncate_chars(&obj.text, 44),
+                        truncate_chars(&crate::player_text::text(&obj.text), 44),
                         obj.progress_label()
                     ),
                 );
@@ -4905,15 +6299,21 @@ fn render_quest_log_panel_legacy(
         } else {
             body_line(
                 parent,
-                &format!("Reward: {}", truncate_chars(&quest.rewards_label(), 64)),
+                &format!(
+                    "Reward: {}",
+                    truncate_chars(&crate::player_text::quest_rewards(quest), 64)
+                ),
             );
             // Reward selection when multiple rewards and ReadyToTurnIn
             if quest.rewards.len() > 1 {
                 body_line(parent, "Choose reward:");
                 for (idx, reward) in quest.rewards.iter().enumerate() {
                     let chosen = state.selected_reward_index == Some(idx as i32);
-                    let label =
-                        format!("{} {}", if chosen { "[x]" } else { "[ ]" }, reward.label());
+                    let label = format!(
+                        "{} {}",
+                        if chosen { "[x]" } else { "[ ]" },
+                        crate::player_text::quest_reward(reward)
+                    );
                     action_button(
                         parent,
                         &label,
@@ -5073,7 +6473,9 @@ fn quest_diary_group_name(quest: &Quest, guidance: Option<&QuestGuidance>) -> St
     // Cadence belongs to the server: the same quest can be a one-time task
     // in Crystal mode and a weekly task in an explicit content profile.
     if guidance.is_some_and(QuestGuidance::is_enabled) {
-        if let Some(group @ ("Daily" | "Weekly" | "Repeatable")) = quest.group.as_deref() {
+        if let Some(group @ ("Daily" | "Weekly" | "Repeatable" | "Daily Tasks" | "Weekly Tasks")) =
+            quest.group.as_deref()
+        {
             return group.to_owned();
         }
     }
@@ -5103,9 +6505,15 @@ fn quest_diary_group_name(quest: &Quest, guidance: Option<&QuestGuidance>) -> St
 
 fn quest_diary_status_label(quest: &Quest, render_text: QuestRenderText) -> &'static str {
     match quest.status {
-        crate::quest_model::QuestStatus::NotStarted => render_text.chrome("ui.questStage.available", "Available"),
-        crate::quest_model::QuestStatus::ReadyToTurnIn => render_text.chrome("ui.questStage.readyToTurnIn", "Ready to turn in"),
-        crate::quest_model::QuestStatus::Completed => render_text.chrome("ui.questStage.completed", "Completed"),
+        crate::quest_model::QuestStatus::NotStarted => {
+            render_text.chrome("ui.questStage.available", "Available")
+        }
+        crate::quest_model::QuestStatus::ReadyToTurnIn => {
+            render_text.chrome("ui.questStage.readyToTurnIn", "Ready to turn in")
+        }
+        crate::quest_model::QuestStatus::Completed => {
+            render_text.chrome("ui.questStage.completed", "Completed")
+        }
         _ => render_text.chrome("ui.questStage.inProgress", "In Progress"),
     }
 }
@@ -5129,14 +6537,28 @@ fn guided_diary_quests<'a>(
             quest.status.is_active()
                 || (can_accept_quest(quest)
                     && (newcomer_diary_accept_authorized(quest, guidance)
-                        || next_id == Some(quest.quest_index)))
+                        || next_id == Some(quest.quest_index)
+                        || mir2_game_data::periodic_quests::is_periodic(quest.quest_index)))
         })
         .filter(|(_, quest)| match tab {
-            GuidedDiaryTab::Main => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_some(),
-            GuidedDiaryTab::Ready => {
-                quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn
+            GuidedDiaryTab::Main => guidance
+                .and_then(|guide| guide.entry(quest.quest_index))
+                .is_some(),
+            GuidedDiaryTab::Ready => quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn,
+            GuidedDiaryTab::Side => {
+                guidance
+                    .and_then(|guide| guide.entry(quest.quest_index))
+                    .is_none()
+                    && !mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
             }
-            GuidedDiaryTab::Side => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_none(),
+            GuidedDiaryTab::Daily => mir2_game_data::periodic_quests::quest(quest.quest_index)
+                .is_some_and(|quest| {
+                    quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Daily
+                }),
+            GuidedDiaryTab::Weekly => mir2_game_data::periodic_quests::quest(quest.quest_index)
+                .is_some_and(|quest| {
+                    quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Weekly
+                }),
         })
         .collect::<Vec<_>>();
     quests.sort_by_key(|(position, quest)| {
@@ -5149,9 +6571,10 @@ fn guided_diary_quests<'a>(
             GuidedDiaryTab::Main => guidance
                 .map(|guide| guide.sort_key(quest.quest_index, *position).1)
                 .unwrap_or(i32::MAX),
-            GuidedDiaryTab::Ready | GuidedDiaryTab::Side => {
-                -quest.min_level_needed.max(0)
-            }
+            GuidedDiaryTab::Ready
+            | GuidedDiaryTab::Side
+            | GuidedDiaryTab::Daily
+            | GuidedDiaryTab::Weekly => -quest.min_level_needed.max(0),
         };
         (
             u8::from(tab == GuidedDiaryTab::Main && next_id != Some(quest.quest_index)),
@@ -5173,7 +6596,14 @@ fn render_guided_quest_diary_panel(
     render_text: QuestRenderText,
 ) {
     let layout = quest_diary_layout(1.0);
-    quest_log_text_at_raw(parent, render_text.chrome("ui.quest", "Quest"), layout.title, 11.0, PANEL_HIGHLIGHT, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        render_text.chrome("ui.quest", "Quest"),
+        layout.title,
+        11.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
     let count_label = journey.map_or_else(
         || "主线进度 --/--".to_owned(),
         |view| match (view.completed_count, view.quest_count) {
@@ -5181,48 +6611,93 @@ fn render_guided_quest_diary_panel(
             _ => "本章 --/--".to_owned(),
         },
     );
-    quest_log_text_at_raw(parent, &count_label, layout.taken_count, 8.0, PANEL_TEXT, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        &count_label,
+        layout.taken_count,
+        8.0,
+        PANEL_TEXT,
+        Justify::Left,
+    );
     quest_log_image_button_at(
-        parent, asset_server, QUEST_DIARY_TOP_CLOSE_ASSET, layout.top_close,
-        QuestUiButton::CloseQuestLog, true,
+        parent,
+        asset_server,
+        QUEST_DIARY_TOP_CLOSE_ASSET,
+        layout.top_close,
+        QuestUiButton::CloseQuestLog,
+        true,
     );
     quest_log_image_button_at_locale(
-        parent, asset_server, QUEST_DIARY_BOTTOM_CLOSE_ASSET, layout.bottom_close,
-        QuestUiButton::CloseQuestLog, true, render_text.chrome("ui.close", "Close"), render_text,
+        parent,
+        asset_server,
+        QUEST_DIARY_BOTTOM_CLOSE_ASSET,
+        layout.bottom_close,
+        QuestUiButton::CloseQuestLog,
+        true,
+        render_text.chrome("ui.close", "Close"),
+        render_text,
     );
 
     for (index, tab) in GuidedDiaryTab::ALL.into_iter().enumerate() {
         let count = guided_diary_quests(tracker, Some(guidance), journey, tab).len();
-        let label = format!("{} {count}", tab.label());
+        let label = format!("{} {count}", tab.localized_label());
+        let (x, y, width) = if index < 3 {
+            (15.0 + index as f32 * 96.0, 37.0, 92.0)
+        } else {
+            (15.0 + (index - 3) as f32 * 144.0, 63.0, 140.0)
+        };
         quest_log_text_button_at_raw(
             parent,
-            QuestLogRect::new(15.0 + index as f32 * 96.0, 37.0, 92.0, 23.0),
+            QuestLogRect::new(x, y, width, 23.0),
             &label,
             QuestUiButton::SelectGuidedDiaryTab(tab),
             true,
         );
         if state.diary_tab == tab {
             quest_log_text_at_raw(
-                parent, "●", QuestLogRect::new(18.0 + index as f32 * 96.0, 42.0, 12.0, 12.0),
-                8.0, PANEL_HIGHLIGHT, Justify::Left,
+                parent,
+                "●",
+                QuestLogRect::new(x + 3.0, y + 5.0, 12.0, 12.0),
+                8.0,
+                PANEL_HIGHLIGHT,
+                Justify::Left,
             );
         }
     }
 
     let heading = match state.diary_tab {
         GuidedDiaryTab::Main => journey
-            .map(|view| format!("当前章节 · {}", truncate_chars(&crate::player_text::text(&view.chapter_title), 20)))
+            .map(|view| {
+                format!(
+                    "当前章节 · {}",
+                    truncate_chars(&crate::player_text::text(&view.chapter_title), 20)
+                )
+            })
             .unwrap_or_else(|| "当前主线".to_owned()),
         GuidedDiaryTab::Ready => "已完成目标 · 可前往交付".to_owned(),
         GuidedDiaryTab::Side => "其他任务 · 可自行选择完成".to_owned(),
+        GuidedDiaryTab::Daily => {
+            crate::native_i18n::key("periodic.diary.reset.daily", "Daily, 00:00 (UTC+8)")
+        }
+        GuidedDiaryTab::Weekly => {
+            crate::native_i18n::key("periodic.diary.reset.weekly", "Monday, 00:00 (UTC+8)")
+        }
     };
     quest_log_text_at_raw(
-        parent, &heading, QuestLogRect::new(19.0, 68.0, 276.0, 15.0),
-        9.0, PANEL_HIGHLIGHT, Justify::Left,
+        parent,
+        &render_text.body(&heading),
+        QuestLogRect::new(19.0, 92.0, 276.0, 15.0),
+        9.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
     );
     quest_log_text_at_raw(
-        parent, "左键查看详情 · 右键跟踪任务", QuestLogRect::new(19.0, 86.0, 276.0, 15.0),
-        8.0, PANEL_TEXT, Justify::Left,
+        parent,
+        &render_text.legacy_copy("左键查看详情 · 右键跟踪任务"),
+        QuestLogRect::new(19.0, 111.0, 276.0, 15.0),
+        8.0,
+        PANEL_TEXT,
+        Justify::Left,
     );
 
     let quests = guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab);
@@ -5234,19 +6709,24 @@ fn render_guided_quest_diary_panel(
         .take(GUIDED_DIARY_PAGE_SIZE)
         .enumerate()
     {
-        let y = 108.0 + index as f32 * 36.0;
+        let y = 133.0 + index as f32 * 33.0;
         let quest_index = quest.quest_index;
-        let current = journey.and_then(|view| view.next.as_ref())
+        let current = journey
+            .and_then(|view| view.next.as_ref())
             .is_some_and(|step| step.quest_id == quest_index);
         if state.selected_quest_index == Some(quest_index) {
             quest_log_image_at(
-                parent, asset_server, QUEST_DIARY_SELECTED_ASSET,
+                parent,
+                asset_server,
+                QUEST_DIARY_SELECTED_ASSET,
                 QuestLogRect::new(23.0, y, 252.0, 16.0),
             );
         }
         if state.is_tracked(quest_index) {
             quest_log_image_at(
-                parent, asset_server, QUEST_DIARY_TRACKED_ASSET,
+                parent,
+                asset_server,
+                QUEST_DIARY_TRACKED_ASSET,
                 QuestLogRect::new(17.0, y + 18.0, 16.0, 12.0),
             );
         }
@@ -5256,42 +6736,78 @@ fn render_guided_quest_diary_panel(
             _ => "进行中",
         };
         let area = if state.diary_tab == GuidedDiaryTab::Main {
-            journey.map(|view| view.chapter_title.as_str()).unwrap_or("主线")
+            journey
+                .map(|view| view.chapter_title.as_str())
+                .unwrap_or("主线")
         } else {
             quest.group.as_deref().unwrap_or("其他地图")
         };
-        let subtitle = format!("{}级 · {status} · {}", quest.min_level_needed.max(0),
-            truncate_chars(&crate::player_text::text(area), 24));
-        parent.spawn((
-            Button,
-            QuestUiButton::SelectQuest { quest_index },
-            QuestDiaryRow { quest_index },
-            RelativeCursorPosition::default(),
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(25.0), top: Val::Px(y),
-                width: Val::Px(270.0), height: Val::Px(33.0),
-                ..default()
-            },
-            BackgroundColor(Color::NONE),
-            FocusPolicy::Block,
-        )).with_children(|row| {
-            quest_log_text_at_raw(
-                row, &truncate_chars(&render_text.title(quest.quest_index, &quest.title), 31),
-                QuestLogRect::new(6.0, 0.0, 220.0, 15.0),
-                9.0, if current { PANEL_HIGHLIGHT } else { PANEL_TEXT }, Justify::Left,
-            );
-            if current {
+        let subtitle = format!(
+            "{}级 · {} · {}",
+            quest.min_level_needed.max(0),
+            crate::player_text::text(status),
+            truncate_chars(&crate::player_text::text(area), 24)
+        );
+        parent
+            .spawn((
+                Button,
+                QuestUiButton::SelectQuest { quest_index },
+                QuestDiaryRow { quest_index },
+                RelativeCursorPosition::default(),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(25.0),
+                    top: Val::Px(y),
+                    width: Val::Px(270.0),
+                    height: Val::Px(33.0),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+                FocusPolicy::Block,
+            ))
+            .with_children(|row| {
                 quest_log_text_at_raw(
-                    row, "当前", QuestLogRect::new(225.0, 0.0, 40.0, 15.0),
-                    8.0, FEEDBACK_OK, Justify::Left,
+                    row,
+                    &truncate_chars(&render_text.title(quest.quest_index, &quest.title), 31),
+                    QuestLogRect::new(6.0, 0.0, 220.0, 15.0),
+                    9.0,
+                    if current { PANEL_HIGHLIGHT } else { PANEL_TEXT },
+                    Justify::Left,
                 );
-            }
-            quest_log_text_at_raw(
-                row, &subtitle, QuestLogRect::new(6.0, 17.0, 255.0, 15.0),
-                8.0, PANEL_TEXT, Justify::Left,
-            );
-        });
+                if current {
+                    quest_log_text_at_raw(
+                        row,
+                        &render_text.legacy_copy("当前"),
+                        QuestLogRect::new(225.0, 0.0, 40.0, 15.0),
+                        8.0,
+                        FEEDBACK_OK,
+                        Justify::Left,
+                    );
+                }
+                quest_log_text_at_raw(
+                    row,
+                    &subtitle,
+                    QuestLogRect::new(6.0, 17.0, 255.0, 15.0),
+                    8.0,
+                    PANEL_TEXT,
+                    Justify::Left,
+                );
+            });
+    }
+
+    if matches!(
+        state.diary_tab,
+        GuidedDiaryTab::Daily | GuidedDiaryTab::Weekly
+    ) && guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab).is_empty()
+    {
+        quest_log_text_at(
+            parent,
+            "Visit a Task Steward in Bichon or Mongchon to view available tasks.",
+            QuestLogRect::new(22.0, 133.0, 274.0, 54.0),
+            9.0,
+            PANEL_TEXT,
+            Justify::Left,
+        );
     }
 
     if state.diary_tab == GuidedDiaryTab::Main {
@@ -5300,39 +6816,61 @@ fn render_guided_quest_diary_panel(
                 let selected = state.selected_graduation_direction == Some(option.direction);
                 quest_log_text_button_at_raw(
                     parent,
-                    QuestLogRect::new(22.0, 114.0 + index as f32 * 72.0, 272.0, 27.0),
-                    &format!("{} {}", if selected { "●" } else { "+" },
-                        truncate_chars(&option.title, 29)),
-                    QuestUiButton::SelectGraduationDirection { direction: option.direction },
+                    QuestLogRect::new(22.0, 138.0 + index as f32 * 72.0, 272.0, 27.0),
+                    &format!(
+                        "{} {}",
+                        if selected { "●" } else { "+" },
+                        truncate_chars(&crate::player_text::text(&option.title), 29)
+                    ),
+                    QuestUiButton::SelectGraduationDirection {
+                        direction: option.direction,
+                    },
                     true,
                 );
                 quest_log_text_at_raw(
-                    parent, &truncate_chars(&option.summary, 42),
-                    QuestLogRect::new(27.0, 145.0 + index as f32 * 72.0, 264.0, 30.0),
-                    8.0, PANEL_TEXT, Justify::Left,
+                    parent,
+                    &truncate_chars(&render_text.body(&option.summary), 42),
+                    QuestLogRect::new(27.0, 169.0 + index as f32 * 72.0, 264.0, 30.0),
+                    8.0,
+                    PANEL_TEXT,
+                    Justify::Left,
                 );
             }
-        } else if page_count == 1 && guided_diary_quests(tracker, Some(guidance), journey,
-            GuidedDiaryTab::Main).is_empty() {
+        } else if page_count == 1
+            && guided_diary_quests(tracker, Some(guidance), journey, GuidedDiaryTab::Main)
+                .is_empty()
+        {
             quest_log_text_at_raw(
-                parent, "暂无可显示的主线，完成前置任务后刷新。",
-                QuestLogRect::new(22.0, 119.0, 274.0, 32.0),
-                9.0, PANEL_TEXT, Justify::Left,
+                parent,
+                "暂无可显示的主线，完成前置任务后刷新。",
+                QuestLogRect::new(22.0, 133.0, 274.0, 32.0),
+                9.0,
+                PANEL_TEXT,
+                Justify::Left,
             );
         }
     }
     quest_log_text_button_at_raw(
-        parent, QuestLogRect::new(22.0, 408.0, 62.0, 22.0), render_text.chrome("ui.previous", "Previous"),
-        QuestUiButton::GuidedDiaryPrevious, page > 0,
+        parent,
+        QuestLogRect::new(22.0, 408.0, 62.0, 22.0),
+        render_text.chrome("ui.previous", "Previous"),
+        QuestUiButton::GuidedDiaryPrevious,
+        page > 0,
     );
     quest_log_text_at_raw(
-        parent, &format!("{}/{page_count}", page + 1),
+        parent,
+        &format!("{}/{page_count}", page + 1),
         QuestLogRect::new(131.0, 412.0, 54.0, 15.0),
-        9.0, PANEL_TEXT, Justify::Center,
+        9.0,
+        PANEL_TEXT,
+        Justify::Center,
     );
     quest_log_text_button_at_raw(
-        parent, QuestLogRect::new(228.0, 408.0, 62.0, 22.0), render_text.chrome("ui.next", "Next"),
-        QuestUiButton::GuidedDiaryNext, page + 1 < page_count,
+        parent,
+        QuestLogRect::new(228.0, 408.0, 62.0, 22.0),
+        render_text.chrome("ui.next", "Next"),
+        QuestUiButton::GuidedDiaryNext,
+        page + 1 < page_count,
     );
 }
 
@@ -5347,13 +6885,28 @@ fn render_quest_diary_panel(
     render_text: QuestRenderText,
 ) {
     if guidance.profile_name() == Some("newcomer-v2") {
-        render_guided_quest_diary_panel(parent, tracker, guidance, journey, state, asset_server, render_text);
+        render_guided_quest_diary_panel(
+            parent,
+            tracker,
+            guidance,
+            journey,
+            state,
+            asset_server,
+            render_text,
+        );
         return;
     }
     let layout = quest_diary_layout(1.0);
     let groups = quest_diary_groups(tracker, Some(guidance));
     let current_count = groups.iter().map(|group| group.quests.len()).sum::<usize>();
-    quest_log_text_at_raw(parent, render_text.chrome("ui.quest", "Quest"), layout.title, 11.0, PANEL_HIGHLIGHT, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        render_text.chrome("ui.quest", "Quest"),
+        layout.title,
+        11.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
     let count_label = journey.map_or_else(
         || format!("List: {current_count}/{QUEST_DIARY_MAX_CURRENT}"),
         |journey| match (journey.completed_count, journey.quest_count) {
@@ -5393,7 +6946,9 @@ fn render_quest_diary_panel(
         QUEST_DIARY_BOTTOM_CLOSE_ASSET,
         layout.bottom_close,
         QuestUiButton::CloseQuestLog,
-        true, render_text.chrome("ui.close", "Close"), render_text,
+        true,
+        render_text.chrome("ui.close", "Close"),
+        render_text,
     );
 
     let mut next_y = QUEST_DIARY_FIRST_ROW_TOP;
@@ -5446,7 +7001,10 @@ fn render_quest_diary_panel(
             }
 
             let level = quest.min_level_needed.max(0);
-            let quest_label = format!("{level}级 {}", render_text.title(quest.quest_index, &quest.title));
+            let quest_label = format!(
+                "{level}级 {}",
+                render_text.title(quest.quest_index, &quest.title)
+            );
             let state_label = quest_diary_status_label(quest, render_text);
             let quest_index = quest.quest_index;
             parent
@@ -5492,7 +7050,10 @@ fn render_quest_diary_panel(
         next_y += QUEST_DIARY_ROW_HEIGHT;
         quest_log_text_at_raw(
             parent,
-            &format!("{} · Choose your next goal", graduation.title),
+            &format!(
+                "{} · Choose your next goal",
+                crate::player_text::text(&graduation.title)
+            ),
             QuestLogRect::new(
                 QUEST_DIARY_GROUP_LEFT,
                 next_y,
@@ -5512,8 +7073,8 @@ fn render_quest_diary_panel(
                 QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 3.0, next_y, 282.0, 15.0),
                 &format!(
                     "{marker} {}: {}",
-                    option.direction.label(),
-                    truncate_chars(&option.title, 28)
+                    crate::player_text::text(option.direction.label()),
+                    truncate_chars(&crate::player_text::text(&option.title), 28)
                 ),
                 QuestUiButton::SelectGraduationDirection {
                     direction: option.direction,
@@ -5523,7 +7084,7 @@ fn render_quest_diary_panel(
             next_y += QUEST_DIARY_ROW_HEIGHT;
             quest_log_text_at_raw(
                 parent,
-                &truncate_chars(&option.summary, 58),
+                &truncate_chars(&crate::player_text::text(&option.summary), 58),
                 QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 12.0, next_y, 270.0, 15.0),
                 8.0,
                 PANEL_TEXT,
@@ -5532,7 +7093,7 @@ fn render_quest_diary_panel(
             next_y += QUEST_DIARY_ROW_HEIGHT;
             quest_log_text_at_raw(
                 parent,
-                &truncate_chars(&option.instruction, 58),
+                &truncate_chars(&crate::player_text::text(&option.instruction), 58),
                 QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 12.0, next_y, 270.0, 15.0),
                 8.0,
                 if selected { FEEDBACK_OK } else { PANEL_TEXT },
@@ -5611,20 +7172,41 @@ fn push_quest_guidance(
     let Some(entry) = guidance.and_then(|guidance| guidance.entry(quest.quest_index)) else {
         return;
     };
-    let mut detail = vec![render_text.legacy_copy(&format!("Category: {}", entry.category.label()))];
-    let description = render_text.description(quest.quest_index, if render_text.is_chinese() { entry.hint.trim() } else { &entry.hint });
+    let mut detail =
+        vec![render_text.legacy_copy(&format!("Category: {}", entry.category.label()))];
+    let description = render_text.description(
+        quest.quest_index,
+        if render_text.is_chinese() {
+            entry.hint.trim()
+        } else {
+            &entry.hint
+        },
+    );
     if !lines.iter().any(|line| line.text == description) {
-        if desktop_wrap { detail.extend(multi_guidance::wrap_card_text(&description)); }
-        else { detail.push(description); }
+        if desktop_wrap {
+            detail.extend(multi_guidance::wrap_card_text(&description));
+        } else {
+            detail.push(description);
+        }
     }
     push_quest_detail_section(lines, &render_text.legacy_copy("Newcomer Guide"), detail);
 }
 
-fn quest_objective_detail_text(objective: &crate::quest_model::QuestObjective,
+fn quest_objective_detail_text(
+    quest_index: i32,
+    objective_index: usize,
+    objective: &crate::quest_model::QuestObjective,
     render_text: QuestRenderText,
 ) -> String {
     let compact = format!("{}/{}", objective.current, objective.target);
     let spaced = objective.progress_label();
+    let label =
+        crate::player_text::quest_objective_label(quest_index, objective_index, &objective.text);
+    if mir2_game_data::periodic_quests::quest(quest_index)
+        .is_some_and(|definition| definition.kills.get(objective_index).is_some())
+    {
+        return format!("{label} ({spaced})");
+    }
     if objective.target == 0
         || objective.text.contains(&compact)
         || objective.text.contains(&spaced)
@@ -5635,31 +7217,85 @@ fn quest_objective_detail_text(objective: &crate::quest_model::QuestObjective,
     }
 }
 
-fn localized_quest_detail_lines(lines: Vec<QuestDetailLine>, desktop_wrap: bool) -> Vec<QuestDetailLine> {
-    lines.into_iter().flat_map(|line| {
-        let text = line.text;
-        if desktop_wrap && line.kind == QuestDetailLineKind::Body {
-            multi_guidance::wrap_card_text(&text).into_iter().map(|text| QuestDetailLine { text, kind: line.kind }).collect()
-        } else { vec![QuestDetailLine { text, kind: line.kind }] }
-    }).collect()
+fn localized_quest_detail_lines(
+    lines: Vec<QuestDetailLine>,
+    desktop_wrap: bool,
+) -> Vec<QuestDetailLine> {
+    lines
+        .into_iter()
+        .flat_map(|line| {
+            let text = line.text;
+            if desktop_wrap && line.kind == QuestDetailLineKind::Body {
+                multi_guidance::wrap_card_text(&text)
+                    .into_iter()
+                    .map(|text| QuestDetailLine {
+                        text,
+                        kind: line.kind,
+                    })
+                    .collect()
+            } else {
+                vec![QuestDetailLine {
+                    text,
+                    kind: line.kind,
+                }]
+            }
+        })
+        .collect()
 }
 
-fn localized_quest_description(quest: &Quest,
-    render_text: QuestRenderText,
-) -> Vec<String> {
-    if !render_text.is_chinese() { return quest.detail.description_lines.clone(); }
+fn localized_quest_description(quest: &Quest, render_text: QuestRenderText) -> Vec<String> {
+    if crate::native_i18n::active() {
+        return crate::player_text::quest_description(
+            quest.quest_index,
+            &quest.detail.description_lines.join("\n"),
+        )
+        .lines()
+        .map(str::to_owned)
+        .collect();
+    }
+    if !render_text.is_chinese() {
+        return quest.detail.description_lines.clone();
+    }
     let config = crate::quest_practice::newcomer_config();
-    if ["quests", "growthRewards"].iter().any(|key| config[key].as_array().is_some_and(|quests|
-        quests.iter().any(|definition| definition["id"].as_i64() == Some(i64::from(quest.quest_index))))) {
-        vec![render_text.description(quest.quest_index, &quest.detail.description_lines.join("\n"))]
-    } else { quest.detail.description_lines.iter().map(|line| render_text.body(line)).collect() }
+    if ["quests", "growthRewards"].iter().any(|key| {
+        config[key].as_array().is_some_and(|quests| {
+            quests
+                .iter()
+                .any(|definition| definition["id"].as_i64() == Some(i64::from(quest.quest_index)))
+        })
+    }) {
+        vec![render_text.description(
+            quest.quest_index,
+            &quest.detail.description_lines.join("\n"),
+        )]
+    } else {
+        quest
+            .detail
+            .description_lines
+            .iter()
+            .map(|line| render_text.body(&line))
+            .collect()
+    }
 }
 
-fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str) -> Vec<QuestDetailLine> {
-    quest_detail_lines_with_wrap(quest, guidance, class_name, true, QuestRenderText::default())
+fn quest_detail_lines(
+    quest: &Quest,
+    guidance: Option<&QuestGuidance>,
+    class_name: &str,
+) -> Vec<QuestDetailLine> {
+    quest_detail_lines_with_wrap(
+        quest,
+        guidance,
+        class_name,
+        true,
+        QuestRenderText::default(),
+    )
 }
 
-fn quest_detail_lines_with_wrap(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str,
+fn quest_detail_lines_with_wrap(
+    quest: &Quest,
+    guidance: Option<&QuestGuidance>,
+    class_name: &str,
     desktop_wrap: bool,
     render_text: QuestRenderText,
 ) -> Vec<QuestDetailLine> {
@@ -5669,11 +7305,30 @@ fn quest_detail_lines_with_wrap(quest: &Quest, guidance: Option<&QuestGuidance>,
     }];
 
     if let Some(practice) = crate::quest_practice::practice_guide(quest.quest_index, class_name) {
-        let complete = quest.objectives.get(practice.objective_index)
+        let complete = quest
+            .objectives
+            .get(practice.objective_index)
             .is_some_and(|objective| objective.target > 0 && objective.current >= objective.target);
-        let details = practice.instructions.into_iter().flat_map(|text|
-            if desktop_wrap { multi_guidance::wrap_card_text(&text) } else { vec![text] }).collect::<Vec<_>>();
-        push_quest_detail_section(&mut lines, if complete { "职业练习（已完成）" } else { "职业练习要求（全部完成）" }, details);
+        let details = practice
+            .instructions
+            .into_iter()
+            .flat_map(|text| {
+                if desktop_wrap {
+                    multi_guidance::wrap_card_text(&text)
+                } else {
+                    vec![text]
+                }
+            })
+            .collect::<Vec<_>>();
+        push_quest_detail_section(
+            &mut lines,
+            if complete {
+                "职业练习（已完成）"
+            } else {
+                "职业练习要求（全部完成）"
+            },
+            details,
+        );
     }
 
     let mut description = localized_quest_description(quest, render_text);
@@ -5684,7 +7339,7 @@ fn quest_detail_lines_with_wrap(quest: &Quest, guidance: Option<&QuestGuidance>,
             .filter(|text| !text.trim().is_empty())
             .filter(|text| quest.group.as_deref() != Some(text.trim()))
         {
-            description.extend(fallback.lines().map(|line| render_text.body(line)));
+            description.extend(fallback.lines().map(|line| render_text.body(&line)));
         }
     }
     lines.extend(
@@ -5705,13 +7360,43 @@ fn quest_detail_lines_with_wrap(quest: &Quest, guidance: Option<&QuestGuidance>,
             .map(|objective| render_text.objective(&objective.text))
             .collect()
     } else {
-        quest.detail.task_description_lines.iter().map(|line| render_text.body(line)).collect()
+        if crate::native_i18n::active() {
+            crate::player_text::quest_section(
+                quest.quest_index,
+                "task",
+                &quest.detail.task_description_lines,
+            )
+        } else {
+            quest
+                .detail
+                .task_description_lines
+                .iter()
+                .map(|line| render_text.body(&line))
+                .collect()
+        }
     };
-    push_quest_detail_section(&mut lines, render_text.chrome("ui.questObjective", "Objectives"), task_lines);
+    push_quest_detail_section(
+        &mut lines,
+        render_text.chrome("ui.questObjective", "Objectives"),
+        task_lines,
+    );
     push_quest_detail_section(
         &mut lines,
         render_text.chrome("ui.questReturnHeading", "Return"),
-        quest.detail.return_description_lines.iter().map(|line| render_text.body(line)),
+        if crate::native_i18n::active() {
+            crate::player_text::quest_section(
+                quest.quest_index,
+                "return",
+                &quest.detail.return_description_lines,
+            )
+        } else {
+            quest
+                .detail
+                .return_description_lines
+                .iter()
+                .map(|line| render_text.body(&line))
+                .collect()
+        },
     );
     if let Some(time_limit) = quest
         .detail
@@ -5720,11 +7405,20 @@ fn quest_detail_lines_with_wrap(quest: &Quest, guidance: Option<&QuestGuidance>,
         .filter(|value| !value.trim().is_empty())
     {
         if render_text.is_chinese() {
-            push_quest_detail_section(&mut lines, &render_text.legacy_copy("Time Limit"),
-                vec![render_text.body(time_limit)]);
+            push_quest_detail_section(
+                &mut lines,
+                &render_text.legacy_copy("Time Limit"),
+                vec![render_text.body(time_limit)],
+            );
         } else {
-        lines.push(QuestDetailLine { text: String::new(), kind: QuestDetailLineKind::Blank });
-        lines.push(QuestDetailLine { text: render_text.format("ui.questTimeLimit", "Time: {0}", time_limit), kind: QuestDetailLineKind::Body });
+            lines.push(QuestDetailLine {
+                text: String::new(),
+                kind: QuestDetailLineKind::Blank,
+            });
+            lines.push(QuestDetailLine {
+                text: render_text.format("ui.questTimeLimit", "Time: {0}", time_limit),
+                kind: QuestDetailLineKind::Body,
+            });
         }
     }
     if quest.status.is_active() && !quest.objectives.is_empty() {
@@ -5734,12 +7428,22 @@ fn quest_detail_lines_with_wrap(quest: &Quest, guidance: Option<&QuestGuidance>,
             quest
                 .objectives
                 .iter()
-                .map(|objective| quest_objective_detail_text(objective, render_text))
+                .enumerate()
+                .map(|(index, objective)| {
+                    quest_objective_detail_text(quest.quest_index, index, objective, render_text)
+                })
                 .collect::<Vec<_>>(),
         );
     }
-    let supplies = crate::quest_practice::supply_instructions(quest.quest_index, class_name).into_iter()
-        .flat_map(|text| if desktop_wrap { multi_guidance::wrap_card_text(&text) } else { vec![text] })
+    let supplies = crate::quest_practice::supply_instructions(quest.quest_index, class_name)
+        .into_iter()
+        .flat_map(|text| {
+            if desktop_wrap {
+                multi_guidance::wrap_card_text(&text)
+            } else {
+                vec![text]
+            }
+        })
         .collect::<Vec<_>>();
     push_quest_detail_section(&mut lines, "回城补给", supplies);
     localized_quest_detail_lines(lines, desktop_wrap)
@@ -5773,16 +7477,18 @@ fn quest_list_message_lines_with_wrap(
         && !quest.detail.completion_description_lines.is_empty()
     {
         lines.extend(
-            quest
-                .detail
-                .completion_description_lines
-                .iter()
-                .filter(|line| !line.trim().is_empty())
-                .map(|line| render_text.body(line))
-                .map(|text| QuestDetailLine {
-                    text,
-                    kind: QuestDetailLineKind::Body,
-                }),
+            crate::player_text::quest_section(
+                quest.quest_index,
+                "completion",
+                &quest.detail.completion_description_lines,
+            )
+            .into_iter()
+            .filter(|line| !line.trim().is_empty())
+            .map(|line| render_text.body(&line))
+            .map(|text| QuestDetailLine {
+                text,
+                kind: QuestDetailLineKind::Body,
+            }),
         );
         push_quest_guidance(&mut lines, quest, guidance, desktop_wrap, render_text);
         return localized_quest_detail_lines(lines, desktop_wrap);
@@ -5796,7 +7502,7 @@ fn quest_list_message_lines_with_wrap(
             .filter(|text| !text.trim().is_empty())
             .filter(|text| quest.group.as_deref() != Some(text.trim()))
         {
-            description.extend(fallback.lines().map(|line| render_text.body(line)));
+            description.extend(fallback.lines().map(|line| render_text.body(&line)));
         }
     }
     lines.extend(
@@ -5816,13 +7522,43 @@ fn quest_list_message_lines_with_wrap(
             .map(|objective| render_text.objective(&objective.text))
             .collect()
     } else {
-        quest.detail.task_description_lines.iter().map(|line| render_text.body(line)).collect()
+        if crate::native_i18n::active() {
+            crate::player_text::quest_section(
+                quest.quest_index,
+                "task",
+                &quest.detail.task_description_lines,
+            )
+        } else {
+            quest
+                .detail
+                .task_description_lines
+                .iter()
+                .map(|line| render_text.body(&line))
+                .collect()
+        }
     };
-    push_quest_detail_section(&mut lines, render_text.chrome("ui.questObjective", "Objectives"), task_lines);
+    push_quest_detail_section(
+        &mut lines,
+        render_text.chrome("ui.questObjective", "Objectives"),
+        task_lines,
+    );
     push_quest_detail_section(
         &mut lines,
         render_text.chrome("ui.questReturnHeading", "Return"),
-        quest.detail.return_description_lines.iter().map(|line| render_text.body(line)),
+        if crate::native_i18n::active() {
+            crate::player_text::quest_section(
+                quest.quest_index,
+                "return",
+                &quest.detail.return_description_lines,
+            )
+        } else {
+            quest
+                .detail
+                .return_description_lines
+                .iter()
+                .map(|line| render_text.body(&line))
+                .collect()
+        },
     );
     if let Some(time_limit) = quest
         .detail
@@ -5831,11 +7567,20 @@ fn quest_list_message_lines_with_wrap(
         .filter(|value| !value.trim().is_empty())
     {
         if render_text.is_chinese() {
-            push_quest_detail_section(&mut lines, &render_text.legacy_copy("Time Limit"),
-                vec![render_text.body(time_limit)]);
+            push_quest_detail_section(
+                &mut lines,
+                &render_text.legacy_copy("Time Limit"),
+                vec![render_text.body(time_limit)],
+            );
         } else {
-        lines.push(QuestDetailLine { text: String::new(), kind: QuestDetailLineKind::Blank });
-        lines.push(QuestDetailLine { text: render_text.format("ui.questTimeLimit", "Time: {0}", time_limit), kind: QuestDetailLineKind::Body });
+            lines.push(QuestDetailLine {
+                text: String::new(),
+                kind: QuestDetailLineKind::Blank,
+            });
+            lines.push(QuestDetailLine {
+                text: render_text.format("ui.questTimeLimit", "Time: {0}", time_limit),
+                kind: QuestDetailLineKind::Body,
+            });
         }
     }
     // `QuestListDialog` constructs QuestMessage with DisplayProgress=false.
@@ -5909,43 +7654,114 @@ fn render_mobile_rewards(
     compact_page: Option<usize>,
     render_text: QuestRenderText,
 ) {
-    let currency = quest.rewards.iter().filter_map(|reward| match reward {
-        crate::quest_model::QuestReward::Experience { amount } => Some(render_text.format("ui.questRewardExp", "EXP {0}", amount)),
-        crate::quest_model::QuestReward::Gold { amount } => Some(render_text.format("ui.questRewardGold", "Gold {0}", amount)),
-        _ => None,
-    }).collect::<Vec<_>>();
+    let currency = quest
+        .rewards
+        .iter()
+        .filter_map(|reward| match reward {
+            crate::quest_model::QuestReward::Experience { amount } => {
+                Some(render_text.format("ui.questRewardExp", "EXP {0}", amount))
+            }
+            crate::quest_model::QuestReward::Gold { amount } => {
+                Some(render_text.format("ui.questRewardGold", "Gold {0}", amount))
+            }
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     if compact_page.is_none() && !currency.is_empty() {
-        mobile_text_raw(parent, layout, &currency.join(" · "),
-            (16.0, layout.height_css() - 210.0, layout.width_css() - 32.0, 16.0),
-            14.0, PANEL_HIGHLIGHT);
+        mobile_text_raw(
+            parent,
+            layout,
+            &currency.join(" · "),
+            (
+                16.0,
+                layout.height_css() - 210.0,
+                layout.width_css() - 32.0,
+                16.0,
+            ),
+            14.0,
+            PANEL_HIGHLIGHT,
+        );
     }
-    let fixed = quest.rewards.iter().filter(|reward|
-        if compact_page.is_some() {
-            !matches!(reward, crate::quest_model::QuestReward::Item { selection_index: Some(_), .. })
-                && fixed_reward_is_visible(reward, guidance)
-        } else {
-            matches!(reward, crate::quest_model::QuestReward::Item { selection_index: None, .. })
-                && fixed_reward_is_visible(reward, guidance)
-        }).collect::<Vec<_>>();
-    let selectable = quest.rewards.iter().filter(|reward|
-        matches!(reward, crate::quest_model::QuestReward::Item { selection_index: Some(_), .. }))
+    let fixed = quest
+        .rewards
+        .iter()
+        .filter(|reward| {
+            if compact_page.is_some() {
+                !matches!(
+                    reward,
+                    crate::quest_model::QuestReward::Item {
+                        selection_index: Some(_),
+                        ..
+                    }
+                ) && fixed_reward_is_visible(reward, guidance)
+            } else {
+                matches!(
+                    reward,
+                    crate::quest_model::QuestReward::Item {
+                        selection_index: None,
+                        ..
+                    }
+                ) && fixed_reward_is_visible(reward, guidance)
+            }
+        })
+        .collect::<Vec<_>>();
+    let selectable = quest
+        .rewards
+        .iter()
+        .filter(|reward| {
+            matches!(
+                reward,
+                crate::quest_model::QuestReward::Item {
+                    selection_index: Some(_),
+                    ..
+                }
+            )
+        })
         .collect::<Vec<_>>();
     let columns = if compact_page.is_some() { 3 } else { 5 };
-    let page = compact_page.unwrap_or(0).min(compact_reward_pages(quest, Some(guidance)).saturating_sub(1));
+    let page = compact_page
+        .unwrap_or(0)
+        .min(compact_reward_pages(quest, Some(guidance)).saturating_sub(1));
     let slot_width = ((layout.width_css() - 32.0) / columns as f32).max(44.0);
     for (row, items) in [fixed, selectable].into_iter().enumerate() {
-        for (column, reward) in items.into_iter().skip(page * columns).take(columns).enumerate() {
-            let crate::quest_model::QuestReward::Item { name, quantity, icon, selection_index, tooltip_source, .. } = reward else {
+        for (column, reward) in items
+            .into_iter()
+            .skip(page * columns)
+            .take(columns)
+            .enumerate()
+        {
+            let crate::quest_model::QuestReward::Item {
+                name,
+                quantity,
+                icon,
+                selection_index,
+                tooltip_source,
+                ..
+            } = reward
+            else {
                 let label = match reward {
-                    crate::quest_model::QuestReward::Gold { amount } => render_text.format("ui.questRewardGold", "Gold {0}", amount),
-                    crate::quest_model::QuestReward::Experience { amount } => render_text.format("ui.questRewardExp", "EXP {0}", amount),
+                    crate::quest_model::QuestReward::Gold { amount } => {
+                        render_text.format("ui.questRewardGold", "Gold {0}", amount)
+                    }
+                    crate::quest_model::QuestReward::Experience { amount } => {
+                        render_text.format("ui.questRewardExp", "EXP {0}", amount)
+                    }
                     crate::quest_model::QuestReward::Unknown { label } => label.clone(),
                     _ => continue,
                 };
-                mobile_text_raw(parent, layout, &label,
-                    (16.0 + column as f32 * slot_width,
-                        100.0 + row as f32 * 48.0, slot_width - 4.0, 44.0),
-                    14.0, PANEL_TEXT);
+                mobile_text_raw(
+                    parent,
+                    layout,
+                    &label,
+                    (
+                        16.0 + column as f32 * slot_width,
+                        100.0 + row as f32 * 48.0,
+                        slot_width - 4.0,
+                        44.0,
+                    ),
+                    14.0,
+                    PANEL_TEXT,
+                );
                 continue;
             };
             let selected = *selection_index != None && selected_reward == *selection_index;
@@ -5955,7 +7771,9 @@ fn render_mobile_rewards(
                     left: Val::Px(layout.px(16.0 + column as f32 * slot_width)),
                     top: Val::Px(layout.px(if compact_page.is_some() {
                         100.0 + row as f32 * 48.0
-                    } else { layout.height_css() - 148.0 + row as f32 * 48.0 })),
+                    } else {
+                        layout.height_css() - 148.0 + row as f32 * 48.0
+                    })),
                     width: Val::Px(layout.px(slot_width - 4.0)),
                     height: Val::Px(layout.px(44.0)),
                     display: Display::Flex,
@@ -5966,35 +7784,67 @@ fn render_mobile_rewards(
                 FocusPolicy::Block,
             ));
             if let Some(reward_index) = selection_index {
-                cell.insert((Button, match surface {
-                    QuestRewardSelectionSurface::Detail => QuestUiButton::SelectReward {
-                        quest_index: quest.quest_index, reward_index: *reward_index,
+                cell.insert((
+                    Button,
+                    match surface {
+                        QuestRewardSelectionSurface::Detail => QuestUiButton::SelectReward {
+                            quest_index: quest.quest_index,
+                            reward_index: *reward_index,
+                        },
+                        QuestRewardSelectionSurface::NpcList => {
+                            QuestUiButton::SelectNpcQuestReward {
+                                quest_index: quest.quest_index,
+                                reward_index: *reward_index,
+                            }
+                        }
                     },
-                    QuestRewardSelectionSurface::NpcList => QuestUiButton::SelectNpcQuestReward {
-                        quest_index: quest.quest_index, reward_index: *reward_index,
-                    },
-                }));
+                ));
             }
             if let Some(document) = crystal_item_tooltip_document_from_source(
-                name, icon.and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
-                *quantity, tooltip_source.as_ref(), player,
+                name,
+                icon.and_then(|value| u16::try_from(value).ok())
+                    .unwrap_or_default(),
+                *quantity,
+                tooltip_source.as_ref(),
+                player,
             ) {
                 cell.insert((Interaction::None, CrystalItemHint(document)));
             }
             cell.with_children(|content| {
                 if let (Some(server), Some(icon)) = (asset_server, icon) {
                     content.spawn((
-                        Node { width: Val::Px(layout.px(28.0)), height: Val::Px(layout.px(28.0)),
-                            margin: UiRect::left(Val::Px(layout.px(3.0))), ..default() },
-                        ImageNode { image: server.load(format!("original-ui/Items/{icon}.png")), ..default() },
+                        Node {
+                            width: Val::Px(layout.px(28.0)),
+                            height: Val::Px(layout.px(28.0)),
+                            margin: UiRect::left(Val::Px(layout.px(3.0))),
+                            ..default()
+                        },
+                        ImageNode {
+                            image: server.load(format!("original-ui/Items/{icon}.png")),
+                            ..default()
+                        },
                         FocusPolicy::Pass,
                     ));
                 }
                 content.spawn((
-                    Node { width: Val::Percent(100.0), min_width: Val::Px(0.0), ..default() },
-                    Text::new(format!("{}{}", render_text.reward_name(name),
-                        if *quantity > 1 { format!("×{quantity}") } else { String::new() })),
-                    TextFont { font_size: FontSize::Px(layout.px(14.0)), ..default() },
+                    Node {
+                        width: Val::Percent(100.0),
+                        min_width: Val::Px(0.0),
+                        ..default()
+                    },
+                    Text::new(format!(
+                        "{}{}",
+                        render_text.reward_name(name),
+                        if *quantity > 1 {
+                            format!("×{quantity}")
+                        } else {
+                            String::new()
+                        }
+                    )),
+                    TextFont {
+                        font_size: FontSize::Px(layout.px(14.0)),
+                        ..default()
+                    },
                     TextColor(PANEL_TEXT),
                     TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                     FocusPolicy::Pass,
@@ -6005,24 +7855,69 @@ fn render_mobile_rewards(
     if compact_page.is_some() {
         let pages = compact_reward_pages(quest, Some(guidance));
         let (previous, next) = match surface {
-            QuestRewardSelectionSurface::Detail => (QuestUiButton::CompactDetailRewardPrevious,
-                QuestUiButton::CompactDetailRewardNext),
-            QuestRewardSelectionSurface::NpcList => (QuestUiButton::CompactNpcRewardPrevious,
-                QuestUiButton::CompactNpcRewardNext),
+            QuestRewardSelectionSurface::Detail => (
+                QuestUiButton::CompactDetailRewardPrevious,
+                QuestUiButton::CompactDetailRewardNext,
+            ),
+            QuestRewardSelectionSurface::NpcList => (
+                QuestUiButton::CompactNpcRewardPrevious,
+                QuestUiButton::CompactNpcRewardNext,
+            ),
         };
-        mobile_button_raw(parent, layout, render_text.chrome("ui.previous", "Previous"), (16.0, 196.0, 80.0, 44.0), previous, page > 0);
-        mobile_button_raw(parent, layout, render_text.chrome("ui.next", "Next"), (104.0, 196.0, 80.0, 44.0), next, page + 1 < pages);
-        mobile_text_raw(parent, layout, &format!("{}/{}", page + 1, pages),
-            (192.0, 206.0, 70.0, 28.0), 14.0, PANEL_TEXT);
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.previous", "Previous"),
+            (16.0, 196.0, 80.0, 44.0),
+            previous,
+            page > 0,
+        );
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.next", "Next"),
+            (104.0, 196.0, 80.0, 44.0),
+            next,
+            page + 1 < pages,
+        );
+        mobile_text_raw(
+            parent,
+            layout,
+            &format!("{}/{}", page + 1, pages),
+            (192.0, 206.0, 70.0, 28.0),
+            14.0,
+            PANEL_TEXT,
+        );
     }
 }
 
 fn compact_reward_pages(quest: &Quest, guidance: Option<&QuestGuidance>) -> usize {
-    let fixed = quest.rewards.iter().filter(|reward|
-        !matches!(reward, crate::quest_model::QuestReward::Item { selection_index: Some(_), .. })
-            && guidance.is_none_or(|guidance| fixed_reward_is_visible(reward, guidance))).count();
-    let selectable = quest.rewards.iter().filter(|reward|
-        matches!(reward, crate::quest_model::QuestReward::Item { selection_index: Some(_), .. })).count();
+    let fixed = quest
+        .rewards
+        .iter()
+        .filter(|reward| {
+            !matches!(
+                reward,
+                crate::quest_model::QuestReward::Item {
+                    selection_index: Some(_),
+                    ..
+                }
+            ) && guidance.is_none_or(|guidance| fixed_reward_is_visible(reward, guidance))
+        })
+        .count();
+    let selectable = quest
+        .rewards
+        .iter()
+        .filter(|reward| {
+            matches!(
+                reward,
+                crate::quest_model::QuestReward::Item {
+                    selection_index: Some(_),
+                    ..
+                }
+            )
+        })
+        .count();
     fixed.div_ceil(3).max(selectable.div_ceil(3)).max(1)
 }
 
@@ -6038,78 +7933,212 @@ fn render_mobile_detail_panel(
     render_text: QuestRenderText,
 ) {
     if layout.compact {
-        compact_quest_tabs(parent, layout, state.compact_detail_page, false, render_text);
+        compact_quest_tabs(
+            parent,
+            layout,
+            state.compact_detail_page,
+            false,
+            render_text,
+        );
         if state.compact_detail_page == CompactQuestPage::Text {
-            mobile_text_raw(parent, layout,
+            mobile_text_raw(
+                parent,
+                layout,
                 &render_text.title(quest.quest_index, &quest.title),
-                (16.0, 52.0, layout.width_css() - 32.0, 24.0), 15.0, PANEL_HIGHLIGHT);
+                (16.0, 52.0, layout.width_css() - 32.0, 24.0),
+                15.0,
+                PANEL_HIGHLIGHT,
+            );
         }
     } else {
-        mobile_chrome(parent, layout, render_text.chrome("ui.quest", "Quest"), QuestUiButton::CloseQuestDetail, render_text);
+        mobile_chrome(
+            parent,
+            layout,
+            render_text.chrome("ui.quest", "Quest"),
+            QuestUiButton::CloseQuestDetail,
+            render_text,
+        );
     }
     let lines = mobile_wrap_quest_lines(
-        quest_detail_lines_with_wrap(quest, Some(guidance),
-            player.class_name.as_deref().unwrap_or(""), false, render_text),
+        quest_detail_lines_with_wrap(
+            quest,
+            Some(guidance),
+            player.class_name.as_deref().unwrap_or(""),
+            false,
+            render_text,
+        ),
         layout.width_css() - 32.0,
     );
     let rows = layout.detail_rows();
     let max_top = lines.len().saturating_sub(rows);
     let top = state.detail_scroll_top.min(max_top);
     if !layout.compact || state.compact_detail_page == CompactQuestPage::Text {
-    for (index, line) in lines.iter().skip(top).take(rows).enumerate() {
-        mobile_text_raw(parent, layout, &line.text,
-            (16.0, (if layout.compact { 76.0 } else { 52.0 }) + index as f32 * 24.0,
-                layout.width_css() - 32.0, 24.0),
-            14.0, if matches!(line.kind, QuestDetailLineKind::Heading | QuestDetailLineKind::Title)
-                { PANEL_HIGHLIGHT } else { PANEL_TEXT });
-    }
-    let pager_y = if layout.compact { layout.height_css() - 49.0 }
-        else { layout.height_css() - 194.0 };
-    mobile_button_raw(parent, layout, render_text.chrome("ui.previous", "Previous"), (16.0, pager_y, 80.0, 44.0),
-        QuestUiButton::QuestDetailScrollUp, top > 0);
-    mobile_button_raw(parent, layout, render_text.chrome("ui.next", "Next"), (104.0, pager_y, 80.0, 44.0),
-        QuestUiButton::QuestDetailScrollDown, top < max_top);
-    mobile_text_raw(parent, layout, &format!("{}/{}", top.saturating_add(1), lines.len().max(1)),
-        (192.0, pager_y + 10.0, 70.0, 28.0), 14.0, PANEL_TEXT);
-    if layout.compact { return; }
+        for (index, line) in lines.iter().skip(top).take(rows).enumerate() {
+            mobile_text_raw(
+                parent,
+                layout,
+                &line.text,
+                (
+                    16.0,
+                    (if layout.compact { 76.0 } else { 52.0 }) + index as f32 * 24.0,
+                    layout.width_css() - 32.0,
+                    24.0,
+                ),
+                14.0,
+                if matches!(
+                    line.kind,
+                    QuestDetailLineKind::Heading | QuestDetailLineKind::Title
+                ) {
+                    PANEL_HIGHLIGHT
+                } else {
+                    PANEL_TEXT
+                },
+            );
+        }
+        let pager_y = if layout.compact {
+            layout.height_css() - 49.0
+        } else {
+            layout.height_css() - 194.0
+        };
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.previous", "Previous"),
+            (16.0, pager_y, 80.0, 44.0),
+            QuestUiButton::QuestDetailScrollUp,
+            top > 0,
+        );
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.next", "Next"),
+            (104.0, pager_y, 80.0, 44.0),
+            QuestUiButton::QuestDetailScrollDown,
+            top < max_top,
+        );
+        mobile_text_raw(
+            parent,
+            layout,
+            &format!("{}/{}", top.saturating_add(1), lines.len().max(1)),
+            (192.0, pager_y + 10.0, 70.0, 28.0),
+            14.0,
+            PANEL_TEXT,
+        );
+        if layout.compact {
+            return;
+        }
     }
     if layout.compact {
-        mobile_text_raw(parent, layout,
+        mobile_text_raw(
+            parent,
+            layout,
             &render_text.title(quest.quest_index, &quest.title),
-            (16.0, 52.0, layout.width_css() - 32.0, 24.0), 15.0, PANEL_HIGHLIGHT);
+            (16.0, 52.0, layout.width_css() - 32.0, 24.0),
+            15.0,
+            PANEL_HIGHLIGHT,
+        );
     }
-    render_mobile_rewards(parent, layout, quest, state.selected_reward_index,
-        QuestRewardSelectionSurface::Detail, player, guidance, asset_server,
-        layout.compact.then_some(state.compact_detail_reward_page), render_text);
+    render_mobile_rewards(
+        parent,
+        layout,
+        quest,
+        state.selected_reward_index,
+        QuestRewardSelectionSurface::Detail,
+        player,
+        guidance,
+        asset_server,
+        layout.compact.then_some(state.compact_detail_reward_page),
+        render_text,
+    );
     let selected_item_index = state.selected_reward_index.unwrap_or(-1);
     let accept_pending = pending.contains(&PendingOperationKey::QuestAccept {
-        npc_index: 0, quest_index: quest.quest_index,
+        npc_index: 0,
+        quest_index: quest.quest_index,
     });
     let finish_pending = pending.has_pending_quest_finish(quest.quest_index);
-    let diary_accept = quest_action_decision(Some(quest), QuestAction::Accept,
-        QuestActionSource::Diary, Some(guidance), accept_pending, None) == QuestActionDecision::Eligible;
-    let diary_finish = quest_action_decision(Some(quest), QuestAction::Finish,
-        QuestActionSource::Diary, Some(guidance), finish_pending,
-        (selected_item_index >= 0).then_some(selected_item_index)) == QuestActionDecision::Eligible;
-    let action = if can_accept_quest(quest) && newcomer_diary_accept_authorized(quest, Some(guidance)) {
-        (render_text.chrome("ui.questAccept", "Accept"), QuestUiButton::AcceptQuest { npc_index: 0, quest_index: quest.quest_index }, diary_accept)
+    let diary_accept = quest_action_decision(
+        Some(quest),
+        QuestAction::Accept,
+        QuestActionSource::Diary,
+        Some(guidance),
+        accept_pending,
+        None,
+    ) == QuestActionDecision::Eligible;
+    let diary_finish = quest_action_decision(
+        Some(quest),
+        QuestAction::Finish,
+        QuestActionSource::Diary,
+        Some(guidance),
+        finish_pending,
+        (selected_item_index >= 0).then_some(selected_item_index),
+    ) == QuestActionDecision::Eligible;
+    let action = if can_accept_quest(quest)
+        && newcomer_diary_accept_authorized(quest, Some(guidance))
+    {
+        (
+            render_text.chrome("ui.questAccept", "Accept"),
+            QuestUiButton::AcceptQuest {
+                npc_index: 0,
+                quest_index: quest.quest_index,
+            },
+            diary_accept,
+        )
     } else if can_finish_quest(quest) && newcomer_diary_finish_authorized(quest, Some(guidance)) {
-        (render_text.chrome("ui.questComplete", "Complete"), QuestUiButton::FinishQuest { quest_index: quest.quest_index, selected_item_index }, diary_finish)
+        (
+            render_text.chrome("ui.questComplete", "Complete"),
+            QuestUiButton::FinishQuest {
+                quest_index: quest.quest_index,
+                selected_item_index,
+            },
+            diary_finish,
+        )
     } else if can_finish_quest(quest) {
-        ("前往交付", QuestUiButton::PrepareQuestFinish { quest_index: quest.quest_index },
-            !finish_pending && state.pending_turn_in.as_ref().is_none_or(|request| request.quest_index != quest.quest_index))
+        (
+            "前往交付",
+            QuestUiButton::PrepareQuestFinish {
+                quest_index: quest.quest_index,
+            },
+            !finish_pending
+                && state
+                    .pending_turn_in
+                    .as_ref()
+                    .is_none_or(|request| request.quest_index != quest.quest_index),
+        )
     } else {
-        (render_text.chrome("ui.questShare", "Share"), QuestUiButton::ShareQuest { quest_index: quest.quest_index }, quest.status.is_active())
+        (
+            render_text.chrome("ui.questShare", "Share"),
+            QuestUiButton::ShareQuest {
+                quest_index: quest.quest_index,
+            },
+            quest.status.is_active(),
+        )
     };
     let [primary_rect, abandon_rect, current_rect] = layout.detail_footer_rects();
     mobile_button_raw(parent, layout, action.0, primary_rect, action.1, action.2);
-    let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon { quest_index: quest.quest_index });
-    mobile_button_raw(parent, layout, render_text.chrome("ui.questAbandon", "Abandon"), abandon_rect,
-        QuestUiButton::AbandonQuest { quest_index: quest.quest_index },
-        can_abandon_quest(quest) && !abandon_pending);
+    let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon {
+        quest_index: quest.quest_index,
+    });
+    mobile_button_raw(
+        parent,
+        layout,
+        render_text.chrome("ui.questAbandon", "Abandon"),
+        abandon_rect,
+        QuestUiButton::AbandonQuest {
+            quest_index: quest.quest_index,
+        },
+        can_abandon_quest(quest) && !abandon_pending,
+    );
     if guidance.is_enabled() && quest.status.is_active() {
-        mobile_button_raw(parent, layout, "设为当前", current_rect,
-            QuestUiButton::MakePrimary { quest_index: quest.quest_index }, true);
+        mobile_button_raw(
+            parent,
+            layout,
+            "设为当前",
+            current_rect,
+            QuestUiButton::MakePrimary {
+                quest_index: quest.quest_index,
+            },
+            true,
+        );
     }
 }
 
@@ -6128,84 +8157,231 @@ fn render_mobile_npc_quest_list_panel(
     if layout.compact {
         compact_quest_tabs(parent, layout, state.compact_npc_page, true, render_text);
     } else {
-        mobile_chrome(parent, layout, render_text.chrome("ui.quest", "Quest"), QuestUiButton::ReturnToNpcDialog, render_text);
+        mobile_chrome(
+            parent,
+            layout,
+            render_text.chrome("ui.quest", "Quest"),
+            QuestUiButton::ReturnToNpcDialog,
+            render_text,
+        );
     }
-    let selected_position = state.npc_quest_selected_index
-        .and_then(|index| quests.iter().position(|quest| quest.quest_index == index)).unwrap_or(0);
-    let Some(quest) = quests.get(selected_position).copied().or_else(|| quests.first().copied()) else {
-        mobile_text_raw(parent, layout, render_text.chrome("ui.questEmpty", "No quests"), (16.0, 54.0, layout.width_css() - 32.0, 44.0),
-            15.0, PANEL_TEXT);
+    let selected_position = state
+        .npc_quest_selected_index
+        .and_then(|index| quests.iter().position(|quest| quest.quest_index == index))
+        .unwrap_or(0);
+    let Some(quest) = quests
+        .get(selected_position)
+        .copied()
+        .or_else(|| quests.first().copied())
+    else {
+        mobile_text_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.questEmpty", "No quests"),
+            (16.0, 54.0, layout.width_css() - 32.0, 44.0),
+            15.0,
+            PANEL_TEXT,
+        );
         return;
     };
     if !layout.compact || state.compact_npc_page == CompactQuestPage::Text {
-    mobile_button_raw(parent, layout, render_text.chrome("ui.previous", "Previous"), (16.0, 54.0, 70.0, 44.0),
-        QuestUiButton::NpcQuestPrevious, selected_position > 0);
-    mobile_text_raw(parent, layout, &format!("{} ({}/{})", render_text.title(quest.quest_index, &quest.title),
-        selected_position + 1, quests.len()),
-        (94.0, 62.0, layout.width_css() - 188.0, 30.0), 15.0, PANEL_HIGHLIGHT);
-    mobile_button_raw(parent, layout, render_text.chrome("ui.next", "Next"), (layout.width_css() - 86.0, 54.0, 70.0, 44.0),
-        QuestUiButton::NpcQuestNext, selected_position + 1 < quests.len());
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.previous", "Previous"),
+            (16.0, 54.0, 70.0, 44.0),
+            QuestUiButton::NpcQuestPrevious,
+            selected_position > 0,
+        );
+        mobile_text_raw(
+            parent,
+            layout,
+            &format!(
+                "{} ({}/{})",
+                render_text.title(quest.quest_index, &quest.title),
+                selected_position + 1,
+                quests.len()
+            ),
+            (94.0, 62.0, layout.width_css() - 188.0, 30.0),
+            15.0,
+            PANEL_HIGHLIGHT,
+        );
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.next", "Next"),
+            (layout.width_css() - 86.0, 54.0, 70.0, 44.0),
+            QuestUiButton::NpcQuestNext,
+            selected_position + 1 < quests.len(),
+        );
 
-    let lines = mobile_wrap_quest_lines(quest_list_message_lines_with_wrap(quest, dialog,
-        Some(guidance), false, render_text),
-        layout.width_css() - 32.0);
-    let rows = layout.message_rows();
-    let max_top = lines.len().saturating_sub(rows);
-    let top = state.npc_quest_message_scroll_top.min(max_top);
-    for (index, line) in lines.iter().skip(top).take(rows).enumerate() {
-        mobile_text_raw(parent, layout, &line.text,
-            (16.0, 102.0 + index as f32 * 24.0, layout.width_css() - 32.0, 24.0),
-            14.0, if matches!(line.kind, QuestDetailLineKind::Title | QuestDetailLineKind::Heading)
-                { PANEL_HIGHLIGHT } else { PANEL_TEXT });
-    }
-    let pager_y = if layout.compact { layout.height_css() - 49.0 }
-        else { layout.height_css() - 194.0 };
-    mobile_button_raw(parent, layout, render_text.chrome("ui.previous", "Previous"), (16.0, pager_y, 80.0, 44.0),
-        QuestUiButton::NpcQuestMessageScrollUp, top > 0);
-    mobile_button_raw(parent, layout, render_text.chrome("ui.next", "Next"), (104.0, pager_y, 80.0, 44.0),
-        QuestUiButton::NpcQuestMessageScrollDown, top < max_top);
-    mobile_text_raw(parent, layout, &format!("{}/{}", top + 1, lines.len().max(1)),
-        (192.0, pager_y + 10.0, 70.0, 28.0), 14.0, PANEL_TEXT);
-    if layout.compact { return; }
+        let lines = mobile_wrap_quest_lines(
+            quest_list_message_lines_with_wrap(quest, dialog, Some(guidance), false, render_text),
+            layout.width_css() - 32.0,
+        );
+        let rows = layout.message_rows();
+        let max_top = lines.len().saturating_sub(rows);
+        let top = state.npc_quest_message_scroll_top.min(max_top);
+        for (index, line) in lines.iter().skip(top).take(rows).enumerate() {
+            mobile_text_raw(
+                parent,
+                layout,
+                &line.text,
+                (
+                    16.0,
+                    102.0 + index as f32 * 24.0,
+                    layout.width_css() - 32.0,
+                    24.0,
+                ),
+                14.0,
+                if matches!(
+                    line.kind,
+                    QuestDetailLineKind::Title | QuestDetailLineKind::Heading
+                ) {
+                    PANEL_HIGHLIGHT
+                } else {
+                    PANEL_TEXT
+                },
+            );
+        }
+        let pager_y = if layout.compact {
+            layout.height_css() - 49.0
+        } else {
+            layout.height_css() - 194.0
+        };
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.previous", "Previous"),
+            (16.0, pager_y, 80.0, 44.0),
+            QuestUiButton::NpcQuestMessageScrollUp,
+            top > 0,
+        );
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.next", "Next"),
+            (104.0, pager_y, 80.0, 44.0),
+            QuestUiButton::NpcQuestMessageScrollDown,
+            top < max_top,
+        );
+        mobile_text_raw(
+            parent,
+            layout,
+            &format!("{}/{}", top + 1, lines.len().max(1)),
+            (192.0, pager_y + 10.0, 70.0, 28.0),
+            14.0,
+            PANEL_TEXT,
+        );
+        if layout.compact {
+            return;
+        }
     }
     if layout.compact {
-        mobile_text_raw(parent, layout,
+        mobile_text_raw(
+            parent,
+            layout,
             &render_text.title(quest.quest_index, &quest.title),
-            (16.0, 52.0, layout.width_css() - 32.0, 24.0), 15.0, PANEL_HIGHLIGHT);
+            (16.0, 52.0, layout.width_css() - 32.0, 24.0),
+            15.0,
+            PANEL_HIGHLIGHT,
+        );
     }
-    render_mobile_rewards(parent, layout, quest, state.npc_selected_reward_index,
-        QuestRewardSelectionSurface::NpcList, player, guidance, asset_server,
-        layout.compact.then_some(state.compact_npc_reward_page), render_text);
+    render_mobile_rewards(
+        parent,
+        layout,
+        quest,
+        state.npc_selected_reward_index,
+        QuestRewardSelectionSurface::NpcList,
+        player,
+        guidance,
+        asset_server,
+        layout.compact.then_some(state.compact_npc_reward_page),
+        render_text,
+    );
 
-    let npc_index = dialog.npc_object_id.or(quest.accept_npc_index).unwrap_or_default();
+    let npc_index = dialog
+        .npc_object_id
+        .or(quest.accept_npc_index)
+        .unwrap_or_default();
     let [action_rect, back_rect, leave_rect] = layout.npc_footer_rects();
     if can_accept_quest(quest) {
         let is_pending = pending.contains(&PendingOperationKey::QuestAccept {
-            npc_index, quest_index: quest.quest_index,
+            npc_index,
+            quest_index: quest.quest_index,
         });
-        let allowed = quest_action_decision(Some(quest), QuestAction::Accept,
+        let allowed = quest_action_decision(
+            Some(quest),
+            QuestAction::Accept,
             QuestActionSource::NpcDialog {
                 action_offered: npc_accept_offered_by_current_dialog(dialog, quest, npc_index),
-            }, Some(guidance), is_pending, None) == QuestActionDecision::Eligible;
-        mobile_button_raw(parent, layout, render_text.chrome("ui.questAccept", "Accept"), action_rect,
-            QuestUiButton::AcceptNpcQuest { npc_index, quest_index: quest.quest_index }, allowed);
+            },
+            Some(guidance),
+            is_pending,
+            None,
+        ) == QuestActionDecision::Eligible;
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.questAccept", "Accept"),
+            action_rect,
+            QuestUiButton::AcceptNpcQuest {
+                npc_index,
+                quest_index: quest.quest_index,
+            },
+            allowed,
+        );
     } else if can_finish_quest(quest) {
         let selected_item_index = state.npc_selected_reward_index.unwrap_or(-1);
-        let decision = quest_action_decision(Some(quest), QuestAction::Finish,
-            QuestActionSource::NpcDialog { action_offered: dialog_exposes_quest_operation(
-                dialog, Some(npc_index), quest.quest_index, true,
-                (selected_item_index >= 0).then_some(selected_item_index),
-            ) }, Some(guidance), pending.has_pending_quest_finish(quest.quest_index),
-            (selected_item_index >= 0).then_some(selected_item_index));
-        let allowed = matches!(decision, QuestActionDecision::Eligible
-            | QuestActionDecision::Rejected(QuestActionRejection::RewardSelectionRequired));
-        mobile_button_raw(parent, layout, render_text.chrome("ui.questComplete", "Complete"), action_rect,
-            QuestUiButton::FinishQuest { quest_index: quest.quest_index, selected_item_index }, allowed);
+        let decision = quest_action_decision(
+            Some(quest),
+            QuestAction::Finish,
+            QuestActionSource::NpcDialog {
+                action_offered: dialog_exposes_quest_operation(
+                    dialog,
+                    Some(npc_index),
+                    quest.quest_index,
+                    true,
+                    (selected_item_index >= 0).then_some(selected_item_index),
+                ),
+            },
+            Some(guidance),
+            pending.has_pending_quest_finish(quest.quest_index),
+            (selected_item_index >= 0).then_some(selected_item_index),
+        );
+        let allowed = matches!(
+            decision,
+            QuestActionDecision::Eligible
+                | QuestActionDecision::Rejected(QuestActionRejection::RewardSelectionRequired)
+        );
+        mobile_button_raw(
+            parent,
+            layout,
+            render_text.chrome("ui.questComplete", "Complete"),
+            action_rect,
+            QuestUiButton::FinishQuest {
+                quest_index: quest.quest_index,
+                selected_item_index,
+            },
+            allowed,
+        );
     }
-    mobile_button_raw(parent, layout, "返回对话", back_rect,
-        QuestUiButton::ReturnToNpcDialog, true);
-    mobile_button_raw(parent, layout, "离开", leave_rect,
-        QuestUiButton::CloseNpcQuestList, true);
+    mobile_button_raw(
+        parent,
+        layout,
+        "返回对话",
+        back_rect,
+        QuestUiButton::ReturnToNpcDialog,
+        true,
+    );
+    mobile_button_raw(
+        parent,
+        layout,
+        "离开",
+        leave_rect,
+        QuestUiButton::CloseNpcQuestList,
+        true,
+    );
 }
 
 fn render_mobile_confirmation(
@@ -6214,40 +8390,108 @@ fn render_mobile_confirmation(
     alert: Option<&str>,
     state: &QuestUiState,
 ) {
-    mobile_chrome(parent, layout, if alert.is_some() { "提示" } else { "确认放弃" },
-        if alert.is_some() { QuestUiButton::CloseQuestAlert }
-        else { QuestUiButton::CancelAbandonQuest }, QuestRenderText::default());
+    mobile_chrome(
+        parent,
+        layout,
+        if alert.is_some() {
+            "提示"
+        } else {
+            "确认放弃"
+        },
+        if alert.is_some() {
+            QuestUiButton::CloseQuestAlert
+        } else {
+            QuestUiButton::CancelAbandonQuest
+        },
+        QuestRenderText::default(),
+    );
     if layout.compact {
         let lines = compact_confirmation_lines(alert.unwrap_or(ASK_CANCEL_QUEST_TEXT), layout);
         let pages = lines.len().div_ceil(5).max(1);
         let page = state.compact_confirmation_page.min(pages - 1);
         for (index, line) in lines.iter().skip(page * 5).take(5).enumerate() {
-            mobile_text(parent, layout, &line.text,
-                (16.0, 62.0 + index as f32 * 24.0, layout.width_css() - 32.0, 24.0),
-                16.0, PANEL_TEXT);
+            mobile_text(
+                parent,
+                layout,
+                &line.text,
+                (
+                    16.0,
+                    62.0 + index as f32 * 24.0,
+                    layout.width_css() - 32.0,
+                    24.0,
+                ),
+                16.0,
+                PANEL_TEXT,
+            );
         }
         if pages > 1 {
-            mobile_button(parent, layout, "上文", (16.0, 196.0, 80.0, 44.0),
-                QuestUiButton::CompactConfirmationPrevious, page > 0);
-            mobile_button(parent, layout, "下文", (104.0, 196.0, 80.0, 44.0),
-                QuestUiButton::CompactConfirmationNext, page + 1 < pages);
-            mobile_text(parent, layout, &format!("{}/{}", page + 1, pages),
-                (192.0, 206.0, 70.0, 28.0), 14.0, PANEL_TEXT);
+            mobile_button(
+                parent,
+                layout,
+                "上文",
+                (16.0, 196.0, 80.0, 44.0),
+                QuestUiButton::CompactConfirmationPrevious,
+                page > 0,
+            );
+            mobile_button(
+                parent,
+                layout,
+                "下文",
+                (104.0, 196.0, 80.0, 44.0),
+                QuestUiButton::CompactConfirmationNext,
+                page + 1 < pages,
+            );
+            mobile_text(
+                parent,
+                layout,
+                &format!("{}/{}", page + 1, pages),
+                (192.0, 206.0, 70.0, 28.0),
+                14.0,
+                PANEL_TEXT,
+            );
         }
     } else {
-        mobile_text(parent, layout, alert.unwrap_or(ASK_CANCEL_QUEST_TEXT),
-            (16.0, 62.0, layout.width_css() - 32.0, layout.height_css() - 128.0),
-            16.0, PANEL_TEXT);
+        mobile_text(
+            parent,
+            layout,
+            alert.unwrap_or(ASK_CANCEL_QUEST_TEXT),
+            (
+                16.0,
+                62.0,
+                layout.width_css() - 32.0,
+                layout.height_css() - 128.0,
+            ),
+            16.0,
+            PANEL_TEXT,
+        );
     }
     let footer_y = layout.height_css() - 49.0;
     if alert.is_some() {
-        mobile_button(parent, layout, "确定", (layout.width_css() - 112.0, footer_y, 96.0, 44.0),
-            QuestUiButton::CloseQuestAlert, true);
+        mobile_button(
+            parent,
+            layout,
+            "确定",
+            (layout.width_css() - 112.0, footer_y, 96.0, 44.0),
+            QuestUiButton::CloseQuestAlert,
+            true,
+        );
     } else {
-        mobile_button(parent, layout, "取消", (layout.width_css() - 224.0, footer_y, 96.0, 44.0),
-            QuestUiButton::CancelAbandonQuest, true);
-        mobile_button(parent, layout, "确定放弃", (layout.width_css() - 112.0, footer_y, 96.0, 44.0),
-            QuestUiButton::ConfirmAbandonQuest, true);
+        mobile_button(
+            parent,
+            layout,
+            "取消",
+            (layout.width_css() - 224.0, footer_y, 96.0, 44.0),
+            QuestUiButton::CancelAbandonQuest,
+            true,
+        );
+        mobile_button(
+            parent,
+            layout,
+            "确定放弃",
+            (layout.width_css() - 112.0, footer_y, 96.0, 44.0),
+            QuestUiButton::ConfirmAbandonQuest,
+            true,
+        );
     }
 }
 
@@ -6278,7 +8522,14 @@ fn render_npc_quest_list_panel(
         .copied()
         .or_else(|| quests.first().copied());
 
-    quest_log_text_at_raw(parent, render_text.chrome("ui.quest", "Quest"), layout.title, 11.0, PANEL_HIGHLIGHT, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        render_text.chrome("ui.quest", "Quest"),
+        layout.title,
+        11.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
     quest_log_text_at_raw(
         parent,
         &format!("List: {}", quests.len()),
@@ -6381,7 +8632,8 @@ fn render_npc_quest_list_panel(
     let Some(quest) = selected else {
         return;
     };
-    let lines = quest_list_message_lines_with_wrap(quest, dialog, Some(guidance), true, render_text);
+    let lines =
+        quest_list_message_lines_with_wrap(quest, dialog, Some(guidance), true, render_text);
     let max_top = lines.len().saturating_sub(QUEST_LIST_MESSAGE_LINE_COUNT);
     let message_top = state.npc_quest_message_scroll_top.min(max_top);
     quest_log_image_button_at(
@@ -6440,7 +8692,9 @@ fn render_npc_quest_list_panel(
         QuestRewardSelectionSurface::NpcList,
         asset_server,
         player,
-        guidance, render_text);
+        guidance,
+        render_text,
+    );
 
     let npc_index = dialog
         .npc_object_id
@@ -6470,7 +8724,10 @@ fn render_npc_quest_list_panel(
                 npc_index,
                 quest_index: quest.quest_index,
             },
-            allowed, render_text.chrome("ui.questAccept", "Accept"), render_text);
+            allowed,
+            render_text.chrome("ui.questAccept", "Accept"),
+            render_text,
+        );
     } else if can_finish_quest(quest) {
         let selected_item_index = state.npc_selected_reward_index.unwrap_or(-1);
         let pending = pending.has_pending_quest_finish(quest.quest_index);
@@ -6505,7 +8762,10 @@ fn render_npc_quest_list_panel(
                 quest_index: quest.quest_index,
                 selected_item_index,
             },
-            allowed, render_text.chrome("ui.questComplete", "Complete"), render_text);
+            allowed,
+            render_text.chrome("ui.questComplete", "Complete"),
+            render_text,
+        );
     }
     quest_log_image_button_at(
         parent,
@@ -6574,11 +8834,25 @@ fn render_quest_alert(
 
 // Preserve the protected turn-in regression's legacy Chinese render API.
 #[cfg(test)]
-fn render_quest_detail_panel(parent: &mut ChildSpawnerCommands, quest: &Quest,
-    guidance: &QuestGuidance, state: &QuestUiState, pending: &PendingOperations,
-    asset_server: Option<&AssetServer>, player: &crate::read_model::PlayerStats) {
-    render_quest_detail_panel_with_text(parent, quest, guidance, state, pending,
-        asset_server, player, QuestRenderText::default());
+fn render_quest_detail_panel(
+    parent: &mut ChildSpawnerCommands,
+    quest: &Quest,
+    guidance: &QuestGuidance,
+    state: &QuestUiState,
+    pending: &PendingOperations,
+    asset_server: Option<&AssetServer>,
+    player: &crate::read_model::PlayerStats,
+) {
+    render_quest_detail_panel_with_text(
+        parent,
+        quest,
+        guidance,
+        state,
+        pending,
+        asset_server,
+        player,
+        QuestRenderText::default(),
+    );
 }
 
 fn render_quest_detail_panel_with_text(
@@ -6593,15 +8867,42 @@ fn render_quest_detail_panel_with_text(
 ) {
     let layout = quest_detail_layout(1.0);
     if guidance.is_enabled() && quest.status.is_active() {
-        quest_log_text_button_at_raw(parent, QuestLogRect::new(125.0, 436.0, 70.0, 25.0),
-            if state.pinned_primary_quest_index == Some(quest.quest_index) { "当前引导" } else { "设为当前" },
-            QuestUiButton::MakePrimary { quest_index: quest.quest_index }, true);
+        quest_log_text_button_at_raw(
+            parent,
+            QuestLogRect::new(125.0, 436.0, 70.0, 25.0),
+            if state.pinned_primary_quest_index == Some(quest.quest_index) {
+                "当前引导"
+            } else {
+                "设为当前"
+            },
+            QuestUiButton::MakePrimary {
+                quest_index: quest.quest_index,
+            },
+            true,
+        );
     }
-    let lines = quest_detail_lines_with_wrap(quest, Some(guidance), player.class_name.as_deref().unwrap_or(""), true, render_text);
+    let lines = quest_detail_lines_with_wrap(
+        quest,
+        Some(guidance),
+        player.class_name.as_deref().unwrap_or(""),
+        true,
+        render_text,
+    );
     let max_top = lines.len().saturating_sub(QUEST_DETAIL_LINE_COUNT);
     let scroll_top = state.detail_scroll_top.min(max_top);
 
-    quest_log_text_at_raw(parent, render_text.chrome("ui.quest", "Quest"), layout.title, 11.0, PANEL_HIGHLIGHT, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        if crate::native_i18n::active() {
+            crate::native_i18n::borrowed_key("quest.ui.details", "Quest details")
+        } else {
+            render_text.chrome("ui.quest", "Quest")
+        },
+        quest_detail_rendered_title_rect(layout, crate::native_i18n::active()),
+        11.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
     quest_log_image_button_at(
         parent,
         asset_server,
@@ -6703,7 +9004,9 @@ fn render_quest_detail_panel_with_text(
         QuestRewardSelectionSurface::Detail,
         asset_server,
         player,
-        guidance, render_text);
+        guidance,
+        render_text,
+    );
 
     let accept_pending = pending.contains(&PendingOperationKey::QuestAccept {
         npc_index: 0,
@@ -6737,7 +9040,10 @@ fn render_quest_detail_panel_with_text(
                 npc_index: 0,
                 quest_index: quest.quest_index,
             },
-            diary_accept, render_text.chrome("ui.questAccept", "Accept"), render_text);
+            diary_accept,
+            render_text.chrome("ui.questAccept", "Accept"),
+            render_text,
+        );
     } else if can_finish_quest(quest) && newcomer_diary_finish_authorized(quest, Some(guidance)) {
         quest_log_image_button_at_locale(
             parent,
@@ -6748,12 +9054,26 @@ fn render_quest_detail_panel_with_text(
                 quest_index: quest.quest_index,
                 selected_item_index,
             },
-            diary_finish, render_text.chrome("ui.questComplete", "Complete"), render_text);
+            diary_finish,
+            render_text.chrome("ui.questComplete", "Complete"),
+            render_text,
+        );
     } else if can_finish_quest(quest) {
-        let waiting = state.pending_turn_in.as_ref().is_some_and(|request| request.quest_index == quest.quest_index)
+        let waiting = state
+            .pending_turn_in
+            .as_ref()
+            .is_some_and(|request| request.quest_index == quest.quest_index)
             || pending.has_pending_quest_finish(quest.quest_index);
-        quest_log_image_button_at(parent, asset_server, QUEST_LIST_FINISH_ASSET, layout.share,
-            QuestUiButton::PrepareQuestFinish { quest_index: quest.quest_index }, !waiting);
+        quest_log_image_button_at(
+            parent,
+            asset_server,
+            QUEST_LIST_FINISH_ASSET,
+            layout.share,
+            QuestUiButton::PrepareQuestFinish {
+                quest_index: quest.quest_index,
+            },
+            !waiting,
+        );
     } else {
         quest_log_image_button_at_locale(
             parent,
@@ -6763,7 +9083,10 @@ fn render_quest_detail_panel_with_text(
             QuestUiButton::ShareQuest {
                 quest_index: quest.quest_index,
             },
-            quest.status.is_active(), render_text.chrome("ui.questShare", "Share"), render_text);
+            quest.status.is_active(),
+            render_text.chrome("ui.questShare", "Share"),
+            render_text,
+        );
     }
     let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon {
         quest_index: quest.quest_index,
@@ -6776,7 +9099,10 @@ fn render_quest_detail_panel_with_text(
         QuestUiButton::AbandonQuest {
             quest_index: quest.quest_index,
         },
-        can_abandon_quest(quest) && !abandon_pending, render_text.chrome("ui.questAbandon", "Abandon"), render_text);
+        can_abandon_quest(quest) && !abandon_pending,
+        render_text.chrome("ui.questAbandon", "Abandon"),
+        render_text,
+    );
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -6853,7 +9179,14 @@ fn render_quest_rewards(
         );
     }
 
-    quest_log_text_at_raw(parent, render_text.chrome("ui.questRewardSelect", "Choose one:"), QuestLogRect::new(25.0, 373.0, 68.0, 16.0), 11.0, PANEL_HIGHLIGHT, Justify::Left);
+    quest_log_text_at_raw(
+        parent,
+        render_text.chrome("ui.questRewardSelect", "Choose one:"),
+        QuestLogRect::new(25.0, 373.0, 68.0, 16.0),
+        11.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
+    );
 
     let fixed = quest
         .rewards
@@ -6886,7 +9219,9 @@ fn render_quest_rewards(
             331.0,
             None,
             player,
-            guidance.is_enabled(), render_text);
+            guidance.is_enabled(),
+            render_text,
+        );
     }
 
     let selectable = quest
@@ -6936,7 +9271,9 @@ fn render_quest_rewards(
                 },
             }),
             player,
-            guidance.is_enabled(), render_text);
+            guidance.is_enabled(),
+            render_text,
+        );
     }
 }
 
@@ -7085,7 +9422,7 @@ fn render_quest_log_panel_legacy_v2(
             .iter()
             .filter(|quest| filter.matches(quest))
             .count();
-        let label = format!("{} {}", filter.label(), count);
+        let label = format!("{} {}", filter.display_label(), count);
         quest_log_text_button_at(
             parent,
             layout.tabs[index],
@@ -7145,7 +9482,10 @@ fn render_quest_log_panel_legacy_v2(
                     let label = format!(
                         "{} {}{}",
                         if selected { "▶" } else { " " },
-                        truncate_chars(&crate::player_text::quest_title(quest.quest_index, &quest.title), 25),
+                        truncate_chars(
+                            &crate::player_text::quest_title(quest.quest_index, &quest.title),
+                            25
+                        ),
                         if tracking { "  •" } else { "" }
                     );
                     let row =
@@ -7218,14 +9558,17 @@ fn render_quest_log_panel_legacy_v2(
                 return;
             };
 
-            detail_title(detail, &crate::player_text::quest_title(quest.quest_index, &quest.title));
+            detail_title(
+                detail,
+                &crate::player_text::quest_title(quest.quest_index, &quest.title),
+            );
             body_line(detail, &format!("Status: {}", quest.status.label()));
             if let Some(npc) = &quest.npc_name {
                 body_line(detail, &format!("Return to: {npc}"));
             }
             if let Some(text) = &quest.unknown_text {
                 if !text.trim().is_empty() {
-                    body_line(detail, &truncate_chars(text, 72));
+                    body_line(detail, &truncate_chars(&crate::player_text::text(text), 72));
                 }
             }
             for objective in quest.objectives.iter().take(3) {
@@ -7233,14 +9576,17 @@ fn render_quest_log_panel_legacy_v2(
                     detail,
                     &format!(
                         "• {} ({})",
-                        truncate_chars(&objective.text, 42),
+                        truncate_chars(&crate::player_text::text(&objective.text), 42),
                         objective.progress_label()
                     ),
                 );
             }
             body_line(
                 detail,
-                &format!("Reward: {}", truncate_chars(&quest.rewards_label(), 52)),
+                &format!(
+                    "Reward: {}",
+                    truncate_chars(&crate::player_text::quest_rewards(quest), 52)
+                ),
             );
             if quest.rewards.len() > 1 {
                 for (index, reward) in quest.rewards.iter().enumerate().take(3) {
@@ -7250,7 +9596,7 @@ fn render_quest_log_panel_legacy_v2(
                         &format!(
                             "{} {}",
                             if selected_reward { "[x]" } else { "[ ]" },
-                            truncate_chars(&reward.label(), 40)
+                            truncate_chars(&crate::player_text::quest_reward(reward), 40)
                         ),
                         QuestUiButton::SelectReward {
                             quest_index: quest.quest_index,
@@ -7349,7 +9695,14 @@ fn quest_log_text_at(
     color: Color,
     justify: Justify,
 ) {
-    quest_log_text_at_raw(parent, &crate::player_text::text(text), rect, font_size, color, justify);
+    quest_log_text_at_raw(
+        parent,
+        &crate::player_text::text(text),
+        rect,
+        font_size,
+        color,
+        justify,
+    );
 }
 
 fn quest_log_text_at_raw(
@@ -7368,6 +9721,7 @@ fn quest_log_text_at_raw(
             width: Val::Px(rect.width),
             height: Val::Px(rect.height),
             min_width: Val::Px(0.0),
+            overflow: Overflow::clip(),
             ..default()
         },
         Text::new(text),
@@ -7451,7 +9805,14 @@ fn quest_log_text_button_at_sized(
     enabled: bool,
     font_size: f32,
 ) {
-    quest_log_text_button_at_sized_raw(parent, rect, &crate::player_text::text(text), action, enabled, font_size);
+    quest_log_text_button_at_sized_raw(
+        parent,
+        rect,
+        &crate::player_text::text(text),
+        action,
+        enabled,
+        font_size,
+    );
 }
 
 fn quest_log_text_button_at_sized_raw(
@@ -7508,9 +9869,16 @@ fn quest_log_text_button_at_sized_raw(
 
 // Image captions remain the authored Chinese skin; other selected languages use
 // the prepared canonical label with the same action rectangle and enablement.
-fn quest_log_image_button_at_locale(parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>, asset_path: &str, rect: QuestLogRect,
-    action: QuestUiButton, enabled: bool, label: &str, render_text: QuestRenderText) {
+fn quest_log_image_button_at_locale(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    asset_path: &str,
+    rect: QuestLogRect,
+    action: QuestUiButton,
+    enabled: bool,
+    label: &str,
+    render_text: QuestRenderText,
+) {
     if render_text.is_chinese() {
         quest_log_image_button_at(parent, asset_server, asset_path, rect, action, enabled);
     } else {
@@ -7583,7 +9951,13 @@ fn render_combat_target_panel(
         return;
     };
 
-    detail_title(parent, &target.name);
+    // The same panel can target a player: player-chosen names are opaque.
+    let target_label = if target.is_player {
+        target.name.clone()
+    } else {
+        crate::player_text::name(&target.name)
+    };
+    panel_text_raw(parent, &target_label, 16.0, PANEL_HIGHLIGHT, Justify::Left);
     if let Some((ratio, label)) = combat_target_health(target) {
         parent
             .spawn((
@@ -7698,7 +10072,9 @@ pub fn quest_target_is_visible(
     })
 }
 
-fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,
+fn tracker_quest_block(
+    parent: &mut ChildSpawnerCommands,
+    quest: &Quest,
     render_text: QuestRenderText,
 ) {
     tracker_title_line_raw(parent, &render_text.title(quest.quest_index, &quest.title));
@@ -7708,7 +10084,7 @@ fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,
                 parent,
                 &format!(
                     "   {} ({})",
-                    truncate_chars(&objective.text, 44),
+                    truncate_chars(&crate::player_text::text(&objective.text), 44),
                     objective.progress_label()
                 ),
             );
@@ -7730,7 +10106,10 @@ fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest,
             if !quest.rewards.is_empty() {
                 tracker_body_line_raw(
                     parent,
-                    &format!("   Reward: {}", truncate_chars(&quest.rewards_label(), 44)),
+                    &format!(
+                        "   Reward: {}",
+                        truncate_chars(&crate::player_text::quest_rewards(quest), 44)
+                    ),
                 );
             }
         }
@@ -7755,9 +10134,17 @@ fn visible_tracker_quests<'a>(tracker: &'a QuestTracker, state: &QuestUiState) -
 fn render_player_hud_panel(parent: &mut ChildSpawnerCommands, model: &UiReadModel) {
     let name = model.player.name.as_deref().unwrap_or("Adventurer");
     let map = model.player.map_name.as_deref().unwrap_or("Unknown map");
-    title_line(
+    panel_text_raw(
         parent,
-        &format!("{}  Lv.{} - {}", name, model.player.level, map),
+        &format!(
+            "{}  Lv.{} - {}",
+            name,
+            model.player.level,
+            crate::player_text::name(map)
+        ),
+        18.0,
+        PANEL_HIGHLIGHT,
+        Justify::Left,
     );
     stat_bar(
         parent,
@@ -7787,7 +10174,11 @@ fn render_control_hint_panel(
     } else if let Some(npc) = nearby.nearest() {
         highlight_line(
             parent,
-            &format!("Nearby: {} ({} tiles)", npc.name, npc.distance),
+            &format!(
+                "Nearby: {} ({} tiles)",
+                crate::player_text::name(&npc.name),
+                npc.distance
+            ),
         );
     }
 }
@@ -7855,7 +10246,39 @@ fn stat_bar(parent: &mut ChildSpawnerCommands, label: &str, ratio: f32, fill_col
         });
 }
 
+fn truncate_display_columns(text: &str, columns: usize) -> String {
+    use unicode_segmentation::UnicodeSegmentation;
+    use unicode_width::UnicodeWidthChar;
+    let width = |grapheme: &str| {
+        grapheme
+            .chars()
+            .map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0))
+            .sum::<usize>()
+    };
+    if text.graphemes(true).map(width).sum::<usize>() <= columns {
+        return text.to_owned();
+    }
+    let budget = columns.saturating_sub(1);
+    let mut result = String::new();
+    let mut used = 0;
+    for grapheme in text.graphemes(true) {
+        let next = width(grapheme);
+        if used + next > budget {
+            break;
+        }
+        result.push_str(grapheme);
+        used += next;
+    }
+    if columns > 0 {
+        result.push('…');
+    }
+    result
+}
+
 fn truncate_chars(text: &str, max_chars: usize) -> String {
+    if crate::native_i18n::active() {
+        return truncate_display_columns(text, max_chars);
+    }
     if text.chars().count() <= max_chars {
         return text.to_owned();
     }
@@ -7953,7 +10376,13 @@ fn panel_text(
     color: Color,
     justify: Justify,
 ) {
-    panel_text_raw(parent, &crate::player_text::text(text), font_size, color, justify);
+    panel_text_raw(
+        parent,
+        &crate::player_text::text(text),
+        font_size,
+        color,
+        justify,
+    );
 }
 
 fn panel_text_raw(
@@ -8091,61 +10520,388 @@ fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
 #[cfg(all(test, feature = "native-ui"))]
 mod tests {
     #[test]
+    fn native_npc_wrapped_opaque_values_never_receive_a_second_translation() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                for opaque in ["Gold", "Accept"] {
+                    // This is an actual catalog sentence with an opaque slot.
+                    // A long server value forces the final word onto its own
+                    // row through the production NPC wrapping algorithm.
+                    let dialog = NpcDialogModel {
+                        is_open: true,
+                        npc_object_id: Some(1),
+                        npc_name: Some("Fixture NPC".into()),
+                        lines: vec![crate::quest_model::NpcDialogLine {
+                            text: format!("I see you're wearing: {} {opaque}", "x".repeat(54)),
+                        }],
+                        options: vec![crate::quest_model::NpcDialogOption {
+                            option_id: "@opaque-target".into(),
+                            label: format!("I see you're holding: {} {opaque}", "x".repeat(54)),
+                            enabled: true,
+                        }],
+                    };
+                    let rows = npc_dialog_rows(&dialog);
+                    assert!(rows
+                        .iter()
+                        .any(|(text, target, _)| text == opaque && target.is_none()));
+                    assert!(rows.iter().any(|(text, target, _)| text == opaque
+                        && target.as_deref() == Some("@opaque-target")));
+                    assert!(rows.len() <= NPC_DIALOG_VISIBLE_ROWS);
+                    let mut world = World::new();
+                    let mut queue = bevy::ecs::world::CommandQueue::default();
+                    Commands::new(&mut queue, &world)
+                        .spawn(Node::default())
+                        .with_children(|parent| {
+                            render_dialog_panel(
+                                parent,
+                                &dialog,
+                                &NpcDialogNav::default(),
+                                &QuestUiState::default(),
+                                &PendingOperations::default(),
+                                false,
+                                None,
+                                QuestRenderText::default(),
+                            );
+                        });
+                    queue.apply(&mut world);
+                    assert_eq!(
+                        world
+                            .query::<&Text>()
+                            .iter(&world)
+                            .filter(|text| text.0 == opaque)
+                            .count(),
+                        2
+                    );
+                    assert!(world
+                        .query::<&QuestUiButton>()
+                        .iter(&world)
+                        .any(|button| matches!(button,
+                        QuestUiButton::SelectNpcDialog { target } if target == "@opaque-target")));
+                }
+            });
+        }
+    }
+
+    #[test]
+    fn native_quest_filters_keep_quest_context_for_shared_words() {
+        use crate::native_i18n::{with_locale, Locale};
+        for (locale, expected) in [
+            (Locale::English, ["All", "Active", "Ready", "New", "Done"]),
+            (
+                Locale::TraditionalChinese,
+                ["全部", "進行中", "可提交", "新任務", "已完成"],
+            ),
+            (
+                Locale::BrazilianPortuguese,
+                ["Todas", "Ativas", "Prontas", "Novas", "Concluídas"],
+            ),
+        ] {
+            with_locale(locale, || {
+                for (filter, label) in super::QuestStageFilter::ALL.into_iter().zip(expected) {
+                    assert_eq!(filter.display_label(), label);
+                }
+            });
+        }
+    }
+
+    #[test]
+    fn native_quest_player_targets_never_translate_player_chosen_names() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                let target = crate::quest_model::CombatTarget {
+                    object_id: 91,
+                    name: "Accept".into(),
+                    hp: 10,
+                    max_hp: 20,
+                    is_player: true,
+                };
+                Commands::new(&mut queue, &world)
+                    .spawn_empty()
+                    .with_children(|parent| render_combat_target_panel(parent, Some(&target)));
+                queue.apply(&mut world);
+                assert!(world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .any(|text| text.0 == "Accept"));
+            });
+        }
+    }
+
+    #[test]
+    fn native_quest_titles_use_scroll_rows_and_fixed_labels_ellipsize_after_translation() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let full = crate::player_text::quest_title(2_120_030, "WRONG");
+                let rows = localized_quest_detail_lines(
+                    vec![QuestDetailLine {
+                        text: full.clone(),
+                        kind: QuestDetailLineKind::Title,
+                    }],
+                    true,
+                );
+                assert!(
+                    !rows.is_empty()
+                        && rows
+                            .iter()
+                            .all(|row| row.kind == QuestDetailLineKind::Title)
+                );
+                let short = truncate_display_columns(&full, 12);
+                assert!(short.ends_with('…'));
+                assert!(
+                    short
+                        .chars()
+                        .map(|c| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0))
+                        .sum::<usize>()
+                        <= 12
+                );
+                assert!(!full.contains("WRONG"));
+            });
+        }
+    }
+
+    #[test]
+    fn localized_detail_title_uses_only_the_unused_header_strip() {
+        for scale in [1.0, 1.25, 1.5] {
+            let layout = quest_detail_layout(scale);
+            assert_eq!(
+                quest_detail_rendered_title_rect(layout, false),
+                layout.title
+            );
+            let title = quest_detail_rendered_title_rect(layout, true);
+            assert_eq!(
+                title,
+                QuestLogRect::new(18.0 * scale, 9.0 * scale, 263.0 * scale, 17.0 * scale)
+            );
+            assert_eq!(
+                title.left + title.width + 8.0 * scale,
+                layout.top_close.left
+            );
+            assert!(title.top + title.height < layout.message.top);
+            // The original source geometry remains available unchanged for
+            // non-native hosts and the Crystal parity geometry assertions.
+            assert_eq!(layout.title.width, 55.0 * scale);
+            assert_eq!(layout.top_close.left, 289.0 * scale);
+        }
+    }
+
+    #[test]
+    fn native_detail_title_renders_the_full_caption_in_all_nine_languages() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let expected = crate::player_text::text("任务详情");
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                Commands::new(&mut queue, &world)
+                    .spawn(Node::default())
+                    .with_children(|parent| {
+                        render_quest_detail_panel(
+                            parent,
+                            &quest(99, QuestStatus::InProgress),
+                            &QuestGuidance::from_profile_name(""),
+                            &QuestUiState::default(),
+                            &PendingOperations::default(),
+                            None,
+                            &crate::read_model::PlayerStats::default(),
+                        );
+                    });
+                queue.apply(&mut world);
+                let mut query = world.query::<(&Text, &Node, &TextFont)>();
+                let titles: Vec<_> = query
+                    .iter(&world)
+                    .filter(|(_, node, _)| node.left == Val::Px(18.0) && node.top == Val::Px(9.0))
+                    .collect();
+                assert_eq!(titles.len(), 1, "{}", locale.code());
+                let (text, node, font) = titles[0];
+                assert_eq!(text.0, expected, "{}", locale.code());
+                assert_eq!(node.width, Val::Px(263.0));
+                assert_eq!(node.height, Val::Px(17.0));
+                assert_eq!(font.font_size, FontSize::Px(11.0));
+            });
+        }
+    }
+
+    #[test]
+    fn compact_quest_labels_never_truncate_inside_a_grapheme() {
+        use unicode_segmentation::UnicodeSegmentation;
+        use unicode_width::UnicodeWidthChar;
+        let columns = |text: &str| {
+            text.chars()
+                .map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0))
+                .sum::<usize>()
+        };
+        for cluster in ["क्षि", "กิ้", "a\u{0301}", "👩\u{200d}💻", "ن\u{0651}"]
+        {
+            let text = format!("{cluster}{cluster}XYZ");
+            let boundaries: std::collections::HashSet<_> = text
+                .grapheme_indices(true)
+                .map(|(index, _)| index)
+                .chain(std::iter::once(text.len()))
+                .collect();
+            for budget in 0..=columns(&text) {
+                let shortened = truncate_display_columns(&text, budget);
+                let prefix = shortened.strip_suffix('…').unwrap_or(&shortened);
+                assert!(text.starts_with(prefix));
+                assert!(
+                    boundaries.contains(&prefix.len()),
+                    "split {cluster:?} at {budget}"
+                );
+                assert!(columns(&shortened) <= budget);
+            }
+            assert_eq!(truncate_display_columns(&text, columns(&text)), text);
+        }
+    }
+
+    #[test]
     fn hunt_navigation_ready_status_means_turn_in_not_reward_already_claimed() {
-        assert_eq!(quest_diary_status_label(&quest(2_110_012, QuestStatus::ReadyToTurnIn), QuestRenderText::default()), "可提交");
+        assert_eq!(
+            quest_diary_status_label(
+                &quest(2_110_012, QuestStatus::ReadyToTurnIn),
+                QuestRenderText::default()
+            ),
+            "可提交"
+        );
     }
 
     #[test]
     fn hunt_navigation_click_checks_the_specific_unfinished_kill_and_authoritative_region() {
         let mut hunt = quest(2_110_010, QuestStatus::InProgress);
         hunt.objectives = vec![crate::quest_model::QuestObjective {
-            objective_id: "2110010:0".into(), text: "Defeat 4 Skeleton.".into(), current: 0, target: 4,
+            objective_id: "2110010:0".into(),
+            text: "Defeat 4 Skeleton.".into(),
+            current: 0,
+            target: 4,
         }];
-        let tracker = QuestTracker { active_quests: vec![hunt] };
-        let region = crate::quest_hunt_regions::active_hunt_regions(&tracker, 39,
-            crate::big_map::BigMapPoint { x: 211, y: 320 }).remove(0);
-        let intent = QuestRouteNavigationIntent {
-            target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: region.radius },
-            quest_index: 2_110_010, reset_epoch: 12, map_index: 39, x: 250, y: 260,
+        let tracker = QuestTracker {
+            active_quests: vec![hunt],
         };
-        let big_map = crate::big_map::BigMapModel { current_map_index: Some(39), reset_epoch: 12, ..default() };
+        let region = crate::quest_hunt_regions::active_hunt_regions(
+            &tracker,
+            39,
+            crate::big_map::BigMapPoint { x: 211, y: 320 },
+        )
+        .remove(0);
+        let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::HuntRegion {
+                monster_index: region.monster_index,
+                radius: region.radius,
+            },
+            quest_index: 2_110_010,
+            reset_epoch: 12,
+            map_index: 39,
+            x: 250,
+            y: 260,
+        };
+        let big_map = crate::big_map::BigMapModel {
+            current_map_index: Some(39),
+            reset_epoch: 12,
+            ..default()
+        };
         let state = QuestUiState::default();
-        assert!(quest_route_intent_is_current(intent, &tracker, &state, None, Some(&big_map)));
+        assert!(quest_route_intent_is_current(
+            intent,
+            &tracker,
+            &state,
+            None,
+            Some(&big_map)
+        ));
         for invalid in [
-            QuestRouteNavigationIntent { target: QuestRouteTarget::Entrance, ..intent },
-            QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion { monster_index: -1, radius: 30 }, ..intent },
-            QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: 31 }, ..intent },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::Entrance,
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::HuntRegion {
+                    monster_index: -1,
+                    radius: 30,
+                },
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::HuntRegion {
+                    monster_index: region.monster_index,
+                    radius: 31,
+                },
+                ..intent
+            },
             QuestRouteNavigationIntent { x: 251, ..intent },
-            QuestRouteNavigationIntent { reset_epoch: 13, ..intent },
-            QuestRouteNavigationIntent { map_index: 1, ..intent },
+            QuestRouteNavigationIntent {
+                reset_epoch: 13,
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                map_index: 1,
+                ..intent
+            },
         ] {
-            assert!(!quest_route_intent_is_current(invalid, &tracker, &state, None, Some(&big_map)), "{invalid:?}");
+            assert!(
+                !quest_route_intent_is_current(invalid, &tracker, &state, None, Some(&big_map)),
+                "{invalid:?}"
+            );
         }
         let mut finished = tracker.clone();
         finished.active_quests[0].objectives[0].current = 4;
-        assert!(!quest_route_intent_is_current(intent, &finished, &state, None, Some(&big_map)));
+        assert!(!quest_route_intent_is_current(
+            intent,
+            &finished,
+            &state,
+            None,
+            Some(&big_map)
+        ));
         finished.active_quests[0].objectives.clear();
-        assert!(!quest_route_intent_is_current(intent, &finished, &state, None, Some(&big_map)));
+        assert!(!quest_route_intent_is_current(
+            intent,
+            &finished,
+            &state,
+            None,
+            Some(&big_map)
+        ));
         let mut app = App::new();
         app.init_resource::<QuestPresentationLocale>();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(tracker);
         app.insert_resource(big_map);
-        app.init_resource::<NpcDialogModel>().init_resource::<NpcDialogNav>()
-            .init_resource::<QuestUiState>().init_resource::<QuestUiIntentQueue>()
-            .init_resource::<QuestRouteNavigationIntentQueue>().init_resource::<PendingOperations>();
-        app.world_mut().spawn((Button, QuestUiButton::NavigateQuestRoute(intent), Interaction::Pressed));
+        app.init_resource::<NpcDialogModel>()
+            .init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<QuestRouteNavigationIntentQueue>()
+            .init_resource::<PendingOperations>();
+        app.world_mut().spawn((
+            Button,
+            QuestUiButton::NavigateQuestRoute(intent),
+            Interaction::Pressed,
+        ));
         app.add_systems(Update, process_quest_ui_input);
         app.update();
-        assert_eq!(app.world().resource::<QuestRouteNavigationIntentQueue>().pending, Some(intent));
-        assert!(app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().message.contains("前往狩猎区域"));
+        assert_eq!(
+            app.world()
+                .resource::<QuestRouteNavigationIntentQueue>()
+                .pending,
+            Some(intent)
+        );
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .feedback
+            .as_ref()
+            .unwrap()
+            .message
+            .contains("前往狩猎区域"));
         // Completion while the pointer still holds the button invalidates the
         // queued walk before release. No command is sent to claim a kill.
         app.world_mut().resource_mut::<QuestTracker>().active_quests[0].objectives[0].current = 4;
         app.update();
-        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app
+            .world()
+            .resource::<QuestRouteNavigationIntentQueue>()
+            .is_empty());
         assert!(app.world().resource::<QuestUiIntentQueue>().is_empty());
     }
 
@@ -8161,15 +10917,22 @@ mod tests {
         };
         let mut queue = QuestRouteNavigationIntentQueue::default();
         assert!(queue.push(intent));
-        assert!(!queue.push(QuestRouteNavigationIntent { x: 151, y: 362, ..intent }));
+        assert!(!queue.push(QuestRouteNavigationIntent {
+            x: 151,
+            y: 362,
+            ..intent
+        }));
         assert_eq!(queue.take(), Some(intent));
         assert!(queue.is_empty());
     }
 
     #[test]
     fn pressed_d401_route_button_enqueues_the_current_oma_entrance() {
-        let d401 = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
-            .find(|map| map.map_file_name == "D401").expect("imported D401 map");
+        let d401 = mir2_game_data::crystal_respawn_manifest_ref()
+            .maps
+            .iter()
+            .find(|map| map.map_file_name == "D401")
+            .expect("imported D401 map");
         assert_eq!(d401.map_index, 47);
         let intent = QuestRouteNavigationIntent {
             target: QuestRouteTarget::Entrance,
@@ -8182,9 +10945,14 @@ mod tests {
         let mut app = App::new();
         app.init_resource::<QuestPresentationLocale>();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
         app.insert_resource(NativePlayerUiState::default());
-        app.insert_resource(QuestTracker { active_quests: vec![quest(2_110_010, QuestStatus::InProgress)] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![quest(2_110_010, QuestStatus::InProgress)],
+        });
         app.insert_resource(crate::big_map::BigMapModel {
             reset_epoch: 7,
             current_map_index: Some(d401.map_index),
@@ -8204,7 +10972,9 @@ mod tests {
         app.add_systems(Update, process_quest_ui_input);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().take(),
+            app.world_mut()
+                .resource_mut::<QuestRouteNavigationIntentQueue>()
+                .take(),
             Some(intent),
         );
     }
@@ -8222,7 +10992,10 @@ mod tests {
         let mut app = App::new();
         app.init_resource::<QuestPresentationLocale>();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::Login, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..default()
+        });
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(QuestTracker::default());
         app.init_resource::<NpcDialogModel>()
@@ -8231,10 +11004,16 @@ mod tests {
             .init_resource::<QuestUiIntentQueue>()
             .init_resource::<QuestRouteNavigationIntentQueue>()
             .init_resource::<PendingOperations>();
-        assert!(app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent));
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestRouteNavigationIntentQueue>()
+            .push(intent));
         app.add_systems(Update, process_quest_ui_input);
         app.update();
-        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app
+            .world()
+            .resource::<QuestRouteNavigationIntentQueue>()
+            .is_empty());
     }
 
     #[test]
@@ -8247,22 +11026,42 @@ mod tests {
             x: 147,
             y: 33,
         };
-        let tracker = QuestTracker { active_quests: vec![
-            quest(2_110_010, QuestStatus::InProgress),
-            quest(42, QuestStatus::InProgress),
-        ] };
+        let tracker = QuestTracker {
+            active_quests: vec![
+                quest(2_110_010, QuestStatus::InProgress),
+                quest(42, QuestStatus::InProgress),
+            ],
+        };
         let state = QuestUiState::default();
         let big_map = crate::big_map::BigMapModel {
             reset_epoch: 7,
             current_map_index: Some(1),
             ..default()
         };
-        assert!(quest_route_intent_is_current(intent, &tracker, &state, None, Some(&big_map)));
-        let pinned = QuestUiState { pinned_primary_quest_index: Some(42), ..default() };
-        assert!(!quest_route_intent_is_current(intent, &tracker, &pinned, None, Some(&big_map)));
+        assert!(quest_route_intent_is_current(
+            intent,
+            &tracker,
+            &state,
+            None,
+            Some(&big_map)
+        ));
+        let pinned = QuestUiState {
+            pinned_primary_quest_index: Some(42),
+            ..default()
+        };
+        assert!(!quest_route_intent_is_current(
+            intent,
+            &tracker,
+            &pinned,
+            None,
+            Some(&big_map)
+        ));
         assert!(!quest_route_intent_is_current(
             QuestRouteNavigationIntent { x: 148, ..intent },
-            &tracker, &state, None, Some(&big_map),
+            &tracker,
+            &state,
+            None,
+            Some(&big_map),
         ));
     }
 
@@ -8278,10 +11077,19 @@ mod tests {
         app.init_resource::<QuestPresentationLocale>();
         app.add_plugins(MinimalPlugins).add_systems(Startup, spawn);
         app.update();
-        let texts: Vec<String> = app.world_mut().query::<&Text>().iter(app.world()).map(|t| t.0.clone()).collect();
+        let texts: Vec<String> = app
+            .world_mut()
+            .query::<&Text>()
+            .iter(app.world())
+            .map(|t| t.0.clone())
+            .collect();
         assert!(texts.iter().any(|t| t.contains("(328,264)")));
         assert!(texts.iter().any(|t| t.contains("新手村安全区不算")));
-        assert!(app.world_mut().query::<&QuestUiButton>().iter(app.world()).any(|b| matches!(b, QuestUiButton::OpenDestinationMap)));
+        assert!(app
+            .world_mut()
+            .query::<&QuestUiButton>()
+            .iter(app.world())
+            .any(|b| matches!(b, QuestUiButton::OpenDestinationMap)));
         for font in app.world_mut().query::<&TextFont>().iter(app.world()) {
             assert_eq!(font.font, FontSource::Family("Microsoft YaHei".into()));
         }
@@ -8293,17 +11101,29 @@ mod tests {
     fn portable_quest_supplies_and_map_are_local_while_five_world_actions_stay_guarded() {
         use super::*;
         use crate::quest_supplies::SupplyVendor;
-        for action in [QuestUiButton::ToggleSupplies, QuestUiButton::ShowSupplyInventory,
-            QuestUiButton::SelectSupplyVendor(SupplyVendor::Potions), QuestUiButton::OpenDestinationMap] {
+        for action in [
+            QuestUiButton::ToggleSupplies,
+            QuestUiButton::ShowSupplyInventory,
+            QuestUiButton::SelectSupplyVendor(SupplyVendor::Potions),
+            QuestUiButton::OpenDestinationMap,
+        ] {
             assert!(!portable_unsupported_action(&action));
             assert!(intent_from_button(&action).is_none());
         }
-        for action in [QuestUiButton::NavigateQuestRoute(QuestRouteNavigationIntent {
-                target: QuestRouteTarget::Entrance, quest_index: 1, reset_epoch: 1,
-                map_index: 0, x: 1, y: 1 }),
+        for action in [
+            QuestUiButton::NavigateQuestRoute(QuestRouteNavigationIntent {
+                target: QuestRouteTarget::Entrance,
+                quest_index: 1,
+                reset_epoch: 1,
+                map_index: 0,
+                x: 1,
+                y: 1,
+            }),
             QuestUiButton::AttackTarget { object_id: 1 },
             QuestUiButton::AttackQuestTarget { object_id: 1 },
-            QuestUiButton::PickUpObject { object_id: 1 }, QuestUiButton::PickUpTile] {
+            QuestUiButton::PickUpObject { object_id: 1 },
+            QuestUiButton::PickUpTile,
+        ] {
             assert!(portable_unsupported_action(&action));
         }
     }
@@ -8590,10 +11410,42 @@ mod tests {
         queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id: 10 });
         assert_eq!(queue.clear_attack_intents(), 2);
         assert_eq!(queue.retry_len(), 1);
-        assert_eq!(queue.drain_intents(), vec![
-            QuestUiIntent::PickUpObject { object_id: 8 },
+        assert_eq!(
+            queue.drain_intents(),
+            vec![
+                QuestUiIntent::PickUpObject { object_id: 8 },
+                QuestUiIntent::InteractNpc { npc_object_id: 10 },
+            ]
+        );
+    }
+
+    #[test]
+    fn mining_directional_cancellation_clears_both_lanes_without_losing_npc_work() {
+        let mining = QuestUiIntent::AttackDirection {
+            direction: "left".into(),
+            mining: true,
+            gesture_id: 1,
+        };
+        let mut queue = QuestUiIntentQueue::default();
+        queue.retain_failed_intents([
+            mining.clone(),
             QuestUiIntent::InteractNpc { npc_object_id: 10 },
         ]);
+        queue.push_intent(mining.clone());
+        queue.push_intent(QuestUiIntent::AttackTarget { object_id: 20 });
+        assert_eq!(queue.clear_directional_attack_intents(), 2);
+        assert_eq!(
+            queue.drain_intents(),
+            vec![
+                QuestUiIntent::InteractNpc { npc_object_id: 10 },
+                QuestUiIntent::AttackTarget { object_id: 20 }
+            ]
+        );
+        queue.retain_failed_intents([mining.clone()]);
+        queue.push_intent(mining);
+        queue.push_intent(QuestUiIntent::PickUpTile);
+        assert_eq!(queue.clear_attack_intents(), 2);
+        assert_eq!(queue.drain_intents(), vec![QuestUiIntent::PickUpTile]);
     }
 
     #[test]
@@ -8896,25 +11748,38 @@ mod tests {
         dialog.apply(crate::quest_model::NpcDialogUpdate {
             npc_object_id: 2000,
             npc_name: Some("Bill".into()),
-            lines: vec!["Stone workshop".into(), "Gold: 9000".into(),
-                "Materials and raw stones stay in your physical Bag.".into()],
-            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"].into_iter()
+            lines: vec![
+                "Stone workshop".into(),
+                "Gold: 9000".into(),
+                "Materials and raw stones stay in your physical Bag.".into(),
+            ],
+            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"]
+                .into_iter()
                 .map(|target| crate::quest_model::NpcDialogOption {
-                    option_id: target.into(), label: "server link".into(), enabled: true,
-                }).collect(),
-            open: true, replace: true,
+                    option_id: target.into(),
+                    label: "server link".into(),
+                    enabled: true,
+                })
+                .collect(),
+            open: true,
+            replace: true,
         });
         dialog
     }
 
     fn rendered_npc_rect(app: &mut App) -> QuestLogRect {
         let world = app.world_mut();
-        let (node, focus) = world.query_filtered::<(&Node, &FocusPolicy), With<NpcDialogPanel>>()
-            .single(world).expect("the actual NPC panel");
+        let (node, focus) = world
+            .query_filtered::<(&Node, &FocusPolicy), With<NpcDialogPanel>>()
+            .single(world)
+            .expect("the actual NPC panel");
         assert_eq!(node.display, Display::Flex);
         assert!(matches!(focus, FocusPolicy::Block));
         let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
-            (node.left, node.top, node.width, node.height) else { panic!("pixel panel bounds") };
+            (node.left, node.top, node.width, node.height)
+        else {
+            panic!("pixel panel bounds")
+        };
         QuestLogRect::new(left, top, width, height)
     }
 
@@ -8922,71 +11787,153 @@ mod tests {
     fn workshop_render_uses_real_native_geometry_and_keeps_modal_current_links() {
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
         app.insert_resource(bevy::prelude::UiScale(2.0));
         let mut window = Window::default();
         window.resolution.set(2048.0, 1536.0);
-        let primary = app.world_mut().spawn((window, bevy::window::PrimaryWindow)).id();
+        let primary = app
+            .world_mut()
+            .spawn((window, bevy::window::PrimaryWindow))
+            .id();
         app.add_plugins(Mir2QuestUiPlugin);
         app.insert_resource(workshop_dialog_for_layout());
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(568.0, 16.0, 440.0, 224.0));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(568.0, 16.0, 440.0, 224.0)
+        );
         let world = app.world_mut();
-        assert_eq!(world.query_filtered::<&Node, With<QuestUiModalBlocker>>()
-            .single(world).unwrap().display, Display::Flex);
-        assert!(blocks_gameplay_input(None, world.resource::<NpcDialogModel>()));
-        assert!(is_world_click_blocked_for_quest(None, world.resource::<NpcDialogModel>(), false));
+        assert_eq!(
+            world
+                .query_filtered::<&Node, With<QuestUiModalBlocker>>()
+                .single(world)
+                .unwrap()
+                .display,
+            Display::Flex
+        );
+        assert!(blocks_gameplay_input(
+            None,
+            world.resource::<NpcDialogModel>()
+        ));
+        assert!(is_world_click_blocked_for_quest(
+            None,
+            world.resource::<NpcDialogModel>(),
+            false
+        ));
         let target = "@stone:v1:list:stone:0";
-        let button = world.query::<(Entity, &QuestUiButton)>().iter(world)
-            .find_map(|(entity, action)| matches!(action,
-                QuestUiButton::SelectNpcDialog { target: actual } if actual == target).then_some(entity))
+        let button = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .find_map(|(entity, action)| {
+                matches!(action,
+                QuestUiButton::SelectNpcDialog { target: actual } if actual == target)
+                .then_some(entity)
+            })
             .expect("a rendered opaque workshop link");
         world.entity_mut(button).insert(Interaction::Pressed);
         app.update();
-        assert_eq!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
-            vec![QuestUiIntent::SelectNpcDialog { target: target.into() }]);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::SelectNpcDialog {
+                target: target.into()
+            }]
+        );
 
         // No dialog update: a native window change must invalidate the layout cache.
-        app.world_mut().get_mut::<Window>(primary).unwrap().resolution.set(2560.0, 1536.0);
+        app.world_mut()
+            .get_mut::<Window>(primary)
+            .unwrap()
+            .resolution
+            .set(2560.0, 1536.0);
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(824.0, 16.0, 440.0, 224.0));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(824.0, 16.0, 440.0, 224.0)
+        );
         app.world_mut().resource_mut::<NpcDialogModel>().lines[0].text = "Blacksmith".into();
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
-        assert!(blocks_gameplay_input(None, app.world().resource::<NpcDialogModel>()));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(0.0, 0.0, 440.0, 224.0)
+        );
+        assert!(blocks_gameplay_input(
+            None,
+            app.world().resource::<NpcDialogModel>()
+        ));
 
         app.insert_resource(workshop_dialog_for_layout());
         app.world_mut().remove_resource::<bevy::prelude::UiScale>();
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(0.0, 0.0, 440.0, 224.0)
+        );
     }
 
     #[test]
     fn workshop_render_preserves_host_mobile_sheet_and_restores_ordinary_bounds() {
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
-        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
         app.add_plugins(Mir2QuestUiPlugin);
         app.insert_resource(workshop_dialog_for_layout());
-        let touch = QuestUiPresentation { logical_width: 1664.0, logical_height: 768.0,
-            stage_css_scale: 0.507, touch: true };
+        let touch = QuestUiPresentation {
+            logical_width: 1664.0,
+            logical_height: 768.0,
+            stage_css_scale: 0.507,
+            touch: true,
+        };
         app.insert_resource(touch);
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), touch.mobile_layout().unwrap().panel);
-        let desktop = QuestUiPresentation { logical_width: 1280.0, logical_height: 720.0,
-            stage_css_scale: 1.0, touch: false };
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            touch.mobile_layout().unwrap().panel
+        );
+        let desktop = QuestUiPresentation {
+            logical_width: 1280.0,
+            logical_height: 720.0,
+            stage_css_scale: 1.0,
+            touch: false,
+        };
         app.insert_resource(desktop);
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(824.0, 16.0, 440.0, 224.0));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(824.0, 16.0, 440.0, 224.0)
+        );
         // Unknown receipts expose only Merchant/Exit. They keep the ordinary modal panel.
-        app.world_mut().resource_mut::<NpcDialogModel>().options.remove(0);
+        app.world_mut()
+            .resource_mut::<NpcDialogModel>()
+            .options
+            .remove(0);
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
-        assert!(is_world_click_blocked_for_quest(None, app.world().resource::<NpcDialogModel>(), false));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(0.0, 0.0, 440.0, 224.0)
+        );
+        assert!(is_world_click_blocked_for_quest(
+            None,
+            app.world().resource::<NpcDialogModel>(),
+            false
+        ));
         app.insert_resource(workshop_dialog_for_layout());
-        app.insert_resource(QuestUiPresentation { logical_width: f32::NAN, ..desktop });
+        app.insert_resource(QuestUiPresentation {
+            logical_width: f32::NAN,
+            ..desktop
+        });
         app.update();
-        assert_eq!(rendered_npc_rect(&mut app), QuestLogRect::new(0.0, 0.0, 440.0, 224.0));
+        assert_eq!(
+            rendered_npc_rect(&mut app),
+            QuestLogRect::new(0.0, 0.0, 440.0, 224.0)
+        );
     }
 
     #[test]
@@ -9076,27 +12023,38 @@ mod tests {
                 .count(),
             1
         );
-        for (cell, children) in world.query_filtered::<(Entity, &Children), With<CrystalItemHint>>()
+        for (cell, children) in world
+            .query_filtered::<(Entity, &Children), With<CrystalItemHint>>()
             .iter(world)
         {
-            assert!(children.iter().all(|child|
-                world.get::<FocusPolicy>(child) == Some(&FocusPolicy::Pass)),
-                "reward decorations must pass hover to cell {cell:?}");
+            assert!(
+                children
+                    .iter()
+                    .all(|child| world.get::<FocusPolicy>(child) == Some(&FocusPolicy::Pass)),
+                "reward decorations must pass hover to cell {cell:?}"
+            );
         }
 
         app.insert_resource(QuestUiPresentation {
-            logical_width: 844.0, logical_height: 390.0,
-            stage_css_scale: 1.0, touch: true,
+            logical_width: 844.0,
+            logical_height: 390.0,
+            stage_css_scale: 1.0,
+            touch: true,
         });
         app.update();
         let world = app.world_mut();
-        let mobile_cells = world.query_filtered::<&Children, With<CrystalItemHint>>()
-            .iter(world).collect::<Vec<_>>();
+        let mobile_cells = world
+            .query_filtered::<&Children, With<CrystalItemHint>>()
+            .iter(world)
+            .collect::<Vec<_>>();
         assert_eq!(mobile_cells.len(), 2);
         for children in mobile_cells {
-            assert!(children.iter().all(|child|
-                world.get::<FocusPolicy>(child) == Some(&FocusPolicy::Pass)),
-                "mobile reward icon and label must pass hover to their cell");
+            assert!(
+                children
+                    .iter()
+                    .all(|child| world.get::<FocusPolicy>(child) == Some(&FocusPolicy::Pass)),
+                "mobile reward icon and label must pass hover to their cell"
+            );
         }
     }
 
@@ -9285,7 +12243,7 @@ mod tests {
         dialog.is_open = false;
         let mut native_open = NativePlayerUiState::default();
         native_open.core.panel = mir2_ui_core::state::UiPanel::QuestLog;
-        assert!(blocks_gameplay_input(Some(&native_open), &dialog,));
+        assert!(!blocks_gameplay_input(Some(&native_open), &dialog));
     }
 
     #[test]
@@ -9660,6 +12618,12 @@ mod tests {
         app.update();
         assert!(!app.world().resource::<NpcDialogModel>().is_open);
         assert!(!app.world().resource::<NpcDialogNav>().can_return());
+        assert!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .npc_service_exit_requested,
+            "an accepted explicit close must also exit an active NPC service"
+        );
         assert_eq!(
             app.world_mut()
                 .resource_mut::<QuestUiIntentQueue>()
@@ -9669,6 +12633,55 @@ mod tests {
             }]
         );
         app.world_mut().despawn(e3);
+    }
+
+    #[test]
+    fn npc_exit_link_requests_service_exit_only_after_its_intent_is_accepted() {
+        for target in ["@exit", "@Exit", "@EXIT"] {
+            let mut app = App::new();
+            app.insert_resource(ButtonInput::<KeyCode>::default())
+                .insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..default()
+                })
+                .init_resource::<NativePlayerUiState>()
+                .init_resource::<QuestPresentationLocale>()
+                .init_resource::<QuestTracker>()
+                .init_resource::<NpcDialogNav>()
+                .init_resource::<QuestUiState>()
+                .init_resource::<QuestUiIntentQueue>()
+                .init_resource::<PendingOperations>()
+                .init_resource::<NearbyNpcModel>()
+                .init_resource::<CombatTargetModel>()
+                .init_resource::<GroundPickupModel>();
+            let mut dialog = dialog_with_option(99, target);
+            dialog.npc_name = Some("Alchemist Samuel".into());
+            app.insert_resource(dialog);
+            app.world_mut().spawn((
+                Button,
+                QuestUiButton::SelectNpcDialog {
+                    target: target.into(),
+                },
+                Interaction::Pressed,
+            ));
+            app.add_systems(Update, process_quest_ui_input);
+            app.update();
+            assert!(
+                app.world()
+                    .resource::<NativePlayerUiState>()
+                    .npc_service_exit_requested
+            );
+            assert!(!app.world().resource::<NpcDialogModel>().is_open);
+            assert!(!app.world().resource::<NpcDialogNav>().can_return());
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents(),
+                vec![QuestUiIntent::SelectNpcDialog {
+                    target: target.into()
+                }]
+            );
+        }
     }
 
     #[test]
@@ -9757,7 +12770,7 @@ mod tests {
             .resource_mut::<ButtonInput<KeyCode>>()
             .clear();
 
-        // Press Q again to close while the quest panel itself is modal.
+        // Press Q again to close the ordinary Diary window.
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::KeyQ);
@@ -10140,7 +13153,9 @@ mod tests {
                         },
                         &PendingOperations::default(),
                         true,
-                        None, QuestRenderText::default());
+                        None,
+                        QuestRenderText::default(),
+                    );
                 });
             }
         });
@@ -10644,8 +13659,14 @@ mod tests {
         assert_eq!(groups[0].quests[0].quest_index, 2);
         assert_eq!(groups[1].name, "BorderVillage");
         assert_eq!(groups[1].quests[0].quest_index, 3);
-        assert_eq!(quest_diary_status_label(groups[0].quests[0], QuestRenderText::default()), "可提交");
-        assert_eq!(quest_diary_status_label(groups[1].quests[0], QuestRenderText::default()), "进行中");
+        assert_eq!(
+            quest_diary_status_label(groups[0].quests[0], QuestRenderText::default()),
+            "可提交"
+        );
+        assert_eq!(
+            quest_diary_status_label(groups[1].quests[0], QuestRenderText::default()),
+            "进行中"
+        );
     }
 
     #[test]
@@ -10674,15 +13695,23 @@ mod tests {
         let tracker = QuestTracker { active_quests: all };
 
         let main_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Main);
-        assert_eq!(main_rows.iter().map(|quest| quest.quest_index).collect::<Vec<_>>(),
-            vec![2_110_013]);
+        assert_eq!(
+            main_rows
+                .iter()
+                .map(|quest| quest.quest_index)
+                .collect::<Vec<_>>(),
+            vec![2_110_013]
+        );
         let side_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Side);
         assert_eq!(side_rows.len(), 11);
         assert_eq!(side_rows.len().div_ceil(GUIDED_DIARY_PAGE_SIZE), 2);
         assert_eq!(side_rows[0].status, QuestStatus::ReadyToTurnIn);
-        let ready_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Ready);
+        let ready_rows =
+            guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Ready);
         assert_eq!(ready_rows.len(), 2);
-        assert!(ready_rows.iter().all(|quest| quest.status == QuestStatus::ReadyToTurnIn));
+        assert!(ready_rows
+            .iter()
+            .all(|quest| quest.status == QuestStatus::ReadyToTurnIn));
     }
 
     #[test]
@@ -10704,19 +13733,33 @@ mod tests {
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
                 render_guided_quest_diary_panel(
-                    parent, &tracker, &guidance, None, &state, None, QuestRenderText::default());
+                    parent,
+                    &tracker,
+                    &guidance,
+                    None,
+                    &state,
+                    None,
+                    QuestRenderText::default(),
+                );
             });
             queue.apply(&mut world);
-            let rows = world.query::<(&QuestDiaryRow, &Node)>().iter(&world)
+            let rows = world
+                .query::<(&QuestDiaryRow, &Node)>()
+                .iter(&world)
                 .collect::<Vec<_>>();
             assert_eq!(rows.len(), expected_rows);
             assert!(rows.iter().all(|(_, node)| match (node.top, node.height) {
                 (Val::Px(top), Val::Px(height)) => top + height <= 408.0,
                 _ => false,
             }));
-            assert_eq!(world.query::<&QuestUiButton>().iter(&world)
-                .filter(|button| matches!(button, QuestUiButton::SelectGuidedDiaryTab(_)))
-                .count(), 3);
+            assert_eq!(
+                world
+                    .query::<&QuestUiButton>()
+                    .iter(&world)
+                    .filter(|button| matches!(button, QuestUiButton::SelectGuidedDiaryTab(_)))
+                    .count(),
+                GuidedDiaryTab::ALL.len()
+            );
         }
     }
 
@@ -10753,12 +13796,16 @@ mod tests {
     #[test]
     fn newcomer_detail_wraps_hint_into_scrollable_logical_lines() {
         let guidance = QuestGuidance::from_profile_name("newcomer-v1");
-        let lines = quest_detail_lines(&quest(1, QuestStatus::InProgress), Some(&guidance), "Warrior");
+        let lines = quest_detail_lines(
+            &quest(1, QuestStatus::InProgress),
+            Some(&guidance),
+            "Warrior",
+        );
         assert!(lines.iter().any(|line| line.text == "新手引导"));
-        assert!(lines
-            .iter()
-            .any(|line| line.text == "分类：推荐任务"));
-        let hint_lines = multi_guidance::wrap_card_text(&crate::player_text::text(guidance.entry(1).unwrap().hint.as_str()));
+        assert!(lines.iter().any(|line| line.text == "分类：推荐任务"));
+        let hint_lines = multi_guidance::wrap_card_text(&crate::player_text::text(
+            guidance.entry(1).unwrap().hint.as_str(),
+        ));
         assert!(hint_lines.len() > 1);
         assert!(hint_lines.iter().all(|line| line.chars().count() <= 46));
         assert!(hint_lines
@@ -10899,7 +13946,7 @@ mod tests {
     fn newcomer_diary_accept_and_finish_work_without_an_npc_dialog() {
         fn app_for(quest: Quest) -> App {
             let mut app = App::new();
-        app.init_resource::<QuestPresentationLocale>();
+            app.init_resource::<QuestPresentationLocale>();
             app.insert_resource(ButtonInput::<KeyCode>::default());
             app.insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -11023,7 +14070,7 @@ mod tests {
     fn click_requires_explicit_diary_endpoint_but_honors_current_npc_offer() {
         fn app_for(quest: Quest, dialog: NpcDialogModel) -> App {
             let mut app = App::new();
-        app.init_resource::<QuestPresentationLocale>();
+            app.init_resource::<QuestPresentationLocale>();
             app.insert_resource(ButtonInput::<KeyCode>::default());
             app.insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -11090,7 +14137,7 @@ mod tests {
 
     #[test]
     fn changing_reward_while_finish_is_pending_does_not_submit_again() {
-        use crate::pending_operations::{QuestOperationAck, apply_quest_operation_ack};
+        use crate::pending_operations::{apply_quest_operation_ack, QuestOperationAck};
 
         let mut quest = quest_with_rewards(
             23,
@@ -11168,7 +14215,10 @@ mod tests {
             Interaction::Pressed,
         ));
         app.update();
-        assert_eq!(app.world().resource::<QuestUiState>().selected_reward_index, Some(1));
+        assert_eq!(
+            app.world().resource::<QuestUiState>().selected_reward_index,
+            Some(1)
+        );
         app.world_mut().spawn((
             Button,
             QuestUiButton::FinishQuest {
@@ -11225,38 +14275,56 @@ mod tests {
 #[cfg(all(test, feature = "portable-quest-ui", not(feature = "native-ui")))]
 mod mobile_layout_tests {
     use super::*;
-    use bevy::ecs::system::RunSystemOnce;
-    use bevy::camera::{ComputedCameraValues, RenderTargetInfo, Viewport};
-    use crate::portable_quest_ui::{Mir2PortableQuestUiPlugin, QuestUiFont, QuestUiHostContext, QuestUiTargetCamera};
+    use crate::portable_quest_ui::{
+        Mir2PortableQuestUiPlugin, QuestUiFont, QuestUiHostContext, QuestUiTargetCamera,
+    };
     use crate::quest_model::QuestStatus;
+    use bevy::camera::{ComputedCameraValues, RenderTargetInfo, Viewport};
+    use bevy::ecs::system::RunSystemOnce;
 
     #[derive(Resource, Default)]
     struct IdleQuestStateChanges(Vec<bool>);
 
-    fn record_idle_quest_state_change(state: Res<QuestUiState>,
-        mut changes: ResMut<IdleQuestStateChanges>) {
+    fn record_idle_quest_state_change(
+        state: Res<QuestUiState>,
+        mut changes: ResMut<IdleQuestStateChanges>,
+    ) {
         changes.0.push(state.is_changed());
     }
 
     fn presentation() -> QuestUiPresentation {
-        QuestUiPresentation { logical_width: 1664.0, logical_height: 768.0,
-            stage_css_scale: 0.507, touch: true }
+        QuestUiPresentation {
+            logical_width: 1664.0,
+            logical_height: 768.0,
+            stage_css_scale: 0.507,
+            touch: true,
+        }
     }
 
     #[test]
     fn workshop_portable_tree_uses_supplied_right_sidebar_and_keeps_touch_sheet() {
         let mut app = computed_app(1024, 512.0, false);
-        app.world_mut().resource_mut::<QuestUiHostContext>().quest_log_open = false;
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .quest_log_open = false;
         let mut dialog = NpcDialogModel::default();
         dialog.apply(crate::quest_model::NpcDialogUpdate {
-            npc_object_id: 2000, npc_name: Some("Bill".into()),
-            lines: vec!["Stone workshop".into(),
-                "Materials and raw stones stay in your physical Bag.".into()],
-            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"].into_iter()
+            npc_object_id: 2000,
+            npc_name: Some("Bill".into()),
+            lines: vec![
+                "Stone workshop".into(),
+                "Materials and raw stones stay in your physical Bag.".into(),
+            ],
+            options: ["@stone:v1:list:stone:0", "@Main", "@Exit"]
+                .into_iter()
                 .map(|target| crate::quest_model::NpcDialogOption {
-                    option_id: target.into(), label: "server link".into(), enabled: true,
-                }).collect(),
-            open: true, replace: true,
+                    option_id: target.into(),
+                    label: "server link".into(),
+                    enabled: true,
+                })
+                .collect(),
+            open: true,
+            replace: true,
         });
         app.insert_resource(dialog);
         app.world_mut().resource_mut::<QuestUiPresentation>().touch = false;
@@ -11270,23 +14338,44 @@ mod mobile_layout_tests {
             assert_eq!(computed.size(), Vec2::new(440.0, 224.0));
             let bounds = compact_rect(computed, transform);
             assert!((bounds.min - Vec2::new(568.0, 16.0)).length() < 0.01);
-            assert!(blocks_gameplay_input(None, world.resource::<NpcDialogModel>()));
+            assert!(blocks_gameplay_input(
+                None,
+                world.resource::<NpcDialogModel>()
+            ));
         }
-        app.world_mut().resource_mut::<NpcDialogModel>().options.remove(0);
+        app.world_mut()
+            .resource_mut::<NpcDialogModel>()
+            .options
+            .remove(0);
         app.update();
         {
             let world = app.world_mut();
-            let node = world.query_filtered::<&Node, With<NpcDialogPanel>>().single(world).unwrap();
+            let node = world
+                .query_filtered::<&Node, With<NpcDialogPanel>>()
+                .single(world)
+                .unwrap();
             assert_eq!((node.left, node.top), (Val::Px(0.0), Val::Px(0.0)));
         }
         app.world_mut().resource_mut::<QuestUiPresentation>().touch = true;
         app.update();
         let world = app.world_mut();
-        let layout = world.resource::<QuestUiPresentation>().mobile_layout().unwrap();
-        let node = world.query_filtered::<&Node, With<NpcDialogPanel>>().single(world).unwrap();
-        assert_eq!((node.left, node.top, node.width, node.height),
-            (Val::Px(layout.panel.left), Val::Px(layout.panel.top),
-                Val::Px(layout.panel.width), Val::Px(layout.panel.height)));
+        let layout = world
+            .resource::<QuestUiPresentation>()
+            .mobile_layout()
+            .unwrap();
+        let node = world
+            .query_filtered::<&Node, With<NpcDialogPanel>>()
+            .single(world)
+            .unwrap();
+        assert_eq!(
+            (node.left, node.top, node.width, node.height),
+            (
+                Val::Px(layout.panel.left),
+                Val::Px(layout.panel.top),
+                Val::Px(layout.panel.width),
+                Val::Px(layout.panel.height)
+            )
+        );
         assert_eq!(node.display, Display::Flex);
     }
 
@@ -11295,8 +14384,12 @@ mod mobile_layout_tests {
         let mut app = computed_app(600, 320.0, true);
         let mut source = quest();
         source.detail.description_lines = vec![" Same English fallback  ".repeat(120)];
-        app.insert_resource(QuestTracker { active_quests: vec![source] });
-        app.insert_resource(QuestPresentationLocale(mir2_game_data::LanguageCode::English));
+        app.insert_resource(QuestTracker {
+            active_quests: vec![source],
+        });
+        app.insert_resource(QuestPresentationLocale(
+            mir2_game_data::LanguageCode::English,
+        ));
         app.update();
         {
             let mut state = app.world_mut().resource_mut::<QuestUiState>();
@@ -11309,22 +14402,33 @@ mod mobile_layout_tests {
         *app.world_mut().resource_mut::<QuestPresentationLocale>() =
             QuestPresentationLocale(mir2_game_data::LanguageCode::Portuguese);
         let world = app.world();
-        assert!(!compact_input_current(world.get_resource::<QuestUiPresentation>(),
-            world.get_resource::<QuestUiHostContext>(), world.get_resource::<QuestGuidance>(),
-            world.resource::<NativePlayerUiState>(), world.resource::<QuestUiState>(),
-            world.resource::<QuestTracker>(), world.resource::<NpcDialogModel>(),
-            world.get_resource::<QuestCompactReadiness>(), *world.resource::<QuestPresentationLocale>()));
+        assert!(!compact_input_current(
+            world.get_resource::<QuestUiPresentation>(),
+            world.get_resource::<QuestUiHostContext>(),
+            world.get_resource::<QuestGuidance>(),
+            world.resource::<NativePlayerUiState>(),
+            world.resource::<QuestUiState>(),
+            world.resource::<QuestTracker>(),
+            world.resource::<NpcDialogModel>(),
+            world.get_resource::<QuestCompactReadiness>(),
+            *world.resource::<QuestPresentationLocale>()
+        ));
         app.update();
         let state = app.world().resource::<QuestUiState>();
         assert_eq!(state.detail_quest_index, Some(23));
         assert_eq!(state.detail_scroll_top, 2);
         assert_eq!(state.selected_reward_index, Some(1));
-        assert_eq!(app.world().resource::<QuestUiHostContext>().open_revision, revision);
+        assert_eq!(
+            app.world().resource::<QuestUiHostContext>().open_revision,
+            revision
+        );
         let current = app.world().resource::<QuestCompactReadiness>();
         assert!(current.current, "{current:?}");
-        assert_ne!(old_stamp, current.stamp, "equal fallback text still changes locale stamp");
+        assert_ne!(
+            old_stamp, current.stamp,
+            "equal fallback text still changes locale stamp"
+        );
     }
-
 
     #[test]
     fn m7_compact_heading_tree_locale_flip_preserves_scroll_reward_pending_and_current_stamp() {
@@ -11333,94 +14437,223 @@ mod mobile_layout_tests {
         for (npc, progress_section) in [(false, false), (false, true), (true, false)] {
             let mut app = computed_app(600, 320.0, false);
             let mut source = quest();
-            source.detail.description_lines = (0..7).map(|i|format!("Opaque host line {i}")).collect();
+            source.detail.description_lines =
+                (0..7).map(|i| format!("Opaque host line {i}")).collect();
             source.detail.task_description_lines = vec!["Task body".into()];
             source.detail.return_description_lines = vec!["Return body".into()];
-            source.objectives = vec![crate::quest_model::QuestObjective { objective_id: "opaque:1".into(),
-                text: "Objective host".into(), current: 1, target: 3 }];
-            let mut second = source.clone(); second.quest_index = 24;
+            source.objectives = vec![crate::quest_model::QuestObjective {
+                objective_id: "opaque:1".into(),
+                text: "Objective host".into(),
+                current: 1,
+                target: 3,
+            }];
+            let mut second = source.clone();
+            second.quest_index = 24;
             let source_copy = source.clone();
-            app.insert_resource(QuestTracker { active_quests: vec![source, second] });
-            let dialog = NpcDialogModel { is_open: npc, npc_object_id: Some(0),
-                npc_name: Some("Village Chief".into()), lines: vec![crate::quest_model::NpcDialogLine { text: "Return".into() }],
-                options: vec![crate::quest_model::NpcDialogOption { option_id: "@raw:return/Progress:9".into(),
-                    label: "Progress".into(), enabled: true }] };
+            app.insert_resource(QuestTracker {
+                active_quests: vec![source, second],
+            });
+            let dialog = NpcDialogModel {
+                is_open: npc,
+                npc_object_id: Some(0),
+                npc_name: Some("Village Chief".into()),
+                lines: vec![crate::quest_model::NpcDialogLine {
+                    text: "Return".into(),
+                }],
+                options: vec![crate::quest_model::NpcDialogOption {
+                    option_id: "@raw:return/Progress:9".into(),
+                    label: "Progress".into(),
+                    enabled: true,
+                }],
+            };
             app.insert_resource(dialog.clone());
-            app.insert_resource(QuestPresentationLocale(mir2_game_data::LanguageCode::English));
-            let layout = app.world().resource::<QuestUiPresentation>().mobile_layout().unwrap();
-            let text = QuestRenderText { locale: QuestPresentationLocale(mir2_game_data::LanguageCode::English) };
-            let rows = if npc { quest_list_message_lines_with_wrap(&source_copy, &dialog, None, false, text) }
-                else { quest_detail_lines_with_wrap(&source_copy, None, "", false, text) };
-            let wrapped = mobile_wrap_quest_lines(rows, layout.width_css()-32.0);
-            let expected_heading = if progress_section { "Progress" } else { "Return" };
-            let heading_index = wrapped.iter().position(|row| row.kind == QuestDetailLineKind::Heading
-                && row.text == expected_heading).expect("independent heading row");
+            app.insert_resource(QuestPresentationLocale(
+                mir2_game_data::LanguageCode::English,
+            ));
+            let layout = app
+                .world()
+                .resource::<QuestUiPresentation>()
+                .mobile_layout()
+                .unwrap();
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(mir2_game_data::LanguageCode::English),
+            };
+            let rows = if npc {
+                quest_list_message_lines_with_wrap(&source_copy, &dialog, None, false, text)
+            } else {
+                quest_detail_lines_with_wrap(&source_copy, None, "", false, text)
+            };
+            let wrapped = mobile_wrap_quest_lines(rows, layout.width_css() - 32.0);
+            let expected_heading = if progress_section {
+                "Progress"
+            } else {
+                "Return"
+            };
+            let heading_index = wrapped
+                .iter()
+                .position(|row| {
+                    row.kind == QuestDetailLineKind::Heading && row.text == expected_heading
+                })
+                .expect("independent heading row");
             let body_index = heading_index + 1;
-            let expected_body = if progress_section { "Objective host (1 / 3)" } else { "Return body" };
+            let expected_body = if progress_section {
+                "Objective host (1 / 3)"
+            } else {
+                "Return body"
+            };
             assert_eq!(wrapped[body_index].text, expected_body);
-            let max_top = wrapped.len().saturating_sub(if npc { layout.message_rows() } else { layout.detail_rows() });
+            let max_top = wrapped.len().saturating_sub(if npc {
+                layout.message_rows()
+            } else {
+                layout.detail_rows()
+            });
             let top = heading_index.min(max_top);
             let body_top = body_index.min(max_top);
-            assert!(top > 0 && top <= max_top && body_top > 0 && body_top <= max_top,
-                "valid nonzero heading/body scroll positions");
-            { let mut state = app.world_mut().resource_mut::<QuestUiState>(); state.select_quest(23);
-                if npc { state.open_npc_quest_list(&[23,24]); state.select_npc_quest(23); state.npc_quest_message_scroll_top=top; }
-                else { state.detail_scroll_top=top; }
-                state.selected_reward_index=Some(1); state.npc_selected_reward_index=Some(1);
-                state.tracked_quest_indices=vec![24,23]; }
+            assert!(
+                top > 0 && top <= max_top && body_top > 0 && body_top <= max_top,
+                "valid nonzero heading/body scroll positions"
+            );
+            {
+                let mut state = app.world_mut().resource_mut::<QuestUiState>();
+                state.select_quest(23);
+                if npc {
+                    state.open_npc_quest_list(&[23, 24]);
+                    state.select_npc_quest(23);
+                    state.npc_quest_message_scroll_top = top;
+                } else {
+                    state.detail_scroll_top = top;
+                }
+                state.selected_reward_index = Some(1);
+                state.npc_selected_reward_index = Some(1);
+                state.tracked_quest_indices = vec![24, 23];
+            }
             let pending = PendingOperationKey::QuestAbandon { quest_index: 23 };
-            assert!(app.world_mut().resource_mut::<PendingOperations>().try_begin(pending.clone()));
+            assert!(app
+                .world_mut()
+                .resource_mut::<PendingOperations>()
+                .try_begin(pending.clone()));
             app.update();
-            let revision=app.world().resource::<QuestUiHostContext>().open_revision;
-            let mut last_stamp=None;
-            for (language, ret, progress) in [(mir2_game_data::LanguageCode::English,"Return","Progress"),
-                (mir2_game_data::LanguageCode::Portuguese,"Local de entrega","Progresso"),
-                (mir2_game_data::LanguageCode::English,"Return","Progress"),
-                (mir2_game_data::LanguageCode::ChineseSimplified,"交付地点","任务进度"),
-                (mir2_game_data::LanguageCode::Spanish,"Lugar de entrega","Progreso")] {
-                *app.world_mut().resource_mut::<QuestPresentationLocale>()=QuestPresentationLocale(language);
+            let revision = app.world().resource::<QuestUiHostContext>().open_revision;
+            let mut last_stamp = None;
+            for (language, ret, progress) in [
+                (mir2_game_data::LanguageCode::English, "Return", "Progress"),
+                (
+                    mir2_game_data::LanguageCode::Portuguese,
+                    "Local de entrega",
+                    "Progresso",
+                ),
+                (mir2_game_data::LanguageCode::English, "Return", "Progress"),
+                (
+                    mir2_game_data::LanguageCode::ChineseSimplified,
+                    "交付地点",
+                    "任务进度",
+                ),
+                (
+                    mir2_game_data::LanguageCode::Spanish,
+                    "Lugar de entrega",
+                    "Progreso",
+                ),
+            ] {
+                *app.world_mut().resource_mut::<QuestPresentationLocale>() =
+                    QuestPresentationLocale(language);
                 if last_stamp.is_some() {
-                    let world=app.world();
-                    assert!(!compact_input_current(world.get_resource::<QuestUiPresentation>(),
-                        world.get_resource::<QuestUiHostContext>(), world.get_resource::<QuestGuidance>(),
-                        world.resource::<NativePlayerUiState>(), world.resource::<QuestUiState>(),
-                        world.resource::<QuestTracker>(), world.resource::<NpcDialogModel>(),
-                        world.get_resource::<QuestCompactReadiness>(), *world.resource::<QuestPresentationLocale>()));
+                    let world = app.world();
+                    assert!(!compact_input_current(
+                        world.get_resource::<QuestUiPresentation>(),
+                        world.get_resource::<QuestUiHostContext>(),
+                        world.get_resource::<QuestGuidance>(),
+                        world.resource::<NativePlayerUiState>(),
+                        world.resource::<QuestUiState>(),
+                        world.resource::<QuestTracker>(),
+                        world.resource::<NpcDialogModel>(),
+                        world.get_resource::<QuestCompactReadiness>(),
+                        *world.resource::<QuestPresentationLocale>()
+                    ));
                 }
                 app.update();
-                let world=app.world_mut();
-                let texts=world.query::<&Text>().iter(world).map(|text|text.0.clone()).collect::<Vec<_>>();
-                let heading=if progress_section { progress } else { ret };
+                let world = app.world_mut();
+                let texts = world
+                    .query::<&Text>()
+                    .iter(world)
+                    .map(|text| text.0.clone())
+                    .collect::<Vec<_>>();
+                let heading = if progress_section { progress } else { ret };
                 assert!(texts.iter().any(|text|text==heading), "actual compact heading npc={npc} progress={progress_section} {language:?}: {texts:?}");
-                let state=world.resource::<QuestUiState>();
-                assert_eq!(if npc {state.npc_quest_message_scroll_top} else {state.detail_scroll_top},top);
-                assert_eq!(state.detail_quest_index,Some(23));
-                if npc { assert_eq!(state.npc_quest_selected_index,Some(23)); }
-                assert_eq!(state.selected_reward_index,Some(1)); assert_eq!(state.npc_selected_reward_index,Some(1));
-                assert_eq!(state.tracked_quest_indices,vec![24,23]);
+                let state = world.resource::<QuestUiState>();
+                assert_eq!(
+                    if npc {
+                        state.npc_quest_message_scroll_top
+                    } else {
+                        state.detail_scroll_top
+                    },
+                    top
+                );
+                assert_eq!(state.detail_quest_index, Some(23));
+                if npc {
+                    assert_eq!(state.npc_quest_selected_index, Some(23));
+                }
+                assert_eq!(state.selected_reward_index, Some(1));
+                assert_eq!(state.npc_selected_reward_index, Some(1));
+                assert_eq!(state.tracked_quest_indices, vec![24, 23]);
                 assert!(world.resource::<PendingOperations>().contains(&pending));
-                let current=world.resource::<QuestCompactReadiness>();
-                assert!(current.current,"measured current compact tree: {current:?}");
-                assert_eq!(current.stamp.unwrap().locale,QuestPresentationLocale(language));
-                assert_eq!(current.stamp.unwrap().sheet, if npc { MobileQuestSheet::NpcList } else { MobileQuestSheet::Detail },
-                    "the real observed sheet must contain the tested section");
-                if let Some(previous)=last_stamp {assert_ne!(current.stamp,Some(previous));}
-                assert_eq!(world.resource::<QuestUiHostContext>().open_revision,revision);
-                assert_eq!(world.resource::<NpcDialogModel>().options[0].option_id,"@raw:return/Progress:9");
-                { let mut state=app.world_mut().resource_mut::<QuestUiState>();
-                    if npc {state.npc_quest_message_scroll_top=body_top;} else {state.detail_scroll_top=body_top;} }
+                let current = world.resource::<QuestCompactReadiness>();
+                assert!(
+                    current.current,
+                    "measured current compact tree: {current:?}"
+                );
+                assert_eq!(
+                    current.stamp.unwrap().locale,
+                    QuestPresentationLocale(language)
+                );
+                assert_eq!(
+                    current.stamp.unwrap().sheet,
+                    if npc {
+                        MobileQuestSheet::NpcList
+                    } else {
+                        MobileQuestSheet::Detail
+                    },
+                    "the real observed sheet must contain the tested section"
+                );
+                if let Some(previous) = last_stamp {
+                    assert_ne!(current.stamp, Some(previous));
+                }
+                assert_eq!(
+                    world.resource::<QuestUiHostContext>().open_revision,
+                    revision
+                );
+                assert_eq!(
+                    world.resource::<NpcDialogModel>().options[0].option_id,
+                    "@raw:return/Progress:9"
+                );
+                {
+                    let mut state = app.world_mut().resource_mut::<QuestUiState>();
+                    if npc {
+                        state.npc_quest_message_scroll_top = body_top;
+                    } else {
+                        state.detail_scroll_top = body_top;
+                    }
+                }
                 app.update();
-                let world=app.world_mut();
+                let world = app.world_mut();
                 assert!(world.query::<&Text>().iter(world).any(|value|value.0==expected_body),
                     "actual opaque body viewport npc={npc} progress={progress_section} {language:?}");
                 assert!(world.resource::<QuestCompactReadiness>().current);
-                { let mut state=app.world_mut().resource_mut::<QuestUiState>();
-                    if npc {state.npc_quest_message_scroll_top=top;} else {state.detail_scroll_top=top;} }
+                {
+                    let mut state = app.world_mut().resource_mut::<QuestUiState>();
+                    if npc {
+                        state.npc_quest_message_scroll_top = top;
+                    } else {
+                        state.detail_scroll_top = top;
+                    }
+                }
                 app.update();
-                let restored=app.world().resource::<QuestCompactReadiness>();
+                let restored = app.world().resource::<QuestCompactReadiness>();
                 assert!(restored.current);
-                assert_eq!(restored.stamp.unwrap().locale,QuestPresentationLocale(language));
-                last_stamp=restored.stamp;
+                assert_eq!(
+                    restored.stamp.unwrap().locale,
+                    QuestPresentationLocale(language)
+                );
+                last_stamp = restored.stamp;
             }
         }
     }
@@ -11432,23 +14665,44 @@ mod mobile_layout_tests {
             let mut source = quest();
             source.quest_index = 2_110_002;
             source.title = "Host long quest".into();
-            source.detail.description_lines = (0..60).map(|n| format!("Host body line {n:02}")).collect();
-            app.insert_resource(QuestTracker { active_quests: vec![source] });
-            app.insert_resource(QuestPresentationLocale(mir2_game_data::LanguageCode::English));
+            source.detail.description_lines =
+                (0..60).map(|n| format!("Host body line {n:02}")).collect();
+            app.insert_resource(QuestTracker {
+                active_quests: vec![source],
+            });
+            app.insert_resource(QuestPresentationLocale(
+                mir2_game_data::LanguageCode::English,
+            ));
             if npc {
-                app.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(0),
-                    npc_name: Some("Village Chief".into()), ..default() });
+                app.insert_resource(NpcDialogModel {
+                    is_open: true,
+                    npc_object_id: Some(0),
+                    npc_name: Some("Village Chief".into()),
+                    ..default()
+                });
                 let mut state = app.world_mut().resource_mut::<QuestUiState>();
                 state.npc_quest_list_open = true;
                 state.select_npc_quest(2_110_002);
-            } else { app.world_mut().resource_mut::<QuestUiState>().select_quest(2_110_002); }
+            } else {
+                app.world_mut()
+                    .resource_mut::<QuestUiState>()
+                    .select_quest(2_110_002);
+            }
             app.update();
             let open_revision = app.world().resource::<QuestUiHostContext>().open_revision;
-            for language in [mir2_game_data::LanguageCode::English, mir2_game_data::LanguageCode::Portuguese] {
+            for language in [
+                mir2_game_data::LanguageCode::English,
+                mir2_game_data::LanguageCode::Portuguese,
+            ] {
                 let mut state = app.world_mut().resource_mut::<QuestUiState>();
-                if npc { state.npc_quest_message_scroll_top = 18; } else { state.detail_scroll_top = 18; }
+                if npc {
+                    state.npc_quest_message_scroll_top = 18;
+                } else {
+                    state.detail_scroll_top = 18;
+                }
                 state.selected_reward_index = Some(1);
-                *app.world_mut().resource_mut::<QuestPresentationLocale>() = QuestPresentationLocale(language);
+                *app.world_mut().resource_mut::<QuestPresentationLocale>() =
+                    QuestPresentationLocale(language);
                 app.update();
                 let state = app.world().resource::<QuestUiState>();
                 assert_eq!(if npc { state.npc_quest_message_scroll_top } else { state.detail_scroll_top }, 18,
@@ -11456,21 +14710,43 @@ mod mobile_layout_tests {
                 assert_eq!(state.selected_reward_index, Some(1));
                 let ready = app.world().resource::<QuestCompactReadiness>();
                 assert!(ready.current, "locale-only measured tree {ready:?}");
-                assert_eq!(ready.stamp.unwrap().locale, QuestPresentationLocale(language));
-                assert_eq!(*app.world().resource::<QuestPresentationLocale>(), QuestPresentationLocale(language));
-                assert_eq!(app.world().resource::<QuestUiHostContext>().open_revision, open_revision);
+                assert_eq!(
+                    ready.stamp.unwrap().locale,
+                    QuestPresentationLocale(language)
+                );
+                assert_eq!(
+                    *app.world().resource::<QuestPresentationLocale>(),
+                    QuestPresentationLocale(language)
+                );
+                assert_eq!(
+                    app.world().resource::<QuestUiHostContext>().open_revision,
+                    open_revision
+                );
             }
-            app.world_mut().resource_mut::<QuestUiHostContext>().host_visible = true;
+            app.world_mut()
+                .resource_mut::<QuestUiHostContext>()
+                .host_visible = true;
             app.update();
-            assert!(app.world().resource::<QuestCompactReadiness>().current, "initial actual layout npc={npc}: {:?}", app.world().resource::<QuestCompactReadiness>());
+            assert!(
+                app.world().resource::<QuestCompactReadiness>().current,
+                "initial actual layout npc={npc}: {:?}",
+                app.world().resource::<QuestCompactReadiness>()
+            );
             let mut reached_tail = false;
             let mut input_executions = 0;
             for _ in 0..100 {
                 let world = app.world_mut();
-                let button = world.query::<(Entity, &QuestUiButton)>().iter(world).find_map(|(e,a)|
-                    ((npc && matches!(a, QuestUiButton::NpcQuestMessageScrollDown)) ||
-                     (!npc && matches!(a, QuestUiButton::QuestDetailScrollDown))).then_some(e));
-                let Some(button) = button else { break; };
+                let button = world
+                    .query::<(Entity, &QuestUiButton)>()
+                    .iter(world)
+                    .find_map(|(e, a)| {
+                        ((npc && matches!(a, QuestUiButton::NpcQuestMessageScrollDown))
+                            || (!npc && matches!(a, QuestUiButton::QuestDetailScrollDown)))
+                        .then_some(e)
+                    });
+                let Some(button) = button else {
+                    break;
+                };
                 world.entity_mut(button).insert(Interaction::Pressed);
                 // Execute the real input system after the prior measured layout.
                 // UiPlugin PreUpdate otherwise replaces synthetic Interaction.
@@ -11478,14 +14754,27 @@ mod mobile_layout_tests {
                 input_executions += 1;
                 app.update();
                 let world = app.world_mut();
-                reached_tail = world.query::<(&Text, &ComputedNode, &bevy::ui::UiGlobalTransform, &InheritedVisibility)>()
-                    .iter(world).any(|(text,node,transform,visible)| {
-                        let rect = compact_rect(node,transform);
-                        text.0 == "Host body line 59" && visible.get() && node.size().min_element() > 0.0
-                            && rect.min.x >= 0.0 && rect.min.y >= 0.0
-                            && rect.max.x <= 600.0 && rect.max.y <= 320.0
+                reached_tail = world
+                    .query::<(
+                        &Text,
+                        &ComputedNode,
+                        &bevy::ui::UiGlobalTransform,
+                        &InheritedVisibility,
+                    )>()
+                    .iter(world)
+                    .any(|(text, node, transform, visible)| {
+                        let rect = compact_rect(node, transform);
+                        text.0 == "Host body line 59"
+                            && visible.get()
+                            && node.size().min_element() > 0.0
+                            && rect.min.x >= 0.0
+                            && rect.min.y >= 0.0
+                            && rect.max.x <= 600.0
+                            && rect.max.y <= 320.0
                     });
-                if reached_tail { break; }
+                if reached_tail {
+                    break;
+                }
             }
             let world = app.world_mut();
             assert!(reached_tail,
@@ -11494,67 +14783,136 @@ mod mobile_layout_tests {
             assert!(input_executions > 0, "real process_quest_ui_input executed");
             let ready = world.resource::<QuestCompactReadiness>();
             assert!(ready.current, "tail actual measured tree {ready:?}");
-            assert_eq!(ready.stamp.unwrap().locale, QuestPresentationLocale(mir2_game_data::LanguageCode::Portuguese));
-            assert_eq!(world.resource::<QuestTracker>().active_quests[0].quest_index, 2_110_002);
+            assert_eq!(
+                ready.stamp.unwrap().locale,
+                QuestPresentationLocale(mir2_game_data::LanguageCode::Portuguese)
+            );
+            assert_eq!(
+                world.resource::<QuestTracker>().active_quests[0].quest_index,
+                2_110_002
+            );
         }
     }
 
     fn quest() -> Quest {
-        Quest { quest_index: 23, accept_npc_index: Some(0), finish_npc_index: Some(0),
-            title: "移动任务".to_owned(), npc_name: None, group: Some("比奇".to_owned()),
-            min_level_needed: 1, detail: Default::default(), status: QuestStatus::ReadyToTurnIn,
-            objectives: Vec::new(), rewards: vec![crate::quest_model::QuestReward::Item {
-                item_id: "reward".to_owned(), name: "奖励戒指".to_owned(), quantity: 1,
-                icon: None, selection_index: Some(1), tooltip_source: None,
-            }], unknown_text: None }
+        Quest {
+            quest_index: 23,
+            accept_npc_index: Some(0),
+            finish_npc_index: Some(0),
+            title: "移动任务".to_owned(),
+            npc_name: None,
+            group: Some("比奇".to_owned()),
+            min_level_needed: 1,
+            detail: Default::default(),
+            status: QuestStatus::ReadyToTurnIn,
+            objectives: Vec::new(),
+            rewards: vec![crate::quest_model::QuestReward::Item {
+                item_id: "reward".to_owned(),
+                name: "奖励戒指".to_owned(),
+                quantity: 1,
+                icon: None,
+                selection_index: Some(1),
+                tooltip_source: None,
+            }],
+            unknown_text: None,
+        }
     }
 
     fn computed_app(width: u32, height: f32, selected_detail: bool) -> App {
         computed_app_scaled(width, height, 1.0, selected_detail)
     }
 
-    fn computed_app_scaled(width: u32, height: f32, css_scale: f32,
-        selected_detail: bool) -> App {
+    fn computed_app_scaled(width: u32, height: f32, css_scale: f32, selected_detail: bool) -> App {
         computed_app_scaled_dpr(width, height, css_scale, 1.0, selected_detail)
     }
 
-    fn computed_app_scaled_dpr(width: u32, height: f32, css_scale: f32,
-        device_scale: f32, selected_detail: bool) -> App {
+    fn computed_app_scaled_dpr(
+        width: u32,
+        height: f32,
+        css_scale: f32,
+        device_scale: f32,
+        selected_detail: bool,
+    ) -> App {
         let mut app = App::new();
-        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default(),
-            bevy::input::InputPlugin, bevy::window::WindowPlugin { primary_window: None,
-                ..default() }, bevy::image::ImagePlugin::default(),
+        app.add_plugins((
+            MinimalPlugins,
+            bevy::asset::AssetPlugin::default(),
+            bevy::input::InputPlugin,
+            bevy::window::WindowPlugin {
+                primary_window: None,
+                ..default()
+            },
+            bevy::image::ImagePlugin::default(),
             bevy::camera::visibility::VisibilityPlugin,
-            bevy::text::TextPlugin, bevy::ui::UiPlugin));
-        app.init_asset::<Image>().init_asset::<Font>()
+            bevy::text::TextPlugin,
+            bevy::ui::UiPlugin,
+        ));
+        app.init_asset::<Image>()
+            .init_asset::<Font>()
             .init_asset::<bevy::image::TextureAtlasLayout>()
             .init_asset::<bevy::mesh::Mesh>()
             .init_asset::<bevy::mesh::skinning::SkinnedMeshInverseBindposes>();
-        let bytes = std::fs::read(concat!(env!("CARGO_MANIFEST_DIR"),
-            "/../../web/public/original-ui/fonts/NotoSansCJKsc-Regular.otf"))
-            .expect("packaged Quest font");
-        let font = app.world_mut().resource_mut::<Assets<Font>>().add(Font::from_bytes(bytes));
+        let bytes = std::fs::read(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../web/public/original-ui/fonts/NotoSansCJKsc-Regular.otf"
+        ))
+        .expect("packaged Quest font");
+        let font = app
+            .world_mut()
+            .resource_mut::<Assets<Font>>()
+            .add(Font::from_bytes(bytes));
         app.insert_resource(QuestUiFont(font));
-        let physical_size = UVec2::new((width as f32 * device_scale).round() as u32,
-            (height * device_scale).round() as u32);
-        let camera = app.world_mut().spawn((Camera2d, Camera {
-            computed: ComputedCameraValues { target_info: Some(RenderTargetInfo {
-                physical_size, scale_factor: device_scale,
-            }), ..Default::default() },
-            viewport: Some(Viewport { physical_size,
-                ..default() }), ..Default::default()
-        })).id();
+        let physical_size = UVec2::new(
+            (width as f32 * device_scale).round() as u32,
+            (height * device_scale).round() as u32,
+        );
+        let camera = app
+            .world_mut()
+            .spawn((
+                Camera2d,
+                Camera {
+                    computed: ComputedCameraValues {
+                        target_info: Some(RenderTargetInfo {
+                            physical_size,
+                            scale_factor: device_scale,
+                        }),
+                        ..Default::default()
+                    },
+                    viewport: Some(Viewport {
+                        physical_size,
+                        ..default()
+                    }),
+                    ..Default::default()
+                },
+            ))
+            .id();
         app.insert_resource(QuestUiTargetCamera(camera));
-        app.insert_resource(QuestUiPresentation { logical_width: width as f32,
-            logical_height: height, stage_css_scale: css_scale, touch: true });
-        app.insert_resource(QuestUiHostContext { generation: 7, revision: 11,
-            layout_preparing: true, in_game: true, quest_log_open: true,
-            open_revision: 1, ..Default::default() });
+        app.insert_resource(QuestUiPresentation {
+            logical_width: width as f32,
+            logical_height: height,
+            stage_css_scale: css_scale,
+            touch: true,
+        });
+        app.insert_resource(QuestUiHostContext {
+            generation: 7,
+            revision: 11,
+            layout_preparing: true,
+            in_game: true,
+            quest_log_open: true,
+            open_revision: 1,
+            ..Default::default()
+        });
         app.insert_resource(ButtonInput::<KeyCode>::default());
         app.add_plugins(Mir2PortableQuestUiPlugin);
-        app.insert_resource(QuestTracker { active_quests: vec![quest()] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![quest()],
+        });
         app.update();
-        if selected_detail { app.world_mut().resource_mut::<QuestUiState>().select_quest(23); }
+        if selected_detail {
+            app.world_mut()
+                .resource_mut::<QuestUiState>()
+                .select_quest(23);
+        }
         app.update();
         app
     }
@@ -11565,13 +14923,19 @@ mod mobile_layout_tests {
             let mut app = computed_app_scaled(1440, 768.0, 600.0 / 1440.0, selected_detail);
             let world = app.world_mut();
             let ready = world.resource::<QuestCompactReadiness>();
-            assert!(ready.current, "600×320 selected={selected_detail}: {ready:?}");
+            assert!(
+                ready.current,
+                "600×320 selected={selected_detail}: {ready:?}"
+            );
             let bounds = ready.panel_css_bounds.expect("measured current panel");
             assert!((bounds.left - 20.0).abs() < 0.01, "{bounds:?}");
             assert!((bounds.top - 12.0).abs() < 0.01, "{bounds:?}");
             assert!((bounds.width - 560.0).abs() < 0.01, "{bounds:?}");
             assert!((bounds.height - 296.0).abs() < 0.01, "{bounds:?}");
-            assert!(ready.actions.iter().all(|rect| rect.width >= 39.9 && rect.height >= 39.9));
+            assert!(ready
+                .actions
+                .iter()
+                .all(|rect| rect.width >= 39.9 && rect.height >= 39.9));
             assert!(ready.min_css_text_size.is_some_and(|size| size >= 13.9));
             let (_, config) = world.query_filtered::<(Entity, &bevy::ui::LayoutConfig),
                 Or<(With<QuestLogPanel>, With<QuestDetailPanel>)>>()
@@ -11582,37 +14946,60 @@ mod mobile_layout_tests {
 
     #[test]
     fn compact_dpr2_idle_diary_keeps_current_text_tree_without_state_churn() {
-        let mut app = computed_app_scaled_dpr(1440, 768.0, 600.0 / 1440.0,
-            2.0, false);
+        let mut app = computed_app_scaled_dpr(1440, 768.0, 600.0 / 1440.0, 2.0, false);
         app.insert_resource(IdleQuestStateChanges::default());
-        app.add_systems(Update, record_idle_quest_state_change
-            .after(process_quest_ui_input).before(render_quest_ui));
-        app.world_mut().resource_mut::<QuestUiHostContext>().host_visible = true;
+        app.add_systems(
+            Update,
+            record_idle_quest_state_change
+                .after(process_quest_ui_input)
+                .before(render_quest_ui),
+        );
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .host_visible = true;
         app.update();
         let initial_children = {
             let world = app.world_mut();
-            let panel = world.query_filtered::<Entity, With<QuestLogPanel>>()
-                .single(world).expect("current diary panel");
-            world.get::<Children>(panel).expect("diary text and controls")
-                .iter().collect::<Vec<_>>()
+            let panel = world
+                .query_filtered::<Entity, With<QuestLogPanel>>()
+                .single(world)
+                .expect("current diary panel");
+            world
+                .get::<Children>(panel)
+                .expect("diary text and controls")
+                .iter()
+                .collect::<Vec<_>>()
         };
         assert!(!initial_children.is_empty());
-        app.world_mut().resource_mut::<IdleQuestStateChanges>().0.clear();
+        app.world_mut()
+            .resource_mut::<IdleQuestStateChanges>()
+            .0
+            .clear();
         for frame in 0..24 {
             app.update();
             let ready = app.world().resource::<QuestCompactReadiness>();
             assert!(ready.current, "DPR2 idle frame {frame}: {ready:?}");
             assert_eq!(ready.first_failure, None);
             let world = app.world_mut();
-            let panel = world.query_filtered::<Entity, With<QuestLogPanel>>()
-                .single(world).expect("current diary panel");
-            let children = world.get::<Children>(panel).expect("diary text and controls")
-                .iter().collect::<Vec<_>>();
-            assert_eq!(children, initial_children,
-                "DPR2 idle frame {frame} rebuilt Diary children");
+            let panel = world
+                .query_filtered::<Entity, With<QuestLogPanel>>()
+                .single(world)
+                .expect("current diary panel");
+            let children = world
+                .get::<Children>(panel)
+                .expect("diary text and controls")
+                .iter()
+                .collect::<Vec<_>>();
+            assert_eq!(
+                children, initial_children,
+                "DPR2 idle frame {frame} rebuilt Diary children"
+            );
         }
-        assert_eq!(app.world().resource::<IdleQuestStateChanges>().0,
-            vec![false; 24], "idle input must not mark QuestUiState changed");
+        assert_eq!(
+            app.world().resource::<IdleQuestStateChanges>().0,
+            vec![false; 24],
+            "idle input must not mark QuestUiState changed"
+        );
     }
 
     #[test]
@@ -11620,46 +15007,67 @@ mod mobile_layout_tests {
         let mut app = computed_app_scaled(1368, 768.0, 640.0 / 1368.0, true);
         let world = app.world_mut();
         assert!(!world.resource::<QuestCompactReadiness>().current);
-        let (panel, computed) = world.query_filtered::<(Entity, &ComputedNode),
-            With<QuestDetailPanel>>().single(world).unwrap();
+        let (panel, computed) = world
+            .query_filtered::<(Entity, &ComputedNode), With<QuestDetailPanel>>()
+            .single(world)
+            .unwrap();
         assert!(world.get::<bevy::ui::LayoutConfig>(panel).is_none());
-        let measured_css_height = computed.size().y * computed.inverse_scale_factor
-            * (640.0 / 1368.0);
-        assert!((334.9..335.3).contains(&measured_css_height),
-            "regular panel keeps Bevy's prior pixel rounding: {measured_css_height}");
+        let measured_css_height =
+            computed.size().y * computed.inverse_scale_factor * (640.0 / 1368.0);
+        assert!(
+            (334.9..335.3).contains(&measured_css_height),
+            "regular panel keeps Bevy's prior pixel rounding: {measured_css_height}"
+        );
     }
 
     #[test]
     fn compact_real_stage_other_sheets_keep_measured_bounds() {
         let mut app = computed_app_scaled(1440, 768.0, 600.0 / 1440.0, true);
-        app.world_mut().resource_mut::<QuestUiState>()
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
             .show_quest_alert("这是一段很长的确认说明。".repeat(60));
         app.update();
         let ready = app.world().resource::<QuestCompactReadiness>();
         assert!(ready.current, "confirmation: {ready:?}");
         assert_eq!(ready.sheet, Some("confirmation"));
-        app.world_mut().resource_mut::<QuestUiState>().close_quest_alert();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .close_quest_alert();
         app.update();
         assert!(app.world().resource::<QuestCompactReadiness>().current);
 
         let mut npc_quest = quest();
         npc_quest.finish_npc_index = Some(45);
-        app.insert_resource(QuestTracker { active_quests: vec![npc_quest] });
-        app.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(45),
+        app.insert_resource(QuestTracker {
+            active_quests: vec![npc_quest],
+        });
+        app.insert_resource(NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(45),
             options: vec![crate::quest_model::NpcDialogOption {
-                option_id: "@FinishQuest:23".to_owned(), label: "交付".to_owned(), enabled: true,
-            }], ..Default::default() });
-        app.world_mut().resource_mut::<QuestUiState>().open_npc_quest_list(&[23]);
+                option_id: "@FinishQuest:23".to_owned(),
+                label: "交付".to_owned(),
+                enabled: true,
+            }],
+            ..Default::default()
+        });
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .open_npc_quest_list(&[23]);
         app.update();
         let ready = app.world().resource::<QuestCompactReadiness>();
         assert!(ready.current, "NPC text: {ready:?}");
         assert_eq!(ready.sheet, Some("npcList"));
-        app.world_mut().resource_mut::<QuestUiState>().compact_npc_page = CompactQuestPage::Rewards;
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .compact_npc_page = CompactQuestPage::Rewards;
         app.update();
         let ready = app.world().resource::<QuestCompactReadiness>();
         assert!(ready.current, "NPC rewards: {ready:?}");
         assert_eq!(ready.page, Some("rewards"));
-        assert!(ready.panel_css_bounds.is_some_and(|rect| (rect.height - 296.0).abs() < 0.01));
+        assert!(ready
+            .panel_css_bounds
+            .is_some_and(|rect| (rect.height - 296.0).abs() < 0.01));
     }
 
     #[test]
@@ -11670,12 +15078,16 @@ mod mobile_layout_tests {
             let readiness = world.resource::<QuestCompactReadiness>();
             assert!(readiness.current, "{width}×{height}: {readiness:?}");
             assert!(readiness.action_count >= 3);
-            assert!(readiness.actions.iter().all(|rect|
-                rect.width >= 39.9 && rect.height >= 39.9));
+            assert!(readiness
+                .actions
+                .iter()
+                .all(|rect| rect.width >= 39.9 && rect.height >= 39.9));
             assert!(readiness.min_css_text_size.is_some_and(|size| size >= 13.9));
             let world = app.world_mut();
-            let (node, computed) = world.query_filtered::<(&Node, &ComputedNode), With<QuestDetailPanel>>()
-                .single(world).unwrap();
+            let (node, computed) = world
+                .query_filtered::<(&Node, &ComputedNode), With<QuestDetailPanel>>()
+                .single(world)
+                .unwrap();
             assert_eq!(node.display, Display::Flex);
             assert!(computed.size().x >= 400.0 && computed.size().y >= 296.0);
         }
@@ -11683,8 +15095,10 @@ mod mobile_layout_tests {
             let mut app = computed_app(width, height, true);
             assert!(!app.world().resource::<QuestCompactReadiness>().current);
             let world = app.world_mut();
-            let (node, computed) = world.query_filtered::<(&Node, &ComputedNode), With<QuestDetailPanel>>()
-                .single(world).unwrap();
+            let (node, computed) = world
+                .query_filtered::<(&Node, &ComputedNode), With<QuestDetailPanel>>()
+                .single(world)
+                .unwrap();
             assert_eq!(node.display, Display::Flex);
             assert!(computed.size().x >= 400.0 && computed.size().y >= 335.0);
         }
@@ -11694,34 +15108,69 @@ mod mobile_layout_tests {
     fn compact_reward_pages_keep_every_fixed_and_selectable_item_reachable() {
         let mut app = computed_app(600, 320.0, true);
         let mut source = quest();
-        source.rewards = (0..8).map(|index| crate::quest_model::QuestReward::Item {
-            item_id: format!("fixed-{index}"), name: format!("固定{index}"), quantity: 1,
-            icon: None, selection_index: None, tooltip_source: None,
-        }).chain((0..8).map(|index| crate::quest_model::QuestReward::Item {
-            item_id: format!("choice-{index}"), name: format!("可选{index}"), quantity: 1,
-            icon: None, selection_index: Some(index), tooltip_source: None,
-        })).collect();
-        app.insert_resource(QuestTracker { active_quests: vec![source] });
-        app.world_mut().resource_mut::<QuestUiState>().compact_detail_page = CompactQuestPage::Rewards;
+        source.rewards = (0..8)
+            .map(|index| crate::quest_model::QuestReward::Item {
+                item_id: format!("fixed-{index}"),
+                name: format!("固定{index}"),
+                quantity: 1,
+                icon: None,
+                selection_index: None,
+                tooltip_source: None,
+            })
+            .chain((0..8).map(|index| crate::quest_model::QuestReward::Item {
+                item_id: format!("choice-{index}"),
+                name: format!("可选{index}"),
+                quantity: 1,
+                icon: None,
+                selection_index: Some(index),
+                tooltip_source: None,
+            }))
+            .collect();
+        app.insert_resource(QuestTracker {
+            active_quests: vec![source],
+        });
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .compact_detail_page = CompactQuestPage::Rewards;
         app.update();
-        assert_eq!(app.world().resource::<QuestCompactReadiness>().page, Some("rewards"));
+        assert_eq!(
+            app.world().resource::<QuestCompactReadiness>().page,
+            Some("rewards")
+        );
         assert!(app.world().resource::<QuestCompactReadiness>().current);
         for page in 0..3 {
             let world = app.world_mut();
-            let choices = world.query::<&QuestUiButton>().iter(world).filter_map(|button| {
-                if let QuestUiButton::SelectReward { reward_index, .. } = button {
-                    Some(*reward_index)
-                } else { None }
-            }).collect::<Vec<_>>();
-            assert_eq!(choices, ((page * 3)..((page + 1) * 3).min(8))
-                .map(|index| index as i32).collect::<Vec<_>>());
-            let fixed_text = world.query::<&Text>().iter(world)
-                .map(|text| text.0.clone()).collect::<Vec<_>>();
+            let choices = world
+                .query::<&QuestUiButton>()
+                .iter(world)
+                .filter_map(|button| {
+                    if let QuestUiButton::SelectReward { reward_index, .. } = button {
+                        Some(*reward_index)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(
+                choices,
+                ((page * 3)..((page + 1) * 3).min(8))
+                    .map(|index| index as i32)
+                    .collect::<Vec<_>>()
+            );
+            let fixed_text = world
+                .query::<&Text>()
+                .iter(world)
+                .map(|text| text.0.clone())
+                .collect::<Vec<_>>();
             for index in (page * 3)..((page + 1) * 3).min(8) {
-                assert!(fixed_text.iter().any(|text| text.contains(&format!("固定{index}"))));
+                assert!(fixed_text
+                    .iter()
+                    .any(|text| text.contains(&format!("固定{index}"))));
             }
             if page < 2 {
-                world.resource_mut::<QuestUiState>().compact_detail_reward_page += 1;
+                world
+                    .resource_mut::<QuestUiState>()
+                    .compact_detail_reward_page += 1;
                 app.update();
                 assert!(app.world().resource::<QuestCompactReadiness>().current);
             }
@@ -11733,25 +15182,39 @@ mod mobile_layout_tests {
         let mut app = computed_app(600, 320.0, false);
         let mut npc_quest = quest();
         npc_quest.finish_npc_index = Some(45);
-        app.insert_resource(QuestTracker { active_quests: vec![npc_quest] });
-        app.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(45),
+        app.insert_resource(QuestTracker {
+            active_quests: vec![npc_quest],
+        });
+        app.insert_resource(NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(45),
             npc_name: Some("任务使者".to_owned()),
             options: vec![crate::quest_model::NpcDialogOption {
-                option_id: "@FinishQuest:23".to_owned(), label: "交付".to_owned(), enabled: true,
-            }], ..Default::default() });
-        app.world_mut().resource_mut::<QuestUiState>().open_npc_quest_list(&[23]);
+                option_id: "@FinishQuest:23".to_owned(),
+                label: "交付".to_owned(),
+                enabled: true,
+            }],
+            ..Default::default()
+        });
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .open_npc_quest_list(&[23]);
         app.update();
         let ready = app.world().resource::<QuestCompactReadiness>();
         assert!(ready.current, "NPC text: {ready:?}");
         assert_eq!(ready.sheet, Some("npcList"));
         assert_eq!(ready.page, Some("text"));
-        app.world_mut().resource_mut::<QuestUiState>().compact_npc_page = CompactQuestPage::Rewards;
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .compact_npc_page = CompactQuestPage::Rewards;
         app.update();
         let ready = app.world().resource::<QuestCompactReadiness>();
         assert!(ready.current, "NPC rewards: {ready:?}");
         assert_eq!(ready.page, Some("rewards"));
-        assert!(ready.actions.iter().all(|rect|
-            rect.width >= 39.9 && rect.height >= 39.9));
+        assert!(ready
+            .actions
+            .iter()
+            .all(|rect| rect.width >= 39.9 && rect.height >= 39.9));
     }
 
     #[test]
@@ -11767,12 +15230,18 @@ mod mobile_layout_tests {
         assert!(ready.current, "{ready:?}");
         assert_eq!(ready.sheet, Some("confirmation"));
         let world = app.world_mut();
-        assert!(world.query::<&QuestUiButton>().iter(world)
+        assert!(world
+            .query::<&QuestUiButton>()
+            .iter(world)
             .any(|button| matches!(button, QuestUiButton::CompactConfirmationNext)));
-        app.world_mut().resource_mut::<QuestUiState>().compact_confirmation_page = 1;
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .compact_confirmation_page = 1;
         app.update();
         assert!(app.world().resource::<QuestCompactReadiness>().current);
-        app.world_mut().resource_mut::<QuestUiState>().close_quest_alert();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .close_quest_alert();
         app.update();
         let ready = app.world().resource::<QuestCompactReadiness>();
         assert!(ready.current, "{ready:?}");
@@ -11782,23 +15251,42 @@ mod mobile_layout_tests {
 
     #[test]
     fn compact_diary_clamps_shrunk_content_and_pages_all_graduation_options() {
-        let options = [GraduationDirection::Equipment, GraduationDirection::Skill,
-            GraduationDirection::Challenge].into_iter().map(|direction|
-            crate::quest_journey::GraduationOption { direction,
-                title: direction.label().to_owned(), summary: String::new(),
-                instruction: String::new() }).collect::<Vec<_>>();
+        let options = [
+            GraduationDirection::Equipment,
+            GraduationDirection::Skill,
+            GraduationDirection::Challenge,
+        ]
+        .into_iter()
+        .map(|direction| crate::quest_journey::GraduationOption {
+            direction,
+            title: direction.label().to_owned(),
+            summary: String::new(),
+            instruction: String::new(),
+        })
+        .collect::<Vec<_>>();
         assert_eq!(mobile_diary_page_count(0, options.len(), 2), 2);
         assert_eq!(mobile_graduation_page(&options, 0, 2, 0).unwrap().len(), 2);
-        assert_eq!(mobile_graduation_page(&options, 0, 2, 1).unwrap()[0].direction,
-            GraduationDirection::Challenge);
+        assert_eq!(
+            mobile_graduation_page(&options, 0, 2, 1).unwrap()[0].direction,
+            GraduationDirection::Challenge
+        );
         let mut app = computed_app(600, 320.0, false);
-        let quests = (0..5).map(|index| { let mut item = quest();
-            item.quest_index += index; item }).collect();
-        app.insert_resource(QuestTracker { active_quests: quests });
+        let quests = (0..5)
+            .map(|index| {
+                let mut item = quest();
+                item.quest_index += index;
+                item
+            })
+            .collect();
+        app.insert_resource(QuestTracker {
+            active_quests: quests,
+        });
         app.world_mut().resource_mut::<QuestUiState>().page = 2;
         app.update();
         assert_eq!(app.world().resource::<QuestUiState>().page, 2);
-        app.insert_resource(QuestTracker { active_quests: vec![quest()] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![quest()],
+        });
         app.update();
         assert_eq!(app.world().resource::<QuestUiState>().page, 0);
         assert!(app.world().resource::<QuestCompactReadiness>().current);
@@ -11807,129 +15295,224 @@ mod mobile_layout_tests {
     #[test]
     fn compact_local_tab_input_rejects_second_old_tree_action_and_hidden_input() {
         let mut app = computed_app(600, 320.0, true);
-        app.world_mut().resource_mut::<QuestUiHostContext>().host_visible = true;
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .host_visible = true;
         app.update();
         let world = app.world_mut();
-        let rewards_tab = world.query::<(Entity, &QuestUiButton)>().iter(world)
-            .find_map(|(entity, button)| matches!(button,
-                QuestUiButton::CompactDetailPage(CompactQuestPage::Rewards)).then_some(entity))
+        let rewards_tab = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .find_map(|(entity, button)| {
+                matches!(
+                    button,
+                    QuestUiButton::CompactDetailPage(CompactQuestPage::Rewards)
+                )
+                .then_some(entity)
+            })
             .expect("current rewards tab");
         world.entity_mut(rewards_tab).insert(Interaction::Pressed);
-        app.world_mut().run_system_once(process_quest_ui_input).unwrap();
+        app.world_mut()
+            .run_system_once(process_quest_ui_input)
+            .unwrap();
         app.update();
-        assert_eq!(app.world().resource::<QuestUiState>().compact_detail_page,
-            CompactQuestPage::Rewards);
+        assert_eq!(
+            app.world().resource::<QuestUiState>().compact_detail_page,
+            CompactQuestPage::Rewards
+        );
         assert!(app.world().resource::<QuestCompactReadiness>().current);
         let world = app.world_mut();
-        let tabs = world.query::<(Entity, &QuestUiButton)>().iter(world)
+        let tabs = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
             .filter_map(|(entity, button)| match button {
                 QuestUiButton::CompactDetailPage(page) => Some((entity, *page)),
                 _ => None,
-            }).collect::<Vec<_>>();
-        for (entity, _) in &tabs { world.entity_mut(*entity).insert(Interaction::Pressed); }
-        app.world_mut().run_system_once(process_quest_ui_input).unwrap();
+            })
+            .collect::<Vec<_>>();
+        for (entity, _) in &tabs {
+            world.entity_mut(*entity).insert(Interaction::Pressed);
+        }
+        app.world_mut()
+            .run_system_once(process_quest_ui_input)
+            .unwrap();
         app.update();
-        assert_eq!(app.world().resource::<QuestUiState>().compact_detail_page,
-            CompactQuestPage::Text, "second old-tree tab must not undo the first");
+        assert_eq!(
+            app.world().resource::<QuestUiState>().compact_detail_page,
+            CompactQuestPage::Text,
+            "second old-tree tab must not undo the first"
+        );
         assert!(app.world().resource::<QuestCompactReadiness>().current);
-        app.world_mut().resource_mut::<QuestUiHostContext>().host_visible = false;
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .host_visible = false;
         let world = app.world_mut();
-        let rewards_tab = world.query::<(Entity, &QuestUiButton)>().iter(world)
-            .find_map(|(entity, button)| matches!(button,
-                QuestUiButton::CompactDetailPage(CompactQuestPage::Rewards)).then_some(entity))
+        let rewards_tab = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .find_map(|(entity, button)| {
+                matches!(
+                    button,
+                    QuestUiButton::CompactDetailPage(CompactQuestPage::Rewards)
+                )
+                .then_some(entity)
+            })
             .unwrap();
         world.entity_mut(rewards_tab).insert(Interaction::Pressed);
-        app.world_mut().run_system_once(process_quest_ui_input).unwrap();
+        app.world_mut()
+            .run_system_once(process_quest_ui_input)
+            .unwrap();
         app.update();
-        assert_eq!(app.world().resource::<QuestUiState>().compact_detail_page,
-            CompactQuestPage::Text, "layout preparation cannot send hidden input");
+        assert_eq!(
+            app.world().resource::<QuestUiState>().compact_detail_page,
+            CompactQuestPage::Text,
+            "layout preparation cannot send hidden input"
+        );
     }
 
     #[test]
     fn compact_guided_tab_switch_rejects_old_page_zero_quest_row() {
         let mut app = computed_app(600, 320.0, false);
         app.insert_resource(QuestGuidance::from_profile_name("newcomer-v2"));
-        app.insert_resource(QuestTracker { active_quests: vec![quest()] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![quest()],
+        });
         {
             let mut state = app.world_mut().resource_mut::<QuestUiState>();
             state.diary_tab = GuidedDiaryTab::Side;
             state.diary_page = 0;
         }
-        app.world_mut().resource_mut::<QuestUiHostContext>().host_visible = true;
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .host_visible = true;
         app.update();
         assert!(app.world().resource::<QuestCompactReadiness>().current);
         let world = app.world_mut();
-        let buttons = world.query::<(Entity, &QuestUiButton)>().iter(world)
+        let buttons = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
             .filter_map(|(entity, button)| match button {
                 QuestUiButton::SelectGuidedDiaryTab(GuidedDiaryTab::Main) => Some((entity, true)),
                 QuestUiButton::SelectQuest { quest_index: 23 } => Some((entity, false)),
                 _ => None,
-            }).collect::<Vec<_>>();
+            })
+            .collect::<Vec<_>>();
         assert_eq!(buttons.len(), 2, "current side tab and quest row");
-        for (entity, _) in buttons { world.entity_mut(entity).insert(Interaction::Pressed); }
+        for (entity, _) in buttons {
+            world.entity_mut(entity).insert(Interaction::Pressed);
+        }
         world.run_system_once(process_quest_ui_input).unwrap();
         let state = world.resource::<QuestUiState>();
         assert_eq!(state.diary_tab, GuidedDiaryTab::Main);
         assert_eq!(state.diary_page, 0);
-        assert_eq!(state.detail_quest_index, None,
-            "old Side row cannot open after Main replaced the visible page");
+        assert_eq!(
+            state.detail_quest_index, None,
+            "old Side row cannot open after Main replaced the visible page"
+        );
         assert!(world.resource::<QuestUiIntentQueue>().is_empty());
     }
 
     #[test]
     fn compact_service_return_invalidates_old_dialog_options_in_same_frame() {
         let mut app = computed_app(600, 320.0, false);
-        let prior = NpcDialogModel { is_open: true, npc_object_id: Some(45),
+        let prior = NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(45),
             options: vec![crate::quest_model::NpcDialogOption {
-                option_id: "@Shared".to_owned(), label: "Previous".to_owned(), enabled: true,
-            }], ..Default::default() };
+                option_id: "@Shared".to_owned(),
+                label: "Previous".to_owned(),
+                enabled: true,
+            }],
+            ..Default::default()
+        };
         app.world_mut().resource_mut::<NpcDialogNav>().push(prior);
-        app.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(45),
+        app.insert_resource(NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(45),
             options: vec![crate::quest_model::NpcDialogOption {
-                option_id: "@Shared".to_owned(), label: "Current".to_owned(), enabled: true,
-            }], ..Default::default() });
-        app.world_mut().resource_mut::<QuestUiHostContext>().host_visible = true;
+                option_id: "@Shared".to_owned(),
+                label: "Current".to_owned(),
+                enabled: true,
+            }],
+            ..Default::default()
+        });
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .host_visible = true;
         app.update();
         assert!(app.world().resource::<QuestCompactReadiness>().current);
         let world = app.world_mut();
-        assert!(world.query::<(Entity, &QuestUiButton)>().iter(world)
-            .any(|(_, action)| matches!(action,
-                QuestUiButton::SelectNpcDialog { target } if target == "@Shared")
-            ), "old dialog option");
+        assert!(
+            world
+                .query::<(Entity, &QuestUiButton)>()
+                .iter(world)
+                .any(|(_, action)| matches!(action,
+                QuestUiButton::SelectNpcDialog { target } if target == "@Shared")),
+            "old dialog option"
+        );
         // Deliver two changes from the old sheet in a deterministic order.
         // The measured snapshot stays current until the next layout pass.
-        let old_buttons = world.query_filtered::<Entity, With<Button>>()
-            .iter(world).collect::<Vec<_>>();
-        for entity in old_buttons { world.despawn(entity); }
-        let return_first = world.spawn((Button, QuestUiButton::ReturnNpcService,
-            Interaction::None)).id();
-        let stale_option = world.spawn((Button, QuestUiButton::SelectNpcDialog {
-            target: "@Shared".to_owned() }, Interaction::None)).id();
+        let old_buttons = world
+            .query_filtered::<Entity, With<Button>>()
+            .iter(world)
+            .collect::<Vec<_>>();
+        for entity in old_buttons {
+            world.despawn(entity);
+        }
+        let return_first = world
+            .spawn((Button, QuestUiButton::ReturnNpcService, Interaction::None))
+            .id();
+        let stale_option = world
+            .spawn((
+                Button,
+                QuestUiButton::SelectNpcDialog {
+                    target: "@Shared".to_owned(),
+                },
+                Interaction::None,
+            ))
+            .id();
         world.entity_mut(return_first).insert(Interaction::Pressed);
         world.entity_mut(stale_option).insert(Interaction::Pressed);
         world.run_system_once(process_quest_ui_input).unwrap();
         assert!(!world.resource::<NpcDialogNav>().can_return());
-        assert!(world.resource::<QuestUiIntentQueue>().is_empty(),
-            "old page option must not send after local return");
+        assert!(
+            world.resource::<QuestUiIntentQueue>().is_empty(),
+            "old page option must not send after local return"
+        );
     }
 
     #[test]
     fn compact_observer_rejects_old_stamp_and_unlaid_out_current_panel() {
         let mut app = computed_app(600, 320.0, true);
         assert!(app.world().resource::<QuestCompactReadiness>().current);
-        app.world_mut().resource_mut::<QuestUiHostContext>().revision += 1;
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .revision += 1;
         let world = app.world();
-        assert!(!compact_input_current(world.get_resource::<QuestUiPresentation>(),
-            world.get_resource::<QuestUiHostContext>(), world.get_resource::<QuestGuidance>(),
-            world.resource::<NativePlayerUiState>(), world.resource::<QuestUiState>(),
-            world.resource::<QuestTracker>(), world.resource::<NpcDialogModel>(),
-            world.get_resource::<QuestCompactReadiness>(), QuestPresentationLocale::default()));
+        assert!(!compact_input_current(
+            world.get_resource::<QuestUiPresentation>(),
+            world.get_resource::<QuestUiHostContext>(),
+            world.get_resource::<QuestGuidance>(),
+            world.resource::<NativePlayerUiState>(),
+            world.resource::<QuestUiState>(),
+            world.resource::<QuestTracker>(),
+            world.resource::<NpcDialogModel>(),
+            world.get_resource::<QuestCompactReadiness>(),
+            QuestPresentationLocale::default()
+        ));
         app.update();
         assert!(app.world().resource::<QuestCompactReadiness>().current);
         let world = app.world_mut();
-        let panel = world.query_filtered::<Entity, With<QuestDetailPanel>>()
-            .single(world).unwrap();
-        world.entity_mut(panel).get_mut::<ComputedNode>().unwrap().size.x = 0.0;
+        let panel = world
+            .query_filtered::<Entity, With<QuestDetailPanel>>()
+            .single(world)
+            .unwrap();
+        world
+            .entity_mut(panel)
+            .get_mut::<ComputedNode>()
+            .unwrap()
+            .size
+            .x = 0.0;
         world.run_system_once(observe_compact_quest_tree).unwrap();
         let ready = world.resource::<QuestCompactReadiness>();
         assert!(!ready.current);
@@ -11941,13 +15524,19 @@ mod mobile_layout_tests {
         let mut app = computed_app(600, 320.0, true);
         let mut source = quest();
         source.detail.description_lines = vec!["阅读任务内容".repeat(120)];
-        app.insert_resource(QuestTracker { active_quests: vec![source.clone()] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![source.clone()],
+        });
         app.update();
-        app.world_mut().resource_mut::<QuestUiState>().detail_scroll_top = 2;
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .detail_scroll_top = 2;
         app.update();
         assert_eq!(app.world().resource::<QuestUiState>().detail_scroll_top, 2);
         source.detail.description_lines = vec!["更新后的同一任务内容".repeat(120)];
-        app.insert_resource(QuestTracker { active_quests: vec![source] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![source],
+        });
         app.update();
         assert_eq!(app.world().resource::<QuestUiState>().detail_scroll_top, 2);
         assert!(app.world().resource::<QuestCompactReadiness>().current);
@@ -11959,7 +15548,9 @@ mod mobile_layout_tests {
         app.update();
         assert!(!app.world().resource::<QuestCompactReadiness>().current);
         assert_eq!(app.world().resource::<QuestUiState>().detail_scroll_top, 2);
-        app.world_mut().resource_mut::<QuestUiHostContext>().layout_preparing = true;
+        app.world_mut()
+            .resource_mut::<QuestUiHostContext>()
+            .layout_preparing = true;
         app.update();
         assert!(app.world().resource::<QuestCompactReadiness>().current);
         assert_eq!(app.world().resource::<QuestUiState>().detail_scroll_top, 2);
@@ -11978,21 +15569,41 @@ mod mobile_layout_tests {
         assert_eq!(layout.dialog_rows(), 5);
         assert_eq!(layout.message_rows(), 2);
         assert_eq!(layout.detail_rows(), 4);
-        let compact = QuestUiPresentation { logical_width: 640.0, logical_height: 359.298,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().expect("640×360 mobile sheet");
+        let compact = QuestUiPresentation {
+            logical_width: 640.0,
+            logical_height: 359.298,
+            stage_css_scale: 1.0,
+            touch: true,
+        }
+        .mobile_layout()
+        .expect("640×360 mobile sheet");
         assert_eq!(compact.message_rows(), 1);
         assert_eq!(compact.detail_rows(), 3);
-        let narrow = QuestUiPresentation { logical_width: 480.0, logical_height: 320.0,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().expect("minimum mobile sheet");
+        let narrow = QuestUiPresentation {
+            logical_width: 480.0,
+            logical_height: 320.0,
+            stage_css_scale: 1.0,
+            touch: true,
+        }
+        .mobile_layout()
+        .expect("minimum mobile sheet");
         assert!(narrow.dialog_footer_button_width(4) >= 44.0);
-        assert!(12.0 + 4.0 * narrow.dialog_footer_button_width(4) + 3.0 * 8.0
-            <= narrow.width_css() - 12.0);
-        let within_sheet = |(x, y, width, height): (f32, f32, f32, f32)|
-            x >= 0.0 && y >= 0.0 && x + width <= narrow.width_css()
-                && y + height <= narrow.height_css() && width >= 44.0 && height >= 44.0;
+        assert!(
+            12.0 + 4.0 * narrow.dialog_footer_button_width(4) + 3.0 * 8.0
+                <= narrow.width_css() - 12.0
+        );
+        let within_sheet = |(x, y, width, height): (f32, f32, f32, f32)| {
+            x >= 0.0
+                && y >= 0.0
+                && x + width <= narrow.width_css()
+                && y + height <= narrow.height_css()
+                && width >= 44.0
+                && height >= 44.0
+        };
         let disjoint = |(ax, ay, aw, ah): (f32, f32, f32, f32),
-            (bx, by, bw, bh): (f32, f32, f32, f32)|
-            ax + aw <= bx || bx + bw <= ax || ay + ah <= by || by + bh <= ay;
+                        (bx, by, bw, bh): (f32, f32, f32, f32)| {
+            ax + aw <= bx || bx + bw <= ax || ay + ah <= by || by + bh <= ay
+        };
         for rects in [narrow.detail_footer_rects(), narrow.npc_footer_rects()] {
             assert!(rects.iter().copied().all(within_sheet));
             for left in 0..rects.len() {
@@ -12001,37 +15612,96 @@ mod mobile_layout_tests {
                 }
             }
         }
-        assert_eq!(mobile_sheet(false, true, true, true, true), MobileQuestSheet::NpcList);
-        assert_eq!(mobile_sheet(false, false, true, true, true), MobileQuestSheet::Dialog);
-        assert!(QuestUiPresentation { touch: false, ..p }.mobile_layout().is_none());
-        assert!(QuestUiPresentation { logical_width: 423.0, logical_height: 360.0,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().is_none());
-        assert!(QuestUiPresentation { logical_width: 844.0, logical_height: 350.0,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().unwrap().compact);
-        assert!(QuestUiPresentation { logical_width: 640.0, logical_height: 358.9,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().unwrap().compact);
-        assert!(QuestUiPresentation { logical_width: 600.0, logical_height: 320.0,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().unwrap().compact);
-        assert!(QuestUiPresentation { logical_width: 600.0, logical_height: 319.0,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().is_none());
-        assert!(QuestUiPresentation { logical_width: 500.0, logical_height: 400.0,
-            stage_css_scale: 1.0, touch: true }.mobile_layout().is_none());
+        assert_eq!(
+            mobile_sheet(false, true, true, true, true),
+            MobileQuestSheet::NpcList
+        );
+        assert_eq!(
+            mobile_sheet(false, false, true, true, true),
+            MobileQuestSheet::Dialog
+        );
+        assert!(QuestUiPresentation { touch: false, ..p }
+            .mobile_layout()
+            .is_none());
+        assert!(QuestUiPresentation {
+            logical_width: 423.0,
+            logical_height: 360.0,
+            stage_css_scale: 1.0,
+            touch: true
+        }
+        .mobile_layout()
+        .is_none());
+        assert!(
+            QuestUiPresentation {
+                logical_width: 844.0,
+                logical_height: 350.0,
+                stage_css_scale: 1.0,
+                touch: true
+            }
+            .mobile_layout()
+            .unwrap()
+            .compact
+        );
+        assert!(
+            QuestUiPresentation {
+                logical_width: 640.0,
+                logical_height: 358.9,
+                stage_css_scale: 1.0,
+                touch: true
+            }
+            .mobile_layout()
+            .unwrap()
+            .compact
+        );
+        assert!(
+            QuestUiPresentation {
+                logical_width: 600.0,
+                logical_height: 320.0,
+                stage_css_scale: 1.0,
+                touch: true
+            }
+            .mobile_layout()
+            .unwrap()
+            .compact
+        );
+        assert!(QuestUiPresentation {
+            logical_width: 600.0,
+            logical_height: 319.0,
+            stage_css_scale: 1.0,
+            touch: true
+        }
+        .mobile_layout()
+        .is_none());
+        assert!(QuestUiPresentation {
+            logical_width: 500.0,
+            logical_height: 400.0,
+            stage_css_scale: 1.0,
+            touch: true
+        }
+        .mobile_layout()
+        .is_none());
     }
 
     #[test]
     fn narrow_dialog_wraps_options_before_counting_mobile_pages() {
-        let dialog = NpcDialogModel { options: vec![crate::quest_model::NpcDialogOption {
-            option_id: "@Buy".to_owned(),
-            label: "这是一段必须在窄屏窗口内换行的NPC长选项文字".to_owned(),
-            enabled: true,
-        }], ..Default::default() };
+        let dialog = NpcDialogModel {
+            options: vec![crate::quest_model::NpcDialogOption {
+                option_id: "@Buy".to_owned(),
+                label: "这是一段必须在窄屏窗口内换行的NPC长选项文字".to_owned(),
+                enabled: true,
+            }],
+            ..Default::default()
+        };
         let rows = mobile_npc_dialog_rows(&dialog, 248.0);
         assert!(rows.len() > npc_dialog_rows(&dialog).len());
-        assert!(rows.iter().all(|(text, target, enabled)|
-            !text.is_empty() && target.as_deref() == Some("@Buy") && *enabled));
-        assert!(rows.iter().all(|(text, _, _)|
-            text.chars().map(mobile_text_columns).sum::<usize>()
-                <= (248.0_f32 / 7.0).floor() as usize));
+        assert!(rows.iter().all(|(text, target, enabled)| !text.is_empty()
+            && target.as_deref() == Some("@Buy")
+            && *enabled));
+        assert!(rows.iter().all(|(text, _, _)| text
+            .chars()
+            .map(mobile_text_columns)
+            .sum::<usize>()
+            <= (248.0_f32 / 7.0).floor() as usize));
     }
 
     #[test]
@@ -12041,13 +15711,31 @@ mod mobile_layout_tests {
         source.title = "Protect the village".to_owned();
         source.detail.description_lines = vec!["Protect the village".to_owned()];
         let desktop = quest_detail_lines(&source, None, "Warrior");
-        let mobile_source = quest_detail_lines_with_wrap(&source, None, "Warrior", false, QuestRenderText::default());
+        let mobile_source = quest_detail_lines_with_wrap(
+            &source,
+            None,
+            "Warrior",
+            false,
+            QuestRenderText::default(),
+        );
         let mobile = mobile_wrap_quest_lines(mobile_source.clone(), 528.0);
-        assert!(desktop.len() > mobile_source.len(), "desktop prewrap remains native only");
-        assert!(mobile_source.iter().any(|line| line.text.contains("消灭村庄附近的 2 个稻草人")));
-        assert!(mobile.iter().all(|line| line.text.chars()
-            .map(mobile_text_columns).sum::<usize>() <= (528.0_f32 / 7.0).floor() as usize));
-        assert!(mobile.len() < desktop.len(), "wider mobile text reduces scroll count");
+        assert!(
+            desktop.len() > mobile_source.len(),
+            "desktop prewrap remains native only"
+        );
+        assert!(mobile_source
+            .iter()
+            .any(|line| line.text.contains("消灭村庄附近的 2 个稻草人")));
+        assert!(mobile.iter().all(|line| line
+            .text
+            .chars()
+            .map(mobile_text_columns)
+            .sum::<usize>()
+            <= (528.0_f32 / 7.0).floor() as usize));
+        assert!(
+            mobile.len() < desktop.len(),
+            "wider mobile text reduces scroll count"
+        );
     }
 
     #[test]
@@ -12056,8 +15744,13 @@ mod mobile_layout_tests {
         let camera = app.world_mut().spawn_empty().id();
         app.insert_resource(QuestUiTargetCamera(camera));
         app.insert_resource(presentation());
-        app.insert_resource(QuestUiHostContext { host_visible: true, in_game: true,
-            quest_log_open: true, open_revision: 1, ..Default::default() });
+        app.insert_resource(QuestUiHostContext {
+            host_visible: true,
+            in_game: true,
+            quest_log_open: true,
+            open_revision: 1,
+            ..Default::default()
+        });
         app.insert_resource(ButtonInput::<KeyCode>::default());
         app.add_plugins(Mir2PortableQuestUiPlugin);
         let mut reward_quest = quest();
@@ -12068,35 +15761,74 @@ mod mobile_layout_tests {
             crate::quest_model::QuestReward::Experience { amount: 80 },
             crate::quest_model::QuestReward::Gold { amount: 50 },
         ]);
-        app.insert_resource(QuestTracker { active_quests: vec![reward_quest] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![reward_quest],
+        });
         app.update();
-        app.world_mut().resource_mut::<QuestUiState>().select_quest(23);
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .select_quest(23);
         app.update();
         let world = app.world_mut();
-        let detail = world.query_filtered::<&Node, With<QuestDetailPanel>>()
-            .single(world).expect("detail panel");
+        let detail = world
+            .query_filtered::<&Node, With<QuestDetailPanel>>()
+            .single(world)
+            .expect("detail panel");
         assert_eq!(detail.display, Display::Flex);
-        let diary = world.query_filtered::<&Node, With<QuestLogPanel>>()
-            .single(world).expect("diary panel");
+        let diary = world
+            .query_filtered::<&Node, With<QuestLogPanel>>()
+            .single(world)
+            .expect("diary panel");
         assert_eq!(diary.display, Display::None);
-        let visible_text = world.query::<&Text>().iter(world)
-            .map(|value| value.0.as_str()).collect::<Vec<_>>();
-        assert!(visible_text.iter().any(|value| value.contains("经验 80 · 金币 50")));
+        let visible_text = world
+            .query::<&Text>()
+            .iter(world)
+            .map(|value| value.0.as_str())
+            .collect::<Vec<_>>();
+        assert!(visible_text
+            .iter()
+            .any(|value| value.contains("经验 80 · 金币 50")));
         assert!(visible_text.iter().any(|value| value.contains("基本剑术")));
-        let reward = world.query::<(&QuestUiButton, &Node)>().iter(world)
-            .find_map(|(action, node)| matches!(action,
-                QuestUiButton::SelectReward { quest_index: 23, reward_index: 1 }).then_some(node))
+        let reward = world
+            .query::<(&QuestUiButton, &Node)>()
+            .iter(world)
+            .find_map(|(action, node)| {
+                matches!(
+                    action,
+                    QuestUiButton::SelectReward {
+                        quest_index: 23,
+                        reward_index: 1
+                    }
+                )
+                .then_some(node)
+            })
             .expect("shared selectable reward");
-        assert!(matches!(reward.height, Val::Px(height) if height * presentation().stage_css_scale >= 44.0));
-        assert!(matches!(reward.width, Val::Px(width) if width * presentation().stage_css_scale >= 44.0));
-        let font_sizes = world.query::<&TextFont>().iter(world)
-            .filter_map(|font| match font.font_size { FontSize::Px(size) => Some(size), _ => None })
+        assert!(
+            matches!(reward.height, Val::Px(height) if height * presentation().stage_css_scale >= 44.0)
+        );
+        assert!(
+            matches!(reward.width, Val::Px(width) if width * presentation().stage_css_scale >= 44.0)
+        );
+        let font_sizes = world
+            .query::<&TextFont>()
+            .iter(world)
+            .filter_map(|font| match font.font_size {
+                FontSize::Px(size) => Some(size),
+                _ => None,
+            })
             .collect::<Vec<_>>();
         assert!(!font_sizes.is_empty());
-        assert!(font_sizes.iter().all(|size| size * presentation().stage_css_scale >= 13.99));
+        assert!(font_sizes
+            .iter()
+            .all(|size| size * presentation().stage_css_scale >= 13.99));
         for (action, node) in world.query::<(&QuestUiButton, &Node)>().iter(world) {
-            if matches!(action, QuestUiButton::CloseQuestDetail | QuestUiButton::SelectReward { .. }
-                | QuestUiButton::PrepareQuestFinish { .. } | QuestUiButton::AbandonQuest { .. }) {
+            if matches!(
+                action,
+                QuestUiButton::CloseQuestDetail
+                    | QuestUiButton::SelectReward { .. }
+                    | QuestUiButton::PrepareQuestFinish { .. }
+                    | QuestUiButton::AbandonQuest { .. }
+            ) {
                 assert!(matches!(node.height, Val::Px(height)
                     if height * presentation().stage_css_scale >= 43.99));
             }
@@ -12105,10 +15837,22 @@ mod mobile_layout_tests {
         world.resource_mut::<NpcDialogModel>().is_open = true;
         app.update();
         let world = app.world_mut();
-        assert_eq!(world.query_filtered::<&Node, With<NpcDialogPanel>>()
-            .single(world).unwrap().display, Display::Flex);
-        assert_eq!(world.query_filtered::<&Node, With<QuestDetailPanel>>()
-            .single(world).unwrap().display, Display::None);
+        assert_eq!(
+            world
+                .query_filtered::<&Node, With<NpcDialogPanel>>()
+                .single(world)
+                .unwrap()
+                .display,
+            Display::Flex
+        );
+        assert_eq!(
+            world
+                .query_filtered::<&Node, With<QuestDetailPanel>>()
+                .single(world)
+                .unwrap()
+                .display,
+            Display::None
+        );
     }
 
     #[test]
@@ -12117,162 +15861,360 @@ mod mobile_layout_tests {
         let camera = app.world_mut().spawn_empty().id();
         app.insert_resource(QuestUiTargetCamera(camera));
         app.insert_resource(presentation());
-        app.insert_resource(QuestUiHostContext { host_visible: true, in_game: true,
-            ..Default::default() });
+        app.insert_resource(QuestUiHostContext {
+            host_visible: true,
+            in_game: true,
+            ..Default::default()
+        });
         app.insert_resource(ButtonInput::<KeyCode>::default());
         app.add_plugins(Mir2PortableQuestUiPlugin);
         let mut reward_quest = quest();
         reward_quest.finish_npc_index = Some(45);
-        app.insert_resource(QuestTracker { active_quests: vec![reward_quest] });
+        app.insert_resource(QuestTracker {
+            active_quests: vec![reward_quest],
+        });
         app.insert_resource(NpcDialogModel {
-            is_open: true, npc_object_id: Some(45), npc_name: Some("任务使者".to_owned()),
+            is_open: true,
+            npc_object_id: Some(45),
+            npc_name: Some("任务使者".to_owned()),
             options: vec![crate::quest_model::NpcDialogOption {
-                option_id: "@FinishQuest:23".to_owned(), label: "交付".to_owned(), enabled: true,
-            }], ..Default::default()
+                option_id: "@FinishQuest:23".to_owned(),
+                label: "交付".to_owned(),
+                enabled: true,
+            }],
+            ..Default::default()
         });
         app.update();
-        app.world_mut().resource_mut::<QuestUiState>().open_npc_quest_list(&[23]);
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .open_npc_quest_list(&[23]);
         app.update();
 
-        let back = app.world_mut().query::<(Entity, &QuestUiButton)>().iter(app.world())
-            .find_map(|(entity, action)| matches!(action, QuestUiButton::ReturnToNpcDialog).then_some(entity))
+        let back = app
+            .world_mut()
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(app.world())
+            .find_map(|(entity, action)| {
+                matches!(action, QuestUiButton::ReturnToNpcDialog).then_some(entity)
+            })
             .expect("mobile return control");
-        app.world_mut().entity_mut(back).insert(Interaction::Pressed);
+        app.world_mut()
+            .entity_mut(back)
+            .insert(Interaction::Pressed);
         app.update();
         assert!(!app.world().resource::<QuestUiState>().npc_quest_list_open);
         assert!(app.world().resource::<NpcDialogModel>().is_open);
         assert!(app.world().resource::<QuestUiIntentQueue>().is_empty());
 
-        app.world_mut().resource_mut::<QuestUiState>().open_npc_quest_list(&[23]);
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .open_npc_quest_list(&[23]);
         app.update();
-        let reward = app.world_mut().query::<(Entity, &QuestUiButton)>().iter(app.world())
-            .find_map(|(entity, action)| matches!(action, QuestUiButton::SelectNpcQuestReward {
-                quest_index: 23, reward_index: 1,
-            }).then_some(entity)).expect("mobile reward button");
-        app.world_mut().entity_mut(reward).insert(Interaction::Pressed);
+        let reward = app
+            .world_mut()
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(app.world())
+            .find_map(|(entity, action)| {
+                matches!(
+                    action,
+                    QuestUiButton::SelectNpcQuestReward {
+                        quest_index: 23,
+                        reward_index: 1,
+                    }
+                )
+                .then_some(entity)
+            })
+            .expect("mobile reward button");
+        app.world_mut()
+            .entity_mut(reward)
+            .insert(Interaction::Pressed);
         app.update();
-        assert_eq!(app.world().resource::<QuestUiState>().npc_selected_reward_index, Some(1));
-        let finish = app.world_mut().query::<(Entity, &QuestUiButton)>().iter(app.world())
-            .find_map(|(entity, action)| matches!(action, QuestUiButton::FinishQuest {
-                quest_index: 23, selected_item_index: 1,
-            }).then_some(entity)).expect("mobile Finish button");
-        app.world_mut().entity_mut(finish).insert(Interaction::Pressed);
+        assert_eq!(
+            app.world()
+                .resource::<QuestUiState>()
+                .npc_selected_reward_index,
+            Some(1)
+        );
+        let finish = app
+            .world_mut()
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(app.world())
+            .find_map(|(entity, action)| {
+                matches!(
+                    action,
+                    QuestUiButton::FinishQuest {
+                        quest_index: 23,
+                        selected_item_index: 1,
+                    }
+                )
+                .then_some(entity)
+            })
+            .expect("mobile Finish button");
+        app.world_mut()
+            .entity_mut(finish)
+            .insert(Interaction::Pressed);
         app.update();
-        assert_eq!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
-            vec![QuestUiIntent::FinishQuest { quest_index: 23, selected_item_index: 1 }]);
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::FinishQuest {
+                quest_index: 23,
+                selected_item_index: 1
+            }]
+        );
     }
 }
-
 
 #[cfg(test)]
 mod presentation_locale_tree_tests {
     use super::*;
     use bevy::ecs::system::RunSystemOnce;
 
-
     #[test]
     fn selected_desktop_locale_counterexample_labels_keep_exact_action_rect_and_enablement() {
-        for language in [mir2_game_data::LanguageCode::English, mir2_game_data::LanguageCode::Spanish,
-            mir2_game_data::LanguageCode::Portuguese, mir2_game_data::LanguageCode::ChineseSimplified] {
+        for language in [
+            mir2_game_data::LanguageCode::English,
+            mir2_game_data::LanguageCode::Spanish,
+            mir2_game_data::LanguageCode::Portuguese,
+            mir2_game_data::LanguageCode::ChineseSimplified,
+        ] {
             for scene in 0..3 {
-                let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+                let text = QuestRenderText {
+                    locale: QuestPresentationLocale(language),
+                };
                 let mut world = World::new();
-                world.run_system_once(move |mut commands: Commands| {
-                    commands.spawn(Node::default()).with_children(|parent| {
-                        let tracker = QuestTracker::default(); let state = QuestUiState::default();
-                        let pending = PendingOperations::default();
-                        let guidance = QuestGuidance::from_profile_name(if scene == 0 { "newcomer-v2" } else { "crystal" });
-                        if scene < 2 { render_quest_diary_panel(parent, &tracker, &guidance, None,
-                            &state, &pending, None, text); }
-                        else { render_dialog_panel(parent, &NpcDialogModel { npc_name: Some("Village Chief".into()),
-                            lines: vec![crate::quest_model::NpcDialogLine { text: "Accept opaque body".into() }],
-                            options: vec![crate::quest_model::NpcDialogOption { option_id: "@Raw:123".into(),
-                                label: "Accept".into(), enabled: true }], ..default() },
-                            &NpcDialogNav::default(), &state, &pending, true, None, text); }
-                    });
-                }).unwrap();
-                let rect = if scene < 2 { quest_diary_layout(1.0).bottom_close }
-                    else { QuestLogRect::new(172.0, 194.0, 96.0, 25.0) };
-                let button = world.query::<(Entity, &Node, &QuestUiButton, &QuestUiButtonVisual)>().iter(&world)
-                    .find_map(|(e,n,a,v)| (n.left==Val::Px(rect.left) && n.top==Val::Px(rect.top)
-                        && n.width==Val::Px(rect.width) && n.height==Val::Px(rect.height)).then_some((e,a.clone(),v.enabled)))
+                world
+                    .run_system_once(move |mut commands: Commands| {
+                        commands.spawn(Node::default()).with_children(|parent| {
+                            let tracker = QuestTracker::default();
+                            let state = QuestUiState::default();
+                            let pending = PendingOperations::default();
+                            let guidance = QuestGuidance::from_profile_name(if scene == 0 {
+                                "newcomer-v2"
+                            } else {
+                                "crystal"
+                            });
+                            if scene < 2 {
+                                render_quest_diary_panel(
+                                    parent, &tracker, &guidance, None, &state, &pending, None, text,
+                                );
+                            } else {
+                                render_dialog_panel(
+                                    parent,
+                                    &NpcDialogModel {
+                                        npc_name: Some("Village Chief".into()),
+                                        lines: vec![crate::quest_model::NpcDialogLine {
+                                            text: "Accept opaque body".into(),
+                                        }],
+                                        options: vec![crate::quest_model::NpcDialogOption {
+                                            option_id: "@Raw:123".into(),
+                                            label: "Accept".into(),
+                                            enabled: true,
+                                        }],
+                                        ..default()
+                                    },
+                                    &NpcDialogNav::default(),
+                                    &state,
+                                    &pending,
+                                    true,
+                                    None,
+                                    text,
+                                );
+                            }
+                        });
+                    })
+                    .unwrap();
+                let rect = if scene < 2 {
+                    quest_diary_layout(1.0).bottom_close
+                } else {
+                    QuestLogRect::new(172.0, 194.0, 96.0, 25.0)
+                };
+                let button = world
+                    .query::<(Entity, &Node, &QuestUiButton, &QuestUiButtonVisual)>()
+                    .iter(&world)
+                    .find_map(|(e, n, a, v)| {
+                        (n.left == Val::Px(rect.left)
+                            && n.top == Val::Px(rect.top)
+                            && n.width == Val::Px(rect.width)
+                            && n.height == Val::Px(rect.height))
+                        .then_some((e, a.clone(), v.enabled))
+                    })
                     .expect("selected authored rectangle");
-                assert!(button.2); assert!(world.get::<Button>(button.0).is_some());
-                assert!(if scene < 2 { matches!(button.1, QuestUiButton::CloseQuestLog) }
-                    else { matches!(button.1, QuestUiButton::ToggleNpcQuestList) });
-                let expected = if scene < 2 { text.chrome("ui.close", "Close") } else { text.chrome("ui.quest", "Quest") };
-                assert!(world.query::<(&Text, &ChildOf)>().iter(&world).any(|(t,p)| p.parent()==button.0 && t.0==expected),
-                    "selected caption scene={scene} language={language:?} expected={expected}");
-                if scene==2 { assert!(world.query::<&Text>().iter(&world).any(|t|t.0=="Accept opaque body"));
-                    assert!(world.query::<&Text>().iter(&world).any(|t|t.0=="Village Chief"));
-                    assert!(world.query::<&Text>().iter(&world).any(|t|t.0=="Accept")); }
+                assert!(button.2);
+                assert!(world.get::<Button>(button.0).is_some());
+                assert!(if scene < 2 {
+                    matches!(button.1, QuestUiButton::CloseQuestLog)
+                } else {
+                    matches!(button.1, QuestUiButton::ToggleNpcQuestList)
+                });
+                let expected = if scene < 2 {
+                    text.chrome("ui.close", "Close")
+                } else {
+                    text.chrome("ui.quest", "Quest")
+                };
+                assert!(
+                    world
+                        .query::<(&Text, &ChildOf)>()
+                        .iter(&world)
+                        .any(|(t, p)| p.parent() == button.0 && t.0 == expected),
+                    "selected caption scene={scene} language={language:?} expected={expected}"
+                );
+                if scene == 2 {
+                    assert!(world
+                        .query::<&Text>()
+                        .iter(&world)
+                        .any(|t| t.0 == "Accept opaque body"));
+                    assert!(world
+                        .query::<&Text>()
+                        .iter(&world)
+                        .any(|t| t.0 == "Village Chief"));
+                    assert!(world.query::<&Text>().iter(&world).any(|t| t.0 == "Accept"));
+                }
             }
         }
     }
 
     #[test]
     fn quest_body_locale_counterexample_completion_and_unknown_keep_chinese_field_adapter_only() {
-        let mut quest = Quest { quest_index: 2_110_002, title: "Host".into(), accept_npc_index: Some(9),
-            finish_npc_index: Some(10), npc_name: None, group: None, min_level_needed: 1,
-            status: crate::quest_model::QuestStatus::InProgress, detail: default(), objectives: vec![],
-            rewards: vec![], unknown_text: None };
+        let mut quest = Quest {
+            quest_index: 2_110_002,
+            title: "Host".into(),
+            accept_npc_index: Some(9),
+            finish_npc_index: Some(10),
+            npc_name: None,
+            group: None,
+            min_level_needed: 1,
+            status: crate::quest_model::QuestStatus::InProgress,
+            detail: default(),
+            objectives: vec![],
+            rewards: vec![],
+            unknown_text: None,
+        };
         quest.detail.completion_description_lines = vec!["  Accept  ".into()];
-        let dialog = NpcDialogModel { npc_object_id: Some(10), ..default() };
-        for language in [mir2_game_data::LanguageCode::English, mir2_game_data::LanguageCode::Spanish,
-            mir2_game_data::LanguageCode::Portuguese, mir2_game_data::LanguageCode::ChineseSimplified] {
-            let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+        let dialog = NpcDialogModel {
+            npc_object_id: Some(10),
+            ..default()
+        };
+        for language in [
+            mir2_game_data::LanguageCode::English,
+            mir2_game_data::LanguageCode::Spanish,
+            mir2_game_data::LanguageCode::Portuguese,
+            mir2_game_data::LanguageCode::ChineseSimplified,
+        ] {
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(language),
+            };
             let expected = text.body("  Accept  ");
-            assert!(quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text)
-                .iter().any(|line| line.text == expected), "completion {language:?}");
-            let mut fallback = quest.clone(); fallback.quest_index = 987_654;
-            fallback.detail = default(); fallback.unknown_text = Some("  Accept  ".into());
-            for lines in [quest_detail_lines_with_wrap(&fallback, None, "", false, text),
-                quest_list_message_lines_with_wrap(&fallback, &dialog, None, false, text)] {
-                assert!(lines.iter().any(|line|line.text==expected), "unknown fallback {language:?}");
+            assert!(
+                quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text)
+                    .iter()
+                    .any(|line| line.text == expected),
+                "completion {language:?}"
+            );
+            let mut fallback = quest.clone();
+            fallback.quest_index = 987_654;
+            fallback.detail = default();
+            fallback.unknown_text = Some("  Accept  ".into());
+            for lines in [
+                quest_detail_lines_with_wrap(&fallback, None, "", false, text),
+                quest_list_message_lines_with_wrap(&fallback, &dialog, None, false, text),
+            ] {
+                assert!(
+                    lines.iter().any(|line| line.text == expected),
+                    "unknown fallback {language:?}"
+                );
             }
         }
     }
 
-
     fn legacy_section_source() -> Quest {
-        Quest { quest_index: 987_654, title: "Host title".into(), accept_npc_index: Some(9),
-            finish_npc_index: Some(10), npc_name: None, group: None, min_level_needed: 1,
+        Quest {
+            quest_index: 987_654,
+            title: "Host title".into(),
+            accept_npc_index: Some(9),
+            finish_npc_index: Some(10),
+            npc_name: None,
+            group: None,
+            min_level_needed: 1,
             status: crate::quest_model::QuestStatus::InProgress,
-            detail: crate::quest_model::QuestDetailText { description_lines: vec!["Host body".into()],
-                task_description_lines: vec!["Host task".into()], return_description_lines: vec!["Host return".into()],
-                time_limit: Some(" 05:00 ".into()), ..default() },
-            objectives: vec![crate::quest_model::QuestObjective { objective_id: "opaque:1".into(),
-                text: "Objective host".into(), current: 1, target: 3 }], rewards: vec![], unknown_text: None }
+            detail: crate::quest_model::QuestDetailText {
+                description_lines: vec!["Host body".into()],
+                task_description_lines: vec!["Host task".into()],
+                return_description_lines: vec!["Host return".into()],
+                time_limit: Some(" 05:00 ".into()),
+                ..default()
+            },
+            objectives: vec![crate::quest_model::QuestObjective {
+                objective_id: "opaque:1".into(),
+                text: "Objective host".into(),
+                current: 1,
+                target: 3,
+            }],
+            rewards: vec![],
+            unknown_text: None,
+        }
     }
 
     fn heading_goldens() -> [(mir2_game_data::LanguageCode, &'static str, &'static str); 4] {
-        [(mir2_game_data::LanguageCode::English, "Return", "Progress"),
-            (mir2_game_data::LanguageCode::ChineseSimplified, "交付地点", "任务进度"),
-            (mir2_game_data::LanguageCode::Spanish, "Lugar de entrega", "Progreso"),
-            (mir2_game_data::LanguageCode::Portuguese, "Local de entrega", "Progresso")]
+        [
+            (mir2_game_data::LanguageCode::English, "Return", "Progress"),
+            (
+                mir2_game_data::LanguageCode::ChineseSimplified,
+                "交付地点",
+                "任务进度",
+            ),
+            (
+                mir2_game_data::LanguageCode::Spanish,
+                "Lugar de entrega",
+                "Progreso",
+            ),
+            (
+                mir2_game_data::LanguageCode::Portuguese,
+                "Local de entrega",
+                "Progresso",
+            ),
+        ]
     }
 
     fn assert_heading_before_body(lines: &[QuestDetailLine], body: &str, heading: &str) {
-        let index = lines.iter().position(|row| row.kind == QuestDetailLineKind::Body && row.text == body)
+        let index = lines
+            .iter()
+            .position(|row| row.kind == QuestDetailLineKind::Body && row.text == body)
             .expect("original section body remains present");
         assert!(index >= 2);
         assert_eq!(lines[index - 2].kind, QuestDetailLineKind::Blank);
         assert!(lines[index - 2].text.is_empty());
         assert_eq!(lines[index - 1].kind, QuestDetailLineKind::Heading);
-        assert_eq!(lines[index - 1].text, heading, "localized heading before unchanged body {body:?}");
+        assert_eq!(
+            lines[index - 1].text,
+            heading,
+            "localized heading before unchanged body {body:?}"
+        );
     }
 
     #[test]
     fn m7_heading_counterexample_detail_return_uses_selected_language() {
         for (language, return_heading, _) in heading_goldens() {
-            for status in [crate::quest_model::QuestStatus::InProgress, crate::quest_model::QuestStatus::ReadyToTurnIn] {
+            for status in [
+                crate::quest_model::QuestStatus::InProgress,
+                crate::quest_model::QuestStatus::ReadyToTurnIn,
+            ] {
                 for desktop_wrap in [false, true] {
-                    let mut quest = legacy_section_source(); quest.status = status.clone();
-                    let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+                    let mut quest = legacy_section_source();
+                    quest.status = status.clone();
+                    let text = QuestRenderText {
+                        locale: QuestPresentationLocale(language),
+                    };
                     let rows = quest_detail_lines_with_wrap(&quest, None, "", desktop_wrap, text);
                     assert_heading_before_body(&rows, "Host return", return_heading);
-                    assert!(rows.iter().position(|row| row.text == "Host task").unwrap()
-                        < rows.iter().position(|row| row.text == return_heading).unwrap());
+                    assert!(
+                        rows.iter().position(|row| row.text == "Host task").unwrap()
+                            < rows
+                                .iter()
+                                .position(|row| row.text == return_heading)
+                                .unwrap()
+                    );
                 }
             }
         }
@@ -12280,15 +16222,33 @@ mod presentation_locale_tree_tests {
 
     #[test]
     fn m7_heading_counterexample_npc_return_uses_selected_language() {
-        let dialog = NpcDialogModel { npc_object_id: Some(9), ..default() };
+        let dialog = NpcDialogModel {
+            npc_object_id: Some(9),
+            ..default()
+        };
         for (language, return_heading, progress_heading) in heading_goldens() {
-            for status in [crate::quest_model::QuestStatus::InProgress, crate::quest_model::QuestStatus::ReadyToTurnIn] {
+            for status in [
+                crate::quest_model::QuestStatus::InProgress,
+                crate::quest_model::QuestStatus::ReadyToTurnIn,
+            ] {
                 for desktop_wrap in [false, true] {
-                    let mut quest = legacy_section_source(); quest.status = status.clone();
-                    let text = QuestRenderText { locale: QuestPresentationLocale(language) };
-                    let rows = quest_list_message_lines_with_wrap(&quest, &dialog, None, desktop_wrap, text);
+                    let mut quest = legacy_section_source();
+                    quest.status = status.clone();
+                    let text = QuestRenderText {
+                        locale: QuestPresentationLocale(language),
+                    };
+                    let rows = quest_list_message_lines_with_wrap(
+                        &quest,
+                        &dialog,
+                        None,
+                        desktop_wrap,
+                        text,
+                    );
                     assert_heading_before_body(&rows, "Host return", return_heading);
-                    assert!(!rows.iter().any(|row| row.kind == QuestDetailLineKind::Heading && row.text == progress_heading));
+                    assert!(!rows
+                        .iter()
+                        .any(|row| row.kind == QuestDetailLineKind::Heading
+                            && row.text == progress_heading));
                 }
             }
         }
@@ -12297,14 +16257,27 @@ mod presentation_locale_tree_tests {
     #[test]
     fn m7_heading_counterexample_detail_progress_uses_selected_language() {
         for (language, return_heading, progress_heading) in heading_goldens() {
-            for status in [crate::quest_model::QuestStatus::InProgress, crate::quest_model::QuestStatus::ReadyToTurnIn] {
+            for status in [
+                crate::quest_model::QuestStatus::InProgress,
+                crate::quest_model::QuestStatus::ReadyToTurnIn,
+            ] {
                 for desktop_wrap in [false, true] {
-                    let mut quest = legacy_section_source(); quest.status = status.clone();
-                    let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+                    let mut quest = legacy_section_source();
+                    quest.status = status.clone();
+                    let text = QuestRenderText {
+                        locale: QuestPresentationLocale(language),
+                    };
                     let rows = quest_detail_lines_with_wrap(&quest, None, "", desktop_wrap, text);
                     assert_heading_before_body(&rows, "Objective host (1 / 3)", progress_heading);
-                    assert!(rows.iter().position(|row| row.text == return_heading).unwrap()
-                        < rows.iter().position(|row| row.text == progress_heading).unwrap());
+                    assert!(
+                        rows.iter()
+                            .position(|row| row.text == return_heading)
+                            .unwrap()
+                            < rows
+                                .iter()
+                                .position(|row| row.text == progress_heading)
+                                .unwrap()
+                    );
                 }
             }
         }
@@ -12313,21 +16286,39 @@ mod presentation_locale_tree_tests {
     #[test]
     fn legacy_chinese_time_section_counterexample_keeps_blank_heading_body_in_both_real_builders() {
         let quest = legacy_section_source();
-        let dialog = NpcDialogModel { npc_object_id: Some(9), ..default() };
+        let dialog = NpcDialogModel {
+            npc_object_id: Some(9),
+            ..default()
+        };
         let chinese = QuestRenderText::default();
-        for lines in [quest_detail_lines_with_wrap(&quest, None, "", false, chinese),
-            quest_list_message_lines_with_wrap(&quest, &dialog, None, false, chinese)] {
-            assert!(lines.windows(3).any(|rows| rows[0].kind == QuestDetailLineKind::Blank && rows[0].text.is_empty()
-                && rows[1].kind == QuestDetailLineKind::Heading && rows[1].text == "时限"
-                && rows[2].kind == QuestDetailLineKind::Body && rows[2].text == " 05:00 "),
-                "legacy exact Chinese Time Limit section: {lines:?}");
+        for lines in [
+            quest_detail_lines_with_wrap(&quest, None, "", false, chinese),
+            quest_list_message_lines_with_wrap(&quest, &dialog, None, false, chinese),
+        ] {
+            assert!(
+                lines
+                    .windows(3)
+                    .any(|rows| rows[0].kind == QuestDetailLineKind::Blank
+                        && rows[0].text.is_empty()
+                        && rows[1].kind == QuestDetailLineKind::Heading
+                        && rows[1].text == "时限"
+                        && rows[2].kind == QuestDetailLineKind::Body
+                        && rows[2].text == " 05:00 "),
+                "legacy exact Chinese Time Limit section: {lines:?}"
+            );
         }
-        for (language, expected) in [(mir2_game_data::LanguageCode::English, "Time:  05:00 "),
+        for (language, expected) in [
+            (mir2_game_data::LanguageCode::English, "Time:  05:00 "),
             (mir2_game_data::LanguageCode::Spanish, "Tiempo:  05:00 "),
-            (mir2_game_data::LanguageCode::Portuguese, "Time:  05:00 ")] {
-            let text = QuestRenderText { locale: QuestPresentationLocale(language) };
-            for lines in [quest_detail_lines_with_wrap(&quest, None, "", false, text),
-                quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text)] {
+            (mir2_game_data::LanguageCode::Portuguese, "Tempo:  05:00 "),
+        ] {
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(language),
+            };
+            for lines in [
+                quest_detail_lines_with_wrap(&quest, None, "", false, text),
+                quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text),
+            ] {
                 assert!(lines.iter().any(|line| line.kind == QuestDetailLineKind::Body && line.text == expected),
                     "canonical non-Chinese time retains supplied whitespace {language:?}: {lines:?}");
             }
@@ -12336,87 +16327,191 @@ mod presentation_locale_tree_tests {
 
     #[test]
     fn distinct_progress_section_counterexample_keeps_tasks_progress_and_npc_scope_separate() {
-        let quest = legacy_section_source();let text = QuestRenderText::default();
+        let quest = legacy_section_source();
+        let text = QuestRenderText::default();
         let lines = quest_detail_lines_with_wrap(&quest, None, "", false, text);
-        assert_eq!(lines.iter().filter(|line| line.kind == QuestDetailLineKind::Heading
-            && line.text == "任务目标").count(), 1, "keyed Tasks is one distinct section");
-        assert_eq!(lines.iter().filter(|line| line.kind == QuestDetailLineKind::Heading
-            && line.text == "任务进度").count(), 1, "legacy Progress is a distinct section");
-        assert!(lines.iter().any(|line| line.text == "Objective host (1 / 3)"));
-        let dialog = NpcDialogModel { npc_object_id: Some(9), ..default() };
+        assert_eq!(
+            lines
+                .iter()
+                .filter(|line| line.kind == QuestDetailLineKind::Heading && line.text == "任务目标")
+                .count(),
+            1,
+            "keyed Tasks is one distinct section"
+        );
+        assert_eq!(
+            lines
+                .iter()
+                .filter(|line| line.kind == QuestDetailLineKind::Heading && line.text == "任务进度")
+                .count(),
+            1,
+            "legacy Progress is a distinct section"
+        );
+        assert!(lines
+            .iter()
+            .any(|line| line.text == "Objective host (1 / 3)"));
+        let dialog = NpcDialogModel {
+            npc_object_id: Some(9),
+            ..default()
+        };
         let npc = quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text);
-        assert!(!npc.iter().any(|line|line.kind == QuestDetailLineKind::Heading && line.text == "任务进度"),
-            "NPC list never gained the detail-only Progress section");
-        for (language, expected) in [(mir2_game_data::LanguageCode::English, "Progress"),
-            (mir2_game_data::LanguageCode::Spanish, "Progreso"), (mir2_game_data::LanguageCode::Portuguese, "Progresso")] {
-            let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+        assert!(
+            !npc.iter()
+                .any(|line| line.kind == QuestDetailLineKind::Heading && line.text == "任务进度"),
+            "NPC list never gained the detail-only Progress section"
+        );
+        for (language, expected) in [
+            (mir2_game_data::LanguageCode::English, "Progress"),
+            (mir2_game_data::LanguageCode::Spanish, "Progreso"),
+            (mir2_game_data::LanguageCode::Portuguese, "Progresso"),
+        ] {
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(language),
+            };
             let detail = quest_detail_lines_with_wrap(&quest, None, "", false, text);
-            assert!(detail.iter().any(|line|line.kind == QuestDetailLineKind::Heading && line.text == expected),
-                "keyed Progress stays distinct from Tasks in the selected language");
-            assert!(detail.iter().any(|line|line.text == "Host task"));
+            assert!(
+                detail
+                    .iter()
+                    .any(|line| line.kind == QuestDetailLineKind::Heading && line.text == expected),
+                "keyed Progress stays distinct from Tasks in the selected language"
+            );
+            assert!(detail.iter().any(|line| line.text == "Host task"));
         }
     }
 
     #[test]
     fn m7_heading_changes_preserve_known_host_vectors_and_section_gates() {
-        let mut quest = legacy_section_source(); quest.quest_index = 2_110_002;
+        let mut quest = legacy_section_source();
+        quest.quest_index = 2_110_002;
         quest.detail.description_lines = vec!["  Return\t ".into(), "Second host 🌿 line  ".into()];
         quest.detail.task_description_lines = vec!["  Progress\t ".into()];
-        quest.detail.return_description_lines = vec!["  Village Chief\t ".into(), "Misión / 任务 / Quest raw line".into()];
+        quest.detail.return_description_lines = vec![
+            "  Village Chief\t ".into(),
+            "Misión / 任务 / Quest raw line".into(),
+        ];
         quest.detail.time_limit = None;
-        let dialog = NpcDialogModel { npc_object_id: Some(9), ..default() };
+        let dialog = NpcDialogModel {
+            npc_object_id: Some(9),
+            ..default()
+        };
         for (language, return_heading, progress_heading) in heading_goldens() {
-            let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(language),
+            };
             if !text.is_chinese() {
-                for rows in [quest_detail_lines_with_wrap(&quest, None, "", false, text),
-                    quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text)] {
-                    for expected in quest.detail.description_lines.iter().chain(&quest.detail.task_description_lines)
-                        .chain(&quest.detail.return_description_lines) {
-                        assert!(rows.iter().any(|row| row.kind == QuestDetailLineKind::Body && &row.text == expected),
-                            "opaque host vector {language:?} {expected:?}: {rows:?}");
+                for rows in [
+                    quest_detail_lines_with_wrap(&quest, None, "", false, text),
+                    quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text),
+                ] {
+                    for expected in quest
+                        .detail
+                        .description_lines
+                        .iter()
+                        .chain(&quest.detail.task_description_lines)
+                        .chain(&quest.detail.return_description_lines)
+                    {
+                        assert!(
+                            rows.iter().any(|row| row.kind == QuestDetailLineKind::Body
+                                && &row.text == expected),
+                            "opaque host vector {language:?} {expected:?}: {rows:?}"
+                        );
                     }
                     assert_heading_before_body(&rows, "  Village Chief\t ", return_heading);
                 }
             }
-            let mut empty = quest.clone(); empty.detail.return_description_lines = vec![" ".into(), "\t".into()];
-            for rows in [quest_detail_lines_with_wrap(&empty, None, "", false, text),
-                quest_list_message_lines_with_wrap(&empty, &dialog, None, false, text)] {
-                assert!(!rows.iter().any(|row| row.kind == QuestDetailLineKind::Heading && row.text == return_heading));
+            let mut empty = quest.clone();
+            empty.detail.return_description_lines = vec![" ".into(), "\t".into()];
+            for rows in [
+                quest_detail_lines_with_wrap(&empty, None, "", false, text),
+                quest_list_message_lines_with_wrap(&empty, &dialog, None, false, text),
+            ] {
+                assert!(!rows
+                    .iter()
+                    .any(|row| row.kind == QuestDetailLineKind::Heading
+                        && row.text == return_heading));
             }
-            for status in [crate::quest_model::QuestStatus::NotStarted, crate::quest_model::QuestStatus::Completed] {
-                let mut inactive = quest.clone(); inactive.status = status;
-                assert!(!quest_detail_lines_with_wrap(&inactive, None, "", false, text).iter()
-                    .any(|row| row.kind == QuestDetailLineKind::Heading && row.text == progress_heading));
+            for status in [
+                crate::quest_model::QuestStatus::NotStarted,
+                crate::quest_model::QuestStatus::Completed,
+            ] {
+                let mut inactive = quest.clone();
+                inactive.status = status;
+                assert!(
+                    !quest_detail_lines_with_wrap(&inactive, None, "", false, text)
+                        .iter()
+                        .any(|row| row.kind == QuestDetailLineKind::Heading
+                            && row.text == progress_heading)
+                );
             }
-            let mut no_objectives = quest.clone(); no_objectives.objectives.clear();
-            assert!(!quest_detail_lines_with_wrap(&no_objectives, None, "", false, text).iter()
-                .any(|row| row.kind == QuestDetailLineKind::Heading && row.text == progress_heading));
-            let mut completion = quest.clone(); completion.detail.completion_description_lines = vec!["  Completion Return\t ".into()];
-            let finish = NpcDialogModel { npc_object_id: Some(10), ..default() };
+            let mut no_objectives = quest.clone();
+            no_objectives.objectives.clear();
+            assert!(
+                !quest_detail_lines_with_wrap(&no_objectives, None, "", false, text)
+                    .iter()
+                    .any(|row| row.kind == QuestDetailLineKind::Heading
+                        && row.text == progress_heading)
+            );
+            let mut completion = quest.clone();
+            completion.detail.completion_description_lines = vec!["  Completion Return\t ".into()];
+            let finish = NpcDialogModel {
+                npc_object_id: Some(10),
+                ..default()
+            };
             let rows = quest_list_message_lines_with_wrap(&completion, &finish, None, false, text);
-            assert_eq!(rows.len(), 2, "distinct finish early return contains only title/body");
+            assert_eq!(
+                rows.len(),
+                2,
+                "distinct finish early return contains only title/body"
+            );
             assert_eq!(rows[1].kind, QuestDetailLineKind::Body);
             assert_eq!(rows[1].text, text.body("  Completion Return\t "));
-            assert!(!rows.iter().any(|row| row.kind == QuestDetailLineKind::Heading));
+            assert!(!rows
+                .iter()
+                .any(|row| row.kind == QuestDetailLineKind::Heading));
         }
     }
 
     #[test]
     fn m7_chrome_words_remain_opaque_in_real_npc_text_and_action_tree() {
         for (language, _, _) in heading_goldens() {
-            let text = QuestRenderText { locale: QuestPresentationLocale(language) };
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(language),
+            };
             let mut world = World::new();
-            world.run_system_once(move |mut commands: Commands| {
-                commands.spawn(Node::default()).with_children(|parent| {
-                    render_dialog_panel(parent, &NpcDialogModel { npc_name: Some("Village Chief".into()),
-                        lines: vec![crate::quest_model::NpcDialogLine { text: "Return".into() }],
-                        options: vec![crate::quest_model::NpcDialogOption { option_id: "@raw:return/Progress:9".into(),
-                            label: "Progress".into(), enabled: true }], ..default() },
-                        &NpcDialogNav::default(), &QuestUiState::default(), &PendingOperations::default(), true, None, text);
-                });
-            }).unwrap();
+            world
+                .run_system_once(move |mut commands: Commands| {
+                    commands.spawn(Node::default()).with_children(|parent| {
+                        render_dialog_panel(
+                            parent,
+                            &NpcDialogModel {
+                                npc_name: Some("Village Chief".into()),
+                                lines: vec![crate::quest_model::NpcDialogLine {
+                                    text: "Return".into(),
+                                }],
+                                options: vec![crate::quest_model::NpcDialogOption {
+                                    option_id: "@raw:return/Progress:9".into(),
+                                    label: "Progress".into(),
+                                    enabled: true,
+                                }],
+                                ..default()
+                            },
+                            &NpcDialogNav::default(),
+                            &QuestUiState::default(),
+                            &PendingOperations::default(),
+                            true,
+                            None,
+                            text,
+                        );
+                    });
+                })
+                .unwrap();
             for expected in ["Village Chief", "Return", "Progress"] {
-                assert!(world.query::<&Text>().iter(&world).any(|value| value.0 == expected), "{language:?}: {expected}");
+                assert!(
+                    world
+                        .query::<&Text>()
+                        .iter(&world)
+                        .any(|value| value.0 == expected),
+                    "{language:?}: {expected}"
+                );
             }
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|action|
                 matches!(action, QuestUiButton::SelectNpcDialog { target } if target == "@raw:return/Progress:9")));
@@ -12426,52 +16521,141 @@ mod presentation_locale_tree_tests {
     #[test]
     fn four_raw_leaf_families_preserve_text_geometry_and_action_payloads() {
         let mut world = World::new();
-        world.run_system_once(|mut commands: Commands| {
-            commands.spawn(Node::default()).with_children(|parent| {
-                let opaque = "Accept Village Chief Dagger";
-                quest_log_text_at_raw(parent, opaque, QuestLogRect::new(9.0, 11.0, 101.0, 23.0),
-                    12.0, PANEL_TEXT, Justify::Left);
-                quest_log_text_button_at_sized_raw(parent, QuestLogRect::new(7.0, 8.0, 99.0, 44.0),
-                    opaque, QuestUiButton::FinishQuest { quest_index: 123, selected_item_index: 7 }, true, 15.0);
-                panel_text_raw(parent, opaque, 13.0, PANEL_TEXT, Justify::Left);
-                action_button_raw(parent, opaque, QuestUiButton::SelectNpcDialog { target: "@Exact:opaque".into() }, true);
-            });
-        }).unwrap();
-        assert_eq!(world.query::<&Text>().iter(&world).filter(|text| text.0 == "Accept Village Chief Dagger").count(), 4);
-        assert!(world.query::<&Node>().iter(&world).any(|node|
-            node.left == Val::Px(9.0) && node.top == Val::Px(11.0)
-            && node.width == Val::Px(101.0) && node.height == Val::Px(23.0)));
-        assert!(world.query::<&QuestUiButton>().iter(&world).any(|action|
-            matches!(action, QuestUiButton::FinishQuest { quest_index: 123, selected_item_index: 7 })));
+        world
+            .run_system_once(|mut commands: Commands| {
+                commands.spawn(Node::default()).with_children(|parent| {
+                    let opaque = "Accept Village Chief Dagger";
+                    quest_log_text_at_raw(
+                        parent,
+                        opaque,
+                        QuestLogRect::new(9.0, 11.0, 101.0, 23.0),
+                        12.0,
+                        PANEL_TEXT,
+                        Justify::Left,
+                    );
+                    quest_log_text_button_at_sized_raw(
+                        parent,
+                        QuestLogRect::new(7.0, 8.0, 99.0, 44.0),
+                        opaque,
+                        QuestUiButton::FinishQuest {
+                            quest_index: 123,
+                            selected_item_index: 7,
+                        },
+                        true,
+                        15.0,
+                    );
+                    panel_text_raw(parent, opaque, 13.0, PANEL_TEXT, Justify::Left);
+                    action_button_raw(
+                        parent,
+                        opaque,
+                        QuestUiButton::SelectNpcDialog {
+                            target: "@Exact:opaque".into(),
+                        },
+                        true,
+                    );
+                });
+            })
+            .unwrap();
+        assert_eq!(
+            world
+                .query::<&Text>()
+                .iter(&world)
+                .filter(|text| text.0 == "Accept Village Chief Dagger")
+                .count(),
+            4
+        );
+        assert!(world
+            .query::<&Node>()
+            .iter(&world)
+            .any(|node| node.left == Val::Px(9.0)
+                && node.top == Val::Px(11.0)
+                && node.width == Val::Px(101.0)
+                && node.height == Val::Px(23.0)));
+        assert!(world
+            .query::<&QuestUiButton>()
+            .iter(&world)
+            .any(|action| matches!(
+                action,
+                QuestUiButton::FinishQuest {
+                    quest_index: 123,
+                    selected_item_index: 7
+                }
+            )));
         assert!(world.query::<&QuestUiButton>().iter(&world).any(|action|
             matches!(action, QuestUiButton::SelectNpcDialog { target } if target == "@Exact:opaque")));
     }
 
     #[test]
     fn known_id_non_chinese_builders_keep_line_vector_and_opaque_fields() {
-        let quest = Quest { quest_index: 2_110_002, title: " Host title  ".into(),
-            accept_npc_index: Some(9), finish_npc_index: Some(10), npc_name: Some("Village Chief".into()),
-            group: None, min_level_needed: 1, status: crate::quest_model::QuestStatus::InProgress,
-            detail: crate::quest_model::QuestDetailText { description_lines: vec!["  First host line  ".into(),
-                "Second host line\t".into()], task_description_lines: vec![" Task host\t ".into()],
-                return_description_lines: vec![" Return host  ".into()], ..default() },
-            objectives: vec![crate::quest_model::QuestObjective { objective_id: "opaque:1".into(),
-                text: " Objective host  ".into(), current: 2, target: 3 }], rewards: vec![], unknown_text: None };
-        let dialog = NpcDialogModel { is_open: true, npc_object_id: Some(9), npc_name: Some("Village Chief".into()),
-            options: vec![crate::quest_model::NpcDialogOption { option_id: "@Exact:opaque".into(), label: "Accept".into(), enabled: true }],
-            ..default() };
-        for language in [mir2_game_data::LanguageCode::English, mir2_game_data::LanguageCode::Spanish,
-            mir2_game_data::LanguageCode::Portuguese] {
-            let text = QuestRenderText { locale: QuestPresentationLocale(language) };
-            assert_eq!(localized_quest_description(&quest, text), quest.detail.description_lines);
+        let quest = Quest {
+            quest_index: 2_110_002,
+            title: " Host title  ".into(),
+            accept_npc_index: Some(9),
+            finish_npc_index: Some(10),
+            npc_name: Some("Village Chief".into()),
+            group: None,
+            min_level_needed: 1,
+            status: crate::quest_model::QuestStatus::InProgress,
+            detail: crate::quest_model::QuestDetailText {
+                description_lines: vec!["  First host line  ".into(), "Second host line\t".into()],
+                task_description_lines: vec![" Task host\t ".into()],
+                return_description_lines: vec![" Return host  ".into()],
+                ..default()
+            },
+            objectives: vec![crate::quest_model::QuestObjective {
+                objective_id: "opaque:1".into(),
+                text: " Objective host  ".into(),
+                current: 2,
+                target: 3,
+            }],
+            rewards: vec![],
+            unknown_text: None,
+        };
+        let dialog = NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(9),
+            npc_name: Some("Village Chief".into()),
+            options: vec![crate::quest_model::NpcDialogOption {
+                option_id: "@Exact:opaque".into(),
+                label: "Accept".into(),
+                enabled: true,
+            }],
+            ..default()
+        };
+        for language in [
+            mir2_game_data::LanguageCode::English,
+            mir2_game_data::LanguageCode::Spanish,
+            mir2_game_data::LanguageCode::Portuguese,
+        ] {
+            let text = QuestRenderText {
+                locale: QuestPresentationLocale(language),
+            };
+            assert_eq!(
+                localized_quest_description(&quest, text),
+                quest.detail.description_lines
+            );
             let lines = quest_detail_lines_with_wrap(&quest, None, "", false, text);
             assert_eq!(lines[0].text, " Host title  ");
-            for expected in ["  First host line  ", "Second host line\t", " Task host\t ", " Return host  "] {
-                assert!(lines.iter().any(|line| line.text == expected), "{language:?} {expected:?}: {lines:?}");
+            for expected in [
+                "  First host line  ",
+                "Second host line\t",
+                " Task host\t ",
+                " Return host  ",
+            ] {
+                assert!(
+                    lines.iter().any(|line| line.text == expected),
+                    "{language:?} {expected:?}: {lines:?}"
+                );
             }
-            assert!(quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text)
-                .iter().any(|line| line.text == "Second host line\t"));
-            assert_eq!(quest_objective_detail_text(&quest.objectives[0], text), " Objective host   (2 / 3)");
+            assert!(
+                quest_list_message_lines_with_wrap(&quest, &dialog, None, false, text)
+                    .iter()
+                    .any(|line| line.text == "Second host line\t")
+            );
+            assert_eq!(
+                quest_objective_detail_text(quest.quest_index, 0, &quest.objectives[0], text),
+                " Objective host   (2 / 3)"
+            );
         }
     }
 }

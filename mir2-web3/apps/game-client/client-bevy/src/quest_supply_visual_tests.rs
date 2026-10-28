@@ -107,7 +107,7 @@ fn shortage_plan(class: &str) -> SupplyPlan {
         .iter()
         .any(|row| row.item_name == "(MP)DrugLarge"));
     if class == "Taoist" {
-        assert!(result.needs_material_switch);
+        assert!(result.needs_taoist_material_guidance);
         assert!(result
             .rows
             .iter()

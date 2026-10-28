@@ -1,0 +1,165 @@
+{
+  "schema": "mir2.health-zero.reviewed-root-04.v1",
+  "baseline": "724e64dcf50e1119bf0d142f99274d96b6f38cd3",
+  "originalSourceReceiptSha256": "141ee65a1682908192001c935bbfb2611f066bbb8d14fea39f0c8332aa20b63f",
+  "originalValidationReceiptSha256": "e8216be32d61b48b23ca7155c3f0c7d9f74af73e568d4bbc465c5b94120d272b",
+  "followup02ReceiptSha256": "85797af0d1fd76920c09f0be7a51d910eb75095bdb574eb02e011652d3c80119",
+  "originalReceiptsAndLogsUnchanged": true,
+  "allEightOtherRound1SourcesUnchanged": true,
+  "currentSourceFiles": [
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "bytes": 685860,
+      "sha256": "1214a6f536f975c1c18ff4eb5d3e17310f1f182a580542053bc35384d6847d42"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/packets.rs",
+      "bytes": 50387,
+      "sha256": "933b07d07c0703397fd1a7c62ea6037eb7e6545b78d611cd516804d6d8602d4f"
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "bytes": 1224441,
+      "sha256": "4bced1d504ced4e5aaf7e2b8575fb6f8e795051e7d9050f5026fe45a3d1c918b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 364868,
+      "sha256": "3dcccde393de5c11af81e4e5ca9c65dc893e676d1b0aacfb5963f68d399f59ab"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_health.rs",
+      "bytes": 16819,
+      "sha256": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone.rs",
+      "bytes": 475281,
+      "sha256": "255ed14847dd592a80a00f2c53fdb6778e603df2b052ec58115f352850a095f1"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/health_zero_authority_tests.rs",
+      "bytes": 5174,
+      "sha256": "ee2fe4f8ba36fff52d2126674355da5ea35fb45d3fe75fd4160e3e95468d8d70"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/health_zero_authority_tests.rs",
+      "bytes": 22557,
+      "sha256": "58518acfac0356b93a4a8f7462d023dea32b59c7c8268424be8fae983309c952"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_authority_tests.rs",
+      "bytes": 15568,
+      "sha256": "611e1412eb3c235c85b77b48fa65cbfacdf0bfc637c3f5e42210bd7243324f9e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_display_tests.rs",
+      "bytes": 3900,
+      "sha256": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 507991,
+      "sha256": "e588080c7efdb6d15075d0a293e927f87bc0d48422e357b636e5214774919a9b"
+    }
+  ],
+  "formulas": [
+    {
+      "name": "native_monster_health_percent",
+      "sha256": "57c536aa60378dfa78a9872d17c863cd362121964579c4d94ae3ffbd100ca5b4",
+      "unchangedFromBaseline": true
+    },
+    {
+      "name": "native_player_health_percent",
+      "sha256": "6fea356f10faf293a63e54a98d14a6edc3e77021e07c03af2c8b1905163d4a74",
+      "unchangedFromBaseline": true
+    },
+    {
+      "name": "health_from_percent",
+      "sha256": "d122b19bc0519cdd486d7e05d480c95cf4684d92086920731f90dfa6bdbb7275",
+      "unchangedFromBaseline": true
+    }
+  ],
+  "runs": [
+    {
+      "log": "health-zero-authority-root-04-01-red.log",
+      "sha256": "c5970205b8f92e64b2244c6aafef314b451f7c93f4ff925ffcc5e7f9b0dda0e3",
+      "passed": 14,
+      "failed": 2,
+      "status": "retained_red_before_root_fix"
+    },
+    {
+      "log": "health-zero-authority-root-04-02-green.log",
+      "sha256": "b74283a7df39079ae78b7fee633135350a21968e0952a3410fe77dfd43a5cede",
+      "passed": 16,
+      "failed": 0,
+      "status": "superseded_by_read_only_cache_replay_finding"
+    },
+    {
+      "log": "health-zero-authority-root-04-03-replay-green.log",
+      "sha256": "43546bb476368af778e247bd1f30ec28a02413d9b5025b6585553d1851a4786e",
+      "passed": 17,
+      "failed": 0,
+      "status": "final_green"
+    },
+    {
+      "log": "health-zero-authority-root-04-04-bridge-adjacent.log",
+      "sha256": "bb1a97e4e5046793358cec782007122e2068eff723ed320cdb7de241f6748f3c",
+      "passed": 102,
+      "failed": 0,
+      "status": "final_green"
+    },
+    {
+      "log": "health-zero-authority-root-04-05-display-adjacent.log",
+      "sha256": "c0ffb00889bfe652cbf6cab4a25341e0200d10317075229933285451c673e253",
+      "passed": 7,
+      "failed": 0,
+      "status": "final_green"
+    },
+    {
+      "log": "health-zero-authority-root-04-06-map-ingress-adjacent.log",
+      "sha256": "2c4c5aa0a9fc40295eed19dab694afa7789d13d5734465896053ee2a4115a31e",
+      "passed": 5,
+      "failed": 0,
+      "status": "final_green"
+    }
+  ],
+  "readOnlyReview": {
+    "reviewer": "/root/health_zero_review_01",
+    "findingsFixed": [
+      "old alive packet shadows later typed HP0 after actual raw live acknowledgement",
+      "overlaid cached packet replay must not acknowledge an incarnation"
+    ],
+    "finalSourceReview": "No further raw-ingress/cache-merge regression found; 17 final focused cases pass.",
+    "notVerified": "terminal corpse animation when the dedicated Death packet is absent"
+  },
+  "scope": [
+    "raw current-map worldSnapshot alone acknowledges live owner precedence",
+    "packet-first cached replay remains pure projection",
+    "real Death true still rejects stale typed live data",
+    "exact HP0 alone does not synthesize death",
+    "percentage math and GroupHero/PetHealth recipient policy unchanged"
+  ],
+  "provenanceLimit": "An independently observed appended explicit-Death test and -03 logs are retained; its author is not established by the original -02 receipt.",
+  "knownBaselineFailureRetained": [
+    {
+      "test": "statue_checkpoint_preserves_sleep_and_wakes_strictly_after_fifteen_minutes",
+      "sha256": "b1320642fc593ef1649961e1ddb736edd93d5b62b2691358abbcdea6a21b45f7",
+      "only_difference": "Cold restore revokes experience_owner containing online epoch/namespace proof",
+      "log": "C:/mir2-build/health-zero-authority-20-sleep-ai-adjacent.log",
+      "baseline_reproduced": true
+    },
+    {
+      "test": "statue_checkpoint_preserves_sleep_and_wakes_strictly_after_fifteen_minutes",
+      "sha256": "85856ffbd5f9d29e4f640edef87f48559474248bdd3a94e5244c2254ad27ebed",
+      "only_difference": "Cold restore revokes experience_owner containing online epoch/namespace proof",
+      "log": "C:/mir2-build/health-zero-authority-22-sleep-baseline-724e.log",
+      "baseline_reproduced": true
+    }
+  ],
+  "frozenR22Changed": false,
+  "publicServiceChanged": false,
+  "nativeAppLaunched": false,
+  "paymentProviderIntegrated": false,
+  "fullP1P7Complete": false
+}

@@ -476,7 +476,8 @@ test("actual Shell active or arming storage stops held keyboard movement even wi
       heldKeyboardMoveKeysRef: { current: new Set(["right"]) }, heldKeyboardRunModeRef: { current: true },
       onViewportDirectionStop: () => { stops++; }, onViewportDirectionIntent() { assert.fail("storage cannot move the world"); } };
     scope.npcShopPointerCallbacksRef = { current: { getBevyNpcShopInputBlocked: () => false } };
-    Object.assign(scope, functions("app/original-client-shell.tsx", ["npcShopBlocksWorldInput"], scope));
+    scope.heroPointerLeaseRef = { current: null }; scope.heroPointerCallbacksRef = { current: {} };
+    Object.assign(scope, functions("app/original-client-shell.tsx", ["heroBlocksWorldInput", "npcShopBlocksWorldInput"], scope));
     functions("app/original-client-shell.tsx", ["dispatchKeyboardMoveInput"], scope).dispatchKeyboardMoveInput("edge");
     assert.equal(scope.heldKeyboardMoveKeysRef.current.size, 0);
     assert.equal(scope.heldKeyboardRunModeRef.current, false); assert.equal(stops, 1);
@@ -526,8 +527,9 @@ test("actual Shell window blur/resize/unmount withdraw Storage and remove its ow
   scope.npcRepairPointerRef = { current: null }; scope.npcRepairQuarantineRef = { current: new Map() };
   scope.npcRepairClickFenceRef = { current: new Map() };
   scope.worldFishingPhysicalRef = { current: null }; scope.worldFishingTerminalRef = { current: null };
+  scope.heroPointerLeaseRef = { current: null }; scope.heroHoverContextRef = { current: null };
   Object.assign(scope, functions("app/original-client-shell.tsx", ["cancelSharedNpcShopPointer", "cancelBagBeltPointer", "cancelNpcRepairPointer",
-    "endCombatUiHold", "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"], scope));
+    "endCombatUiHold", "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical", "cancelSharedHeroPointer"], scope));
   for (const name of ["Compose", "Mail", "Spells", "Character", "Bag", "Hud"]) scope["cancelShared" + name + "Pointer"] = () => {};
   const cleanup = effect("app/original-client-shell.tsx", "useEffect", 'cancelSharedStoragePointer("blur")', scope)();
   assert.equal(listeners.size, 8);
@@ -555,8 +557,9 @@ test("actual Shell layout owner/geometry replacement cancels Storage before clea
   scope.bagBeltQuarantineRef = { current: new Map() };
   scope.npcRepairPointerRef = { current: null }; scope.npcRepairQuarantineRef = { current: new Map() };
   scope.worldFishingPhysicalRef = { current: null }; scope.worldFishingTerminalRef = { current: null };
+  scope.heroPointerLeaseRef = { current: null }; scope.heroHoverContextRef = { current: null };
   Object.assign(scope, functions("app/original-client-shell.tsx", ["cancelSharedNpcShopPointer", "cancelBagBeltPointer", "cancelNpcRepairPointer",
-    "endCombatUiHold", "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical"], scope));
+    "endCombatUiHold", "cancelWorldFishingHeldPointer", "retireWorldFishingPhysical", "cancelSharedHeroPointer"], scope));
   for (const name of ["Compose", "Mail", "Hud", "Character", "Spells", "Bag"]) scope["cancelShared" + name + "Pointer"] = () => calls.push(name);
   effect("app/original-client-shell.tsx", "useLayoutEffect", "if (bevyBagOwnerRevision === 0", scope)();
   assert.equal(calls[0], "storage"); assert.equal(calls.at(-1), "stop"); assert.equal(scope.heldScenePointerRef.current, null);

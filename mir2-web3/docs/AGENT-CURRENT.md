@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-10-23 (Asia/Shanghai).
+Short routing summary, updated 2026-10-28 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -18,6 +18,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 | Topic | Recorded state and next scope | Detailed reference |
 | --- | --- | --- |
+| Windows wallet / branch integration (2026-10-28) | Native Dubhe QR login uses the existing nine-language preference. Full-history integration with remote `e11c32fb1` preserves local gameplay and durable authority domains; consult the dated validation record for results and remaining acceptance limits. Local test launchers require no Docker. | [Integration record](BRANCH-INTEGRATION-20261028.zh-CN.md), [wallet flow](DUBHE-WALLET-WINDOWS-LOGIN.zh-CN.md) |
 | Overall parity | Candidate100 remains false in the latest summarized records; final human acceptance remains open. Do not invent an overall percentage. | [Roadmap](CRYSTAL-1TO1-ROADMAP.md), relevant topic section |
 | Level 100 / SLG (2026-10-19) | User direction is a level-100 cap with new SLG after max level. Resource audit/planning is recorded; runtime cap, level 71-100 content, balancing, ordinary acquisition and server entry gates still require implementation/verification. Keep custom rules separate from Crystal's original baseline. | [Growth rules](LEVEL100-SLG-PROGRESSION.zh-CN.md), [equipment audit](EQUIPMENT-LEVEL100-SLG-AUDIT-20261019.zh-CN.md), [queue](AGENT-TASK-QUEUE.md) topic heading |
 | Cross-chat integration (2026-10-14) | Code/push/validation scope was reconciled. Signed R26 paired release, event-site re-publication and player acceptance remained open in that record; confirm current status only for related tasks. | [Code progress](CODE-PROGRESS-20261014.zh-CN.md) |

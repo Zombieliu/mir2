@@ -532,7 +532,12 @@ fn click_item(
         ui.selected = Some((gear, slot, id));
     }
 }
-pub(super) fn merge_packet(source: &ItemModel, target: &ItemModel, grid_from: Grid, grid_to: Grid) -> Option<C> {
+pub(super) fn merge_packet(
+    source: &ItemModel,
+    target: &ItemModel,
+    grid_from: Grid,
+    grid_to: Grid,
+) -> Option<C> {
     item_use::merge_packet(source, target, grid_from, grid_to)
 }
 pub fn use_item(

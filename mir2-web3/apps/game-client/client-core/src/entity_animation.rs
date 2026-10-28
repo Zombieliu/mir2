@@ -7,7 +7,7 @@
 //! globals so a renderer can advance it with an explicit monotonic millisecond
 //! clock.
 
-use crate::ordered_map::OrderedMap;
+use crate::ordered_map::{OrderedMap, OrderedSet};
 use std::collections::VecDeque;
 use std::fmt;
 
@@ -47,6 +47,7 @@ pub enum AnimationAction {
     Hide,
     Walking,
     Running,
+    Jump,
     Attack1,
     Attack2,
     Attack3,
@@ -169,6 +170,10 @@ impl AnimationCatalog {
         catalog.add_default(
             AnimationAction::Running,
             FrameDescriptor::from_crystal(80, 6, 0, 100, false),
+        );
+        catalog.add_default(
+            AnimationAction::Jump,
+            FrameDescriptor::from_crystal(288, 8, 0, 100, false),
         );
         catalog.add_default(
             AnimationAction::Attack1,
@@ -361,6 +366,7 @@ pub struct ActionTransition {
 pub enum QueueDisposition {
     Started,
     Queued,
+    Coalesced,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -518,6 +524,12 @@ pub struct EntityAnimationState {
     rng: DeterministicRng,
     last_enqueued_event_sequence: Option<u64>,
     last_started_event_sequence: Option<u64>,
+    /// Crystal queues Attack4 locally for a received DoubleSlash Attack1.
+    /// Keep its identity beside the FIFO rather than synthesizing a new wire
+    /// sequence or changing the ordinary player attack descriptors.
+    double_slash_sequences: OrderedSet<u64>,
+    double_slash_descriptor: Option<FrameDescriptor>,
+    double_slash_second_pending: bool,
 }
 
 impl EntityAnimationState {
@@ -570,6 +582,9 @@ impl EntityAnimationState {
             rng,
             last_enqueued_event_sequence: None,
             last_started_event_sequence: None,
+            double_slash_sequences: OrderedSet::new(),
+            double_slash_descriptor: None,
+            double_slash_second_pending: false,
         })
     }
 
@@ -578,9 +593,11 @@ impl EntityAnimationState {
     }
 
     pub fn current_descriptor(&self) -> &FrameDescriptor {
-        self.catalog
-            .descriptor(self.current_action)
-            .expect("active actions always have a validated descriptor")
+        self.double_slash_descriptor.as_ref().unwrap_or_else(|| {
+            self.catalog
+                .descriptor(self.current_action)
+                .expect("active actions always have a validated descriptor")
+        })
     }
 
     pub fn queue_depth(&self) -> usize {
@@ -636,6 +653,21 @@ impl EntityAnimationState {
         }
 
         self.last_enqueued_event_sequence = Some(event.sequence);
+        // Crystal's owner Struck handler allows only one waiting reaction.
+        // Damage/HP packets are independent; dozens of attackers must not
+        // turn into seconds of historical flinches before the next action.
+        if self.kind == EntityKind::Player
+            && event.action == AnimationAction::Struck
+            && self
+                .action_feed
+                .iter()
+                .any(|queued| queued.action == AnimationAction::Struck)
+        {
+            return Ok(EventUpdate {
+                disposition: QueueDisposition::Coalesced,
+                transitions,
+            });
+        }
         self.action_feed.push_back(event);
         let started = self.try_start_front_event(now_ms, &mut transitions)?;
         Ok(EventUpdate {
@@ -648,23 +680,65 @@ impl EntityAnimationState {
         })
     }
 
+    /// Apply the source-owned two-part DoubleSlash animation. The caller must
+    /// have a real Assassin ObjectAttack(DoubleSlash), not a skill toggle.
+    /// Missing body actions fail closed; the native adapter may retain its
+    /// normal attack path without inventing a replacement frame.
+    pub fn apply_double_slash_event(
+        &mut self,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        if self.kind != EntityKind::Player || event.action != AnimationAction::Attack1 {
+            return Err(AnimationError::UnsupportedAction {
+                action: event.action,
+            });
+        }
+        for action in [AnimationAction::Attack1, AnimationAction::Attack4] {
+            let descriptor = self
+                .catalog
+                .descriptor(action)
+                .ok_or(AnimationError::UnsupportedAction { action })?;
+            // Both real Assassin source actions have six 100 ms phases.
+            // Do not apply their timing to a different/mounted frame set.
+            if descriptor.frame_count != 6 || descriptor.frame_interval_ms != 100 {
+                return Err(AnimationError::UnsupportedAction { action });
+            }
+        }
+        if self
+            .last_enqueued_event_sequence
+            .is_some_and(|last| event.sequence <= last)
+        {
+            return self.apply_event(event, now_ms);
+        }
+        self.double_slash_sequences.insert(event.sequence);
+        let result = self.apply_event(event, now_ms);
+        if result.is_err() {
+            self.double_slash_sequences.remove(&event.sequence);
+        }
+        result
+    }
+
     /// Apply a movement event as the latest authoritative player segment.
     ///
     /// Crystal's generic action feed remains FIFO, but a native presentation
     /// may already have started the next authoritative motion window before a
-    /// previous walk/run cycle reaches its final frame. When no other action is
-    /// waiting, restart that player locomotion immediately so the internal
-    /// action and visible movement phase share the new segment. Every other
-    /// case preserves the ordinary [`Self::apply_event`] queue behavior.
+    /// previous walk/run cycle reaches its final frame. Stale locomotion and
+    /// hit reactions cannot replay after that displacement has already begun.
+    /// Restart the latest segment when only these presentation actions remain;
+    /// real attacks, casts, and life transitions retain their FIFO barriers.
     pub fn apply_latest_locomotion_event(
         &mut self,
         event: AnimationEvent,
         now_ms: u64,
     ) -> Result<EventUpdate, AnimationError> {
         let can_replace = self.kind == EntityKind::Player
-            && self.current_action.is_locomotion()
+            && (self.current_action.is_locomotion()
+                || self.current_action == AnimationAction::Struck)
             && event.action.is_locomotion()
-            && self.action_feed.is_empty();
+            && self.action_feed.iter().all(|queued| {
+                queued.action.is_locomotion() || queued.action == AnimationAction::Struck
+            });
         if !can_replace {
             return self.apply_event(event, now_ms);
         }
@@ -681,6 +755,8 @@ impl EntityAnimationState {
         }
 
         self.last_enqueued_event_sequence = Some(event.sequence);
+        self.action_feed.clear();
+        self.double_slash_sequences.clear();
         self.start_event(event, now_ms, &mut transitions)?;
         Ok(EventUpdate {
             disposition: QueueDisposition::Started,
@@ -720,6 +796,7 @@ impl EntityAnimationState {
 
         self.last_enqueued_event_sequence = Some(event.sequence);
         self.action_feed.clear();
+        self.double_slash_sequences.clear();
         self.start_event(event, now_ms, &mut transitions)?;
         Ok(EventUpdate {
             disposition: QueueDisposition::Started,
@@ -758,6 +835,18 @@ impl EntityAnimationState {
             return Ok(());
         }
 
+        if self.double_slash_second_pending && self.current_action == AnimationAction::Attack1 {
+            self.start_double_slash_phase(
+                AnimationAction::Attack4,
+                self.direction,
+                self.last_started_event_sequence
+                    .expect("DoubleSlash has a source sequence"),
+                at_ms,
+                transitions,
+            )?;
+            return Ok(());
+        }
+
         match self.current_action {
             AnimationAction::Show => {
                 self.enter_idle(at_ms, TransitionReason::ShowCompleted, transitions)?;
@@ -767,6 +856,7 @@ impl EntityAnimationState {
             }
             AnimationAction::Die => {
                 self.action_feed.clear();
+                self.double_slash_sequences.clear();
                 self.start_action(
                     AnimationAction::Dead,
                     self.direction,
@@ -781,6 +871,7 @@ impl EntityAnimationState {
             }
             AnimationAction::Revive => {
                 self.action_feed.clear();
+                self.double_slash_sequences.clear();
                 self.enter_idle(at_ms, TransitionReason::ReviveCompleted, transitions)?;
             }
             _ => {
@@ -829,6 +920,15 @@ impl EntityAnimationState {
         at_ms: u64,
         transitions: &mut Vec<ActionTransition>,
     ) -> Result<(), AnimationError> {
+        if self.double_slash_sequences.remove(&event.sequence) {
+            return self.start_double_slash_phase(
+                AnimationAction::Attack1,
+                event.direction,
+                event.sequence,
+                at_ms,
+                transitions,
+            );
+        }
         self.start_action(
             event.action,
             event.direction,
@@ -837,6 +937,34 @@ impl EntityAnimationState {
             TransitionReason::Event(event.sequence),
             transitions,
         )
+    }
+
+    fn start_double_slash_phase(
+        &mut self,
+        action: AnimationAction,
+        direction: Direction,
+        sequence: u64,
+        at_ms: u64,
+        transitions: &mut Vec<ActionTransition>,
+    ) -> Result<(), AnimationError> {
+        self.start_action(
+            action,
+            direction,
+            Some(sequence),
+            at_ms,
+            TransitionReason::Event(sequence),
+            transitions,
+        )?;
+        let mut descriptor = *self
+            .catalog
+            .descriptor(action)
+            .ok_or(AnimationError::UnsupportedAction { action })?;
+        // PlayerObject.cs truncates FrameInterval * 0.46f for both actions.
+        descriptor.frame_interval_ms = descriptor.frame_interval_ms * 46 / 100;
+        self.double_slash_descriptor = Some(descriptor);
+        self.double_slash_second_pending = action == AnimationAction::Attack1;
+        self.next_motion_at_ms = Some(deadline(at_ms, descriptor.frame_interval_ms)?);
+        Ok(())
     }
 
     fn enter_idle(
@@ -877,6 +1005,8 @@ impl EntityAnimationState {
             .descriptor(action)
             .ok_or(AnimationError::UnsupportedAction { action })?;
         let previous = self.current_action;
+        self.double_slash_descriptor = None;
+        self.double_slash_second_pending = false;
         self.current_action = action;
         self.direction = direction;
         self.frame_index = 0;
@@ -1013,6 +1143,15 @@ impl AnimationWorld {
         now_ms: u64,
     ) -> Result<EventUpdate, AnimationError> {
         state_for_key_mut(&mut self.active, key)?.apply_event(event, now_ms)
+    }
+
+    pub fn apply_double_slash_event(
+        &mut self,
+        key: &EntityKey,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        state_for_key_mut(&mut self.active, key)?.apply_double_slash_event(event, now_ms)
     }
 
     pub fn apply_latest_locomotion_event(
@@ -1171,6 +1310,264 @@ mod tests {
         let remaining_frames = descriptor.frame_count - state.frame_index;
         state.next_motion_at_ms.unwrap()
             + u64::from(remaining_frames - 1) * descriptor.frame_interval_ms
+    }
+
+    #[test]
+    fn five_class_jump_keeps_source_facing_and_eight_frames_before_next_action() {
+        let mut world = AnimationWorld::new(7);
+        let key = spawn_default(&mut world, "archer", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Jump, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::AttackRange1, Direction::Right),
+                100,
+            )
+            .unwrap();
+        let descriptor = world.state(&key).unwrap().current_descriptor();
+        assert_eq!(
+            *descriptor,
+            FrameDescriptor::from_crystal(288, 8, 0, 100, false)
+        );
+        world.tick(799).unwrap();
+        let pose = world.state(&key).unwrap().pose();
+        assert_eq!(
+            (
+                pose.action,
+                pose.direction,
+                pose.logical_frame_index,
+                pose.draw_frame_index
+            ),
+            (AnimationAction::Jump, Direction::Right, 7, 311)
+        );
+        assert_eq!(pose.last_started_event_sequence, Some(1));
+        let transitions = world.tick(800).unwrap();
+        assert_eq!(
+            (
+                transitions[0].at_ms,
+                transitions[0].to,
+                transitions[0].reason
+            ),
+            (
+                800,
+                AnimationAction::AttackRange1,
+                TransitionReason::Event(2)
+            )
+        );
+        assert_eq!(world.state(&key).unwrap().queue_depth(), 0);
+        assert!(!AnimationCatalog::crystal_monster().supports(AnimationAction::Jump));
+    }
+
+    #[test]
+    fn double_slash_two_source_actions_share_sequence_and_restore_normal_clock() {
+        let mut world = AnimationWorld::new(7);
+        let key = spawn_default(&mut world, "assassin", EntityKind::Player, 0);
+        world
+            .apply_double_slash_event(
+                &key,
+                AnimationEvent::new(4, AnimationAction::Attack1, Direction::Left),
+                10,
+            )
+            .unwrap();
+        assert_eq!(
+            world
+                .state(&key)
+                .unwrap()
+                .current_descriptor()
+                .frame_interval_ms,
+            46
+        );
+        world.tick(285).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Attack1
+        );
+        assert_eq!(world.state(&key).unwrap().pose().logical_frame_index, 5);
+        let transitions = world.tick(286).unwrap();
+        assert_eq!(transitions[0].to, AnimationAction::Attack4);
+        assert_eq!(transitions[0].reason, TransitionReason::Event(4));
+        assert_eq!(
+            world
+                .state(&key)
+                .unwrap()
+                .pose()
+                .last_started_event_sequence,
+            Some(4)
+        );
+        assert_eq!(world.state(&key).unwrap().pose().direction, Direction::Left);
+        world.tick(561).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Attack4
+        );
+        world.tick(562).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Standing
+        );
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(5, AnimationAction::Attack1, Direction::Down),
+                563,
+            )
+            .unwrap();
+        assert_eq!(
+            world
+                .state(&key)
+                .unwrap()
+                .current_descriptor()
+                .frame_interval_ms,
+            100
+        );
+        world.tick(1_162).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Attack1
+        );
+        world.tick(1_163).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Standing
+        );
+    }
+
+    #[test]
+    fn double_slash_second_precedes_newer_actions_without_reordering_source_fifo() {
+        let mut world = AnimationWorld::new(7);
+        let key = spawn_default(&mut world, "assassin", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Walking, Direction::Right),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_double_slash_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Attack1, Direction::Left),
+                10,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(3, AnimationAction::Spell, Direction::Up),
+                20,
+            )
+            .unwrap();
+        world.tick(600).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Attack1
+        );
+        assert_eq!(
+            world
+                .state(&key)
+                .unwrap()
+                .pose()
+                .last_started_event_sequence,
+            Some(2)
+        );
+        world.tick(876).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Attack4
+        );
+        world.tick(1_152).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().pose().action,
+            AnimationAction::Spell
+        );
+        assert_eq!(
+            world
+                .state(&key)
+                .unwrap()
+                .current_descriptor()
+                .frame_interval_ms,
+            100
+        );
+        assert_eq!(
+            world.state(&key).unwrap().last_enqueued_event_sequence(),
+            Some(3)
+        );
+    }
+
+    #[test]
+    fn double_slash_revival_clears_both_parts_and_pending_source_markers() {
+        let mut world = AnimationWorld::new(7);
+        let key = spawn_default(&mut world, "assassin", EntityKind::Player, 0);
+        world
+            .apply_double_slash_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Attack1, Direction::Down),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_double_slash_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Attack1, Direction::Down),
+                20,
+            )
+            .unwrap();
+        world
+            .apply_revival_event(
+                &key,
+                AnimationEvent::new(3, AnimationAction::Standing, Direction::Up),
+                50,
+            )
+            .unwrap();
+        world.tick(1_200).unwrap();
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Standing);
+        assert!(state.double_slash_sequences.is_empty());
+        assert!(state.double_slash_descriptor.is_none());
+        assert!(!state.double_slash_second_pending);
+        assert_eq!(state.queue_depth(), 0);
+    }
+
+    #[test]
+    fn double_slash_rejects_wrong_kind_missing_actions_and_duplicate_sequences() {
+        let mut world = AnimationWorld::new(7);
+        let monster = spawn_default(&mut world, "monster", EntityKind::Monster, 0);
+        let event = AnimationEvent::new(1, AnimationAction::Attack1, Direction::Down);
+        assert!(world.apply_double_slash_event(&monster, event, 0).is_err());
+        let mut catalog = AnimationCatalog::new();
+        for action in [AnimationAction::Standing, AnimationAction::Attack1] {
+            catalog
+                .insert(
+                    action,
+                    *AnimationCatalog::crystal_player()
+                        .descriptor(action)
+                        .unwrap(),
+                )
+                .unwrap();
+        }
+        let missing = world
+            .spawn("missing", EntityKind::Player, Direction::Down, catalog, 0)
+            .unwrap();
+        assert!(world.apply_double_slash_event(&missing, event, 0).is_err());
+        assert_eq!(
+            world.state(&missing).unwrap().pose().action,
+            AnimationAction::Standing
+        );
+        let valid = spawn_default(&mut world, "valid", EntityKind::Player, 0);
+        world.apply_double_slash_event(&valid, event, 0).unwrap();
+        assert!(world.apply_double_slash_event(&valid, event, 20).is_err());
+        assert_eq!(world.state(&valid).unwrap().queue_depth(), 0);
+        world.tick(552).unwrap();
+        assert_eq!(
+            world.state(&valid).unwrap().pose().action,
+            AnimationAction::Standing
+        );
     }
 
     #[test]
@@ -1520,6 +1917,97 @@ mod tests {
         assert_eq!(state.next_motion_at_ms, Some(350));
         assert_eq!(state.queue_depth(), 0);
         assert_eq!(state.last_started_event_sequence(), Some(2));
+    }
+
+    #[test]
+    fn coalesced_player_hits_retire_sequence_without_restarting_reaction() {
+        let mut world = AnimationWorld::new(13);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Struck, Direction::Down),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Struck, Direction::Down),
+                50,
+            )
+            .unwrap();
+        for sequence in 3..=50 {
+            let update = world
+                .apply_event(
+                    &key,
+                    AnimationEvent::new(sequence, AnimationAction::Struck, Direction::Down),
+                    50,
+                )
+                .unwrap();
+            assert_eq!(update.disposition, QueueDisposition::Coalesced);
+        }
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.queue_depth(), 1);
+        assert_eq!(state.last_enqueued_event_sequence(), Some(50));
+        assert_eq!(state.last_started_event_sequence(), Some(1));
+        assert_eq!(state.next_motion_at_ms, Some(100));
+        world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(51, AnimationAction::Walking, Direction::Right),
+                100,
+            )
+            .unwrap();
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Walking);
+        assert_eq!(state.queue_depth(), 0);
+        assert!(matches!(
+            world.apply_event(
+                &key,
+                AnimationEvent::new(50, AnimationAction::Struck, Direction::Down),
+                100
+            ),
+            Err(AnimationError::OutOfOrderEvent {
+                previous: 51,
+                incoming: 50
+            })
+        ));
+    }
+
+    #[test]
+    fn latest_escape_cannot_discard_waiting_spell_or_death_barrier() {
+        for barrier in [AnimationAction::Spell, AnimationAction::Die] {
+            let mut world = AnimationWorld::new(14);
+            let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+            world
+                .apply_event(
+                    &key,
+                    AnimationEvent::new(1, AnimationAction::Struck, Direction::Down),
+                    0,
+                )
+                .unwrap();
+            world
+                .apply_event(&key, AnimationEvent::new(2, barrier, Direction::Down), 50)
+                .unwrap();
+            let update = world
+                .apply_latest_locomotion_event(
+                    &key,
+                    AnimationEvent::new(3, AnimationAction::Walking, Direction::Right),
+                    50,
+                )
+                .unwrap();
+            assert_eq!(update.disposition, QueueDisposition::Queued);
+            assert_eq!(
+                world
+                    .state(&key)
+                    .unwrap()
+                    .queued_actions()
+                    .map(|event| event.action)
+                    .collect::<Vec<_>>(),
+                vec![barrier, AnimationAction::Walking]
+            );
+        }
     }
 
     #[test]

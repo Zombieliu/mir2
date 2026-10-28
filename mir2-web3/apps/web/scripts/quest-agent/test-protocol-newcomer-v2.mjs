@@ -80,11 +80,26 @@ test('N21 class practice selects the authored training actor over a closer impor
     entities: [
       { kind: 'selfPlayer', objectId: 1, x: 299, y: 385, hp: 90, dead: false },
       { kind: 'monster', objectId: 294325, name: 'WoomaFighter', x: 298, y: 385, hp: 285, dead: false },
-      { kind: 'monster', objectId: 210021, name: 'WoomaFighter', x: 300, y: 385, hp: 120, dead: false },
+      { kind: 'monster', objectId: 1202100, name: 'WoomaFighter', x: 300, y: 385, hp: 120, dead: false },
     ],
   };
   const target = await approachPracticeTarget({ snapshot }, quest, async () => ({ reached: true }), 1, () => {});
-  assert.equal(target.objectId, 210021);
+  assert.equal(target.objectId, 1202100);
+});
+
+test('N19 practice can acquire each real multi-actor Dung slot from the captured training group', async () => {
+  const route = await loadNewcomerV2Route({ className: 'Wizard', gender: 'Male' });
+  const quest = route.quests.find(row => row.questId === 2110019);
+  // Ordinary captured D022 group10023 exposes these three real IDs, rather
+  // than the one-actor/no-spread legacy ID210023 used by the stale controller.
+  for (const objectId of [1202300, 1202301, 1202302]) {
+    const client = { snapshot: { playerObjectId: 1, mapFileName: 'D022', entities: [
+      { kind: 'selfPlayer', objectId: 1, x: 336, y: 381, hp: 105, dead: false },
+      { kind: 'monster', objectId, name: 'Dung', x: 336, y: 380, hp: 155, maxHp: 155, dead: false },
+    ] } };
+    const target = await approachPracticeTarget(client, quest, async () => ({ reached: true }), 1, () => {});
+    assert.equal(target.objectId, objectId);
+  }
 });
 
 test('all three D022 training footholds have a static walk path from the ordinary entry', async () => {
@@ -293,6 +308,69 @@ test('V2 Wizard combat refreshes a stale cooldown snapshot and then casts normal
   assert.equal(sent[1].type, 'magic');
   assert.equal(sent[1].spell, 'FireBall');
   assert.equal(client.snapshot.questLog[0].stage, 'ReadyToTurnIn');
+});
+
+test('V2 ranged mine objectives require a fresh public Zombie2 reveal before magic', async () => {
+  for (const shows of [true, false]) {
+    const quest = { questId: 2110014, objectiveMaps: ['D401'], objectives: {
+      kill: [{ monsterName: 'Zombie2', spawnCandidates: [{ mapFileName: 'D401', position: { x: 9, y: 0 }, count: 1 }] }],
+      item: [], flag: [],
+    } };
+    const client = { sequence: 0, events: [], snapshot: {
+      mapFileName: 'D401', playerObjectId: 1, playerHp: 100, playerMaxHp: 100, playerMp: 100, playerMaxMp: 100,
+      entities: [
+        { objectId: 1, kind: 'player', class: 'Wizard', level: 21, x: 0, y: 0, hp: 100, maxHp: 100 },
+        { objectId: 9, kind: 'monster', name: 'Zombie2', ai: 24, x: 9, y: 0, hp: 10, maxHp: 10, dead: false },
+      ],
+      knownSkills: [{ spell: 'FireBall', mpCost: 4, cooldownRemainingTicks: 0 }],
+      inventoryItems: [], beltItems: [], equipmentItems: [],
+      questLog: [{ questId: quest.questId, stage: 'InProgress', objectives: [{ label: 'Zombie2', current: 0, required: 1, done: false }] }],
+    } };
+    const emit = (packet, payload) => client.events.push({ sequence: ++client.sequence, direction: 'received', packet, payload });
+    emit('ObjectShow', { objectId: 9 }); // A prior visit cannot reveal this incarnation.
+    emit('MapChanged', { fileName: 'D401' });
+    const sent = [];
+    let revealed = false;
+    client.send = command => {
+      sent.push(command);
+      if (command.type === 'magic') {
+        assert.equal(revealed, true, 'snapshot-only buried coordinates must not authorize damage');
+        Object.assign(client.snapshot.entities[1], { hp: 0, dead: true });
+        client.snapshot.questLog[0].objectives[0] = { label: 'Zombie2', current: 1, required: 1, done: true };
+        client.snapshot.questLog[0].stage = 'ReadyToTurnIn';
+        emit('ObjectDied', { objectId: 9 });
+      } else if (command.type === 'clientVersion') {
+        client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+      }
+    };
+    client.wait = async (predicate, label) => {
+      const value = predicate();
+      assert.ok(value, `missing public ${label}`);
+      return value;
+    };
+    const ranges = [];
+    const operation = () => completeV2Objectives(client, quest, {
+      navigate: async (point, range) => {
+        ranges.push(range);
+        client.snapshot.entities[0].x = Number(point.x) - range;
+        if (range === 3 && shows) {
+          revealed = true;
+          emit('ObjectMonster', { objectId: 9, hidden: false, dead: false });
+          emit('ObjectShow', { objectId: 9 });
+        }
+        return { reached: true, successfulSteps: 6, attempts: 6 };
+      }, travel: async () => {}, className: 'Wizard', checkDeadline: () => {},
+    });
+    if (shows) {
+      await operation();
+      assert.equal(client.snapshot.questLog[0].stage, 'ReadyToTurnIn');
+      assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+    } else {
+      await assert.rejects(operation, /buried target lacked an authoritative/);
+      assert.equal(sent.some(command => command.type === 'magic'), false);
+    }
+    assert.equal(ranges[0], 3, 'use the public reveal radius while this incarnation is underground');
+  }
 });
 
 test('V2 objective combat explicitly opts into the bounded timed-search respawn observation', async () => {
@@ -641,8 +719,8 @@ function practiceClient({ knownSkills, inventoryItems = [], beltItems = [], requ
       }
       return { payload: { success: true } };
     },
-    async wait(predicate) {
-      assert.equal(Boolean(predicate()), true, 'wait predicate must be backed by the updated authoritative snapshot');
+    async wait(predicate, label) {
+      if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
       return true;
     },
   };
@@ -1005,6 +1083,74 @@ test('Wizard practice waits for a fresh shared cooldown receipt before GreatFire
   assert.deepEqual(client.events.filter(event => event.packet === 'ObjectStruck').map(event => event.payload.objectId), [9, 10]);
 });
 
+test('Taoist normal practice waits for acknowledged movement ActionTime, not passive SpiritSword readiness', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['Healing', 'SpiritSword'],
+    requirements: { taoist: ['normal attack landed with SpiritSword learned'] },
+    completeOn: 1,
+  });
+  const healing = client.snapshot.knownSkills[0];
+  healing.cooldownRemainingMs = 0;
+  healing.cooldownRemainingTicks = 0;
+  client.snapshot.knownSkills[1].cooldownRemainingTicks = 0;
+  let refreshes = 0;
+  const originalSend = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      refreshes += 1;
+      // First public snapshot is the observed r8 post-movement lock; only a
+      // later authoritative snapshot releases the shared ActionTime.
+      healing.cooldownRemainingMs = refreshes === 1 ? 434 : 0;
+      healing.cooldownRemainingTicks = refreshes === 1 ? 1 : 0;
+      client.events.push({ sequence: ++client.sequence, direction: 'received',
+        type: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+      return;
+    }
+    if (command.type === 'attack') {
+      assert.ok(refreshes >= 2, 'a 47ms movement ACK must not admit the practice attack');
+      assert.equal(healing.cooldownRemainingTicks, 0);
+    }
+    originalSend(command);
+  };
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'normal' }] });
+  assert.equal(refreshes, 2);
+  assert.deepEqual(sent.map(command => command.type), ['attack']);
+  assert.equal(client.snapshot.questLog[0].objectives[0].done, true);
+});
+
+test('normal practice retries an owner-accepted accuracy miss but never counts an observer attack', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['SpiritSword'],
+    requirements: { taoist: ['normal attack landed with SpiritSword learned'] }, completeOn: 1,
+  });
+  let attempts = 0;
+  const originalSend = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'attack' && ++attempts === 1) {
+      sent.push(command);
+      client.events.push({ sequence: ++client.sequence, direction: 'received',
+        packet: 'ObjectAttack', payload: { objectId: 1, spell: 0 } });
+      return;
+    }
+    originalSend(command);
+  };
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'normal' }] });
+  assert.equal(attempts, 2);
+  assert.deepEqual(sent.map(command => command.type), ['attack', 'attack']);
+  assert.equal(client.events.filter(event => event.packet === 'ObjectStruck').length, 1);
+
+  const rejected = practiceClient({ knownSkills: ['SpiritSword'], requirements: { taoist: ['normal attack landed with SpiritSword learned'] } });
+  rejected.client.send = command => {
+    rejected.sent.push(command);
+    rejected.client.events.push({ sequence: ++rejected.client.sequence, direction: 'received',
+      packet: 'ObjectAttack', payload: { objectId: 9, spell: 0 } });
+  };
+  await assert.rejects(executeV2PracticePlan({ client: rejected.client, quest: rejected.quest,
+    navigate: async () => {}, plan: [{ kind: 'normal' }] }),
+    error => error.reason === 'awaitingPracticeDamage');
+  assert.equal(rejected.sent.length, 1, 'a monster attack must not authorize practice retries');
+});
+
 test('N16 and N21 FireWall practice use the public ground-cast packet and require the target-zero cast receipt', async () => {
   for (const [questId, requirements] of [
     [2110016, ['FireWall learned', 'owned FireWall damage committed']],
@@ -1073,6 +1219,152 @@ test('FireWall rejects a monster-target or non-cast acknowledgement even when th
       /FireWall lacked a positive post-send target damage receipt/,
     );
   }
+});
+
+test('FireWall practice reaims the same moving target only after an accepted ground miss', async () => {
+  const { client, quest, sent } = practiceClient({
+    questId: 2110021, knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] },
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  let casts = 0;
+  let probes = 0;
+  const originalSend = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      probes += 1;
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    if (command.type === 'magic' && ++casts === 1) {
+      sent.push(command);
+      client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+        payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+      // A diagonal step leaves the five-cell cross before its first damage tick.
+      Object.assign(client.snapshot.entities[1], { x: 2, y: 1 });
+      return;
+    }
+    originalSend(command);
+  };
+  const timeouts = [];
+  client.wait = async (predicate, label, timeoutMs) => {
+    if (label.includes('FireWall damage')) timeouts.push(timeoutMs);
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
+    return true;
+  };
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'spell', spell: 'FireWall' }] });
+  assert.equal(casts, 2);
+  assert.equal(probes, 1, 'a public frame must refresh readiness and target before the second cast');
+  assert.deepEqual(sent.map(command => [command.x, command.y, command.targetId]), [[1,0,0],[2,1,0]]);
+  assert.ok(timeouts.every(timeout => timeout > 0 && timeout <= 12_000));
+  assert.equal(timeouts[0], 2_500);
+  assert.equal(client.events.filter(event => event.packet === 'ObjectStruck').length, 1);
+});
+
+test('FireWall practice stops after three accepted misses without inventing damage or navigation', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    sent.push(command);
+    client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+      payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+  };
+  client.wait = async (predicate, label) => {
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
+    return true;
+  };
+  let navigationCalls = 0;
+  await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => { navigationCalls += 1; },
+    plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'awaitingPracticeDamage');
+  assert.equal(sent.length, 3);
+  assert.equal(navigationCalls, 1, 'reaiming must not multiply the original navigation budget');
+  assert.equal(client.snapshot.questLog[0].objectives[0].done, false);
+});
+
+test('FireWall practice never sends a retry after its original twelve-second window', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  const originalNow = Date.now;
+  let elapsed = 0;
+  Date.now = () => 100_000 + elapsed;
+  try {
+    client.send = command => {
+      sent.push(command);
+      client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+        payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+    };
+    client.wait = async (predicate, label) => {
+      if (!predicate()) { elapsed = 12_000; throw new Error(`Timeout waiting for ${label}`); }
+      return true;
+    };
+    await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
+      plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'awaitingPracticeDamage');
+    assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+  } finally { Date.now = originalNow; }
+});
+
+test('FireWall retry validates range again after authoritative readiness changes', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  let probes = 0;
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      probes += 1;
+      client.snapshot.knownSkills[0].cooldownRemainingTicks = probes === 1 ? 1 : 0;
+      if (probes === 2) client.snapshot.entities[1].x = 9;
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    sent.push(command);
+    client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+      payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+  };
+  client.wait = async (predicate, label) => {
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
+    return true;
+  };
+  await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
+    plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'practiceTargetLost');
+  assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+  assert.equal(probes, 2);
+});
+
+test('FireWall never retries an accepted cast after a non-timeout observation failure', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  const failure = new Error('predicate arithmetic failed');
+  let probes = 0;
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      probes += 1;
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    sent.push(command);
+    client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+      payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+  };
+  client.wait = async (predicate, label) => {
+    if (label.includes('FireWall damage')) throw failure;
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
+    return true;
+  };
+  await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
+    plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error === failure);
+  assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+  assert.equal(probes, 0);
 });
 
 test('practice plans execute every q21 class action rather than one priority spell', () => {
@@ -1356,6 +1648,49 @@ test('SummonSkeleton pauses before casting when no real Amulet can be equipped',
     client, quest, navigate: async () => {}, plan: [{ kind: 'summon' }],
   }), /requires a real equipped Amulet/);
   assert.deepEqual(sent, []);
+});
+
+test('real owner-only UserLocation makes V2 practice refresh shared readiness before a summon, target spell, or self-heal', async () => {
+  for (const [spell, step] of [
+    ['SummonSkeleton', { kind: 'summon' }],
+    ['FireBall', { kind: 'spell', spell: 'FireBall' }],
+    ['Healing', { kind: 'healing' }],
+  ]) {
+    const { client, quest } = practiceClient({
+      knownSkills: spell === 'SummonSkeleton' ? ['SoulFireBall', spell] : [spell],
+      inventoryItems: [{ uniqueId: 42, name: 'Amulet', quantity: 71,
+        tooltipSource: { info: { requiredClass: 31, requiredType: 0, requiredAmount: 1 } } }],
+      requirements: { taoist: ['owned skeleton damage committed'] },
+    });
+    client.snapshot.entities[0].level = 19;
+    client.snapshot.entities[0].class = spell === 'FireBall' ? 'Wizard' : 'Taoist';
+    client.snapshot.knownSkills[0].cooldownRemainingTicks = 0;
+    client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+      payload: structuredClone(client.snapshot) });
+    client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'packet',
+      // The real owner-only wire receipt has no objectId. ObjectWalk is the
+      // observer packet; inventing an id here hid the live post-walk failure.
+      packet: 'UserLocation', payload: { x: 0, y: 0 }, at: new Date().toISOString() });
+    let probes = 0;
+    client.send = command => {
+      if (command.type === 'clientVersion') {
+        probes += 1;
+        for (const skill of client.snapshot.knownSkills) skill.cooldownRemainingTicks = probes === 1 ? 1 : 0;
+        client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+          payload: structuredClone(client.snapshot) });
+        return;
+      }
+      if (command.type === 'magic') {
+        if (probes < 2) throw new Error(`${spell} used stale pre-walk readiness`);
+        assert.equal(command.spell, spell);
+        throw new Error('fresh practice command inspected');
+      }
+      throw new Error(`unexpected command ${command.type}`);
+    };
+    await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [step] }),
+      /fresh practice command inspected/, spell);
+    assert.equal(probes, 2, spell);
+  }
 });
 
 test('SummonSkeleton uses the public target-zero summon route after equipping real Amulet', async () => {

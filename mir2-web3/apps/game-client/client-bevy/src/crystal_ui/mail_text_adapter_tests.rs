@@ -68,11 +68,13 @@ fn target_cancels_while_mail_body_is_covered_or_send_is_pending() {
     state.mail_recipient_prompt_active = true;
     assert!(active_mail_text_target(&shell, &state, &compose, &editor, &pending, 0).is_none());
     state.mail_recipient_prompt_active = false;
-    assert!(pending.try_begin(crate::pending_operations::PendingOperationKey::SendMail {
-        recipient: "Receiver".into(),
-        message: "Body".into(),
-        gold: 0,
-        attachment_unique_ids: vec![],
-    }));
+    assert!(
+        pending.try_begin(crate::pending_operations::PendingOperationKey::SendMail {
+            recipient: "Receiver".into(),
+            message: "Body".into(),
+            gold: 0,
+            attachment_unique_ids: vec![],
+        })
+    );
     assert!(active_mail_text_target(&shell, &state, &compose, &editor, &pending, 0).is_none());
 }

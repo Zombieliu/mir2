@@ -116,9 +116,23 @@ pub fn render(
         ))
         .with_children(|panel| {
             spawn_overlay_frame(panel, assets, "original-ui/Title/119.png", size.x, size.y);
+            if crate::native_i18n::active() {
+                for (caption, x, width) in [
+                    ("Function", 18.0, 188.0),
+                    ("Default", 214.0, 130.0),
+                    ("Current", 356.0, 124.0),
+                ] {
+                    localized_art_label(
+                        panel,
+                        caption,
+                        CrystalRect::new(x, 70.0, width, 16.0),
+                        10.0,
+                    );
+                }
+            }
             overlay_centered_text_at(
                 panel,
-                "Keyboard Settings",
+                &crate::native_i18n::tr("Keyboard Settings"),
                 CrystalRect::new(135.0, 34.0, 242.0, 30.0),
                 40.0 / 3.0,
                 Color::WHITE,
@@ -156,11 +170,11 @@ pub fn render(
             }
             overlay_text_at(
                 panel,
-                if model.enforce {
+                &crate::native_i18n::tr(if model.enforce {
                     "Assign Rule: Strict"
                 } else {
                     "Assign Rule: Relaxed"
-                },
+                }),
                 CrystalRect::new(120.0, 404.0, 300.0, 20.0),
                 32.0 / 3.0,
                 Color::WHITE,
@@ -212,7 +226,7 @@ pub fn render(
                         }
                         overlay_text_at(
                             panel,
-                            &label,
+                            &crate::native_i18n::tr(&label),
                             CrystalRect::new(35.0, y as f32 + 5.0, 200.0, 20.0),
                             12.0,
                             Color::WHITE,
@@ -222,7 +236,7 @@ pub fn render(
                         let bind = &model.bindings[index];
                         overlay_text_at(
                             panel,
-                            &bind.description,
+                            &crate::native_i18n::tr(&bind.description),
                             CrystalRect::new(20.0, y as f32, 200.0, 15.0),
                             32.0 / 3.0,
                             Color::WHITE,
@@ -255,14 +269,14 @@ pub fn render(
                         );
                         overlay_text_at(
                             panel,
-                            &format!(
+                            &crate::native_i18n::tr(&format!(
                                 "  {}",
                                 if waiting {
                                     "????".into()
                                 } else {
                                     bind.display()
                                 }
-                            ),
+                            )),
                             CrystalRect::new(360.0, y as f32, 120.0, 16.0),
                             32.0 / 3.0,
                             Color::WHITE,

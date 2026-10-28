@@ -8,6 +8,7 @@ fn award() -> ZoneMonsterKillAward {
         experience: 6,
         drops: vec![],
         boss_audit: None,
+        mentor_bank: None,
         experience_selection: None,
         source_receipt_key: None,
     }
@@ -21,19 +22,20 @@ fn guild_kill_source_known_failure_retains_envelope_and_new_service_replays_dura
     let identity = runtime.inner.active_identity().unwrap();
     let key = super::super::ZonePresenceKey::from_identity(&identity);
     let config = runtime.inner.shared_mentor_config().unwrap();
+    let generated =
+        super::cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award());
+    let issued = generated[0].clone();
     let before = runtime.inner.world_snapshot().player_experience;
     config.inject_account_store_transaction_fault(
         mir2_simulation::AccountStoreTransactionFault::BeforePersist,
     );
-    assert!(runtime
-        .apply_zone_monster_kill_awards(vec![award()])
-        .is_empty());
+    assert!(runtime.apply_zone_monster_kill_awards(generated).is_empty());
     assert_eq!(runtime.inner.world_snapshot().player_experience, before);
     let pending = state
         .lock()
         .unwrap()
         .take_pending_zone_monster_kill_awards(&key);
-    assert_eq!(pending, vec![award()]);
+    assert_eq!(pending, vec![issued.clone()]);
     let packets = runtime.apply_zone_monster_kill_awards(pending);
     assert!(packets
         .iter()
@@ -47,7 +49,7 @@ fn guild_kill_source_known_failure_retains_envelope_and_new_service_replays_dura
         .next()
         .unwrap()
         .clone();
-    let mut fixed_award = award();
+    let mut fixed_award = issued;
     fixed_award.source_receipt_key = Some(fixed_key);
     runtime.account_inventory_service = Arc::new(InProcessAccountInventoryService::new());
     runtime.inventory_zone_id = ZoneId::new("different-delivery-zone");
@@ -114,15 +116,15 @@ fn guild_kill_source_unknown_keeps_original_pending_reward_and_key_without_succe
     start_new_runtime(&mut runtime, "guild-kill-unknown", "PendingKeeper");
     let key =
         super::super::ZonePresenceKey::from_identity(&runtime.inner.active_identity().unwrap());
+    let generated =
+        super::cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award());
+    let mut expected = generated[0].clone();
     let before = runtime.inner.world_snapshot().player_experience;
-    assert!(runtime
-        .apply_zone_monster_kill_awards(vec![award()])
-        .is_empty());
+    assert!(runtime.apply_zone_monster_kill_awards(generated).is_empty());
     let pending = state
         .lock()
         .unwrap()
         .take_pending_zone_monster_kill_awards(&key);
-    let mut expected = award();
     expected.source_receipt_key = Some(service.keys.lock().unwrap()[0].clone());
     assert_eq!(pending, vec![expected.clone()]);
     // Checkpoint/reconnect transport and a different delivery namespace cannot

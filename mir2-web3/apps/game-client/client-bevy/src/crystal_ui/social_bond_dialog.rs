@@ -69,6 +69,7 @@ pub struct RelationshipDialogUi {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BondPromptKind {
     MentorName { text: String },
+    GuildName { text: String },
     CancelMentor { name: String, level: u16 },
     MentorInvite { name: String, level: u16 },
     MarriageInvite { name: String },
@@ -81,8 +82,18 @@ pub struct BondPrompt {
 }
 
 impl BondPrompt {
+    pub fn has_name_editor(&self) -> bool {
+        matches!(
+            self.kind,
+            BondPromptKind::MentorName { .. } | BondPromptKind::GuildName { .. }
+        )
+    }
     pub fn text(&self, owner_class: &str) -> String {
         match &self.kind {
+            BondPromptKind::GuildName { .. } => crate::native_i18n::key(
+                "client.EnterGuildNameLengthLimit",
+                "Please enter a guild name, length must be 3~20 characters.",
+            ),
             BondPromptKind::MentorName { .. } => {
                 "Please enter the name of the person you would like to be your Mentor.".into()
             }
@@ -100,6 +111,26 @@ impl BondPrompt {
     }
 }
 
+/// Presentation lease for a normal NPC @CREATEGUILD request. This is never
+/// server permission: the server must revalidate its own one-use grant.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GuildCreationContext {
+    pub npc_object_id: u32,
+    pub map_epoch: u64,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum GuildCreationPhase {
+    Waiting,
+    Editing,
+    Queued,
+    Sent,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct GuildCreationRequest {
+    context: GuildCreationContext,
+    phase: GuildCreationPhase,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct SocialBondDialogs {
     pub mentor: MentorDialogUi,
@@ -110,6 +141,7 @@ pub struct SocialBondDialogs {
     pub notice: Option<String>,
     pub input_consumed: bool,
     pending: Option<(ClientPacket, BondPrompt)>,
+    guild_creation: Option<GuildCreationRequest>,
 }
 impl Default for SocialBondDialogs {
     fn default() -> Self {
@@ -125,6 +157,7 @@ impl Default for SocialBondDialogs {
             notice: None,
             input_consumed: false,
             pending: None,
+            guild_creation: None,
         }
     }
 }
@@ -154,6 +187,9 @@ impl SocialBondDialogs {
         self.revision = revision;
     }
     fn prompt(&mut self, kind: BondPromptKind) {
+        if !matches!(kind, BondPromptKind::GuildName { .. }) {
+            self.invalidate_guild_creation();
+        }
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         self.revision = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         self.input = Default::default();
@@ -161,6 +197,75 @@ impl SocialBondDialogs {
             revision: self.revision,
             kind,
         });
+    }
+    pub fn can_request_guild_creation(&self, context: GuildCreationContext) -> bool {
+        context.npc_object_id != 0
+            && self.prompt.is_none()
+            && self
+                .guild_creation
+                .is_none_or(|request| request.phase == GuildCreationPhase::Sent)
+    }
+    /// Call only after the ordinary NPC link has been accepted by transport.
+    pub fn begin_guild_creation_request(&mut self, context: GuildCreationContext) -> bool {
+        if !self.can_request_guild_creation(context) {
+            return false;
+        }
+        self.guild_creation = Some(GuildCreationRequest {
+            context,
+            phase: GuildCreationPhase::Waiting,
+        });
+        true
+    }
+    pub fn invalidate_guild_creation(&mut self) {
+        self.guild_creation = None;
+        if self
+            .prompt
+            .as_ref()
+            .is_some_and(|p| matches!(p.kind, BondPromptKind::GuildName { .. }))
+        {
+            self.prompt = None;
+            self.input.cancel_modal();
+        }
+        if self
+            .pending
+            .as_ref()
+            .is_some_and(|(p, _)| matches!(p, ClientPacket::GuildNameReturn { .. }))
+        {
+            self.pending = None;
+        }
+    }
+    pub fn retain_guild_creation_context(&mut self, context: Option<GuildCreationContext>) {
+        if self
+            .guild_creation
+            .is_some_and(|request| Some(request.context) != context)
+        {
+            self.invalidate_guild_creation();
+        }
+    }
+    pub fn retain_guild_creation_map(&mut self, map_epoch: u64) {
+        if self
+            .guild_creation
+            .is_some_and(|request| request.context.map_epoch != map_epoch)
+        {
+            self.invalidate_guild_creation();
+        }
+    }
+    /// Only the currently answered NPC modal may dispatch a name once.
+    pub fn can_dispatch_guild_name(&self, packet: &ClientPacket) -> bool {
+        matches!(packet, ClientPacket::GuildNameReturn { .. })
+            && self
+                .guild_creation
+                .is_some_and(|request| request.phase == GuildCreationPhase::Queued)
+            && self.pending.as_ref().is_some_and(|(pending, prompt)| {
+                pending == packet && matches!(prompt.kind, BondPromptKind::GuildName { .. })
+            })
+    }
+    pub fn guild_name_dispatched(&mut self, packet: &ClientPacket) {
+        if self.can_dispatch_guild_name(packet) {
+            self.guild_creation.as_mut().unwrap().phase = GuildCreationPhase::Sent;
+            self.pending = None;
+            self.input.cancel_modal();
+        }
     }
     pub fn action(&mut self, page: BondPage, action: BondAction) -> Option<BondEffect> {
         let open = match page {
@@ -241,10 +346,15 @@ impl SocialBondDialogs {
 
     pub fn sync_editor(&mut self) {
         if let Some(BondPrompt {
-            kind: BondPromptKind::MentorName { text },
+            kind: BondPromptKind::MentorName { text } | BondPromptKind::GuildName { text },
             ..
         }) = &self.prompt
         {
+            let guild_name = matches!(
+                self.prompt.as_ref().unwrap().kind,
+                BondPromptKind::GuildName { .. }
+            );
+            let previous_revision = self.input.editor_revision;
             if self.input.modal.as_ref().is_none_or(
                 |m| !matches!(m,super::friend_dialog::FriendModal::Add{text:old,..} if old==text),
             ) {
@@ -255,6 +365,13 @@ impl SocialBondDialogs {
             }
             self.input.open = true;
             self.input.sync_editor();
+            if guild_name && previous_revision != self.input.editor_revision {
+                self.input.editor = Some(super::friend_dialog::text_editor::FriendTextEditor::new(
+                    text.clone(),
+                    20,
+                    false,
+                ));
+            }
         } else {
             self.input.cancel_modal();
         }
@@ -262,7 +379,7 @@ impl SocialBondDialogs {
     pub fn sync_draft(&mut self) {
         if let (
             Some(BondPrompt {
-                kind: BondPromptKind::MentorName { text },
+                kind: BondPromptKind::MentorName { text } | BondPromptKind::GuildName { text },
                 ..
             }),
             Some(e),
@@ -291,6 +408,12 @@ impl SocialBondDialogs {
         self.sync_draft();
     }
     pub fn release_unsent(&mut self, packet: &ClientPacket) {
+        if matches!(packet, ClientPacket::GuildNameReturn { .. }) {
+            if !self.can_dispatch_guild_name(packet) {
+                return;
+            }
+            self.guild_creation.as_mut().unwrap().phase = GuildCreationPhase::Editing;
+        }
         if self
             .pending
             .as_ref()
@@ -316,10 +439,33 @@ impl SocialBondDialogs {
         if accept && self.prompt.as_ref().is_some_and(|p|matches!(&p.kind,BondPromptKind::MentorName{text} if text.is_empty() || text.encode_utf16().count()>50)) {
             self.input.edit_notice=Some("Enter a name of at most 50 characters.".into()); return None;
         }
+        if accept && self.prompt.as_ref().is_some_and(|p| matches!(&p.kind, BondPromptKind::GuildName { text }
+            if !(3..=20).contains(&text.trim().encode_utf16().count()) || text.contains('\\') || text.chars().any(char::is_control))) {
+            self.input.edit_notice = Some(crate::native_i18n::key(
+                "client.EnterGuildNameLengthLimit",
+                "Please enter a guild name, length must be 3~20 characters.",
+            ));
+            return None;
+        }
         let prompt = self.prompt.take()?;
         let packet = match prompt.kind.clone() {
             BondPromptKind::MentorName { text } => {
                 accept.then_some(ClientPacket::AddMentor { name: text })
+            }
+            BondPromptKind::GuildName { text } => {
+                if !accept {
+                    self.invalidate_guild_creation();
+                    self.input.cancel_modal();
+                    return None;
+                }
+                let request = self.guild_creation.as_mut()?;
+                if request.phase != GuildCreationPhase::Editing {
+                    return None;
+                }
+                request.phase = GuildCreationPhase::Queued;
+                Some(ClientPacket::GuildNameReturn {
+                    name: text.trim().to_owned(),
+                })
             }
             BondPromptKind::CancelMentor { name, level } => {
                 (accept && name == self.mentor.name && level == self.mentor.level)
@@ -341,13 +487,29 @@ impl SocialBondDialogs {
 
     pub fn observe(&mut self, packet: &ServerPacket) -> bool {
         match packet {
+            ServerPacket::GuildNameRequest => {
+                if let Some(request) = self.guild_creation.as_mut() {
+                    if request.phase == GuildCreationPhase::Waiting {
+                        request.phase = GuildCreationPhase::Editing;
+                        self.prompt(BondPromptKind::GuildName {
+                            text: String::new(),
+                        });
+                    }
+                }
+            }
             ServerPacket::MentorUpdate {
                 name,
                 level,
                 online,
                 mentee_exp,
             } => {
-                self.pending = None;
+                if !self
+                    .pending
+                    .as_ref()
+                    .is_some_and(|(p, _)| matches!(p, ClientPacket::GuildNameReturn { .. }))
+                {
+                    self.pending = None;
+                }
                 if self.mentor.name != *name || self.mentor.level != *level {
                     if self.prompt.as_ref().is_some_and(|p| {
                         matches!(
@@ -371,7 +533,13 @@ impl SocialBondDialogs {
                 map_name,
                 married_days,
             } => {
-                self.pending = None;
+                if !self
+                    .pending
+                    .as_ref()
+                    .is_some_and(|(p, _)| matches!(p, ClientPacket::GuildNameReturn { .. }))
+                {
+                    self.pending = None;
+                }
                 if self.relationship.name != *name
                     || self.relationship.date_binary_datetime != *date_binary_datetime
                 {

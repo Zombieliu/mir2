@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.death-effects-classifier-red-green.v5",
+  "v4ClassifierSha256": "8908ec479aaa1c072cfb5e769be4c8b41bcd05d6030a2bc5d991092eff561ace",
+  "v5ClassifierSha256": "f7b9fb5a4667e6c675eadab6f6f5d9d01e0a4d4e7bd733599a3895cb885abef0",
+  "sameTestsSha256": "1c071a8bc0b287cc29909337d13495c9329901a53934d1251758972bc3a512bb",
+  "red": {
+    "exitCode": 1,
+    "tests": 16,
+    "pass": 1,
+    "fail": 15,
+    "skipped": 0,
+    "log": "RED-DEAD-EFFECTS-02.log",
+    "logSha256": "66ba66b054df6ea60f926d09b023cbc45ae5d2fe34412f2f5e1e20974ed9f822"
+  },
+  "green": {
+    "exitCode": 0,
+    "tests": 16,
+    "pass": 16,
+    "fail": 0,
+    "skipped": 0,
+    "log": "GREEN-DEAD-EFFECTS-01.log",
+    "logSha256": "6c2b98da58089287e04ef12d223300bc3ebecb2bd5bc87a542d7d3a93ecedf9e"
+  },
+  "gatewayStarted": false,
+  "runtimeEdited": false,
+  "syntheticTestsAreGameplayAcceptance": false
+}

@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "kind": "periodic-postgres-r2-windows-live-test",
+  "startedAtUtc": "2026-10-02T01:07:32.165495+00:00",
+  "completedAtUtc": "2026-10-02T01:09:24.483610+00:00",
+  "durationSeconds": 112.315,
+  "processExitCode": 0,
+  "exactOnePassed": true,
+  "passed": true,
+  "timedOut": false,
+  "processFailure": null,
+  "testName": "postgres_periodic::postgres_periodic_claim_is_atomic_before_ack_and_cas_blocks_retries",
+  "binarySha256": "f71c895abb22c5bb5d524f163469072ce75b04c9621ec90a3c73fa28935d3ec1",
+  "testSourceSha256": "3a7072f2125351c6485d9574450b47a8a02ecc678cdfcd989ce890bab80f7fe6",
+  "binaryBytes": 65826816,
+  "ignoredListSha256": "2291a0371e61ff5aa9140da7a0a1558e6212f2d3f2286ccde1e77cbe1f850ef9",
+  "logSha256": "544ebf0901b4a2e6bfc1bf9ee9b5563d4c4df0251056a99d687e6769b4b8afae",
+  "credentialsRedacted": true,
+  "sshForwardingScope": {
+    "kind": "root-established pinned encrypted SSH loopback",
+    "local": "127.0.0.1:55433",
+    "serverPostgresLoopbackPort": 5432,
+    "database": "mir2_periodic_qa_20261002_claims",
+    "serverVersionReportedByRoot": "16.13"
+  },
+  "childEnvironmentOnly": true,
+  "noUrlInArguments": true,
+  "workerServerServiceChanges": false,
+  "workerRemoteEnvironmentChanges": false,
+  "databaseEffects": "only the reviewed test's fresh owned QA schema/accounts and assertions",
+  "r1Outcome": "resource-interrupted server compilation, not a test assertion failure",
+  "r1WorkerReceiptSha256": "d6ad63e93ae66c2dcdfec594f69cdc25e9bd8c142f45097030ce8d95c4236fa2",
+  "naturalKills": false,
+  "ordinaryTimedCompletion": false,
+  "proofs": [
+    {
+      "cases": [
+        {
+          "acceptedLockPersistedBeforeAck": true,
+          "cadence": "daily",
+          "claimedPeriod": 20728,
+          "commitBarrierObserved": true,
+          "committedRevision": 3,
+          "independentStaleCasRejected": true,
+          "noAckBeforeCommit": true,
+          "postgresSaveVersion": 5,
+          "questId": 92006,
+          "retryAndReloginNoDoubleReward": true,
+          "rewardExp": 14000,
+          "rewardGold": 8000
+        },
+        {
+          "acceptedLockPersistedBeforeAck": true,
+          "cadence": "weekly",
+          "claimedPeriod": 2961,
+          "commitBarrierObserved": true,
+          "committedRevision": 3,
+          "independentStaleCasRejected": true,
+          "noAckBeforeCommit": true,
+          "postgresSaveVersion": 5,
+          "questId": 92009,
+          "retryAndReloginNoDoubleReward": true,
+          "rewardExp": 70000,
+          "rewardGold": 60000
+        }
+      ],
+      "credentialsRedacted": true,
+      "database": "mir2_periodic_qa_20261002_claims",
+      "isolatedSourceOfTruth": true,
+      "naturalKills": false,
+      "ordinaryTimedCompletion": false,
+      "ownedSchema": "periodic_qa_20261002_50116_18da9104ece5a090",
+      "publicSchemaUsed": false,
+      "schema": 1
+    }
+  ]
+}

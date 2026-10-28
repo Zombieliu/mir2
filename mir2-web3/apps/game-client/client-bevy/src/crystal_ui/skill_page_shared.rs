@@ -131,7 +131,11 @@ impl SkillPagePlan {
                     id: s.id,
                     icon: b.icon,
                     level: s.level.to_string(),
-                    name: s.name.clone(),
+                    name: if crate::native_i18n::active() {
+                        crate::native_i18n::tr(&s.name)
+                    } else {
+                        s.name.clone()
+                    },
                     exp: experience_label(s.level, &b),
                     key: key_label(b.hotkey),
                     cooldown: (rem >= 100 && delay >= 34)
@@ -150,6 +154,17 @@ pub fn image(
     rect: CrystalRect,
     alpha: f32,
 ) {
+    #[cfg(feature = "native-ui")]
+    if crate::native_i18n::active()
+        && matches!(
+            path.as_str(),
+            "original-ui/Title/516.png" | "original-ui/Title/517.png"
+        )
+    {
+        super::overlays::spawn_static_overlay_sprite(parent, assets, path, rect);
+        return;
+    }
+
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -394,7 +409,7 @@ pub fn paint_assignment<B: Bundle, M: Bundle>(
                 .unwrap_or("");
             text_with_layout(
                 p,
-                &format!("Select the Key for: {name}"),
+                &crate::native_i18n::tr(&format!("Select the Key for: {name}")),
                 CrystalRect::new(49., 17., 230., 32.),
                 font,
                 32. / 3.,

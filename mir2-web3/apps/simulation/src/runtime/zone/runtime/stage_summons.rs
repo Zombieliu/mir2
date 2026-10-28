@@ -24,7 +24,10 @@ mod tests {
 
     fn boss_zone() -> ZoneRuntime {
         let template = crystal_monster_by_name("ZumaTaurus").unwrap();
-        let mut zone = ZoneRuntime::new(ZoneKey::for_map("stage-wave-unit"));
+        let mut zone = ZoneRuntime::new_with_collision(
+            ZoneKey::for_map("stage-wave-unit"),
+            ZoneCollision::unbounded(),
+        );
         let spawn = ZoneMonsterSpawn {
             crystal_drop_seed: None,
             object_id: 17,

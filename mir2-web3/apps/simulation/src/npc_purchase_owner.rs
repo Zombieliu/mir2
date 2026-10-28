@@ -14,7 +14,12 @@ use crate::runtime::{NpcPurchaseProducer, NpcPurchaseReceipt, NpcPurchaseRequest
 pub const NPC_PURCHASE_OWNER_PROTOCOL_VERSION: u16 = 1;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 pub enum NpcPurchaseOwnerAction {
     Begin,
     Quote { request: NpcPurchaseRequest },
@@ -26,7 +31,12 @@ pub enum NpcPurchaseOwnerAction {
 // Begin as an empty struct variant so the same strict field policy applies to
 // all four actions, while preserving the public unit variant and wire shape.
 #[derive(Deserialize)]
-#[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 enum StrictOwnerAction {
     Begin {},
     Quote { request: NpcPurchaseRequest },
@@ -61,17 +71,29 @@ impl NpcPurchaseOwnerAction {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "kind", rename_all = "camelCase", rename_all_fields = "camelCase", deny_unknown_fields)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
 pub enum NpcPurchaseOwnerReply {
-    Producer { producer: NpcPurchaseProducer },
-    Quote { intent: NpcPurchaseIntent },
+    Producer {
+        producer: NpcPurchaseProducer,
+    },
+    Quote {
+        intent: NpcPurchaseIntent,
+    },
     Recovery {
         // Require the field itself. Only an explicit null represents no result;
         // serde's implicit missing-Option default would conceal malformed replies.
         #[serde(deserialize_with = "required_receipt")]
         receipt: Option<NpcPurchaseReceipt>,
     },
-    Purchase { receipt: NpcPurchaseReceipt, replayed: bool },
+    Purchase {
+        receipt: NpcPurchaseReceipt,
+        replayed: bool,
+    },
 }
 
 fn required_receipt<'de, D>(deserializer: D) -> Result<Option<NpcPurchaseReceipt>, D::Error>
@@ -100,13 +122,20 @@ mod tests {
 
     // Schema fixtures only: no execution carrier or trusted publication is
     // constructed, and decoding these values does not establish host authority.
-    fn operation_fixture(currency: NpcPurchaseCurrency, source: NpcPurchaseSource) -> NpcPurchaseOperation {
+    fn operation_fixture(
+        currency: NpcPurchaseCurrency,
+        source: NpcPurchaseSource,
+    ) -> NpcPurchaseOperation {
         NpcPurchaseOperation {
             actor: [17; 32],
             request_scope: [29; 32],
             sequence: u64::MAX,
             intent: NpcPurchaseIntent {
-                request: NpcPurchaseRequest { item_index: u64::MAX, count: u16::MAX, panel_type: 0 },
+                request: NpcPurchaseRequest {
+                    item_index: u64::MAX,
+                    count: u16::MAX,
+                    panel_type: 0,
+                },
                 currency,
                 source,
                 service_catalog_proof: [41; 32],
@@ -115,7 +144,11 @@ mod tests {
     }
 
     fn operation_json() -> Value {
-        serde_json::to_value(operation_fixture(NpcPurchaseCurrency::Pearls, NpcPurchaseSource::Used)).unwrap()
+        serde_json::to_value(operation_fixture(
+            NpcPurchaseCurrency::Pearls,
+            NpcPurchaseSource::Used,
+        ))
+        .unwrap()
     }
 
     fn receipt_json() -> Value {
@@ -148,7 +181,10 @@ mod tests {
         let encoded = serde_json::to_string(document).unwrap();
         let needle = format!("\"{field}\":");
         assert!(encoded.contains(&needle));
-        let insertion = format!("\"{duplicate}\":{},\"{field}\":", serde_json::to_string(value).unwrap());
+        let insertion = format!(
+            "\"{duplicate}\":{},\"{field}\":",
+            serde_json::to_string(value).unwrap()
+        );
         encoded.replacen(&needle, &insertion, 1)
     }
 
@@ -158,7 +194,10 @@ mod tests {
         let begin = NpcPurchaseOwnerAction::Begin;
         assert!(begin.is_mutation());
         assert_eq!(begin.operation(), None);
-        assert_eq!(serde_json::to_string(&begin).unwrap(), r#"{"kind":"begin"}"#);
+        assert_eq!(
+            serde_json::to_string(&begin).unwrap(),
+            r#"{"kind":"begin"}"#
+        );
         for (currency, source) in [
             (NpcPurchaseCurrency::Gold, NpcPurchaseSource::Trade),
             (NpcPurchaseCurrency::Pearls, NpcPurchaseSource::Trade),
@@ -167,19 +206,33 @@ mod tests {
             (NpcPurchaseCurrency::Pearls, NpcPurchaseSource::Used),
         ] {
             let operation = operation_fixture(currency, source);
-            let quote = NpcPurchaseOwnerAction::Quote { request: operation.intent.request };
+            let quote = NpcPurchaseOwnerAction::Quote {
+                request: operation.intent.request,
+            };
             assert!(!quote.is_mutation());
             assert_eq!(quote.operation(), None);
             for (action, kind, mutation) in [
                 (quote, "quote", false),
                 (NpcPurchaseOwnerAction::Query { operation }, "query", false),
-                (NpcPurchaseOwnerAction::Purchase { operation }, "purchase", true),
+                (
+                    NpcPurchaseOwnerAction::Purchase { operation },
+                    "purchase",
+                    true,
+                ),
             ] {
                 let encoded = serde_json::to_string(&action).unwrap();
-                assert_eq!(serde_json::from_str::<NpcPurchaseOwnerAction>(&encoded).unwrap(), action);
-                assert_eq!(serde_json::from_str::<Value>(&encoded).unwrap()["kind"], kind);
+                assert_eq!(
+                    serde_json::from_str::<NpcPurchaseOwnerAction>(&encoded).unwrap(),
+                    action
+                );
+                assert_eq!(
+                    serde_json::from_str::<Value>(&encoded).unwrap()["kind"],
+                    kind
+                );
                 assert_eq!(action.is_mutation(), mutation);
-                if kind != "quote" { assert_eq!(action.operation(), Some(operation)); }
+                if kind != "quote" {
+                    assert_eq!(action.operation(), Some(operation));
+                }
             }
         }
     }
@@ -216,13 +269,22 @@ mod tests {
         let operation = action.operation().unwrap();
         assert_eq!(operation.sequence, u64::MAX);
         assert_eq!(operation.intent.request.item_index, u64::MAX);
-        let reply: NpcPurchaseOwnerReply = serde_json::from_str(&serde_json::to_string(&reply_json()).unwrap()).unwrap();
-        let NpcPurchaseOwnerReply::Purchase { receipt, replayed } = reply else { panic!("wrong decoded variant") };
+        let reply: NpcPurchaseOwnerReply =
+            serde_json::from_str(&serde_json::to_string(&reply_json()).unwrap()).unwrap();
+        let NpcPurchaseOwnerReply::Purchase { receipt, replayed } = reply else {
+            panic!("wrong decoded variant")
+        };
         assert!(replayed);
         assert_eq!(receipt.entry.operation, operation);
         assert_eq!(receipt.entry.server_revision, u64::MAX - 1);
         match receipt.entry.outcome {
-            NpcPurchaseProcessingOutcome::Committed { request, charged, admitted_count, incoming_unique_id, .. } => {
+            NpcPurchaseProcessingOutcome::Committed {
+                request,
+                charged,
+                admitted_count,
+                incoming_unique_id,
+                ..
+            } => {
                 assert_eq!(request, operation.intent.request);
                 assert_eq!(charged, 0);
                 assert_eq!(admitted_count, u16::MAX);
@@ -234,21 +296,54 @@ mod tests {
 
     #[test]
     fn unknown_fields_are_rejected_at_every_action_layer() {
-        assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(r#"{"kind":"begin","ownerLease":1}"#).is_err());
-        for pointer in ["", "/operation", "/operation/intent", "/operation/intent/request"] {
+        assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(
+            r#"{"kind":"begin","ownerLease":1}"#
+        )
+        .is_err());
+        for pointer in [
+            "",
+            "/operation",
+            "/operation/intent",
+            "/operation/intent/request",
+        ] {
             let mut value = action_json();
-            value.pointer_mut(pointer).unwrap().as_object_mut().unwrap().insert("unexpected".into(), json!(true));
-            assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(&value.to_string()).is_err(), "{pointer}");
+            value
+                .pointer_mut(pointer)
+                .unwrap()
+                .as_object_mut()
+                .unwrap()
+                .insert("unexpected".into(), json!(true));
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerAction>(&value.to_string()).is_err(),
+                "{pointer}"
+            );
         }
         assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(r#"{"kind":"quote","request":{"itemIndex":0,"count":1,"panelType":0,"name":"invented"}}"#).is_err());
     }
 
     #[test]
     fn unknown_fields_are_rejected_at_every_reply_layer() {
-        for pointer in ["", "/receipt", "/receipt/entry", "/receipt/entry/operation", "/receipt/entry/operation/intent", "/receipt/entry/operation/intent/request", "/receipt/entry/outcome/committed", "/receipt/entry/outcome/committed/request"] {
+        for pointer in [
+            "",
+            "/receipt",
+            "/receipt/entry",
+            "/receipt/entry/operation",
+            "/receipt/entry/operation/intent",
+            "/receipt/entry/operation/intent/request",
+            "/receipt/entry/outcome/committed",
+            "/receipt/entry/outcome/committed/request",
+        ] {
             let mut value = reply_json();
-            value.pointer_mut(pointer).unwrap().as_object_mut().unwrap().insert("unexpected".into(), json!(true));
-            assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&value.to_string()).is_err(), "{pointer}");
+            value
+                .pointer_mut(pointer)
+                .unwrap()
+                .as_object_mut()
+                .unwrap()
+                .insert("unexpected".into(), json!(true));
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerReply>(&value.to_string()).is_err(),
+                "{pointer}"
+            );
         }
         for value in [
             json!({ "kind": "producer", "producer": { "actor": ([17; 32].to_vec()), "producerScope": ([53; 32].to_vec()), "serverRevision": 0, "ownerLease": 1 } }),
@@ -270,20 +365,40 @@ mod tests {
             ("kind", r"k\u0069nd", "/kind"),
             ("operation", r"oper\u0061tion", "/operation"),
             ("actor", r"ac\u0074or", "/operation/actor"),
-            ("requestScope", r"request\u0053cope", "/operation/requestScope"),
+            (
+                "requestScope",
+                r"request\u0053cope",
+                "/operation/requestScope",
+            ),
             ("sequence", r"se\u0071uence", "/operation/sequence"),
             ("intent", r"int\u0065nt", "/operation/intent"),
             ("request", r"req\u0075est", "/operation/intent/request"),
             ("currency", r"cur\u0072ency", "/operation/intent/currency"),
             ("source", r"sou\u0072ce", "/operation/intent/source"),
-            ("serviceCatalogProof", r"serviceCatalog\u0050roof", "/operation/intent/serviceCatalogProof"),
-            ("itemIndex", r"item\u0049ndex", "/operation/intent/request/itemIndex"),
+            (
+                "serviceCatalogProof",
+                r"serviceCatalog\u0050roof",
+                "/operation/intent/serviceCatalogProof",
+            ),
+            (
+                "itemIndex",
+                r"item\u0049ndex",
+                "/operation/intent/request/itemIndex",
+            ),
             ("count", r"co\u0075nt", "/operation/intent/request/count"),
-            ("panelType", r"panel\u0054ype", "/operation/intent/request/panelType"),
+            (
+                "panelType",
+                r"panel\u0054ype",
+                "/operation/intent/request/panelType",
+            ),
         ] {
             for duplicate in [field, escaped] {
-                let raw = duplicate_field(&value, field, duplicate, value.pointer(pointer).unwrap());
-                assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(&raw).is_err(), "{duplicate}");
+                let raw =
+                    duplicate_field(&value, field, duplicate, value.pointer(pointer).unwrap());
+                assert!(
+                    serde_json::from_str::<NpcPurchaseOwnerAction>(&raw).is_err(),
+                    "{duplicate}"
+                );
             }
         }
     }
@@ -296,22 +411,54 @@ mod tests {
             ("kind", r"k\u0069nd", "/kind"),
             ("receipt", r"rece\u0069pt", "/receipt"),
             ("replayed", r"repl\u0061yed", "/replayed"),
-            ("producerScope", r"producer\u0053cope", "/receipt/producerScope"),
+            (
+                "producerScope",
+                r"producer\u0053cope",
+                "/receipt/producerScope",
+            ),
             ("entry", r"en\u0074ry", "/receipt/entry"),
-            ("serverRevision", r"server\u0052evision", "/receipt/entry/serverRevision"),
+            (
+                "serverRevision",
+                r"server\u0052evision",
+                "/receipt/entry/serverRevision",
+            ),
             ("outcome", r"out\u0063ome", "/receipt/entry/outcome"),
-            ("charged", r"char\u0067ed", "/receipt/entry/outcome/committed/charged"),
-            ("admittedCount", r"admitted\u0043ount", "/receipt/entry/outcome/committed/admittedCount"),
-            ("incomingUniqueId", r"incoming\u0055niqueId", "/receipt/entry/outcome/committed/incomingUniqueId"),
+            (
+                "charged",
+                r"char\u0067ed",
+                "/receipt/entry/outcome/committed/charged",
+            ),
+            (
+                "admittedCount",
+                r"admitted\u0043ount",
+                "/receipt/entry/outcome/committed/admittedCount",
+            ),
+            (
+                "incomingUniqueId",
+                r"incoming\u0055niqueId",
+                "/receipt/entry/outcome/committed/incomingUniqueId",
+            ),
         ] {
             for duplicate in [field, escaped] {
-                let raw = duplicate_field(&value, field, duplicate, value.pointer(pointer).unwrap());
-                assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&raw).is_err(), "{duplicate}");
+                let raw =
+                    duplicate_field(&value, field, duplicate, value.pointer(pointer).unwrap());
+                assert!(
+                    serde_json::from_str::<NpcPurchaseOwnerReply>(&raw).is_err(),
+                    "{duplicate}"
+                );
             }
         }
         let recovery = json!({ "kind": "recovery", "receipt": null });
         for duplicate in ["receipt", r"rece\u0069pt"] {
-            assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&duplicate_field(&recovery, "receipt", duplicate, &Value::Null)).is_err());
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerReply>(&duplicate_field(
+                    &recovery,
+                    "receipt",
+                    duplicate,
+                    &Value::Null
+                ))
+                .is_err()
+            );
         }
         let producer = json!({ "kind": "producer", "producer": {
             "actor": ([17; 32].to_vec()), "producerScope": ([53; 32].to_vec()), "serverRevision": 0
@@ -320,21 +467,48 @@ mod tests {
         for (document, field, escaped, pointer) in [
             (&producer, "producer", r"pro\u0064ucer", "/producer"),
             (&producer, "actor", r"ac\u0074or", "/producer/actor"),
-            (&producer, "producerScope", r"producer\u0053cope", "/producer/producerScope"),
-            (&producer, "serverRevision", r"server\u0052evision", "/producer/serverRevision"),
+            (
+                &producer,
+                "producerScope",
+                r"producer\u0053cope",
+                "/producer/producerScope",
+            ),
+            (
+                &producer,
+                "serverRevision",
+                r"server\u0052evision",
+                "/producer/serverRevision",
+            ),
             (&quote, "intent", r"int\u0065nt", "/intent"),
         ] {
             assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&document.to_string()).is_ok());
             for duplicate in [field, escaped] {
-                assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&duplicate_field(document, field, duplicate, document.pointer(pointer).unwrap())).is_err(), "{duplicate}");
+                assert!(
+                    serde_json::from_str::<NpcPurchaseOwnerReply>(&duplicate_field(
+                        document,
+                        field,
+                        duplicate,
+                        document.pointer(pointer).unwrap()
+                    ))
+                    .is_err(),
+                    "{duplicate}"
+                );
             }
         }
     }
 
     #[test]
     fn recovery_requires_explicit_receipt_and_only_null_represents_a_miss() {
-        assert_eq!(serde_json::from_str::<NpcPurchaseOwnerReply>(r#"{"kind":"recovery","receipt":null}"#).unwrap(), NpcPurchaseOwnerReply::Recovery { receipt: None });
-        for raw in [r#"{"kind":"recovery"}"#, r#"{"kind":"recovery","receipt":false}"#, r#"{"kind":"recovery","receipt":{}}"#] {
+        assert_eq!(
+            serde_json::from_str::<NpcPurchaseOwnerReply>(r#"{"kind":"recovery","receipt":null}"#)
+                .unwrap(),
+            NpcPurchaseOwnerReply::Recovery { receipt: None }
+        );
+        for raw in [
+            r#"{"kind":"recovery"}"#,
+            r#"{"kind":"recovery","receipt":false}"#,
+            r#"{"kind":"recovery","receipt":{}}"#,
+        ] {
             assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(raw).is_err());
         }
     }
@@ -342,15 +516,36 @@ mod tests {
     #[test]
     fn unknown_tags_and_wrong_variant_shapes_are_rejected() {
         for raw in [
-            r#"{}"#, r#"{"kind":"retry"}"#, r#"{"kind":"Begin"}"#, r#"{"kind":1}"#,
-            r#"{"kind":"quote"}"#, r#"{"kind":"query"}"#, r#"{"kind":"purchase","operation":null}"#,
-            r#"{"kind":"begin","operation":{}}"#, r#"{"begin":{}}"#, r#"[]"#,
-        ] { assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(raw).is_err(), "{raw}"); }
+            r#"{}"#,
+            r#"{"kind":"retry"}"#,
+            r#"{"kind":"Begin"}"#,
+            r#"{"kind":1}"#,
+            r#"{"kind":"quote"}"#,
+            r#"{"kind":"query"}"#,
+            r#"{"kind":"purchase","operation":null}"#,
+            r#"{"kind":"begin","operation":{}}"#,
+            r#"{"begin":{}}"#,
+            r#"[]"#,
+        ] {
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerAction>(raw).is_err(),
+                "{raw}"
+            );
+        }
         for raw in [
-            r#"{}"#, r#"{"kind":"unknown"}"#, r#"{"kind":"Recovery","receipt":null}"#,
-            r#"{"kind":"producer"}"#, r#"{"kind":"quote","intent":null}"#,
-            r#"{"kind":"purchase","receipt":null,"replayed":false}"#, r#"{"recovery":{"receipt":null}}"#,
-        ] { assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(raw).is_err(), "{raw}"); }
+            r#"{}"#,
+            r#"{"kind":"unknown"}"#,
+            r#"{"kind":"Recovery","receipt":null}"#,
+            r#"{"kind":"producer"}"#,
+            r#"{"kind":"quote","intent":null}"#,
+            r#"{"kind":"purchase","receipt":null,"replayed":false}"#,
+            r#"{"recovery":{"receipt":null}}"#,
+        ] {
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerReply>(raw).is_err(),
+                "{raw}"
+            );
+        }
         let mut purchase = reply_json();
         purchase.as_object_mut().unwrap().remove("replayed");
         assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&purchase.to_string()).is_err());
@@ -359,7 +554,8 @@ mod tests {
     #[test]
     fn wrong_numeric_types_and_ranges_are_never_coerced() {
         for (pointer, malformed) in [
-            ("/operation/sequence", json!(-1)), ("/operation/sequence", json!(1.0)),
+            ("/operation/sequence", json!(-1)),
+            ("/operation/sequence", json!(1.0)),
             ("/operation/sequence", json!("18446744073709551615")),
             ("/operation/intent/request/itemIndex", json!("0")),
             ("/operation/intent/request/count", json!(65536)),
@@ -367,36 +563,68 @@ mod tests {
         ] {
             let mut value = action_json();
             *value.pointer_mut(pointer).unwrap() = malformed;
-            assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(&value.to_string()).is_err(), "{pointer}");
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerAction>(&value.to_string()).is_err(),
+                "{pointer}"
+            );
         }
-        let overflow = action_json().to_string().replacen("\"sequence\":18446744073709551615", "\"sequence\":18446744073709551616", 1);
+        let overflow = action_json().to_string().replacen(
+            "\"sequence\":18446744073709551615",
+            "\"sequence\":18446744073709551616",
+            1,
+        );
         assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(&overflow).is_err());
         for (pointer, malformed) in [
-            ("/replayed", json!(1)), ("/replayed", json!("true")),
+            ("/replayed", json!(1)),
+            ("/replayed", json!("true")),
             ("/receipt/entry/serverRevision", json!(1.5)),
-            ("/receipt/entry/outcome/committed/charged", json!(4294967296u64)),
+            (
+                "/receipt/entry/outcome/committed/charged",
+                json!(4294967296u64),
+            ),
             ("/receipt/entry/outcome/committed/admittedCount", json!(-1)),
-            ("/receipt/entry/outcome/committed/incomingUniqueId", json!("0")),
+            (
+                "/receipt/entry/outcome/committed/incomingUniqueId",
+                json!("0"),
+            ),
         ] {
             let mut value = reply_json();
             *value.pointer_mut(pointer).unwrap() = malformed;
-            assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&value.to_string()).is_err(), "{pointer}");
+            assert!(
+                serde_json::from_str::<NpcPurchaseOwnerReply>(&value.to_string()).is_err(),
+                "{pointer}"
+            );
         }
     }
 
     #[test]
     fn wrong_opaque_width_and_nested_enum_shapes_are_rejected() {
-        for pointer in ["/operation/actor", "/operation/requestScope", "/operation/intent/serviceCatalogProof"] {
-            for malformed in [json!([17; 31].to_vec()), json!([17; 33].to_vec()), json!("opaque"), json!(([256; 32].to_vec()))] {
+        for pointer in [
+            "/operation/actor",
+            "/operation/requestScope",
+            "/operation/intent/serviceCatalogProof",
+        ] {
+            for malformed in [
+                json!([17; 31].to_vec()),
+                json!([17; 33].to_vec()),
+                json!("opaque"),
+                json!(([256; 32].to_vec())),
+            ] {
                 let mut value = action_json();
                 *value.pointer_mut(pointer).unwrap() = malformed;
-                assert!(serde_json::from_str::<NpcPurchaseOwnerAction>(&value.to_string()).is_err(), "{pointer}");
+                assert!(
+                    serde_json::from_str::<NpcPurchaseOwnerAction>(&value.to_string()).is_err(),
+                    "{pointer}"
+                );
             }
         }
         for (pointer, malformed) in [
             ("/operation/intent/currency", json!("gems")),
             ("/operation/intent/source", json!("buy_back")),
-            ("/operation/intent", json!({ "service_catalog_proof": ([41; 32].to_vec()) })),
+            (
+                "/operation/intent",
+                json!({ "service_catalog_proof": ([41; 32].to_vec()) }),
+            ),
         ] {
             let mut value = action_json();
             *value.pointer_mut(pointer).unwrap() = malformed;
@@ -405,7 +633,11 @@ mod tests {
         let mut reply = reply_json();
         reply["receipt"]["entry"]["outcome"] = json!({ "unknown": {} });
         assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&reply.to_string()).is_err());
-        for malformed in [json!([53; 31].to_vec()), json!([53; 33].to_vec()), json!("opaque")] {
+        for malformed in [
+            json!([53; 31].to_vec()),
+            json!([53; 33].to_vec()),
+            json!("opaque"),
+        ] {
             let mut reply = reply_json();
             reply["receipt"]["producerScope"] = malformed.clone();
             assert!(serde_json::from_str::<NpcPurchaseOwnerReply>(&reply.to_string()).is_err());

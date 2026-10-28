@@ -1,0 +1,244 @@
+{
+  "schema": "mir2.r18-single-isolated-public-export.v1",
+  "generatedUtc": "2026-10-04T16:50:08.395376+00:00",
+  "sourceRevision": "321316b791120a6fe549e4006623e63333a5543f",
+  "binarySha256": "4064f6bce2337bbd1d251b37e7219163fd524828ddb83d90031232a0b1e25ca8",
+  "frozenSha256": "b7ac4b4f33cc746248a6e6c0f2d9d97a5822fc4be5e953e5f1e08aad34dfc0c0",
+  "wrapperExitCode": 0,
+  "archiveName": "PUBLIC-RECEIPTS-01.tar.gz",
+  "archiveSha256": "54ae0a3acb45b7336e019e2c139bd30fa18f91e3028f91e8c23738e6eb30138a",
+  "archiveBytes": 21211888,
+  "receiptCount": 45,
+  "uncompressedBytes": 169772159,
+  "privateStoresKeysOrRawGatewayLogsIncluded": false,
+  "explicitPublicAllowlistApplied": true,
+  "allOwnedGatewaysClosedBeforeExport": true,
+  "singleRunNoRetry": true,
+  "files": [
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/Taoist-bootstrap-relogin.jsonl",
+      "sha256": "e63198c143b02ab0e4b8c30653ca344869c1ac31279d3cfc6516201247f03c6d",
+      "bytes": 1168347
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/Taoist.jsonl",
+      "sha256": "de6186b715259885cee20aec6741bb9bf14a82a3635758afedae218ac4bc45df",
+      "bytes": 1616044
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/Warrior-bootstrap-relogin.jsonl",
+      "sha256": "31bad9d468175a7e27d09905219792baa216fec058254e8de239f42e0096c857",
+      "bytes": 1168218
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/Warrior.jsonl",
+      "sha256": "6363f02385f78e8fbfc051eb457a5ccb373930851692ad6a151cbeadf637ff77",
+      "bytes": 1665030
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/Wizard-bootstrap-relogin.jsonl",
+      "sha256": "37006d458bc18f9ac7b58198b878ecf840d0ca8604365313d617ee4ee325c4c3",
+      "bytes": 1168227
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/Wizard.jsonl",
+      "sha256": "954dd8b92fd62f3a0e1863fed29bd0a2abb544cac2248292e0cb2fd6ddd291dc",
+      "bytes": 1615924
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-receipts/report.json",
+      "sha256": "8b5f13e4d268f9646e1b6a6638f5300e18cfe68e09cb847ac182a486f2b96c6f",
+      "bytes": 37224
+    },
+    {
+      "relativePath": "public-receipts/bootstrap-stage.json",
+      "sha256": "102a2014828a99a273bace1533eddb11d0f0500abfd1628743d50540790c2629",
+      "bytes": 5682
+    },
+    {
+      "relativePath": "public-receipts/bootstrap.driver.stdout.log",
+      "sha256": "c50ea9ec4131e238b2948aad7aae6606163b6aab61c8711cba9920e97c4b9256",
+      "bytes": 247
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Taoist-alive-relogin.jsonl",
+      "sha256": "854c9adb70c324b692985df321a2699d5dde2e0fef8eb3d37e4ddc6945bfcea2",
+      "bytes": 1235449
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Taoist-fresh-load.jsonl",
+      "sha256": "11ecc705be0b23d3915ebff4530eeae7eebe45f43f46fbaef68c72087a610da2",
+      "bytes": 1968190
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Taoist.jsonl",
+      "sha256": "1db85ac403842118ab349457c11aaffe1bb02418e29c5e3a8bbea8840ab190d7",
+      "bytes": 11096370
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Warrior.jsonl",
+      "sha256": "636daee98b62ba121a7d2d50cc2f5ea6f8301c93d26522c4c36e1c20a9ed8643",
+      "bytes": 34513365
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Wizard-alive-relogin.jsonl",
+      "sha256": "aecd1934f8f70b601a0434ef952b0368cc86a7492e21c12bf54d18bf10fea0cb",
+      "bytes": 1235234
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Wizard-fresh-load.jsonl",
+      "sha256": "69d4c8344bcd1c9830b56fb5728218658dadb60b825648228253700fa21b75a6",
+      "bytes": 2016301
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/Wizard.jsonl",
+      "sha256": "4b1055e1e0c842cef54a4c78ad8f231be71d613fe462e51da722299d00f5fb67",
+      "bytes": 6881750
+    },
+    {
+      "relativePath": "public-receipts/death-receipts/report.json",
+      "sha256": "6e452747059e5e98197f9d2fd873f40f8f2049253fcf4b9793b1be503e683eef",
+      "bytes": 78463
+    },
+    {
+      "relativePath": "public-receipts/death-stage.json",
+      "sha256": "c187c1a7e5bd725d29ded70225bd41c1d2c776984d1045c441f71374ae12b5d3",
+      "bytes": 5680
+    },
+    {
+      "relativePath": "public-receipts/death.driver.stdout.log",
+      "sha256": "b12157281adfbb9ca6bd9e847651f8ee10ed936b2e98c3ae97e05f2c6bdba23b",
+      "bytes": 238
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/Taoist-dense-relogin.jsonl",
+      "sha256": "e0b4c81ac6b241491e3981926231c2ed8d747dafeff017e4eb8d37fa6fec272b",
+      "bytes": 1229078
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/Taoist.jsonl",
+      "sha256": "809fed9c70d3ecfd9683bcf917a22d0417ddda06bc239ae3e637985f0c6188b6",
+      "bytes": 32102131
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/Warrior-dense-relogin.jsonl",
+      "sha256": "44482ee57a5563684b3ec1c399efadd9acfd65328f7a3b85961c0d1d9bf7e675",
+      "bytes": 1245279
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/Warrior.jsonl",
+      "sha256": "5a558c60ab24c81e739cb707504983a23f4bfa87260f53baeedcfb316b1d1ea3",
+      "bytes": 11436898
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/Wizard-dense-relogin.jsonl",
+      "sha256": "b2449169d0753c4783aba2d3ff9addc61a8c65d5e099132ed6bc4b26299b16b2",
+      "bytes": 1213668
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/Wizard.jsonl",
+      "sha256": "b7528d1fae93b2c551b5a2475bb1d42d5a0fdfb1a7fa8c9fc9c9882d950664a5",
+      "bytes": 30775958
+    },
+    {
+      "relativePath": "public-receipts/dense-receipts/report.json",
+      "sha256": "f83c45301a273a50ac0a3accf963c49f8536ecbb747eacad1af6c14d64f54ff1",
+      "bytes": 2498178
+    },
+    {
+      "relativePath": "public-receipts/dense-stage.json",
+      "sha256": "ff26a9ee58d3f1da9f1b64ff06081b6c1ea581a557d5b8968ed414a3d63248e4",
+      "bytes": 5686
+    },
+    {
+      "relativePath": "public-receipts/dense.driver.stdout.log",
+      "sha256": "2026364141e204fbe3f9cda4497f8e1bb804129604aeb62a4c166555298a7171",
+      "bytes": 244
+    },
+    {
+      "relativePath": "public-receipts/level-field-diff.json",
+      "sha256": "accaa4aa913865f3a378826124e8ffb4feb35332b1e9ced8f2d426cf4d416d18",
+      "bytes": 3595
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/Taoist-purchases-relogin.jsonl",
+      "sha256": "416a9ad0a105ba967213911e3221c587caf3a35a0812f65ae2bf15526164cd40",
+      "bytes": 1150316
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/Taoist.jsonl",
+      "sha256": "4aa456c31f78e7e7ca890129fd1e04975eb1e9df9a45b9897202b64d222948bb",
+      "bytes": 7644642
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/Warrior-purchases-relogin.jsonl",
+      "sha256": "2a993a6ea7e06169d4b9904ffc828ba6d8d516b53d3d8980e7dc0b60447a29e8",
+      "bytes": 1234732
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/Warrior.jsonl",
+      "sha256": "a2d412bb6f5fbea94a20b1cd526383996918f4d7f85682e3bdad3f7b92e7e926",
+      "bytes": 2789335
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/Wizard-purchases-relogin.jsonl",
+      "sha256": "98152386ff6c6e934c9a37b4ad78b7011b0e01e5a512ac3ce75e95b0084aeac6",
+      "bytes": 1150053
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/Wizard.jsonl",
+      "sha256": "895741b52a4c751b4efcb3f965bc7e2794d755cd63e9d3e5729522166f29541d",
+      "bytes": 7663642
+    },
+    {
+      "relativePath": "public-receipts/purchases-receipts/report.json",
+      "sha256": "3accf3a2055c635746bafdcd41a15f57738302987314760dc3ad8b6c229a97af",
+      "bytes": 96960
+    },
+    {
+      "relativePath": "public-receipts/purchases-stage.json",
+      "sha256": "6f4ed82889f66efe62091444cd95493153698ff1c08fc5fb0b7b6df4a1d2d107",
+      "bytes": 5685
+    },
+    {
+      "relativePath": "public-receipts/purchases.driver.stdout.log",
+      "sha256": "5eb2b4dcecaa0359ffcb4c08c223108a2b24239bb126c01c45f58da9fe3ef5a8",
+      "bytes": 247
+    },
+    {
+      "relativePath": "public-receipts/travel-field-diff.json",
+      "sha256": "f1b77f09305873dd60cb9ed76ecb0a56b3d2ce3cc909165810d42a641da389f1",
+      "bytes": 2566
+    },
+    {
+      "relativePath": "wrapper-report.json",
+      "sha256": "752519b0bdfb6c221db47bc2409eab92109fbe96883efa3b6e619702315411b9",
+      "bytes": 42196
+    },
+    {
+      "relativePath": "PREFLIGHT-02.json",
+      "sha256": "cce8ec3031201d58b679c30c515867e885d8b2edb9215280f50ce24dbf971ad6",
+      "bytes": 2070
+    },
+    {
+      "relativePath": "REMOTE-VERIFY-ONLY-01.json",
+      "sha256": "ca3efe2394d113db043515291fee8d3eb75f9641d7cc72a933644d5d1a5994f5",
+      "bytes": 1180
+    },
+    {
+      "relativePath": "FROZEN-RECHECK-FINAL-01.json",
+      "sha256": "17f0428c25847a893b1c7aecef1880792f41a0ca0aa067a6770113c5bf1dea4e",
+      "bytes": 360
+    },
+    {
+      "relativePath": "EXECUTION-LAUNCH-01.json",
+      "sha256": "2dd4a0693ac99bf015f329fb192ff7948db69e296bcf962d7b47b37136c7f229",
+      "bytes": 1208
+    },
+    {
+      "relativePath": "wrapper-stdout.log",
+      "sha256": "ad0ad04753a20f4a4ec59a869c9644f590436dec3c8181f906b221f37a7e46a7",
+      "bytes": 269
+    }
+  ]
+}

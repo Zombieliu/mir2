@@ -1,5 +1,9 @@
 # Windows 原生可玩闭环验收清单
 
+## 完整分支集成与开发版构建（2026-10-28）
+
+在下述最初选择性恢复语言之后，按用户要求继续合入远端完整历史。Windows 开发版已重新构建；原生全量、共享 UI、九语言钱包离屏验证与服务端回归的精确结果及限制见[合并记录](BRANCH-INTEGRATION-20261028.zh-CN.md)。本机启动脚本无需 Docker，手机实签及最终玩家接受仍须单独验收。
+
 ## Windows Dubhe Wallet 扫码登录：原生实现与离屏验证（2026-10-28）
 
 原生 Bevy 登录页已接入扫码按钮/F8、二维码弹层、倒计时、取消及刷新，验证后使用带 token 的网关登录。Windows 开发 EXE 已编译并实际启动连接本机网关。针对语言反馈，已选择性恢复发布分支原有九语、字体和用户偏好，扫码文案随同一语言设置切换；聚焦回归及九语无窗口 GPU 显示检查通过。尚无手机钱包实签或生产部署验收。配置、分支边界、各组测试及演示图见 [Windows 扫码登录证据](DUBHE-WALLET-WINDOWS-LOGIN.zh-CN.md)，不据此提升整体 Accepted 状态。
@@ -17,6 +21,15 @@ Windows使用独立窗口输入、原生背包与桥接，不能直接沿用Web 
 实际切换1024×768自动→1280×960并恢复；登入前九语标签均已逐个观察，俄语/越南语长按钮在边界内换行。16张有效窗口截图已保存。客户端恢复繁中和自动模式，空登入页等待用户手动登入；没有自动执行账号认证，没有进入游戏世界，22项玩法仍not_run，不代表Candidate100或人类前端验收完成。旧构建记录和其他正文保留，各自证据范围不能合并。
 
 完整记录：[本轮原生实机记录](NATIVE-PLAY-ACCEPTANCE-20261010.md)、[实际结果](generated/native-play-acceptance-20261010/acceptance-result.json)、[证据索引](generated/native-play-acceptance-20261010/evidence-index.json)。
+
+> 2026-10-15 runtime配置补充：Root默认318通过（原2项忽略），Native economy/shared UI启用521通过（原4项忽略）。28项既有Native正例转至启用配置真实执行，默认拒绝与结构负例保留；CI覆盖两配置及WASM检查。仅修测试配置，产品guard未改，GUI/发布/人类验收仍开放。详见[本轮集成记录](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
+
+
+## 五分支集成：本地原生回归完成（2026-10-15，北京时间）
+
+冲突处理和本地验证完成。Windows functional03为1138通过/0失败/原7忽略；Native UI native05为1556通过/0失败/原14忽略，Core196与portable metrics/widget/wheel31通过，Windows默认优化配置 `--tests` 类型检查通过。Quest空间命中、隐藏/初帧、旧按下点拖出/释放及三缩放已回归，真实预算/Owned/owner/UID/碰撞门禁保留；旧32失败与资源缺失日志保留。其余 Web、NPC、Runtime、WASM静态检查及 Gateway11/105分组结果见[集成说明](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。
+
+最终提交、精确 SHA CI/真 PG资格与合入以 PR和 Actions为准，本地真 PG未执行。普通密码跨Zone healing风险、durable Sabuk税款、新完整签名包及新的 GUI/实机/人类验收仍开放；RPC资格仅覆盖真实Passkey Source，不把单测当作可玩包验收。原41份差异与 HEAD未变，服务器 bad3737 / Stripe TEST本轮不部署，Candidate100=false。
 
 ## Source50：新完整 Web 包已构建，Sharp 入口兼容修复；实玩待验证（2026-10-09）
 
@@ -188,6 +201,480 @@ Native 技能 projector 移入现有 Runtime 供 producer 与 owner checkpoint �
 
 证据：[实际有限结果02](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-finite-result02.json)、[原始字节含全部25份nonce](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-storage-source35-raw-evidence01.json)、[Source34发布](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-renderer-source34-publication01.json)。两次Root数据reader错误（展示括号、拒绝归档WASM字节）保留，不计产品/测试失败，未启动进程或改断言。下面Source34及更旧段落为历史。
 
+
+
+
+## Preserved gameplay and release branch checkpoints
+
+The following entries retain their original dates, source identities and evidence limits from the gameplay/release branches. They do not report verification of this integration.
+
+> Five-class Windows regression, 2026-10-12: the complete actual merged
+> Native host run passes 987 tests, with 7 original external checks ignored.
+> All five typed DoubleSlash/BackStep combinations pass, including committed
+> Jump behind Struck, continued held escape and unchanged attack cooldown.
+> Source has no drift; the original failed formatting log is retained.
+> Real Release binaries, complete signed delivery, full Linux Gateway qualification
+> and drained paired publication remain pending; this is not human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Current Windows checkpoint, 2026-10-12: full Native01 compiled and ran,
+> with912 pass/75 fail/7 original external ignores; this is not a green gate.
+> The missing generated keyed-map index was rebuilt by the original Node
+> producer, and two new DoubleSlash idle assertions now match original500ms
+> Standing. Production animation/clocks and all other assertions are unchanged.
+> A retained old-binary asset-root diagnostic passes; current-source full02,
+> newest NPC integration, clean builds and paired publication remain pending.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Current five-class/R25 merge, 2026-10-12: actual second-merge checks pass
+> simulation124/Gateway18, consumption-time CanMove9, real buff clocks5,
+> owner health16/32, zero-health7, outcome3, map transfer4 and monthly8.
+> Counts overlap; two original test-support billing cases are not executed
+> locally here and remain in the unchanged Linux workflow. Original Sim120/4
+> failure and fixture preparation failures are retained. Native BackStep/queued
+> Jump input guards and five combination tests are now written; their actual
+> Windows checks, clean Git/Linux/build/package/paired rollout remain pending.
+> Source schema is 7/7 (Zone), 3/2 (Gateway/factory), not schema8.
+> Public R25/feed20 is unchanged. No game switch or human acceptance.
+> [Exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Five-class integration checkpoint, 2026-10-12: the actual first R24 working
+> merge passes simulation124/Gateway18, Native bridge32/health20, nine-locale
+> validation13 and game-data75 (67 library + 5/3 integration). Original failed,
+> aborted and zero-match runs are retained and not counted as passes. Public
+> is now R25/feed20/client d917 and Gateway4006; preserve both through the next
+> actual merge before fresh checks, genuine Native build and paired publication.
+> No game/Gateway switch or human acceptance occurred in this round.
+> [Scope and exact evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+
+> Five-class integration follow-up, 2026-10-11: actual public R24/feed19 uses
+> Source87fd85a0d5a819e5b38c90d192421f9239f65678. Preserve all its shop/mail/
+> month-card/billing/owner-health fixes before building the five-class release.
+> Current green five-class evidence precedes that merge; fresh merged checks,
+> genuine binaries and publication remain open. Updater81 passes/4 original
+> ignores; focused7 overlaps. No public switch or native acceptance occurred.
+> [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md).
+
+> Current five-class round, 2026-10-11: Assassin/Archer level 1–50 normal
+> content and authoritative shared-zone combat pass simulation118/Gateway12;
+> adjacent entity22/player-combat7 and native animation28/audio26/supplies21/
+> Windows bridge32 pass. Original failed logs remain; overlapping filters are
+> not summed. Real Source pixels and selected-profile asset closure pass.
+> Commit/Linux/attested EXE/updater compatibility/package/deploy/native human
+> gates remain open. Old 200,000-file/32 MiB update bounds need a finite,
+> backward-compatible engine upgrade before the larger resource release.
+> [Exact scope and evidence](FIVE-CLASS-CANDIDATE-20261011.md). This is a bounded
+> Candidate round, not all-level five-class or whole-project 100% acceptance.
+> Root owns common/production files; explorers are read-only. No new Goal.
+
+
+> R25/feed20 actually public, 2026-10-11: d917 CI subject, complete40-file CDN
+> stage38147308719, same-source CAS promotion38149850915 and actual Windows
+> production HTTPS/CMS/HTTP206 proof pass. [Exact receipts and limits](CLASSIC-R25-CANDIDATE-PUBLICATION-20261011.md).
+> Existing launchers can update without a new installer. Native dense-combat
+> escape, continuous attacking, laptop pacing, fresh screenshots and human
+> acceptance remain open. Gateway4006 continues running; no Gateway switch.
+
+
+> Windows CI qualification repair and Gateway publication, 2026-10-11:
+> actual8d96 CI reported success but its unchanged Native tests failed938/3/7;
+> that EXE is quarantined. Source-pinned11 pet WAV inputs are now tracked and
+> verified before cargo. Nine fixtures exclusively own the global native queue;
+> controlled real LogOutSuccess reproduces both original failures without
+> changing assertions. Original four CI commands remain and stop on any failed
+> native exit. Actual corrected default-parallel Native941/0/7, focused13 (subset),
+> Node25, six exit-control cases and formatting pass. [Original evidence](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Linux4006 is truly live with normal backup/stops/cold restart, monthly price1000
+> and original production PID/config preserved. Original44 ordinary +18 resume
+> public protocol checks pass,14 normal logouts; fresh08:22/08:48 UTC reads are
+> empty/unchanged. First failed preflight, dead owned fixture and recovery
+> diagnostic remain failed. This is not alive crowd/native/human acceptance.
+> Fresh clean client CI/build, signed R25 client/feed and fullP1-P7/Mentor remain
+> open; client stays R24/feed19. Root is sole writer; expired heartbeat paused.
+
+
+> Follow-up client build repair, 2026-10-11: the first complete4006 client CI
+> exposed optional native mail dependencies in default Android/Shared builds.
+> Mail now respects native-ui; original native behavior/assertions remain exact.
+> Actual default11 and Native13 mail checks pass (24 executions/15 functions,
+> 9 overlapping); no tests ignored. Format and neutral runtime compile pass.
+> Real monthly/Stripe PostgreSQL gates at4006 passed. [Evidence and scope](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> Corrected full client CI, signed delivery, safe paired publication and native
+> dense-combat/human acceptance remain open. Server and resources are unchanged;
+> artifacts retain their actual source identity. FullP1–P7/Mentor remains open.
+
+> Integrated live health/billing with Source movement and Windows escape, 2026-10-11:
+> the public01a8 and owned9c histories are both retained. Actual local checks:
+> 317 distinct server names and941 Native names pass; one PostgreSQL external
+> and seven Native external checks remain ignored. Original failures and the
+> read-only correction of the Native name collector912→941 are retained.
+> [Scope, original evidence and limits](CLASSIC-LIVE-HEALTH-BILLING-MOVEMENT-INTEGRATION-20261011.md).
+> New two-parent Git publication, matching Linux/Windows builds, safe paired
+> publication, dense native combat and human acceptance remain pending here.
+> Old1e/9c artifacts are separate; existing workflow gates and live commerce
+> are preserved. Root is the sole writer. FullP1–P7/Mentor is open; expired
+> heartbeat remains paused. Older progress below is historical.
+
+> Continued Windows round, 2026-10-11: an enqueued attack paces only the next
+> hit; escape reads the actual admitted animation. Correction keeps400ms and
+> real pending ACKs, with blocked-path hints tied to current collision. Native
+> component stage gate911 passes/7 original native-external ignored; focused11
+> and adjacent340 overlap. [Original failures, source and actual checks](CLASSIC-CLIENT-ESCAPE-ACTION-CLOCK-20261011.md).
+> Foreign-cache compilation and incomplete large-memory fixture run remain;
+> fixture-only absolute-clock repair preserves product clocks/assertions and
+> now checks actual motion prediction. Server1e is pushed; own Linux38102609192
+> is separate. New Windows package/feed, paired publication, opaque action
+> receipt and actual dense-combat/native/human acceptance remain open. Last
+> public01:59 UTC64b6/R23/feed18 had no sessions; recheck before stage/apply.
+> Root owns all files. FullP1-P7/Mentor stays open; expired heartbeat stays paused.
+
+
+> 2026-10-09 target/movement lifecycle Candidate: temporary blocked pursuit now
+> keeps a live target and caches only failed routes against the exact shared
+> collision footprint. A blocker death/position/blocked-hint change replans;
+> cosmetic changes do not repeat A*. Invalid/dead/removed attacks cancel stale
+> movement and acknowledge the real bound owner even if the Zone queue is empty,
+> without shortening action/Struck/spell clocks. Local native900/0/7ignored,
+> Gateway21, native focused5 and the actual three-class native/Gateway socket
+> cohort pass; corrections68/68/71ms, fresh movement,5s quiet, three normal logouts.
+> The genuine mining91.wav is now tracked and required by the generic packager.
+> Linux/Windows exact-source release CI and paired publication are pending;
+> this Candidate does not change the last verified R22/feed17/Gateway536 pair.
+> Full seven-monster/native-human and P1-P7/Mentor gates remain open.
+> [Scope, original evidence and remaining work](CLASSIC-TARGET-MOVEMENT-LIFECYCLE-20261009.md).
+
+
+> 2026-10-10 monthly-mail sandbox switch completed after the user's normal
+> logout and all six admission counters reached zero. Native8aafbb60db and
+> Gateway92912f25c1 are running; first_main_update, healthy connection and
+> unchanged saved accounts/private settings are verified. Existing parcels
+> were not claimed or activated by the agent. Native human acceptance remains
+> open; public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Actual switch and startup receipt](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/MAIL-LOCAL-SWITCH-RECEIPT.json).
+
+> 2026-10-10 monthly parcel presentation Candidate: concrete Stage5
+> itemStatesJson now survives the subsequent native snapshot; reserved monthly
+> item metadata supplies its1813 icon, localized name and activation-on-use
+> hint after claim. Unknown date displays a placeholder without inventing time.
+> Exact shop purchase/gift bodies support nine locales; free text is preserved.
+> Native mail94/Windows projection8 checks and the final Windows build pass.
+> Source concurrency CI38050349344 at1429e70e90 passes actual isolated PG Gift,
+> billing and shared-owner checks. Native human acceptance and public rollout
+> remain open; the active user session is preserved until normal exit.
+> Public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Fix, failure history and proofs](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
+> 2026-10-10 Gift concurrency follow-up: Source Gift15 and Gateway shop35
+> checks pass. A known pre-persistence split-read error may recover only a
+> matching complete durable payer receipt; an orphan recipient unit cannot
+> create another outcome, debit or parcel. One known CAS retry keeps the first
+> resolved recipient identity. Unknown/frozen outcomes remain closed. Actual
+> PostgreSQL CI and the newly observed native monthly-mail icon fix are still
+> pending; public R22/Gatewaya41/feed17 and original P1-P7 remain unchanged.
+> [Evidence and retained failures](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md).
+
+> 2026-10-10 商城购买、赠送与充值返回页 Candidate：默认选择商城点数，
+> 手动选金币后保留选择，货币/余额失败原因可见。GIFT输入完整好友角色名，
+> 再确认收件人和点数总价；商品通过邮件领取，月卡使用才计时。客户端59项、
+> Source28项、网关商城35/充值39/通用赠送1项通过；双普通账号真实WS已核验
+> 在线邮件到账、领取、UID使用、重复请求不再扣款及正常退出后新连接密码重登。
+> 返回页九语言/阿拉伯RTL及54组浏览器布局状态检查通过，Windows新客户端
+> 已编译。原生人工操作、真实PG赠送CI及正式发布仍待验收；公共R22/feed17不变。
+> [范围、失败记录及证据](generated/player-qa/stripe-billing-20261009/shop-gift-return-20261010/README.md)。
+
+> 2026-10-10 用户确认正常退出后，月卡首页测试客户端已实际启动。
+> 旧exe被正在运行的三角洲占用，未关闭或改动三角洲；改以已核验的新文件名
+> 启动，沿用原测试配置和profile。充值测试快捷方式已指向新版，旧exe及备份
+> 均保留。实际启动到first_main_update，进程响应正常；网关PID223912保持
+> 健康且未重启。尚未进行新版正常登录、商城购买/领取/使用的人工验收。
+> 公共R22/网关a41/feed17不变。
+> [切换记录和保留失败](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/SWITCH-RECEIPT.json)。
+
+> 2026-10-10 月卡商品展示修正：30天月卡在商城「全部」首页优先显示，
+> 本地配置售价1000点数，仅可用商城点数购买。正常商城购买→邮件领取→
+> 背包使用才增加30天；购买本身不计时。客户端14项、服务端月卡9项测试
+> 通过，Windows编译及待切换文件哈希核对通过；保留当前正在玩的测试客户端。
+> 尚未切换、人工验收或发布到正式服；当前公共R22/网关a41/feed17不变。
+> [证据及未通过范围](generated/player-qa/stripe-billing-20261009/shop-first-page-20261010/README.md)。
+
+新增月卡展示验收：正常登录→商城「全部」第一页看到「30 天月卡」→勾选
+商城点数→1000点数购买→领取邮件附件→在背包使用→正常重登核对时间。
+无需通过充值弹窗完成游戏内购买；未启用月卡的账号仍可在角色选择页续费。
+上述人工路线尚未勾选完成。
+
+> 2026-10-09 新增充值/月卡 Candidate：商城充值入口和角色选择页续费已接
+>服务端；Stripe 确认后到账角色商城点数，30天月卡按真实UID消费一次。
+>本地服务端/HTTP/WS/私有RPC测试、Windows编译、5项host/10项模型/2项URL
+>检查通过；代码4a26的Stripe CI37946216332和月卡CI37946216237均通过真实
+>临时PostgreSQL验收。没有实际支付、浏览器跳转、截图或人工验收；价格、
+>Stripe配置和配套发布仍待完成。当前用户R22/网关a41/feed17保持原状。
+>[流程、配置及剩余验收](STRIPE-CREDITS-MONTHLY-CARD-20261009.md)。
+
+新增人工路线：正常登录→商城充值→浏览器付款→返回游戏刷新点数→购买月卡→
+领取/使用→重登核对时间；同时验收过期角色选择页续费、重复点击、取消付款、
+网络超时重试、背包满和九语言显示。当前不得勾选这些人工项目。
+
+> 2026-10-08 current public delivery: R22/game7fea, invited Gatewaya41 and
+> signed feed17 are actually live on origin and R2/CDN. Prior normal exit0,
+> strict six-counter/TCP drain, private backup, both normal service stops and
+> Candidate cold restart passed. Original production identity, environment,
+> capacity51/66/51 and resource limits were preserved.
+> Authenticated promote37772462840 advances the pointer and verifies aliases;
+> full40-object/1052247716-byte checks belong to earlier stage37739769708.
+> Promotion did not reverify all object bytes or CMS. Independent HTTPS aliases
+> match the prepared signed17 bytes. Ordinary public WSS passes44 checks across
+> six class/gender variants, eight normal logouts and two actual movement/
+> saved-position/relogin stories. Their observer relation checks total44.
+> R22 native PID187896 was launched for manual login; only startup through
+> first_main_update was observed. No actual native login is claimed.
+> Human shop-wheel/visual acceptance and natural crowded combat remain open.
+> The separate b235 health correction is outside frozen R22 and undeployed.
+> FullP1–P7 and the original missed12-hour deadline remain unfinished.
+> Real-payment recharge is not integrated; monthly cards use operator codes.
+> [Actual rollout and verification limits](generated/player-qa/classic-20261008/delivery-checkpoint-05/README.md).
+
+> Historical 2026-10-08 health follow-up: the personal Session mirror now ignores
+> ObjectHealth for monster life/Harvest authority. Source float percentage and
+> expiry byte-cast order are centralized and checked against independent C#
+> vectors. Focused lifecycle, math, party and genuine transport checks pass.
+> Five adjacent failures reproduce by name/count at unmodified parent937ac636;
+> original assertions/logs and the zero-test selections remain retained.
+> Full recipients, owner HP/MP packets, shared Hero identity, retained healing
+> and Web percentage0-to-HP0 are open. This code is outside frozen R22.
+> At10:23 UTC R20 was observed alive with one Gatewayc6 connection; strict
+> drain, paired rollout, feed promotion and human wheel acceptance are pending.
+> Public R20/feed16/Gatewayc6 and the original missed12-hour deadline remain.
+> P1–P7 is unfinished; real-payment recharge is not integrated.
+> [Bound source and tests](HEALTH-ZERO-AUTHORITY-20261008.md),
+> [original evidence05](generated/player-qa/classic-20261008/health-authority-05/ARCHIVE.json).
+
+> 2026-10-08 stage-only checkpoint: R22/feed17 immutable origin and R2 objects
+> are prepared; CI37739769708 at publisher e7850e9 verifies all40 objects and
+> 1052247716 public bytes. The exact stage receipt is authenticated. Worker
+> code/settings readback passes; public aliases stay R20/feed16 and Gatewayc6.
+> No paired rollout or native acceptance is claimed. The failed Linux tooling
+> run is retained; only portable offline test paths were repaired.
+> Separately, percentage0 no longer manufactures death in Zone/Gateway/native
+> caches. A raw current-map typed live snapshot now retires old alive packet
+> precedence; cached packet replay cannot acknowledge that incarnation. Native
+> authority17, bridge102, display7 and map-ingress5 checks pass. Actual death,
+> revive, drops and PK guards remain; the reproduced sleep-baseline failure,
+> unacknowledged-life ordering and missing-Death corpse animation remain open.
+> This health slice is outside frozen R22/7fea. The user-client R19 was selected
+> incorrectly; verified R20 awaits normal-exit confirmation and wheel acceptance.
+> The original12-hour deadline remains missed; fullP1–P7 is unfinished.
+> [Stage evidence](generated/player-qa/classic-20261008/delivery-checkpoint-03/ARCHIVE.json),
+> [health scope](HEALTH-ZERO-AUTHORITY-20261008.md),
+> [remaining work](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-08 local R22 package is complete and passes the original validation,
+> detached CMS, all154579 payload hashes and additive exact-frozen-source check.
+> The external package verifier's own sourceRepoCheck remains unavailable;
+> the separate original-function source check is recorded explicitly.
+> Fresh delivery-02 build passes after delivery-01 rejected an ADS on D:\;
+> no installation/stream/security gate was changed. Decoded delivery and its
+> separate external CMS check pass; feed17 is signed locally. CDN and paired
+> public rollout remain pending. Public Gatewayc6/feed16
+> and the active R19 user session stay intact; verified R20 is ready for normal
+> exit and the client-only wheel switch. New personal-runtime GIVEPET birth/
+> CHECKHUM parser corrections pass9 focused,24 DefaultNPC and1 ordinary quest
+> checks; adjacent54/2 is reproduced exactly on the original baseline. This
+> additional Source slice is outside frozen R22 and does not implement shared
+> ordered NPC world effects. The12-hour deadline remains missed; fullP1–P7
+> and actual native acceptance are open.
+> [Current evidence](generated/player-qa/classic-20261008/delivery-checkpoint-02/ARCHIVE.json),
+> [remaining work](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-08 classic Candidate integration is active under the user's12-hour
+> scope. Original party/source XP, timed safe-zone buffs, causal PK receipts,
+> typed shared pets and saved growth, ordinary Guild management/war, native
+> refining, default NPC hooks and mentor bank/settlement are implemented with
+> bounded evidence. Live owner-ID and first-life0 defects found by genuine
+> transport tests are fixed. Public R20/feed16 and Gatewayc6c3238 remain the
+> current baseline until exact-source CI and paired publication pass.
+> Seven-monster escape is still strict/inconclusive, Source NPC shared-world
+> ordered outbox and natural late-map/Boss/loot/native-human gates remain open.
+> No full100% completion is inferred from import/build/test counts.
+> [Current results and remaining gates](CLASSIC-12H-DELIVERY-20261007.md).
+
+> 2026-10-07 shared-player appearance source c6c32381a6 is actually live in
+> the isolated invited playtest after human normal-exit/switch authorization.
+> Drained preflight, private DB/state/config backup, normal old/Candidate stops
+> and Candidate cold restart pass; only ExecStart changes. Capacity51/66/51,
+> environment/unit/resource limits and original production PID stay unchanged.
+> Verified public HTTPS/WSS passes44 checks across all three classes/both
+> genders using five owned accounts; all8 ordinary lifecycles log out normally
+> and final connections/admissions/leases drain. No Windows reinstall/feed16
+> update is needed. Native two-client/human visual acceptance remains open.
+> [Actual rollout evidence](generated/player-qa/shared-player-appearance-20261007/rollout-01/README.md).
+
+> The fix uses ordinary transformation-1 and trusted current equipment/hair
+> before Join and on changes, preserving Zone life/position/status authority.
+> Clean Linux CI37617054260, Zone5/Gateway3, checkpoint regressions and read-only
+> review pass. Both public harness failures are retained: missing Origin,
+> then the unchanged fifth-registration/hour budget. The passing run reuses
+> owned accounts without weakening limits. Original drop-award failure,
+> Windows relink and archive-name verifier failures stay recorded. father50000
+> gold is delivered once by private mail, awaiting claim; fullP1–P8 is unfinished.
+> [Exact scope and evidence](SHARED-PLAYER-APPEARANCE-20261007.md).
+
+
+> 2026-10-07 final client-only NPC map/shop publication: actual R20/source8fa
+> and signed16 are public. Strict complete packaging/CMS/decoded delivery,
+> stage37603327260 (41 objects / 1,077,405,420 full CDN bytes), same-commit
+> separate promote37605195682 and actual Windows HTTPS/CMS/206 pass.
+> Previous feed15 bytes/fingerprints, all service PIDs, D/F files and saves
+> are preserved; no Gateway restart or UI takeover. Existing Launcher updates
+> without reinstalling; exact old engine/Bootstrap are reused. Public native
+> NPC/shop human and affected-laptop acceptance remain open; fullP1–P8 is
+> unfinished. Earlier R19/15 entries below are historical freeze records.
+> [Actual release evidence](generated/player-qa/npc-map-shop-20261007/publication-16/README.md).
+
+> 2026-10-07 NPC 高亮/GO TO普通寻路与武器商店滚动 Candidate 已修复。
+> Bevy37+20、Windows23+9和显式GPU1通过；原始截图显示选中Smith与货单末页矿镐。
+> 已核验鼠标松手、地图/NPC身份、旧自动奔跑、公告阻挡和缩放。
+> 公开仍R19/更新15；原生实机、公网升级和玩家体验须在新签名交付后独立验收。
+> [操作、真实商人和完整证据](NATIVE-NPC-MAP-SHOP-20261007.md)。
+
+> 2026-10-07 挖矿输入 Candidate 已实现真实已装备 CanMine/UID/耐久门控，
+> 按住左键挥镐，松手/右键/移动键/UI/死亡/换图取消旧意图；发送失败不重试。
+> 主人匹配确认使用原版 Mine/Attack2，旁观者普通 Attack1。输入10、相邻8、
+> 双队列1和离屏GPU1通过，男女八方向六帧96源几何核验及四张真实PNG保留。
+> 离屏 runtimeWorldRenderer=false/liveAcceptance=false；配套实际鼠标采矿、
+> 断线与真人验收、音效10091和发布继续开放，不计入P6完整验收。
+> [源码、操作与证据](SHARED-CRYSTAL-MINING-20261007.md)。
+
+> 2026-10-06 月卡 Candidate：角色选择页可查询期限、粘贴启用码、兑换和刷新。
+> Windows 协议1/1、状态/输入5/5通过；九语言实际离屏 GPU 窗口均可见，
+> 缺字、文字越界和窗口越界均为0。首次截图发现窗口被选择页遮住，已修正
+> GlobalZIndex并补上打开/关闭画面对比，原失败截图保留。服务端真实 HTTP/WS
+> 3/3、账本9/9和独立 PostgreSQL 并发1/1通过。仍未发布配套客户端/网关，
+> 玩家实机点击、正式服收费和在线支付未验收；旧玩法 P1–P8验收不变。
+> [月卡实际截图和证据](generated/player-qa/monthly-card-20261006/README.md)。
+
+> 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
+> after P3/source513eb83, applying only two Gateway terminal hunks. Source7
+> merges its actual nested rank, retires exact current editor context, and is
+> preserved before canonical255; hidden strict5s timeout and unsent/stale cleanup
+> are checked. Root83 client/4 wire/4 FIFO/3 terminal/9 P3 checks pass, overlapping
+> retained worker checks; one existing GPU case stays ignored. Native clicks,
+> self/AOI labels, no-nonce ABA, paired network/build/rollout and fullP5 stay open.
+> Protected authority/native queue/schemas/locks and R18 artifacts are unchanged.
+> [Scope](NATIVE-GUILD-RANK-RENAME-20261005.md),
+> [root evidence](generated/player-qa/guild-rank-native-20261005/README.md).
+
+
+> 2026-10-05 exact frozen R18/source321316 completes one isolated prepared
+> ordinary-protocol run. Wizard/Taoist actual natural Death and valid dead Magic
+> inputs retain absolute MP541/260, items and life/position; normal LogOut and
+> different fresh Login/StartGame restore alive128/541 and239/260 at0(288,616).
+> Quiet and alive-save/relogin pass. Root verifies93 frozen public files and
+> actual closed windows; historical R17 MP failures remain. Warrior180s death
+> is inconclusive; all10 dense cases lack seven qualified attackers (maximum4).
+> Seven-monster/native/human/fullP1/progression/load/capacity gates stay false.
+> Existing realms/Caddy/config/feed/counters are unchanged. R18 is not rolled
+> out; actual file updater/rollback passed separately, CDN login is pending.
+> [Exact public result and root review](generated/player-qa/r18-prepared-network-20261005/README.md).
+
+
+> 2026-10-05原生下载实测约100 KB/s，R17仍逐文件安装；R2原生入口404。
+> R17的11个资源合包/真实R16差分/CMS与36对象闭包已准备；本机Cloudflare
+> 尚未登录，未stage/promote或做CDN速度验收。实际R17→R18文件更新、删除、
+> 内容缓存、个人文件与完整回滚通过；这是无加速器/无启动的隔离检查。冻结R18
+> 与实际公网R17分别记录，F/玩家存档/游戏网关保持原状。
+> [诊断与边界](NATIVE-DOWNLOAD-ACCELERATION-20261005.md)。
+
+> 2026-10-03 怪群右键逃跑源码修复：普通怪物/NPC图像不吞右键，临时挡路记录
+> 在寻路前过期，玩家受击显示最多留一个等待动作；最新合法位移不再重播历史
+> 受击。本地预测序号与真实包序号分开，死亡/施法屏障仍保留。完整Windows
+> 858项通过/5项GPU忽略，动画核心23项通过；60步期间960次受击没有历史积压。
+> 服务端保留实际伤害、碰撞及控制期限。源码验证完成；尚未发布新包、切换网关
+> 或做人类实机验收，F盘安装仍保留。经典/NewMove围堵、打开出口后三职业逃跑、
+> 控制到期、战斗/死亡/药品/UI输入按下述路线待配套发布后验证。
+> [复现、诊断与验收步骤](CROWDED-COMBAT-ESCAPE-20261003.md)。
+
+> 2026-10-03 沙巴克验收入口：比奇皇宫 Administrator 创建行会并报名；
+> 攻城窗口在邀请服为北京时间18:00–18:30；王宫 Officer 可查看状态，
+> 城主会长可在战后管理税率、城防和税金。原生行会名称窗口支持九语言
+> 与 IME，城门开/关/死亡的碰撞预测与服务端一致。Windows845项、共享
+> UI1217项及九语言离线 GPU 页面通过，跨 TCP/WS 普通包占领流程通过；
+> R16 新包、配套网关及 sequence11 自动更新已发布。27.48 MB 在线安装器
+> 已通过外网 TLS、长度、断点范围和完整文件 SHA 校验；人工实机争夺、
+> 新机首次安装和本机 R15→R16 更新尚未验收。现有 F盘安装目录保持不动。
+> [完整步骤与未验收项](SABUK-SHARED-SIEGE-20261003.md)。
+
+> 2026-10-02 用户自定义施毒规则：施毒术可直接消耗背包或腰带毒粉，
+> 已装备毒粉优先；火符和召唤仍需装备护身符。九种语言的任务描述、
+> 练习/材料提示和补给卡已统一，28项非视觉服务端/客户端检查通过，
+> 包含真实 Gateway 普通技能包的内存库存收据。尚未部署或切换；
+> 原生界面、实际游玩和人工视觉验收仍待后续验证，不计为 Crystal 1:1。
+> [规则与范围](POISONING-CARRIED-POISON-RULE-20261002.md)。
+
+> 2026-10-01 caster follow-up: strict audit of independent frozen saves and
+> normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
+> Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
+> cohort is retained. The original r2 ordinary clock ended 48/52: Wizard 22/26
+> at its 120-minute deadline; Taoist completed 26/26 within about 98 minutes.
+> Wizard's separate functional 26/26 inherits its ordinary nodes;
+> freshTimedCompletion=false.
+> Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
+> new loadout branch was not observed live; existing practice ACKs are separate.
+> Shared UI checks: 1197 passed / 10 ignored. Explicit NPCResponse follow-up
+> passes Windows 809 / 5 ignored and runtime 276 / 1 ignored. Real empty or
+> nonempty response pages retire service children; ordered Closed/Buy signals
+> do not open a bootstrap shop. Passive snapshot text absence retains the service.
+> Ordered Exit/retry, late goods, map/scene and merchant regressions pass; six
+> offline GPU captures after 560 ms pass. Earlier failures/42 captures remain.
+> [Packet boundary evidence](generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json).
+> Finite control handoff, canonical mana and prior 6d498c080 server validations
+> retain their documented scopes and original failure records. No new full
+> server-suite or whole-game parity acceptance follows. Client-only r9 source
+> 180b01d46, Candidate09 and installer are built and verified; signed sequence5
+> is published. Actual signed-package delta/rollback checks pass 2/2, six game
+> payloads plus the engine (107.17 MiB), and public HTTPS feed/signature bytes match.
+> F-drive native HTTPS retry now activates exact Candidate09 and engine, verifies
+> all six changed game files, preserves eight preferences, and rechecks at zero
+> downloads. Five verified cached payloads are reused; two remaining payloads
+> download 112,308,736 bytes. First 900s timeout is preserved, not relabelled.
+> Public game services remain unchanged on the existing r8 Gateway; human
+> stores are preserved. Installed mouse/GUI and affected-laptop acceptance,
+> full route timing, counted/periodic poison, dynamic mana and unrelated parity
+> gaps remain open; capacity remains paused.
+> [r9 delivery evidence](generated/player-qa/caster-journey-20261001/release-r9/README.md).
+> [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+> [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
+
+> 2026-10-01 技能/界面输入修复：共享1186、Windows801项串行检查通过。
+> 技能、人物、背包、设置、菜单、帮助和任务日志/详情只拦截各自窗口区域；
+> 窗口外移动、技能快捷键、药品快捷键及已建立的攻击/路线可继续。
+> 确认、购买、NPC、拖动和搜索输入仍受保护；已移除的任务不会留下隐形拦截。
+> 9级买药实际打开流程的9种语言GPU截图通过，背包在购买列表旁边。
+> 本机F盘已由r5升级到干净3f5e61533的r8，安装和本机启动校验通过。
+> 配套试玩服务器已部署；签名更新序号4、公网更新与重复检查零下载通过。
+> 已从本机桌面启动器打开新版繁体登录页并保存应用内截图，未输入账号密码。
+> [证据](generated/player-qa/skill-input-shop-20261001/README.md)。
+
+> 2026-09-30 原生三语与 DPI 修复：zh-TW/en/pt-BR 的登录、创建角色、
+> 任务/NPC、商店/背包、选项、帮助等界面已接入翻译及内置字体。
+> 共享1147、Windows777、词库工具12项通过；47张实际离线GPU截图通过，
+> 90次语言切换字体图集稳定在16MiB。移除高DPI下放大客户区的逻辑尺寸约束，
+> 并测试跨显示器尺寸恢复。外星人笔记本复测、全新安装及真人三语流程仍待验证；
+> 不等同全游戏验收。干净97144d6a0发布版、123030文件签名校验通过，
+> 三语x64安装包已构建，名称统一为 Numeron - Legend of Rebirth。
+> [安装包与校验值](generated/player-qa/native-multilingual-20260930/release/README.md)。
+> [证据与复现](generated/player-qa/native-multilingual-20260930/README.md)。
+
+> 2026-09-29 创建/选角预览：男女五职业共192张源帧逐像素与原版一致。
+> 修正法师特效混合方式、名字/焦点变化重置动画；离线实际GPU检查320帧、
+> 64张截图，16组法师叠加对照均未压暗底图。共享1108/原生768项通过。
+> Windows发布版GUI子系统与有上限的启动日志已验证，Candidate03完整性及
+> x64 r3安装包编译通过；实际安装升级与用户创建角色操作仍未验收。
+> 刺客/弓手仅检查既有绘制能力，未开放创建。
+> [证据与限制](generated/player-qa/invited-playtest-20260929/character-preview-startup.md)。
 
 > 2026-09-03 relocated-launch map repair: the native map locator resolves a
 > junction's physical asset root before looking for the development map pack.

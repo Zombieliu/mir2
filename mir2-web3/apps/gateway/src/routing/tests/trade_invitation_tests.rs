@@ -81,8 +81,18 @@ fn invitation_requires_mutual_facing() {
     let turn_packets = second.handle_packet(ClientPacket::Turn {
         direction: MirDirection::Right,
     });
-    let facing = second.world_snapshot().entities.into_iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).expect("recipient must remain active").direction;
-    assert_eq!(facing, MirDirection::Right, "fixture turn must reach authoritative state: {turn_packets:?}");
+    let facing = second
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("recipient must remain active")
+        .direction;
+    assert_eq!(
+        facing,
+        MirDirection::Right,
+        "fixture turn must reach authoritative state: {turn_packets:?}"
+    );
     first.handle_packet(ClientPacket::TradeRequest);
     assert!(!second
         .handle_packet(ClientPacket::KeepAlive { time: 1 })
@@ -131,9 +141,11 @@ fn disconnected_inviter_cannot_be_accepted_and_new_invite_is_possible() {
 #[test]
 fn gold_and_items_are_private_to_the_established_partner() {
     let registry = ZoneRegistry::in_process();
-    let mut first = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
-    let mut second = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
-    let mut third = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+    // All three authenticated accounts belong to the same authoritative store.
+    let config = GatewayConfig::default();
+    let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+    let mut second = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+    let mut third = GatewaySession::new_with_zone_registry(config, &registry);
     start_demo_character(&mut first);
     start_new_character(&mut second, "trade-second", "Blade");
     start_new_character(&mut third, "trade-third", "Watcher");

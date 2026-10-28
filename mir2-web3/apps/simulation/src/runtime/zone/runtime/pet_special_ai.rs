@@ -170,6 +170,7 @@ impl ZoneRuntime {
             if damage > 0 {
                 out.extend(self.resolve_pending_native_monster_hit(
                     PendingNativeMonsterHit {
+                        force_experience_owner: false,
                         ready_at_ms: now,
                         session_id: h.owner.clone(),
                         attacker_object_id: h.source,

@@ -2,6 +2,8 @@ import { questCoordinate, questMapIndex, sameQuestWorldStamp, type QuestWorldSta
 
 export type QuestRouteTarget =
   | Readonly<{ type: "entrance" }>
+  | Readonly<{ type: "taskNpc"; objectId: number }>
+  | Readonly<{ type: "mapNpc"; objectId: number }>
   | Readonly<{ type: "huntRegion"; monsterIndex: number; radius: number }>
   | Readonly<{ type: "supply"; vendor: "potions" | "general" | "poison" }>;
 
@@ -45,6 +47,9 @@ export function parseQuestWorldAction(value: unknown): QuestWorldAction | null {
     const target = value.routeTarget;
     if (target.type === "entrance") {
       if (!keys(target, ["type"])) return null;
+    } else if (target.type === "taskNpc" || target.type === "mapNpc") {
+      if (!keys(target, ["type", "objectId"]) || !objectId(target.objectId)
+        || (target.type === "taskNpc" ? !positive(value.questIndex) : value.questIndex !== 0)) return null;
     } else if (target.type === "huntRegion") {
       if (!keys(target, ["type", "monsterIndex", "radius"]) || !questCoordinate(target.monsterIndex)
         || !questCoordinate(target.radius) || target.radius < 0 || target.radius > 0xffff) return null;

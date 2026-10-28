@@ -1,0 +1,18 @@
+
+running 13 tests
+test routing::tests::gateway_kill_award_level_up_updates_zone_and_personal_vitals ... ok
+test routing::tests::gateway_legal_archer_cannot_materialize_neutral_range_target ... ok
+test routing::tests::gateway_melee_materializes_neutral_harvestable_deer ... ok
+test routing::tests::gateway_non_level_awards_do_not_push_stale_personal_hp_into_zone ... ok
+test routing::tests::gateway_ordinary_accepted_attack_prepares_passive_slaying_without_mana ... ok
+test routing::tests::gateway_prefilter_uses_explicit_disposition_for_friendly_and_hostile_ai0 ... ok
+test routing::tests::gateway_refreshes_changed_combat_state_before_the_next_range_intent ... ok
+test routing::tests::gateway_refreshes_mount_attack_capability_before_each_melee_intent ... ok
+test routing::tests::gateway_refreshes_trusted_range_admission_and_rejects_unauthorized_sessions ... ok
+test routing::tests::gateway_shared_range_uses_crystal_nine_tile_boundary ... ok
+test routing::tests::gateway_twin_drake_shared_mana_commits_once_and_survives_refresh ... ok
+test routing::tests::gateway_unauthorized_materialized_range_is_atomic ... ok
+test routing::tests::gateway_zone_vitals_sync_updates_personal_max_hp_after_level_up ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 857 filtered out; finished in 18.58s
+

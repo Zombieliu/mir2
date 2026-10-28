@@ -92,7 +92,7 @@ impl ZoneRuntime {
             if !self.can_native_monster_occupy(object_id, &current) {
                 return false;
             }
-            if native_monster_adjacent_to(&current, target) {
+            if current == *target || native_monster_adjacent_to(&current, target) {
                 return true;
             }
             let Some(direction) = zone_direction_toward(&current, target) else {
@@ -151,5 +151,24 @@ impl ZoneRuntime {
             }
         }
         progress_direction.map(|direction| (direction, offset_point(position, direction, 1)))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn chase_can_enter_an_empty_follow_cell_for_monster_master_pets() {
+        let zone = ZoneRuntime::new_with_collision(
+            ZoneKey::for_map("empty-pet-follow"),
+            ZoneCollision::unbounded(),
+        );
+        let source = Point { x: 10, y: 10 };
+        let target = Point { x: 11, y: 10 };
+        assert_eq!(
+            zone.native_monster_chase_step(101, &source, &target, MirDirection::Right),
+            Some((MirDirection::Right, target))
+        );
     }
 }

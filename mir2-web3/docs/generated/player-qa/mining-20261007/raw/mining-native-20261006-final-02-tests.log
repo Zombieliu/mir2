@@ -1,0 +1,16 @@
+
+running 11 tests
+test entity_presentation::mining_visual_tests::mining_source_pose_and_original_ore_icons_offscreen_gpu ... ignored, explicit offline mining GPU; run alone with MIR2_NATIVE_ASSET_ROOT and fresh MIR2_MINING_VISUAL_OUTPUT
+test entity_presentation::tests::mining_animation_marker_cannot_reuse_stale_or_moved_or_canceled_attack ... ok
+test entity_presentation::tests::mining_owner_confirmation_uses_crystal_attack2_but_observer_stays_attack1 ... ok
+test input::mining_input::tests::mining_empty_shift_attacks_and_wall_requires_usable_tool ... ok
+test input::mining_input::tests::mining_gesture_survives_wear_but_not_weapon_or_map_changes ... ok
+test input::mining_input::tests::mining_hold_cancels_on_death_swap_map_or_transform_and_never_rearms_old_press ... ok
+test input::mining_input::tests::mining_hold_paces_swings_and_replaces_unsent_work_then_cancels_on_release ... ok
+test input::mining_input::tests::mining_requires_real_equipped_source_and_working_durability ... ok
+test input::tests::mining_input_tests::mining_native_bridge_forwards_only_latest_current_gesture_without_spell ... ok
+test input::tests::mining_input_tests::mining_native_manual_input_or_ui_cancels_unsent_swing_immediately ... ok
+test input::tests::mining_input_tests::mining_native_saturated_sender_never_retains_an_old_directional_attack ... ok
+
+test result: ok. 10 passed; 0 failed; 1 ignored; 0 measured; 868 filtered out; finished in 0.02s
+

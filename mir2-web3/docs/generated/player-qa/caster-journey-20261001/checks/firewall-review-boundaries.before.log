@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: FireWall retry validates range again after authoritative readiness changes
+not ok 1 - FireWall retry validates range again after authoritative readiness changes
+  ---
+  duration_ms: 205.1478
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-newcomer-v2.mjs:1314:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    2 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 2
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-newcomer-v2.mjs:1338:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: FireWall never retries an accepted cast after a non-timeout observation failure
+not ok 2 - FireWall never retries an accepted cast after a non-timeout observation failure
+  ---
+  duration_ms: 1.6639
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-newcomer-v2.mjs:1342:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The validation function is expected to return "true". Received false
+    
+    Caught error:
+    
+    Error: FireWall lacked a positive post-send target damage receipt
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    async TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-newcomer-v2.mjs:1364:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 295.3477

@@ -750,15 +750,24 @@ export async function restockV2Supplies(client, navigateNear, { policy, travel, 
           const affordable = Math.floor(beforeGold / unitPrice);
           if (phase === 'minimum' && affordable < remaining) return blocked(`insufficient gold for ${supply.name}: need ${remaining * unitPrice}, have ${beforeGold}`);
           if (affordable <= 0) break; // Optional top-up, every minimum was already checked.
-          const quantity = Math.min(remaining, affordable, supply.stackSize);
+          let quantity = Math.min(remaining, affordable, supply.stackSize);
           const weight = Number(client.snapshot.playerWeights?.bag ?? client.snapshot.currentWeight);
           const maxWeight = Number(client.snapshot.maxWeight);
+          // Mandatory floors remain strict. Once all floors are confirmed,
+          // fill only the available bag room instead of turning an optional
+          // 24-potion recommendation into a false departure blocker.
+          if (phase === 'target' && !['amulet', 'poison'].includes(kind) &&
+              Number.isFinite(weight) && Number.isFinite(maxWeight) && maxWeight >= 0) {
+            quantity = Math.min(quantity, Math.max(0, Math.floor((maxWeight - weight) / supply.weight)));
+            if (quantity <= 0) break;
+          }
           // Crystal charges Amulet item weight once per stack, not per charge.
           const carried = [...(client.snapshot.inventoryItems ?? []), ...(client.snapshot.beltItems ?? [])];
           const stackHasRoom = carried.some(item => v2SupplyItem(item)?.itemIndex === supply.itemIndex &&
             Number(item.quantity ?? 0) + quantity <= supply.stackSize);
           const gainWeight = ['amulet', 'poison'].includes(kind) ? (stackHasRoom ? 0 : supply.weight) : quantity * supply.weight;
           if (Number.isFinite(weight) && Number.isFinite(maxWeight) && maxWeight >= 0 && weight + gainWeight > maxWeight) {
+            if (phase === 'target') break;
             return blocked(`bag weight prevents ${supply.name}: ${weight}+${gainWeight}>${maxWeight}`);
           }
           const beforeQuantity = v2SupplyStock(client.snapshot)[kind];

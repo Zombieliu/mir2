@@ -2785,8 +2785,7 @@ impl SimulationSession {
                 PlayerActionKind::Move,
                 crystal_packet_move_delay_ticks(command.running),
             );
-            let packets = self.move_player_by_direction(command.direction, command.running);
-            return self.finalize_packets(packets);
+            return self.move_player_by_direction(command.direction, command.running);
         }
         if crystal_movement_retry_pending(self.app.world()) {
             advance_runtime_tick(self.app.world_mut());
@@ -2796,25 +2795,37 @@ impl SimulationSession {
                     PlayerActionKind::Move,
                     crystal_packet_move_delay_ticks(command.running),
                 );
-                let packets = self.move_player_by_direction(command.direction, command.running);
-                return self.finalize_packets(packets);
+                return self.move_player_by_direction(command.direction, command.running);
             }
-            return self.finalize_packets(Vec::new());
+            return Vec::new();
         }
-        let packets = advance(self.app.world_mut());
-        self.finalize_packets(packets)
+        advance(self.app.world_mut())
     }
 
     pub fn tick(&mut self) -> Vec<ServerPacket> {
-        let before=match self.begin_guild_experience_command(false){Ok(before)=>before,Err(_)=>return Vec::new()};
-        let packets=self.tick_with_world_advance(advance_world);
-        self.finish_guild_experience_command(before,packets).unwrap_or_default()
+        let before = match self.begin_default_npc_source_command() {
+            Ok(before) => before,
+            Err(_) => return Vec::new(),
+        };
+        let mut packets = self.tick_with_world_advance(advance_world);
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_default()
     }
 
     pub(crate) fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
-        let before=match self.begin_guild_experience_command(false){Ok(before)=>before,Err(_)=>return Vec::new()};
-        let packets = advance_shared_zone_personal_world(self.app.world_mut());
-        let packets=self.finalize_packets(packets);
-        self.finish_guild_experience_command(before,packets).unwrap_or_default()
+        self.try_tick_shared_zone_personal_state()
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn try_tick_shared_zone_personal_state(
+        &mut self,
+    ) -> Result<Vec<ServerPacket>, String> {
+        let before = self.begin_default_npc_source_command()?;
+        let mut packets = advance_shared_zone_personal_world(self.app.world_mut());
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
     }
 }

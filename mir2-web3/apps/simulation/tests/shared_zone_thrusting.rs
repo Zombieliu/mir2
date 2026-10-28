@@ -358,7 +358,12 @@ fn primary_query_does_not_train_on_friendly_unknown_or_hidden_front_occupants() 
     attacker.chat_profile.attack_mode = 1;
     attacker.chat_profile.group_members = vec!["Warrior201".into()];
     zone.handle(ZoneCommand::Join(attacker));
-    zone.handle(ZoneCommand::Join(player(201, Point { x: 11, y: 10 })));
+    // Crystal's Group attack gate checks the target's authoritative roster.
+    // A real shared group is reciprocal; a one-sided attacker label is not
+    // evidence that the target has admitted this attacker into its group.
+    let mut grouped_target = player(201, Point { x: 11, y: 10 });
+    grouped_target.chat_profile.group_members = vec!["Warrior101".into()];
+    zone.handle(ZoneCommand::Join(grouped_target));
     zone.handle(ZoneCommand::sync_player_combat_state(
         owner(),
         MirClass::Warrior,

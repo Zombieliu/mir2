@@ -1,0 +1,81 @@
+{
+  "feature": "account-monthly-card",
+  "serverSource": "cb330c515a3f16a3d5fb0acbeac0f8fe35b1aedc",
+  "serverCi": "https://github.com/Zombieliu/mir2/actions/runs/37464517808",
+  "serverCiConclusion": "success",
+  "candidateUiSource": [
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "46fa407189afad29394a3b1b5380cf65030bce2c363777edd7cebd5b2d2dcd9a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "sha256": "9116797ea96aaaa607a27c9132617c54f26cb4f2e1356614cc31029e2d1a22af"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "monthly-card-zh-TW.png",
+      "sha256": "43a7789de4893810923010883fa336b303c1ed9a3eb1aa0e14df6d57f1579be2",
+      "bytes": 239918
+    },
+    {
+      "file": "monthly-card-en.png",
+      "sha256": "7e91fc8f70edf16b4456e979fe32626a108ecc764e1e6c4955a4137f440bc6e2",
+      "bytes": 240053
+    },
+    {
+      "file": "monthly-card-pt-BR.png",
+      "sha256": "bbf6c793dfa391396e7ca798cc992a309f7026af8045a28ab02afe18db7c37dd",
+      "bytes": 251815
+    },
+    {
+      "file": "monthly-card-ru.png",
+      "sha256": "bd54694925989e7d89ef9bf26948de5cfdfa9fb06572e51eda37ef5bdc8a725f",
+      "bytes": 251633
+    },
+    {
+      "file": "monthly-card-hi.png",
+      "sha256": "4161d9475841e0c6b812489188566900a55665907ac232efa10f785f653ad4b3",
+      "bytes": 235088
+    },
+    {
+      "file": "monthly-card-id.png",
+      "sha256": "6f24d8a90ba3e88436d5a6e7e2ffb81c2ef6c11d87f83c82579c0907f2ff39d0",
+      "bytes": 247957
+    },
+    {
+      "file": "monthly-card-vi.png",
+      "sha256": "b26285d0d7ecd6a32ae900d9008606f763f413001bb85aa00e6e74870e0aa1d7",
+      "bytes": 245135
+    },
+    {
+      "file": "monthly-card-th.png",
+      "sha256": "2f60506827659e03edc3c0b732531603375e1a801cad927d7616e618c3417906",
+      "bytes": 234591
+    },
+    {
+      "file": "monthly-card-ar.png",
+      "sha256": "30f423802e99f43521b3518544f1ff683aa48fdd606f9189f0ee87ea4ae27c89",
+      "bytes": 239622
+    }
+  ],
+  "gpuLocales": 9,
+  "actualModalFrameChangeVerified": true,
+  "missingGlyphs": 0,
+  "overflowingTextNodes": 0,
+  "outsideViewportNodes": 0,
+  "manualImageReview": [
+    "zh-TW",
+    "ar",
+    "pt-BR"
+  ],
+  "originalOcclusionRetained": true,
+  "fixtureAssets": "read-only R10 original UI and font fixture",
+  "requiredAccessDefault": false,
+  "publicRealmChanged": false,
+  "publicFeedChanged": false,
+  "productionAccountStoreChanged": false,
+  "playerInteractionAccepted": false,
+  "onlinePaymentIntegrated": false
+}

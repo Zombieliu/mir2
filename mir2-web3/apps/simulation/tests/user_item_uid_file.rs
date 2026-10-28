@@ -135,6 +135,39 @@ fn nonzero_initial_floor_issues_floor_plus_one() {
 }
 
 #[test]
+fn durable_issuer_skips_monthly_card_range_and_commits_the_gap_before_return() {
+    const RESERVED_FIRST: u64 = 0x001d_0000_0000_0000;
+    const RESERVED_LAST: u64 = 0x001d_ffff_ffff_ffff;
+    for floor in [RESERVED_FIRST - 2, RESERVED_FIRST, RESERVED_LAST - 1] {
+        let directory = TestDirectory::new("monthly-card-reserved-range");
+        let state_path = directory.state_path();
+        let allocator = UserItemUidAllocator::initialize_file(&state_path, floor).unwrap();
+        if floor == RESERVED_FIRST - 2 {
+            assert_eq!(
+                allocator.issue(issue_reason()).unwrap().get(),
+                RESERVED_FIRST - 1
+            );
+        }
+        assert_eq!(
+            allocator.issue(UserItemUidReason::Crafting).unwrap().get(),
+            RESERVED_LAST + 1
+        );
+        assert_eq!(allocator.issued_through().unwrap(), RESERVED_LAST + 1);
+        drop(allocator);
+
+        let reopened = UserItemUidAllocator::open_file(&state_path).unwrap();
+        assert_eq!(reopened.issued_through().unwrap(), RESERVED_LAST + 1);
+        assert_eq!(
+            reopened
+                .issue(UserItemUidReason::NpcTradePurchase)
+                .unwrap()
+                .get(),
+            RESERVED_LAST + 2
+        );
+    }
+}
+
+#[test]
 fn raise_floor_is_monotonic_durable_and_restart_safe() {
     let directory = TestDirectory::new("raise-floor");
     let state_path = directory.state_path();

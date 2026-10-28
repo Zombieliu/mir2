@@ -14,7 +14,10 @@ pub const MAX_QUEUED_INTENTS: usize = 24;
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum QuestUiIntent {
     /// Detail-window action, separately scoped from world-click interaction.
-    InteractQuestNpc { quest_index: i32, npc_object_id: u32 },
+    InteractQuestNpc {
+        quest_index: i32,
+        npc_object_id: u32,
+    },
     InteractNpc {
         npc_object_id: u32,
     },
@@ -39,6 +42,13 @@ pub enum QuestUiIntent {
     },
     AttackTarget {
         object_id: u32,
+    },
+    /// Windows current held world gesture. The host revalidates this context;
+    /// a canceled or superseded gesture must never be retried later.
+    AttackDirection {
+        direction: String,
+        mining: bool,
+        gesture_id: u64,
     },
     /// Host-resolved Crystal Alt+world-click on a tile without a target.
     /// The gateway/server remains authoritative over nearby carcass selection.
@@ -76,6 +86,7 @@ impl QuestUiIntent {
             | Self::SelectNpcDialog { .. }
             | Self::ShareQuest { .. }
             | Self::AttackTarget { .. }
+            | Self::AttackDirection { .. }
             | Self::HarvestDirection { .. }
             | Self::PickUpObject { .. }
             | Self::PickUpTile => None,
@@ -169,10 +180,29 @@ impl QuestUiIntentQueue {
     /// requests. Keep quest and NPC operations in their original FIFO order.
     pub fn clear_attack_intents(&mut self) -> usize {
         let before = self.len();
+        self.retry_intents.retain(|intent| {
+            !matches!(
+                intent,
+                QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+            )
+        });
+        self.intents.retain(|intent| {
+            !matches!(
+                intent,
+                QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }
+            )
+        });
+        before - self.len()
+    }
+
+    /// Cancel a held directional gesture without changing an established
+    /// monster selection or unrelated NPC/quest operations.
+    pub fn clear_directional_attack_intents(&mut self) -> usize {
+        let before = self.len();
         self.retry_intents
-            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. }));
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
         self.intents
-            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. }));
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
         before - self.len()
     }
 

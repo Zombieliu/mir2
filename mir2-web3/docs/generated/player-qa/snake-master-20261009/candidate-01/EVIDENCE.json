@@ -1,0 +1,487 @@
+{
+  "schema": "mir2.snake-master.candidate-evidence.v1",
+  "parentRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+  "sourceSha256": {
+    "apps/simulation/src/runtime/zone/runtime.rs": "95b66c20b55958bc3a460fa0f036267e9985335ed0e680937936452ea64d8e66",
+    "apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs": "5d233547f96a892ef7e10e03895b4c256a832ebdef187558392e1a2b3db8c800",
+    "apps/simulation/src/runtime/zone/runtime/snake_totem_ai.rs": "0e03432880222ef045d3a58b1f41bd74e6201d6cead6e6bec6e5953bae686ade",
+    "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs": "8c81d8da5c7ace354d360540bbfaf967e66ea2254933b883ac681f243b1caa8c",
+    "apps/simulation/src/runtime/zone/runtime/owned_pet_immediate_master_tests.rs": "b2d1b7d61d59ab0e19576d12b6a13983501ee45cc9a0a6eedb5fe0fc659a447c",
+    "apps/simulation/tests/shared_snake_master_lifecycle.rs": "cfaacaf5f928b1ac0037aed7f63f5c3c1dcf30f4e1a91e73bf90121289cf2612",
+    "apps/simulation/tests/shared_zone.rs": "a0ecdff3eef071174e72adf285321661f96fdaff538eda091564b82c7859781c",
+    "apps/simulation/src/runtime/zone/runtime/checkpoint.rs": "1fd402761e144b98654a4d4c7621bd12aa655b90ed2ca8befacc710e52ea887f",
+    "../.github/workflows/gateway-release.yml": "a61ea689c904031cfed631f97a1647a3db04cd9f8e00c66ab996ceffbbe4ba1c"
+  },
+  "finalTests": [
+    {
+      "name": "31-final-private",
+      "receiptSha256": "832a783e75f2956b2cf43d60b444b5c43aac800cf934b3db1c0c538254fcc06f",
+      "exitCode": 0,
+      "summary": [
+        "test result: ok. 64 passed; 0 failed; 0 ignored; 0 measured; 2141 filtered out; finished in 0.20s"
+      ]
+    },
+    {
+      "name": "32-final-zone-api",
+      "receiptSha256": "1758e31846c4f076ed4fb08afef3cdad4677cc1d6f08631609d4917e7e2a0a9a",
+      "exitCode": 0,
+      "summary": [
+        "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s"
+      ]
+    },
+    {
+      "name": "33-final-pet-api",
+      "receiptSha256": "24af2bcd7f3438528d60c81f8b3102499710377ed5dda6cdab7166c5c57c08d5",
+      "exitCode": 0,
+      "summary": [
+        "test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.25s"
+      ]
+    },
+    {
+      "name": "34-final-broad-zone",
+      "receiptSha256": "ca3eb3a89b6314a6068da919988efdcb1b5abe7aaafeaf1ce43d7ec539380e27",
+      "exitCode": 101,
+      "summary": [
+        "failures:",
+        "failures:",
+        "    zone_native_holy_deva_uses_ranged_summon_attack_against_hostile_monster",
+        "    zone_native_monster_combat_kill_and_drop_are_authoritative",
+        "    zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage",
+        "    zone_native_player_fire_bounce_chains_projectiles_and_damage",
+        "    zone_native_player_poison_cloud_spawns_ground_spell_and_poisons_monsters",
+        "    zone_native_summon_attacks_hostile_monster_for_owner_without_hitting_players",
+        "    zone_native_summon_shinsu_spawns_owned_pet_and_attacks_hostile_monster",
+        "    zone_native_vampire_spider_explodes_on_expiry_and_vampires_nearby_target",
+        "test result: FAILED. 200 passed; 9 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.57s"
+      ]
+    }
+  ],
+  "originalFixturesUnchanged": true,
+  "fullZoneGreen": false,
+  "published": false,
+  "humanAccepted": false,
+  "archivedEntries": [
+    {
+      "path": "raw/01-snake-public.log",
+      "size": 31495,
+      "sha256": "55148a234df069c0a18159c97d419530e1cd62e99a4cfb478a9b55013bf286fb"
+    },
+    {
+      "path": "raw/01-snake-public.log.json",
+      "size": 1583,
+      "sha256": "4d7e6f523b1080e636781795e0344f64cf7f0bd5352971186764ef6666eba53e"
+    },
+    {
+      "path": "raw/02-snake-public.log",
+      "size": 31511,
+      "sha256": "fab5063d61cf9fae6ed8c4b9b66a3233b113f0fa6845f23ae5f788e9b989712f"
+    },
+    {
+      "path": "raw/02-snake-public.log.json",
+      "size": 1583,
+      "sha256": "61039889b8feaec77e570b477ee163485da277597e551f7dcda0b9f80c4f5987"
+    },
+    {
+      "path": "raw/03-snake-public.log",
+      "size": 31019,
+      "sha256": "6450744f9db3cb930811c15be63dbf2ec906b93d8ccb64ed19697a19d6d6bae0"
+    },
+    {
+      "path": "raw/03-snake-public.log.json",
+      "size": 1581,
+      "sha256": "61878db8cb83e4fa051a068b9db7c860ed942486c36d8c0a109fd1bafbf5712b"
+    },
+    {
+      "path": "raw/04-snake-private.log",
+      "size": 4732,
+      "sha256": "713b9febbb5eb285cbb53ec2c28f789a1980911f15a2985f85e4427c2ffda195"
+    },
+    {
+      "path": "raw/04-snake-private.log.json",
+      "size": 1740,
+      "sha256": "126038c7aac84326d283d404f686891eed25d01453ceb2bd5fef2ffa3230ee9e"
+    },
+    {
+      "path": "raw/05-snake-private.log",
+      "size": 40092,
+      "sha256": "e567172ac2ad8e78c7fca6bc7f475e61225ef7c1daa2c53fb7a1cf321222ca96"
+    },
+    {
+      "path": "raw/05-snake-private.log.json",
+      "size": 1740,
+      "sha256": "205687a4ea21b7e9b755e119fedcc70edc8de403992f1000c89d860203d8f8fe"
+    },
+    {
+      "path": "raw/06-snake-public.log",
+      "size": 31778,
+      "sha256": "4962ec58a42f54b183c82d900a03c1d6d286d3e112dbdebdb432d989293c006b"
+    },
+    {
+      "path": "raw/06-snake-public.log.json",
+      "size": 1736,
+      "sha256": "379a8b364b91cbb279025b58b58ba56afbcd70a59a2c951c0896cfdf6f4b7550"
+    },
+    {
+      "path": "raw/07-snake-private.log",
+      "size": 40249,
+      "sha256": "ff3152bfd42d5f2e7a05404253ac2fc03d7e84f9804dcc0a97162b727a940cd5"
+    },
+    {
+      "path": "raw/07-snake-private.log.json",
+      "size": 1740,
+      "sha256": "933ab594f2705213a47bed501931afbcfdceb7b6510735839593fec2a777421d"
+    },
+    {
+      "path": "raw/08-snake-public.log",
+      "size": 32125,
+      "sha256": "9fbd366d8e49922c13bd54744f346eae06693fcd7f6f2fc5ebc0b8bfd4160b29"
+    },
+    {
+      "path": "raw/08-snake-public.log.json",
+      "size": 1736,
+      "sha256": "719a01908e21ad5e0dff36d40583d9c9937d9f183f53b0c0d051948897060fdf"
+    },
+    {
+      "path": "raw/09-snake-public.log",
+      "size": 32350,
+      "sha256": "285f5dc6f6e5e9bc40f258e7bcdf89666d2fd765c7e328ad28f5bf4fb34fa1f2"
+    },
+    {
+      "path": "raw/09-snake-public.log.json",
+      "size": 1736,
+      "sha256": "e185758df81da2d233e5e5976005d64fb53703a730a0db15f624a0cf8b4eb41f"
+    },
+    {
+      "path": "raw/10-snake-public.log",
+      "size": 32250,
+      "sha256": "50c213bfe759ee35fc8f3974ffa5f5ff3f6835a35b404652fe53f6c9c5beda47"
+    },
+    {
+      "path": "raw/10-snake-public.log.json",
+      "size": 1736,
+      "sha256": "4f453224105b617db7d55e1296a03da33d1263d7494d9483f60b06a13f281e80"
+    },
+    {
+      "path": "raw/11-snake-private.log",
+      "size": 39501,
+      "sha256": "a8f24f14af0e246ce39ec75fd59372d648b394d92d43bca60073e18de30358b7"
+    },
+    {
+      "path": "raw/11-snake-private.log.json",
+      "size": 1738,
+      "sha256": "de447e61df7537e477e0c695466e7c91884311043124054c985c3e16844da093"
+    },
+    {
+      "path": "raw/12-snake-private.log",
+      "size": 5955,
+      "sha256": "8bb54c7157321e5dadeb0fe32f7b29a7da776cde5e5d71977e9c2358fe6f4d1f"
+    },
+    {
+      "path": "raw/12-snake-private.log.json",
+      "size": 1740,
+      "sha256": "47cdd38c78d4942b3349ff647e2abdfb85f56a873b35814527f3890cec931f57"
+    },
+    {
+      "path": "raw/13-snake-public.log",
+      "size": 4799,
+      "sha256": "2e5cd76ac0570895cdd9b014972b81ac96aba217ca0a155905fb9e03312458d8"
+    },
+    {
+      "path": "raw/13-snake-public.log.json",
+      "size": 1736,
+      "sha256": "bd5e99948f82744043036a91d61e0a782083acf7bd3b2a1448408b448187ac9f"
+    },
+    {
+      "path": "raw/14-scoped-rustfmt-check.log",
+      "size": 83821,
+      "sha256": "3b6e7ead341c7debb5c2ae88ee9120bb9aa86f5fffc204ed75aa1fc5ef15cd12"
+    },
+    {
+      "path": "raw/15-snake-public.log",
+      "size": 31333,
+      "sha256": "46f269835ced15ff520760e22483770b41d931000bf5edc034a960c92db01a23"
+    },
+    {
+      "path": "raw/15-snake-public.log.json",
+      "size": 1734,
+      "sha256": "2d1bae2b8f0108bea0dfe14df038e7ede8fd9e7bbcbf7897a72f187b2013845c"
+    },
+    {
+      "path": "raw/16-snake-private.log",
+      "size": 39976,
+      "sha256": "899b249839dc3876e781af4096253577aae742bda465df6f9414d1d9856883bf"
+    },
+    {
+      "path": "raw/16-snake-private.log.json",
+      "size": 1738,
+      "sha256": "c4084342ee4db419caba4160b60c6582d66e88f42e41005b1bc8bde20d65dac3"
+    },
+    {
+      "path": "raw/17-owned-private.log",
+      "size": 44426,
+      "sha256": "369c2d162e12433ad5d3325a65fb11164d16a2220e5d0dab376a76a19123f4c4"
+    },
+    {
+      "path": "raw/17-owned-private.log.json",
+      "size": 1709,
+      "sha256": "9300d1e2e199c2485f9bf7aa94717025768cacc2dd750702c95cd34e032a90dd"
+    },
+    {
+      "path": "raw/18-pet-public.log",
+      "size": 32110,
+      "sha256": "ed450d195e666860c962137b792c084529b5ab9d847103a5d669eeadf5d3aec1"
+    },
+    {
+      "path": "raw/18-pet-public.log.json",
+      "size": 1697,
+      "sha256": "b4584d7af5b51268f68c9c580a7b68e211c7b167c26c430a9c1b1b38faf6001b"
+    },
+    {
+      "path": "raw/19-pet-public.log",
+      "size": 34435,
+      "sha256": "b61dea844df2711daf63ff35f13f0b7bccdfded26b6dbde4bda598dafa9c7905"
+    },
+    {
+      "path": "raw/19-pet-public.log.json",
+      "size": 1735,
+      "sha256": "82f837d88a79b21b9ec1a3d48ce103b50fc0bb8f0e9dbc904f124cf859d70a36"
+    },
+    {
+      "path": "raw/20-experience-adjacent.log",
+      "size": 39593,
+      "sha256": "bd56bcb878bda2e52d032fb6460bee0e5b2c5c7741a49dbe79c2c2f3981758c2"
+    },
+    {
+      "path": "raw/20-experience-adjacent.log.json",
+      "size": 1720,
+      "sha256": "1cb858ac2ae9aa5e44767a7b1a66a97c981dd7978c483f24f1a259dbd650f90f"
+    },
+    {
+      "path": "raw/21-snake-adjacent.log",
+      "size": 31210,
+      "sha256": "cbfd3e4a077fc8b08ad528e9366fe40aaea09d2f0636a104915464752f13c7f6"
+    },
+    {
+      "path": "raw/21-snake-adjacent.log.json",
+      "size": 1976,
+      "sha256": "df154fe0a20293c5f26f344ff7424f529315da05b6d3fe04a85c5dfadd13425b"
+    },
+    {
+      "path": "raw/22-scoped-rustfmt-final.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/23-worker-handoff.json",
+      "size": 8834,
+      "sha256": "462c8ac60dc9aa38c3ded7ed6e93288cc092f8b3d4601a98522da3eba3155e85"
+    },
+    {
+      "path": "raw/24-experience-adjacent.log",
+      "size": 39012,
+      "sha256": "cabeb172d6dee376ee45573eeaf7bd3bfc9697392539b41581d3bb117287db1b"
+    },
+    {
+      "path": "raw/24-experience-adjacent.log.json",
+      "size": 1718,
+      "sha256": "07897b9ad52d057897836b6a7d37b9abf7f7893770d0389f6e9e7138d6dcc2aa"
+    },
+    {
+      "path": "raw/25-final-private.log",
+      "size": 46796,
+      "sha256": "95653a5aea411963abd4c1e79f5cdc4c1fd4bf9a2a00bea49e2ef942d56a85b0"
+    },
+    {
+      "path": "raw/25-final-private.log.json",
+      "size": 2148,
+      "sha256": "0ecfc9fd61d3fc2e18c6f0bc1a9eb16043e5364b4a8db11297756891855736a4"
+    },
+    {
+      "path": "raw/26-final-zone-api.log",
+      "size": 31333,
+      "sha256": "2baa6d6cd42b43b2c0a0efadadbff14308e067b168b734ec24a228ae5833fefa"
+    },
+    {
+      "path": "raw/26-final-zone-api.log.json",
+      "size": 2103,
+      "sha256": "07910a93082a80c0830f7975cd96bc9101feaea3d216b019254c8dc5adfa7b1d"
+    },
+    {
+      "path": "raw/27-final-pet-api.log",
+      "size": 34434,
+      "sha256": "96ec66e7780e32355f245f58be19ccb6f7bbf5868206f0cc160fe6f84e11f767"
+    },
+    {
+      "path": "raw/27-final-pet-api.log.json",
+      "size": 2107,
+      "sha256": "d0be0e9933a8fa90b5e317d2304e2e357d6171513d8a79d7024030674d96d484"
+    },
+    {
+      "path": "raw/28-final-broad-zone.log",
+      "size": 51350,
+      "sha256": "fe57e33f9005d7b2f5c44902dc937e42f437ba20363568e06d7c07c740acb60e"
+    },
+    {
+      "path": "raw/28-final-broad-zone.log.json",
+      "size": 2760,
+      "sha256": "2873a9d09cd1ca602665705548d927637541cd2a8ad740037b9396d0a19e6287"
+    },
+    {
+      "path": "raw/29-root-format.log",
+      "size": 1759896,
+      "sha256": "ba813b06d5181d6628e52ddcba0d332e8dade9fe3c0ec8e7dc79c52498b53d69"
+    },
+    {
+      "path": "raw/30-root-scoped-format.log",
+      "size": 16377,
+      "sha256": "7ca48da3a5d803bb32579e7c18cdafe467f94bc2392636305716b1080596357e"
+    },
+    {
+      "path": "raw/31-final-private.log",
+      "size": 46918,
+      "sha256": "5fb1845f1a8657de43f691dbfeceec77177597e9569b32020326b4b56cdb72a5"
+    },
+    {
+      "path": "raw/31-final-private.log.json",
+      "size": 2148,
+      "sha256": "832a783e75f2956b2cf43d60b444b5c43aac800cf934b3db1c0c538254fcc06f"
+    },
+    {
+      "path": "raw/32-final-zone-api.log",
+      "size": 31333,
+      "sha256": "9f5c1fe91b1fe0a17a15357e9f2b9b0a8bdba046d1f4cb6f8351b28137ede4df"
+    },
+    {
+      "path": "raw/32-final-zone-api.log.json",
+      "size": 2103,
+      "sha256": "1758e31846c4f076ed4fb08afef3cdad4677cc1d6f08631609d4917e7e2a0a9a"
+    },
+    {
+      "path": "raw/33-final-pet-api.log",
+      "size": 34434,
+      "sha256": "feb5f2a18b9bc75b86e18e204713be9a8d65993506b2383e8d68382cbcd7a4cb"
+    },
+    {
+      "path": "raw/33-final-pet-api.log.json",
+      "size": 2107,
+      "sha256": "24af2bcd7f3438528d60c81f8b3102499710377ed5dda6cdab7166c5c57c08d5"
+    },
+    {
+      "path": "raw/34-final-broad-zone.log",
+      "size": 51350,
+      "sha256": "bcfb680b537e17fe65a8293c144f38c5dac47d5addaf913b3ec2158a5c93f749"
+    },
+    {
+      "path": "raw/34-final-broad-zone.log.json",
+      "size": 2760,
+      "sha256": "ca3eb3a89b6314a6068da919988efdcb1b5abe7aaafeaf1ce43d7ec539380e27"
+    },
+    {
+      "path": "raw/Run-RootFinalChecks-25.ps1",
+      "size": 4095,
+      "sha256": "8883ea897f6ce88eb683415874a6c735a8d285955c05bc17165c1fe64a765c5c"
+    },
+    {
+      "path": "raw/Run-RootFinalChecks-31.ps1",
+      "size": 4095,
+      "sha256": "d5f17e515fe4fa7afd9ecf61f81f83377d30ee3fb46455e3c9751bbe07e385bb"
+    },
+    {
+      "path": "raw/Run-SnakeMasterChecks.ps1",
+      "size": 3452,
+      "sha256": "ddb64139c7b1d53f77b640f29c907e1fa02e53843815aa321f66e69b05bb9c2f"
+    },
+    {
+      "path": "source/apps/simulation/src/runtime/zone/runtime.rs",
+      "size": 686611,
+      "sha256": "95b66c20b55958bc3a460fa0f036267e9985335ed0e680937936452ea64d8e66"
+    },
+    {
+      "path": "source/apps/simulation/src/runtime/zone/runtime/owned_pet_combat.rs",
+      "size": 199286,
+      "sha256": "5d233547f96a892ef7e10e03895b4c256a832ebdef187558392e1a2b3db8c800"
+    },
+    {
+      "path": "source/apps/simulation/src/runtime/zone/runtime/snake_totem_ai.rs",
+      "size": 15416,
+      "sha256": "0e03432880222ef045d3a58b1f41bd74e6201d6cead6e6bec6e5953bae686ade"
+    },
+    {
+      "path": "source/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "size": 25007,
+      "sha256": "8c81d8da5c7ace354d360540bbfaf967e66ea2254933b883ac681f243b1caa8c"
+    },
+    {
+      "path": "source/apps/simulation/src/runtime/zone/runtime/owned_pet_immediate_master_tests.rs",
+      "size": 23122,
+      "sha256": "b2d1b7d61d59ab0e19576d12b6a13983501ee45cc9a0a6eedb5fe0fc659a447c"
+    },
+    {
+      "path": "source/apps/simulation/tests/shared_snake_master_lifecycle.rs",
+      "size": 15157,
+      "sha256": "cfaacaf5f928b1ac0037aed7f63f5c3c1dcf30f4e1a91e73bf90121289cf2612"
+    },
+    {
+      "path": "source/apps/simulation/tests/shared_zone.rs",
+      "size": 472078,
+      "sha256": "a0ecdff3eef071174e72adf285321661f96fdaff538eda091564b82c7859781c"
+    },
+    {
+      "path": "source/apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "size": 91437,
+      "sha256": "1fd402761e144b98654a4d4c7621bd12aa655b90ed2ca8befacc710e52ea887f"
+    },
+    {
+      "path": "source/repository/.github/workflows/gateway-release.yml",
+      "size": 7489,
+      "sha256": "a61ea689c904031cfed631f97a1647a3db04cd9f8e00c66ab996ceffbbe4ba1c"
+    },
+    {
+      "path": "crystal-original/Server/MirObjects/Monsters/CharmedSnake.cs",
+      "size": 8011,
+      "sha256": "365e00fe2cc911337dc5be94d0ea6fd20aab55a0dcd8fde30565b2b833efc267"
+    },
+    {
+      "path": "crystal-original/Server/MirObjects/Monsters/SnakeTotem.cs",
+      "size": 6156,
+      "sha256": "d4f9c7005cab867759f162415d8648391b4f9a51b32385f66fb5b7b206fbacd5"
+    },
+    {
+      "path": "crystal-original/Server/MirObjects/MonsterObject.cs",
+      "size": 147722,
+      "sha256": "2cc4e673c589ad57452b4682c3bcb155b4b6b3027b1d3ee52a18a5ae1b7df98e"
+    },
+    {
+      "path": "crystal-original/Server/MirObjects/MapObject.cs",
+      "size": 35194,
+      "sha256": "f465ee5fe84bc9fe6ab3ef9dd0c138c8c6b1dee83d1ea5b007cc5cb3afe53f7f"
+    },
+    {
+      "path": "baseline/16-zone-adjacent.log",
+      "size": 73269,
+      "sha256": "01648efb76029a6e6245cf2236df9745acc281c6658894fbd21359a1d4254bd5"
+    },
+    {
+      "path": "baseline/16-zone-adjacent.log.json",
+      "size": 1890,
+      "sha256": "5292735c20bc03ee548b36c8021f0ce12f19fbe5584c127b0d94188d39b235ab"
+    },
+    {
+      "path": "baseline/17-zone-baseline.log",
+      "size": 73273,
+      "sha256": "f2582c419c54820e4c3949550c540dedd0c42599a65b3841a3d005e736bb4868"
+    },
+    {
+      "path": "baseline/17-zone-baseline.log.json",
+      "size": 1214,
+      "sha256": "6d45baa10c1f08f5db5610fb40d02e03bfa39ed8cb3fb81b978664d362abdcbc"
+    },
+    {
+      "path": "source/actual-working-diff.patch",
+      "size": 28816,
+      "sha256": "7813fc8fdaefcc17cc34615f5a1e95b9bf4be3f95985ac3056986b7761056798"
+    }
+  ],
+  "archiveBytes": 782337,
+  "archiveSha256": "bb395eced0270531b236dcc8d74179b9542d4c4b2a582d6b8d3d49c239735850"
+}

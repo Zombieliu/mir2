@@ -7,7 +7,10 @@
       "mapFileName": "D022",
       "monster": "Dung",
       "monsterIndex": 242,
-      "position": { "x": 340, "y": 355 },
+      "position": {
+        "x": 340,
+        "y": 355
+      },
       "count": 3,
       "spread": 3,
       "delayMinutes": 0,
@@ -19,7 +22,10 @@
       "mapFileName": "D022",
       "monster": "WoomaSoldier",
       "monsterIndex": 244,
-      "position": { "x": 370, "y": 340 },
+      "position": {
+        "x": 370,
+        "y": 340
+      },
       "count": 3,
       "spread": 3,
       "delayMinutes": 0,
@@ -32,7 +38,10 @@
       "mapFileName": "D022",
       "monster": "WoomaFighter",
       "monsterIndex": 246,
-      "position": { "x": 300, "y": 385 },
+      "position": {
+        "x": 300,
+        "y": 385
+      },
       "count": 3,
       "spread": 3,
       "delayMinutes": 0,
@@ -42,34 +51,92 @@
       "sourceNote": "V2-only three-monster 120-HP WoomaFighter foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
     },
     {
-      "mapFileName": "D022", "monster": "Dung", "monsterIndex": 242,
-      "position": { "x": 360, "y": 355 }, "count": 3, "spread": 3,
-      "delayMinutes": 0, "respawnIndex": 10022, "sourceQuestId": 2110019
+      "mapFileName": "D022",
+      "monster": "Dung",
+      "monsterIndex": 242,
+      "position": {
+        "x": 360,
+        "y": 355
+      },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10022,
+      "sourceQuestId": 2110019
     },
     {
-      "mapFileName": "D022", "monster": "Dung", "monsterIndex": 242,
-      "position": { "x": 335, "y": 380 }, "count": 3, "spread": 3,
-      "delayMinutes": 0, "respawnIndex": 10023, "sourceQuestId": 2110019
+      "mapFileName": "D022",
+      "monster": "Dung",
+      "monsterIndex": 242,
+      "position": {
+        "x": 335,
+        "y": 380
+      },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10023,
+      "sourceQuestId": 2110019
     },
     {
-      "mapFileName": "D022", "monster": "WoomaSoldier", "monsterIndex": 244,
-      "position": { "x": 320, "y": 395 }, "count": 3, "spread": 3,
-      "delayMinutes": 0, "respawnIndex": 10024, "maxHp": 120, "sourceQuestId": 2110020
+      "mapFileName": "D022",
+      "monster": "WoomaSoldier",
+      "monsterIndex": 244,
+      "position": {
+        "x": 320,
+        "y": 395
+      },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10024,
+      "maxHp": 120,
+      "sourceQuestId": 2110020
     },
     {
-      "mapFileName": "D022", "monster": "WoomaSoldier", "monsterIndex": 244,
-      "position": { "x": 370, "y": 325 }, "count": 3, "spread": 3,
-      "delayMinutes": 0, "respawnIndex": 10025, "maxHp": 120, "sourceQuestId": 2110020
+      "mapFileName": "D022",
+      "monster": "WoomaSoldier",
+      "monsterIndex": 244,
+      "position": {
+        "x": 370,
+        "y": 325
+      },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10025,
+      "maxHp": 120,
+      "sourceQuestId": 2110020
     },
     {
-      "mapFileName": "D022", "monster": "WoomaFighter", "monsterIndex": 246,
-      "position": { "x": 280, "y": 340 }, "count": 3, "spread": 3,
-      "delayMinutes": 0, "respawnIndex": 10026, "maxHp": 120, "sourceQuestId": 2110021
+      "mapFileName": "D022",
+      "monster": "WoomaFighter",
+      "monsterIndex": 246,
+      "position": {
+        "x": 280,
+        "y": 340
+      },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10026,
+      "maxHp": 120,
+      "sourceQuestId": 2110021
     },
     {
-      "mapFileName": "D022", "monster": "WoomaFighter", "monsterIndex": 246,
-      "position": { "x": 300, "y": 330 }, "count": 3, "spread": 3,
-      "delayMinutes": 0, "respawnIndex": 10027, "maxHp": 120, "sourceQuestId": 2110021
+      "mapFileName": "D022",
+      "monster": "WoomaFighter",
+      "monsterIndex": 246,
+      "position": {
+        "x": 300,
+        "y": 330
+      },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10027,
+      "maxHp": 120,
+      "sourceQuestId": 2110021
     }
   ],
   "quests": [
@@ -101,16 +168,21 @@
       "rewards": {
         "common": [
           {
-            "count": 1,
-            "name": "WoodenSword"
-          },
-          {
             "count": 10,
             "name": "(HP)DrugSmall"
           }
         ],
-        "warrior": [],
+        "warrior": [
+          {
+            "count": 1,
+            "name": "WoodenSword"
+          }
+        ],
         "wizard": [
+          {
+            "count": 1,
+            "name": "WoodenSword"
+          },
           {
             "count": 10,
             "name": "(MP)DrugSmall"
@@ -118,8 +190,24 @@
         ],
         "taoist": [
           {
+            "count": 1,
+            "name": "WoodenSword"
+          },
+          {
             "count": 10,
             "name": "(MP)DrugSmall"
+          }
+        ],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "HoaSword"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "WoodenBow"
           }
         ]
       }
@@ -153,7 +241,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -212,6 +302,18 @@
             "count": 10,
             "name": "(MP)DrugSmall"
           }
+        ],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "FatalSword"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "Focus"
+          }
         ]
       }
     },
@@ -254,6 +356,14 @@
             "taoist": [
               "Healing learned",
               "Healing cast accepted on self"
+            ],
+            "assassin": [
+              "FatalSword learned",
+              "normal attack landed with FatalSword learned"
+            ],
+            "archer": [
+              "Focus learned",
+              "normal ranged attack landed with Focus learned"
             ]
           }
         }
@@ -262,7 +372,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -304,7 +416,9 @@
             "count": 1,
             "name": "SpiritSword"
           }
-        ]
+        ],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -355,6 +469,22 @@
             "count": 20,
             "name": "(MP)DrugSmall"
           }
+        ],
+        "assassin": [
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "StraightShot"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
         ]
       }
     },
@@ -398,7 +528,9 @@
             "count": 20,
             "name": "RedPoison"
           }
-        ]
+        ],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -442,6 +574,14 @@
             "taoist": [
               "SpiritSword learned",
               "normal attack landed with SpiritSword learned"
+            ],
+            "assassin": [
+              "DoubleSlash learned",
+              "DoubleSlash attack damage committed"
+            ],
+            "archer": [
+              "DoubleShot learned",
+              "DoubleShot damage committed"
             ]
           }
         }
@@ -450,7 +590,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -501,7 +643,9 @@
             "count": 20,
             "name": "(MP)DrugSmall"
           }
-        ]
+        ],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -531,7 +675,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -572,6 +718,14 @@
             "taoist": [
               "SoulFireBall learned",
               "SoulFireBall damage committed with material consumption"
+            ],
+            "assassin": [
+              "DoubleSlash attack damage committed",
+              "legal reposition between attacks"
+            ],
+            "archer": [
+              "DoubleShot damage committed",
+              "legal reposition between attacks"
             ]
           }
         }
@@ -585,7 +739,9 @@
             "count": 1,
             "name": "SummonSkeleton"
           }
-        ]
+        ],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -626,6 +782,12 @@
               "SummonSkeleton learned",
               "owned skeleton exists in authoritative Zone",
               "owned skeleton damage committed"
+            ],
+            "assassin": [
+              "DoubleSlash attack damage committed"
+            ],
+            "archer": [
+              "StraightShot damage committed"
             ]
           }
         }
@@ -634,7 +796,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -703,7 +867,9 @@
             "count": 30,
             "name": "RedPoison"
           }
-        ]
+        ],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -744,7 +910,27 @@
           }
         ],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "Haste"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "Meditation"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ]
       }
     },
     {
@@ -785,6 +971,14 @@
             "taoist": [
               "Poisoning learned",
               "owned poison effect committed with material consumption"
+            ],
+            "assassin": [
+              "DoubleSlash attack damage committed",
+              "legal reposition between attacks"
+            ],
+            "archer": [
+              "DoubleShot damage committed",
+              "legal reposition between attacks"
             ]
           }
         }
@@ -798,7 +992,9 @@
             "name": "FireWall"
           }
         ],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -839,6 +1035,12 @@
             "taoist": [
               "owned skeleton damage committed",
               "SoulFireBall damage committed"
+            ],
+            "assassin": [
+              "DoubleSlash attack damage committed"
+            ],
+            "archer": [
+              "StraightShot damage committed"
             ]
           }
         }
@@ -847,7 +1049,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -925,6 +1129,26 @@
             "count": 100,
             "name": "Amulet"
           }
+        ],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "FlashDash"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "ExplosiveTrap"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
         ]
       }
     },
@@ -969,6 +1193,14 @@
               "SummonSkeleton learned",
               "level-eligible weapon equipped",
               "eligible Amulet equipped and legal poison available in bag for re-equip between casts"
+            ],
+            "assassin": [
+              "DoubleSlash learned",
+              "level-eligible weapon equipped"
+            ],
+            "archer": [
+              "StraightShot learned",
+              "level-eligible weapon equipped"
             ]
           }
         }
@@ -977,7 +1209,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -1007,7 +1241,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -1042,7 +1278,9 @@
         ],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -1086,6 +1324,15 @@
               "owned skeleton damage committed",
               "SoulFireBall damage committed",
               "owned poison effect committed"
+            ],
+            "assassin": [
+              "DoubleSlash attack damage committed",
+              "legal reposition between attacks"
+            ],
+            "archer": [
+              "DoubleShot damage committed",
+              "StraightShot damage committed",
+              "legal reposition between attacks"
             ]
           }
         }
@@ -1094,7 +1341,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     },
     {
@@ -1126,7 +1375,9 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [],
+        "archer": []
       }
     }
   ],
@@ -1173,6 +1424,34 @@
             "count": 100,
             "name": "Amulet"
           }
+        ],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "SharpSabre"
+          },
+          {
+            "count": 1,
+            "name": "DoubleSlash"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "CompoundBow"
+          },
+          {
+            "count": 1,
+            "name": "DoubleShot"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
         ]
       }
     },
@@ -1201,6 +1480,18 @@
           {
             "count": 1,
             "name": "KeenKrissSword"
+          }
+        ],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "IronBlades"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "LongBow"
           }
         ]
       }
@@ -1246,6 +1537,28 @@
             "count": 1,
             "name": "SolidSerpentSword"
           }
+        ],
+        "assassin": [
+          {
+            "count": 1,
+            "maleItem": "SpiritRobe(M)",
+            "femaleItem": "SpiritRobe(F)"
+          },
+          {
+            "count": 1,
+            "name": "BlackIronCrowSwords"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "maleItem": "LeatherArmour(M)",
+            "femaleItem": "LeatherArmour(F)"
+          },
+          {
+            "count": 1,
+            "name": "ToughLongBow"
+          }
         ]
       }
     },
@@ -1260,7 +1573,31 @@
         "common": [],
         "warrior": [],
         "wizard": [],
-        "taoist": []
+        "taoist": [],
+        "assassin": [
+          {
+            "count": 1,
+            "name": "BladesOfDarkness"
+          },
+          {
+            "count": 1,
+            "name": "HeavenlySword"
+          }
+        ],
+        "archer": [
+          {
+            "count": 1,
+            "name": "FiendBow"
+          },
+          {
+            "count": 1,
+            "name": "BackStep"
+          },
+          {
+            "count": 1,
+            "name": "Concentration"
+          }
+        ]
       }
     }
   ]

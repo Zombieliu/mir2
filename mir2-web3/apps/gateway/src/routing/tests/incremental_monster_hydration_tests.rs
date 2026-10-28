@@ -1,9 +1,6 @@
 use super::*;
 
-fn shared_spitting_spider_at(
-    state: &SharedInProcessZoneState,
-    position: &Point,
-) -> Option<u32> {
+fn shared_spitting_spider_at(state: &SharedInProcessZoneState, position: &Point) -> Option<u32> {
     state
         .map_layer(Some("0"))
         .and_then(|map| {
@@ -122,10 +119,7 @@ fn async_walk_into_aoi_hydrates_actual_distant_manifest_spawn_on_serialized_drai
         Some(outside_aoi.clone())
     );
     assert_eq!(
-        shared_spitting_spider_at(
-            &shared.lock().expect("shared state should lock"),
-            &target,
-        ),
+        shared_spitting_spider_at(&shared.lock().expect("shared state should lock"), &target,),
         None,
         "the distant slot must begin dormant instead of being assumed from a seed"
     );
@@ -163,16 +157,15 @@ fn async_walk_into_aoi_hydrates_actual_distant_manifest_spawn_on_serialized_drai
         "ordinary movement must enter the manifest slot AOI; target={target:?}, outside={outside_aoi:?}, immediate_position={immediate_position:?}, immediate_packets={immediate_packets}"
     );
     assert_eq!(
-        shared_spitting_spider_at(
-            &shared.lock().expect("shared state should lock"),
-            &target,
-        ),
+        shared_spitting_spider_at(&shared.lock().expect("shared state should lock"), &target,),
         None,
         "the cadence worker cannot hydrate a personal dormant spawn by itself"
     );
 
     let drained = runtime
-        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 1 }))
+        .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive {
+            time: 1,
+        }))
         .expect("the next serialized packet should drain the authoritative movement");
     let spawned = drained.iter().find_map(|packet| match packet {
         ServerPacket::ObjectMonster { info }
@@ -187,10 +180,7 @@ fn async_walk_into_aoi_hydrates_actual_distant_manifest_spawn_on_serialized_drai
         "entering the actual slot's AOI must emit its ObjectMonster on the serialized drain"
     );
     assert_eq!(
-        shared_spitting_spider_at(
-            &shared.lock().expect("shared state should lock"),
-            &target,
-        ),
+        shared_spitting_spider_at(&shared.lock().expect("shared state should lock"), &target,),
         spawned,
         "the emitted monster must also be retained by the shared Zone"
     );

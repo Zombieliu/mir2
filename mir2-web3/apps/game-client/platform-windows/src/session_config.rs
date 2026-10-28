@@ -168,7 +168,8 @@ impl NativeSessionConfig {
         )?;
         config.wallet_auth = select_wallet_auth(
             std::env::var(AUTH_HTTP_URL_ENV).ok(),
-            file.as_ref().and_then(|config| config.auth_http_url.clone()),
+            file.as_ref()
+                .and_then(|config| config.auth_http_url.clone()),
         )?;
         config.reconnect = NativeReconnectConfig::from_env()?;
         if let Some(file) = file {
@@ -327,7 +328,9 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                     }
                     let profile = parse_toml_string(value, "gameplay.quest_guidance")?;
                     if !matches!(profile.as_str(), "crystal" | "newcomer-v1" | "newcomer-v2") {
-                        return Err(format!("{CONFIG_FILE_NAME} unsupported quest guidance {profile}"));
+                        return Err(format!(
+                            "{CONFIG_FILE_NAME} unsupported quest guidance {profile}"
+                        ));
                     }
                     config.quest_guidance = Some(profile);
                 }
@@ -498,6 +501,103 @@ mod tests {
     use super::*;
 
     #[test]
+    fn native_entry_loads_invited_wss_and_keeps_explicit_local_overrides() {
+        const FIXTURE_ENV: &str = "MIR2_NATIVE_CONFIG_TEST_EXPECTED_GATEWAY";
+        const TEST_NAME: &str =
+            "session_config::tests::native_entry_loads_invited_wss_and_keeps_explicit_local_overrides";
+        if let Ok(expected_gateway) = std::env::var(FIXTURE_ENV) {
+            let config = NativeSessionConfig::load(crate::gateway::DEFAULT_GATEWAY_WS_URL)
+                .expect("the normal native entry must load without credentials");
+            assert_eq!(config.gateway_url, expected_gateway);
+            assert_eq!(config.auto_login, None);
+            return;
+        }
+
+        // Separate processes isolate environment and executable/CWD file
+        // precedence without racing other tests or opening a native window.
+        struct FixtureRoot(PathBuf);
+        impl Drop for FixtureRoot {
+            fn drop(&mut self) {
+                assert_eq!(self.0.parent(), Some(std::env::temp_dir().as_path()));
+                let _ = fs::remove_dir_all(&self.0);
+            }
+        }
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let fixture = FixtureRoot(std::env::temp_dir().join(format!(
+            "mir2-native-entry-config-{}-{nonce}",
+            std::process::id()
+        )));
+        fs::create_dir(&fixture.0).unwrap();
+        let bin_dir = fixture.0.join("bin");
+        let cwd_dir = fixture.0.join("cwd");
+        fs::create_dir(&bin_dir).unwrap();
+        fs::create_dir(&cwd_dir).unwrap();
+        let test_exe = bin_dir.join("native-config-test.exe");
+        let source_exe = std::env::current_exe().unwrap();
+        fs::hard_link(&source_exe, &test_exe)
+            .or_else(|_| fs::copy(&source_exe, &test_exe).map(|_| ()))
+            .unwrap();
+        let file_config = |url: &str| format!("[server]\ngateway_ws_url = '{url}'\n");
+
+        for (scenario, expected_gateway, environment_gateway) in [
+            ("default", "wss://165.154.65.136.sslip.io/playtest/ws", None),
+            ("cwd", "ws://127.0.0.1:19010/ws", None),
+            ("sibling", "ws://127.0.0.1:19110/ws", None),
+            (
+                "environment",
+                "ws://127.0.0.1:19210/ws",
+                Some("ws://127.0.0.1:19210/ws"),
+            ),
+        ] {
+            if scenario == "cwd" {
+                fs::write(
+                    cwd_dir.join(CONFIG_FILE_NAME),
+                    file_config("ws://127.0.0.1:19010/ws"),
+                )
+                .unwrap();
+            } else if scenario == "sibling" {
+                fs::write(
+                    bin_dir.join(CONFIG_FILE_NAME),
+                    file_config("ws://127.0.0.1:19110/ws"),
+                )
+                .unwrap();
+            }
+            let mut command = std::process::Command::new(&test_exe);
+            command
+                .args(["--exact", TEST_NAME, "--nocapture"])
+                .current_dir(&cwd_dir)
+                .env(FIXTURE_ENV, expected_gateway);
+            for variable in [
+                ACCOUNT_ENV,
+                PASSWORD_ENV,
+                CHARACTER_INDEX_ENV,
+                GATEWAY_URL_ENV,
+                AUTH_HTTP_URL_ENV,
+                RESUME_DEADLINE_MS_ENV,
+                RESUME_INITIAL_BACKOFF_MS_ENV,
+                RESUME_MAX_BACKOFF_MS_ENV,
+                RESUME_JITTER_PERCENT_ENV,
+                RESUME_COMMAND_BATCH_ENV,
+            ] {
+                command.env_remove(variable);
+            }
+            if let Some(url) = environment_gateway {
+                command.env(GATEWAY_URL_ENV, url);
+            }
+            let output = command.output().expect("isolated config test process");
+            assert!(
+                output.status.success(),
+                "{scenario} config failed:\n{}\n{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+    }
+
+    #[test]
     fn missing_credentials_open_the_interactive_login_flow() {
         let config =
             NativeSessionConfig::from_values(None, None, None, None, "ws://127.0.0.1:7110/ws")
@@ -508,7 +608,10 @@ mod tests {
         assert_eq!(config.wallet_auth, None);
         assert_eq!(config.window_width, 1024);
         assert_eq!(config.window_height, 768);
-        assert!(config.force_daylight, "development launches default to daylight");
+        assert!(
+            config.force_daylight,
+            "development launches default to daylight"
+        );
     }
 
     #[test]
@@ -648,7 +751,12 @@ force_daylight = false
         assert_eq!(parsed.window_width, Some(1024));
         assert_eq!(parsed.window_height, Some(768));
         assert_eq!(parsed.force_daylight, Some(false));
-        assert_eq!(parse_client_toml("[display]\nforce_daylight = true").unwrap().force_daylight, Some(true));
+        assert_eq!(
+            parse_client_toml("[display]\nforce_daylight = true")
+                .unwrap()
+                .force_daylight,
+            Some(true)
+        );
         assert!(parse_client_toml("[display]\nforce_daylight = 'false'").is_err());
         validate_gateway_url(parsed.gateway_ws_url.as_deref().unwrap()).unwrap();
     }
@@ -700,14 +808,22 @@ id = "player"
         assert_eq!(select_wallet_auth(None, None).unwrap(), None);
         let parsed = parse_client_toml("[server]\nauth_http_url = 'https://login.example.com'")
             .expect("authentication origin is public configuration, not a persisted credential");
-        let config = select_wallet_auth(None, parsed.auth_http_url.clone()).unwrap().unwrap();
+        let config = select_wallet_auth(None, parsed.auth_http_url.clone())
+            .unwrap()
+            .unwrap();
         assert_eq!(config.origin, "https://login.example.com");
-        let overridden = select_wallet_auth(Some("http://127.0.0.1:3000".into()), parsed.auth_http_url)
-            .unwrap().unwrap();
+        let overridden =
+            select_wallet_auth(Some("http://127.0.0.1:3000".into()), parsed.auth_http_url)
+                .unwrap()
+                .unwrap();
         assert_eq!(overridden.origin, "http://127.0.0.1:3000");
         assert!(select_wallet_auth(Some(" ".into()), None).is_err());
-        assert!(parse_client_toml("[server]\nauth_http_url = 'http://public.example.com'").is_err());
-        assert!(parse_client_toml("[server]\nauth_http_url = 'https://login.example.com/api'").is_err());
+        assert!(
+            parse_client_toml("[server]\nauth_http_url = 'http://public.example.com'").is_err()
+        );
+        assert!(
+            parse_client_toml("[server]\nauth_http_url = 'https://login.example.com/api'").is_err()
+        );
         for secret in ["intent_token", "session_token", "wallet_credential"] {
             let error = parse_client_toml(&format!("[server]\n{secret} = 'do-not-store'"))
                 .expect_err("wallet login secrets must remain memory-only");

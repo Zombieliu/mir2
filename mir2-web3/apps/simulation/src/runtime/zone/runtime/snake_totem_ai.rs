@@ -1,5 +1,5 @@
 //! SnakeTotem62's production and life-bound hostile monster aggro.
-use super::entity_combat::EntityTargetPurpose;
+use super::entity_combat::{EntityTargetPurpose, ZoneCombatEntityRef};
 use super::*;
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(crate) struct SnakeTotemState {
@@ -25,6 +25,51 @@ pub(in crate::runtime::zone) fn initialize_snake_totem(
     m.direction = MirDirection::Up;
 }
 impl ZoneRuntime {
+    /// CharmedSnake.Die calls base.Die before IsAttackTarget, so this burst
+    /// sees Master=null. This is only the existing unowned-Monster burst path;
+    /// it does not grant Human/pet PvP or use a causal Human for permission.
+    pub(super) fn charmed_snake_death_explosion_can_attack(
+        &self,
+        source: &ZoneCombatEntityRef,
+        target: &ZoneCombatEntityRef,
+        now: u64,
+    ) -> bool {
+        let (
+            ZoneCombatEntityRef::Monster {
+                object_id: source_id,
+                ..
+            },
+            ZoneCombatEntityRef::Monster {
+                object_id: target_id,
+                ..
+            },
+        ) = (source, target)
+        else {
+            return false;
+        };
+        if source_id == target_id
+            || !self.entity_ref_exists(source, true)
+            || !self.entity_ref_exists(target, false)
+        {
+            return false;
+        }
+        let snake = &self.native_monsters[source_id];
+        let victim = &self.native_monsters[target_id];
+        if snake.ai != 63
+            || snake.name != "CharmedSnake"
+            || !snake.dead
+            || snake.hp != 0
+            || victim.master_object_id != 0
+            || victim.owner_session_id.is_some()
+        {
+            return false;
+        }
+        // MonsterObject.IsAttackTarget(MonsterObject): when both Masters are
+        // null, neither a Totem threat nor the Human's modes/Pets allow a hit.
+        // Hallucination/Rage retain their original strict active deadline.
+        now < snake.hallucination_until_ms || self.owned_monster_rage_active(*source_id, now)
+    }
+
     /// Called before removal/replacement while the retiring totem still exists.
     /// Tag the current child instances, never rescan the reused parent id later.
     pub(super) fn retire_shared_snake_totem_children(&mut self, id: u32) {
@@ -202,11 +247,14 @@ impl ZoneRuntime {
         minion.owner_player_object_id = owner_id;
         minion.summon_skill_level = totem.summon_skill_level;
         minion.visible_extra = true;
-        minion.next_ai_ready_at_ms = now + 1000;
+        // Spawned overrides the constructor's +1000 ActionTime with +2000;
+        // MonsterObject.CanMove/CanAttack require Envir.Time strictly later.
+        minion.next_ai_ready_at_ms = now.saturating_add(2001);
         minion.incarnation = self.allocate_monster_incarnation();
         self.native_monsters.insert(child, minion);
         let packet = native_summon_spawn_packet(&spawn, child, id);
         self.apply_zone_object_packets(std::slice::from_ref(&packet), now);
+        self.register_owned_snake_child_life(child, id);
         if let Some(object) = self.objects.get_mut(&child) {
             object.expires_at_ms = Some(now + 10000 + u64::from(totem.summon_skill_level) * 2000);
         }
@@ -220,7 +268,7 @@ mod retirement_tests {
     use mir2_protocol::{MirClass, MirGender};
     #[test]
     fn owned_totem_retirement_does_not_claim_new_same_id_children() {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("snake-retirement-fixture"));
+        let mut z = ZoneRuntime::new(ZoneKey::for_map("d024"));
         let owner = SessionId::new("owner");
         z.handle(ZoneCommand::Join(ZoneJoin {
             session_id: owner.clone(),
@@ -234,8 +282,8 @@ mod retirement_tests {
             hp: 1000,
             max_hp: 1000,
             mp: 100,
-            map_file_name: "snake-retirement-fixture".into(),
-            position: Point { x: 100, y: 100 },
+            map_file_name: "d024".into(),
+            position: Point { x: 20, y: 20 },
             direction: MirDirection::Right,
             chat_profile: Default::default(),
             combat_stats: Default::default(),
@@ -245,7 +293,7 @@ mod retirement_tests {
             object_id: 0,
             spell: Spell::SummonSnakes,
             direction: MirDirection::Right,
-            target: Point { x: 104, y: 100 },
+            target: Point { x: 24, y: 20 },
             cast: true,
             level: 2,
             damage: 0,
@@ -335,6 +383,15 @@ mod retirement_tests {
         for old in &old_children[1..] {
             assert!(!z.native_monsters.get(old).is_some_and(|m| !m.dead));
         }
+        assert!(
+            restored.online_presence.is_empty(),
+            "cold recovery revokes online authority"
+        );
+        // Compare the complete state under the same cold-recovery policy.
+        // The live Node's online presence is intentionally absent after decode;
+        // every monster incarnation, parent/child link and pending action still
+        // has to match byte-for-byte after revoking that same authority here.
+        z.clear_online_authority();
         assert_eq!(
             z.checkpoint_bytes().unwrap(),
             restored.checkpoint_bytes().unwrap()

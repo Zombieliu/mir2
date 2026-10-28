@@ -611,6 +611,18 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           );
         }
         if (!(error instanceof ThreatenedNavigation)) throw error;
+        if (settings.focusTargetThroughAggressors) {
+          // No quest target has been acquired yet. Preserve the same focused
+          // policy used during an engagement instead of spending this caster's
+          // fixed attack cap on a non-objective BoneFighter during search.
+          recordSearchDiagnostic(client, {
+            type: 'focusedSpawnSearchRetreat', questId, target: pending.name,
+            objectId: Number(error.threatObjectId) > 0
+              ? error.threatObjectId : provenAggressors(client, null, settings)[0]?.objectId ?? null,
+          });
+          await retreatAndRecover(client, navigateNear, settings);
+          continue;
+        }
         let cleared;
         try {
           cleared = await clearProvenAggressors(

@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "path": "ci-run-37243580805/download.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci-run-37243580805/jobs.json",
+      "size": 2013,
+      "sha256": "a4ff59ad75ffbe01fd8970233cbdcfa4114fc4ba1bb2c9c2972eaa3890e4f94e"
+    },
+    {
+      "path": "ci-run-37243580805/receipt.json",
+      "size": 660,
+      "sha256": "30a1b78a8281dc54608b40c72b002dbdf6a2cde96d248af64a331c063e4aaedf"
+    },
+    {
+      "path": "DISPATCH-01.json",
+      "size": 608,
+      "sha256": "0e27b95426c0a34efd7a38d4a5949507144622a90c68df84bb6a38393f49735b"
+    },
+    {
+      "path": "dispatch-01.log",
+      "size": 59,
+      "sha256": "491c55dfb4bf97b0f04b8caf3090c52f2f9134e8b5fe8c2981901c9bda2e0a84"
+    },
+    {
+      "path": "dispatch-after-remote-confirmation.py",
+      "size": 2215,
+      "sha256": "d0d40d4742d3f0194d7ddd90215f7bb62f1d3000c7f00c17f7f94d561bd7d58f"
+    },
+    {
+      "path": "publish-probe.py",
+      "size": 3301,
+      "sha256": "be7b400aad623fb5929ff92271093e44b4b5bcc9553278c6423ddce83465d230"
+    },
+    {
+      "path": "PUSH-01.json",
+      "size": 668,
+      "sha256": "9979c122b719f414f25ba4b27ebbe5f83fc40023d0c9f30915d30b589b7a4d1b"
+    },
+    {
+      "path": "push-01.log",
+      "size": 150,
+      "sha256": "25820dbf112c94deb389d272be923bd02282bd6db351396084ec77e95632741a"
+    },
+    {
+      "path": "read-account-ci.py",
+      "size": 1216,
+      "sha256": "17f2a6442b934d38ba56c671020dc46ac99500b3db2ad6060aab0e8d34260d80"
+    },
+    {
+      "path": "REMOTE-CONFIRMATION-02.json",
+      "size": 217,
+      "sha256": "d3f1e130b6679f5d00cecf2063c2b0e3abec5e694074878465e98f4de62de87a"
+    },
+    {
+      "path": "remote-ref-02.log",
+      "size": 90,
+      "sha256": "5045beeae0b59242473c909b558bd88b109f3180b78fa48df3f1730761e68bcd"
+    }
+  ],
+  "actualCiRun": 37243580805,
+  "actualVerifyStatus": 401,
+  "bucketReadNotProbed": true,
+  "oldWebJobsSkipped": true,
+  "r2AndDeployAuthorityNotProven": true
+}

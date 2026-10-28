@@ -170,7 +170,15 @@ mod tests {
         ));
         let bytes = zone.checkpoint_bytes().unwrap();
         let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
-        assert_eq!(restored.checkpoint_bytes().unwrap(), bytes);
+        assert_eq!(
+            restored.players[&id].native_status_poison_deadlines,
+            zone.players[&id].native_status_poison_deadlines
+        );
+        assert_eq!(restored.players[&id].poison, zone.players[&id].poison);
+        assert!(
+            restored.online_presence.is_empty(),
+            "cold recovery revokes online authority"
+        );
         assert_eq!(restored.expire_zone_player_status_poisons(5_100).len(), 1);
         assert_eq!(restored.players[&id].poison, CRYSTAL_POISON_SLOW);
         assert!(zone_player_slowed(&restored.players[&id], 15_099));

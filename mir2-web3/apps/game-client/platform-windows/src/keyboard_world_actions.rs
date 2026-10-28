@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 #[derive(Default)]
 pub struct WorldShortcutState {
     owner: Option<String>,
-    stamp:Option<crate::gateway::NativeCommandStamp>,
+    stamp: Option<crate::gateway::NativeCommandStamp>,
     pickup_ready: Option<Instant>,
 }
 impl WorldShortcutState {
@@ -26,6 +26,11 @@ pub fn keyboard_world_actions_system(
     shell: Option<Res<NativeShellModel>>,
     mut ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     windows: Query<&Window>,
     entities: Res<EntityModelSet>,
     presentation: Res<NativeEntityPresentation>,
@@ -56,16 +61,26 @@ pub fn keyboard_world_actions_system(
         .iter()
         .find(|e| e.kind == EntityKind::SelfPlayer);
     let identity = owner.map(|e| e.object_id.clone());
-    let stamp=commands.applied_world_stamp();
-    if state.owner != identity || state.stamp!=stamp {
+    let stamp = commands.applied_world_stamp();
+    if state.owner != identity || state.stamp != stamp {
         *state = WorldShortcutState {
             owner: identity,
             stamp,
             ..Default::default()
         };
     }
-    if commands.ownership_fence().is_some()&&stamp.is_none(){return;}
-    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), &windows) {
+    if commands.ownership_fence().is_some() && stamp.is_none() {
+        return;
+    }
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        ui.as_deref(),
+        notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
+        &windows,
+    ) {
         return;
     }
     let Some(ui) = ui.as_deref_mut() else {

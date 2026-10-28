@@ -3,7 +3,8 @@
 use bevy::prelude::*;
 use bevy::ui::{AlignItems, BackgroundColor, JustifyContent, Node, PositionType, UiRect, Val};
 
-use crate::native_login_locale::{NativeLoginCaption, NativeUiLocale};
+use crate::native_i18n;
+use crate::native_login_locale::NativeUiLocale;
 use crate::native_shell::{LoginFocus, NativeShellModel};
 
 use super::assets::login_assets;
@@ -124,9 +125,33 @@ pub fn spawn_login_screen(
 ) {
     let assets = login_assets();
     spawn_stage_frame(parent, asset_server, spec::login::PANEL);
-    spawn_stage_frame(parent, asset_server, spec::login::TITLE);
-    spawn_stage_frame(parent, asset_server, spec::login::ACCOUNT_LABEL);
-    spawn_stage_frame(parent, asset_server, spec::login::PASSWORD_LABEL);
+    if native_i18n::active() {
+        spawn_label(
+            parent,
+            "Login",
+            CrystalRect::new(368.0, 286.0, 288.0, 28.0),
+            20.0,
+            Justify::Center,
+        );
+        spawn_label(
+            parent,
+            "Account",
+            CrystalRect::new(352.0, 355.0, 77.0, 21.0),
+            12.0,
+            Justify::Right,
+        );
+        spawn_label(
+            parent,
+            "Password",
+            CrystalRect::new(352.0, 378.0, 77.0, 21.0),
+            12.0,
+            Justify::Right,
+        );
+    } else {
+        spawn_stage_frame(parent, asset_server, spec::login::TITLE);
+        spawn_stage_frame(parent, asset_server, spec::login::ACCOUNT_LABEL);
+        spawn_stage_frame(parent, asset_server, spec::login::PASSWORD_LABEL);
+    }
 
     spawn_login_field(
         parent,
@@ -210,58 +235,10 @@ pub fn spawn_login_screen(
         .with_children(|button| {
             button.spawn((
                 Text::new(locale.wallet_entry()),
-                TextFont {
-                    font_size: FontSize::Px(14.0),
-                    ..default()
-                },
+                login_font(14.0),
                 TextColor(NOTICE_INFO),
             ));
         });
-
-    // Original bitmap labels contain baked-in text. Cover only their caption
-    // areas, leaving every existing button and field hit rectangle unchanged.
-    for (rect, caption, size) in [
-        (
-            CrystalRect::new(368.0, 286.0, 288.0, 28.0),
-            NativeLoginCaption::Title,
-            16.0,
-        ),
-        (
-            CrystalRect::new(352.0, 355.0, 77.0, 21.0),
-            NativeLoginCaption::Account,
-            10.0,
-        ),
-        (
-            CrystalRect::new(352.0, 378.0, 77.0, 21.0),
-            NativeLoginCaption::Password,
-            10.0,
-        ),
-        (spec::login::OK.rect, NativeLoginCaption::Login, 11.0),
-        (
-            spec::login::NEW_ACCOUNT.rect,
-            NativeLoginCaption::NewAccount,
-            10.0,
-        ),
-        (
-            spec::login::CHANGE_PASSWORD.rect,
-            NativeLoginCaption::ChangePassword,
-            10.0,
-        ),
-        (
-            spec::login::SAFE_KEY.rect,
-            NativeLoginCaption::SafeKey,
-            10.0,
-        ),
-        (spec::login::CANCEL.rect, NativeLoginCaption::Cancel, 10.0),
-    ] {
-        spawn_localized_caption(
-            parent,
-            rect,
-            &locale.login_caption(caption),
-            size,
-            caption != NativeLoginCaption::Login || model.login.is_ready(),
-        );
-    }
 
     if let Some(notice) = &model.notice {
         spawn_notice(
@@ -270,46 +247,6 @@ pub fn spawn_login_screen(
             matches!(notice.kind, crate::native_shell::ShellNoticeKind::Error),
         );
     }
-}
-
-fn spawn_localized_caption(
-    parent: &mut ChildSpawnerCommands,
-    rect: CrystalRect,
-    caption: &str,
-    font_size: f32,
-    enabled: bool,
-) {
-    parent
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(rect.left + 1.0),
-                top: Val::Px(rect.top + 1.0),
-                width: Val::Px(rect.width - 2.0),
-                height: Val::Px(rect.height - 2.0),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(Color::srgb(0.09, 0.07, 0.05)),
-            bevy::ui::FocusPolicy::Pass,
-            ZIndex(1),
-        ))
-        .with_children(|label| {
-            label.spawn((
-                Text::new(caption),
-                TextFont {
-                    font_size: FontSize::Px(font_size),
-                    ..default()
-                },
-                TextColor(if enabled {
-                    NOTICE_INFO
-                } else {
-                    Color::srgba(0.94, 0.88, 0.72, 0.45)
-                }),
-                bevy::ui::FocusPolicy::Pass,
-            ));
-        });
 }
 
 fn spawn_stage_frame(
@@ -331,6 +268,40 @@ fn spawn_stage_frame(
             ..default()
         },
     ));
+}
+
+fn spawn_label(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    rect: CrystalRect,
+    size: f32,
+    justify: Justify,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        Text::new(native_i18n::tr(label)),
+        super::typography::crystal_text_font(size),
+        TextColor(FIELD_TEXT),
+        TextLayout::justify(justify),
+    ));
+}
+
+fn login_font(size: f32) -> TextFont {
+    if native_i18n::active() {
+        super::typography::crystal_text_font(size)
+    } else {
+        TextFont {
+            font_size: FontSize::Px(size),
+            ..default()
+        }
+    }
 }
 
 fn spawn_login_field(
@@ -359,20 +330,14 @@ fn spawn_login_field(
         .with_children(|field| {
             field.spawn((
                 Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(10.0),
-                    ..default()
-                },
+                login_font(10.0),
                 TextColor(FIELD_TEXT),
             ));
             if focused {
                 field.spawn((
                     CrystalLoginCaret::default(),
                     Text::new("|"),
-                    TextFont {
-                        font_size: FontSize::Px(10.0),
-                        ..default()
-                    },
+                    login_font(10.0),
                     TextColor(FIELD_TEXT),
                     Visibility::Visible,
                 ));
@@ -407,11 +372,8 @@ fn spawn_notice(parent: &mut ChildSpawnerCommands, text: &str, is_error: bool) {
         },))
         .with_children(|notice| {
             notice.spawn((
-                Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(15.0),
-                    ..default()
-                },
+                Text::new(native_i18n::tr(text)),
+                login_font(15.0),
                 TextColor(if is_error { NOTICE_ERROR } else { NOTICE_INFO }),
             ));
         });

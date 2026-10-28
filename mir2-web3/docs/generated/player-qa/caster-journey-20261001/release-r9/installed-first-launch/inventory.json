@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "source": "C:\\mir2-playtest-releases\\20261001-native-r9",
+  "files": [
+    {
+      "path": "native-launcher-boot-receipt.json",
+      "size": 1495,
+      "sha256": "b9a219cfb37f57f0cfea3d8141ec5709278575bf9204624514bd8aad75f55538"
+    }
+  ]
+}

@@ -636,12 +636,15 @@ fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
     // Complete content packs keep large monster libraries as individual PNGs.
     // Apply the same metadata/file checks as character frames, without forcing
     // every monster texture into the always-resident starter atlas.
-    let monster_library = library.strip_prefix("Monster/").is_some_and(|index| {
-        index.len() == 3 && index.bytes().all(|b| b.is_ascii_digit())
-    });
+    let monster_library = library
+        .strip_prefix("Monster/")
+        .is_some_and(|index| index.len() == 3 && index.bytes().all(|b| b.is_ascii_digit()));
     let gate_library = matches!(library, "Gate/00" | "Gate/01" | "Gate/02" | "Gate/03");
-    if library != "DNItems" && !is_player_sprite_library(library) && !is_pet_sprite_library(library)
-        && !monster_library && !gate_library
+    if library != "DNItems"
+        && !is_player_sprite_library(library)
+        && !is_pet_sprite_library(library)
+        && !monster_library
+        && !gate_library
     {
         return None;
     }
@@ -817,6 +820,7 @@ fn uses_archer_alt(action: AnimationAction) -> bool {
         action,
         AnimationAction::Walking
             | AnimationAction::Running
+            | AnimationAction::Jump
             | AnimationAction::AttackRange1
             | AnimationAction::AttackRange2
     )
@@ -911,8 +915,31 @@ fn resolved_native_sprite_with_availability(
         weapon_library_secondary = None;
         weapon_frame_offset = Some(gender_weapon_offset);
     }
-    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary", library_exists);
-    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary", library_exists);
+    // Source PlayerObject forces Archer altAnim for Jump even without a
+    // class bow. Derive only matching, actually available body/hair libraries
+    // from authoritative gear metadata; never invent an AR weapon.
+    let archer_jump = class_key == "archer" && untransformed && action == AnimationAction::Jump;
+    let jump_library = |library: Option<&str>, family: &str, alternate: &str| {
+        library
+            .and_then(|library| {
+                normalized_library_key(library)
+                    .strip_prefix(family)
+                    .map(|index| format!("/original-ui/{alternate}{index}"))
+            })
+            .filter(|library| library_exists(library))
+    };
+    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary", library_exists)
+        .or_else(|| {
+            archer_jump
+                .then(|| jump_library(Some(&body_library), "CArmour/", "ARArmour/"))
+                .flatten()
+        });
+    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary", library_exists)
+        .or_else(|| {
+            archer_jump
+                .then(|| jump_library(hair_library.as_deref(), "CHair/", "ARHair/"))
+                .flatten()
+        });
     let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary", library_exists);
     let alt_weapon_library_secondary =
         available_sprite_library(sprite, "altWeaponLibrarySecondary", library_exists);
@@ -935,7 +962,7 @@ fn resolved_native_sprite_with_availability(
             weapon_library_secondary: None,
             mount_library,
             body_base_offset: sprite_number(sprite, "altFrameBaseOffset")
-                .unwrap_or(gender_body_offset),
+                .unwrap_or(if gender_key == "female" { 352 } else { 0 }),
             weapon_frame_offset: sprite_number(sprite, "altWeaponFrameOffset")
                 .or(weapon_frame_offset),
             mount_frame_offset,
@@ -993,6 +1020,7 @@ fn payload_animation_action(entity: &Value) -> AnimationAction {
         "attackRange1" => AnimationAction::AttackRange1,
         "attackRange2" => AnimationAction::AttackRange2,
         "dashAttack" => AnimationAction::DashAttack,
+        "jump" => AnimationAction::Jump,
         "spell" => AnimationAction::Spell,
         "struck" => AnimationAction::Struck,
         "die" => AnimationAction::Die,
@@ -2192,7 +2220,10 @@ mod tests {
     #[test]
     fn crystal_npc_image_libraries_keep_npcs_and_flags_separate() {
         assert_eq!(crystal_npc_library_from_image(8).as_deref(), Some("NPC/08"));
-        assert_eq!(crystal_npc_library_from_image(45).as_deref(), Some("NPC/45"));
+        assert_eq!(
+            crystal_npc_library_from_image(45).as_deref(),
+            Some("NPC/45")
+        );
         assert_eq!(
             crystal_npc_library_from_image(1000).as_deref(),
             Some("Flag/00")
@@ -2406,13 +2437,19 @@ mod tests {
 
     #[test]
     fn monster_standalone_paths_remain_strict() {
-        for path in ["/original-ui/Monster/009/80.png", "/original-ui/Gate/00/33.png"] {
+        for path in [
+            "/original-ui/Monster/009/80.png",
+            "/original-ui/Gate/00/33.png",
+        ] {
             assert!(player_frame_path_parts(path).is_some(), "{path}");
         }
         for path in [
-            "/original-ui/Monster/../009/80.png", "/original-ui/Monster/9/80.png",
-            "/original-ui/Monster/009/-1.png", "/original-ui/Monster/009/080.png",
-            "/original-ui/Monster/009/80.png/extra", "/original-ui/Gate/04/0.png",
+            "/original-ui/Monster/../009/80.png",
+            "/original-ui/Monster/9/80.png",
+            "/original-ui/Monster/009/-1.png",
+            "/original-ui/Monster/009/080.png",
+            "/original-ui/Monster/009/80.png/extra",
+            "/original-ui/Gate/04/0.png",
         ] {
             assert!(player_frame_path_parts(path).is_none(), "{path}");
         }
@@ -2421,13 +2458,31 @@ mod tests {
     #[test]
     fn newcomer_monster_standalone_frames_retain_original_geometry() {
         let index = starter_atlas_index().expect("starter atlas index");
-        for library in ["Monster/009", "Monster/011", "Monster/022", "Monster/027",
-            "Monster/029", "Monster/030", "Monster/069", "Monster/070", "Monster/078", "Gate/00"] {
+        for library in [
+            "Monster/009",
+            "Monster/011",
+            "Monster/022",
+            "Monster/027",
+            "Monster/029",
+            "Monster/030",
+            "Monster/069",
+            "Monster/070",
+            "Monster/078",
+            "Gate/00",
+        ] {
             let frames = load_original_frame_geometry(library).expect(library);
             for (frame, geometry) in frames {
-                let layer = build_entity_layer(index, &mut HashMap::new(), "1:body".to_owned(),
-                    &format!("/original-ui/{library}"), frame, 100.0, 200.0, 5.0)
-                    .unwrap_or_else(|| panic!("missing native {library}/{frame}"));
+                let layer = build_entity_layer(
+                    index,
+                    &mut HashMap::new(),
+                    "1:body".to_owned(),
+                    &format!("/original-ui/{library}"),
+                    frame,
+                    100.0,
+                    200.0,
+                    5.0,
+                )
+                .unwrap_or_else(|| panic!("missing native {library}/{frame}"));
                 assert_eq!(layer["width"], json!(geometry.width as f32));
                 assert_eq!(layer["height"], json!(geometry.height as f32));
                 assert_eq!(layer["left"], json!(100.0 + geometry.offset_x as f32));
@@ -2441,9 +2496,16 @@ mod tests {
         let index = starter_atlas_index().expect("starter atlas index");
         for frame in 0..224 {
             let layer = build_entity_layer(
-                index, &mut HashMap::new(), "42:body".to_owned(),
-                "/original-ui/Monster/006", frame, 100.0, 200.0, 5.0,
-            ).unwrap_or_else(|| panic!("HookingCat missing native frame {frame}"));
+                index,
+                &mut HashMap::new(),
+                "42:body".to_owned(),
+                "/original-ui/Monster/006",
+                frame,
+                100.0,
+                200.0,
+                5.0,
+            )
+            .unwrap_or_else(|| panic!("HookingCat missing native frame {frame}"));
             assert_eq!(layer["atlasKey"], "hooking-cat");
             assert!(layer["width"].as_f64().unwrap() > 0.0);
             assert!(layer["height"].as_f64().unwrap() > 0.0);
@@ -2550,19 +2612,34 @@ mod tests {
                                 build_entity_render_state_with_poses(&payload, &poses).unwrap();
                             let entity = &state["entities"][0];
                             let layers = entity["layers"].as_array().unwrap();
-                            let actor_layers = layers.iter().filter(|layer| !layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+                            let actor_layers = layers
+                                .iter()
+                                .filter(|layer| {
+                                    !layer["key"].as_str().unwrap().contains(":self-occlusion:")
+                                })
+                                .collect::<Vec<_>>();
                             assert_eq!(actor_layers.len(), 3,
                                 "{library} offset {body_offset}, {direction}, {action:?}, phase {phase}");
                             assert_eq!(layers.len(), 5, "three actor parts plus body/hair redraw");
                             for role in ["body", "hair"] {
-                                let original = actor_layers.iter().find(|v| v["key"] == format!("1000:{role}")).unwrap();
-                                let redraw = layers.iter().find(|v| v["key"] == format!("1000:self-occlusion:{role}")).unwrap();
-                                for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
+                                let original = actor_layers
+                                    .iter()
+                                    .find(|v| v["key"] == format!("1000:{role}"))
+                                    .unwrap();
+                                let redraw = layers
+                                    .iter()
+                                    .find(|v| v["key"] == format!("1000:self-occlusion:{role}"))
+                                    .unwrap();
+                                for field in
+                                    ["path", "atlasRectKey", "left", "top", "width", "height"]
+                                {
                                     assert_eq!(original[field], redraw[field]);
                                 }
                                 assert_eq!(redraw["opacity"], json!(0.4));
                                 assert_eq!(redraw["additive"], json!(false));
-                                assert!(redraw["z"].as_f64().unwrap() > original["z"].as_f64().unwrap());
+                                assert!(
+                                    redraw["z"].as_f64().unwrap() > original["z"].as_f64().unwrap()
+                                );
                             }
                             let body = layers
                                 .iter()
@@ -3080,6 +3157,34 @@ mod tests {
             find(":weapon-primary")["z"].as_f64().unwrap() < find(":body")["z"].as_f64().unwrap()
         );
         assert!(find(":hair")["z"].as_f64().unwrap() > find(":body")["z"].as_f64().unwrap());
+    }
+
+    #[test]
+    fn five_class_archer_jump_uses_real_alt_body_without_a_class_bow() {
+        let entity = serde_json::json!({"kind":"player","classKey":"archer","genderKey":"female",
+            "transformType":-1,"sprite":{"bodyLibrary":"CArmour/03","hairLibrary":"CHair/02",
+            "weaponLibrary":"CWeapon/01","frameBaseOffset":808,"weaponFrameOffset":416}});
+        let available =
+            |library: &str| matches!(normalized_library_key(library), "ARArmour/03" | "ARHair/02");
+        let jump =
+            resolved_native_sprite_with_availability(&entity, AnimationAction::Jump, &available);
+        assert_eq!(normalized_library_key(&jump.body_library), "ARArmour/03");
+        assert_eq!(
+            normalized_library_key(jump.hair_library.as_deref().unwrap()),
+            "ARHair/02"
+        );
+        assert_eq!(jump.body_base_offset, 352);
+        assert_eq!(
+            jump.weapon_library.as_deref(),
+            Some("/original-ui/CWeapon/01")
+        );
+        assert_eq!(jump.weapon_frame_offset, Some(416));
+        let walk =
+            resolved_native_sprite_with_availability(&entity, AnimationAction::Walking, &available);
+        assert_eq!(walk.body_library, "/original-ui/CArmour/03");
+        let missing =
+            resolved_native_sprite_with_availability(&entity, AnimationAction::Jump, &|_| false);
+        assert_eq!(missing.body_library, "/original-ui/CArmour/03");
     }
 
     #[test]

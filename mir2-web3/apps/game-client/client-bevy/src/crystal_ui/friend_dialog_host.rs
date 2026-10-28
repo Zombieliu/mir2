@@ -167,7 +167,14 @@ pub fn edit_key(f: &mut FriendDialogUi, event: &KeyboardInput) {
         KeyCode::Enter | KeyCode::NumpadEnter => result = editor.newline(),
         _ if !ctrl => {
             if let bevy::input::keyboard::Key::Character(chars) = &event.logical_key {
-                result = editor.insert_with_policy(chars, text_editor::InsertPolicy::FitPrefix);
+                result = editor.insert_with_policy(
+                    chars,
+                    if f.reject_over_budget {
+                        text_editor::InsertPolicy::RejectOverflow
+                    } else {
+                        text_editor::InsertPolicy::FitPrefix
+                    },
+                );
             }
         }
         _ => {}

@@ -133,6 +133,9 @@ fn owned_shinsu() -> (ZoneRuntime, u32) {
     (z, id)
 }
 fn enemy(z: &mut ZoneRuntime, id: u32, x: i32, y: i32, ac: i32) {
+    enemy_at(z, id, x, y, ac, 520);
+}
+fn enemy_at(z: &mut ZoneRuntime, id: u32, x: i32, y: i32, ac: i32, now_ms: u64) {
     let mut m = monster(0, point(x, y));
     m.object_id = id;
     m.max_hp = 1000;
@@ -142,7 +145,7 @@ fn enemy(z: &mut ZoneRuntime, id: u32, x: i32, y: i32, ac: i32) {
     z.handle(ZoneCommand::SpawnMonster {
         session_id: SessionId::new("owner"),
         monster: m,
-        now_ms: 520,
+        now_ms,
     });
 }
 fn hp(z: &ZoneRuntime, id: u32) -> i32 {
@@ -191,18 +194,28 @@ fn owned_shinsu_transforms_then_hits_both_line_cells_at_550_and_600ms() {
         .any(|p| matches!(p,ServerPacket::ObjectAttack{info} if info.object_id==id)));
     let bytes = z.checkpoint_bytes().unwrap();
     let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
-    restored.tick(4061);
-    assert_eq!(hp(&restored, 9111), 1000);
-    assert_eq!(hp(&restored, 9112), 1000);
-    restored.tick(4062);
-    assert!(hp(&restored, 9111) < 1000);
-    assert_eq!(hp(&restored, 9112), 1000);
-    let first = 1000 - hp(&restored, 9111);
-    restored.tick(4112);
+    z.tick(4061);
+    assert_eq!(hp(&z, 9111), 1000);
+    assert_eq!(hp(&z, 9112), 1000);
+    z.tick(4062);
+    assert!(hp(&z, 9111) < 1000);
+    assert_eq!(hp(&z, 9112), 1000);
+    let first = 1000 - hp(&z, 9111);
+    z.tick(4111);
+    assert_eq!(hp(&z, 9112), 1000);
+    z.tick(4112);
     assert_eq!(
-        1000 - hp(&restored, 9112),
+        1000 - hp(&z, 9112),
         first,
         "one DC roll shared by two cells"
+    );
+    let cold = restored.tick(4112);
+    assert_eq!(hp(&restored, 9111), 1000);
+    assert_eq!(hp(&restored, 9112), 1000);
+    assert!(
+        !packets_for(&cold, "owner").iter().any(|p| matches!(p,
+        ServerPacket::ObjectStruck { info } if [9111, 9112].contains(&info.object_id))),
+        "cold restore revokes the old owner's delayed damage authority"
     );
 }
 
@@ -225,10 +238,30 @@ fn shinsu_ignores_friendly_line_cell_but_damages_hostile_second_cell() {
             .any(|p| matches!(p,ServerPacket::ObjectShow{object_id} if *object_id==id)),
         "friendly-only scene must not activate attack mode"
     );
-    enemy(&mut z, 9112, 23, 20, 0);
+    enemy_at(&mut z, 9112, 23, 20, 0, 2512);
+    // First establish the real hostile's Target, then Show on the next tick.
     z.tick(2512);
-    z.tick(3513);
+    let show = z.tick(2513);
+    assert!(packets_for(&show, "owner")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectShow { object_id } if *object_id == id)));
+    assert!(!packets_for(&z.tick(3513), "owner")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectAttack { info } if info.object_id == id)));
+    let launch = z.tick(3514);
+    assert!(packets_for(&launch, "owner")
+        .iter()
+        .any(|p| matches!(p, ServerPacket::ObjectAttack { info } if info.object_id == id)));
+    z.tick(4064);
+    assert_eq!(hp(&z, MONSTER_ID), 1000);
+    assert_eq!(hp(&z, 9112), 1000);
     z.tick(4113);
+    assert_eq!(
+        hp(&z, 9112),
+        1000,
+        "second cell remains pending until 600ms"
+    );
+    z.tick(4114);
     assert_eq!(
         hp(&z, MONSTER_ID),
         1000,
@@ -245,6 +278,7 @@ fn shinsu_line_uses_impact_armour_and_owner_disconnect_cancels_pending_hit() {
     let (mut z, _) = owned_shinsu();
     enemy(&mut z, 9111, 22, 20, 0);
     enemy(&mut z, 9112, 23, 20, 100_000);
+    z.tick(2510); // Real wild AI acquires pet/owner before Shinsu Show.
     z.tick(2511);
     z.tick(3512);
     z.tick(4112);
@@ -252,6 +286,7 @@ fn shinsu_line_uses_impact_armour_and_owner_disconnect_cancels_pending_hit() {
     assert_eq!(hp(&z, 9112), 1000, "second cell armour must be respected");
     let (mut z, _) = owned_shinsu();
     enemy(&mut z, 9111, 22, 20, 0);
+    z.tick(2510);
     z.tick(2511);
     z.tick(3512);
     z.handle(ZoneCommand::Leave {
@@ -276,6 +311,7 @@ fn shinsu_returns_to_small_visible_form_only_after_thirty_seconds_without_target
         monster: m,
         now_ms: 520,
     });
+    z.tick(2510);
     z.tick(2511);
     z.tick(3512);
     z.tick(4062);

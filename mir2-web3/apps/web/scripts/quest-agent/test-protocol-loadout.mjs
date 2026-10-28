@@ -681,6 +681,142 @@ test("Wizard falls back to affordable FireBall when GreatFireBall lacks MP", asy
   assert.equal(client.sent[0].spell, "FireBall");
 });
 
+function lightningCombatState(targetPosition = { x: 16, y: 10 }) {
+  const state = snapshot('Wizard', 28);
+  state.playerMp = 50;
+  state.knownSkills.push(
+    { spell: 'Lightning', cooldownRemainingTicks: 0, mpCost: 38 },
+    { spell: 'GreatFireBall', cooldownRemainingTicks: 0, mpCost: 7 },
+    { spell: 'FireBall', cooldownRemainingTicks: 0, mpCost: 3 },
+  );
+  const target = { objectId: 99, kind: 'monster', hp: 120, dead: false, ...targetPosition };
+  state.entities.push(target);
+  return { state, target };
+}
+
+test('ordinary Wizard Lightning uses the caster on the wire and the enemy for damage tracking', async () => {
+  const { state, target } = lightningCombatState({ x: 318, y: 346 });
+  Object.assign(state.entities[0], { x: 312, y: 346 });
+  // Sanitized geometry from the actual N21 public frame at sequence 1288:
+  // three living WoomaFighters occupy the same six-cell Right ray.
+  state.entities.push(
+    { objectId: 100, kind: 'monster', hp: 60, dead: false, x: 315, y: 346 },
+    { objectId: 101, kind: 'monster', hp: 120, dead: false, x: 316, y: 346 },
+  );
+  const client = mockClient(state);
+  const result = await combatAction(client, target);
+  assert.equal(result.spell, 'Lightning');
+  assert.equal(result.targetId, 99, 'self-routed offense must still wait for the enemy damage receipt');
+  assert.deepEqual(client.sent, [{ type: 'magic', objectId: 10, spell: 'Lightning', direction: 'Right',
+    targetId: 10, x: 312, y: 346, spellTargetLock: false }]);
+  assert.equal(combatApproachRange(client, target), 9, 'the existing navigation range remains unchanged');
+});
+
+test('ordinary Wizard Lightning accepts all eight canonical rays within six cells', async () => {
+  for (const [dx, dy, direction] of [
+    [0, -1, 'Up'], [6, -6, 'UpRight'], [6, 0, 'Right'], [1, 1, 'DownRight'],
+    [0, 6, 'Down'], [-6, 6, 'DownLeft'], [-1, 0, 'Left'], [-6, -6, 'UpLeft'],
+  ]) {
+    const { state, target } = lightningCombatState({ x: 10 + dx, y: 10 + dy });
+    const client = mockClient(state);
+    const result = await combatAction(client, target);
+    assert.equal(result.spell, 'Lightning', direction);
+    assert.equal(result.targetId, target.objectId, direction);
+    assert.equal(client.sent[0].direction, direction);
+    assert.equal(client.sent[0].targetId, state.playerObjectId);
+    assert.equal(client.sent[0].spellTargetLock, false);
+  }
+});
+
+test('ordinary Wizard preserves GreatFireBall outside the actual Lightning ray', async () => {
+  for (const position of [{ x: 13, y: 12 }, { x: 17, y: 10 }, { x: 10, y: 10 }]) {
+    const { state, target } = lightningCombatState(position);
+    const client = mockClient(state);
+    const result = await combatAction(client, target);
+    assert.equal(result.spell, 'GreatFireBall', JSON.stringify(position));
+    assert.equal(client.sent.length, 1);
+    assert.equal(client.sent[0].targetId, 99);
+    assert.equal(client.sent[0].spellTargetLock, true);
+  }
+});
+
+test('ordinary Wizard Lightning requires learned skill, exact MP cost and sampled readiness', async () => {
+  for (const change of [
+    state => { state.knownSkills.shift(); },
+    state => { state.playerMp = 37; },
+    state => { delete state.playerMp; },
+    state => { state.knownSkills[0].cooldownRemainingTicks = 1; },
+    state => { delete state.knownSkills[0].cooldownRemainingTicks; },
+    state => { delete state.knownSkills[0].mpCost; },
+  ]) {
+    const { state, target } = lightningCombatState();
+    change(state);
+    const client = mockClient(state);
+    const result = await combatAction(client, target);
+    assert.notEqual(result.spell, 'Lightning');
+    assert.equal(client.sent.some(command => command.spell === 'Lightning'), false);
+  }
+  const { state, target } = lightningCombatState();
+  state.playerMp = 38;
+  assert.equal((await combatAction(mockClient(state), target)).spell, 'Lightning', 'exact mana floor permits a normal cast');
+});
+
+test('ordinary Wizard preserves FireBall and cooldown waiting when Lightning is unavailable', async () => {
+  const { state, target } = lightningCombatState();
+  state.knownSkills[0].cooldownRemainingTicks = 1;
+  state.knownSkills[1].cooldownRemainingTicks = 1;
+  const fallback = mockClient(state);
+  assert.equal((await combatAction(fallback, target)).spell, 'FireBall');
+  assert.equal(fallback.sent[0].spell, 'FireBall');
+  state.knownSkills[2].cooldownRemainingTicks = 1;
+  const waiting = mockClient(state);
+  assert.deepEqual(await combatAction(waiting, target), {
+    kind: 'wait', spell: 'GreatFireBall', targetId: 99, delayMs: 650,
+  });
+  assert.deepEqual(waiting.sent, []);
+});
+
+test('ordinary Wizard Lightning uses the fresh owner and target after a movement receipt', async () => {
+  const { state, target } = lightningCombatState({ x: 16, y: 10 });
+  const client = mpRefreshClient(state, [
+    { sequence: 40, direction: 'received', type: 'worldSnapshot' },
+    { sequence: 41, direction: 'received', packet: 'UserLocation', payload: { x: 11, y: 10 } },
+  ], 50);
+  const send = client.send.bind(client);
+  client.send = command => {
+    send(command);
+    if (command.type === 'clientVersion') {
+      Object.assign(state.entities[0], { x: 11, y: 10 });
+      state.entities[1] = { ...target, x: 15, y: 14 };
+    }
+  };
+  const result = await combatAction(client, target);
+  assert.equal(result.spell, 'Lightning');
+  assert.equal(result.targetId, 99);
+  assert.deepEqual(client.sent, [{ type: 'clientVersion' }, { type: 'magic', objectId: 10,
+    spell: 'Lightning', direction: 'DownRight', targetId: 10, x: 11, y: 10, spellTargetLock: false }]);
+});
+
+test('ordinary Wizard never trusts a stale target ray or pre-movement Lightning readiness', async () => {
+  const { state, target } = lightningCombatState();
+  state.entities[1] = { ...target, x: 15, y: 11 };
+  const moved = mockClient(state);
+  assert.equal((await combatAction(moved, target)).spell, 'GreatFireBall');
+  state.entities[1] = target;
+  const refreshing = mpRefreshClient(state, [
+    { sequence: 40, direction: 'received', type: 'worldSnapshot' },
+    { sequence: 41, direction: 'received', packet: 'UserLocation', payload: { x: 10, y: 10 } },
+  ], 50);
+  const send = refreshing.send.bind(refreshing);
+  refreshing.send = command => {
+    send(command);
+    if (command.type === 'clientVersion') state.knownSkills[0].cooldownRemainingTicks = 1;
+  };
+  assert.equal((await combatAction(refreshing, target)).spell, 'GreatFireBall');
+  assert.deepEqual(refreshing.sent.map(command => command.type), ['clientVersion', 'magic']);
+  assert.equal(refreshing.sent[1].spell, 'GreatFireBall');
+});
+
 test("combat approach keeps a ready Wizard FireBall at a safe ranged distance", () => {
   const state = snapshot("Wizard", 7);
   state.playerMp = 3;
@@ -907,6 +1043,94 @@ test("unavailable or out-of-range FireBall falls back to ordinary attack", async
     await combatAction(client, target);
     assert.deepEqual(client.sent[0], { type: "attack", objectId: 99 });
   }
+});
+
+for (const className of ['Wizard', 'Taoist']) {
+  test(`${className} ordinary combat refreshes owner-only movement before trusting ready magic`, async () => {
+    const state = snapshot(className, 21);
+    const spell = className === 'Wizard' ? 'GreatFireBall' : 'SoulFireBall';
+    state.knownSkills.push({ spell, cooldownRemainingTicks: 0, cooldownRemainingMs: 0, mpCost: 3 });
+    if (className === 'Taoist') state.equipmentItems.push({ name: 'Amulet', uniqueId: 7120, quantity: 10, slot: 'amulet' });
+    const target = { objectId: 99, kind: 'monster', x: 14, y: 8, hp: 90, dead: false };
+    state.entities.push(target);
+    const client = mpRefreshClient(state, [
+      { sequence: 40, direction: 'received', type: 'worldSnapshot', payload: { playerMp: 30 } },
+      // Crystal's real owner UserLocation has no objectId. In the live N14
+      // trace a stale ready frame was reused 38-46 ms after this receipt.
+      { sequence: 41, direction: 'received', packet: 'UserLocation', payload: { x: 10, y: 10, direction: 'Down' } },
+    ], 30);
+    const send = client.send.bind(client);
+    client.send = command => {
+      send(command);
+      if (command.type === 'clientVersion') {
+        state.knownSkills[0].cooldownRemainingMs = 500;
+        state.knownSkills[0].cooldownRemainingTicks = 1;
+      }
+    };
+    const result = await combatAction(client, target);
+    assert.equal(result.kind, 'wait');
+    assert.equal(result.spell, spell);
+    assert.deepEqual(client.sent, [{ type: 'clientVersion' }]);
+    assert.equal(client.snapshot.playerMp, 30);
+  });
+}
+
+test('ordinary combat rereads a moved target after the movement readiness probe', async () => {
+  const state = snapshot('Wizard', 21);
+  state.knownSkills.push({ spell: 'GreatFireBall', cooldownRemainingTicks: 0, mpCost: 3 });
+  const target = { objectId: 99, kind: 'monster', x: 14, y: 8, hp: 90, dead: false };
+  state.entities.push(target);
+  const client = mpRefreshClient(state, [
+    { sequence: 40, direction: 'received', type: 'worldSnapshot' },
+    { sequence: 41, direction: 'received', packet: 'UserLocation', payload: { x: 10, y: 10 } },
+  ], 30);
+  const send = client.send.bind(client);
+  client.send = command => {
+    send(command);
+    if (command.type === 'clientVersion') state.entities[1] = { ...target, x: 15, y: 9 };
+  };
+  assert.equal((await combatAction(client, target)).kind, 'magic');
+  assert.deepEqual(client.sent.map(command => command.type), ['clientVersion', 'magic']);
+  assert.equal(client.sent[1].x, 15);
+  assert.equal(client.sent[1].y, 9);
+});
+
+test('ordinary combat drops a target absent from the fresh movement readiness frame', async () => {
+  const state = snapshot('Wizard', 21);
+  state.knownSkills.push({ spell: 'GreatFireBall', cooldownRemainingTicks: 0, mpCost: 3 });
+  const client = mpRefreshClient(state, [
+    { sequence: 40, direction: 'received', type: 'worldSnapshot' },
+    { sequence: 41, direction: 'received', packet: 'UserLocation', payload: { x: 10, y: 10 } },
+  ], 30);
+  assert.deepEqual(await combatAction(client, { objectId: 99, x: 14, y: 8, hp: 90, dead: false }), {
+    kind: 'wait', targetId: 99, delayMs: 1,
+  });
+  assert.deepEqual(client.sent, [{ type: 'clientVersion' }]);
+});
+
+test('ordinary combat excludes a foreign UserLocation from owner readiness', async () => {
+  const state = snapshot('Wizard', 21);
+  state.knownSkills.push({ spell: 'GreatFireBall', cooldownRemainingTicks: 0, mpCost: 3 });
+  const client = mockClient(state);
+  client.events = [
+    { sequence: 40, direction: 'received', type: 'worldSnapshot' },
+    { sequence: 41, direction: 'received', packet: 'UserLocation', payload: { objectId: 88, x: 10, y: 10 } },
+  ];
+  const result = await combatAction(client, { objectId: 99, x: 14, y: 8, hp: 90, dead: false });
+  assert.equal(result.kind, 'magic');
+  assert.deepEqual(client.sent.map(command => command.type), ['magic']);
+});
+
+test('ordinary combat uses a ready frame newer than movement without another probe', async () => {
+  const state = snapshot('Wizard', 21);
+  state.knownSkills.push({ spell: 'GreatFireBall', cooldownRemainingTicks: 0, mpCost: 3 });
+  const client = mockClient(state);
+  client.events = [
+    { sequence: 40, direction: 'received', packet: 'UserLocation', payload: { x: 10, y: 10 } },
+    { sequence: 41, direction: 'received', type: 'worldSnapshot' },
+  ];
+  assert.equal((await combatAction(client, { objectId: 99, x: 14, y: 8, hp: 90, dead: false })).kind, 'magic');
+  assert.deepEqual(client.sent.map(command => command.type), ['magic']);
 });
 
 let failures = 0;

@@ -3,6 +3,7 @@ use bevy_ecs::{
     prelude::{Resource, World},
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use crate::config::{
     CurrencyKind, ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition,
@@ -118,6 +119,8 @@ pub(super) struct CrystalNpcExecutionState {
     pub(super) script_key: Option<String>,
     pub(super) section_label: Option<String>,
     pub(super) line_number: usize,
+    // Set only after the complete original script proof is checked at dispatch.
+    pub(super) verified_classic_route_legacy: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -155,6 +158,20 @@ pub(super) fn crystal_npc_labels_match(section_label: &str, requested_label: &st
     let section_base = crystal_npc_label_base(section_label);
     let requested_base = crystal_npc_label_base(requested_label);
     !section_base.is_empty() && section_base.eq_ignore_ascii_case(&requested_base)
+}
+
+pub(super) fn crystal_npc_dialog_targets_match(displayed: &str, requested: &str) -> bool {
+    fn complete_target(target: &str) -> String {
+        let unwrapped = unwrap_crystal_npc_label_brackets(target);
+        match unwrapped.split_once('(') {
+            Some((head, suffix)) => format!("{}({suffix}", normalize_crystal_npc_label(head)),
+            None => normalize_crystal_npc_label(unwrapped),
+        }
+    }
+    // Section lookup may match a base label; menu authorization must preserve
+    // the entire argument suffix. Unwrap outer [] before handling a target;
+    // do not use the argument parser, which discards empty/whitespace values.
+    complete_target(displayed).eq_ignore_ascii_case(&complete_target(requested))
 }
 
 pub(super) fn crystal_npc_label_base(label: &str) -> String {
@@ -240,13 +257,17 @@ fn next_crystal_npc_markup(line: &str) -> Option<(usize, usize, &str, bool)> {
     }
 }
 
-pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
+fn unwrap_crystal_npc_label_brackets(label: &str) -> &str {
     let trimmed = label.trim();
-    let trimmed = trimmed
+    trimmed
         .strip_prefix('[')
         .and_then(|value| value.strip_suffix(']'))
         .map(str::trim)
-        .unwrap_or(trimmed);
+        .unwrap_or(trimmed)
+}
+
+pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
+    let trimmed = unwrap_crystal_npc_label_brackets(label);
     if trimmed.starts_with('@') {
         trimmed.to_string()
     } else {
@@ -255,7 +276,9 @@ pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
 }
 
 pub(super) fn parse_crystal_label_target(target: &str) -> (String, Vec<String>) {
-    let trimmed = target.trim();
+    // Accept both [@page](args) and [@page(args)] while retaining the
+    // existing argument parser. Authorization compares the unparsed target.
+    let trimmed = unwrap_crystal_npc_label_brackets(target);
     let Some(open_paren) = trimmed.find('(') else {
         return (normalize_crystal_npc_label(trimmed), Vec::new());
     };
@@ -520,6 +543,9 @@ pub(super) fn collect_quoted_segments(line: &str) -> Vec<String> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct CrystalLocalTimeSnapshot {
+    pub(super) year: u16,
+    pub(super) month: u16,
+    pub(super) day: u16,
     pub(super) day_of_week: &'static str,
     pub(super) hour: u16,
     pub(super) minute: u16,
@@ -553,6 +579,9 @@ pub(super) fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> 
     };
 
     Some(CrystalLocalTimeSnapshot {
+        year: system_time.year,
+        month: system_time.month,
+        day: system_time.day,
         day_of_week,
         hour: system_time.hour,
         minute: system_time.minute,
@@ -587,6 +616,9 @@ pub(super) fn crystal_local_time_snapshot() -> Option<CrystalLocalTimeSnapshot> 
     };
 
     Some(CrystalLocalTimeSnapshot {
+        year: u16::try_from(local_time.tm_year + 1900).ok()?,
+        month: u16::try_from(local_time.tm_mon + 1).ok()?,
+        day: u16::try_from(local_time.tm_mday).ok()?,
         day_of_week,
         hour: u16::try_from(local_time.tm_hour).ok()?,
         minute: u16::try_from(local_time.tm_min).ok()?,
@@ -603,11 +635,15 @@ pub(super) fn handle_npc_interaction(
     context: NpcInteractionContext,
     mut packets: Vec<ServerPacket>,
 ) -> Vec<ServerPacket> {
+    if let Some(result) = super::npc_conquest::officer_main(world, &context) {
+        return result;
+    }
     if let Some(script_key) = context.script_key.as_deref() {
         if let Some(result) = run_crystal_npc_script(world, &context, script_key, "@Main") {
             packets.extend(result.packets);
             if let Some(mut dialog) = result.dialog {
                 append_crystal_quest_links(world, &context, &mut dialog);
+                super::npc_conquest::append_registrar_entry(world, &context, &mut dialog);
                 let footer = dialog.footer.clone();
                 set_dialog(world, dialog);
                 packets.push(ServerPacket::ObjectChat {
@@ -704,7 +740,8 @@ fn crystal_quest_link_dialog(
     context: &NpcInteractionContext,
 ) -> Option<ActiveNpcDialogState> {
     let mut links = quest_dialog_links_for_npc(world, context.object_id, &context.quest_ids);
-    if links.is_empty() {
+    let periodic = mir2_game_data::periodic_quests::npc(context.object_id).is_some();
+    if links.is_empty() && !periodic {
         return None;
     }
     links.push(NpcDialogLinkState {
@@ -723,7 +760,17 @@ fn crystal_quest_link_dialog(
         current: 0,
         required: 1,
         title: context.name.clone(),
-        body: vec!["How can I help you?".to_string()],
+        body: if periodic {
+            vec![
+                "Daily and Weekly Tasks".into(),
+                "Bichon and Mongchon share these tasks and rewards.".into(),
+                "Daily reset: 00:00 server time (UTC+8).".into(),
+                "Weekly reset: Monday 00:00 server time (UTC+8).".into(),
+                "Tasks unlock at level 10. Claimed tasks return after reset.".into(),
+            ]
+        } else {
+            vec!["How can I help you?".to_string()]
+        },
         footer,
         links,
         input: None,
@@ -734,6 +781,7 @@ fn crystal_npc_info_for_loaded_object_id(object_id: u32) -> Option<CrystalNpcInf
     crystal_npc_info_manifest()
         .npcs
         .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
         .find(|npc| npc.loaded_object_id == Some(object_id))
 }
 
@@ -753,12 +801,190 @@ pub(super) fn run_crystal_npc_script(
     run_crystal_npc_script_impl(world, context, &script, start_label)
 }
 
+const CLASSIC_STONE_SCRIPT: &str = "MongchonProvince/StoneTemple/Stone";
+const CLASSIC_BIG_TAOIST_SCRIPT: &str = "WoomyonWoods/TaoistVillage/BigTaoist";
+
+fn classic_route_script_sha256(bytes: impl AsRef<[u8]>) -> String {
+    Sha256::digest(bytes.as_ref())
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
+}
+
+/// Both original raw text and the complete imported execution representation
+/// are bound. A forged path, condition, parsed section or source edit cannot
+/// inherit the reviewed compatibility. Original source/manifests are unchanged.
+fn verified_classic_route_legacy_script(script: &CrystalNpcScript) -> Result<bool, ()> {
+    const PROOFS: [(&str, &str, &str, &str); 2] = [
+        (
+            CLASSIC_STONE_SCRIPT,
+            "MongchonProvince/StoneTemple/Stone.txt",
+            "249ff6c6810c7f06cd52f551c2534a2e24e7cead835d6948b72101146cf154c2",
+            "f86465391544e7633c1999aea856636266456d650bbd0d56af5d66322dc39d0d",
+        ),
+        (
+            CLASSIC_BIG_TAOIST_SCRIPT,
+            "WoomyonWoods/TaoistVillage/BigTaoist.txt",
+            "911a5edd4dc638eedf54819d0314cbcf2b438f32ba02d6d951091146ece02ebd",
+            "e186e61b616cfb28f48611eeca19aba568cf9d9c6f39362ed932b133bcef3111",
+        ),
+    ];
+    let raw_hash = classic_route_script_sha256(script.raw_text.as_bytes());
+    let Some(&(key, path, raw_sha, execution_sha)) =
+        PROOFS.iter().find(|(key, path, raw_sha, _)| {
+            script.script_key.eq_ignore_ascii_case(key)
+                || script.relative_path.eq_ignore_ascii_case(path)
+                || raw_hash == *raw_sha
+        })
+    else {
+        return Ok(false);
+    };
+    let execution = serde_json::to_vec(script).map_err(|_| ())?;
+    if script.script_key != key
+        || script.relative_path != path
+        || raw_hash != raw_sha
+        || classic_route_script_sha256(execution) != execution_sha
+    {
+        return Err(());
+    }
+    Ok(true)
+}
+
+fn classic_route_quest_condition(
+    world: &World,
+    condition: &str,
+    state: &CrystalNpcExecutionState,
+) -> Option<bool> {
+    if !state.verified_classic_route_legacy {
+        return None;
+    }
+    let (quest_id, current) = match (
+        state.script_key.as_deref(),
+        state.section_label.as_deref(),
+        condition,
+    ) {
+        (Some(CLASSIC_STONE_SCRIPT), Some("@MAIN"), "CHECKQUEST 135 0") => (135, true),
+        (Some(CLASSIC_STONE_SCRIPT), Some("@Check2"), "CHECKQUEST 153 1") => (153, false),
+        (Some(CLASSIC_BIG_TAOIST_SCRIPT), Some("@Next1"), "CHECKQUEST 146 1") => (146, false),
+        _ => return None,
+    };
+    Some(
+        world
+            .resource::<QuestResource>()
+            .quests
+            .iter()
+            .any(|quest| {
+                quest.quest_id == quest_id
+                    && if current {
+                        matches!(
+                            quest.stage,
+                            QuestStage::InProgress | QuestStage::ReadyToTurnIn
+                        )
+                    } else {
+                        quest.stage == QuestStage::Completed
+                    }
+            }),
+    )
+}
+
+fn is_verified_classic_stone_item_line(
+    state: &CrystalNpcExecutionState,
+    line: &str,
+    command: &str,
+) -> bool {
+    state.verified_classic_route_legacy
+        && state.script_key.as_deref() == Some(CLASSIC_STONE_SCRIPT)
+        && state.section_label.as_deref() == Some("@stonetomba")
+        && line == format!("{command} StoneHeart 1")
+}
+
+fn is_canonical_classic_stoneheart(item: &ItemState) -> bool {
+    item.key == "crystal-item-1080"
+        && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        && validate_committed_item_state_carrier(item).is_ok()
+        && try_user_item_from_item_state(item)
+            .is_ok_and(|carrier| carrier.item_index == 1080 && carrier.unique_id != 0)
+}
+
+#[cfg(test)]
+mod classic_late_route_source_proof_tests {
+    use super::*;
+
+    #[test]
+    fn classic_late_route_source_proof_binds_complete_original_and_parsed_script() {
+        for key in [CLASSIC_STONE_SCRIPT, CLASSIC_BIG_TAOIST_SCRIPT] {
+            let original = crystal_npc_script_by_key(key).unwrap();
+            assert_eq!(verified_classic_route_legacy_script(&original), Ok(true));
+            let mut changed = original.clone();
+            changed.raw_text.push(' ');
+            assert_eq!(verified_classic_route_legacy_script(&changed), Err(()));
+            let mut forged = original.clone();
+            forged.sections[0].lines.push("SET [999] 1".into());
+            assert_eq!(verified_classic_route_legacy_script(&forged), Err(()));
+            let mut wrong_path = original.clone();
+            wrong_path.relative_path = "Other/Stone.txt".into();
+            assert_eq!(verified_classic_route_legacy_script(&wrong_path), Err(()));
+            let mut unknown_key = original.clone();
+            unknown_key.script_key = "Other/Unknown".into();
+            assert_eq!(verified_classic_route_legacy_script(&unknown_key), Err(()));
+        }
+    }
+
+    #[test]
+    fn classic_late_route_unrelated_script_and_numeric_stage_contract_remain_unchanged() {
+        let unrelated = crystal_npc_script_by_key("MongchonProvince/MudWall/MonDelegate").unwrap();
+        assert_eq!(verified_classic_route_legacy_script(&unrelated), Ok(false));
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::Available), 0);
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::InProgress), 1);
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::ReadyToTurnIn), 2);
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::Completed), 3);
+        let unverified = CrystalNpcExecutionState {
+            script_key: Some(CLASSIC_STONE_SCRIPT.into()),
+            section_label: Some("@stonetomba".into()),
+            ..Default::default()
+        };
+        assert!(!is_verified_classic_stone_item_line(
+            &unverified,
+            "CHECKITEM StoneHeart 1",
+            "CHECKITEM"
+        ));
+    }
+}
+
 pub(super) fn run_crystal_npc_script_impl(
     world: &mut World,
     context: &NpcInteractionContext,
     script: &CrystalNpcScript,
     start_label: &str,
 ) -> Option<CrystalNpcRunResult> {
+    run_crystal_npc_script_impl_with_default_keys(world, context, script, start_label, false)
+        .map(|(result, _)| result)
+}
+
+pub(super) fn run_crystal_default_npc_script(
+    world: &mut World,
+    context: &NpcInteractionContext,
+    script: &CrystalNpcScript,
+    start_label: &str,
+) -> Option<(CrystalNpcRunResult, Vec<String>)> {
+    if context.object_id != 0 || script.script_key != "00Default" {
+        return None;
+    }
+    run_crystal_npc_script_impl_with_default_keys(world, context, script, start_label, true)
+}
+
+fn run_crystal_npc_script_impl_with_default_keys(
+    world: &mut World,
+    context: &NpcInteractionContext,
+    script: &CrystalNpcScript,
+    start_label: &str,
+    default_keys: bool,
+) -> Option<(CrystalNpcRunResult, Vec<String>)> {
+    // Candidate playability repair: inferred legacy Jev numeric intent for
+    // ONLY these two supplied route scripts. This is not the modern C# rule
+    // (which treats all non-ACTIVE CHECKQUEST tokens as Completed), and does
+    // not reinterpret numeric quest stages in any unrelated script.
+    let verified_classic_route_legacy = verified_classic_route_legacy_script(script).ok()?;
     let mut label = start_label.to_string();
     let mut packets = Vec::new();
     let context_state = CrystalNpcContextState {
@@ -766,18 +992,28 @@ pub(super) fn run_crystal_npc_script_impl(
     };
     let mut execution_state = CrystalNpcExecutionState {
         script_key: Some(script.script_key.clone()),
+        verified_classic_route_legacy,
         label_args: context.args.clone(),
         input: context.input.clone(),
         ..CrystalNpcExecutionState::default()
     };
 
     for _ in 0..CRYSTAL_NPC_MAX_SECTION_HOPS {
-        let section = crystal_npc_section(&script, &label)?;
+        // NPCPage.ArgumentParse explicitly retains full @_ default signatures.
+        // A request for UseItem(500) must never hit the first UseItem(1) page.
+        let section = if default_keys && label.starts_with("@_") {
+            script
+                .sections
+                .iter()
+                .find(|section| section.label.eq_ignore_ascii_case(&label))?
+        } else {
+            crystal_npc_section(&script, &label)?
+        };
         execution_state.section_label = Some(section.label.clone());
         process_crystal_npc_goods_expiry(world);
         let buy_back_items = crystal_npc_buy_back_items_for_script(world, &script.script_key);
         let used_goods_items = crystal_npc_used_goods_for_script(world, &script.script_key);
-        if let Some(service_packets) = crystal_npc_service_packets_for_label_with_markets(
+        if let Some(mut service_packets) = crystal_npc_service_packets_for_label_with_markets(
             Some(script),
             &section.label,
             &buy_back_items,
@@ -791,6 +1027,7 @@ pub(super) fn run_crystal_npc_script_impl(
                 &section.label,
                 &service_packets,
             );
+            super::npc_conquest_trade::refresh_conquest_goods_price(world, &mut service_packets);
             if label_key == "STORAGE" {
                 packets.extend(crystal_npc_storage_open_packets(world));
             } else if label_key == "REFINE" {
@@ -800,10 +1037,13 @@ pub(super) fn run_crystal_npc_script_impl(
             } else {
                 packets.extend(service_packets);
             }
-            return Some(CrystalNpcRunResult {
-                dialog: None,
-                packets,
-            });
+            return Some((
+                CrystalNpcRunResult {
+                    dialog: None,
+                    packets,
+                },
+                vec![],
+            ));
         }
         let outcome =
             execute_crystal_npc_section(world, section, &context_state, &mut execution_state);
@@ -817,61 +1057,72 @@ pub(super) fn run_crystal_npc_script_impl(
         }
 
         if outcome.close_dialog {
-            return Some(CrystalNpcRunResult {
-                dialog: None,
-                packets,
-            });
+            return Some((
+                CrystalNpcRunResult {
+                    dialog: None,
+                    packets,
+                },
+                outcome.raw_page,
+            ));
         }
 
         if outcome.body.is_empty() && outcome.links.is_empty() {
-            if packets.is_empty() {
+            if packets.is_empty() && !default_keys {
                 return None;
             }
-            return Some(CrystalNpcRunResult {
-                dialog: None,
-                packets,
-            });
+            return Some((
+                CrystalNpcRunResult {
+                    dialog: None,
+                    packets,
+                },
+                outcome.raw_page,
+            ));
         }
 
-        return Some(CrystalNpcRunResult {
-            dialog: Some(ActiveNpcDialogState {
-                npc_object_id: context.object_id,
-                npc_name: context.name.clone(),
-                npc_name_key: context.name_key.clone(),
-                stage: None,
-                current: 0,
-                required: 0,
-                title: context.name.clone(),
-                body: outcome.body,
-                footer: outcome
-                    .links
-                    .first()
-                    .map(|link| link.text.clone())
-                    .unwrap_or_else(|| context.name.clone()),
-                links: outcome.links,
-                input: None,
-            }),
-            packets,
-        });
+        return Some((
+            CrystalNpcRunResult {
+                dialog: Some(ActiveNpcDialogState {
+                    npc_object_id: context.object_id,
+                    npc_name: context.name.clone(),
+                    npc_name_key: context.name_key.clone(),
+                    stage: None,
+                    current: 0,
+                    required: 0,
+                    title: context.name.clone(),
+                    body: outcome.body,
+                    footer: outcome
+                        .links
+                        .first()
+                        .map(|link| link.text.clone())
+                        .unwrap_or_else(|| context.name.clone()),
+                    links: outcome.links,
+                    input: None,
+                }),
+                packets,
+            },
+            outcome.raw_page,
+        ));
     }
 
     execution_state.section_label = Some(label);
     execution_state.line_number = 0;
-    record_crystal_npc_script_diagnostic(
-        world,
-        &execution_state,
-        "GOTO",
-        format!("Crystal NPC script exceeded section hop limit of {CRYSTAL_NPC_MAX_SECTION_HOPS}"),
-    );
-    Some(CrystalNpcRunResult {
-        dialog: None,
-        packets,
-    })
+    let exhausted =
+        format!("Crystal NPC script exceeded section hop limit of {CRYSTAL_NPC_MAX_SECTION_HOPS}");
+    record_crystal_npc_script_diagnostic(world, &execution_state, "GOTO", exhausted.clone());
+    super::shared_guild_experience::reject_source(world, exhausted);
+    Some((
+        CrystalNpcRunResult {
+            dialog: None,
+            packets,
+        },
+        vec![],
+    ))
 }
 
 #[derive(Debug, Clone, Default)]
 pub(super) struct CrystalNpcSectionOutcome {
     body: Vec<String>,
+    raw_page: Vec<String>,
     links: Vec<NpcDialogLinkState>,
     packets: Vec<ServerPacket>,
     goto_label: Option<String>,
@@ -888,6 +1139,7 @@ pub(super) fn execute_crystal_npc_section(
     let mut mode = CrystalNpcParseMode::None;
     let mut if_conditions = Vec::new();
     let mut if_result = None;
+    let mut selected_act_returned = false;
 
     for (line_index, raw_line) in section.lines.iter().enumerate() {
         execution_state.line_number = section.line_number + line_index;
@@ -922,6 +1174,7 @@ pub(super) fn execute_crystal_npc_section(
             if mode == CrystalNpcParseMode::If {
                 if_conditions.clear();
                 if_result = None;
+                selected_act_returned = false;
             } else if matches!(
                 mode,
                 CrystalNpcParseMode::Say
@@ -935,12 +1188,21 @@ pub(super) fn execute_crystal_npc_section(
                     world,
                     &if_conditions,
                     context_state,
+                    execution_state,
                 ));
             }
             continue;
         }
 
         if matches!(mode, CrystalNpcParseMode::If) {
+            // NPCSegment.ParseCheck:255 splits the original line on ASCII
+            // spaces, substitutes each argument without re-splitting it, and
+            // omits CHECKHUM with fewer than three source arguments. Omission
+            // is not a failed check: an otherwise empty CheckList succeeds.
+            // Validate before runtime expansion can introduce extra spaces.
+            if original_checkhum_has_missing_arguments(line) {
+                continue;
+            }
             let resolved = resolve_crystal_npc_runtime_tokens(world, line, execution_state);
             record_unknown_crystal_npc_condition_command(world, &resolved, execution_state);
             if_conditions.push(resolved);
@@ -964,14 +1226,29 @@ pub(super) fn execute_crystal_npc_section(
             mode,
             CrystalNpcParseMode::Act | CrystalNpcParseMode::ElseAct
         ) {
-            let control = execute_crystal_npc_action_line(
+            if selected_act_returned {
+                continue;
+            }
+            // Buff actions are parsed before expansion. Source substitutes
+            // each parameter independently, without splitting inserted spaces.
+            let control = execute_original_npc_buff_action(
                 world,
-                &resolve_crystal_npc_runtime_tokens(world, line, execution_state),
+                line,
                 &mut outcome.packets,
                 execution_state,
-            );
+            )
+            .or_else(|| super::npc_spawn_actions::execute(world, line, execution_state))
+            .unwrap_or_else(|| {
+                execute_crystal_npc_action_line(
+                    world,
+                    &resolve_crystal_npc_runtime_tokens(world, line, execution_state),
+                    &mut outcome.packets,
+                    execution_state,
+                )
+            });
             match control {
                 CrystalNpcActionControl::Continue => {}
+                CrystalNpcActionControl::ReturnFromActList => selected_act_returned = true,
                 CrystalNpcActionControl::Goto(label) => {
                     outcome.goto_label = Some(label);
                     break;
@@ -991,6 +1268,7 @@ pub(super) fn execute_crystal_npc_section(
         ) || (!line.starts_with('#') && matches!(mode, CrystalNpcParseMode::None))
         {
             let resolved_line = resolve_crystal_npc_runtime_tokens(world, line, execution_state);
+            outcome.raw_page.push(resolved_line.clone());
             outcome
                 .links
                 .extend(parse_crystal_npc_links(&resolved_line));
@@ -1012,6 +1290,14 @@ enum CrystalNpcParseMode {
     Act,
     ElseSay,
     ElseAct,
+}
+
+fn original_checkhum_has_missing_arguments(line: &str) -> bool {
+    let mut parts = line.split(' ').filter(|part| !part.is_empty());
+    parts
+        .next()
+        .is_some_and(|command| command.eq_ignore_ascii_case("CHECKHUM"))
+        && parts.count() < 3
 }
 
 pub(super) fn resolve_crystal_npc_runtime_tokens(
@@ -1135,6 +1421,41 @@ pub(super) fn crystal_npc_named_token_value(world: &World, token: &str) -> Optio
     }
 
     let (name, args) = parse_crystal_npc_function_token(trimmed)?;
+    if super::npc_conquest::enabled(world) {
+        let snapshot = match name.as_str() {
+            "CONQUESTRATE" | "CONQUESTGOLD" | "CONQUESTSCHEDULE" => {
+                super::npc_conquest::script_snapshot(world)
+            }
+            _ => None,
+        };
+        match name.as_str() {
+            "CONQUESTRATE" => {
+                return Some(
+                    snapshot
+                        .map(|record| record.tax_rate_percent.to_string())
+                        .unwrap_or_else(|| "0".into()),
+                )
+            }
+            "CONQUESTGOLD" => {
+                return Some(
+                    snapshot
+                        .map(|record| record.gold.to_string())
+                        .unwrap_or_else(|| "0".into()),
+                )
+            }
+            "CONQUESTSCHEDULE" => {
+                return Some(
+                    if snapshot.is_some_and(|record| record.attacker_guild_id.is_some()) {
+                        "Scheduled"
+                    } else {
+                        "Not scheduled"
+                    }
+                    .into(),
+                )
+            }
+            _ => {}
+        }
+    }
     match name.as_str() {
         "CONQUESTOWNER" => Some(crystal_npc_conquest_owner_name(world)),
         "CONQUESTRATE" => Some(
@@ -1209,11 +1530,24 @@ pub(super) fn evaluate_crystal_npc_conditions(
     world: &mut World,
     conditions: &[String],
     context_state: &CrystalNpcContextState,
+    execution_state: &CrystalNpcExecutionState,
 ) -> bool {
     !conditions.is_empty()
-        && conditions
-            .iter()
-            .all(|condition| evaluate_crystal_npc_condition(world, condition, context_state))
+        && conditions.iter().all(|condition| {
+            if let Some(result) = classic_route_quest_condition(world, condition, execution_state) {
+                return result;
+            }
+            // Source-specific carrier repair: the normal q135 reward is a
+            // canonical item1080, not the old unvalidated name-only key.
+            if is_verified_classic_stone_item_line(execution_state, condition, "CHECKITEM") {
+                return world
+                    .resource::<InventoryResource>()
+                    .inventory_items
+                    .iter()
+                    .any(is_canonical_classic_stoneheart);
+            }
+            evaluate_crystal_npc_condition(world, condition, context_state)
+        })
 }
 
 pub(super) fn evaluate_crystal_npc_condition(
@@ -1232,11 +1566,9 @@ pub(super) fn evaluate_crystal_npc_condition(
         "HOUR" => crystal_npc_check_hour(&parts[1..]),
         "MIN" => crystal_npc_check_minute(&parts[1..]),
         "LEVEL" => crystal_npc_compare_numeric(world, player_level(world), &parts[1..]),
-        "CHECKGOLD" => crystal_npc_compare_numeric(
-            world,
-            i32::try_from(world.resource::<PlayerRuntimeResource>().gold).unwrap_or(i32::MAX),
-            &parts[1..],
-        ),
+        "CHECKGOLD" => {
+            crystal_npc_compare_gold(world.resource::<PlayerRuntimeResource>().gold, &parts[1..])
+        }
         "CHECKPKPOINT" => crystal_npc_compare_numeric(
             world,
             world.resource::<PlayerRuntimeResource>().pk_points,
@@ -1386,6 +1718,26 @@ pub(super) fn crystal_npc_compare_numeric(_world: &World, left: i32, parts: &[&s
     }
 }
 
+/// NPCSegment.CheckGold parses both operands as uint32. Default GoldBar,
+/// GoldBarBundle and GoldChest guards legitimately exceed i32::MAX.
+fn crystal_npc_compare_gold(left: u32, parts: &[&str]) -> bool {
+    let [operator, right] = parts else {
+        return false;
+    };
+    let Ok(right) = right.parse::<u32>() else {
+        return false;
+    };
+    match *operator {
+        ">" => left > right,
+        "<" => left < right,
+        ">=" => left >= right,
+        "<=" => left <= right,
+        "=" | "==" => left == right,
+        "<>" | "!=" => left != right,
+        _ => false,
+    }
+}
+
 pub(super) fn crystal_npc_check_day_of_week(parts: &[&str]) -> bool {
     let [expected_day] = parts else {
         return false;
@@ -1417,8 +1769,8 @@ pub(super) fn crystal_npc_check_minute(parts: &[&str]) -> bool {
     crystal_local_time_snapshot().is_some_and(|snapshot| snapshot.minute == expected_minute)
 }
 
-pub(super) fn crystal_npc_is_admin(_world: &World) -> bool {
-    false
+pub(super) fn crystal_npc_is_admin(world: &World) -> bool {
+    super::packets::trusted_npc_is_gm(world)
 }
 
 pub(super) fn crystal_npc_check_map_light(parts: &[&str]) -> bool {
@@ -1508,6 +1860,11 @@ pub(super) fn crystal_npc_check_conquest(world: &World, parts: &[&str]) -> bool 
     let Ok(conquest_id) = conquest_id.parse::<i32>() else {
         return false;
     };
+    if super::npc_conquest::enabled(world) {
+        return conquest_id == 1
+            && super::npc_conquest::script_snapshot(world)
+                .is_some_and(|record| !record.war_active);
+    }
     world
         .resource::<MapRuntimeResource>()
         .conquest_wars
@@ -1524,6 +1881,9 @@ pub(super) enum ConquestAssetKind {
 }
 
 pub(super) fn crystal_npc_condition_conquest_owner(world: &World, _parts: &[&str]) -> bool {
+    if super::npc_conquest::enabled(world) {
+        return super::npc_conquest::script_owner_matches(world);
+    }
     let stage5 = world.resource::<Stage5SystemsResource>();
     let owner = stage5.stage5_systems.conquest.castle_owner.trim();
     !owner.is_empty()
@@ -1532,6 +1892,9 @@ pub(super) fn crystal_npc_condition_conquest_owner(world: &World, _parts: &[&str
 }
 
 pub(super) fn crystal_npc_conquest_owner_name(world: &World) -> String {
+    if super::npc_conquest::enabled(world) {
+        return super::npc_conquest::script_owner_name(world);
+    }
     let owner = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -1565,6 +1928,11 @@ pub(super) fn crystal_npc_check_permission(world: &World, _parts: &[&str]) -> bo
 }
 
 pub(super) fn crystal_npc_afford_conquest_asset(world: &World, kind: ConquestAssetKind) -> bool {
+    // The shared officer issues priced, range-bound management capabilities.
+    // Old personal-snapshot affordability must never authorize a mutation.
+    if super::npc_conquest::enabled(world) {
+        return false;
+    }
     let player_runtime = world.resource::<PlayerRuntimeResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
     let available = player_runtime
@@ -1603,7 +1971,17 @@ pub(super) fn crystal_npc_check_buff(world: &World, parts: &[&str]) -> bool {
     let [buff_key] = parts else {
         return false;
     };
-    let key = normalize_stage5_key(buff_key);
+    // CheckBuff uses Enum.TryParse(ignoreCase:true), unlike ACT IsDefined.
+    // Numeric byte enum values are also accepted by the original parser.
+    let key = buff_key
+        .parse::<u8>()
+        .ok()
+        .and_then(crystal_buff_key_for_type)
+        .map(str::to_owned)
+        .or_else(|| original_npc_buff_name(buff_key, true).and_then(original_npc_buff_key));
+    let Some(key) = key else {
+        return false;
+    };
     world
         .resource::<BuffResource>()
         .buffs
@@ -1627,6 +2005,48 @@ pub(super) fn crystal_npc_conquest_asset_label(
     let Ok(asset_id) = u8::try_from(asset_id.max(0)) else {
         return "Unknown".to_string();
     };
+    if super::npc_conquest::enabled(world) {
+        let key = format!(
+            "{}:{asset_id}",
+            match kind {
+                ConquestAssetKind::Guard => "archer",
+                ConquestAssetKind::Wall => "wall",
+                ConquestAssetKind::Gate => "gate",
+            }
+        );
+        let Some(record) = super::npc_conquest::script_snapshot(world) else {
+            return "Unknown".into();
+        };
+        let Some(defense) = record.defenses.get(&key) else {
+            return "Unknown".into();
+        };
+        return match kind {
+            ConquestAssetKind::Guard => {
+                if defense.hp > 0 {
+                    "Alive"
+                } else {
+                    "Dead"
+                }
+            }
+            ConquestAssetKind::Wall => {
+                if defense.hp == defense.max_hp {
+                    "Repaired"
+                } else {
+                    "Damaged"
+                }
+            }
+            ConquestAssetKind::Gate => {
+                if defense.hp == 0 {
+                    "Damaged"
+                } else if defense.open {
+                    "Open"
+                } else {
+                    "Closed"
+                }
+            }
+        }
+        .into();
+    }
     let conquest = &world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -1942,12 +2362,6 @@ pub(super) fn crystal_npc_check_hum(world: &World, parts: &[&str]) -> bool {
             }
             crystal_npc_compare_numeric(world, 1, &[*operator, *count])
         }
-        [count, map_file_name] => {
-            if !crystal_npc_check_map(world, &[*map_file_name]) {
-                return false;
-            }
-            count.parse::<i32>().is_ok_and(|expected| expected <= 1)
-        }
         _ => false,
     }
 }
@@ -2027,6 +2441,9 @@ pub(super) fn player_level(world: &World) -> i32 {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) enum CrystalNpcActionControl {
     Continue,
+    // NPCSegment.Act returns; Success/Failed still append SAY and the page
+    // continues with its next segment. BREAK has different page semantics.
+    ReturnFromActList,
     Goto(String),
     Break,
     Close,
@@ -2038,6 +2455,12 @@ pub(super) fn execute_crystal_npc_action_line(
     packets: &mut Vec<ServerPacket>,
     execution_state: &mut CrystalNpcExecutionState,
 ) -> CrystalNpcActionControl {
+    if let Some(control) = execute_original_npc_buff_action(world, line, packets, execution_state) {
+        return control;
+    }
+    if let Some(control) = super::npc_spawn_actions::execute(world, line, execution_state) {
+        return control;
+    }
     if let Some(label) = parse_crystal_goto_target(line) {
         return CrystalNpcActionControl::Goto(label);
     }
@@ -2054,6 +2477,13 @@ pub(super) fn execute_crystal_npc_action_line(
             }
             CrystalNpcActionControl::Continue
         }
+        "ENTERMAP" => {
+            match super::default_npc_events::consume_enter_map(world) {
+                Ok(entry_packets) => packets.extend(entry_packets),
+                Err(error) => super::shared_guild_experience::reject_source(world, error),
+            }
+            CrystalNpcActionControl::Continue
+        }
         "TAKEGOLD" => {
             if let Some(amount) = parts.get(1).and_then(|value| value.parse::<u32>().ok()) {
                 let mut player_runtime = world.resource_mut::<PlayerRuntimeResource>();
@@ -2062,6 +2492,19 @@ pub(super) fn execute_crystal_npc_action_line(
             CrystalNpcActionControl::Continue
         }
         "TAKEITEM" => {
+            if is_verified_classic_stone_item_line(execution_state, line, "TAKEITEM") {
+                let mut inventory = world.resource_mut::<InventoryResource>();
+                let Some(index) = inventory
+                    .inventory_items
+                    .iter()
+                    .rposition(is_canonical_classic_stoneheart)
+                else {
+                    // Do not execute the following MOVE without its exact debit.
+                    return CrystalNpcActionControl::Break;
+                };
+                inventory.inventory_items.remove(index); // original stack_size=1
+                return CrystalNpcActionControl::Continue;
+            }
             let _ = crystal_npc_take_item(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }
@@ -2071,6 +2514,39 @@ pub(super) fn execute_crystal_npc_action_line(
         }
         "GIVEGOLD" => {
             crystal_npc_give_gold(world, &parts[1..]);
+            CrystalNpcActionControl::Continue
+        }
+        "REDUCEPKPOINT" => {
+            if let Some(amount) = parts.get(1).and_then(|value| value.parse::<i32>().ok()) {
+                let mut player = world.resource_mut::<PlayerRuntimeResource>();
+                player.pk_points = player.pk_points.saturating_sub(amount).max(0);
+            }
+            CrystalNpcActionControl::Continue
+        }
+        "CANGAINEXP" => {
+            // The original parser omits a missing argument. bool.TryParse
+            // assigns false for malformed supplied text, including numeric 1.
+            if let Some(value) = parts.get(1) {
+                super::default_npc_events::set_can_gain_experience(
+                    world,
+                    value.eq_ignore_ascii_case("true"),
+                );
+            }
+            CrystalNpcActionControl::Continue
+        }
+        "CHANGEGENDER" => {
+            // Original changes CharacterInfo only: the page explicitly tells
+            // the player to relog before the live actor appearance changes.
+            if let Some(character) = world
+                .resource_mut::<SessionResource>()
+                .selected_character
+                .as_mut()
+            {
+                character.gender = match character.gender {
+                    MirGender::Male => MirGender::Female,
+                    MirGender::Female => MirGender::Male,
+                };
+            }
             CrystalNpcActionControl::Continue
         }
         "GIVEPEARLS" | "TAKEPEARLS" => {
@@ -2110,22 +2586,9 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_clear_pets(world);
             CrystalNpcActionControl::Continue
         }
-        "PARAM1" => {
-            crystal_npc_param1(parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
-        "PARAM2" => {
-            crystal_npc_param2(parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
-        "PARAM3" => {
-            crystal_npc_param3(parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
-        "MONGEN" => {
-            crystal_npc_mongen(world, parts.get(1..).unwrap_or_default(), execution_state);
-            CrystalNpcActionControl::Continue
-        }
+        // ASCII-space Source declarations were already parsed above. Tabs or
+        // other whitespace must not create arguments through this fallback.
+        "PARAM1" | "PARAM2" | "PARAM3" | "MONGEN" => CrystalNpcActionControl::Continue,
         "MONCLEAR" => {
             crystal_npc_monclear(world, parts.get(1..).unwrap_or_default());
             CrystalNpcActionControl::Continue
@@ -2245,6 +2708,69 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_add_to_guild(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }
+        "REMOVEFROMGUILD" => {
+            let guild = super::shared_guilds::project_legacy_shape(world).unwrap_or_else(|| {
+                world
+                    .resource::<Stage5SystemsResource>()
+                    .stage5_systems
+                    .guild
+                    .clone()
+            });
+            let player_name = stage5_player_name(world);
+            if !guild.name.is_empty()
+                && guild
+                    .members
+                    .iter()
+                    .any(|name| name.eq_ignore_ascii_case(&player_name))
+            {
+                let newbie = world
+                    .resource::<RuntimeConfigResource>()
+                    .config
+                    .crystal_newbie_guild_name
+                    == guild.name;
+                let removed_types: Vec<u8> = world
+                    .resource::<BuffResource>()
+                    .buffs
+                    .iter()
+                    .filter_map(|buff| crystal_buff_type_for_key(&buff.key))
+                    .filter(|kind| *kind == 110 || (newbie && *kind == 115))
+                    .collect();
+                world.resource_mut::<BuffResource>().buffs.retain(|buff| {
+                    !crystal_buff_type_for_key(&buff.key)
+                        .is_some_and(|kind| kind == 110 || (newbie && kind == 115))
+                });
+                for buff_type in removed_types {
+                    packets.push(ServerPacket::RemoveBuff {
+                        buff_type,
+                        object_id: current_player_object_id(world).unwrap_or_default(),
+                    });
+                }
+                if super::shared_guilds::enabled(world) {
+                    if let Err(error) =
+                        super::npc_shared_guild_actions::queue_source_shared_guild_leave(world)
+                    {
+                        super::shared_guild_experience::reject_source(world, error);
+                    }
+                } else if !(guild.members.len() > 1
+                    && matches!(
+                        guild.rank.to_ascii_lowercase().as_str(),
+                        "leader" | "chief" | "guildmaster"
+                    ))
+                {
+                    let current = &mut world
+                        .resource_mut::<Stage5SystemsResource>()
+                        .stage5_systems
+                        .guild;
+                    current
+                        .members
+                        .retain(|name| !name.eq_ignore_ascii_case(&player_name));
+                    current.name.clear();
+                    current.rank.clear();
+                    current.permissions.clear();
+                }
+            }
+            CrystalNpcActionControl::Continue
+        }
         "ADDNAMELIST" => {
             crystal_npc_name_list(world, &parts[1..], true);
             CrystalNpcActionControl::Continue
@@ -2261,10 +2787,8 @@ pub(super) fn execute_crystal_npc_action_line(
             crystal_npc_change_hair(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }
-        "GIVEBUFF" => {
-            crystal_npc_give_buff(world, &parts[1..]);
-            CrystalNpcActionControl::Continue
-        }
+        // A non-ASCII-space delimiter cannot create a Source Buff action.
+        "GIVEBUFF" | "REMOVEBUFF" => CrystalNpcActionControl::Continue,
         "REVIVEHERO" => {
             crystal_npc_revive_hero(world);
             CrystalNpcActionControl::Continue
@@ -2680,7 +3204,7 @@ pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
         .first()
         .and_then(|value| value.parse::<u8>().ok())
         .unwrap_or(1)
-        .clamp(1, 5);
+        .min(5);
     let pet_level = pet_count
         .get(1)
         .and_then(|value| value.parse::<u8>().ok())
@@ -2703,15 +3227,13 @@ pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
         return;
     };
 
-    for offset in 0..count {
-        let spawn_position = Point {
-            x: player_position.x + i32::from(offset % 2),
-            y: player_position.y + i32::from(offset / 2),
-        };
-        let _ = spawn_runtime_monster(
+    // Crystal applies level and ActionTime only to this action's new pets,
+    // all on the owner's exact tile (NPCSegment.cs:3435–3447).
+    for _ in 0..count {
+        if let Some(entity) = spawn_runtime_monster(
             world,
             &template,
-            spawn_position,
+            player_position.clone(),
             player_direction,
             None,
             Some(SummonedMonster {
@@ -2725,18 +3247,9 @@ pub(super) fn crystal_npc_give_pet(world: &mut World, parts: &[&str]) {
             }),
             Some(false),
             Some(WorldEntityDisposition::Friendly),
-            0,
-        );
-    }
-
-    for entity in crystal_npc_pet_entities(world) {
-        let is_new_pet =
-            entity_name(world, entity).is_some_and(|name| name.eq_ignore_ascii_case(monster_name));
-        if !is_new_pet {
-            continue;
-        }
-        if let Ok(mut entry) = world.get_entity_mut(entity) {
-            entry.insert(NpcPetState { pet_level });
+            crystal_speed_to_ticks(1_000),
+        ) {
+            world.entity_mut(entity).insert(NpcPetState { pet_level });
         }
     }
 }
@@ -2763,31 +3276,6 @@ pub(super) fn crystal_npc_remove_pet(world: &mut World, parts: &[&str]) {
     for entity in pets_to_remove {
         let _ = world.despawn(entity);
     }
-}
-
-pub(super) fn crystal_npc_param1(parts: &[&str], execution_state: &mut CrystalNpcExecutionState) {
-    let [map_file_name, instance @ ..] = parts else {
-        return;
-    };
-    execution_state.map_file_name = Some((*map_file_name).to_string());
-    execution_state.map_instance = instance
-        .first()
-        .and_then(|value| value.parse::<i32>().ok())
-        .unwrap_or(1);
-}
-
-pub(super) fn crystal_npc_param2(parts: &[&str], execution_state: &mut CrystalNpcExecutionState) {
-    let Some(x) = parts.first().and_then(|value| value.parse::<i32>().ok()) else {
-        return;
-    };
-    execution_state.x = x;
-}
-
-pub(super) fn crystal_npc_param3(parts: &[&str], execution_state: &mut CrystalNpcExecutionState) {
-    let Some(y) = parts.first().and_then(|value| value.parse::<i32>().ok()) else {
-        return;
-    };
-    execution_state.y = y;
 }
 
 pub(super) fn crystal_npc_mongen(
@@ -2821,23 +3309,12 @@ pub(super) fn crystal_npc_mongen(
         return;
     }
 
-    for index in 0..count {
-        let offset = i32::from(index);
+    for _ in 0..count {
         let spawn_position = Point {
-            x: execution_state.x + (offset % 2),
-            y: execution_state.y + (offset / 2),
+            x: execution_state.x,
+            y: execution_state.y,
         };
-        let _ = spawn_runtime_monster(
-            world,
-            &template,
-            spawn_position,
-            MirDirection::Up,
-            None,
-            None,
-            None,
-            None,
-            0,
-        );
+        let _ = spawn_runtime_monster_on_source_script_cell(world, &template, spawn_position);
     }
 }
 
@@ -2931,6 +3408,9 @@ pub(super) fn crystal_npc_message_packet(
 }
 
 pub(super) fn crystal_npc_set_conquest_rate(world: &mut World, parts: &[&str]) {
+    if super::npc_conquest::enabled(world) {
+        return;
+    }
     let Some(rate) = parts.last().and_then(|value| value.parse::<u8>().ok()) else {
         return;
     };
@@ -2948,6 +3428,9 @@ pub(super) fn crystal_npc_repair_conquest_asset(
     kind: ConquestAssetKind,
     parts: &[&str],
 ) {
+    if super::npc_conquest::enabled(world) {
+        return;
+    }
     let Some(asset_id) = crystal_npc_asset_id(parts) else {
         return;
     };
@@ -2971,6 +3454,9 @@ pub(super) fn crystal_npc_repair_conquest_asset(
 }
 
 pub(super) fn crystal_npc_repair_all_conquest_assets(world: &mut World) {
+    if super::npc_conquest::enabled(world) {
+        return;
+    }
     let mut resources = world.resource_mut::<Stage5SystemsResource>();
     resources.stage5_systems.conquest.guards = (1..=12).collect();
     resources.stage5_systems.conquest.walls = (1..=3).collect();
@@ -2983,6 +3469,9 @@ pub(super) fn crystal_npc_repair_all_conquest_assets(world: &mut World) {
 }
 
 pub(super) fn crystal_npc_set_conquest_gate_open(world: &mut World, parts: &[&str], open: bool) {
+    if super::npc_conquest::enabled(world) {
+        return;
+    }
     let Some(asset_id) = crystal_npc_asset_id(parts) else {
         return;
     };
@@ -3004,6 +3493,9 @@ pub(super) fn crystal_npc_set_conquest_gate_open(world: &mut World, parts: &[&st
 }
 
 pub(super) fn crystal_npc_start_conquest(world: &mut World, parts: &[&str]) {
+    if super::npc_conquest::enabled(world) {
+        return;
+    }
     let conquest_id = parts.first().copied().unwrap_or("1");
     let mut resources = world.resource_mut::<Stage5SystemsResource>();
     push_unique(
@@ -3018,6 +3510,9 @@ pub(super) fn crystal_npc_start_conquest(world: &mut World, parts: &[&str]) {
 }
 
 pub(super) fn crystal_npc_take_conquest_gold(world: &mut World, parts: &[&str]) {
+    if super::npc_conquest::enabled(world) {
+        return;
+    }
     let amount = parts
         .get(1)
         .or_else(|| parts.first())
@@ -3149,19 +3644,8 @@ pub(super) fn crystal_npc_change_level(world: &mut World, parts: &[&str]) {
     else {
         return;
     };
-    {
-        let mut session = world.resource_mut::<SessionResource>();
-        if let Some(character) = session.selected_character.as_mut() {
-            character.level = level;
-        }
-    }
-    if let Some(player) = player_entity(world) {
-        if let Ok(mut entry) = world.get_entity_mut(player) {
-            if let Some(mut body) = entry.get_mut::<CharacterBody>() {
-                body.level = level;
-            }
-        }
-    }
+    world.resource_mut::<PlayerRuntimeResource>().experience = 0;
+    super::leveling::apply_level_change(world, level);
 }
 
 pub(super) fn crystal_npc_change_hair(world: &mut World, parts: &[&str]) {
@@ -3175,30 +3659,174 @@ pub(super) fn crystal_npc_change_hair(world: &mut World, parts: &[&str]) {
         .hair = hair;
 }
 
-pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) {
-    let [key, duration @ ..] = parts else {
-        return;
+/// BuffInfo's 59 source names are the original enum except None. Validation
+/// retains enum spelling, including currently unsupported monster/GM buffs.
+/// Mapping a supported type to a local key is a separate operation.
+fn original_npc_buff_name(name: &str, ignore_case: bool) -> Option<&str> {
+    if name == "None" || (ignore_case && name.eq_ignore_ascii_case("None")) {
+        return Some("None");
+    }
+    mir2_game_data::crystal_buff_manifest_ref()
+        .buffs
+        .iter()
+        .find(|buff| {
+            if ignore_case {
+                buff.buff_type.eq_ignore_ascii_case(name)
+            } else {
+                buff.buff_type == name
+            }
+        })
+        .map(|buff| buff.buff_type.as_str())
+}
+
+fn original_npc_buff_key(name: &str) -> Option<String> {
+    let mut key = String::new();
+    for (index, ch) in name.chars().enumerate() {
+        if index != 0 && ch.is_ascii_uppercase() {
+            key.push('-');
+        }
+        key.push(ch.to_ascii_lowercase());
+    }
+    crystal_buff_type_for_key(&key)
+        .and_then(crystal_buff_key_for_type)
+        .map(str::to_owned)
+}
+
+fn execute_original_npc_buff_action(
+    world: &mut World,
+    line: &str,
+    packets: &mut Vec<ServerPacket>,
+    state: &CrystalNpcExecutionState,
+) -> Option<CrystalNpcActionControl> {
+    let raw: Vec<_> = line.split(' ').filter(|part| !part.is_empty()).collect();
+    let command = *raw.first()?;
+    let give = command.eq_ignore_ascii_case("GIVEBUFF");
+    if !give && !command.eq_ignore_ascii_case("REMOVEBUFF") {
+        return None;
+    }
+    // ParseAct omission precedes Enum.IsDefined and argument substitution.
+    if raw.len() < if give { 4 } else { 2 } {
+        return Some(CrystalNpcActionControl::Continue);
+    }
+    let expanded: Vec<_> = raw[1..]
+        .iter()
+        .map(|arg| resolve_crystal_npc_runtime_tokens(world, arg, state))
+        .collect();
+    let parts: Vec<_> = expanded.iter().map(String::as_str).collect();
+    let Some(name) = original_npc_buff_name(parts[0], false) else {
+        return Some(CrystalNpcActionControl::ReturnFromActList);
     };
-    let key = normalize_stage5_key(key);
-    let duration_ticks = duration
-        .first()
-        .and_then(|value| value.parse::<u64>().ok())
-        .unwrap_or(60)
-        .max(1);
+    if give {
+        if let Some(buff) = crystal_npc_give_buff(world, &parts) {
+            packets.push(buff);
+        }
+    } else if let Some(buff_type) =
+        original_npc_buff_key(name).and_then(|key| crystal_buff_type_for_key(&key))
+    {
+        let mut buffs = world.resource_mut::<BuffResource>();
+        let count = buffs.buffs.len();
+        buffs
+            .buffs
+            .retain(|buff| crystal_buff_type_for_key(&buff.key) != Some(buff_type));
+        if buffs.buffs.len() != count {
+            packets.push(ServerPacket::RemoveBuff {
+                buff_type,
+                object_id: current_player_object_id(world).unwrap_or_default(),
+            });
+        }
+    }
+    Some(CrystalNpcActionControl::Continue)
+}
+
+pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) -> Option<ServerPacket> {
+    let [source_key, duration, _visible, _rest @ ..] = parts else {
+        return None;
+    };
+    let key = original_npc_buff_name(source_key, false).and_then(original_npc_buff_key)?;
+    let seconds = duration.trim().parse::<i32>().unwrap_or(0);
     let tick = runtime_tick(world);
-    apply_or_refresh_buff(
-        world,
-        BuffState {
-            real_time_duration: None,
-            key: key.clone(),
-            name: stage5_item_name(&key),
-            description: "Crystal NPC buff.".to_string(),
-            expires_at_tick: tick.saturating_add(duration_ticks),
-            attack_bonus: 0,
-            defence_bonus: 0,
-            stats: Vec::new(),
-        },
+    // The pinned NPCSegment source deliberately passes empty Stats and does
+    // not forward parsed infinite/stackable values to AddBuff. Keep that
+    // behavior rather than inventing the percentages shown in sample text.
+    let infinite = matches!(
+        key.as_str(),
+        "mentee"
+            | "mentor"
+            | "guild"
+            | "skill"
+            | "clear-ring"
+            | "lover"
+            | "newbie"
+            | "mental-state"
     );
+    let previous = world
+        .resource::<BuffResource>()
+        .buffs
+        .iter()
+        .find(|buff| buff.key == key)
+        .cloned();
+    let stacked = matches!(
+        key.as_str(),
+        "exp"
+            | "drop"
+            | "gold"
+            | "bag-weight"
+            | "impact"
+            | "magic"
+            | "taoist"
+            | "storm"
+            | "health-aid"
+            | "mana-aid"
+            | "defence"
+            | "magic-defence"
+            | "wonder-drug"
+            | "knapsack"
+    );
+    let duration_ms = u64::try_from(seconds)
+        .unwrap_or(0)
+        .saturating_mul(1000)
+        .saturating_add(if stacked {
+            previous.as_ref().map_or(0, |buff| buff.remaining_ms(tick))
+        } else {
+            0
+        });
+    let buff = BuffState {
+        real_time_duration: Some(if infinite {
+            // Infinite stack types retain the first supplied ExpireTime; it
+            // is packet/save metadata, never an online expiry countdown.
+            previous
+                .as_ref()
+                .and_then(|buff| buff.real_time_duration.clone())
+                .filter(RealTimeBuffDuration::is_infinite)
+                .unwrap_or_else(|| {
+                    RealTimeBuffDuration::new_infinite(if previous.is_some() {
+                        0
+                    } else {
+                        duration_ms
+                    })
+                })
+        } else {
+            RealTimeBuffDuration::new(duration_ms)
+        }),
+        key: key.clone(),
+        name: stage5_item_name(&key),
+        description: "Crystal NPC buff.".into(),
+        expires_at_tick: if infinite {
+            u64::MAX
+        } else {
+            tick.saturating_add(duration_ms.div_ceil(1000))
+        },
+        attack_bonus: previous.as_ref().map_or(0, |buff| buff.attack_bonus),
+        defence_bonus: previous.as_ref().map_or(0, |buff| buff.defence_bonus),
+        stats: previous
+            .as_ref()
+            .map_or_else(Vec::new, |buff| buff.stats.clone()),
+    };
+    // That last bool is AddBuff.refreshStats, not ClientBuff.Visible. The
+    // original BuffInfo supplies visibility and the infinite stack type.
+    let packet = client_buff_packet_for_state(world, &buff)?;
+    apply_or_refresh_buff(world, buff);
+    Some(packet)
 }
 
 pub(super) fn crystal_npc_revive_hero(world: &mut World) {
@@ -3357,13 +3985,25 @@ impl SimulationSession {
     }
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.interact_impl(object_id);
-        self.finalize_journey_npc_packets(object_id, packets)
+        let packets = self.finalize_journey_npc_packets(object_id, packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.interact_shared_npc_snapshot_impl(npc);
-        self.finalize_journey_npc_packets(npc.object_id, packets)
+        let packets = self.finalize_journey_npc_packets(npc.object_id, packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn call_shared_npc_snapshot(
@@ -3371,34 +4011,79 @@ impl SimulationSession {
         npc: &WorldEntitySnapshot,
         key: &str,
     ) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
-        self.finalize_journey_npc_packets(npc.object_id, packets)
+        let packets = self.finalize_journey_npc_packets(npc.object_id, packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.call_npc_impl(object_id, key);
-        self.finalize_journey_npc_packets(object_id, packets)
+        let packets = self.finalize_journey_npc_packets(object_id, packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
-        let object_id = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
+        let object_id = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
             .map(|dialog| dialog.npc_object_id);
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.select_npc_dialog_target_impl(target);
-        match object_id {
+        let packets = match object_id {
             Some(object_id) => self.finalize_journey_npc_packets(object_id, packets),
             None => self.finalize_packets(packets),
-        }
+        };
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
-    fn finalize_journey_npc_packets(&mut self, object_id: u32, mut packets: Vec<ServerPacket>) -> Vec<ServerPacket> {
-        packets.extend(super::quests::newcomer_v2_events::observe_committed_command(
-            self.app.world_mut(), super::quests::newcomer_v2_events::CommandContext::Npc(object_id), &packets));
+    fn periodic_save_failure_packets() -> Vec<ServerPacket> {
+        vec![ServerPacket::Chat {
+            message: "Task could not be saved. Reconnect and try again.".into(),
+            chat_type: ChatType::System,
+        }]
+    }
+
+    fn finalize_journey_npc_packets(
+        &mut self,
+        object_id: u32,
+        mut packets: Vec<ServerPacket>,
+    ) -> Vec<ServerPacket> {
+        packets.extend(
+            super::quests::newcomer_v2_events::observe_committed_command(
+                self.app.world_mut(),
+                super::quests::newcomer_v2_events::CommandContext::Npc(object_id),
+                &packets,
+            ),
+        );
         self.finalize_packets(packets)
     }
 
     pub fn submit_npc_input(&mut self, value: &str) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.submit_npc_input_impl(value);
-        self.finalize_packets(packets)
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub fn confirm_npc_input(
@@ -3407,8 +4092,14 @@ impl SimulationSession {
         page_name: &str,
         value: &str,
     ) -> Vec<ServerPacket> {
+        let before = match self.begin_npc_dialog_source_command(false) {
+            Ok(before) => before,
+            Err(_) => return Self::periodic_save_failure_packets(),
+        };
         let packets = self.confirm_npc_input_impl(npc_id, page_name, value);
-        self.finalize_packets(packets)
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_else(|_| Self::periodic_save_failure_packets())
     }
 
     pub(super) fn interact_impl(&mut self, object_id: u32) -> Vec<ServerPacket> {
@@ -3574,7 +4265,10 @@ impl SimulationSession {
         target: &str,
         input_value: Option<String>,
     ) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world()) {
+        if !is_in_world(self.app.world())
+            || super::components::current_player_is_dead(self.app.world())
+        {
+            super::npc_input::invalidate(self.app.world_mut());
             return Vec::new();
         }
 
@@ -3585,6 +4279,7 @@ impl SimulationSession {
             .active_npc_dialog
             .clone()
         else {
+            super::npc_input::invalidate(self.app.world_mut());
             return Vec::new();
         };
 
@@ -3600,40 +4295,35 @@ impl SimulationSession {
         }
 
         let input_link = normalized_target.starts_with("@@");
-        if input_link && input_value.is_none() {
-            let prompt = crystal_npc_input_prompt(&active_dialog, target);
-            set_dialog(
-                self.app.world_mut(),
-                ActiveNpcDialogState {
-                    npc_object_id: active_dialog.npc_object_id,
-                    npc_name: active_dialog.npc_name.clone(),
-                    npc_name_key: active_dialog.npc_name_key.clone(),
-                    stage: None,
-                    current: 0,
-                    required: 0,
-                    title: active_dialog.npc_name.clone(),
-                    body: vec![prompt.clone()],
-                    footer: active_dialog.npc_name.clone(),
-                    links: Vec::new(),
-                    input: Some(NpcDialogInputState {
-                        target: normalized_target,
-                        prompt,
-                    }),
-                },
-            );
-            return Vec::new();
-        }
-
-        if !active_dialog
-            .links
-            .iter()
-            .any(|link| crystal_npc_labels_match(&link.target, &normalized_target))
-            && active_dialog
-                .input
-                .as_ref()
-                .is_none_or(|input| !crystal_npc_labels_match(&input.target, &normalized_target))
-        {
-            return Vec::new();
+        if input_value.is_some() {
+            if !input_link
+                || active_dialog
+                    .input
+                    .as_ref()
+                    .is_none_or(|input| !crystal_npc_dialog_targets_match(&input.target, target))
+                || !super::npc_input::consume(
+                    self.app.world_mut(),
+                    active_dialog.npc_object_id,
+                    target,
+                )
+            {
+                return Vec::new();
+            }
+        } else {
+            if !active_dialog
+                .links
+                .iter()
+                .any(|link| crystal_npc_dialog_targets_match(&link.target, target))
+            {
+                return Vec::new();
+            }
+            if input_link {
+                super::npc_input::request(self.app.world_mut(), target);
+                return Vec::new();
+            }
+            if !super::npc_input::permits_menu_target(self.app.world_mut(), target) {
+                return Vec::new();
+            }
         }
 
         // Opaque workshop quotes are validated against the exact original
@@ -3644,6 +4334,9 @@ impl SimulationSession {
 
         if normalized_target.eq_ignore_ascii_case("@CREATEGUILD") {
             return self.grant_shared_guild_creation_from_npc();
+        }
+        if let Some(packets) = self.select_shared_conquest_npc(&normalized_target) {
+            return packets;
         }
 
         // Crystal treats this as a built-in NPC key, not a script section.
@@ -3804,12 +4497,10 @@ impl SimulationSession {
             };
             input.target.clone()
         } else {
-            let trimmed = page_name.trim();
-            if trimmed.starts_with('@') {
-                trimmed.to_string()
-            } else {
-                format!("@{trimmed}")
-            }
+            // Preserve the argument suffix and both legacy bracket forms.
+            // Admission compares the complete target, then the parser
+            // normalizes only the label head after authorization succeeds.
+            page_name.trim().to_string()
         };
 
         self.select_npc_dialog_target_with_input_impl(&target, Some(value.to_string()))
@@ -3841,6 +4532,10 @@ fn parse_explicit_npc_quest_command(target: &str) -> Option<ExplicitNpcQuestComm
 #[cfg(test)]
 #[path = "npc_parcel_tests.rs"]
 mod npc_parcel_tests;
+
+#[cfg(test)]
+#[path = "npc_pet_source_semantics_tests.rs"]
+mod npc_pet_source_semantics_tests;
 
 #[cfg(test)]
 mod dialog_security_tests {

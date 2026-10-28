@@ -1,0 +1,33 @@
+{
+  "candidate": "WN-CANDIDATE-20260929-invited-03",
+  "sourceRevision": "c3828af30e80600547999eca375b6b86cb700c6b",
+  "installer": "C:\\mir2-playtest-releases\\20260929-preview\\Mir2-Invite-20260929-r3-Setup.exe",
+  "installerVersion": "2026.9.29.3",
+  "installerBytes": 594799887,
+  "installerSha256": "455B68EF0E22E5BD526295C9277967DFB5B32F97B82446784E95E3061C5AD455",
+  "installerMachine": "AMD64",
+  "installerAuthenticode": "NotSigned",
+  "clientExeSha256": "546BB79CCD867336BE492D5ED72D12C1FE725D14AE2CB4410058FBCD94D54FD3",
+  "clientSubsystem": "IMAGE_SUBSYSTEM_WINDOWS_GUI",
+  "packageFiles": 123029,
+  "packageBytes": 741631686,
+  "strictPackageVerification": true,
+  "detachedPackageSignatureValid": true,
+  "exactInstallerInputVerification": true,
+  "installerCompileExit": 0,
+  "sharedRegressionPassed": 1108,
+  "nativeRegressionPassed": 768,
+  "gpuFramesChecked": 320,
+  "gpuScreenshots": 64,
+  "installedUpgradeVerified": false,
+  "liveCharacterCreationVerified": false,
+  "threeLanguageGameDelivered": false,
+  "multilingualDesignLocales": [
+    "zh-TW",
+    "en",
+    "pt-BR"
+  ],
+  "capacityWorkResumed": false,
+  "userClientReplaced": false,
+  "builtAtUtc": "2026-09-29T13:44:51.9561134+00:00"
+}

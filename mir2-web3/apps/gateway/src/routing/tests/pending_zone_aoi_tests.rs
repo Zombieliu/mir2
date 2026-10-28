@@ -108,13 +108,17 @@ fn town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spa
         );
     }
 
-    runtime
+    let mut death_packets = runtime
         .inner
         .execute(WorldCommand::ClientPacket(ClientPacket::Chat {
             message: "@DIE".to_string(),
             linked_items: Vec::new(),
         }))
         .expect("private death fixture should execute");
+    runtime.filter_stale_owner_dead_entity_packets(&mut death_packets);
+    assert!(death_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Death { .. })));
     let revive_packets = runtime
         .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
         .expect("TownRevive should execute through the Gateway");
@@ -205,7 +209,9 @@ fn authoritative_zone_death_discards_queued_live_spawn_and_positive_health() {
     let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
     let mut runtime = shared_session_runtime(shared.clone());
     start_demo_runtime(&mut runtime);
-    let key = runtime.current_presence_key().expect("presence should exist");
+    let key = runtime
+        .current_presence_key()
+        .expect("presence should exist");
     let session_id = runtime
         .current_zone_session_id()
         .expect("Zone session should exist");
@@ -263,15 +269,19 @@ fn authoritative_zone_death_discards_queued_live_spawn_and_positive_health() {
             monster: spawn.clone(),
             now_ms: death_now_ms,
         });
-        outbounds.extend(state.zone_manager.handle(ZoneCommand::UpdatePlayerCombatStats {
-            session_id: session_id.clone(),
-            stats: mir2_simulation::ZonePlayerCombatStats {
-                min_dc: 10_000,
-                max_dc: 10_000,
-                accuracy: 100,
-                ..Default::default()
-            },
-        }));
+        outbounds.extend(
+            state
+                .zone_manager
+                .handle(ZoneCommand::UpdatePlayerCombatStats {
+                    session_id: session_id.clone(),
+                    stats: mir2_simulation::ZonePlayerCombatStats {
+                        min_dc: 10_000,
+                        max_dc: 10_000,
+                        accuracy: 100,
+                        ..Default::default()
+                    },
+                }),
+        );
         outbounds.extend(state.zone_manager.handle(ZoneCommand::PlayerAttackObject {
             session_id: session_id.clone(),
             object_id,
@@ -359,10 +369,7 @@ fn authoritative_zone_death_discards_queued_live_spawn_and_positive_health() {
     }
     {
         let mut state = shared.lock().expect("shared state should lock");
-        state.queue_zone_packets(
-            key,
-            vec![stale_corpse, zone_monster_spawn_packet(&spawn)],
-        );
+        state.queue_zone_packets(key, vec![stale_corpse, zone_monster_spawn_packet(&spawn)]);
     }
     let after_revive = runtime.apply_pending_zone_packets();
     assert_eq!(object_monster_count(&after_revive, object_id), 1);

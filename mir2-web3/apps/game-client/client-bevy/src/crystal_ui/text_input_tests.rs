@@ -328,7 +328,6 @@ fn menu_editor_and_overlay_labels_use_original_arial_family() {
     }
 }
 
-
 fn mail_app() -> (App, Entity) {
     let mut state = NativePlayerUiState::default();
     state.core.panel = mir2_ui_core::state::UiPanel::Mail;
@@ -382,12 +381,20 @@ fn mail_ime_preedit_never_mutates_draft_and_exact_commit_is_once() {
         },
     );
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose
-            .as_ref().unwrap().message,
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .unwrap()
+            .message,
         "A"
     );
-    assert!(app.world().resource::<super::super::mail_editor::MailLetterEditor>()
-        .composition().is_some());
+    assert!(app
+        .world()
+        .resource::<super::super::mail_editor::MailLetterEditor>()
+        .composition()
+        .is_some());
     send(
         &mut app,
         Ime::Commit {
@@ -396,11 +403,20 @@ fn mail_ime_preedit_never_mutates_draft_and_exact_commit_is_once() {
         },
     );
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose
-            .as_ref().unwrap().message,
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .unwrap()
+            .message,
         "A你好"
     );
-    assert!(app.world().resource::<NativePlayerUiState>().ime_frame_consumed);
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .ime_frame_consumed
+    );
 }
 
 #[test]
@@ -414,8 +430,9 @@ fn covered_or_new_session_mail_target_rejects_late_ime_commit() {
             cursor: None,
         },
     );
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_feedback_prompt =
-        Some("covered".into());
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_feedback_prompt = Some("covered".into());
     send(
         &mut app,
         Ime::Commit {
@@ -424,12 +441,20 @@ fn covered_or_new_session_mail_target_rejects_late_ime_commit() {
         },
     );
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose
-            .as_ref().unwrap().message,
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .unwrap()
+            .message,
         "A"
     );
-    assert!(app.world().resource::<super::super::mail_editor::MailLetterEditor>()
-        .composition().is_none());
+    assert!(app
+        .world()
+        .resource::<super::super::mail_editor::MailLetterEditor>()
+        .composition()
+        .is_none());
     app.world_mut()
         .resource_mut::<NativePlayerUiState>()
         .mail_feedback_prompt = None;
@@ -444,8 +469,13 @@ fn covered_or_new_session_mail_target_rejects_late_ime_commit() {
         },
     );
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose
-            .as_ref().unwrap().message,
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .unwrap()
+            .message,
         "A"
     );
 }

@@ -137,7 +137,6 @@ fn persistence_round_trip_and_invalid_load_are_atomic() {
     assert!(!m.capture("A", KeyModifiers::default()));
 }
 
-
 #[test]
 fn skill_mode_remaps_only_explicit_skill_modifier_rows() {
     let mut model = KeyboardDialogUi::default();
@@ -174,7 +173,10 @@ fn skill_mode_remaps_only_explicit_skill_modifier_rows() {
         (0, 0)
     );
     assert_eq!(
-        (model.bindings[disabled].ctrl, model.bindings[disabled].tilde),
+        (
+            model.bindings[disabled].ctrl,
+            model.bindings[disabled].tilde
+        ),
         (1, 0)
     );
     assert_eq!(

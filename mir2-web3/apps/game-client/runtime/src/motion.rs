@@ -160,7 +160,9 @@ impl Plugin for CrystalMoveClockPlugin {
             .init_resource::<MoveClockSource>()
             .add_systems(
                 PreUpdate,
-                tick_crystal_move_clock_system.in_set(CrystalMoveClockSet).before(super::NativeMotionProducerSet),
+                tick_crystal_move_clock_system
+                    .in_set(CrystalMoveClockSet)
+                    .before(super::NativeMotionProducerSet),
             );
     }
 }

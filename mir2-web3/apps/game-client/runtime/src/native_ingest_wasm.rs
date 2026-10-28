@@ -55,8 +55,16 @@ pub(crate) enum NativeInboundMessage {
 pub(crate) struct NativeInbound;
 
 impl NativeInbound {
-    pub(crate) fn mail_stream_failure(&self)->Option<mir2_client_bevy::mail_service::MailServiceStreamEpoch>{None}
-    pub(crate) fn fail_mail_stream(&self,_epoch:mir2_client_bevy::mail_service::MailServiceStreamEpoch){}
+    pub(crate) fn mail_stream_failure(
+        &self,
+    ) -> Option<mir2_client_bevy::mail_service::MailServiceStreamEpoch> {
+        None
+    }
+    pub(crate) fn fail_mail_stream(
+        &self,
+        _epoch: mir2_client_bevy::mail_service::MailServiceStreamEpoch,
+    ) {
+    }
     pub(crate) fn new() -> Self {
         Self
     }

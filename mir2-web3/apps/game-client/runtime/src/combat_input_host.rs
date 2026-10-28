@@ -124,9 +124,8 @@ mod web {
         };
         let mut clock = ANCHOR.with(Cell::get);
         let frame_ms = TIME.with(Cell::get);
-        let accepted = STATE.with(|s| {
-            ingest_combat_snapshot(&mut s.borrow_mut(), &mut clock, snapshot, frame_ms)
-        });
+        let accepted = STATE
+            .with(|s| ingest_combat_snapshot(&mut s.borrow_mut(), &mut clock, snapshot, frame_ms));
         if accepted {
             ANCHOR.with(|a| a.set(clock));
         }

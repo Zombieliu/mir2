@@ -250,6 +250,7 @@ fn build_animation_catalog(source: &HashMap<String, SourceAction>) -> Option<Ani
     for (action, source_name) in [
         (AnimationAction::Show, "Show"),
         (AnimationAction::Hide, "Hide"),
+        (AnimationAction::Jump, "Jump"),
     ] {
         if let Some(source_action) = source.get(source_name) {
             catalog.insert(action, source_action.descriptor).ok()?;
@@ -276,6 +277,7 @@ fn resolve_source_action<'a>(
         AnimationAction::AttackRange1 => &["AttackRange1", "Attack1", "Standing"],
         AnimationAction::AttackRange2 => &["AttackRange2", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::DashAttack => &["DashAttack", "Attack1", "Walking", "Standing"],
+        AnimationAction::Jump => &["Jump"],
         AnimationAction::Spell => &["Spell", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::Struck => &["Struck", "Standing"],
         AnimationAction::Die => &["Die", "Dead", "Standing"],

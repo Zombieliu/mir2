@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.mining.r19.operator-recipes.v1",
+  "gameSource": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+  "engineSource": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "oldGame": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "originObjectCount": 40,
+  "sourceBytesVerified": 1051831921,
+  "originWriterSha256": "95c6b60ff94cbd72f6caf5fabf05ab275052e9a869fbdd20594418c430545710",
+  "gatewayOperatorSha256": "7de335743dfcafe8717d566e3bf4193096a4dd77e954be7031f68fa91f1251c7",
+  "gatewayManifestSha256": "833c76390bcc7752a7f8b8fb2b6fcd3e5fe5d5acadcb8911b272b99598d1d515",
+  "guardSha256": "10693760a24973f896caa3f5ac6b1f59e02a32f6e9977cea0dbaa65adbaa0811",
+  "originConfigSha256": "4f54f9ca961771de96efff9b24d983815cfbbf5c69369bed9da5e9c61dec4632",
+  "publicMutations": false,
+  "automaticV6RollbackAfterV7Start": false
+}

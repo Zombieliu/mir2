@@ -2,6 +2,7 @@ import assert from "node:assert/strict";import test from "node:test";import {rea
 function load(url){const m={exports:{}};new Function("exports","module","require",ts.transpileModule(readFileSync(url,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(m.exports,m,p=>load(new URL(`${p}.ts`,url)));return m.exports;}
 const ui=load(new URL("../lib/bevy-character-ui.ts",import.meta.url));
 const {questWorldControlAt}=load(new URL("../lib/bevy-quest-world-controls.ts",import.meta.url));
+const {storagePrepareCanvasStyle}=load(new URL("../lib/bevy-storage-presentation.ts",import.meta.url));
 const caps={schemaVersion:1,characterPageAbiVersion:1,characterEquipmentIntentAbiVersion:1,compiled:true,startup:true};
 const item={uniqueId:0,key:"a",name:"a",quantity:1,container:2,slot:0,icon:1,description:"",stateImageX:0,stateImageY:0,stateImageWidth:0,stateImageHeight:0};
 function fixture(){let sent=null,sink=null,frame=1,now=0,current=true,cleared=0;const outcomes=[];
@@ -76,6 +77,7 @@ test("actual shell gives foreground Bag/modal priority and consumes Character cl
   readBevyQuestWorldControls:()=>null,readBevyQuestWorldControlBlockers:()=>null,questWorldControlAt,readBevyHudStatus:()=>null,
   sceneInteractionReady:true,questLocalModalOpen:false,mobileMoreOpen:false,bevyQuestUiCapturesPointer:false,bevyCharacterPageReady:true,
   HTMLElement:Element,sharedUiCanvasId:()=>"canvas",webGl2SharedCanvasPrototype:false,
+  cancelWorldFishingHeldPointer:()=>{},
   scenePointFromMouseEvent:e=>({sceneX:e.clientX,sceneY:e.clientY}),handleSharedHudPointer:()=>{hudCalls++;return true;}};
  const keys=Object.keys(scope),code=ts.transpileModule(decl.join("\n"),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
  const api=new Function(...keys,`${code};return {handleSharedBagPointer,cancelSharedCharacterPointer};`)(...keys.map(k=>scope[k]));
@@ -97,7 +99,7 @@ test("fixed stage UI canvas keeps Character visible and interactive for GPU and 
  assert.equal(world.attributes.properties.some(a=>a.name?.getText(ast)==="data-ui-interactive"),false);
  assert.equal(stage.attributes.properties.some(a=>a.name?.getText(ast)==="data-ui-interactive"),true);
  for(const webGl2SharedCanvasPrototype of [false,true]){
-   const scope={screen:"game",webGl2SharedCanvasPrototype,bevyCharacterPageReady:true,bevyMailPageReady:false,bevySpellsPageReady:false,bevyQuestUiCapturesPointer:false,bevyQuestWorldUiReady:false,bevyQuestUiReady:false,bevyBagUiActive:false,bevyHudUiReady:false,bevyNpcShopUiActive:false,bevyNpcShopUiTransitioning:false,bevyStorageUiActive:false,bevyStorageUiTransitioning:false,hpOrbOwner:false,mpOrbOwner:false,experienceBarOwner:false,weightBarOwner:false};
+   const scope={screen:"game",webGl2SharedCanvasPrototype,bevyHeroUiActive:false,bevyHeroUiTransitioning:false,bevyCharacterPageReady:true,bevyMailPageReady:false,bevySpellsPageReady:false,bevyQuestUiCapturesPointer:false,bevyQuestWorldUiReady:false,bevyQuestUiReady:false,bevyBagUiActive:false,bevyHudUiReady:false,bevyNpcShopUiActive:false,bevyNpcShopUiTransitioning:false,bevyStorageUiActive:false,bevyStorageUiTransitioning:false,hpOrbOwner:false,mpOrbOwner:false,experienceBarOwner:false,weightBarOwner:false,storagePrepareCanvasStyle,bevyStoragePreparePresentation:null,sharedUiCanvasId:()=>"canvas"};
    const value=name=>{const attribute=stage.attributes.properties.find(a=>a.name?.getText(ast)===name);return new Function(...Object.keys(scope),`return (${attribute.initializer.expression.getText(ast)});`)(...Object.values(scope));};
    assert.match(value("className"),/shared-quest-ui-visible/);assert.equal(value("data-ui-interactive"),"true");assert.equal(value("style").pointerEvents,"auto");
  }

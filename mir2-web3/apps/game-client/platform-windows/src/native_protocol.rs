@@ -32,6 +32,23 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    DepositRefineItem {
+        from: i32,
+        to: i32,
+    },
+    RetrieveRefineItem {
+        from: i32,
+        to: i32,
+    },
+    RefineCancel,
+    RefineItem {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+    },
+    CheckRefine {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+    },
     AllowMentor,
     AddMentor {
         name: String,
@@ -131,6 +148,44 @@ pub enum NativeOutboundCommand {
         hero: bool,
     },
     ClientVersion,
+    BillingStatus {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingCheckout {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "offerId")]
+        offer_id: String,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingBuyMonthlyCard {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingActivateMonthlyCard {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "itemUniqueId")]
+        item_unique_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    MonthlyCardStatus,
+    RedeemMonthlyCard {
+        code: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -411,6 +466,17 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "priceType")]
         price_type: i32,
     },
+    GameShopGift {
+        #[serde(rename = "requestId")]
+        request_id: String,
+        #[serde(rename = "gIndex")]
+        g_index: i32,
+        quantity: u8,
+        #[serde(rename = "priceType")]
+        price_type: i32,
+        #[serde(rename = "recipientName")]
+        recipient_name: String,
+    },
     SellItem {
         #[serde(rename = "uniqueId")]
         unique_id: u64,
@@ -505,6 +571,9 @@ pub enum NativeOutboundCommand {
     GuildBuffUpdate {
         action: u8,
         id: i32,
+    },
+    GuildNameReturn {
+        name: String,
     },
     RequestGuildInfo {
         #[serde(rename = "infoType")]
@@ -619,6 +688,11 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::DepositRefineItem { .. } => "depositRefineItem",
+            Self::RetrieveRefineItem { .. } => "retrieveRefineItem",
+            Self::RefineCancel => "refineCancel",
+            Self::RefineItem { .. } => "refineItem",
+            Self::CheckRefine { .. } => "checkRefine",
             Self::AllowMentor => "allowMentor",
             Self::AddMentor { .. } => "addMentor",
             Self::CancelMentor => "cancelMentor",
@@ -643,6 +717,12 @@ impl NativeOutboundCommand {
             Self::Observe { .. } => "observe",
             Self::Inspect { .. } => "inspect",
             Self::ClientVersion => "clientVersion",
+            Self::BillingStatus { .. } => "billingStatus",
+            Self::BillingCheckout { .. } => "billingCheckout",
+            Self::BillingBuyMonthlyCard { .. } => "billingBuyMonthlyCard",
+            Self::BillingActivateMonthlyCard { .. } => "billingActivateMonthlyCard",
+            Self::MonthlyCardStatus => "monthlyCardStatus",
+            Self::RedeemMonthlyCard { .. } => "redeemMonthlyCard",
             Self::ClientCapabilities { .. } => "clientCapabilities",
             Self::ResumeSession { .. } => "resumeSession",
             Self::Login { .. } => "login",
@@ -695,6 +775,7 @@ impl NativeOutboundCommand {
             Self::SpellToggle { .. } => "spellToggle",
             Self::BuyItem { .. } => "buyItem",
             Self::GameShopBuy { .. } => "gameShopBuy",
+            Self::GameShopGift { .. } => "gameShopGift",
             Self::SellItem { .. } => "sellItem",
             Self::RepairItem { .. } => "repairItem",
             Self::SpecialRepairItem { .. } => "specialRepairItem",
@@ -715,6 +796,7 @@ impl NativeOutboundCommand {
             Self::DelMember { .. } => "delMember",
             Self::GroupInvite { .. } => "groupInvite",
             Self::GuildBuffUpdate { .. } => "guildBuffUpdate",
+            Self::GuildNameReturn { .. } => "guildNameReturn",
             Self::RequestGuildInfo { .. } => "requestGuildInfo",
             Self::GuildStorageGoldChange { .. } => "guildStorageGoldChange",
             Self::GuildStorageItemChange { .. } => "guildStorageItemChange",
@@ -847,6 +929,7 @@ pub struct Disconnect {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ErrorEvent {
+    pub code: Option<String>,
     pub message: Option<String>,
     pub packet: Option<String>,
     pub payload: Value,
@@ -961,6 +1044,8 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    Billing(mir2_client_bevy::native_billing::BillingReply),
+    MonthlyCard(mir2_client_bevy::native_monthly_card::MonthlyCardReply),
     Packet(PacketEvent),
     Error(ErrorEvent),
     ResumeCredential(ResumeCredentialEvent),
@@ -1019,21 +1104,41 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "billing" => serde_json::from_value(payload)
+            .map(InboundEvent::Billing)
+            .map_err(|_| ParseInboundError::InvalidJson("invalid billing response".into())),
+        "monthlyCard" => serde_json::from_value(payload)
+            .map(InboundEvent::MonthlyCard)
+            .map_err(|error| {
+                ParseInboundError::InvalidJson(format!("invalid monthly card response: {error}"))
+            }),
         "packet" => parse_packet(packet.as_deref(), payload),
-        "error" => Ok(InboundEvent::Error(ErrorEvent {
-            message: payload
-                .get("message")
+        "error" => {
+            // The public Gateway sends flat error envelopes. Keep the older
+            // nested shape readable, without hiding the authoritative reason.
+            let code = value
+                .get("code")
+                .or_else(|| payload.get("code"))
                 .and_then(Value::as_str)
-                .map(str::to_owned)
-                .or_else(|| {
-                    payload
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .map(str::to_owned)
-                }),
-            packet: packet.clone(),
-            payload,
-        })),
+                .map(str::to_owned);
+            let message = [
+                value.get("message"),
+                value.get("error"),
+                payload.get("message"),
+                payload.get("error"),
+            ]
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .find(|message| !message.trim().is_empty())
+            .map(str::to_owned);
+            Ok(InboundEvent::Error(ErrorEvent {
+                code,
+                message,
+                packet: packet.clone(),
+                payload,
+            }))
+        }
         "worldSnapshot" => Ok(InboundEvent::Packet(PacketEvent::WorldSnapshot(
             WorldSnapshot { payload },
         ))),
@@ -1490,6 +1595,69 @@ mod tests {
     }
 
     #[test]
+    fn billing_commands_use_only_server_owned_account_and_offer_identity() {
+        assert_serialized(
+            NativeOutboundCommand::BillingStatus {
+                character_index: 7,
+                request_id: 11,
+            },
+            serde_json::json!({"type":"billingStatus","characterIndex":7,"requestId":11}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingCheckout {
+                character_index: 7,
+                offer_id: "small".into(),
+                order_request_id: "native-stable-order".into(),
+                request_id: 12,
+            },
+            serde_json::json!({"type":"billingCheckout","characterIndex":7,"offerId":"small","orderRequestId":"native-stable-order","requestId":12}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingBuyMonthlyCard {
+                character_index: 7,
+                order_request_id: "native-stable-month".into(),
+                request_id: 13,
+            },
+            serde_json::json!({"type":"billingBuyMonthlyCard","characterIndex":7,"orderRequestId":"native-stable-month","requestId":13}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::BillingActivateMonthlyCard {
+                character_index: 7,
+                item_unique_id: "18446744073709551615".into(),
+                request_id: 14,
+            },
+            serde_json::json!({"type":"billingActivateMonthlyCard","characterIndex":7,"itemUniqueId":"18446744073709551615","requestId":14}),
+        );
+    }
+
+    #[test]
+    fn billing_response_is_typed_and_never_logs_the_checkout_url() {
+        let parsed = parse_inbound_value(serde_json::json!({"type":"billing","payload":{
+            "operation":"checkout","requestId":12,"characterIndex":7,
+            "checkoutUrl":"https://checkout.stripe.com/c/pay/cs_test_opaque#private",
+            "replayed":true
+        }}))
+        .unwrap();
+        let debug = format!("{parsed:?}");
+        assert!(!debug.contains("cs_test_opaque"));
+        assert!(!debug.contains("private"));
+        let InboundEvent::Billing(reply) = parsed else {
+            panic!("missing typed billing response");
+        };
+        assert_eq!(reply.request_id, 12);
+        assert_eq!(reply.character_index, 7);
+        assert_eq!(
+            reply.operation,
+            mir2_client_bevy::native_billing::BillingOperation::Checkout
+        );
+        let error = parse_inbound_value(serde_json::json!({"type":"billing","payload":{
+            "operation":"https://checkout.stripe.com/c/pay/private","requestId":12,"characterIndex":7
+        }})).unwrap_err().to_string();
+        assert!(!error.contains("checkout.stripe.com"));
+        assert!(!error.contains("private"));
+    }
+
+    #[test]
     fn outbound_commands_serialize_with_camel_case_tagged_wire_contract() {
         assert_serialized(
             NativeOutboundCommand::ClientVersion,
@@ -1908,6 +2076,38 @@ mod tests {
     }
 
     #[test]
+    fn game_shop_gift_wire_is_distinct_and_receipt_keeps_exact_recipient() {
+        let command = NativeOutboundCommand::GameShopGift {
+            request_id: "gs-1".into(),
+            g_index: 31,
+            quantity: 1,
+            price_type: 0,
+            recipient_name: "Friend_1".into(),
+        };
+        assert_eq!(command.command_type(), "gameShopGift");
+        assert_serialized(
+            command,
+            json!({"type":"gameShopGift", "requestId":"gs-1",
+            "gIndex":31, "quantity":1, "priceType":0, "recipientName":"Friend_1"}),
+        );
+        let gift = parse_inbound_value(json!({
+            "type":"gameShopReceipt", "protocol":"nativeGameShopGiftReceiptV1",
+            "requestId":"gs-1", "success":true, "gIndex":31,
+            "quantity":1, "priceType":0, "recipientName":"Friend_1", "mailId":7
+        }))
+        .unwrap();
+        assert!(matches!(gift, InboundEvent::GameShopReceipt(receipt)
+            if receipt.is_valid() && receipt.recipient_name.as_deref() == Some("Friend_1")));
+        let wrong = parse_inbound_value(json!({
+            "type":"gameShopReceipt", "protocol":"nativeGameShopReceiptV1",
+            "requestId":"gs-1", "success":true, "gIndex":31,
+            "quantity":1, "priceType":0, "recipientName":"Friend_1", "mailId":7
+        }))
+        .unwrap();
+        assert!(matches!(wrong, InboundEvent::GameShopReceipt(receipt) if !receipt.is_valid()));
+    }
+
+    #[test]
     fn allow_observe_packet_is_typed_and_requires_a_boolean() {
         let parsed = parse_inbound_event(
             r#"{"type":"packet","packet":"AllowObserve","payload":{"allow":true}}"#,
@@ -2270,6 +2470,28 @@ mod tests {
     }
 
     #[test]
+    fn inbound_flat_gateway_error_preserves_code_and_prefers_canonical_message() {
+        let InboundEvent::Error(error) = parse_inbound_event(
+            r#"{"type":"error","code":"authRateLimited","message":"public reason","payload":{"message":"legacy reason"}}"#,
+        ).unwrap() else { panic!("expected error envelope") };
+        assert_eq!(error.code.as_deref(), Some("authRateLimited"));
+        assert_eq!(error.message.as_deref(), Some("public reason"));
+    }
+
+    #[test]
+    fn inbound_gateway_error_uses_legacy_reason_when_flat_message_is_empty_or_invalid() {
+        for raw in [
+            r#"{"type":"error","message":"","payload":{"error":"legacy reason"}}"#,
+            r#"{"type":"error","message":false,"payload":{"message":"legacy reason"}}"#,
+        ] {
+            let InboundEvent::Error(error) = parse_inbound_event(raw).unwrap() else {
+                panic!("expected error envelope")
+            };
+            assert_eq!(error.message.as_deref(), Some("legacy reason"));
+        }
+    }
+
+    #[test]
     fn inbound_change_password_results_preserve_authoritative_codes() {
         let result = parse_inbound_event(
             r#"{
@@ -2291,7 +2513,10 @@ mod tests {
         ).expect("parse canonical gateway expiry without floating-point conversion");
         match canonical {
             InboundEvent::Packet(PacketEvent::ChangePasswordBanned(banned)) => {
-                assert_eq!(banned.expiry.as_ref().and_then(Value::as_i64), Some(630822816000000001));
+                assert_eq!(
+                    banned.expiry.as_ref().and_then(Value::as_i64),
+                    Some(630822816000000001)
+                );
             }
             other => panic!("expected canonical change password banned result, got: {other:?}"),
         }
@@ -2518,5 +2743,25 @@ mod tests {
 
         let malformed = parse_inbound_event("{not json");
         assert!(malformed.is_err());
+    }
+
+    #[test]
+    fn monthly_card_wire_keeps_request_correlation_and_redacts_vouchers() {
+        let code = format!("MC1-{}", "A".repeat(43));
+        let command = NativeOutboundCommand::RedeemMonthlyCard {
+            code: code.clone(),
+            request_id: 7,
+        };
+        let wire = serde_json::to_value(&command).unwrap();
+        assert_eq!(wire["type"], "redeemMonthlyCard");
+        assert_eq!(wire["requestId"], 7);
+        assert_eq!(wire["code"], code);
+        assert!(!format!("{command:?}").contains(&code));
+        let event = parse_inbound_event(r#"{"type":"monthlyCard","payload":{"operation":"redeem","requestId":7,"replayed":false,"status":{"required":true,"active":true,"expiresAtMs":9999,"serverNowMs":1,"remainingMs":9998,"canEnterGame":true}}}"#).unwrap();
+        let InboundEvent::MonthlyCard(reply) = event else {
+            panic!("monthly card reply missing");
+        };
+        assert_eq!(reply.request_id, Some(7));
+        assert!(reply.status.unwrap().can_enter_game);
     }
 }

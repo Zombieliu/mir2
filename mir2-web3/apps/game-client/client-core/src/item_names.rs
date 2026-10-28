@@ -79,6 +79,33 @@ const MONSTERS: &[(&str, &str, &str)] = &[
 ];
 
 const NAMES: &[(&str, &str)] = &[
+    // Exact Assassin/Archer and five-class growth reward identities.
+    ("BackStep", "后撤步"),
+    ("BlackIronCrowSwords", "黑铁鸦双剑"),
+    ("BladesOfDarkness", "黑暗双刃"),
+    ("CompoundBow", "复合弓"),
+    ("Concentration", "专注"),
+    ("DoubleShot", "连射"),
+    ("DoubleSlash", "双重斩击"),
+    ("ExplosiveTrap", "爆炸陷阱"),
+    ("FatalSword", "致命剑术"),
+    ("FiendBow", "恶魔弓"),
+    ("FlashDash", "拔刀术"),
+    ("Focus", "聚焦"),
+    ("Haste", "疾速"),
+    ("HeavenlySword", "天剑"),
+    ("HoaSword", "花剑"),
+    ("IronBlades", "铁双刃"),
+    ("LeatherArmour(F)", "皮革盔甲（女）"),
+    ("LeatherArmour(M)", "皮革盔甲（男）"),
+    ("LongBow", "长弓"),
+    ("Meditation", "冥想"),
+    ("SharpSabre", "锋利刀"),
+    ("SpiritRobe(F)", "灵魂长袍（女）"),
+    ("SpiritRobe(M)", "灵魂长袍（男）"),
+    ("StraightShot", "直射"),
+    ("ToughLongBow", "坚韧长弓"),
+    ("WoodenBow", "木弓"),
     ("Warrior", "战士"),
     ("Wizard", "法师"),
     ("Taoist", "道士"),
@@ -237,20 +264,19 @@ const NPCS: &[(&str, &str)] = &[
     ("ArcherGuard", "弓箭守卫"),
 ];
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
     fn exact_names_keep_known_npc_variants_and_unknown_input_bytes() {
-        assert_eq!(name("Amulet"),"护身符");
-        assert_eq!(known_name("amulet"),None);
-        let (key,translation)=NPCS.iter().find(|(key,_)| key.contains('_')).unwrap();
-        assert_eq!(name(key),*translation);
-        assert_eq!(name(&key.replace('_'," ")),*translation);
-        assert_eq!(name(&key.replace('_'," - ")),*translation);
-        assert_eq!(name(" Unknown Item ")," Unknown Item ");
+        assert_eq!(name("Amulet"), "护身符");
+        assert_eq!(known_name("amulet"), None);
+        let (key, translation) = NPCS.iter().find(|(key, _)| key.contains('_')).unwrap();
+        assert_eq!(name(key), *translation);
+        assert_eq!(name(&key.replace('_', " ")), *translation);
+        assert_eq!(name(&key.replace('_', " - ")), *translation);
+        assert_eq!(name(" Unknown Item "), " Unknown Item ");
         assert!(known_monster("Scarecrow").is_some());
-        assert_eq!(known_monster("scarecrow"),None);
+        assert_eq!(known_monster("scarecrow"), None);
     }
 }

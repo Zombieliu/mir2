@@ -5,53 +5,53 @@ pub mod capture_context;
 #[cfg(feature = "web-quest-ui")]
 pub mod character_ui_host;
 pub mod combat_input_host;
+#[cfg(feature = "web-item-tooltip")]
+mod combat_modes_host;
 pub mod entity_animation;
 mod entity_animation_bridge;
 #[cfg(test)]
 #[path = "fallback_hierarchy_tests.rs"]
 mod fallback_hierarchy_tests;
-#[cfg(feature = "web-quest-ui")]
-pub mod hud_ui_host;
 #[cfg(all(feature = "web-quest-ui", any(target_arch = "wasm32", test)))]
 pub mod hero_ui_host;
+#[cfg(feature = "web-quest-ui")]
+pub mod hud_ui_host;
 mod interpolation;
+#[cfg(feature = "web-item-tooltip")]
+mod item_tooltip_query;
 mod lighting;
 mod local_motion;
 #[cfg(test)]
 #[path = "mail_service_runtime_tests.rs"]
 mod mail_service_runtime_tests;
+#[cfg(feature = "web-quest-ui")]
+pub mod mail_ui_host;
 mod motion;
 mod movement_shadow;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native_ingest;
-#[cfg(not(target_arch = "wasm32"))]
-pub mod npc_purchase_economy;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod npc_purchase_economy;
+#[cfg(feature = "web-quest-ui")]
+mod npc_shop_ui_host;
 mod presentation_pose;
 #[cfg(feature = "web-quest-ui")]
-mod quest_ui_host;
-#[cfg(feature = "web-quest-ui")]
 mod quest_route_plan;
-#[cfg(feature = "web-item-tooltip")]
-mod item_tooltip_query;
-#[cfg(feature = "web-item-tooltip")]
-mod skill_bar_query;
-#[cfg(feature = "web-item-tooltip")]
-mod combat_modes_host;
+#[cfg(feature = "web-quest-ui")]
+mod quest_ui_host;
 mod remote_motion;
 #[cfg(not(target_arch = "wasm32"))]
 mod render_diagnostics;
 mod runtime_ui_capabilities;
+#[cfg(feature = "web-item-tooltip")]
+mod skill_bar_query;
 #[cfg(feature = "web-quest-ui")]
 pub mod spells_ui_host;
 #[cfg(feature = "web-quest-ui")]
-mod npc_shop_ui_host;
-#[cfg(feature = "web-quest-ui")]
 mod storage_ui_host;
-#[cfg(feature = "web-quest-ui")]
-pub mod mail_ui_host;
 mod webgl2_shared_ui;
 #[cfg(not(target_arch = "wasm32"))]
 pub use render_diagnostics::{native_render_diagnostics_enabled, record_native_render_marker};
@@ -239,14 +239,19 @@ pub struct Mir2NativeSessionBoundaryPlugin;
 /// Production typed parcel ingress, usable with the session-boundary plugin
 /// on a plain App. Its parent runtime retains the original model ordering.
 pub struct Mir2NativeMailServiceIngestPlugin;
-#[derive(Debug,Clone,Copy,PartialEq,Eq,Hash,SystemSet)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, SystemSet)]
 struct NativeMailServiceIngestSet;
 impl Plugin for Mir2NativeMailServiceIngestPlugin {
-    fn build(&self, app:&mut App) {
+    fn build(&self, app: &mut App) {
         app.init_resource::<mir2_client_bevy::mail_service::MailServiceInbox>()
             .init_resource::<native_ingest::NativeInbound>()
-            .add_systems(Update,ingest_pending_mail_service.in_set(PendingLifecycleSet::Ingest)
-                .in_set(NativeMailServiceIngestSet).after(apply_session_reset_to_runtime_models));
+            .add_systems(
+                Update,
+                ingest_pending_mail_service
+                    .in_set(PendingLifecycleSet::Ingest)
+                    .in_set(NativeMailServiceIngestSet)
+                    .after(apply_session_reset_to_runtime_models),
+            );
     }
 }
 
@@ -1414,27 +1419,51 @@ pub fn get_mir2_quest_route_plan(query_json: &str, blocked_bits: &[u8]) -> Strin
 
 /// Additive local HUD preference support; the existing strict capabilities JSON is unchanged.
 #[wasm_bindgen(js_name = getMir2HudPreferencesVersion)]
-pub fn get_mir2_hud_preferences_version() -> u32 { if cfg!(feature = "web-quest-ui") { 1 } else { 0 } }
+pub fn get_mir2_hud_preferences_version() -> u32 {
+    if cfg!(feature = "web-quest-ui") {
+        1
+    } else {
+        0
+    }
+}
 
 #[wasm_bindgen(js_name = getMir2QuestNameTargetsVersion)]
-pub fn get_mir2_quest_name_targets_version() -> u32 { if cfg!(feature = "web-quest-ui") { 1 } else { 0 } }
+pub fn get_mir2_quest_name_targets_version() -> u32 {
+    if cfg!(feature = "web-quest-ui") {
+        1
+    } else {
+        0
+    }
+}
 
 /// Read-only identities from the current shared Quest tracker. Thin ABI0 remains explicitly unknown.
 #[wasm_bindgen(js_name = getMir2QuestNameTargets)]
 pub fn get_mir2_quest_name_targets() -> String {
     #[cfg(all(feature = "web-quest-ui", target_arch = "wasm32"))]
-    { return quest_ui_host::quest_name_targets_json(); }
+    {
+        return quest_ui_host::quest_name_targets_json();
+    }
     #[cfg(not(all(feature = "web-quest-ui", target_arch = "wasm32")))]
-    { "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into() }
+    {
+        "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into()
+    }
 }
 
 #[wasm_bindgen(js_name = getMir2CombatModeKeysVersion)]
-pub fn get_mir2_combat_mode_keys_version() -> u32 { if cfg!(feature = "web-item-tooltip") { 1 } else { 0 } }
+pub fn get_mir2_combat_mode_keys_version() -> u32 {
+    if cfg!(feature = "web-item-tooltip") {
+        1
+    } else {
+        0
+    }
+}
 
 /// Local Native reducer only; the browser's final socket gate retains all authority.
 #[cfg(feature = "web-item-tooltip")]
 #[wasm_bindgen(js_name = processMir2CombatModeKeys)]
-pub fn process_mir2_combat_mode_keys(input: &str) -> String { combat_modes_host::process_json(input) }
+pub fn process_mir2_combat_mode_keys(input: &str) -> String {
+    combat_modes_host::process_json(input)
+}
 
 /// Read-only Crystal item document, shared with the Native tooltip painter.
 #[cfg(feature = "web-item-tooltip")]
@@ -1467,7 +1496,8 @@ pub fn get_mir2_skill_bar_document(query_json: &str) -> String {
 #[cfg(test)]
 #[test]
 fn npc_gold_buy_query_is_data_only_and_rejects_incomplete_models() {
-    let result: serde_json::Value = serde_json::from_str(&get_mir2_npc_gold_buy_plan("{}")).unwrap();
+    let result: serde_json::Value =
+        serde_json::from_str(&get_mir2_npc_gold_buy_plan("{}")).unwrap();
     assert_eq!(result["canBuy"], false);
     assert_eq!(result["blockReason"], "invalidInput");
     assert!(result["command"].is_null());
@@ -1479,12 +1509,15 @@ pub fn get_mir2_mail_ui_capabilities() -> String {
         && (COMPILED_RENDER_BACKEND == "webgpu"
             || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
     #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
-    let startup = { let mode = quest_ui_host::startup_mode();
-        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2) };
+    let startup = {
+        let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2)
+    };
     #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
     let startup = false;
     serde_json::json!({"schemaVersion":1,"mailPageAbiVersion":u8::from(compiled),
-        "mailIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup}).to_string()
+        "mailIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup})
+    .to_string()
 }
 
 #[wasm_bindgen(js_name = getMir2MailComposeUiCapabilities)]
@@ -1493,12 +1526,15 @@ pub fn get_mir2_mail_compose_ui_capabilities() -> String {
         && (COMPILED_RENDER_BACKEND == "webgpu"
             || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
     #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
-    let startup = { let mode = quest_ui_host::startup_mode();
-        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2) };
+    let startup = {
+        let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2)
+    };
     #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
     let startup = false;
     serde_json::json!({"schemaVersion":1,"mailComposeUiAbiVersion":u8::from(compiled),
-        "textAdapterAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup}).to_string()
+        "textAdapterAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup})
+    .to_string()
 }
 #[wasm_bindgen(js_name = getMir2HudSourceGeometry)]
 pub fn get_mir2_hud_source_geometry() -> String {
@@ -1919,8 +1955,12 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             Update,
             PendingLifecycleSet::Ingest.before(PendingLifecycleSet::UiReset),
         )
-        .configure_sets(Update,NativeMailServiceIngestSet.after(ingest_pending_mail_model)
-            .before(ingest_pending_shop_model))
+        .configure_sets(
+            Update,
+            NativeMailServiceIngestSet
+                .after(ingest_pending_mail_model)
+                .before(ingest_pending_shop_model),
+        )
         .add_systems(
             Update,
             (
@@ -2011,13 +2051,16 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         );
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
-    app.add_systems(Update, npc_purchase_economy::apply_pending_native_npc_economy
-        .after(ingest_pending_chat_line)
-        .after(ingest_pending_lighting_render_state)
-        .after(NativeMailServiceIngestSet)
-        .before(PendingLifecycleSet::UiReset)
-        .before(RuntimePresentationSet)
-        .in_set(PendingLifecycleSet::Ingest));
+    app.add_systems(
+        Update,
+        npc_purchase_economy::apply_pending_native_npc_economy
+            .after(ingest_pending_chat_line)
+            .after(ingest_pending_lighting_render_state)
+            .after(NativeMailServiceIngestSet)
+            .before(PendingLifecycleSet::UiReset)
+            .before(RuntimePresentationSet)
+            .in_set(PendingLifecycleSet::Ingest),
+    );
     combat_input_host::install(&mut app);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(Last, render_diagnostics::capture_committed_frame);
@@ -2035,9 +2078,17 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
             }
             quest_ui_host::install(&mut app, ui_mode.shared_webgl2);
-            #[cfg(not(all(feature = "webgl2", not(feature = "webgpu"), not(feature = "webgl2-shared-ui"))))]
+            #[cfg(not(all(
+                feature = "webgl2",
+                not(feature = "webgpu"),
+                not(feature = "webgl2-shared-ui")
+            )))]
             storage_ui_host::install(&mut app);
-            #[cfg(not(all(feature = "webgl2", not(feature = "webgpu"), not(feature = "webgl2-shared-ui"))))]
+            #[cfg(not(all(
+                feature = "webgl2",
+                not(feature = "webgpu"),
+                not(feature = "webgl2-shared-ui")
+            )))]
             npc_shop_ui_host::install(&mut app);
         }
     }
@@ -2091,7 +2142,10 @@ mod shared_ui_camera_tests {
     fn non_wasm_web_spec_uses_the_world_canvas_selector() {
         let selector = get_mir2_runtime_canvas_selector();
         assert_eq!(selector, "#mir2-web3-canvas");
-        assert_eq!(RuntimeWindowSpec::web().canvas_selector.as_deref(), Some(selector.as_str()));
+        assert_eq!(
+            RuntimeWindowSpec::web().canvas_selector.as_deref(),
+            Some(selector.as_str())
+        );
     }
 
     #[test]
@@ -2781,39 +2835,77 @@ fn ingest_pending_mail_service(
     mut inbox: ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
     native: Res<native_ingest::NativeInbound>,
 ) {
-    if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
+    if let Some(epoch) = native.mail_stream_failure() {
+        inbox.fail_stream(epoch);
+    }
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::MailService(_)
-            | native_ingest::NativeInboundMessage::MailServiceStreamStarted(_)
-            | native_ingest::NativeInboundMessage::MailQuoteReceipt(_)
-            | native_ingest::NativeInboundMessage::MailSendReceipt(_)
-            | native_ingest::NativeInboundMessage::MailSendAcknowledgement(_)),
         |message| {
-            let critical_epoch=match &message{
-                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt)=>Some(receipt.ticket.epoch()),
-                native_ingest::NativeInboundMessage::MailSendReceipt(receipt)=>Some(receipt.ticket.epoch()),
-                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack)=>Some(ack.ticket.epoch()),
-                native_ingest::NativeInboundMessage::MailService(delivery) if matches!(delivery.event,mir2_client_bevy::mail_service::MailServiceEvent::Cost{..})=>Some(delivery.epoch),
-                _=>None,
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::MailService(_)
+                    | native_ingest::NativeInboundMessage::MailServiceStreamStarted(_)
+                    | native_ingest::NativeInboundMessage::MailQuoteReceipt(_)
+                    | native_ingest::NativeInboundMessage::MailSendReceipt(_)
+                    | native_ingest::NativeInboundMessage::MailSendAcknowledgement(_)
+            )
+        },
+        |message| {
+            let critical_epoch = match &message {
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt) => {
+                    Some(receipt.ticket.epoch())
+                }
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt) => {
+                    Some(receipt.ticket.epoch())
+                }
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack) => {
+                    Some(ack.ticket.epoch())
+                }
+                native_ingest::NativeInboundMessage::MailService(delivery)
+                    if matches!(
+                        delivery.event,
+                        mir2_client_bevy::mail_service::MailServiceEvent::Cost { .. }
+                    ) =>
+                {
+                    Some(delivery.epoch)
+                }
+                _ => None,
             };
             let accepted = match message {
-                native_ingest::NativeInboundMessage::MailServiceStreamStarted(marker) => inbox.start_stream(marker),
-                native_ingest::NativeInboundMessage::MailService(delivery) => inbox.push_delivery(delivery),
-                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt)=>inbox.push_quote_receipt(receipt),
-                native_ingest::NativeInboundMessage::MailSendReceipt(receipt)=>inbox.push_send_receipt(receipt),
-                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack)=>inbox.push_send_acknowledgement(ack),
+                native_ingest::NativeInboundMessage::MailServiceStreamStarted(marker) => {
+                    inbox.start_stream(marker)
+                }
+                native_ingest::NativeInboundMessage::MailService(delivery) => {
+                    inbox.push_delivery(delivery)
+                }
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt) => {
+                    inbox.push_quote_receipt(receipt)
+                }
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt) => {
+                    inbox.push_send_receipt(receipt)
+                }
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack) => {
+                    inbox.push_send_acknowledgement(ack)
+                }
                 _ => return,
             };
             if !accepted {
-                if let Some(epoch)=critical_epoch{native.fail_mail_stream(epoch);inbox.fail_stream(epoch);}
-                publish_status("native-mail-service-overflow", "mail service delivery rejected");
+                if let Some(epoch) = critical_epoch {
+                    native.fail_mail_stream(epoch);
+                    inbox.fail_stream(epoch);
+                }
+                publish_status(
+                    "native-mail-service-overflow",
+                    "mail service delivery rejected",
+                );
                 eprintln!("[runtime] mail service delivery rejected");
             }
         },
     );
     // A marker drained in this same pass must not erase an already-poisoned
     // producing stream merely because the inbox had not seen its epoch yet.
-    if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
+    if let Some(epoch) = native.mail_stream_failure() {
+        inbox.fail_stream(epoch);
+    }
 }
 
 fn ingest_pending_shop_model(
@@ -3017,7 +3109,10 @@ fn ingest_pending_npc_shop_service(
                 return;
             };
             if shop.apply_service_signal(signal) {
-                surface_signals.npc_shop_open_requested = true;
+                // Preserve packet order: Closed cancels an earlier service
+                // opening in this frame and must never open an empty shop.
+                surface_signals.npc_shop_open_requested =
+                    signal.mode != mir2_client_bevy::shop::NpcShopServiceMode::Closed;
             } else {
                 publish_status("native-decode-error", "invalid native NPC service");
             }
@@ -3297,16 +3392,18 @@ fn ingest_pending_storage_model(
 
 fn ingest_pending_hero_model(world: &mut World) {
     let mut messages = Vec::new();
-    world.resource::<native_ingest::NativeInbound>().drain_matching(
-        |message| match message {
-            native_ingest::NativeInboundMessage::HeroModel(_)
-            | native_ingest::NativeInboundMessage::HeroModelReceipt(_) => true,
-            #[cfg(not(target_arch = "wasm32"))]
-            native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_) => true,
-            _ => false,
-        },
-        |message| messages.push(message),
-    );
+    world
+        .resource::<native_ingest::NativeInbound>()
+        .drain_matching(
+            |message| match message {
+                native_ingest::NativeInboundMessage::HeroModel(_)
+                | native_ingest::NativeInboundMessage::HeroModelReceipt(_) => true,
+                #[cfg(not(target_arch = "wasm32"))]
+                native_ingest::NativeInboundMessage::HeroOwnerSnapshot(_) => true,
+                _ => false,
+            },
+            |message| messages.push(message),
+        );
     for message in messages {
         #[cfg(not(target_arch = "wasm32"))]
         if let native_ingest::NativeInboundMessage::HeroOwnerSnapshot(update) = message {
@@ -3324,8 +3421,8 @@ fn ingest_pending_hero_model(world: &mut World) {
                     {
                         if model.skill_key_ack.is_some() || model.item_result_receipt {
                             if let Some(mut receipts) = world.get_resource_mut::<mir2_client_bevy::hero_model::HeroModelReceipts>() {
-                                receipts.0.push_back(model.clone());
-                            }
+                            receipts.0.push_back(model.clone());
+                        }
                         }
                         world.insert_resource(model);
                     }
@@ -9672,6 +9769,9 @@ mod effect_mask_shadow_tests {
 mod native_data_path_tests {
     use super::*;
 
+    #[cfg(test)]
+    mod guild_rank_ingest_tests;
+
     fn ingest_app() -> App {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins)
@@ -9878,6 +9978,57 @@ mod native_data_path_tests {
         assert_eq!(receipts.0[0].bindings[0].hotkey, Some(16));
         assert_eq!(receipts.0[0].authority.snapshot_serial, 9);
         assert_eq!(receipts.0[0].skill_key_ack.as_ref().unwrap().request_id, 73);
+    }
+
+    #[test]
+    fn native_npc_service_queue_preserves_close_and_reopen_order() {
+        use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal, ShopModel};
+
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        for (modes, expected_mode, expected_open) in [
+            (
+                vec![NpcShopServiceMode::Closed],
+                NpcShopServiceMode::Closed,
+                false,
+            ),
+            (
+                vec![
+                    NpcShopServiceMode::Buy,
+                    NpcShopServiceMode::Sell,
+                    NpcShopServiceMode::Closed,
+                ],
+                NpcShopServiceMode::Closed,
+                false,
+            ),
+            (
+                vec![NpcShopServiceMode::Closed, NpcShopServiceMode::Buy],
+                NpcShopServiceMode::Buy,
+                true,
+            ),
+        ] {
+            let mut app = ingest_app();
+            for mode in modes {
+                assert!(native_ingest::push_native_npc_shop_service(
+                    serde_json::to_string(&NpcShopServiceSignal {
+                        mode,
+                        repair_rate: None
+                    })
+                    .unwrap()
+                ));
+            }
+            app.update();
+            assert_eq!(
+                app.world().resource::<ShopModel>().service_mode,
+                expected_mode
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                    .npc_shop_open_requested,
+                expected_open,
+                "a close packet must cancel any earlier open request in the same frame"
+            );
+        }
     }
 
     #[test]

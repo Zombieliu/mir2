@@ -1,0 +1,2010 @@
+diff --git a/mir2-web3/apps/simulation/src/runtime/resources.rs b/mir2-web3/apps/simulation/src/runtime/resources.rs
+--- a/mir2-web3/apps/simulation/src/runtime/resources.rs
++++ b/mir2-web3/apps/simulation/src/runtime/resources.rs
+@@ -490,6 +490,9 @@
+     pub(super) player_direction: MirDirection,
+     pub(super) bind_point: Option<crate::config::CharacterBindPoint>,
+     pub(super) player_vitals: PlayerVitals,
++    /// Crystal online Dead is independent of HP: LevelUp refills a corpse's
++    /// pools without reviving it. Transient; CharacterInfo persists HP, not Dead.
++    pub(super) player_dead: bool,
+     pub(super) experience: i64,
+     pub(super) max_experience: i64,
+     pub(super) gold: u32,
+@@ -528,6 +531,7 @@
+                 mp: default_mp,
+                 max_mp: default_mp,
+             },
++            player_dead: false,
+             experience: 0,
+             max_experience: 100,
+             gold: 0,
+diff --git a/mir2-web3/apps/simulation/src/runtime/components.rs b/mir2-web3/apps/simulation/src/runtime/components.rs
+--- a/mir2-web3/apps/simulation/src/runtime/components.rs
++++ b/mir2-web3/apps/simulation/src/runtime/components.rs
+@@ -6,7 +6,7 @@
+ 
+ use crate::config::WorldEntityDisposition;
+ 
+-use super::resources::SessionResource;
++use super::resources::{PlayerRuntimeResource, SessionResource};
+ 
+ #[derive(Component)]
+ pub(super) struct WorldObject;
+@@ -300,5 +300,7 @@
+ pub(super) fn current_player_is_dead(world: &World) -> bool {
+     player_entity(world)
+         .and_then(|entity| entity_player_vitals(world, entity))
+-        .is_some_and(|vitals| vitals.hp <= 0)
+-}
++        .is_some_and(|vitals| {
++            vitals.hp <= 0 || world.resource::<PlayerRuntimeResource>().player_dead
++        })
++}
+diff --git a/mir2-web3/apps/simulation/src/runtime/combat.rs b/mir2-web3/apps/simulation/src/runtime/combat.rs
+--- a/mir2-web3/apps/simulation/src/runtime/combat.rs
++++ b/mir2-web3/apps/simulation/src/runtime/combat.rs
+@@ -353,7 +353,7 @@
+     damage: i32,
+     packets: &mut Vec<ServerPacket>,
+ ) -> PlayerDamageOutcome {
+-    if damage <= 0 {
++    if damage <= 0 || current_player_is_dead(world) {
+         return PlayerDamageOutcome {
+             applied: false,
+             died: false,
+@@ -385,7 +385,7 @@
+     damage: i32,
+     packets: &mut Vec<ServerPacket>,
+ ) -> PlayerDamageOutcome {
+-    if damage <= 0 {
++    if damage <= 0 || current_player_is_dead(world) {
+         return PlayerDamageOutcome {
+             applied: false,
+             died: false,
+@@ -430,6 +430,7 @@
+         let tick = runtime_tick(world);
+         let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+         runtime.player_vitals = updated_vitals;
++        runtime.player_dead |= updated_vitals.hp <= 0;
+         runtime.last_damaged_tick = tick;
+     }
+     if let Some(info) = object_health_info_for_entity(world, player, 0) {
+@@ -1602,7 +1603,7 @@
+     let Some(vitals) = world.entity(player).get::<PlayerVitals>().copied() else {
+         return;
+     };
+-    if vitals.hp <= 0 {
++    if current_player_is_dead(world) {
+         return;
+     }
+     if vitals.hp >= vitals.max_hp && vitals.mp >= vitals.max_mp {
+diff --git a/mir2-web3/apps/simulation/src/runtime/session.rs b/mir2-web3/apps/simulation/src/runtime/session.rs
+--- a/mir2-web3/apps/simulation/src/runtime/session.rs
++++ b/mir2-web3/apps/simulation/src/runtime/session.rs
+@@ -8,6 +8,7 @@
+     apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
+ };
+ use super::components::{
++    current_player_is_dead,
+     entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
+     player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc,
+     ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
+@@ -130,6 +131,7 @@
+     pub player_hp: Option<i32>,
+     pub player_max_hp: Option<i32>,
+     pub player_mp: Option<i32>,
++    pub player_dead: Option<bool>,
+ }
+ 
+ #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+@@ -708,6 +710,7 @@
+             player_hp: player_vitals.map(|vitals| vitals.hp),
+             player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
+             player_mp: player_vitals.map(|vitals| vitals.mp),
++            player_dead: player_vitals.map(|_| current_player_is_dead(world)),
+         }
+     }
+ 
+@@ -979,7 +982,10 @@
+             })
+         };
+         if let Some(vitals) = updated_vitals {
+-            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
++            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
++            runtime.player_vitals = vitals;
++            runtime.player_dead |= vitals.hp <= 0;
++            drop(runtime);
+             advance_runtime_tick(world);
+         }
+     }
+@@ -1018,9 +1024,25 @@
+             })
+         };
+         if let Some(vitals) = updated_vitals {
+-            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
++            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
++            runtime.player_vitals = vitals;
++            runtime.player_dead |= vitals.hp <= 0;
++            drop(runtime);
+             advance_runtime_tick(world);
+         }
++    }
++
++    /// Trusted shared-life reconciliation only. Positive vitals alone never
++    /// authorize a revive; the Zone's explicit life transition does.
++    pub fn force_authoritative_player_life(&mut self, dead: bool) {
++        if !is_in_world(self.app.world()) {
++            return;
++        }
++        let world = self.app.world_mut();
++        let hp_zero = player_entity(world)
++            .and_then(|entity| entity_player_vitals(world, entity))
++            .is_some_and(|vitals| vitals.hp <= 0);
++        world.resource_mut::<PlayerRuntimeResource>().player_dead = dead || hp_zero;
+     }
+ 
+     /// Land chain-confirmed ore in the active player's bag (M3, WF-4) and re-render the
+diff --git a/mir2-web3/apps/simulation/src/runtime/packets.rs b/mir2-web3/apps/simulation/src/runtime/packets.rs
+--- a/mir2-web3/apps/simulation/src/runtime/packets.rs
++++ b/mir2-web3/apps/simulation/src/runtime/packets.rs
+@@ -7926,7 +7926,7 @@
+             (
+                 WorldEntityKind::SelfPlayer,
+                 WorldEntityDisposition::Friendly,
+-                player_vitals.map(|v| v.hp <= 0).unwrap_or(false),
++                current_player_is_dead(world),
+                 player_vitals.map(|v| v.hp),
+                 player_vitals.map(|v| v.max_hp),
+                 body.map(|v| v.level),
+diff --git a/mir2-web3/apps/simulation/src/runtime/movement.rs b/mir2-web3/apps/simulation/src/runtime/movement.rs
+--- a/mir2-web3/apps/simulation/src/runtime/movement.rs
++++ b/mir2-web3/apps/simulation/src/runtime/movement.rs
+@@ -206,7 +206,7 @@
+     teleport_to_bind_map(world, bind_map, bind_position, direction)
+ }
+ 
+-fn bound_town_destination(world: &World) -> (mir2_protocol::MapInformation, Point) {
++pub(super) fn bound_town_destination(world: &World) -> (mir2_protocol::MapInformation, Point) {
+     let config = &world.resource::<RuntimeConfigResource>().config;
+     let bind = world
+         .resource::<PlayerRuntimeResource>()
+@@ -368,7 +368,11 @@
+             current_map.file_name.clone(),
+         )
+     };
+-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
++    {
++        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
++        runtime.player_vitals = revived_vitals;
++        runtime.player_dead = false;
++    }
+ 
+     let changes_map = normalize_map_file_name(&current_map_file_name)
+         != normalize_map_file_name(&bind_map.file_name);
+diff --git a/mir2-web3/apps/simulation/src/runtime/items.rs b/mir2-web3/apps/simulation/src/runtime/items.rs
+--- a/mir2-web3/apps/simulation/src/runtime/items.rs
++++ b/mir2-web3/apps/simulation/src/runtime/items.rs
+@@ -2722,7 +2722,11 @@
+         *vitals
+     };
+ 
+-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
++    {
++        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
++        runtime.player_vitals = revived_vitals;
++        runtime.player_dead = false;
++    }
+ 
+     let mut packets = Vec::new();
+     if let Some(info) = object_revived_info_for_entity(world, player, true) {
+diff --git a/mir2-web3/apps/simulation/src/runtime/save.rs b/mir2-web3/apps/simulation/src/runtime/save.rs
+--- a/mir2-web3/apps/simulation/src/runtime/save.rs
++++ b/mir2-web3/apps/simulation/src/runtime/save.rs
+@@ -2718,6 +2718,13 @@
+             mp: save.mp.max(0),
+             max_mp: restored_max_mp.max(save.mp.max(0)),
+         };
++        if matches!(skill_timing_restore, SkillTimingRestore::ResetForNewSession) {
++            // A genuinely new Crystal PlayerObject has Dead=false. CharacterInfo
++            // stores HP/MP only; same-epoch checkpoint restores retain online life.
++            player_runtime.player_dead = false;
++        } else if save.hp <= 0 {
++            player_runtime.player_dead = true;
++        }
+         player_runtime.experience = save.experience.max(0);
+         player_runtime.max_experience = match config.content_profile.as_ref() {
+             Some(profile)
+@@ -3849,12 +3856,34 @@
+                 resolution: 0,
+             }];
+         }
++        if save.hp <= 0 {
++            // Only a genuine new login uses Crystal Load's bind/full rule.
++            // Same-epoch restores and trusted native-state fixtures do not.
++            let (map, position) = super::movement::bound_town_destination(self.app.world());
++            self.app.world_mut().resource_mut::<MapRuntimeResource>().current_map = map;
++            self.app.world_mut().resource_mut::<PlayerRuntimeResource>().player_position = position;
++        }
+         refresh_runtime_map_collision(self.app.world_mut());
+         if recover_out_of_bounds_loaded_transform(self.app.world_mut()) {
+             refresh_runtime_map_collision(self.app.world_mut());
+         }
+         refresh_storage_password_state(self.app.world_mut());
+         rebuild_world(self.app.world_mut());
++        if save.hp <= 0 {
++            // Rebuild performs RefreshStats. Refill its current maxima, not
++            // stale saved ceilings (PlayerObject.Load refreshes before SetHP).
++            let world = self.app.world_mut();
++            if let Some(player) = player_entity(world) {
++                let restored = world.entity_mut(player).get_mut::<PlayerVitals>().map(|mut vitals| {
++                    vitals.hp = vitals.max_hp;
++                    vitals.mp = vitals.max_mp;
++                    *vitals
++                });
++                if let Some(vitals) = restored {
++                    world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
++                }
++            }
++        }
+         if should_use_crystal_current_map_world(self.app.world()) {
+             clear_non_player_world_entities(self.app.world_mut());
+             spawn_visible_world_for_current_map(self.app.world_mut());
+diff --git a/mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs b/mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs
+--- a/mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs
++++ b/mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs
+@@ -161,6 +161,7 @@
+ #[derive(Debug)]
+ pub(crate) struct GuildExperienceCheckpoint {
+     save: CharacterSaveRecord,
++    player_dead: bool,
+     visible: BTreeSet<u32>,
+     dirty_economy: BTreeSet<String>,
+     buffs: BuffResource,
+@@ -285,6 +286,7 @@
+             .map_err(|_| "guild XP error state poisoned")? = None;
+         Ok(Some(GuildExperienceCheckpoint {
+             save,
++            player_dead: super::components::current_player_is_dead(world),
+             visible: self.visible_objects.clone(),
+             dirty_economy: self.dirty_economy_projection_event_ids.clone(),
+             buffs: world.resource::<BuffResource>().clone(),
+@@ -348,6 +350,7 @@
+                 .ok_or("guild XP rollback source missing")?;
+             if durable.revision == before.save.revision {
+                 self.restore_active_character_checkpoint(&before.save)?;
++                self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
+                 // Preserve original in-memory clock anchors. Deserializing the
+                 // saved remaining duration alone would extend real-time buffs.
+                 *self.app.world_mut().resource_mut::<BuffResource>() = before.buffs;
+@@ -359,6 +362,7 @@
+                 self.dirty_economy_projection_event_ids = before.dirty_economy;
+             } else {
+                 self.restore_active_character_checkpoint(&durable)?;
++                self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
+             }
+             return Err(error);
+         }
+diff --git a/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs b/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs
+--- a/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs
++++ b/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs
+@@ -177,6 +177,7 @@
+             save: self
+                 .active_character_checkpoint()
+                 .ok_or_else(|| "prepared after checkpoint missing".to_string())?,
++            player_dead: crate::runtime::components::current_player_is_dead(self.app.world()),
+             visible: self.visible_objects.clone(),
+             dirty_economy: self.dirty_economy_projection_event_ids.clone(),
+             buffs: self.app.world().resource::<BuffResource>().clone(),
+@@ -239,6 +240,7 @@
+         save: &crate::CharacterSaveRecord,
+     ) -> Result<(), String> {
+         self.restore_active_character_checkpoint(save)?;
++        self.app.world_mut().resource_mut::<crate::runtime::resources::PlayerRuntimeResource>().player_dead = snapshot.player_dead;
+         *self.app.world_mut().resource_mut::<BuffResource>() = snapshot.buffs.clone();
+         *self.app.world_mut().resource_mut::<NpcStateResource>() = snapshot.npc.clone();
+         *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = snapshot.queue.clone();
+diff --git a/mir2-web3/apps/simulation/src/world_runtime.rs b/mir2-web3/apps/simulation/src/world_runtime.rs
+--- a/mir2-web3/apps/simulation/src/world_runtime.rs
++++ b/mir2-web3/apps/simulation/src/world_runtime.rs
+@@ -803,6 +803,10 @@
+ 
+     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
+         self.session.force_authoritative_player_vitals(hp, mp);
++    }
++
++    pub fn force_authoritative_player_life(&mut self, dead: bool) {
++        self.session.force_authoritative_player_life(dead);
+     }
+ 
+     pub fn force_authoritative_player_vitals_with_max_hp(
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+@@ -1225,6 +1225,10 @@
+             .map(|player| player.life_generation)
+     }
+ 
++    pub fn player_is_dead(&self, session_id: &SessionId) -> Option<bool> {
++        self.players.get(session_id).map(|player| player.dead)
++    }
++
+     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
+         self.players
+             .get(session_id)
+@@ -1387,26 +1391,29 @@
+         hp: i32,
+         max_hp: i32,
+         mp: i32,
++        dead: Option<bool>,
+     ) -> Vec<ZoneOutbound> {
+         let Some(player) = self.players.get_mut(session_id) else {
+             return Vec::new();
+         };
+-        let life_changed = player.dead != (hp.clamp(0, max_hp.max(1)) == 0);
++        let hp_zero = hp.clamp(0, max_hp.max(1)) == 0;
++        let next_dead = dead.unwrap_or(player.dead || hp_zero) || hp_zero;
++        let life_changed = player.dead != next_dead;
+         player.max_hp = max_hp.max(1);
+         player.hp = hp.clamp(0, player.max_hp);
+         player.mp = mp.max(0);
+-        if player.dead != (player.hp == 0) {
++        if life_changed {
+             player.clear_status_poisons();
+             if player.dead {
+                 player.life_generation = player.life_generation.saturating_add(1);
+             }
+         }
+-        player.dead = player.hp == 0;
++        player.dead = next_dead;
+         let object_id = player.object_id;
+         if life_changed {
+             self.clear_native_player_life_actions(object_id);
+         }
+-        if hp <= 0 {
++        if next_dead {
+             return self.remove_intelligent_creature(session_id, 0);
+         }
+         Vec::new()
+@@ -1563,7 +1570,10 @@
+                 hp,
+                 max_hp,
+                 mp,
+-            } => self.sync_player_vitals(&session_id, hp, max_hp, mp),
++            } => self.sync_player_vitals(&session_id, hp, max_hp, mp, None),
++            ZoneCommand::SyncPlayerVitalsAndLife {
++                session_id, hp, max_hp, mp, dead,
++            } => self.sync_player_vitals(&session_id, hp, max_hp, mp, Some(dead)),
+             ZoneCommand::Chat {
+                 session_id,
+                 message,
+@@ -17539,7 +17549,7 @@
+             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+         let session_id = join_player(&mut zone, "shielded", 101);
+         zone.apply_native_player_magic_shield(&session_id, 2, 0, 10);
+-        zone.sync_player_vitals(&session_id, 2, 500, 100);
++        zone.sync_player_vitals(&session_id, 2, 500, 100, None);
+         let strike = (0..100)
+             .find(|&index| zone_hazard_hash(index, 7) % 100 > 2)
+             .expect("bounded lethal hazard seed");
+@@ -17643,7 +17653,7 @@
+     fn hazard_forwards_only_the_damage_actually_applied() {
+         let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+         let session = join_player(&mut zone, "low-hp", Point { x: 2, y: 2 });
+-        zone.sync_player_vitals(&session, 2, 500, 100);
++        zone.sync_player_vitals(&session, 2, 500, 100, None);
+         let id = zone.players[&session].object_id;
+         let strike = (0..100)
+             .find(|&i| zone_hazard_hash(i, 7) % 100 > 2)
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/types.rs b/mir2-web3/apps/simulation/src/runtime/zone/types.rs
+--- a/mir2-web3/apps/simulation/src/runtime/zone/types.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/types.rs
+@@ -507,6 +507,15 @@
+         hp: i32,
+         max_hp: i32,
+         mp: i32,
++    },
++    /// Trusted owner/session lifecycle mirror. Unlike ordinary pool changes,
++    /// explicit Revive can clear Dead; no client packet exposes this command.
++    SyncPlayerVitalsAndLife {
++        session_id: SessionId,
++        hp: i32,
++        max_hp: i32,
++        mp: i32,
++        dead: bool,
+     },
+     Chat {
+         session_id: SessionId,
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/manager.rs b/mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+--- a/mir2-web3/apps/simulation/src/runtime/zone/manager.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+@@ -298,6 +298,7 @@
+             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
+             | ZoneCommand::SyncPlayerTransform { session_id, .. }
+             | ZoneCommand::SyncPlayerVitals { session_id, .. }
++            | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
+             | ZoneCommand::Chat { session_id, .. }
+             | ZoneCommand::BroadcastPackets { session_id, .. }
+             | ZoneCommand::SyncSharedObjects { session_id, .. }
+@@ -636,6 +637,11 @@
+         self.zones.get(key)?.player_life_generation(session_id)
+     }
+ 
++    pub fn player_is_dead(&self, session_id: &SessionId) -> Option<bool> {
++        let key = self.session_zones.get(session_id)?;
++        self.zones.get(key)?.player_is_dead(session_id)
++    }
++
+     /// Trusted server-only Harvest admission query for the player's active
+     /// Zone. No raw client command can synchronize the predicates it reads.
+     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
+diff --git a/mir2-web3/apps/gateway/src/routing.rs b/mir2-web3/apps/gateway/src/routing.rs
+--- a/mir2-web3/apps/gateway/src/routing.rs
++++ b/mir2-web3/apps/gateway/src/routing.rs
+@@ -3503,6 +3503,7 @@
+             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
+             | ZoneCommand::SyncPlayerTransform { session_id, .. }
+             | ZoneCommand::SyncPlayerVitals { session_id, .. }
++            | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
+             | ZoneCommand::Chat { session_id, .. }
+             | ZoneCommand::BroadcastPackets { session_id, .. }
+             | ZoneCommand::SyncSharedObjects { session_id, .. }
+@@ -9249,9 +9250,12 @@
+             zone_state
+                 .zone_sessions
+                 .get(&key)
+-                .and_then(|session_id| zone_state.zone_manager.player_vitals(session_id))
+-        };
+-        let Some((hp, max_hp, mp)) = vitals else {
++                .and_then(|session_id| Some((
++                    zone_state.zone_manager.player_vitals(session_id)?,
++                    zone_state.zone_manager.player_is_dead(session_id)?,
++                )))
++        };
++        let Some(((hp, max_hp, mp), dead)) = vitals else {
+             return;
+         };
+         let snapshot = self.inner.local_player_vitals_snapshot();
+@@ -9263,16 +9267,17 @@
+         // no-op because the packet handler observed a living player. Preserve
+         // the acknowledged private death until an explicit revive emits
+         // ObjectRevived and synchronizes both authorities below.
+-        let local_player_is_acknowledged_dead = snapshot.player_hp == Some(0)
++        let local_player_is_acknowledged_dead = snapshot.player_dead == Some(true)
+             && snapshot
+                 .player_object_id
+                 .is_some_and(|object_id| self.owner_dead_entity_ids.contains(&object_id));
+-        if local_player_is_acknowledged_dead && hp > 0 {
++        if local_player_is_acknowledged_dead && !dead {
+             return;
+         }
+         if snapshot.player_hp != Some(hp)
+             || snapshot.player_max_hp != Some(max_hp)
+             || snapshot.player_mp != Some(mp)
++            || snapshot.player_dead != Some(dead)
+         {
+             self.inner
+                 .force_authoritative_player_vitals_with_max_hp(
+@@ -9280,6 +9285,7 @@
+                     Some(max_hp),
+                     Some(mp),
+                 );
++            self.inner.force_authoritative_player_life(dead);
+         }
+     }
+ 
+@@ -9304,11 +9310,12 @@
+             .lock()
+             .expect("shared zone presence mutex should not be poisoned")
+             .zone_manager
+-            .handle(ZoneCommand::SyncPlayerVitals {
++            .handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                 session_id,
+                 hp,
+                 max_hp,
+                 mp,
++                dead: snapshot.player_dead.unwrap_or(hp <= 0),
+             });
+     }
+ 
+@@ -9551,6 +9558,10 @@
+                     .zone_session_keys
+                     .insert(session_id.clone(), key.clone());
+                 let mut outbounds = zone_state.zone_manager.join(join.clone());
++                outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SyncPlayerVitalsAndLife {
++                    session_id: session_id.clone(), hp: join.hp, max_hp: join.max_hp, mp: join.mp,
++                    dead: snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).is_some_and(|entity| entity.dead),
++                }));
+                 let now_ms = Self::zone_now_ms();
+                 outbounds.extend(
+                     zone_state
+@@ -9640,11 +9651,12 @@
+             outbounds.extend(
+                 zone_state
+                     .zone_manager
+-                    .handle(ZoneCommand::SyncPlayerVitals {
++                    .handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                         session_id: session_id.clone(),
+                         hp: join.hp,
+                         max_hp: join.max_hp,
+                         mp: join.mp,
++                        dead: snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).is_some_and(|entity| entity.dead),
+                     }),
+             );
+             outbounds.extend(
+@@ -10175,7 +10187,7 @@
+         let authoritative_transform = authoritative_transform.ok_or_else(|| {
+             "fenced shared Zone presence has no authoritative transform".to_string()
+         })?;
+-        let authoritative_vitals = authoritative_vitals
++        authoritative_vitals
+             .ok_or_else(|| "fenced shared Zone presence has no authoritative vitals".to_string())?;
+ 
+         // Deterministic drain order is part of the persistence contract. Packet
+@@ -10213,10 +10225,24 @@
+             authoritative_transform.0,
+             authoritative_transform.1,
+         );
+-        self.inner.force_authoritative_player_vitals(
+-            Some(authoritative_vitals.0),
+-            Some(authoritative_vitals.2),
+-        );
++        // A confirmed reward may have refreshed the pools during this fence.
++        // Re-read the same frozen owner's latest authority, not its pre-award HP.
++        let (authoritative_vitals, authoritative_dead) = {
++            let state = self.zone_state.lock()
++                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
++            let session = state.zone_sessions.get(&key)
++                .ok_or_else(|| "fenced shared Zone presence lost its session".to_string())?;
++            (
++                state.zone_manager.player_vitals(session)
++                    .ok_or_else(|| "fenced shared Zone presence lost its vitals".to_string())?,
++                state.zone_manager.player_is_dead(session)
++                    .ok_or_else(|| "fenced shared Zone presence lost its life".to_string())?,
++            )
++        };
++        self.inner.force_authoritative_player_vitals_with_max_hp(
++            Some(authoritative_vitals.0), Some(authoritative_vitals.1), Some(authoritative_vitals.2),
++        );
++        self.inner.force_authoritative_player_life(authoritative_dead);
+         let checkpoint = self
+             .inner
+             .active_character_checkpoint()
+@@ -10459,6 +10485,9 @@
+                         // instead of subtracting again from a later snapshot.
+                         self.inner
+                             .force_authoritative_player_vitals(Some(settlement.hp_before), None);
++                        // The authenticated same-life receipt proves its living
++                        // precondition even when the current mirror is already Dead.
++                        self.inner.force_authoritative_player_life(false);
+                         if delta > 0 {
+                             self.inner.apply_zone_player_damage(delta);
+                         } else if let Some(heal) = delta.checked_neg() {
+@@ -10486,19 +10515,22 @@
+             // This deliberately bypasses the legacy acknowledged-private-death
+             // guard: these receipts originate from the shared life authority.
+             if let Some(session) = self.current_zone_session_id() {
+-                let current = self
+-                    .zone_state
+-                    .lock()
+-                    .expect("shared zone presence mutex should not be poisoned")
+-                    .zone_manager
+-                    .player_vitals(&session);
+-                if let Some((hp, _, mp)) = current {
++                let current = {
++                    let state = self.zone_state.lock()
++                        .expect("shared zone presence mutex should not be poisoned");
++                    state.zone_manager.player_vitals(&session).zip(
++                        state.zone_manager.player_is_dead(&session),
++                    )
++                };
++                if let Some(((hp, max_hp, mp), dead)) = current {
+                     let snapshot = self.inner.local_player_vitals_snapshot();
+-                    if snapshot.player_hp != Some(hp) || snapshot.player_mp != Some(mp) {
++                    if snapshot.player_hp != Some(hp) || snapshot.player_mp != Some(mp)
++                        || snapshot.player_max_hp != Some(max_hp) || snapshot.player_dead != Some(dead) {
+                         self.inner
+-                            .force_authoritative_player_vitals(Some(hp), Some(mp));
++                            .force_authoritative_player_vitals_with_max_hp(Some(hp), Some(max_hp), Some(mp));
++                        self.inner.force_authoritative_player_life(dead);
+                     }
+-                    if hp > 0 {
++                    if !dead {
+                         if let Some(id) = snapshot.player_object_id {
+                             self.owner_dead_entity_ids.remove(&id);
+                         }
+@@ -10715,10 +10747,10 @@
+         let Some(session) = state.zone_sessions.get(&key) else {
+             return;
+         };
+-        let (Some(presence), Some(generation), Some((hp, _, _))) = (
++        let (Some(presence), Some(generation), Some(dead)) = (
+             state.players.get(&key),
+             state.zone_manager.player_life_generation(session),
+-            state.zone_manager.player_vitals(session),
++            state.zone_manager.player_is_dead(session),
+         ) else {
+             return;
+         };
+@@ -10734,15 +10766,15 @@
+         let local_id = self.local_self_object_id();
+         let owner = |id: u32| id == object_id || Some(id) == local_id;
+         packets.retain(|packet| match packet {
+-            ServerPacket::Death { .. } if hp > 0 => false,
+-            ServerPacket::ObjectDied { info } if hp > 0 && owner(info.object_id) => false,
++            ServerPacket::Death { .. } if !dead => false,
++            ServerPacket::ObjectDied { info } if !dead && owner(info.object_id) => false,
+             ServerPacket::ObjectHealth { info }
+-                if hp > 0 && owner(info.object_id) && info.percent == 0 =>
++                if !dead && owner(info.object_id) && info.percent == 0 =>
+             {
+                 false
+             }
+-            ServerPacket::Revived if hp == 0 => false,
+-            ServerPacket::ObjectRevived { info } if hp == 0 && owner(info.object_id) => false,
++            ServerPacket::Revived if dead => false,
++            ServerPacket::ObjectRevived { info } if dead && owner(info.object_id) => false,
+             _ => true,
+         });
+     }
+@@ -10904,6 +10936,9 @@
+                 return Err(
+                     "monster kill award economy commit failed during teardown drain".to_string(),
+                 );
++            }
++            if receipt.packets.iter().any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })) {
++                self.sync_current_zone_vitals_from_inner();
+             }
+             packets.extend(receipt.packets);
+         }
+@@ -12033,7 +12068,8 @@
+         // Native Magic bypasses the personal packet handler. Keep its trusted
+         // finite-status admission before materialization, item spend or Zone
+         // spell deadlines; Cast=false preparation remains neutral.
+-        if matches!(&attack.kind, ZoneNativePlayerAttackKind::Magic { cast: true, .. })
++        if self.inner.local_player_vitals_snapshot().player_dead == Some(true)
++            || matches!(&attack.kind, ZoneNativePlayerAttackKind::Magic { cast: true, .. })
+             && self.inner.zone_magic_cast_blocked_by_status()
+         {
+             return self.authoritative_zone_owner_correction();
+@@ -14223,7 +14259,7 @@
+         // execute against it instead of silently turning the player alive just
+         // before the packet handler checks `Dead`.
+         let revives_presented_private_death =
+-            is_town_revive && self.inner.world_snapshot().player_hp == Some(0);
++            is_town_revive && self.inner.local_player_vitals_snapshot().player_dead == Some(true);
+         let applies_native_state = matches!(
+             &command,
+             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
+@@ -15554,6 +15590,8 @@
+ 
+ #[cfg(test)]
+ mod tests {
++    #[path = "dead_experience_chain_tests.rs"]
++    mod dead_experience_chain_tests;
+     #[path = "crowded_escape_tests.rs"]
+     mod crowded_escape_tests;
+     #[path = "guild_kill_source_tests.rs"]
+diff --git a/mir2-web3/apps/simulation/tests/dead_experience_chain.rs b/mir2-web3/apps/simulation/tests/dead_experience_chain.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/tests/dead_experience_chain.rs
+@@ -0,0 +1,140 @@
++//! Public trusted personal-session lifecycle fences. These are save/load and
++//! retained-bootstrap fixtures; the actual poison/monster/death/EXP chain is
++//! separately exercised through ordinary authenticated Gateway packets.
++use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
++use mir2_simulation::{
++    CharacterBindPoint, InProcessWorldRuntime, SimulationConfig, WorldCommand, WorldEntityKind,
++    WorldRuntime,
++};
++
++fn start(runtime: &mut InProcessWorldRuntime) {
++    let login = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
++            account_id: "demo".into(),
++            password: "demo".into(),
++        }))
++        .unwrap();
++    assert!(login
++        .iter()
++        .any(|p| matches!(p, ServerPacket::LoginSuccess { .. })));
++    let started = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
++            character_index: 0,
++        }))
++        .unwrap();
++    assert!(started
++        .iter()
++        .any(|p| matches!(p, ServerPacket::UserInformation { .. })));
++}
++
++fn own_dead(runtime: &InProcessWorldRuntime) -> bool {
++    runtime
++        .world_snapshot()
++        .entities
++        .iter()
++        .find(|e| e.kind == WorldEntityKind::SelfPlayer)
++        .unwrap()
++        .dead
++}
++
++#[test]
++fn ordinary_positive_vitals_and_retained_bootstrap_do_not_revive_online_dead() {
++    let mut runtime = InProcessWorldRuntime::new(SimulationConfig::default());
++    start(&mut runtime);
++    let max_hp = runtime.world_snapshot().player_max_hp.unwrap();
++    runtime.force_authoritative_player_vitals(Some(0), Some(0));
++    assert!(own_dead(&runtime));
++    runtime.force_authoritative_player_vitals(Some(max_hp), Some(0));
++    assert!(
++        own_dead(&runtime),
++        "a trusted pool refill is still not an explicit Revive"
++    );
++    let before = runtime.active_character_checkpoint().unwrap();
++    runtime
++        .restore_active_character_checkpoint(&before)
++        .unwrap();
++    assert!(
++        own_dead(&runtime),
++        "same-session save checkpoint must preserve transient life"
++    );
++    runtime
++        .execute(WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 0 })
++        .unwrap();
++    assert!(
++        own_dead(&runtime),
++        "retained runtime bootstrap must not run new-login life reset"
++    );
++    let revived = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
++        .unwrap();
++    assert_eq!(
++        revived
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::Revived))
++            .count(),
++        1
++    );
++    assert!(!own_dead(&runtime));
++}
++
++#[test]
++fn genuine_new_login_from_hp_zero_revives_full_at_bind() {
++    let config = SimulationConfig::default();
++    let mut runtime = InProcessWorldRuntime::new(config.clone());
++    start(&mut runtime);
++    let bind = Point { x: 334, y: 259 };
++    let mut save = runtime.active_character_checkpoint().unwrap();
++    save.position = Point { x: 337, y: 270 };
++    save.bind_point = Some(CharacterBindPoint {
++        map_file_name: "0".into(),
++        position: bind.clone(),
++    });
++    runtime.restore_active_character_checkpoint(&save).unwrap();
++    runtime.force_authoritative_player_vitals(Some(0), Some(0));
++    runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
++        .unwrap();
++    let mut login = InProcessWorldRuntime::new(config);
++    start(&mut login);
++    let after = login.world_snapshot();
++    assert_eq!(
++        after.player_hp, after.player_max_hp,
++        "Crystal Load HP0 refills HP"
++    );
++    assert_eq!(after.player_mp, after.player_max_mp);
++    let self_player = after
++        .entities
++        .iter()
++        .find(|e| e.kind == WorldEntityKind::SelfPlayer)
++        .unwrap();
++    assert_eq!((self_player.x, self_player.y), (bind.x, bind.y));
++    assert!(!self_player.dead);
++}
++
++#[test]
++fn genuine_new_login_from_full_hp_corpse_is_alive_at_saved_valid_position() {
++    let config = SimulationConfig::default();
++    let mut runtime = InProcessWorldRuntime::new(config.clone());
++    start(&mut runtime);
++    let position = Point { x: 337, y: 270 };
++    runtime.force_authoritative_player_transform(position.clone(), MirDirection::Right);
++    let hp = runtime.world_snapshot().player_max_hp.unwrap();
++    runtime.force_authoritative_player_vitals(Some(0), Some(0));
++    runtime.force_authoritative_player_vitals(Some(hp), None);
++    // Preserve the source distinction: durable character saves have HP/MP, not
++    // a permanent Dead flag. Online life resets only with a genuinely new login.
++    runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
++        .unwrap();
++    let mut login = InProcessWorldRuntime::new(config);
++    start(&mut login);
++    let after = login.world_snapshot();
++    let player = after
++        .entities
++        .iter()
++        .find(|e| e.kind == WorldEntityKind::SelfPlayer)
++        .unwrap();
++    assert!(!player.dead);
++    assert_eq!((player.x, player.y), (position.x, position.y));
++    assert_eq!(after.player_hp, Some(hp));
++}
+diff --git a/mir2-web3/apps/gateway/src/routing/tests/dead_experience_chain_tests.rs b/mir2-web3/apps/gateway/src/routing/tests/dead_experience_chain_tests.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/gateway/src/routing/tests/dead_experience_chain_tests.rs
+@@ -0,0 +1,1036 @@
++//! Authenticated ordinary Poisoning -> native monster lethal hit -> periodic
++//! poison kill -> durable Gateway reward. Isolated in-process account/map data;
++//! not TCP/WSS, native-client, or human acceptance evidence.
++use super::*;
++use serde_json::json;
++
++const TARGET: u32 = 391_001;
++const KILLER: u32 = 391_002;
++const EXP: u32 = 20;
++
++fn fixture(name: &str, level_up: bool) -> SharedInProcessZoneSessionRuntime {
++    fixture_with_config(name, level_up, None)
++}
++
++fn fixture_with_config(
++    name: &str,
++    level_up: bool,
++    config: Option<mir2_simulation::SimulationConfig>,
++) -> SharedInProcessZoneSessionRuntime {
++    let state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
++    let mut runtime = shared_session_runtime(state.clone());
++    if let Some(config) = config {
++        runtime.inner = InProcessWorldRuntime::new(config);
++    }
++    start_new_runtime_with_class(&mut runtime, name, name, MirClass::Taoist);
++    let mut save = runtime.inner.active_character_checkpoint().unwrap();
++    save.character.level = 14;
++    save.position = Point { x: 340, y: 550 };
++    save.hp = 1;
++    save.mp = 100;
++    save.max_mp = 100;
++    save.max_experience = if level_up { 100 } else { 10_000 };
++    save.experience = if level_up { 90 } else { 0 };
++    save.bind_point = Some(mir2_simulation::CharacterBindPoint {
++        map_file_name: "0".into(),
++        position: Point { x: 334, y: 259 },
++    });
++    let powder = mir2_game_data::crystal_item_by_name("GreenPoison").unwrap();
++    save.inventory_items_json = vec![json!({
++        "key": format!("crystal-item-{}", powder.item_index), "name": powder.name,
++        "icon": powder.image, "slot": 1, "unique_id": 71_001, "container": "bag1",
++        "quantity": 3, "description": "isolated poison death-chain fixture",
++        "weight": powder.weight, "equip_slot": "amulet", "attack": 0, "defence": 0,
++        "heal_hp": 0, "heal_mp": 0, "user_item_metadata": {"item_index": powder.item_index}
++    })
++    .to_string()];
++    save.skill_states_json = vec![json!({
++        "key": "poisoning", "name": "Poisoning", "description": "isolated learned skill",
++        "level": 3, "experience": 0, "cooldown_ticks": 1, "cooldown_ends_at": 0
++    })
++    .to_string()];
++    runtime
++        .inner
++        .restore_active_character_checkpoint(&save)
++        .unwrap();
++    runtime
++        .inner
++        .force_authoritative_player_transform(save.position.clone(), MirDirection::Right);
++    runtime.force_next_zone_transform_sync = true;
++    runtime.sync_zone_snapshot();
++    let sid = runtime.current_zone_session_id().unwrap();
++    runtime.sync_authoritative_zone_combat_state(&sid).unwrap();
++    let starting_pools = runtime.inner.world_snapshot();
++    runtime.dispatch_zone_player_command(
++        ZoneCommand::SyncPlayerVitals {
++            session_id: sid.clone(),
++            hp: 1,
++            max_hp: starting_pools.player_max_hp.unwrap(),
++            mp: starting_pools.player_mp.unwrap(),
++        },
++        false,
++    );
++    let mut target = shared_monster_entity(TARGET);
++    target.name = "Skeleton".into();
++    target.ai = Some(3);
++    target.x = 342;
++    target.y = 550;
++    target.hp = Some(1);
++    target.max_hp = Some(1);
++    target.disposition = WorldEntityDisposition::Hostile;
++    target.sprite = None;
++    state.lock().unwrap().sync_map_layer(
++        "0".into(),
++        vec![target],
++        BTreeSet::new(),
++        Vec::new(),
++        BTreeSet::new(),
++    );
++    spawn(&mut runtime, TARGET, Point { x: 342, y: 550 }, 1, EXP);
++    runtime.apply_pending_zone_packets();
++    runtime
++}
++
++fn spawn(
++    runtime: &mut SharedInProcessZoneSessionRuntime,
++    id: u32,
++    position: Point,
++    hp: i32,
++    experience: u32,
++) {
++    let sid = runtime.current_zone_session_id().unwrap();
++    let mut state = runtime.zone_state.lock().unwrap();
++    let out = state.zone_manager.handle(ZoneCommand::SpawnMonster {
++        session_id: sid,
++        now_ms: SharedInProcessZoneSessionRuntime::zone_now_ms(),
++        monster: ZoneMonsterSpawn {
++            crystal_drop_seed: None,
++            object_id: id,
++            name: "Skeleton".into(),
++            name_colour_argb: -1,
++            image: 3,
++            ai: 3,
++            disposition: Some(WorldEntityDisposition::Hostile),
++            level: 20,
++            hp,
++            max_hp: hp,
++            experience,
++            move_speed_ms: 100_000,
++            attack_speed_ms: 100_000,
++            friendly_guild: None,
++            position,
++            direction: MirDirection::Up,
++            defense: Default::default(),
++            respawn: None,
++            drops: vec![],
++        },
++    });
++    state.dispatch_zone_outbounds(out, None);
++}
++
++fn tick(runtime: &mut SharedInProcessZoneSessionRuntime, now_ms: u64) {
++    super::super::run_shared_zone_cadence_tick(&runtime.zone_state, now_ms).unwrap();
++}
++
++/// Return the exact award chosen by production poison arbitration. The original
++/// stays queued for the normal Gateway consumer (or the fenced teardown).
++fn poison_after_real_death(
++    runtime: &mut SharedInProcessZoneSessionRuntime,
++) -> ZoneMonsterKillAward {
++    poison_after_real_death_with_receipts(runtime).0
++}
++
++fn poison_after_real_death_with_receipts(
++    runtime: &mut SharedInProcessZoneSessionRuntime,
++) -> (ZoneMonsterKillAward, Vec<QueuedZoneVitalDelta>) {
++    let owner = runtime.inner.world_snapshot().player_object_id.unwrap();
++    let cast = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::Magic {
++            object_id: owner,
++            spell: Spell::Poisoning,
++            direction: MirDirection::Right,
++            target_id: TARGET,
++            location: Point { x: 342, y: 550 },
++            spell_target_lock: true,
++        }))
++        .unwrap();
++    assert!(
++        cast.iter().any(|p| matches!(
++            p,
++            ServerPacket::Magic {
++                spell: Spell::Poisoning,
++                cast: true,
++                ..
++            }
++        )),
++        "{cast:?}"
++    );
++    assert!(
++        cast.iter().any(|p| matches!(
++            p,
++            ServerPacket::ObjectPoisoned {
++                object_id: TARGET,
++                poison: 1
++            }
++        )),
++        "{cast:?}"
++    );
++    assert!(cast.iter().any(|p| matches!(
++        p,
++        ServerPacket::DeleteItem {
++            unique_id: 71_001,
++            count: 1
++        }
++    )));
++    let base = SharedInProcessZoneSessionRuntime::zone_now_ms();
++    spawn(runtime, KILLER, Point { x: 340, y: 551 }, 10_000, 0);
++    tick(runtime, base + 10);
++    tick(runtime, base + 700);
++    let key = runtime.current_presence_key().unwrap();
++    let death_deltas = {
++        let mut state = runtime.zone_state.lock().unwrap();
++        let deltas = state.take_pending_zone_player_damages(&key);
++        for delta in deltas.iter().cloned() {
++            state.queue_zone_player_vital_delta(key.clone(), delta);
++        }
++        deltas
++    };
++    assert!(death_deltas.iter().any(|delta| matches!(delta, QueuedZoneVitalDelta::Settled { settlement, .. } if settlement.death_transition)));
++    let death = runtime.apply_pending_zone_packets();
++    assert!(
++        death
++            .iter()
++            .any(|p| matches!(p, ServerPacket::Death { .. })),
++        "actual native hit must kill before poison: {death:?}"
++    );
++    assert!(death.iter().any(|p| matches!(p, ServerPacket::DamageIndicator { object_id, damage, .. } if *object_id != TARGET && *damage > 0)), "{death:?}");
++    assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
++    assert!(own_dead(runtime));
++    tick(runtime, base + 2_100);
++    let key = runtime.current_presence_key().unwrap();
++    let awards = {
++        let mut state = runtime.zone_state.lock().unwrap();
++        let awards = state.take_pending_zone_monster_kill_awards(&key);
++        state.prepend_zone_monster_kill_awards(key, awards.clone());
++        awards
++    };
++    assert_eq!(
++        awards.len(),
++        1,
++        "ordinary periodic poison must choose one dead solo owner"
++    );
++    assert_eq!(awards[0].monster_object_id, TARGET);
++    assert_eq!(awards[0].monster_name, "Skeleton");
++    assert_eq!(awards[0].experience, EXP);
++    let award = awards[0].clone();
++    (award, death_deltas)
++}
++
++fn own_dead(runtime: &SharedInProcessZoneSessionRuntime) -> bool {
++    runtime
++        .inner
++        .world_snapshot()
++        .entities
++        .iter()
++        .find(|e| e.kind == WorldEntityKind::SelfPlayer)
++        .unwrap()
++        .dead
++}
++
++fn assert_same_owner_life(runtime: &SharedInProcessZoneSessionRuntime, dead: bool) {
++    let identity = runtime.inner.active_identity().unwrap();
++    let key = runtime.current_presence_key().unwrap();
++    let sid = runtime.current_zone_session_id().unwrap();
++    let personal = runtime.inner.world_snapshot();
++    let self_entity = personal
++        .entities
++        .iter()
++        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
++        .unwrap();
++    let (session, reverse_key, name, zone_life, zone_pools) = {
++        let state = runtime.zone_state.lock().unwrap();
++        (
++            state.zone_sessions.get(&key).cloned(),
++            state.zone_session_keys.get(&sid).cloned(),
++            state.players.get(&key).unwrap().entity.name.clone(),
++            state.zone_manager.player_is_dead(&sid),
++            state.zone_manager.player_vitals(&sid),
++        )
++    };
++    assert_eq!(key.account_id, identity.account_id);
++    assert_eq!(key.character_index, identity.character_index);
++    assert_eq!(session, Some(sid));
++    assert_eq!(reverse_key, Some(key));
++    assert_eq!(name, self_entity.name);
++    assert_eq!(self_entity.dead, dead);
++    assert_eq!(zone_life, Some(dead));
++    assert_eq!(
++        zone_pools,
++        Some((
++            personal.player_hp.unwrap(),
++            personal.player_max_hp.unwrap(),
++            personal.player_mp.unwrap()
++        ))
++    );
++}
++
++fn assert_award(packets: &[ServerPacket], level_up: bool) {
++    assert_eq!(
++        packets
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::GainExperience { amount: EXP }))
++            .count(),
++        1,
++        "{packets:?}"
++    );
++    assert_eq!(
++        packets
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::LevelChanged { .. }))
++            .count(),
++        usize::from(level_up),
++        "{packets:?}"
++    );
++    assert!(
++        packets
++            .iter()
++            .any(|p| matches!(p, ServerPacket::ObjectDied { info } if info.object_id == TARGET)),
++        "{packets:?}"
++    );
++    assert!(!packets.iter().any(|p| matches!(
++        p,
++        ServerPacket::Revived | ServerPacket::ObjectRevived { .. }
++    )));
++}
++
++#[test]
++fn dead_poison_non_level_award_is_durable_and_does_not_revive() {
++    let mut runtime = fixture("DeadNoLevel", false);
++    poison_after_real_death(&mut runtime);
++    let packets = runtime.apply_pending_zone_packets();
++    assert_award(&packets, false);
++    assert_eq!(
++        runtime.inner.world_snapshot().player_experience,
++        i64::from(EXP)
++    );
++    assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
++    assert!(own_dead(&runtime));
++    assert_same_owner_life(&runtime, true);
++    let config = runtime.inner.shared_mentor_config().unwrap();
++    let identity = runtime.inner.active_identity().unwrap();
++    let store = config.account_store.lock().unwrap();
++    let saved = &store.accounts[&identity.account_id].saves[&identity.character_index];
++    assert_eq!(saved.experience, i64::from(EXP));
++    assert_eq!(
++        saved.guild_experience_journal.applied_kill_receipts.len(),
++        1
++    );
++}
++
++#[test]
++fn dead_poison_level_refills_pools_without_online_revive() {
++    let mut runtime = fixture("DeadLevel", true);
++    poison_after_real_death(&mut runtime);
++    let sid = runtime.current_zone_session_id().unwrap();
++    let generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid)
++        .unwrap();
++    let packets = runtime.apply_pending_zone_packets();
++    assert_award(&packets, true);
++    let after = runtime.inner.world_snapshot();
++    assert_eq!(
++        after.player_hp, after.player_max_hp,
++        "Crystal LevelUp refills HP even while Dead"
++    );
++    assert_eq!(after.player_mp, after.player_max_mp);
++    assert_eq!(after.player_experience, 10);
++    let after_generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid);
++    assert_eq!(
++        after_generation,
++        Some(generation),
++        "level-up is not a revive transition"
++    );
++    assert!(
++        own_dead(&runtime),
++        "full HP must not clear the independent online Dead"
++    );
++    assert_same_owner_life(&runtime, true);
++}
++
++#[test]
++fn dead_poison_level_rejects_actions_and_town_revive_still_works() {
++    let mut runtime = fixture("DeadActions", true);
++    poison_after_real_death(&mut runtime);
++    runtime.apply_pending_zone_packets();
++    let before = runtime.inner.world_snapshot();
++    let sid = runtime.current_zone_session_id().unwrap();
++    let position = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_transform(&sid)
++        .unwrap();
++    for packet in [
++        ClientPacket::Walk {
++            direction: MirDirection::Left,
++        },
++        ClientPacket::Run {
++            direction: MirDirection::Left,
++        },
++        ClientPacket::Attack {
++            direction: MirDirection::Down,
++            spell: Spell::None,
++        },
++        ClientPacket::Magic {
++            object_id: before.player_object_id.unwrap(),
++            spell: Spell::Poisoning,
++            direction: MirDirection::Down,
++            target_id: KILLER,
++            location: Point { x: 340, y: 551 },
++            spell_target_lock: true,
++        },
++    ] {
++        let packets = runtime.execute(WorldCommand::ClientPacket(packet)).unwrap();
++        assert!(!packets.iter().any(|p| matches!(p, ServerPacket::ObjectAttack { info } if info.object_id == before.player_object_id.unwrap()) || matches!(p, ServerPacket::Magic { cast: true, .. })), "dead owner admitted an action: {packets:?}");
++    }
++    tick(
++        &mut runtime,
++        SharedInProcessZoneSessionRuntime::zone_now_ms() + 4_000,
++    );
++    let after_position = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_transform(&sid);
++    assert_eq!(after_position, Some(position));
++    let generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid)
++        .unwrap();
++    let revived = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
++        .unwrap();
++    assert_eq!(
++        revived
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::Revived))
++            .count(),
++        1,
++        "full HP corpse must accept TownRevive: {revived:?}"
++    );
++    assert!(!own_dead(&runtime));
++    let revived_generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid);
++    assert_eq!(revived_generation, Some(generation + 1));
++    let repeated = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
++        .unwrap();
++    assert!(!repeated.iter().any(|p| matches!(p, ServerPacket::Revived)));
++    let repeated_generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid);
++    assert_eq!(repeated_generation, revived_generation);
++}
++
++#[test]
++fn dead_poison_fenced_teardown_saves_latest_level_pools() {
++    let mut runtime = fixture("DeadTeardown", true);
++    poison_after_real_death(&mut runtime);
++    let lease = ZoneOwnerLease::in_process(&ZoneId::new("test-shared-zone"));
++    let prepared = runtime
++        .prepare_teardown_checkpoint(&lease)
++        .unwrap()
++        .unwrap();
++    let saved = prepared.checkpoint();
++    assert_eq!(saved.character.level, 15);
++    assert_eq!(saved.experience, 10);
++    assert_eq!(
++        saved.hp, saved.max_hp,
++        "teardown must not overwrite the committed refill with pre-award HP0"
++    );
++    assert_eq!(saved.mp, saved.max_mp);
++    assert!(
++        own_dead(&runtime),
++        "teardown drain must retain online life until actual removal"
++    );
++}
++
++#[test]
++fn dead_poison_known_save_failure_preserves_life_then_retry_and_duplicate() {
++    let mut runtime = fixture("DeadRetry", true);
++    let award = poison_after_real_death(&mut runtime);
++    let config = runtime.inner.shared_mentor_config().unwrap();
++    config.inject_account_store_transaction_fault(
++        mir2_simulation::AccountStoreTransactionFault::BeforePersist,
++    );
++    let failed = runtime.apply_pending_zone_packets();
++    assert!(!failed.iter().any(|p| matches!(
++        p,
++        ServerPacket::GainExperience { .. }
++            | ServerPacket::LevelChanged { .. }
++            | ServerPacket::Revived
++    )));
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 90);
++    assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
++    assert!(own_dead(&runtime));
++    let retry = runtime.apply_pending_zone_packets();
++    assert_eq!(
++        retry
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::GainExperience { amount: EXP }))
++            .count(),
++        1
++    );
++    assert!(own_dead(&runtime));
++    let identity = runtime.inner.active_identity().unwrap();
++    let key = config.account_store.lock().unwrap().accounts[&identity.account_id].saves
++        [&identity.character_index]
++        .guild_experience_journal
++        .applied_kill_receipts
++        .keys()
++        .next()
++        .unwrap()
++        .clone();
++    let mut duplicate = award;
++    duplicate.source_receipt_key = Some(key);
++    runtime.account_inventory_service = Arc::new(InProcessAccountInventoryService::new());
++    assert!(runtime
++        .apply_zone_monster_kill_awards(vec![duplicate.clone()])
++        .is_empty());
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 10);
++    assert!(own_dead(&runtime));
++    duplicate.experience += 1;
++    assert!(
++        runtime
++            .apply_zone_monster_kill_awards(vec![duplicate])
++            .is_empty(),
++        "same durable key with altered payload must reject"
++    );
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 10);
++    assert!(own_dead(&runtime));
++}
++
++#[test]
++fn dead_poison_retained_bootstrap_preserves_online_life() {
++    let mut runtime = fixture("DeadResume", true);
++    poison_after_real_death(&mut runtime);
++    runtime.apply_pending_zone_packets();
++    let character_index = runtime.inner.active_identity().unwrap().character_index;
++    runtime
++        .inner
++        .execute(WorldCommand::ReplayRetainedStartGameBootstrap { character_index })
++        .unwrap();
++    assert!(
++        own_dead(&runtime),
++        "retained authenticated runtime is not a fresh PlayerObject"
++    );
++}
++
++fn learned_magic_fixture(name: &str, spell: Spell) -> SharedInProcessZoneSessionRuntime {
++    let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
++    let mut runtime = shared_session_runtime(shared.clone());
++    let class = if spell == Spell::FireBall {
++        MirClass::Wizard
++    } else {
++        MirClass::Taoist
++    };
++    start_new_runtime_with_class(&mut runtime, name, name, class);
++    let mut save = runtime.inner.active_character_checkpoint().unwrap();
++    save.character.level = 20;
++    save.position = Point { x: 340, y: 550 };
++    save.hp = 1;
++    save.mp = 100;
++    save.max_mp = 100;
++    let (key, display) = match spell {
++        Spell::FireBall => ("fireball", "FireBall"),
++        Spell::Healing => ("healing", "Healing"),
++        Spell::Poisoning => ("poisoning", "Poisoning"),
++        _ => unreachable!(),
++    };
++    save.skill_states_json = vec![json!({
++        "key": key, "name": display, "description": "isolated valid dead-Magic admission fence",
++        "level": 0, "experience": 0, "cooldown_ticks": 0, "cooldown_ends_at": 0
++    })
++    .to_string()];
++    if spell == Spell::Poisoning {
++        let powder = mir2_game_data::crystal_item_by_name("GreenPoison").unwrap();
++        save.inventory_items_json = vec![json!({
++            "key": format!("crystal-item-{}", powder.item_index), "name": powder.name,
++            "icon": powder.image, "slot": 1, "unique_id": 71_001, "container": "bag1",
++            "quantity": 3, "description": "isolated native admission fixture", "weight": powder.weight,
++            "equip_slot": "amulet", "attack": 0, "defence": 0, "heal_hp": 0, "heal_mp": 0,
++            "user_item_metadata": {"item_index": powder.item_index}
++        }).to_string()];
++    }
++    runtime
++        .inner
++        .restore_active_character_checkpoint(&save)
++        .unwrap();
++    runtime.force_next_zone_transform_sync = true;
++    runtime.sync_zone_snapshot();
++    let sid = runtime.current_zone_session_id().unwrap();
++    runtime.sync_authoritative_zone_combat_state(&sid).unwrap();
++    let starting_pools = runtime.inner.world_snapshot();
++    runtime.dispatch_zone_player_command(
++        ZoneCommand::SyncPlayerVitals {
++            session_id: sid,
++            hp: 1,
++            max_hp: starting_pools.player_max_hp.unwrap(),
++            mp: starting_pools.player_mp.unwrap(),
++        },
++        false,
++    );
++    let mut target = shared_monster_entity(TARGET);
++    target.name = "Skeleton".into();
++    target.ai = Some(3);
++    target.x = 342;
++    target.y = 550;
++    target.hp = Some(100);
++    target.max_hp = Some(100);
++    target.disposition = WorldEntityDisposition::Hostile;
++    target.sprite = None;
++    shared.lock().unwrap().sync_map_layer(
++        "0".into(),
++        vec![target],
++        BTreeSet::new(),
++        Vec::new(),
++        BTreeSet::new(),
++    );
++    spawn(&mut runtime, TARGET, Point { x: 342, y: 550 }, 100, 0);
++    runtime.apply_pending_zone_packets();
++    runtime
++}
++
++fn native_hp(runtime: &SharedInProcessZoneSessionRuntime, id: u32) -> i32 {
++    runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .native_monster_snapshots(&ZoneKey::for_map("0"))
++        .into_iter()
++        .find(|m| m.object_id == id)
++        .unwrap()
++        .hp
++}
++
++fn ordinary_magic(runtime: &SharedInProcessZoneSessionRuntime, spell: Spell) -> WorldCommand {
++    let own = runtime.inner.world_snapshot().player_object_id.unwrap();
++    WorldCommand::ClientPacket(ClientPacket::Magic {
++        object_id: own,
++        spell,
++        direction: MirDirection::Up,
++        target_id: if spell == Spell::Healing { own } else { TARGET },
++        location: if spell == Spell::Healing {
++            Point { x: 340, y: 550 }
++        } else {
++            Point { x: 342, y: 550 }
++        },
++        spell_target_lock: true,
++    })
++}
++
++#[test]
++fn native_zero_hp_death_rejects_valid_magic_without_spend_hit_or_turn() {
++    for (spell, alive_name, dead_name) in [
++        (Spell::FireBall, "AliveFire", "DeadFire"),
++        (Spell::Healing, "AliveHeal", "DeadHeal"),
++        (Spell::Poisoning, "AlivePoison", "DeadPoison"),
++    ] {
++        // Positive control has no prior spell/action deadline. Prove this exact
++        // learned packet reaches native execution and really spends MP/material.
++        let mut alive = learned_magic_fixture(alive_name, spell);
++        let starting_mp = alive.inner.world_snapshot().player_mp.unwrap();
++        let alive_cast = alive.execute(ordinary_magic(&alive, spell)).unwrap();
++        assert!(
++            alive_cast
++                .iter()
++                .any(|p| matches!(p, ServerPacket::Magic { cast: true, .. })),
++            "{spell:?}: {alive_cast:?}"
++        );
++        assert!(
++            alive.inner.world_snapshot().player_mp.unwrap() < starting_mp,
++            "{spell:?} control must spend real MP"
++        );
++        if spell == Spell::Poisoning {
++            assert!(alive_cast.iter().any(|p| matches!(
++                p,
++                ServerPacket::DeleteItem {
++                    unique_id: 71_001,
++                    count: 1
++                }
++            )));
++        }
++        let mut dead = learned_magic_fixture(dead_name, spell);
++        let base = SharedInProcessZoneSessionRuntime::zone_now_ms();
++        spawn(&mut dead, KILLER, Point { x: 340, y: 551 }, 10_000, 0);
++        tick(&mut dead, base + 10);
++        tick(&mut dead, base + 700);
++        let death = dead.apply_pending_zone_packets();
++        assert!(
++            death
++                .iter()
++                .any(|p| matches!(p, ServerPacket::Death { .. })),
++            "{spell:?}: real native death required {death:?}"
++        );
++        assert_eq!(dead.inner.world_snapshot().player_hp, Some(0));
++        let sid = dead.current_zone_session_id().unwrap();
++        let before = dead.inner.active_character_checkpoint().unwrap();
++        let before_transform = dead
++            .zone_state
++            .lock()
++            .unwrap()
++            .zone_manager
++            .player_transform(&sid)
++            .unwrap();
++        let target_hp = native_hp(&dead, TARGET);
++        let rejected = dead.execute(ordinary_magic(&dead, spell)).unwrap();
++        tick(&mut dead, base + 2_100);
++        let after = dead.inner.active_character_checkpoint().unwrap();
++        assert_eq!(after.mp, before.mp, "{spell:?} dead cast must not spend MP");
++        assert_eq!(
++            after.inventory_items_json, before.inventory_items_json,
++            "{spell:?} dead cast must not debit powder"
++        );
++        assert_eq!(
++            native_hp(&dead, TARGET),
++            target_hp,
++            "{spell:?} dead cast must not cause a delayed target hit"
++        );
++        let after_transform = dead
++            .zone_state
++            .lock()
++            .unwrap()
++            .zone_manager
++            .player_transform(&sid);
++        assert_eq!(
++            after_transform,
++            Some(before_transform.clone()),
++            "{spell:?} dead Magic must not turn"
++        );
++        assert!(!rejected.iter().any(|p| matches!(
++            p,
++            ServerPacket::Magic { cast: true, .. }
++                | ServerPacket::ObjectMagic { cast: true, .. }
++                | ServerPacket::DeleteItem { .. }
++        )));
++        let turned = dead
++            .execute(WorldCommand::ClientPacket(ClientPacket::Turn {
++                direction: MirDirection::Left,
++            }))
++            .unwrap();
++        tick(&mut dead, base + 3_100);
++        let after_turn = dead
++            .zone_state
++            .lock()
++            .unwrap()
++            .zone_manager
++            .player_transform(&sid);
++        assert_eq!(
++            after_turn,
++            Some(before_transform),
++            "explicit dead Turn must not change facing: {turned:?}"
++        );
++        assert!(own_dead(&dead));
++    }
++}
++
++#[test]
++fn acknowledged_private_death_also_rejects_native_magic_before_zone_mirror_catches_up() {
++    // Isolated split-authority fixture corresponding to the source admission
++    // edge observed by the separately retained R17 ordinary network audit.
++    let mut runtime = learned_magic_fixture("PrivateDead", Spell::FireBall);
++    runtime
++        .inner
++        .force_authoritative_player_vitals(Some(0), None);
++    let local = runtime.inner.world_snapshot().player_object_id.unwrap();
++    runtime.owner_dead_entity_ids.insert(local);
++    let sid = runtime.current_zone_session_id().unwrap();
++    let zone_before = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_vitals(&sid)
++        .unwrap();
++    assert!(zone_before.0 > 0);
++    let before = runtime.inner.active_character_checkpoint().unwrap();
++    let before_direction = before.direction;
++    let target_hp = native_hp(&runtime, TARGET);
++    let packets = runtime
++        .execute(ordinary_magic(&runtime, Spell::FireBall))
++        .unwrap();
++    tick(
++        &mut runtime,
++        SharedInProcessZoneSessionRuntime::zone_now_ms() + 1_000,
++    );
++    let after = runtime.inner.active_character_checkpoint().unwrap();
++    assert_eq!(
++        after.mp, before.mp,
++        "positive old Zone HP cannot authorize a dead private caster"
++    );
++    assert_eq!(after.direction, before_direction);
++    assert_eq!(native_hp(&runtime, TARGET), target_hp);
++    assert!(!packets
++        .iter()
++        .any(|p| matches!(p, ServerPacket::Magic { cast: true, .. })));
++    assert!(own_dead(&runtime));
++}
++
++#[test]
++fn real_poison_logout_relogin_distinguishes_zero_hp_from_full_hp_dead_save() {
++    for (name, level_up) in [("DeadLoginZero", false), ("DeadLoginFull", true)] {
++        let mut runtime = fixture(name, level_up);
++        let mut award = poison_after_real_death(&mut runtime);
++        runtime.apply_pending_zone_packets();
++        let config = runtime.inner.shared_mentor_config().unwrap();
++        let before = runtime.inner.active_character_checkpoint().unwrap();
++        assert!(own_dead(&runtime));
++        let logout = runtime
++            .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
++            .unwrap();
++        assert!(logout
++            .iter()
++            .any(|p| matches!(p, ServerPacket::LogOutSuccess { .. })));
++        let mut next =
++            shared_session_runtime(Arc::new(Mutex::new(SharedInProcessZoneState::new())));
++        next.inner = InProcessWorldRuntime::new(config.clone());
++        next.execute(WorldCommand::ClientPacket(ClientPacket::Login {
++            account_id: name.into(),
++            password: name.into(),
++        }))
++        .unwrap();
++        next.execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
++            character_index: before.character.index,
++        }))
++        .unwrap();
++        let after = next.inner.active_character_checkpoint().unwrap();
++        assert!(
++            !own_dead(&next),
++            "a genuinely new PlayerObject starts alive"
++        );
++        assert_eq!(after.hp, after.max_hp);
++        assert_eq!(after.character.level, before.character.level);
++        assert_eq!(after.experience, before.experience);
++        assert_eq!(
++            after.position,
++            if level_up {
++                before.position
++            } else {
++                before.bind_point.unwrap().position
++            }
++        );
++        assert_eq!(
++            after.guild_experience_journal.applied_kill_receipts.len(),
++            1
++        );
++        award.source_receipt_key = after
++            .guild_experience_journal
++            .applied_kill_receipts
++            .keys()
++            .next()
++            .cloned();
++        assert!(next.apply_zone_monster_kill_awards(vec![award]).is_empty());
++        assert_eq!(
++            next.inner.world_snapshot().player_experience,
++            after.experience
++        );
++        assert!(!own_dead(&next));
++    }
++}
++
++#[test]
++fn genuine_dead_receipts_replayed_after_level_and_revive_do_not_repeat_penalty() {
++    let mut runtime = fixture("DeadReceipt", true);
++    let (_, deltas) = poison_after_real_death_with_receipts(&mut runtime);
++    runtime.apply_pending_zone_packets();
++    let before = runtime.inner.active_character_checkpoint().unwrap();
++    let tick_before = runtime.inner.world_snapshot().tick;
++    let duplicate = runtime.apply_zone_player_damages(deltas.clone());
++    let after = runtime.inner.active_character_checkpoint().unwrap();
++    assert_eq!(after.hp, before.hp);
++    assert_eq!(after.inventory_items_json, before.inventory_items_json);
++    assert_eq!(after.equipment_items_json, before.equipment_items_json);
++    assert_eq!(runtime.inner.world_snapshot().tick, tick_before);
++    assert!(duplicate.is_empty());
++    assert!(own_dead(&runtime));
++    runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::TownRevive))
++        .unwrap();
++    assert!(!own_dead(&runtime));
++    let before = runtime.inner.active_character_checkpoint().unwrap();
++    let duplicate = runtime.apply_zone_player_damages(deltas);
++    let after = runtime.inner.active_character_checkpoint().unwrap();
++    assert_eq!(after.hp, before.hp);
++    assert_eq!(after.inventory_items_json, before.inventory_items_json);
++    assert_eq!(after.equipment_items_json, before.equipment_items_json);
++    assert!(duplicate.is_empty());
++    assert!(!own_dead(&runtime));
++}
++
++#[test]
++fn unknown_poison_award_publication_freezes_without_fake_success_or_revive() {
++    let root = std::env::temp_dir().join(format!(
++        "mir2-dead-source-unknown-{}-{}",
++        std::process::id(),
++        SharedInProcessZoneSessionRuntime::zone_now_ms()
++    ));
++    std::fs::create_dir_all(&root).unwrap();
++    let config = mir2_simulation::SimulationConfig::default()
++        .with_account_store_path(root.join("accounts.json"));
++    config.save_account_store().unwrap();
++    let mut runtime = fixture_with_config("DeadUnknown", true, Some(config.clone()));
++    let actual_award = poison_after_real_death(&mut runtime);
++    config.inject_account_store_transaction_fault(
++        mir2_simulation::AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
++    );
++    let packets = runtime.apply_pending_zone_packets();
++    assert!(!packets.iter().any(|p| matches!(
++        p,
++        ServerPacket::GainExperience { .. }
++            | ServerPacket::LevelChanged { .. }
++            | ServerPacket::Revived
++            | ServerPacket::ObjectRevived { .. }
++    )));
++    assert!(
++        config.save_account_store().is_err(),
++        "an unknown publication must retain the existing repository freeze"
++    );
++    assert!(own_dead(&runtime));
++    let key = runtime.current_presence_key().unwrap();
++    let pending = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .take_pending_zone_monster_kill_awards(&key);
++    assert_eq!(pending.len(), 1);
++    assert_eq!(pending[0].monster_object_id, actual_award.monster_object_id);
++    assert_eq!(pending[0].experience, actual_award.experience);
++    assert!(pending[0].source_receipt_key.is_some());
++    let rejected = runtime.apply_zone_monster_kill_awards(pending);
++    assert!(rejected.is_empty());
++    assert!(own_dead(&runtime));
++    let lease = ZoneOwnerLease::in_process(&ZoneId::new("test-shared-zone"));
++    assert!(
++        runtime.prepare_teardown_checkpoint(&lease).is_err(),
++        "unconfirmed reward publication must not become a successful teardown"
++    );
++}
++
++fn carried_item(name: &str, uid: u64, slot: u8) -> String {
++    let template = mir2_game_data::crystal_item_by_name(name).unwrap();
++    json!({
++        "key": format!("crystal-item-{}", template.item_index), "name": template.name,
++        "icon": template.image, "slot": slot, "unique_id": uid, "container": "bag1",
++        "quantity": 1, "description": "isolated full-HP corpse item fence", "weight": template.weight,
++        "attack": 0, "defence": 0, "heal_hp": 0, "heal_mp": 0,
++        "user_item_metadata": {"item_index": template.item_index}
++    }).to_string()
++}
++
++#[test]
++fn full_hp_poison_level_corpse_blocks_normal_potion_but_scroll_explicitly_revives() {
++    let mut runtime = fixture("DeadScroll", true);
++    poison_after_real_death(&mut runtime);
++    runtime.apply_pending_zone_packets();
++    assert!(own_dead(&runtime));
++    let mut save = runtime.inner.active_character_checkpoint().unwrap();
++    save.inventory_items_json
++        .push(carried_item("(HP)DrugSmall", 71_002, 2));
++    save.inventory_items_json
++        .push(carried_item("ResurrectionScroll", 71_003, 3));
++    runtime
++        .inner
++        .restore_active_character_checkpoint(&save)
++        .unwrap();
++    let denied = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
++            unique_id: 71_002,
++            grid: MirGridType::Inventory,
++        }))
++        .unwrap();
++    assert!(
++        !denied.iter().any(|p| matches!(
++            p,
++            ServerPacket::DeleteItem { .. } | ServerPacket::UseItem { success: true, .. }
++        )),
++        "{denied:?}"
++    );
++    assert!(runtime
++        .inner
++        .world_snapshot()
++        .inventory_items
++        .iter()
++        .any(|item| item.unique_id == 71_002));
++    assert!(own_dead(&runtime));
++    let sid = runtime.current_zone_session_id().unwrap();
++    let generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid)
++        .unwrap();
++    let revived = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
++            unique_id: 71_003,
++            grid: MirGridType::Inventory,
++        }))
++        .unwrap();
++    assert!(
++        revived.iter().any(|p| matches!(
++            p,
++            ServerPacket::UseItem {
++                unique_id: 71_003,
++                success: true,
++                ..
++            }
++        )),
++        "{revived:?}"
++    );
++    assert!(revived
++        .iter()
++        .any(|p| matches!(p, ServerPacket::ObjectRevived { .. })));
++    assert!(!runtime
++        .inner
++        .world_snapshot()
++        .inventory_items
++        .iter()
++        .any(|item| item.unique_id == 71_003));
++    assert!(!own_dead(&runtime));
++    let after_generation = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_life_generation(&sid);
++    assert_eq!(after_generation, Some(generation + 1));
++    let zone_dead = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .player_is_dead(&sid);
++    assert_eq!(zone_dead, Some(false));
++}
+diff --git a/mir2-web3/docs/DEAD-EXPERIENCE-CHAIN-20261004.md b/mir2-web3/docs/DEAD-EXPERIENCE-CHAIN-20261004.md
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/docs/DEAD-EXPERIENCE-CHAIN-20261004.md
+@@ -0,0 +1,132 @@
++# 死亡经验、升级和复活权威链 — 2026-10-04
++
++本轮实现基线为 `17b44e08f4253bfc0905dfb951e978d82bf78ada`，包含已整合的
++v27 地图和同图普通 EXPOwner。验证期间 root 独立提交公告代码及全局文档
++`95e18e8ebd5e05f1d6baf3523a853716d3026b70`，与本轮写集不相交。
++下述修复是**限定源码 Candidate**；没有构建发布包、提交或推送本轮代码、
++更新服务器、修改真人存档或 F 盘安装。已发布 R17/source6032 保持不变。
++
++## 原版规则与定位
++
++来源为 `E:/mir2/Crystal` 的实际源码，冻结全文哈希、带行号节选和只读计划在
++`C:/mir2-playtest-releases/20261004-native-r17/dead-experience-chain-plan-01`。
++
++| 原版来源 | 本轮遵循的行为 |
++| --- | --- |
++| `Server/MirObjects/MapObject.cs:69`；`HumanObject.cs:117–157,552` | 在线 Dead 独立于 HP；Dead 阻止移动、攻击、施法和常规再生。 |
++| `HumanObject.cs:219`；`PlayerObject.cs:794–848,891–938` | Solo 经验接收没有 Dead gate。不能把 Blocking 的 `!Dead` 误读成 CanGainExp；原组队死亡排除规则另属范围。 |
++| `MonsterObject.cs:982–990,1495–1509` | 周期毒可继续采用仍在场的死亡主人，目标真正死亡后再发奖励。 |
++| `HumanObject.cs:845–865` | LevelUp 刷新属性并补满 HP/MP；正值 SetHP 不清 Dead。死亡后升级满血仍是尸体。 |
++| `PlayerObject.cs:643–650,1392–1443` | 真死亡明确 HP0/Dead；TownRevive 明确清 Dead、补满并回绑定点。 |
++| `Server/MirDatabase/CharacterInfo.cs:57,176–180,414–424`；`HumanObject.cs:59–68` | 角色存档写 HP/MP/EXP，不单独存 Dead；死后升级后的满血会进入持久化值。 |
++| `PlayerObject.cs:206–264,1069–1107` | 真正新登录创建新 PlayerObject、RefreshStats；保存 HP0 才回绑定点并补满，合法 HP>0 沿原位置活登录。 |
++
++旧实现将 `hp > 0` 当作复活许可，造成两条真实缺陷：死后毒杀升级令 Zone
++清 Dead、推进 life generation；fenced teardown 则在奖励后用预先缓存的 HP0
++覆盖已提交的满血升级。原版行为不能用“死后升级始终保持 HP0”代替。
++
++另有已发布 R17 的独立普通网络失败证据：
++`dense-network-qa-v4-execution-01/R17-V4-RUN-AUDIT-01.json`，SHA-256
++`506a5062e50e71eeb36aa9d2e0266aae67ff014190da46859a8ebe2ad0e008a2`。
++Wizard Death1006/HP0 后 Magic1018 的绝对 MP541→538；Taoist Death1354 后
++Healing1368 的 MP260→257。Wizard 同一段还有 Dead Attack1017，目标随后
++8 伤没有足够攻击者归因，**不能单独算成 FireBall 伤害**。Wizard 朝向也改变。
++缺少 MagicCast/ObjectMagic ACK 不能证明拒绝；旧分类器的假通过保留，离线
++重分类是独立证据。本轮没有声称这些旧 trace 已由新源码网络复测转绿。
++
++## 修复范围
++
++- 个人 `PlayerRuntimeResource.player_dead` 为在线状态。中央死亡资格和
++  SelfPlayer 快照采用它；普通正值 HP 同步、升级补满或同 epoch 恢复不清死态。
++  真死亡标记后拒绝再次伤害和常规再生；Hero/Monster 判定不改。
++- 内部 typed vitals/life snapshot 与 `SyncPlayerVitalsAndLife` 同步两份镜像。
++  共享游戏生命仍由单写 Zone 权威裁决；普通 `SyncPlayerVitals` 只改 pools，
++  没有正值 HP 隐式复活。新命令和 getter 是服务器可信边界，没有普通客户端入口。
++- Gateway 奖励同步、私有已确认死亡保护、stale Death/Revived 过滤及可信
++  settled receipt 重放使用明确 life；只在真实复活 transition 推进 generation。
++  原 object/generation/sequence、死亡掉落和物品扣除 watermark 保持。
++- native attack 在物体 materialization、MP/材料消费、Zone 法术计时和 Turn
++  之前检查最新 personal Dead；由 pre-drain 后的可信生命镜像拦截提前准备的
++  HP0 或满血尸体输入。既有有限控制状态 admission 保持。
++- checked 奖励 drain 同步已提交升级后的 pools/life；teardown 在同一已冻结
++  presence 下重读最新 HP/maxHP/MP/Dead，不再恢复奖励之前的旧 HP0。
++- 已知保存失败/prepare 回滚 checkpoint 增加 transient life；immutable kill
++  key/payload、CAS、journal、UnknownOutcome 冻结和不发假成功合同保持。
++- TownRevive/既有复活卷明确清 Dead。正常 `start_game` 对保存 HP0 先选择
++  绑定点、重建/RefreshStats，再按当前 maxima 补满；满 HP 的合法保存位置
++  保留。`CharacterSaveRecord` 没有增加永久 Dead schema。
++- 同 epoch restore 保留 life；retained bootstrap 不运行真正新登录的规则。
++  原 `leveling.rs` 满 HP/MP 行为及用户自定义日常约5级/周常约10级经验未改。
++
++批准写集共18文件：`runtime/resources.rs`、`components.rs`、`combat.rs`、
++`session.rs`、`packets.rs`、`movement.rs`、`items.rs`、`save.rs`、
++`shared_guild_experience.rs`、`prepared_kill_experience.rs`；`world_runtime.rs`；
++`zone/runtime.rs`、`zone/types.rs`、`zone/manager.rs`；`gateway/routing.rs`；
++新 `simulation/tests/dead_experience_chain.rs`、
++`gateway/src/routing/tests/dead_experience_chain_tests.rs` 和本说明。
++路径前缀以冻结 `source-file-index.json` 为准。manager 仅 typed getter/转发；
++Zone 原有两个私有伤害测试调用只补 `None` 生命周期参数以恢复编译。
++未运行会递归修改 module 的全文件格式化；只格式化两个新测试文件。
++
++## RED、GREEN 与测试证据
++
++实际执行 Rust1.95.0、`--locked`，显式
++`CARGO_TARGET_DIR=C:/mir2-build/gateway-tests-r49`、jobs2，串行测试。
++完整日志和逐文件 SHA/基线/限定 patch 冻结于
++`C:/mir2-playtest-releases/20261004-native-r17/dead-experience-chain-implementation-01`。
++`run-receipts.json` 记录命令、日志哈希和测试结果，不将下述失败覆写成成功。
++
++| 日志（`C:/mir2-build/`） | 实际结果 |
++| --- | --- |
++| `dead-experience-chain-gateway-red01` 至 `red04` 的 `-20261004.log` | 先有 bootstrap literal 编译错误、fixture optional-selection 错假设及断言持 mutex 的二次 panic/abort；完整保留，不能当成独立游戏 RED 数量。 |
++| `dead-experience-chain-gateway-red05-20261004.log` | 6 项真实链：1通过/5失败，落在升级 Dead/generation、满血尸体 TownRevive、失败重试/retained life 和 teardown stale HP0。写生产修复前执行。 |
++| `dead-experience-chain-simulation-red01-20261004.log` | 3 项：1通过/2失败，实际 HP0 新登录未补满、正值 vitals 隐式复活。 |
++| `dead-experience-chain-gateway-green01/02-20261004.log` | 首批真实链6/6，随后有效 HP0 Magic/私有已确认死亡补充8/8。 |
++| `dead-experience-chain-gateway-green03-20261004.log` | 新 unknown 断言误用 private API，编译失败；改用既有公开保存 API，未改生产冻结规则。 |
++| `dead-experience-chain-gateway-green04-20261004.log` | 10通过/1失败；真实毒→HP0退出→重登得到16/81HP，揭示必须在 RefreshStats 后补满。修正正常 Load 顺序。 |
++| `dead-experience-chain-gateway-green05-20261004.log` | 完整12/12通过。 |
++| `dead-experience-chain-gateway-green06-20261004.log` | 明确镜像 pools 断言后11通过/1失败；非升级 fixture 人工将 Zone MP设100超过个人 max66。仅修 fixture 使用 restore 后实际 pools，保留一致断言，并强化 alive MP 对照为实际前值。 |
++| `dead-experience-chain-gateway-green07-20261004.log` | 最终12/12通过，含实际 account/character/presence/session 和 personal↔Zone life/pools 一致。 |
++| `dead-experience-chain-external-adjacent01-20261004.log` | 新个人生命周期3/3；前轮普通怪归属21/21。 |
++| `dead-experience-chain-security-adjacent01-20261004.log` | 现有 security/lifecycle20/20，含 queued potion、绑定点回城、登录资格及保存位置。 |
++| `dead-experience-chain-scroll-adjacent01-20261004.log` | 两个旧私有方法调用缺参，编译失败；已限定补参数。 |
++| `dead-experience-chain-scroll-adjacent02-20261004.log` | 既有复活卷3/3。 |
++| `dead-experience-chain-prepared/reincarnation/town-adjacent01-20261004.log` | 既有 prepare回滚2/2、共享Reincarnation1/1、TownRevive2/2。 |
++| `dead-experience-chain-vital-adjacent01-20261004.log` | 既有真实batched死亡/复活回执、活人升级及teardown vitals5/5。 |
++| `dead-experience-chain-delayed-receipt/foreign-receipt/private-death/potion-logout/live-award-adjacent01-20261004.log` | 各1/1，保留跨生命旧回执、异身份拒绝、私有死亡、药品/退出和活人非升级奖励护栏。 |
++| `dead-experience-chain-guild-kill-adjacent01-20261004.log` | 既有known/unknown持久化kill source2/2；这些是消费者fixture，不能替代新实际毒击杀链。 |
++
++最终新增 focused15、既有邻接61，均通过各自限定命令；没有重跑整世界全套。
++前轮 `shared-monster-ownership-adjacent-summon-ai-04-20261004.log` 的 Hell
++purification 失败及冻结R17的相同 baseline 失败仍保留，未在此轮弱化或闭合。
++
++新 Gateway 共用链是隔离账号普通 NewAccount/Login/NewCharacter/StartGame，
++可信 fixture 确定等级/已学技能/初始经验/真实粉末和怪物池。通过实际 Magic
++施毒、普通 native AI 致死、真实正值周期毒 tick 致死目标产生 award；不直接
++构造 kill award 冒充链路。重复/冲突检查复用已产生的实际 key/award。
++非升级和升级均检查实际 XP/journal；后者满 HP/MP 仍 Dead、generation不推进。
++正常Logout后独立新服务Login/StartGame验证 HP0→绑定/full 与满HP原位置活登录。
++
++有效 FireBall/Healing/Poisoning 各有无旧法术 deadline 的活人正对照；死亡组
++经 native 实际致死后仅发对应 Magic，检查 MP、真实粉末、目标实际延迟HP、
++位置/方向与显式死态 Turn。它们不靠缺 ACK 或混合 Attack/Magic 的伤害时序
++推导因果。另有满血尸体 Walk/Run/melee 拒绝、常规药品不消费、真实复活卷和
++TownRevive 一次 generation、实际死亡回执重复不再扣物品、known retry及
++UnknownOutcome 不发假 XP/复活。后续账务 key replay 保持一次领取。
++
++## 仍未执行或未闭合
++
++- 新源码未做独立真实 TCP/WSS/原生鼠标和真人验收；旧 R17 网络失败不能
++  因 in-process GREEN 改成通过。需使用新源码 paired Gateway 重测。
++- retained 测试经真实毒死亡升级后调用既有 trusted bootstrap，证明同在线
++  runtime 不重置 life；不是完整 authenticated reconnect/token/socket Gate。
++- fenced测试验证实际 queued award 的 checked 提交与准备退出checkpoint；
++  未声称已验证所有 transport断连/SQL restart/unknown恢复流程。
++- 普通合法位置、绑定点和源 Load 的 HP0顺序已测；完整PKtown、NoReconnect
++  等原本尚未闭合的世界规则不由本轮扩写。复活術邻接只保原功能，非新增1.76范围。
++- 跨图/logout EXP全局身份、源60秒地面掉落、原版party/generic Boss规则、
++  native密集战斗和此前Hell fixture保持独立Gate。本轮没有放宽生命generation
++  为登录身份，也没有更改经理/组队/掉落算法或原版地图准入。
++
++本轮源码和证据冻结后由root审阅整合；继续独立Goal阶段不表示上述人工或网络
++Gate已通过，也不触发发布或对既有安装/真人进度的变更。

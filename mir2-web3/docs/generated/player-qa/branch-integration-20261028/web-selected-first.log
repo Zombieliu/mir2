@@ -1,0 +1,622 @@
+TAP version 13
+# Subtest: creates a bounded trusted session and keeps browser intent out of the QR
+ok 1 - creates a bounded trusted session and keeps browser intent out of the QR
+  ---
+  duration_ms: 12.5902
+  type: 'test'
+  ...
+# Subtest: accepts empty POST streams from NextRequest and an explicit empty object
+ok 2 - accepts empty POST streams from NextRequest and an explicit empty object
+  ---
+  duration_ms: 6.4707
+  type: 'test'
+  ...
+# Subtest: verifies a real Sui signature and reissues only the same fixed-expiry one-use proof
+ok 3 - verifies a real Sui signature and reissues only the same fixed-expiry one-use proof
+  ---
+  duration_ms: 21.3931
+  type: 'test'
+  ...
+# Subtest: rejects missing/disallowed Origin, body-selected sessions, and large bodies before relay access
+ok 4 - rejects missing/disallowed Origin, body-selected sessions, and large bodies before relay access
+  ---
+  duration_ms: 2.668
+  type: 'test'
+  ...
+# Subtest: rejects intent tampering and use from another otherwise allowed origin
+ok 5 - rejects intent tampering and use from another otherwise allowed origin
+  ---
+  duration_ms: 2.5937
+  type: 'test'
+  ...
+# Subtest: rejects create responses that change trusted origins, protocol URLs, identity fields, or TTL
+ok 6 - rejects create responses that change trusted origins, protocol URLs, identity fields, or TTL
+  ---
+  duration_ms: 6.0452
+  type: 'test'
+  ...
+# Subtest: rejects changed signed envelopes and wrong account, key, chain, message, bytes, signature, or time
+ok 7 - rejects changed signed envelopes and wrong account, key, chain, message, bytes, signature, or time
+  ---
+  duration_ms: 17.7096
+  type: 'test'
+  ...
+# Subtest: expires intents before relay access and reports wallet rejection without issuing a proof
+ok 8 - expires intents before relay access and reports wallet rejection without issuing a proof
+  ---
+  duration_ms: 3.3641
+  type: 'test'
+  ...
+# Subtest: bounds relay responses and fails closed on malformed JSON, upstream failures, or unsafe config
+ok 9 - bounds relay responses and fails closed on malformed JSON, upstream failures, or unsafe config
+  ---
+  duration_ms: 5.5071
+  type: 'test'
+  ...
+# Subtest: Dubhe approval exchanges the proof once for the canonical channel account
+ok 10 - Dubhe approval exchanges the proof once for the canonical channel account
+  ---
+  duration_ms: 68.0397
+  type: 'test'
+  ...
+# Subtest: wallet rejection and expiry never exchange an identity proof
+ok 11 - wallet rejection and expiry never exchange an identity proof
+  ---
+  duration_ms: 24.0554
+  type: 'test'
+  ...
+# Subtest: aborted or superseded create, poll, approved callback, and exchange cannot return a login
+ok 12 - aborted or superseded create, poll, approved callback, and exchange cannot return a login
+  ---
+  duration_ms: 103.0138
+  type: 'test'
+  ...
+# Subtest: local expiry stops polling without an extra request
+ok 13 - local expiry stops polling without an extra request
+  ---
+  duration_ms: 10.606
+  type: 'test'
+  ...
+# Subtest: same-device hidden tabs wait for return before polling or claiming an approved login
+ok 14 - same-device hidden tabs wait for return before polling or claiming an approved login
+  ---
+  duration_ms: 11.6019
+  type: 'test'
+  ...
+# Subtest: hidden tabs expire without polling and cancellation stops a hidden wait
+ok 15 - hidden tabs expire without polling and cancellation stops a hidden wait
+  ---
+  duration_ms: 17.6886
+  type: 'test'
+  ...
+# Subtest: malformed create, status, and approved proof responses fail without exchange
+ok 16 - malformed create, status, and approved proof responses fail without exchange
+  ---
+  duration_ms: 117.2781
+  type: 'test'
+  ...
+# Subtest: actual page submits the canonical channel session once
+ok 17 - actual page submits the canonical channel session once
+  ---
+  duration_ms: 16.0505
+  type: 'test'
+  ...
+# Subtest: actual page cancel and retry retire old requests without clearing the newer busy flag
+ok 18 - actual page cancel and retry retire old requests without clearing the newer busy flag
+  ---
+  duration_ms: 8.6809
+  type: 'test'
+  ...
+# Subtest: actual page QR retry also ignores an older rejected promise
+ok 19 - actual page QR retry also ignores an older rejected promise
+  ---
+  duration_ms: 8.5749
+  type: 'test'
+  ...
+# Subtest: actual page identity leases reject epoch, socket, generation, auth, screen, and intent changes
+ok 20 - actual page identity leases reject epoch, socket, generation, auth, screen, and intent changes
+  ---
+  duration_ms: 45.5452
+  type: 'test'
+  ...
+# Subtest: actual page lifecycle aborts retired QR and prevents old completion from clearing newer busy
+ok 21 - actual page lifecycle aborts retired QR and prevents old completion from clearing newer busy
+  ---
+  duration_ms: 7.3531
+  type: 'test'
+  ...
+# [mir2] equipment send outcome is unknown Error: transport outcome unknown
+#     at page.scope.socketRef.current.send (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:569:101)
+#     at sendRaw (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:218:21), <anonymous>:573:16)
+#     at send (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:218:21), <anonymous>:187:26)
+#     at Object.dispatchBevyCharacterIntent (eval at harness (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:218:21), <anonymous>:724:31)
+#     at TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-page-gate.mjs:570:21)
+#     at Test.runInAsyncScope (node:async_hooks:214:14)
+#     at Test.run (node:internal/test_runner/test:1047:25)
+#     at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+#     at Test.postRun (node:internal/test_runner/test:1173:19)
+#     at Test.run (node:internal/test_runner/test:1101:12)
+# Subtest: ordinary medicine Use reaches socket with a complete session even if equipment WASM is unavailable
+ok 22 - ordinary medicine Use reaches socket with a complete session even if equipment WASM is unavailable
+  ---
+  duration_ms: 166.6489
+  type: 'test'
+  ...
+# Subtest: unknown bag metadata refuses Use, and Equip refuses a missing ledger
+ok 23 - unknown bag metadata refuses Use, and Equip refuses a missing ledger
+  ---
+  duration_ms: 2.0199
+  type: 'test'
+  ...
+# Subtest: weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot
+ok 24 - weapon replacement reaches the socket and the real ledger releases after ACK plus the swapped snapshot
+  ---
+  duration_ms: 7.9286
+  type: 'test'
+  ...
+# Subtest: React Use and native Equip/Use all choose the current free ring hand through the real send gate
+ok 25 - React Use and native Equip/Use all choose the current free ring hand through the real send gate
+  ---
+  duration_ms: 10.8527
+  type: 'test'
+  ...
+# Subtest: mount Use proves the current instance but emits only Crystal wire slot 13
+ok 26 - mount Use proves the current instance but emits only Crystal wire slot 13
+  ---
+  duration_ms: 0.882
+  type: 'test'
+  ...
+# Subtest: a replaced mount, non-mount item, or missing instance proof cannot issue mount Use
+ok 27 - a replaced mount, non-mount item, or missing instance proof cannot issue mount Use
+  ---
+  duration_ms: 0.5836
+  type: 'test'
+  ...
+# Subtest: synchronous action listener logout prevents outer Equip bytes and releases its proven-unsent reservation
+ok 28 - synchronous action listener logout prevents outer Equip bytes and releases its proven-unsent reservation
+  ---
+  duration_ms: 1.5634
+  type: 'test'
+  ...
+# Subtest: synchronous action listener logout also prevents outer Move bytes
+ok 29 - synchronous action listener logout also prevents outer Move bytes
+  ---
+  duration_ms: 0.6417
+  type: 'test'
+  ...
+# Subtest: cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells
+ok 30 - cross-page move keeps the actual WASM ledger target reservation and sends only explicit destination cells
+  ---
+  duration_ms: 1.5462
+  type: 'test'
+  ...
+# Subtest: cross-page move rechecks the socket, connection, session, and logout gate after the synchronous action event
+ok 31 - cross-page move rechecks the socket, connection, session, and logout gate after the synchronous action event
+  ---
+  duration_ms: 1.6575
+  type: 'test'
+  ...
+# Subtest: a captured render identity from another connection or session cannot send item commands
+ok 32 - a captured render identity from another connection or session cannot send item commands
+  ---
+  duration_ms: 0.8527
+  type: 'test'
+  ...
+# Subtest: late WASM installation cannot establish a baseline across a pre-existing logout gate
+ok 33 - late WASM installation cannot establish a baseline across a pre-existing logout gate
+  ---
+  duration_ms: 0.419
+  type: 'test'
+  ...
+# Subtest: actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK
+ok 34 - actual page rejects old rendered owners and keeps the real WASM pending across handoff and ACK
+  ---
+  duration_ms: 0.8763
+  type: 'test'
+  ...
+# Subtest: actual raw send rechecks the original Bevy token and live host after synchronous action listeners
+ok 35 - actual raw send rechecks the original Bevy token and live host after synchronous action listeners
+  ---
+  duration_ms: 0.8903
+  type: 'test'
+  ...
+# Subtest: retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations
+ok 36 - retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations
+  ---
+  duration_ms: 4.8001
+  type: 'test'
+  ...
+# Subtest: storage compatibility callbacks require a storage proof for current and stale owners
+ok 37 - storage compatibility callbacks require a storage proof for current and stale owners
+  ---
+  duration_ms: 0.749
+  type: 'test'
+  ...
+# Subtest: actual Bevy intent adapter preserves UID0 and global bag cells through shared Equip/Use/Move gates
+ok 38 - actual Bevy intent adapter preserves UID0 and global bag cells through shared Equip/Use/Move gates
+  ---
+  duration_ms: 2.7126
+  type: 'test'
+  ...
+# Subtest: actual close wrapper revokes ownership before a same-frame queued Use can submit
+ok 39 - actual close wrapper revokes ownership before a same-frame queued Use can submit
+  ---
+  duration_ms: 1.0354
+  type: 'test'
+  ...
+# Subtest: actual Character dispatch rechecks UID0, hidden Bag and first empty second-page slot through one real ledger
+ok 40 - actual Character dispatch rechecks UID0, hidden Bag and first empty second-page slot through one real ledger
+  ---
+  duration_ms: 2.3811
+  type: 'test'
+  ...
+# Subtest: actual Character source replacement, full bag and final synchronous logout cannot send
+ok 41 - actual Character source replacement, full bag and final synchronous logout cannot send
+  ---
+  duration_ms: 2.4175
+  type: 'test'
+  ...
+# Subtest: actual Character unknown send keeps the existing pending reservation
+ok 42 - actual Character unknown send keeps the existing pending reservation
+  ---
+  duration_ms: 2.7235
+  type: 'test'
+  ...
+# Subtest: inventory move callbacks preserve the clicked destination page through the real page planner
+ok 43 - inventory move callbacks preserve the clicked destination page through the real page planner
+  ---
+  duration_ms: 19.6732
+  type: 'test'
+  ...
+# Subtest: actual inventory handlers show a failed move only as failure and clear selection after either result
+ok 44 - actual inventory handlers show a failed move only as failure and clear selection after either result
+  ---
+  duration_ms: 32.0048
+  type: 'test'
+  ...
+# Subtest: actual page move returns its submission result for rejected bag plans and every existing grid
+ok 45 - actual page move returns its submission result for rejected bag plans and every existing grid
+  ---
+  duration_ms: 1.2809
+  type: 'test'
+  ...
+# Subtest: actual page move sends bag cells and blocks a pending equipment instance
+ok 46 - actual page move sends bag cells and blocks a pending equipment instance
+  ---
+  duration_ms: 0.4621
+  type: 'test'
+  ...
+# Subtest: actual page move blocks pending destination, old render, logout, and missing baseline
+ok 47 - actual page move blocks pending destination, old render, logout, and missing baseline
+  ---
+  duration_ms: 0.3839
+  type: 'test'
+  ...
+# Subtest: actual page move leaves non-bag routes on their existing contract
+ok 48 - actual page move leaves non-bag routes on their existing contract
+  ---
+  duration_ms: 0.4197
+  type: 'test'
+  ...
+# Subtest: actual page moves between explicit bag pages and checks the real destination pending instance
+ok 49 - actual page moves between explicit bag pages and checks the real destination pending instance
+  ---
+  duration_ms: 0.3774
+  type: 'test'
+  ...
+# Subtest: actual page rejects missing or non-bag destinations instead of inferring a source page
+ok 50 - actual page rejects missing or non-bag destinations instead of inferring a source page
+  ---
+  duration_ms: 0.263
+  type: 'test'
+  ...
+# Subtest: bag MoveItem uses current cells rather than the server instance ID
+ok 51 - bag MoveItem uses current cells rather than the server instance ID
+  ---
+  duration_ms: 0.3709
+  type: 'test'
+  ...
+# Subtest: bag2 MoveItem offsets local cells and honors authoritative total capacity
+ok 52 - bag2 MoveItem offsets local cells and honors authoritative total capacity
+  ---
+  duration_ms: 0.4079
+  type: 'test'
+  ...
+# Subtest: cross-page bag moves use independent cells, including equal local indices, with capacity checks on both ends
+ok 53 - cross-page bag moves use independent cells, including equal local indices, with capacity checks on both ends
+  ---
+  duration_ms: 0.637
+  type: 'test'
+  ...
+# Subtest: cross-page bag target identity must be unique and authoritative on the target page
+ok 54 - cross-page bag target identity must be unique and authoritative on the target page
+  ---
+  duration_ms: 0.2641
+  type: 'test'
+  ...
+# Subtest: bag MoveItem rejects stale, ambiguous, untrusted, or invalid source and target
+ok 55 - bag MoveItem rejects stale, ambiguous, untrusted, or invalid source and target
+  ---
+  duration_ms: 0.6861
+  type: 'test'
+  ...
+# Subtest: Crystal ResizeInventory converts whole-array sizes to bag capacity
+ok 56 - Crystal ResizeInventory converts whole-array sizes to bag capacity
+  ---
+  duration_ms: 0.172
+  type: 'test'
+  ...
+# Subtest: missing server ID stays display-only, including second bag and belt slot aliases
+ok 57 - missing server ID stays display-only, including second bag and belt slot aliases
+  ---
+  duration_ms: 0.2394
+  type: 'test'
+  ...
+# Subtest: zero is a real server item instance ID
+ok 58 - zero is a real server item instance ID
+  ---
+  duration_ms: 0.1539
+  type: 'test'
+  ...
+# Subtest: invalid and imprecise IDs cannot authorize an item command
+ok 59 - invalid and imprecise IDs cannot authorize an item command
+  ---
+  duration_ms: 0.5393
+  type: 'test'
+  ...
+# Subtest: same-slot replacement or movement invalidates a captured instance selection
+ok 60 - same-slot replacement or movement invalidates a captured instance selection
+  ---
+  duration_ms: 0.1648
+  type: 'test'
+  ...
+# Subtest: equipment slot selection rejects a replaced or untrusted occupant before instance removal
+ok 61 - equipment slot selection rejects a replaced or untrusted occupant before instance removal
+  ---
+  duration_ms: 0.2337
+  type: 'test'
+  ...
+# Subtest: remove request sends the equipped instance ID, independent of equipment and destination slots
+ok 62 - remove request sends the equipped instance ID, independent of equipment and destination slots
+  ---
+  duration_ms: 0.3445
+  type: 'test'
+  ...
+# Subtest: remove destination treats bag2 cells as unified indices and rejects a full or invalid bag
+ok 63 - remove destination treats bag2 cells as unified indices and rejects a full or invalid bag
+  ---
+  duration_ms: 0.3939
+  type: 'test'
+  ...
+# Subtest: movement snapshot authority changes survive an unchanged slot display ID
+ok 64 - movement snapshot authority changes survive an unchanged slot display ID
+  ---
+  duration_ms: 0.2345
+  type: 'test'
+  ...
+# Subtest: equipment source grid preserves storage authority without changing destination slot
+ok 65 - equipment source grid preserves storage authority without changing destination slot
+  ---
+  duration_ms: 0.1163
+  type: 'test'
+  ...
+# Subtest: storage refresh retains only packet-supplied authority
+ok 66 - storage refresh retains only packet-supplied authority
+  ---
+  duration_ms: 0.2089
+  type: 'test'
+  ...
+# portable fixture retained at C:\\Users\\Administrator\\AppData\\Local\\Temp\\portable-next-fixture-h8hb99
+# Subtest: selection cuts only audited remote media and exact external roots, preserving local metadata
+ok 67 - selection cuts only audited remote media and exact external roots, preserving local metadata
+  ---
+  duration_ms: 2.0104
+  type: 'test'
+  ...
+# Subtest: standalone selection precedes copying linked public and dependency trees
+ok 68 - standalone selection precedes copying linked public and dependency trees
+  ---
+  duration_ms: 21.1734
+  type: 'test'
+  ...
+# Subtest: source public walk preserves selected metadata, assets, and pinned immutable release
+ok 69 - source public walk preserves selected metadata, assets, and pinned immutable release
+  ---
+  duration_ms: 16.0005
+  type: 'test'
+  ...
+# Subtest: absent standalone required-server-files is copied byte-for-byte and conflicting metadata rejected
+ok 70 - absent standalone required-server-files is copied byte-for-byte and conflicting metadata rejected
+  ---
+  duration_ms: 3.9405
+  type: 'test'
+  ...
+# Subtest: NFT dependency copy materializes only the verified physical closure, including native files
+ok 71 - NFT dependency copy materializes only the verified physical closure, including native files
+  ---
+  duration_ms: 48.2712
+  type: 'test'
+  ...
+# Subtest: installed Sharp target package is a full physical native closure
+ok 72 - installed Sharp target package is a full physical native closure
+  ---
+  duration_ms: 27.5142
+  type: 'test'
+  ...
+# Subtest: Sharp native closure fails missing binary, missing metadata and linked entries
+ok 73 - Sharp native closure fails missing binary, missing metadata and linked entries
+  ---
+  duration_ms: 27.9874
+  type: 'test'
+  ...
+# Subtest: NFT missing listed file is fatal, without quietly treating it as an optional warning
+ok 74 - NFT missing listed file is fatal, without quietly treating it as an optional warning
+  ---
+  duration_ms: 11.9958
+  type: 'test'
+  ...
+# Subtest: installed NFT walks an isolated standalone fixture through the guarded callbacks
+ok 75 - installed NFT walks an isolated standalone fixture through the guarded callbacks
+  ---
+  duration_ms: 189.6872
+  type: 'test'
+  ...
+# Subtest: actual current atlas closure selects only declared pages and validates their regular paths
+ok 76 - actual current atlas closure selects only declared pages and validates their regular paths
+  ---
+  duration_ms: 27.024
+  type: 'test'
+  ...
+# Subtest: pinned atlas keeps exact manifest/page union; missing, duplicate, escape and changed pins fail
+ok 77 - pinned atlas keeps exact manifest/page union; missing, duplicate, escape and changed pins fail
+  ---
+  duration_ms: 18.3458
+  type: 'test'
+  ...
+# Subtest: JSON whitespace compaction preserves every string, escape, numeric token and key order
+ok 78 - JSON whitespace compaction preserves every string, escape, numeric token and key order
+  ---
+  duration_ms: 0.3532
+  type: 'test'
+  ...
+# Subtest: all actual original-ui JSON can be compacted without changing parsed values
+ok 79 - all actual original-ui JSON can be compacted without changing parsed values
+  ---
+  duration_ms: 2673.3605
+  type: 'test'
+  ...
+# Subtest: actual root asset manifest compacts without changing assetHash or source bytes
+ok 80 - actual root asset manifest compacts without changing assetHash or source bytes
+  ---
+  duration_ms: 169.3235
+  type: 'test'
+  ...
+# Subtest: two selected public sources must agree and retain effects, fonts, GDI and three local fallbacks
+ok 81 - two selected public sources must agree and retain effects, fonts, GDI and three local fallbacks
+  ---
+  duration_ms: 75.2764
+  type: 'test'
+  ...
+# Subtest: exact scene cache and copied NFT metadata are excluded without hiding dist/server/static
+ok 82 - exact scene cache and copied NFT metadata are excluded without hiding dist/server/static
+  ---
+  duration_ms: 0.194
+  type: 'test'
+  ...
+# Subtest: local map closure leaves every old default selection unchanged and admits only exact ancestors
+ok 83 - local map closure leaves every old default selection unchanged and admits only exact ancestors
+  ---
+  duration_ms: 6.7956
+  type: 'test'
+  ...
+# Subtest: finite Warehouse request copies precisely 116 verified PNG leaves and retains the full manifest
+ok 84 - finite Warehouse request copies precisely 116 verified PNG leaves and retains the full manifest
+  ---
+  duration_ms: 272.1792
+  type: 'test'
+  ...
+# Subtest: local map custody rejects missing bytes, changed bytes and invalid full-manifest size/hash records
+ok 85 - local map custody rejects missing bytes, changed bytes and invalid full-manifest size/hash records
+  ---
+  duration_ms: 34.3377
+  type: 'test'
+  ...
+# Subtest: local map request pin rejects incomplete input, duplicate/escaped paths and inconsistent frame identity
+ok 86 - local map request pin rejects incomplete input, duplicate/escaped paths and inconsistent frame identity
+  ---
+  duration_ms: 23.2348
+  type: 'test'
+  ...
+# Subtest: local map custody rejects file, ancestor, manifest, input and public-root symlinks
+ok 87 - local map custody rejects file, ancestor, manifest, input and public-root symlinks
+  ---
+  duration_ms: 34.0628
+  type: 'test'
+  ...
+# Subtest: canonical warehouse static skins are local while adjacent media and old remote roots stay remote
+ok 88 - canonical warehouse static skins are local while adjacent media and old remote roots stay remote
+  ---
+  duration_ms: 2.6202
+  type: 'test'
+  ...
+# Subtest: actual public copy retains exact warehouse bytes, legacy art and metadata without whole-library selection
+ok 89 - actual public copy retains exact warehouse bytes, legacy art and metadata without whole-library selection
+  ---
+  duration_ms: 56.5025
+  type: 'test'
+  ...
+# Subtest: absent warehouse skin stays absent after actual copy and is never replaced by a neighboring frame
+ok 90 - absent warehouse skin stays absent after actual copy and is never replaced by a neighboring frame
+  ---
+  duration_ms: 30.8636
+  type: 'test'
+  ...
+# Subtest: warehouse local skin copy retains fatal differing-source collision checks
+ok 91 - warehouse local skin copy retains fatal differing-source collision checks
+  ---
+  duration_ms: 6.7154
+  type: 'test'
+  ...
+# Subtest: canonical Bag and Storage static skin union is local without expanding adjacent remote media
+ok 92 - canonical Bag and Storage static skin union is local without expanding adjacent remote media
+  ---
+  duration_ms: 2.4213
+  type: 'test'
+  ...
+# Subtest: actual public copy retains all thirty genuine Bag and Storage PNG bytes
+ok 93 - actual public copy retains all thirty genuine Bag and Storage PNG bytes
+  ---
+  duration_ms: 130.4553
+  type: 'test'
+  ...
+# Subtest: canonical Shop static skins join Bag and Storage without selecting neighboring or dynamic media
+ok 94 - canonical Shop static skins join Bag and Storage without selecting neighboring or dynamic media
+  ---
+  duration_ms: 3.809
+  type: 'test'
+  ...
+# Subtest: actual public copy retains all forty-two genuine Bag Storage and Shop PNGs with missing and collision safeguards
+ok 95 - actual public copy retains all forty-two genuine Bag Storage and Shop PNGs with missing and collision safeguards
+  ---
+  duration_ms: 239.4712
+  type: 'test'
+  ...
+# Subtest: canonical Character Stats Spells hair and wing alternatives form the exact bounded static selection
+ok 96 - canonical Character Stats Spells hair and wing alternatives form the exact bounded static selection
+  ---
+  duration_ms: 10.5021
+  type: 'test'
+  ...
+# Subtest: actual complete static union copies genuine PNG and metadata hashes while absent character art stays absent
+ok 97 - actual complete static union copies genuine PNG and metadata hashes while absent character art stays absent
+  ---
+  duration_ms: 857.5356
+  type: 'test'
+  ...
+# Subtest: public directory-specific first Trade goods and shared concrete-stack rules select only the finite Source77 closure
+ok 98 - public directory-specific first Trade goods and shared concrete-stack rules select only the finite Source77 closure
+  ---
+  duration_ms: 192.5864
+  type: 'test'
+  ...
+# Subtest: canonical initial equipment covers all five classes and both genders with only five StateItem frames
+ok 99 - canonical initial equipment covers all five classes and both genders with only five StateItem frames
+  ---
+  duration_ms: 0.6301
+  type: 'test'
+  ...
+# Subtest: actual finite public/starter copy preserves genuine PNG hashes and absent or unreferenced art stays absent
+ok 100 - actual finite public/starter copy preserves genuine PNG hashes and absent or unreferenced art stays absent
+  ---
+  duration_ms: 2514.7992
+  type: 'test'
+  ...
+1..100
+# tests 100
+# suites 0
+# pass 100
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 7836.3828

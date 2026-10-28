@@ -187,12 +187,7 @@ pub fn remove_plan(model: &HeroModel, slot: u8) -> Option<C> {
 }
 
 /// Exact Crystal stack planner shared with both Hero hosts.
-pub fn merge_packet(
-    source: &ItemModel,
-    target: &ItemModel,
-    grid_from: G,
-    grid_to: G,
-) -> Option<C> {
+pub fn merge_packet(source: &ItemModel, target: &ItemModel, grid_from: G, grid_to: G) -> Option<C> {
     let (Some(source_info), Some(target_info)) = (
         source.tooltip_source.as_ref(),
         target.tooltip_source.as_ref(),

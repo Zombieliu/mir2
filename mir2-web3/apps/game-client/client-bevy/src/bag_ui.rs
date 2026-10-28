@@ -274,7 +274,10 @@ mod tests {
             items: vec![item(Some(0), 7, 2)],
             ..Default::default()
         };
-        assert_eq!(reconcile_inventory_refresh(&mut pending, &inventory, &worn), 1);
+        assert_eq!(
+            reconcile_inventory_refresh(&mut pending, &inventory, &worn),
+            1
+        );
         assert!(!pending.has_pending_equipment_instance(0));
         let remove = plan_equipment(
             &worn,

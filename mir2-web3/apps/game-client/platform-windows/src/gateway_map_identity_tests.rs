@@ -2,6 +2,7 @@ use super::*;
 
 #[test]
 fn map_identity_stale_snapshot_receipts_do_not_project_actors() {
+    let _native_queue_guard = super::native_queue_test_guard();
     let adapter = NativeGameplayAdapter::default();
     let (sender, receiver) = std::sync::mpsc::channel();
     let mut skills = SkillPacketCursor::default();
@@ -90,6 +91,7 @@ fn map_identity_missing_or_zero_minimap_cannot_reuse_previous_image_and_reconnec
 
 #[test]
 fn map_identity_information_only_transfer_rejects_source_but_keeps_receipts() {
+    let _native_queue_guard = super::native_queue_test_guard();
     let context = GatewaySessionContext::default();
     let (shell_sender, _shell_receiver) = std::sync::mpsc::channel();
     let (gameplay_sender, gameplay_receiver) = std::sync::mpsc::channel();

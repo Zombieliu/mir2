@@ -9402,5 +9402,22 @@
   "monthly.CodeExpired": "Kode kedaluwarsa. Hubungi pengelola.",
   "monthly.LoginRequired": "Masuk kembali untuk mengelola langganan.",
   "monthly.Banned": "Akun diblokir. Hubungi pengelola.",
-  "monthly.Unavailable": "Layanan langganan tidak tersedia. Coba lagi nanti."
+  "monthly.Unavailable": "Layanan langganan tidak tersedia. Coba lagi nanti.",
+  "shell.assassin_description": "Assassin menyerang dengan dua bilah dan mengandalkan penyamaran.\nMereka mengutamakan serangan cepat dan pergerakan cermat.",
+  "shell.archer_description": "Archer menyerang dari jauh dengan busur dan tembakan khusus.\nJaga jarak dan perhatikan posisi.",
+  "quest.practice.class.learn": "Pelajari {skill}.",
+  "quest.practice.class.normal_hit": "Setelah mempelajari {skill}, kenai monster dengan serangan biasa.",
+  "quest.practice.class.toggle_hit": "Aktifkan {skill}, lalu lukai monster dengan serangan biasa.",
+  "quest.practice.class.spell_hit": "Gunakan {skill} untuk melukai monster; serangan yang meleset tidak dihitung.",
+  "quest.supply.assassinPoisonEquip": "Pedang Racun: kenakan bubuk merah atau hijau; 1 tiap penggunaan.",
+  "quest.supply.assassinPoisonEquipped": "Pedang Racun: bubuk dikenakan; 1 tiap penggunaan.",
+  "ui.questProgressHeading": "Progres",
+  "ui.questReturnHeading": "Tempat penyerahan",
+  "ui.questClientLoading": "Menyiapkan tindakan misi…",
+  "ui.questClientUnavailable": "Tindakan misi sementara tidak tersedia. Silakan coba lagi.",
+  "ui.questActionPending": "Permintaan Anda sedang diproses. Harap tunggu.",
+  "ui.questActionRewardRequired": "Pilih hadiah terlebih dahulu.",
+  "ui.questActionTalkToNpc": "Bicara dengan NPC misi untuk melanjutkan.",
+  "ui.questActionStateChanged": "Misi telah berubah. Tinjau dan coba lagi.",
+  "ui.retry": "Coba lagi"
 }

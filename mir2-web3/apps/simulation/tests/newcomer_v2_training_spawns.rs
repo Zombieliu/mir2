@@ -9,18 +9,55 @@ fn v2_training_spawns_are_real_profile_sources_and_do_not_change_other_cadences(
     let original = config.crystal_respawns_for_map("D022");
     assert!(original.iter().any(|spawn| spawn.respawn_index == 940));
     assert!(original.iter().any(|spawn| spawn.respawn_index == 941));
-    let original_soldier_hp = original.iter().find(|spawn| spawn.respawn_index == 940).unwrap().monster_hp;
-    let original_fighter_hp = original.iter().find(|spawn| spawn.respawn_index == 941).unwrap().monster_hp;
-    assert_eq!(original.iter().find(|spawn| spawn.respawn_index == 939).unwrap().count, 50);
-    assert_eq!(original.iter().find(|spawn| spawn.respawn_index == 940).unwrap().count, 50);
-    assert_eq!(original.iter().find(|spawn| spawn.respawn_index == 941).unwrap().count, 30);
-    assert!(!original.iter().any(|spawn| (10019..=10027).contains(&spawn.respawn_index)));
+    let original_soldier_hp = original
+        .iter()
+        .find(|spawn| spawn.respawn_index == 940)
+        .unwrap()
+        .monster_hp;
+    let original_fighter_hp = original
+        .iter()
+        .find(|spawn| spawn.respawn_index == 941)
+        .unwrap()
+        .monster_hp;
+    assert_eq!(
+        original
+            .iter()
+            .find(|spawn| spawn.respawn_index == 939)
+            .unwrap()
+            .count,
+        50
+    );
+    assert_eq!(
+        original
+            .iter()
+            .find(|spawn| spawn.respawn_index == 940)
+            .unwrap()
+            .count,
+        50
+    );
+    assert_eq!(
+        original
+            .iter()
+            .find(|spawn| spawn.respawn_index == 941)
+            .unwrap()
+            .count,
+        30
+    );
+    assert!(!original
+        .iter()
+        .any(|spawn| (10019..=10027).contains(&spawn.respawn_index)));
 
     std::env::set_var("MIR2_QUEST_CADENCE", "newcomer-v2");
     let v2 = config.crystal_respawns_for_map("D022");
     for index in [939, 940, 941] {
-        let imported = v2.iter().find(|spawn| spawn.respawn_index == index).unwrap();
-        let original_group = original.iter().find(|spawn| spawn.respawn_index == index).unwrap();
+        let imported = v2
+            .iter()
+            .find(|spawn| spawn.respawn_index == index)
+            .unwrap();
+        let original_group = original
+            .iter()
+            .find(|spawn| spawn.respawn_index == index)
+            .unwrap();
         assert_eq!(imported.count, 1);
         assert_eq!(imported.location, original_group.location);
         assert_eq!(imported.spread, original_group.spread);
@@ -38,7 +75,10 @@ fn v2_training_spawns_are_real_profile_sources_and_do_not_change_other_cadences(
         (10026, "WoomaFighter", 280, 340),
         (10027, "WoomaFighter", 300, 330),
     ] {
-        let spawn = v2.iter().find(|spawn| spawn.respawn_index == index).unwrap();
+        let spawn = v2
+            .iter()
+            .find(|spawn| spawn.respawn_index == index)
+            .unwrap();
         assert_eq!(spawn.monster_name, name);
         assert_eq!(spawn.location.x, x);
         assert_eq!(spawn.location.y, y);
@@ -50,12 +90,30 @@ fn v2_training_spawns_are_real_profile_sources_and_do_not_change_other_cadences(
         }
     }
     for name in ["Dung", "WoomaSoldier", "WoomaFighter"] {
-        assert_eq!(v2.iter().filter(|spawn| (10019..=10027).contains(&spawn.respawn_index)
-            && spawn.monster_name == name).map(|spawn| u32::from(spawn.count)).sum::<u32>(), 9,
-            "each objective has three bounded groups, enough for combat and practice");
+        assert_eq!(
+            v2.iter()
+                .filter(|spawn| (10019..=10027).contains(&spawn.respawn_index)
+                    && spawn.monster_name == name)
+                .map(|spawn| u32::from(spawn.count))
+                .sum::<u32>(),
+            9,
+            "each objective has three bounded groups, enough for combat and practice"
+        );
     }
-    assert_eq!(v2.iter().find(|spawn| spawn.respawn_index == 940).unwrap().monster_hp, original_soldier_hp);
-    assert_eq!(v2.iter().find(|spawn| spawn.respawn_index == 941).unwrap().monster_hp, original_fighter_hp);
+    assert_eq!(
+        v2.iter()
+            .find(|spawn| spawn.respawn_index == 940)
+            .unwrap()
+            .monster_hp,
+        original_soldier_hp
+    );
+    assert_eq!(
+        v2.iter()
+            .find(|spawn| spawn.respawn_index == 941)
+            .unwrap()
+            .monster_hp,
+        original_fighter_hp
+    );
     assert!(!config
         .crystal_respawns_for_map("D021")
         .iter()

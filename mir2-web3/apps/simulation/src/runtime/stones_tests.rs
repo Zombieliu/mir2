@@ -205,13 +205,21 @@ fn stone_save_reload_keeps_original_secret_and_physical_reference() {
     assert_eq!(try_user_item_from_item_state(&fresh.app.world().resource::<InventoryResource>().inventory_items[0])
         .unwrap().item_index,frozen.private_output().template_id);
     let durable=fs::read(&path).unwrap();
+    let cut_store:crate::AccountStore=serde_json::from_slice(&durable).unwrap();
     drop(fresh);drop(config);
     let config=SimulationConfig::default().with_crystal_world_runtime().with_account_store_path(&path);
     let mut reloaded=login(config);reloaded.begin_stone_workshops().unwrap();reloaded.interact(npc);
     assert!(reloaded.stone_workshop_view().unwrap().stones.is_empty());
+    // Cold login may checkpoint NPC/login state, while the private cut
+    // tombstone and exact physical output must survive unchanged.
+    let after_login=fs::read(&path).unwrap();
+    let reloaded_store:crate::AccountStore=serde_json::from_slice(&after_login).unwrap();
+    assert_eq!(reloaded_store.sealed_stones,cut_store.sealed_stones);
+    assert_eq!(reloaded_store.accounts["demo"].saves[&0].inventory_items_json,
+        cut_store.accounts["demo"].saves[&0].inventory_items_json);
     let replay=reloaded.execute_stone_workshop(cut).unwrap();
     assert!(replay.replayed);assert!(replay.packets.is_empty());
-    assert_eq!(fs::read(&path).unwrap(),durable);
+    assert_eq!(fs::read(&path).unwrap(),after_login);
 }
 #[test]
 fn stone_ordinary_account_scope_and_restore_cannot_rewind_secret_or_cut_tombstone() {

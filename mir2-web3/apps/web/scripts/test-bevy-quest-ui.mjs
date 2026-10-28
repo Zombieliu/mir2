@@ -231,28 +231,65 @@ test("Quest world context requires a complete same-player projection and exact v
 test("the actual Page capture retires raw Quest skills for self NewMagic only on the current connection", () => {
   const page = ts.createSourceFile("page.tsx", readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8"),
     ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  let capture;
+  const declarations = new Map();
   const visit = (node) => {
-    if (ts.isFunctionDeclaration(node) && node.name?.text === "captureSpellsGatewayEvent") capture = node;
+    if (ts.isFunctionDeclaration(node)
+      && ["currentSpellsOwner", "captureSpellsGatewayEvent"].includes(node.name?.text)) {
+      declarations.set(node.name.text, node);
+    }
     ts.forEachChild(node, visit);
   };
   visit(page);
-  assert.ok(capture);
-  const compiled = ts.transpileModule(capture.getText(page), {
+  const names = ["currentSpellsOwner", "captureSpellsGatewayEvent"];
+  for (const name of names) assert.ok(declarations.has(name), `actual Page ${name}`);
+  const compiled = ts.transpileModule(names.map(name => declarations.get(name).getText(page)).join("\n"), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   });
   const skills = { current: true };
-  const observe = new Function("equipmentConnectionGenerationRef", "questSkillsBaselineCurrentRef",
-    "currentSpellsOwner", "combatRawRef", "worldRef", "combatMastersRef",
-    `${compiled.outputText}\nreturn captureSpellsGatewayEvent;`)(
-    { current: 2 }, skills, () => null, { current: null },
-    { current: { playerObjectId: "1000", mapFileName: "0" } }, { current: new Map() });
+  const baseline = { snapshot: { playerObjectId: 1000, knownSkills: [{ spell: "FireBall" }] } };
+  const combatBaselineSourceRef = { current: baseline };
+  let withdrawals = 0;
+  const scope = {
+    equipmentConnectionGenerationRef: { current: 2 },
+    equipmentSessionGenerationRef: { current: 3 },
+    equipmentStartGameRef: { current: { connectionGeneration: 2, sessionGeneration: 3 } },
+    equipmentHostSuspendReasonRef: { current: null },
+    equipmentBagOwnerRef: { current: { ownerRevision: 1 } },
+    questSkillsBaselineCurrentRef: skills, combatBaselineSourceRef,
+    combatIngressRef: { current: { withdraw() { withdrawals++; } } },
+    combatRawRef: { current: null },
+    worldRef: { current: { playerObjectId: "1000", mapFileName: "0" } },
+    combatMastersRef: { current: new Map() },
+  };
+  const observe = new Function(...Object.keys(scope),
+    `${compiled.outputText}\nreturn captureSpellsGatewayEvent;`)(...Object.values(scope));
   observe({ type: "packet", packet: "NewMagic", payload: { hero: false, spell: "SoulFireBall" } }, 1);
   assert.equal(skills.current, true, "a retired connection must not alter the current player baseline");
+  assert.equal(combatBaselineSourceRef.current, baseline);
+  assert.equal(withdrawals, 0);
   observe({ type: "packet", packet: "NewMagic", payload: { hero: true, spell: "SoulFireBall" } }, 2);
   assert.equal(skills.current, true, "hero skill changes do not invalidate the player's known skills");
+  assert.equal(combatBaselineSourceRef.current, baseline);
+  assert.equal(withdrawals, 0);
+  for (const malformed of [
+    { type: "status", packet: "NewMagic", payload: { hero: false } },
+    { type: "packet", payload: { hero: false, spell: "SoulFireBall" } },
+  ]) {
+    observe(malformed, 2);
+    assert.equal(skills.current, true, "an envelope without a NewMagic packet cannot change known skills");
+    assert.equal(combatBaselineSourceRef.current, baseline);
+    assert.equal(withdrawals, 0);
+  }
   observe({ type: "packet", packet: "NewMagic", payload: { hero: false, spell: "SoulFireBall" } }, 2);
   assert.equal(skills.current, false, "self learning stays unknown until the next complete authority baseline");
+  assert.equal(combatBaselineSourceRef.current, null, "self learning retires the physical combat baseline too");
+  assert.equal(withdrawals, 1, "the current combat ingress must actually withdraw its prior authority");
+  skills.current = true;
+  combatBaselineSourceRef.current = baseline;
+  observe({ type: "packet", packet: "NewMagic", payload: null }, 2);
+  assert.equal(skills.current, false, "a current NewMagic with incomplete payload cannot retain a claimed complete baseline");
+  assert.equal(combatBaselineSourceRef.current, null);
+  assert.equal(withdrawals, 2);
 });
 
 test("renderer restart, first NPC input capture and stopped-loop fallback preserve one UI owner", (t) => {
@@ -498,7 +535,10 @@ test("local Quest actions require exact seven-field stamp, role and nested route
   const stamp = stampOf(worldContext.stampBevyQuestWorldContext(completeQuestDraft(), 9));
   const route = { ...stamp, type: "navigateQuestRoute", questIndex: 23, resetEpoch: 4,
     mapIndex: 0, x: 5, y: 6, routeTarget: { type: "huntRegion", monsterIndex: 8, radius: 2 } };
+  const taskNpc = { ...route, questIndex: 92010, routeTarget: { type: "taskNpc", objectId: 2180 } };
+  const mapNpc = { ...route, questIndex: 0, routeTarget: { type: "mapNpc", objectId: 5 } };
   const candidates = [{ ...stamp, type: "openDestinationMap" }, route,
+    taskNpc, mapNpc,
     { ...stamp, type: "attackTarget", objectId: 44 }, { ...stamp, type: "attackQuestTarget", objectId: 44 },
     { ...stamp, type: "pickUpObject", objectId: 80, x: 3, y: 1 }, { ...stamp, type: "pickUpTile", x: 1, y: 1 }];
   for (const value of candidates) {
@@ -515,6 +555,10 @@ test("local Quest actions require exact seven-field stamp, role and nested route
     { ...route, routeTarget: { type: "entrance", radius: 2 } },
     { ...route, routeTarget: { type: "huntRegion", monsterIndex: 8, radius: 2, vendor: "potions" } },
     { ...route, routeTarget: { type: "supply", vendor: "unknown" } },
+    { ...taskNpc, questIndex: 0 }, { ...taskNpc, questIndex: -1 }, { ...mapNpc, questIndex: 92010 },
+    { ...taskNpc, routeTarget: { type: "taskNpc", objectId: 2180, radius: 0 } },
+    { ...mapNpc, routeTarget: { type: "mapNpc", index: 5 } },
+    { ...mapNpc, routeTarget: { type: "npc", objectId: 5 } },
     { ...stamp, type: "attackTarget", objectId: 0 }, { ...stamp, type: "attackTarget", objectId: "44" },
     { ...stamp, type: "attackQuestTarget", objectId: 44, x: 2 },
     { ...stamp, type: "pickUpObject", objectId: 80, x: 3 },
@@ -523,6 +567,12 @@ test("local Quest actions require exact seven-field stamp, role and nested route
   ]) assert.equal(worldActions.parseQuestWorldAction(invalid), null);
   assert.ok(worldActions.parseQuestWorldAction({ ...route, routeTarget: { type: "entrance" } }));
   assert.ok(worldActions.parseQuestWorldAction({ ...route, routeTarget: { type: "supply", vendor: "poison" } }));
+  for (const npc of [taskNpc, mapNpc]) {
+    for (const objectId of [undefined, null, 0, -1, 0.5, NaN, 0x1_0000_0000, "2180"]) {
+      assert.equal(worldActions.parseQuestWorldAction({ ...npc, routeTarget: { ...npc.routeTarget, objectId } }), null);
+    }
+    assert.ok(worldActions.parseQuestWorldAction({ ...npc, routeTarget: { ...npc.routeTarget, objectId: 0xffff_ffff } }));
+  }
 });
 
 test("ordinary map packets retire same-map transitions and images never supply map authority", () => {
@@ -626,6 +676,46 @@ test("the shared route adapter verifies a complete JS-fake WASM response against
   const supply = { ...action, x: 5, routeTarget: { type: "supply", vendor: "potions" } };
   assert.ok(check({ ...result, radius: 2 }, geometry, [], [], supply));
   assert.equal(check({ ...result, radius: 1 }, geometry, [], [], supply), null);
+});
+
+test("NPC route targets preserve object IDs, task roles and the exact two-tile approach", () => {
+  const { action, geometry, origin, result } = routeFixture();
+  for (const [type, objectId, questIndex] of [["taskNpc", 2180, 92010], ["mapNpc", 5, 0]]) {
+    const npc = { ...action, questIndex, x: 5, routeTarget: { type, objectId } };
+    const response = { ...result, radius: 2 };
+    let captured;
+    const runtime = { getMir2QuestRoutePlan(json, bits) {
+      captured = JSON.parse(json);
+      assert.equal(bits, geometry.blockedBits);
+      return JSON.stringify(response);
+    } };
+    assert.ok(routePlan.planBevyQuestRoute(runtime, npc, geometry, origin, [{ x: 5, y: 1 }], []),
+      "the server NPC's occupied tile is approached, never entered");
+    assert.deepEqual(captured.routeTarget, { type, objectId });
+    assert.deepEqual(captured.destination, { x: 5, y: 1 });
+    assert.deepEqual(captured.stamp, stampOf(npc));
+    const check = (reply, routed = npc, geom = geometry, occupied = [], edges = []) =>
+      routePlan.planBevyQuestRoute({ getMir2QuestRoutePlan: () => JSON.stringify(reply) }, routed, geom, origin, occupied, edges);
+    for (const radius of [0, 1, 3, -1, 0.5]) assert.equal(check({ ...response, radius }), null);
+    for (const objectId of [0, -1, 0.5, 0x1_0000_0000, "5"]) {
+      assert.equal(check(response, { ...npc, routeTarget: { type, objectId } }), null);
+    }
+    assert.equal(check(response, { ...npc, resetEpoch: 5 }), null);
+    assert.equal(check(response, { ...npc, x: 0.5 }), null);
+    assert.equal(check(response, { ...npc, x: 0x8000_0000 }), null);
+    assert.equal(check(response, { ...npc, routeTarget: { type, objectId, radius: 0 } }), null);
+    assert.equal(check(response, { ...npc, questIndex: type === "taskNpc" ? 0 : 92010 }), null);
+    assert.equal(check({ ...response, stamp: { ...response.stamp, revision: 10 } }), null);
+    assert.equal(check({ ...response, destination: { x: 2, y: 1 }, steps: result.steps.slice(0, 1) }), null);
+    assert.equal(check(response, npc, blockedGeometry(geometry, { x: 3, y: 1 })), null);
+    assert.equal(check(response, npc, geometry, [{ x: 3, y: 1 }]), null);
+    assert.equal(check(response, npc, geometry, [], [{ from: origin, to: { x: 2, y: 1 } }]), null);
+    const nearNpc = { ...npc, x: 3 };
+    const arrived = { ...response, destination: origin, steps: [] };
+    assert.ok(check(arrived, nearNpc));
+    assert.equal(check(arrived, nearNpc, blockedGeometry(geometry, origin)), null);
+    assert.equal(check(arrived, nearNpc, geometry, [origin]), null);
+  }
 });
 
 test("route execution follows bends, validates each 2/3-tile run and replans deviations", () => {

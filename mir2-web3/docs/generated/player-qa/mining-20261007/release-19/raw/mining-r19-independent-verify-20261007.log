@@ -1,0 +1,8 @@
+petGuildClosure=libraries:22,png:6219,sounds:11
+entityAtlasClosure=atlases:2,pages:8
+playerSpriteClosure=families:10,libraries:67,frames:58160
+itemIconClosure=files:1004,png:1003
+stateItemClosure=files:219,png:218
+actorClosure=libraries:128,frames:25597
+nativeMapClosure=maps:209,frames:52333,missing:1177,sourceNoDraw:531
+verify-windows-candidate passed; sourceRepoCheck=checked; nonvisual=True

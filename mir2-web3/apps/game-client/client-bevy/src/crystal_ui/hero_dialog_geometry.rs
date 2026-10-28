@@ -1,6 +1,6 @@
 //! Source-sized current-frame hit regions; independent of recreated Bevy interaction nodes.
-use crate::crystal_ui::{spec::CrystalRect, character_page::CRYSTAL_CHARACTER_EQUIPMENT_SLOTS};
 use super::{render::HeroAction, HeroDialogModel, HeroPage};
+use crate::crystal_ui::{character_page::CRYSTAL_CHARACTER_EQUIPMENT_SLOTS, spec::CrystalRect};
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum HeroWindow {
     Inventory,

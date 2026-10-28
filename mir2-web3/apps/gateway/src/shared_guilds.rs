@@ -13,6 +13,7 @@ pub(super) fn is_guild_command(command: &WorldCommand) -> bool {
     match command {
         WorldCommand::ClientPacket(ClientPacket::Chat { message, .. }) => {
             message.trim().eq_ignore_ascii_case("@ALLOWGUILD")
+                || message.trim().eq_ignore_ascii_case("@LEAVEGUILD")
         }
         WorldCommand::ClientPacket(
             ClientPacket::GuildNameReturn { .. }
@@ -51,12 +52,7 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(config) = self.inner.shared_mentor_config() else {
             return Vec::new();
         };
-        let error = |message: &str| {
-            vec![ServerPacket::Chat {
-                message: message.into(),
-                chat_type: mir2_protocol::ChatType::System,
-            }]
-        };
+        let error = management::error;
         if !matches!(packet, ClientPacket::GuildNameReturn { .. })
             && config.refresh_shared_guild_authority().is_err()
         {
@@ -79,6 +75,14 @@ impl SharedInProcessZoneSessionRuntime {
                     && invite.target_epoch.matches(p)
             })
         });
+        if let Some(packets) =
+            management::execute(self, packet, &config, &key, &presences, &mut coordinator)
+        {
+            return packets;
+        }
+        if let Some(packets) = wars::execute(packet, &config, &key, &presences, &mut coordinator) {
+            return packets;
+        }
         match packet {
             ClientPacket::Chat { .. } => {
                 let enabled = if coordinator.guild_permissions.remove(&key) {
@@ -116,6 +120,9 @@ impl SharedInProcessZoneSessionRuntime {
                     .any(|rank| rank.index == member.rank_index && rank.options & 2 != 0)
                 {
                     return error("Your rank cannot recruit members.");
+                }
+                if !guild.active_wars.is_empty() {
+                    return error("server.CannotRecruitDuringWar");
                 }
                 let targets = presences
                     .iter()
@@ -192,6 +199,8 @@ impl SharedInProcessZoneSessionRuntime {
                         }
                         error(if reason == "server.GuildFull" {
                             "The guild is full."
+                        } else if reason == "server.CannotRecruitDuringWar" {
+                            "server.CannotRecruitDuringWar"
                         } else {
                             "The guild invitation could not be saved."
                         })
@@ -301,6 +310,109 @@ impl SharedInProcessZoneSessionRuntime {
                     }
                 }
             }
+            ClientPacket::EditGuildMember {
+                change_type: 3,
+                rank_index,
+                rank_name,
+                ..
+            } => {
+                match config.commit_shared_guild_rank_name(&identity(&key), *rank_index, rank_name)
+                {
+                    Ok(guild) => {
+                        let actor = guild
+                            .member(&identity(&key))
+                            .expect("committed rename retains actor");
+                        let rank = guild
+                            .ranks
+                            .iter()
+                            .find(|rank| rank.index == *rank_index)
+                            .expect("committed rename retains target rank");
+                        let members = {
+                            let store = config.account_store.lock().expect("committed guild store");
+                            guild
+                                .members
+                                .iter()
+                                .filter(|member| member.rank_index == *rank_index)
+                                .map(|member| mir2_protocol::GuildMember {
+                                    name: member.name.clone(),
+                                    id: member.identity.character_index,
+                                    last_login_binary_datetime: store
+                                        .accounts
+                                        .get(&member.identity.account_id)
+                                        .and_then(|account| {
+                                            account
+                                                .character_last_access_binary_datetimes
+                                                .get(&member.identity.character_index)
+                                        })
+                                        .copied()
+                                        .unwrap_or(0),
+                                    has_voted: false,
+                                    online: presences
+                                        .iter()
+                                        .any(|presence| identity(&presence.key) == member.identity),
+                                })
+                                .collect()
+                        };
+                        let packets = vec![ServerPacket::GuildMemberChange {
+                            name: actor.name.clone(),
+                            rank_index: 0,
+                            status: 7,
+                            ranks: vec![mir2_protocol::GuildRank {
+                                name: rank.name.clone(),
+                                options: rank.options,
+                                index: i32::from(rank.index),
+                                members,
+                            }],
+                        }];
+                        coordinator.changed();
+                        for presence in &presences {
+                            if presence.key != key
+                                && guild.member(&identity(&presence.key)).is_some()
+                            {
+                                presence
+                                    .zone
+                                    .lock()
+                                    .expect("validated guild zone")
+                                    .queue_zone_packets(presence.key.clone(), packets.clone());
+                            }
+                        }
+                        packets
+                    }
+                    Err(reason) => error(&reason),
+                }
+            }
+            ClientPacket::EditGuildNotice { notice } => {
+                match config.commit_shared_guild_notice(&identity(&key), notice) {
+                    Ok(guild) => {
+                        // Preserve Crystal's terminal invalidation, then project the committed
+                        // content for native clients that do not automatically request page 0.
+                        let packets = vec![
+                            ServerPacket::GuildNoticeChange {
+                                update: -1,
+                                notice: Vec::new(),
+                            },
+                            ServerPacket::GuildNoticeChange {
+                                update: 0,
+                                notice: guild.notice.clone(),
+                            },
+                        ];
+                        coordinator.changed();
+                        for presence in &presences {
+                            if presence.key != key
+                                && guild.member(&identity(&presence.key)).is_some()
+                            {
+                                presence
+                                    .zone
+                                    .lock()
+                                    .expect("validated guild zone")
+                                    .queue_zone_packets(presence.key.clone(), packets.clone());
+                            }
+                        }
+                        packets
+                    }
+                    Err(reason) => error(&reason),
+                }
+            }
             ClientPacket::RequestGuildInfo { info_type } => {
                 let mut packets = self.inner.shared_guild_packets(
                     &presences
@@ -324,3 +436,8 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 }
+
+#[path = "shared_guild_management.rs"]
+mod management;
+#[path = "shared_guild_wars.rs"]
+mod wars;

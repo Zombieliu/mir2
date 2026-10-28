@@ -9,6 +9,7 @@ pub(super) struct SharedMentorCoordinator {
     pub(super) guild_permissions: BTreeSet<ZonePresenceKey>,
     pub(super) marriages: BTreeMap<ZonePresenceKey, super::shared_marriage::MarriageInvitation>,
     pub(super) divorces: BTreeMap<ZonePresenceKey, super::shared_marriage::MarriageInvitation>,
+    pub(super) groups: super::shared_groups::SharedGroupCoordinator,
 }
 
 #[derive(Debug, Clone)]
@@ -66,11 +67,18 @@ impl SharedMentorCoordinator {
 
 impl SharedInProcessZoneSessionRuntime {
     pub(super) fn refresh_shared_social_buff_packets(&mut self) -> Vec<ServerPacket> {
-        let Ok(presences) = self.mentor_presences() else { return Vec::new(); };
-        let online = presences.into_iter().map(|presence| (presence.key.account_id, presence.key.character_index)).collect();
+        let Ok(presences) = self.mentor_presences() else {
+            return Vec::new();
+        };
+        let online = presences
+            .into_iter()
+            .map(|presence| (presence.key.account_id, presence.key.character_index))
+            .collect();
         // A status refresh failure must not discard an already committed command
         // response. No new buff is created from unavailable relationship data.
-        self.inner.refresh_shared_social_buffs(&online).unwrap_or_default()
+        self.inner
+            .refresh_shared_social_buffs(&online)
+            .unwrap_or_default()
     }
     pub(super) fn refresh_shared_mentor_packets(&mut self, force: bool) -> Option<ServerPacket> {
         let online = self
@@ -104,10 +112,23 @@ impl SharedInProcessZoneSessionRuntime {
                     continue;
                 }
                 if let Some(session) = state.zone_sessions.get(key) {
+                    let mut entity = player.entity.clone();
+                    // Tick can publish a confirmed level through the experience
+                    // authority before the slower viewport metadata refresh.
+                    if let Some(profile) = state
+                        .zone_manager
+                        .player_experience_profile(session)
+                        .filter(|p| {
+                            p.account_id == key.account_id
+                                && p.character_index == key.character_index
+                        })
+                    {
+                        entity.level = Some(profile.level);
+                    }
                     result.push(MentorPresence {
                         key: key.clone(),
                         session: session.clone(),
-                        entity: player.entity.clone(),
+                        entity,
                         object_id: player.zone_object_id,
                         map_file_name: player.map_file_name.clone(),
                         zone: zone.clone(),
@@ -252,6 +273,13 @@ impl SharedInProcessZoneSessionRuntime {
                 );
                 match result {
                     Ok(_) => {
+                        if let Err(error) = self.project_mentor_bank_participants(
+                            &config,
+                            &[owner_id.clone(), identity(&student.key)],
+                            &presences,
+                        ) {
+                            eprintln!("[mentor] accepted projection pending: {error}");
+                        }
                         coordinator.changed();
                         coordinator.forget(&key);
                         coordinator.forget(&student.key);
@@ -289,12 +317,34 @@ impl SharedInProcessZoneSessionRuntime {
                 }
                 Err(reason) => vec![error(reason)],
             },
-            ClientPacket::CancelMentor => match config.commit_shared_mentor_mutation(
-                &owner_id,
-                SharedMentorMutation::Cancel,
-                now,
-            ) {
-                Ok(_) => {
+            ClientPacket::CancelMentor => match config
+                .shared_mentor_profile_for(&owner_id)
+                .and_then(|profile| {
+                    let teacher = if profile.mentor.is_mentor {
+                        Some(owner_id.clone())
+                    } else {
+                        profile.mentor.partner_identity.clone()
+                    };
+                    let online = teacher
+                        .as_ref()
+                        .is_some_and(|id| presences.iter().any(|p| identity(&p.key) == *id));
+                    config.settle_shared_mentor_bank(
+                        &owner_id,
+                        profile.mentor.ledger.relationship_epoch,
+                        Some(mir2_simulation::SharedMentorBreakReason::Manual),
+                        now,
+                        online,
+                    )
+                }) {
+                Ok(receipt) => {
+                    if let Err(error) = self.project_mentor_bank_participants(
+                        &config,
+                        &receipt.participants,
+                        &presences,
+                    ) {
+                        eprintln!("[mentor] ended projection pending: {error}");
+                    }
+                    self.notify_mentor_end(&receipt, &presences);
                     coordinator.changed();
                     coordinator.forget(&key);
                     vec![msg("server.YouHaveMentorshipCooldown", &["7".into()])]

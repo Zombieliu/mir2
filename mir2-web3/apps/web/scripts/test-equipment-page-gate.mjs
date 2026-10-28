@@ -31,19 +31,37 @@ const storageAdapter = transpileModule(new URL("../lib/storage-gateway-adapter.t
   if (id === "./mail-parcel-gateway-adapter") return parcelAdapter;
   throw new Error(`Unexpected storage dependency ${id}`);
 });
-const { BagBeltMoveDispatcher } = transpileModule(new URL("../lib/bag-belt-move-dispatcher.ts", import.meta.url), (id) => {
-  assert.equal(id, "./mail-parcel-gateway-adapter");
-  return parcelAdapter;
-});
-const purchaseClient = transpileModule(new URL("../lib/npc-purchase-client.ts", import.meta.url));
+const npcPurchaseClient = transpileModule(new URL("../lib/npc-purchase-client.ts", import.meta.url));
 const mailPackets = transpileModule(new URL("../lib/extended-server-packets.ts", import.meta.url), (id) => {
   assert.equal(id, "./npc-purchase-client");
-  return purchaseClient;
+  return npcPurchaseClient;
 });
 const mailUi = transpileModule(new URL("../lib/bevy-mail-ui.ts", import.meta.url), (id) => {
   assert.equal(id, "./extended-server-packets");
   return mailPackets;
 });
+// Added send/retirement gates consume these actual pure modules. Keep every
+// runtime import explicit; none of these entries imports a renderer/Core loader.
+const pureDependencies = {
+  "bag-belt-move-dispatcher": { "./mail-parcel-gateway-adapter": "mail-parcel-gateway-adapter" },
+  "social-window-operations": {}, "social-incoming-replies": {}, "world-fishing-source": {},
+  "storage-rental-confirmation": { "./social-incoming-replies": "social-incoming-replies", "./npc-purchase-client": "npc-purchase-client" },
+  "npc-repair-service": { "./equipment-gateway-adapter": "equipment-gateway-adapter" },
+  "crystal-item-source": {},
+  "npc-pearl-buy-source": { "./crystal-item-source": "crystal-item-source" },
+  "npc-pearl-buy": { "./npc-pearl-buy-source": "npc-pearl-buy-source" },
+  "bevy-npc-shop-buy": { "./npc-pearl-buy": "npc-pearl-buy" },
+};
+const pureCache = new Map([["equipment-gateway-adapter", adapter], ["mail-parcel-gateway-adapter", parcelAdapter], ["npc-purchase-client", npcPurchaseClient]]);
+function loadPure(name) {
+  if (pureCache.has(name)) return pureCache.get(name);
+  assert.ok(Object.hasOwn(pureDependencies, name), "module outside pure allowlist: " + name);
+  const value = transpileModule(new URL("../lib/" + name + ".ts", import.meta.url), id => {
+    assert.ok(Object.hasOwn(pureDependencies[name], id), "unexpected " + name + " dependency: " + id);
+    return loadPure(pureDependencies[name][id]);
+  });
+  pureCache.set(name, value); return value;
+}
 const { EquipmentSessionController } = transpileModule(new URL("../lib/equipment-session-controller.ts", import.meta.url));
 
 const manifest = JSON.parse(readFileSync(new URL("../lib/generated/client_core_runtime.json", import.meta.url), "utf8"));
@@ -76,7 +94,9 @@ function actualRuntime() {
 const pageUrl = new URL("../app/page.tsx", import.meta.url);
 const pageSource = readFileSync(pageUrl, "utf8");
 const syntax = ts.createSourceFile(fileURLToPath(pageUrl), pageSource, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const names = ["cancelMailParcel","setMailboxOpen","syncEquipmentSnapshot", "suspendEquipmentConnection", "rejectEquipmentCommand", "currentEquipmentOwner", "itemCommandRequiresOwner", "parityItemMutationAllowed", "socialItemMutationAllowed", "send", "sendRaw", "moveItem", "useItem", "dispatchBevyBagIntent", "dispatchBevyCharacterIntent", "setShowInventory"];
+const names = ["cancelMailParcel","setMailboxOpen","syncEquipmentSnapshot", "suspendEquipmentConnection", "rejectEquipmentCommand", "currentEquipmentOwner", "itemCommandRequiresOwner", "send", "sendRaw", "moveItem", "useItem", "dispatchBevyBagIntent", "dispatchBevyCharacterIntent", "setShowInventory",
+  "cancelWorldFishingGesture", "retireWorldFishingGesture", "parityItemMutationAllowed", "socialItemMutationAllowed",
+  "endStorageService", "retireNpcShopService", "closeNpcRepairService"];
 const declarations = new Map();
 function visit(node) {
   if (ts.isFunctionDeclaration(node) && node.name && names.includes(node.name.text)) {
@@ -86,12 +106,11 @@ function visit(node) {
 }
 visit(syntax);
 assert.deepEqual([...declarations.keys()].sort(), [...names].sort(), "page gate declarations changed");
-const loginUrl = new URL("../lib/client-login-runtime.ts", import.meta.url);
-const loginAst = ts.createSourceFile(fileURLToPath(loginUrl), readFileSync(loginUrl, "utf8"), ts.ScriptTarget.Latest, true);
-const authClassifiers = loginAst.statements.filter(node => ts.isFunctionDeclaration(node)
-  && ["preauthCommandKind", "isSensitiveGatewayCommand"].includes(node.name?.text)).map(node => node.getText(loginAst).replace(/^export /, ""));
-assert.equal(authClassifiers.length, 2);
-const pageFunctions = names.map((name) => declarations.get(name)).concat(authClassifiers).join("\n");
+const loginAst = ts.createSourceFile("client-login-runtime.ts", readFileSync(new URL("../lib/client-login-runtime.ts", import.meta.url), "utf8"), ts.ScriptTarget.Latest, true);
+const loginNames = ["preauthCommandKind", "isSensitiveGatewayCommand"];
+const loginNodes = loginAst.statements.filter(node => ts.isFunctionDeclaration(node) && loginNames.includes(node.name?.text));
+assert.equal(loginNodes.length, loginNames.length, "actual pure command classification declarations");
+const pageFunctions = [...loginNodes.map(node => node.getText(loginAst).replace(/^export /, "")), ...names.map((name) => declarations.get(name))].join("\n");
 const pageJavaScript = ts.transpileModule(pageFunctions, {
   fileName: "page-gates.ts",
   compilerOptions: { module: ts.ModuleKind.None, target: ts.ScriptTarget.ES2022 },
@@ -123,20 +142,28 @@ function harness({ item = bagItem(4), worldState = world(item), cachedSnapshot =
   class CustomEvent { constructor(type, options) { this.type = type; this.detail = options.detail; } }
   const spellsWithdrawalsRef = { current: 0 };
   const scope = {
-    // These adjacent domains are dormant: no service, gesture or proof exists.
-    // The actual shared mutation gates below still run against empty custody.
-    npcPearlSendEpochRef: { current: 0 }, npcPurchaseClientRef: { current: null },
-    npcPurchaseEconomicSourceRef: { current: null }, npcPurchaseDisplaySourceRef: { current: null },
-    npcPearlShopSourceRef: { current: { retire() {} } },
-    retireWorldFishingGesture() {}, worldFishingSourceRef: { current: { retire() {} } }, worldFishingCommitRef: { current: null },
-    heroOperationsRef: { current: { pending: null } }, mailCollectBarrierRef: { current: null },
-    bagBeltMovesRef: { current: new BagBeltMoveDispatcher() }, bagBeltInventoryReadyRef: { current: null },
-    socialItemOperationsRef: { current: { pending: null } },
-    storageRentalRef: { current: { retire() {} } }, setStorageRentalPrompt() {},
-    retireSocialRequests() {}, retireSocialItemConnection() {},
-    npcGoldBuyInventoryRef: { current: { invalidate() {} } }, npcRepairAuthorityRef: { current: { invalidateInventory() {} } },
-    storageUiIngressRef: { current: null }, retireNpcShopService() {},
-    ownedTooltipEpochRef: { current: { bag: {}, character: {} } }, endStorageService() {},
+    // These surfaces are dormant, with the same initial ownership facts as Page.
+    // The real selected source functions still perform every cancellation/gate.
+    npcPearlSendEpochRef: {current:0}, npcPearlBuyProofsRef: {current:new WeakMap()},
+    npcPurchaseClientRef: {current:null}, npcPurchaseUnavailableRef: {current:false},
+    npcPurchaseEconomicSourceRef: {current:null}, npcPurchaseDisplaySourceRef: {current:null},
+    npcPurchaseOptInSocketsRef: {current:new WeakSet()},
+    npcPearlShopSourceRef: {current:new (loadPure("npc-pearl-buy-source").NpcPearlShopSource)()},
+    npcGoldBuyInventoryRef: {current:new (loadPure("bevy-npc-shop-buy").NpcGoldBuyInventoryReadiness)()},
+    npcRepairAuthorityRef: {current:new (loadPure("npc-repair-service").NpcRepairService)()},
+    npcRepairDialogBindingRef: {current:null}, setNpcRepairService:()=>{},
+    npcBuyDispatcherRef: {current:null}, npcShopClockRef: {current:{service:0,catalog:0}},
+    npcBuySelectedRef: {current:null}, npcShopServiceRef: {current:null}, setNpcShopService:()=>{},
+    worldFishingGestureRegistryRef: {current:new WeakMap()}, worldFishingActiveGestureRef: {current:null},
+    worldFishingQueuedRef: {current:null}, worldFishingCommitRef: {current:null},
+    worldFishingSourceRef: {current:new (loadPure("world-fishing-source").WorldFishingSource)()},
+    ownedTooltipEpochRef: {current:{bag:{},character:{}}},
+    bagBeltMovesRef: {current:new (loadPure("bag-belt-move-dispatcher").BagBeltMoveDispatcher)()},
+    bagBeltInventoryReadyRef: {current:null}, heroOperationsRef: {current:{pending:null}}, mailCollectBarrierRef: {current:null},
+    socialItemOperationsRef: {current:new (loadPure("social-window-operations").SocialWindowOperations)()},
+    storageRentalRef: {current:new (loadPure("storage-rental-confirmation").StorageRentalConfirmation)()},
+    storageUiIngressRef: {current:null}, storageServiceActiveRef: {current:false}, storageCompatibilityRef: {current:false},
+    setStorageRentalPrompt:()=>{}, setStorageServiceActive:()=>{}, setStorageCompatibility:()=>{}, setStoragePasswordOpenVersion:()=>{},
     combatIngressRef:{current:null},mailIngressRef:{current:null},mailDispatcherRef:{current:null},mailRawRef:{current:null},mailOpenRef:{current:false},mailReadAttemptRef:{current:null},mailCompatRef:{current:null},setMailCompatibility:()=>{},setShowMail:()=>{},
     // This adjacent fixture initializes the real existing equipment bridge.
     // Mail is legitimately idle/unavailable here; its adapter gate is actual
@@ -417,19 +444,33 @@ test("actual raw send rechecks the original Bevy token and live host after synch
   }
 });
 
-test("retired compatibility bag callbacks cannot submit Drop, Merge, Split or Sell", () => {
-  for (const type of ["dropItem", "mergeItem", "splitItem", "sellItem", "dropGold"]) {
-    const command = { type, uniqueId: 4, from: 0, to: 4, count: 1 };
+test("retired compatibility bag callbacks cannot submit Drop, Merge, Split, Sell or storage operations", () => {
+  function prepared(page, type) {
+    if (!["storeItemV2", "takeBackItemV2"].includes(type)) return {command:{ type, uniqueId: 4, from: 0, to: 4, count: 1 }, options:undefined};
+    const deposit = type === "storeItemV2", source = {...bagItem(4), container:deposit ? "bag1" : "storage", slot:0};
+    page.scope.worldRef.current = {...world(source), inventoryCapacity:46, storageSize:80,
+      hasExpandedStorage:false, hasStoragePassword:false, requireStoragePassword:false, storageSessionUnlocked:true,
+      inventoryItems:deposit ? [source] : [], storageItems:deposit ? [] : [source]};
+    const transfer = storageAdapter.prepareStorageTransfer(page.scope.worldRef.current, deposit ? "deposit" : "withdraw",
+      "st-0000000000000001", source, {container:deposit ? "storage" : "bag1", slot:4});
+    assert.ok(transfer, "the positive and stale-owner samples must first have actual valid storage custody");
+    page.scope.pendingStorageRequestsRef.current.set(transfer.proof.requestId, {proof:transfer.proof, enteredSocket:false});
+    return {command:transfer.command, options:{storageProof:transfer.proof}};
+  }
+  for (const type of ["dropItem", "mergeItem", "splitItem", "sellItem", "dropGold", "storeItemV2", "takeBackItemV2"]) {
     const allowed = harness();
-    assert.equal(allowed.send(command), true, `current owner: ${type}`);
+    const {command,options} = prepared(allowed,type);
+    assert.equal(allowed.send(command,options), true, `current owner: ${type}`);
     assert.deepEqual(allowed.sent, [command], "existing wire is preserved");
     const page = harness();
+    const stale = prepared(page,type);
     page.scope.equipmentBagOwnerRef.current = { ...session, runGeneration: 1, ownerRevision: 1, owner: "bevy" };
-    assert.equal(page.send({ type }), false, type);
+    assert.equal(page.send(stale.command,stale.options), false, type);
     assert.deepEqual(page.sent, []);
     const current = harness();
+    const final = prepared(current,type);
     current.onAction(() => { current.scope.equipmentBagOwnerRef.current.ownerRevision++; });
-    assert.equal(current.send({ type }), false, `final gate: ${type}`);
+    assert.equal(current.send(final.command,final.options), false, `final gate: ${type}`);
     assert.deepEqual(current.sent, []);
   }
 });

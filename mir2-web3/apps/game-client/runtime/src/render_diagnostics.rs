@@ -55,9 +55,14 @@ fn run_writer(path: &std::path::Path, receiver: mpsc::Receiver<Value>) -> std::i
         std::fs::create_dir_all(parent)?;
     }
     // Lock a sidecar so the JSONL remains readable during a live reproduction.
-    let lock = std::fs::OpenOptions::new().create(true).read(true).write(true)
-        .truncate(false).open(path.with_extension("writer.lock"))?;
-    lock.try_lock().map_err(|error| std::io::Error::other(format!("trace writer already active: {error}")))?;
+    let lock = std::fs::OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .truncate(false)
+        .open(path.with_extension("writer.lock"))?;
+    lock.try_lock()
+        .map_err(|error| std::io::Error::other(format!("trace writer already active: {error}")))?;
     let file = std::fs::OpenOptions::new()
         .create(true)
         // Windows cannot lock an append-only handle; include read access.
@@ -84,7 +89,8 @@ fn run_writer(path: &std::path::Path, receiver: mpsc::Receiver<Value>) -> std::i
         if let Some(summary) = health.observe(&event) {
             output.record(&summary)?;
         }
-        let events = if event["type"] == "renderFrame" && event.get("movementCorrelation").is_none() {
+        let events = if event["type"] == "renderFrame" && event.get("movementCorrelation").is_none()
+        {
             ring.push(event)
         } else {
             vec![event]
@@ -533,7 +539,11 @@ mod tests {
     use super::*;
     #[test]
     fn real_file_writer_locks_and_flushes_session() {
-        let path = std::env::temp_dir().join(format!("mir2-render-writer-{}-{}.jsonl", std::process::id(), unix_ms()));
+        let path = std::env::temp_dir().join(format!(
+            "mir2-render-writer-{}-{}.jsonl",
+            std::process::id(),
+            unix_ms()
+        ));
         let (sender, receiver) = mpsc::sync_channel(1);
         drop(sender);
         run_writer(&path, receiver).expect("real platform file locking and write must succeed");

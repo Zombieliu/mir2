@@ -12,12 +12,13 @@ use bevy::{
     },
     prelude::*,
 };
+use unicode_segmentation::UnicodeSegmentation;
 
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
 use crate::crystal_ui::select::{
-    animate_character_previews, spawn_character_preview_at, spawn_character_select_screen,
-    CrystalSelectAction,
+    animate_character_previews, load_character_preview_materials, spawn_character_preview_at,
+    spawn_character_select_screen, CrystalSelectAction,
 };
 use crate::crystal_ui::spec::{self, CrystalButtonSpec};
 use crate::crystal_ui::widget::{
@@ -27,9 +28,9 @@ use crate::crystal_ui::widget::{
 use crate::native_i18n;
 use crate::native_login_locale::NativeUiLocale;
 use crate::native_shell::{
-    parse_registration_birth_date, valid_registration_email, validate_registration_fields,
-    ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen,
-    NativeUiIntent, NativeUiIntentQueue, RegistrationFocus,
+    validate_registration_field, validate_registration_fields, ChangePasswordFocus,
+    CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen, NativeUiIntent,
+    NativeUiIntentQueue, RegistrationFocus,
 };
 use crate::native_wallet_login::{
     NativeWalletLogin, NativeWalletLoginAction, NativeWalletLoginActionQueue,
@@ -49,7 +50,7 @@ const MAX_PASSWORD: usize = 32;
 const MAX_CHANGE_ACCOUNT: usize = 15;
 const MAX_CHANGE_PASSWORD: usize = 15;
 const MAX_NAME: usize = 18;
-const CLASSES: [&str; 3] = ["Warrior", "Wizard", "Taoist"];
+const CLASSES: [&str; 5] = ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"];
 const GENDERS: [&str; 2] = ["Male", "Female"];
 
 const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
@@ -62,10 +63,21 @@ const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165
 const NEW_CHARACTER_NAME_FIELD: spec::CrystalRect =
     spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0);
 const NEW_CHARACTER_PREVIEW_ANCHOR: (f32, f32) = (338.0, 404.0);
-const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 3] = [
+const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 5] = [
     spec::CrystalRect::new(541.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(591.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(641.0, 450.0, 44.0, 42.0),
+    spec::CrystalRect::new(691.0, 450.0, 44.0, 42.0),
+    spec::CrystalRect::new(741.0, 450.0, 44.0, 42.0),
+];
+// Three labels on the first row, two on the second. The original icon slots
+// remain unchanged; translated class names get enough width in every locale.
+const LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 5] = [
+    spec::CrystalRect::new(497.0, 450.0, 90.0, 30.0),
+    spec::CrystalRect::new(591.0, 450.0, 90.0, 30.0),
+    spec::CrystalRect::new(685.0, 450.0, 90.0, 30.0),
+    spec::CrystalRect::new(497.0, 489.0, 137.0, 30.0),
+    spec::CrystalRect::new(638.0, 489.0, 137.0, 30.0),
 ];
 const NEW_CHARACTER_GENDER_BUTTONS: [spec::CrystalRect; 2] = [
     spec::CrystalRect::new(541.0, 497.0, 44.0, 42.0),
@@ -330,12 +342,13 @@ fn change_password_submit_intent(model: &NativeShellModel) -> NativeUiIntent {
 }
 
 fn registration_submit_intent(model: &NativeShellModel) -> Result<NativeUiIntent, &'static str> {
+    let birth_date_binary = validate_registration_fields(&model.registration)?;
     Ok(NativeUiIntent::SubmitRegistration {
         account_id: model.registration.account_id.clone(),
         password: model.registration.password.clone(),
         confirm_password: model.registration.confirm_password.clone(),
         birth_date: model.registration.birth_date.clone(),
-        birth_date_binary: parse_registration_birth_date(&model.registration.birth_date)?,
+        birth_date_binary,
         user_name: model.registration.user_name.clone(),
         secret_question: model.registration.secret_question.clone(),
         secret_answer: model.registration.secret_answer.clone(),
@@ -375,6 +388,11 @@ struct NativeShellContent;
 
 #[derive(Component)]
 pub(crate) enum NativeShellButton {
+    OpenBilling,
+    OpenMonthlyCard,
+    RedeemMonthlyCard,
+    CloseMonthlyCard,
+    FocusMonthlyCard,
     CancelCreate,
     SubmitCreate,
     SelectCreateClass(u8),
@@ -435,22 +453,30 @@ fn animate_login_door(
 
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
+        crate::crystal_ui::overlays::register_crystal_additive_ui(app);
         app.init_resource::<NativeUiIntentQueue>()
             .init_resource::<NativeShellAuxFocus>()
             .init_resource::<NativeShellTextModifiers>()
             .init_resource::<NativeWalletLogin>()
             .init_resource::<NativeWalletLoginActionQueue>()
-            .add_systems(Startup, spawn_shell_ui)
+            .add_systems(Startup, (spawn_shell_ui, load_character_preview_materials))
             .add_systems(
                 Update,
                 (
                     animate_login_door,
-                    update_root_visibility,
                     shell_keyboard_input,
                     shell_pointer_input,
-                    render_shell_ui,
+                    crate::native_billing::process_input,
                 )
-                    .chain(),
+                    .chain()
+                    .after(crate::pending_operations::PendingLifecycleSet::UiReset)
+                    .before(crate::crystal_ui::NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
+                (update_root_visibility, render_shell_ui)
+                    .chain()
+                    .after(crate::crystal_ui::NativePlayerUiSet::Mutate),
             )
             .add_systems(
                 Update,
@@ -521,9 +547,10 @@ fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn update_root_visibility(
     shell: Option<Res<NativeShellModel>>,
-    mut roots: Query<&mut Node, With<NativeShellRoot>>,
+    mut roots: Query<(&mut Node, &mut BackgroundColor), With<NativeShellRoot>>,
+    mut backgrounds: Query<&mut Node, (With<NativeLoginDoorBackground>, Without<NativeShellRoot>)>,
 ) {
-    let Ok(mut root) = roots.single_mut() else {
+    let Ok((mut root, mut color)) = roots.single_mut() else {
         return;
     };
 
@@ -532,7 +559,16 @@ fn update_root_visibility(
         return;
     };
 
-    root.display = if shell.screen == NativeShellScreen::InGame {
+    let in_game = shell.screen == NativeShellScreen::InGame;
+    color.0 = if in_game { Color::NONE } else { ROOT_BG };
+    for mut background in &mut backgrounds {
+        background.display = if in_game {
+            Display::None
+        } else {
+            Display::Flex
+        };
+    }
+    root.display = if in_game && !shell.billing.open {
         Display::None
     } else {
         Display::Flex
@@ -571,7 +607,7 @@ fn shell_pointer_input(
         return;
     };
 
-    if shell.screen == NativeShellScreen::InGame {
+    if shell.screen == NativeShellScreen::InGame || shell.billing.open {
         return;
     }
 
@@ -646,6 +682,7 @@ fn shell_pointer_input(
     for (interaction, action) in select_interactions.iter() {
         if *interaction != Interaction::Pressed
             || shell.screen != NativeShellScreen::CharacterSelect
+            || shell.monthly_card.open
         {
             continue;
         }
@@ -713,7 +750,34 @@ fn shell_pointer_input(
             continue;
         }
 
+        if shell.monthly_card.open
+            && !matches!(
+                action,
+                NativeShellButton::OpenMonthlyCard
+                    | NativeShellButton::OpenBilling
+                    | NativeShellButton::RedeemMonthlyCard
+                    | NativeShellButton::CloseMonthlyCard
+                    | NativeShellButton::FocusMonthlyCard
+            )
+        {
+            continue;
+        }
         match action {
+            NativeShellButton::OpenBilling => {
+                shell.open_billing();
+            }
+            NativeShellButton::OpenMonthlyCard => {
+                apply_and_queue(&mut shell, &mut queue, NativeUiIntent::OpenMonthlyCard);
+            }
+            NativeShellButton::RedeemMonthlyCard => {
+                apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RedeemMonthlyCard);
+            }
+            NativeShellButton::CloseMonthlyCard => {
+                let _ = shell.apply_ui_intent(NativeUiIntent::CloseMonthlyCard);
+            }
+            NativeShellButton::FocusMonthlyCard => {
+                shell.monthly_card.focus = crate::native_monthly_card::MonthlyCardFocus::Code;
+            }
             NativeShellButton::CancelCreate => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelCharacterCreate);
             }
@@ -770,15 +834,14 @@ fn shell_pointer_input(
             NativeShellButton::CancelChangePassword => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelChangePassword);
             }
-            NativeShellButton::SubmitRegistration => {
-                if let Ok(intent) = registration_submit_intent(&shell) {
+            NativeShellButton::SubmitRegistration => match registration_submit_intent(&shell) {
+                Ok(intent) => {
                     apply_and_queue(&mut shell, &mut queue, intent);
-                } else {
-                    shell.notice = Some(crate::native_shell::ShellNotice::error(
-                        "birth date must use YYYY-MM-DD",
-                    ));
                 }
-            }
+                Err(message) => {
+                    shell.notice = Some(crate::native_shell::ShellNotice::error(message));
+                }
+            },
             NativeShellButton::CancelRegistration => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelRegistration);
             }
@@ -838,7 +901,7 @@ fn shell_keyboard_input(
     modifiers.alt = keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight);
     modifiers.super_key = keys.pressed(KeyCode::SuperLeft) || keys.pressed(KeyCode::SuperRight);
 
-    if shell.screen == NativeShellScreen::InGame {
+    if shell.screen == NativeShellScreen::InGame || shell.billing.open {
         return;
     }
     if wallet.as_deref().is_some_and(|wallet| wallet.visible) {
@@ -862,6 +925,47 @@ fn shell_keyboard_input(
         return;
     }
     let shifted = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
+    shell.monthly_card.expire_pending_request(
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_millis() as u64),
+    );
+    if shell.screen == NativeShellScreen::CharacterSelect && shell.monthly_card.open {
+        use crate::native_monthly_card::MonthlyCardFocus;
+        if keys.just_pressed(KeyCode::Escape) {
+            shell.apply_ui_intent(NativeUiIntent::CloseMonthlyCard);
+            return;
+        }
+        if keys.just_pressed(KeyCode::Tab) {
+            shell.monthly_card.focus = shell.monthly_card.focus.next(shifted);
+            return;
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            match shell.monthly_card.focus {
+                MonthlyCardFocus::Close => {
+                    shell.apply_ui_intent(NativeUiIntent::CloseMonthlyCard);
+                }
+                MonthlyCardFocus::Refresh => {
+                    apply_and_queue(&mut shell, &mut queue, NativeUiIntent::OpenMonthlyCard);
+                }
+                MonthlyCardFocus::Billing => {
+                    shell.open_billing();
+                }
+                _ => {
+                    apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RedeemMonthlyCard);
+                }
+            }
+            return;
+        }
+        if !shell.monthly_card.pending && shell.monthly_card.focus == MonthlyCardFocus::Code {
+            if modifiers.control && keys.just_pressed(KeyCode::KeyA) {
+                shell.monthly_card.code.clear();
+            }
+            pop_editable_tail(&mut shell.monthly_card.code, edit_delete_count);
+            shell.monthly_card.append(&typed_text);
+        }
+        return;
+    }
 
     match shell.screen {
         NativeShellScreen::Login => {
@@ -1002,6 +1106,9 @@ fn shell_keyboard_input(
             if shell.register_request_in_flight {
                 return;
             }
+            let previous_form = (shell.notice.is_some()
+                && (edit_delete_count > 0 || !typed_text.is_empty()))
+            .then(|| shell.registration.clone());
             match shell.registration.focus {
                 RegistrationFocus::AccountId => {
                     pop_editable_tail(&mut shell.registration.account_id, edit_delete_count)
@@ -1067,6 +1174,9 @@ fn shell_keyboard_input(
                     }
                     RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => {}
                 }
+            }
+            if previous_form.is_some_and(|before| before != shell.registration) {
+                shell.notice = None;
             }
         }
 
@@ -1434,7 +1544,7 @@ fn render_shell_ui(
         return;
     };
 
-    if model.screen == NativeShellScreen::InGame {
+    if model.screen == NativeShellScreen::InGame && !model.billing.open {
         return;
     }
 
@@ -1461,9 +1571,8 @@ fn render_shell_ui(
 
     commands.entity(content).despawn_children();
 
-    commands
-        .entity(content)
-        .with_children(|screen| match model.screen {
+    commands.entity(content).with_children(|screen| {
+        match model.screen {
             NativeShellScreen::Connecting => {
                 with_generic_panel(screen, |panel| {
                     info_block(panel, "Connecting", "Connecting to gateway...");
@@ -1497,6 +1606,7 @@ fn render_shell_ui(
             }
             NativeShellScreen::CharacterSelect => {
                 spawn_character_select_screen(screen, &asset_server, &model);
+                render_monthly_card(screen, &model);
             }
             NativeShellScreen::CharacterCreate => {
                 render_character_create(screen, &asset_server, &model);
@@ -1524,7 +1634,9 @@ fn render_shell_ui(
                 render_connection_lost(screen, &asset_server, &model, current_aux_focus);
             }
             NativeShellScreen::InGame => {}
-        });
+        }
+        crate::native_billing::render(screen, &model.billing);
+    });
 }
 
 fn with_generic_panel(
@@ -1566,20 +1678,46 @@ fn render_character_create(
     // frame already contains the input border and the five class/two gender
     // slots, so the native overlay must be anchored to that frame rather than
     // recreating a second generic panel beside it.
-    parent.spawn((
-        absolute_node(NEW_CHARACTER_FRAME),
-        ImageNode {
-            image: asset_server.load("original-ui/Prguse/73.png"),
-            image_mode: NodeImageMode::Stretch,
-            ..default()
-        },
-    ));
-    spawn_native_image(
-        parent,
-        asset_server,
-        "original-ui/Title/20.png",
-        NEW_CHARACTER_TITLE,
-    );
+    if crate::native_i18n::active() {
+        spawn_localized_frame(parent, NEW_CHARACTER_FRAME);
+        spawn_aux_text(
+            parent,
+            "Create Character",
+            spec::CrystalRect::new(238.0, 168.0, 548.0, 32.0),
+            22.0,
+            GOLD,
+            Justify::Center,
+        );
+        for (label, top) in [
+            ("Character Name", 399.0),
+            ("Class", 451.0),
+            ("Gender", 510.0),
+        ] {
+            spawn_aux_text(
+                parent,
+                label,
+                spec::CrystalRect::new(497.0, top, 278.0, 19.0),
+                12.0,
+                GOLD,
+                Justify::Left,
+            );
+        }
+    } else {
+        parent.spawn((
+            absolute_node(NEW_CHARACTER_FRAME),
+            ImageNode {
+                image: asset_server.load("original-ui/Prguse/73.png"),
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            },
+        ));
+        spawn_native_image(
+            parent,
+            asset_server,
+            "original-ui/Title/20.png",
+            NEW_CHARACTER_TITLE,
+        );
+    }
     spawn_character_preview_at(
         parent,
         asset_server,
@@ -1606,6 +1744,17 @@ fn render_character_create(
 
     for (index, rect) in NEW_CHARACTER_CLASS_BUTTONS.into_iter().enumerate() {
         let selected = character_class_index(&model.character_create.class_name) == index as u16;
+        if crate::native_i18n::active() {
+            spawn_aux_text_button(
+                parent,
+                LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS[index],
+                CLASSES[index].to_owned(),
+                NativeShellButton::SelectCreateClass(index as u8),
+                true,
+                selected,
+            );
+            continue;
+        }
         let normal = 2426 + index as u16 * 3 + if selected { 1 } else { 0 };
         let class_spec = CrystalButtonSpec::new(
             "Prguse",
@@ -1628,6 +1777,17 @@ fn render_character_create(
     }
     for (index, rect) in NEW_CHARACTER_GENDER_BUTTONS.into_iter().enumerate() {
         let selected = character_gender_index(&model.character_create.gender_name) == index as u16;
+        if crate::native_i18n::active() {
+            spawn_aux_text_button(
+                parent,
+                spec::CrystalRect::new(497.0 + index as f32 * 141.0, 533.0, 137.0, 30.0),
+                GENDERS[index].to_owned(),
+                NativeShellButton::SelectCreateGender(index as u8),
+                true,
+                selected,
+            );
+            continue;
+        }
         let base = if index == 0 { 2420 } else { 2423 };
         let normal = base + if selected { 1 } else { 0 };
         let gender_spec = CrystalButtonSpec::new(
@@ -1653,7 +1813,7 @@ fn render_character_create(
     if let Some(notice) = &model.notice {
         spawn_aux_notice(
             parent,
-            &notice.message,
+            &create_notice_message(model, &notice.message),
             notice.kind,
             spec::CrystalRect::new(628.0, 610.0, 304.0, 28.0),
         );
@@ -1689,6 +1849,30 @@ fn render_character_create(
     );
 }
 
+fn create_notice_message(model: &NativeShellModel, source: &str) -> String {
+    let form = &model.character_create;
+    let request = format!(
+        "create character requested name={} class={} gender={}",
+        form.name, form.class_name, form.gender_name
+    );
+    if !crate::native_i18n::active() || source != request {
+        return source.to_owned();
+    }
+    // These two values are closed protocol enums. The player-entered name is
+    // never sent through the translation lookup or reinterpreted as a template.
+    let class = crate::native_i18n::tr(&form.class_name);
+    let gender = crate::native_i18n::tr(&form.gender_name);
+    crate::native_i18n::format_key(
+        "shell.notice.create_requested",
+        "Creating {name} ({class_name}, {gender_name})...",
+        &[
+            ("name", &form.name),
+            ("class_name", &class),
+            ("gender_name", &gender),
+        ],
+    )
+}
+
 fn render_registration(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
@@ -1697,17 +1881,39 @@ fn render_registration(
     // Crystal's LoginScene.NewAccountDialog uses Prguse frame 63 at the centre
     // of the 1024x768 stage.  Its labels are part of the exported source art;
     // only its text boxes, description, and Title buttons are live controls.
-    spawn_native_image(
-        parent,
-        asset_server,
-        "original-ui/Prguse/63.png",
-        NEW_ACCOUNT_FRAME,
-    );
+    if crate::native_i18n::active() {
+        spawn_localized_frame(parent, NEW_ACCOUNT_FRAME);
+        spawn_aux_text(
+            parent,
+            "New Account",
+            spec::CrystalRect::new(238.0, 178.0, 548.0, 30.0),
+            22.0,
+            GOLD,
+            Justify::Center,
+        );
+    } else {
+        spawn_native_image(
+            parent,
+            asset_server,
+            "original-ui/Prguse/63.png",
+            NEW_ACCOUNT_FRAME,
+        );
+    }
 
     let form = &model.registration;
     let password = password_mask(&form.password);
     let confirm_password = password_mask(&form.confirm_password);
     for (focus, rect) in NEW_ACCOUNT_FIELDS {
+        if crate::native_i18n::active() {
+            spawn_aux_text(
+                parent,
+                registration_label(focus),
+                spec::CrystalRect::new(239.0, rect.top, 198.0, 22.0),
+                12.0,
+                CREAM,
+                Justify::Right,
+            );
+        }
         let value = match focus {
             RegistrationFocus::AccountId => form.account_id.as_str(),
             RegistrationFocus::Password => password.as_str(),
@@ -1807,86 +2013,20 @@ fn registration_field_border_color(
     let neutral = Color::srgb_u8(128, 128, 128);
     let valid = Color::srgb(0.0, 0.5, 0.0);
     let invalid = Color::srgb(0.75, 0.0, 0.0);
-    let alphanumeric = |value: &str, min, max| {
-        let length = value.chars().count();
-        (min..=max).contains(&length)
-            && value
-                .chars()
-                .all(|character| character.is_ascii_alphanumeric())
+    let value = match focus {
+        RegistrationFocus::AccountId => &form.account_id,
+        RegistrationFocus::Password => &form.password,
+        RegistrationFocus::ConfirmPassword => &form.confirm_password,
+        RegistrationFocus::UserName => &form.user_name,
+        RegistrationFocus::BirthDate => &form.birth_date,
+        RegistrationFocus::SecretQuestion => &form.secret_question,
+        RegistrationFocus::SecretAnswer => &form.secret_answer,
+        RegistrationFocus::EmailAddress => &form.email_address,
+        RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => return neutral,
     };
-    match focus {
-        RegistrationFocus::AccountId => {
-            if form.account_id.is_empty() {
-                neutral
-            } else if alphanumeric(&form.account_id, 3, 15) {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::Password => {
-            if form.password.is_empty() {
-                neutral
-            } else if alphanumeric(&form.password, 5, 15) {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::ConfirmPassword => {
-            if form.confirm_password.is_empty() {
-                neutral
-            } else if alphanumeric(&form.confirm_password, 5, 15)
-                && form.confirm_password == form.password
-            {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::UserName => {
-            optional_field_color(&form.user_name, 20, neutral, valid, invalid)
-        }
-        RegistrationFocus::BirthDate => {
-            if form.birth_date.is_empty() {
-                neutral
-            } else if parse_registration_birth_date(&form.birth_date).is_ok() {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::SecretQuestion => {
-            optional_field_color(&form.secret_question, 30, neutral, valid, invalid)
-        }
-        RegistrationFocus::SecretAnswer => {
-            optional_field_color(&form.secret_answer, 30, neutral, valid, invalid)
-        }
-        RegistrationFocus::EmailAddress => {
-            if form.email_address.is_empty() {
-                neutral
-            } else if form.email_address.chars().count() <= 50
-                && valid_registration_email(&form.email_address)
-            {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => neutral,
-    }
-}
-
-fn optional_field_color(
-    value: &str,
-    max_chars: usize,
-    neutral: Color,
-    valid: Color,
-    invalid: Color,
-) -> Color {
     if value.is_empty() {
         neutral
-    } else if value.chars().count() <= max_chars {
+    } else if validate_registration_field(form, focus).is_ok() {
         valid
     } else {
         invalid
@@ -1895,17 +2035,32 @@ fn optional_field_color(
 
 fn registration_description(focus: RegistrationFocus) -> &'static str {
     match focus {
-        RegistrationFocus::AccountId => "Account ID: 3-15 letters or numbers.",
+        RegistrationFocus::AccountId => "账号：3–15 位英文字母或数字。",
         RegistrationFocus::Password | RegistrationFocus::ConfirmPassword => {
-            "Password: 5-15 letters or numbers. Confirm it exactly."
+            "密码：10–15 位英文字母或数字。不能与账号相同，不能使用常见弱口令；两次输入须一致。"
         }
-        RegistrationFocus::UserName => "Optional user name: up to 20 characters.",
-        RegistrationFocus::BirthDate => "Optional birth date: YYYY-MM-DD.",
-        RegistrationFocus::SecretQuestion => "Optional secret question: up to 30 characters.",
-        RegistrationFocus::SecretAnswer => "Optional secret answer: up to 30 characters.",
-        RegistrationFocus::EmailAddress => "Optional email address: up to 50 characters.",
-        RegistrationFocus::SubmitButton => "Create the account with these details.",
-        RegistrationFocus::CancelButton => "Return to the login screen.",
+        RegistrationFocus::UserName => "姓名（选填）：最多 20 个字符。",
+        RegistrationFocus::BirthDate => "出生日期（选填）：格式为 YYYY-MM-DD。",
+        RegistrationFocus::SecretQuestion => "密保问题（选填）：最多 30 个字符。",
+        RegistrationFocus::SecretAnswer => "密保答案（选填）：最多 30 个字符。",
+        RegistrationFocus::EmailAddress => "邮箱（选填）：填写完整有效的邮箱地址，最多 50 个字符。",
+        RegistrationFocus::SubmitButton => "使用以上信息注册账号。",
+        RegistrationFocus::CancelButton => "返回登录界面。",
+    }
+}
+
+fn registration_label(focus: RegistrationFocus) -> &'static str {
+    match focus {
+        RegistrationFocus::AccountId => "Account",
+        RegistrationFocus::Password => "Password",
+        RegistrationFocus::ConfirmPassword => "Confirm Password",
+        RegistrationFocus::UserName => "Name (optional)",
+        RegistrationFocus::BirthDate => "Birth Date (optional)",
+        RegistrationFocus::SecretQuestion => "Security Question (optional)",
+        RegistrationFocus::SecretAnswer => "Security Answer (optional)",
+        RegistrationFocus::EmailAddress => "Email (optional)",
+        RegistrationFocus::SubmitButton => "OK",
+        RegistrationFocus::CancelButton => "Cancel",
     }
 }
 
@@ -1999,6 +2154,10 @@ fn safe_key_image_button(
     label: &str,
     action: NativeShellButton,
 ) {
+    if crate::native_i18n::active() && label.chars().count() > 1 {
+        spawn_aux_text_button(parent, spec.rect, label.to_owned(), action, true, false);
+        return;
+    }
     let image = assets.normal.clone();
     parent
         .spawn((
@@ -2078,7 +2237,11 @@ fn render_delete_confirm(
     );
     spawn_aux_text(
         parent,
-        &format!("Delete '{}' (slot {})?", name, index),
+        &crate::native_i18n::format_key(
+            "shell.delete.prompt",
+            "Delete '{name}' (slot {slot})?",
+            &[("name", name), ("slot", &index.to_string())],
+        ),
         spec::CrystalRect::new(366.0, 350.0, 292.0, 25.0),
         14.0,
         CREAM,
@@ -2178,6 +2341,17 @@ fn render_connection_lost(
         );
     }
     let retry_spec = connection_lost_retry_spec();
+    if crate::native_i18n::active() {
+        spawn_aux_text_button(
+            parent,
+            retry_spec.rect,
+            "Retry".to_owned(),
+            NativeShellButton::Retry,
+            true,
+            aux_focus.connection_retry,
+        );
+        return;
+    }
     spawn_crystal_image_button(
         parent,
         asset_server,
@@ -2205,14 +2379,21 @@ fn connection_notice_summary(message: &str) -> String {
     if let Some(start) = message.rfind("(os error ") {
         if let Some(relative_end) = message[start..].find(')') {
             let end = start + relative_end + 1;
-            return format!("Cannot reach the local Gateway.\n{}", &message[start..end]);
+            return format!(
+                "{}\n{}",
+                crate::native_i18n::tr("Error Connecting to Server"),
+                &message[start..end]
+            );
         }
     }
 
     const MAX_NOTICE_CHARS: usize = 72;
-    let mut summary = message.split_whitespace().collect::<Vec<_>>().join(" ");
-    if summary.chars().count() > MAX_NOTICE_CHARS {
-        summary = summary.chars().take(MAX_NOTICE_CHARS - 1).collect();
+    let mut summary = crate::native_i18n::tr(message)
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    if summary.graphemes(true).count() > MAX_NOTICE_CHARS {
+        summary = summary.graphemes(true).take(MAX_NOTICE_CHARS - 1).collect();
         summary.push('…');
     }
     summary
@@ -2234,9 +2415,21 @@ fn character_gender_index(gender_name: &str) -> u16 {
 
 fn character_description(class_name: &str) -> &'static str {
     match character_class_index(class_name) {
-        0 => "Warriors are resilient frontline fighters.\nThey favor close combat and heavy weapons.",
-        1 => "Wizards command powerful elemental magic.\nThey favor ranged spells and careful positioning.",
-        2 => "Taoists support allies and master spiritual arts.\nThey balance healing, buffs, and combat.",
+        0 => {
+            "Warriors are resilient frontline fighters.\nThey favor close combat and heavy weapons."
+        }
+        1 => {
+            "Wizards command powerful elemental magic.\nThey favor ranged spells and careful positioning."
+        }
+        2 => {
+            "Taoists support allies and master spiritual arts.\nThey balance healing, buffs, and combat."
+        }
+        3 => {
+            "Assassins strike with paired blades and stealth.\nThey favor quick attacks and careful movement."
+        }
+        4 => {
+            "Archers attack from range with bows and special shots.\nKeep your distance and watch your positioning."
+        }
         _ => "",
     }
 }
@@ -2289,6 +2482,16 @@ fn absolute_node(rect: spec::CrystalRect) -> Node {
     }
 }
 
+fn spawn_localized_frame(parent: &mut ChildSpawnerCommands, rect: spec::CrystalRect) {
+    let mut node = absolute_node(rect);
+    node.border = UiRect::all(Val::Px(1.0));
+    parent.spawn((
+        node,
+        BackgroundColor(Color::srgb(0.035, 0.025, 0.02)),
+        BorderColor::all(GOLD),
+    ));
+}
+
 fn spawn_aux_text(
     parent: &mut ChildSpawnerCommands,
     value: &str,
@@ -2301,7 +2504,7 @@ fn spawn_aux_text(
     node.overflow = Overflow::clip();
     parent.spawn((
         node,
-        Text::new(value.to_owned()),
+        Text::new(crate::native_i18n::tr(value)),
         body_font(size),
         TextColor(color),
         TextLayout::justify(justify),
@@ -2422,7 +2625,7 @@ fn spawn_aux_text_button(
                 align_items: AlignItems::Center,
                 ..default()
             },
-            Text::new(label),
+            Text::new(crate::native_i18n::tr(&label)),
             body_font(12.0),
             TextColor(CREAM),
             TextLayout::justify(Justify::Center),
@@ -2432,18 +2635,15 @@ fn spawn_aux_text_button(
 
 fn title_line(parent: &mut ChildSpawnerCommands, text: &str) {
     parent.spawn((
-        Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(28.0),
-            ..default()
-        },
+        Text::new(crate::native_i18n::tr(text)),
+        body_font(28.0),
         TextColor(GOLD),
     ));
 }
 
 fn text_line(parent: &mut ChildSpawnerCommands, text: &str) {
     parent.spawn((
-        Text::new(text.to_owned()),
+        Text::new(crate::native_i18n::tr(text)),
         body_font(16.0),
         TextColor(CREAM),
     ));
@@ -2460,7 +2660,7 @@ fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focus
         },))
         .with_children(|row| {
             row.spawn((
-                Text::new(format!("{label}")),
+                Text::new(crate::native_i18n::tr(label)),
                 body_font(14.0),
                 TextColor(CREAM),
             ));
@@ -2515,11 +2715,70 @@ fn action_button(
     }
     button.with_children(|label_node| {
         label_node.spawn((
-            Text::new(label.to_owned()),
+            Text::new(crate::native_i18n::tr(label)),
             body_font(16.0),
             TextColor(CREAM),
         ));
     });
+}
+
+fn render_monthly_card(parent: &mut ChildSpawnerCommands, model: &NativeShellModel) {
+    use crate::native_monthly_card::MonthlyCardFocus;
+    spawn_aux_text_button(
+        parent,
+        spec::CrystalRect::new(774.0, 58.0, 226.0, 36.0),
+        "Monthly Card".into(),
+        NativeShellButton::OpenMonthlyCard,
+        true,
+        false,
+    );
+    if !model.monthly_card.open {
+        return;
+    }
+    let card = &model.monthly_card;
+    parent.spawn((absolute_node(spec::CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
+        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.75)), GlobalZIndex(2000)))
+        .with_children(|layer| {
+            spawn_localized_frame(layer, spec::CrystalRect::new(202.0, 170.0, 620.0, 456.0));
+            spawn_aux_text(layer, "Monthly Card", spec::CrystalRect::new(222.0, 207.0, 580.0, 34.0), 22.0, GOLD, Justify::Center);
+            spawn_aux_text(layer, "Each card adds 30 days. All characters share the account's expiry; offline time counts.",
+                spec::CrystalRect::new(224.0, 252.0, 576.0, 60.0), 14.0, CREAM, Justify::Left);
+            spawn_aux_text_button(layer, spec::CrystalRect::new(422.0, 574.0, 380.0, 36.0),
+                crate::native_i18n::tr("billing.open"), NativeShellButton::OpenBilling,
+                model.billing_character_index().is_some(), card.focus == MonthlyCardFocus::Billing);
+            let status = match &card.status {
+                None => crate::native_i18n::tr("Checking monthly card..."),
+                Some(status) => {
+                    let label = if !status.required { "Monthly card is optional on this server." }
+                        else if status.active { "Monthly card active" } else { "Monthly card required or expired" };
+                    let mut text = crate::native_i18n::tr(label);
+                    if let Some(expires) = status.expires_at_ms.and_then(|ms| i64::try_from(ms).ok())
+                        .and_then(chrono::DateTime::<chrono::Utc>::from_timestamp_millis) {
+                        text.push('\n');
+                        text.push_str(&crate::native_i18n::tr("Expires: {0}").replace("{0}", &expires.format("%Y-%m-%d %H:%M UTC").to_string()));
+                    }
+                    text
+                }
+            };
+            spawn_aux_text(layer, &status, spec::CrystalRect::new(224.0, 318.0, 576.0, 58.0), 14.0, CREAM, Justify::Left);
+            layer.spawn((absolute_node(spec::CrystalRect::new(224.0, 384.0, 576.0, 42.0)),
+                BackgroundColor(Color::BLACK), BorderColor::all(GOLD), Button, NativeShellButton::FocusMonthlyCard))
+                .with_children(|field| {
+                    field.spawn((Node { padding: UiRect::all(Val::Px(8.0)), ..default() },
+                        Text::new(if card.code.is_empty() { crate::native_i18n::tr("Paste activation code (Ctrl+V)") } else { card.code.clone() }),
+                        body_font(15.0), TextColor(CREAM)));
+                });
+            if let Some(message) = &card.message {
+                spawn_aux_text(layer, message, spec::CrystalRect::new(224.0, 439.0, 576.0, 65.0), 14.0, GOLD, Justify::Left);
+            }
+            spawn_aux_text_button(layer, spec::CrystalRect::new(224.0, 523.0, 180.0, 36.0),
+                if card.pending { "Redeeming..." } else { "Redeem" }.into(), NativeShellButton::RedeemMonthlyCard,
+                card.can_submit(), card.focus == MonthlyCardFocus::Redeem);
+            spawn_aux_text_button(layer, spec::CrystalRect::new(422.0, 523.0, 182.0, 36.0), "Check status".into(),
+                NativeShellButton::OpenMonthlyCard, !card.pending, card.focus == MonthlyCardFocus::Refresh);
+            spawn_aux_text_button(layer, spec::CrystalRect::new(622.0, 523.0, 180.0, 36.0), "Close".into(),
+                NativeShellButton::CloseMonthlyCard, true, card.focus == MonthlyCardFocus::Close);
+        });
 }
 
 fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
@@ -2546,6 +2805,9 @@ fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: Nativ
 }
 
 fn body_font(size: f32) -> TextFont {
+    if crate::native_i18n::active() {
+        return crate::crystal_ui::typography::crystal_text_font(size);
+    }
     TextFont {
         font_size: FontSize::Px(size),
         ..default()
@@ -2553,7 +2815,231 @@ fn body_font(size: f32) -> TextFont {
 }
 
 #[cfg(test)]
+#[path = "native_shell_preview_visual_tests.rs"]
+mod preview_visual_tests;
+
+#[cfg(test)]
+#[path = "native_i18n_visual_tests.rs"]
+pub(crate) mod i18n_visual_tests;
+
+#[cfg(test)]
 mod tests {
+    use crate::native_shell::parse_registration_birth_date;
+
+    fn multilingual_shell_app(model: NativeShellModel) -> App {
+        use bevy::asset::AssetApp;
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
+            .init_asset::<Image>()
+            .insert_resource(model)
+            .add_systems(Update, render_shell_ui);
+        app.edit_schedule(Update, |schedule| {
+            schedule.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        });
+        app.world_mut().spawn((Node::default(), NativeShellContent));
+        app
+    }
+
+    fn shell_texts(app: &mut App) -> Vec<String> {
+        app.world_mut()
+            .query::<&Text>()
+            .iter(app.world())
+            .map(|text| text.0.clone())
+            .collect()
+    }
+
+    #[test]
+    fn expired_character_can_open_the_shared_billing_panel() {
+        use crate::native_shell::CharacterSummary;
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        model.last_account = Some("alice".into());
+        model.characters = vec![CharacterSummary::new(7, "Hero", 1, "Warrior", "Male")];
+        model.selected_character_index = Some(7);
+        model.monthly_card.open = true;
+        model.monthly_card.status = Some(crate::native_monthly_card::MonthlyCardStatus {
+            required: true,
+            active: false,
+            expires_at_ms: Some(1),
+            server_now_ms: 2,
+            remaining_ms: 0,
+            can_enter_game: false,
+        });
+        assert!(model.open_billing());
+        assert_eq!(model.billing.unsent_request().unwrap().character_index, 7);
+        let mut app = multilingual_shell_app(model);
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                app.update();
+                assert!(shell_texts(&mut app).contains(&crate::native_i18n::tr("billing.title")));
+                assert!(app
+                    .world_mut()
+                    .query::<&crate::native_billing::BillingButton>()
+                    .iter(app.world())
+                    .next()
+                    .is_some());
+            });
+        }
+    }
+
+    #[test]
+    fn monthly_card_modal_is_localized_in_all_nine_languages_and_preserves_the_code() {
+        use crate::native_i18n::{self, Locale};
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        model.monthly_card.open = true;
+        model.monthly_card.code = format!("MC1-{}", "A".repeat(43));
+        let expected = model.clone();
+        let mut app = multilingual_shell_app(model);
+        for locale in Locale::ALL {
+            native_i18n::with_locale(locale, || {
+                app.update();
+                let texts = shell_texts(&mut app);
+                for text in [
+                    "Monthly Card",
+                    "Redeem",
+                    "Check status",
+                    "Checking monthly card...",
+                ] {
+                    assert!(
+                        texts.contains(&native_i18n::tr(text)),
+                        "missing {text} in {locale:?}"
+                    );
+                }
+                assert!(texts.contains(&expected.monthly_card.code));
+                assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
+                assert!(app
+                    .world_mut()
+                    .query::<&GlobalZIndex>()
+                    .iter(app.world())
+                    .any(|z| z.0 > 1000));
+            });
+        }
+        let mut model = expected;
+        model.characters = vec![CharacterSummary::new(5, "OwnHero", 7, "Warrior", "Male")];
+        model.selected_character_index = Some(5);
+        assert!(!model.apply_ui_intent(NativeUiIntent::StartGame));
+    }
+
+    #[test]
+    fn localized_shell_rebuilds_without_changing_form_input_or_validation() {
+        use crate::native_i18n::{self, Locale};
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Registration;
+        model.registration.account_id = "Password".into();
+        model.registration.password = "Secret98325".into();
+        model.registration.confirm_password = "Secret98325".into();
+        let expected = model.clone();
+        let mut app = multilingual_shell_app(model);
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                app.update();
+                let texts = shell_texts(&mut app);
+                assert!(texts.contains(&native_i18n::tr("New Account")));
+                assert!(texts.contains(&native_i18n::tr("Confirm Password")));
+                assert!(
+                    texts.iter().any(|text| text == "Password"),
+                    "account text must remain opaque"
+                );
+                assert!(texts.iter().any(|text| text == "***********"));
+                assert!(!texts.iter().any(|text| text.contains("Secret98325")));
+                assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
+            });
+        }
+    }
+
+    #[test]
+    fn localized_create_and_select_keep_protocol_identity_and_opaque_names() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                let mut model = NativeShellModel::default();
+                model.screen = NativeShellScreen::CharacterCreate;
+                model.character_create.name = "Warrior".into();
+                model.character_create.class_name = "Wizard".into();
+                model.character_create.gender_name = "Female".into();
+                let mut app = multilingual_shell_app(model);
+                app.update();
+                let texts = shell_texts(&mut app);
+                assert!(texts.contains(&native_i18n::tr("Create Character")));
+                assert!(texts.contains(&native_i18n::tr("Wizard")));
+                assert!(texts.iter().any(|text| text == "Warrior"));
+                assert_eq!(
+                    app.world()
+                        .resource::<NativeShellModel>()
+                        .character_create
+                        .class_name,
+                    "Wizard"
+                );
+                let mut model = app.world_mut().resource_mut::<NativeShellModel>();
+                model.screen = NativeShellScreen::CharacterSelect;
+                model.characters = vec![CharacterSummary::new(5, "Warrior", 7, "Wizard", "Female")];
+                model.selected_character_index = Some(5);
+                drop(model);
+                app.update();
+                let texts = shell_texts(&mut app);
+                assert!(texts.contains(&native_i18n::tr("Select Character")));
+                assert!(texts.iter().any(|text| text == "Warrior"));
+                assert!(texts.contains(&native_i18n::tr("Wizard")));
+                assert_eq!(
+                    app.world().resource::<NativeShellModel>().characters[0].name,
+                    "Warrior"
+                );
+            });
+        }
+    }
+
+    #[test]
+    fn localized_delete_prompt_does_not_reinterpret_placeholders_in_player_names() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                let mut model = NativeShellModel::default();
+                model.screen = NativeShellScreen::DeleteConfirm { index: 5 };
+                model.characters = vec![CharacterSummary::new(
+                    5,
+                    "Gold{slot}Cancel",
+                    7,
+                    "Wizard",
+                    "Female",
+                )];
+                model.selected_character_index = Some(5);
+                model.delete_confirm_index = Some(5);
+                let expected = model.clone();
+                let mut app = multilingual_shell_app(model);
+                app.update();
+                let texts = shell_texts(&mut app);
+                let prompt = native_i18n::format_key(
+                    "shell.delete.prompt",
+                    "Delete '{name}' (slot {slot})?",
+                    &[("name", "Gold{slot}Cancel"), ("slot", "5")],
+                );
+                assert!(texts.contains(&prompt));
+                assert!(!texts.iter().any(|text| text.contains("Gold5Cancel")));
+                assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
+            });
+        }
+    }
+
+    #[test]
+    fn localized_create_request_translates_only_typed_class_and_gender() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                let mut model = NativeShellModel::default();
+                model.character_create.name = "Gold{gender_name}Cancel".into();
+                model.character_create.class_name = "Wizard".into();
+                model.character_create.gender_name = "Female".into();
+                let source = "create character requested name=Gold{gender_name}Cancel class=Wizard gender=Female";
+                let text = create_notice_message(&model, source);
+                assert!(text.contains("Gold{gender_name}Cancel"));
+                assert!(text.contains(&native_i18n::tr("Wizard")));
+                assert!(text.contains(&native_i18n::tr("Female")));
+                assert_eq!(model.character_create.class_name, "Wizard");
+                assert_eq!(create_notice_message(&model, "Gold"), "Gold");
+            });
+        }
+    }
     #[test]
     fn door_waits_for_all_frames_then_updates_the_real_background_handle() {
         use super::*;
@@ -3294,12 +3780,84 @@ mod tests {
     }
 
     #[test]
-    fn new_character_class_and_gender_choices_are_limited_to_existing_backend_flow() {
-        assert_eq!(CLASSES, ["Warrior", "Wizard", "Taoist"]);
+    fn new_character_class_and_gender_choices_cover_all_five_source_classes() {
+        assert_eq!(
+            CLASSES,
+            ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"]
+        );
         assert_eq!(GENDERS, ["Male", "Female"]);
-        assert!(!CLASSES.contains(&"Assassin"));
-        assert!(!CLASSES.contains(&"Archer"));
-        assert_eq!(character_description("Warrior").is_empty(), false);
+        for (index, class) in CLASSES.into_iter().enumerate() {
+            assert_eq!(character_class_index(class), index as u16);
+            assert!(!character_description(class).is_empty());
+            assert_eq!(
+                rotate_choice(class, &CLASSES, false),
+                CLASSES[(index + 1) % CLASSES.len()]
+            );
+            assert_eq!(
+                rotate_choice(class, &CLASSES, true),
+                CLASSES[(index + CLASSES.len() - 1) % CLASSES.len()]
+            );
+        }
+    }
+
+    #[test]
+    fn five_class_create_buttons_fit_the_frame_in_all_nine_locales() {
+        use crate::native_i18n::{self, Locale};
+        for locale in Locale::ALL {
+            for class in CLASSES {
+                native_i18n::with_locale(locale, || {
+                    let mut model = NativeShellModel::default();
+                    model.screen = NativeShellScreen::CharacterCreate;
+                    model.character_create.class_name = class.into();
+                    model.character_create.name = "OwnHero".into();
+                    let expected = model.clone();
+                    let mut app = multilingual_shell_app(model);
+                    app.update();
+                    let texts = shell_texts(&mut app);
+                    for choice in CLASSES {
+                        assert!(
+                            texts.contains(&native_i18n::tr(choice)),
+                            "{locale:?}: {choice}"
+                        );
+                    }
+                    let description = native_i18n::tr(character_description(class));
+                    assert!(texts.contains(&description), "{locale:?}: {class}");
+                    if locale != Locale::English {
+                        assert_ne!(description, character_description(class));
+                    }
+                    let mut buttons = app.world_mut().query::<(&NativeShellButton, &Node)>();
+                    let classes = buttons
+                        .iter(app.world())
+                        .filter_map(|(action, node)| {
+                            let NativeShellButton::SelectCreateClass(index) = action else {
+                                return None;
+                            };
+                            let expected_rect =
+                                LOCALIZED_NEW_CHARACTER_CLASS_BUTTONS[usize::from(*index)];
+                            assert_eq!(
+                                (node.left, node.top, node.width, node.height),
+                                (
+                                    Val::Px(expected_rect.left),
+                                    Val::Px(expected_rect.top),
+                                    Val::Px(expected_rect.width),
+                                    Val::Px(expected_rect.height)
+                                )
+                            );
+                            assert!(
+                                NEW_CHARACTER_FRAME.contains(expected_rect.left, expected_rect.top)
+                            );
+                            assert!(NEW_CHARACTER_FRAME.contains(
+                                expected_rect.left + expected_rect.width,
+                                expected_rect.top + expected_rect.height
+                            ));
+                            Some(*index)
+                        })
+                        .collect::<Vec<_>>();
+                    assert_eq!(classes.len(), CLASSES.len());
+                    assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
+                });
+            }
+        }
     }
 
     #[test]
@@ -3342,8 +3900,8 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::OpenRegistration));
         let intent = NativeUiIntent::SubmitRegistration {
             account_id: "hero".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
             birth_date: "2000-01-01".to_owned(),
             birth_date_binary: parse_registration_birth_date("2000-01-01").unwrap(),
             user_name: "Hero".to_owned(),
@@ -3393,8 +3951,8 @@ mod tests {
         let mut queue = NativeUiIntentQueue::default();
         let intent = NativeUiIntent::SubmitRegistration {
             account_id: "hero".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
             birth_date: String::new(),
             birth_date_binary: 0,
             user_name: String::new(),
@@ -3496,8 +4054,8 @@ mod tests {
     fn registration_submit_intent_preserves_every_supported_new_account_field() {
         let mut model = NativeShellModel::default();
         model.registration.account_id = "newhero".to_owned();
-        model.registration.password = "Secret1".to_owned();
-        model.registration.confirm_password = "Secret1".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
         model.registration.birth_date = "2001-02-03".to_owned();
         model.registration.user_name = "New Hero".to_owned();
         model.registration.secret_question = "first pet?".to_owned();
@@ -3508,8 +4066,8 @@ mod tests {
             registration_submit_intent(&model),
             Ok(NativeUiIntent::SubmitRegistration {
                 account_id: "newhero".to_owned(),
-                password: "Secret1".to_owned(),
-                confirm_password: "Secret1".to_owned(),
+                password: "ValidPass42".to_owned(),
+                confirm_password: "ValidPass42".to_owned(),
                 birth_date: "2001-02-03".to_owned(),
                 birth_date_binary: parse_registration_birth_date("2001-02-03").unwrap(),
                 user_name: "New Hero".to_owned(),
@@ -3526,12 +4084,202 @@ mod tests {
         assert!(!registration_submit_enabled(&model));
 
         model.registration.account_id = "newhero".to_owned();
-        model.registration.password = "Secret1".to_owned();
-        model.registration.confirm_password = "Secret1".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
         assert!(registration_submit_enabled(&model));
 
         model.register_request_in_flight = true;
         assert!(!registration_submit_enabled(&model));
+    }
+
+    fn registration_model_for_test() -> NativeShellModel {
+        NativeShellModel {
+            screen: NativeShellScreen::Registration,
+            registration: crate::native_shell::RegistrationForm {
+                account_id: "newhero".to_owned(),
+                password: "ValidPass42".to_owned(),
+                confirm_password: "ValidPass42".to_owned(),
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn registration_password_colors_and_submit_agree_with_the_production_policy() {
+        let mut model = registration_model_for_test();
+        for password in [
+            "short",
+            "Alpha1234",
+            "1234567890",
+            "Password123",
+            "qwerty12345",
+            "mir2password",
+            "Alpha12345678901",
+        ] {
+            model.registration.password = password.to_owned();
+            model.registration.confirm_password = password.to_owned();
+            for focus in [
+                RegistrationFocus::Password,
+                RegistrationFocus::ConfirmPassword,
+            ] {
+                assert_eq!(
+                    registration_field_border_color(&model.registration, focus),
+                    Color::srgb(0.75, 0.0, 0.0)
+                );
+            }
+            assert!(!registration_submit_enabled(&model));
+            assert!(registration_submit_intent(&model).is_err());
+        }
+        for password in ["Alpha12345", "Alpha1234567890"] {
+            model.registration.password = password.to_owned();
+            model.registration.confirm_password = password.to_owned();
+            assert!(registration_submit_enabled(&model));
+            assert_eq!(
+                registration_field_border_color(&model.registration, RegistrationFocus::Password),
+                Color::srgb(0.0, 0.5, 0.0)
+            );
+        }
+        model.registration.account_id = "ALPHA1234567890".to_owned();
+        assert!(!registration_submit_enabled(&model));
+        assert_eq!(
+            registration_field_border_color(&model.registration, RegistrationFocus::Password),
+            Color::srgb(0.75, 0.0, 0.0)
+        );
+        assert!(registration_description(RegistrationFocus::Password).contains("10–15"));
+        assert!(registration_description(RegistrationFocus::EmailAddress).contains("选填"));
+    }
+
+    #[test]
+    fn registration_invalid_email_never_queues_even_when_a_raw_intent_bypasses_the_button() {
+        for email in ["1S", "hero@example", "hero!@example.test"] {
+            let mut model = registration_model_for_test();
+            let mut intent = registration_submit_intent(&model).unwrap();
+            model.registration.email_address = email.to_owned();
+            assert!(!registration_submit_enabled(&model));
+            assert!(registration_submit_intent(&model)
+                .unwrap_err()
+                .contains("邮箱"));
+            assert_eq!(
+                registration_field_border_color(
+                    &model.registration,
+                    RegistrationFocus::EmailAddress
+                ),
+                Color::srgb(0.75, 0.0, 0.0)
+            );
+            if let NativeUiIntent::SubmitRegistration { email_address, .. } = &mut intent {
+                *email_address = email.to_owned();
+            }
+            let mut queue = NativeUiIntentQueue::default();
+            assert!(!apply_and_queue(&mut model, &mut queue, intent));
+            assert!(queue.is_empty());
+            assert!(!model.register_request_in_flight);
+            assert!(model.notice.as_ref().unwrap().message.contains("邮箱"));
+        }
+        let model = registration_model_for_test();
+        assert!(registration_submit_enabled(&model));
+        assert_eq!(
+            registration_field_border_color(&model.registration, RegistrationFocus::EmailAddress),
+            Color::srgb_u8(128, 128, 128)
+        );
+    }
+
+    #[test]
+    fn registration_keyboard_validation_and_editing_clear_only_stale_notices() {
+        let mut shell = registration_model_for_test();
+        shell.registration.email_address = "1S".to_owned();
+        shell.registration.focus = RegistrationFocus::SubmitButton;
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default())
+            .insert_resource(shell)
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<NativeShellAuxFocus>()
+            .init_resource::<NativeShellTextModifiers>()
+            .add_message::<KeyboardInput>()
+            .add_systems(Update, shell_keyboard_input);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Enter);
+        app.update();
+        assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+        assert!(app
+            .world()
+            .resource::<NativeShellModel>()
+            .notice
+            .as_ref()
+            .unwrap()
+            .message
+            .contains("邮箱"));
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .registration
+            .focus = RegistrationFocus::EmailAddress;
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::KeyA,
+            Key::Character("a".into()),
+            ButtonState::Pressed,
+            Some("a"),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .registration
+                .email_address,
+            "1Sa"
+        );
+        assert!(app.world().resource::<NativeShellModel>().notice.is_none());
+
+        {
+            let mut shell = app.world_mut().resource_mut::<NativeShellModel>();
+            shell.registration.focus = RegistrationFocus::Password;
+            shell.notice = Some(crate::native_shell::ShellNotice::error("旧的注册错误"));
+        }
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::Digit1,
+            Key::Character("!".into()),
+            ButtonState::Pressed,
+            Some("!"),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .registration
+                .password,
+            "ValidPass42"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .notice
+                .as_ref()
+                .unwrap()
+                .message,
+            "旧的注册错误"
+        );
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .register_request_in_flight = true;
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::KeyA,
+            Key::Character("a".into()),
+            ButtonState::Pressed,
+            Some("a"),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .registration
+                .password,
+            "ValidPass42"
+        );
+        assert!(app.world().resource::<NativeShellModel>().notice.is_some());
+        assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
     }
 
     #[test]
@@ -3590,13 +4338,32 @@ mod tests {
     }
 
     #[test]
-    fn connection_notice_collapses_localized_socket_text_to_a_bounded_summary() {
-        assert_eq!(
-            connection_notice_summary(
-                "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)"
-            ),
-            "Cannot reach the local Gateway.\n(os error 10061)"
-        );
+    fn connection_notice_localizes_server_errors_without_assuming_a_local_gateway() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                let server_error =
+                    native_i18n::for_locale(language, "client.ErrorConnectingToServer", "");
+                assert!(!server_error.is_empty());
+                for (message, code) in [
+                    (
+                        "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)",
+                        "(os error 10061)",
+                    ),
+                    (
+                        "gateway connect failed: IO error: Connection refused (os error 111)",
+                        "(os error 111)",
+                    ),
+                ] {
+                    assert_eq!(
+                        connection_notice_summary(message),
+                        format!("{server_error}\n{code}"),
+                        "{} must use the existing server error translation",
+                        language.code(),
+                    );
+                }
+            });
+        }
     }
 
     #[test]

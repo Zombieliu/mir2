@@ -19,28 +19,24 @@ fn graduation_requires_the_authoritative_v2_route_growth_claims_and_level() {
             .copied()
             .filter(|quest_id| *quest_id != 2_120_030),
     );
-    assert!(
-        catalog
-            .derive(
-                &guidance,
-                &QuestTracker::default(),
-                &completed,
-                &player("Warrior", 30)
-            )
-            .is_some_and(|view| view.graduation.is_none())
-    );
+    assert!(catalog
+        .derive(
+            &guidance,
+            &QuestTracker::default(),
+            &completed,
+            &player("Warrior", 30)
+        )
+        .is_some_and(|view| view.graduation.is_none()));
 
     completed.replace_authoritative(V2_GRADUATION_COMPLETION_IDS.iter().copied());
-    assert!(
-        catalog
-            .derive(
-                &guidance,
-                &QuestTracker::default(),
-                &completed,
-                &player("Warrior", 29)
-            )
-            .is_some_and(|view| view.graduation.is_none())
-    );
+    assert!(catalog
+        .derive(
+            &guidance,
+            &QuestTracker::default(),
+            &completed,
+            &player("Warrior", 29)
+        )
+        .is_some_and(|view| view.graduation.is_none()));
 }
 
 #[test]
@@ -77,11 +73,9 @@ fn graduation_projects_only_the_matching_class_three_local_targets() {
         .option(GraduationDirection::Challenge)
         .expect("shared free-roam direction");
     assert_eq!(challenge.summary, "Medium difficulty · Insect Cave N 2F");
-    assert!(
-        challenge
-            .instruction
-            .starts_with("Reach Insect Cave N 2F from Insect Cave W 1F")
-    );
+    assert!(challenge
+        .instruction
+        .starts_with("Reach Insect Cave N 2F from Insect Cave W 1F"));
     assert!(!challenge.instruction.contains("D605"));
     assert!(!challenge.instruction.contains("P176"));
 }
@@ -92,24 +86,20 @@ fn v1_and_crystal_profiles_never_project_v2_graduation_choices() {
     completed.replace_authoritative(V2_GRADUATION_COMPLETION_IDS.iter().copied());
 
     let v1_guidance = QuestGuidance::from_profile_name("newcomer-v1");
-    assert!(
-        NewcomerJourneyCatalog::from_guidance(&v1_guidance)
-            .derive(
-                &v1_guidance,
-                &QuestTracker::default(),
-                &completed,
-                &player("Warrior", 30),
-            )
-            .is_some_and(|view| view.graduation.is_none())
-    );
-    assert!(
-        NewcomerJourneyCatalog::bundled()
-            .derive(
-                &QuestGuidance::from_profile_name("crystal"),
-                &QuestTracker::default(),
-                &completed,
-                &player("Warrior", 30),
-            )
-            .is_none()
-    );
+    assert!(NewcomerJourneyCatalog::from_guidance(&v1_guidance)
+        .derive(
+            &v1_guidance,
+            &QuestTracker::default(),
+            &completed,
+            &player("Warrior", 30),
+        )
+        .is_some_and(|view| view.graduation.is_none()));
+    assert!(NewcomerJourneyCatalog::bundled()
+        .derive(
+            &QuestGuidance::from_profile_name("crystal"),
+            &QuestTracker::default(),
+            &completed,
+            &player("Warrior", 30),
+        )
+        .is_none());
 }

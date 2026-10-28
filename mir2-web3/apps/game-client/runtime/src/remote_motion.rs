@@ -484,7 +484,9 @@ impl Plugin for RemoteMotionPresentationPlugin {
             .init_resource::<RemoteMotionPresentation>()
             .add_systems(
                 PreUpdate,
-                ingest_remote_motion_presentation_system.after(motion::CrystalMoveClockSet).after(super::NativeMotionProducerSet),
+                ingest_remote_motion_presentation_system
+                    .after(motion::CrystalMoveClockSet)
+                    .after(super::NativeMotionProducerSet),
             );
     }
 }

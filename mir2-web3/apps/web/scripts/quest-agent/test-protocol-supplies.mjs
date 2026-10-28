@@ -282,6 +282,37 @@ test('V2 Taoist buys real charges at Bull and Travis using normal room travel an
   assert.equal(client.snapshot.mapFileName, '0');
 });
 
+test('V2 optional HP top-up respects remaining bag weight without rejecting confirmed departure minima', async () => {
+  for (const [maxWeight, expectedHp] of [[114, 17], [89, 4]]) {
+    const state = snapshot({ className: 'Taoist', level: 16, gold: 8000, mp: 60 });
+    state.knownSkills = [{ spell: 'Healing' }, { spell: 'Poisoning' }];
+    state.inventoryItems.push(item(710, 20, 'GreenPoison'));
+    state.playerWeights = { bag: 80 };
+    state.maxWeight = maxWeight;
+    const client = v2ShopClient(state);
+    const send = client.send.bind(client);
+    client.send = command => {
+      const bagBefore = Number(client.snapshot.playerWeights.bag);
+      send(command);
+      if (command.type === 'buyItem') {
+        assert.equal(command.itemIndex, HP_MEDIUM * 100);
+        const weightAfter = bagBefore + 2 * command.count;
+        assert.ok(weightAfter <= maxWeight, 'ordinary purchase must fit real bag weight');
+        client.snapshot.playerWeights.bag = weightAfter;
+        client.events.at(-1).payload.playerWeights.bag = weightAfter;
+      }
+    };
+    const result = await restockV2Supplies(client, async () => {}, {
+      policy: v2SupplyPolicy(client.snapshot, { questId: 2110010 }, 'Taoist'),
+    });
+    assert.equal(result.status, 'restocked');
+    assert.equal(result.ready, true);
+    assert.equal(v2SupplyStock(client.snapshot).hp, expectedHp);
+    assert.equal(client.snapshot.gold, 8000 - expectedHp * 110);
+    assert.equal(client.snapshot.playerWeights.bag, 80 + expectedHp * 2);
+  }
+});
+
 test('V2 insufficient gold, excess weight and unconfirmed purchases return blocked', async () => {
   for (const failure of ['gold', 'weight', 'rejected', 'wrongDebit', 'wrongQuantity']) {
     const state = snapshot({ className: 'Wizard', level: 28, gold: failure === 'gold' ? 1 : 20_000, hp: 4 });

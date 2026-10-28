@@ -1,0 +1,29 @@
+Full retained log: C:/mir2-build/crowded-escape-server-red2-20261003.log
+SHA256: 29f88af69f6b68a69ac7539581649471146936d7180c908c9a82832375c58290
+
+running 10 tests
+test completely_surrounded_player_cannot_cross_live_monster_but_can_escape_after_kill ... ok
+test crystal_stun_allows_manual_walk_and_run_through_empty_corridor ... FAILED
+test crystal_stun_allows_physical_attack_but_never_bypasses_melee_action_cadence ... FAILED
+test crystal_stun_rejects_actual_cast_without_mana_cooldown_or_target_damage ... FAILED
+test dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch ... FAILED
+test frozen_expiry_releases_movement_even_when_independent_stun_remains_active ... FAILED
+test paralysis_frozen_and_lr_paralysis_keep_real_block_until_deadline_then_new_held_move_works ... ok
+test pending_escape_keeps_finite_player_action_deadline_despite_dense_incoming_hits ... ok
+test seven_same_tick_monster_hits_damage_each_time_but_present_one_shared_flinch ... FAILED
+test staggered_dense_hits_share_five_hundred_ms_window_without_dropping_damage ... FAILED
+test result: FAILED. 3 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+Failure details:
+failures:
+    crystal_stun_allows_manual_walk_and_run_through_empty_corridor
+    crystal_stun_allows_physical_attack_but_never_bypasses_melee_action_cadence
+    crystal_stun_rejects_actual_cast_without_mana_cooldown_or_target_damage
+    dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch
+    frozen_expiry_releases_movement_even_when_independent_stun_remains_active
+    seven_same_tick_monster_hits_damage_each_time_but_present_one_shared_flinch
+    staggered_dense_hits_share_five_hundred_ms_window_without_dropping_damage
+
+test result: FAILED. 3 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `-p mir2-simulation --test shared_crowded_escape`

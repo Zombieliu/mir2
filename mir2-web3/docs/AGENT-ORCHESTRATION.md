@@ -95,3 +95,7 @@ The complete previous orchestration file is preserved byte-for-byte in
 section with an explicit path only when investigating that recorded round.
 The detailed [Shared Zone MVP rules](SHARED-ZONE-MVP-RULES.md) are required for
 Zone/session/gateway movement and lifecycle work, not unrelated edits.
+
+Incoming branch history was preserved during the 2026-10-28 merge in
+[the incoming orchestration archive](AGENT-ORCHESTRATION-INCOMING-20261028.md).
+It is historical evidence, not a replacement for the current policy above.

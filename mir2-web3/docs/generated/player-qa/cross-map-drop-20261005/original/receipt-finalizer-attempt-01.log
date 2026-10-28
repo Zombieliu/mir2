@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "C:\mir2-playtest-releases\20261004-native-r18\cross-map-drop-implementation-01\finalize_receipt.py", line 125, in <module>
+    assert forward.returncode == 0, forward.stderr.decode()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: error: patch failed: mir2-web3/apps/gateway/src/routing.rs:2312
+error: mir2-web3/apps/gateway/src/routing.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/drops.rs:60
+error: mir2-web3/apps/simulation/src/runtime/drops.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/zone/manager.rs:5
+error: mir2-web3/apps/simulation/src/runtime/zone/manager.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/zone/mod.rs:5
+error: mir2-web3/apps/simulation/src/runtime/zone/mod.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:48
+error: mir2-web3/apps/simulation/src/runtime/zone/runtime.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs:22
+error: mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs:1
+error: mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/src/runtime/zone/types.rs:780
+error: mir2-web3/apps/simulation/src/runtime/zone/types.rs: patch does not apply
+error: patch failed: mir2-web3/apps/simulation/tests/shared_monster_ownership.rs:446
+error: mir2-web3/apps/simulation/tests/shared_monster_ownership.rs: patch does not apply
+error: mir2-web3/apps/simulation/src/runtime/zone/online_identity.rs: already exists in working directory
+error: mir2-web3/apps/simulation/src/runtime/zone/runtime/ground_ownership.rs: already exists in working directory
+error: mir2-web3/apps/simulation/tests/shared_cross_map_drop_lifecycle.rs: already exists in working directory
+error: mir2-web3/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs: already exists in working directory
+error: mir2-web3/docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md: already exists in working directory
+

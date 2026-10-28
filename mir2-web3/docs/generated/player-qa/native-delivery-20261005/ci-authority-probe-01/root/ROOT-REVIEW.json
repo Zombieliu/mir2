@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.native-ci-probe-root-review.v1",
+  "passed": true,
+  "sourcePins": {
+    "cloudflare_read_authority_probe.py": "1ce602ca8e1e1dc69c6745dec0ebce68237b040aa40ea11830b6aec9cdcf02dd",
+    "test_cloudflare_read_authority_probe.py": "c9f830c69b2f552e526d0f26c251027d7a443e2504423e90289a11807fc758d5"
+  },
+  "rootTestReceipt": {
+    "name": "TEST-RECEIPT-1791151944749390300.json",
+    "sha256": "e40b9f1d5740b9974d2d1e91b344c284d36e85862cee94c862564911c85e0bf1"
+  },
+  "workflowBeforeSha256": "94fd630de690aed1f67301b2bb1045501f008cb26f137d36210522f0eff27be5",
+  "workflowAfterSha256": "b5f868f0636960b131244835888823ed4ee284f249e78a428166219a19ce2931",
+  "legacyWorkflowStructureUnchangedExceptNativeExclusion": true,
+  "selectedNativeProbeHasOnlyReadOnlyCloudflareCredentials": true,
+  "realCredentialValueRead": false,
+  "actualGitHubDispatch": false,
+  "actualAuthRequests": false,
+  "tests": 31,
+  "writeOrDeploymentAuthorityProven": false
+}

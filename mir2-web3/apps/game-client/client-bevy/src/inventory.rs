@@ -353,17 +353,30 @@ impl NpcGoldTradeCapacity {
         let mut ids = std::collections::HashSet::new();
         self.fresh_compatible_unique_ids.len() <= 86
             && (self.roster_valid || self.fresh_compatible_unique_ids.is_empty())
-            && self.fresh_compatible_unique_ids.iter().all(|id| ids.insert(*id))
+            && self
+                .fresh_compatible_unique_ids
+                .iter()
+                .all(|id| ids.insert(*id))
     }
 }
 impl<'de> Deserialize<'de> for NpcGoldTradeCapacity {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
         #[serde(deny_unknown_fields, rename_all = "camelCase")]
-        struct Raw { roster_valid: bool, fresh_compatible_unique_ids: Vec<u64> }
+        struct Raw {
+            roster_valid: bool,
+            fresh_compatible_unique_ids: Vec<u64>,
+        }
         let raw = Raw::deserialize(deserializer)?;
-        let value = Self { roster_valid: raw.roster_valid, fresh_compatible_unique_ids: raw.fresh_compatible_unique_ids };
-        if !value.valid() { return Err(serde::de::Error::custom("invalid NPC gold capacity evidence")); }
+        let value = Self {
+            roster_valid: raw.roster_valid,
+            fresh_compatible_unique_ids: raw.fresh_compatible_unique_ids,
+        };
+        if !value.valid() {
+            return Err(serde::de::Error::custom(
+                "invalid NPC gold capacity evidence",
+            ));
+        }
         Ok(value)
     }
 }
@@ -378,7 +391,11 @@ pub struct InventoryModel {
     pub capacity: u16,
     pub gold: u32,
     pub items: Vec<ItemModel>,
-    #[serde(default, rename = "npcGoldTradeCapacity", skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        rename = "npcGoldTradeCapacity",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub npc_gold_trade_capacity: Option<NpcGoldTradeCapacity>,
 }
 

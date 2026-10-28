@@ -244,6 +244,7 @@ pub(super) mod tests {
             g_index: 31,
             quantity: 1,
             price_type: 1,
+            recipient_name: None,
             new_stock_level: Some(9),
             mail_id: Some(77),
             code: None,

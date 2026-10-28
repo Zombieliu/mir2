@@ -33,7 +33,9 @@ pub fn preview_layers(input: CashPreviewInput) -> Vec<CashPreviewLayer> {
     };
     let d = u16::from(input.direction.clamp(1, 8) - 1);
     let anim = ((input.elapsed_ms / 150) % 6) as u16;
-    if i16::try_from(input.armour_shape).is_err() { return vec![]; }
+    if i16::try_from(input.armour_shape).is_err() {
+        return vec![];
+    }
     let body_shape = input.armour_shape.max(0) as u16;
     let body = |frame| layer(format!("CArmour/{body_shape:02}"), frame);
     match input.item_type {
@@ -86,7 +88,11 @@ pub fn preview_layers(input: CashPreviewInput) -> Vec<CashPreviewLayer> {
 /// Local presentation only. The Web facade rejects directions outside 1..=8.
 pub fn preview_turn(direction: u8, right: bool) -> u8 {
     let direction = direction.clamp(1, 8);
-    if right { direction % 8 + 1 } else { (direction + 6) % 8 + 1 }
+    if right {
+        direction % 8 + 1
+    } else {
+        (direction + 6) % 8 + 1
+    }
 }
 
 #[cfg(test)]
@@ -94,18 +100,35 @@ mod tests {
     use super::*;
 
     fn input(item_type: u8, shape: i32, direction: u8, elapsed_ms: u64) -> CashPreviewInput {
-        CashPreviewInput { item_type, shape, direction, elapsed_ms,
-            required_gender: 1, armour_shape: 0, female: false }
+        CashPreviewInput {
+            item_type,
+            shape,
+            direction,
+            elapsed_ms,
+            required_gender: 1,
+            armour_shape: 0,
+            female: false,
+        }
     }
 
     #[test]
     fn native_weapon_gender_direction_and_clock_are_preserved() {
-        assert_eq!(preview_layers(input(1, 9, 2, 150)), vec![
-            layer("CArmour/00".into(), 39), layer("CWeapon/09".into(), 39)]);
+        assert_eq!(
+            preview_layers(input(1, 9, 2, 150)),
+            vec![
+                layer("CArmour/00".into(), 39),
+                layer("CWeapon/09".into(), 39)
+            ]
+        );
         let mut female = input(1, 9, 8, 900);
         female.female = true;
-        assert_eq!(preview_layers(female), vec![
-            layer("CWeapon/09".into(), 74), layer("CArmour/00".into(), 882)]);
+        assert_eq!(
+            preview_layers(female),
+            vec![
+                layer("CWeapon/09".into(), 74),
+                layer("CArmour/00".into(), 882)
+            ]
+        );
     }
 
     #[test]
@@ -115,24 +138,43 @@ mod tests {
             i.armour_shape = 12;
             let layers = preview_layers(i);
             let libraries: Vec<_> = layers.iter().map(|l| l.library.as_str()).collect();
-            assert_eq!(libraries, if matches!(direction, 2 | 3) {
-                vec!["AWeaponL/09", "CArmour/12", "AWeaponR/09"]
-            } else if matches!(direction, 7 | 8) {
-                vec!["AWeaponR/09", "CArmour/12", "AWeaponL/09"]
-            } else { vec!["AWeaponL/09", "AWeaponR/09", "CArmour/12"] });
+            assert_eq!(
+                libraries,
+                if matches!(direction, 2 | 3) {
+                    vec!["AWeaponL/09", "CArmour/12", "AWeaponR/09"]
+                } else if matches!(direction, 7 | 8) {
+                    vec!["AWeaponR/09", "CArmour/12", "AWeaponL/09"]
+                } else {
+                    vec!["AWeaponL/09", "AWeaponR/09", "CArmour/12"]
+                }
+            );
         }
     }
 
     #[test]
     fn archer_armour_transform_and_mount_use_native_frames() {
-        assert_eq!(preview_layers(input(1, 209, 6, 150))[0].library, "CArmour/00");
-        assert_eq!(preview_layers(input(2, 7, 1, 150)), vec![layer("CArmour/07".into(), 33)]);
+        assert_eq!(
+            preview_layers(input(1, 209, 6, 150))[0].library,
+            "CArmour/00"
+        );
+        assert_eq!(
+            preview_layers(input(2, 7, 1, 150)),
+            vec![layer("CArmour/07".into(), 33)]
+        );
         let mut armour = input(2, 7, 1, 150);
         armour.required_gender = 0;
         assert_eq!(preview_layers(armour)[0].frame, 841);
-        assert_eq!(preview_layers(input(37, 4, 8, 900))[0], layer("Transform/04".into(), 74));
-        assert_eq!(preview_layers(input(19, 3, 1, 150)), vec![
-            layer("Mount/03".into(), 33), layer("CArmour/00".into(), 449)]);
+        assert_eq!(
+            preview_layers(input(37, 4, 8, 900))[0],
+            layer("Transform/04".into(), 74)
+        );
+        assert_eq!(
+            preview_layers(input(19, 3, 1, 150)),
+            vec![
+                layer("Mount/03".into(), 33),
+                layer("CArmour/00".into(), 449)
+            ]
+        );
         let mut mount = input(19, 3, 8, 1200);
         mount.female = true;
         assert_eq!(preview_layers(mount)[1].frame, 1312);
@@ -149,6 +191,8 @@ mod tests {
         assert!(preview_layers(invalid_armour).is_empty());
         assert_eq!(preview_turn(8, true), 1);
         assert_eq!(preview_turn(1, false), 8);
-        for d in 1..=8 { assert_eq!(preview_turn(preview_turn(d, true), false), d); }
+        for d in 1..=8 {
+            assert_eq!(preview_turn(preview_turn(d, true), false), d);
+        }
     }
 }

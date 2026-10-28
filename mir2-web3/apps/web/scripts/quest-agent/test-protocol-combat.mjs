@@ -3625,6 +3625,60 @@ test("interrupts spawn navigation for a proven aggressor, clears it within budge
   assert.equal(searchVisits, 2);
 });
 
+test("a focused Skeleton spawn search retreats from BoneFighter without spending its attack budget", async () => {
+  const quest = { questId: 2110010, stage: "InProgress", objectives: [objective("Kill Skeleton", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(61, "BoneFighter", 100, 100, { hp: 110, maxHp: 110, disposition: "hostile" }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    assert.equal(command.objectId, 60, "the non-objective aggressor must not consume attacks");
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { dead: true, hp: 0 });
+      state.questLog[0].objectives[0] = objective("Kill Skeleton", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 60 });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let searches = 0;
+  let recoveries = 0;
+  const navigate = async (target, range, stopWhen, options = {}) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId != null) {
+      Object.assign(actor, { x: target.x - range, y: target.y });
+      return { reached: true };
+    }
+    if (options.maxSuccessfulSteps) {
+      Object.assign(actor, { x: 40, y: 40 });
+      return { reached: true, successfulSteps: 8 };
+    }
+    searches += 1;
+    Object.assign(actor, { x: target.x, y: target.y });
+    if (searches === 1) {
+      Object.assign(client.snapshot.entities.find(entry => entry.objectId === 61), { x: target.x, y: target.y - 1 });
+      client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+      assert.equal(stopWhen(), true);
+    } else {
+      client.snapshot.entities.find(entry => entry.objectId === 61).x = 100;
+      client.snapshot.entities.push(monster(60, "Skeleton", target.x, target.y, { disposition: "hostile" }));
+    }
+    return { reached: false };
+  };
+  const result = await completeQuestObjectives(client, {
+    questId: 2110010,
+    objectives: { kill: [{ monsterName: "Skeleton", spawnCandidates: [spawn("Skeleton", 30, 30)] }], item: [] },
+  }, navigate, {
+    ...settings, focusTargetThroughAggressors: true, maxEngagements: 4,
+    recoverAfterUnsafeRetreat: async () => { recoveries += 1; },
+  });
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(recoveries, 1);
+  assert.equal(searches, 2);
+  assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).hp, 110);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
+  assert.ok(diagnostics.some(entry => entry.type === "focusedSpawnSearchRetreat" && entry.objectId === 61));
+});
+
 test("a failed spawn route sustains the player and interrupts immediately for a proven aggressor", async () => {
   const quest = { questId: 62, stage: "InProgress", objectives: [objective("Kill KekTal", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [
@@ -5181,6 +5235,67 @@ test('a blocked cave retreat uses a held escape before breakout combat above the
   assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'noAuthoritativeEscapeStep'));
   assert.deepEqual(client.sent.filter(command => command.type === 'attack' || command.type === 'magic'), [],
     'an optional public escape prevents an unsafe breakout attack');
+});
+
+test('a strict no-plan Wizard kite reaches held-scroll recovery without falling back to offense', async () => {
+  const quest = { questId: 2110020, stage: 'InProgress', objectives: [objective('Kill WoomaSoldier', 1, 3)] };
+  const attackers = [
+    monster(61, 'WoomaSoldier', 19, 20, { disposition: 'hostile' }),
+    monster(62, 'WoomaSoldier', 20, 19, { disposition: 'hostile' }),
+    monster(63, 'WoomaSoldier', 21, 20, { disposition: 'hostile' }),
+  ];
+  const target = monster(60, 'WoomaSoldier', 27, 20, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [...attackers, target]));
+  Object.assign(client.snapshot, { playerHp: 35, playerMaxHp: 40, playerClass: 'Wizard',
+    inventory: [{ uniqueId: 8, itemIndex: 719, count: 1 }] });
+  Object.assign(client.snapshot.entities[0], { x: 20, y: 20, hp: 35, maxHp: 40, class: 'Wizard' });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const navigate = async () => ({ reached: false, successfulSteps: 0 });
+  const blocked = new Uint8Array(50 * 50).fill(1);
+  blocked[20 * 50 + 20] = 0;
+  let baseActions = 0;
+  const action = createWizardKitingAction(async () => {
+    baseActions += 1;
+    return { kind: 'magic', targetId: target.objectId };
+  }, navigate, {
+    approachRange: () => 9,
+    fightWhenBlocked: false,
+    // Synthetic collision control: no legal retreat tile exists.
+    loadCollisionMap: async () => ({ mapFileName: '0', width: 50, height: 50, blocked }),
+  });
+  let escapes = 0;
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 2110020,
+    objectives: { kill: [{ monsterName: 'WoomaSoldier', spawnCandidates: [spawn('WoomaSoldier', 27, 20)] }], item: [] },
+  }, navigate, {
+    ...settings,
+    approachRange: () => 9,
+    action,
+    maxEngagements: 48,
+    maxAttackAttempts: 20,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 0,
+    unsafeRetreatMaxSteps: 1,
+    emergencyEscapeHpRatio: 0.65,
+    escapeWhenRetreatBlocked: true,
+    emergencyEscape: async owner => {
+      escapes += 1;
+      assert.equal(owner.snapshot.inventory[0].count, 1);
+      owner.send({ type: 'useItem', uniqueId: 8 });
+      owner.receive('UseItem', state => { state.inventory[0].count = 0; }, { uniqueId: 8, success: true });
+      owner.receive('MapInformation', state => {
+        Object.assign(state.entities[0], { x: 50, y: 50 });
+        state.entities = [state.entities[0]];
+      }, { fileName: '0' });
+      return true;
+    },
+    recoverAfterUnsafeRetreat: async () => { throw new Error('strict kite escaped through held scroll'); },
+  }), /strict kite escaped through held scroll/);
+  assert.equal(escapes, 1);
+  assert.equal(baseActions, 0);
+  assert.deepEqual(client.sent, [{ type: 'useItem', uniqueId: 8 }]);
+  assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'noAuthoritativeEscapeStep'));
 });
 
 test('V2 full-spread search ignores a stale ordinary-monster history hint before the nearest field', async () => {

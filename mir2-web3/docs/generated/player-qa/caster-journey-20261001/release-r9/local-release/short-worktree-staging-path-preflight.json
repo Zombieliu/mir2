@@ -1,0 +1,21 @@
+{
+  "referenceManifest": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\dist\\r8\\PACKAGE-MANIFEST.json",
+  "sourceImmutable": true,
+  "stagePrefix": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-00000000000000000000000000000000",
+  "maxStagingPathCharacters": 240,
+  "pathsOver259": [],
+  "longestPaths": [
+    [
+      240,
+      "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-00000000000000000000000000000000\\mir2-assets\\generated\\native-map-keyed\\manifest.00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad.json"
+    ],
+    [
+      236,
+      "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-00000000000000000000000000000000\\mir2-assets\\generated\\native-map-keyed\\pages\\fff949d102cb099e8a1f9780ec85f3f70148e2f5984b28b83f9d8904e1f6fdec.png"
+    ],
+    [
+      236,
+      "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-00000000000000000000000000000000\\mir2-assets\\generated\\native-map-keyed\\pages\\fff685f5dae9eeb84857ca37116dd6f126da9267a328252d230490af82cd1f8b.png"
+    ]
+  ]
+}

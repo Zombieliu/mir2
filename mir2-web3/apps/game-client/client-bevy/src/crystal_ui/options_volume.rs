@@ -112,7 +112,10 @@ pub(super) fn process(
     mut effects: Option<ResMut<UiEffectQueue>>,
 ) {
     let revision = reset.as_deref().map_or(0, |value| value.0);
-    if drag.reset_revision.is_some_and(|previous| previous != revision) {
+    if drag
+        .reset_revision
+        .is_some_and(|previous| previous != revision)
+    {
         drag.cancel();
     }
     drag.reset_revision = Some(revision);
@@ -150,12 +153,21 @@ pub(super) fn process(
         && !state.menu_pointer_consumed
     {
         if let Some(cursor) = press_cursor {
-            let local = cursor - Vec2::new(CRYSTAL_OPTIONS_PANEL_RECT.left, CRYSTAL_OPTIONS_PANEL_RECT.top);
+            let local = cursor
+                - Vec2::new(
+                    CRYSTAL_OPTIONS_PANEL_RECT.left,
+                    CRYSTAL_OPTIONS_PANEL_RECT.top,
+                );
             drag.captured = channel_at(local);
             if let Some(channel) = drag.captured {
                 let mut fallback = UiEffectQueue::default();
                 let effects = effects.as_deref_mut().unwrap_or(&mut fallback);
-                apply_volume(&mut state, effects, channel, volume_from_x(channel, local.x));
+                apply_volume(
+                    &mut state,
+                    effects,
+                    channel,
+                    volume_from_x(channel, local.x),
+                );
                 state.menu_pointer_consumed = true;
             }
         }
@@ -167,10 +179,18 @@ pub(super) fn process(
         if mouse.pressed(MouseButton::Left) {
             if let Some(cursor) = current_cursor {
                 let local = cursor
-                    - Vec2::new(CRYSTAL_OPTIONS_PANEL_RECT.left, CRYSTAL_OPTIONS_PANEL_RECT.top);
+                    - Vec2::new(
+                        CRYSTAL_OPTIONS_PANEL_RECT.left,
+                        CRYSTAL_OPTIONS_PANEL_RECT.top,
+                    );
                 let mut fallback = UiEffectQueue::default();
                 let effects = effects.as_deref_mut().unwrap_or(&mut fallback);
-                apply_volume(&mut state, effects, channel, volume_from_x(channel, local.x));
+                apply_volume(
+                    &mut state,
+                    effects,
+                    channel,
+                    volume_from_x(channel, local.x),
+                );
             }
             state.menu_pointer_consumed = true;
         }

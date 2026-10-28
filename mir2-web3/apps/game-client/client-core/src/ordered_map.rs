@@ -21,18 +21,24 @@ impl<K, V> Default for OrderedMap<K, V> {
 
 impl<K, V> OrderedMap<K, V> {
     pub const fn new() -> Self {
-        Self { entries: Vec::new() }
+        Self {
+            entries: Vec::new(),
+        }
     }
 
     pub fn keys(&self) -> impl DoubleEndedIterator<Item = &K> + ExactSizeIterator + FusedIterator {
         self.entries.iter().map(|(key, _)| key)
     }
 
-    pub fn iter(&self) -> impl DoubleEndedIterator<Item = (&K, &V)> + ExactSizeIterator + FusedIterator {
+    pub fn iter(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = (&K, &V)> + ExactSizeIterator + FusedIterator {
         self.entries.iter().map(|(key, value)| (key, value))
     }
 
-    pub fn values_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut V> + ExactSizeIterator + FusedIterator {
+    pub fn values_mut(
+        &mut self,
+    ) -> impl DoubleEndedIterator<Item = &mut V> + ExactSizeIterator + FusedIterator {
         self.entries.iter_mut().map(|(_, value)| value)
     }
 
@@ -43,6 +49,11 @@ impl<K, V> OrderedMap<K, V> {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+
+    /// Remove every entry while retaining the allocated storage for reuse.
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
 }
 
 impl<K: Ord, V> OrderedMap<K, V> {
@@ -51,7 +62,8 @@ impl<K: Ord, V> OrderedMap<K, V> {
         K: Borrow<Q>,
         Q: Ord + ?Sized,
     {
-        self.entries.binary_search_by(|(stored, _)| stored.borrow().cmp(key))
+        self.entries
+            .binary_search_by(|(stored, _)| stored.borrow().cmp(key))
     }
 
     pub fn insert(&mut self, key: K, value: V) -> Option<V> {
@@ -94,7 +106,9 @@ impl<K: Ord, V> OrderedMap<K, V> {
         K: Borrow<Q>,
         Q: Ord + ?Sized,
     {
-        self.search(key).ok().map(|index| self.entries.remove(index).1)
+        self.search(key)
+            .ok()
+            .map(|index| self.entries.remove(index).1)
     }
 }
 
@@ -117,7 +131,9 @@ impl<K> Default for OrderedSet<K> {
 
 impl<K> OrderedSet<K> {
     pub const fn new() -> Self {
-        Self { entries: OrderedMap::new() }
+        Self {
+            entries: OrderedMap::new(),
+        }
     }
 
     pub fn iter(&self) -> impl DoubleEndedIterator<Item = &K> + ExactSizeIterator + FusedIterator {
@@ -130,6 +146,11 @@ impl<K> OrderedSet<K> {
 
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
+    }
+
+    /// Remove every key while retaining the allocated storage for reuse.
+    pub fn clear(&mut self) {
+        self.entries.clear();
     }
 }
 
@@ -144,6 +165,14 @@ impl<K: Ord> OrderedSet<K> {
         Q: Ord + ?Sized,
     {
         self.entries.contains_key(key)
+    }
+
+    pub fn remove<Q>(&mut self, key: &Q) -> bool
+    where
+        K: Borrow<Q>,
+        Q: Ord + ?Sized,
+    {
+        self.entries.remove(key).is_some()
     }
 }
 
@@ -160,11 +189,15 @@ mod tests {
     use std::collections::{BTreeMap, BTreeSet};
 
     fn map_rows(map: &OrderedMap<String, i32>) -> Vec<(&str, i32)> {
-        map.iter().map(|(key, value)| (key.as_str(), *value)).collect()
+        map.iter()
+            .map(|(key, value)| (key.as_str(), *value))
+            .collect()
     }
 
     fn tree_rows(map: &BTreeMap<String, i32>) -> Vec<(&str, i32)> {
-        map.iter().map(|(key, value)| (key.as_str(), *value)).collect()
+        map.iter()
+            .map(|(key, value)| (key.as_str(), *value))
+            .collect()
     }
 
     #[test]
@@ -172,15 +205,38 @@ mod tests {
         let mut map = OrderedMap::new();
         let mut tree = BTreeMap::new();
         assert!(map.is_empty());
-        for (key, value) in [("z", 1), ("a", 2), ("中", 3), ("β", 4),
-            ("A", 5), ("10", 6), ("2", 7), ("a", 8)] {
-            assert_eq!(map.insert(key.to_owned(), value), tree.insert(key.to_owned(), value));
+        for (key, value) in [
+            ("z", 1),
+            ("a", 2),
+            ("中", 3),
+            ("β", 4),
+            ("A", 5),
+            ("10", 6),
+            ("2", 7),
+            ("a", 8),
+        ] {
+            assert_eq!(
+                map.insert(key.to_owned(), value),
+                tree.insert(key.to_owned(), value)
+            );
             assert_eq!(map_rows(&map), tree_rows(&tree));
             assert_eq!(map.len(), tree.len());
             assert_eq!(map.is_empty(), tree.is_empty());
         }
-        assert_eq!(map.keys().map(String::as_str).collect::<Vec<_>>(), tree.keys().map(String::as_str).collect::<Vec<_>>());
-        assert_eq!(map.iter().rev().map(|(k, v)| (k.as_str(), *v)).collect::<Vec<_>>(), tree.iter().rev().map(|(k, v)| (k.as_str(), *v)).collect::<Vec<_>>());
+        assert_eq!(
+            map.keys().map(String::as_str).collect::<Vec<_>>(),
+            tree.keys().map(String::as_str).collect::<Vec<_>>()
+        );
+        assert_eq!(
+            map.iter()
+                .rev()
+                .map(|(k, v)| (k.as_str(), *v))
+                .collect::<Vec<_>>(),
+            tree.iter()
+                .rev()
+                .map(|(k, v)| (k.as_str(), *v))
+                .collect::<Vec<_>>()
+        );
         assert_eq!(map.clone(), map);
         assert_eq!(format!("{map:?}"), format!("{tree:?}"));
     }
@@ -196,28 +252,63 @@ mod tests {
         for key in ["alpha", "bravo", "charlie", "delta", "absent", ""] {
             assert_eq!(map.get(key), tree.get(key));
             assert_eq!(map.contains_key(key), tree.contains_key(key));
-            assert_eq!(map.get_mut(key).map(|v| { *v += 10; *v }), tree.get_mut(key).map(|v| { *v += 10; *v }));
+            assert_eq!(
+                map.get_mut(key).map(|v| {
+                    *v += 10;
+                    *v
+                }),
+                tree.get_mut(key).map(|v| {
+                    *v += 10;
+                    *v
+                })
+            );
         }
-        for (index, value) in map.values_mut().enumerate() { *value += index as i32; }
-        for (index, value) in tree.values_mut().enumerate() { *value += index as i32; }
+        for (index, value) in map.values_mut().enumerate() {
+            *value += index as i32;
+        }
+        for (index, value) in tree.values_mut().enumerate() {
+            *value += index as i32;
+        }
         assert_eq!(map_rows(&map), tree_rows(&tree));
         for key in ["bravo", "alpha", "delta", "missing", "charlie"] {
             assert_eq!(map.remove(key), tree.remove(key));
             assert_eq!(map_rows(&map), tree_rows(&tree));
         }
         assert!(map.is_empty());
-        assert_eq!(map.insert("bravo".to_owned(), 99), tree.insert("bravo".to_owned(), 99));
+        assert_eq!(
+            map.insert("bravo".to_owned(), 99),
+            tree.insert("bravo".to_owned(), 99)
+        );
         assert_eq!(map.get(&"bravo".to_owned()), tree.get(&"bravo".to_owned()));
         assert_eq!(map_rows(&map), tree_rows(&tree));
     }
 
     #[derive(Clone, Debug)]
-    struct IdentityKey { text: &'static str, identity: u32 }
-    impl PartialEq for IdentityKey { fn eq(&self, other: &Self) -> bool { self.text == other.text } }
+    struct IdentityKey {
+        text: &'static str,
+        identity: u32,
+    }
+    impl PartialEq for IdentityKey {
+        fn eq(&self, other: &Self) -> bool {
+            self.text == other.text
+        }
+    }
     impl Eq for IdentityKey {}
-    impl PartialOrd for IdentityKey { fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) } }
-    impl Ord for IdentityKey { fn cmp(&self, other: &Self) -> Ordering { self.text.cmp(other.text) } }
-    impl Borrow<str> for IdentityKey { fn borrow(&self) -> &str { self.text } }
+    impl PartialOrd for IdentityKey {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    impl Ord for IdentityKey {
+        fn cmp(&self, other: &Self) -> Ordering {
+            self.text.cmp(other.text)
+        }
+    }
+    impl Borrow<str> for IdentityKey {
+        fn borrow(&self) -> &str {
+            self.text
+        }
+    }
     #[derive(Debug, PartialEq, Eq)]
     struct NonDefaultValue(u32);
 
@@ -226,15 +317,30 @@ mod tests {
         let mut map: OrderedMap<IdentityKey, NonDefaultValue> = OrderedMap::default();
         let mut tree = BTreeMap::new();
         for (identity, value) in [(11, 1), (22, 2), (33, 3)] {
-            let key = IdentityKey { text: "same", identity };
-            assert_eq!(map.insert(key.clone(), NonDefaultValue(value)), tree.insert(key, NonDefaultValue(value)));
-            assert_eq!(map.keys().next().unwrap().identity, tree.keys().next().unwrap().identity);
+            let key = IdentityKey {
+                text: "same",
+                identity,
+            };
+            assert_eq!(
+                map.insert(key.clone(), NonDefaultValue(value)),
+                tree.insert(key, NonDefaultValue(value))
+            );
+            assert_eq!(
+                map.keys().next().unwrap().identity,
+                tree.keys().next().unwrap().identity
+            );
             assert_eq!(map.keys().next().unwrap().identity, 11);
             assert_eq!(map.get("same"), tree.get("same"));
         }
         assert_eq!(map.remove("same"), tree.remove("same"));
-        let fresh = IdentityKey { text: "same", identity: 44 };
-        assert_eq!(map.insert(fresh.clone(), NonDefaultValue(4)), tree.insert(fresh, NonDefaultValue(4)));
+        let fresh = IdentityKey {
+            text: "same",
+            identity: 44,
+        };
+        assert_eq!(
+            map.insert(fresh.clone(), NonDefaultValue(4)),
+            tree.insert(fresh, NonDefaultValue(4))
+        );
         assert_eq!(map.keys().next().unwrap().identity, 44);
         assert_eq!(format!("{map:?}"), format!("{tree:?}"));
     }
@@ -247,12 +353,49 @@ mod tests {
         for (text, identity) in [("z", 1), ("a", 2), ("m", 3), ("a", 4), ("z", 5)] {
             let key = IdentityKey { text, identity };
             assert_eq!(set.insert(key.clone()), tree.insert(key));
-            assert_eq!(set.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>(), tree.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>());
+            assert_eq!(
+                set.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>(),
+                tree.iter()
+                    .map(|k| (k.text, k.identity))
+                    .collect::<Vec<_>>()
+            );
             assert_eq!(set.len(), tree.len());
             assert_eq!(set.is_empty(), tree.is_empty());
         }
-        for text in ["a", "m", "z", "missing", ""] { assert_eq!(set.contains(text), tree.contains(text)); }
-        assert_eq!(set.iter().rev().map(|k| k.text).collect::<Vec<_>>(), tree.iter().rev().map(|k| k.text).collect::<Vec<_>>());
+        for text in ["a", "m", "z", "missing", ""] {
+            assert_eq!(set.contains(text), tree.contains(text));
+        }
+        assert_eq!(
+            set.iter().rev().map(|k| k.text).collect::<Vec<_>>(),
+            tree.iter().rev().map(|k| k.text).collect::<Vec<_>>()
+        );
         assert_eq!(format!("{set:?}"), format!("{tree:?}"));
+        for text in ["m", "absent", "a", "m"] {
+            assert_eq!(set.remove(text), tree.remove(text));
+            assert_eq!(
+                set.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>(),
+                tree.iter()
+                    .map(|k| (k.text, k.identity))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let capacity = set.entries.entries.capacity();
+        assert!(!set.is_empty());
+        set.clear();
+        tree.clear();
+        assert!(set.is_empty());
+        assert_eq!(set.entries.entries.capacity(), capacity);
+        assert_eq!(set.remove("z"), tree.remove("z"));
+        let key = IdentityKey {
+            text: "z",
+            identity: 9,
+        };
+        assert_eq!(set.insert(key.clone()), tree.insert(key));
+        assert_eq!(
+            set.iter().map(|k| (k.text, k.identity)).collect::<Vec<_>>(),
+            tree.iter()
+                .map(|k| (k.text, k.identity))
+                .collect::<Vec<_>>()
+        );
     }
 }

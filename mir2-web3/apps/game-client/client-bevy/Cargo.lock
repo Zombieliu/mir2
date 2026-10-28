@@ -2784,6 +2784,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "chrono",
+ "fontique",
  "mir2-client-core",
  "mir2-game-data",
  "mir2-protocol",

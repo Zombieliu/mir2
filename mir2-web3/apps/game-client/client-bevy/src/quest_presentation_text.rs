@@ -9,7 +9,9 @@ include!("../../../../packages/game-data/data/generated/quest_presentation_text.
 pub struct QuestPresentationLocale(pub LanguageCode);
 
 impl Default for QuestPresentationLocale {
-    fn default() -> Self { Self(LanguageCode::ChineseSimplified) }
+    fn default() -> Self {
+        Self(LanguageCode::ChineseSimplified)
+    }
 }
 
 impl Serialize for QuestPresentationLocale {
@@ -26,7 +28,11 @@ impl<'de> Deserialize<'de> for QuestPresentationLocale {
             "zh-CN" => LanguageCode::ChineseSimplified,
             "es" => LanguageCode::Spanish,
             "pt-BR" => LanguageCode::Portuguese,
-            _ => return Err(serde::de::Error::custom("invalid Quest presentation language")),
+            _ => {
+                return Err(serde::de::Error::custom(
+                    "invalid Quest presentation language",
+                ))
+            }
         };
         Ok(Self(language))
     }
@@ -34,41 +40,104 @@ impl<'de> Deserialize<'de> for QuestPresentationLocale {
 
 /// Immutable context passed through the selected render/build subtree.
 #[derive(Debug, Clone, Copy, Default)]
-pub struct QuestRenderText { pub locale: QuestPresentationLocale }
+pub struct QuestRenderText {
+    pub locale: QuestPresentationLocale,
+}
 
 impl QuestRenderText {
-    pub fn is_chinese(self) -> bool { self.locale.0 == LanguageCode::ChineseSimplified }
+    pub fn is_chinese(self) -> bool {
+        if crate::native_i18n::active() {
+            return false;
+        }
+        self.locale.0 == LanguageCode::ChineseSimplified
+    }
     pub fn chrome<'a>(self, key: &str, fallback: &'a str) -> &'a str {
+        if crate::native_i18n::active() {
+            return crate::native_i18n::borrowed_key(key, fallback);
+        }
         let index = match self.locale.0 {
-            LanguageCode::English => 0, LanguageCode::Spanish => 1,
-            LanguageCode::Portuguese => 2, LanguageCode::ChineseSimplified => 3,
+            LanguageCode::English => 0,
+            LanguageCode::Spanish => 1,
+            LanguageCode::Portuguese => 2,
+            LanguageCode::ChineseSimplified => 3,
         };
-        QUEST_PRESENTATION_TEXT.iter().find(|(candidate, _)| *candidate == key)
-            .map(|(_, values)| if values[index].is_empty() { values[0] } else { values[index] })
-            .filter(|value| !value.is_empty()).unwrap_or(fallback)
+        QUEST_PRESENTATION_TEXT
+            .iter()
+            .find(|(candidate, _)| *candidate == key)
+            .map(|(_, values)| {
+                if values[index].is_empty() {
+                    values[0]
+                } else {
+                    values[index]
+                }
+            })
+            .filter(|value| !value.is_empty())
+            .unwrap_or(fallback)
     }
     pub fn title(self, quest_index: i32, value: &str) -> String {
-        if self.is_chinese() { crate::player_text::quest_title(quest_index, value) } else { value.to_owned() }
+        if crate::native_i18n::active() {
+            return crate::player_text::quest_title(quest_index, value);
+        }
+        if self.is_chinese() {
+            crate::player_text::quest_title(quest_index, value)
+        } else {
+            value.to_owned()
+        }
     }
     pub fn description(self, quest_index: i32, value: &str) -> String {
-        if self.is_chinese() { crate::player_text::quest_description(quest_index, value) } else { value.to_owned() }
+        if crate::native_i18n::active() {
+            return crate::player_text::quest_description(quest_index, value);
+        }
+        if self.is_chinese() {
+            crate::player_text::quest_description(quest_index, value)
+        } else {
+            value.to_owned()
+        }
     }
     pub fn objective(self, value: &str) -> String {
-        if self.is_chinese() { crate::player_text::quest_objective(value) } else { value.to_owned() }
+        if crate::native_i18n::active() {
+            return crate::player_text::quest_objective(value);
+        }
+        if self.is_chinese() {
+            crate::player_text::quest_objective(value)
+        } else {
+            value.to_owned()
+        }
     }
     pub fn reward_name(self, value: &str) -> String {
-        if self.is_chinese() { crate::player_text::name(value) } else { value.to_owned() }
+        if crate::native_i18n::active() {
+            return crate::player_text::name(value);
+        }
+        if self.is_chinese() {
+            crate::player_text::name(value)
+        } else {
+            value.to_owned()
+        }
     }
     pub fn body(self, value: &str) -> String {
-        if self.is_chinese() { crate::player_text::text(value) } else { value.to_owned() }
+        if crate::native_i18n::active() {
+            return crate::player_text::text(value);
+        }
+        if self.is_chinese() {
+            crate::player_text::text(value)
+        } else {
+            value.to_owned()
+        }
     }
     pub fn format(self, key: &str, fallback: &str, value: impl std::fmt::Display) -> String {
-        self.chrome(key, fallback).replace("{0}", &value.to_string())
+        self.chrome(key, fallback)
+            .replace("{0}", &value.to_string())
     }
     /// Unkeyed authored client copy remains outside this slice.
-    pub fn legacy_copy(self, value: &str) -> String { crate::player_text::text(value) }
+    pub fn legacy_copy(self, value: &str) -> String {
+        crate::player_text::text(value)
+    }
     pub fn track(self, tracked: bool) -> String {
         let label = self.chrome("ui.questTrack", "Track");
-        if tracked { format!("✓ {label}") } else { label.to_owned() }
+        if tracked {
+            format!("✓ {label}")
+        } else {
+            label.to_owned()
+        }
     }
 }

@@ -268,9 +268,7 @@ pub(in crate::runtime) fn enabled(world: &World) -> bool {
 /// but quest 124 is mandatory in the one-day newcomer route. Keep the original
 /// schedule in the Crystal profile and relax only this NPC's time gate while
 /// the explicit newcomer profile is active.
-pub(in crate::runtime) fn keeps_npc_available_outside_time_window(
-    object_id: Option<u32>,
-) -> bool {
+pub(in crate::runtime) fn keeps_npc_available_outside_time_window(object_id: Option<u32>) -> bool {
     object_id == Some(1_358)
 }
 

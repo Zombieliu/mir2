@@ -16,6 +16,7 @@ fn path() -> PathBuf {
 pub(in crate::config) fn fixture_guild(store: &AccountStore) -> SharedGuildRecord {
     let character = &store.accounts["demo"].characters[0];
     SharedGuildRecord {
+        active_wars: Default::default(),
         id: "123456789abcdef0123456789abcdef0".into(),
         name: "SchemaQA".into(),
         revision: 1,
@@ -28,7 +29,8 @@ pub(in crate::config) fn fixture_guild(store: &AccountStore) -> SharedGuildRecor
             name: "Leader".into(),
             options: 255,
         }],
-        members: vec![SharedGuildMember { membership_epoch: 0,
+        members: vec![SharedGuildMember {
+            membership_epoch: 0,
             identity: Stage5FriendIdentity {
                 account_id: "demo".into(),
                 character_index: character.index,
@@ -40,7 +42,8 @@ pub(in crate::config) fn fixture_guild(store: &AccountStore) -> SharedGuildRecor
         storage: BTreeMap::new(),
         buffs: BTreeMap::new(),
         last_buff_tick_ms: 0,
-        experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+        experience_receipts: BTreeSet::new(),
+        experience_receipt_payloads: Default::default(),
     }
 }
 #[test]

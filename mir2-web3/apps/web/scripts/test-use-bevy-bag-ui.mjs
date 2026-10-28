@@ -55,10 +55,14 @@ test("actual hook StrictMode cleanup/restart retires sink, monotonic owner, fram
     const old = { ...snapshot, intentSequence: 1, type: "close" };
     const revision = input.ownerRevision;
     cleanup();
-    assert.equal(state.active, false); assert.equal(timers.size, 0); assert.equal(listeners.size, 0);
+    // Retired hook callbacks cannot write React/owner state. Observe physical
+    // withdrawal now, and the fresh effect's state/owner below after restart.
+    assert.equal(snapshot.inputEnabled, false); assert.equal(sink, null);
+    assert.equal(timers.size, 0); assert.equal(listeners.size, 0);
     assert.equal(JSON.parse(oldSink(JSON.stringify(old))).accepted, false);
-    assert.ok(input.ownerRevision > revision);
     cleanup = effect();
+    assert.equal(state.active, false); assert.ok(input.ownerRevision > revision);
+    assert.equal(JSON.parse(oldSink(JSON.stringify(old))).accepted, false, "restart cannot revive the retired sink");
     assert.equal(timers.size, 1); assert.equal(listeners.size, 2);
     assert.notEqual(snapshot.runGeneration, old.runGeneration);
     echo(); tick(); echo(); tick(); assert.equal(state.active, true);

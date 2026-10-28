@@ -113,6 +113,9 @@ impl<'de> Deserialize<'de> for SkillModel {
                 cooldown_remaining_ticks: explicit
                     .map(|binding| binding.cooldown_remaining_ticks)
                     .unwrap_or(raw_skill.cooldown_remaining_ticks),
+                cooldown_remaining_ms: explicit
+                    .and_then(|binding| binding.cooldown_remaining_ms)
+                    .or(raw_skill.cooldown_remaining_ms),
                 mp_cost: explicit
                     .and_then(|binding| binding.mp_cost)
                     .or(raw_skill.mp_cost),
@@ -167,6 +170,11 @@ pub struct SkillBinding {
     pub offensive: Option<bool>,
     #[serde(default)]
     pub cooldown_remaining_ticks: u32,
+    /// Exact shared-Zone readiness at the authoritative snapshot. Legacy
+    /// producers keep the rounded tick value above; native UI ages either
+    /// sample on its monotonic clock rather than waiting for another snapshot.
+    #[serde(default, alias = "cooldown_remaining_ms")]
+    pub cooldown_remaining_ms: Option<u32>,
     #[serde(default)]
     pub cast_sequence: u64,
     #[serde(default)]
@@ -195,6 +203,7 @@ impl Default for SkillBinding {
             can_use: None,
             offensive: None,
             cooldown_remaining_ticks: 0,
+            cooldown_remaining_ms: None,
             cast_sequence: 0,
             mp_cost: None,
             delay_ms: None,
@@ -266,6 +275,8 @@ struct RawSkillEntry {
     offensive: Option<bool>,
     #[serde(default, alias = "cooldown_remaining_ticks")]
     cooldown_remaining_ticks: u32,
+    #[serde(default, alias = "cooldown_remaining_ms")]
+    cooldown_remaining_ms: Option<u32>,
     #[serde(default, alias = "cast_sequence")]
     cast_sequence: u64,
     #[serde(default, alias = "cast_time_ms")]
@@ -280,11 +291,17 @@ impl SkillModel {
         self.skills.len() == expected.skills.len()
             && self.bindings.len() == self.skills.len()
             && expected.bindings.len() == expected.skills.len()
-            && self.skills.iter().zip(&self.bindings)
+            && self
+                .skills
+                .iter()
+                .zip(&self.bindings)
                 .zip(expected.skills.iter().zip(&expected.bindings))
                 .all(|((actual, binding), (source, source_binding))| {
-                    actual.id == source.id && actual.name == source.name && actual.key == source.key
-                        && binding.skill_id == actual.id && source_binding.skill_id == source.id
+                    actual.id == source.id
+                        && actual.name == source.name
+                        && actual.key == source.key
+                        && binding.skill_id == actual.id
+                        && source_binding.skill_id == source.id
                         && binding.spell == source_binding.spell
                         && binding.icon == source_binding.icon
                         && binding.need1 == source_binding.need1
@@ -400,6 +417,26 @@ pub struct SkillEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exact_cooldown_readiness_is_additive_and_explicit_zero_is_preserved() {
+        let model: SkillModel = serde_json::from_value(serde_json::json!({
+            "skills":[
+                {"id":1,"cooldownRemainingTicks":1,"cooldownRemainingMs":299},
+                {"id":2,"cooldown_remaining_ticks":2,"cooldown_remaining_ms":0},
+                {"id":3,"cooldownRemainingTicks":3},
+                {"id":4,"cooldownRemainingMs":500}
+            ],
+            "bindings":[{"skillId":4,"cooldownRemainingMs":0}]
+        }))
+        .unwrap();
+        assert_eq!(model.binding_for(1).cooldown_remaining_ms, Some(299));
+        assert_eq!(model.binding_for(2).cooldown_remaining_ms, Some(0));
+        assert_eq!(model.binding_for(3).cooldown_remaining_ms, None);
+        assert_eq!(model.binding_for(4).cooldown_remaining_ms, Some(0));
+        assert_eq!(model.binding_for(1).cooldown_remaining_ticks, 1);
+        assert_eq!(model.binding_for(2).cooldown_remaining_ticks, 2);
+    }
 
     #[test]
     fn original_skill_experience_is_optional_and_round_trips_without_fabrication() {
@@ -755,30 +792,51 @@ mod tests {
              "need1":0,"need2":200,"need3":300,"castKind":"target","offensive":true},
             {"id":2,"name":"Healing","key":"healing","spell":"Healing","icon":1,
              "need1":100,"need2":200,"need3":300,"castKind":"target","offensive":false}
-        ]})).unwrap();
+        ]}))
+        .unwrap();
         assert!(expected.has_same_learned_descriptors(&expected));
-        for field in ["id","name","key","spell","icon","need1","need2","need3","castKind","offensive",
-            "row-order","binding-order","missing-binding","extra-binding","wrong-binding-id"] {
+        for field in [
+            "id",
+            "name",
+            "key",
+            "spell",
+            "icon",
+            "need1",
+            "need2",
+            "need3",
+            "castKind",
+            "offensive",
+            "row-order",
+            "binding-order",
+            "missing-binding",
+            "extra-binding",
+            "wrong-binding-id",
+        ] {
             let mut actual = expected.clone();
             match field {
-                "id" => actual.skills[0].id=8,
-                "name" => actual.skills[0].name="different learned name".into(),
-                "key" => actual.skills[0].key=Some("other-string-key".into()),
-                "spell" => actual.bindings[0].spell=Some("Lightning".into()),
-                "icon" => actual.bindings[0].icon=Some(9),
-                "need1" => actual.bindings[0].need1=None,
-                "need2" => actual.bindings[0].need2=Some(0),
-                "need3" => actual.bindings[0].need3=Some(0),
-                "castKind" => actual.bindings[0].cast_kind=Some("self".into()),
-                "offensive" => actual.bindings[0].offensive=Some(false),
-                "row-order" => { actual.skills.reverse();actual.bindings.reverse(); }
+                "id" => actual.skills[0].id = 8,
+                "name" => actual.skills[0].name = "different learned name".into(),
+                "key" => actual.skills[0].key = Some("other-string-key".into()),
+                "spell" => actual.bindings[0].spell = Some("Lightning".into()),
+                "icon" => actual.bindings[0].icon = Some(9),
+                "need1" => actual.bindings[0].need1 = None,
+                "need2" => actual.bindings[0].need2 = Some(0),
+                "need3" => actual.bindings[0].need3 = Some(0),
+                "castKind" => actual.bindings[0].cast_kind = Some("self".into()),
+                "offensive" => actual.bindings[0].offensive = Some(false),
+                "row-order" => {
+                    actual.skills.reverse();
+                    actual.bindings.reverse();
+                }
                 "binding-order" => actual.bindings.reverse(),
-                "missing-binding" => { actual.bindings.pop(); }
+                "missing-binding" => {
+                    actual.bindings.pop();
+                }
                 "extra-binding" => actual.bindings.push(actual.bindings[0].clone()),
-                "wrong-binding-id" => actual.bindings[0].skill_id=2,
+                "wrong-binding-id" => actual.bindings[0].skill_id = 2,
                 _ => unreachable!(),
             }
-            assert!(!actual.has_same_learned_descriptors(&expected),"{field}");
+            assert!(!actual.has_same_learned_descriptors(&expected), "{field}");
         }
     }
 
@@ -788,18 +846,31 @@ mod tests {
             {"id":1,"name":"FireBall","key":"fireball","spell":"FireBall","icon":0,
              "need1":0,"need2":200,"need3":300,"castKind":"target","offensive":true,
              "level":1,"experience":5,"mpCost":5,"canUse":true,"hotkey":1,"delayMs":1000}
-        ]})).unwrap();
-        let mut live=expected.clone();
-        live.skills[0].level=2;live.skills[0].mp_cost=7;live.skills[0].cooldown_ms=2200;
-        let binding=&mut live.bindings[0];
-        binding.experience=Some(42);binding.hotkey=Some(16);binding.mp_cost=Some(7);
-        binding.can_use=Some(false);binding.cooldown_remaining_ticks=9;binding.cast_sequence=17;
-        binding.delay_ms=Some(2200);binding.cast_time_ms=Some(101);
-        live.authority.snapshot_serial=12;
-        live.skill_key_ack=Some(SkillKeyAck{request_id:73,spell:"FireBall".into(),key:16,old_key:1,accepted:true});
+        ]}))
+        .unwrap();
+        let mut live = expected.clone();
+        live.skills[0].level = 2;
+        live.skills[0].mp_cost = 7;
+        live.skills[0].cooldown_ms = 2200;
+        let binding = &mut live.bindings[0];
+        binding.experience = Some(42);
+        binding.hotkey = Some(16);
+        binding.mp_cost = Some(7);
+        binding.can_use = Some(false);
+        binding.cooldown_remaining_ticks = 9;
+        binding.cast_sequence = 17;
+        binding.delay_ms = Some(2200);
+        binding.cast_time_ms = Some(101);
+        live.authority.snapshot_serial = 12;
+        live.skill_key_ack = Some(SkillKeyAck {
+            request_id: 73,
+            spell: "FireBall".into(),
+            key: 16,
+            old_key: 1,
+            accepted: true,
+        });
         assert!(live.has_same_learned_descriptors(&expected));
-        assert_eq!(live.binding_for(1).hotkey,Some(16));
-        assert_eq!(live.selection_for_shortcut(16).unwrap().mp_cost,Some(7));
+        assert_eq!(live.binding_for(1).hotkey, Some(16));
+        assert_eq!(live.selection_for_shortcut(16).unwrap().mp_cost, Some(7));
     }
-
 }

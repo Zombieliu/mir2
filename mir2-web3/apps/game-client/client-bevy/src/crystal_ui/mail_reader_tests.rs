@@ -85,7 +85,9 @@ fn opens_unread_once_but_reopens_already_read_without_status_send() {
         vec![NativePlayerUiIntent::ReadMail { mail_id: 10 }]
     );
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = None;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = None;
     press_button(&mut app, OverlayButton::ReadMail(11));
     assert_eq!(
         app.world().resource::<NativePlayerUiState>().mail_reader,
@@ -100,7 +102,9 @@ fn opens_unread_once_but_reopens_already_read_without_status_send() {
         .drain_intents()
         .is_empty());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = None;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = None;
     app.world_mut().resource_mut::<MailModel>().selected_id = Some(10);
     press_button(&mut app, OverlayButton::SelectMail(10));
     assert_eq!(
@@ -125,13 +129,24 @@ fn exact_id_and_kind_refreshes_reject_stale_reader_actions() {
     };
     assert!(mail_reader_is_current(&reader, &model));
     model.mails[0] = message(20, true, true, false);
-    assert!(!mail_reader_is_current(&reader, &model), "attachment changes switch source reader kind");
+    assert!(
+        !mail_reader_is_current(&reader, &model),
+        "attachment changes switch source reader kind"
+    );
     model.mails[0] = message(21, false, true, false);
-    assert!(!mail_reader_is_current(&reader, &model), "row reordering or replacement cannot retarget ID");
+    assert!(
+        !mail_reader_is_current(&reader, &model),
+        "row reordering or replacement cannot retarget ID"
+    );
 
     let mut app = reader_test_app();
-    app.world_mut().resource_mut::<MailModel>().mails.push(message(20, false, true, false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(reader);
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(message(20, false, true, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(reader);
     app.world_mut().resource_mut::<MailModel>().mails.clear();
     press_button(&mut app, OverlayButton::MailReaderDelete);
     assert!(app
@@ -166,8 +181,13 @@ fn production_refresh_closes_removed_or_retyped_reader_before_input() {
             ..Default::default()
         })
         .add_systems(Update, sync_local_panel_models);
-    app.world_mut().resource_mut::<MailModel>().mails.push(message(25, false, true, false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(message(25, false, true, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 25,
         kind: MailReaderKind::Letter,
     });
@@ -175,7 +195,10 @@ fn production_refresh_closes_removed_or_retyped_reader_before_input() {
     app.update();
     let state = app.world().resource::<NativePlayerUiState>();
     assert!(state.mail_reader.is_none());
-    assert!(state.mail_reader_input_consumed, "refresh cancellation consumes the exposed frame");
+    assert!(
+        state.mail_reader_input_consumed,
+        "refresh cancellation consumes the exposed frame"
+    );
 }
 
 #[test]
@@ -187,18 +210,24 @@ fn reader_actions_keep_source_guards_and_status_queue_dedup() {
         message(32, true, true, false),
     ]);
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 30,
         kind: MailReaderKind::Letter,
     });
     press_button(&mut app, OverlayButton::MailReaderDelete);
-    assert!(app
-        .world_mut()
-        .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents()
-        .is_empty(), "locked source letters do not delete");
+    assert!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty(),
+        "locked source letters do not delete"
+    );
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 31,
         kind: MailReaderKind::Letter,
     });
@@ -222,14 +251,20 @@ fn reader_actions_keep_source_guards_and_status_queue_dedup() {
             .drain_intents(),
         vec![NativePlayerUiIntent::DeleteMail { mail_id: 31 }]
     );
-    assert!(app.world().resource::<NativePlayerUiState>().mail_reader.is_none());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .mail_reader
+        .is_none());
     // The production sync system clears a close-frame latch on the next UI
     // frame. Model that next frame before exercising an unrelated parcel.
     app.world_mut()
         .resource_mut::<NativePlayerUiState>()
         .mail_reader_input_consumed = false;
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 32,
         kind: MailReaderKind::Parcel,
     });
@@ -250,7 +285,12 @@ fn reply_prefills_only_authorized_sender_and_reader_close_consumes_frame() {
         message(41, false, true, false),
     ]);
     press_button(&mut app, OverlayButton::MailReply(41));
-    assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_none());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .core
+        .mail_compose
+        .is_none());
     press_button(&mut app, OverlayButton::MailReply(40));
     assert_eq!(
         app.world()
@@ -281,24 +321,36 @@ fn reply_prefills_only_authorized_sender_and_reader_close_consumes_frame() {
     app.update();
     app.world_mut().despawn(close);
     app.world_mut().despawn(covered);
-    assert!(app.world().resource::<NativePlayerUiState>().mail_reader.is_none());
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
-        .mail_reader_input_consumed);
-    assert!(app
-        .world_mut()
-        .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents()
-        .is_empty(), "reader close cannot leak to a covered list action");
+        .mail_reader
+        .is_none());
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_reader_input_consumed
+    );
+    assert!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty(),
+        "reader close cannot leak to a covered list action"
+    );
 }
 
 #[test]
 fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
     let mut app = super::tests::overlay_render_test_app();
     let parcel = message(50, true, true, false);
-    app.world_mut().resource_mut::<MailModel>().mails.push(parcel.clone());
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(parcel.clone());
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 50,
         kind: MailReaderKind::Parcel,
     });
@@ -315,12 +367,21 @@ fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
     assert_eq!(mail_reader_text(&parcel), "first\r\nsecond");
     assert!(!mail_date_label(parcel.date_sent_binary_datetime).is_empty());
     assert_eq!(parcel.items.len().min(5), 1);
-    assert_eq!(parcel.items[0].image, Some(71), "only explicit attachment images are rendered");
+    assert_eq!(
+        parcel.items[0].image,
+        Some(71),
+        "only explicit attachment images are rendered"
+    );
     super::primary_item_image_tests::load_original_images(world);
     let (cell, image, node) = world
         .query::<(&OriginalItemImage, &ImageNode, &Node)>()
         .iter(world)
-        .find(|(_, image, _)| image.image.path().is_some_and(|path| path.to_string() == "original-ui/Items/71.png"))
+        .find(|(_, image, _)| {
+            image
+                .image
+                .path()
+                .is_some_and(|path| path.to_string() == "original-ui/Items/71.png")
+        })
         .expect("parcel attachment uses original item layout");
     assert_eq!((cell.cell_width, cell.cell_height), (35, 31));
     let bitmap = world.resource::<Assets<Image>>().get(&image.image).unwrap();
@@ -331,10 +392,85 @@ fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
 }
 
 #[test]
+fn monthly_card_mail_renders_original_icon_hint_and_missing_date_placeholder() {
+    let mut app = super::tests::overlay_render_test_app();
+    let parcel = MailMessage {
+        id: 51,
+        sender: "Gameshop".into(),
+        body: "MonthlyCard30Days x1".into(),
+        read: true,
+        items: vec![MailAttachment {
+            key: Some("crystal-item-1000001".into()),
+            item_index: Some(1_000_001),
+            unique_id: Some(8751),
+            name: Some("MonthlyCard30Days".into()),
+            count: 1,
+            identified: true,
+            soul_bound_id: -1,
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(parcel.clone());
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
+        mail_id: 51,
+        kind: MailReaderKind::Parcel,
+    });
+    app.update();
+    let world = app.world_mut();
+    super::primary_item_image_tests::load_original_images(world);
+    let (_, image, node) = world
+        .query::<(&OriginalItemImage, &ImageNode, &Node)>()
+        .iter(world)
+        .find(|(_, image, _)| {
+            image
+                .image
+                .path()
+                .is_some_and(|path| path.to_string() == "original-ui/Items/1813.png")
+        })
+        .expect("monthly card uses its packaged original item PNG");
+    assert_eq!(node.display, Display::Flex);
+    assert!(world
+        .resource::<Assets<Image>>()
+        .get(&image.image)
+        .is_some());
+    let texts = world
+        .query::<&Text>()
+        .iter(world)
+        .map(|text| text.0.clone())
+        .collect::<Vec<_>>();
+    assert!(texts.contains(&crate::mail::mail_date_display_label(0)));
+    assert!(texts.contains(&parcel.display_body()));
+    let hints = world
+        .query::<&CrystalItemHint>()
+        .iter(world)
+        .map(|hint| hint.0.plain_text())
+        .collect::<Vec<_>>();
+    assert!(
+        hints
+            .iter()
+            .any(|text| text.contains("30") && text.contains("when used")),
+        "attachment hover explains activation on use"
+    );
+    assert!(mail_claim_enabled(&parcel));
+    assert_eq!(parcel.date_sent_binary_datetime, 0);
+}
+
+#[test]
 fn escape_closes_reader_and_session_reset_clears_it() {
     let mut app = reader_test_app();
-    app.world_mut().resource_mut::<MailModel>().mails.push(message(60, false, true, false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(message(60, false, true, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 60,
         kind: MailReaderKind::Letter,
     });
@@ -342,11 +478,16 @@ fn escape_closes_reader_and_session_reset_clears_it() {
         .resource_mut::<ButtonInput<KeyCode>>()
         .press(KeyCode::Escape);
     app.update();
-    assert!(app.world().resource::<NativePlayerUiState>().mail_reader.is_none());
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
-        .mail_reader_input_consumed);
+        .mail_reader
+        .is_none());
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_reader_input_consumed
+    );
 
     let mut state = NativePlayerUiState {
         mail_reader: Some(MailReaderUi {
@@ -364,26 +505,76 @@ fn native_shared_mail_painter_preserves_reader_controls_and_locked_parcel_visual
     for kind in [MailReaderKind::Letter, MailReaderKind::Parcel] {
         let mut app = super::tests::overlay_render_test_app();
         let parcel = kind == MailReaderKind::Parcel;
-        app.world_mut().resource_mut::<MailModel>().mails.push(message(70, parcel, true, true));
-        app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {mail_id: 70, kind});
+        app.world_mut()
+            .resource_mut::<MailModel>()
+            .mails
+            .push(message(70, parcel, true, true));
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .mail_reader = Some(MailReaderUi { mail_id: 70, kind });
         app.update();
         let world = app.world_mut();
-        let controls = world.query::<(&OverlayButton, Option<&Button>, &CrystalImageButton)>().iter(world).collect::<Vec<_>>();
-        assert_eq!(controls.iter().filter(|(action, _, _)|matches!(action, OverlayButton::MailReaderClose)).count(), 2);
+        let controls = world
+            .query::<(&OverlayButton, Option<&Button>, &CrystalImageButton)>()
+            .iter(world)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            controls
+                .iter()
+                .filter(|(action, _, _)| matches!(action, OverlayButton::MailReaderClose))
+                .count(),
+            2
+        );
         if parcel {
-            let (_, button, visual) = controls.iter().find(|(action, _, _)|matches!(action, OverlayButton::MailReaderClaim)).unwrap();
+            let (_, button, visual) = controls
+                .iter()
+                .find(|(action, _, _)| matches!(action, OverlayButton::MailReaderClaim))
+                .unwrap();
             assert!(button.is_none());
             assert!(!visual.enabled);
-            assert_eq!(visual.assets.disabled.as_deref(), Some("original-ui/Title/683.png"));
-            assert!(!controls.iter().any(|(action, _, _)|matches!(action, OverlayButton::MailReaderDelete | OverlayButton::MailReaderLock)));
+            assert_eq!(
+                visual.assets.disabled.as_deref(),
+                Some("original-ui/Title/683.png")
+            );
+            assert!(!controls.iter().any(|(action, _, _)| matches!(
+                action,
+                OverlayButton::MailReaderDelete | OverlayButton::MailReaderLock
+            )));
         } else {
-            for wanted in [OverlayButton::MailReaderDelete, OverlayButton::MailReaderLock] {
-                assert!(controls.iter().any(|(action, button, visual)|std::mem::discriminant(*action)==std::mem::discriminant(&wanted) && button.is_some() && visual.enabled));
+            for wanted in [
+                OverlayButton::MailReaderDelete,
+                OverlayButton::MailReaderLock,
+            ] {
+                assert!(controls
+                    .iter()
+                    .any(|(action, button, visual)| std::mem::discriminant(*action)
+                        == std::mem::discriminant(&wanted)
+                        && button.is_some()
+                        && visual.enabled));
             }
-            assert!(!controls.iter().any(|(action, _, _)|matches!(action, OverlayButton::MailReaderClaim)));
+            assert!(!controls
+                .iter()
+                .any(|(action, _, _)| matches!(action, OverlayButton::MailReaderClaim)));
         }
-        let frame = if parcel {"original-ui/Title/675.png"} else {"original-ui/Title/672.png"};
-        assert!(world.query::<(&ImageNode, &Node)>().iter(world).any(|(image, node)|image.image.path().is_some_and(|path|path.to_string()==frame) && node.width==Val::Px(236.) && node.height==Val::Px(if parcel {384.} else {300.})));
-        assert!(world.query::<(&Text, &TextLayout, &Node)>().iter(world).any(|(text, layout, node)|text.0=="first\r\nsecond" && layout.linebreak==LineBreak::WordOrCharacter && node.overflow==Overflow::clip()));
+        let frame = if parcel {
+            "original-ui/Title/675.png"
+        } else {
+            "original-ui/Title/672.png"
+        };
+        assert!(world
+            .query::<(&ImageNode, &Node)>()
+            .iter(world)
+            .any(|(image, node)| image
+                .image
+                .path()
+                .is_some_and(|path| path.to_string() == frame)
+                && node.width == Val::Px(236.)
+                && node.height == Val::Px(if parcel { 384. } else { 300. })));
+        assert!(world
+            .query::<(&Text, &TextLayout, &Node)>()
+            .iter(world)
+            .any(|(text, layout, node)| text.0 == "first\r\nsecond"
+                && layout.linebreak == LineBreak::WordOrCharacter
+                && node.overflow == Overflow::clip()));
     }
 }

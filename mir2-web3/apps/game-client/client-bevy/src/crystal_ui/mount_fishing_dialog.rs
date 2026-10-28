@@ -318,7 +318,9 @@ impl MountFishingUi {
         {
             return None;
         }
-        if !mir2_client_core::fishing_click::claim_fishing_cast(now, &mut self.last_cast_ms) { return None; }
+        if !mir2_client_core::fishing_click::claim_fishing_cast(now, &mut self.last_cast_ms) {
+            return None;
+        }
         Some(ClientPacket::FishingCast { cast_out: true })
     }
     pub fn observe(&mut self, self_id: u32, packet: &ServerPacket, now: u64) -> bool {
@@ -470,7 +472,9 @@ impl MountFishingUi {
     }
     pub fn release_unsent(&mut self, packet: &ClientPacket) {
         match packet {
-            ClientPacket::FishingCast { cast_out: true } => mir2_client_core::fishing_click::release_unsent_fishing_cast(&mut self.last_cast_ms),
+            ClientPacket::FishingCast { cast_out: true } => {
+                mir2_client_core::fishing_click::release_unsent_fishing_cast(&mut self.last_cast_ms)
+            }
             ClientPacket::FishingCast { cast_out: false } => self.status_open = self.fishing,
             ClientPacket::FishingChangeAutocast { auto_cast } if self.auto_cast == *auto_cast => {
                 self.auto_cast = !*auto_cast && self.can_auto_cast()

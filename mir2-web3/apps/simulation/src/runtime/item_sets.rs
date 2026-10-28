@@ -3,8 +3,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 struct StatAccumulator<'a>(&'a mut BTreeMap<u8, i32>);
 impl StatAccumulator<'_> {
-    fn get(&self, stat: u8) -> i32 { self.0.get(&stat).copied().unwrap_or_default() }
-    fn add(&mut self, stat: u8, value: i32) { self.0.insert(stat, self.get(stat).saturating_add(value)); }
+    fn get(&self, stat: u8) -> i32 {
+        self.0.get(&stat).copied().unwrap_or_default()
+    }
+    fn add(&mut self, stat: u8, value: i32) {
+        self.0.insert(stat, self.get(stat).saturating_add(value));
+    }
 }
 fn needed(set: u8) -> usize {
     match set {

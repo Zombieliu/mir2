@@ -4,11 +4,11 @@
 //! socket, request-id allocator, authoritative snapshots, and ACK correlation.
 
 use mir2_client_bevy::inventory::CrystalItemTooltipSourceModel;
-use mir2_client_bevy::portable_quest_ui::QuestUiHostContext;
 #[cfg(target_arch = "wasm32")]
 use mir2_client_bevy::portable_hud_bar_draw_plan::applied_draw_plan;
 use mir2_client_bevy::portable_hud_bar_draw_plan::HudBarDrawPlan;
 use mir2_client_bevy::portable_hud_bar_draw_plan::HudBarPlanCommit;
+use mir2_client_bevy::portable_quest_ui::QuestUiHostContext;
 #[cfg(target_arch = "wasm32")]
 use std::cell::RefCell;
 use std::collections::HashSet;
@@ -49,8 +49,7 @@ use mir2_client_bevy::portable_hp_orb_ui::{
 };
 #[cfg(target_arch = "wasm32")]
 use mir2_client_bevy::portable_quest_ui::{
-    Mir2PortableQuestUiPlugin, QuestUiFont, QuestUiTargetCamera,
-    PORTABLE_QUEST_REQUIRED_SKINS,
+    Mir2PortableQuestUiPlugin, QuestUiFont, QuestUiTargetCamera, PORTABLE_QUEST_REQUIRED_SKINS,
 };
 #[cfg(any(target_arch = "wasm32", test))]
 use mir2_client_bevy::portable_weight_bar_ui::{
@@ -67,8 +66,8 @@ use mir2_client_bevy::quest_model::{
     CompletedQuestTracker, NpcDialogLine, NpcDialogModel, NpcDialogOption, Quest, QuestDetailText,
     QuestObjective, QuestReward, QuestStatus, QuestTracker,
 };
-use mir2_client_bevy::quest_ui::QuestUiPresentation;
 use mir2_client_bevy::quest_presentation_text::QuestPresentationLocale;
+use mir2_client_bevy::quest_ui::QuestUiPresentation;
 #[cfg(target_arch = "wasm32")]
 use mir2_client_bevy::quest_ui::{NpcDialogNav, QuestUiState};
 use mir2_client_bevy::read_model::{PlayerStats, UiReadModel};
@@ -172,23 +171,38 @@ struct WebQuestSupplyPlayer {
 
 impl WebQuestWorldContext {
     fn validate(&self, generation: u64, revision: u64) -> bool {
-        self.generation == generation && self.revision == revision
+        self.generation == generation
+            && self.revision == revision
             && (1..=MAX_SAFE_JS_INTEGER).contains(&self.connection_generation)
             && (1..=MAX_SAFE_JS_INTEGER).contains(&self.session_generation)
             && (1..=MAX_SAFE_JS_INTEGER).contains(&self.scene_revision)
             && self.player_object_id > 0
-            && !self.map_file_name.is_empty() && self.map_file_name.len() <= 128
+            && !self.map_file_name.is_empty()
+            && self.map_file_name.len() <= 128
             && !self.map_file_name.contains('\0')
-            && self.map_file_name == self.map_file_name.trim()
-                .strip_suffix(".map").unwrap_or(self.map_file_name.trim()).to_lowercase()
-            && self.inventory.capacity == mir2_client_bevy::inventory::InventoryModel::canonical_capacity(self.inventory.capacity)
-            && self.inventory.gold == self.player.gold && self.player.level > 0
+            && self.map_file_name
+                == self
+                    .map_file_name
+                    .trim()
+                    .strip_suffix(".map")
+                    .unwrap_or(self.map_file_name.trim())
+                    .to_lowercase()
+            && self.inventory.capacity
+                == mir2_client_bevy::inventory::InventoryModel::canonical_capacity(
+                    self.inventory.capacity,
+                )
+            && self.inventory.gold == self.player.gold
+            && self.player.level > 0
             && !self.player.class_name.is_empty()
             && matches!(self.player.gender.as_str(), "male" | "female")
-            && self.known_skills.as_ref().is_none_or(|rows| rows.len() <= 512)
+            && self
+                .known_skills
+                .as_ref()
+                .is_none_or(|rows| rows.len() <= 512)
             && self.map_index.is_none_or(|index| index >= 0)
             && self.selected_object_id.is_none_or(|id| id > 0)
-            && self.entities.len() <= 512 && self.ground_drops.len() <= 512
+            && self.entities.len() <= 512
+            && self.ground_drops.len() <= 512
             && self.valid_world_rows()
     }
     fn valid_world_rows(&self) -> bool {
@@ -197,18 +211,35 @@ impl WebQuestWorldContext {
         let mut ids = HashSet::new();
         let mut self_count = 0;
         for row in &self.entities {
-            if row.object_id == 0 || !ids.insert(row.object_id) || !text(&row.name)
-                || row.direction.as_ref().is_some_and(|value| value.len() > 32 || value.contains('\0')) {
+            if row.object_id == 0
+                || !ids.insert(row.object_id)
+                || !text(&row.name)
+                || row
+                    .direction
+                    .as_ref()
+                    .is_some_and(|value| value.len() > 32 || value.contains('\0'))
+            {
                 return false;
             }
             if row.kind == EntityKind::SelfPlayer {
                 self_count += 1;
-                if row.object_id != self.player_object_id { return false; }
-            } else if row.object_id == self.player_object_id { return false; }
+                if row.object_id != self.player_object_id {
+                    return false;
+                }
+            } else if row.object_id == self.player_object_id {
+                return false;
+            }
         }
-        if self_count > 1 { return false; }
-        self.ground_drops.iter().all(|row| row.object_id > 0 && ids.insert(row.object_id)
-            && row.quantity > 0 && text(&row.name) && text(&row.source_monster))
+        if self_count > 1 {
+            return false;
+        }
+        self.ground_drops.iter().all(|row| {
+            row.object_id > 0
+                && ids.insert(row.object_id)
+                && row.quantity > 0
+                && text(&row.name)
+                && text(&row.source_monster)
+        })
     }
     fn into_resource(self) -> mir2_client_bevy::portable_quest_ui::QuestWorldContext {
         use mir2_client_bevy::portable_quest_ui::{QuestWorldContext, QuestWorldStamp};
@@ -223,19 +254,29 @@ impl WebQuestWorldContext {
             weights: self.player.weights,
             ..Default::default()
         };
-        let skills = self.known_skills.as_deref()
+        let skills = self
+            .known_skills
+            .as_deref()
             .and_then(|rows| mir2_client_bevy::skill_page_state::normalize_raw_skills(rows).ok());
-        let mut context = QuestWorldContext { stamp: Some(QuestWorldStamp {
-            generation: self.generation, revision: self.revision,
-            connection_generation: self.connection_generation,
-            session_generation: self.session_generation,
-            scene_revision: self.scene_revision,
-            player_object_id: self.player_object_id,
-            map_file_name: self.map_file_name,
-        }), inventory: Some(self.inventory.into_model()), player: Some(player), skills,
-            map_index: self.map_index, raw_entities: self.entities,
-            selected_object_id: self.selected_object_id, ground_drops: self.ground_drops,
-            ..Default::default() };
+        let mut context = QuestWorldContext {
+            stamp: Some(QuestWorldStamp {
+                generation: self.generation,
+                revision: self.revision,
+                connection_generation: self.connection_generation,
+                session_generation: self.session_generation,
+                scene_revision: self.scene_revision,
+                player_object_id: self.player_object_id,
+                map_file_name: self.map_file_name,
+            }),
+            inventory: Some(self.inventory.into_model()),
+            player: Some(player),
+            skills,
+            map_index: self.map_index,
+            raw_entities: self.entities,
+            selected_object_id: self.selected_object_id,
+            ground_drops: self.ground_drops,
+            ..Default::default()
+        };
         context.rebuild_projections();
         context
     }
@@ -678,7 +719,8 @@ fn install_supported(app: &mut App, shared_webgl2: bool) {
     crate::mail_ui_host::install(app);
     app.configure_sets(
         Update,
-        CrystalHintSet::Sync.after(PendingLifecycleSet::Ingest)
+        CrystalHintSet::Sync
+            .after(PendingLifecycleSet::Ingest)
             .after(mir2_client_bevy::portable_hero_ui::HeroPaintSet),
     );
     app.add_systems(
@@ -697,7 +739,8 @@ fn install_supported(app: &mut App, shared_webgl2: bool) {
             sync_quest_ui_visibility,
         )
             .chain()
-            .in_set(PendingLifecycleSet::Ingest).in_set(QuestHostIngestSet),
+            .in_set(PendingLifecycleSet::Ingest)
+            .in_set(QuestHostIngestSet),
     );
     app.add_systems(
         PostUpdate,
@@ -708,7 +751,10 @@ fn install_supported(app: &mut App, shared_webgl2: bool) {
             .after(ExperienceBarObservationSet::Observe)
             .after(WeightBarObservationSet::Observe),
     );
-    app.add_systems(Last, (forward_quest_ui_intents, forward_quest_presentation_actions));
+    app.add_systems(
+        Last,
+        (forward_quest_ui_intents, forward_quest_presentation_actions),
+    );
 }
 
 /// Called before Startup, so the new route never creates painter roots or private leases.
@@ -727,18 +773,24 @@ fn install_bar_route(app: &mut App, draw_plan: bool) {
 }
 
 #[cfg(target_arch = "wasm32")]
-#[derive(SystemSet,Debug,Hash,PartialEq,Eq,Clone)]
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub(crate) struct QuestHostIngestSet;
 
 #[cfg(target_arch = "wasm32")]
 #[allow(clippy::too_many_arguments)]
 fn ingest_quest_ui_snapshot(
-    (mut applied, mut locale): (ResMut<AppliedQuestUiSnapshot>, ResMut<QuestPresentationLocale>),
+    (mut applied, mut locale): (
+        ResMut<AppliedQuestUiSnapshot>,
+        ResMut<QuestPresentationLocale>,
+    ),
     mut context: ResMut<QuestUiHostContext>,
     mut tracker: ResMut<QuestTracker>,
     mut completed: ResMut<CompletedQuestTracker>,
     mut dialog: ResMut<NpcDialogModel>,
-    read_authority: (ResMut<UiReadModel>, ResMut<mir2_client_bevy::read_model::UiReadModelIngress>),
+    read_authority: (
+        ResMut<UiReadModel>,
+        ResMut<mir2_client_bevy::read_model::UiReadModelIngress>,
+    ),
     mut guidance: ResMut<QuestGuidance>,
     mut catalog: ResMut<NewcomerJourneyCatalog>,
     mut pending: ResMut<PendingOperations>,
@@ -756,26 +808,41 @@ fn ingest_quest_ui_snapshot(
     mut assets: ResMut<QuestUiHostAssets>,
     mut packaged_font: ResMut<QuestUiFont>,
 ) {
-    let (mut read_model,mut read_ingress)=read_authority;
-    let (mut quest_state, mut world_context, mut presentation_actions, mut routes, mut route_stamp) = quest_interaction;
+    let (mut read_model, mut read_ingress) = read_authority;
+    let (mut quest_state, mut world_context, mut presentation_actions, mut routes, mut route_stamp) =
+        quest_interaction;
     let Some(mut snapshot) = PENDING_SNAPSHOT.with(|mailbox| mailbox.borrow_mut().take()) else {
         return;
     };
-    if applied.has_snapshot && !snapshot.is_newer_than(applied.generation, applied.revision)
-    {
+    if applied.has_snapshot && !snapshot.is_newer_than(applied.generation, applied.revision) {
         return;
     }
     let new_generation = !applied.has_snapshot || snapshot.generation > applied.generation;
     // A hidden or changed scene cannot replay a local panel action on return.
-    let next_stamp = snapshot.world_context.as_ref().map(|context| (
-        context.generation, context.revision, context.connection_generation,
-        context.session_generation, context.scene_revision, context.player_object_id,
-        context.map_file_name.as_str()));
-    let previous_stamp = world_context.stamp.as_ref().map(|stamp| (
-        stamp.generation, stamp.revision, stamp.connection_generation,
-        stamp.session_generation, stamp.scene_revision, stamp.player_object_id,
-        stamp.map_file_name.as_str()));
-    if new_generation || !snapshot.in_game || !snapshot.host_visible || next_stamp != previous_stamp {
+    let next_stamp = snapshot.world_context.as_ref().map(|context| {
+        (
+            context.generation,
+            context.revision,
+            context.connection_generation,
+            context.session_generation,
+            context.scene_revision,
+            context.player_object_id,
+            context.map_file_name.as_str(),
+        )
+    });
+    let previous_stamp = world_context.stamp.as_ref().map(|stamp| {
+        (
+            stamp.generation,
+            stamp.revision,
+            stamp.connection_generation,
+            stamp.session_generation,
+            stamp.scene_revision,
+            stamp.player_object_id,
+            stamp.map_file_name.as_str(),
+        )
+    });
+    if new_generation || !snapshot.in_game || !snapshot.host_visible || next_stamp != previous_stamp
+    {
         presentation_actions.clear();
         routes.clear();
         route_stamp.0 = None;
@@ -786,7 +853,9 @@ fn ingest_quest_ui_snapshot(
             *world_context = context.into_resource();
         }
     }
-    if *locale != snapshot.language { *locale = snapshot.language; }
+    if *locale != snapshot.language {
+        *locale = snapshot.language;
+    }
     applied.language = snapshot.language;
     if new_generation {
         pending.release_all_quest_operations();
@@ -864,7 +933,12 @@ fn ingest_quest_ui_snapshot(
     *tracker = models.quests;
     *completed = models.completed;
     *dialog = models.dialog;
-    read_ingress.apply_legacy_quest(&mut read_model, generation, revision, models.read_model.player);
+    read_ingress.apply_legacy_quest(
+        &mut read_model,
+        generation,
+        revision,
+        models.read_model.player,
+    );
 
     applied.generation = generation;
     applied.revision = revision;
@@ -1014,8 +1088,13 @@ fn sync_quest_hint_surface(
     assets: Res<AssetServer>,
     mut surface: ResMut<CrystalHintSurface>,
 ) {
-    let hero_hint_owner = hero.active && hero.ready && hero.input_enabled
-        && matches!(assets.get_load_state(hud.font.id()), Some(bevy::asset::LoadState::Loaded));
+    let hero_hint_owner = hero.active
+        && hero.ready
+        && hero.input_enabled
+        && matches!(
+            assets.get_load_state(hud.font.id()),
+            Some(bevy::asset::LoadState::Loaded)
+        );
     let active = (context.in_game
         && context.host_visible
         && quest_ui_has_open_surface(&player_ui, &quest_state, &dialog))
@@ -1063,8 +1142,12 @@ fn publish_quest_ui_status(
     assets: Res<QuestUiHostAssets>,
     server: Res<AssetServer>,
     roots: Query<Entity, With<mir2_client_bevy::quest_ui::QuestUiRoot>>,
-    quest_world: (Res<QuestUiHostContext>, Res<mir2_client_bevy::portable_quest_ui::QuestWorldContext>,
-        Res<mir2_client_bevy::portable_quest_ui::QuestWorldControlRects>, Res<QuestTracker>),
+    quest_world: (
+        Res<QuestUiHostContext>,
+        Res<mir2_client_bevy::portable_quest_ui::QuestWorldContext>,
+        Res<mir2_client_bevy::portable_quest_ui::QuestWorldControlRects>,
+        Res<QuestTracker>,
+    ),
     player_ui: Res<NativePlayerUiState>,
     quest_state: Res<QuestUiState>,
     dialog: Res<NpcDialogModel>,
@@ -1073,16 +1156,32 @@ fn publish_quest_ui_status(
 ) {
     let (context, world, rects, tracker) = quest_world;
     NAME_TARGETS.with(|published| {
-        *published.borrow_mut() = QuestNameTargets::from_context(&world, &context, &tracker,
-            applied.has_snapshot && applied.host_visible && applied.in_game
-                && world.stamp.as_ref().is_some_and(|stamp| stamp.generation == applied.generation && stamp.revision == applied.revision));
+        *published.borrow_mut() = QuestNameTargets::from_context(
+            &world,
+            &context,
+            &tracker,
+            applied.has_snapshot
+                && applied.host_visible
+                && applied.in_game
+                && world.stamp.as_ref().is_some_and(|stamp| {
+                    stamp.generation == applied.generation && stamp.revision == applied.revision
+                }),
+        );
     });
     WORLD_CONTROL_RECTS.with(|published| {
-        *published.borrow_mut() = if world.current(&context) && rects.stamp == world.stamp
-            && applied.has_snapshot && applied.presentation_ready && applied.host_visible && applied.in_game
-            && rects.stamp.as_ref().is_some_and(|stamp| stamp.generation == applied.generation && stamp.revision == applied.revision) {
+        *published.borrow_mut() = if world.current(&context)
+            && rects.stamp == world.stamp
+            && applied.has_snapshot
+            && applied.presentation_ready
+            && applied.host_visible
+            && applied.in_game
+            && rects.stamp.as_ref().is_some_and(|stamp| {
+                stamp.generation == applied.generation && stamp.revision == applied.revision
+            }) {
             (*rects).clone()
-        } else { mir2_client_bevy::portable_quest_ui::QuestWorldControlRects::default() };
+        } else {
+            mir2_client_bevy::portable_quest_ui::QuestWorldControlRects::default()
+        };
     });
     let (experience_bar, weight_bar, experience_bar_context, weight_bar_context) = bar_inputs;
     let asset_state = assets
@@ -1374,6 +1473,7 @@ fn encode_quest_intent(intent: &QuestUiIntent, generation: u64) -> Result<String
         QuestUiIntent::InteractQuestNpc { .. }
         | QuestUiIntent::InteractNpc { .. }
         | QuestUiIntent::AttackTarget { .. }
+        | QuestUiIntent::AttackDirection { .. }
         | QuestUiIntent::HarvestDirection { .. }
         | QuestUiIntent::PickUpObject { .. }
         | QuestUiIntent::PickUpTile => {
@@ -1459,7 +1559,9 @@ fn forward_quest_ui_intents(
     }
 }
 
-fn quest_action_stamp_message(stamp: &mir2_client_bevy::portable_quest_ui::QuestWorldStamp) -> serde_json::Value {
+fn quest_action_stamp_message(
+    stamp: &mir2_client_bevy::portable_quest_ui::QuestWorldStamp,
+) -> serde_json::Value {
     serde_json::json!({
         "generation": stamp.generation, "revision": stamp.revision,
         "connectionGeneration": stamp.connection_generation,
@@ -1476,24 +1578,33 @@ fn quest_presentation_message(
     tracker: &QuestTracker,
 ) -> Option<serde_json::Value> {
     use mir2_client_bevy::portable_quest_ui::QuestPresentationAction as Action;
-    if !action.current(context, tracker) { return None; }
+    if !action.current(context, tracker) {
+        return None;
+    }
     let mut message = quest_action_stamp_message(action.stamp());
     match action {
         Action::OpenDestinationMap(_) => message["type"] = serde_json::json!("openDestinationMap"),
         Action::AttackTarget { object_id, .. } | Action::AttackQuestTarget { object_id, .. } => {
-            message["type"] = serde_json::json!(if matches!(action, Action::AttackQuestTarget { .. }) {
-                "attackQuestTarget"
-            } else { "attackTarget" });
+            message["type"] =
+                serde_json::json!(if matches!(action, Action::AttackQuestTarget { .. }) {
+                    "attackQuestTarget"
+                } else {
+                    "attackTarget"
+                });
             message["objectId"] = serde_json::json!(object_id);
         }
-        Action::PickUpObject { object_id, x, y, .. } => {
+        Action::PickUpObject {
+            object_id, x, y, ..
+        } => {
             message["type"] = serde_json::json!("pickUpObject");
             message["objectId"] = serde_json::json!(object_id);
-            message["x"] = serde_json::json!(x); message["y"] = serde_json::json!(y);
+            message["x"] = serde_json::json!(x);
+            message["y"] = serde_json::json!(y);
         }
         Action::PickUpTile { x, y, .. } => {
             message["type"] = serde_json::json!("pickUpTile");
-            message["x"] = serde_json::json!(x); message["y"] = serde_json::json!(y);
+            message["x"] = serde_json::json!(x);
+            message["y"] = serde_json::json!(y);
         }
     }
     Some(message)
@@ -1503,28 +1614,50 @@ fn quest_route_message(
     intent: mir2_client_bevy::quest_ui::QuestRouteNavigationIntent,
     stamp: &mir2_client_bevy::portable_quest_ui::QuestWorldStamp,
     context: &mir2_client_bevy::portable_quest_ui::QuestWorldContext,
-    tracker: &QuestTracker, state: &mir2_client_bevy::quest_ui::QuestUiState,
+    tracker: &QuestTracker,
+    state: &mir2_client_bevy::quest_ui::QuestUiState,
     journey: Option<&mir2_client_bevy::quest_journey::JourneyView>,
 ) -> Option<serde_json::Value> {
-    use mir2_client_bevy::quest_ui::QuestRouteTarget;
     use mir2_client_bevy::quest_supplies::SupplyVendor;
-    if context.stamp.as_ref() != Some(stamp) || context.self_tile().is_none()
+    use mir2_client_bevy::quest_ui::QuestRouteTarget;
+    if context.stamp.as_ref() != Some(stamp)
+        || context.self_tile().is_none()
         || !mir2_client_bevy::quest_ui::quest_route_intent_is_current(
-            intent, tracker, state, journey, context.big_map.as_ref()) { return None; }
+            intent,
+            tracker,
+            state,
+            journey,
+            context.big_map.as_ref(),
+        )
+    {
+        return None;
+    }
     let route_target = match intent.target {
         QuestRouteTarget::Entrance => serde_json::json!({ "type": "entrance" }),
-        QuestRouteTarget::HuntRegion { monster_index, radius } => serde_json::json!({
+        QuestRouteTarget::TaskNpc { object_id } => {
+            serde_json::json!({ "type": "taskNpc", "objectId": object_id })
+        }
+        QuestRouteTarget::MapNpc { object_id } => {
+            serde_json::json!({ "type": "mapNpc", "objectId": object_id })
+        }
+        QuestRouteTarget::HuntRegion {
+            monster_index,
+            radius,
+        } => serde_json::json!({
             "type": "huntRegion", "monsterIndex": monster_index, "radius": radius }),
-        QuestRouteTarget::Supply { vendor } => serde_json::json!({ "type": "supply", "vendor": match vendor {
+        QuestRouteTarget::Supply { vendor } => {
+            serde_json::json!({ "type": "supply", "vendor": match vendor {
             SupplyVendor::Potions => "potions", SupplyVendor::General => "general", SupplyVendor::Poison => "poison",
-        } }),
+        } })
+        }
     };
     let mut message = quest_action_stamp_message(stamp);
     message["type"] = serde_json::json!("navigateQuestRoute");
     message["questIndex"] = serde_json::json!(intent.quest_index);
     message["resetEpoch"] = serde_json::json!(intent.reset_epoch);
     message["mapIndex"] = serde_json::json!(intent.map_index);
-    message["x"] = serde_json::json!(intent.x); message["y"] = serde_json::json!(intent.y);
+    message["x"] = serde_json::json!(intent.x);
+    message["y"] = serde_json::json!(intent.y);
     message["routeTarget"] = route_target;
     Some(message)
 }
@@ -1535,37 +1668,71 @@ fn forward_quest_presentation_actions(
     context: Res<mir2_client_bevy::portable_quest_ui::QuestWorldContext>,
     mut actions: ResMut<mir2_client_bevy::portable_quest_ui::QuestPresentationActionQueue>,
     mut quest_state: ResMut<QuestUiState>,
-    routing: (ResMut<mir2_client_bevy::quest_ui::QuestRouteNavigationIntentQueue>,
+    routing: (
+        ResMut<mir2_client_bevy::quest_ui::QuestRouteNavigationIntentQueue>,
         ResMut<mir2_client_bevy::portable_quest_ui::QuestRouteWorldStamp>,
-        Res<QuestTracker>, Res<QuestGuidance>, Res<CompletedQuestTracker>,
-        Res<NewcomerJourneyCatalog>, Res<UiReadModel>),
+        Res<QuestTracker>,
+        Res<QuestGuidance>,
+        Res<CompletedQuestTracker>,
+        Res<NewcomerJourneyCatalog>,
+        Res<UiReadModel>,
+    ),
 ) {
     let (mut routes, mut route_stamp, tracker, guidance, completed, catalog, read_model) = routing;
     let (stamp, message) = if let Some(action) = actions.take() {
-        let Some(message) = quest_presentation_message(&action, &context, &tracker) else { return; };
+        let Some(message) = quest_presentation_message(&action, &context, &tracker) else {
+            return;
+        };
         (action.stamp().clone(), message)
     } else {
-        let Some(intent) = routes.take() else { route_stamp.0 = None; return; };
-        let Some(stamp) = route_stamp.0.take() else { return; };
+        let Some(intent) = routes.take() else {
+            route_stamp.0 = None;
+            return;
+        };
+        let Some(stamp) = route_stamp.0.take() else {
+            return;
+        };
         let journey = catalog.derive(&guidance, &tracker, &completed, &read_model.player);
-        let Some(message) = quest_route_message(intent, &stamp, &context, &tracker, &quest_state, journey.as_ref()) else { return; };
+        let Some(message) = quest_route_message(
+            intent,
+            &stamp,
+            &context,
+            &tracker,
+            &quest_state,
+            journey.as_ref(),
+        ) else {
+            return;
+        };
         (stamp, message)
     };
     let active = STATUS.with(|status| {
         let status = status.borrow();
-        status.ready && applied.presentation_ready
-            && status.generation == stamp.generation && status.revision == stamp.revision
+        status.ready
+            && applied.presentation_ready
+            && status.generation == stamp.generation
+            && status.revision == stamp.revision
     });
-    if !active || !applied.in_game || !applied.host_visible || !applied.has_snapshot
-        || applied.generation != stamp.generation || applied.revision != stamp.revision
-        || context.inventory.is_none() || context.player.is_none() || context.stamp.as_ref() != Some(&stamp)
-        || PENDING_SNAPSHOT.with(|pending| pending.borrow().is_some()) {
+    if !active
+        || !applied.in_game
+        || !applied.host_visible
+        || !applied.has_snapshot
+        || applied.generation != stamp.generation
+        || applied.revision != stamp.revision
+        || context.inventory.is_none()
+        || context.player.is_none()
+        || context.stamp.as_ref() != Some(&stamp)
+        || PENDING_SNAPSHOT.with(|pending| pending.borrow().is_some())
+    {
         return;
     }
     let sink = INTENT_SINK.with(|sink| sink.borrow().clone());
-    let Some(sink) = sink else { return; };
-    let response = sink.call1(&JsValue::NULL, &JsValue::from_str(&message.to_string()))
-        .ok().and_then(|value| value.as_string())
+    let Some(sink) = sink else {
+        return;
+    };
+    let response = sink
+        .call1(&JsValue::NULL, &JsValue::from_str(&message.to_string()))
+        .ok()
+        .and_then(|value| value.as_string())
         .and_then(|value| serde_json::from_str::<WebIntentResult>(&value).ok());
     if !response.is_some_and(|result| result.accepted) {
         quest_state.set_feedback("The Quest world action is no longer current", true);
@@ -1603,7 +1770,11 @@ impl WebQuestUiSnapshot {
         {
             return Err("invalid HUD bar draw-plan commit");
         }
-        if self.world_context.as_ref().is_some_and(|context| !context.validate(self.generation, self.revision)) {
+        if self
+            .world_context
+            .as_ref()
+            .is_some_and(|context| !context.validate(self.generation, self.revision))
+        {
             return Err("invalid Quest world context");
         }
         let mut ids = HashSet::new();
@@ -1800,15 +1971,41 @@ struct QuestNameTargets {
     object_ids: Vec<u32>,
 }
 impl QuestNameTargets {
-    fn unknown() -> Self { Self { version: 1, known: false, stamp: None, object_ids: vec![] } }
-    fn from_context(world: &mir2_client_bevy::portable_quest_ui::QuestWorldContext,
-        host: &QuestUiHostContext, tracker: &QuestTracker, applied_current: bool) -> Self {
-        if !applied_current || !world.current(host) { return Self::unknown(); }
-        let object_ids = world.raw_entities.iter()
-            .filter(|row| row.kind == mir2_client_bevy::entities::EntityKind::Monster && row.dead == Some(false)
-                && mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster(tracker, &row.name))
-            .map(|row| row.object_id).collect();
-        Self { version: 1, known: true, stamp: world.stamp.clone(), object_ids }
+    fn unknown() -> Self {
+        Self {
+            version: 1,
+            known: false,
+            stamp: None,
+            object_ids: vec![],
+        }
+    }
+    fn from_context(
+        world: &mir2_client_bevy::portable_quest_ui::QuestWorldContext,
+        host: &QuestUiHostContext,
+        tracker: &QuestTracker,
+        applied_current: bool,
+    ) -> Self {
+        if !applied_current || !world.current(host) {
+            return Self::unknown();
+        }
+        let object_ids = world
+            .raw_entities
+            .iter()
+            .filter(|row| {
+                row.kind == mir2_client_bevy::entities::EntityKind::Monster
+                    && row.dead == Some(false)
+                    && mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster(
+                        tracker, &row.name,
+                    )
+            })
+            .map(|row| row.object_id)
+            .collect();
+        Self {
+            version: 1,
+            known: true,
+            stamp: world.stamp.clone(),
+            object_ids,
+        }
     }
 }
 
@@ -2040,9 +2237,10 @@ pub fn set_mir2_quest_ui_snapshot(json: String) -> bool {
         let status = status.borrow();
         !snapshot.is_newer_than(status.generation, status.revision)
     }) || PENDING_SNAPSHOT.with(|pending| {
-        pending.borrow().as_ref().is_some_and(|current| {
-            !snapshot.is_newer_than(current.generation, current.revision)
-        })
+        pending
+            .borrow()
+            .as_ref()
+            .is_some_and(|current| !snapshot.is_newer_than(current.generation, current.revision))
     });
     if stale {
         return false;
@@ -2053,7 +2251,9 @@ pub fn set_mir2_quest_ui_snapshot(json: String) -> bool {
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(js_name = getMir2QuestWorldContextVersion)]
-pub fn get_mir2_quest_world_context_version() -> u32 { 2 }
+pub fn get_mir2_quest_world_context_version() -> u32 {
+    2
+}
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(js_name = getMir2QuestWorldControlRects)]
@@ -2061,15 +2261,25 @@ pub fn get_mir2_quest_world_control_rects() -> String {
     let pending = PENDING_SNAPSHOT.with(|pending| pending.borrow().is_some());
     WORLD_CONTROL_RECTS.with(|rects| {
         let rects = rects.borrow();
-        let current = !pending && INTENT_SINK.with(|sink| sink.borrow().is_some())
-            && rects.stamp.as_ref().is_some_and(|stamp| STATUS.with(|status| {
-            let status = status.borrow();
-            status.ready && status.generation == stamp.generation && status.revision == stamp.revision
-        }));
+        let current = !pending
+            && INTENT_SINK.with(|sink| sink.borrow().is_some())
+            && rects.stamp.as_ref().is_some_and(|stamp| {
+                STATUS.with(|status| {
+                    let status = status.borrow();
+                    status.ready
+                        && status.generation == stamp.generation
+                        && status.revision == stamp.revision
+                })
+            });
         // Do not relabel previous-frame rectangles with a pending snapshot.
-        if current { serde_json::to_string(&*rects) } else {
-            serde_json::to_string(&mir2_client_bevy::portable_quest_ui::QuestWorldControlRects::default())
-        }.unwrap_or_else(|_| "null".to_owned())
+        if current {
+            serde_json::to_string(&*rects)
+        } else {
+            serde_json::to_string(
+                &mir2_client_bevy::portable_quest_ui::QuestWorldControlRects::default(),
+            )
+        }
+        .unwrap_or_else(|_| "null".to_owned())
     })
 }
 
@@ -2078,11 +2288,22 @@ pub(crate) fn quest_name_targets_json() -> String {
     let pending = PENDING_SNAPSHOT.with(|pending| pending.borrow().is_some());
     NAME_TARGETS.with(|published| {
         let targets = published.borrow();
-        let current = !pending && targets.known && targets.stamp.as_ref().is_some_and(|stamp| STATUS.with(|status| {
-            let status = status.borrow(); status.generation == stamp.generation && status.revision == stamp.revision
-        }));
-        let json = if current { serde_json::to_string(&*targets) } else { serde_json::to_string(&QuestNameTargets::unknown()) };
-        json.unwrap_or_else(|_| "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into())
+        let current = !pending
+            && targets.known
+            && targets.stamp.as_ref().is_some_and(|stamp| {
+                STATUS.with(|status| {
+                    let status = status.borrow();
+                    status.generation == stamp.generation && status.revision == stamp.revision
+                })
+            });
+        let json = if current {
+            serde_json::to_string(&*targets)
+        } else {
+            serde_json::to_string(&QuestNameTargets::unknown())
+        };
+        json.unwrap_or_else(|_| {
+            "{\"version\":1,\"known\":false,\"stamp\":null,\"objectIds\":[]}".into()
+        })
     })
 }
 
@@ -2185,8 +2406,10 @@ mod tests {
         for field in ["capacity", "gold", "items"] {
             let mut changed = base.clone();
             changed["inventory"].as_object_mut().unwrap().remove(field);
-            assert!(serde_json::from_value::<WebQuestWorldContext>(changed).is_err(),
-                "missing {field} must not become a complete Quest inventory");
+            assert!(
+                serde_json::from_value::<WebQuestWorldContext>(changed).is_err(),
+                "missing {field} must not become a complete Quest inventory"
+            );
         }
     }
 
@@ -2209,12 +2432,23 @@ mod tests {
         let parse = |value| serde_json::from_value::<WebQuestWorldContext>(value).unwrap();
         assert!(parse(base.clone()).validate(7, 9));
         for field in ["mapIndex", "entities", "selectedObjectId", "groundDrops"] {
-            let mut changed = base.clone(); changed.as_object_mut().unwrap().remove(field);
-            assert!(serde_json::from_value::<WebQuestWorldContext>(changed).is_err(), "missing {field}");
+            let mut changed = base.clone();
+            changed.as_object_mut().unwrap().remove(field);
+            assert!(
+                serde_json::from_value::<WebQuestWorldContext>(changed).is_err(),
+                "missing {field}"
+            );
         }
         for field in ["direction", "level", "dead", "hp", "maxHp"] {
-            let mut changed = base.clone(); changed["entities"][1].as_object_mut().unwrap().remove(field);
-            assert!(serde_json::from_value::<WebQuestWorldContext>(changed).is_err(), "missing {field}");
+            let mut changed = base.clone();
+            changed["entities"][1]
+                .as_object_mut()
+                .unwrap()
+                .remove(field);
+            assert!(
+                serde_json::from_value::<WebQuestWorldContext>(changed).is_err(),
+                "missing {field}"
+            );
         }
         let mut changed = base.clone();
         changed["entities"][1]["dead"] = json!(null);
@@ -2223,11 +2457,17 @@ mod tests {
         assert!(projected.target.target.is_none());
         assert_eq!(projected.big_map.as_ref().unwrap().current_map_index, None);
         for (field, invalid) in [("objectId", json!(0)), ("objectId", json!(1000))] {
-            let mut changed = base.clone(); changed["entities"][1][field] = invalid;
+            let mut changed = base.clone();
+            changed["entities"][1][field] = invalid;
             assert!(!parse(changed).validate(7, 9));
         }
-        for (field, invalid) in [("objectId", json!(44)), ("objectId", json!(0)), ("quantity", json!(0))] {
-            let mut changed = base.clone(); changed["groundDrops"][0][field] = invalid;
+        for (field, invalid) in [
+            ("objectId", json!(44)),
+            ("objectId", json!(0)),
+            ("quantity", json!(0)),
+        ] {
+            let mut changed = base.clone();
+            changed["groundDrops"][0][field] = invalid;
             assert!(!parse(changed).validate(7, 9));
         }
         let mut changed = base.clone();
@@ -2241,27 +2481,68 @@ mod tests {
     }
 
     fn quest_world_hunt_tracker() -> QuestTracker {
-        QuestTracker { active_quests: vec![Quest {
-            quest_index: 23, accept_npc_index: None, finish_npc_index: None,
-            title: "Hunt".into(), npc_name: None, group: None, min_level_needed: 0,
-            detail: Default::default(), status: QuestStatus::InProgress,
-            objectives: vec![QuestObjective { objective_id: "hen".into(), text: "Defeat Hen".into(), current: 0, target: 2 }],
-            rewards: vec![], unknown_text: None,
-        }] }
+        QuestTracker {
+            active_quests: vec![Quest {
+                quest_index: 23,
+                accept_npc_index: None,
+                finish_npc_index: None,
+                title: "Hunt".into(),
+                npc_name: None,
+                group: None,
+                min_level_needed: 0,
+                detail: Default::default(),
+                status: QuestStatus::InProgress,
+                objectives: vec![QuestObjective {
+                    objective_id: "hen".into(),
+                    text: "Defeat Hen".into(),
+                    current: 0,
+                    target: 2,
+                }],
+                rewards: vec![],
+                unknown_text: None,
+            }],
+        }
     }
 
     #[test]
     fn quest_world_local_messages_preserve_origin_and_recheck_life_tile_and_revision() {
-        use mir2_client_bevy::portable_quest_ui::{QuestPresentationAction as Action, QuestPresentationActionQueue};
-        let mut context = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json()).unwrap().into_resource();
+        use mir2_client_bevy::portable_quest_ui::{
+            QuestPresentationAction as Action, QuestPresentationActionQueue,
+        };
+        let mut context = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json())
+            .unwrap()
+            .into_resource();
         let tracker = quest_world_hunt_tracker();
         let stamp = context.stamp.clone().unwrap();
-        let actions = [Action::OpenDestinationMap(stamp.clone()),
-            Action::AttackTarget { stamp: stamp.clone(), object_id: 44 },
-            Action::AttackQuestTarget { stamp: stamp.clone(), object_id: 44 },
-            Action::PickUpObject { stamp: stamp.clone(), object_id: 80, x: 102, y: 201 },
-            Action::PickUpTile { stamp: stamp.clone(), x: 100, y: 200 }];
-        let names = ["openDestinationMap", "attackTarget", "attackQuestTarget", "pickUpObject", "pickUpTile"];
+        let actions = [
+            Action::OpenDestinationMap(stamp.clone()),
+            Action::AttackTarget {
+                stamp: stamp.clone(),
+                object_id: 44,
+            },
+            Action::AttackQuestTarget {
+                stamp: stamp.clone(),
+                object_id: 44,
+            },
+            Action::PickUpObject {
+                stamp: stamp.clone(),
+                object_id: 80,
+                x: 102,
+                y: 201,
+            },
+            Action::PickUpTile {
+                stamp: stamp.clone(),
+                x: 100,
+                y: 200,
+            },
+        ];
+        let names = [
+            "openDestinationMap",
+            "attackTarget",
+            "attackQuestTarget",
+            "pickUpObject",
+            "pickUpTile",
+        ];
         let mut queue = QuestPresentationActionQueue::default();
         for (action, expected_type) in actions.iter().zip(names) {
             assert!(queue.push(action.clone()));
@@ -2271,13 +2552,20 @@ mod tests {
             assert_eq!(message["type"], expected_type);
             assert_eq!(message["revision"], 9);
             assert_eq!(message["sceneRevision"], 4);
-            if expected_type == "pickUpObject" { assert_eq!(message["x"], 102); assert_eq!(message["y"], 201); }
-            if expected_type == "pickUpTile" { assert_eq!(message["x"], 100); assert_eq!(message["y"], 200); }
+            if expected_type == "pickUpObject" {
+                assert_eq!(message["x"], 102);
+                assert_eq!(message["y"], 201);
+            }
+            if expected_type == "pickUpTile" {
+                assert_eq!(message["x"], 100);
+                assert_eq!(message["y"], 200);
+            }
             assert!(queue.take().is_none());
         }
         context.raw_entities[1].dead = None;
         assert!(quest_presentation_message(&actions[2], &context, &tracker).is_none());
-        context.raw_entities[1].dead = Some(false); context.raw_entities[1].hp = None;
+        context.raw_entities[1].dead = Some(false);
+        context.raw_entities[1].hp = None;
         assert!(quest_presentation_message(&actions[2], &context, &tracker).is_none());
         context.raw_entities[1].max_hp = None;
         assert!(quest_presentation_message(&actions[2], &context, &tracker).is_some());
@@ -2294,63 +2582,307 @@ mod tests {
     #[test]
     fn quest_world_route_output_revalidates_shared_supply_and_unknown_map() {
         use mir2_client_bevy::quest_supplies::SupplyVendor;
-        use mir2_client_bevy::quest_ui::{QuestRouteNavigationIntent, QuestRouteTarget, QuestUiState};
-        let mut context = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json()).unwrap().into_resource();
+        use mir2_client_bevy::quest_ui::{
+            QuestRouteNavigationIntent, QuestRouteTarget, QuestUiState,
+        };
+        let mut context = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json())
+            .unwrap()
+            .into_resource();
         let destination = SupplyVendor::Potions.destination().unwrap();
-        let intent = QuestRouteNavigationIntent { quest_index: 0, reset_epoch: 4,
-            map_index: destination.map_index, x: destination.x, y: destination.y,
-            target: QuestRouteTarget::Supply { vendor: SupplyVendor::Potions } };
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 0,
+            reset_epoch: 4,
+            map_index: destination.map_index,
+            x: destination.x,
+            y: destination.y,
+            target: QuestRouteTarget::Supply {
+                vendor: SupplyVendor::Potions,
+            },
+        };
         let stamp = context.stamp.clone().unwrap();
         let mut state = QuestUiState::default();
-        state.supply_open = true; state.supply_vendor = Some(SupplyVendor::Potions);
+        state.supply_open = true;
+        state.supply_vendor = Some(SupplyVendor::Potions);
         let tracker = QuestTracker::default();
         assert!(quest_route_message(intent, &stamp, &context, &tracker, &state, None).is_none());
-        context.map_index = Some(destination.map_index); context.rebuild_projections();
-        let message = quest_route_message(intent, &stamp, &context, &tracker, &state, None).unwrap();
+        context.map_index = Some(destination.map_index);
+        context.rebuild_projections();
+        let message =
+            quest_route_message(intent, &stamp, &context, &tracker, &state, None).unwrap();
         assert_eq!(message["type"], "navigateQuestRoute");
-        assert_eq!(message["routeTarget"], json!({"type":"supply","vendor":"potions"}));
+        assert_eq!(
+            message["routeTarget"],
+            json!({"type":"supply","vendor":"potions"})
+        );
         assert_eq!(message["mapIndex"], destination.map_index);
         assert_eq!(message["resetEpoch"], 4);
-        assert!(quest_route_message(QuestRouteNavigationIntent { reset_epoch: 5, ..intent }, &stamp, &context, &tracker, &state, None).is_none());
+        assert!(quest_route_message(
+            QuestRouteNavigationIntent {
+                reset_epoch: 5,
+                ..intent
+            },
+            &stamp,
+            &context,
+            &tracker,
+            &state,
+            None
+        )
+        .is_none());
         let closed = QuestUiState::default();
         assert!(quest_route_message(intent, &stamp, &context, &tracker, &closed, None).is_none());
         context.stamp.as_mut().unwrap().scene_revision += 1;
         assert!(quest_route_message(intent, &stamp, &context, &tracker, &state, None).is_none());
-        context.stamp = Some(stamp.clone()); context.map_index = Some(39); context.rebuild_projections();
+        context.stamp = Some(stamp.clone());
+        context.map_index = Some(39);
+        context.rebuild_projections();
         let mut hunt = quest_world_hunt_tracker();
         hunt.active_quests[0].quest_index = 2_110_010;
         hunt.active_quests[0].objectives[0].text = "Defeat 4 Skeleton.".into();
         hunt.active_quests[0].objectives[0].target = 4;
-        let region = mir2_client_bevy::quest_hunt_regions::active_hunt_regions(&hunt, 39,
-            mir2_client_bevy::big_map::BigMapPoint { x: 211, y: 320 }).remove(0);
-        let hunt_intent = QuestRouteNavigationIntent { quest_index: 2_110_010, reset_epoch: 4,
-            map_index: 39, x: region.center.x, y: region.center.y,
-            target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: region.radius } };
-        let message = quest_route_message(hunt_intent, &stamp, &context, &hunt, &closed, None).unwrap();
-        assert_eq!(message["routeTarget"], json!({ "type":"huntRegion", "monsterIndex":region.monster_index, "radius":region.radius }));
-        assert!(quest_route_message(QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion {
-            monster_index: region.monster_index, radius: region.radius + 1 }, ..hunt_intent },
-            &stamp, &context, &hunt, &closed, None).is_none());
+        let region = mir2_client_bevy::quest_hunt_regions::active_hunt_regions(
+            &hunt,
+            39,
+            mir2_client_bevy::big_map::BigMapPoint { x: 211, y: 320 },
+        )
+        .remove(0);
+        let hunt_intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 4,
+            map_index: 39,
+            x: region.center.x,
+            y: region.center.y,
+            target: QuestRouteTarget::HuntRegion {
+                monster_index: region.monster_index,
+                radius: region.radius,
+            },
+        };
+        let message =
+            quest_route_message(hunt_intent, &stamp, &context, &hunt, &closed, None).unwrap();
+        assert_eq!(
+            message["routeTarget"],
+            json!({ "type":"huntRegion", "monsterIndex":region.monster_index, "radius":region.radius })
+        );
+        assert!(quest_route_message(
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::HuntRegion {
+                    monster_index: region.monster_index,
+                    radius: region.radius + 1
+                },
+                ..hunt_intent
+            },
+            &stamp,
+            &context,
+            &hunt,
+            &closed,
+            None
+        )
+        .is_none());
+    }
+
+    #[test]
+    fn task_npc_route_output_preserves_real_stewards_and_rejects_changed_task_or_destination() {
+        use mir2_client_bevy::quest_ui::{
+            QuestRouteNavigationIntent, QuestRouteTarget, QuestUiState,
+        };
+        for object_id in [2180, 2181] {
+            let npc = mir2_game_data::periodic_quests::npc(object_id).unwrap();
+            let mut context = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json())
+                .unwrap()
+                .into_resource();
+            context.map_index = Some(npc.map_index);
+            context.stamp.as_mut().unwrap().map_file_name = npc.map.clone();
+            context.rebuild_projections();
+            let stamp = context.stamp.clone().unwrap();
+            let mut tracker = quest_world_hunt_tracker();
+            tracker.active_quests[0].quest_index = 92010;
+            tracker.active_quests[0].status = QuestStatus::ReadyToTurnIn;
+            tracker.active_quests[0].finish_npc_index = Some(2180);
+            let mut state = QuestUiState::default();
+            state.pinned_primary_quest_index = Some(92010);
+            let intent = QuestRouteNavigationIntent {
+                target: QuestRouteTarget::TaskNpc { object_id },
+                quest_index: 92010,
+                reset_epoch: stamp.scene_revision,
+                map_index: npc.map_index,
+                x: npc.x,
+                y: npc.y,
+            };
+            let message =
+                quest_route_message(intent, &stamp, &context, &tracker, &state, None).unwrap();
+            assert_eq!(message["type"], "navigateQuestRoute");
+            assert_eq!(
+                message["routeTarget"],
+                json!({"type":"taskNpc","objectId":object_id})
+            );
+            assert_eq!(message["questIndex"], 92010);
+            assert_eq!(message["resetEpoch"], stamp.scene_revision);
+            assert_eq!(message["mapIndex"], npc.map_index);
+            assert_eq!(message["mapFileName"], npc.map);
+            assert_eq!(
+                (message["x"].as_i64(), message["y"].as_i64()),
+                (Some(i64::from(npc.x)), Some(i64::from(npc.y)))
+            );
+            for changed in [
+                QuestRouteNavigationIntent {
+                    quest_index: 0,
+                    ..intent
+                },
+                QuestRouteNavigationIntent {
+                    reset_epoch: intent.reset_epoch + 1,
+                    ..intent
+                },
+                QuestRouteNavigationIntent {
+                    map_index: intent.map_index + 1,
+                    ..intent
+                },
+                QuestRouteNavigationIntent {
+                    x: intent.x + 1,
+                    ..intent
+                },
+                QuestRouteNavigationIntent {
+                    target: QuestRouteTarget::TaskNpc {
+                        object_id: if object_id == 2180 { 2181 } else { 2180 },
+                    },
+                    ..intent
+                },
+            ] {
+                assert!(
+                    quest_route_message(changed, &stamp, &context, &tracker, &state, None)
+                        .is_none()
+                );
+            }
+            tracker.active_quests[0].status = QuestStatus::InProgress;
+            assert!(
+                quest_route_message(intent, &stamp, &context, &tracker, &state, None).is_none()
+            );
+            tracker.active_quests[0].status = QuestStatus::ReadyToTurnIn;
+            context.stamp.as_mut().unwrap().revision += 1;
+            assert!(
+                quest_route_message(intent, &stamp, &context, &tracker, &state, None).is_none()
+            );
+        }
+    }
+
+    #[test]
+    fn map_npc_route_output_preserves_selected_server_object_id_and_rechecks_its_scene() {
+        use mir2_client_bevy::big_map::{BigMapInfo, BigMapNpc, BigMapPoint};
+        use mir2_client_bevy::quest_ui::{
+            QuestRouteNavigationIntent, QuestRouteTarget, QuestUiState,
+        };
+        let mut context = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json())
+            .unwrap()
+            .into_resource();
+        context.map_index = Some(1);
+        context.rebuild_projections();
+        let map = context.big_map.as_mut().unwrap();
+        map.apply_new_map_info(
+            1,
+            BigMapInfo {
+                title: "BichonProvince".into(),
+                width: 800,
+                height: 800,
+                big_map: 101,
+                movements: vec![],
+                npcs: vec![BigMapNpc {
+                    index: 17,
+                    file_name: "BichonProvince/BorderVillage/Blacksmith".into(),
+                    name: "Blacksmith_Smith".into(),
+                    map_index: 1,
+                    location: BigMapPoint { x: 296, y: 613 },
+                    image: 0,
+                    rate: 0,
+                    show_on_big_map: true,
+                    big_map_icon: 112,
+                    object_id: 5,
+                    icon: 0,
+                    can_teleport_to: false,
+                }],
+            },
+        );
+        assert!(map.select_npc(5));
+        let stamp = context.stamp.clone().unwrap();
+        let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::MapNpc { object_id: 5 },
+            quest_index: 0,
+            reset_epoch: stamp.scene_revision,
+            map_index: 1,
+            x: 296,
+            y: 613,
+        };
+        let tracker = QuestTracker::default();
+        let state = QuestUiState::default();
+        let message =
+            quest_route_message(intent, &stamp, &context, &tracker, &state, None).unwrap();
+        assert_eq!(
+            message["routeTarget"],
+            json!({"type":"mapNpc","objectId":5})
+        );
+        assert_eq!(message["questIndex"], 0);
+        assert_eq!(
+            (message["x"].as_i64(), message["y"].as_i64()),
+            (Some(296), Some(613))
+        );
+        for changed in [
+            QuestRouteNavigationIntent {
+                quest_index: 23,
+                ..intent
+            },
+            QuestRouteNavigationIntent {
+                reset_epoch: intent.reset_epoch + 1,
+                ..intent
+            },
+            QuestRouteNavigationIntent { y: 614, ..intent },
+            QuestRouteNavigationIntent {
+                target: QuestRouteTarget::MapNpc { object_id: 17 },
+                ..intent
+            },
+        ] {
+            assert!(
+                quest_route_message(changed, &stamp, &context, &tracker, &state, None).is_none()
+            );
+        }
+        context.stamp.as_mut().unwrap().scene_revision += 1;
+        assert!(quest_route_message(intent, &stamp, &context, &tracker, &state, None).is_none());
+        context.stamp = Some(stamp.clone());
+        assert!(!context.big_map.as_mut().unwrap().select_npc(17));
+        assert!(quest_route_message(intent, &stamp, &context, &tracker, &state, None).is_none());
     }
 
     #[test]
     fn m8_strict_abi1_rejects_extended_player_and_cleanup_cannot_erase_full_hud() {
-        let mut old=json!({"generation":7,"revision":999,"inGame":false,"hostVisible":false,
+        let mut old = json!({"generation":7,"revision":999,"inGame":false,"hostVisible":false,
             "questLogOpen":false,"openRevision":1,"blocksGameplayKeys":false,"turnInBlocked":false,
             "profile":"crystal","quests":[],"completedKnown":false,"completedQuestIds":[],
             "dialog":{"isOpen":false,"hasInput":false},"player":{"hp":0,"maxHp":0,"level":0}});
-        old["player"]["crystalStats"]=json!([{"stat":0,"value":9}]);
-        let rejected=serde_json::from_value::<WebQuestUiSnapshot>(old.clone()).unwrap_err();
-        assert!(rejected.to_string().contains("unknown field `crystalStats`"));
-        old["player"].as_object_mut().unwrap().remove("crystalStats");
-        let cleanup=serde_json::from_value::<WebQuestUiSnapshot>(old).unwrap().into_models();
-        assert_eq!(cleanup.read_model.player.gold,0); // Actual ABI1/default loss boundary.
-        let mut model=UiReadModel {player:PlayerStats{gold:32,name:Some("Full".into()),
-            crystal_stats:Some(vec![mir2_client_bevy::read_model::CrystalPlayerStatModel{stat:0,value:9}]),..Default::default()}};
-        let expected=model.player.clone();let mut ingress=mir2_client_bevy::read_model::UiReadModelIngress::default();
-        assert!(ingress.apply_full(&mut model,7,1,Some(expected.clone())));
-        assert!(!ingress.apply_legacy_quest(&mut model,7,999,cleanup.read_model.player));
-        assert_eq!(model.player,expected);
+        old["player"]["crystalStats"] = json!([{"stat":0,"value":9}]);
+        let rejected = serde_json::from_value::<WebQuestUiSnapshot>(old.clone()).unwrap_err();
+        assert!(rejected
+            .to_string()
+            .contains("unknown field `crystalStats`"));
+        old["player"]
+            .as_object_mut()
+            .unwrap()
+            .remove("crystalStats");
+        let cleanup = serde_json::from_value::<WebQuestUiSnapshot>(old)
+            .unwrap()
+            .into_models();
+        assert_eq!(cleanup.read_model.player.gold, 0); // Actual ABI1/default loss boundary.
+        let mut model = UiReadModel {
+            player: PlayerStats {
+                gold: 32,
+                name: Some("Full".into()),
+                crystal_stats: Some(vec![mir2_client_bevy::read_model::CrystalPlayerStatModel {
+                    stat: 0,
+                    value: 9,
+                }]),
+                ..Default::default()
+            },
+        };
+        let expected = model.player.clone();
+        let mut ingress = mir2_client_bevy::read_model::UiReadModelIngress::default();
+        assert!(ingress.apply_full(&mut model, 7, 1, Some(expected.clone())));
+        assert!(!ingress.apply_legacy_quest(&mut model, 7, 999, cleanup.read_model.player));
+        assert_eq!(model.player, expected);
     }
 
     #[test]
@@ -2676,7 +3208,8 @@ mod tests {
     }
 
     #[test]
-    fn quest_locale_dto_distinguishes_missing_from_present_invalid_and_publishes_initial_capability() {
+    fn quest_locale_dto_distinguishes_missing_from_present_invalid_and_publishes_initial_capability(
+    ) {
         let base = json!({ "generation": 4, "revision": 10, "inGame": true,
             "hostVisible": true, "questLogOpen": true, "openRevision": 2,
             "blocksGameplayKeys": false, "turnInBlocked": false, "profile": "crystal",
@@ -2685,7 +3218,8 @@ mod tests {
         let missing: WebQuestUiSnapshot = serde_json::from_value(base.clone()).unwrap();
         assert_eq!(missing.language, QuestPresentationLocale::default());
         for language in ["en", "zh-CN", "es", "pt-BR"] {
-            let mut value = base.clone(); value["language"] = json!(language);
+            let mut value = base.clone();
+            value["language"] = json!(language);
             let snapshot: WebQuestUiSnapshot = serde_json::from_value(value).unwrap();
             assert_eq!(snapshot.language.0.code(), language);
             assert_eq!(snapshot.validate(), Ok(()), "valid locale DTO {language}");
@@ -2694,15 +3228,34 @@ mod tests {
             assert!(!snapshot.is_newer_than(5, 0));
             assert!(snapshot.is_newer_than(3, 100));
         }
-        for invalid in [json!(null), json!(4), json!(true), json!({}), json!([]),
-            json!("en-US"), json!("EN"), json!("zh"), json!("pt"), json!("es-ES"), json!("")] {
-            let mut value = base.clone(); value["language"] = invalid.clone();
-            assert!(serde_json::from_value::<WebQuestUiSnapshot>(value).is_err(), "{invalid}");
+        for invalid in [
+            json!(null),
+            json!(4),
+            json!(true),
+            json!({}),
+            json!([]),
+            json!("en-US"),
+            json!("EN"),
+            json!("zh"),
+            json!("pt"),
+            json!("es-ES"),
+            json!(""),
+        ] {
+            let mut value = base.clone();
+            value["language"] = invalid.clone();
+            assert!(
+                serde_json::from_value::<WebQuestUiSnapshot>(value).is_err(),
+                "{invalid}"
+            );
         }
         let original = serde_json::to_string(&base).unwrap();
-        let duplicate = format!("{{\"language\":\"en\",\"language\":\"es\",{}", &original[1..]);
+        let duplicate = format!(
+            "{{\"language\":\"en\",\"language\":\"es\",{}",
+            &original[1..]
+        );
         assert!(serde_json::from_str::<WebQuestUiSnapshot>(&duplicate).is_err());
-        let mut unknown = base; unknown["locale"] = json!("en");
+        let mut unknown = base;
+        unknown["locale"] = json!("en");
         assert!(serde_json::from_value::<WebQuestUiSnapshot>(unknown).is_err());
         let initial = serde_json::to_value(WebQuestUiStatus::default()).unwrap();
         assert_eq!(initial["questLocaleVersion"], 1);
@@ -2892,30 +3445,77 @@ mod tests {
 
     #[test]
     fn quest_name_targets_are_native_tracker_projection_with_current_full_stamp() {
-        let mut world=serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json()).unwrap().into_resource();
-        let stamp=world.stamp.clone().unwrap(); let tracker=quest_world_hunt_tracker();
-        let host=QuestUiHostContext { generation:stamp.generation,revision:stamp.revision,in_game:true,host_visible:true,..Default::default() };
-        let actual=QuestNameTargets::from_context(&world,&host,&tracker,true);
-        let expected:Vec<u32>=world.raw_entities.iter().filter(|row| row.kind==mir2_client_bevy::entities::EntityKind::Monster && row.dead==Some(false)
-            && mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster(&tracker,&row.name)).map(|row| row.object_id).collect();
-        assert!(actual.known); assert_eq!(actual.object_ids,expected); assert!(actual.object_ids.contains(&44));
-        assert_eq!(actual.stamp.as_ref(),Some(&stamp));
-        let json=serde_json::to_value(&actual).unwrap(); assert_eq!(json["version"],1);
-        assert_eq!(json["stamp"]["sceneRevision"],stamp.scene_revision);
-        world.raw_entities.iter_mut().find(|row|row.object_id==44).unwrap().dead=Some(true);
-        assert!(!QuestNameTargets::from_context(&world,&host,&tracker,true).object_ids.contains(&44));
+        let mut world = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json())
+            .unwrap()
+            .into_resource();
+        let stamp = world.stamp.clone().unwrap();
+        let tracker = quest_world_hunt_tracker();
+        let host = QuestUiHostContext {
+            generation: stamp.generation,
+            revision: stamp.revision,
+            in_game: true,
+            host_visible: true,
+            ..Default::default()
+        };
+        let actual = QuestNameTargets::from_context(&world, &host, &tracker, true);
+        let expected: Vec<u32> = world
+            .raw_entities
+            .iter()
+            .filter(|row| {
+                row.kind == mir2_client_bevy::entities::EntityKind::Monster
+                    && row.dead == Some(false)
+                    && mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster(
+                        &tracker, &row.name,
+                    )
+            })
+            .map(|row| row.object_id)
+            .collect();
+        assert!(actual.known);
+        assert_eq!(actual.object_ids, expected);
+        assert!(actual.object_ids.contains(&44));
+        assert_eq!(actual.stamp.as_ref(), Some(&stamp));
+        let json = serde_json::to_value(&actual).unwrap();
+        assert_eq!(json["version"], 1);
+        assert_eq!(json["stamp"]["sceneRevision"], stamp.scene_revision);
+        world
+            .raw_entities
+            .iter_mut()
+            .find(|row| row.object_id == 44)
+            .unwrap()
+            .dead = Some(true);
+        assert!(
+            !QuestNameTargets::from_context(&world, &host, &tracker, true)
+                .object_ids
+                .contains(&44)
+        );
     }
     #[test]
     fn quest_name_targets_missing_context_stale_host_or_incomplete_quest_are_unknown_or_empty() {
-        let world=serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json()).unwrap().into_resource();
-        let stamp=world.stamp.clone().unwrap(); let mut tracker=quest_world_hunt_tracker();
-        let mut host=QuestUiHostContext { generation:stamp.generation,revision:stamp.revision,in_game:true,host_visible:true,..Default::default() };
-        assert!(!QuestNameTargets::from_context(&world,&host,&tracker,false).known);
-        host.revision+=1; let stale=QuestNameTargets::from_context(&world,&host,&tracker,true);
-        assert!(!stale.known); assert!(stale.stamp.is_none()); assert!(stale.object_ids.is_empty());
-        host.revision=stamp.revision; tracker.active_quests[0].objectives[0].current=2;
-        let complete=QuestNameTargets::from_context(&world,&host,&tracker,true); assert!(complete.known); assert!(complete.object_ids.is_empty());
-        host.host_visible=false; assert!(!QuestNameTargets::from_context(&world,&host,&tracker,true).known);
-        assert!(!QuestNameTargets::from_context(&Default::default(),&host,&tracker,true).known);
+        let world = serde_json::from_value::<WebQuestWorldContext>(quest_world_v2_json())
+            .unwrap()
+            .into_resource();
+        let stamp = world.stamp.clone().unwrap();
+        let mut tracker = quest_world_hunt_tracker();
+        let mut host = QuestUiHostContext {
+            generation: stamp.generation,
+            revision: stamp.revision,
+            in_game: true,
+            host_visible: true,
+            ..Default::default()
+        };
+        assert!(!QuestNameTargets::from_context(&world, &host, &tracker, false).known);
+        host.revision += 1;
+        let stale = QuestNameTargets::from_context(&world, &host, &tracker, true);
+        assert!(!stale.known);
+        assert!(stale.stamp.is_none());
+        assert!(stale.object_ids.is_empty());
+        host.revision = stamp.revision;
+        tracker.active_quests[0].objectives[0].current = 2;
+        let complete = QuestNameTargets::from_context(&world, &host, &tracker, true);
+        assert!(complete.known);
+        assert!(complete.object_ids.is_empty());
+        host.host_visible = false;
+        assert!(!QuestNameTargets::from_context(&world, &host, &tracker, true).known);
+        assert!(!QuestNameTargets::from_context(&Default::default(), &host, &tracker, true).known);
     }
 }

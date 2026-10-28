@@ -5,18 +5,18 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 // Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
-const sources = { rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
+const sources = { npcPurchaseClient:"../lib/npc-purchase-client.ts", rankingInspectRequests:"../lib/ranking-inspect-requests.ts", pearlSource:"../lib/npc-pearl-buy-source.ts", crystalItem:"../lib/crystal-item-source.ts", repair:"../lib/npc-repair-service.ts", fishingSource: "../lib/world-fishing-source.ts", bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { npcPurchaseClient:{}, rankingInspectRequests:{}, pearlSource:{"./crystal-item-source":"crystalItem"}, crystalItem:{}, repair:{"./equipment-gateway-adapter":"equipment"}, fishingSource: {}, bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
-  rental: { "./social-incoming-replies": "social" }, bag: { "./world-model/item-identity": "identity" },
-  socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {} };
+  rental: { "./social-incoming-replies": "social", "./npc-purchase-client": "npcPurchaseClient" }, bag: { "./world-model/item-identity": "identity" },
+  socialItems: { "./bevy-bag-model": "bag", "./world-model/item-identity": "identity" }, stage5:{}, tooltip:{"./crystal-item-source":"crystalItem"}, guildBuff:{}, socialActions: {}, extended: {"./npc-purchase-client":"npcPurchaseClient"} };
 const modules = new Map();
 function loadPure(name) {
   assert(Object.hasOwn(sources, name), "module outside pure allowlist");
@@ -82,7 +82,7 @@ const names = ["worldFishingOwner", "cancelWorldFishingGesture", "retireWorldFis
   "submitPasswordLoginWithCredentials", "submitLogin", "submitSuiLogin", "submitIdentitySession",
   "quickEnterWorld", "captureIdentityIntent", "identityIntentCurrent", "linkCurrentSuiIdentity", "setIdentityLinkBusy",
   "clearGatewayReconnectTimer", "setGatewayReconnectStatus", "resetGatewayReconnectState", "createIdleReconnectStatus", "flushGatewayProtocolQueue", "captureSpouseUiSource", "spouseUiSourceCurrent", "mailSpouse", "whisperSpouse", "openMailWindow",
-  "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw",
+  "submitStorageTransfer", "storeItem", "takeBackItem", "send", "sendRaw", "recordNpcPurchaseAction",
   "itemCommandRequiresOwner", "retireEquipmentSession", "advanceHeroWindowEpochs", "mailParcelItemsIdle", "endStorageService", "closeNpcRepairService", "retireNpcShopService",
   "currentSpellsOwner", "currentSocialReplyOwner", "currentSocialReceiveOwner", "sameSocialPhysicalOwner",
   "socialReplyWindowOpen", "captureSocialRequest", "closeSocialReplyWindow", "replySocialRequest", "retireSocialRequests",
@@ -215,7 +215,9 @@ assert.ok(authControlsInitializer);
 // Extract only the current pure normalizer; its type-only world import is not run.
 const pureQuestMap = extractPureDeclarations("../lib/bevy-quest-world-context.ts", ["normalizeQuestMapFileName"]);
 const fishingRefNames = ["worldFishingSourceRef", "worldFishingCommitRef", "worldFishingGestureRegistryRef",
-  "worldFishingActiveGestureRef", "worldFishingQueuedRef", "worldFishingCastClockRef", "questSceneRevisionRef"];
+  "worldFishingActiveGestureRef", "worldFishingQueuedRef", "worldFishingCastClockRef", "questSceneRevisionRef",
+  "npcPurchaseClientRef", "npcPurchaseUnavailableRef", "npcPurchaseEconomicSourceRef", "npcPurchaseDisplaySourceRef",
+  "npcPurchaseOptInSocketsRef", "npcPurchaseSendActionRef", "npcPurchaseActionRef"];
 const fishingRefInitializers = new Map();
 (function visitFishingRefs(node) {
   if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && fishingRefNames.includes(node.name.text)) {
@@ -318,7 +320,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     } },
     currentEquipmentOwner: token => token != null && Object.keys(owner).every(key => token[key] === liveOwner.current[key]),
     rejectEquipmentCommand: reason => { logs.push(reason); return false; },
-    combatIngressRef: { current: null }, combatRawRef: { current: null },
+    combatIngressRef: { current: null }, combatRawRef: { current: null }, combatBaselineSourceRef: { current: null },
     combatMastersRef: { current: new Map() }, combatPointerRef: { current: null },
     spellsIngressRef: { current: null }, spellsRawSnapshotRef: { current: null },
     mailParcelRef: { current: null }, mailIngressRef: { current: null },
@@ -365,6 +367,7 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     isMovementConsoleCommand: () => false, isCombatResolutionCommand: () => false,
     recordDebugEvent: () => {}, appendLog: message => logs.push(message),
     t: (key, _args, fallback) => fallback ?? key,
+    setNpcPurchaseActionStatus: value => { scope.npcPurchaseActionStatus = value; },
   };
   // These are real source/cancel closures with inactive gesture custody. This
   // storage/social harness has no committed Fishing runtime, proof or physical edge.

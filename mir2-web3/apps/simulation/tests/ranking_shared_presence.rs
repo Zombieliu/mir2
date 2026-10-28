@@ -4,8 +4,8 @@ use mir2_protocol::{ClientPacket, MirClass, MirGender, PlayerInspectInfo, Server
 use mir2_simulation::{
     AccountRecord, CharacterRecord, CharacterSaveRecord, InProcessWorldRuntime,
     RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence,
-    RankingInspectRequest, SimulationConfig, SimulationSession, Stage5FriendIdentity,
-    WorldCommand, WorldRuntime,
+    RankingInspectRequest, SimulationConfig, SimulationSession, Stage5FriendIdentity, WorldCommand,
+    WorldRuntime,
 };
 use serde_json::json;
 
@@ -127,8 +127,11 @@ const LIVE_TARGET_ACCOUNT: &str = "ranking-live-target";
 const LIVE_WEAPON_UID: u64 = 70_701;
 
 fn runtime_equipment(slot: &str, item_type: u8, uid: u64) -> String {
-    let item = mir2_game_data::crystal_item_manifest_ref().items.iter()
-        .find(|item| item.item_type == item_type).expect("actual Crystal equipment template");
+    let item = mir2_game_data::crystal_item_manifest_ref()
+        .items
+        .iter()
+        .find(|item| item.item_type == item_type)
+        .expect("actual Crystal equipment template");
     json!({
         "key": format!("crystal-item-{}", item.item_index),
         "slot": slot, "name": item.name, "icon": item.image,
@@ -136,7 +139,8 @@ fn runtime_equipment(slot: &str, item_type: u8, uid: u64) -> String {
         "quantity": 1, "durability_current": item.durability,
         "durability_max": item.durability, "attack": 0, "defence": 0,
         "user_item_unique_id": uid, "user_item_metadata": {"item_index": item.item_index}
-    }).to_string()
+    })
+    .to_string()
 }
 
 fn inspect_runtime_config() -> SimulationConfig {
@@ -150,7 +154,11 @@ fn inspect_runtime_config() -> SimulationConfig {
             (LIVE_TARGET_ACCOUNT, LIVE_TARGET, "LiveRankTarget", 52, 11),
         ] {
             let character = CharacterRecord {
-                index, name: name.into(), level, class: MirClass::Warrior, gender: MirGender::Male,
+                index,
+                name: name.into(),
+                level,
+                class: MirClass::Warrior,
+                gender: MirGender::Male,
             };
             let mut account = AccountRecord::new(character);
             let save = account.saves.get_mut(&index).unwrap();
@@ -159,11 +167,15 @@ fn inspect_runtime_config() -> SimulationConfig {
             save.position = config.spawn.clone();
             save.equipment_items_explicit_empty = true;
             save.equipment_items_json.clear();
-            save.stage5_systems_json = Some(json!({
-                "appearance": {"hair": hair}, "relationship": {"partnerIdentity": null}
-            }).to_string());
+            save.stage5_systems_json = Some(
+                json!({
+                    "appearance": {"hair": hair}, "relationship": {"partnerIdentity": null}
+                })
+                .to_string(),
+            );
             if index == LIVE_TARGET {
-                save.equipment_items_json.push(runtime_equipment("weapon", 1, LIVE_WEAPON_UID));
+                save.equipment_items_json
+                    .push(runtime_equipment("weapon", 1, LIVE_WEAPON_UID));
             }
             store.accounts.insert(account_id.into(), account);
         }
@@ -172,23 +184,45 @@ fn inspect_runtime_config() -> SimulationConfig {
 }
 
 fn runtime_packet(runtime: &mut InProcessWorldRuntime, packet: ClientPacket) -> Vec<ServerPacket> {
-    runtime.execute(WorldCommand::ClientPacket(packet)).expect("memory runtime packet")
+    runtime
+        .execute(WorldCommand::ClientPacket(packet))
+        .expect("memory runtime packet")
 }
 
 fn runtime_login_start(runtime: &mut InProcessWorldRuntime, account_id: &str, index: i32) {
-    let login = runtime_packet(runtime, ClientPacket::Login {
-        account_id: account_id.into(), password: "demo".into(),
-    });
-    assert!(login.iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
-    let start = runtime_packet(runtime, ClientPacket::StartGame { character_index: index });
-    assert!(start.iter().any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+    let login = runtime_packet(
+        runtime,
+        ClientPacket::Login {
+            account_id: account_id.into(),
+            password: "demo".into(),
+        },
+    );
+    assert!(login
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    let start = runtime_packet(
+        runtime,
+        ClientPacket::StartGame {
+            character_index: index,
+        },
+    );
+    assert!(start
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
 }
 
 fn prepare_runtime_inspect(runtime: &InProcessWorldRuntime) -> RankingInspectRequest {
-    let request = runtime.prepare_ranking_inspect(LIVE_TARGET as u32).expect("active runtime inspect ticket");
-    assert_eq!(request.target_identity(), &RankingInspectIdentity {
-        account_id: LIVE_TARGET_ACCOUNT.into(), character_index: LIVE_TARGET, name: "LiveRankTarget".into(),
-    });
+    let request = runtime
+        .prepare_ranking_inspect(LIVE_TARGET as u32)
+        .expect("active runtime inspect ticket");
+    assert_eq!(
+        request.target_identity(),
+        &RankingInspectIdentity {
+            account_id: LIVE_TARGET_ACCOUNT.into(),
+            character_index: LIVE_TARGET,
+            name: "LiveRankTarget".into(),
+        }
+    );
     request
 }
 
@@ -212,30 +246,48 @@ fn ranking_inspect_runtime_online_uses_current_target_export_instead_of_saved_fi
         // The online owner's loaded state remains current while this saved image
         // represents an older level and a different, valid worn item.
         let mut store = config.account_store.lock().unwrap();
-        let save = store.accounts.get_mut(LIVE_TARGET_ACCOUNT).unwrap().saves.get_mut(&LIVE_TARGET).unwrap();
+        let save = store
+            .accounts
+            .get_mut(LIVE_TARGET_ACCOUNT)
+            .unwrap()
+            .saves
+            .get_mut(&LIVE_TARGET)
+            .unwrap();
         save.character.level = 17;
         save.equipment_items_json = vec![runtime_equipment("helmet", 4, LIVE_WEAPON_UID + 1)];
-        save.stage5_systems_json = Some(json!({
-            "appearance": {"hair": 4}, "relationship": {"partnerIdentity": null}
-        }).to_string());
+        save.stage5_systems_json = Some(
+            json!({
+                "appearance": {"hair": 4}, "relationship": {"partnerIdentity": null}
+            })
+            .to_string(),
+        );
     }
-    let current: RankingInspectOnlineProjection = target.active_ranking_inspect_projection()
+    let current: RankingInspectOnlineProjection = target
+        .active_ranking_inspect_projection()
         .expect("matching active target owner exports its live equipment");
     assert_eq!(current.identity.account_id, LIVE_TARGET_ACCOUNT);
     assert_eq!(current.info.level, 52);
     assert_eq!(current.info.hair, 11);
-    assert_eq!(current.info.equipment[0].as_ref().unwrap().unique_id, LIVE_WEAPON_UID);
+    assert_eq!(
+        current.info.equipment[0].as_ref().unwrap().unique_id,
+        LIVE_WEAPON_UID
+    );
     assert!(current.info.equipment[2].is_none());
     let online = runtime_inspected(viewer.complete_ranking_inspect(
-        prepare_runtime_inspect(&viewer), RankingInspectPresence::Online(Some(current.clone())),
+        prepare_runtime_inspect(&viewer),
+        RankingInspectPresence::Online(Some(current.clone())),
     ));
     assert_eq!(online, current.info);
     let saved = runtime_inspected(viewer.complete_ranking_inspect(
-        prepare_runtime_inspect(&viewer), RankingInspectPresence::Offline,
+        prepare_runtime_inspect(&viewer),
+        RankingInspectPresence::Offline,
     ));
     assert_eq!((saved.level, saved.hair), (17, 4));
     assert!(saved.equipment[0].is_none());
-    assert_eq!(saved.equipment[2].as_ref().unwrap().unique_id, LIVE_WEAPON_UID + 1);
+    assert_eq!(
+        saved.equipment[2].as_ref().unwrap().unique_id,
+        LIVE_WEAPON_UID + 1
+    );
     assert_ne!(online.equipment, saved.equipment);
 }
 
@@ -244,12 +296,21 @@ fn ranking_inspect_runtime_online_none_and_unknown_never_fall_back_to_valid_save
     let mut viewer = InProcessWorldRuntime::new(inspect_runtime_config());
     runtime_login_start(&mut viewer, "demo", 0);
     let saved = runtime_inspected(viewer.complete_ranking_inspect(
-        prepare_runtime_inspect(&viewer), RankingInspectPresence::Offline,
+        prepare_runtime_inspect(&viewer),
+        RankingInspectPresence::Offline,
     ));
     assert_eq!(saved.name, "LiveRankTarget");
-    assert_eq!(saved.equipment[0].as_ref().unwrap().unique_id, LIVE_WEAPON_UID);
-    for presence in [RankingInspectPresence::Online(None), RankingInspectPresence::Unknown] {
-        assert!(viewer.complete_ranking_inspect(prepare_runtime_inspect(&viewer), presence).is_empty());
+    assert_eq!(
+        saved.equipment[0].as_ref().unwrap().unique_id,
+        LIVE_WEAPON_UID
+    );
+    for presence in [
+        RankingInspectPresence::Online(None),
+        RankingInspectPresence::Unknown,
+    ] {
+        assert!(viewer
+            .complete_ranking_inspect(prepare_runtime_inspect(&viewer), presence)
+            .is_empty());
     }
 }
 
@@ -262,29 +323,47 @@ fn ranking_inspect_runtime_rejects_foreign_hero_and_malformed_online_projections
     runtime_login_start(&mut target, LIVE_TARGET_ACCOUNT, LIVE_TARGET);
     let current = target.active_ranking_inspect_projection().unwrap();
     let accepted = runtime_inspected(viewer.complete_ranking_inspect(
-        prepare_runtime_inspect(&viewer), RankingInspectPresence::Online(Some(current.clone())),
+        prepare_runtime_inspect(&viewer),
+        RankingInspectPresence::Online(Some(current.clone())),
     ));
     assert_eq!(accepted.equipment.len(), 14);
-    for violation in ["account", "index", "name", "hero", "width13", "width15", "zeroCount", "wrongSlot"] {
+    for violation in [
+        "account",
+        "index",
+        "name",
+        "hero",
+        "width13",
+        "width15",
+        "zeroCount",
+        "wrongSlot",
+    ] {
         let mut projection = current.clone();
         match violation {
             "account" => projection.identity.account_id = "demo".into(),
             "index" => projection.identity.character_index = 0,
             "name" => projection.info.name = "RuntimeViewer".into(),
             "hero" => projection.info.is_hero = true,
-            "width13" => { let _ = projection.info.equipment.pop(); },
+            "width13" => {
+                let _ = projection.info.equipment.pop();
+            }
             "width15" => projection.info.equipment.push(None),
             "zeroCount" => projection.info.equipment[0].as_mut().unwrap().count = 0,
             "wrongSlot" => {
                 let mut wrong_slot = projection.info.equipment[0].as_ref().unwrap().clone();
                 wrong_slot.unique_id = LIVE_WEAPON_UID + 1;
                 projection.info.equipment[1] = Some(wrong_slot);
-            },
+            }
             _ => unreachable!(),
         }
-        assert!(viewer.complete_ranking_inspect(
-            prepare_runtime_inspect(&viewer), RankingInspectPresence::Online(Some(projection)),
-        ).is_empty(), "online violation must reject without offline fallback: {violation}");
+        assert!(
+            viewer
+                .complete_ranking_inspect(
+                    prepare_runtime_inspect(&viewer),
+                    RankingInspectPresence::Online(Some(projection)),
+                )
+                .is_empty(),
+            "online violation must reject without offline fallback: {violation}"
+        );
     }
 }
 
@@ -298,18 +377,29 @@ fn ranking_inspect_runtime_single_use_ticket_rejects_requester_logout_relogin_ab
     let old_ticket = prepare_runtime_inspect(&viewer);
     let target_identity = old_ticket.target_identity().clone();
     let logout = runtime_packet(&mut viewer, ClientPacket::LogOut);
-    assert!(logout.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
+    assert!(logout
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })));
     assert!(viewer.prepare_ranking_inspect(LIVE_TARGET as u32).is_none());
     assert!(viewer.active_ranking_inspect_projection().is_none());
     runtime_login_start(&mut viewer, "demo", 0);
-    assert_eq!(viewer.active_ranking_inspect_projection().unwrap().identity, identity_before);
-    assert!(config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision > revision_before);
+    assert_eq!(
+        viewer.active_ranking_inspect_projection().unwrap().identity,
+        identity_before
+    );
+    assert!(
+        config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision > revision_before
+    );
     let fresh_ticket = prepare_runtime_inspect(&viewer);
     assert_eq!(fresh_ticket.target_identity(), &target_identity);
     // Requests are non-Clone and completion consumes them. This actual stale
     // owned ticket must fail even after the same account/index/name reappears.
-    assert!(viewer.complete_ranking_inspect(old_ticket, RankingInspectPresence::Offline).is_empty());
-    let fresh = runtime_inspected(viewer.complete_ranking_inspect(fresh_ticket, RankingInspectPresence::Offline));
+    assert!(viewer
+        .complete_ranking_inspect(old_ticket, RankingInspectPresence::Offline)
+        .is_empty());
+    let fresh = runtime_inspected(
+        viewer.complete_ranking_inspect(fresh_ticket, RankingInspectPresence::Offline),
+    );
     assert_eq!(fresh.name, "LiveRankTarget");
 }
 
@@ -319,17 +409,33 @@ fn ranking_inspect_runtime_online_partner_uses_exact_account_and_current_name() 
     {
         let mut store = config.account_store.lock().unwrap();
         for (account_id, name) in [("partner", "OldPartner"), ("unrelated", "WrongPartner")] {
-            store.accounts.insert(account_id.into(), AccountRecord::new(CharacterRecord {
-                index: 31, name: name.into(), level: 30, class: MirClass::Wizard, gender: MirGender::Female,
-            }));
+            store.accounts.insert(
+                account_id.into(),
+                AccountRecord::new(CharacterRecord {
+                    index: 31,
+                    name: name.into(),
+                    level: 30,
+                    class: MirClass::Wizard,
+                    gender: MirGender::Female,
+                }),
+            );
         }
         store.accounts.get_mut("partner").unwrap().characters[0].name = "CurrentPartner".into();
-        store.accounts.get_mut(LIVE_TARGET_ACCOUNT).unwrap().saves.get_mut(&LIVE_TARGET).unwrap()
-            .stage5_systems_json = Some(json!({
+        store
+            .accounts
+            .get_mut(LIVE_TARGET_ACCOUNT)
+            .unwrap()
+            .saves
+            .get_mut(&LIVE_TARGET)
+            .unwrap()
+            .stage5_systems_json = Some(
+            json!({
                 "appearance": {"hair": 11},
                 "relationship": {"partnerIdentity": {"accountId": "partner", "characterIndex": 31},
                     "partnerName": "OldPartner", "authorityRevision": 1}
-            }).to_string());
+            })
+            .to_string(),
+        );
         store.accounts.get_mut("partner").unwrap().saves.get_mut(&31).unwrap()
             .stage5_systems_json = Some(json!({
                 "appearance": {"hair": 0},
@@ -342,35 +448,58 @@ fn ranking_inspect_runtime_online_partner_uses_exact_account_and_current_name() 
     let mut target = InProcessWorldRuntime::new(config);
     runtime_login_start(&mut target, LIVE_TARGET_ACCOUNT, LIVE_TARGET);
     let mut current = target.active_ranking_inspect_projection().unwrap();
-    assert_eq!(current.partner_identity,
-        Some(Stage5FriendIdentity { account_id: "partner".into(), character_index: 31 }));
+    assert_eq!(
+        current.partner_identity,
+        Some(Stage5FriendIdentity {
+            account_id: "partner".into(),
+            character_index: 31
+        })
+    );
     assert_eq!(current.info.lover_name, "CurrentPartner");
     current.info.lover_name = "UntrustedCachedPartnerName".into();
     let info = runtime_inspected(viewer.complete_ranking_inspect(
-        prepare_runtime_inspect(&viewer), RankingInspectPresence::Online(Some(current)),
+        prepare_runtime_inspect(&viewer),
+        RankingInspectPresence::Online(Some(current)),
     ));
     assert_eq!(info.name, "LiveRankTarget");
     assert_eq!(info.lover_name, "CurrentPartner");
 }
 
 #[test]
-fn ranking_inspect_disconnect_retires_requester_and_old_ticket_even_after_exact_checkpoint_restore() {
+fn ranking_inspect_disconnect_retires_requester_and_old_ticket_even_after_exact_checkpoint_restore()
+{
     let mut viewer = InProcessWorldRuntime::new(inspect_runtime_config());
     runtime_login_start(&mut viewer, "demo", 0);
     let before = viewer.active_ranking_inspect_projection().unwrap().identity;
     let checkpoint = viewer.active_character_checkpoint().unwrap();
     let old_ticket = prepare_runtime_inspect(&viewer);
     let packets = runtime_packet(&mut viewer, ClientPacket::Disconnect);
-    assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::Disconnect { .. })));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Disconnect { .. })));
     // Retained personal state exists only for persistence recovery.
     assert!(viewer.prepare_ranking_inspect(LIVE_TARGET as u32).is_none());
     assert!(viewer.active_ranking_inspect_projection().is_none());
-    viewer.restore_active_character_checkpoint(&checkpoint).unwrap();
-    assert_eq!(viewer.active_ranking_inspect_projection().unwrap().identity, before);
-    assert_eq!(viewer.active_character_checkpoint().unwrap().revision, checkpoint.revision);
-    assert!(viewer.complete_ranking_inspect(old_ticket, RankingInspectPresence::Offline).is_empty());
+    viewer
+        .restore_active_character_checkpoint(&checkpoint)
+        .unwrap();
+    assert_eq!(
+        viewer.active_ranking_inspect_projection().unwrap().identity,
+        before
+    );
+    assert_eq!(
+        viewer.active_character_checkpoint().unwrap().revision,
+        checkpoint.revision
+    );
+    assert!(viewer
+        .complete_ranking_inspect(old_ticket, RankingInspectPresence::Offline)
+        .is_empty());
     let fresh = prepare_runtime_inspect(&viewer);
-    assert_eq!(runtime_inspected(viewer.complete_ranking_inspect(fresh, RankingInspectPresence::Offline)).name, "LiveRankTarget");
+    assert_eq!(
+        runtime_inspected(viewer.complete_ranking_inspect(fresh, RankingInspectPresence::Offline))
+            .name,
+        "LiveRankTarget"
+    );
 }
 
 #[test]
@@ -381,11 +510,25 @@ fn ranking_inspect_failed_disconnect_save_retires_queries_while_recovery_state_i
     let old_ticket = prepare_runtime_inspect(&viewer);
     {
         let mut store = config.account_store.lock().unwrap();
-        store.accounts.get_mut("demo").unwrap().saves.get_mut(&0).unwrap().revision += 1;
+        store
+            .accounts
+            .get_mut("demo")
+            .unwrap()
+            .saves
+            .get_mut(&0)
+            .unwrap()
+            .revision += 1;
     }
-    assert!(viewer.execute(WorldCommand::ClientPacket(ClientPacket::Disconnect)).is_err());
-    assert!(viewer.active_identity().is_some(), "failed saving preserves recovery identity");
+    assert!(viewer
+        .execute(WorldCommand::ClientPacket(ClientPacket::Disconnect))
+        .is_err());
+    assert!(
+        viewer.active_identity().is_some(),
+        "failed saving preserves recovery identity"
+    );
     assert!(viewer.prepare_ranking_inspect(LIVE_TARGET as u32).is_none());
     assert!(viewer.active_ranking_inspect_projection().is_none());
-    assert!(viewer.complete_ranking_inspect(old_ticket, RankingInspectPresence::Offline).is_empty());
+    assert!(viewer
+        .complete_ranking_inspect(old_ticket, RankingInspectPresence::Offline)
+        .is_empty());
 }

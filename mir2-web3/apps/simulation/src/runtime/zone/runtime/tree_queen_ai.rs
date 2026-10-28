@@ -651,7 +651,7 @@ mod power_tests {
     use super::*;
     use mir2_protocol::MirGender;
     fn fixture(id: u32) -> ZoneRuntime {
-        let mut z = ZoneRuntime::new(ZoneKey::for_map("tree-buff"));
+        let mut z = ZoneRuntime::new(ZoneKey::for_map("d024"));
         z.handle(ZoneCommand::Join(ZoneJoin {
             session_id: SessionId::new("target"),
             account_id: "test".into(),
@@ -664,8 +664,8 @@ mod power_tests {
             hp: 10000,
             max_hp: 10000,
             mp: 0,
-            map_file_name: "tree-buff".into(),
-            position: Point { x: 101, y: 100 },
+            map_file_name: "d024".into(),
+            position: Point { x: 21, y: 20 },
             direction: MirDirection::Left,
             chat_profile: Default::default(),
             combat_stats: Default::default(),
@@ -686,7 +686,7 @@ mod power_tests {
             attack_speed_ms: 1000,
             friendly_guild: None,
             defense: Default::default(),
-            position: Point { x: 100, y: 100 },
+            position: Point { x: 20, y: 20 },
             direction: MirDirection::Up,
             respawn: None,
             drops: Vec::new(),
@@ -759,8 +759,8 @@ mod power_tests {
         z.tree_root(
             97999,
             2,
-            Point { x: 101, y: 100 },
-            Point { x: 102, y: 100 },
+            Point { x: 21, y: 20 },
+            Point { x: 22, y: 20 },
             false,
             0,
             1,

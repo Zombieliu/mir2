@@ -9402,5 +9402,22 @@
   "monthly.CodeExpired": "รหัสหมดอายุแล้ว โปรดติดต่อผู้ดูแล",
   "monthly.LoginRequired": "โปรดเข้าสู่ระบบอีกครั้งเพื่อจัดการบัตรรายเดือน",
   "monthly.Banned": "บัญชีถูกระงับ โปรดติดต่อผู้ดูแล",
-  "monthly.Unavailable": "บริการบัตรรายเดือนไม่พร้อมใช้งาน โปรดลองใหม่ภายหลัง"
+  "monthly.Unavailable": "บริการบัตรรายเดือนไม่พร้อมใช้งาน โปรดลองใหม่ภายหลัง",
+  "shell.assassin_description": "นักฆ่าโจมตีด้วยดาบคู่และการลอบเร้น\nถนัดการโจมตีรวดเร็วและการเคลื่อนที่อย่างระมัดระวัง",
+  "shell.archer_description": "นักธนูโจมตีระยะไกลด้วยธนูและท่ายิงพิเศษ\nรักษาระยะห่างและเลือกตำแหน่งให้ดี",
+  "quest.practice.class.learn": "เรียนรู้ {skill}",
+  "quest.practice.class.normal_hit": "หลังเรียนรู้ {skill} ให้โจมตีมอนสเตอร์ให้โดนด้วยการโจมตีปกติ",
+  "quest.practice.class.toggle_hit": "เปิดใช้ {skill} แล้วสร้างความเสียหายแก่มอนสเตอร์ด้วยการโจมตีปกติ",
+  "quest.practice.class.spell_hit": "ใช้ {skill} สร้างความเสียหายแก่มอนสเตอร์ การโจมตีที่ไม่โดนจะไม่นับ",
+  "quest.supply.assassinPoisonEquip": "ดาบพิษ: สวมผงพิษแดงหรือเขียว ใช้ครั้งละ 1",
+  "quest.supply.assassinPoisonEquipped": "ดาบพิษ: สวมผงพิษแล้ว ใช้ครั้งละ 1",
+  "ui.questProgressHeading": "ความคืบหน้า",
+  "ui.questReturnHeading": "สถานที่ส่งภารกิจ",
+  "ui.questClientLoading": "กำลังเตรียมการดำเนินการภารกิจ…",
+  "ui.questClientUnavailable": "การดำเนินการภารกิจไม่พร้อมใช้งานชั่วคราว โปรดลองอีกครั้ง",
+  "ui.questActionPending": "กำลังดำเนินการตามคำขอของคุณ โปรดรอสักครู่",
+  "ui.questActionRewardRequired": "โปรดเลือกรางวัลก่อน",
+  "ui.questActionTalkToNpc": "พูดคุยกับ NPC ภารกิจเพื่อดำเนินการต่อ",
+  "ui.questActionStateChanged": "ภารกิจมีการเปลี่ยนแปลง โปรดตรวจสอบแล้วลองอีกครั้ง",
+  "ui.retry": "ลองอีกครั้ง"
 }

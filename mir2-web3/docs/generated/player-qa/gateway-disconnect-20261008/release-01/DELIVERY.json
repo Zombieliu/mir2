@@ -1,0 +1,740 @@
+{
+  "schema": "mir2.gateway.disconnect-delivery-evidence.v1",
+  "createdUtc": "2026-10-08T19:11:29.634538+00:00",
+  "sourceRevision": "536b4a59f3a8af43f6d4484238e2847573dfb106",
+  "sourceBranch": "codex/gateway-disconnect-lifecycle-20261008",
+  "ci": {
+    "schema": "mir2.gateway.disconnect-linux-ci.v1",
+    "createdUtc": "2026-10-08T17:52:15.107238+00:00",
+    "runId": "37810114063",
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/37810114063",
+    "revision": "536b4a59f3a8af43f6d4484238e2847573dfb106",
+    "runConclusion": "success",
+    "jobs": [
+      {
+        "name": "build-linux-x64",
+        "conclusion": "success",
+        "databaseId": 113424474146
+      },
+      {
+        "name": "siege-acceptance / siege-linux",
+        "conclusion": "success",
+        "databaseId": 113424474353
+      }
+    ],
+    "githubArtifactDigest": "sha256:d93048ee6f649b6ff21b03b5a2f16c698709452b2ee8bdb316373e063c4c4bf7",
+    "githubArtifactBytes": 33748377,
+    "archiveSha256": "02a70ed8487327a418b6ad3b3cf0d9227c6fa7a7812df73c199a8f40a4aee41b",
+    "archiveBytes": 34194659,
+    "binarySha256": "755b02a845869551c79017ecb6392a1faee8007ebc117001443a294feb050dba",
+    "binaryBytes": 83430592,
+    "zoneHostBinarySha256": "7bf5cd1b6aae49857b4dd887089fa69011aa967fba8ec2c9a02c0bd6d8d7a301",
+    "manifestSha256": "fa489066f81e38befa27fbdc639fc21cc4287596f4f754230f3f4adf73bd10ab",
+    "logSha256": "c35ee19f6ea2913ea7fccaaa3158f1c0dd04240da4d82a789c12ebc2ade22726",
+    "publicR2Upload": false,
+    "serverSwitched": false
+  },
+  "public": {
+    "schema": "mir2.gateway.disconnect-public-verification.v1",
+    "createdUtc": "2026-10-08T19:05:29.527596+00:00",
+    "revision": "536b4a59f3a8af43f6d4484238e2847573dfb106",
+    "runId": "37810114063",
+    "ciUrl": "https://github.com/Zombieliu/mir2/actions/runs/37810114063",
+    "binarySha256": "755b02a845869551c79017ecb6392a1faee8007ebc117001443a294feb050dba",
+    "ordinaryChecks": 44,
+    "nativeResumeChecks": 18,
+    "normalPublicChecks": 62,
+    "normalLogoutAcknowledgements": 14,
+    "resumeAcceptedAttempt": "native-resume-public-02",
+    "historicalResumeAttempt": {
+      "directory": "native-resume-public-01",
+      "passed": false,
+      "completedChecks": 15,
+      "failure": "Verified public WSS failed",
+      "includedInPassCount": false
+    },
+    "retryChanges": [
+      "Immutable output directory",
+      "Transport code/HTTP-status diagnostics only"
+    ],
+    "originalRealmUnchanged": true,
+    "clientReinstallRequired": false,
+    "nativeUiAccepted": false,
+    "fullQueuePressureTestedPublicly": false,
+    "fullGoalComplete": false,
+    "after": {
+      "binaryBytes": 83430592,
+      "binarySha256": "755b02a845869551c79017ecb6392a1faee8007ebc117001443a294feb050dba",
+      "files": {
+        "/etc/mir2-playtest/gateway.env": {
+          "bytes": 4036,
+          "sha256": "77f12d974ca32103673181669803c89283c68cf34a952c0a177b721c1d013729"
+        },
+        "/etc/systemd/system/mir2-playtest.service": {
+          "bytes": 2188,
+          "sha256": "9bf1b374db39732ad7b59e6d468086eea8c4563fbfb3185ef3bf9dfd714551a9"
+        },
+        "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf": {
+          "bytes": 188,
+          "sha256": "7ca27c867a1bbd5f8208a4af75c9f6c374dd6d4a509201be48c8b7e864a58839"
+        },
+        "/etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf": {
+          "bytes": 594,
+          "sha256": "d136270aad3a230fd882443afc26c17e49134ba2449e5beab67b7acc45ecd1a4"
+        }
+      },
+      "ok": true,
+      "original": {
+        "ok": true,
+        "pids": [
+          "3855184"
+        ],
+        "release": "/opt/mir2/gateway/releases/79ba815c0-checkpoint-base64",
+        "revision": null
+      },
+      "remoteZoneConfigured": false,
+      "tcp7200": 0,
+      "test": {
+        "ai_live": {
+          "discordDeadLettersTotal": 0,
+          "discordFailureTotal": 0,
+          "discordSuccessTotal": 0,
+          "distributionDeadLettersTotal": 0,
+          "distributionFailureTotal": 0,
+          "distributionSuccessTotal": 0,
+          "enabled": false,
+          "generatedSegmentsTotal": 0,
+          "mode": "shadow",
+          "modelFailureTotal": 0,
+          "modelSuccessTotal": 0,
+          "persistedSegmentsTotal": 0,
+          "persistenceErrorsTotal": 0,
+          "processedFramesTotal": 0,
+          "queuedDiscordDeliveries": 0,
+          "queuedDistributionDeliveries": 0,
+          "running": false,
+          "scoredHighlightsTotal": 0,
+          "ttsFailureTotal": 0,
+          "ttsSuccessTotal": 0
+        },
+        "capacity": {
+          "currentActiveSessions": 0,
+          "currentLoginInFlight": 0,
+          "currentNewCharacterInFlight": 0,
+          "currentReconnectLeases": 0,
+          "currentStartGameInFlight": 0,
+          "currentWsConnections": 0,
+          "maxActiveSessions": 51,
+          "maxLoginInFlight": 2,
+          "maxNewCharacterInFlight": 1,
+          "maxReconnectLeases": 51,
+          "maxStartGameInFlight": 2,
+          "maxWsConnections": 66
+        },
+        "channel_identity": {
+          "accountCount": 0,
+          "backend": "postgres",
+          "durable": true,
+          "identityCount": 0
+        },
+        "gameplay_events": {
+          "accepted": 0,
+          "configured": false,
+          "dropped": 0,
+          "failed": 0,
+          "lastError": null,
+          "published": 0,
+          "sink": "none",
+          "topic": null
+        },
+        "gate15": null,
+        "http": "ready",
+        "identity_backend": "postgres",
+        "ok": true,
+        "revision": "536b4a59f3a8af43f6d4484238e2847573dfb106",
+        "session_cache": {
+          "backend": "redis",
+          "configured": true,
+          "healthy": true,
+          "lastError": null,
+          "recordCount": 0,
+          "routeLeaseCount": 0,
+          "staleRecordCount": 0,
+          "ttlSeconds": 30
+        },
+        "spectator": {
+          "activeMaps": 1,
+          "activeViewers": 0,
+          "bufferedFrames": 90,
+          "dataDir": ".mir2-data/spectator",
+          "droppedFramesTotal": 0,
+          "persistedFramesTotal": 0,
+          "publishedFramesTotal": 113,
+          "recordingEnabled": false,
+          "recordingErrorsTotal": 0
+        },
+        "tcp_stub": "ready",
+        "ws": "ready"
+      },
+      "unit": {
+        "DropInPaths": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf /etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf",
+        "ExecMainStatus": "0",
+        "MainPID": "3099928",
+        "NRestarts": "0",
+        "Result": "success"
+      }
+    }
+  },
+  "automation": {
+    "schema": "mir2.classic.expired-heartbeat-stop.v1",
+    "automationId": "mir2-12",
+    "statusObserved": "PAUSED",
+    "scheduledDeadlineUtc": "2026-10-08T03:13:35Z",
+    "fullGoalComplete": false,
+    "goalNotMarkedComplete": true
+  },
+  "traceSanitization": [
+    {
+      "file": "ordinary-public-01/female-taoist-R2121cccbba.jsonl",
+      "originalRetainedLocallySha256": "a010786d4402f0cb8ac8bdbdc5737b29992829604aa8b72d0059f487ef7609d0",
+      "exportedSha256": "61670972996ce4badda89d3846452a0bfa9c6fcf56b6a263288fcd5e8e1a6346",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 717,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/female-taoist-relogin-R2121cccbba.jsonl",
+      "originalRetainedLocallySha256": "a59e4bb0957e53bf59fed4106dbd7ebc10534aa874f8ee26965e28724b74e4c9",
+      "exportedSha256": "357298f442fdefa9890a4efdd597b53dd966fe89daccc8693317997c2989d11e",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 715,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/initial-R2100cccbba.jsonl",
+      "originalRetainedLocallySha256": "cbe9b67e5ed83dfec0b78a2fbcfe2f0772e226b79b28facd074bb7f027ec7a8a",
+      "exportedSha256": "682c410ffb6ed18e5e2e28fb7d7f2b2379dc3f2ce550b34b1517b8c2ae85a19e",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 786,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/initial-R2101cccbba.jsonl",
+      "originalRetainedLocallySha256": "b17e48d61e5d1ac97eae3c6e1698c2aa07d2299cc14145935d90cd6e81b1f171",
+      "exportedSha256": "6c1c6ff41db7a90c7e993c835cb72d32a325bd27ac72bd4cdc79f93a0a44b33e",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 796,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/initial-R2110cccbba.jsonl",
+      "originalRetainedLocallySha256": "2f063828fc31561a7b93742d25ff1e1f847b4d4b82c6c2d6e3864692acd62b36",
+      "exportedSha256": "77f8132faaa06e04ef8598b22fbf197dc3c63cc4b6d459d136643859ce8c609d",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 804,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/initial-R2111cccbba.jsonl",
+      "originalRetainedLocallySha256": "af964cf4c5b66e5f30e6a18e3b5fda95cc7055905314c1835c0a133572cd5bc4",
+      "exportedSha256": "399207dae4fe68f445446f6193002da61250ad9995419644baa1d8c8d5e0610c",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 787,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/initial-R2120cccbba.jsonl",
+      "originalRetainedLocallySha256": "a7f40bfdeb025bc149a47d57fe43b7cf4ceae22408b5fe2d17f522cc2b3a96dd",
+      "exportedSha256": "856f5ff4e869a1d94cd506baa53ed48202f2d631696c6d5a4e30f6976bc035fb",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 720,
+      "originalCopiedIntoArchive": false
+    },
+    {
+      "file": "ordinary-public-01/warrior-relogin-R2100cccbba.jsonl",
+      "originalRetainedLocallySha256": "da33c91fe4998e0de0fca1cd8a0d06660eefa68d28fd78fd97fc4e63cf7216e9",
+      "exportedSha256": "afde5b2a19b9ec207b6d6a46d198da6c3c604f525a54c95e41441d1f5e622692",
+      "replacements": 1,
+      "fieldPaths": [
+        "/session/credentialId"
+      ],
+      "eventsPreserved": 768,
+      "originalCopiedIntoArchive": false
+    }
+  ],
+  "archive": {
+    "file": "original-release-evidence.zip",
+    "bytes": 2045642,
+    "sha256": "dd7b07f222085080ce40aea75f17875351031d63b15a9a0004e5e576f24074d6",
+    "entries": [
+      {
+        "file": "automation/expired-followup-stop.json",
+        "bytes": 228,
+        "sha256": "487a39b89541d667ecae5c13f79afae262e93e0a6d242352f7425fc43c96481e"
+      },
+      {
+        "file": "git/source-commit-01.json",
+        "bytes": 254,
+        "sha256": "98127e116a84a92fbb9bc184017ab8b5add5d1144936d5a20d2033dca3a20b03"
+      },
+      {
+        "file": "linux-ci/CI-VERIFIED.json",
+        "bytes": 1225,
+        "sha256": "2f2d7d4077fd03f33ea326331f97e3fd1286497d1e41144100b7d90bbc673127"
+      },
+      {
+        "file": "linux-ci/README.txt",
+        "bytes": 7476,
+        "sha256": "7cde83e530a922405c2d87b278dd9446537a8abf553b9b8b0a4c2e8425a1f3c2"
+      },
+      {
+        "file": "linux-ci/RELEASE.json",
+        "bytes": 1551,
+        "sha256": "7375393040127a3e8eeeb5a884aa9a17195ab19d29846de8ea60322138440f2e"
+      },
+      {
+        "file": "linux-ci/VERIFIED-FILES.json",
+        "bytes": 412,
+        "sha256": "fa489066f81e38befa27fbdc639fc21cc4287596f4f754230f3f4adf73bd10ab"
+      },
+      {
+        "file": "linux-ci/ci-artifacts-original.json",
+        "bytes": 751,
+        "sha256": "1066574186129e15f6d22c33eca2931738c36e4c27552e900b6a70a0a1fbc4ec"
+      },
+      {
+        "file": "linux-ci/ci-log-original.txt",
+        "bytes": 2700667,
+        "sha256": "c35ee19f6ea2913ea7fccaaa3158f1c0dd04240da4d82a789c12ebc2ade22726"
+      },
+      {
+        "file": "linux-ci/ci-status-original.json",
+        "bytes": 4505,
+        "sha256": "7e2fbc958129767b5f32153bd72431917b0ed3ba2bcc7a6135e5753696c6de04"
+      },
+      {
+        "file": "linux-ci/latest-mir2-gateway-release.json",
+        "bytes": 1717,
+        "sha256": "2359838ce5a697d35ea6761627274890bbb20c09182177ab4f8bb408021bd880"
+      },
+      {
+        "file": "linux-ci/mir2-gateway-linux-x64-2026-10-09-disconnect-536b4a59f3.tar.gz.sha256",
+        "bytes": 129,
+        "sha256": "51fdf360d0f01c027c73cea2f47eea8ac049f1e1f194387e9e4f4171abaccb2d"
+      },
+      {
+        "file": "operator/DEPLOYED-01.json",
+        "bytes": 2383,
+        "sha256": "d76a5a6bc80814c8239fe24f46cd799895f4d89f418bdee1c7f4c7e480314985"
+      },
+      {
+        "file": "operator/PUBLIC-VERIFIED-01.json",
+        "bytes": 4943,
+        "sha256": "c5d33665c3a1ceddd4d67f3d42d7e6f90ec6ea542127d14c00a3ac653c652b1d"
+      },
+      {
+        "file": "operator/deploy-after-01.log",
+        "bytes": 2894,
+        "sha256": "ffa37c6c47f1fc28eb7a089e4c88e0a3672b12bb3fe7f34a9522251bbc30d690"
+      },
+      {
+        "file": "operator/deploy-apply-02.log",
+        "bytes": 2180,
+        "sha256": "ad4afa5f77cc3858c206eddbb62979ad7fed6a33948493e65b2f76c90c215c59"
+      },
+      {
+        "file": "operator/deploy-attempt-01-source.py",
+        "bytes": 8819,
+        "sha256": "1ca3c38098ed32fae08fa1597d281a407a2479b3c62240b993e8116b71540ac5"
+      },
+      {
+        "file": "operator/deploy-before-01.log",
+        "bytes": 2891,
+        "sha256": "db5e1c3d80829cbe87ad35971f7ab8d19b5298bbd5dfb633fc438534b5fe6096"
+      },
+      {
+        "file": "operator/deploy-before-02.log",
+        "bytes": 2894,
+        "sha256": "02ba8b0248596edd0deeff57bc8241d01bdd4a270a25fce7ab8b669305959f29"
+      },
+      {
+        "file": "operator/deploy-before-03.log",
+        "bytes": 2894,
+        "sha256": "b4b0dcd74a7464e25016be652f53bc6323e1eb3197b598b5bae1dfbeb90eeb1f"
+      },
+      {
+        "file": "operator/deploy-preflight-01.log",
+        "bytes": 64,
+        "sha256": "3efc973860e0c88dca1a51266bdc949c324cd001380073a5829db918708cadac"
+      },
+      {
+        "file": "operator/deploy-preflight-02.log",
+        "bytes": 1452,
+        "sha256": "ac4ee15377bf88f7990d2792cc9a7bde34e6c3ab99cd269530082c1e791218ed"
+      },
+      {
+        "file": "operator/deploy-resume-stage-02.log",
+        "bytes": 66,
+        "sha256": "db71c11dbead55b8df4aeabe68d928a2d7ffd2796167fcc7c63612e21ba758df"
+      },
+      {
+        "file": "operator/deploy-resume-stage-after-upload-02.log",
+        "bytes": 65,
+        "sha256": "163728cc8653973f599e421485cbe2c474735502602536426bd77c1394efcdc6"
+      },
+      {
+        "file": "operator/deploy-stage-created-01.log",
+        "bytes": 24,
+        "sha256": "4c71e2bbea8fd742c6963efc5ef891142587cd47dc4f286729a97d21c170bfc5"
+      },
+      {
+        "file": "operator/deploy-stage-verified-01.log",
+        "bytes": 120,
+        "sha256": "a28677c3235e217d992f214e401f2aff0f6c190c39854d8b4e23e34bbff41769"
+      },
+      {
+        "file": "operator/deploy-upload-01.log",
+        "bytes": 34,
+        "sha256": "e5730f28940662d448e21f72e570e68ff57f3c82ef1610ececb09a591b1c47be"
+      },
+      {
+        "file": "operator/deploy-upload-02.log",
+        "bytes": 34,
+        "sha256": "c8647b70a1e5c985074e9f9c953bc1e743a692d8fc2d5356b2b2dba9f5062329"
+      },
+      {
+        "file": "operator/operator-prepared-01.json",
+        "bytes": 434,
+        "sha256": "89586056c9721b49741d57b382f37eb38df7c7468fe7fe9862ab97671b36e2cd"
+      },
+      {
+        "file": "operator/operator-prepared-02.json",
+        "bytes": 501,
+        "sha256": "089a9e561ba410f738b52bd2e087d8de1515d351c9f8950ef0b139a1457a6056"
+      },
+      {
+        "file": "operator/public-native-resume-01.log",
+        "bytes": 2187,
+        "sha256": "e99776612b9c414b17746bc35e8fedaab14393cb3ee4b2900dcbfe01a6db3bd5"
+      },
+      {
+        "file": "operator/public-ordinary-01.log",
+        "bytes": 8724,
+        "sha256": "3e0ecfb3e866bc3d2f2b50d47869d1d000351804c90f0de22a3290905592c60d"
+      },
+      {
+        "file": "operator/remote-apply-02.sh",
+        "bytes": 387,
+        "sha256": "cb16e841c1a42abc8044080b48b8b9788e753396896f8947b2f7f311bbdb850a"
+      },
+      {
+        "file": "operator/remote-preflight-01.sh",
+        "bytes": 379,
+        "sha256": "d111057256431475e6554e77b65e31d2faaa0b25299e9e9d53559cfeab490c6e"
+      },
+      {
+        "file": "operator/remote-preflight-02.sh",
+        "bytes": 379,
+        "sha256": "d4ec563ef05e7c96f8f0f4f49e5caca4a4830a1f2907522b9c1d90ff8b0e1a8c"
+      },
+      {
+        "file": "operator/remote-resume-stage-02.sh",
+        "bytes": 1640,
+        "sha256": "d99f0ee6b258eeb1f4ece2b33bb0fbd354ec7a15c44d1fba170749310030f1a7"
+      },
+      {
+        "file": "operator/remote-stage-setup-01.sh",
+        "bytes": 511,
+        "sha256": "28dbc61f1daa29aab2ec1dd9a1ebad6b77df4d629d96cec7accc658b7afbaac0"
+      },
+      {
+        "file": "operator/remote-stage-verify-01.sh",
+        "bytes": 2069,
+        "sha256": "0ae06c26c89a201102af89cea5e914640f6a73e6eb8a6d9b720845acbcee25d9"
+      },
+      {
+        "file": "operator/upgrade-disconnect-gateway-01.py",
+        "bytes": 31551,
+        "sha256": "f54c85cf93dd3d696da527e409a458a6dcefb0725eb9aef48c6542c51cc97b59"
+      },
+      {
+        "file": "operator/upgrade-disconnect-gateway-02.py",
+        "bytes": 31551,
+        "sha256": "049cdec755e03728e58cdee3962c7309ae30cfa52c78c688eaede94a30a5472b"
+      },
+      {
+        "file": "operator/upload-batch-01.json",
+        "bytes": 782,
+        "sha256": "9ba45e6fcb51ae367082d5d413e435c8490b2689b36b4be168a1445cdbc4e38c"
+      },
+      {
+        "file": "operator/upload-batch-02.json",
+        "bytes": 256,
+        "sha256": "73647b91c0290a3c2ada0e33edae17232eab576a80deb5a2c4a0298d5891ad41"
+      },
+      {
+        "file": "public/native-resume-public-01/PREPARATION.json",
+        "bytes": 496,
+        "sha256": "981606cdd22db39c47c19fc688af08723af7c73cdef1c9e396783d884fb74881"
+      },
+      {
+        "file": "public/native-resume-public-01/RESULT.json",
+        "bytes": 3354,
+        "sha256": "18aaaa6507f720d9a397e54ab77a48c6bac3a907ab1913cdeab22e3829fe0ef2"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-1-cold-login-R2100cccbba.jsonl",
+        "bytes": 955901,
+        "sha256": "e6987981b0f8f267a3dc1c104d0f39094ec273a0a5f9819077e182183d92dfff"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-1-original-R2100cccbba.jsonl",
+        "bytes": 919544,
+        "sha256": "b5885a8db8b19345b5a0fd39c3666696f30d9c3903e4061913c2c795ffa2cee2"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-1-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "1d34518ce395590811f653042b4463f151cd8422106009bd9dedab9c8693137c"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-1-resumed-R2100cccbba.jsonl",
+        "bytes": 186649,
+        "sha256": "ea7b64c09c8e32cc69382bb3cb71dbb95fbbf883d42469bef1c880b0e92980c8"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-2-cold-login-R2100cccbba.jsonl",
+        "bytes": 951429,
+        "sha256": "1f2cad48965e1e988796fc7fac5aa6a39631e2181ccbdd0a186c2a44f6e8bf86"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-2-original-R2100cccbba.jsonl",
+        "bytes": 920434,
+        "sha256": "dff589fd263d10f67ea522e87f0e0a2f1118510e5a1e03c9168449e21a8fdb8c"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-2-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "c34e6cf8a8ebb0c52dcf5cb8d13f24c2f948ea02c55def30ea1b2d00a44326d6"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-2-resumed-R2100cccbba.jsonl",
+        "bytes": 184721,
+        "sha256": "aee959d8c9a2d371574ec2ced3be15cc8329c133443801a80af19b247811062e"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-3-original-R2100cccbba.jsonl",
+        "bytes": 915715,
+        "sha256": "66a41af947fed66f5583d62d81834499b21115b687af4ca65b410e6c68ff8dca"
+      },
+      {
+        "file": "public/native-resume-public-01/cycle-3-resumed-R2100cccbba.jsonl",
+        "bytes": 183692,
+        "sha256": "b632a5291bdab1113d81db773b6a75aa0ee0315fc7524609e0d0e8650579d52c"
+      },
+      {
+        "file": "public/native-resume-public-01/native-resume-smoke.mjs",
+        "bytes": 13774,
+        "sha256": "4aa96984e4f62fcecba0fed1e8344e7ce8be9fe3b84ae9da4917ddff5c291e3b"
+      },
+      {
+        "file": "public/native-resume-public-02/PREPARATION.json",
+        "bytes": 517,
+        "sha256": "6dbc829a6b3495f118760a7a34b192179572513ff58c1c28f4dfa1481f4e3a03"
+      },
+      {
+        "file": "public/native-resume-public-02/RESULT.json",
+        "bytes": 3810,
+        "sha256": "ab0893cd95ed2ef2047e84f8c6f76812cd58be93cb85c359a825b5b8316abf13"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-1-cold-login-R2100cccbba.jsonl",
+        "bytes": 946582,
+        "sha256": "58f5b5d50a02f9c3d1fe31f90f9adaf74ded1257afb3d05eb9b20ab53a5d9142"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-1-original-R2100cccbba.jsonl",
+        "bytes": 912470,
+        "sha256": "604fa3fa6805f4115d58adc1abc00b5e37f13fd60884dd0306e18c2e90cbfaf0"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-1-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "df3fc2b4bb9eefdf4f0155e37334ccef905efc05b9824a80a10f8c9036854147"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-1-resumed-R2100cccbba.jsonl",
+        "bytes": 182775,
+        "sha256": "afe4c53fefe0dbdc156cb05e54ad4181c33d34ba6613e795c6196fa2beb53182"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-2-cold-login-R2100cccbba.jsonl",
+        "bytes": 941657,
+        "sha256": "20b8faab396f797e9d7ca333e9ad3de9ff108aa9bf6ca73026016cea039167a3"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-2-original-R2100cccbba.jsonl",
+        "bytes": 912078,
+        "sha256": "66d9f9f317989e4bdc9a1d2e97559ce546cd7b10698acf529a99a362e51d7230"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-2-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "e1579a98690e9ef73db9f3d94191ee1d73ee6ea8caa8671883d4e652286584af"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-2-resumed-R2100cccbba.jsonl",
+        "bytes": 182088,
+        "sha256": "3baa00f48f42d7ea8cc5a6cd7bad3deade0bf49367432954caf56eb31d35e08b"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-3-cold-login-R2100cccbba.jsonl",
+        "bytes": 940944,
+        "sha256": "514ed74fc15aac4059bb324af323056a2f990abb173ceac8c7dca1e195c3e228"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-3-original-R2100cccbba.jsonl",
+        "bytes": 905296,
+        "sha256": "e238ba74d2469bf3a4f38eb37ae1a131c582fdc809bee9ef11a3eef3ac595c32"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-3-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "c41dd276fb90cc0e0c5264f8da0814760f3049da123929fbf26e77f8a8c57cdf"
+      },
+      {
+        "file": "public/native-resume-public-02/cycle-3-resumed-R2100cccbba.jsonl",
+        "bytes": 182088,
+        "sha256": "218b1ce4b34575964f638728b529cd3a7b08225ca12a2b8631e3883df8f29417"
+      },
+      {
+        "file": "public/native-resume-public-02/native-resume-smoke.mjs",
+        "bytes": 14164,
+        "sha256": "58ade98b9af9e32f501cdfabdb561a4ebfab98d39c735cac097130c27466c9ce"
+      },
+      {
+        "file": "public/ordinary-public-01/PREPARATION.json",
+        "bytes": 437,
+        "sha256": "982e9c99ce730c8e24680f7d0c6394325127421ca59d1c8bfd9aed52ea5cb38c"
+      },
+      {
+        "file": "public/ordinary-public-01/RESULT.json",
+        "bytes": 12631,
+        "sha256": "614ddd121bd3c187a0dbf56939e401ec9139c4650ec76970e02e6042c43bf80f"
+      },
+      {
+        "file": "public/ordinary-public-01/female-taoist-R2121cccbba.jsonl",
+        "bytes": 977999,
+        "sha256": "61670972996ce4badda89d3846452a0bfa9c6fcf56b6a263288fcd5e8e1a6346"
+      },
+      {
+        "file": "public/ordinary-public-01/female-taoist-relogin-R2121cccbba.jsonl",
+        "bytes": 973665,
+        "sha256": "357298f442fdefa9890a4efdd597b53dd966fe89daccc8693317997c2989d11e"
+      },
+      {
+        "file": "public/ordinary-public-01/initial-R2100cccbba.jsonl",
+        "bytes": 994824,
+        "sha256": "682c410ffb6ed18e5e2e28fb7d7f2b2379dc3f2ce550b34b1517b8c2ae85a19e"
+      },
+      {
+        "file": "public/ordinary-public-01/initial-R2101cccbba.jsonl",
+        "bytes": 977348,
+        "sha256": "6c1c6ff41db7a90c7e993c835cb72d32a325bd27ac72bd4cdc79f93a0a44b33e"
+      },
+      {
+        "file": "public/ordinary-public-01/initial-R2110cccbba.jsonl",
+        "bytes": 987863,
+        "sha256": "77f8132faaa06e04ef8598b22fbf197dc3c63cc4b6d459d136643859ce8c609d"
+      },
+      {
+        "file": "public/ordinary-public-01/initial-R2111cccbba.jsonl",
+        "bytes": 981425,
+        "sha256": "399207dae4fe68f445446f6193002da61250ad9995419644baa1d8c8d5e0610c"
+      },
+      {
+        "file": "public/ordinary-public-01/initial-R2120cccbba.jsonl",
+        "bytes": 979321,
+        "sha256": "856f5ff4e869a1d94cd506baa53ed48202f2d631696c6d5a4e30f6976bc035fb"
+      },
+      {
+        "file": "public/ordinary-public-01/public-smoke.mjs",
+        "bytes": 11446,
+        "sha256": "8c06b8274867d2bcb37f4830d7426827616a699a7caa4040094a5ae2541bce45"
+      },
+      {
+        "file": "public/ordinary-public-01/warrior-relogin-R2100cccbba.jsonl",
+        "bytes": 975638,
+        "sha256": "afde5b2a19b9ec207b6d6a46d198da6c3c604f525a54c95e41441d1f5e622692"
+      },
+      {
+        "file": "runners/Deploy-GatewayLifecycleRelease.py",
+        "bytes": 11568,
+        "sha256": "4a105eb3953f76a7d92ac8b45d930aac901a1be351871929e020120456ede7f4"
+      },
+      {
+        "file": "runners/Download-GatewayLifecycleCI.py",
+        "bytes": 6196,
+        "sha256": "5db56a3aa1d5d3ea8165bc02ca601b168cae5edcdf134630e7f574b1355599b8"
+      },
+      {
+        "file": "runners/Finalize-GatewayLifecyclePublic.py",
+        "bytes": 4709,
+        "sha256": "0bdebf28d7e4ace5a8a87fee85f1983939fde6cc9e7b957bf95a526871601333"
+      },
+      {
+        "file": "runners/Prepare-GatewayLifecycleOperator.py",
+        "bytes": 4162,
+        "sha256": "6ffaaa355e7c69cf9d0b2a4f9e6ca1fd9e7b56a86c39149edd4ac7d386435206"
+      },
+      {
+        "file": "runners/Prepare-GatewayLifecycleOperator02.py",
+        "bytes": 1424,
+        "sha256": "3ec3e3709458defaf0bbb0e969ca6573d524004aea363750e9696aa8069208da"
+      },
+      {
+        "file": "runners/Prepare-GatewayLifecycleResumeRetry.py",
+        "bytes": 2349,
+        "sha256": "01cdb1f498f9d6b6a72f3eeb49a429fa30ce308308346e6bd320ad41707b42d8"
+      },
+      {
+        "file": "runners/Prepare-GatewayLifecycleResumeSmoke.py",
+        "bytes": 1937,
+        "sha256": "2f996b1385a3f9cd8f2ee357b83af72e46f791bdd151d6e52c09ee025a3f9eeb"
+      },
+      {
+        "file": "runners/gateway-lifecycle-read-public-01.sh",
+        "bytes": 2408,
+        "sha256": "a4f7b69957e9ec428ec6a6cbc7d27c301f4b0892c14b9cad313a6c26be0be214"
+      }
+    ]
+  },
+  "scope": [
+    "The accepted ordinary44 and final resume18 run total62; the unsuccessful prior15 are excluded.",
+    "Original unabridged CI output and complete sanitized public protocol event traces are retained.",
+    "Private account ledger, database dump, live environment and credential values are not copied.",
+    "No new client installation, natural dense-monster pressure or human frontend acceptance is claimed.",
+    "The original twelve-hour checkpoint was missed; P1-P7 and Mentor remain incomplete."
+  ]
+}

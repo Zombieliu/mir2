@@ -1,0 +1,16 @@
+{
+  "schema": "mir2.windows.package-preflight.v4",
+  "candidate": "WN-CANDIDATE-20260929-invited-04",
+  "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\dist\\r4",
+  "sourceRevision": "97144d6a0c819d608c0e9d1c5034259cac489297",
+  "worktreeDirty": false,
+  "buildAttestationSha256": "FAAC70EF3DE41DC1E5D9EA57C750A17805FC063C26BC36546F009314D2FFFEF2",
+  "packageManifestSha256": "B4C350C993DA8EEE5C90BC29FFFABD0C080030B9D28CE36936B4B02593AD364B",
+  "packageManifestAggregateSha256": "F74C13447B4895EEC92208879A1E5E6FFFA3D896F41864B4C4BCA7FA725F0521",
+  "packageManifestFileCount": 123026,
+  "signerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+  "staged": true,
+  "builtByPackagingScript": false,
+  "visual": false,
+  "accepted": false
+}

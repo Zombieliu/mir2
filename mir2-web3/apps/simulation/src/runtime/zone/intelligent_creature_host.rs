@@ -267,8 +267,20 @@ mod tests {
         let bytes = z.checkpoint_bytes().unwrap();
         let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
         assert_eq!(
-            z.canonical_state_root().unwrap(),
-            restored.canonical_state_root().unwrap()
+            serde_json::to_value(&z.intelligent_creatures).unwrap(),
+            serde_json::to_value(&restored.intelligent_creatures).unwrap()
+        );
+        assert_eq!(
+            z.intelligent_creature_operations,
+            restored.intelligent_creature_operations
+        );
+        assert_eq!(
+            z.intelligent_creature_intents,
+            restored.intelligent_creature_intents
+        );
+        assert!(
+            restored.online_presence.is_empty(),
+            "cold recovery revokes online authority"
         );
         let ops = restored.drain_intelligent_creature_operations();
         assert_eq!(ops.len(), 1);
@@ -337,7 +349,8 @@ mod tests {
         let mut manager = crate::runtime::zone::ZoneManager::new();
         for (session, id, x, drop_id) in [("owner", 100, 10, 300), ("observer", 101, 14, 301)] {
             let mut joined = join(session, id, x);
-            joined.map_file_name = "creature-host-test".into();
+            joined.map_file_name = "d024".into();
+            joined.position = Point { x: x + 10, y: 20 };
             manager.join(joined);
             manager.handle(ZoneCommand::SyncGroundDrops {
                 session_id: SessionId::new(session),
@@ -346,8 +359,8 @@ mod tests {
                     name: "Gold".into(),
                     name_colour_argb: -1,
                     icon: 0,
-                    x: x + 1,
-                    y: 10,
+                    x: x + 11,
+                    y: 20,
                     quantity: 1,
                     source_monster: "".into(),
                     owner_object_id: Some(id),
@@ -367,7 +380,7 @@ mod tests {
             assert!(manager.request_intelligent_creature_pickup(
                 &SessionId::new(session),
                 false,
-                Point { x: x + 1, y: 10 }
+                Point { x: x + 11, y: 20 }
             ));
         }
         manager.tick_all(1000);
@@ -410,7 +423,8 @@ mod tests {
         let mut manager = crate::runtime::zone::ZoneManager::new();
         let old_session = SessionId::new("owner");
         let mut old = join("owner", 100, 10);
-        old.map_file_name = "creature-host-test".into();
+        old.map_file_name = "d024".into();
+        old.position = Point { x: 20, y: 20 };
         manager.join(old);
         manager.handle(ZoneCommand::SyncGroundDrops {
             session_id: old_session.clone(),
@@ -419,8 +433,8 @@ mod tests {
                 name: "Gold".into(),
                 name_colour_argb: -1,
                 icon: 0,
-                x: 11,
-                y: 10,
+                x: 21,
+                y: 20,
                 quantity: 1,
                 source_monster: "".into(),
                 owner_object_id: Some(100),
@@ -440,7 +454,7 @@ mod tests {
         assert!(manager.request_intelligent_creature_pickup(
             &old_session,
             false,
-            Point { x: 11, y: 10 }
+            Point { x: 21, y: 20 }
         ));
         manager.tick_all(1000);
         let original = manager.drain_intelligent_creature_operations(&old_session);
@@ -455,7 +469,8 @@ mod tests {
         let mut fresh = join("new-session", 200, 10);
         fresh.account_id = "owner-account".into();
         fresh.character_index = 100;
-        fresh.map_file_name = "creature-host-test".into();
+        fresh.map_file_name = "d024".into();
+        fresh.position = Point { x: 20, y: 20 };
         manager.join(fresh);
         assert!(manager
             .drain_intelligent_creature_operations(&SessionId::new("new-session"))

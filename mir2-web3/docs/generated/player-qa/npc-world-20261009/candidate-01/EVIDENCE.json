@@ -1,0 +1,736 @@
+{
+  "schema": "mir2.npc-source-guard-and-ordered-pet-candidate.v1",
+  "createdUtc": "2026-10-09T12:47:45.934708+00:00",
+  "parentSource": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "candidateCommittedAtArchive": false,
+  "published": false,
+  "fullGoalComplete": false,
+  "finalSelectedTests": 94,
+  "finalGates": [
+    {
+      "stem": "15-root-final-source-guard",
+      "count": 6,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "npc_source_guard_tests::",
+        "--",
+        "--test-threads=1"
+      ],
+      "utcStarted": "2026-10-09T12:24:15.2735505Z",
+      "utcFinished": "2026-10-09T12:24:22.8115855Z",
+      "declared13SourcePathsUnchanged": true,
+      "logSha256": "65c48c194c3357143db0ddb42fd842101ce8022daea903b5b19149eb324959fd",
+      "names": [
+        "runtime::npc_source_guard_tests::actual_main_flag_mutation_with_live_oven_still_saves_before_ack",
+        "runtime::npc_source_guard_tests::actual_main_oven_failure_restores_exact_source_clock_and_retry_commits_once",
+        "runtime::npc_source_guard_tests::original_main_flag_is_durable_before_ack_on_all_npc_entry_wrappers",
+        "runtime::npc_source_guard_tests::original_main_known_pre_persist_failure_rolls_back_flag_and_suppresses_source_ack",
+        "runtime::npc_source_guard_tests::repeated_unchanged_main_does_not_consume_account_store_write_fault",
+        "runtime::npc_source_guard_tests::unchanged_main_with_live_oven_does_not_save_elapsed_only_timer_projection"
+      ]
+    },
+    {
+      "stem": "16-root-final-default-source-events",
+      "count": 24,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "default_npc_events_tests::",
+        "--",
+        "--test-threads=1"
+      ],
+      "utcStarted": "2026-10-09T12:24:22.8363035Z",
+      "utcFinished": "2026-10-09T12:24:30.1098918Z",
+      "declared13SourcePathsUnchanged": true,
+      "logSha256": "68f1d5ea50fc73676486aba899257a12c6d2024596e59c58728458660c3310d4",
+      "names": [
+        "runtime::default_npc_events_tests::actual_default_levelup_guild_leave_reward_and_full_source_rollback_then_settle_xp_before_leave",
+        "runtime::default_npc_events_tests::actual_default_levelup_keeps_the_last_leader_of_a_nonempty_guild",
+        "runtime::default_npc_events_tests::bounded_queue_rejects_overflow_and_restore_rejects_duplicate_receipt_sequence",
+        "runtime::default_npc_events_tests::budget_retains_ordered_continuation_for_save_and_next_tick",
+        "runtime::default_npc_events_tests::daily_online_tick_and_saved_continuation_commit_once_without_saving_unchanged_ticks",
+        "runtime::default_npc_events_tests::entry_ticket_is_canonical_actor_sequence_bound_and_consumed_once",
+        "runtime::default_npc_events_tests::gold_item_uses_u32_source_guard_and_never_aliases_test_scroll_page",
+        "runtime::default_npc_events_tests::item_page_preserves_inline_links_and_only_visible_followup_is_permitted",
+        "runtime::default_npc_events_tests::live_experience_switch_rolls_back_with_source_reward_and_resets_on_new_actor",
+        "runtime::default_npc_events_tests::login_executes_source_absent_file_noop_without_unknown_diagnostic",
+        "runtime::default_npc_events_tests::obsolete_coordinate_or_missing_ticket_cannot_enter_map",
+        "runtime::default_npc_events_tests::ordinary_custom_command_uses_default_source_and_moved_map_enter_is_durable",
+        "runtime::default_npc_events_tests::ordinary_item_menu_declared_links_work_and_raw_trusted_event_keys_never_work",
+        "runtime::default_npc_events_tests::ordinary_script_item_consumption_pk_reward_receipt_and_failed_ack_are_atomic",
+        "runtime::default_npc_events_tests::original_can_gain_exp_opcode_uses_live_bool_try_parse_and_gates_personal_gain",
+        "runtime::default_npc_events_tests::saved_default_hook_preflight_rejects_invalid_receipts_before_restoring_state",
+        "runtime::default_npc_events_tests::source_catalog_expands_insert_and_include_and_seals_original_parser_omissions",
+        "runtime::default_npc_events_tests::source_pk_reduction_clamps_zero_and_gender_potion_changes_saved_info",
+        "runtime::default_npc_events_tests::source_reward_and_receipt_rollback_together_before_ack_then_commit_once",
+        "runtime::default_npc_events_tests::source_script_buff_uses_real_duration_empty_stats_and_original_stack_instead_of_sample_text_percentage",
+        "runtime::default_npc_events_tests::trusted_shared_life_projection_queues_die_once_and_revive_allows_next_death",
+        "runtime::default_npc_events_tests::typed_events_keep_exact_original_parameter_signatures",
+        "runtime::default_npc_events_tests::unauthenticated_and_malformed_hooks_cannot_enter_queue",
+        "runtime::default_npc_events_tests::unknown_numeric_item_shape_and_literal_quest_placeholder_are_quiet_noops"
+      ]
+    },
+    {
+      "stem": "17-root-final-refine-durable",
+      "count": 10,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "refine_durable_tests::",
+        "--",
+        "--test-threads=1"
+      ],
+      "utcStarted": "2026-10-09T12:24:30.1248547Z",
+      "utcFinished": "2026-10-09T12:24:36.4437135Z",
+      "declared13SourcePathsUnchanged": true,
+      "logSha256": "e07af6aea72b4146cb5af11eb3dc645ecd8d5c3c3abc4405f6e2b024b4b139cb",
+      "names": [
+        "runtime::refine_durable_tests::all_sixteen_materials_are_durable_before_ack_and_reload_with_original_uid_and_fields",
+        "runtime::refine_durable_tests::belt_weapon_can_start_return_to_full_bag_empty_belt_and_check_with_durable_rollback",
+        "runtime::refine_durable_tests::checking_pending_weapon_failure_rolls_back_instance_and_commits_destruction_only_once",
+        "runtime::refine_durable_tests::full_bag_cancel_has_negative_ack_and_retains_durable_custody_for_later_space",
+        "runtime::refine_durable_tests::ordinary_collect_checkpoint_failure_keeps_result_in_oven_and_retry_returns_exact_uid_once",
+        "runtime::refine_durable_tests::original_belt_and_second_bag_cells_preserve_concrete_item_across_durable_transfers",
+        "runtime::refine_durable_tests::oven_start_failure_preserves_gold_weapon_and_material_then_retry_charges_once",
+        "runtime::refine_durable_tests::overweight_refine_cancel_returns_to_empty_source_cell_and_never_manufactures_mail",
+        "runtime::refine_durable_tests::refine_deposit_persist_failure_returns_no_ack_and_rolls_back_live_and_durable_custody",
+        "runtime::refine_durable_tests::retrieve_and_cancel_failure_keep_held_uid_and_both_retry_without_duplicate_items"
+      ]
+    },
+    {
+      "stem": "18-root-final-security-source-entry",
+      "count": 20,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "security_lifecycle",
+        "--",
+        "--test-threads=1"
+      ],
+      "utcStarted": "2026-10-09T12:24:36.4557949Z",
+      "utcFinished": "2026-10-09T12:25:42.7059401Z",
+      "declared13SourcePathsUnchanged": true,
+      "logSha256": "929ee60d9f7766a8bfb5651108176d7cd45347acd5412b97df1c33372d4bfb3b",
+      "names": [
+        "abnormal_teardown_save_updates_the_crystal_select_roster_last_access",
+        "commercial_identity_policy_rejects_weak_or_ambiguous_credentials",
+        "debug_crystal_teleport_rejected_in_prod_path",
+        "each_joined_player_has_unique_object_id",
+        "logout_updates_the_crystal_select_roster_last_access",
+        "move_to_rejected_for_player_path",
+        "passkey_account_can_create_character_and_start_game",
+        "password_accounts_are_written_as_argon2id_and_can_login",
+        "production_player_wrapper_rejects_before_runtime_execution",
+        "queued_potion_cannot_revive_a_dead_player_before_town_revive",
+        "raw_passkey_login_rejected_for_player_path",
+        "recovery_password_reset_rehashes_and_invalidates_the_previous_password",
+        "stage5_command_rejected_for_player_path",
+        "start_game_preserves_a_valid_full_map_transform_outside_the_starter_window",
+        "start_game_recovers_an_out_of_bounds_legacy_revive_transform",
+        "successful_legacy_plaintext_login_is_migrated_to_argon2id",
+        "town_revive_from_field_changes_to_the_configured_bind_map",
+        "unauthenticated_delete_character_rejected",
+        "unauthenticated_new_character_rejected",
+        "unauthenticated_start_game_rejected"
+      ]
+    },
+    {
+      "stem": "19-root-final-ordered-pet-plan",
+      "count": 32,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "npc_world_plan::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "utcStarted": "2026-10-09T12:25:42.7192858Z",
+      "utcFinished": "2026-10-09T12:25:43.1241061Z",
+      "declared13SourcePathsUnchanged": true,
+      "logSha256": "5848c31298d1670c400d9f6d3b0484fa951841e0f23f5ff598f427ad4d6b2670",
+      "names": [
+        "runtime::npc_world_plan::tests::birth_counter_exhaustion_rejects_preparation_without_partial_append",
+        "runtime::npc_world_plan::tests::byte_level_overflow_defaults_to_zero_and_valid_level_caps_at_seven",
+        "runtime::npc_world_plan::tests::clear_marks_next_ai_reverse_order_and_same_segment_checks_still_see_pets",
+        "runtime::npc_world_plan::tests::count_parser_preserves_zero_and_caps_each_valid_invocation_only",
+        "runtime::npc_world_plan::tests::explicit_zero_never_calls_factory_but_unknown_info_still_stops_act",
+        "runtime::npc_world_plan::tests::give_then_clear_then_give_has_no_retroactive_death_or_relevel",
+        "runtime::npc_world_plan::tests::infrastructure_error_is_not_source_factory_null_and_discards_preparation",
+        "runtime::npc_world_plan::tests::invalid_xp_projection_rejects_stale_arbitrary_level_and_amount",
+        "runtime::npc_world_plan::tests::marked_next_turn_pet_is_still_eligible_until_actual_death",
+        "runtime::npc_world_plan::tests::max_level_pet_projection_is_unchanged_not_reset_or_relevelled",
+        "runtime::npc_world_plan::tests::noncanonical_resolver_result_is_an_error_not_a_substitute_monster",
+        "runtime::npc_world_plan::tests::omitted_parameters_give_one_zero_level_pet_at_exact_owner_cell",
+        "runtime::npc_world_plan::tests::one_actual_experience_call_cannot_skip_multiple_pet_levels",
+        "runtime::npc_world_plan::tests::persisted_xp_plan_rejects_foreign_map_replay_and_noncanonical_template",
+        "runtime::npc_world_plan::tests::petlevel_uses_final_reference_even_dead_and_empty_list_passes",
+        "runtime::npc_world_plan::tests::plan_rejects_nonprefix_birth_unknown_target_offset_and_unknown_schema",
+        "runtime::npc_world_plan::tests::plan_roundtrip_is_only_data_and_ordered_replay_detects_forged_after_image",
+        "runtime::npc_world_plan::tests::remove_binds_lives_in_reverse_order_without_removing_references",
+        "runtime::npc_world_plan::tests::remove_then_give_never_retargets_new_same_named_birth",
+        "runtime::npc_world_plan::tests::repeated_remove_preserves_real_die_idempotence_and_source_list",
+        "runtime::npc_world_plan::tests::serde_unknown_fields_cannot_be_smuggled_into_plan_or_operation",
+        "runtime::npc_world_plan::tests::source_comparison_does_not_accept_invented_aliases",
+        "runtime::npc_world_plan::tests::source_factory_null_stops_remaining_act_and_keeps_birth_prefix",
+        "runtime::npc_world_plan::tests::source_pet_xp_accepts_data_range_edge_and_rejects_one_cell_beyond",
+        "runtime::npc_world_plan::tests::source_pet_xp_rejects_foreign_map_without_losing_owner_list_reference",
+        "runtime::npc_world_plan::tests::source_pet_xp_rejects_triple_amount_for_ordinary_red_viper",
+        "runtime::npc_world_plan::tests::source_pet_xp_uint_addition_and_x3_amount_wrap",
+        "runtime::npc_world_plan::tests::source_read_set_rejects_duplicate_life_but_preserves_cross_map_references",
+        "runtime::npc_world_plan::tests::two_gives_do_not_cap_total_or_relevel_same_named_old_pets",
+        "runtime::npc_world_plan::tests::unknown_source_template_changes_no_existing_pet",
+        "runtime::npc_world_plan::tests::xp_projections_keep_source_list_order_and_cannot_duplicate_targets",
+        "runtime::npc_world_plan::tests::zero_actual_gain_is_a_noop_and_no_eligible_pets_still_records_actual_call"
+      ]
+    },
+    {
+      "stem": "21-root-final-prepared-kill-rejection",
+      "count": 2,
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--offline",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "prepared_kill_runtime",
+        "--",
+        "--test-threads=1"
+      ],
+      "utcStarted": "2026-10-09T12:43:09.7814861Z",
+      "utcFinished": "2026-10-09T12:43:11.2709686Z",
+      "declared13SourcePathsUnchanged": true,
+      "logSha256": "0319fa872b177af69a7bb814434350d1bab48a6e4e86b0ded1f4948febe1a350",
+      "names": [
+        "runtime::shared_guilds::experience_tests::prepared_kill_runtime_missing_commit_receipt_freezes_instead_of_false_success",
+        "runtime::shared_guilds::experience_tests::prepared_kill_runtime_rejection_restores_complete_private_source"
+      ]
+    }
+  ],
+  "declaredInputs": "13 selected repository paths; not the complete Cargo/toolchain/workspace closure",
+  "historicalZeroTestFilter": "20-root-final-prepared-kill-rejection: zero tests; excluded from acceptance",
+  "limits": [
+    "NPC fixtures prepare actual imported D604/Ashes @MAIN and owned actor proximity, not natural story or native UI acceptance.",
+    "Ordered pet module is private pure interpretation; no live Zone capture, same-CAS outbox, authoritative world apply or recovery integration.",
+    "Known NPC write failure preserves exact raw oven state; prepared-kill raw oven recovery remains a separate unqualified boundary.",
+    "No public QA/auth/collision/clock/capacity rule weakened. No user save modified by these isolated tests.",
+    "Historical library305/8 and shared_zone201/8 remain separate RED evidence; this is not a green full-suite claim."
+  ],
+  "archive": {
+    "file": "original-evidence.zip",
+    "bytes": 309559,
+    "sha256": "d930c1463be74884ba6016ac94c47b4f8987388c43311ee70817422049d90720",
+    "entries": [
+      {
+        "path": "history/01-root-ordered-pet-plan-after.json",
+        "bytes": 2237,
+        "sha256": "649c4b3988f567f97d2452075a5eb5e562291a63b13efa2bb9d4759d7044d0a8"
+      },
+      {
+        "path": "history/01-root-ordered-pet-plan-before.json",
+        "bytes": 2238,
+        "sha256": "fa9666e1bafcb5db6b7da8b5d81ecbfec7c0c34e1a05aca3d9bd5d1cd5273411"
+      },
+      {
+        "path": "history/01-root-ordered-pet-plan-result.json",
+        "bytes": 209,
+        "sha256": "053860f974c6a0efed2bc27446efc54f1ba0131d16d8c24e0bc0d9f8f1d09465"
+      },
+      {
+        "path": "history/01-root-ordered-pet-plan.log",
+        "bytes": 43987,
+        "sha256": "7e7edec0240ad6d38384cb9b8b9b5e24640dd477f26db28e69bcc5dc9ecef7bd"
+      },
+      {
+        "path": "history/02-root-source-xp-boundary-red-after.json",
+        "bytes": 2260,
+        "sha256": "8122ecbaebb0108a12f39bba4c03a1bfc5957ce695786fb05cc24c94b4752afa"
+      },
+      {
+        "path": "history/02-root-source-xp-boundary-red-before.json",
+        "bytes": 2261,
+        "sha256": "1b511381b92c1ebf61bc021409a78e129c16183be3aeb91d442e11966db8aa75"
+      },
+      {
+        "path": "history/02-root-source-xp-boundary-red-result.json",
+        "bytes": 217,
+        "sha256": "b62d8ae323218b2dd4fa5aa442beb9cce4695e4197417a08720a97d3b8d46c2d"
+      },
+      {
+        "path": "history/02-root-source-xp-boundary-red.log",
+        "bytes": 42315,
+        "sha256": "bfb78f027de2a0108f039ad4687b7a0597a76fe1699aa5a6c9b0c6009c6a247d"
+      },
+      {
+        "path": "history/03-root-ordered-pet-plan-green-after.json",
+        "bytes": 2237,
+        "sha256": "326110d1bdf7818a52a974b37f98a77dfa9fd42f8dd7303f82862314e7b88bad"
+      },
+      {
+        "path": "history/03-root-ordered-pet-plan-green-before.json",
+        "bytes": 2238,
+        "sha256": "a8eae92752fbf64fe7853e9e6743e5fd9066f6bdf39819d1c24b54cad080a939"
+      },
+      {
+        "path": "history/03-root-ordered-pet-plan-green-result.json",
+        "bytes": 215,
+        "sha256": "e9ba02fb5138bcbf32a18b5f38810e8fccde6d0f3a958fdba4d04f659895394c"
+      },
+      {
+        "path": "history/03-root-ordered-pet-plan-green.log",
+        "bytes": 44574,
+        "sha256": "bb66bb712fdadb6191744e46b4d4cf78270f4e4b2f1f58520003f5a6d802f106"
+      },
+      {
+        "path": "history/04-root-original-main-boundary-red-after.json",
+        "bytes": 2485,
+        "sha256": "40e5d79d1a54fb6fa455e5120ae228f20b903944fd0db2d0c922500c57190716"
+      },
+      {
+        "path": "history/04-root-original-main-boundary-red-before.json",
+        "bytes": 2486,
+        "sha256": "f6860aed36c07865a86a70e2a80a179db8a164725e4d0fcf53558813fac0d246"
+      },
+      {
+        "path": "history/04-root-original-main-boundary-red-result.json",
+        "bytes": 221,
+        "sha256": "2d3605cd5738f840f1361efe8f2963410e85b4e9603bebd0ce49414a92e14af2"
+      },
+      {
+        "path": "history/04-root-original-main-boundary-red.log",
+        "bytes": 42616,
+        "sha256": "f115492b145b13c4754e4ebdce5fb6ff02810a4c81033e270842c1711ef7901c"
+      },
+      {
+        "path": "history/05-root-original-main-boundary-green-after.json",
+        "bytes": 2485,
+        "sha256": "adabc12ef63f17a55c9946fe8cd7835809ef2b6bbe35f5c1fcb2b87014085213"
+      },
+      {
+        "path": "history/05-root-original-main-boundary-green-before.json",
+        "bytes": 2486,
+        "sha256": "35fc436852da5b598968ab8b84d6422b9b614f3129bbd8e02fc3af3e19f31341"
+      },
+      {
+        "path": "history/05-root-original-main-boundary-green-result.json",
+        "bytes": 223,
+        "sha256": "d7962e236ec3eaf9a80cd982c279e71fef410c093dfb3f96b6c7d4643b60bb16"
+      },
+      {
+        "path": "history/05-root-original-main-boundary-green.log",
+        "bytes": 42618,
+        "sha256": "b9b300e3d4501abf8dcc0c05c7ae7c8ddb5246f5375e5f1541727fe2b5c641b9"
+      },
+      {
+        "path": "history/06-root-original-main-all-entry-green-after.json",
+        "bytes": 2485,
+        "sha256": "888b8206494d68db2e5ecab8000f01c65dfa0d0238ad85f4d4e8cc48f7f05a06"
+      },
+      {
+        "path": "history/06-root-original-main-all-entry-green-before.json",
+        "bytes": 2486,
+        "sha256": "e70b0dd314a66c7ff4481419016a6962cbd43b337fb337ee1987efed4aec4ca8"
+      },
+      {
+        "path": "history/06-root-original-main-all-entry-green-result.json",
+        "bytes": 222,
+        "sha256": "dad1322d48636133211bd40417d936dadfb55bd77663fd2d66b528ab404c9d0a"
+      },
+      {
+        "path": "history/06-root-original-main-all-entry-green.log",
+        "bytes": 41443,
+        "sha256": "34ef371edb3e860d656731ba29e4cdf3541cba4499a132dd70b71baa5559d364"
+      },
+      {
+        "path": "history/07-root-final-ordered-pet-plan-after.json",
+        "bytes": 3159,
+        "sha256": "884f648630b7c7125b950250f0e14793af137592434fed9206437cbff1afa9eb"
+      },
+      {
+        "path": "history/07-root-final-ordered-pet-plan-before.json",
+        "bytes": 3160,
+        "sha256": "3291252fe4d516223b8b4df3d9ce9de237af6a1db9fbc7ca006fd8d580fc24c0"
+      },
+      {
+        "path": "history/07-root-final-ordered-pet-plan-result.json",
+        "bytes": 215,
+        "sha256": "8ebb415b7cc6fb39bda93d8c9e016bb8cd62bbdc877b52981a29675ec4c790e7"
+      },
+      {
+        "path": "history/07-root-final-ordered-pet-plan.log",
+        "bytes": 44451,
+        "sha256": "68a3223c63f6ef359a41dadaeb4b997a41d890fe72efe1e178f3d653b76d5760"
+      },
+      {
+        "path": "history/08-root-default-source-events-after.json",
+        "bytes": 3164,
+        "sha256": "3a4ee7fa514f8c98afdefac949a96665e8efacb8482acf44d441c33fa37f0901"
+      },
+      {
+        "path": "history/08-root-default-source-events-before.json",
+        "bytes": 3165,
+        "sha256": "fad1dc0ec5a4f69dbeb39d7088b2b8c292c223c017dad5a7a41c5adc6fca43b5"
+      },
+      {
+        "path": "history/08-root-default-source-events-result.json",
+        "bytes": 214,
+        "sha256": "855314d4ddb60717264cecf4b7e2a5084ef3ab78d615459b3f31fd961100d715"
+      },
+      {
+        "path": "history/08-root-default-source-events.log",
+        "bytes": 43867,
+        "sha256": "c947dffdfe2fd3fac072de9ea4960f1a3f8babf8bcc594ef5b612c60c89b9d2b"
+      },
+      {
+        "path": "history/09-root-refine-durable-after.json",
+        "bytes": 3160,
+        "sha256": "51c887aab093ea1736c248c94bb39d30630b00fc86c6f39c3de7e8697d8b6888"
+      },
+      {
+        "path": "history/09-root-refine-durable-before.json",
+        "bytes": 3161,
+        "sha256": "0079928a2bc049576865b7a612f56248b0a99808afd51603432442d71d0eaa82"
+      },
+      {
+        "path": "history/09-root-refine-durable-result.json",
+        "bytes": 207,
+        "sha256": "24063fe888502181a365f62fcadd1d93f87d70f7a83ceea87e51a72665d2c993"
+      },
+      {
+        "path": "history/09-root-refine-durable.log",
+        "bytes": 42240,
+        "sha256": "35afe708ea3c5bd57d7906f2a49aadc3b75df122ae9cde5205d10ab1dbe2b683"
+      },
+      {
+        "path": "history/10-root-security-source-entry-after.json",
+        "bytes": 3157,
+        "sha256": "0d808cfe4bfed54d5ce9ce44d82129c2b35b715488c37f31177c54e18f35c274"
+      },
+      {
+        "path": "history/10-root-security-source-entry-before.json",
+        "bytes": 3158,
+        "sha256": "f479a24a9f69049d9bae119e6503fff4291ed8d0df194cf970bdc814761392a4"
+      },
+      {
+        "path": "history/10-root-security-source-entry-result.json",
+        "bytes": 214,
+        "sha256": "1dd974e793e8e5b7f6f3ae22f27d12b4b8e9ba209a82ddcaa56f84e25733ebb1"
+      },
+      {
+        "path": "history/10-root-security-source-entry.log",
+        "bytes": 41590,
+        "sha256": "ebe1c5e8697efb59f9a5a2b3d4528239c7c648eaa85a021708d86c5826418220"
+      },
+      {
+        "path": "history/11-root-live-oven-readonly-red-after.json",
+        "bytes": 3191,
+        "sha256": "a6cb230f87c9366dcd20c8f381d4755ad3da9ad1c58aaacfb0e978926e2fd089"
+      },
+      {
+        "path": "history/11-root-live-oven-readonly-red-before.json",
+        "bytes": 3192,
+        "sha256": "0e99da68b163701ef2a3dd35d853d12d5bf334b9c0852c037871f9c4065163cd"
+      },
+      {
+        "path": "history/11-root-live-oven-readonly-red-result.json",
+        "bytes": 217,
+        "sha256": "f99bfa0f6349a1d0da73df1e20e55356d82f5a1f5de77940b2969edc4a0f1254"
+      },
+      {
+        "path": "history/11-root-live-oven-readonly-red.log",
+        "bytes": 41934,
+        "sha256": "a838bb1b138ee6f29bd4deec9ba59a8dd34f86ac25122f87f4cd334e8d70018d"
+      },
+      {
+        "path": "history/12-root-source-main-oven-green-after.json",
+        "bytes": 3162,
+        "sha256": "3ca37de93434f2df78f58153970f795ca40e19a516cd9dfd4b6f9e0a1c61338f"
+      },
+      {
+        "path": "history/12-root-source-main-oven-green-before.json",
+        "bytes": 3163,
+        "sha256": "e642e719ce938e8b9f32d6db5101dd668bbbb0669504080e77a9d4ad4fd6bd79"
+      },
+      {
+        "path": "history/12-root-source-main-oven-green-result.json",
+        "bytes": 217,
+        "sha256": "68da719658e64114f8c13809f6c8e561c60f5c03af07f8560b25211fd1c4ee74"
+      },
+      {
+        "path": "history/12-root-source-main-oven-green.log",
+        "bytes": 4571,
+        "sha256": "3f3daf1e1bc6896258277d8b58a4098c9c810a52090421b0f283efce0684937c"
+      },
+      {
+        "path": "history/13-root-source-main-oven-green-after.json",
+        "bytes": 3162,
+        "sha256": "8d261542840378706b925c2d541f3d119e877f6bfa32f803de7e1d59219edaa9"
+      },
+      {
+        "path": "history/13-root-source-main-oven-green-before.json",
+        "bytes": 3163,
+        "sha256": "8b59234a6895a107a9e4afe980cf7da72ab70aaad3ff02ac314d09be6ab32c40"
+      },
+      {
+        "path": "history/13-root-source-main-oven-green-result.json",
+        "bytes": 215,
+        "sha256": "039d096fd072a09d3004eb38db52ec1add98fa9af39710e742d8991dbf4fd13a"
+      },
+      {
+        "path": "history/13-root-source-main-oven-green.log",
+        "bytes": 41563,
+        "sha256": "14adcd6adc4192a2ed33c8433d17ea9444a84e06d1c38eeadda5426b25c09fac"
+      },
+      {
+        "path": "history/14-root-final-main-and-oven-after.json",
+        "bytes": 3162,
+        "sha256": "ee4ce9a2e1fba572156c49bbfff328a549247906d19b007bb83091155d5122e9"
+      },
+      {
+        "path": "history/14-root-final-main-and-oven-before.json",
+        "bytes": 3163,
+        "sha256": "36fd2452e4be8bdf34fecfbb844ea16236deb108e74fab81c915dd3f91ab5748"
+      },
+      {
+        "path": "history/14-root-final-main-and-oven-result.json",
+        "bytes": 212,
+        "sha256": "7cf7e743e21d2820bc6df59a4b2ccf7aeda054d3aa7a833e355a039707c62981"
+      },
+      {
+        "path": "history/14-root-final-main-and-oven.log",
+        "bytes": 41795,
+        "sha256": "48d31e94e4edd6bf81e307c32ad6f2942fbbfbfe43b7ae33c783f1d46c9ee63a"
+      },
+      {
+        "path": "history/15-root-final-source-guard-after.json",
+        "bytes": 3409,
+        "sha256": "9941fbd2ca1d218466e9b3fca585c8bc27695d0302bebf2ec4c10dffe72c953d"
+      },
+      {
+        "path": "history/15-root-final-source-guard-before.json",
+        "bytes": 3410,
+        "sha256": "d55f481f24c3aa34eb2160a35e7b9674ac8fe66cab080072b70cc3b0d2a35759"
+      },
+      {
+        "path": "history/15-root-final-source-guard-result.json",
+        "bytes": 211,
+        "sha256": "f4763ee78c056df0d0f3aabef3a384223ae9f19428dc4d6c5f29f2193089ef2b"
+      },
+      {
+        "path": "history/15-root-final-source-guard.log",
+        "bytes": 41672,
+        "sha256": "65c48c194c3357143db0ddb42fd842101ce8022daea903b5b19149eb324959fd"
+      },
+      {
+        "path": "history/16-root-final-default-source-events-after.json",
+        "bytes": 3411,
+        "sha256": "be58470ed6ab774aa7eb59c12b174f586092e5955fadb21e8cdeef08ee266970"
+      },
+      {
+        "path": "history/16-root-final-default-source-events-before.json",
+        "bytes": 3412,
+        "sha256": "8c67fe91a36e561084ea6e67a78aed1078a626e04426a677320a6d0f2fe4f146"
+      },
+      {
+        "path": "history/16-root-final-default-source-events-result.json",
+        "bytes": 220,
+        "sha256": "032c7e36e8bcf3f6ef5d42a1fe2f15dddd5b2be42e9c0114420269abc0ee5c11"
+      },
+      {
+        "path": "history/16-root-final-default-source-events.log",
+        "bytes": 43867,
+        "sha256": "68f1d5ea50fc73676486aba899257a12c6d2024596e59c58728458660c3310d4"
+      },
+      {
+        "path": "history/17-root-final-refine-durable-after.json",
+        "bytes": 3407,
+        "sha256": "8b69d0df503e25da9533514b162ff84115af6f7a73e77a2deac789f46eb9c9a0"
+      },
+      {
+        "path": "history/17-root-final-refine-durable-before.json",
+        "bytes": 3408,
+        "sha256": "a44897b5e1a5c087b4cf592bf3a17159a7cc5e31e4929007f4d74d248f95535f"
+      },
+      {
+        "path": "history/17-root-final-refine-durable-result.json",
+        "bytes": 213,
+        "sha256": "f89080d5d324518d2ab7670ee8ffc075891c350f3898c5cbef6f1849805bc86e"
+      },
+      {
+        "path": "history/17-root-final-refine-durable.log",
+        "bytes": 42240,
+        "sha256": "e07af6aea72b4146cb5af11eb3dc645ecd8d5c3c3abc4405f6e2b024b4b139cb"
+      },
+      {
+        "path": "history/18-root-final-security-source-entry-after.json",
+        "bytes": 3404,
+        "sha256": "7156aeaf0458b56c608b3f69e70bde9fd0c52d922863b833f4038db0a3860a3e"
+      },
+      {
+        "path": "history/18-root-final-security-source-entry-before.json",
+        "bytes": 3405,
+        "sha256": "1f249c7fef6e45e42bed51afcb70f614203f6afbc86a37a3e3ae57d90d4670f0"
+      },
+      {
+        "path": "history/18-root-final-security-source-entry-result.json",
+        "bytes": 220,
+        "sha256": "c6feffc159739f9d450df6fedd7c72fdc462e81ab95593feb44d3f3b5b0ac4d0"
+      },
+      {
+        "path": "history/18-root-final-security-source-entry.log",
+        "bytes": 41590,
+        "sha256": "929ee60d9f7766a8bfb5651108176d7cd45347acd5412b97df1c33372d4bfb3b"
+      },
+      {
+        "path": "history/19-root-final-ordered-pet-plan-after.json",
+        "bytes": 3406,
+        "sha256": "2a9388436d0c3f29ca7ed26aced6ddc12d99407a01b6187a36b1f24ddf3998c6"
+      },
+      {
+        "path": "history/19-root-final-ordered-pet-plan-before.json",
+        "bytes": 3407,
+        "sha256": "1a468883147f786ee6fb4db53bb1e39c6006acb7283f128b83d482435b87b457"
+      },
+      {
+        "path": "history/19-root-final-ordered-pet-plan-result.json",
+        "bytes": 215,
+        "sha256": "c03cca3fc620caf285af7dca8a79c417c5bc84c28bebd6750e5c855039db6062"
+      },
+      {
+        "path": "history/19-root-final-ordered-pet-plan.log",
+        "bytes": 44451,
+        "sha256": "5848c31298d1670c400d9f6d3b0484fa951841e0f23f5ff598f427ad4d6b2670"
+      },
+      {
+        "path": "history/20-root-final-prepared-kill-rejection-after.json",
+        "bytes": 3437,
+        "sha256": "7b95665e41f600da12f1f6e5cdf9da99702d72f12615bc8ee9f55c2c30eb2600"
+      },
+      {
+        "path": "history/20-root-final-prepared-kill-rejection-before.json",
+        "bytes": 3438,
+        "sha256": "0a40c5e0325672530d106d62682d2cc77edb58ee6762185f14364bf25d068e39"
+      },
+      {
+        "path": "history/20-root-final-prepared-kill-rejection-result.json",
+        "bytes": 222,
+        "sha256": "84649c7de75c8b8408c9afdc4b279553a55fa7a24bbf31665f02a1bbce62fe9b"
+      },
+      {
+        "path": "history/20-root-final-prepared-kill-rejection.log",
+        "bytes": 40966,
+        "sha256": "904d0e89fa863c5c23e60b4a8d4761523222beed9204f23179e2a4987e54b17d"
+      },
+      {
+        "path": "history/21-root-final-prepared-kill-rejection-after.json",
+        "bytes": 3406,
+        "sha256": "9404414a23d988550c8128d43eb548e2dd1cf041b4eb9cc768c0f5ab8692864e"
+      },
+      {
+        "path": "history/21-root-final-prepared-kill-rejection-before.json",
+        "bytes": 3407,
+        "sha256": "39438e102cdc8e6eea90aa415005a9ff38bb488551181d6c6a1bab4d67b37ed5"
+      },
+      {
+        "path": "history/21-root-final-prepared-kill-rejection-result.json",
+        "bytes": 222,
+        "sha256": "16a0b68a93f5c707f4667c67e6a404f36ba16911363bf042804ccdbb37a18fd9"
+      },
+      {
+        "path": "history/21-root-final-prepared-kill-rejection.log",
+        "bytes": 41219,
+        "sha256": "0319fa872b177af69a7bb814434350d1bab48a6e4e86b0ded1f4948febe1a350"
+      },
+      {
+        "path": "final-runner/Run-P7NpcWorldRoot.ps1",
+        "bytes": 2175,
+        "sha256": "5e5824f88aa5f9c2fb4ec83c33f0fd848457d2940b7d1d47b44a3ca191fe7b65"
+      },
+      {
+        "path": "final-runner/Run-P7NpcFinalAdjacent.ps1",
+        "bytes": 1211,
+        "sha256": "6041037d274bb15e6548bb9edf88b69064c9da5aef24e5b027e66c8fb36bbf67"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/mod.rs",
+        "bytes": 7047,
+        "sha256": "56a4c5496a51b4dbc66d6305d94f0cc8805ca6de839dec8023d87dcf05d3651b"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/zone/mod.rs",
+        "bytes": 1834,
+        "sha256": "5a48210b5e712abfe6b60f276f25a891affee8011c379dd57dba18850cc4d736"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/npc_world_plan.rs",
+        "bytes": 50821,
+        "sha256": "810b9708b179c26326a57b75a98d1a74fb3081163590b83adac6740fcd67ea21"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/npc_source_guard_tests.rs",
+        "bytes": 12375,
+        "sha256": "1794155e80ea8bb6e9da956edc914e7eb7087413dd58510a0023e6fdf2f21031"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/npc_script.rs",
+        "bytes": 146779,
+        "sha256": "a66ff38ce6a6aa40f959125df470624a4c89f18ecd02603682a16d729f32b96c"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/packets.rs",
+        "bytes": 395371,
+        "sha256": "1039e84de9598dbce41689a997d1c65df43dbbfeb7967883cacd05f8b16e06af"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/shared_guild_experience.rs",
+        "bytes": 22007,
+        "sha256": "d316cfcefda8f1abf1d550b0caa6425b2bdbaeaf582c960fb6c2706e549ee3e4"
+      },
+      {
+        "path": "final-source/apps/simulation/src/runtime/prepared_kill_experience.rs",
+        "bytes": 11502,
+        "sha256": "4f6277734480b92e009c4362351356a01fb2db7f731b8bb6819d11017bb2ad01"
+      },
+      {
+        "path": "final-source/apps/simulation/src/world_runtime.rs",
+        "bytes": 62764,
+        "sha256": "a645f67c04b39d8539bd82e7ab7d936deed9136f318641a0cc130d9fbbb651df"
+      }
+    ],
+    "wholeOriginalBytesVerified": true,
+    "zipCrcVerified": true
+  }
+}

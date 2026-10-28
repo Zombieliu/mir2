@@ -1,0 +1,56 @@
+{
+  "schema": "mir2.r18-live-before-after-readonly.v1",
+  "beforeUtc": "2026-10-04T16:12:39.840987+00:00",
+  "afterUtc": "2026-10-04T16:50:03.981953+00:00",
+  "realmsUnchanged": true,
+  "caddyUnchanged": true,
+  "configHashesUnchanged": true,
+  "feedUnchanged": true,
+  "beforeSixCounters": [
+    {
+      "currentWsConnections": 1,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  ],
+  "afterSixCounters": [
+    {
+      "currentWsConnections": 1,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    {
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    }
+  ],
+  "beforeTcpCounts": [
+    0,
+    0
+  ],
+  "afterTcpCounts": [
+    0,
+    0
+  ],
+  "sourceOrServiceMutationByQa": false,
+  "livePrivateStoreRead": false,
+  "capacityAccepted": false
+}

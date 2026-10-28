@@ -1,13 +1,12 @@
 use std::any::Any;
 
 use crate::runtime::{
-    GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
+    GameShopPurchaseOutcome, LocalPlayerVitalsSnapshot, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution, NpcGoldBuyRequest,
+    NpcPurchaseBeforeExecution, NpcPurchaseProcessingError, NpcPurchaseProcessingExecution,
+    NpcPurchaseRequest, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
-    LocalPlayerVitalsSnapshot, NpcGoldBuyRequest, NpcGoldBuyBeforeExecution,
-    NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,
-    NpcPurchaseRequest, NpcPurchaseBeforeExecution, NpcPurchaseProcessingError,
-    NpcPurchaseProcessingExecution,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -42,15 +41,54 @@ pub struct NativeGameShopPurchaseRequest {
     pub price_type: i32,
 }
 
+/// Dedicated trusted gift operation. Old purchase commands never infer a
+/// recipient or degrade a gift into a self-purchase.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NativeGameShopGiftRequest {
+    pub purchase: NativeGameShopPurchaseRequest,
+    pub recipient_name: String,
+}
+
+/// A server-prepared continuation of one admission. The durable half is bound
+/// byte-for-byte to the authority; the runtime half retains its clock domain.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterHandoffCheckpoint {
+    /// Bound by the source admission; never supplied by a player packet.
+    pub account_id: String,
+    pub durable: CharacterSaveRecord,
+    pub runtime: CharacterSaveRecord,
+    pub source_tick: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterHandoffClockWitness {
+    pub epoch: String,
+    pub now_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CharacterHandoffCommitment {
+    pub runtime: CharacterSaveRecord,
+    pub restored_clock: CharacterHandoffClockWitness,
+    pub observed_clock: CharacterHandoffClockWitness,
+}
+
 #[derive(Debug, Clone)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
     /// Gateway-only bootstrap after taking custody of an authenticated retained session.
-    ReplayRetainedStartGameBootstrap { character_index: i32 },
+    ReplayRetainedStartGameBootstrap {
+        character_index: i32,
+    },
     /// Trusted native receipt purchase. Raw clients cannot construct this
     /// command; Gateway binds the server idempotency key to authenticated
     /// identity before the Zone/Simulation path sees it.
     NativeGameShopPurchase(NativeGameShopPurchaseRequest),
+    NativeGameShopGift(NativeGameShopGiftRequest),
     PasskeyLogin {
         account_id: String,
     },
@@ -124,6 +162,18 @@ pub enum WorldCommand {
     SetLanguage {
         language: String,
     },
+    /// Authenticated billing seam only; never accepted as a raw player command.
+    BillingRefresh {
+        character_index: i32,
+    },
+    BillingBuyMonthlyCard {
+        character_index: i32,
+        request_id: String,
+    },
+    BillingActivateMonthlyCard {
+        character_index: i32,
+        unique_id: u64,
+    },
     Tick,
 }
 
@@ -132,9 +182,14 @@ pub fn validate_production_player_command(
     command: &WorldCommand,
 ) -> Result<(), String> {
     match command {
-        WorldCommand::ReplayRetainedStartGameBootstrap { .. } => {
-            Err("retained bootstrap replay is not allowed on the production player path".to_string())
+        WorldCommand::BillingRefresh { .. }
+        | WorldCommand::BillingBuyMonthlyCard { .. }
+        | WorldCommand::BillingActivateMonthlyCard { .. } => {
+            Err("billing commands require the authenticated billing seam".into())
         }
+        WorldCommand::ReplayRetainedStartGameBootstrap { .. } => Err(
+            "retained bootstrap replay is not allowed on the production player path".to_string(),
+        ),
         WorldCommand::PasskeyLogin { .. } => {
             Err("raw passkey login is not allowed on the production player path".to_string())
         }
@@ -168,7 +223,9 @@ pub fn validate_production_player_command(
         WorldCommand::ClientPacket(ClientPacket::Inspect { .. }) if !authenticated => {
             Err("authenticated account is required to inspect a character".to_string())
         }
-        WorldCommand::NativeGameShopPurchase(_) if !authenticated => {
+        WorldCommand::NativeGameShopPurchase(_) | WorldCommand::NativeGameShopGift(_)
+            if !authenticated =>
+        {
             Err("authenticated account is required for native GameShop purchases".to_string())
         }
         _ => Ok(()),
@@ -231,6 +288,7 @@ pub enum WorldCommandKind {
     CreditGoldFromOre,
     ItemRentalRequest,
     SetLanguage,
+    Billing,
     Tick,
 }
 
@@ -241,7 +299,10 @@ impl WorldCommand {
                 WorldCommandKind::ClientPacket(client_packet_name(packet))
             }
             Self::NativeGameShopPurchase(_) => WorldCommandKind::ClientPacket("GameShopBuy"),
-            Self::ReplayRetainedStartGameBootstrap { .. } => WorldCommandKind::ReplayRetainedStartGameBootstrap,
+            Self::NativeGameShopGift(_) => WorldCommandKind::ClientPacket("GameShopGift"),
+            Self::ReplayRetainedStartGameBootstrap { .. } => {
+                WorldCommandKind::ReplayRetainedStartGameBootstrap
+            }
             Self::PasskeyLogin { .. } => WorldCommandKind::PasskeyLogin,
             Self::MoveTo { .. } => WorldCommandKind::MoveTo,
             Self::Attack { .. } => WorldCommandKind::Attack,
@@ -260,6 +321,9 @@ impl WorldCommand {
             Self::CreditGoldFromOre { .. } => WorldCommandKind::CreditGoldFromOre,
             Self::ItemRentalRequest { .. } => WorldCommandKind::ItemRentalRequest,
             Self::SetLanguage { .. } => WorldCommandKind::SetLanguage,
+            Self::BillingRefresh { .. }
+            | Self::BillingBuyMonthlyCard { .. }
+            | Self::BillingActivateMonthlyCard { .. } => WorldCommandKind::Billing,
             Self::Tick => WorldCommandKind::Tick,
         }
     }
@@ -314,7 +378,7 @@ pub trait WorldRuntime: Send + Sync {
         let snapshot_tick = if skip_snapshot {
             0
         } else {
-            self.world_snapshot().tick
+            self.current_tick()
         };
         let packet_count = packets.len();
         Ok(WorldCommandExecution {
@@ -338,41 +402,73 @@ pub trait WorldRuntime: Send + Sync {
     }
 
     /// Local domain capability only; this does not advertise a network receipt ABI.
-    fn supports_typed_npc_gold_buy_outcome(&self) -> bool { false }
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
+        false
+    }
 
     /// Unsupported implementations must never fall back to execute/legacy BuyItem.
-    fn execute_production_npc_gold_buy_requiring_typed_outcome(&mut self,
-        _authenticated: bool, _request: NpcGoldBuyRequest,
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &mut self,
+        _authenticated: bool,
+        _request: NpcGoldBuyRequest,
     ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
-        Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime))
+        Err(NpcGoldBuyProcessingError::BeforeExecution(
+            NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+        ))
     }
-
 
     /// Explicit durable owner capability. Unsupported routes never execute BuyItem.
-    fn supports_durable_npc_purchase_owner(&self) -> bool { false }
-
-    fn execute_npc_purchase_owner(&mut self, _authenticated: bool, _owner_epoch: [u8; 32],
-        _action: crate::NpcPurchaseOwnerAction,
-    ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
-        Err(crate::NpcPurchaseDurableError::BeforeExecution { detail: "durable NPC purchase owner capability is unavailable".into() })
+    fn supports_durable_npc_purchase_owner(&self) -> bool {
+        false
     }
 
-    fn npc_purchase_owner_authority(&self, _owner_epoch: [u8; 32]) -> Option<crate::NpcPurchaseProducer> { None }
+    fn execute_npc_purchase_owner(
+        &mut self,
+        _authenticated: bool,
+        _owner_epoch: [u8; 32],
+        _action: crate::NpcPurchaseOwnerAction,
+    ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
+        Err(crate::NpcPurchaseDurableError::BeforeExecution {
+            detail: "durable NPC purchase owner capability is unavailable".into(),
+        })
+    }
 
+    fn npc_purchase_owner_authority(
+        &self,
+        _owner_epoch: [u8; 32],
+    ) -> Option<crate::NpcPurchaseProducer> {
+        None
+    }
 
-    fn npc_purchase_owner_checkpoint(&self, _owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> { None }
+    fn npc_purchase_owner_checkpoint(&self, _owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> {
+        None
+    }
 
-    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, _checkpoint: &CharacterSaveRecord) -> Result<(), String> {
+    fn apply_npc_purchase_owner_replica_checkpoint(
+        &mut self,
+        _checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
         Err("world runtime does not implement isolated NPC purchase checkpoint replay".into())
     }
 
     /// Local evidence for all NPC purchase branches, not a network capability.
-    fn supports_typed_npc_purchase_outcome(&self) -> bool { false }
+    fn supports_typed_npc_purchase_outcome(&self) -> bool {
+        false
+    }
 
-    fn execute_production_npc_purchase_requiring_typed_outcome(&mut self,
-        _authenticated: bool, _request: NpcPurchaseRequest,
+    fn execute_production_npc_purchase_requiring_typed_outcome(
+        &mut self,
+        _authenticated: bool,
+        _request: NpcPurchaseRequest,
     ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
-        Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::UnsupportedRuntime))
+        Err(NpcPurchaseProcessingError::BeforeExecution(
+            NpcPurchaseBeforeExecution::UnsupportedRuntime,
+        ))
+    }
+
+    /// Gift support is negotiated separately from self-purchases.
+    fn supports_native_game_shop_gifts(&self) -> bool {
+        false
     }
 
     fn execute_production_player_command(
@@ -385,7 +481,20 @@ pub trait WorldRuntime: Send + Sync {
     }
 
     fn world_snapshot(&self) -> WorldSnapshot;
-    fn supports_magic_key_assignment(&self,_spell:mir2_protocol::Spell,_key:u8,_old_key:u8)->bool{false}
+
+    /// Read-only outcome clock projection. Other runtimes retain their
+    /// existing snapshot behavior unless they can provide the same clock.
+    fn current_tick(&self) -> u64 {
+        self.world_snapshot().tick
+    }
+    fn supports_magic_key_assignment(
+        &self,
+        _spell: mir2_protocol::Spell,
+        _key: u8,
+        _old_key: u8,
+    ) -> bool {
+        false
+    }
     fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         Vec::new()
     }
@@ -393,11 +502,43 @@ pub trait WorldRuntime: Send + Sync {
     fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
         None
     }
+    fn active_character_teardown_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        self.active_character_checkpoint()
+    }
     fn restore_active_character_checkpoint(
         &mut self,
         _checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
         Err("world runtime does not support active character checkpoint restore".to_string())
+    }
+
+    /// Verified isolated base-snapshot reconstruction. No credential login or
+    /// player command may invoke this boundary.
+    fn restore_replica_session_checkpoint(
+        &mut self,
+        _identity: &ActiveSessionIdentity,
+        _checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        Err("world runtime does not support verified replica session restore".into())
+    }
+
+    /// Server-only handoff seams. These have no WorldCommand/client-packet form.
+    fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        Err("world runtime does not implement authoritative character handoff preparation".into())
+    }
+
+    fn resume_character_handoff(
+        &mut self,
+        _checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<CharacterHandoffCommitment, String> {
+        Err("world runtime does not implement trusted character handoff resume".into())
+    }
+
+    fn apply_character_handoff_replica(
+        &mut self,
+        _checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<(), String> {
+        Err("world runtime does not implement verified character handoff replay".into())
     }
     fn save_active_character(&mut self) -> Result<(), String>;
     /// Persist a final world-leave snapshot and Crystal LastLogoutDate.
@@ -407,6 +548,15 @@ pub trait WorldRuntime: Send + Sync {
     /// exact final-save path.
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
         self.save_active_character()
+    }
+    /// Trusted prepared teardown; never exposed through player ingress.
+    /// Legacy remote/test runtimes retain their existing behavior.
+    fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.restore_active_character_checkpoint(checkpoint)?;
+        self.save_active_character_for_logout()
     }
     fn refresh_active_external_mail(&mut self) -> bool;
 }
@@ -423,6 +573,13 @@ impl InProcessWorldRuntime {
         Self {
             session: SimulationSession::new(config),
         }
+    }
+
+    pub fn character_handoff_commitment(
+        &self,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<CharacterHandoffCommitment, String> {
+        self.session.character_handoff_commitment(checkpoint)
     }
 
     pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
@@ -451,11 +608,55 @@ impl InProcessWorldRuntime {
     pub fn shared_mentor_config(&self) -> Option<SimulationConfig> {
         self.session.shared_mentor_config()
     }
-    pub fn refresh_shared_social_buffs(&mut self, online: &std::collections::BTreeSet<(String, i32)>) -> Result<Vec<ServerPacket>, String> {
+    pub fn shared_group_permission(&self) -> Option<bool> {
+        self.session.shared_group_permission()
+    }
+    pub fn apply_shared_group_projection(
+        &mut self,
+        allow_group: bool,
+        members: &[String],
+    ) -> Result<(), String> {
+        self.session
+            .apply_shared_group_projection(allow_group, members)
+    }
+    pub fn shared_conquest_config(&self) -> Option<SimulationConfig> {
+        self.session
+            .shared_mentor_config()
+            .filter(|config| !config.conquest_policies.is_empty())
+    }
+    pub fn refresh_shared_social_buffs(
+        &mut self,
+        online: &std::collections::BTreeSet<(String, i32)>,
+    ) -> Result<Vec<ServerPacket>, String> {
         self.session.refresh_shared_social_buffs(online)
     }
     pub fn social_experience_buff_rates(&self) -> (Option<i32>, Option<i32>) {
         self.session.social_experience_buff_rates()
+    }
+    pub fn consume_shared_mentor_credits(&mut self) -> Result<Vec<ServerPacket>, String> {
+        self.session.consume_shared_mentor_credits()
+    }
+
+    pub fn active_zone_experience_profile(
+        &self,
+    ) -> Result<Option<crate::ZoneExperienceProfile>, String> {
+        self.session.active_zone_experience_profile()
+    }
+
+    pub fn set_shared_personal_experience_context(
+        &mut self,
+        profile: Option<crate::ZoneExperienceProfile>,
+        zone: Option<crate::ZoneKey>,
+    ) -> Result<(), String> {
+        self.session
+            .set_shared_personal_experience_context(profile, zone)
+    }
+
+    pub fn apply_shared_owned_pet_player_kill(
+        &mut self,
+        receipt: &crate::ZoneOwnedPetPlayerKillReceipt,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session.apply_shared_owned_pet_player_kill(receipt)
     }
     pub fn refresh_shared_mentor(
         &mut self,
@@ -467,6 +668,9 @@ impl InProcessWorldRuntime {
 
     pub fn into_session(self) -> SimulationSession {
         self.session
+    }
+    pub fn monthly_card_access_expired(&self) -> Result<bool, String> {
+        self.session.monthly_card_access_expired()
     }
 
     pub fn ranking_with_online_characters(
@@ -670,14 +874,31 @@ impl InProcessWorldRuntime {
         )
     }
 
-    pub fn reconcile_shared_monster_kill_receipt(&mut self, key: &str, hash: &str) -> Result<(), crate::PreparedKillPublicationFailure> {
-        self.session.reconcile_shared_monster_kill_receipt(key,hash)
+    pub fn reconcile_shared_monster_kill_receipt(
+        &mut self,
+        key: &str,
+        hash: &str,
+    ) -> Result<(), crate::PreparedKillPublicationFailure> {
+        self.session
+            .reconcile_shared_monster_kill_receipt(key, hash)
     }
 
-    pub fn commit_shared_monster_kill_via_postgres<T,F>(&mut self, key: &str, award: &crate::runtime::zone::ZoneMonsterKillAward, publish: F)
-        -> Result<(T, Vec<ServerPacket>), crate::PreparedKillPublicationFailure>
-    where F: FnOnce(&crate::PreparedKillAccountSource) -> Result<crate::PreparedKillPublication<T>, crate::PreparedKillPublicationFailure> {
-        self.session.commit_shared_monster_kill_via_postgres(key,award,publish)
+    pub fn commit_shared_monster_kill_via_postgres<T, F>(
+        &mut self,
+        key: &str,
+        award: &crate::runtime::zone::ZoneMonsterKillAward,
+        publish: F,
+    ) -> Result<(T, Vec<ServerPacket>), crate::PreparedKillPublicationFailure>
+    where
+        F: FnOnce(
+            &crate::PreparedKillAccountSource,
+        ) -> Result<
+            crate::PreparedKillPublication<T>,
+            crate::PreparedKillPublicationFailure,
+        >,
+    {
+        self.session
+            .commit_shared_monster_kill_via_postgres(key, award, publish)
     }
 
     pub fn commit_shared_monster_kill_award_with_receipt(
@@ -685,13 +906,20 @@ impl InProcessWorldRuntime {
         key: &str,
         award: &crate::runtime::zone::ZoneMonsterKillAward,
     ) -> SharedAccountInventoryTransactionReceipt {
-        self.session.commit_shared_monster_kill_award_with_receipt(key, award)
+        self.session
+            .commit_shared_monster_kill_award_with_receipt(key, award)
     }
 
     pub fn try_commit_shared_monster_kill_award_with_receipt(
-        &mut self, key: &str, award: &crate::runtime::zone::ZoneMonsterKillAward,
-    ) -> Result<(SharedAccountInventoryTransactionReceipt, bool), crate::runtime::SharedMonsterKillCommitFailure> {
-        self.session.try_commit_shared_monster_kill_award_with_receipt(key, award)
+        &mut self,
+        key: &str,
+        award: &crate::runtime::zone::ZoneMonsterKillAward,
+    ) -> Result<
+        (SharedAccountInventoryTransactionReceipt, bool),
+        crate::runtime::SharedMonsterKillCommitFailure,
+    > {
+        self.session
+            .try_commit_shared_monster_kill_award_with_receipt(key, award)
     }
 
     pub fn commit_shared_skill_item_consumption_transaction(
@@ -713,6 +941,17 @@ impl InProcessWorldRuntime {
         self.session.shared_skill_item_param(spell)
     }
 
+    pub fn shared_mining_tool(&self) -> Option<crate::runtime::zone::ZoneMiningTool> {
+        self.session.shared_mining_tool()
+    }
+
+    pub fn apply_shared_mining_swing(
+        &mut self,
+        swing: &crate::runtime::zone::ZoneMiningSwing,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session.apply_shared_mining_swing(swing)
+    }
+
     pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {
         self.session.zone_monster_spawn_snapshot(object_id)
     }
@@ -728,6 +967,41 @@ impl InProcessWorldRuntime {
     }
     pub fn enable_shared_guild_authority(&mut self) {
         self.session.enable_shared_guild_authority();
+    }
+    pub fn sync_shared_experience_buff_clocks(
+        &mut self,
+        profile: Option<&crate::ZoneExperienceProfile>,
+        now_ms: u64,
+    ) -> Result<(), String> {
+        self.session
+            .sync_shared_experience_buff_clocks(profile, now_ms)
+    }
+    pub fn set_shared_pet_experience_context(
+        &mut self,
+        snapshot: crate::ZoneSavedPetSnapshot,
+        admission: Option<crate::ZonePetExperienceAdmission>,
+    ) -> Result<(), String> {
+        self.session
+            .set_shared_pet_experience_context(snapshot, admission)
+    }
+    pub fn take_shared_pet_experience_commit(
+        &mut self,
+    ) -> Option<(crate::ZonePetExperienceAdmission, Vec<u32>)> {
+        self.session.take_shared_pet_experience_commit()
+    }
+    pub fn pending_shared_pet_experience_commit(
+        &self,
+    ) -> Option<(crate::ZonePetExperienceAdmission, Vec<u32>)> {
+        self.session.pending_shared_pet_experience_commit()
+    }
+    pub fn acknowledge_shared_pet_experience_commit(
+        &mut self,
+        steps: &[u32],
+    ) -> Result<(), String> {
+        self.session.acknowledge_shared_pet_experience_commit(steps)
+    }
+    pub fn active_saved_pet_snapshot(&self) -> crate::ZoneSavedPetSnapshot {
+        self.session.active_saved_pet_snapshot()
     }
     pub fn submit_shared_guild_name(&mut self, name: &str) -> Result<Vec<ServerPacket>, String> {
         self.session.submit_shared_guild_name(name)
@@ -764,6 +1038,15 @@ impl InProcessWorldRuntime {
         self.session.tick_shared_zone_personal_state()
     }
 
+    pub fn try_tick_shared_zone_personal_state(&mut self) -> Result<Vec<ServerPacket>, String> {
+        let mut packets = self
+            .session
+            .poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())?;
+        packets.extend(self.session.game_shop_gift_mail_notifications());
+        packets.extend(self.session.try_tick_shared_zone_personal_state()?);
+        Ok(packets)
+    }
+
     pub fn zone_melee_attack_damage(&self) -> i32 {
         self.session.zone_melee_attack_damage()
     }
@@ -791,6 +1074,10 @@ impl InProcessWorldRuntime {
 
     pub fn zone_magic_attack_profile(&self, spell: Spell) -> Option<(u8, i32, i32, u64)> {
         self.session.zone_magic_attack_profile(spell)
+    }
+
+    pub fn zone_magic_cast_blocked_by_status(&self) -> bool {
+        self.session.zone_magic_cast_blocked_by_status()
     }
 
     pub fn item_rental_request(&mut self, partner_name: &str, renting: bool) -> Vec<ServerPacket> {
@@ -841,10 +1128,18 @@ impl InProcessWorldRuntime {
         self.session.active_zone_join_snapshot(session_id)
     }
 
+    pub fn active_zone_player_appearance(&self) -> Option<crate::ZonePlayerAppearance> {
+        self.session.active_zone_player_appearance()
+    }
+
     /// Read the trusted combat projection without building the much broader
     /// world/quest/UI snapshot used by a full Zone join.
     pub fn zone_player_combat_stats(&self) -> ZonePlayerCombatStats {
         self.session.zone_player_combat_stats()
+    }
+
+    pub fn commit_zone_focus_attack(&mut self) -> Vec<ServerPacket> {
+        self.session.commit_zone_focus_attack()
     }
 
     pub fn force_authoritative_player_transform(
@@ -860,8 +1155,17 @@ impl InProcessWorldRuntime {
         self.session.reconcile_current_map_monster_activation();
     }
 
+    #[cfg(feature = "test-support")]
+    pub fn materialize_cold_source_pool_for_test(&mut self) -> Result<usize, String> {
+        self.session.materialize_cold_source_pool_for_test()
+    }
+
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         self.session.force_authoritative_player_vitals(hp, mp);
+    }
+
+    pub fn force_authoritative_player_life(&mut self, dead: bool) {
+        self.session.force_authoritative_player_life(dead);
     }
 
     pub fn force_authoritative_player_vitals_with_max_hp(
@@ -899,6 +1203,13 @@ impl InProcessWorldRuntime {
             .apply_zone_player_magic_spend(spell, mp_cost, cooldown_ms);
     }
 
+    pub fn commit_zone_five_class_practice(
+        &mut self,
+        receipt: &crate::ZoneFiveClassPracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        self.session.commit_zone_five_class_practice(receipt)
+    }
+
     pub fn commit_zone_magic_practice(
         &mut self,
         receipt: &crate::ZoneMagicPracticeReceipt,
@@ -923,6 +1234,10 @@ impl InProcessWorldRuntime {
 
     pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
         self.session.commit_zone_journey_state()
+    }
+
+    pub fn force_zone_flaming_sword_state(&mut self, armed: bool) {
+        self.session.force_zone_flaming_sword_state(armed);
     }
 
     pub fn apply_zone_player_buff_packets(
@@ -1047,8 +1362,14 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
-    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        self.session.supports_magic_key_assignment(spell,key,old_key)
+    fn supports_magic_key_assignment(
+        &self,
+        spell: mir2_protocol::Spell,
+        key: u8,
+        old_key: u8,
+    ) -> bool {
+        self.session
+            .supports_magic_key_assignment(spell, key, old_key)
     }
     fn as_any(&self) -> &dyn Any {
         self
@@ -1063,17 +1384,82 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
-        let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
-            |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
-        let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
-        let packets = match command {
-            WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
-            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
-                self.session.replay_active_character_bootstrap(character_index)
+        if !matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
+                | WorldCommand::BillingRefresh { .. }
+                | WorldCommand::BillingBuyMonthlyCard { .. }
+                | WorldCommand::BillingActivateMonthlyCard { .. }
+        ) && self.session.monthly_card_access_expired()?
+        {
+            return self.execute(WorldCommand::ClientPacket(ClientPacket::LogOut));
+        }
+        let xp_source = matches!(
+            &command,
+            WorldCommand::Attack { .. }
+                | WorldCommand::Interact { .. }
+                | WorldCommand::SelectNpcDialog { .. }
+                | WorldCommand::SubmitNpcInput { .. }
+                | WorldCommand::CastSkill { .. }
+        );
+        let periodic_checkpoint = matches!(&command, WorldCommand::SelectNpcDialog { target }
+            if crate::runtime::periodic_quest_target(target));
+        let default_source = matches!(
+            &command,
+            WorldCommand::MoveTo { .. }
+                | WorldCommand::Attack { .. }
+                | WorldCommand::Interact { .. }
+                | WorldCommand::SelectNpcDialog { .. }
+                | WorldCommand::SubmitNpcInput { .. }
+                | WorldCommand::CastSkill { .. }
+                | WorldCommand::UseItem { .. }
+                | WorldCommand::TransferMap { .. }
+                | WorldCommand::ApplyHandoffTransform { .. }
+                | WorldCommand::Stage5Command { .. }
+        );
+        let before = if periodic_checkpoint
+            || matches!(
+                &command,
+                WorldCommand::Interact { .. }
+                    | WorldCommand::SelectNpcDialog { .. }
+                    | WorldCommand::SubmitNpcInput { .. }
+            ) {
+            self.session.begin_npc_dialog_source_command(false)?
+        } else if default_source {
+            self.session.begin_default_npc_source_command()?
+        } else if xp_source {
+            self.session.begin_guild_experience_command(false)?
+        } else {
+            None
+        };
+        let mut billing_packets = match &command {
+            WorldCommand::Tick => {
+                let mut packets = self
+                    .session
+                    .poll_pending_recharge_credits(crate::monthly_card::monthly_card_now_ms())?;
+                packets.extend(self.session.game_shop_gift_mail_notifications());
+                packets
             }
+            WorldCommand::NativeGameShopPurchase(_)
+            | WorldCommand::NativeGameShopGift(_)
+            | WorldCommand::ClientPacket(ClientPacket::GameShopBuy { .. }) => {
+                self.session.refresh_recharge_credit_preflight()?
+            }
+            _ => Vec::new(),
+        };
+        let mut packets = match command {
+            WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => self
+                .session
+                .replay_active_character_bootstrap(character_index),
             WorldCommand::NativeGameShopPurchase(request) => {
                 self.session
                     .game_shop_buy_packet_idempotent(request)?
+                    .packets
+            }
+            WorldCommand::NativeGameShopGift(request) => {
+                self.session
+                    .game_shop_gift_packet_idempotent(request)?
                     .packets
             }
             WorldCommand::PasskeyLogin { account_id } => self.session.passkey_login(&account_id),
@@ -1083,11 +1469,11 @@ impl WorldRuntime for InProcessWorldRuntime {
             WorldCommand::Attack { object_id } => self.session.attack(object_id),
             WorldCommand::Interact { object_id } => self.session.interact(object_id),
             WorldCommand::SelectNpcDialog { target } => {
-                self.session.select_npc_dialog_target(&target)
+                self.session.select_npc_dialog_from_source_command(&target)
             }
             WorldCommand::SubmitNpcInput { value } => self.session.submit_npc_input(&value),
             WorldCommand::PickUp { object_id } => self.session.pick_up(object_id),
-            WorldCommand::UseItem { key } => self.session.use_item(&key),
+            WorldCommand::UseItem { key } => self.session.use_item_from_source_command(&key),
             WorldCommand::DropItem { key } => self.session.drop_item(&key),
             WorldCommand::DeleteCharacter { character_index } => {
                 self.session.delete_character(character_index)
@@ -1136,8 +1522,73 @@ impl WorldRuntime for InProcessWorldRuntime {
                 Vec::new()
             }
             WorldCommand::Tick => self.session.tick(),
+            WorldCommand::BillingRefresh { character_index } => {
+                if let Some(identity) = self.session.active_identity() {
+                    if identity.character_index != character_index {
+                        return Err("billingCharacterMismatch".into());
+                    }
+                    self.session.consume_pending_recharge_credits()?
+                } else {
+                    let (config, account) = self.session.billing_authenticated_config()?;
+                    config.consume_inactive_pending_recharge_credits(
+                        &account,
+                        character_index,
+                        crate::monthly_card::monthly_card_now_ms(),
+                    )?;
+                    Vec::new()
+                }
+            }
+            WorldCommand::BillingBuyMonthlyCard {
+                character_index,
+                request_id,
+            } => {
+                let now = crate::monthly_card::monthly_card_now_ms();
+                if let Some(identity) = self.session.active_identity() {
+                    if identity.character_index != character_index {
+                        return Err("billingCharacterMismatch".into());
+                    }
+                    self.session.buy_billing_monthly_card(&request_id, now)?
+                } else {
+                    let (config, account) = self.session.billing_authenticated_config()?;
+                    config.buy_monthly_card_for_character(
+                        &account,
+                        character_index,
+                        &request_id,
+                        now,
+                    )?;
+                    Vec::new()
+                }
+            }
+            WorldCommand::BillingActivateMonthlyCard {
+                character_index,
+                unique_id,
+            } => {
+                let now = crate::monthly_card::monthly_card_now_ms();
+                if let Some(identity) = self.session.active_identity() {
+                    if identity.character_index != character_index {
+                        return Err("billingCharacterMismatch".into());
+                    }
+                    self.session.activate_billing_monthly_card(unique_id, now)?
+                } else {
+                    let (config, account) = self.session.billing_authenticated_config()?;
+                    config.activate_monthly_card_for_character(
+                        &account,
+                        character_index,
+                        unique_id,
+                        now,
+                    )?;
+                    Vec::new()
+                }
+            }
         };
-        self.session.finish_guild_experience_command(before,packets)
+        billing_packets.append(&mut packets);
+        let mut packets = billing_packets;
+        if default_source {
+            self.session
+                .dispatch_default_npc_source_packets(&mut packets);
+        }
+        self.session
+            .finish_guild_experience_command(before, packets)
     }
 
     fn execute_with_outcome(
@@ -1147,26 +1598,36 @@ impl WorldRuntime for InProcessWorldRuntime {
         let command_kind = command.kind();
         let skip_snapshot = command.skips_outcome_snapshot();
         let (packets, game_shop_purchase_outcome) = match command {
+            WorldCommand::NativeGameShopGift(request) => {
+                let mut packets = self.session.refresh_recharge_credit_preflight()?;
+                let execution = self.session.game_shop_gift_packet_idempotent(request)?;
+                packets.extend(execution.packets);
+                (packets, Some(execution.outcome))
+            }
             WorldCommand::NativeGameShopPurchase(request) => {
+                let mut packets = self.session.refresh_recharge_credit_preflight()?;
                 let execution = self.session.game_shop_buy_packet_idempotent(request)?;
-                (execution.packets, Some(execution.outcome))
+                packets.extend(execution.packets);
+                (packets, Some(execution.outcome))
             }
             WorldCommand::ClientPacket(ClientPacket::GameShopBuy {
                 g_index,
                 quantity,
                 price_type,
             }) => {
+                let mut packets = self.session.refresh_recharge_credit_preflight()?;
                 let execution = self
                     .session
                     .game_shop_buy_packet_with_outcome(g_index, quantity, price_type);
-                (execution.packets, Some(execution.outcome))
+                packets.extend(execution.packets);
+                (packets, Some(execution.outcome))
             }
             command => (self.execute(command)?, None),
         };
         let snapshot_tick = if skip_snapshot {
             0
         } else {
-            self.world_snapshot().tick
+            self.current_tick()
         };
         let packet_count = packets.len();
         Ok(WorldCommandExecution {
@@ -1185,54 +1646,83 @@ impl WorldRuntime for InProcessWorldRuntime {
         true
     }
 
-    fn supports_typed_npc_gold_buy_outcome(&self) -> bool { true }
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
+        true
+    }
 
-    fn execute_production_npc_gold_buy_requiring_typed_outcome(&mut self,
-        authenticated: bool, request: NpcGoldBuyRequest,
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        request: NpcGoldBuyRequest,
     ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
         if !authenticated {
-            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            ));
         }
         self.session.try_npc_gold_buy_with_outcome(request)
     }
-
 
     fn supports_durable_npc_purchase_owner(&self) -> bool {
         self.session.supports_durable_npc_purchase_owner()
     }
 
-    fn execute_npc_purchase_owner(&mut self, authenticated: bool, owner_epoch: [u8; 32],
+    fn execute_npc_purchase_owner(
+        &mut self,
+        authenticated: bool,
+        owner_epoch: [u8; 32],
         action: crate::NpcPurchaseOwnerAction,
     ) -> Result<crate::NpcPurchaseOwnerExecution, crate::NpcPurchaseDurableError> {
-        self.session.execute_npc_purchase_owner(authenticated, owner_epoch, action)
+        self.session
+            .execute_npc_purchase_owner(authenticated, owner_epoch, action)
     }
 
-    fn npc_purchase_owner_authority(&self, owner_epoch: [u8; 32]) -> Option<crate::NpcPurchaseProducer> {
+    fn npc_purchase_owner_authority(
+        &self,
+        owner_epoch: [u8; 32],
+    ) -> Option<crate::NpcPurchaseProducer> {
         self.session.npc_purchase_owner_authority(owner_epoch).ok()
     }
-
 
     fn npc_purchase_owner_checkpoint(&self, owner_epoch: [u8; 32]) -> Option<CharacterSaveRecord> {
         self.session.npc_purchase_owner_checkpoint(owner_epoch).ok()
     }
 
-    fn apply_npc_purchase_owner_replica_checkpoint(&mut self, checkpoint: &CharacterSaveRecord) -> Result<(), String> {
-        self.session.apply_npc_purchase_owner_replica_checkpoint(checkpoint)
+    fn apply_npc_purchase_owner_replica_checkpoint(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session
+            .apply_npc_purchase_owner_replica_checkpoint(checkpoint)
     }
 
-    fn supports_typed_npc_purchase_outcome(&self) -> bool { true }
+    fn supports_typed_npc_purchase_outcome(&self) -> bool {
+        true
+    }
 
-    fn execute_production_npc_purchase_requiring_typed_outcome(&mut self,
-        authenticated: bool, request: NpcPurchaseRequest,
+    fn execute_production_npc_purchase_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        request: NpcPurchaseRequest,
     ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
         if !authenticated {
-            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotAuthenticated));
+            return Err(NpcPurchaseProcessingError::BeforeExecution(
+                NpcPurchaseBeforeExecution::NotAuthenticated,
+            ));
         }
         self.session.try_npc_purchase_with_outcome(request)
     }
 
+    fn supports_native_game_shop_gifts(&self) -> bool {
+        self.session.game_shop_gift_enabled()
+    }
+
     fn world_snapshot(&self) -> WorldSnapshot {
         self.session.world_snapshot()
+    }
+
+    fn current_tick(&self) -> u64 {
+        self.session.current_tick()
     }
 
     fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
@@ -1247,11 +1737,44 @@ impl WorldRuntime for InProcessWorldRuntime {
         self.session.active_character_checkpoint()
     }
 
+    fn active_character_teardown_checkpoint(&self) -> Option<CharacterSaveRecord> {
+        self.session.active_character_teardown_checkpoint()
+    }
+
     fn restore_active_character_checkpoint(
         &mut self,
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
         self.session.restore_active_character_checkpoint(checkpoint)
+    }
+
+    fn restore_replica_session_checkpoint(
+        &mut self,
+        identity: &ActiveSessionIdentity,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session
+            .restore_replica_session_checkpoint(identity, checkpoint)
+    }
+
+    fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        self.session.prepare_character_handoff()
+    }
+
+    fn resume_character_handoff(
+        &mut self,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<CharacterHandoffCommitment, String> {
+        self.session
+            .resume_authenticated_character_handoff(checkpoint)
+    }
+
+    fn apply_character_handoff_replica(
+        &mut self,
+        checkpoint: &CharacterHandoffCheckpoint,
+    ) -> Result<(), String> {
+        self.session
+            .apply_authenticated_character_handoff_replica(checkpoint)
     }
 
     fn save_active_character(&mut self) -> Result<(), String> {
@@ -1262,10 +1785,22 @@ impl WorldRuntime for InProcessWorldRuntime {
         self.session.save_active_character_for_logout()
     }
 
+    fn save_frozen_character_checkpoint_for_logout(
+        &mut self,
+        checkpoint: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        self.session
+            .save_frozen_character_checkpoint_for_logout(checkpoint)
+    }
+
     fn refresh_active_external_mail(&mut self) -> bool {
         self.session.refresh_active_external_mail()
     }
 }
+
+#[cfg(test)]
+#[path = "world_runtime_tick_tests.rs"]
+mod outcome_tick_tests;
 
 #[cfg(test)]
 mod tests {

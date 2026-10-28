@@ -2726,7 +2726,12 @@ pub(super) fn revive_current_player_from_resurrection_scroll(
         *vitals
     };
 
-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = revived_vitals;
+        runtime.player_dead = false;
+    }
+    super::npc_input::invalidate(world);
 
     let mut packets = Vec::new();
     if let Some(info) = object_revived_info_for_entity(world, player, true) {
@@ -2995,6 +3000,15 @@ pub(super) fn use_item(
     let Some(item) = item_at_use_location(world.resource::<InventoryResource>(), location) else {
         return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
     };
+    if super::billing_monthly_card::is_card(&item) {
+        // A key selects the next matching item and cannot identify a retry.
+        let Some((uid, grid)) = packet_ack else {
+            return Vec::new();
+        };
+        return super::billing_monthly_card::use_card_packet(world, uid, grid).unwrap_or_else(
+            || prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new()),
+        );
+    }
     let mut packets = Vec::new();
     let item_template = crystal_item_template_for_item_key(&item.key);
     let dynamic_item_template = crystal_item_template_for_dynamic_key(&item.key);
@@ -3054,7 +3068,9 @@ pub(super) fn use_item(
 
     if let Some(template) = item_template.as_ref().or(dynamic_item_template.as_ref()) {
         if let Some((success, creature_packets)) =
-            super::intelligent_creatures::use_creature_special_item(world, template, &item, location)
+            super::intelligent_creatures::use_creature_special_item(
+                world, template, &item, location,
+            )
         {
             return prepend_optional_packet(use_item_ack(packet_ack, success), creature_packets);
         }

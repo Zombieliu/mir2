@@ -1,0 +1,1658 @@
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs
+index 0399ec10e..b079df444 100644
+--- a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs
++++ b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs
+@@ -1,5 +1,8 @@
+ use super::*;
+ use guild_buff_dialog::*;
++#[cfg(test)]
++#[path = "guild_rank_flow_tests.rs"]
++mod guild_rank_flow_tests;
+ #[derive(Debug, Clone, Default, PartialEq)]
+ pub struct GuildPanelUi {
+     pub buffs: GuildBuffDialog,
+@@ -15,6 +18,8 @@ pub struct GuildPanelUi {
+     pub rank_dropdown: bool,
+     pub rank_scroll: usize,
+     pub rank_name_ready_ms: u64,
++    pub rank_name_submission: Option<crate::social::GuildRankRenameRequest>,
++    pub rank_name_unconfirmed: bool,
+     pub rank_option_ready_ms: u64,
+     pub now_ms: u64,
+     pub cursor: Option<Vec2>,
+@@ -149,7 +154,7 @@ pub(super) fn process(
+     mut state: ResMut<NativePlayerUiState>,
+     mut host: ResMut<GuildHost>,
+     mut intents: ResMut<NativePlayerUiIntentQueue>,
+-    social: Res<crate::social::SocialModel>,
++    mut social: ResMut<crate::social::SocialModel>,
+     time: Option<Res<Time>>,
+     ui: Option<Res<crate::read_model::UiReadModel>>,
+     shell: Option<Res<NativeShellModel>>,
+@@ -162,10 +167,9 @@ pub(super) fn process(
+         &bevy::text::TextLayoutInfo,
+     )>,
+ ) {
+-    if let Some(ui) = ui {
+-        state.guild_panel.owner_name = ui.player.name.clone().unwrap_or_default();
+-    }
+-    state.guild_panel.now_ms = time.map_or(0, |t| t.elapsed().as_millis() as u64);
++    let now_ms = time.map_or(0, |t| t.elapsed().as_millis() as u64);
++    state.guild_panel.now_ms = now_ms;
++    reconcile_rank_rename_editor(&mut state, &mut social);
+     host.buff_hover = None;
+     state.guild_panel.cursor = None;
+     state.guild_panel.left_down = false;
+@@ -192,6 +196,10 @@ pub(super) fn process(
+         }
+         state.guild_panel.guild_name = social.guild.name.clone();
+     }
++    state.guild_panel.now_ms = now_ms;
++    if let Some(ui) = ui {
++        state.guild_panel.owner_name = ui.player.name.clone().unwrap_or_default();
++    }
+     if let Some(name) = social.guild.pending_invite_from.as_ref() {
+         let identity = (name.clone(), social.guild.pending_invite_epoch);
+         if state.guild_panel.answered_invite.as_ref() != Some(&identity) {
+@@ -391,11 +399,7 @@ pub(super) fn process(
+         let local = cursor - Vec2::new(rect.left + 42., rect.top + 96.);
+         if mouse.just_pressed(MouseButton::Left) {
+             let focus = CrystalRect::new(0., 0., 130., 16.).contains(local.x, local.y)
+-                && state
+-                    .selected_guild_rank
+-                    .is_some_and(|r| i32::from(r) >= social.guild.my_rank_id)
+-                && social_has_permission(&social.guild, "changeRank")
+-                && state.guild_panel.now_ms >= state.guild_panel.rank_name_ready_ms;
++                && rank_name_available(&state, &social.guild);
+             state.guild_rank_name_focused = focus;
+             state.guild_panel.rank_editor.editor_focused = focus;
+             host.selection = focus;
+@@ -817,34 +821,77 @@ pub(super) fn render_error(
+     });
+ }
+ 
++pub(super) fn rank_name_available(
++    state: &NativePlayerUiState,
++    guild: &crate::social::GuildModel,
++) -> bool {
++    state.selected_guild_rank.is_some_and(|index| {
++        guild.ranks.iter().any(|rank| rank.index == i32::from(index))
++            && guild.my_rank_id >= 0
++            && i32::from(index) >= guild.my_rank_id
++    }) && social_has_permission(guild, "changeRank")
++        && (state.guild_panel.rank_name_ready_ms == 0
++            || state.guild_panel.now_ms > state.guild_panel.rank_name_ready_ms)
++}
++
++/// This runs while hidden too. Only the dedicated rename key has a timeout.
++pub(super) fn reconcile_rank_rename_editor(
++    state: &mut NativePlayerUiState,
++    social: &mut crate::social::SocialModel,
++) {
++    if let Some(request) = state.guild_panel.rank_name_submission.clone() {
++        let pending = social.pending.contains(
++            &crate::social::SocialPendingOperation::GuildRankRename(request.clone()),
++        );
++        let current_scope = social.guild.rank_rename_scope_matches(&request);
++        // In the ordinary path only exact status-7 reconciliation can retire
++        // this key before its deadline. Scope/reset and local send failure are
++        // handled separately; this releases an editor, never grants success.
++        if !current_scope || !pending || state.guild_panel.now_ms > request.deadline_ms {
++            let expired = current_scope && pending && state.guild_panel.now_ms > request.deadline_ms;
++            state.guild_panel.rank_name_submission = None;
++            state.guild_panel.rank_name_ready_ms = 0;
++            state.guild_panel.rank_name_unconfirmed = expired;
++            if current_scope && !pending
++                && state.selected_guild_rank == Some(request.rank_index)
++                && state.guild_rank_name_draft == request.rank_name
++            {
++                if let Some(rank) = social.guild.ranks.iter()
++                    .find(|rank| rank.index == i32::from(request.rank_index))
++                {
++                    state.guild_rank_name_draft = rank.name.clone();
++                }
++            }
++        }
++    }
++    social.expire_guild_rank_renames(state.guild_panel.now_ms);
++}
++
+ pub(super) fn save_rank_name(
+     state: &mut NativePlayerUiState,
+     social: &mut crate::social::SocialModel,
+     intents: &mut NativePlayerUiIntentQueue,
+ ) {
++    reconcile_rank_rename_editor(state, social);
+     let Some(rank_index) = state.selected_guild_rank else {
+         return;
+     };
+-    if i32::from(rank_index) < social.guild.my_rank_id
+-        || !social_has_permission(&social.guild, "changeRank")
+-        || state.guild_panel.now_ms < state.guild_panel.rank_name_ready_ms
+-    {
++    if !rank_name_available(state, &social.guild) {
+         return;
+     }
+     let name = state.guild_rank_name_draft.clone();
+-    if name.is_empty() || name.encode_utf16().count() > 20 {
++    let Some(deadline_ms) = state.guild_panel.now_ms.checked_add(5000) else {
+         return;
+-    }
+-    if intents.push_social_pending(
+-        social,
+-        NativePlayerUiIntent::GuildEditMember {
+-            change_type: 3,
+-            rank_index,
+-            name: String::new(),
+-            rank_name: name,
+-        },
+-    ) {
+-        state.guild_panel.rank_name_ready_ms = state.guild_panel.now_ms + 5000;
++    };
++    let Some(request) = social.guild_rank_rename_request(
++        &state.guild_panel.owner_name, rank_index, &name, deadline_ms,
++    ) else {
++        return;
++    };
++    if intents.push_guild_rank_rename_pending(social, request.clone()) {
++        state.guild_panel.rank_name_submission = Some(request);
++        state.guild_panel.rank_name_ready_ms = deadline_ms;
++        state.guild_panel.rank_name_unconfirmed = false;
+         state.guild_rank_name_focused = false;
+         state.guild_panel.rank_editor.editor_focused = false;
+     }
+@@ -889,8 +936,9 @@ mod tests {
+     #[test]
+     fn rank_rename_uses_type_three_and_cannot_edit_a_senior_rank() {
+         let mut state = NativePlayerUiState::default();
+-        let mut social = crate::social::SocialModel::default();
++        let mut social = crate::social::guild_rank_native_tests::seeded(1);
+         let mut queue = NativePlayerUiIntentQueue::default();
++        state.guild_panel.owner_name = "Officer".into();
+         social.guild.permissions = vec!["changeRank".into()];
+         social.guild.my_rank_id = 1;
+         state.selected_guild_rank = Some(0);
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
+index b0af607ca..39be07d23 100644
+--- a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
++++ b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
+@@ -2704,6 +2704,11 @@ impl NativePlayerUiIntentQueue {
+         if self.intents.iter().any(|queued| queued == &intent) {
+             return false;
+         }
++        // Rename needs the actual editor/owner/scope context, absent from this
++        // generic method. Other social pending contracts stay unchanged.
++        if matches!(&intent, NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }) {
++            return false;
++        }
+         let operation = match &intent {
+             NativePlayerUiIntent::GroupSwitch { allow_group } => {
+                 Some(crate::social::SocialPendingOperation::GroupSwitch {
+@@ -2812,6 +2817,28 @@ impl NativePlayerUiIntentQueue {
+         self.push_intent(intent)
+     }
+ 
++    pub fn push_guild_rank_rename_pending(
++        &mut self,
++        social: &mut crate::social::SocialModel,
++        request: crate::social::GuildRankRenameRequest,
++    ) -> bool {
++        let intent = NativePlayerUiIntent::GuildEditMember {
++            change_type: 3,
++            rank_index: request.rank_index,
++            name: String::new(),
++            rank_name: request.rank_name.clone(),
++        };
++        if self.intents.len() >= MAX_QUEUED
++            || self.intents.iter().any(|queued| queued == &intent)
++            || !social.guild.rank_rename_scope_matches(&request)
++            || !crate::social::valid_rank_rename_name(&request.rank_name)
++            || !social.begin_pending(crate::social::SocialPendingOperation::GuildRankRename(request))
++        {
++            return false;
++        }
++        self.push_intent(intent)
++    }
++
+     /// Queue a client-only transient intent without adding a server pending
+     /// key. This remains useful for non-authoritative local intents; server
+     /// operations should use [`Self::push_pending_intent`].
+@@ -8885,15 +8912,24 @@ fn process_overlay_buttons(
+                     continue;
+                 };
+                 state.guild_panel.rank_dropdown = false;
+-                state.guild_panel.rank_name_ready_ms = 0;
+                 state.selected_guild_rank = Some(rank_index);
+                 state.guild_rank_name_draft = rank.name.clone();
++                let pending = social.pending.iter().find_map(|pending| match pending {
++                    crate::social::SocialPendingOperation::GuildRankRename(request)
++                        if request.rank_index == rank_index
++                            && social.guild.rank_rename_scope_matches(request) => Some(request.clone()),
++                    _ => None,
++                });
++                state.guild_panel.rank_name_ready_ms = pending.as_ref().map_or(0, |request| request.deadline_ms);
++                state.guild_panel.rank_name_unconfirmed = false;
++                if let Some(request) = &pending {
++                    state.guild_rank_name_draft = request.rank_name.clone();
++                }
++                state.guild_panel.rank_name_submission = pending;
+                 state.guild_rank_name_focused = false;
+             }
+             OverlayButton::GuildRankNameFocus => {
+-                if state.selected_guild_rank.is_some()
+-                    && social_has_permission(&social.guild, "changeRank")
+-                {
++                if guild_panel::rank_name_available(&state, &social.guild) {
+                     state.guild_rank_name_focused = true;
+                 }
+             }
+@@ -14578,7 +14614,7 @@ fn render_guild_ranks(
+         92,
+         CrystalRect::new(x + 155., y + 290., 40., 25.),
+         OverlayButton::GuildRankNameSave,
+-        can_change,
++        can_change && guild_panel::rank_name_available(state, guild),
+     );
+     for (i, label) in [
+         "Edit ranks",
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/social.rs b/mir2-web3/apps/game-client/client-bevy/src/social.rs
+index 1e5381779..13fcd4f81 100644
+--- a/mir2-web3/apps/game-client/client-bevy/src/social.rs
++++ b/mir2-web3/apps/game-client/client-bevy/src/social.rs
+@@ -11,6 +11,10 @@ use serde_json::Value;
+ 
+ use crate::inventory::CrystalItemTooltipSourceModel;
+ 
++#[cfg(test)]
++#[path = "social_guild_rank_tests.rs"]
++pub(crate) mod guild_rank_native_tests;
++
+ pub const MAX_GROUP_MEMBERS: usize = 15;
+ pub const MAX_GUILD_MEMBERS: usize = 200;
+ pub const MAX_GUILD_RANKS: usize = 255;
+@@ -81,6 +85,30 @@ pub struct GuildRankModel {
+     pub members: Vec<GuildMemberModel>,
+ }
+ 
++/// Client cursor evidence from an ordinary status-7 packet, not a wire nonce.
++#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
++#[serde(rename_all = "camelCase")]
++pub struct GuildRankChange {
++    pub revision: u64,
++    pub scope_epoch: u64,
++    pub actor: String,
++    pub rank_index: u8,
++    pub rank_name: String,
++}
++
++/// Exact local editor context. This is never sent as a server command or saved.
++#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
++#[serde(rename_all = "camelCase")]
++pub struct GuildRankRenameRequest {
++    pub guild_name: String,
++    pub scope_epoch: u64,
++    pub requester: String,
++    pub rank_index: u8,
++    pub rank_name: String,
++    pub observed_change_revision: u64,
++    pub deadline_ms: u64,
++}
++
+ #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+ #[serde(rename_all = "camelCase", default)]
+ pub struct GuildStorageItemModel {
+@@ -118,6 +146,29 @@ pub struct GuildModel {
+     /// Monotonic identity for distinct authoritative invitations. Repeated
+     /// delivery of the same inviter does not advance this value.
+     pub pending_invite_epoch: u64,
++    /// Local packet-cursor scope; advances on Guild exit/change/rejoin.
++    pub scope_epoch: u64,
++    pub rank_packet_status: Option<u8>,
++    /// Retained across metadata packets so a later refresh cannot hide a reply.
++    pub rank_change: Option<GuildRankChange>,
++}
++
++impl GuildModel {
++    pub fn rank_rename_scope_matches(&self, request: &GuildRankRenameRequest) -> bool {
++        self.name.as_deref() == Some(request.guild_name.as_str())
++            && self.scope_epoch == request.scope_epoch
++    }
++
++    pub fn confirms_rank_rename(&self, request: &GuildRankRenameRequest) -> bool {
++        self.rank_rename_scope_matches(request)
++            && self.rank_change.as_ref().is_some_and(|change| {
++                change.scope_epoch == request.scope_epoch
++                    && change.revision > request.observed_change_revision
++                    && change.actor == request.requester
++                    && change.rank_index == request.rank_index
++                    && change.rank_name == request.rank_name
++            })
++    }
+ }
+ 
+ #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+@@ -207,6 +258,7 @@ pub enum SocialPendingOperation {
+         rank_index: u8,
+         name: String,
+     },
++    GuildRankRename(GuildRankRenameRequest),
+     GuildNotice {
+         notice: Vec<String>,
+     },
+@@ -271,6 +323,16 @@ pub struct SocialModel {
+ 
+ impl SocialModel {
+     pub fn begin_pending(&mut self, operation: SocialPendingOperation) -> bool {
++        if let SocialPendingOperation::GuildRankRename(request) = &operation {
++            if self.pending.iter().any(|pending| matches!(pending,
++                SocialPendingOperation::GuildRankRename(existing)
++                if existing.scope_epoch == request.scope_epoch
++                    && existing.guild_name == request.guild_name
++                    && existing.rank_index == request.rank_index))
++            {
++                return false;
++            }
++        }
+         if self.pending.iter().any(|item| item == &operation) {
+             return false;
+         }
+@@ -281,6 +343,43 @@ impl SocialModel {
+         true
+     }
+ 
++    pub fn guild_rank_rename_request(
++        &self,
++        requester: &str,
++        rank_index: u8,
++        rank_name: &str,
++        deadline_ms: u64,
++    ) -> Option<GuildRankRenameRequest> {
++        let guild_name = self.guild.name.clone()?;
++        if requester.is_empty()
++            || !valid_rank_rename_name(rank_name)
++            || !self.guild.ranks.iter().any(|rank| rank.index == i32::from(rank_index))
++        {
++            return None;
++        }
++        Some(GuildRankRenameRequest {
++            guild_name,
++            scope_epoch: self.guild.scope_epoch,
++            requester: requester.to_owned(),
++            rank_index,
++            rank_name: rank_name.to_owned(),
++            observed_change_revision: self.guild.rank_change.as_ref().map_or(0, |change| change.revision),
++            deadline_ms,
++        })
++    }
++
++    /// Crystal allows retry strictly after five seconds, without claiming success.
++    /// No other social operation gains a timeout or changes its completion rule.
++    pub fn expire_guild_rank_renames(&mut self, now_ms: u64) {
++        let guild = &self.guild;
++        self.pending.retain(|pending| match pending {
++            SocialPendingOperation::GuildRankRename(request) => {
++                guild.rank_rename_scope_matches(request) && now_ms <= request.deadline_ms
++            }
++            _ => true,
++        });
++    }
++
+     pub fn clear_session(&mut self) {
+         *self = Self::default();
+     }
+@@ -432,8 +531,16 @@ impl SocialModel {
+                 else {
+                     return false;
+                 };
+-                if raw_name.trim().is_empty() || raw_rank.trim().is_empty() {
+-                    self.guild = GuildModel::default();
++                if raw_name.trim().is_empty() || raw_rank.is_empty() {
++                    let scope_epoch = if self.guild.name.is_some() {
++                        let Some(next) = self.guild.scope_epoch.checked_add(1) else {
++                            return false;
++                        };
++                        next
++                    } else {
++                        self.guild.scope_epoch
++                    };
++                    self.guild = GuildModel { scope_epoch, ..Default::default() };
+                     success = Some(true);
+                     self.last_event = Some(SocialAuthoritativeEvent {
+                         packet: packet.to_owned(),
+@@ -451,8 +558,19 @@ impl SocialModel {
+                 let Some(name) = clean_name(Some(&Value::String(raw_name.to_owned()))) else {
+                     return false;
+                 };
++                let Some(rank_name) = raw_rank_name(Some(&Value::String(raw_rank.to_owned()))) else {
++                    return false;
++                };
++                if self.guild.name.as_deref() != Some(name.as_str()) {
++                    let Some(next) = self.guild.scope_epoch.checked_add(1) else {
++                        return false;
++                    };
++                    self.guild.scope_epoch = next;
++                    self.guild.rank_change = None;
++                    self.guild.rank_packet_status = None;
++                }
+                 self.guild.name = Some(name);
+-                self.guild.rank_name = clean_name(Some(&Value::String(raw_rank.to_owned())));
++                self.guild.rank_name = Some(rank_name);
+                 self.guild.spare_points =
+                     value_u8(guild_field(payload, "spare_points", "sparePoints")).unwrap_or(0);
+                 self.guild.level = value_u8(guild_field(payload, "level", "level")).unwrap_or(0);
+@@ -507,10 +625,22 @@ impl SocialModel {
+                 if ranks.len() > MAX_GUILD_RANKS {
+                     return false;
+                 }
++                let status = value_u8(payload.get("status"));
++                let is_rank_delta = status == Some(7);
++                if is_rank_delta && (ranks.len() != 1 || self.guild.name.is_none()) {
++                    return false;
++                }
+                 let mut all = Vec::new();
+                 let mut parsed_ranks = Vec::new();
+                 for rank in ranks {
+-                    let Some(name) = clean_name(rank.get("name")) else {
++                    if is_rank_delta && (value_i32(rank.get("index"))
++                        .and_then(|index| u8::try_from(index).ok()).is_none()
++                        || value_u8(rank.get("options")).is_none()
++                        || !rank.get("members").is_some_and(Value::is_array))
++                    {
++                        return false;
++                    }
++                    let Some(name) = raw_rank_name(rank.get("name")) else {
+                         return false;
+                     };
+                     let members = rank
+@@ -538,8 +668,42 @@ impl SocialModel {
+                     });
+                 }
+                 let had_members = !self.guild.members.is_empty();
+-                self.guild.ranks = parsed_ranks;
+-                self.guild.members = all;
++                if is_rank_delta {
++                    let updated = parsed_ranks.pop().expect("validated single rank");
++                    let Ok(rank_index) = u8::try_from(updated.index) else {
++                        return false;
++                    };
++                    let Some(actor) = clean_name(payload.get("name")) else {
++                        return false;
++                    };
++                    let matching = self.guild.ranks.iter().enumerate()
++                        .filter(|(_, rank)| rank.index == updated.index)
++                        .map(|(index, _)| index).collect::<Vec<_>>();
++                    if matching.len() != 1 {
++                        return false;
++                    }
++                    let target = matching[0];
++                    let count = self.guild.ranks.iter().enumerate()
++                        .filter(|(index, _)| *index != target)
++                        .map(|(_, rank)| rank.members.len()).sum::<usize>() + updated.members.len();
++                    if count > MAX_GUILD_MEMBERS {
++                        return false;
++                    }
++                    let Some(revision) = self.guild.rank_change.as_ref().map_or(0, |change| change.revision).checked_add(1) else {
++                        return false;
++                    };
++                    self.guild.rank_change = Some(GuildRankChange {
++                        revision, scope_epoch: self.guild.scope_epoch, actor,
++                        rank_index, rank_name: updated.name.clone(),
++                    });
++                    self.guild.ranks[target] = updated;
++                    self.guild.members = self.guild.ranks.iter()
++                        .flat_map(|rank| rank.members.iter().cloned()).collect();
++                } else {
++                    self.guild.ranks = parsed_ranks;
++                    self.guild.members = all;
++                }
++                self.guild.rank_packet_status = status;
+                 // GuildMemberChange carries the authoritative rank table. If
+                 // the server included the viewer's rank, refresh permissions
+                 // from that rank's options instead of retaining stale status
+@@ -551,6 +715,9 @@ impl SocialModel {
+                     .iter()
+                     .find(|rank| rank.index == self.guild.my_rank_id)
+                 {
++                    if is_rank_delta {
++                        self.guild.rank_name = Some(my_rank.name.clone());
++                    }
+                     self.guild.my_options = my_rank.options;
+                     self.guild.permissions = guild_permissions_from_options(my_rank.options);
+                 }
+@@ -918,6 +1085,12 @@ impl SocialModel {
+                     && event.rank_index == Some(*rank_index)
+                     && (name.is_empty() || event.subject.as_deref() == Some(name.as_str()))
+             }),
++            SocialPendingOperation::GuildRankRename(request) => {
++                !current.guild.rank_rename_scope_matches(request)
++                    || (event.is_some_and(|event| event.packet == "GuildMemberChange")
++                        && current.guild.rank_packet_status == Some(7)
++                        && current.guild.confirms_rank_rename(request))
++            }
+             SocialPendingOperation::GuildNotice { notice } => event.is_some_and(|event| {
+                 (event.packet == "GuildNoticeChange" && event.success == Some(true))
+                     || (event.packet == "GuildNoticeResult" && event.success.is_some())
+@@ -1025,6 +1198,16 @@ fn clean_name(value: Option<&Value>) -> Option<String> {
+     (!text.is_empty() && text.chars().count() <= 32).then(|| text.to_owned())
+ }
+ 
++fn raw_rank_name(value: Option<&Value>) -> Option<String> {
++    let text = value?.as_str()?;
++    (!text.is_empty() && text.encode_utf16().count() <= 20 && !text.contains('\\'))
++        .then(|| text.to_owned())
++}
++
++pub fn valid_rank_rename_name(text: &str) -> bool {
++    (3..=20).contains(&text.encode_utf16().count()) && !text.contains('\\')
++}
++
+ fn guild_permissions_from_options(options: u8) -> Vec<String> {
+     GUILD_PERMISSION_KEYS
+         .iter()
+@@ -1922,7 +2105,7 @@ mod tests {
+         assert!(model.apply_packet("GuildStatus", &json!({"guildName":"","guildRankName":""})));
+         let incoming = model.clone();
+         model.apply_authoritative(incoming);
+-        assert_eq!(model.guild, GuildModel::default());
++        assert_eq!(model.guild, GuildModel { scope_epoch: 1, ..GuildModel::default() });
+         assert!(model.pending.is_empty());
+     }
+ 
+diff --git a/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs b/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs
+index 0344dd961..1faff0060 100644
+--- a/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs
++++ b/mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs
+@@ -38,7 +38,7 @@ use mir2_client_bevy::quest_ui::{
+ #[cfg(test)]
+ use mir2_client_bevy::quest_ui::begin_detail_quest_turn_in;
+ use mir2_client_bevy::read_model::UiReadModel;
+-use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
++use mir2_client_bevy::social::{GuildRankRenameRequest, SocialModel, SocialPendingOperation};
+ use serde_json::Value;
+ 
+ use crate::gateway::GatewayCommand;
+@@ -46,6 +46,9 @@ use crate::input::{
+     native_input_trace_enabled, GatewayCommands, NativeKeyboardInput, WorldPointerMovementState,
+ };
+ use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
++#[cfg(test)]
++#[path = "guild_rank_wire_tests.rs"]
++mod guild_rank_wire_tests;
+ use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate};
+ use mir2_client_bevy::crystal_ui::overlays::{
+     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
+@@ -2299,6 +2302,48 @@ fn mail_attachment_indices(inventory: &InventoryModel, ids: &[u64]) -> Option<[u
+     Some(indices)
+ }
+ 
++fn queued_guild_rank_rename(
++    intent: &NativePlayerUiIntent,
++    social: Option<&SocialModel>,
++) -> Option<GuildRankRenameRequest> {
++    let NativePlayerUiIntent::GuildEditMember {
++        change_type: 3, rank_index, name, rank_name,
++    } = intent else { return None; };
++    if !name.is_empty() { return None; }
++    social?.pending.iter().find_map(|pending| match pending {
++        SocialPendingOperation::GuildRankRename(request)
++            if request.rank_index == *rank_index && request.rank_name == *rank_name =>
++        {
++            Some(request.clone())
++        }
++        _ => None,
++    })
++}
++
++fn release_unsent_guild_rank_rename(
++    request: &GuildRankRenameRequest,
++    social: Option<&mut SocialModel>,
++    ui: Option<&mut NativePlayerUiState>,
++) {
++    if let Some(social) = social {
++        social.pending.retain(|pending| !matches!(pending,
++            SocialPendingOperation::GuildRankRename(current) if current == request));
++    }
++    if let Some(ui) = ui {
++        if ui.guild_panel.rank_name_submission.as_ref() == Some(request) {
++            ui.guild_panel.rank_name_submission = None;
++            ui.guild_panel.rank_name_ready_ms = 0;
++            ui.guild_panel.rank_name_unconfirmed = ui.guild_panel.now_ms > request.deadline_ms;
++            if ui.selected_guild_rank == Some(request.rank_index)
++                && ui.guild_rank_name_draft == request.rank_name
++            {
++                ui.guild_rank_name_focused = true;
++                ui.guild_panel.rank_editor.editor_focused = true;
++            }
++        }
++    }
++}
++
+ pub fn forward_quest_ui_intents(
+     shell: Res<NativeShellModel>,
+     mut intents: ResMut<QuestUiIntentQueue>,
+@@ -2330,6 +2375,13 @@ pub fn forward_quest_ui_intents(
+         .map(|mut queue| queue.drain_intents())
+         .unwrap_or_default();
+     if shell.screen != NativeShellScreen::InGame {
++        for intent in &player_pending {
++            if let Some(request) = queued_guild_rank_rename(intent, social.as_deref()) {
++                release_unsent_guild_rank_rename(
++                    &request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
++                );
++            }
++        }
+         if let Some(ui) = player_ui_state.as_deref_mut() {
+             ui.social_bonds.invalidate_guild_creation();
+             ui.ranking = Default::default();
+@@ -2755,6 +2807,22 @@ pub fn forward_quest_ui_intents(
+     }
+ 
+     for intent in player_pending {
++        let guild_rank_rename = queued_guild_rank_rename(&intent, social.as_deref());
++        if matches!(&intent, NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }) {
++            let can_dispatch = guild_rank_rename.as_ref().is_some_and(|request|
++                social.as_deref().is_some_and(|social| social.guild.rank_rename_scope_matches(request))
++                    && player_ui_state.as_deref().is_some_and(|ui|
++                        ui.guild_panel.owner_name == request.requester
++                            && ui.guild_panel.now_ms <= request.deadline_ms));
++            if !can_dispatch {
++                if let Some(request) = guild_rank_rename.as_ref() {
++                    release_unsent_guild_rank_rename(
++                        request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
++                    );
++                }
++                continue;
++            }
++        }
+         let bond_request = match &intent {
+             NativePlayerUiIntent::SocialBondPacket(packet) => Some(packet.clone()),
+             _ => None,
+@@ -3248,6 +3316,11 @@ pub fn forward_quest_ui_intents(
+                 .transport_result(request_id, &spell, key, old_key, sent);
+         }
+         if !sent {
++            if let Some(request) = guild_rank_rename.as_ref() {
++                release_unsent_guild_rank_rename(
++                    request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
++                );
++            }
+             if let Some(notice) = guild_notice_request {
+                 if let Some(ui) = player_ui_state.as_deref_mut() {
+                     if ui.guild_notice_submission.as_ref() == Some(&notice) {
+@@ -3259,12 +3332,12 @@ pub fn forward_quest_ui_intents(
+                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildNotice{notice:pending} if pending==&notice));
+                 }
+             }
+-            if let Some((change_type, rank_index, name, rank_name)) = guild_edit_request {
++            if let Some((change_type, rank_index, name, _rank_name)) = guild_edit_request {
+                 if let Some(social) = social.as_deref_mut() {
+                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildMember{change_type:t,rank_index:i,name:n} if *t==change_type && *i==rank_index && n==&name));
+                 }
+                 if let Some(ui) = player_ui_state.as_deref_mut() {
+-                    ui.guild_panel.create_ready_ms = 0;
++                    if change_type != 3 { ui.guild_panel.create_ready_ms = 0; }
+                     match change_type {
+                         0 if ui.guild_recruit_draft.is_empty() => {
+                             ui.guild_recruit_draft = name;
+@@ -3272,13 +3345,6 @@ pub fn forward_quest_ui_intents(
+                             let draft = ui.guild_recruit_draft.clone();
+                             ui.guild_panel.sync_recruit(&draft);
+                         }
+-                        3 if ui.selected_guild_rank == Some(rank_index)
+-                            && ui.guild_rank_name_draft == rank_name =>
+-                        {
+-                            ui.guild_panel.rank_name_ready_ms = 0;
+-                            ui.guild_rank_name_focused = true;
+-                            ui.guild_panel.rank_editor.editor_focused = true;
+-                        }
+                         5 => ui.guild_panel.rank_option_ready_ms = 0,
+                         _ => {}
+                     }
+diff --git a/mir2-web3/apps/game-client/runtime/src/lib.rs b/mir2-web3/apps/game-client/runtime/src/lib.rs
+index a4c437243..6a10fdb10 100644
+--- a/mir2-web3/apps/game-client/runtime/src/lib.rs
++++ b/mir2-web3/apps/game-client/runtime/src/lib.rs
+@@ -9187,6 +9187,9 @@ mod effect_mask_shadow_tests {
+ mod native_data_path_tests {
+     use super::*;
+ 
++    #[cfg(test)]
++    mod guild_rank_ingest_tests;
++
+     fn ingest_app() -> App {
+         let mut app = App::new();
+         app.add_plugins(MinimalPlugins)
+diff --git a/mir2-web3/apps/gateway/src/routing.rs b/mir2-web3/apps/gateway/src/routing.rs
+index c25f46202..9ce62da80 100644
+--- a/mir2-web3/apps/gateway/src/routing.rs
++++ b/mir2-web3/apps/gateway/src/routing.rs
+@@ -14621,6 +14621,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+             is_trade_state_mutation && self.has_pending_durable_trade_projection();
+         drop(predrain_stage);
+         let inner_stage = GatewaySlowStage::start("shared_session.inner_execute");
++        // Only this ordinary command enters the trusted durable rename branch
++        // below. Its source status-7 reply must precede the canonical refresh.
++        let preserves_guild_rank_rename_terminal = matches!(
++            &command,
++            WorldCommand::ClientPacket(ClientPacket::EditGuildMember { change_type: 3, .. })
++        );
+         let mut command_packets = if blocks_durable_trade_mutation {
+             trade_item_failure.clone().into_iter().collect()
+         } else if unavailable_shared_target {
+@@ -14819,7 +14825,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+             }
+             command_packets.extend(marriage_updates);
+             let guild_updates = self.refresh_shared_guild_packets();
+-            command_packets.retain(|packet|!matches!(packet,ServerPacket::GuildStatus{..}|ServerPacket::GuildMemberChange{..}));
++            command_packets.retain(|packet| match packet {
++                ServerPacket::GuildStatus { .. } => false,
++                ServerPacket::GuildMemberChange { status: 7, .. }
++                    if preserves_guild_rank_rename_terminal => true,
++                ServerPacket::GuildMemberChange { .. } => false,
++                _ => true,
++            });
+             command_packets.extend(guild_updates);
+             command_packets.extend(self.refresh_shared_social_buff_packets());
+             // Preserve the pre-scan generation so concurrent changes refresh on the next tick.
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs b/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs
+@@ -0,0 +1,153 @@
++//! Real typed server packets. These checks do not accept AOI, network or human UI.
++use super::*;
++use mir2_protocol::{GuildMember, GuildRank, ServerPacket};
++
++pub(crate) fn rank(index: i32, name: &str, options: u8, members: &[(&str, i32)]) -> GuildRank {
++    GuildRank {
++        name: name.into(), options, index,
++        members: members.iter().map(|(name, id)| GuildMember {
++            name: (*name).into(), id: *id, last_login_binary_datetime: 123,
++            has_voted: false, online: true,
++        }).collect(),
++    }
++}
++
++pub(crate) fn full_ranks(name: &str) -> Vec<GuildRank> {
++    vec![rank(0, "Leader", 255, &[("Leader", 1)]),
++        rank(1, "Officer", 65, &[("Officer", 2)]),
++        rank(2, name, 1, &[("Alice", 3), ("Bob", 4)])]
++}
++
++pub(crate) fn status(guild: &str, rank_name: &str, my_rank: i32) -> ServerPacket {
++    ServerPacket::GuildStatus {
++        guild_name: guild.into(), guild_rank_name: rank_name.into(), level: 3,
++        experience: 41, max_experience: 1000, gold: 99123, spare_points: 2,
++        member_count: 4, max_members: 50, voting: false, item_count: 0,
++        buff_count: 0, my_options: if my_rank == 0 { 255 } else { 1 }, my_rank_id: my_rank,
++    }
++}
++
++pub(crate) fn terminal(actor: &str, index: i32, name: &str) -> ServerPacket {
++    let ranks = full_ranks(name);
++    ServerPacket::GuildMemberChange {
++        name: actor.into(), rank_index: 0, status: 7,
++        ranks: vec![ranks[index as usize].clone()],
++    }
++}
++
++pub(crate) fn full(name: &str) -> ServerPacket {
++    ServerPacket::GuildMemberChange { name: String::new(), rank_index: 0,
++        status: 255, ranks: full_ranks(name) }
++}
++
++pub(crate) fn apply_typed(model: &mut SocialModel, packet: ServerPacket) -> bool {
++    let serialized = serde_json::to_value(packet).unwrap();
++    let (name, payload) = serialized.as_object().unwrap().iter().next().unwrap();
++    model.apply_network_packet(name, payload)
++}
++
++pub(crate) fn seeded(my_rank: i32) -> SocialModel {
++    let mut model = SocialModel::default();
++    assert!(apply_typed(&mut model, status("Rank Guild", if my_rank == 0 { "Leader" } else { "Scouts" }, my_rank)));
++    assert!(apply_typed(&mut model, full("Scouts")));
++    model.guild.notice = vec!["unchanged notice".into()];
++    model.guild.storage_items = vec![None; 112];
++    model
++}
++
++#[test]
++fn guild_rank_status7_merges_one_nonzero_rank_retaining_three_ranks_four_members() {
++    let mut model = seeded(0);
++    let before = model.guild.clone();
++    assert!(apply_typed(&mut model, terminal("Leader", 2, "Veterans")));
++    assert_eq!(model.guild.ranks.len(), 3, "one-rank delta is not a full roster");
++    assert_eq!(&model.guild.ranks[..2], &before.ranks[..2]);
++    assert_eq!(model.guild.members.len(), 4);
++    assert_eq!(model.guild.ranks[2].name, "Veterans");
++    for member in model.guild.members.iter().filter(|m| m.rank_index == Some(2)) {
++        assert_eq!(member.rank_name.as_deref(), Some("Veterans"));
++    }
++    assert_eq!(model.guild.gold, before.gold);
++    assert_eq!(model.guild.storage_items, before.storage_items);
++    assert_eq!(model.guild.notice, before.notice);
++    assert_eq!(model.guild.rank_name, before.rank_name, "other rank is not my rank");
++    assert_eq!(model.guild.my_options, before.my_options);
++}
++
++#[test]
++fn guild_rank_status7_updates_own_numeric_rank_and_source_options() {
++    let mut model = seeded(2);
++    let mut packet = terminal("Leader", 2, "Veterans");
++    if let ServerPacket::GuildMemberChange { ranks, .. } = &mut packet { ranks[0].options = 65; }
++    assert!(apply_typed(&mut model, packet));
++    assert_eq!(model.guild.rank_name.as_deref(), Some("Veterans"));
++    assert_eq!(model.guild.my_options, 65);
++    assert_eq!(model.guild.permissions, vec!["CanChangeRank", "CanChangeNotice"]);
++    assert_eq!(model.guild.ranks.len(), 3);
++}
++
++#[test]
++fn guild_rank_source_reply_has_status7_nested_index_and_no_command_echo() {
++    let value = serde_json::to_value(terminal("Leader", 2, "Veterans")).unwrap();
++    let payload = &value["GuildMemberChange"];
++    assert_eq!(payload["status"], 7);
++    assert_eq!(payload["rankIndex"], 0);
++    assert_eq!(payload["ranks"][0]["index"], 2);
++    assert!(payload.get("changeType").is_none());
++}
++
++#[test]
++fn guild_rank_raw_legal_spaces_and_twenty_utf16_survive_typed_status_and_delta() {
++    for name in [" A ".to_owned(), "   ".to_owned(), "😀".repeat(10)] {
++        assert!((3..=20).contains(&name.encode_utf16().count()));
++        let mut model = seeded(2);
++        assert!(apply_typed(&mut model, terminal("Leader", 2, &name)));
++        assert_eq!(model.guild.ranks.len(), 3);
++        assert_eq!(model.guild.ranks[2].name, name);
++        assert!(apply_typed(&mut model, status("Rank Guild", &name, 2)));
++        assert_eq!(model.guild.name.as_deref(), Some("Rank Guild"));
++        assert_eq!(model.guild.rank_name.as_deref(), Some(name.as_str()));
++    }
++}
++
++#[test]
++fn guild_rank_status7_rejects_multi_rank_and_unknown_delta_without_model_mutation() {
++    let model = seeded(0);
++    let packets = [
++        ServerPacket::GuildMemberChange { name: "Leader".into(), rank_index: 0,
++            status: 7, ranks: full_ranks("Veterans")[..2].to_vec() },
++        ServerPacket::GuildMemberChange { name: "Leader".into(), rank_index: 0,
++            status: 7, ranks: vec![rank(99, "Unknown", 1, &[])] },
++    ];
++    for packet in packets {
++        let mut observed = model.clone();
++        assert!(!apply_typed(&mut observed, packet));
++        assert_eq!(observed, model, "rejected delta must not mutate or invent ACK");
++    }
++}
++
++#[test]
++fn guild_rank_status255_remains_an_explicit_full_list_replacement() {
++    let mut model = seeded(0);
++    assert!(apply_typed(&mut model, ServerPacket::GuildMemberChange {
++        name: String::new(), rank_index: 0, status: 255,
++        ranks: vec![rank(0, "Leader", 255, &[("Leader", 1)])],
++    }));
++    assert_eq!(model.guild.ranks.len(), 1);
++    assert_eq!(model.guild.members.len(), 1);
++    assert_eq!(model.guild.gold, 99123);
++}
++
++#[test]
++fn guild_rank_status7_requires_actual_nested_index_options_and_member_list() {
++    let model = seeded(0);
++    for missing in ["index", "options", "members"] {
++        let value = serde_json::to_value(terminal("Leader", 2, "Veterans")).unwrap();
++        let mut payload = value["GuildMemberChange"].clone();
++        payload["ranks"][0].as_object_mut().unwrap().remove(missing);
++        let mut observed = model.clone();
++        assert!(!observed.apply_network_packet("GuildMemberChange", &payload),
++            "missing source field {missing} must not overwrite an unrelated rank");
++        assert_eq!(observed, model);
++    }
++}
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs
+@@ -0,0 +1,235 @@
++//! Ordinary UI helpers and real typed packet cursor; no GPU/human acceptance.
++use super::*;
++use crate::social::{guild_rank_native_tests as wire, SocialModel, SocialPendingOperation};
++use std::time::Duration;
++
++fn fixture(name: &str) -> (NativePlayerUiState, SocialModel, NativePlayerUiIntentQueue) {
++    let mut state = NativePlayerUiState::default();
++    state.guild_panel.guild_name = Some("Rank Guild".into());
++    state.guild_panel.owner_name = "Leader".into();
++    state.guild_panel.now_ms = 100;
++    state.selected_guild_rank = Some(2);
++    state.guild_rank_name_draft = name.into();
++    (state, wire::seeded(0), NativePlayerUiIntentQueue::default())
++}
++
++fn process_hidden(state: NativePlayerUiState, social: SocialModel,
++    queue: NativePlayerUiIntentQueue, now_ms: u64) -> App {
++    let mut time = Time::<()>::default();
++    time.advance_by(Duration::from_millis(now_ms));
++    let mut app = App::new();
++    app.insert_resource(state).insert_resource(social).insert_resource(queue)
++        .insert_resource(GuildHost::default()).insert_resource(time)
++        .add_message::<bevy::input::mouse::MouseWheel>()
++        .add_systems(Update, process);
++    app.update();
++    app
++}
++
++fn submit(state: &mut NativePlayerUiState, social: &mut SocialModel,
++    queue: &mut NativePlayerUiIntentQueue) {
++    save_rank_name(state, social, queue);
++    assert!(matches!(&queue.drain_intents()[..],
++        [NativePlayerUiIntent::GuildEditMember { change_type: 3, rank_index: 2,
++            name, rank_name }] if name.is_empty() && rank_name == &state.guild_rank_name_draft));
++}
++
++#[test]
++fn guild_rank_matching_typed_terminal_releases_exact_pending_and_editor_before_deadline() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    let mut network = local.clone();
++    let unrelated = SocialPendingOperation::GroupAdd { name: "Friend".into() };
++    local.begin_pending(unrelated.clone());
++    submit(&mut state, &mut local, &mut queue);
++    assert_eq!(local.pending.len(), 2);
++    assert!(wire::apply_typed(&mut network, wire::terminal("Leader", 2, "Veterans")));
++    local.apply_authoritative(network);
++    assert_eq!(local.pending, vec![unrelated.clone()], "typed 7 uses nested rank, not absent changeType");
++    let mut app = process_hidden(state, local, queue, 200);
++    {
++        let state = app.world().resource::<NativePlayerUiState>();
++        assert_eq!(state.guild_panel.rank_name_ready_ms, 0, "ACK retires editor wait");
++        assert_eq!(state.guild_rank_name_draft, "Veterans");
++    }
++    let mut state = app.world_mut().remove_resource::<NativePlayerUiState>().unwrap();
++    let mut local = app.world_mut().remove_resource::<SocialModel>().unwrap();
++    let mut queue = app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();
++    state.guild_rank_name_draft = "Explorers".into();
++    submit(&mut state, &mut local, &mut queue);
++    assert!(local.pending.contains(&unrelated));
++}
++
++#[test]
++fn guild_rank_metadata_255_matching_text_never_completes_request() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    let mut network = local.clone();
++    submit(&mut state, &mut local, &mut queue);
++    let pending = local.pending.clone();
++    assert!(wire::apply_typed(&mut network, wire::full("Veterans")));
++    local.apply_authoritative(network);
++    assert_eq!(local.pending, pending, "canonical state is not a source terminal");
++    let app = process_hidden(state, local, queue, 200);
++    assert_eq!(app.world().resource::<NativePlayerUiState>().guild_panel.rank_name_ready_ms, 5100);
++}
++
++#[test]
++fn guild_rank_foreign_actor_wrong_rank_or_text_does_not_release_request() {
++    for packet in [wire::terminal("Officer", 2, "Veterans"),
++        wire::terminal("Leader", 1, "Officer"), wire::terminal("Leader", 2, "Scouts")] {
++        let (mut state, mut local, mut queue) = fixture("Veterans");
++        let mut network = local.clone();
++        submit(&mut state, &mut local, &mut queue);
++        let pending = local.pending.clone();
++        assert!(wire::apply_typed(&mut network, packet));
++        local.apply_authoritative(network);
++        assert_eq!(local.pending, pending);
++        let app = process_hidden(state, local, queue, 200);
++        assert_eq!(app.world().resource::<NativePlayerUiState>().guild_rank_name_draft, "Veterans");
++    }
++}
++
++#[test]
++fn guild_rank_hidden_timeout_is_strictly_after_five_seconds_and_keeps_other_pending() {
++    for now_ms in [5099, 5100, 5101] {
++        let (mut state, mut local, mut queue) = fixture("Veterans");
++        let unrelated = SocialPendingOperation::GuildNotice { notice: vec!["memo".into()] };
++        local.begin_pending(unrelated.clone());
++        submit(&mut state, &mut local, &mut queue);
++        let mut app = process_hidden(state, local, queue, now_ms);
++        let social = app.world().resource::<SocialModel>();
++        assert_eq!(social.pending.len(), if now_ms > 5100 { 1 } else { 2 }, "hidden panel must retire only timed-out rename at {now_ms}");
++        assert!(social.pending.contains(&unrelated));
++        assert_eq!(app.world().resource::<NativePlayerUiState>().guild_rank_name_draft, "Veterans");
++        assert_eq!(social.guild.ranks[2].name, "Scouts", "timeout never renames optimistically");
++        if now_ms > 5100 {
++            let mut state = app.world_mut().remove_resource::<NativePlayerUiState>().unwrap();
++            let mut local = app.world_mut().remove_resource::<SocialModel>().unwrap();
++            let mut queue = app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();
++            submit(&mut state, &mut local, &mut queue);
++        }
++    }
++}
++
++#[test]
++fn guild_rank_same_name_source_terminal_still_completes() {
++    let (mut state, mut local, mut queue) = fixture("Scouts");
++    let mut network = local.clone();
++    submit(&mut state, &mut local, &mut queue);
++    assert!(wire::apply_typed(&mut network, wire::terminal("Leader", 2, "Scouts")));
++    local.apply_authoritative(network);
++    assert!(local.pending.is_empty(), "a source reply need not change the old text");
++}
++
++#[test]
++fn guild_rank_leave_and_rejoin_same_guild_scope_revokes_old_rename_only() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    let mut network = local.clone();
++    let unrelated = SocialPendingOperation::GroupAdd { name: "Friend".into() };
++    local.begin_pending(unrelated.clone());
++    submit(&mut state, &mut local, &mut queue);
++    assert!(wire::apply_typed(&mut network, wire::status("", "", -1)));
++    assert!(wire::apply_typed(&mut network, wire::status("Rank Guild", "Leader", 0)));
++    assert!(wire::apply_typed(&mut network, wire::full("Scouts")));
++    local.apply_authoritative(network);
++    assert_eq!(local.pending, vec![unrelated], "same display name does not preserve old membership context");
++    assert_eq!(local.guild.ranks[2].name, "Scouts");
++}
++
++#[test]
++fn guild_rank_scene_retains_pending_and_session_reset_retires_it() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    submit(&mut state, &mut local, &mut queue);
++    let pending = local.pending.clone();
++    local.clear_scene();
++    assert_eq!(local.pending, pending);
++    assert_eq!(local.guild.name.as_deref(), Some("Rank Guild"));
++    local.clear_session();
++    assert!(local.pending.is_empty());
++    let app = process_hidden(state, local, queue, 200);
++    assert_eq!(app.world().resource::<NativePlayerUiState>().guild_panel.rank_name_ready_ms, 0);
++}
++
++#[test]
++fn guild_rank_full_queue_refuses_before_pending_and_input_follows_utf16_admission() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    for _ in 0..MAX_QUEUED { assert!(queue.push_intent(NativePlayerUiIntent::GuildBuffUpdate(GuildBuffRequest { action: 1, id: 9 }))); }
++    let before = local.clone();
++    save_rank_name(&mut state, &mut local, &mut queue);
++    assert_eq!(local, before);
++    assert_eq!(state.guild_panel.rank_name_ready_ms, 0);
++    for name in ["ab".to_owned(), "bad\\rank".to_owned(), "😀".repeat(11)] {
++        let (mut state, mut local, mut queue) = fixture(&name);
++        save_rank_name(&mut state, &mut local, &mut queue);
++        assert!(queue.drain_intents().is_empty(), "invalid source rank admitted: {name:?}");
++        assert!(local.pending.is_empty());
++    }
++    for name in [" A ".to_owned(), "   ".to_owned(), "😀".repeat(10)] {
++        let (mut state, mut local, mut queue) = fixture(&name);
++        submit(&mut state, &mut local, &mut queue);
++    }
++}
++
++#[test]
++fn guild_rank_cached_old_source_projection_does_not_ack_a_new_request() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    let mut network = local.clone();
++    assert!(wire::apply_typed(&mut network, wire::terminal("Leader", 2, "Veterans")));
++    local.apply_authoritative(network.clone());
++    submit(&mut state, &mut local, &mut queue);
++    let pending = local.pending.clone();
++    local.apply_authoritative(network);
++    assert_eq!(local.pending, pending, "cached proof is not a new source arrival");
++}
++
++#[test]
++fn guild_rank_nonrename_status_does_not_ack_matching_text() {
++    for status in [6, 8, 255] {
++        let (mut state, mut local, mut queue) = fixture("Veterans");
++        let mut network = local.clone();
++        submit(&mut state, &mut local, &mut queue);
++        let pending = local.pending.clone();
++        let mut packet = wire::terminal("Leader", 2, "Veterans");
++        if let mir2_protocol::ServerPacket::GuildMemberChange { status: value, .. } = &mut packet {
++            *value = status;
++        }
++        assert!(wire::apply_typed(&mut network, packet));
++        local.apply_authoritative(network);
++        assert_eq!(local.pending, pending);
++    }
++}
++
++#[test]
++fn guild_rank_editor_releases_after_terminal_then_peer_delta_in_same_frame() {
++    let (mut state, mut local, mut queue) = fixture("Veterans");
++    let mut network = local.clone();
++    submit(&mut state, &mut local, &mut queue);
++    assert!(wire::apply_typed(&mut network, wire::terminal("Leader", 2, "Veterans")));
++    local.apply_authoritative(network.clone());
++    assert!(wire::apply_typed(&mut network, wire::terminal("Officer", 1, "Officer")));
++    local.apply_authoritative(network);
++    let app = process_hidden(state, local, queue, 200);
++    let state = app.world().resource::<NativePlayerUiState>();
++    assert_eq!(state.guild_panel.rank_name_ready_ms, 0);
++    assert!(state.guild_panel.rank_name_submission.is_none());
++    assert_eq!(state.guild_rank_name_draft, "Veterans");
++    assert!(!state.guild_panel.rank_name_unconfirmed);
++}
++
++#[test]
++fn guild_rank_new_membership_editor_keeps_actual_owner_and_clock_for_first_command() {
++    let (mut state, social, queue) = fixture("Veterans");
++    state.guild_panel.guild_name = Some("Old Guild".into());
++    let mut time = Time::<()>::default();
++    time.advance_by(Duration::from_millis(200));
++    let mut ui = crate::read_model::UiReadModel::default();
++    ui.player.name = Some("Leader".into());
++    let mut app = App::new();
++    app.insert_resource(state).insert_resource(social).insert_resource(queue)
++        .insert_resource(GuildHost::default()).insert_resource(time).insert_resource(ui)
++        .add_message::<bevy::input::mouse::MouseWheel>().add_systems(Update, process);
++    app.update();
++    let state = app.world().resource::<NativePlayerUiState>();
++    assert_eq!(state.guild_panel.owner_name, "Leader");
++    assert_eq!(state.guild_panel.now_ms, 200);
++    assert_eq!(state.guild_panel.guild_name.as_deref(), Some("Rank Guild"));
++}
+diff --git a/mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs b/mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs
+@@ -0,0 +1,129 @@
++//! Local ordinary queue/wire checks. No TCP/WSS, service or native acceptance.
++use super::*;
++use bevy::prelude::App;
++use mir2_client_bevy::social::GuildRankRenameRequest;
++use mir2_protocol::{GuildMember, GuildRank, ServerPacket};
++
++fn apply(model: &mut SocialModel, packet: ServerPacket) {
++    let value = serde_json::to_value(packet).unwrap();
++    let (name, payload) = value.as_object().unwrap().iter().next().unwrap();
++    assert!(model.apply_network_packet(name, payload));
++}
++
++fn guild_status(name: &str) -> ServerPacket {
++    ServerPacket::GuildStatus { guild_name: name.into(), guild_rank_name: "Leader".into(),
++        level: 0, experience: 0, max_experience: 1000, gold: 0, spare_points: 0,
++        member_count: 1, max_members: 50, voting: false, item_count: 0,
++        buff_count: 0, my_options: 255, my_rank_id: 0 }
++}
++
++fn fixture(in_game: bool, sender: mpsc::Sender<GatewayCommand>) -> (App, GuildRankRenameRequest) {
++    let mut social = SocialModel::default();
++    apply(&mut social, guild_status("Rank Guild"));
++    apply(&mut social, ServerPacket::GuildMemberChange { name: String::new(), rank_index: 0,
++        status: 255, ranks: vec![
++            GuildRank { name: "Leader".into(), options: 255, index: 0, members: vec![GuildMember {
++                name: "Leader".into(), id: 1, last_login_binary_datetime: 0, has_voted: false, online: true }] },
++            GuildRank { name: "Officers".into(), options: 1, index: 1, members: vec![] },
++            GuildRank { name: "Scouts".into(), options: 0, index: 2, members: vec![] },
++        ] });
++    let request = social.guild_rank_rename_request("Leader", 2, "Veterans", 5100).unwrap();
++    let mut queue = NativePlayerUiIntentQueue::default();
++    assert!(queue.push_guild_rank_rename_pending(&mut social, request.clone()));
++    let mut ui = NativePlayerUiState::default();
++    ui.guild_panel.owner_name = "Leader".into();
++    ui.guild_panel.guild_name = Some("Rank Guild".into());
++    ui.guild_panel.now_ms = 100;
++    ui.guild_panel.rank_name_submission = Some(request.clone());
++    ui.guild_panel.rank_name_ready_ms = 5100;
++    ui.selected_guild_rank = Some(2);
++    ui.guild_rank_name_draft = "Veterans".into();
++    let mut shell = NativeShellModel::default();
++    if in_game { shell.screen = NativeShellScreen::InGame; }
++    let mut app = App::new();
++    app.insert_resource(shell).insert_resource(social).insert_resource(queue).insert_resource(ui)
++        .init_resource::<QuestUiIntentQueue>().insert_resource(GatewayCommands::new(sender))
++        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
++    (app, request)
++}
++
++#[test]
++fn guild_rank_transport_acceptance_keeps_exact_pending_and_does_not_claim_success() {
++    let (sender, receiver) = mpsc::channel();
++    let (mut app, request) = fixture(true, sender);
++    let event = app.world().resource::<SocialModel>().last_event.clone();
++    app.update();
++    let sent = receiver.try_iter().collect::<Vec<_>>();
++    assert!(matches!(&sent[..], [GatewayCommand::Wire(NativeOutboundCommand::EditGuildMember {
++        change_type: 3, rank_index: 2, name, rank_name
++    })] if name.is_empty() && rank_name == "Veterans"));
++    let social = app.world().resource::<SocialModel>();
++    assert_eq!(social.pending, vec![SocialPendingOperation::GuildRankRename(request)]);
++    assert_eq!(social.last_event, event);
++    assert_eq!(social.guild.ranks[2].name, "Scouts");
++    app.update();
++    assert_eq!(receiver.try_iter().count(), 0, "accepted sends are not replayed");
++}
++
++#[test]
++fn guild_rank_unsent_command_releases_only_exact_context_and_restores_matching_editor() {
++    for in_game in [true, false] {
++        let (sender, receiver) = mpsc::channel();
++        drop(receiver);
++        let (mut app, _) = fixture(in_game, sender);
++        let unrelated = SocialPendingOperation::GroupAdd { name: "Friend".into() };
++        app.world_mut().resource_mut::<SocialModel>().begin_pending(unrelated.clone());
++        let before = app.world().resource::<SocialModel>().guild.clone();
++        app.update();
++        assert_eq!(app.world().resource::<SocialModel>().pending, vec![unrelated]);
++        assert_eq!(app.world().resource::<SocialModel>().guild, before);
++        let ui = app.world().resource::<NativePlayerUiState>();
++        assert!(ui.guild_panel.rank_name_submission.is_none());
++        assert_eq!(ui.guild_panel.rank_name_ready_ms, 0);
++        assert_eq!(ui.guild_rank_name_draft, "Veterans");
++    }
++}
++
++#[test]
++fn guild_rank_failure_for_other_editor_does_not_clear_current_context_or_focus() {
++    let (sender, receiver) = mpsc::channel();
++    drop(receiver);
++    let (mut app, _) = fixture(true, sender);
++    let other = app.world().resource::<SocialModel>()
++        .guild_rank_rename_request("Leader", 1, "Captains", 6100).unwrap();
++    app.world_mut().resource_mut::<SocialModel>()
++        .begin_pending(SocialPendingOperation::GuildRankRename(other.clone()));
++    {
++        let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
++        ui.selected_guild_rank = Some(1);
++        ui.guild_rank_name_draft = "Captains".into();
++        ui.guild_panel.rank_name_submission = Some(other.clone());
++        ui.guild_panel.rank_name_ready_ms = 6100;
++    }
++    app.update();
++    assert_eq!(app.world().resource::<SocialModel>().pending,
++        vec![SocialPendingOperation::GuildRankRename(other.clone())]);
++    let ui = app.world().resource::<NativePlayerUiState>();
++    assert_eq!(ui.guild_panel.rank_name_submission, Some(other));
++    assert_eq!(ui.guild_panel.rank_name_ready_ms, 6100);
++    assert!(!ui.guild_rank_name_focused);
++}
++
++#[test]
++fn guild_rank_queued_old_scope_or_expired_input_is_not_transmitted() {
++    for expired in [false, true] {
++        let (sender, receiver) = mpsc::channel();
++        let (mut app, _) = fixture(true, sender);
++        if expired {
++            app.world_mut().resource_mut::<NativePlayerUiState>().guild_panel.now_ms = 5101;
++        } else {
++            let mut incoming = app.world().resource::<SocialModel>().clone();
++            incoming.pending.clear();
++            apply(&mut incoming, guild_status("New Guild"));
++            app.world_mut().resource_mut::<SocialModel>().apply_authoritative(incoming);
++        }
++        app.update();
++        assert_eq!(receiver.try_iter().count(), 0, "consumed old editor input must not mutate a new Guild");
++        assert!(app.world().resource::<SocialModel>().pending.is_empty());
++    }
++}
+diff --git a/mir2-web3/apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs b/mir2-web3/apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs
+@@ -0,0 +1,121 @@
++//! Actual bounded native FIFO/reset consumer checks. Packet JSON has a typed
++//! protocol counterpart in social_guild_rank_tests; this is not network QA.
++use super::*;
++use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
++use serde_json::{json, Value};
++
++fn rank(index: i32, name: &str, options: u8, members: &[(&str, i32)]) -> Value {
++    json!({"index":index,"name":name,"options":options,"members":members.iter()
++        .map(|(name,id)|json!({"name":name,"id":id,"lastLoginBinaryDatetime":123,
++            "hasVoted":false,"online":true})).collect::<Vec<_>>()})
++}
++
++fn ranks(name: &str) -> Vec<Value> {
++    vec![rank(0,"Leader",255,&[("Leader",1)]),
++        rank(1,"Officer",65,&[("Officer",2)]),
++        rank(2,name,1,&[("Alice",3),("Bob",4)])]
++}
++
++fn full(name: &str) -> Value {
++    json!({"name":"","rankIndex":0,"status":255,"ranks":ranks(name)})
++}
++
++fn terminal() -> Value {
++    json!({"name":"Leader","rankIndex":0,"status":7,"ranks":[ranks("Veterans")[2].clone()]})
++}
++
++fn seeded() -> SocialModel {
++    let mut social = SocialModel::default();
++    assert!(social.apply_network_packet("GuildStatus", &json!({
++        "guildName":"Rank Guild","guildRankName":"Leader","level":3,
++        "experience":41,"maxExperience":1000,"gold":99123,"sparePoints":2,
++        "memberCount":4,"maxMembers":50,"voting":false,"itemCount":0,
++        "buffCount":0,"myOptions":255,"myRankId":0})));
++    assert!(social.apply_network_packet("GuildMemberChange", &full("Scouts")));
++    social
++}
++
++fn pending_app() -> (App, SocialModel, SocialPendingOperation) {
++    let mut app = ingest_app();
++    let network = seeded();
++    let mut local = network.clone();
++    let request = local.guild_rank_rename_request("Leader",2,"Veterans",5100).unwrap();
++    assert!(local.begin_pending(SocialPendingOperation::GuildRankRename(request)));
++    let unrelated = SocialPendingOperation::GroupAdd {name:"Friend".into()};
++    assert!(local.begin_pending(unrelated.clone()));
++    app.insert_resource(local);
++    (app, network, unrelated)
++}
++
++fn enqueue(network: &SocialModel) {
++    assert!(native_ingest::push_native_social_model(serde_json::to_string(network).unwrap()));
++}
++
++#[test]
++fn guild_rank_ingest_fifo_retains_terminal_before_metadata_in_one_main_frame() {
++    let _guard = native_ingest::native_queue_test_guard();
++    let (mut app,mut network,unrelated) = pending_app();
++    assert!(network.apply_network_packet("GuildMemberChange", &terminal()));
++    enqueue(&network);
++    assert!(network.apply_network_packet("GuildMemberChange", &full("Veterans")));
++    enqueue(&network);
++    assert_eq!(app.world().resource::<native_ingest::NativeInbound>().diagnostics().message_count,2);
++    app.update();
++    let local = app.world().resource::<SocialModel>();
++    assert_eq!(local.pending,vec![unrelated]);
++    assert_eq!(local.guild.rank_packet_status,Some(255));
++    assert_eq!(local.guild.ranks.len(),3);
++    assert_eq!(local.guild.members.len(),4);
++    assert_eq!(local.guild.ranks[2].name,"Veterans");
++    assert_eq!(app.world().resource::<native_ingest::NativeInbound>().diagnostics().message_count,0);
++}
++
++#[test]
++fn guild_rank_ingest_metadata_only_does_not_ack_even_if_text_matches() {
++    let _guard = native_ingest::native_queue_test_guard();
++    let (mut app,mut network,_) = pending_app();
++    let pending = app.world().resource::<SocialModel>().pending.clone();
++    assert!(network.apply_network_packet("GuildMemberChange", &full("Veterans")));
++    enqueue(&network);
++    app.update();
++    assert_eq!(app.world().resource::<SocialModel>().pending,pending);
++}
++
++#[test]
++fn guild_rank_ingest_scene_reset_retains_pending_and_ordinary_roster() {
++    let _guard = native_ingest::native_queue_test_guard();
++    let (mut app,mut network,_) = pending_app();
++    let pending = app.world().resource::<SocialModel>().pending.clone();
++    assert!(native_ingest::push_native_scene_reset());
++    assert!(network.apply_network_packet("GuildMemberChange", &full("Scouts")));
++    enqueue(&network);
++    app.update();
++    let local = app.world().resource::<SocialModel>();
++    assert_eq!(local.pending,pending);
++    assert_eq!(local.guild.name.as_deref(),Some("Rank Guild"));
++    assert_eq!(local.guild.ranks.len(),3);
++    assert_eq!(local.guild.members.len(),4);
++}
++
++#[test]
++fn guild_rank_ingest_session_reset_retires_old_queued_terminal_and_pending() {
++    let _guard = native_ingest::native_queue_test_guard();
++    let (mut app,mut old,_) = pending_app();
++    assert!(old.apply_network_packet("GuildMemberChange", &terminal()));
++    enqueue(&old);
++    assert!(native_ingest::push_native_data_reset());
++    let mut fresh = SocialModel::default();
++    assert!(fresh.apply_network_packet("GuildStatus", &json!({
++        "guildName":"Fresh Guild","guildRankName":"Leader","level":3,
++        "experience":41,"maxExperience":1000,"gold":99123,"sparePoints":2,
++        "memberCount":4,"maxMembers":50,"voting":false,"itemCount":0,
++        "buffCount":0,"myRankId":0,"myOptions":255})));
++    assert!(fresh.apply_network_packet("GuildMemberChange", &full("Fresh Rank")));
++    enqueue(&fresh);
++    app.update();
++    let local = app.world().resource::<SocialModel>();
++    assert!(local.pending.is_empty());
++    assert_eq!(local.guild.name.as_deref(),Some("Fresh Guild"));
++    assert_eq!(local.guild.ranks[2].name,"Fresh Rank");
++    assert!(local.guild.rank_change.is_none(),"retired terminal cannot confirm new-session work");
++}
+diff --git a/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs b/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs
+@@ -0,0 +1,239 @@
++//! Isolated prepared guilds plus ordinary authenticated typed packets.
++//! These API checks do not accept native pending/status, AOI ranks, TCP/WSS or guild creation.
++use mir2_gateway::{GatewayConfig, SharedInProcessZoneRuntimeFactory, ZoneId, ZoneRuntimeFactory};
++use mir2_protocol::{ClientPacket, MirClass, MirGender, ServerPacket};
++use mir2_simulation::{
++    AccountRecord, AccountStoreTransactionFault, CharacterRecord, CharacterSaveRecord,
++    SharedGuildMember, SharedGuildRank, SharedGuildRecord, Stage5FriendIdentity, WorldCommand,
++    ZoneRuntimeHandle,
++};
++use std::collections::BTreeMap;
++
++const GUILD_ID: &str = "1123456789abcdef0123456789abcdef";
++const OTHER_GUILD_ID: &str = "2123456789abcdef0123456789abcdef";
++
++fn identity(account_id: &str, character_index: i32) -> Stage5FriendIdentity {
++    Stage5FriendIdentity {
++        account_id: account_id.into(),
++        character_index,
++    }
++}
++
++fn fixture() -> GatewayConfig {
++    let config = GatewayConfig::default().with_crystal_world_runtime();
++    let mut store = config.account_store.lock().unwrap();
++    store.accounts.clear();
++    for (index, account_id, name) in [
++        (0, "leader", "Leader"),
++        (1, "officer", "Officer"),
++        (2, "member", "Member"),
++        (3, "outsider", "Outsider"),
++        (4, "other-leader", "Other Leader"),
++    ] {
++        let mut account = AccountRecord::empty();
++        let character = CharacterRecord {
++            index,
++            name: name.into(),
++            level: 22,
++            class: MirClass::Warrior,
++            gender: MirGender::Male,
++        };
++        let mut save = CharacterSaveRecord::new(character.clone());
++        save.map_file_name = config.map.file_name.clone();
++        save.map_title = config.map.title.clone();
++        save.position = config.spawn.clone();
++        account.characters.push(character);
++        account.saves.insert(index, save);
++        store.accounts.insert(account_id.into(), account);
++    }
++    let guild = SharedGuildRecord {
++        id: GUILD_ID.into(),
++        name: "Rank Guild".into(),
++        revision: 7,
++        level: 0,
++        experience: 41,
++        spare_points: 2,
++        gold: 99_123,
++        ranks: vec![
++            SharedGuildRank {
++                index: 0,
++                name: "Leader".into(),
++                options: 255,
++            },
++            SharedGuildRank {
++                index: 1,
++                name: "Officer".into(),
++                options: 1,
++            },
++            SharedGuildRank {
++                index: 2,
++                name: "Members".into(),
++                options: 0,
++            },
++        ],
++        members: vec![
++            SharedGuildMember {
++                membership_epoch: 4,
++                identity: identity("leader", 0),
++                name: "Leader".into(),
++                rank_index: 0,
++            },
++            SharedGuildMember {
++                membership_epoch: 5,
++                identity: identity("officer", 1),
++                name: "Officer".into(),
++                rank_index: 1,
++            },
++            SharedGuildMember {
++                membership_epoch: 6,
++                identity: identity("member", 2),
++                name: "Member".into(),
++                rank_index: 2,
++            },
++        ],
++        notice: vec!["unchanged notice".into()],
++        storage: BTreeMap::new(),
++        buffs: BTreeMap::new(),
++        last_buff_tick_ms: 0,
++        experience_receipts: Default::default(),
++        experience_receipt_payloads: Default::default(),
++    };
++    let mut other = guild.clone();
++    other.id = OTHER_GUILD_ID.into();
++    other.name = "Other Guild".into();
++    other.members = vec![SharedGuildMember {
++        membership_epoch: 2,
++        identity: identity("other-leader", 4),
++        name: "Other Leader".into(),
++        rank_index: 0,
++    }];
++    store.shared_guilds.insert(GUILD_ID.into(), guild);
++    store.shared_guilds.insert(OTHER_GUILD_ID.into(), other);
++    drop(store);
++    config
++}
++
++fn send(runtime: &mut ZoneRuntimeHandle, packet: ClientPacket) -> Vec<ServerPacket> {
++    runtime.execute(WorldCommand::ClientPacket(packet)).unwrap()
++}
++
++fn login(runtime: &mut ZoneRuntimeHandle, account: &str, index: i32) {
++    assert!(send(
++        runtime,
++        ClientPacket::Login {
++            account_id: account.into(),
++            password: "demo".into()
++        }
++    )
++    .iter()
++    .any(|p| matches!(p, ServerPacket::LoginSuccess { .. })));
++    send(
++        runtime,
++        ClientPacket::StartGame {
++            character_index: index,
++        },
++    );
++    assert!(runtime.active_identity().is_some());
++}
++
++fn edit(rank_index: u8, rank_name: &str) -> ClientPacket {
++    ClientPacket::EditGuildMember {
++        change_type: 3,
++        rank_index,
++        // This field must never supply the actor identity or display name.
++        name: "Other Leader".into(),
++        rank_name: rank_name.into(),
++    }
++}
++
++fn persisted(config: &GatewayConfig) -> SharedGuildRecord {
++    config.account_store.lock().unwrap().shared_guilds[GUILD_ID].clone()
++}
++
++fn has_rank(packets: &[ServerPacket], index: u8, name: &str) -> bool {
++    packets.iter().any(|p| {
++        matches!(p, ServerPacket::GuildMemberChange { ranks, .. }
++        if ranks.iter().any(|rank| rank.index == i32::from(index) && rank.name == name))
++    })
++}
++
++fn source_rank_event(packets: &[ServerPacket], index: u8, name: &str) -> bool {
++    packets.iter().any(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, name: actor, ranks, .. }
++        if actor == "Leader" && ranks.len() == 1 && ranks[0].index == i32::from(index) && ranks[0].name == name))
++}
++
++fn assert_only_rename(
++    before: &SharedGuildRecord,
++    after: &SharedGuildRecord,
++    index: u8,
++    name: &str,
++) {
++    let mut expected = before.clone();
++    expected
++        .ranks
++        .iter_mut()
++        .find(|rank| rank.index == index)
++        .unwrap()
++        .name = name.into();
++    expected.revision += 1;
++    assert_eq!(after, &expected);
++}
++
++
++// Ordinary typed packets through the production wrapper; no injected success.
++#[test]
++fn guild_rank_actor_receives_original_status7_after_canonical_refresh() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("terminal-a"));
++    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("terminal-b"));
++    let mut outsider = factory.create_runtime(config.clone(), &ZoneId::new("terminal-b"));
++    login(&mut leader, "leader", 0);
++    login(&mut member, "member", 2);
++    login(&mut outsider, "outsider", 3);
++    let before = persisted(&config);
++    let reply = send(&mut leader, edit(2, "Veterans"));
++    assert_only_rename(&before, &persisted(&config), 2, "Veterans");
++    let terminals = reply.iter().filter(|p| matches!(p,
++        ServerPacket::GuildMemberChange { status: 7, .. })).collect::<Vec<_>>();
++    assert_eq!(terminals.len(), 1, "full projection is not the source terminal: {reply:?}");
++    assert!(matches!(terminals[0], ServerPacket::GuildMemberChange {
++        name, rank_index: 0, status: 7, ranks
++    } if name == "Leader" && ranks.len() == 1 && ranks[0].index == 2
++        && ranks[0].name == "Veterans" && ranks[0].options == 0
++        && ranks[0].members.len() == 1 && ranks[0].members[0].name == "Member"));
++    let terminal_index = reply.iter().position(|p| matches!(p,
++        ServerPacket::GuildMemberChange { status: 7, .. })).unwrap();
++    let canonical_index = reply.iter().position(|p| matches!(p,
++        ServerPacket::GuildMemberChange { status: 255, .. })).unwrap();
++    assert!(terminal_index < canonical_index,
++        "source terminal must enter the actual native FIFO before full metadata: {reply:?}");
++    assert!(source_rank_event(&member.execute(WorldCommand::Tick).unwrap(), 2, "Veterans"));
++    assert!(!has_rank(&outsider.execute(WorldCommand::Tick).unwrap(), 2, "Veterans"));
++}
++
++#[test]
++fn guild_rank_repeated_same_name_has_source_terminal_for_each_valid_request() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("terminal-repeat"));
++    login(&mut leader, "leader", 0);
++    let before = persisted(&config);
++    for offset in 1..=2 {
++        let reply = send(&mut leader, edit(2, "Members"));
++        assert_eq!(persisted(&config).revision, before.revision + offset);
++        assert!(source_rank_event(&reply, 2, "Members"), "same name is still a source reply: {reply:?}");
++    }
++}
++
++#[test]
++fn guild_rank_denied_request_has_no_success_terminal_or_durable_change() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("terminal-denied"));
++    login(&mut member, "member", 2);
++    let before = persisted(&config);
++    let reply = send(&mut member, edit(2, "Forbidden"));
++    assert_eq!(persisted(&config), before);
++    assert!(!reply.iter().any(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, .. })));
++}

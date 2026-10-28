@@ -1,0 +1,398 @@
+{
+  "schema": "mir2.npc-input-delivery-evidence.v1",
+  "createdUtc": "2026-10-11T18:37:56.231805+00:00",
+  "revision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+  "localDistinctTests": 318,
+  "newTests": 24,
+  "focused29AreSubset": true,
+  "originalFailuresAndSupersededCancelledCiRetained": true,
+  "linuxRun": "38159622183",
+  "linuxQualified": true,
+  "newBackendPublished": true,
+  "normalPublicChecks": 62,
+  "clientReinstallRequired": false,
+  "publicFeed20Preserved": true,
+  "nativeHumanAccepted": false,
+  "sharedWorldInvocationAccepted": false,
+  "fullClassicAccepted": false,
+  "sources": {
+    "mir2-web3/apps/simulation/src/runtime/combat.rs": "48d81c08f0ce25850729caee902b7ca53e3c727b5f6179a5d1187daa490508a0",
+    "mir2-web3/apps/simulation/src/runtime/default_npc_events.rs": "dbb6bde35e9b6e9420252bd1d39bc434b46b9a82588f1de12c570989b2d329d3",
+    "mir2-web3/apps/simulation/src/runtime/items.rs": "683a7fc58c0931ef8ee866c38051b7e040c6d91d004889b2e5481ce7b25e094c",
+    "mir2-web3/apps/simulation/src/runtime/map.rs": "dffb5ec695c29fd9b1bd3d6f154bbd98173ceb1ae810a3c868404d4ddb01ce65",
+    "mir2-web3/apps/simulation/src/runtime/mod.rs": "498e694b30b2066687f39a2cf18d67797e1e3cfde0c945b5aa352f1a6f510e67",
+    "mir2-web3/apps/simulation/src/runtime/movement.rs": "2aa984a9a1251bff59055186ed7c1b125027cf415624e717c0b95c34c715b154",
+    "mir2-web3/apps/simulation/src/runtime/npc.rs": "72346c19e1f565d38ef89eb048db77fa6f0b6368819399083713c098f97bf83e",
+    "mir2-web3/apps/simulation/src/runtime/npc_conquest_trade.rs": "38566a36e93bb693d326e941f56dba385c7351f8135aa72bfaab30be9c6c82eb",
+    "mir2-web3/apps/simulation/src/runtime/npc_dialog_admission_tests.rs": "a62542539cf0299c6ec6e233869e6a1f3833e44181b5a2feb4bf4766e71f5e85",
+    "mir2-web3/apps/simulation/src/runtime/npc_input.rs": "f98db84aac7a8fbc587c2352434c61ed2424760c6c438da352abf3eecdd24251",
+    "mir2-web3/apps/simulation/src/runtime/npc_pet_source_semantics_tests.rs": "f6a24b24106f561dd54741d2cf7a8de5c77221181aa677b24744c473c046e6b6",
+    "mir2-web3/apps/simulation/src/runtime/npc_script.rs": "e6ac182279903f8f4963e0ca5c63b828251b02a6f0807b21e4a117963cc58cbe",
+    "mir2-web3/apps/simulation/src/runtime/packets.rs": "3890c160365b2678eb7f304b4395a417c5058a9c47009edcb9d8f905211e9b54",
+    "mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs": "ebba4b06eb679845f92eb3c845eb6f9bdf228a11120579a6ea08e036efda593c",
+    "mir2-web3/apps/simulation/src/runtime/save.rs": "97fe5882024bd4cf640170703e0eb5f40ee40d40af4e566df79da37168868fb9",
+    "mir2-web3/apps/simulation/src/runtime/shared_guild_experience.rs": "3648564561a6bc0d529f3048157f52cacf598648d4e87b258f4c7a49b2cbfcda",
+    "mir2-web3/apps/simulation/src/runtime/tests.rs": "0937be35cd27cbcb5a966e8a55b4f3c23440fdddbffb1c80f129e03a544e0c10"
+  },
+  "archive": {
+    "path": "original-evidence.zip",
+    "bytes": 941806,
+    "sha256": "c8e0f2205f5f15cef6b42cb9f9eb4e3f667fba75790c655d05ff812857b8dbdd",
+    "files": [
+      {
+        "path": "baseline-01.log",
+        "bytes": 50133,
+        "sha256": "c8e825e5efc276656bb63eb08b263e6336fa1a2647173d69e246a749b6670b09"
+      },
+      {
+        "path": "review-baseline-01.log",
+        "bytes": 44606,
+        "sha256": "6ab3e65dc41156525f5cbc21188cca9eb3b4c9fb421b333493c3fdd4556b88b4"
+      },
+      {
+        "path": "fixed-01.log",
+        "bytes": 4797,
+        "sha256": "b846780ac3f4c40c6f33b40debbeb5156d028c217bf15057f355dc201301133c"
+      },
+      {
+        "path": "fixed-02.log",
+        "bytes": 43522,
+        "sha256": "9e86d61fe108d0c0538ba79dfd4033b4d8c6b2589f483d0319f7db460068f003"
+      },
+      {
+        "path": "lifecycle-01.log",
+        "bytes": 44445,
+        "sha256": "9f80db785e1d93d5168c9d9cfc79a627e99b9512fe43533427c18c2687efd6b2"
+      },
+      {
+        "path": "adjacent-01.log",
+        "bytes": 75737,
+        "sha256": "35fd7a6b30e5d421dbcd1def821faec398a11ee91f0281687093b08fdc8f7f21"
+      },
+      {
+        "path": "parent-regressions-01.log",
+        "bytes": 44037,
+        "sha256": "ddd5d7a4188301cf1973e3366468db5807bc56932427bd2197bf806ab3abef50"
+      },
+      {
+        "path": "repair-focused-01.log",
+        "bytes": 45525,
+        "sha256": "a484796e954dbd39b2a2ab1cd768447cadafe33710e7c8fc632a15be7e3dbded"
+      },
+      {
+        "path": "adjacent-02.log",
+        "bytes": 78688,
+        "sha256": "c6ba9a2333387a2046a778825ca577fa0ad51dbb32309908a2dae7f58a1b647a"
+      },
+      {
+        "path": "legacy-confirm-baseline-01.log",
+        "bytes": 42975,
+        "sha256": "f1a2fed0156276cb3b7cd25ccc2666cfad7d85345277484a058e1e3e97999687"
+      },
+      {
+        "path": "repair-focused-02.log",
+        "bytes": 45648,
+        "sha256": "cd64c1d1df8847bf78bf59c234c7bab0756d2bf107742a448cfc6883b3677834"
+      },
+      {
+        "path": "adjacent-03.log",
+        "bytes": 78688,
+        "sha256": "a8f73618bdb5967e5aafdd0b1991829502f645004e80fae4bb8c3a6194d32c2d"
+      },
+      {
+        "path": "LOCAL-REGRESSION-01.json",
+        "bytes": 79828,
+        "sha256": "51905ed12638ed433dbae7efaa37e48bc9c5a27dd42d07e2f6d5166cd71eac25"
+      },
+      {
+        "path": "LOCAL-REGRESSION-02.json",
+        "bytes": 55755,
+        "sha256": "353f27f987abddbb6e2d1f4f6d5fcc721903c29d8f6fe83fed1a2325a52a23da"
+      },
+      {
+        "path": "parent-baseline-01/subject.json",
+        "bytes": 5267,
+        "sha256": "bff7e3b8ec320cab3c496d25d51de68b54c52a90ebd9bc4b71934809366dacdb"
+      },
+      {
+        "path": "parent-baseline-01/RESTORED.json",
+        "bytes": 139,
+        "sha256": "63d4cd9a0731c1c22e9aa1fee5dc0f0d861fac3d98269715c74409a49f5230b7"
+      },
+      {
+        "path": "linux-superseded-01.json",
+        "bytes": 6119,
+        "sha256": "98ae3b62659217079ccb973c242e75d65f5f9140f196939c0eabb938f7f31616"
+      },
+      {
+        "path": "linux-superseded-cancel-01.log",
+        "bytes": 54,
+        "sha256": "ff4604d2b0a7cfce544a3787fe1aecc0b592c7680be39cc17a10f1067b0d2f79"
+      },
+      {
+        "path": "linux-superseded-final-01.json",
+        "bytes": 168,
+        "sha256": "6c23a83ff5d54bc84d8aceeaf0b20a2680472f2171b7cba1189396a6c43c2ad9"
+      },
+      {
+        "path": "linux-runs-02.json",
+        "bytes": 903,
+        "sha256": "7bd0d606799a28072cf1ddec4e3e558c40525071cd3b46c9daa50e7643567781"
+      },
+      {
+        "path": "public-preflight-01/VERIFIED.json",
+        "bytes": 765,
+        "sha256": "cdabd70ff96d02b69a59dc0c21fde8b08318e95fdd19b2ea88b435317cbcebfc"
+      },
+      {
+        "path": "server-ci-02/PREPARATION.json",
+        "bytes": 581,
+        "sha256": "1ad550b4e81a2a515e2dfe0a2ee06de9a996b2e80528ca1720c1837af396cffe"
+      },
+      {
+        "path": "server-ci-02/artifact-01/CI-VERIFIED.json",
+        "bytes": 1224,
+        "sha256": "1f22657a7662397b40c7c4665127704b6793381636951ee4d4429f599a342d40"
+      },
+      {
+        "path": "server-ci-02/artifact-01/ci-status-original.json",
+        "bytes": 6486,
+        "sha256": "c682ce6d52c7ceb584378bbec303e0789b26572d2afbba2260c924c765c3c6c1"
+      },
+      {
+        "path": "server-ci-02/artifact-01/ci-artifacts-original.json",
+        "bytes": 751,
+        "sha256": "638080704eefe5fce19dd1b2558c7443bf413f0b6ffa2fbd6d485adaebdb02d8"
+      },
+      {
+        "path": "server-ci-02/artifact-01/ci-log-original.txt",
+        "bytes": 9492806,
+        "sha256": "0011c4c88a20772465466872d465406a240aec746950f67267cd904aa866a73f"
+      },
+      {
+        "path": "server-ci-02/artifact-01/latest-mir2-gateway-release.json",
+        "bytes": 1695,
+        "sha256": "e791bcb5aa2381fa954c506d41cfc84d4b7f5afa660ffc41b6aab3a70b83447b"
+      },
+      {
+        "path": "server-ci-02/artifact-01/RELEASE.json",
+        "bytes": 1540,
+        "sha256": "a3b6357037f6c99782f61f0ac7d4ca7b8805d6c55f94066efe40fc00a00fe45d"
+      },
+      {
+        "path": "server-ci-02/artifact-01/VERIFIED-FILES.json",
+        "bytes": 412,
+        "sha256": "189ec583a94a494122ad446ec7ccc87032ab1ced52427cf9a819cdc62068b6b1"
+      },
+      {
+        "path": "server-rollout-02/PREPARATION.json",
+        "bytes": 2721,
+        "sha256": "e3ef42f623fcf96a7cbbd5b0e3b59cf2c242b180dd2683458eeb654bf2e3b856"
+      },
+      {
+        "path": "server-rollout-02/DEPLOYED-01.json",
+        "bytes": 2383,
+        "sha256": "fad6ef9ce7b114240d8e17fdd42a16425c266f43de57fcaa7ad8252568fe4e6f"
+      },
+      {
+        "path": "server-rollout-02/PUBLIC-VERIFIED-01.json",
+        "bytes": 4216,
+        "sha256": "4684dc3203ae614249953c6219e226da038a4fab9bcab8161c71f13336f78871"
+      },
+      {
+        "path": "server-rollout-02/ordinary-public-01/RESULT.json",
+        "bytes": 12631,
+        "sha256": "2f1fb50c4d0fe6e1d17ccbc9be5f201ee726ffa61c42d00fced3b79e3e2baaf2"
+      },
+      {
+        "path": "server-rollout-02/native-resume-public-01/RESULT.json",
+        "bytes": 3811,
+        "sha256": "3c2b6f8baa54d32f8f583557ab66db13cb9beeddf0a8292ef54a13fafe1dab3e"
+      },
+      {
+        "path": "publication-complete-02/VERIFIED.json",
+        "bytes": 5093,
+        "sha256": "91393ce6ef61fbbad51231a7cbe523b3cb7d4809f9855eb0b3870f47fc45dba0"
+      }
+    ]
+  },
+  "ci": {
+    "schema": "mir2.gateway.npc-input-linux-ci.v1",
+    "createdUtc": "2026-10-11T18:21:46.456919+00:00",
+    "runId": "38159622183",
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/38159622183",
+    "revision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+    "runConclusion": "success",
+    "jobs": [
+      {
+        "name": "build-linux-x64",
+        "conclusion": "success",
+        "databaseId": 114529623810
+      },
+      {
+        "name": "siege-acceptance / siege-linux",
+        "conclusion": "success",
+        "databaseId": 114529623914
+      }
+    ],
+    "githubArtifactDigest": "sha256:f1a0aa79c9c296b33546594d98baa1aae612d58403badc19b3e8b1d47b73a2a9",
+    "githubArtifactBytes": 34526181,
+    "archiveSha256": "b1097301ef92ab1e174ec57467cb0b10f28006f3dcc5b83636277074ee899bb3",
+    "archiveBytes": 34983388,
+    "binarySha256": "22bee6075c24a5cf25d86f6fcf51a02d9f07c5d4208da2eed40d0072fa6be449",
+    "binaryBytes": 84812336,
+    "zoneHostBinarySha256": "3260290ffb0240479cb64180b0547d7e07eb7cfc972590577c5ed1ff97672edf",
+    "manifestSha256": "189ec583a94a494122ad446ec7ccc87032ab1ced52427cf9a819cdc62068b6b1",
+    "logSha256": "0011c4c88a20772465466872d465406a240aec746950f67267cd904aa866a73f",
+    "publicR2Upload": false,
+    "serverSwitched": false
+  },
+  "public": {
+    "schema": "mir2.npc-input-publication-complete.v1",
+    "passed": true,
+    "revision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+    "pid": "3397094",
+    "run": "38159622183",
+    "binarySha256": "22bee6075c24a5cf25d86f6fcf51a02d9f07c5d4208da2eed40d0072fa6be449",
+    "binaryBytes": 84812336,
+    "newBackendPublished": true,
+    "normalPublicChecks": 62,
+    "publicApplicationRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+    "publicUpdaterRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "publicFeedSequence": 20,
+    "publicFeed20Preserved": true,
+    "privateEnvironmentAndCaddyPreserved": true,
+    "existingStripeTestConfigAndMonthlyPrice1000Preserved": true,
+    "originalRealmPreserved": true,
+    "noSessionsForceDisconnected": true,
+    "clientReinstallRequired": false,
+    "nativeHumanAccepted": false,
+    "sharedWorldInvocationAccepted": false,
+    "fullClassicAccepted": false,
+    "originalProtectedReadSha256": "57ad9c55fc6a45aad566b67288662a37b35c675c4e89d779f3c8619a17fc51ec",
+    "newProtectedReadSha256": "ae0389ec712ffcaaa8945f52aedde5068e2cf2ccfb60fb44a1dbc0f4639589d8",
+    "protectedStdoutSha256": "ccf1b1235d03596101425f91d1ef7b157beb22423abf350a143679ef5db7ead8",
+    "after": {
+      "binaryBytes": 84812336,
+      "binarySha256": "22bee6075c24a5cf25d86f6fcf51a02d9f07c5d4208da2eed40d0072fa6be449",
+      "files": {
+        "/etc/mir2-playtest/gateway.env": {
+          "bytes": 4746,
+          "sha256": "41d0939baa6f164a5db0605ef441647c4c8214a6b4ac1dd7c69ab1da65c647c0"
+        },
+        "/etc/systemd/system/mir2-playtest.service": {
+          "bytes": 2188,
+          "sha256": "9bf1b374db39732ad7b59e6d468086eea8c4563fbfb3185ef3bf9dfd714551a9"
+        },
+        "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf": {
+          "bytes": 224,
+          "sha256": "de97bed5447a75c64fd948dd06ac2ce2b6f1216f22559f6e5a98e11aa3caece9"
+        },
+        "/etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf": {
+          "bytes": 594,
+          "sha256": "d136270aad3a230fd882443afc26c17e49134ba2449e5beab67b7acc45ecd1a4"
+        }
+      },
+      "ok": true,
+      "original": {
+        "ok": true,
+        "pids": [
+          "3855184"
+        ],
+        "release": "/opt/mir2/gateway/releases/79ba815c0-checkpoint-base64",
+        "revision": null
+      },
+      "remoteZoneConfigured": false,
+      "tcp7200": 0,
+      "test": {
+        "ai_live": {
+          "discordDeadLettersTotal": 0,
+          "discordFailureTotal": 0,
+          "discordSuccessTotal": 0,
+          "distributionDeadLettersTotal": 0,
+          "distributionFailureTotal": 0,
+          "distributionSuccessTotal": 0,
+          "enabled": false,
+          "generatedSegmentsTotal": 0,
+          "mode": "shadow",
+          "modelFailureTotal": 0,
+          "modelSuccessTotal": 0,
+          "persistedSegmentsTotal": 0,
+          "persistenceErrorsTotal": 0,
+          "processedFramesTotal": 0,
+          "queuedDiscordDeliveries": 0,
+          "queuedDistributionDeliveries": 0,
+          "running": false,
+          "scoredHighlightsTotal": 0,
+          "ttsFailureTotal": 0,
+          "ttsSuccessTotal": 0
+        },
+        "capacity": {
+          "currentActiveSessions": 0,
+          "currentLoginInFlight": 0,
+          "currentNewCharacterInFlight": 0,
+          "currentReconnectLeases": 0,
+          "currentStartGameInFlight": 0,
+          "currentWsConnections": 0,
+          "maxActiveSessions": 51,
+          "maxLoginInFlight": 2,
+          "maxNewCharacterInFlight": 1,
+          "maxReconnectLeases": 51,
+          "maxStartGameInFlight": 2,
+          "maxWsConnections": 66
+        },
+        "channel_identity": {
+          "accountCount": 0,
+          "backend": "postgres",
+          "durable": true,
+          "identityCount": 0
+        },
+        "gameplay_events": {
+          "accepted": 0,
+          "configured": false,
+          "dropped": 0,
+          "failed": 0,
+          "lastError": null,
+          "published": 0,
+          "sink": "none",
+          "topic": null
+        },
+        "gate15": null,
+        "http": "ready",
+        "identity_backend": "postgres",
+        "ok": true,
+        "revision": "75c5b2e1f65816e062d2032c9b941bb725152f7c",
+        "session_cache": {
+          "backend": "redis",
+          "configured": true,
+          "healthy": true,
+          "lastError": null,
+          "recordCount": 0,
+          "routeLeaseCount": 0,
+          "staleRecordCount": 0,
+          "ttlSeconds": 30
+        },
+        "spectator": {
+          "activeMaps": 1,
+          "activeViewers": 0,
+          "bufferedFrames": 90,
+          "dataDir": ".mir2-data/spectator",
+          "droppedFramesTotal": 0,
+          "persistedFramesTotal": 0,
+          "publishedFramesTotal": 102,
+          "recordingEnabled": false,
+          "recordingErrorsTotal": 0
+        },
+        "tcp_stub": "ready",
+        "ws": "ready"
+      },
+      "unit": {
+        "DropInPaths": "/etc/systemd/system/mir2-playtest.service.d/50-periodic-b71.conf /etc/systemd/system/mir2-playtest.service.d/90-spectator-watch.conf",
+        "ExecMainStatus": "0",
+        "MainPID": "3397094",
+        "NRestarts": "0",
+        "Result": "success"
+      }
+    }
+  }
+}

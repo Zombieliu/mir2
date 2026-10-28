@@ -36,24 +36,37 @@ impl std::fmt::Debug for Prompt {
 }
 
 impl Prompt {
-    pub fn unlock() -> Self { Self::new(Stage::Unlock, true) }
-    pub fn setup(forced: bool) -> Self { Self::new(Stage::New, forced) }
-    pub fn change() -> Self { Self::new(Stage::ConfirmChange, false) }
+    pub fn unlock() -> Self {
+        Self::new(Stage::Unlock, true)
+    }
+    pub fn setup(forced: bool) -> Self {
+        Self::new(Stage::New, forced)
+    }
+    pub fn change() -> Self {
+        Self::new(Stage::ConfirmChange, false)
+    }
 
     fn new(stage: Stage, close_storage_on_cancel: bool) -> Self {
         Self {
-            stage, close_storage_on_cancel, draft: String::new(),
-            current: String::new(), new: String::new(), mismatch: false,
+            stage,
+            close_storage_on_cancel,
+            draft: String::new(),
+            current: String::new(),
+            new: String::new(),
+            mismatch: false,
         }
     }
 
-    pub fn masked(&self) -> String { "*".repeat(self.draft.chars().count()) }
+    pub fn masked(&self) -> String {
+        "*".repeat(self.draft.chars().count())
+    }
 
     pub fn push_text(&mut self, text: &str) {
         // MirInputBox.MaxLength = 50. Preserve spaces/case; never silently
         // transform a credential or replace the authoritative format check.
         let remaining = 50usize.saturating_sub(self.draft.chars().count());
-        self.draft.extend(text.chars().filter(|ch| !ch.is_control()).take(remaining));
+        self.draft
+            .extend(text.chars().filter(|ch| !ch.is_control()).take(remaining));
     }
 
     pub fn can_submit(&self) -> bool {
@@ -64,7 +77,9 @@ impl Prompt {
     /// drafts: close/clear only after the caller successfully queues it, so
     /// queue backpressure cannot lose the player's input.
     pub fn submit(&mut self) -> Option<Command> {
-        if !self.can_submit() { return None; }
+        if !self.can_submit() {
+            return None;
+        }
         self.mismatch = false;
         match self.stage {
             Stage::ConfirmChange => self.stage = Stage::Current,
@@ -86,7 +101,10 @@ impl Prompt {
                     }
                     return None;
                 }
-                return Some(Command::Set { current: self.current.clone(), new: self.new.clone() });
+                return Some(Command::Set {
+                    current: self.current.clone(),
+                    new: self.new.clone(),
+                });
             }
             Stage::Unlock => return Some(Command::Unlock(self.draft.clone())),
         }
@@ -110,7 +128,10 @@ mod tests {
         assert!(prompt.submit().is_none());
         assert!(prompt.mismatch);
         prompt.draft = "New12".into();
-        let expected = Command::Set { current: "Old 1".into(), new: "New12".into() };
+        let expected = Command::Set {
+            current: "Old 1".into(),
+            new: "New12".into(),
+        };
         assert!(prompt.submit() == Some(expected.clone()));
         assert!(prompt.submit() == Some(expected)); // retry after queue rejection
     }
@@ -127,7 +148,13 @@ mod tests {
         prompt.push_text("abcde");
         prompt.submit();
         prompt.push_text("abcde");
-        assert!(prompt.submit() == Some(Command::Set { current: String::new(), new: "abcde".into() }));
+        assert!(
+            prompt.submit()
+                == Some(Command::Set {
+                    current: String::new(),
+                    new: "abcde".into()
+                })
+        );
     }
 
     #[test]

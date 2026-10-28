@@ -1,26 +1,31 @@
 {
   "schema": "mir2-content-profile-bundle/1",
   "profileId": "platinum_176",
-  "profileVersion": 26,
+  "profileVersion": 27,
   "acceptanceLevel": 50,
   "source": "Crystal.Database-29.01.25/Jev with classic 1.76 world overrides and the source three-class level-50 skill set",
   "sourceData": {
     "crystalDatabaseVersion": 117,
     "crystalDatabaseCustomVersion": 0
   },
-  "builtAt": "2026-09-19T17:03:58.633Z",
+  "builtAt": "2026-10-06T15:05:23.176Z",
   "hashAlgorithm": "sha256",
-  "contentHash": "b2bb23127956c5eb7397619bb6bd6621c945eea730405c2417018cac87c6bba4",
+  "contentHash": "4b95ee1a25df34185d94240613c36673a093a8ee27ca80509bbe0b7acb5beaf4",
   "files": [
     {
       "path": "packages/game-data/data/content_profiles/platinum_176.json",
-      "bytes": 42725,
-      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd"
+      "bytes": 47571,
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
     },
     {
       "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
       "bytes": 6741323,
       "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_mining_manifest.json",
+      "bytes": 5976,
+      "sha256": "e0b316ed8172ac1f0d3f1577fc06df126682563ff019612e7cd4663eccff3c28"
     },
     {
       "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
@@ -79,9 +84,11 @@
     }
   ],
   "summary": {
-    "maps": 164,
-    "monsters": 174,
-    "items": 195,
+    "maps": 208,
+    "nativeResourceOnlyMaps": 1,
+    "nativeMaps": 209,
+    "monsters": 176,
+    "items": 203,
     "skills": 63,
     "npcScripts": 101,
     "respawnOverrides": 2,

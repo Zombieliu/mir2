@@ -1,5 +1,8 @@
 use super::*;
 use guild_buff_dialog::*;
+#[cfg(test)]
+#[path = "guild_rank_flow_tests.rs"]
+mod guild_rank_flow_tests;
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct GuildPanelUi {
     pub buffs: GuildBuffDialog,
@@ -15,6 +18,8 @@ pub struct GuildPanelUi {
     pub rank_dropdown: bool,
     pub rank_scroll: usize,
     pub rank_name_ready_ms: u64,
+    pub rank_name_submission: Option<crate::social::GuildRankRenameRequest>,
+    pub rank_name_unconfirmed: bool,
     pub rank_option_ready_ms: u64,
     pub now_ms: u64,
     pub cursor: Option<Vec2>,
@@ -149,7 +154,7 @@ pub(super) fn process(
     mut state: ResMut<NativePlayerUiState>,
     mut host: ResMut<GuildHost>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
-    social: Res<crate::social::SocialModel>,
+    mut social: ResMut<crate::social::SocialModel>,
     time: Option<Res<Time>>,
     ui: Option<Res<crate::read_model::UiReadModel>>,
     shell: Option<Res<NativeShellModel>>,
@@ -162,10 +167,9 @@ pub(super) fn process(
         &bevy::text::TextLayoutInfo,
     )>,
 ) {
-    if let Some(ui) = ui {
-        state.guild_panel.owner_name = ui.player.name.clone().unwrap_or_default();
-    }
-    state.guild_panel.now_ms = time.map_or(0, |t| t.elapsed().as_millis() as u64);
+    let now_ms = time.map_or(0, |t| t.elapsed().as_millis() as u64);
+    state.guild_panel.now_ms = now_ms;
+    reconcile_rank_rename_editor(&mut state, &mut social);
     host.buff_hover = None;
     state.guild_panel.cursor = None;
     state.guild_panel.left_down = false;
@@ -191,6 +195,10 @@ pub(super) fn process(
             state.guild_recruit_draft.clear();
         }
         state.guild_panel.guild_name = social.guild.name.clone();
+    }
+    state.guild_panel.now_ms = now_ms;
+    if let Some(ui) = ui {
+        state.guild_panel.owner_name = ui.player.name.clone().unwrap_or_default();
     }
     if let Some(name) = social.guild.pending_invite_from.as_ref() {
         let identity = (name.clone(), social.guild.pending_invite_epoch);
@@ -391,11 +399,7 @@ pub(super) fn process(
         let local = cursor - Vec2::new(rect.left + 42., rect.top + 96.);
         if mouse.just_pressed(MouseButton::Left) {
             let focus = CrystalRect::new(0., 0., 130., 16.).contains(local.x, local.y)
-                && state
-                    .selected_guild_rank
-                    .is_some_and(|r| i32::from(r) >= social.guild.my_rank_id)
-                && social_has_permission(&social.guild, "changeRank")
-                && state.guild_panel.now_ms >= state.guild_panel.rank_name_ready_ms;
+                && rank_name_available(&state, &social.guild);
             state.guild_rank_name_focused = focus;
             state.guild_panel.rank_editor.editor_focused = focus;
             host.selection = focus;
@@ -506,6 +510,14 @@ pub(super) fn render_buff(
         "original-ui/Prguse/1853.png".into(),
         CrystalRect::new(x, y, 216., 332.),
     );
+    if crate::native_i18n::active() {
+        localized_art_label(
+            parent,
+            "Points Remaining",
+            CrystalRect::new(x + 3., y + 2., 112., 17.),
+            9.,
+        );
+    }
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -546,7 +558,7 @@ pub(super) fn render_buff(
                 }
                 overlay_text_at(
                     p,
-                    &row.name,
+                    &crate::native_i18n::tr(&row.name),
                     CrystalRect::new(35., 1., 153., 15.),
                     32. / 3.,
                     Color::WHITE,
@@ -560,7 +572,7 @@ pub(super) fn render_buff(
                 };
                 overlay_text_at(
                     p,
-                    label,
+                    &crate::native_i18n::tr(label),
                     CrystalRect::new(35., 17., 112., 15.),
                     32. / 3.,
                     if row.warning_red {
@@ -572,7 +584,7 @@ pub(super) fn render_buff(
                 if let Some(active) = row.active {
                     overlay_text_at(
                         p,
-                        if active { "Active" } else { "Inactive" },
+                        &crate::native_i18n::tr(if active { "Active" } else { "Inactive" }),
                         CrystalRect::new(140., 17., 60., 15.),
                         32. / 3.,
                         Color::WHITE,
@@ -613,38 +625,70 @@ fn buff_hint(model: &GuildBuffDialog, row: usize) -> String {
     let Some(info) = model.catalog.get(model.start_index + row) else {
         return String::new();
     };
-    let mut lines = vec![info.name.clone()];
+    let mut lines = vec![crate::native_i18n::tr(&info.name)];
     if info.level_requirement > 0 {
-        lines.push(format!("Minimum Guild Level: {}", info.level_requirement));
+        lines.push(crate::native_i18n::tr(&format!(
+            "Minimum Guild Level: {}",
+            info.level_requirement
+        )));
     }
     if info.points_requirement > 0 {
-        lines.push(format!("Points Required: {}", info.points_requirement));
+        lines.push(crate::native_i18n::tr(&format!(
+            "Points Required: {}",
+            info.points_requirement
+        )));
     }
     if info.activation_cost > 0 {
-        lines.push(format!("Activation Cost: {} gold.", info.activation_cost));
+        lines.push(crate::native_i18n::tr(&format!(
+            "Activation Cost: {} gold.",
+            info.activation_cost
+        )));
     }
     if info.time_limit > 0 {
-        lines.push(
-            if let Some(active) = model.enabled.iter().find(|b| b.id == info.id && b.active) {
-                format!("Time Remaining: {} minutes", active.active_time_remaining)
-            } else {
-                format!("Buff Length: {} minutes.", info.time_limit)
-            },
-        );
+        lines.push(crate::native_i18n::tr(&if let Some(active) =
+            model.enabled.iter().find(|b| b.id == info.id && b.active)
+        {
+            format!("Time Remaining: {} minutes", active.active_time_remaining)
+        } else {
+            format!("Buff Length: {} minutes.", info.time_limit)
+        }));
     }
     for stat in &info.stats {
         let name = mir2_protocol::crystal_stat_label(stat.stat);
-        lines.push(format!(
-            "{} {} by: {}{}.",
-            if stat.value < 0 {
-                "Decreases"
+        if crate::native_i18n::active() {
+            let (key, source) = if stat.value < 0 {
+                (
+                    "game.guild.buff_decreases",
+                    "Decreases {stat} by: {value}{suffix}.",
+                )
             } else {
-                "Increases"
-            },
-            name,
-            stat.value,
-            if name.contains("Percent") { "%" } else { "" }
-        ));
+                (
+                    "game.guild.buff_increases",
+                    "Increases {stat} by: {value}{suffix}.",
+                )
+            };
+            lines.push(crate::native_i18n::format_key(
+                key,
+                source,
+                &[
+                    ("stat", &crate::native_i18n::tr(&name)),
+                    ("value", &stat.value.to_string()),
+                    ("suffix", if name.contains("Percent") { "%" } else { "" }),
+                ],
+            ));
+        } else {
+            lines.push(format!(
+                "{} {} by: {}{}.",
+                if stat.value < 0 {
+                    "Decreases"
+                } else {
+                    "Increases"
+                },
+                name,
+                stat.value,
+                if name.contains("Percent") { "%" } else { "" }
+            ));
+        }
     }
     lines.join("\n")
 }
@@ -661,22 +705,30 @@ pub(super) fn render_error(
     let (Some(assets), Ok(root)) = (assets, roots.single()) else {
         return;
     };
-    let invite_text = state
-        .guild_panel
-        .invite
-        .as_ref()
-        .map(|(name, _)| format!("Do you want to join the {name} guild?"));
-    let kick_text = state
-        .guild_panel
-        .kick_member
-        .as_ref()
-        .map(|name| format!("Are you sure you want to kick {name}?"));
+    let invite_text = state.guild_panel.invite.as_ref().map(|(name, _)| {
+        crate::native_i18n::format_key(
+            "game.guild.confirm_join",
+            "Do you want to join the {name} guild?",
+            &[("name", name)],
+        )
+    });
+    let kick_text = state.guild_panel.kick_member.as_ref().map(|name| {
+        crate::native_i18n::format_key(
+            "game.guild.confirm_kick",
+            "Are you sure you want to kick {name}?",
+            &[("name", name)],
+        )
+    });
     let member_text = state
         .guild_panel
         .member_change
         .as_ref()
         .map(|(name, _, rank)| {
-            format!("Are you sure you want to change the rank of {name} to {rank}?")
+            crate::native_i18n::format_key(
+                "game.guild.confirm_rank",
+                "Are you sure you want to change the rank of {name} to {rank}?",
+                &[("name", name), ("rank", rank)],
+            )
         });
     let text = if let Some(text) = invite_text.as_deref() {
         text
@@ -718,7 +770,7 @@ pub(super) fn render_error(
             spawn_overlay_frame(p, &assets, "original-ui/Prguse/360.png", 456., 190.);
             friend_dialog::view::wrapped_text(
                 p,
-                text,
+                &crate::native_i18n::tr(text),
                 CrystalRect::new(35., 35., 390., 110.),
                 Color::WHITE,
             );
@@ -769,34 +821,91 @@ pub(super) fn render_error(
     });
 }
 
+pub(super) fn rank_name_available(
+    state: &NativePlayerUiState,
+    guild: &crate::social::GuildModel,
+) -> bool {
+    state.selected_guild_rank.is_some_and(|index| {
+        guild
+            .ranks
+            .iter()
+            .any(|rank| rank.index == i32::from(index))
+            && guild.my_rank_id >= 0
+            && i32::from(index) >= guild.my_rank_id
+    }) && social_has_permission(guild, "changeRank")
+        && (state.guild_panel.rank_name_ready_ms == 0
+            || state.guild_panel.now_ms > state.guild_panel.rank_name_ready_ms)
+}
+
+/// This runs while hidden too. Only the dedicated rename key has a timeout.
+pub(super) fn reconcile_rank_rename_editor(
+    state: &mut NativePlayerUiState,
+    social: &mut crate::social::SocialModel,
+) {
+    if let Some(request) = state.guild_panel.rank_name_submission.clone() {
+        let pending =
+            social
+                .pending
+                .contains(&crate::social::SocialPendingOperation::GuildRankRename(
+                    request.clone(),
+                ));
+        let current_scope = social.guild.rank_rename_scope_matches(&request);
+        // In the ordinary path only exact status-7 reconciliation can retire
+        // this key before its deadline. Scope/reset and local send failure are
+        // handled separately; this releases an editor, never grants success.
+        if !current_scope || !pending || state.guild_panel.now_ms > request.deadline_ms {
+            let expired =
+                current_scope && pending && state.guild_panel.now_ms > request.deadline_ms;
+            state.guild_panel.rank_name_submission = None;
+            state.guild_panel.rank_name_ready_ms = 0;
+            state.guild_panel.rank_name_unconfirmed = expired;
+            if current_scope
+                && !pending
+                && state.selected_guild_rank == Some(request.rank_index)
+                && state.guild_rank_name_draft == request.rank_name
+            {
+                if let Some(rank) = social
+                    .guild
+                    .ranks
+                    .iter()
+                    .find(|rank| rank.index == i32::from(request.rank_index))
+                {
+                    state.guild_rank_name_draft = rank.name.clone();
+                }
+            }
+        }
+    }
+    social.expire_guild_rank_renames(state.guild_panel.now_ms);
+}
+
 pub(super) fn save_rank_name(
     state: &mut NativePlayerUiState,
     social: &mut crate::social::SocialModel,
     intents: &mut NativePlayerUiIntentQueue,
 ) {
+    reconcile_rank_rename_editor(state, social);
     let Some(rank_index) = state.selected_guild_rank else {
         return;
     };
-    if i32::from(rank_index) < social.guild.my_rank_id
-        || !social_has_permission(&social.guild, "changeRank")
-        || state.guild_panel.now_ms < state.guild_panel.rank_name_ready_ms
-    {
+    if !rank_name_available(state, &social.guild) {
         return;
     }
     let name = state.guild_rank_name_draft.clone();
-    if name.is_empty() || name.encode_utf16().count() > 20 {
+    let Some(deadline_ms) = state.guild_panel.now_ms.checked_add(5000) else {
         return;
-    }
-    if intents.push_social_pending(
-        social,
-        NativePlayerUiIntent::GuildEditMember {
-            change_type: 3,
-            rank_index,
-            name: String::new(),
-            rank_name: name,
-        },
-    ) {
-        state.guild_panel.rank_name_ready_ms = state.guild_panel.now_ms + 5000;
+    };
+    let Some(request) = social.guild_rank_rename_request(
+        &state.guild_panel.owner_name,
+        rank_index,
+        &name,
+        deadline_ms,
+    ) else {
+        return;
+    };
+    if intents.push_guild_rank_rename_pending(social, request.clone()) {
+        state.guild_panel.rank_name_submission = Some(request);
+        state.guild_panel.rank_name_ready_ms = deadline_ms;
+        state.guild_panel.rank_name_unconfirmed = false;
         state.guild_rank_name_focused = false;
         state.guild_panel.rank_editor.editor_focused = false;
     }
@@ -841,8 +950,9 @@ mod tests {
     #[test]
     fn rank_rename_uses_type_three_and_cannot_edit_a_senior_rank() {
         let mut state = NativePlayerUiState::default();
-        let mut social = crate::social::SocialModel::default();
+        let mut social = crate::social::guild_rank_native_tests::seeded(1);
         let mut queue = NativePlayerUiIntentQueue::default();
+        state.guild_panel.owner_name = "Officer".into();
         social.guild.permissions = vec!["changeRank".into()];
         social.guild.my_rank_id = 1;
         state.selected_guild_rank = Some(0);
@@ -964,7 +1074,7 @@ pub(super) fn confirm_member_rank(
 
 pub(super) fn member_status(member: &crate::social::GuildMemberModel) -> String {
     if member.online {
-        return "Online".into();
+        return crate::native_i18n::tr("Online");
     }
     let ticks = (member.last_login_binary_datetime as u64 & 0x3fff_ffff_ffff_ffff) as i64;
     let seconds = ticks / 10_000_000 - 62_135_596_800;
@@ -974,11 +1084,11 @@ pub(super) fn member_status(member: &crate::social::GuildMemberModel) -> String 
     let days = (chrono::Local::now().naive_local()
         - last.with_timezone(&chrono::Local).naive_local())
     .num_days();
-    match days {
+    crate::native_i18n::tr(&match days {
         0 => "Today".into(),
         1 => "Yesterday".into(),
         n => format!("{n} days ago"),
-    }
+    })
 }
 
 pub(super) fn confirm_kick(

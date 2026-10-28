@@ -656,6 +656,10 @@ impl UserItemUidStore for FileUserItemUidAuthority {
                 issued_through,
                 generation: current.generation,
             })?;
+        // Monthly-card consumables use deterministic replay identities in a
+        // reserved range. Skip it at the durable authority so every issuer,
+        // including production and inventory, shares the same exclusion.
+        let next = crate::monthly_card::skip_monthly_card_reserved_unique_id(next);
         let next_generation =
             current
                 .generation

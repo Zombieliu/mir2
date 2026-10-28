@@ -4,7 +4,6 @@
 use std::collections::VecDeque;
 
 use axum::extract::ws::Message;
-use futures_util::SinkExt;
 use mir2_protocol::catalog_transport::{
     encode_catalog_batch, CatalogTransportError, MAX_CATALOG_DECODED_BYTES, MAX_CATALOG_ENVELOPES,
 };
@@ -112,14 +111,45 @@ pub(super) async fn send_session_packets(
     packets: &[ServerPacket],
     opted_in: bool,
 ) -> Result<(), String> {
-    for frame in SessionPacketFrames::new(packets, opted_in) {
-        sender
-            .lock()
+    if !opted_in || !is_bootstrap(packets) {
+        return super::packet_batch::send_responses(sender, packets)
             .await
-            .send(frame.map_err(|error| error.to_string())?)
-            .await
-            .map_err(|error| error.to_string())?;
+            .map(|_| ())
+            .map_err(|error| error.to_string());
     }
+    let mut batch = Vec::with_capacity(super::transport::MAX_BATCH_MESSAGES);
+    let mut batch_bytes = 0;
+    for frame in SessionPacketFrames::new(packets, opted_in) {
+        let frame = frame.map_err(|error| error.to_string())?;
+        let bytes = match &frame {
+            Message::Text(text) => text.len(),
+            Message::Binary(bytes) => bytes.len(),
+            _ => unreachable!("catalog frames contain only protocol text or binary"),
+        };
+        if !batch.is_empty()
+            && (batch.len() == super::transport::MAX_BATCH_MESSAGES
+                || batch_bytes + bytes > super::transport::MAX_BATCH_BYTES)
+        {
+            sender
+                .send_batch(std::mem::take(&mut batch))
+                .await
+                .map_err(|error| error.to_string())?;
+            batch_bytes = 0;
+        }
+        batch.push(frame);
+        batch_bytes += bytes;
+        if batch_bytes > super::transport::MAX_BATCH_BYTES {
+            sender
+                .send_batch(std::mem::take(&mut batch))
+                .await
+                .map_err(|error| error.to_string())?;
+            batch_bytes = 0;
+        }
+    }
+    sender
+        .send_batch(batch)
+        .await
+        .map_err(|error| error.to_string())?;
     Ok(())
 }
 
@@ -127,7 +157,7 @@ pub(super) async fn send_session_packets(
 mod tests {
     use super::*;
     use crate::web::{self, validate_native_client_capabilities};
-    use futures_util::StreamExt;
+    use futures_util::{SinkExt, StreamExt};
     use mir2_protocol::catalog_transport::{
         decode_catalog_batch, CATALOG_GZIP_CAPABILITY, MAX_CATALOG_WIRE_BYTES,
     };

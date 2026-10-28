@@ -139,9 +139,10 @@ pub fn compatible_storage_stack(source: &ItemModel, target: &ItemModel) -> bool 
         .zip(complete_live_template_index(target))
         .is_some_and(|(from_index, to_index)| {
             from_index == to_index
-                && target.tooltip_source.as_ref().is_some_and(|source| {
-                    target.quantity < u32::from(source.info.stack_size)
-                })
+                && target
+                    .tooltip_source
+                    .as_ref()
+                    .is_some_and(|source| target.quantity < u32::from(source.info.stack_size))
         })
 }
 
@@ -176,9 +177,9 @@ pub fn plan_bag_to_storage(
     if !unique_endpoints(source, target, Some(inventory), storage) {
         return None;
     }
-    if let Some(plan) = target.and_then(|target| {
-        merge_plan(source, target, StorageGrid::Inventory, StorageGrid::Storage)
-    }) {
+    if let Some(plan) = target
+        .and_then(|target| merge_plan(source, target, StorageGrid::Inventory, StorageGrid::Storage))
+    {
         return Some(plan);
     }
     let to = if target.is_none() {
@@ -207,9 +208,9 @@ pub fn plan_storage_to_bag(
     if !unique_endpoints(source, target, Some(inventory), storage) {
         return None;
     }
-    if let Some(plan) = target.and_then(|target| {
-        merge_plan(source, target, StorageGrid::Storage, StorageGrid::Inventory)
-    }) {
+    if let Some(plan) = target
+        .and_then(|target| merge_plan(source, target, StorageGrid::Storage, StorageGrid::Inventory))
+    {
         return Some(plan);
     }
     let to = if target.is_none() {
@@ -240,9 +241,9 @@ pub fn plan_storage_to_storage(
     if !unique_endpoints(source, target, None, storage) {
         return None;
     }
-    if let Some(plan) = target.and_then(|target| {
-        merge_plan(source, target, StorageGrid::Storage, StorageGrid::Storage)
-    }) {
+    if let Some(plan) = target
+        .and_then(|target| merge_plan(source, target, StorageGrid::Storage, StorageGrid::Storage))
+    {
         return Some(plan);
     }
     Some(StorageTransferPlan::Move {
@@ -306,11 +307,23 @@ mod tests {
     fn transfers_recheck_slot_identity_container_and_current_capacity() {
         let inventory = bag(vec![item(0, 2, 10, 1, 2)]);
         let storage = warehouse(vec![item(4, 3, 20, 1, 2)]);
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 99), 4), None);
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(3, 10), 4), None);
-        assert_eq!(plan_storage_to_bag(&inventory, &storage, selection(3, 99), 4), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 99), 4),
+            None
+        );
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(3, 10), 4),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_bag(&inventory, &storage, selection(3, 99), 4),
+            None
+        );
         assert_eq!(plan_storage_to_storage(&storage, selection(3, 99), 4), None);
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 80), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 80),
+            None
+        );
         assert_eq!(
             plan_storage_to_bag(
                 &inventory,
@@ -339,16 +352,32 @@ mod tests {
         storage.has_password = true;
         storage.unlocked = false;
         storage.size = 160;
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 4), None);
-        assert_eq!(plan_storage_to_bag(&inventory, &storage, selection(3, 20), 4), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 4),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_bag(&inventory, &storage, selection(3, 20), 4),
+            None
+        );
         assert_eq!(plan_storage_to_storage(&storage, selection(3, 20), 4), None);
         storage.unlocked = true;
-        assert_eq!(plan_storage_to_bag(&inventory, &storage, selection(80, 30), 4), None);
-        assert_eq!(plan_storage_to_storage(&storage, selection(3, 20), 80), None);
+        assert_eq!(
+            plan_storage_to_bag(&inventory, &storage, selection(80, 30), 4),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_storage(&storage, selection(3, 20), 80),
+            None
+        );
         storage.has_expanded = true;
         assert_eq!(
             plan_storage_to_bag(&inventory, &storage, selection(80, 30), 4),
-            Some(StorageTransferPlan::TakeBack { unique_id: 30, from: 80, to: 4 }),
+            Some(StorageTransferPlan::TakeBack {
+                unique_id: 30,
+                from: 80,
+                to: 4
+            }),
         );
     }
 
@@ -366,18 +395,38 @@ mod tests {
             }),
         );
         storage.items[0].quantity = 6; // The carrier still says five: reject this merge.
-        let fallback = Some(StorageTransferPlan::Store { unique_id: 10, from: 2, to: 0 });
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3), fallback);
+        let fallback = Some(StorageTransferPlan::Store {
+            unique_id: 10,
+            from: 2,
+            to: 0,
+        });
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3),
+            fallback
+        );
         storage.items[0] = item(4, 3, 20, 2, 5);
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3), fallback);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3),
+            fallback
+        );
         storage.items[0] = item(4, 3, 20, 1, 20);
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3), fallback);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3),
+            fallback
+        );
         storage.items[0] = item(4, 3, 20, 1, 5);
         storage.items[0]
-            .tooltip_source.as_mut().unwrap()
-            .user_item.as_mut().unwrap()
+            .tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
             .unique_id = 99;
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3), fallback);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 3),
+            fallback
+        );
     }
 
     #[test]
@@ -385,13 +434,19 @@ mod tests {
         let inventory = bag(vec![item(0, 2, 10, 1, 2)]);
         let mut storage = warehouse(vec![item(4, 0, 20, 2, 1), item(4, 1, 30, 1, 5)]);
         storage.size = 2;
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 0), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 0),
+            None
+        );
         assert!(matches!(
             plan_bag_to_storage(&inventory, &storage, selection(2, 10), 1),
             Some(StorageTransferPlan::Merge { id_to: 30, .. }),
         ));
         storage.items[1].tooltip_source = None;
-        assert_eq!(plan_bag_to_storage(&inventory, &storage, selection(2, 10), 1), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &storage, selection(2, 10), 1),
+            None
+        );
     }
 
     #[test]
@@ -400,11 +455,19 @@ mod tests {
         let storage = warehouse(vec![item(4, 3, 20, 1, 2)]);
         assert_eq!(
             plan_storage_to_bag(&inventory, &storage, selection(3, 20), 4),
-            Some(StorageTransferPlan::TakeBack { unique_id: 20, from: 3, to: 4 }),
+            Some(StorageTransferPlan::TakeBack {
+                unique_id: 20,
+                from: 3,
+                to: 4
+            }),
         );
         assert_eq!(
             plan_storage_to_bag(&inventory, &storage, selection(3, 20), 2),
-            Some(StorageTransferPlan::TakeBack { unique_id: 20, from: 3, to: 0 }),
+            Some(StorageTransferPlan::TakeBack {
+                unique_id: 20,
+                from: 3,
+                to: 0
+            }),
         );
         let same = bag(vec![item(0, 2, 10, 1, 2)]);
         assert_eq!(
@@ -424,7 +487,11 @@ mod tests {
         assert_eq!(plan_storage_to_storage(&storage, selection(3, 20), 3), None);
         assert_eq!(
             plan_storage_to_storage(&storage, selection(3, 20), 4),
-            Some(StorageTransferPlan::Move { unique_id: 20, from: 3, to: 4 }),
+            Some(StorageTransferPlan::Move {
+                unique_id: 20,
+                from: 3,
+                to: 4
+            }),
         );
         storage.items[1] = item(4, 4, 30, 1, 2);
         assert_eq!(
@@ -446,22 +513,33 @@ mod tests {
         let mut storage = warehouse(vec![item(4, 3, 20, 1, 2)]);
         storage.selected_storage_slot = Some(3);
         let selected = selection(3, 20);
-        let mut inventory = InventoryModel { capacity: 86, ..Default::default() };
+        let mut inventory = InventoryModel {
+            capacity: 86,
+            ..Default::default()
+        };
         let capacity = u32::from(inventory.bag_slot_capacity());
         assert_eq!(capacity, 80);
         inventory.items = (0..capacity - 1)
             .map(|slot| item(0, slot, u64::from(slot) + 100, 2, 1))
             .collect();
-        inventory.items.extend([item(0, 999, 999, 2, 1), item(0, 0, 1000, 2, 1)]);
+        inventory
+            .items
+            .extend([item(0, 999, 999, 2, 1), item(0, 0, 1000, 2, 1)]);
         assert!(storage_withdraw_enabled(&storage, &inventory));
-        assert!(storage_withdraw_enabled_for_selection(&storage, &inventory, selected));
+        assert!(storage_withdraw_enabled_for_selection(
+            &storage, &inventory, selected
+        ));
         assert_eq!(first_empty_bag_slot(&inventory), Some(capacity - 1));
         inventory.items.push(item(0, capacity - 1, 2000, 2, 1));
         assert!(!storage_withdraw_enabled(&storage, &inventory));
-        assert!(!storage_withdraw_enabled_for_selection(&storage, &inventory, selected));
+        assert!(!storage_withdraw_enabled_for_selection(
+            &storage, &inventory, selected
+        ));
         inventory.items.retain(|item| item.slot != capacity - 1);
         storage.items[0].unique_id = Some(21);
-        assert!(!storage_withdraw_enabled_for_selection(&storage, &inventory, selected));
+        assert!(!storage_withdraw_enabled_for_selection(
+            &storage, &inventory, selected
+        ));
     }
 
     #[test]
@@ -474,8 +552,15 @@ mod tests {
         let mut storage = warehouse(vec![item(4, 3, 20, 1, 2)]);
         storage.selected_storage_slot = Some(3);
         assert!(!storage_withdraw_enabled(&storage, &inventory));
-        assert!(!storage_withdraw_enabled_for_selection(&storage, &inventory, selection(3, 20)));
-        assert_eq!(plan_storage_to_bag(&inventory, &storage, selection(3, 20), 0), None);
+        assert!(!storage_withdraw_enabled_for_selection(
+            &storage,
+            &inventory,
+            selection(3, 20)
+        ));
+        assert_eq!(
+            plan_storage_to_bag(&inventory, &storage, selection(3, 20), 0),
+            None
+        );
     }
 
     #[test]
@@ -484,20 +569,44 @@ mod tests {
         let storage = warehouse(vec![item(4, 3, 20, 1, 2), item(4, 5, 50, 1, 2)]);
         let mut damaged_bag = inventory.clone();
         damaged_bag.items.push(item(0, 2, 99, 1, 2)); // Same source cell, another UID.
-        assert_eq!(plan_bag_to_storage(&damaged_bag, &storage, selection(2, 10), 5), None);
-        assert_eq!(plan_storage_to_bag(&damaged_bag, &storage, selection(3, 20), 2), None);
+        assert_eq!(
+            plan_bag_to_storage(&damaged_bag, &storage, selection(2, 10), 5),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_bag(&damaged_bag, &storage, selection(3, 20), 2),
+            None
+        );
 
         let mut damaged_storage = storage.clone();
         damaged_storage.items.push(item(4, 3, 99, 1, 2));
-        assert_eq!(plan_bag_to_storage(&inventory, &damaged_storage, selection(2, 10), 3), None);
-        assert_eq!(plan_storage_to_bag(&inventory, &damaged_storage, selection(3, 20), 4), None);
-        assert_eq!(plan_storage_to_storage(&damaged_storage, selection(3, 20), 5), None);
-        assert_eq!(plan_storage_to_storage(&damaged_storage, selection(5, 50), 3), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &damaged_storage, selection(2, 10), 3),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_bag(&inventory, &damaged_storage, selection(3, 20), 4),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_storage(&damaged_storage, selection(3, 20), 5),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_storage(&damaged_storage, selection(5, 50), 3),
+            None
+        );
 
         let mut duplicate_bag_uid = inventory.clone();
         duplicate_bag_uid.items.push(item(0, 8, 10, 1, 2));
-        assert_eq!(plan_bag_to_storage(&duplicate_bag_uid, &storage, selection(2, 10), 5), None);
-        assert_eq!(plan_storage_to_bag(&duplicate_bag_uid, &storage, selection(3, 20), 2), None);
+        assert_eq!(
+            plan_bag_to_storage(&duplicate_bag_uid, &storage, selection(2, 10), 5),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_bag(&duplicate_bag_uid, &storage, selection(3, 20), 2),
+            None
+        );
 
         let mut duplicate_storage_uid = storage.clone();
         duplicate_storage_uid.items.push(item(4, 8, 20, 1, 2));
@@ -509,13 +618,25 @@ mod tests {
             plan_storage_to_bag(&inventory, &duplicate_storage_uid, selection(3, 20), 4),
             None,
         );
-        assert_eq!(plan_storage_to_storage(&duplicate_storage_uid, selection(3, 20), 5), None);
-        assert_eq!(plan_storage_to_storage(&duplicate_storage_uid, selection(5, 50), 3), None);
+        assert_eq!(
+            plan_storage_to_storage(&duplicate_storage_uid, selection(3, 20), 5),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_storage(&duplicate_storage_uid, selection(5, 50), 3),
+            None
+        );
 
         let mut cross_grid_uid = storage.clone();
         cross_grid_uid.items.push(item(4, 8, 10, 1, 2));
-        assert_eq!(plan_bag_to_storage(&inventory, &cross_grid_uid, selection(2, 10), 5), None);
-        assert_eq!(plan_storage_to_bag(&inventory, &cross_grid_uid, selection(3, 20), 2), None);
+        assert_eq!(
+            plan_bag_to_storage(&inventory, &cross_grid_uid, selection(2, 10), 5),
+            None
+        );
+        assert_eq!(
+            plan_storage_to_bag(&inventory, &cross_grid_uid, selection(3, 20), 2),
+            None
+        );
 
         let mut mirrored_bag = inventory.clone();
         mirrored_bag.items.extend(storage.items.clone());
@@ -523,15 +644,27 @@ mod tests {
         mirrored_storage.items.extend(inventory.items.clone());
         assert!(matches!(
             plan_bag_to_storage(&mirrored_bag, &mirrored_storage, selection(2, 10), 3),
-            Some(StorageTransferPlan::Merge { id_from: 10, id_to: 20, .. }),
+            Some(StorageTransferPlan::Merge {
+                id_from: 10,
+                id_to: 20,
+                ..
+            }),
         ));
         assert!(matches!(
             plan_storage_to_bag(&mirrored_bag, &mirrored_storage, selection(3, 20), 2),
-            Some(StorageTransferPlan::Merge { id_from: 20, id_to: 10, .. }),
+            Some(StorageTransferPlan::Merge {
+                id_from: 20,
+                id_to: 10,
+                ..
+            }),
         ));
         assert!(matches!(
             plan_storage_to_storage(&mirrored_storage, selection(3, 20), 5),
-            Some(StorageTransferPlan::Merge { id_from: 20, id_to: 50, .. }),
+            Some(StorageTransferPlan::Merge {
+                id_from: 20,
+                id_to: 50,
+                ..
+            }),
         ));
     }
 }

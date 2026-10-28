@@ -44,12 +44,23 @@ fn started(config: &SimulationConfig) -> SimulationSession {
     s
 }
 fn items(s: &SimulationSession) -> Vec<Value> {
-    s.active_character_checkpoint()
-        .unwrap()
-        .inventory_items_json
+    let save = s.active_character_checkpoint().unwrap();
+    save.inventory_items_json
         .iter()
+        .chain(&save.belt_items_json)
         .map(|v| serde_json::from_str(v).unwrap())
         .collect()
+}
+fn crystal_inventory_slot(item: &Value) -> i32 {
+    let slot = item["slot"].as_i64().unwrap() as i32;
+    // Crystal PlayerObject.DepositRefineItem addresses Info.Inventory[]:
+    // six belt cells followed by the two forty-cell bag pages.
+    match item["container"].as_str().unwrap() {
+        "belt" => slot,
+        "bag1" => 6 + slot,
+        "bag2" => 46 + slot,
+        other => panic!("not a carried Crystal inventory cell: {other}"),
+    }
 }
 fn identity(mut v: Value) -> Value {
     v.as_object_mut().unwrap().remove("slot");
@@ -103,6 +114,17 @@ fn consign(s: &mut SimulationSession, uid: u64) -> u64 {
 }
 fn fill_bag(s: &mut SimulationSession, sample: &Value) {
     let mut save = s.active_character_checkpoint().unwrap();
+    // RefineCancel searches every original Inventory[] cell, including Belt.
+    // An empty belt would allow the real instance to return despite a full bag.
+    save.belt_items_json = (0..6)
+        .map(|slot| {
+            let mut item = sample.clone();
+            item["unique_id"] = json!(810_000 + slot);
+            item["slot"] = json!(slot);
+            item["container"] = json!("belt");
+            item.to_string()
+        })
+        .collect();
     save.inventory_items_json = (0..save.inventory_capacity - 6)
         .map(|slot| {
             let mut item = sample.clone();
@@ -123,10 +145,13 @@ fn full_bag_keeps_market_and_refine_custody_until_space_is_available() {
         let id = if market {
             consign(&mut s, 700_003)
         } else {
-            s.handle_packet(ClientPacket::DepositRefineItem {
-                from: before["slot"].as_i64().unwrap() as i32,
-                to: 2,
-            });
+            assert!(s
+                .handle_packet(ClientPacket::DepositRefineItem {
+                    from: crystal_inventory_slot(&before),
+                    to: 2,
+                })
+                .iter()
+                .any(|p| matches!(p, ServerPacket::DepositRefineItem { success: true, .. })));
             0
         };
         fill_bag(&mut s, &before);
@@ -282,13 +307,16 @@ fn demo_with_every_bag_item_in_custody_is_not_reseeded_on_login() {
     fixture_save
         .inventory_items_json
         .retain(|encoded| serde_json::from_str::<Value>(encoded).unwrap()["key"] == "dagger");
+    // This migration case starts with one carried asset. Remove the separate
+    // starter Belt fixtures before asserting that all carried cells are empty.
+    fixture_save.belt_items_json.clear();
     s.restore_active_character_checkpoint(&fixture_save)
         .unwrap();
     open_refine(&mut s);
     let item = items(&s).into_iter().next().unwrap();
     assert!(s
         .handle_packet(ClientPacket::DepositRefineItem {
-            from: item["slot"].as_i64().unwrap() as i32,
+            from: crystal_inventory_slot(&item),
             to: 0,
         })
         .iter()
@@ -349,7 +377,7 @@ fn refine_cancel_returns_only_what_fits_and_keeps_the_remaining_instance() {
     for (to, item) in [(0, &dagger), (1, &potion)] {
         assert!(s
             .handle_packet(ClientPacket::DepositRefineItem {
-                from: item["slot"].as_i64().unwrap() as i32,
+                from: crystal_inventory_slot(item),
                 to,
             })
             .iter()
@@ -416,7 +444,7 @@ fn refine_retrieve_and_cancel_preserve_equipment_after_save_reload() {
         let config = SimulationConfig::default();
         let mut s = started(&config);
         let before = fixture(&mut s, "dagger", 700_002);
-        let slot = before["slot"].as_i64().unwrap() as i32;
+        let slot = crystal_inventory_slot(&before);
         assert!(s
             .handle_packet(ClientPacket::DepositRefineItem { from: slot, to: 2 })
             .iter()

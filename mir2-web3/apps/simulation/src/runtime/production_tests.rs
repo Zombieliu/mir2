@@ -584,8 +584,13 @@ fn production_overweight_rejects_whole_batch_before_global_uid_issuance() {
 #[test]
 fn production_double_session_cas_and_original_request_recovery() {
     let mut f = Fixture::new("cas");
-    let mut stale = login(f.config.clone());
-    stale.configure_personal_production(f.cfg.clone()).unwrap();
+    // StartGame may durably checkpoint enter-map/NPC state. Keep that newest
+    // owner as the writer, and retain the original session as the stale actor.
+    let fresh = login(f.config.clone());
+    let mut stale = std::mem::replace(&mut f.session, fresh);
+    f.session
+        .configure_personal_production(f.cfg.clone())
+        .unwrap();
     let receipt = f.execute(f.start.clone(), 1000).unwrap().receipt;
     assert!(
         stale

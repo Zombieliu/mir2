@@ -1,0 +1,11 @@
+{
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T19:33:58.3004542+00:00",
+  "complete": true,
+  "success": true,
+  "pid": 51760,
+  "phase": "complete",
+  "gameStarted": false,
+  "finishedUtc": "2026-10-01T19:40:00.5296883+00:00"
+}

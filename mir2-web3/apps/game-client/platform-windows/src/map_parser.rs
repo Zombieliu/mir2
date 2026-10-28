@@ -175,10 +175,16 @@ impl ParsedMap {
 
     /// Reuse the manifest lookup across a full-map route search. The raw map
     /// stays immutable; only an ordinary player entrance can exempt its cell.
-    pub(crate) fn player_movement_collision(&self, map_file_name: &str) -> PlayerMovementCollision<'_> {
-        let entrances = map_cache_key(map_file_name)
-            .and_then(|key| ordinary_player_entrances().get(&key));
-        PlayerMovementCollision { map: self, entrances }
+    pub(crate) fn player_movement_collision(
+        &self,
+        map_file_name: &str,
+    ) -> PlayerMovementCollision<'_> {
+        let entrances =
+            map_cache_key(map_file_name).and_then(|key| ordinary_player_entrances().get(&key));
+        PlayerMovementCollision {
+            map: self,
+            entrances,
+        }
     }
 }
 
@@ -223,30 +229,47 @@ impl PlayerMovementCollision<'_> {
         if x < 0 || y < 0 || x >= i32::from(self.map.width) || y >= i32::from(self.map.height) {
             return true;
         }
-        !self.entrances
+        !self
+            .entrances
             .and_then(|entrances| entrances.get(&(x, y)))
-            .is_some_and(|destinations| destinations.iter().any(OrdinaryEntranceDestination::has_valid_landing))
+            .is_some_and(|destinations| {
+                destinations
+                    .iter()
+                    .any(OrdinaryEntranceDestination::has_valid_landing)
+            })
     }
 }
 
 fn build_ordinary_player_entrances(
     maps: &[mir2_game_data::CrystalRespawnMap],
 ) -> HashMap<String, OrdinaryEntranceCells> {
-    let by_index = maps.iter().map(|map| (map.map_index, map)).collect::<HashMap<_, _>>();
+    let by_index = maps
+        .iter()
+        .map(|map| (map.map_index, map))
+        .collect::<HashMap<_, _>>();
     let mut result = HashMap::<String, OrdinaryEntranceCells>::new();
     for map in maps {
-        let Some(source_key) = map_cache_key(&map.map_file_name) else { continue; };
+        let Some(source_key) = map_cache_key(&map.map_file_name) else {
+            continue;
+        };
         for movement in &map.movements {
             // Mirror valid direct server movements, while refusing conditional
             // conquest edges because the client has no authority to grant them.
-            if movement.need_hole || movement.need_move || movement.conquest_index != 0
+            if movement.need_hole
+                || movement.need_move
+                || movement.conquest_index != 0
                 || (movement.destination.x == 0 && movement.destination.y == 0)
             {
                 continue;
             }
-            let Some(target) = by_index.get(&movement.map_index) else { continue; };
-            result.entry(source_key.clone()).or_default()
-                .entry((movement.source.x, movement.source.y)).or_default()
+            let Some(target) = by_index.get(&movement.map_index) else {
+                continue;
+            };
+            result
+                .entry(source_key.clone())
+                .or_default()
+                .entry((movement.source.x, movement.source.y))
+                .or_default()
                 .push(OrdinaryEntranceDestination {
                     map_file_name: target.map_file_name.clone(),
                     x: movement.destination.x,
@@ -260,7 +283,9 @@ fn build_ordinary_player_entrances(
 
 fn ordinary_player_entrances() -> &'static HashMap<String, OrdinaryEntranceCells> {
     static ENTRANCES: OnceLock<HashMap<String, OrdinaryEntranceCells>> = OnceLock::new();
-    ENTRANCES.get_or_init(|| build_ordinary_player_entrances(&mir2_game_data::crystal_respawn_manifest_ref().maps))
+    ENTRANCES.get_or_init(|| {
+        build_ordinary_player_entrances(&mir2_game_data::crystal_respawn_manifest_ref().maps)
+    })
 }
 
 fn parsed_map_cache() -> &'static Mutex<ParsedMapCache> {
@@ -1571,7 +1596,10 @@ pub fn map_cell_blocks_movement(map_file_name: &str, x: i32, y: i32) -> Option<b
 /// landing cells remain blocked. This never returns a teleport instruction.
 pub fn map_cell_blocks_player_movement(map_file_name: &str, x: i32, y: i32) -> Option<bool> {
     let map = load_map(map_file_name)?;
-    Some(map.player_movement_collision(map_file_name).cell_blocks_movement(x, y))
+    Some(
+        map.player_movement_collision(map_file_name)
+            .cell_blocks_movement(x, y),
+    )
 }
 
 /// Validate and normalize the map cache key before touching the filesystem.
@@ -2631,16 +2659,25 @@ mod tests {
     fn mir3_small_objects_use_standalone_source_images() {
         for index in [210, 225, 240, 255, 270, 310, 325, 340, 355, 370] {
             let library = library_key_for_index(index);
-            assert!(map_path_requires_alpha_key(&build_original_map_frame_path(&library, 2766)));
+            assert!(map_path_requires_alpha_key(&build_original_map_frame_path(
+                &library, 2766
+            )));
         }
         for name in ["smobjectsbad", "smobjectsc2", "smobjectscwoods"] {
             assert!(!map_library_segment_requires_alpha_key(name));
         }
-        let map = ParsedMap { width: 1, height: 1, cells: vec![middle_cell(255, 2766)] };
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![middle_cell(255, 2766)],
+        };
         let key = atlas_rect_key("WemadeMir3/Snow/SmObjectsc", 2766);
         let atlas = atlas_index_for(&key, 48, 32);
-        let standalone = standalone_index_for(&key, "/generated/native-map-keyed/pages/snow.png", 48, 32);
-        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone)).unwrap();
+        let standalone =
+            standalone_index_for(&key, "/generated/native-map-keyed/pages/snow.png", 48, 32);
+        let state =
+            build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone))
+                .unwrap();
         assert_eq!(state["tiles"].as_array().unwrap().len(), 0);
         assert_eq!(state["standaloneTiles"].as_array().unwrap().len(), 1);
     }

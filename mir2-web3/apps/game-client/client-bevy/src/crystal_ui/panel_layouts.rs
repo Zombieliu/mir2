@@ -228,6 +228,24 @@ pub const INVENTORY_PANEL_SIZE: Size = Size {
 /// `MirControl.Location`, whose source default is `(0,0)`. Service/trade
 /// dialogs may move it later; the direct I/F9/HUD path starts here.
 pub const INVENTORY_PANEL_ORIGIN: Point = Point { x: 0, y: 0 };
+/// NPCDialog.Show places the bag to the right of its 440px frame. NPCGoods
+/// arrives independently on native clients, so its own open transition must
+/// also provide this placement when the dialogue has not opened first.
+pub const NPC_SERVICE_INVENTORY_ORIGIN: Point = Point { x: 445, y: 0 };
+pub const NPC_DIALOG_PANEL_SIZE: Size = Size {
+    width: 440,
+    height: 224,
+};
+pub const NPC_GOODS_PANEL_ORIGIN: Point = Point { x: 0, y: 224 };
+pub const NPC_GOODS_PANEL_SIZE: Size = Size {
+    width: 244,
+    height: 334,
+};
+pub const NPC_DROP_PANEL_ORIGIN: Point = Point { x: 264, y: 224 };
+pub const NPC_DROP_PANEL_SIZE: Size = Size {
+    width: 176,
+    height: 147,
+};
 pub const INVENTORY_PAGE_COLUMNS: usize = 8;
 pub const INVENTORY_PAGE_ROWS: usize = 5;
 pub const INVENTORY_PAGE_SIZE: usize = INVENTORY_PAGE_COLUMNS * INVENTORY_PAGE_ROWS;

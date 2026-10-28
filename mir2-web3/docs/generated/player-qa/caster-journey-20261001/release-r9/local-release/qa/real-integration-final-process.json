@@ -1,0 +1,72 @@
+{
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T17:37:49.114650+00:00",
+  "pid": 46692,
+  "complete": true,
+  "success": true,
+  "testsStarted": true,
+  "publicPublished": false,
+  "phase": "complete",
+  "fixtureConfigSha256": "0AD06A7A87B585640DAB5A776C68042633B37790533D20E6BFB976768CC23728",
+  "helperSha256": "ADAE1F93370619B19423274004C66FB45800CFA09080A9453294CD1BF8C038A3",
+  "newPackage": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+  "oldPackage": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\dist\\r8",
+  "output": "C:\\mir2-updater-qa\\real-r8-r9-final-v1",
+  "feedSequence": 5,
+  "changedPayloadFiles": 6,
+  "changedPayloadBytes": 110649368,
+  "testExeSha256": "A11D5CD4029AE15B7A5A5FB4F972FDBCBE1ABFA89EE42F048A45097EA25303F4",
+  "testExitCode": 0,
+  "tests": [
+    {
+      "name": "real_package_delta_preserves_personal_files_and_first_launch_rollback",
+      "passed": true
+    },
+    {
+      "name": "real_r6_metadata_matches_native_cms_key_pin_and_rejects_tampering",
+      "passed": true
+    }
+  ],
+  "rollbackPreservedFiles": {
+    "game/logs/player.log": {
+      "bytes": 16,
+      "sha256": "7DFDC5CA23B808CDE451AA9FAA3C410AEB0F6DECDABF5C487D6B20078FFFDA88"
+    },
+    "game/personal-file.txt": {
+      "bytes": 13,
+      "sha256": "0802C68F625C4272A23DFCA374CAEA37C1C89E80FE7649D92B1E678F9FF4794C"
+    }
+  },
+  "gameLaunched": false,
+  "realTestReportSha256": "8F532DEE245745282B68914EC3537418F20A2C03F52646574F2A0693C99D7422",
+  "report": {
+    "allNewPayloadHashesVerified": true,
+    "engineRollbackVerified": true,
+    "engineUpdated": true,
+    "failedReleaseQuarantined": true,
+    "gameLaunched": false,
+    "passed": true,
+    "pendingFirstLaunchRetained": true,
+    "requests": [
+      "releases/game-WN-CANDIDATE-20261001-invited-09/BUILD-ATTESTATION.json",
+      "releases/game-WN-CANDIDATE-20261001-invited-09/KNOWN-ISSUES.md",
+      "releases/game-WN-CANDIDATE-20261001-invited-09/MULTILINGUAL-SOURCES.json",
+      "releases/game-WN-CANDIDATE-20261001-invited-09/NotoSansTC-OFL.txt",
+      "releases/game-WN-CANDIDATE-20261001-invited-09/README-START.txt",
+      "releases/game-WN-CANDIDATE-20261001-invited-09/mir2-platform-windows.exe",
+      "releases/updater-00A898666E57DC04-s5/Mir2Updater.exe"
+    ],
+    "result": {
+      "activated": true,
+      "candidate": "WN-CANDIDATE-20261001-invited-09",
+      "changedGameFiles": 6,
+      "downloadedBytes": 112374808,
+      "downloadedFiles": 7,
+      "sequence": 5
+    },
+    "rollback": "WN-CANDIDATE-20261001-invited-08",
+    "unchangedPayloadFiles": 123025
+  },
+  "finishedUtc": "2026-10-01T18:20:59.253019+00:00"
+}

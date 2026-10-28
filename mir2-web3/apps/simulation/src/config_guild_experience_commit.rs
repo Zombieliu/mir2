@@ -7,8 +7,13 @@ impl AccountStoreMutationPlan {
     /// Even a no-Guild/legacy kill publishes its source receipt atomically.
     /// Losing that account-only COMMIT response must never invite a replay.
     pub(in crate::config) fn carries_guild_experience_source(&self) -> bool {
-        self.accounts.values().any(|account| account.saves.values().any(|save|
-            save.desired_save.as_ref().is_some_and(|save| !save.guild_experience_journal.is_empty())))
+        self.accounts.values().any(|account| {
+            account.saves.values().any(|save| {
+                save.desired_save
+                    .as_ref()
+                    .is_some_and(|save| !save.guild_experience_journal.is_empty())
+            })
+        })
     }
     pub(in crate::config) fn fence_compensation(
         &mut self,
@@ -16,6 +21,10 @@ impl AccountStoreMutationPlan {
         committed: &AccountStore,
     ) {
         self.force_source_cas = true;
+        for (index, mutation) in &mut self.conquests {
+            mutation.expected_version = receipt.conquest_versions.get(index).copied();
+            mutation.original = committed.shared_conquests.get(index).cloned();
+        }
         for (id, mutation) in &mut self.guilds {
             mutation.expected_version = receipt.guild_versions.get(id).copied();
         }

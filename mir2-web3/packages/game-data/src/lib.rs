@@ -1,18 +1,22 @@
-use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point};
+use mir2_protocol::{MapInformation, MirClass, MirDirection, MirGender, Point, Spell};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
-mod crystal_guild_settings;
 mod crystal_creature_settings;
+mod crystal_guild_settings;
 mod crystal_hero_settings;
 mod crystal_npc_goods;
-pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_json};
-pub use crystal_hero_settings::{crystal_hero_settings, calculate_crystal_hero_base_stat, CrystalHeroSettings, CrystalHeroSource, CrystalHeroRules};
 pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
+pub use crystal_hero_settings::{
+    calculate_crystal_hero_base_stat, crystal_hero_settings, CrystalHeroRules, CrystalHeroSettings,
+    CrystalHeroSource,
+};
+pub use crystal_npc_goods::{crystal_npc_goods_item_json, crystal_npc_goods_list_json};
 #[cfg(test)]
 mod crystal_item_image;
 pub mod crystal_map_events;
+pub mod periodic_quests;
 pub use crystal_guild_settings::{
     crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
     CrystalGuildSettings,
@@ -30,6 +34,9 @@ pub struct ContentProfile {
     pub rate_policy: ContentRatePolicy,
     pub experience_curve: Vec<ExperienceLevel>,
     pub map_whitelist: Vec<ContentMapRule>,
+    /// Exact original rooms shipped as assets, never runtime map admission.
+    #[serde(default)]
+    pub native_resource_only_maps: Vec<String>,
     pub monster_whitelist: Vec<String>,
     pub boss_monsters: Vec<String>,
     pub boss_respawn_jitter_minutes: u16,
@@ -171,6 +178,10 @@ pub struct ContentProfileBundleFile {
 #[serde(rename_all = "camelCase")]
 pub struct ContentProfileBundleSummary {
     pub maps: usize,
+    #[serde(default)]
+    pub native_resource_only_maps: usize,
+    #[serde(default)]
+    pub native_maps: usize,
     pub monsters: usize,
     pub items: usize,
     pub skills: usize,
@@ -203,6 +214,37 @@ pub fn platinum_176_profile_bundle() -> ContentProfileBundle {
                 (bundle.profile_id.as_str(), bundle.profile_version),
                 (profile.profile_id.as_str(), profile.version),
                 "platinum_176 bundle must describe the compiled content profile"
+            );
+            bundle
+        })
+        .clone()
+}
+
+pub fn platinum_fiveclass_profile() -> ContentProfile {
+    static PROFILE: OnceLock<ContentProfile> = OnceLock::new();
+    PROFILE
+        .get_or_init(|| {
+            serde_json::from_str(include_str!(
+                "../data/content_profiles/platinum_fiveclass.json"
+            ))
+            .expect("platinum_fiveclass content profile json should be valid")
+        })
+        .clone()
+}
+
+pub fn platinum_fiveclass_profile_bundle() -> ContentProfileBundle {
+    static BUNDLE: OnceLock<ContentProfileBundle> = OnceLock::new();
+    BUNDLE
+        .get_or_init(|| {
+            let bundle: ContentProfileBundle = serde_json::from_str(include_str!(
+                "../data/generated/platinum_fiveclass_bundle.json"
+            ))
+            .expect("platinum_fiveclass content profile bundle json should be valid");
+            let profile = platinum_fiveclass_profile();
+            assert_eq!(
+                (bundle.profile_id.as_str(), bundle.profile_version),
+                (profile.profile_id.as_str(), profile.version),
+                "platinum_fiveclass bundle must describe the compiled content profile"
             );
             bundle
         })
@@ -280,6 +322,83 @@ pub fn content_profile_respawn_overrides_for_map(
         .collect()
 }
 
+fn validate_native_resource_only_maps(
+    profile: &ContentProfile,
+    manifest: &CrystalRespawnManifest,
+    errors: &mut Vec<String>,
+) {
+    validate_unique_strings(
+        "nativeResourceOnlyMaps",
+        profile.native_resource_only_maps.iter().map(String::as_str),
+        errors,
+    );
+    for name in &profile.native_resource_only_maps {
+        if name != "D71653"
+            || !matches!(
+                profile.profile_id.as_str(),
+                "platinum_176" | "platinum_fiveclass"
+            )
+        {
+            errors.push(format!(
+                "nativeResourceOnlyMaps has no named original-room policy for {name}"
+            ));
+            continue;
+        }
+        if profile
+            .map_whitelist
+            .iter()
+            .any(|map| map.file_name.eq_ignore_ascii_case(name))
+        {
+            errors.push(format!(
+                "nativeResourceOnlyMaps room {name} must not be runtime-admitted"
+            ));
+        }
+        let rooms = manifest
+            .maps
+            .iter()
+            .filter(|map| map.map_file_name == *name)
+            .collect::<Vec<_>>();
+        let source_matches = rooms.len() == 1 && {
+            let room = rooms[0];
+            room.map_index == 235
+                && room.map_title == "TacticalMaze"
+                && room.mini_map == 0
+                && room.big_map == 0
+                && room.respawn_count == 0
+                && room.respawns.is_empty()
+                && room.safe_zones.is_empty()
+                && room.movement_count == 1
+                && room.movements.len() == 1
+                && room.movements[0]
+                    == CrystalMovementTemplate {
+                        map_index: 209,
+                        source: Point { x: 17, y: 12 },
+                        destination: Point { x: 36, y: 34 },
+                        need_hole: false,
+                        need_move: false,
+                        conquest_index: 0,
+                        show_on_big_map: false,
+                        icon: 0,
+                    }
+                && !manifest.maps.iter().any(|map| {
+                    map.movements
+                        .iter()
+                        .any(|movement| movement.map_index == 235)
+                })
+                && !serde_json::to_string(&crystal_npc_manifest())
+                    .expect("imported NPC manifest serializes")
+                    .to_ascii_lowercase()
+                    .contains("d71653")
+                && !include_str!("../data/generated/crystal_map_event_manifest.json")
+                    .to_ascii_lowercase()
+                    .contains("d71653")
+        };
+        if !source_matches {
+            errors.push(format!("nativeResourceOnlyMaps room {name} no longer matches its original no-entry source proof"));
+        }
+    }
+}
+
 pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<String>> {
     let mut errors = Vec::new();
 
@@ -346,12 +465,22 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
         ));
     }
 
-    let expected_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist];
+    let classic_classes = [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist];
+    let five_classes = [
+        MirClass::Warrior,
+        MirClass::Wizard,
+        MirClass::Taoist,
+        MirClass::Assassin,
+        MirClass::Archer,
+    ];
+    let expected_classes: &[MirClass] = if profile.profile_id == "platinum_fiveclass" {
+        &five_classes
+    } else {
+        &classic_classes
+    };
     if profile.allowed_classes.as_slice() != expected_classes {
-        errors.push(
-            "allowedClasses must contain exactly Warrior, Wizard, Taoist in canonical order"
-                .to_string(),
-        );
+        errors
+            .push("allowedClasses must match the selected profile in canonical order".to_string());
     }
 
     let mut expected_level = 1_u16;
@@ -466,6 +595,7 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     );
 
     let crystal_map_manifest = crystal_respawn_manifest();
+    validate_native_resource_only_maps(profile, &crystal_map_manifest, &mut errors);
     let crystal_maps: BTreeSet<_> = crystal_map_manifest
         .maps
         .iter()
@@ -835,7 +965,7 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     for skill in &profile.skills {
         if !expected_classes.contains(&skill.class) {
             errors.push(format!(
-                "skill {} references a class outside platinum_176",
+                "skill {} references a class outside the selected profile",
                 skill.spell
             ));
         }
@@ -851,7 +981,22 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
                 skill.spell
             ));
         }
-        if !profile.item_whitelist.contains(&skill.spell) {
+        if !profile.item_whitelist.iter().any(|name| {
+            let Some(book) = crystal_item_by_name(name) else {
+                return false;
+            };
+            let class_flag = match skill.class {
+                MirClass::Warrior => 1,
+                MirClass::Wizard => 2,
+                MirClass::Taoist => 4,
+                MirClass::Assassin => 8,
+                MirClass::Archer => 16,
+            };
+            book.required_class & class_flag != 0
+                && book.required_type == 0
+                && u16::from(book.required_amount) == skill.required_level
+                && crystal_magic_for_book(&book).is_some_and(|magic| magic.spell == skill.spell)
+        }) {
             errors.push(format!(
                 "skill {} has no matching book in itemWhitelist",
                 skill.spell
@@ -1990,6 +2135,16 @@ pub struct CrystalRespawnMap {
     pub map_file_name: String,
     pub map_title: String,
     #[serde(default)]
+    pub fight: bool,
+    #[serde(default)]
+    pub no_fight: bool,
+    #[serde(default)]
+    pub no_experience: bool,
+    #[serde(default)]
+    pub no_group: bool,
+    #[serde(default)]
+    pub no_pets: bool,
+    #[serde(default)]
     pub mini_map: u16,
     #[serde(default)]
     pub big_map: u16,
@@ -2756,6 +2911,20 @@ pub fn crystal_magic_by_spell(spell: &str) -> Option<CrystalMagicTemplate> {
         .cloned()
 }
 
+/// Crystal stores a skill book's authoritative spell ID in Shape. Display
+/// names include historical typos (CresentSlash, CatTognue, StoneTrap).
+pub fn crystal_magic_for_book(book: &CrystalItemTemplate) -> Option<CrystalMagicTemplate> {
+    if book.item_type != 20 {
+        return None;
+    }
+    let spell = Spell::try_from(u8::try_from(book.shape).ok()?).ok()?;
+    crystal_magic_manifest_ref()
+        .magics
+        .iter()
+        .find(|magic| Spell::from_crystal_name(&magic.spell) == Some(spell))
+        .cloned()
+}
+
 pub fn crystal_buff_by_type(buff_type: &str) -> Option<CrystalBuffTemplate> {
     crystal_buff_manifest_ref()
         .buffs
@@ -2780,6 +2949,9 @@ pub fn crystal_drop_table_for_monster_name(monster_name: &str) -> Option<Crystal
 }
 
 pub fn crystal_item_by_name(name: &str) -> Option<CrystalItemTemplate> {
+    if name.eq_ignore_ascii_case(BILLING_MONTHLY_CARD_ITEM_NAME) {
+        return Some(billing_monthly_card_item_template());
+    }
     crystal_item_manifest_ref()
         .items
         .iter()
@@ -2788,11 +2960,59 @@ pub fn crystal_item_by_name(name: &str) -> Option<CrystalItemTemplate> {
 }
 
 pub fn crystal_item_by_index(item_index: i32) -> Option<CrystalItemTemplate> {
+    if item_index == BILLING_MONTHLY_CARD_ITEM_INDEX {
+        return Some(billing_monthly_card_item_template());
+    }
     crystal_item_manifest_ref()
         .items
         .iter()
         .find(|item| item.item_index == item_index)
         .cloned()
+}
+
+/// Application-owned catalogue row. The imported Crystal manifests stay exact.
+pub const BILLING_MONTHLY_CARD_ITEM_INDEX: i32 = 1_000_001;
+pub const BILLING_MONTHLY_CARD_GAME_SHOP_INDEX: i32 = 1_000_001;
+pub const BILLING_MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
+
+pub fn billing_monthly_card_item_template() -> CrystalItemTemplate {
+    CrystalItemTemplate {
+        item_index: BILLING_MONTHLY_CARD_ITEM_INDEX,
+        name: BILLING_MONTHLY_CARD_ITEM_NAME.into(),
+        item_type: 17,
+        grade: 0,
+        required_type: 0,
+        required_class: 31,
+        required_gender: 3,
+        item_set: 0,
+        shape: 1000,
+        weight: 1,
+        light: 0,
+        required_amount: 0,
+        image: 1813,
+        durability: 0,
+        stack_size: 1,
+        price: 0,
+        start_item: false,
+        effect: 0,
+        need_identify: false,
+        show_group_pickup: false,
+        class_based: false,
+        level_based: false,
+        can_mine: false,
+        global_drop_notify: false,
+        // DontDeathdrop/Drop/Sell/Store/Trade/Repair/Upgrade, UnableToRent/Disassemble,
+        // NoMail and NoHero keep the issued unit in its owner's custody.
+        bind: (0x0001u16 | 0x0002 | 0x0004 | 0x0008 | 0x0010 | 0x0020 | 0x0040
+            | 0x1000 | 0x2000 | 0x4000 | 0x8000) as i16,
+        unique: 0,
+        random_stats_id: 0,
+        can_fast_run: false,
+        can_awakening: false,
+        slots: 0,
+        stats: Vec::new(),
+        tooltip: Some("Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.".into()),
+    }
 }
 
 /// Exact data-selection port of Crystal `Functions.GetRealItem`.
@@ -3505,7 +3725,7 @@ mod tests {
         let profile = platinum_176_profile();
 
         assert_eq!(profile.profile_id, "platinum_176");
-        assert_eq!(profile.version, 26);
+        assert_eq!(profile.version, 27);
         assert_eq!(
             profile.allowed_classes,
             [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]
@@ -3758,6 +3978,14 @@ mod tests {
             .all(|byte| byte.is_ascii_hexdigit()));
         assert_eq!(bundle.source_data.crystal_database_version, 117);
         assert_eq!(bundle.summary.maps, profile.map_whitelist.len());
+        assert_eq!(
+            bundle.summary.native_resource_only_maps,
+            profile.native_resource_only_maps.len()
+        );
+        assert_eq!(
+            bundle.summary.native_maps,
+            profile.map_whitelist.len() + profile.native_resource_only_maps.len()
+        );
         assert_eq!(bundle.summary.monsters, profile.monster_whitelist.len());
         assert_eq!(bundle.summary.items, profile.item_whitelist.len());
         assert_eq!(bundle.summary.skills, profile.skills.len());
@@ -3774,7 +4002,12 @@ mod tests {
             bundle.summary.quest_reward_overrides,
             profile.quest_reward_overrides.len()
         );
-        assert_eq!(bundle.files.len(), 13);
+        assert_eq!(bundle.files.len(), 14);
+        assert!(bundle
+            .files
+            .iter()
+            .any(|file| file.path
+                == "packages/game-data/data/generated/crystal_mining_manifest.json"));
     }
 
     #[test]
@@ -4820,3 +5053,10 @@ mod tests {
         }));
     }
 }
+mod crystal_mining;
+#[cfg(test)]
+mod fiveclass_tests;
+pub use crystal_mining::{
+    crystal_mine_set, crystal_mining_item, crystal_mining_manifest, crystal_mining_map,
+    CrystalMineDrop, CrystalMineSet, CrystalMineZone, CrystalMiningManifest, CrystalMiningMap,
+};

@@ -173,6 +173,8 @@ fn postgres_deleted_account_cannot_be_recreated_by_stale_save() {
         guild_clock: None,
         source_guild_clock_version: None,
         source_guild_versions: BTreeMap::new(),
+        shared_conquests: BTreeMap::new(),
+        source_conquest_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -224,6 +226,8 @@ fn authoritative_test_store(accounts: BTreeMap<String, AccountRecord>) -> Accoun
         guild_clock: None,
         source_guild_clock_version: None,
         source_guild_versions: BTreeMap::new(),
+        shared_conquests: BTreeMap::new(),
+        source_conquest_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -380,7 +384,15 @@ fn development_file_fixture_still_supplies_demo_account() {
         config.account_store_database_mode,
         AccountStoreDatabaseMode::Mirror
     );
-    assert_eq!(config.account_store_path.as_deref(), Some(std::fs::canonicalize(path.parent().unwrap()).unwrap().join(path.file_name().unwrap()).as_path()));
+    assert_eq!(
+        config.account_store_path.as_deref(),
+        Some(
+            std::fs::canonicalize(path.parent().unwrap())
+                .unwrap()
+                .join(path.file_name().unwrap())
+                .as_path()
+        )
+    );
 }
 fn source_of_truth_test_config(accounts: BTreeMap<String, AccountRecord>) -> SimulationConfig {
     source_of_truth_test_config_with_store(authoritative_test_store(accounts))
@@ -880,6 +892,7 @@ fn alpha_repository_probe_outcome(
         clock: None,
         stones: None,
         guild_versions: BTreeMap::new(),
+        conquest_versions: BTreeMap::new(),
         heroes: Default::default(),
         account_versions: BTreeMap::from([("alpha".to_string(), account_version)]),
         save_versions: BTreeMap::from([("alpha".to_string(), BTreeMap::from([(1, save_version)]))]),

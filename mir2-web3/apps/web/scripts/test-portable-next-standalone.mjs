@@ -1208,7 +1208,7 @@ function finiteCatalog77() {
     assert.match(rustFunction76(inventorySource, "concrete_item_image_index"), /source\.user_item_image\(count\)/);
     assert.match(rustFunction76(shopSource, "user_item_image_index"), /concrete_item_image_index\(\s*self\.icon,\s*u32::from\(self\.count\),\s*self\.tooltip_source\.as_ref\(\)/);
     const hostPaths = rustFunction76(shopHost, "catalog_icon_paths");
-    assert.match(hostPaths, /good\.user_item_image_index\(\)/);
+    assert.match(hostPaths, /good\s*\.user_item_image_index\(\)/);
     assert.match(hostPaths, /format!\("original-ui\/Items\/\{index\}\.png"\)/);
     const { npcs } = JSON.parse(npcRaw), { scripts } = JSON.parse(scriptRaw), { items } = JSON.parse(itemRaw);
     const rule = concreteImageRule77(imageSource);

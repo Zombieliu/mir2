@@ -43,6 +43,18 @@ fn prepare_first(first: &mut GatewaySession) -> Vec<ServerPacket> {
     packets
 }
 
+fn fill_receiver_bag_with_catalog_items(receiver: &mut GatewaySession) {
+    let template = mir2_game_data::crystal_item_by_name("DemonLeather").unwrap();
+    let key = format!("crystal-item-{}", template.item_index);
+    for _ in 0..100 {
+        if receiver.world_snapshot().free_bag_slots == 0 {
+            return;
+        }
+        receiver.stage5_command("qa.giveItem", vec![key.clone()]);
+    }
+    assert_eq!(receiver.world_snapshot().free_bag_slots, 0);
+}
+
 #[test]
 fn each_party_completes_once_only_after_its_committed_delivery() {
     let (mut first, mut second) = started_shared_zone_sessions();
@@ -133,7 +145,7 @@ fn cancellation_refunds_waiting_offer_once_without_any_completion() {
 #[test]
 fn receiver_capacity_rejection_refunds_both_sides_without_completion() {
     let (mut first, mut second) = started_shared_zone_sessions();
-    fill_gateway_bag(&mut second);
+    fill_receiver_bag_with_catalog_items(&mut second);
     let first_gold = first.world_snapshot().gold;
     let second_gold = second.world_snapshot().gold;
     let total_items = inventory_totals(&first, &second);

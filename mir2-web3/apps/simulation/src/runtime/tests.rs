@@ -1403,6 +1403,35 @@ fn set_current_player_mp(session: &mut SimulationSession, mp: i32) {
         .mp = mp;
 }
 
+// Seeded summon-behaviour fixtures use a level-three skill. Prepare its
+// canonical mana for the requested casts rather than relying on Scout's
+// 35-MP starter pool (SummonShinsu level three costs 40).
+fn prepare_shinsu_cast_mana(session: &mut SimulationSession, casts: i32) -> i32 {
+    let (_, _, cost, _) = session
+        .zone_magic_attack_profile(Spell::SummonShinsu)
+        .expect("seeded Shinsu skill has canonical mana");
+    let required = cost * casts;
+    let player = player_entity(session.app.world()).expect("player entity");
+    let current = *session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals");
+    let prepared = PlayerVitals {
+        mp: required,
+        max_mp: current.max_mp.max(required),
+        ..current
+    };
+    session.app.world_mut().entity_mut(player).insert(prepared);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .player_vitals = prepared;
+    cost
+}
+
 /// Register an account directly in the store, seeded with the default character
 /// at index 0 and password "demo". Login no longer auto-creates accounts, so
 /// persistence tests that previously relied on login-as-register must register
@@ -4129,26 +4158,27 @@ fn npc_dialog_target_npc_without_script_rejects_without_runtime_chat_and_dismiss
     let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    session
-        .app
-        .world_mut()
-        .resource_mut::<NpcStateResource>()
-        .active_npc_dialog = Some(super::ActiveNpcDialogState {
-        npc_object_id: 4999,
-        npc_name: "Quiet Trader".to_string(),
-        npc_name_key: None,
-        stage: None,
-        current: 0,
-        required: 0,
-        title: "Quiet Trader".to_string(),
-        body: vec!["Quiet Trader".to_string()],
-        footer: "Quiet Trader".to_string(),
-        links: vec![super::NpcDialogLinkState {
-            text: "Next".to_string(),
-            target: "@Next".to_string(),
-        }],
-        input: None,
-    });
+    // This synthetic server page must be published; directly copied UI has
+    // no menu authority and cannot reach the no-script dispatch branch.
+    crate::runtime::npc::set_dialog(
+        session.app.world_mut(),
+        super::ActiveNpcDialogState {
+            npc_object_id: 4999,
+            npc_name: "Quiet Trader".to_string(),
+            npc_name_key: None,
+            stage: None,
+            current: 0,
+            required: 0,
+            title: "Quiet Trader".to_string(),
+            body: vec!["Quiet Trader".to_string()],
+            footer: "Quiet Trader".to_string(),
+            links: vec![super::NpcDialogLinkState {
+                text: "Next".to_string(),
+                target: "@Next".to_string(),
+            }],
+            input: None,
+        },
+    );
 
     let packets = session.select_npc_dialog_target("@Next");
     let snapshot = session.world_snapshot();
@@ -8993,6 +9023,8 @@ fn forged_harvest_packet_is_rejected_while_riding_mount() {
 fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -14728,6 +14760,18 @@ fn yimoogi_final_teleport_spawns_white_serpents_at_old_location() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+
+    // This phase fixture intentionally places its actors beyond Bichon's map.
+    // Declare its terrain instead of relying on the old missing-map fallback.
+    install_isolated_map_fixture(
+        &mut session,
+        mir2_game_data::MapBounds {
+            min_x: 900,
+            max_x: 912,
+            min_y: 895,
+            max_y: 905,
+        },
+    );
 
     let player_origin = Point { x: 900, y: 900 };
     let yimoogi_position = Point {
@@ -27815,6 +27859,7 @@ fn npc_confirm_input_packet_runs_input_label_with_submitted_value() {
 
     let _ = session.interact(4987);
     let _ = session.select_npc_dialog_target("@summon");
+    let _ = session.select_npc_dialog_target("@agitonerecall");
     let _ = session.select_npc_dialog_target("@@summontest");
     let input_dialog = session
         .world_snapshot()
@@ -27857,6 +27902,7 @@ fn npc_confirm_input_packet_rejects_wrong_active_npc() {
 
     let _ = session.interact(4987);
     let _ = session.select_npc_dialog_target("@summon");
+    let _ = session.select_npc_dialog_target("@agitonerecall");
     let _ = session.select_npc_dialog_target("@@summontest");
     let packets = session.handle_packet(ClientPacket::NpcConfirmInput {
         npc_id: 4988,
@@ -28613,6 +28659,13 @@ fn crystal_npc_buy_item_dead_player_is_silent_and_preserves_state() {
         )
     };
     set_current_player_hp(&mut session, 0);
+    // Settle the already-observed death hook before testing the merchant's
+    // silent rejection. Its independent DefaultNPC packets are not a buy.
+    assert!(session
+        .try_handle_packet(ClientPacket::KeepAlive { time: 0 })
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::KeepAlive { .. })));
 
     let buy_packets = session.handle_packet(ClientPacket::BuyItem {
         item_index,
@@ -30333,7 +30386,7 @@ fn crystal_npc_stage5_message_buff_appearance_name_list_and_hero_commands_execut
     for line in [
         r#"LINEMESSAGE "Forged" Hint"#,
         r#"GLOBALMESSAGE "Sabuk changed" Announcement"#,
-        "GIVEBUFF PRISON 3600",
+        "GIVEBUFF Prison 3600 TRUE",
         "CHANGEHAIR 4",
         "CHANGELEVEL 22",
         "ADDNAMELIST ../NameLists/Rebirth1.txt",
@@ -33308,6 +33361,8 @@ fn drop_item_packet_missing_inventory_item_rejects_without_runtime_chat() {
 fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -33370,6 +33425,8 @@ fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
 fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -33396,14 +33453,18 @@ fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
     });
     let snapshot = session.world_snapshot();
 
+    // The first post-death packet also drains the source DefaultNPC #DIE hook.
     assert_eq!(
         packets,
-        vec![ServerPacket::DropItem {
-            unique_id: 0,
-            count: 2,
-            hero_inventory: false,
-            success: false,
-        }]
+        vec![
+            ServerPacket::DropItem {
+                unique_id: 0,
+                count: 2,
+                hero_inventory: false,
+                success: false,
+            },
+            ServerPacket::NPCUpdate { npc_id: 0 }
+        ]
     );
     assert_eq!(
         snapshot
@@ -33420,6 +33481,8 @@ fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
 fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -34782,12 +34845,16 @@ fn delete_item_packet_dead_player_acknowledges_without_mutation() {
     });
     let snapshot = session.world_snapshot();
 
+    // The first post-death packet also drains the source DefaultNPC #DIE hook.
     assert_eq!(
         packets,
-        vec![ServerPacket::DeleteItem {
-            unique_id: 0,
-            count: 2,
-        }]
+        vec![
+            ServerPacket::DeleteItem {
+                unique_id: 0,
+                count: 2,
+            },
+            ServerPacket::NPCUpdate { npc_id: 0 }
+        ]
     );
     assert_eq!(
         snapshot
@@ -35252,13 +35319,17 @@ fn sell_item_dead_player_only_acks_and_preserves_inventory_and_gold() {
     });
     let resources = session.app.world().resource::<InventoryResource>();
 
+    // The first post-death packet also drains the source DefaultNPC #DIE hook.
     assert_eq!(
         packets,
-        vec![ServerPacket::SellItem {
-            unique_id: 3,
-            count: 1,
-            success: false,
-        }]
+        vec![
+            ServerPacket::SellItem {
+                unique_id: 3,
+                count: 1,
+                success: false,
+            },
+            ServerPacket::NPCUpdate { npc_id: 0 }
+        ]
     );
     assert_eq!(player_gold(&session), gold_before);
     assert_eq!(
@@ -37340,6 +37411,8 @@ fn crystal_use_item_packet_consumes_belt_slot() {
 fn use_item_packet_static_potion_rejects_on_no_drug_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -37591,6 +37664,8 @@ fn use_item_packet_dynamic_crystal_normal_potion_queues_timed_restore() {
 fn use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -37793,6 +37868,14 @@ fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll(
         .config
         .spawn
         .clone();
+    let bind = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .bind_point
+        .clone()
+        .expect("StartGame inside Bichon safe area binds its center");
+    assert_eq!(bind.position, Point { x: 328, y: 264 });
     set_player_position(
         &mut session,
         Point {
@@ -37811,11 +37894,14 @@ fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll(
         .map
         .file_name
         .clone();
-    session.app.world_mut().resource_mut::<PlayerRuntimeResource>().bind_point =
-        Some(crate::config::CharacterBindPoint {
-            map_file_name: bind_map,
-            position: spawn.clone(),
-        });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .bind_point = Some(crate::config::CharacterBindPoint {
+        map_file_name: bind_map,
+        position: spawn.clone(),
+    });
 
     let packets = session.handle_packet(ClientPacket::UseItem {
         unique_id: 31,
@@ -37852,12 +37938,10 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
     config.map_collision.region_bounds.max_y = 700;
     config.map_collision.play_bounds = config.map_collision.region_bounds;
     config.map_collision.blocked_cells.clear();
-    config.spawn.x = (config.map_collision.region_bounds.min_x
-        + config.map_collision.region_bounds.max_x)
-        / 2;
-    config.spawn.y = (config.map_collision.region_bounds.min_y
-        + config.map_collision.region_bounds.max_y)
-        / 2;
+    config.spawn.x =
+        (config.map_collision.region_bounds.min_x + config.map_collision.region_bounds.max_x) / 2;
+    config.spawn.y =
+        (config.map_collision.region_bounds.min_y + config.map_collision.region_bounds.max_y) / 2;
     let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -37919,6 +38003,8 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
 fn use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: true,
@@ -38020,6 +38106,8 @@ fn use_item_packet_dynamic_crystal_random_teleport_teleports_same_map() {
 fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38518,6 +38606,8 @@ fn use_item_packet_equipped_mount_toggles_riding_state() {
 fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38559,6 +38649,8 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
 
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38646,6 +38738,8 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
     let mut config = SimulationConfig::default();
     // Destination map "1" forbids mounts.
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "1".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -38977,13 +39071,17 @@ fn use_item_packet_dead_player_ack_fails_without_mutation() {
         grid: MirGridType::Inventory,
     });
 
+    // The first post-death packet also drains the source DefaultNPC #DIE hook.
     assert_eq!(
         packets,
-        vec![ServerPacket::UseItem {
-            unique_id: 0,
-            success: false,
-            grid: MirGridType::Inventory,
-        }]
+        vec![
+            ServerPacket::UseItem {
+                unique_id: 0,
+                success: false,
+                grid: MirGridType::Inventory,
+            },
+            ServerPacket::NPCUpdate { npc_id: 0 }
+        ]
     );
     let snapshot = session.world_snapshot();
     assert_eq!(snapshot.player_hp, Some(0));
@@ -39089,6 +39187,8 @@ fn use_item_packet_dead_player_resurrection_scroll_revives_and_consumes_item() {
 fn use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -40702,7 +40802,10 @@ fn return_incoming_item_tree_through_path(
                         .any(|item| i32::from(item.slot) == *slot)
                 })
                 .expect("hero take-back fixture should expose an empty bag slot");
-            let hero_packets = session.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot });
+            let hero_packets = session.handle_packet(ClientPacket::TakeBackHeroItem {
+                from: 3,
+                to: to_slot,
+            });
             assert!(hero_packets.iter().any(|packet| matches!(
                 packet,
                 ServerPacket::TakeBackHeroItem { success: true, .. }
@@ -41003,7 +41106,10 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                     .expect("malformed hero fixture should expose an empty bag slot");
                 assert!(matches!(
                     session
-                        .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot })
+                        .handle_packet(ClientPacket::TakeBackHeroItem {
+                            from: 3,
+                            to: to_slot
+                        })
                         .as_slice(),
                     [ServerPacket::TakeBackHeroItem { success: false, .. }]
                 ));
@@ -41278,7 +41384,9 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                         gender: MirGender::Female,
                         class: MirClass::Warrior,
                     });
-                    assert!(super::super::map::spawn_stage5_hero(session.app.world_mut()).is_some());
+                    assert!(
+                        super::super::map::spawn_stage5_hero(session.app.world_mut()).is_some()
+                    );
                     let mut hero_item = item;
                     hero_item.slot = 3;
                     session
@@ -41314,7 +41422,10 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                         .expect("zero hero fixture should expose an empty bag slot");
                     assert!(matches!(
                         session
-                            .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot })
+                            .handle_packet(ClientPacket::TakeBackHeroItem {
+                                from: 3,
+                                to: to_slot
+                            })
                             .as_slice(),
                         [ServerPacket::TakeBackHeroItem { success: false, .. }]
                     ));
@@ -45368,7 +45479,14 @@ fn repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold() {
         .find(|item| item.slot == 30)
         .expect("repair item should remain");
 
-    assert_eq!(packets, vec![ServerPacket::RepairItem { unique_id: 30 }]);
+    // The first post-death packet also drains the source DefaultNPC #DIE hook.
+    assert_eq!(
+        packets,
+        vec![
+            ServerPacket::RepairItem { unique_id: 30 },
+            ServerPacket::NPCUpdate { npc_id: 0 }
+        ]
+    );
     assert_eq!(player_gold(&session), 50_000);
     assert_eq!(
         (item.durability_current, item.durability_max),
@@ -45863,7 +45981,7 @@ fn srepair_item_service_context_rejects_when_player_leaves_data_range() {
 }
 
 #[test]
-fn town_teleport_returns_player_to_spawn() {
+fn town_teleport_returns_player_to_latest_safe_area_center() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -45877,8 +45995,10 @@ fn town_teleport_returns_player_to_spawn() {
         .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)
         .expect("self player");
 
-    assert_eq!(player.x, 330);
-    assert_eq!(player.y, 270);
+    // The configured spawn (330,270) is in Bichon's safe area; entering
+    // that area binds its center (328,264), as TownRevive does.
+    assert_eq!(player.x, 328);
+    assert_eq!(player.y, 264);
     assert_eq!(player.direction, MirDirection::Down);
     assert!(!packets
         .iter()
@@ -45889,6 +46009,8 @@ fn town_teleport_returns_player_to_spawn() {
 fn town_teleport_packet_rejects_when_current_map_disallows_town_teleport() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: true,
         no_escape: false,
@@ -49972,6 +50094,17 @@ fn magic_packet_crystal_moon_light_hides_until_buff_expires() {
         } if *packet_object_id == object_id
     )));
 
+    // Assassin stealth uses an exact wall-clock duration. Expire that clock
+    // explicitly instead of assuming fast simulation ticks advance real time.
+    let mut buffs = session.app.world_mut().resource_mut::<BuffResource>();
+    let moon = buffs
+        .buffs
+        .iter_mut()
+        .find(|buff| buff.key == "moon-light")
+        .unwrap();
+    assert!(moon.real_time_duration.is_some());
+    moon.real_time_duration = Some(crate::runtime::buffs::RealTimeBuffDuration::new(0));
+    drop(buffs);
     let mut revealed = false;
     for _ in 0..20 {
         let tick_packets = session.tick();
@@ -51444,7 +51577,7 @@ fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
 }
 
 #[test]
-fn skill_snapshot_mp_cost_uses_the_same_starter_override_as_casting() {
+fn skill_snapshot_mp_cost_uses_the_same_crystal_formula_as_casting() {
     let healing = super::crystal_skill_state("Healing", 2).expect("Healing skill");
     let definition = super::skill_definition(&healing.key).expect("starter skill definition");
     let crystal_magic = super::crystal_magic_for_skill_key(&healing.key)
@@ -51453,16 +51586,13 @@ fn skill_snapshot_mp_cost_uses_the_same_starter_override_as_casting() {
         + i32::from(crystal_magic.level_cost) * i32::from(healing.level);
     let snapshot = healing.snapshot(0, mir2_game_data::LanguageCode::English);
 
-    assert_eq!(snapshot.mp_cost, u32::try_from(definition.mana_cost).ok());
+    assert_eq!(snapshot.mp_cost, u32::try_from(crystal_formula).ok());
     assert_ne!(
         definition.mana_cost, crystal_formula,
-        "fixture must prove starter metadata takes precedence over the Crystal fallback"
+        "fixture must expose the legacy alias disagreement with Crystal casting"
     );
     let json = serde_json::to_value(&snapshot).expect("serialize authoritative skill snapshot");
-    assert_eq!(
-        json["mpCost"].as_i64(),
-        Some(i64::from(definition.mana_cost))
-    );
+    assert_eq!(json["mpCost"].as_i64(), Some(i64::from(crystal_formula)));
     assert!(json.get("mp_cost").is_none());
 }
 
@@ -55479,9 +55609,15 @@ fn casting_summon_shinsu_spawns_friendly_player_pet() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    let mana_cost = prepare_shinsu_cast_mana(&mut session, 1);
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
     let cast_packets = session.cast_skill("summon-shinsu");
+    assert!(cast_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(session.world_snapshot().player_mp, Some(0));
+    assert_eq!(mana_cost, 40);
     assert!(!cast_packets.iter().any(
         |packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Summon"))
     ));
@@ -55521,11 +55657,16 @@ fn casting_summon_shinsu_recalls_existing_pet() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    let mana_cost = prepare_shinsu_cast_mana(&mut session, 2);
     let first_position = Point { x: 333, y: 267 };
     let second_position = Point { x: 360, y: 267 };
     set_player_position(&mut session, first_position.clone());
 
-    let _ = session.cast_skill("summon-shinsu");
+    let first_cast = session.cast_skill("summon-shinsu");
+    assert!(first_cast
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(session.world_snapshot().player_mp, Some(mana_cost));
     let _ = session.tick();
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     let before_recall =
@@ -55547,7 +55688,15 @@ fn casting_summon_shinsu_recalls_existing_pet() {
         .cooldown_ends_at = 0;
 
     set_player_position(&mut session, second_position.clone());
-    let _ = session.cast_skill("summon-shinsu");
+    let before_mp = session.world_snapshot().player_mp.expect("player mana");
+    let recall_cast = session.cast_skill("summon-shinsu");
+    assert!(recall_cast
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(
+        session.world_snapshot().player_mp,
+        Some(before_mp - mana_cost)
+    );
     let shinsu_position =
         entity_position(session.app.world(), shinsu).expect("recalled shinsu position");
 
@@ -56010,6 +56159,7 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    prepare_shinsu_cast_mana(&mut session, 1);
     let origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, origin.clone());
 
@@ -56061,7 +56211,11 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     ));
     sync_visible_objects(&mut session);
 
-    let _ = session.cast_skill("summon-shinsu");
+    let cast_packets = session.cast_skill("summon-shinsu");
+    assert!(cast_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(session.world_snapshot().player_mp, Some(0));
     let _ = session.tick();
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     set_entity_position(&mut session, shinsu, origin.clone());
@@ -58593,15 +58747,26 @@ fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
         "gameShop.buyCredit",
         vec!["31".to_string(), "2".to_string()],
     );
-    let mail_key = |packets: &[ServerPacket]| packets.iter().find_map(|packet| match packet {
-        ServerPacket::ReceiveMail { mail } => mail.first().map(|m| (m.mail_id, m.items.len())),
-        _ => None,
-    });
-    assert_eq!(mail_key(&packet_credit_packets), mail_key(&stage5_credit_packets));
+    let mail_key = |packets: &[ServerPacket]| {
+        packets.iter().find_map(|packet| match packet {
+            ServerPacket::ReceiveMail { mail } => mail.first().map(|m| (m.mail_id, m.items.len())),
+            _ => None,
+        })
+    };
+    assert_eq!(
+        mail_key(&packet_credit_packets),
+        mail_key(&stage5_credit_packets)
+    );
     assert!(mail_key(&packet_credit_packets).is_some());
     assert_eq!(
-        packet_credit_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>(),
-        stage5_credit_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>()
+        packet_credit_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>(),
+        stage5_credit_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>()
     );
     let mut packet_credit_snapshot = packet_credit.world_snapshot();
     let mut stage5_credit_snapshot = stage5_credit.world_snapshot();
@@ -58622,11 +58787,20 @@ fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
     });
     let stage5_gold_packets =
         stage5_gold.stage5_command("gameShop.buyGold", vec!["31".to_string(), "2".to_string()]);
-    assert_eq!(mail_key(&packet_gold_packets), mail_key(&stage5_gold_packets));
+    assert_eq!(
+        mail_key(&packet_gold_packets),
+        mail_key(&stage5_gold_packets)
+    );
     assert!(mail_key(&packet_gold_packets).is_some());
     assert_eq!(
-        packet_gold_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>(),
-        stage5_gold_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>()
+        packet_gold_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>(),
+        stage5_gold_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>()
     );
     let mut packet_gold_snapshot = packet_gold.world_snapshot();
     let mut stage5_gold_snapshot = stage5_gold.world_snapshot();
@@ -59784,15 +59958,19 @@ fn combine_item_packet_dead_player_ack_fails_without_mutation() {
         id_to: 32,
     });
 
+    // The first post-death packet also drains the source DefaultNPC #DIE hook.
     assert_eq!(
         packets,
-        vec![ServerPacket::CombineItem {
-            grid: MirGridType::Inventory,
-            id_from: 31,
-            id_to: 32,
-            success: false,
-            destroy: false,
-        }]
+        vec![
+            ServerPacket::CombineItem {
+                grid: MirGridType::Inventory,
+                id_from: 31,
+                id_to: 32,
+                success: false,
+                destroy: false,
+            },
+            ServerPacket::NPCUpdate { npc_id: 0 }
+        ]
     );
     let resources = session.app.world().resource::<InventoryResource>();
     assert!(resources
@@ -62503,10 +62681,7 @@ fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     // The normal packet path must reject moving a reserved item. Exercise the
     // confirm-time custody guard with an explicit test-only custody tamper.
     {
-        let mut inventory = session
-            .app
-            .world_mut()
-            .resource_mut::<InventoryResource>();
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
         let offered = inventory
             .inventory_items
             .iter()
@@ -63110,7 +63285,10 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
     let sender_snapshot = sender.world_snapshot();
-    assert_eq!(sender_snapshot.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender_snapshot.gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
     assert!(!sender_snapshot
         .inventory_items
         .iter()
@@ -63275,7 +63453,10 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
-    assert_eq!(sender.world_snapshot().gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender.world_snapshot().gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
     assert!(!sender
         .world_snapshot()
         .inventory_items
@@ -63295,7 +63476,10 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
             .get("demo")
             .and_then(|account| account.saves.get(&0))
             .expect("sender save should exist");
-        assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+        assert_eq!(
+            sender_save.gold,
+            3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+        );
         assert!(!sender_save.inventory_items_json.iter().any(|state| {
             serde_json::from_str::<ItemState>(state)
                 .ok()
@@ -63346,6 +63530,10 @@ fn stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Starting each Session may checkpoint enter-map/NPC state. Measure only
+    // the two mail/shop commits below against the established durable baseline.
+    let sender_revision_before =
+        config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision;
     assert_eq!(stale.world_snapshot().gold, 3_000);
     assert!(stale
         .world_snapshot()
@@ -63416,8 +63604,12 @@ fn stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance
             .get("demo")
             .and_then(|account| account.saves.get(&0))
             .expect("sender save should remain durable");
-        assert_eq!(sender_save.revision, 3);
-        assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE, "stale balance must not win");
+        assert_eq!(sender_save.revision, sender_revision_before + 2);
+        assert_eq!(
+            sender_save.gold,
+            3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE,
+            "stale balance must not win"
+        );
         assert!(
             !sender_save.inventory_items_json.iter().any(|state| {
                 serde_json::from_str::<ItemState>(state)
@@ -63529,6 +63721,10 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         password: "demo".to_string(),
     });
     stale.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Starting each Session may checkpoint enter-map/NPC state. Measure only
+    // the two mail/shop commits below against the established durable baseline.
+    let sender_revision_before =
+        config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision;
 
     assert!(first
         .handle_packet(ClientPacket::SendMail {
@@ -63549,7 +63745,10 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         })
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 165_000 })));
-    assert_eq!(stale.world_snapshot().gold, 500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000);
+    assert_eq!(
+        stale.world_snapshot().gold,
+        500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000
+    );
     assert!(!stale
         .world_snapshot()
         .inventory_items
@@ -63567,8 +63766,11 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         .get("demo")
         .and_then(|account| account.saves.get(&0))
         .expect("sender save should remain durable");
-    assert_eq!(sender_save.revision, 4);
-    assert_eq!(sender_save.gold, 500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000);
+    assert_eq!(sender_save.revision, sender_revision_before + 2);
+    assert_eq!(
+        sender_save.gold,
+        500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000
+    );
     assert!(!sender_save.inventory_items_json.iter().any(|state| {
         serde_json::from_str::<ItemState>(state)
             .ok()
@@ -63605,6 +63807,10 @@ fn concurrent_same_account_mail_transactions_have_no_lost_update() {
         password: "demo".to_string(),
     });
     second.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    // Starting each Session may checkpoint enter-map/NPC state. Measure only
+    // the two mail/shop commits below against the established durable baseline.
+    let sender_revision_before =
+        config.account_store.lock().unwrap().accounts["demo"].saves[&0].revision;
 
     let barrier = std::sync::Arc::new(std::sync::Barrier::new(3));
     let first_barrier = barrier.clone();
@@ -63655,8 +63861,11 @@ fn concurrent_same_account_mail_transactions_have_no_lost_update() {
         .get("demo")
         .and_then(|account| account.saves.get(&0))
         .expect("sender save should remain durable");
-    assert_eq!(sender_save.revision, 3);
-    assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(sender_save.revision, sender_revision_before + 2);
+    assert_eq!(
+        sender_save.gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
     assert!(!sender_save.inventory_items_json.iter().any(|state| {
         serde_json::from_str::<ItemState>(state)
             .ok()
@@ -63872,7 +64081,10 @@ fn online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status
     let attachment = serde_json::from_str::<ItemState>(&external_mail.item_states_json[0])
         .expect("external exact attachment should decode");
     assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
-    assert_eq!(sender.world_snapshot().gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender.world_snapshot().gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
 
     let _ = std::fs::remove_dir_all(dir);
 }
@@ -64889,10 +65101,23 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
 
     session.handle_packet(ClientPacket::RequestIntelligentCreatureUpdates { update: true });
     let mut tick_packets = session.tick();
-    session.app.world_mut().remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
+    session
+        .app
+        .world_mut()
+        .remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
     let now = crate::runtime::inventory::current_binary_datetime();
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 0, now, &mut tick_packets);
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 1000, now, &mut tick_packets);
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        0,
+        now,
+        &mut tick_packets,
+    );
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        1000,
+        now,
+        &mut tick_packets,
+    );
     assert!(tick_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UpdateIntelligentCreatureList { creature_list, .. }
@@ -64909,7 +65134,12 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
     assert_eq!(session.world_snapshot().gold, starting_gold);
 
     for second in 2..=25 {
-        crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), second * 1000, now, &mut Vec::new());
+        crate::runtime::intelligent_creatures::maintenance_at(
+            session.app.world_mut(),
+            second * 1000,
+            now,
+            &mut Vec::new(),
+        );
     }
     assert!(matches!(
         session
@@ -64983,10 +65213,23 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
     let starting_gold = session.world_snapshot().gold;
     session.handle_packet(ClientPacket::DropGold { amount: 75 });
     let mut tick_packets = session.tick();
-    session.app.world_mut().remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
+    session
+        .app
+        .world_mut()
+        .remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
     let now = crate::runtime::inventory::current_binary_datetime();
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 0, now, &mut tick_packets);
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 1000, now, &mut tick_packets);
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        0,
+        now,
+        &mut tick_packets,
+    );
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        1000,
+        now,
+        &mut tick_packets,
+    );
     assert!(!tick_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::IntelligentCreaturePickup { .. })));
@@ -65333,8 +65576,14 @@ fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
     });
 
     assert_eq!(
-        session.handle_packet(ClientPacket::SetAutoPotValue { stat: 12, value: 75 }),
-        vec![ServerPacket::SetAutoPotValue { stat: 12, value: 75 }]
+        session.handle_packet(ClientPacket::SetAutoPotValue {
+            stat: 12,
+            value: 75
+        }),
+        vec![ServerPacket::SetAutoPotValue {
+            stat: 12,
+            value: 75
+        }]
     );
     assert_eq!(
         session.handle_packet(ClientPacket::SetAutoPotValue {
@@ -65466,21 +65715,24 @@ fn valid_hero_transfer_takeback_roundtrip_preserves_uid_across_save_load() {
         .iter()
         .any(|packet| matches!(packet, ServerPacket::TransferHeroItem { success: true, .. })));
     let packets = first.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 10 });
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::TakeBackHeroItem { success: true, .. }
-    )));
-    assert!(first.world_snapshot().inventory_items.iter().any(|item| {
-        item.slot == 10 && item.unique_id == 4 && item.key == "dagger"
-    }));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TakeBackHeroItem { success: true, .. })));
+    assert!(first
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| { item.slot == 10 && item.unique_id == 4 && item.key == "dagger" }));
     assert!(first.save_active_character().is_ok());
 
     let mut reloaded = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut reloaded);
     assert_start_game_success(&mut reloaded, 0);
-    assert!(reloaded.world_snapshot().inventory_items.iter().any(|item| {
-        item.slot == 10 && item.unique_id == 4 && item.key == "dagger"
-    }));
+    assert!(reloaded
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| { item.slot == 10 && item.unique_id == 4 && item.key == "dagger" }));
 }
 
 #[test]
@@ -65559,7 +65811,10 @@ fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
         class: MirClass::Warrior,
     });
     assert_eq!(
-        session.handle_packet(ClientPacket::TransferHeroItem { from: 0, to: 0 }).first().cloned(),
+        session
+            .handle_packet(ClientPacket::TransferHeroItem { from: 0, to: 0 })
+            .first()
+            .cloned(),
         Some(ServerPacket::TransferHeroItem {
             from: 0,
             to: 0,
@@ -65636,7 +65891,10 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
         .find(|item| item.key == "red-potion")
         .cloned()
         .expect("red potion should be in hero inventory");
-    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 12, value: 90 });
+    session.handle_packet(ClientPacket::SetAutoPotValue {
+        stat: 12,
+        value: 90,
+    });
     session.handle_packet(ClientPacket::SetAutoPotItem {
         grid: MirGridType::HeroHpItem,
         item_index: 658,
@@ -65689,6 +65947,8 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
 fn new_hero_on_no_hero_map_stays_unsummoned_with_crystal_system_message() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "0.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -65769,6 +66029,8 @@ fn new_hero_on_no_hero_map_stays_unsummoned_with_crystal_system_message() {
 fn hero_is_unsummoned_when_entering_crystal_no_hero_map() {
     let mut config = SimulationConfig::default();
     config.map_drop_rules.push(MapDropRuleRecord {
+        no_experience: false,
+
         map_file_name: "HF1.map".to_string(),
         no_town_teleport: false,
         no_escape: false,
@@ -66020,12 +66282,22 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .inventory_items
         .retain(|item| item.container != ItemContainer::Bag1 || item.slot != 2);
     add_inventory_crystal_item(&mut session, "BlackIronOre", 2);
+    // The helper's slot-based legacy UID would alias a seeded carrier.
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .iter_mut()
+        .find(|item| item.key == "crystal-item-828")
+        .unwrap()
+        .unique_id = 900_828;
 
-    let deposit_packets = session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
+    let deposit_packets = session.handle_packet(ClientPacket::DepositRefineItem { from: 8, to: 0 });
     assert_eq!(
         deposit_packets,
         vec![ServerPacket::DepositRefineItem {
-            from: 2,
+            from: 8,
             to: 0,
             success: true,
         }]
@@ -66041,12 +66313,12 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .any(|item| item.key == "crystal-item-828"));
 
     let retrieve_packets =
-        session.handle_packet(ClientPacket::RetrieveRefineItem { from: 0, to: 2 });
+        session.handle_packet(ClientPacket::RetrieveRefineItem { from: 0, to: 8 });
     assert_eq!(
         retrieve_packets,
         vec![ServerPacket::RetrieveRefineItem {
             from: 0,
-            to: 2,
+            to: 8,
             success: true,
         }]
     );
@@ -66056,7 +66328,7 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .iter()
         .any(|item| item.key == "crystal-item-828"));
 
-    session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
+    session.handle_packet(ClientPacket::DepositRefineItem { from: 8, to: 0 });
     let cancel_packets = session.handle_packet(ClientPacket::RefineCancel);
     assert!(cancel_packets
         .iter()
@@ -66068,8 +66340,13 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
         .slots
         .is_empty());
 
+    // Starter potions occupy belt 0/1 and RepairOil occupies belt 2, so
+    // Crystal cancel returns to the first free array cell, belt slot 3.
+    assert!(cancel_packets.iter().any(|packet| matches!(packet,
+        ServerPacket::RetrieveRefineItem { from: 0, to: 3, success: true })),
+        "cancel must return the exact ore to the first free cell: {cancel_packets:?}");
     // Re-deposit an ingredient so a refine attempt can run.
-    let redeposit = session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
+    let redeposit = session.handle_packet(ClientPacket::DepositRefineItem { from: 3, to: 0 });
     assert!(redeposit.iter().any(|packet| matches!(
         packet,
         ServerPacket::DepositRefineItem { success: true, .. }
@@ -69916,7 +70193,10 @@ fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
         Some(99)
     );
 
-    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 13, value: 40 });
+    session.handle_packet(ClientPacket::SetAutoPotValue {
+        stat: 13,
+        value: 40,
+    });
     assert_eq!(
         session
             .world_snapshot()

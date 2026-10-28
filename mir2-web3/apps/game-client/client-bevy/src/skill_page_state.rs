@@ -226,6 +226,19 @@ pub struct SkillCooldownClock {
     owner: Option<(u64, u32)>,
     last_now: u64,
     starts: HashMap<u32, (String, u64, u64)>,
+    readiness_samples: HashMap<u32, SkillReadinessSample>,
+}
+#[derive(Debug, Clone, PartialEq)]
+struct SkillReadinessSample {
+    spell: String,
+    snapshot_serial: u64,
+    remaining_ms: u32,
+    observed_at_ms: u64,
+}
+fn snapshot_readiness_ms(binding: &crate::skill_model::SkillBinding) -> u32 {
+    binding
+        .cooldown_remaining_ms
+        .unwrap_or_else(|| binding.cooldown_remaining_ticks.saturating_mul(1_000))
 }
 impl SkillCooldownClock {
     pub fn observe(&mut self, skills: &SkillModel, now_ms: u64) {
@@ -244,11 +257,14 @@ impl SkillCooldownClock {
         );
         if self.owner != Some(owner) || now_ms < self.last_now {
             self.starts.clear();
+            self.readiness_samples.clear();
         }
         self.owner = Some(owner);
         self.last_now = now_ms;
         self.starts
             .retain(|id, (spell, _, _)| exact_skill(skills, *id, spell));
+        self.readiness_samples
+            .retain(|id, sample| exact_skill(skills, *id, &sample.spell));
         for b in &skills.bindings {
             let Some(spell) = b
                 .spell
@@ -261,7 +277,7 @@ impl SkillCooldownClock {
                 && self
                     .starts
                     .get(&b.skill_id)
-                    .is_none_or(|(_, seq, _)| *seq != b.cast_sequence)
+                    .is_none_or(|(_, seq, _)| b.cast_sequence > *seq)
             {
                 let start = start_for(b.skill_id, spell, b.cast_sequence)
                     .filter(|at| *at <= now_ms)
@@ -269,7 +285,64 @@ impl SkillCooldownClock {
                 self.starts
                     .insert(b.skill_id, (spell.clone(), b.cast_sequence, start));
             }
+            let remaining_ms = snapshot_readiness_ms(b);
+            if self
+                .readiness_samples
+                .get(&b.skill_id)
+                .is_none_or(|sample| {
+                    skills.authority.snapshot_serial > sample.snapshot_serial
+                        || (skills.authority.snapshot_serial == 0
+                            && sample.snapshot_serial == 0
+                            && sample.remaining_ms != remaining_ms)
+                })
+            {
+                self.readiness_samples.insert(
+                    b.skill_id,
+                    SkillReadinessSample {
+                        spell: spell.clone(),
+                        snapshot_serial: skills.authority.snapshot_serial,
+                        remaining_ms,
+                        observed_at_ms: now_ms,
+                    },
+                );
+            }
         }
+    }
+    /// Input readiness ages authoritative samples independently from cast animation.
+    /// Repeated or stale snapshots cannot restart an elapsed action gate.
+    pub fn readiness_remaining_ms(&self, id: u32, skills: &SkillModel, now_ms: u64) -> u32 {
+        let binding = skills.binding_for(id);
+        let same_owner = self.owner
+            == Some((
+                skills.authority.session_epoch,
+                skills.authority.player_object_id,
+            ));
+        let sampled = self
+            .readiness_samples
+            .get(&id)
+            .filter(|sample| {
+                same_owner
+                    && exact_skill(skills, id, &sample.spell)
+                    && sample.snapshot_serial >= skills.authority.snapshot_serial
+            })
+            .map(|sample| {
+                sample.remaining_ms.saturating_sub(
+                    now_ms
+                        .saturating_sub(sample.observed_at_ms)
+                        .min(u64::from(u32::MAX)) as u32,
+                )
+            })
+            .unwrap_or_else(|| snapshot_readiness_ms(&binding));
+        let toggle = binding
+            .cast_kind
+            .as_deref()
+            .is_some_and(|kind| kind.trim().eq_ignore_ascii_case("toggle"));
+        let cast_remaining = if same_owner && !toggle {
+            self.remaining_ms(id, skills, now_ms)
+        } else {
+            0
+        };
+        sampled.max(cast_remaining)
     }
     pub fn remaining_ms(&self, id: u32, skills: &SkillModel, now_ms: u64) -> u32 {
         let Some((spell, _, start)) = self.starts.get(&id) else {

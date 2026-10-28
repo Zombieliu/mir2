@@ -187,6 +187,11 @@ pub(in crate::runtime) fn refresh_state_conditions(world: &mut World) -> Vec<Ser
         "Poisoning",
         "SoulFireBall",
         "SummonSkeleton",
+        "FatalSword",
+        "DoubleSlash",
+        "Focus",
+        "StraightShot",
+        "DoubleShot",
     ] {
         if knows(world, spell) {
             conditions.push(format!("{spell} learned"));
@@ -199,29 +204,18 @@ pub(in crate::runtime) fn refresh_state_conditions(world: &mut World) -> Vec<Ser
     if eligible_equipment(world, EquipmentSlot::Armour) {
         conditions.push("eligibleClassArmourEquipped".into());
     }
-    // Use the same material admission as actual casts; no bag-only substitute.
-    let inventory = world.resource::<InventoryResource>();
+    // Poisoning's custom bag/belt rule uses exactly the actual cast selector.
     let usable_poison = super::super::skills::crystal_spell_required_items_available(
         world,
         mir2_protocol::Spell::Poisoning,
-    ) || inventory.inventory_items.iter().any(|item| {
-        item.quantity > 0
-            && super::super::items::crystal_item_template_for_dynamic_key(&item.key).is_some_and(
-                |template| {
-                    template.item_type == super::super::crystal_compat::CRYSTAL_ITEM_TYPE_AMULET
-                        && matches!(template.shape, 1 | 2)
-                        && super::super::items::crystal_item_requirement_rejection_key(
-                            world, inventory, &template,
-                        )
-                        .is_none()
-                },
-            )
-    });
+    );
     if super::super::skills::crystal_spell_required_items_available(
         world,
         mir2_protocol::Spell::SoulFireBall,
     ) && usable_poison
     {
+        // Retain the authored condition key for existing quest saves. Player
+        // instructions now explain direct bag/belt Poisoning consumption.
         conditions.push(
             "eligible Amulet equipped and legal poison available in bag for re-equip between casts"
                 .into(),
@@ -405,6 +399,11 @@ pub(in crate::runtime) fn record_spell_damage(
     }
     for (id, moved) in advanced {
         let mut conditions = vec![format!("{spell} damage committed")];
+        if spell == "DoubleSlash" {
+            // Keep the authored physical-technique key used by existing quest
+            // definitions and saves when projecting this committed spell hit.
+            conditions.push("DoubleSlash attack damage committed".into());
+        }
         if spell == "SoulFireBall" {
             conditions.push("SoulFireBall damage committed with material consumption".into());
         }
@@ -442,18 +441,33 @@ pub(in crate::runtime) fn record_zone_event(
                     conditions.push("HalfMoon attack damage committed")
                 }
                 Technique::Normal | Technique::Fencing | Technique::Slaying => {
-                    for spell in ["Fencing", "Slaying", "SpiritSword"] {
+                    for spell in ["Fencing", "Slaying", "SpiritSword", "FatalSword"] {
                         if knows(world, spell) {
                             conditions.push(match spell {
                                 "Fencing" => "normal attack landed with Fencing learned",
                                 "Slaying" => "normal attack landed with Slaying learned",
+                                "FatalSword" => "normal attack landed with FatalSword learned",
                                 _ => "normal attack landed with SpiritSword learned",
                             });
                         }
                     }
                 }
+                Technique::DoubleSlash if knows(world, "DoubleSlash") => {
+                    return record_spell_damage(world, "DoubleSlash", receipt.source_action_at_ms)
+                }
                 _ => {}
             }
+        }
+        Event::RangedDamage
+            if receipt.damage.is_some_and(|damage| damage > 0) && knows(world, "Focus") =>
+        {
+            conditions.push("normal ranged attack landed with Focus learned");
+        }
+        Event::StraightShotDamage if receipt.damage.is_some_and(|damage| damage > 0) => {
+            return record_spell_damage(world, "StraightShot", receipt.source_action_at_ms)
+        }
+        Event::DoubleShotDamage if receipt.damage.is_some_and(|damage| damage > 0) => {
+            return record_spell_damage(world, "DoubleShot", receipt.source_action_at_ms)
         }
         Event::LightningDamage if receipt.damage.is_some_and(|damage| damage > 0) => {
             return record_spell_damage(world, "Lightning", receipt.source_action_at_ms)

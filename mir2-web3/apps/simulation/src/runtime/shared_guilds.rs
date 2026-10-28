@@ -154,6 +154,61 @@ fn charge_creation_costs(save: &mut CharacterSaveRecord) -> Result<(), String> {
     Ok(())
 }
 impl SimulationConfig {
+    /// Shared notice authority: permission is rechecked inside the durable guild transaction.
+    /// The transport derives `identity` from its authenticated active character, never a packet.
+    pub fn commit_shared_guild_notice(
+        &self,
+        identity: &Stage5FriendIdentity,
+        notice: &[String],
+    ) -> Result<SharedGuildRecord, String> {
+        let guild_id = self
+            .shared_guild_for_identity(identity)?
+            .ok_or("You are not in a guild.")?
+            .id;
+        self.commit_account_store_transaction_with_guilds(
+            std::slice::from_ref(&identity.account_id),
+            std::slice::from_ref(&guild_id),
+            |store| {
+                if !store
+                    .accounts
+                    .get(&identity.account_id)
+                    .is_some_and(|account| {
+                        account
+                            .characters
+                            .iter()
+                            .any(|character| character.index == identity.character_index)
+                    })
+                {
+                    return Err("Guild character no longer exists.".into());
+                }
+                let guild = store
+                    .shared_guilds
+                    .get_mut(&guild_id)
+                    .ok_or("Guild no longer exists.")?;
+                let member = guild.member(identity).ok_or("You are not in this guild.")?;
+                let rank = guild
+                    .ranks
+                    .iter()
+                    .find(|rank| rank.index == member.rank_index)
+                    .ok_or("Guild rank no longer exists.")?;
+                // Crystal GuildRankOptions.CanChangeNotice = 64; a leader name is not authority.
+                if rank.options & 64 == 0 {
+                    return Err("Your rank cannot change the guild notice.".into());
+                }
+                if notice.len() > 200 {
+                    return Err("Guild notices can contain at most 200 lines.".into());
+                }
+                let next_revision = guild
+                    .revision
+                    .checked_add(1)
+                    .ok_or("Guild revision exhausted.")?;
+                guild.notice = notice.to_vec();
+                guild.revision = next_revision;
+                Ok(guild.clone())
+            },
+        )
+    }
+
     fn commit_shared_guild_gold(
         &self,
         identity: &Stage5FriendIdentity,
@@ -280,7 +335,8 @@ impl SimulationConfig {
                         name: "Leader".into(),
                         options: 255,
                     }],
-                    members: vec![SharedGuildMember { membership_epoch: 1,
+                    members: vec![SharedGuildMember {
+                        membership_epoch: 1,
                         identity: identity.clone(),
                         name: next.character.name.clone(),
                         rank_index: 0,
@@ -289,7 +345,9 @@ impl SimulationConfig {
                     storage: BTreeMap::new(),
                     buffs: BTreeMap::new(),
                     last_buff_tick_ms: 0,
-                    experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+                    experience_receipts: BTreeSet::new(),
+                    experience_receipt_payloads: Default::default(),
+                    active_wars: Default::default(),
                 };
                 if store
                     .shared_guilds
@@ -353,8 +411,17 @@ impl SimulationConfig {
             if rank.options & 2 == 0 {
                 return Err("server.GuildPermissionDenied".into());
             }
-            if guild.members.iter().any(|member|member.identity.character_index==target.character_index){
-                return Err("ambiguous legacy public character index; account migration required".into());
+            if !guild.active_wars.is_empty() {
+                return Err("server.CannotRecruitDuringWar".into());
+            }
+            if guild
+                .members
+                .iter()
+                .any(|member| member.identity.character_index == target.character_index)
+            {
+                return Err(
+                    "ambiguous legacy public character index; account migration required".into(),
+                );
             }
             let cap = *mir2_game_data::crystal_guild_settings()
                 .member_caps
@@ -372,7 +439,11 @@ impl SimulationConfig {
                 });
             }
             let rank_index = guild.ranks.last().ok_or("guild rank missing")?.index;
-            guild.members.push(SharedGuildMember { membership_epoch: guild.revision.checked_add(1).ok_or("guild membership epoch exhausted")?,
+            guild.members.push(SharedGuildMember {
+                membership_epoch: guild
+                    .revision
+                    .checked_add(1)
+                    .ok_or("guild membership epoch exhausted")?,
                 identity: target.clone(),
                 name: target_name,
                 rank_index,
@@ -395,10 +466,14 @@ use mir2_protocol::{GuildMember, GuildRank, ServerPacket};
 #[derive(Resource, Default)]
 pub(super) struct SharedGuildSession {
     pub enabled: bool,
-    create_grant: Option<Stage5FriendIdentity>,
+    create_grant: Option<GuildCreationGrant>,
     online: BTreeSet<(String, i32)>,
     last_announced_name: Option<String>,
     loaded_bank_guild: Option<String>,
+}
+struct GuildCreationGrant {
+    identity: Stage5FriendIdentity,
+    npc_binding: Option<(u32, String)>,
 }
 fn world_identity(world: &World) -> Option<Stage5FriendIdentity> {
     let session = world.resource::<SessionResource>();
@@ -456,6 +531,19 @@ pub(super) fn project_legacy_shape(world: &World) -> Option<Stage5GuildState> {
         .collect();
     view.notice = guild.notice.clone();
     view.storage_gold = guild.gold;
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    if let Ok(store) = config.account_store.lock() {
+        view.active_wars = guild
+            .active_wars
+            .keys()
+            .filter_map(|enemy_id| {
+                store
+                    .shared_guilds
+                    .get(enemy_id)
+                    .map(|enemy| enemy.name.clone())
+            })
+            .collect();
+    }
     for (bit, name) in [
         (1, "CanChangeRank"),
         (2, "CanRecruit"),
@@ -603,6 +691,7 @@ impl crate::SimulationSession {
     }
 
     pub fn enable_shared_guild_authority(&mut self) {
+        self.initialize_shared_experience_rate_clock();
         if !enabled(self.app.world()) {
             self.app.world_mut().insert_resource(SharedGuildSession {
                 enabled: true,
@@ -622,7 +711,8 @@ impl crate::SimulationSession {
         }
     }
     pub(super) fn grant_shared_guild_creation_from_npc(&mut self) -> Vec<ServerPacket> {
-        if !enabled(self.app.world()) {
+        if !enabled(self.app.world()) || super::components::current_player_is_dead(self.app.world())
+        {
             return Vec::new();
         }
         let Some(identity) = world_identity(self.app.world()) else {
@@ -637,10 +727,30 @@ impl crate::SimulationSession {
         {
             return Vec::new();
         }
+        let npc_binding = self
+            .app
+            .world()
+            .resource::<super::resources::NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .map(|dialog| {
+                (
+                    dialog.npc_object_id,
+                    self.app
+                        .world()
+                        .resource::<super::resources::MapRuntimeResource>()
+                        .current_map
+                        .file_name
+                        .clone(),
+                )
+            });
         self.app
             .world_mut()
             .resource_mut::<SharedGuildSession>()
-            .create_grant = Some(identity);
+            .create_grant = Some(GuildCreationGrant {
+            identity,
+            npc_binding,
+        });
         vec![ServerPacket::GuildNameRequest]
     }
     pub fn submit_shared_guild_name(&mut self, name: &str) -> Result<Vec<ServerPacket>, String> {
@@ -651,8 +761,34 @@ impl crate::SimulationSession {
             .world_mut()
             .get_resource_mut::<SharedGuildSession>()
             .and_then(|mut state| state.create_grant.take());
-        if grant.as_ref() != Some(&identity) {
+        let Some(grant) = grant else {
             return Err("guild create requires an unused NPC authorization".into());
+        };
+        if grant.identity != identity {
+            return Err("guild creation actor changed".into());
+        }
+        if super::components::current_player_is_dead(self.app.world()) {
+            return Err("guild creation requires a living character".into());
+        }
+        if let Some((npc_id, map)) = grant.npc_binding {
+            let current = self
+                .app
+                .world()
+                .resource::<super::resources::NpcStateResource>()
+                .active_npc_dialog
+                .as_ref();
+            if current.is_none_or(|dialog| dialog.npc_object_id != npc_id)
+                || self
+                    .app
+                    .world()
+                    .resource::<super::resources::MapRuntimeResource>()
+                    .current_map
+                    .file_name
+                    != map
+                || !super::npc::crystal_npc_object_in_data_range(self.app.world(), npc_id)
+            {
+                return Err("guild creation NPC authorization expired".into());
+            }
         }
         if name.is_empty() {
             return Ok(Vec::new());
@@ -953,6 +1089,15 @@ mod experience_tests;
 
 #[path = "shared_guild_bank.rs"]
 mod bank;
+
+#[path = "shared_guild_management.rs"]
+mod management;
+
+#[path = "shared_guild_management_commands.rs"]
+mod management_commands;
+
+#[path = "shared_guild_wars.rs"]
+mod wars;
 
 #[path = "shared_guild_buffs.rs"]
 pub(super) mod buffs;

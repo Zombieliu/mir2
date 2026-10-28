@@ -24321,6 +24321,96 @@
         "monthlyCardLedgerFull",
         "monthlyCardRequestIdInvalid"
       ]
+    },
+    {
+      "key": "ui.questProgressHeading",
+      "en": "Progress",
+      "zh-TW": "任務進度",
+      "pt-BR": "Progresso",
+      "aliases": [
+        "Progress",
+        "任务进度"
+      ]
+    },
+    {
+      "key": "ui.questReturnHeading",
+      "en": "Return",
+      "zh-TW": "交付地點",
+      "pt-BR": "Local de entrega",
+      "aliases": [
+        "Return",
+        "交付地点"
+      ]
+    },
+    {
+      "key": "ui.questClientLoading",
+      "en": "Preparing quest actions…",
+      "zh-TW": "正在準備任務操作…",
+      "pt-BR": "Preparando as ações de missão…",
+      "aliases": [
+        "Preparing quest actions…",
+        "正在准备任务操作…"
+      ]
+    },
+    {
+      "key": "ui.questClientUnavailable",
+      "en": "Quest actions are temporarily unavailable. Please retry.",
+      "zh-TW": "任務操作暫時無法使用，請重試。",
+      "pt-BR": "As ações de missão estão temporariamente indisponíveis. Tente novamente.",
+      "aliases": [
+        "Quest actions are temporarily unavailable. Please retry.",
+        "任务操作暂时无法使用，请重试。"
+      ]
+    },
+    {
+      "key": "ui.questActionPending",
+      "en": "Your request is being processed. Please wait.",
+      "zh-TW": "請求處理中，請稍候。",
+      "pt-BR": "Sua solicitação está sendo processada. Aguarde.",
+      "aliases": [
+        "Your request is being processed. Please wait.",
+        "请求处理中，请稍候。"
+      ]
+    },
+    {
+      "key": "ui.questActionRewardRequired",
+      "en": "Select a reward first.",
+      "zh-TW": "請先選擇獎勵。",
+      "pt-BR": "Selecione uma recompensa primeiro.",
+      "aliases": [
+        "Select a reward first.",
+        "请先选择奖励。"
+      ]
+    },
+    {
+      "key": "ui.questActionTalkToNpc",
+      "en": "Talk to the quest NPC to continue.",
+      "zh-TW": "請與任務 NPC 交談後繼續。",
+      "pt-BR": "Fale com o NPC da missão para continuar.",
+      "aliases": [
+        "Talk to the quest NPC to continue.",
+        "请与任务 NPC 交谈后继续。"
+      ]
+    },
+    {
+      "key": "ui.questActionStateChanged",
+      "en": "The quest has changed. Review it and try again.",
+      "zh-TW": "任務狀態已變更，請查看任務後重試。",
+      "pt-BR": "A missão mudou. Confira os detalhes e tente novamente.",
+      "aliases": [
+        "The quest has changed. Review it and try again.",
+        "任务状态已变化，请查看任务后重试。"
+      ]
+    },
+    {
+      "key": "ui.retry",
+      "en": "Retry",
+      "zh-TW": "重試",
+      "pt-BR": "Tentar novamente",
+      "aliases": [
+        "Retry",
+        "重试"
+      ]
     }
   ]
 }

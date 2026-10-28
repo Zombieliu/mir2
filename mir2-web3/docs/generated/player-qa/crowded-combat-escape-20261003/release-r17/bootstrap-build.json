@@ -1,0 +1,48 @@
+{
+  "schema": "mir2.windows.bootstrap-build.v1",
+  "passed": true,
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "createdUtc": "2026-10-04T02:18:25.8805500+00:00",
+  "gameLaunched": false,
+  "installed": false,
+  "published": false,
+  "signingRequested": false,
+  "fullOfflineInstallerPreserved": true,
+  "runtimeIncluded": true,
+  "runtimeSha256": "843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C",
+  "compilerSha256": "D06EBD38F38E3CEE60A3C50CC45BD449D77E0BC6A5CABC607EA9886808E4DE1A",
+  "stages": [
+    {
+      "manifestSha256": "CEAE366BEBCA1C19C3F529EB22F016CCC80DFF5B8655694E76682E31AB12CB18",
+      "passed": true,
+      "fileCount": 125969,
+      "sourceRepoCheck": "unavailable",
+      "stage": "strict-game-and-pinned-cms"
+    },
+    {
+      "passed": true,
+      "engineSha256": "FB3505D6D84D997CDBCEF17F986A39B930C3FCE5D108CA9831D90C5F69B16734",
+      "stage": "updater-bundle-cms"
+    },
+    {
+      "installedFiles": 29,
+      "passed": true,
+      "installedBytes": 26652440,
+      "fullPackageFiles": 125969,
+      "stage": "literal-inputs-and-nine-languages"
+    },
+    {
+      "stage": "inno-compile",
+      "passed": true
+    }
+  ],
+  "installer": {
+    "sha256": "ACED5E53A57C0E98081F8415C5EBFB95942BE7B3CBB130490DB24E5F8DC15621",
+    "publicAuthenticode": "NotSigned",
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\bootstrap-01\\artifacts\\Numeron-Legend-of-Rebirth-20261004-r17-Bootstrap.exe",
+    "sizeBytes": 27482388
+  },
+  "bootstrapInputsSha256": "4F487B21EA97957A721E30C1C0595BC01A6D8FA1B5CFCA9C9009B09C102E5BFD",
+  "recipeSha256": "2AF3D01DCF2A2DEC0B6E103003B66BEB2DE2C1808F68254A6C3B019D4E62DC89"
+}

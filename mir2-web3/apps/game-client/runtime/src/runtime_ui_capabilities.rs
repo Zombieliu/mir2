@@ -220,7 +220,13 @@ mod tests {
 
 /// Storage negotiates a separate ABI; it does not extend any existing exact
 /// Quest/Bag, HUD, Character, Spells or Mail capability object.
-fn describe_storage(backend: &str, wasm: bool, host: bool, shared_gl2: bool, requested: bool) -> serde_json::Value {
+fn describe_storage(
+    backend: &str,
+    wasm: bool,
+    host: bool,
+    shared_gl2: bool,
+    requested: bool,
+) -> serde_json::Value {
     let compiled = wasm && host && (backend == "webgpu" || backend == "webgl2" && shared_gl2);
     serde_json::json!({"schemaVersion":1,"storageUiAbiVersion":u8::from(compiled),
         "storageIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":compiled&&requested})
@@ -233,8 +239,14 @@ pub(crate) fn current_storage_json() -> String {
     };
     #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
     let requested = false;
-    describe_storage(super::COMPILED_RENDER_BACKEND, cfg!(target_arch = "wasm32"),
-        cfg!(feature = "web-quest-ui"), cfg!(feature = "webgl2-shared-ui"), requested).to_string()
+    describe_storage(
+        super::COMPILED_RENDER_BACKEND,
+        cfg!(target_arch = "wasm32"),
+        cfg!(feature = "web-quest-ui"),
+        cfg!(feature = "webgl2-shared-ui"),
+        requested,
+    )
+    .to_string()
 }
 
 #[cfg(test)]
@@ -249,24 +261,53 @@ mod storage_tests {
             ("webgl2", true, true, true, true, true),
             ("webgpu", true, true, false, true, true),
         ] {
-            assert_eq!(describe_storage(backend, wasm, host, shared, requested),
+            assert_eq!(
+                describe_storage(backend, wasm, host, shared, requested),
                 serde_json::json!({"schemaVersion":1,"storageUiAbiVersion":u8::from(expected),
-                    "storageIntentAbiVersion":u8::from(expected),"compiled":expected,"startup":expected}));
+                    "storageIntentAbiVersion":u8::from(expected),"compiled":expected,"startup":expected})
+            );
         }
         let inactive = describe_storage("webgl2", true, true, true, false);
-        assert_eq!(inactive["compiled"], true); assert_eq!(inactive["startup"], false);
-        assert_eq!(serde_json::from_str::<serde_json::Value>(&current_json()).unwrap().as_object().unwrap().len(), 6);
-        for value in [current_hud_json(),current_character_json(),current_spells_json()] {
-            assert_eq!(serde_json::from_str::<serde_json::Value>(&value).unwrap().as_object().unwrap().len(),5);
+        assert_eq!(inactive["compiled"], true);
+        assert_eq!(inactive["startup"], false);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&current_json())
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .len(),
+            6
+        );
+        for value in [
+            current_hud_json(),
+            current_character_json(),
+            current_spells_json(),
+        ] {
+            assert_eq!(
+                serde_json::from_str::<serde_json::Value>(&value)
+                    .unwrap()
+                    .as_object()
+                    .unwrap()
+                    .len(),
+                5
+            );
         }
-        #[cfg(not(target_arch="wasm32"))]
-        assert_eq!(serde_json::from_str::<serde_json::Value>(&current_storage_json()).unwrap(),
-            describe_storage("native", false, true, true, true));
+        #[cfg(not(target_arch = "wasm32"))]
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&current_storage_json()).unwrap(),
+            describe_storage("native", false, true, true, true)
+        );
     }
 }
 
 /// NPC goods have an independent ABI; existing exact capability objects stay intact.
-pub(crate) fn describe_npc_shop(backend: &str, wasm: bool, host: bool, shared_gl2: bool, requested: bool) -> serde_json::Value {
+pub(crate) fn describe_npc_shop(
+    backend: &str,
+    wasm: bool,
+    host: bool,
+    shared_gl2: bool,
+    requested: bool,
+) -> serde_json::Value {
     let compiled = wasm && host && (backend == "webgpu" || backend == "webgl2" && shared_gl2);
     serde_json::json!({"schemaVersion":1,"npcShopUiAbiVersion":u8::from(compiled),
         "npcShopIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":compiled&&requested})
@@ -279,6 +320,12 @@ pub(crate) fn current_npc_shop_json() -> String {
     };
     #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
     let requested = false;
-    describe_npc_shop(super::COMPILED_RENDER_BACKEND, cfg!(target_arch = "wasm32"),
-        cfg!(feature = "web-quest-ui"), cfg!(feature = "webgl2-shared-ui"), requested).to_string()
+    describe_npc_shop(
+        super::COMPILED_RENDER_BACKEND,
+        cfg!(target_arch = "wasm32"),
+        cfg!(feature = "web-quest-ui"),
+        cfg!(feature = "webgl2-shared-ui"),
+        requested,
+    )
+    .to_string()
 }

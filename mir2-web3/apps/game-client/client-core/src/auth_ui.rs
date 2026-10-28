@@ -11,8 +11,8 @@ const MIN_PASSWORD_LENGTH: usize = 5;
 const MAX_PASSWORD_LENGTH: usize = 15;
 pub const SAFE_KEY_DEFAULT_SEED: u64 = 0x4D49_5232_5341_4645;
 pub const SAFE_KEY_ALPHABET: [char; 36] = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -56,9 +56,7 @@ impl AuthUiError {
             Self::Account => "account ID must be 3-15 alphanumeric characters",
             Self::Password => "password must be 5-15 alphanumeric characters",
             Self::ConfirmMismatch => "password confirmation does not match",
-            Self::ConfirmInvalid => {
-                "password confirmation must be 5-15 alphanumeric characters"
-            }
+            Self::ConfirmInvalid => "password confirmation must be 5-15 alphanumeric characters",
             Self::UserName => "user name must be at most 20 characters",
             Self::Question => "secret question must be at most 30 characters",
             Self::Answer => "secret answer must be at most 30 characters",
@@ -155,8 +153,8 @@ pub fn parse_registration_birth_date(value: &str) -> Result<i64, AuthUiError> {
     }
 
     let previous_year = i64::from(year - 1);
-    let days_before_year = 365 * previous_year + previous_year / 4 - previous_year / 100
-        + previous_year / 400;
+    let days_before_year =
+        365 * previous_year + previous_year / 4 - previous_year / 100 + previous_year / 400;
     let days_before_month = match month {
         1 => 0,
         2 => 31,
@@ -323,7 +321,11 @@ impl SafeKeyState {
 
 pub fn safe_key_permutation(seed: u64) -> Vec<char> {
     let mut keys = SAFE_KEY_ALPHABET.to_vec();
-    let mut state = if seed == 0 { SAFE_KEY_DEFAULT_SEED } else { seed };
+    let mut state = if seed == 0 {
+        SAFE_KEY_DEFAULT_SEED
+    } else {
+        seed
+    };
     for i in (1..keys.len()).rev() {
         state = splitmix64(state);
         let j = (state % (i as u64 + 1)) as usize;
@@ -391,14 +393,7 @@ mod tests {
 
     fn validate(values: [&str; 8]) -> Result<i64, AuthUiError> {
         validate_registration_fields(
-            values[0],
-            values[1],
-            values[2],
-            values[3],
-            values[4],
-            values[5],
-            values[6],
-            values[7],
+            values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7],
         )
     }
 
@@ -472,7 +467,10 @@ mod tests {
     fn safe_key_board_is_deterministic_complete_and_zero_seed_uses_default() {
         let board = safe_key_permutation(17);
         assert_eq!(board, safe_key_permutation(17));
-        assert_eq!(safe_key_permutation(0), safe_key_permutation(SAFE_KEY_DEFAULT_SEED));
+        assert_eq!(
+            safe_key_permutation(0),
+            safe_key_permutation(SAFE_KEY_DEFAULT_SEED)
+        );
         assert_eq!(board.len(), 36);
         assert_eq!(board.iter().copied().collect::<BTreeSet<_>>().len(), 36);
     }
@@ -480,9 +478,18 @@ mod tests {
     #[test]
     fn safe_key_edit_caps_fields_and_deletes_one_unicode_scalar() {
         assert_eq!(safe_key_edit("abc", "Q", true, false), "abcq");
-        assert_eq!(safe_key_edit("x".repeat(24).as_str(), "Q", true, false), "x".repeat(24));
-        assert_eq!(safe_key_edit("x".repeat(31).as_str(), "Q", false, false), format!("{}q", "x".repeat(31)));
-        assert_eq!(safe_key_edit("x".repeat(32).as_str(), "Q", false, false), "x".repeat(32));
+        assert_eq!(
+            safe_key_edit("x".repeat(24).as_str(), "Q", true, false),
+            "x".repeat(24)
+        );
+        assert_eq!(
+            safe_key_edit("x".repeat(31).as_str(), "Q", false, false),
+            format!("{}q", "x".repeat(31))
+        );
+        assert_eq!(
+            safe_key_edit("x".repeat(32).as_str(), "Q", false, false),
+            "x".repeat(32)
+        );
         assert_eq!(safe_key_edit("a💠", "", true, true), "a");
         assert_eq!(safe_key_edit("abc", "q", true, true), "abc");
         assert_eq!(safe_key_edit("abc", "q", true, false), "abc");

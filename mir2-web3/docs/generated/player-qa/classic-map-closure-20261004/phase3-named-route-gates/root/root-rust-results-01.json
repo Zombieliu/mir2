@@ -1,0 +1,10 @@
+{
+  "ordinaryExit": 0,
+  "proofExit": 0,
+  "ordinaryPassed": 13,
+  "sourceProofPassed": 2,
+  "rootSourceBase": "17b44e08f",
+  "noticeSource": "95e18e8eb",
+  "isolatedOnly": true,
+  "gatewayStarted": false
+}

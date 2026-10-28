@@ -8,14 +8,14 @@
 
 use core::fmt;
 use std::collections::VecDeque;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use web_time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::Resource;
 use mir2_client_core::auth_ui::{
-    safe_key_edit, validate_change_password_fields as validate_shared_change_password_fields,
-    parse_registration_birth_date as parse_shared_registration_birth_date,
-    validate_registration_fields as validate_shared_registration_fields,
-    valid_registration_email as shared_valid_registration_email, AuthUiError,
+    parse_registration_birth_date as parse_shared_registration_birth_date, safe_key_edit,
+    valid_registration_email as shared_valid_registration_email,
+    validate_change_password_fields as validate_shared_change_password_fields,
+    validate_registration_fields as validate_shared_registration_fields, AuthUiError,
 };
 pub use mir2_client_core::auth_ui::{
     safe_key_permutation, SafeKeyState, SAFE_KEY_ALPHABET, SAFE_KEY_DEFAULT_SEED,
@@ -235,13 +235,8 @@ pub fn validate_change_password_fields(
     new_password: &str,
     confirm_password: &str,
 ) -> Result<(), &'static str> {
-    validate_shared_change_password_fields(
-        account_id,
-        old_password,
-        new_password,
-        confirm_password,
-    )
-    .map_err(AuthUiError::message)
+    validate_shared_change_password_fields(account_id, old_password, new_password, confirm_password)
+        .map_err(AuthUiError::message)
 }
 
 /// Converts the documented native ISO date entry to unspecified .NET DateTime ticks.
@@ -253,7 +248,77 @@ pub(crate) fn valid_registration_email(value: &str) -> bool {
     shared_valid_registration_email(value)
 }
 
+pub(crate) fn validate_registration_field(
+    form: &RegistrationForm,
+    focus: RegistrationFocus,
+) -> Result<(), &'static str> {
+    fn valid_alphanumeric(value: &str, min: usize, max: usize) -> bool {
+        (min..=max).contains(&value.len()) && value.bytes().all(|byte| byte.is_ascii_alphanumeric())
+    }
+    match focus {
+        RegistrationFocus::AccountId => {
+            if !valid_alphanumeric(&form.account_id, 3, 15) {
+                return Err("账号需为 3–15 位英文字母或数字。");
+            }
+        }
+        RegistrationFocus::Password => {
+            if !valid_alphanumeric(&form.password, 10, 15) {
+                return Err("注册密码需为 10–15 位英文字母或数字。");
+            }
+            if form.password.eq_ignore_ascii_case(&form.account_id) {
+                return Err("密码不能与账号相同（不区分大小写）。");
+            }
+            // Same denylist as the production identity policy in save.rs.
+            if matches!(
+                form.password.to_ascii_lowercase().as_str(),
+                "1234567890" | "password123" | "qwerty12345" | "mir2password"
+            ) {
+                return Err("这个密码过于常见，请换一个密码。");
+            }
+        }
+        RegistrationFocus::ConfirmPassword => {
+            validate_registration_field(form, RegistrationFocus::Password)?;
+            if form.confirm_password != form.password {
+                return Err("两次输入的密码不一致。");
+            }
+        }
+        RegistrationFocus::UserName if form.user_name.chars().count() > 20 => {
+            return Err("姓名最多 20 个字符，也可以留空。");
+        }
+        RegistrationFocus::BirthDate => {
+            parse_registration_birth_date(&form.birth_date)?;
+        }
+        RegistrationFocus::SecretQuestion if form.secret_question.chars().count() > 30 => {
+            return Err("密保问题最多 30 个字符，也可以留空。");
+        }
+        RegistrationFocus::SecretAnswer if form.secret_answer.chars().count() > 30 => {
+            return Err("密保答案最多 30 个字符，也可以留空。");
+        }
+        RegistrationFocus::EmailAddress => {
+            if form.email_address.chars().count() > 50
+                || !valid_registration_email(&form.email_address)
+            {
+                return Err("请输入完整有效的邮箱地址（最多 50 个字符），也可以留空。");
+            }
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
 pub fn validate_registration_fields(form: &RegistrationForm) -> Result<i64, &'static str> {
+    for focus in [
+        RegistrationFocus::AccountId,
+        RegistrationFocus::Password,
+        RegistrationFocus::ConfirmPassword,
+        RegistrationFocus::UserName,
+        RegistrationFocus::BirthDate,
+        RegistrationFocus::SecretQuestion,
+        RegistrationFocus::SecretAnswer,
+        RegistrationFocus::EmailAddress,
+    ] {
+        validate_registration_field(form, focus)?;
+    }
     validate_shared_registration_fields(
         &form.account_id,
         &form.password,
@@ -395,6 +460,8 @@ impl ShellNotice {
 
 #[derive(Clone, Default, PartialEq, Eq, Resource)]
 pub struct NativeShellModel {
+    pub billing: crate::native_billing::BillingPanel,
+    pub monthly_card: crate::native_monthly_card::MonthlyCardPanel,
     pub screen: NativeShellScreen,
     pub login_opening_elapsed: Duration,
     pub login: LoginForm,
@@ -462,6 +529,34 @@ impl fmt::Debug for NativeShellModel {
 }
 
 impl NativeShellModel {
+    pub fn billing_character_index(&self) -> Option<i32> {
+        if self.screen == NativeShellScreen::InGame {
+            self.active_character.as_ref().map(|c| c.index)
+        } else {
+            self.selected_character_index
+                .filter(|index| self.has_character_index(*index))
+        }
+    }
+
+    pub fn open_billing(&mut self) -> bool {
+        if !matches!(
+            self.screen,
+            NativeShellScreen::CharacterSelect | NativeShellScreen::InGame
+        ) {
+            return false;
+        }
+        let Some(character) = self.billing_character_index() else {
+            self.set_error("billing.selectCharacter");
+            return false;
+        };
+        let Some(account) = self.last_account.as_deref() else {
+            return false;
+        };
+        self.billing
+            .open_for(account, character, crate::native_billing::now_ms());
+        true
+    }
+
     /// Crystal shows idle ChrSel/0, then frames 1..18 at 100 ms each.
     /// The nineteenth offset completes the animation instead of being drawn.
     pub fn login_opening_frame(&self) -> u32 {
@@ -484,6 +579,8 @@ impl NativeShellModel {
     }
 
     fn clear_session_payload(&mut self) {
+        self.billing = Default::default();
+        self.monthly_card = Default::default();
         self.login_opening_elapsed = Duration::ZERO;
         self.characters.clear();
         self.selected_character_index = None;
@@ -546,6 +643,9 @@ impl NativeShellModel {
 /// User intents from Bevy UI widgets.
 #[derive(Clone, PartialEq, Eq)]
 pub enum NativeUiIntent {
+    OpenMonthlyCard,
+    RedeemMonthlyCard,
+    CloseMonthlyCard,
     Login,
     OpenRegistration,
     SubmitRegistration {
@@ -601,6 +701,9 @@ pub enum NativeUiIntent {
 impl fmt::Debug for NativeUiIntent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::OpenMonthlyCard => f.write_str("OpenMonthlyCard"),
+            Self::RedeemMonthlyCard => f.write_str("RedeemMonthlyCard"),
+            Self::CloseMonthlyCard => f.write_str("CloseMonthlyCard"),
             Self::SubmitRegistration { account_id, .. } => f
                 .debug_struct("SubmitRegistration")
                 .field("account_id", account_id)
@@ -691,6 +794,8 @@ impl fmt::Debug for NativeUiIntent {
 /// Gateway callbacks for shell transitions.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NativeGatewayEvent {
+    BillingReply(crate::native_billing::BillingReply),
+    MonthlyCardReply(crate::native_monthly_card::MonthlyCardReply),
     Connected,
     AccountCreated,
     AccountCreationFailed {
@@ -793,10 +898,35 @@ impl NativeShellModel {
 
     pub fn apply_ui_intent(&mut self, intent: NativeUiIntent) -> bool {
         match (self.screen, intent) {
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::OpenMonthlyCard) => {
+                self.monthly_card.open = true;
+                self.monthly_card.focus = crate::native_monthly_card::MonthlyCardFocus::Code;
+                true
+            }
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::CloseMonthlyCard) => {
+                self.monthly_card.open = false;
+                true
+            }
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::RedeemMonthlyCard)
+                if self.monthly_card.open && self.monthly_card.can_submit() =>
+            {
+                let Some(request_id) = self.monthly_card.request_id.checked_add(1) else {
+                    return false;
+                };
+                self.monthly_card.request_id = request_id;
+                self.monthly_card.submitted_code = self.monthly_card.code.clone();
+                self.monthly_card.pending = true;
+                self.monthly_card.command_sent = false;
+                self.monthly_card.request_started_at_ms = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .map_or(0, |d| d.as_millis() as u64);
+                self.monthly_card.message = None;
+                true
+            }
             (NativeShellScreen::Login, NativeUiIntent::Login) => self.begin_login(),
             (NativeShellScreen::Login, NativeUiIntent::OpenRegistration) => {
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
                 self.registration = RegistrationForm::default();
@@ -806,7 +936,7 @@ impl NativeShellModel {
             }
             (NativeShellScreen::Registration, NativeUiIntent::CancelRegistration) => {
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
                 self.registration = RegistrationForm::default();
@@ -838,7 +968,7 @@ impl NativeShellModel {
                 self.registration.email_address = email_address;
 
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
                 let expected_birth_date_binary =
@@ -850,7 +980,7 @@ impl NativeShellModel {
                         }
                     };
                 if expected_birth_date_binary != birth_date_binary {
-                    self.set_error("birth date is not acceptable");
+                    self.set_error("出生日期校验失败，请重新填写。");
                     return false;
                 }
                 self.register_request_in_flight = true;
@@ -905,6 +1035,19 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::StartGame) => {
+                if self.monthly_card.open || self.billing.open {
+                    return false;
+                }
+                if self
+                    .monthly_card
+                    .status
+                    .as_ref()
+                    .is_some_and(|status| !status.can_enter_game)
+                {
+                    self.monthly_card.open = true;
+                    self.monthly_card.message = Some("monthlyCardRequired".into());
+                    return false;
+                }
                 if self.start_game_request_in_flight {
                     self.set_error("start game request is still pending");
                     return false;
@@ -1008,20 +1151,12 @@ impl NativeShellModel {
                 }
                 match self.login.focus {
                     LoginFocus::Account => {
-                        self.login.account = safe_key_edit(
-                            &self.login.account,
-                            &key.to_string(),
-                            true,
-                            false,
-                        );
+                        self.login.account =
+                            safe_key_edit(&self.login.account, &key.to_string(), true, false);
                     }
                     LoginFocus::Password => {
-                        self.login.password = safe_key_edit(
-                            &self.login.password,
-                            &key.to_string(),
-                            false,
-                            false,
-                        );
+                        self.login.password =
+                            safe_key_edit(&self.login.password, &key.to_string(), false, false);
                     }
                     LoginFocus::LoginButton | LoginFocus::NewAccountButton => {
                         self.login.focus = LoginFocus::Account;
@@ -1130,6 +1265,32 @@ impl NativeShellModel {
 
     pub fn apply_gateway_event(&mut self, event: NativeGatewayEvent) -> bool {
         match (self.screen, event) {
+            (_, NativeGatewayEvent::BillingReply(reply)) => {
+                let character = self.billing_character_index();
+                let account = self.last_account.as_deref().unwrap_or_default();
+                let accepted =
+                    self.billing
+                        .accept(reply, account, character, crate::native_billing::now_ms());
+                if accepted {
+                    if let Some(status) = &self.billing.status {
+                        self.monthly_card.status = Some(status.monthly_card.clone());
+                    }
+                }
+                accepted
+            }
+            (_, NativeGatewayEvent::MonthlyCardReply(reply)) => {
+                self.monthly_card.accept(reply);
+                if self.screen == NativeShellScreen::CharacterSelect
+                    && self
+                        .monthly_card
+                        .status
+                        .as_ref()
+                        .is_some_and(|status| !status.can_enter_game)
+                {
+                    self.monthly_card.open = true;
+                }
+                true
+            }
             (_, NativeGatewayEvent::Disconnect { reason }) => {
                 self.screen = NativeShellScreen::ConnectionLost;
                 self.clear_session_payload();
@@ -1369,8 +1530,13 @@ impl NativeShellModel {
                 self.delete_command_sent = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.characters = characters;
-                self.selected_character_index = self.selected_character_index
-                    .filter(|index| self.characters.iter().any(|character| character.index == *index))
+                self.selected_character_index = self
+                    .selected_character_index
+                    .filter(|index| {
+                        self.characters
+                            .iter()
+                            .any(|character| character.index == *index)
+                    })
                     .or_else(|| self.characters.first().map(|character| character.index));
                 self.active_character = None;
                 self.notice = None;
@@ -1497,8 +1663,107 @@ mod tests {
         assert!(valid_registration_email(""));
         assert!(valid_registration_email("hero@example.test"));
         assert!(valid_registration_email("note hero@example.test."));
+        assert!(!valid_registration_email("1S"));
         assert!(!valid_registration_email("hero!@example.test"));
         assert!(!valid_registration_email("hero@example"));
+    }
+
+    fn valid_registration_form() -> RegistrationForm {
+        RegistrationForm {
+            account_id: "newhero".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn registration_password_boundaries_and_production_weak_passwords_are_rejected() {
+        for (password, accepted) in [
+            ("Alpha1234", false),
+            ("Alpha12345", true),
+            ("Alpha1234567890", true),
+            ("Alpha12345678901", false),
+            ("2468135790", true),
+            ("Alpha1234!", false),
+            ("Alpha1234 ", false),
+            ("Alpha1234\n", false),
+            ("密码Alpha12345", false),
+            ("1234567890", false),
+            ("PASSWORD123", false),
+            ("Qwerty12345", false),
+            ("Mir2Password", false),
+        ] {
+            let mut form = valid_registration_form();
+            form.password = password.to_owned();
+            form.confirm_password = password.to_owned();
+            assert_eq!(validate_registration_fields(&form).is_ok(), accepted);
+            assert_eq!(
+                validate_registration_field(&form, RegistrationFocus::Password).is_ok(),
+                accepted
+            );
+            assert_eq!(
+                validate_registration_field(&form, RegistrationFocus::ConfirmPassword).is_ok(),
+                accepted
+            );
+        }
+        let mut form = valid_registration_form();
+        form.account_id = "NewAccount9".to_owned();
+        form.password = "newaccount9".to_owned();
+        form.confirm_password = form.password.clone();
+        assert_eq!(
+            validate_registration_fields(&form),
+            Err("密码不能与账号相同（不区分大小写）。")
+        );
+        form.account_id = "different".to_owned();
+        assert!(validate_registration_fields(&form).is_ok());
+        form.confirm_password = "Newaccount9".to_owned();
+        assert_eq!(
+            validate_registration_fields(&form),
+            Err("两次输入的密码不一致。")
+        );
+    }
+
+    #[test]
+    fn registration_optional_fields_accept_empty_values_and_keep_their_bounds() {
+        let mut form = valid_registration_form();
+        assert_eq!(validate_registration_fields(&form), Ok(0));
+        for (account, accepted) in [
+            ("ab", false),
+            ("abc", true),
+            ("abcdefghijklmno", true),
+            ("abcdefghijklmnop", false),
+            ("bad id", false),
+        ] {
+            form.account_id = account.to_owned();
+            assert_eq!(validate_registration_fields(&form).is_ok(), accepted);
+        }
+        form.account_id = "newhero".to_owned();
+        form.user_name = "名".repeat(20);
+        form.secret_question = "问".repeat(30);
+        form.secret_answer = "答".repeat(30);
+        form.birth_date = "2000-02-29".to_owned();
+        form.email_address = "hero@example.test".to_owned();
+        assert!(validate_registration_fields(&form).is_ok());
+        form.user_name.push('名');
+        assert!(validate_registration_field(&form, RegistrationFocus::UserName).is_err());
+        form.secret_question.push('问');
+        assert!(validate_registration_field(&form, RegistrationFocus::SecretQuestion).is_err());
+        form.secret_answer.push('答');
+        assert!(validate_registration_field(&form, RegistrationFocus::SecretAnswer).is_err());
+        form.birth_date = "2001-02-29".to_owned();
+        assert!(validate_registration_field(&form, RegistrationFocus::BirthDate).is_err());
+        form.email_address = format!("{}@example.test", "a".repeat(40));
+        assert!(validate_registration_field(&form, RegistrationFocus::EmailAddress).is_err());
+    }
+
+    #[test]
+    fn registration_password_policy_does_not_block_legacy_login_credentials() {
+        let mut model = model_with_valid_login();
+        model.login.password = "short".to_owned();
+        assert!(model.apply_ui_intent(NativeUiIntent::Login));
+        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.login_request_in_flight);
     }
 
     #[test]
@@ -1553,8 +1818,8 @@ mod tests {
 
         let valid = NativeUiIntent::SubmitRegistration {
             account_id: "newhero".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
             birth_date: "2001-02-03".to_owned(),
             birth_date_binary: parse_registration_birth_date("2001-02-03").unwrap(),
             user_name: "New Hero".to_owned(),
@@ -1588,8 +1853,8 @@ mod tests {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::Registration;
         model.registration.account_id = "newhero".to_owned();
-        model.registration.password = "secret".to_owned();
-        model.registration.confirm_password = "secret".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
         assert!(model.apply_ui_intent(NativeUiIntent::SubmitRegistration {
             account_id: model.registration.account_id.clone(),
             password: model.registration.password.clone(),
@@ -1601,9 +1866,11 @@ mod tests {
             secret_answer: String::new(),
             email_address: String::new(),
         }));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
-            message: "account already exists".to_owned(),
-        }));
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+                message: "account already exists".to_owned(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::Registration);
         assert!(!model.register_request_in_flight);
         assert_eq!(model.registration.account_id, "newhero");
@@ -1941,7 +2208,10 @@ mod tests {
         }));
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.characters, roster);
-        assert_eq!(model.selected_character_index, roster.first().map(|character| character.index));
+        assert_eq!(
+            model.selected_character_index,
+            roster.first().map(|character| character.index)
+        );
         assert!(model.active_character.is_none());
         assert!(model.login.password.is_empty());
         let debug = format!("{model:?}");
@@ -1972,9 +2242,11 @@ mod tests {
         model.characters = starter_characters();
         model.active_character = model.characters.first().cloned();
         assert!(model.apply_ui_intent(NativeUiIntent::Logout));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::OperationFailure {
-            message: "log out failed".into(),
-        }));
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::OperationFailure {
+                message: "log out failed".into(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::InGame);
         assert!(model.active_character.is_some());
         assert!(!model.logout_request_in_flight);

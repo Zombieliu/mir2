@@ -368,6 +368,28 @@ export function resolveCrystalMapPlacement(reference, offsetIndex) {
   };
 }
 
+function resolveFullCrystalMapPlacement(reference, frame) {
+  if (!Number.isInteger(frame.x) || !Number.isInteger(frame.y)) return null;
+  if (reference.layer !== "front") return null;
+
+  // GameScene.DrawObjects applies .Lib X/Y only in these front-layer paths.
+  // Ordinary Draw/DrawUp/DrawUpBlend ignore those offsets. Atlas extraction
+  // retains the entire image, so ordinary full fallbacks use the same native
+  // bottom-left default as direct original-map exports.
+  const usesSourceOffset = reference.additive
+    ? /^(WemadeMir2\/Objects(13|26)|ShandaMir2\/[^/]+)$/i.test(
+        reference.libraryKey,
+      ) || (reference.frameIndex >= 2723 && reference.frameIndex <= 2732)
+    : /^WemadeMir2\/Objects27$/i.test(reference.libraryKey) &&
+      (frame.x !== 0 || frame.y !== 0);
+  if (!usesSourceOffset) return null;
+  return {
+    placementMode: "source-offset",
+    offsetX: frame.x,
+    offsetY: frame.y,
+  };
+}
+
 function parseArgs(argv) {
   const parsed = {};
   for (let index = 0; index < argv.length; index += 1) {
@@ -851,14 +873,7 @@ class FullCrystalMapFrameSource {
       })
       .png({ compressionLevel: 9, adaptiveFiltering: true })
       .toBuffer();
-    const placement =
-      Number.isInteger(frame.x) && Number.isInteger(frame.y)
-        ? {
-            placementMode: "source-offset",
-            offsetX: frame.x,
-            offsetY: frame.y,
-          }
-        : null;
+    const placement = resolveFullCrystalMapPlacement(reference, frame);
     return {
       noDraw: false,
       encoded,

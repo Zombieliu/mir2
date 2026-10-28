@@ -19,6 +19,12 @@ use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
 use super::hud_bar::weight_bar_asset;
+pub use super::hud_orb::{
+    crystal_hp_only, hp_only_orb_clip_geometry, orb_clip_geometry, orb_source_rect, HudSourceRect,
+    OrbClipGeometry, OrbSide, ORB_HALF_WIDTH, ORB_HEIGHT, ORB_HP_ONLY_WIDTH, ORB_HP_SOURCE_LEFT,
+    ORB_MP_SOURCE_LEFT, ORB_TOP, ORB_WIDTH,
+};
+use super::hud_orb::{orb_image_nodes, update_orb_image_node};
 use super::item_image::{layout_original_item_images, original_item_image_bundle};
 use super::item_tooltip::crystal_item_tooltip_document;
 use super::notice::NoticeDialogState;
@@ -27,12 +33,6 @@ use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::{
     spawn_crystal_image_button, CrystalHint, CrystalItemHint, Mir2CrystalHintPlugin,
-};
-use super::hud_orb::{orb_image_nodes, update_orb_image_node};
-pub use super::hud_orb::{
-    crystal_hp_only, hp_only_orb_clip_geometry, orb_clip_geometry, orb_source_rect,
-    HudSourceRect, OrbClipGeometry, OrbSide, ORB_HEIGHT, ORB_HALF_WIDTH, ORB_HP_ONLY_WIDTH,
-    ORB_HP_SOURCE_LEFT, ORB_MP_SOURCE_LEFT, ORB_TOP, ORB_WIDTH,
 };
 
 #[cfg(test)]
@@ -47,7 +47,13 @@ pub(crate) const HUD_Z_INDEX: i32 = 950;
 /// The HUD only attaches these values to buttons.  A platform host may later
 /// translate them into UI intents; this module intentionally has no consumer
 /// that mutates a shell, inventory, or gameplay resource.
-pub use super::shared_hud::{CrystalHudAction, CrystalHudHpText, CrystalHudMpText, CrystalHudHpAlternateTopText, CrystalHudHpAlternateBottomText, CrystalHudName, CrystalHudLevel, CrystalHudGold, CrystalHudExperienceText, CrystalHudWeightText, HP_TEXT_RECT, MP_TEXT_RECT, LEVEL_RECT, NAME_RECT, GOLD_RECT, EXPERIENCE_TEXT_RECT, ALTERNATE_TOP_RECT, ALTERNATE_BOTTOM_RECT, hp_view_alternate_top, hp_view_alternate_bottom, compact_mp_label, format_gold};
+pub use super::shared_hud::{
+    compact_mp_label, format_gold, hp_view_alternate_bottom, hp_view_alternate_top,
+    CrystalHudAction, CrystalHudExperienceText, CrystalHudGold, CrystalHudHpAlternateBottomText,
+    CrystalHudHpAlternateTopText, CrystalHudHpText, CrystalHudLevel, CrystalHudMpText,
+    CrystalHudName, CrystalHudWeightText, ALTERNATE_BOTTOM_RECT, ALTERNATE_TOP_RECT,
+    EXPERIENCE_TEXT_RECT, GOLD_RECT, HP_TEXT_RECT, LEVEL_RECT, MP_TEXT_RECT, NAME_RECT,
+};
 
 /// Root marker for the native-only Crystal HUD.
 #[derive(Component, Debug)]
@@ -59,32 +65,15 @@ pub struct CrystalHudHpOrb;
 #[derive(Component, Debug)]
 pub struct CrystalHudMpOrb;
 
-
-
-
-
-
-
-
-
-
-
 /// Crystal's alternate HP/MP presentation when `Settings.HPView` is disabled.
 /// The original client keeps the orbs, but replaces compact labels with two
 /// stacked raw-value labels.
 
-
-
-
 #[derive(Component, Debug)]
 pub struct CrystalHudExperienceBar;
 
-
-
 #[derive(Component, Debug)]
 pub struct CrystalHudWeightBar;
-
-
 
 #[derive(Component, Debug)]
 pub struct CrystalHudSpaceText;
@@ -231,15 +220,8 @@ impl CrystalNewMailBlink {
 
 /// Exact source-relative positions from Crystal's `MainDialog`.
 
-
-
-
-
-
 pub const MAP_TITLE_RECT: CrystalRect = CrystalRect::new(900.0, 2.0, 120.0, 18.0);
 pub const MAP_COORDINATE_RECT: CrystalRect = CrystalRect::new(944.0, 131.0, 56.0, 18.0);
-
-
 
 pub struct Mir2CrystalHudPlugin;
 
@@ -255,7 +237,10 @@ impl Plugin for Mir2CrystalHudPlugin {
             .init_resource::<MapModel>()
             .init_resource::<NativeShellModel>()
             .add_systems(Startup, spawn_crystal_hud)
-            .add_systems(Update, super::shared_hud::update_main_hud.run_if(resource_changed::<UiReadModel>))
+            .add_systems(
+                Update,
+                super::shared_hud::update_main_hud.run_if(resource_changed::<UiReadModel>),
+            )
             .add_systems(
                 Update,
                 update_hud_visibility.after(NativePlayerUiSet::Mutate),
@@ -264,7 +249,7 @@ impl Plugin for Mir2CrystalHudPlugin {
                 Update,
                 update_hud_read_model.run_if(resource_changed::<UiReadModel>),
             )
-
+            .add_systems(Update, update_hud_map_locale.after(update_hud_read_model))
             .add_systems(Update, update_hud_option_presentation)
             .add_systems(
                 Update,
@@ -416,7 +401,7 @@ fn spawn_crystal_hud(
                 root,
                 CrystalHudMapTitleContainer,
                 CrystalHudMapTitle,
-                ui_model.player.map_name.as_deref().unwrap_or(""),
+                &crate::native_i18n::tr(ui_model.player.map_name.as_deref().unwrap_or("")),
                 MAP_TITLE_RECT,
                 CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
@@ -506,18 +491,10 @@ fn spawn_orb_half(
     let (node, image) = orb_image_nodes(asset_server, side, ratio, hp_only, 0.0, ORB_TOP);
     match side {
         OrbSide::Hp => {
-            parent.spawn((
-                CrystalHudHpOrb,
-                node,
-                image,
-            ));
+            parent.spawn((CrystalHudHpOrb, node, image));
         }
         OrbSide::Mp => {
-            parent.spawn((
-                CrystalHudMpOrb,
-                node,
-                image,
-            ));
+            parent.spawn((CrystalHudMpOrb, node, image));
         }
     }
 }
@@ -995,23 +972,35 @@ fn update_hud_read_model(
         model.player.normalized_weight(),
     );
 
-    set_text(&mut text_queries.p5(), model.player.map_name.as_deref().unwrap_or("").to_owned());
+    set_text(
+        &mut text_queries.p5(),
+        crate::native_i18n::tr(model.player.map_name.as_deref().unwrap_or("")),
+    );
+}
 
+fn update_hud_map_locale(
+    model: Res<UiReadModel>,
+    mut last: Local<Option<(u64, crate::native_i18n::Locale)>>,
+    mut titles: Query<(&mut Text, &mut TextFont), With<CrystalHudMapTitle>>,
+) {
+    let locale = (crate::native_i18n::revision(), crate::native_i18n::locale());
+    if *last == Some(locale) {
+        return;
+    }
+    *last = Some(locale);
+    for (mut text, mut font) in &mut titles {
+        **text = crate::native_i18n::tr(model.player.map_name.as_deref().unwrap_or(""));
+        font.font = crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX).font;
+    }
 }
 
 /// Keep alternate HP/MP labels in a separate system because Bevy's `ParamSet`
 /// supports eight queries. It shares the same change gate as the primary HUD
 /// update and still reads only authoritative player values.
 
-
 /// `MainDialog` switches from compact HP/MP labels to two raw-value rows when
 /// `Settings.HPView` is off. Keeping this pure makes the alternate rendering
 /// independently testable from the Bevy node wiring.
-
-
-
-
-
 
 /// Apply the presentation choices this HUD owns. The state is read directly
 /// from `NativePlayerUiState.core.options`; this system never copies options
@@ -1072,8 +1061,16 @@ fn sync_orb_half<T>(
     T: Component,
 {
     for (mut node, mut image) in query.iter_mut() {
-        update_orb_image_node(&mut node, &mut image, asset_server,
-            side, ratio, hp_only, 0.0, ORB_TOP);
+        update_orb_image_node(
+            &mut node,
+            &mut image,
+            asset_server,
+            side,
+            ratio,
+            hp_only,
+            0.0,
+            ORB_TOP,
+        );
     }
 }
 
@@ -1525,8 +1522,6 @@ where
     }
 }
 
-
-
 /// Return the belt item at a fixed Crystal slot, ignoring bag/equipment items.
 pub fn belt_slot_item<'a>(model: &'a InventoryModel, slot: u8) -> Option<&'a ItemModel> {
     model
@@ -1582,6 +1577,49 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_map_title_locale_changes_without_changing_authoritative_model() {
+        use super::*;
+        use crate::native_i18n::{self, Locale};
+        let mut model = UiReadModel::default();
+        model.player.map_name = Some("Warrior".into());
+        model.player.name = Some("Password".into());
+        let mut app = App::new();
+        app.insert_resource(model)
+            .add_systems(Update, update_hud_map_locale);
+        app.edit_schedule(Update, |schedule| {
+            schedule.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        });
+        let title = app
+            .world_mut()
+            .spawn((
+                CrystalHudMapTitle,
+                Text::new("Warrior"),
+                crystal_text_font(12.0),
+            ))
+            .id();
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                app.update();
+                assert_eq!(
+                    app.world().get::<Text>(title).unwrap().0,
+                    native_i18n::tr("Warrior")
+                );
+                assert_eq!(
+                    app.world()
+                        .resource::<UiReadModel>()
+                        .player
+                        .map_name
+                        .as_deref(),
+                    Some("Warrior")
+                );
+                assert_eq!(
+                    app.world().resource::<UiReadModel>().player.name.as_deref(),
+                    Some("Password")
+                );
+            });
+        }
+    }
     use super::*;
     use crate::inventory::{
         CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,

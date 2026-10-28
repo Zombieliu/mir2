@@ -26,7 +26,7 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             level: player.level,
             location: player.position.clone(),
             direction: player.direction,
-            hair: 0,
+            hair: player.hair,
             light: player.light,
             weapon: player.weapon,
             weapon_effect: player.weapon_effect,
@@ -34,12 +34,10 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             poison: player.poison,
             dead: player.dead,
             hidden: player.hidden,
-            effect: if !player.dead
-                && player
-                    .buffs
-                    .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
-            {
+            effect: if !player.dead && player.buffs.contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE) {
                 CRYSTAL_MAGIC_SHIELD_UP_EFFECT
+            } else if !player.dead && player.buffs.contains_key(&25) {
+                13 // Source ElementalBarrier's AOI re-entry appearance.
             } else {
                 player.effect
             },
@@ -49,9 +47,9 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             riding_mount: player.riding_mount,
             fishing: player.fishing,
             transform_type: player.transform_type,
-            element_orb_effect: 0,
-            element_orb_level: 0,
-            element_orb_max: 0,
+            element_orb_effect: player.element_orb_effect,
+            element_orb_level: player.element_orb_level,
+            element_orb_max: player.element_orb_max,
             buffs: player
                 .buffs
                 .values()
@@ -204,7 +202,9 @@ pub(crate) fn apply_observer_action_state(
             player.effect = 0;
         }
         ServerPacket::ObjectRevived { info } if info.object_id == owner_local_object_id => {
-            if player.dead { player.life_generation = player.life_generation.saturating_add(1); }
+            if player.dead {
+                player.life_generation = player.life_generation.saturating_add(1);
+            }
             player.dead = false;
             player.clear_status_poisons();
         }
@@ -1185,9 +1185,6 @@ pub(crate) fn apply_retained_zone_object_packet(object: &mut ZoneObject, packet:
         }
         ServerPacket::ObjectHealth { info } if info.object_id == object.object_id => {
             object.health = Some(info.clone());
-            if info.percent == 0 {
-                update_retained_dead(&mut object.packet, true);
-            }
         }
         ServerPacket::ObjectMana { info } if info.object_id == object.object_id => {
             object.mana = Some(info.clone());

@@ -5,7 +5,12 @@ use mir2_simulation::{
 };
 use serde_json::Value;
 fn deer_base_speed() -> u64 {
-    u64::from(mir2_game_data::crystal_monster_by_name("Deer").unwrap().move_speed).max(900)
+    u64::from(
+        mir2_game_data::crystal_monster_by_name("Deer")
+            .unwrap()
+            .move_speed,
+    )
+    .max(900)
 }
 fn p(x: i32, y: i32) -> Point {
     Point { x, y }
@@ -157,12 +162,18 @@ fn saved_temperament_does_not_reroll_or_double_speed_discount_and_leaving_clears
     restored.handle(ZoneCommand::Leave {
         session_id: SessionId::new("a"),
     });
-    assert_eq!(zone.tick(2 + deer_base_speed() - 300), restored.tick(2 + deer_base_speed() - 300));
+    assert_eq!(
+        zone.tick(2 + deer_base_speed() - 300),
+        restored.tick(2 + deer_base_speed() - 300)
+    );
     assert_eq!(
         state(&restored, id)["special_ai"]["passive"]["target_object_id"],
         Value::Null
     );
-    assert_eq!(state(&restored, id)["move_speed_ms"], deer_base_speed() - 300);
+    assert_eq!(
+        state(&restored, id)["move_speed_ms"],
+        deer_base_speed() - 300
+    );
     assert_eq!(
         state(&restored, id)["position"],
         serde_json::json!({"x":10,"y":9})

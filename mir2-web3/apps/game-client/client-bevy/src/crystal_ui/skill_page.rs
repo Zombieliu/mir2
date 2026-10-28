@@ -1,6 +1,6 @@
 //! Native wrapper around the one shared learned-page painter.
 use super::*;
-use crate::crystal_ui::skill_page_shared::{SkillPagePlan, experience_label, key_label};
+use crate::crystal_ui::skill_page_shared::{experience_label, key_label, SkillPagePlan};
 pub(super) fn render(
     parent: &mut ChildSpawnerCommands,
     assets: Option<&AssetServer>,

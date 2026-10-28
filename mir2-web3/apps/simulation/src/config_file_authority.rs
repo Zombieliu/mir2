@@ -100,7 +100,10 @@ impl FileAuthority {
     /// Identity is a durable domain, not a disposable cache. Its path is always
     /// derived from the currently bound canonical account authority.
     pub(super) fn item_identity_path(&self, config: &SimulationConfig) -> Result<PathBuf, String> {
-        let path = config.account_store_path.as_deref().ok_or("item identity requires File authority")?;
+        let path = config
+            .account_store_path
+            .as_deref()
+            .ok_or("item identity requires File authority")?;
         if !self.owns(config, path) {
             return Err("item identity requires a live canonical File authority binding".into());
         }
@@ -160,7 +163,8 @@ impl FileAuthority {
         };
         let mut reconciliation_name = path.as_os_str().to_os_string();
         reconciliation_name.push(".reconciliation.pending");
-        let reconciliation_pending = match fs::symlink_metadata(PathBuf::from(reconciliation_name)) {
+        let reconciliation_pending = match fs::symlink_metadata(PathBuf::from(reconciliation_name))
+        {
             Ok(_) => true,
             Err(error) if error.kind() == io::ErrorKind::NotFound => false,
             Err(error) => return Err(format!("reconciliation guard inspection failed: {error}")),
@@ -272,13 +276,18 @@ mod tests {
     #[test]
     fn interrupted_operator_reconciliation_blocks_an_empty_publication_marker() {
         let path = path();
-        let authority = FileAuthority::acquire(&path, SimulationConfig::default().default_character).unwrap();
+        let authority =
+            FileAuthority::acquire(&path, SimulationConfig::default().default_character).unwrap();
         drop(authority);
         let mut guard = path.as_os_str().to_os_string();
         guard.push(".reconciliation.pending");
         fs::write(PathBuf::from(guard), b"durable pending operator decision").unwrap();
-        let reopened = FileAuthority::acquire(&path, SimulationConfig::default().default_character).unwrap();
-        assert!(matches!(*reopened.write_state.lock().unwrap(), AccountStoreWriteState::Frozen { .. }));
+        let reopened =
+            FileAuthority::acquire(&path, SimulationConfig::default().default_character).unwrap();
+        assert!(matches!(
+            *reopened.write_state.lock().unwrap(),
+            AccountStoreWriteState::Frozen { .. }
+        ));
         assert!(reopened.begin_publication().is_err());
     }
     #[test]

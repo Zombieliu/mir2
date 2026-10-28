@@ -6,7 +6,9 @@ use bevy::prelude::*;
 use bevy::text::{Justify, LineBreak, TextLayout};
 
 use super::assets::CrystalButtonAssetSet;
-use super::item_image::{original_item_image_bundle, spawn_original_item_image_tinted, OriginalItemPaintScale};
+use super::item_image::{
+    original_item_image_bundle, spawn_original_item_image_tinted, OriginalItemPaintScale,
+};
 use super::item_tooltip::{
     crystal_item_tooltip_document_with_options, CrystalItemTooltipOptions, CrystalStackSplitHint,
 };
@@ -89,13 +91,22 @@ pub struct BagPaintLayout {
 }
 
 impl Default for BagPaintLayout {
-    fn default() -> Self { Self { scale: 1.0, touch: false } }
+    fn default() -> Self {
+        Self {
+            scale: 1.0,
+            touch: false,
+        }
+    }
 }
 
 impl BagPaintLayout {
     fn rect(self, rect: CrystalRect) -> CrystalRect {
-        CrystalRect::new(rect.left * self.scale, rect.top * self.scale,
-            rect.width * self.scale, rect.height * self.scale)
+        CrystalRect::new(
+            rect.left * self.scale,
+            rect.top * self.scale,
+            rect.width * self.scale,
+            rect.height * self.scale,
+        )
     }
 }
 
@@ -221,7 +232,12 @@ fn text_at(parent: &mut ChildSpawnerCommands, text: String, rect: CrystalRect, f
     ));
 }
 
-fn paint_weight_bar(parent: &mut ChildSpawnerCommands, asset_server: &AssetServer, ratio: f32, layout: BagPaintLayout) {
+fn paint_weight_bar(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    ratio: f32,
+    layout: BagPaintLayout,
+) {
     let width = inventory_weight_bar_width(ratio);
     if width <= 0.0 {
         return;
@@ -264,8 +280,18 @@ pub fn paint_original_item_cell<A: Bundle, M: Bundle>(
     count_font: &TextFont,
 ) {
     paint_original_item_cell_with_hint(
-        parent, asset_server, item, rect, action, marker, enabled, muted, player,
-        count_font, CrystalStackSplitHint::default(), 1.0,
+        parent,
+        asset_server,
+        item,
+        rect,
+        action,
+        marker,
+        enabled,
+        muted,
+        player,
+        count_font,
+        CrystalStackSplitHint::default(),
+        1.0,
     );
 }
 
@@ -313,12 +339,20 @@ fn paint_original_item_cell_with_hint<A: Bundle, M: Bundle>(
             if muted {
                 if paint_scale == 1.0 {
                     spawn_original_item_image_tinted(
-                        cell, asset_server, index, rect.width as i32, rect.height as i32,
+                        cell,
+                        asset_server,
+                        index,
+                        rect.width as i32,
+                        rect.height as i32,
                         Color::srgba(105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 0.8),
                     );
                 } else {
                     let (marker, node, mut image) = original_item_image_bundle(
-                        asset_server, Some(index), rect.width as i32, rect.height as i32);
+                        asset_server,
+                        Some(index),
+                        rect.width as i32,
+                        rect.height as i32,
+                    );
                     image.color = Color::srgba(105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 0.8);
                     cell.spawn((marker, node, image, OriginalItemPaintScale(paint_scale)));
                 }
@@ -418,8 +452,17 @@ pub fn paint_crystal_inventory<A: Bundle>(
     cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
     decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
 ) {
-    paint_crystal_inventory_with_layout(parent, asset_server, inventory, player, options,
-        BagPaintLayout::default(), map_action, cell_policy, decorate);
+    paint_crystal_inventory_with_layout(
+        parent,
+        asset_server,
+        inventory,
+        player,
+        options,
+        BagPaintLayout::default(),
+        map_action,
+        cell_policy,
+        decorate,
+    );
 }
 
 pub fn paint_crystal_inventory_with_layout<A: Bundle>(
@@ -433,28 +476,61 @@ pub fn paint_crystal_inventory_with_layout<A: Bundle>(
     cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
     decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
 ) {
-    paint_crystal_inventory_profile(parent, asset_server, inventory, player, options, layout,
-        BagPaintControls::Full, map_action, cell_policy, decorate);
+    paint_crystal_inventory_profile(
+        parent,
+        asset_server,
+        inventory,
+        player,
+        options,
+        layout,
+        BagPaintControls::Full,
+        map_action,
+        cell_policy,
+        decorate,
+    );
 }
 
 /// The personal bag beside Hero exposes only ordinary bag pages and transfer cells.
 pub fn paint_crystal_hero_transfer_inventory<A: Bundle>(
-    parent: &mut ChildSpawnerCommands, asset_server: &AssetServer, inventory: &InventoryModel,
-    player: &PlayerStats, options: &BagPaintOptions, map_action: impl FnMut(BagPaintAction) -> A,
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    inventory: &InventoryModel,
+    player: &PlayerStats,
+    options: &BagPaintOptions,
+    map_action: impl FnMut(BagPaintAction) -> A,
     cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
     decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
 ) {
-    paint_crystal_inventory_profile(parent, asset_server, inventory, player, options,
-        BagPaintLayout::default(), BagPaintControls::HeroTransfer, map_action, cell_policy, decorate);
+    paint_crystal_inventory_profile(
+        parent,
+        asset_server,
+        inventory,
+        player,
+        options,
+        BagPaintLayout::default(),
+        BagPaintControls::HeroTransfer,
+        map_action,
+        cell_policy,
+        decorate,
+    );
 }
 
 #[derive(Clone, Copy)]
-enum BagPaintControls { Full, HeroTransfer }
+enum BagPaintControls {
+    Full,
+    HeroTransfer,
+}
 
 fn paint_crystal_inventory_profile<A: Bundle>(
-    parent: &mut ChildSpawnerCommands, asset_server: &AssetServer, inventory: &InventoryModel,
-    player: &PlayerStats, options: &BagPaintOptions, layout: BagPaintLayout, controls: BagPaintControls,
-    mut map_action: impl FnMut(BagPaintAction) -> A, mut cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    inventory: &InventoryModel,
+    player: &PlayerStats,
+    options: &BagPaintOptions,
+    layout: BagPaintLayout,
+    controls: BagPaintControls,
+    mut map_action: impl FnMut(BagPaintAction) -> A,
+    mut cell_policy: impl FnMut(BagPaintCellInfo<'_>) -> BagCellPolicy,
     mut decorate: impl FnMut(&mut ChildSpawnerCommands, BagPaintCellInfo<'_>),
 ) {
     parent.spawn((
@@ -481,7 +557,9 @@ fn paint_crystal_inventory_profile<A: Bundle>(
         ),
         (2, 146.0, 198, 739),
     ] {
-        if matches!(controls, BagPaintControls::HeroTransfer) && page == 2 { continue; }
+        if matches!(controls, BagPaintControls::HeroTransfer) && page == 2 {
+            continue;
+        }
         let action = BagPaintAction::SelectPage(page);
         let index = if options.page == page {
             active_index
@@ -513,8 +591,11 @@ fn paint_crystal_inventory_profile<A: Bundle>(
         360,
         361,
         362,
-        layout.rect(if layout.touch { CrystalRect::new(278.0, 2.0, 32.0, 32.0) }
-            else { CrystalRect::new(289.0, 3.0, 24.0, 21.0) }),
+        layout.rect(if layout.touch {
+            CrystalRect::new(278.0, 2.0, 32.0, 32.0)
+        } else {
+            CrystalRect::new(289.0, 3.0, 24.0, 21.0)
+        }),
         close,
         map_action(close),
     );
@@ -546,22 +627,24 @@ fn paint_crystal_inventory_profile<A: Bundle>(
         );
     }
     let delete = BagPaintAction::ToggleDelete;
-    if !layout.touch && matches!(controls, BagPaintControls::Full) { image_button(
-        parent,
-        asset_server,
-        "Prguse2",
-        if options.delete_mode { 368 } else { 366 },
-        if options.delete_mode { 368 } else { 367 },
-        368,
-        CrystalRect::new(
-            INVENTORY_DELETE_BUTTON_ORIGIN.x as f32,
-            INVENTORY_DELETE_BUTTON_ORIGIN.y as f32,
-            INVENTORY_DELETE_BUTTON_SIZE.width as f32,
-            INVENTORY_DELETE_BUTTON_SIZE.height as f32,
-        ),
-        delete,
-        map_action(delete),
-    ); }
+    if !layout.touch && matches!(controls, BagPaintControls::Full) {
+        image_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            if options.delete_mode { 368 } else { 366 },
+            if options.delete_mode { 368 } else { 367 },
+            368,
+            CrystalRect::new(
+                INVENTORY_DELETE_BUTTON_ORIGIN.x as f32,
+                INVENTORY_DELETE_BUTTON_ORIGIN.y as f32,
+                INVENTORY_DELETE_BUTTON_SIZE.width as f32,
+                INVENTORY_DELETE_BUTTON_SIZE.height as f32,
+            ),
+            delete,
+            map_action(delete),
+        );
+    }
 
     let (container, page_offset) = if options.page == 2 {
         (3, 0)
@@ -577,12 +660,14 @@ fn paint_crystal_inventory_profile<A: Bundle>(
                 top: Val::Px(INVENTORY_GRID_ORIGIN.y as f32 * layout.scale),
                 width: Val::Px(
                     (INVENTORY_GRID_STEP.x as usize * (INVENTORY_PAGE_COLUMNS - 1)
-                        + INVENTORY_CELL_SIZE.width as usize) as f32 * layout.scale,
+                        + INVENTORY_CELL_SIZE.width as usize) as f32
+                        * layout.scale,
                 ),
                 height: Val::Px(
                     (INVENTORY_GRID_STEP.y as usize
                         * (INVENTORY_PAGE_SIZE / INVENTORY_PAGE_COLUMNS - 1)
-                        + INVENTORY_CELL_SIZE.height as usize) as f32 * layout.scale,
+                        + INVENTORY_CELL_SIZE.height as usize) as f32
+                        * layout.scale,
                 ),
                 ..default()
             },
@@ -596,7 +681,8 @@ fn paint_crystal_inventory_profile<A: Bundle>(
                     continue;
                 }
                 let raw_item = page_items.iter().copied().find(|item| item.slot == slot);
-                let rect = layout.rect(bag_cell_rect(local_slot).expect("bounded inventory page cell"));
+                let rect =
+                    layout.rect(bag_cell_rect(local_slot).expect("bounded inventory page cell"));
                 let raw = BagPaintCellInfo {
                     container,
                     slot,
@@ -656,27 +742,53 @@ mod tests {
 
     fn paint_fixture(mut commands: Commands, assets: Res<AssetServer>, layout: Res<FixtureLayout>) {
         let inventory = InventoryModel {
-            items: vec![ItemModel { unique_id: Some(7), icon: 1, quantity: 7,
-                slot: 0, container: 0, name: "Potion".into(), ..default() }],
+            items: vec![ItemModel {
+                unique_id: Some(7),
+                icon: 1,
+                quantity: 7,
+                slot: 0,
+                container: 0,
+                name: "Potion".into(),
+                ..default()
+            }],
             ..default()
         };
-        let options = BagPaintOptions { page: 0, delete_mode: false, weight_ratio: None,
-            free_slots: Some(39), font: TextFont::default(),
-            stack_split_hint: CrystalStackSplitHint::MoreActions };
+        let options = BagPaintOptions {
+            page: 0,
+            delete_mode: false,
+            weight_ratio: None,
+            free_slots: Some(39),
+            font: TextFont::default(),
+            stack_split_hint: CrystalStackSplitHint::MoreActions,
+        };
         commands.spawn(Node::default()).with_children(|parent| {
-            paint_crystal_inventory_with_layout(parent, &assets, &inventory,
-                &PlayerStats::default(), &options, layout.0,
-                |_| (), |_| BagCellPolicy::new(true, true, false), |_, _| {});
+            paint_crystal_inventory_with_layout(
+                parent,
+                &assets,
+                &inventory,
+                &PlayerStats::default(),
+                &options,
+                layout.0,
+                |_| (),
+                |_| BagCellPolicy::new(true, true, false),
+                |_, _| {},
+            );
         });
     }
 
     #[test]
     fn touch_painter_uses_real_hit_nodes_and_bag_only_scaled_icon() {
-        for (css_scale, expected_touch) in [(1.0, false), (640.0 / 1368.0, true),
-            (844.0 / 1664.0, true)] {
+        for (css_scale, expected_touch) in
+            [(1.0, false), (640.0 / 1368.0, true), (844.0 / 1664.0, true)]
+        {
             let layout = if expected_touch {
-                BagPaintLayout { scale: 1.28 / css_scale, touch: true }
-            } else { BagPaintLayout::default() };
+                BagPaintLayout {
+                    scale: 1.28 / css_scale,
+                    touch: true,
+                }
+            } else {
+                BagPaintLayout::default()
+            };
             let mut app = App::new();
             app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
                 .init_asset::<Image>()
@@ -691,23 +803,44 @@ mod tests {
             let mut delete = 0;
             for (action, node) in actions.iter(world) {
                 match action {
-                    BagPaintAction::InspectCell { .. } => { cells += 1; }
-                    BagPaintAction::SelectPage(_) => { tabs += 1; }
-                    BagPaintAction::Close => { close += 1; }
-                    BagPaintAction::ToggleDelete => { delete += 1; }
+                    BagPaintAction::InspectCell { .. } => {
+                        cells += 1;
+                    }
+                    BagPaintAction::SelectPage(_) => {
+                        tabs += 1;
+                    }
+                    BagPaintAction::Close => {
+                        close += 1;
+                    }
+                    BagPaintAction::ToggleDelete => {
+                        delete += 1;
+                    }
                 }
                 if expected_touch {
-                    let (Val::Px(width), Val::Px(height)) = (node.width, node.height) else { panic!("real hit Node required"); };
-                    assert!(width * css_scale >= 39.99 && height * css_scale >= 39.99,
-                        "{action:?}: {}x{} CSS", width * css_scale, height * css_scale);
+                    let (Val::Px(width), Val::Px(height)) = (node.width, node.height) else {
+                        panic!("real hit Node required");
+                    };
+                    assert!(
+                        width * css_scale >= 39.99 && height * css_scale >= 39.99,
+                        "{action:?}: {}x{} CSS",
+                        width * css_scale,
+                        height * css_scale
+                    );
                 }
             }
-            assert_eq!((cells, tabs, close, delete), (40, 3, 1, usize::from(!expected_touch)));
+            assert_eq!(
+                (cells, tabs, close, delete),
+                (40, 3, 1, usize::from(!expected_touch))
+            );
             let mut scaled = world.query::<&OriginalItemPaintScale>();
             assert_eq!(scaled.iter(world).count(), usize::from(expected_touch));
             if !expected_touch {
                 let mut first = world.query::<(&BagPaintCell, &Node)>();
-                let node = first.iter(world).find(|(cell, _)| cell.slot == 0).unwrap().1;
+                let node = first
+                    .iter(world)
+                    .find(|(cell, _)| cell.slot == 0)
+                    .unwrap()
+                    .1;
                 assert_eq!((node.width, node.height), (Val::Px(36.0), Val::Px(32.0)));
             }
         }

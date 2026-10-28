@@ -99,9 +99,17 @@ use super::movement::{current_location, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_object_in_data_range, crystal_npc_object_visible_in_world,
     crystal_npc_visible_to_character_for_profile, crystal_quest_ids_by_npc, dismiss_dialog,
-    sell_item_impl,
-    CrystalNpcLocalTime, NpcFlagState,
+    sell_item_impl, CrystalNpcLocalTime, NpcFlagState,
 };
+use super::npc_gold_buy_outcome::{
+    finish_npc_gold_buy_processing, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
+    NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyRequest,
+};
+use super::npc_purchase_outcome::{
+    finish_npc_purchase_processing, NpcPurchaseBeforeExecution, NpcPurchaseProcessingError,
+    NpcPurchaseProcessingExecution, NpcPurchaseProcessingOutcome, NpcPurchaseRequest,
+};
+use super::quests::quest_recurrence::{quest_completion_is_permanent, refresh_quest_recurrence};
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
     completed_quest_ids, crystal_npc_quest_icon, crystal_quest_finish_npc_matches,
@@ -110,15 +118,11 @@ use super::quests::{
     effective_quest_ids_for_npc, ensure_runtime_quest, newcomer_daily_bonus_update_packet,
     quest_definition_exists, quest_log_snapshots, quest_template_by_id,
 };
-use super::quests::quest_recurrence::{
-    quest_completion_is_permanent, refresh_quest_recurrence,
-};
 use super::ranking_inspect::{
     project_ranking_inspect, ranking_inspect_equipment_projection, ranking_inspect_live_facts,
     resolve_ranking_inspect_target, saved_ranking_inspect_facts, RankingInspectIdentity,
     RankingInspectOnlineProjection, RankingInspectSource,
 };
-use super::RankingInspectPresence;
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
     get_rented_items_impl, item_rental_fee_impl, item_rental_lock_fee_impl,
@@ -137,12 +141,6 @@ use super::resources::{
 };
 use super::save::*;
 use super::session::SimulationSession;
-use super::npc_gold_buy_outcome::{finish_npc_gold_buy_processing, NpcGoldBuyRequest,
-    NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError,
-    NpcGoldBuyProcessingExecution};
-use super::npc_purchase_outcome::{finish_npc_purchase_processing, NpcPurchaseRequest,
-    NpcPurchaseBeforeExecution, NpcPurchaseProcessingOutcome, NpcPurchaseProcessingError,
-    NpcPurchaseProcessingExecution};
 use super::skills::{
     assign_magic_key, cast_skill_with_context, skill_key_for_crystal_spell, SkillCastContext,
 };
@@ -155,6 +153,7 @@ use super::stage5::{
     stage5_claim_mail_authoritative, stage5_item_name, stage5_player_name,
     validate_stage5_guild_storage_item_carriers, Stage5MailClaimOutcome,
 };
+use super::RankingInspectPresence;
 
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
 const CRYSTAL_MAIL_CAPACITY: usize = 100;
@@ -256,13 +255,18 @@ fn stage5_mail_cost(gold: u32, items: &[ItemState], has_stamp: bool) -> Option<u
     if has_stamp {
         return Some(0);
     }
-    items.iter().try_fold((gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?, |cost, item| {
-        let template = crystal_item_template_for_item_key(&item.key)?;
-        let price = crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
-        // Match PlayerObject.GetMailCost's double division and per-item floor.
-        let insurance = ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
-        cost.checked_add(insurance)
-    })
+    items.iter().try_fold(
+        (gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?,
+        |cost, item| {
+            let template = crystal_item_template_for_item_key(&item.key)?;
+            let price =
+                crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
+            // Match PlayerObject.GetMailCost's double division and per-item floor.
+            let insurance =
+                ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
+            cost.checked_add(insurance)
+        },
+    )
 }
 
 struct Stage5MailParcelPlan {
@@ -272,34 +276,61 @@ struct Stage5MailParcelPlan {
 }
 
 fn stage5_mail_parcel_plan(
-    inventory: &[ItemState], gold: u32, items_idx: &[u64; 5], stamped: bool,
+    inventory: &[ItemState],
+    gold: u32,
+    items_idx: &[u64; 5],
+    stamped: bool,
 ) -> Option<Stage5MailParcelPlan> {
     let ids = stage5_mail_attachment_ids(items_idx)?;
-    let stamp = stamped.then(|| inventory.iter().find(|item| {
-        matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            && item.quantity > 0
-            && exact_mail_item_state_is_valid(item)
-            && crystal_item_template_for_item_key(&item.key)
-                .is_some_and(|template| template.item_type == 0 && template.shape == 1)
-    })).flatten().cloned();
+    let stamp = stamped
+        .then(|| {
+            inventory.iter().find(|item| {
+                matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                    && item.quantity > 0
+                    && exact_mail_item_state_is_valid(item)
+                    && crystal_item_template_for_item_key(&item.key)
+                        .is_some_and(|template| template.item_type == 0 && template.shape == 1)
+            })
+        })
+        .flatten()
+        .cloned();
     if let Some(stamp) = &stamp {
         let id = item_unique_id(stamp);
         // A stamp cannot pay postage and also be mailed; reject the ambiguous
         // request rather than relying on attachment ordering or stack counts.
-        if ids.contains(&id) || inventory.iter().filter(|item| item_unique_id(item) == id).count() != 1 {
+        if ids.contains(&id)
+            || inventory
+                .iter()
+                .filter(|item| item_unique_id(item) == id)
+                .count()
+                != 1
+        {
             return None;
         }
     } else if items_idx[1..].iter().any(|id| *id != 0) {
         return None;
     }
-    let attachments = ids.iter().map(|id| {
-        let matches = inventory.iter().filter(|item| item_matches_inventory_unique_id(item, *id)).collect::<Vec<_>>();
-        let [item] = matches.as_slice() else { return None; };
-        (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            && stage5_mail_item_allowed(item)).then(|| (*item).clone())
-    }).collect::<Option<Vec<_>>>()?;
+    let attachments = ids
+        .iter()
+        .map(|id| {
+            let matches = inventory
+                .iter()
+                .filter(|item| item_matches_inventory_unique_id(item, *id))
+                .collect::<Vec<_>>();
+            let [item] = matches.as_slice() else {
+                return None;
+            };
+            (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                && stage5_mail_item_allowed(item))
+            .then(|| (*item).clone())
+        })
+        .collect::<Option<Vec<_>>>()?;
     let cost = stage5_mail_cost(gold, &attachments, stamp.is_some())?;
-    Some(Stage5MailParcelPlan { cost, stamp, attachments })
+    Some(Stage5MailParcelPlan {
+        cost,
+        stamp,
+        attachments,
+    })
 }
 
 fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bool) -> Option<u32> {
@@ -307,12 +338,18 @@ fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bo
     let config = &world.resource::<RuntimeConfigResource>().config;
     let store = config.account_store.lock().ok()?;
     let account = store.accounts.get(&sender.account_id)?;
-    let character = account.characters.iter().find(|character| character.index == sender.character_index && character.name == sender.character_name)?;
+    let character = account.characters.iter().find(|character| {
+        character.index == sender.character_index && character.name == sender.character_name
+    })?;
     let save = account.saves.get(&character.index)?;
     if save.character.index != character.index || save.character.name != character.name {
         return None;
     }
-    let inventory = save.inventory_items_json.iter().map(|state| serde_json::from_str::<ItemState>(state).ok()).collect::<Option<Vec<_>>>()?;
+    let inventory = save
+        .inventory_items_json
+        .iter()
+        .map(|state| serde_json::from_str::<ItemState>(state).ok())
+        .collect::<Option<Vec<_>>>()?;
     stage5_mail_parcel_plan(&inventory, gold, items_idx, stamped).map(|plan| plan.cost)
 }
 
@@ -567,13 +604,20 @@ fn stage5_commit_mail_transaction(
             Some(target_save)
         };
         let sender_baseline_revision = sender_save.revision;
-        let durable_inventory = sender_save.inventory_items_json.iter()
+        let durable_inventory = sender_save
+            .inventory_items_json
+            .iter()
             .map(|state| serde_json::from_str::<ItemState>(state))
             .collect::<Result<Vec<_>, _>>()
             .map_err(|error| format!("invalid parcel inventory: {error}"))?;
-        let durable_plan = stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
-            .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
-        let durable_stamp_json = durable_plan.stamp.as_ref().map(serde_json::to_string).transpose()
+        let durable_plan =
+            stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
+                .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
+        let durable_stamp_json = durable_plan
+            .stamp
+            .as_ref()
+            .map(serde_json::to_string)
+            .transpose()
             .map_err(|error| format!("invalid parcel stamp: {error}"))?;
         if durable_stamp_json.as_deref() != expected_stamp_state_json
             || mail.gold.checked_add(durable_plan.cost) != Some(total)
@@ -591,9 +635,14 @@ fn stage5_commit_mail_transaction(
             .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
         if let Some(mut stamp) = durable_plan.stamp {
             let stamp_id = item_unique_id(&stamp);
-            let index = sender_save.inventory_items_json.iter().position(|state| {
-                serde_json::from_str::<ItemState>(state).is_ok_and(|item| item_unique_id(&item) == stamp_id)
-            }).ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
+            let index = sender_save
+                .inventory_items_json
+                .iter()
+                .position(|state| {
+                    serde_json::from_str::<ItemState>(state)
+                        .is_ok_and(|item| item_unique_id(&item) == stamp_id)
+                })
+                .ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
             if stamp.quantity == 1 {
                 sender_save.inventory_items_json.remove(index);
             } else {
@@ -778,7 +827,10 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     let Some(plan) = stage5_mail_parcel_plan(
-        &world.resource::<InventoryResource>().inventory_items, gold, &items_idx, stamped,
+        &world.resource::<InventoryResource>().inventory_items,
+        gold,
+        &items_idx,
+        stamped,
     ) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
@@ -792,7 +844,8 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
 
-    let item_states_json = match plan.attachments
+    let item_states_json = match plan
+        .attachments
         .iter()
         .map(serde_json::to_string)
         .collect::<Result<Vec<_>, _>>()
@@ -863,7 +916,10 @@ fn stage5_send_mail_packet(
         .inventory_items
         .iter()
         .filter_map(|item| {
-            let remaining = committed_quantities.get(&item_unique_id(item)).copied().unwrap_or(0);
+            let remaining = committed_quantities
+                .get(&item_unique_id(item))
+                .copied()
+                .unwrap_or(0);
             let removed = item.quantity.saturating_sub(remaining);
             (removed > 0).then_some((item_unique_id(item), removed))
         })
@@ -893,6 +949,15 @@ fn stage5_send_mail_packet(
 fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacket> {
     let Some(mail_id) = u32::try_from(mail_id).ok() else {
         return Vec::new();
+    };
+    // Capture immutable issuance authority before the save transaction takes
+    // the Store lock; the staged claim must not re-enter that lock.
+    let card_units = match super::billing_monthly_card::trusted_claim_units(world) {
+        Ok(units) => units,
+        Err(error) => {
+            super::shared_guild_experience::reject_source(world, error);
+            return Vec::new();
+        }
     };
     let base_inventory = world.resource::<InventoryResource>().clone();
     let base_player = world.resource::<PlayerRuntimeResource>().clone();
@@ -925,6 +990,7 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
         staged_systems.mail = visible_mail;
 
         let mut staged_world = World::new();
+        staged_world.insert_resource(card_units);
         staged_world.insert_resource(staged_inventory);
         staged_world.insert_resource(staged_player);
         staged_world.insert_resource(Stage5SystemsResource {
@@ -1368,17 +1434,64 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
     let max_mp = super::hero_ai::hero_authoritative_stat(world, CRYSTAL_STAT_MP).max(0);
     let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
     let saved = world.resource::<HeroInventoryResource>().saved_vitals;
-    let hp = live.map(|v|v.hp).or_else(||saved.map(|v|v.hp)).unwrap_or(max_hp);
-    let mp = live.map(|v|v.mp).or_else(||saved.map(|v|v.mp)).unwrap_or(max_mp);
-    let magics = world.resource::<Stage5SystemsResource>().stage5_systems.hero_learned_magics.iter().filter_map(|learned| {
-        let template = crystal_magic_by_spell(&format!("{:?}", learned.spell))?;
-        Some(mir2_protocol::ClientMagic {
-            name:template.name.clone(),spell:learned.spell,base_cost:template.base_cost,level_cost:template.level_cost,icon:template.icon,
-            level1:template.level1,level2:template.level2,level3:template.level3,need1:template.need1,need2:template.need2,need3:template.need3,
-            level:learned.level,key:learned.key,experience:learned.experience,
-            delay:i64::from(template.delay_base.saturating_sub(template.delay_reduction.saturating_mul(u32::from(learned.level))).max(1)),range:template.range,cast_time:super::hero_ai::hero_cast::cast_offset(world,learned.spell,i64::from(template.delay_base.saturating_sub(template.delay_reduction.saturating_mul(u32::from(learned.level))).max(1))),
+    let hp = live
+        .map(|v| v.hp)
+        .or_else(|| saved.map(|v| v.hp))
+        .unwrap_or(max_hp);
+    let mp = live
+        .map(|v| v.mp)
+        .or_else(|| saved.map(|v| v.mp))
+        .unwrap_or(max_mp);
+    let magics = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero_learned_magics
+        .iter()
+        .filter_map(|learned| {
+            let template = crystal_magic_by_spell(&format!("{:?}", learned.spell))?;
+            Some(mir2_protocol::ClientMagic {
+                name: template.name.clone(),
+                spell: learned.spell,
+                base_cost: template.base_cost,
+                level_cost: template.level_cost,
+                icon: template.icon,
+                level1: template.level1,
+                level2: template.level2,
+                level3: template.level3,
+                need1: template.need1,
+                need2: template.need2,
+                need3: template.need3,
+                level: learned.level,
+                key: learned.key,
+                experience: learned.experience,
+                delay: i64::from(
+                    template
+                        .delay_base
+                        .saturating_sub(
+                            template
+                                .delay_reduction
+                                .saturating_mul(u32::from(learned.level)),
+                        )
+                        .max(1),
+                ),
+                range: template.range,
+                cast_time: super::hero_ai::hero_cast::cast_offset(
+                    world,
+                    learned.spell,
+                    i64::from(
+                        template
+                            .delay_base
+                            .saturating_sub(
+                                template
+                                    .delay_reduction
+                                    .saturating_mul(u32::from(learned.level)),
+                            )
+                            .max(1),
+                    ),
+                ),
+            })
         })
-    }).collect();
+        .collect();
     Some(ServerPacket::HeroInformation {
         info: HeroUserInformation {
             object_id,
@@ -1404,9 +1517,24 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
 }
 
 pub(super) fn hero_bootstrap_packets(world: &World) -> Vec<ServerPacket> {
-    let Some(info)=stage5_hero_information_packet(world) else {return Vec::new();};
-    let class=world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap().class;
-    vec![ServerPacket::HeroBaseStatsInfo {stats:mir2_game_data::crystal_hero_settings().base_stats(class).clone()},info]
+    let Some(info) = stage5_hero_information_packet(world) else {
+        return Vec::new();
+    };
+    let class = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero
+        .as_ref()
+        .unwrap()
+        .class;
+    vec![
+        ServerPacket::HeroBaseStatsInfo {
+            stats: mir2_game_data::crystal_hero_settings()
+                .base_stats(class)
+                .clone(),
+        },
+        info,
+    ]
 }
 
 fn stage5_current_hero_info(world: &World) -> Option<ClientHeroInformation> {
@@ -1437,86 +1565,201 @@ fn stage5_hero_ready_for_inventory(world: &World) -> bool {
         && current_hero_object_id(world).is_some()
 }
 
-fn transfer_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket> {
-    let failure=ServerPacket::TransferHeroItem {from,to,success:false};
-    if !stage5_hero_ready_for_inventory(world) {return vec![failure];}
-    let mut hero=world.resource::<HeroInventoryResource>().clone();
-    let Ok(hero_ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
-    let Some(from_slot)=u8::try_from(from).ok() else {return vec![failure];};
-    let Some(to_slot)=u8::try_from(to).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
-    let mut inventory=world.resource::<InventoryResource>().clone();
-    if !is_valid_inventory_slot(from_slot,inventory.inventory_capacity) || hero.items.iter().any(|item|item.slot==to_slot) {return vec![failure];}
-    let Some(index)=inventory.inventory_items.iter().position(|item|inventory_item_matches_index(item,from_slot)) else {return vec![failure];};
-    let mut item=inventory.inventory_items[index].clone();
-    if stage5_trade_reserves_item(world,&item) || item_has_crystal_or_rental_bind_flag(&item,CRYSTAL_BIND_NO_HERO) {return vec![failure];}
-    if item_unique_id(&item)==0 && item.user_item_metadata.is_none() && item.socketed.is_empty() {
+fn transfer_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    let failure = ServerPacket::TransferHeroItem {
+        from,
+        to,
+        success: false,
+    };
+    if !stage5_hero_ready_for_inventory(world) {
+        return vec![failure];
+    }
+    let mut hero = world.resource::<HeroInventoryResource>().clone();
+    let Ok(hero_ids) = super::hero_inventory::validate_hero_custody(&hero) else {
+        return vec![failure];
+    };
+    let Some(from_slot) = u8::try_from(from).ok() else {
+        return vec![failure];
+    };
+    let Some(to_slot) = u8::try_from(to).ok().filter(|slot| *slot < hero.capacity) else {
+        return vec![failure];
+    };
+    let mut inventory = world.resource::<InventoryResource>().clone();
+    if !is_valid_inventory_slot(from_slot, inventory.inventory_capacity)
+        || hero.items.iter().any(|item| item.slot == to_slot)
+    {
+        return vec![failure];
+    }
+    let Some(index) = inventory
+        .inventory_items
+        .iter()
+        .position(|item| inventory_item_matches_index(item, from_slot))
+    else {
+        return vec![failure];
+    };
+    let mut item = inventory.inventory_items[index].clone();
+    if stage5_trade_reserves_item(world, &item)
+        || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_NO_HERO)
+    {
+        return vec![failure];
+    }
+    if item_unique_id(&item) == 0 && item.user_item_metadata.is_none() && item.socketed.is_empty() {
         // Legacy slot-zero roots have no global identity. Promote only this
         // staged root before crossing custody; an exact sidecar UID is never
         // rewritten, and failure leaves the old personal carrier untouched.
-        inventory.reserved_item_unique_ids.extend(hero_ids.iter().copied());
+        inventory
+            .reserved_item_unique_ids
+            .extend(hero_ids.iter().copied());
         inventory.reserved_item_unique_ids.insert(0);
-        item.unique_id=super::inventory::allocate_item_unique_id(&inventory,item.container,item.slot);
-        let Ok(wire)=super::items::try_user_item_from_item_state(&item) else{return vec![failure];};
-        let Ok(promoted)=super::items::try_item_state_from_user_item(item,&wire) else{return vec![failure];};
-        item=promoted;inventory.inventory_items[index]=item.clone();
+        item.unique_id =
+            super::inventory::allocate_item_unique_id(&inventory, item.container, item.slot);
+        let Ok(wire) = super::items::try_user_item_from_item_state(&item) else {
+            return vec![failure];
+        };
+        let Ok(promoted) = super::items::try_item_state_from_user_item(item, &wire) else {
+            return vec![failure];
+        };
+        item = promoted;
+        inventory.inventory_items[index] = item.clone();
     }
-    if !super::item_custody::can_take(&inventory,&item) || super::hero_inventory::reject_cross_custody_ids(&item,&hero_ids).is_err() {return vec![failure];}
-    let weight=hero.items.iter().map(super::hero_inventory::item_weight).fold(0u32,u32::saturating_add).saturating_add(super::hero_inventory::item_weight(&item));
-    if weight>super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_BAG_WEIGHT).max(0) as u32 {
-        return vec![system_message_key(world,"server.TooHeavyToTransfer"),failure];
+    if !super::item_custody::can_take(&inventory, &item)
+        || super::hero_inventory::reject_cross_custody_ids(&item, &hero_ids).is_err()
+    {
+        return vec![failure];
+    }
+    let weight = hero
+        .items
+        .iter()
+        .map(super::hero_inventory::item_weight)
+        .fold(0u32, u32::saturating_add)
+        .saturating_add(super::hero_inventory::item_weight(&item));
+    if weight
+        > super::hero_ai::hero_authoritative_stat(
+            world,
+            super::crystal_compat::CRYSTAL_STAT_BAG_WEIGHT,
+        )
+        .max(0) as u32
+    {
+        return vec![
+            system_message_key(world, "server.TooHeavyToTransfer"),
+            failure,
+        ];
     }
     inventory.inventory_items.remove(index);
-    item.slot=to_slot;item.container=ItemContainer::Bag1;
+    item.slot = to_slot;
+    item.container = ItemContainer::Bag1;
     hero.items.push(item);
-    let Ok(ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
+    let Ok(ids) = super::hero_inventory::validate_hero_custody(&hero) else {
+        return vec![failure];
+    };
     inventory.reserved_item_unique_ids.extend(ids);
-    *world.resource_mut::<InventoryResource>()=inventory;
-    *world.resource_mut::<HeroInventoryResource>()=hero;
-    let mut packets=vec![ServerPacket::TransferHeroItem {from,to,success:true}];
-    packets.extend(hero_bootstrap_packets(world));packets
+    *world.resource_mut::<InventoryResource>() = inventory;
+    *world.resource_mut::<HeroInventoryResource>() = hero;
+    let mut packets = vec![ServerPacket::TransferHeroItem {
+        from,
+        to,
+        success: true,
+    }];
+    packets.extend(hero_bootstrap_packets(world));
+    packets
 }
-fn take_back_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket> {
-    let failure=ServerPacket::TakeBackHeroItem {from,to,success:false};
-    if !stage5_hero_ready_for_inventory(world) {return vec![failure];}
-    let mut hero=world.resource::<HeroInventoryResource>().clone();
-    if super::hero_inventory::validate_hero_custody(&hero).is_err() {return vec![failure];}
-    let Some(from_slot)=u8::try_from(from).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
-    let Some(to_slot)=u8::try_from(to).ok() else {return vec![failure];};
-    let Some(index)=hero.items.iter().position(|item|item.slot==from_slot) else {return vec![failure];};
-    let item=hero.items.remove(index);
-    let Ok(held)=super::item_custody::reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems) else {return vec![failure];};
-    if super::hero_inventory::reject_cross_custody_ids(&item,&held).is_err() {return vec![failure];}
-    let Some((mut inventory,_))=super::item_custody::plan_return(world.resource::<InventoryResource>(),&item,Some(to_slot),false) else {return vec![failure];};
-    let Ok(hero_ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
-    inventory.reserved_item_unique_ids=held;inventory.reserved_item_unique_ids.extend(hero_ids);
-    *world.resource_mut::<InventoryResource>()=inventory;
-    *world.resource_mut::<HeroInventoryResource>()=hero;
-    let mut packets=vec![ServerPacket::TakeBackHeroItem {from,to,success:true}];
-    packets.extend(hero_bootstrap_packets(world));packets
+fn take_back_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    let failure = ServerPacket::TakeBackHeroItem {
+        from,
+        to,
+        success: false,
+    };
+    if !stage5_hero_ready_for_inventory(world) {
+        return vec![failure];
+    }
+    let mut hero = world.resource::<HeroInventoryResource>().clone();
+    if super::hero_inventory::validate_hero_custody(&hero).is_err() {
+        return vec![failure];
+    }
+    let Some(from_slot) = u8::try_from(from).ok().filter(|slot| *slot < hero.capacity) else {
+        return vec![failure];
+    };
+    let Some(to_slot) = u8::try_from(to).ok() else {
+        return vec![failure];
+    };
+    let Some(index) = hero.items.iter().position(|item| item.slot == from_slot) else {
+        return vec![failure];
+    };
+    let item = hero.items.remove(index);
+    let Ok(held) = super::item_custody::reserved_ids(
+        &world.resource::<Stage5SystemsResource>().stage5_systems,
+    ) else {
+        return vec![failure];
+    };
+    if super::hero_inventory::reject_cross_custody_ids(&item, &held).is_err() {
+        return vec![failure];
+    }
+    let Some((mut inventory, _)) = super::item_custody::plan_return(
+        world.resource::<InventoryResource>(),
+        &item,
+        Some(to_slot),
+        false,
+    ) else {
+        return vec![failure];
+    };
+    let Ok(hero_ids) = super::hero_inventory::validate_hero_custody(&hero) else {
+        return vec![failure];
+    };
+    inventory.reserved_item_unique_ids = held;
+    inventory.reserved_item_unique_ids.extend(hero_ids);
+    *world.resource_mut::<InventoryResource>() = inventory;
+    *world.resource_mut::<HeroInventoryResource>() = hero;
+    let mut packets = vec![ServerPacket::TakeBackHeroItem {
+        from,
+        to,
+        success: true,
+    }];
+    packets.extend(hero_bootstrap_packets(world));
+    packets
 }
 
-fn consume_hero_inventory_item_at_index(world:&mut World,item_index:usize) {
-    let removed={
-        let mut hero=world.resource_mut::<HeroInventoryResource>();
-        let Some(item)=hero.items.get_mut(item_index) else {return;};
-        if item.quantity>1 {item.quantity-=1;None} else {Some(hero.items.remove(item_index))}
+fn consume_hero_inventory_item_at_index(world: &mut World, item_index: usize) {
+    let removed = {
+        let mut hero = world.resource_mut::<HeroInventoryResource>();
+        let Some(item) = hero.items.get_mut(item_index) else {
+            return;
+        };
+        if item.quantity > 1 {
+            item.quantity -= 1;
+            None
+        } else {
+            Some(hero.items.remove(item_index))
+        }
     };
-    if let Some(item)=removed {
-        if let Ok(carrier)=super::items::try_user_item_from_item_state(&item) {
-            let mut ids=BTreeSet::new();
-            if super::hero_inventory::collect_item_ids(&carrier,&mut ids).is_ok() {
-                let mut inventory=world.resource_mut::<InventoryResource>();
-                for id in ids {inventory.reserved_item_unique_ids.remove(&id);}
+    if let Some(item) = removed {
+        if let Ok(carrier) = super::items::try_user_item_from_item_state(&item) {
+            let mut ids = BTreeSet::new();
+            if super::hero_inventory::collect_item_ids(&carrier, &mut ids).is_ok() {
+                let mut inventory = world.resource_mut::<InventoryResource>();
+                for id in ids {
+                    inventory.reserved_item_unique_ids.remove(&id);
+                }
             }
         }
     }
 }
-fn hero_use_success(world:&World,unique_id:u64,mut packets:Vec<ServerPacket>)->Vec<ServerPacket> {
-    if let Some(vitals)=hero_entity(world).and_then(|entity|entity_player_vitals(world,entity)) {
-        packets.push(ServerPacket::HeroHealthChanged {hp:vitals.hp,mp:vitals.mp});
+fn hero_use_success(
+    world: &World,
+    unique_id: u64,
+    mut packets: Vec<ServerPacket>,
+) -> Vec<ServerPacket> {
+    if let Some(vitals) = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity))
+    {
+        packets.push(ServerPacket::HeroHealthChanged {
+            hp: vitals.hp,
+            mp: vitals.mp,
+        });
     }
     packets.extend(hero_bootstrap_packets(world));
-    prepend_optional_packet(use_item_ack(Some((unique_id,MirGridType::HeroInventory)),true),packets)
+    prepend_optional_packet(
+        use_item_ack(Some((unique_id, MirGridType::HeroInventory)), true),
+        packets,
+    )
 }
 
 fn hero_use_item_failed(unique_id: u64) -> Vec<ServerPacket> {
@@ -1545,29 +1788,51 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
     else {
         return hero_use_item_failed(unique_id);
     };
-    if super::item_custody::refresh(world).is_err() {return hero_use_item_failed(unique_id);}
+    if super::item_custody::refresh(world).is_err() {
+        return hero_use_item_failed(unique_id);
+    }
     let item = world.resource::<HeroInventoryResource>().items[hero_item_index].clone();
     let ack = Some((unique_id, MirGridType::HeroInventory));
     let item_template = crystal_item_template_for_item_key(&item.key);
     let mut packets = Vec::new();
 
     if let Some(template) = item_template.as_ref() {
-        let hero=world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap();
-        if super::items::crystal_hero_item_requirement_rejected(world,hero.level,hero.class,hero.gender,template) || item.quantity==0 || super::items::validate_committed_item_state_carrier(&item).is_err() {
+        let hero = world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .unwrap();
+        if super::items::crystal_hero_item_requirement_rejected(
+            world,
+            hero.level,
+            hero.class,
+            hero.gender,
+            template,
+        ) || item.quantity == 0
+            || super::items::validate_committed_item_state_carrier(&item).is_err()
+        {
             return hero_use_item_failed(unique_id);
         }
-        if template.item_type==super::crystal_compat::CRYSTAL_ITEM_TYPE_SCROLL && template.shape==15 {
-            let capacity=world.resource::<HeroInventoryResource>().capacity;
-            if capacity>=42 {return vec![use_item_ack(ack,false).unwrap(),system_message_key(world,"server.HeroInventoryMax")];}
+        if template.item_type == super::crystal_compat::CRYSTAL_ITEM_TYPE_SCROLL
+            && template.shape == 15
+        {
+            let capacity = world.resource::<HeroInventoryResource>().capacity;
+            if capacity >= 42 {
+                return vec![
+                    use_item_ack(ack, false).unwrap(),
+                    system_message_key(world, "server.HeroInventoryMax"),
+                ];
+            }
             {
-                let mut hero=world.resource_mut::<HeroInventoryResource>();
+                let mut hero = world.resource_mut::<HeroInventoryResource>();
                 super::hero_inventory::expand_capacity(&mut hero);
             }
-            consume_hero_inventory_item_at_index(world,hero_item_index);
-            packets.push(system_message_key(world,"server.HeroInventoryIncreased"));
+            consume_hero_inventory_item_at_index(world, hero_item_index);
+            packets.push(system_message_key(world, "server.HeroInventoryIncreased"));
             // Hero.Enqueue drops ResizeInventory and the client routes that packet
             // to the player. Refresh this Hero's exact array instead.
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
 
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION && current_map_disallows_drug(world) {
@@ -1584,7 +1849,7 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
                 return prepend_optional_packet(use_item_ack(ack, false), packets);
             }
             consume_hero_inventory_item_at_index(world, hero_item_index);
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
 
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION
@@ -1606,13 +1871,13 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
                     }
                 }
             }
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
 
         if let Some(magic) = crystal_learn_hero_book_magic(world, template) {
             packets.push(ServerPacket::NewMagic { magic, hero: true });
             consume_hero_inventory_item_at_index(world, hero_item_index);
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
     }
 
@@ -1629,7 +1894,7 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
             return prepend_optional_packet(use_item_ack(ack, false), packets);
         }
         consume_hero_inventory_item_at_index(world, hero_item_index);
-        return hero_use_success(world,unique_id,packets);
+        return hero_use_success(world, unique_id, packets);
     }
 
     prepend_optional_packet(use_item_ack(ack, false), packets)
@@ -2487,6 +2752,9 @@ fn stage5_guild_end_war_packet(
 }
 
 fn tick_stage5_guild_wars(world: &mut World, tick: u64, packets: &mut Vec<ServerPacket>) {
+    if super::shared_guilds::enabled(world) {
+        return;
+    }
     if tick == 0 || tick % STAGE5_GUILD_WAR_TICK_INTERVAL != 0 {
         return;
     }
@@ -3580,12 +3848,8 @@ fn active_npc_allows_quest_request(
     finish: bool,
     selected_item_index: Option<i32>,
 ) -> bool {
-    if newcomer_diary_allows_quest_request_without_npc(
-        world,
-        quest_id,
-        requested_npc_index,
-        finish,
-    ) {
+    if newcomer_diary_allows_quest_request_without_npc(world, quest_id, requested_npc_index, finish)
+    {
         return true;
     }
 
@@ -3599,17 +3863,12 @@ fn active_npc_allows_quest_request(
     let npc_object_id = active_dialog.npc_object_id;
     if !active_dialog.links.iter().any(|link| {
         quest_dialog_link_allows_operation(&link.target, quest_id, finish, selected_item_index)
+            && super::npc_input::has_menu_target(world, &link.target)
     }) {
         return false;
     }
 
-    if !quest_npc_matches_request(
-        world,
-        quest_id,
-        requested_npc_index,
-        finish,
-        npc_object_id,
-    ) {
+    if !quest_npc_matches_request(world, quest_id, requested_npc_index, finish, npc_object_id) {
         return false;
     }
 
@@ -3703,12 +3962,11 @@ fn quest_dialog_link_allows_operation(
 
 #[cfg(test)]
 mod quest_dialog_operation_link_tests {
-    use bevy_ecs::prelude::World;
-    use mir2_protocol::Point;
+    use mir2_protocol::{ClientPacket, MirDirection, Point, ServerPacket};
 
-    use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
-    use super::super::npc::{ActiveNpcDialogState, NpcDialogLinkState};
-    use super::super::resources::{NpcStateResource, SessionResource};
+    use super::super::components::{entity_by_object_id, player_entity, Position};
+    use super::super::npc::{set_dialog, ActiveNpcDialogState, NpcDialogLinkState};
+    use super::super::resources::NpcStateResource;
     use super::{
         active_npc_allows_quest_request, quest_dialog_link_allows_operation, GUIDE_NPC_ID,
         GUIDE_QUEST_ID,
@@ -3762,20 +4020,23 @@ mod quest_dialog_operation_link_tests {
 
     #[test]
     fn quest_packets_require_the_exact_active_dialog_inside_crystal_data_range() {
-        let mut world = World::new();
-        world.insert_resource(NpcStateResource::new());
-        let config = crate::config::SimulationConfig::default();
-        let mut session = SessionResource::new(&config);
-        session.selected_character = Some(config.default_character.clone());
-        world.insert_resource(session);
-        let player = world
-            .spawn((SelfPlayer, ObjectId(1), Position(Point { x: 10, y: 10 })))
-            .id();
-        world.spawn((
-            Npc,
-            ObjectId(GUIDE_NPC_ID),
-            Position(Point { x: 11, y: 10 }),
-        ));
+        let mut session = crate::SimulationSession::new(crate::config::SimulationConfig::default());
+        assert!(session
+            .handle_packet(ClientPacket::Login {
+                account_id: "demo".into(),
+                password: "demo".into(),
+            })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        assert!(session
+            .handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::UserInformation { .. })));
+        session.force_authoritative_player_transform(Point { x: 10, y: 10 }, MirDirection::Down);
+        let world = session.app.world_mut();
+        let player = player_entity(world).unwrap();
+        let npc = entity_by_object_id(world, GUIDE_NPC_ID).unwrap();
+        world.entity_mut(npc).get_mut::<Position>().unwrap().0 = Point { x: 11, y: 10 };
 
         assert!(!active_npc_allows_quest_request(
             &world,
@@ -3799,22 +4060,26 @@ mod quest_dialog_operation_link_tests {
             None,
         ));
 
-        world.resource_mut::<NpcStateResource>().active_npc_dialog = Some(ActiveNpcDialogState {
-            npc_object_id: GUIDE_NPC_ID,
-            npc_name: "Village Guide".to_string(),
-            npc_name_key: None,
-            stage: None,
-            current: 0,
-            required: 1,
-            title: "Quest".to_string(),
-            body: Vec::new(),
-            footer: String::new(),
-            links: vec![NpcDialogLinkState {
-                text: "Accept".to_string(),
-                target: format!("@AcceptQuest:{GUIDE_QUEST_ID}"),
-            }],
-            input: None,
-        });
+        // Publish this synthetic test page through the trusted server path.
+        set_dialog(
+            world,
+            ActiveNpcDialogState {
+                npc_object_id: GUIDE_NPC_ID,
+                npc_name: "Village Guide".to_string(),
+                npc_name_key: None,
+                stage: None,
+                current: 0,
+                required: 1,
+                title: "Quest".to_string(),
+                body: Vec::new(),
+                footer: String::new(),
+                links: vec![NpcDialogLinkState {
+                    text: "Accept".to_string(),
+                    target: format!("@AcceptQuest:{GUIDE_QUEST_ID}"),
+                }],
+                input: None,
+            },
+        );
         assert!(
             !active_npc_allows_quest_request(&world, GUIDE_QUEST_ID, Some(0), false, None,),
             "the removed Web sentinel must not impersonate a concrete NPC"
@@ -3827,15 +4092,17 @@ mod quest_dialog_operation_link_tests {
             None,
         ));
 
-        world
-            .resource_mut::<NpcStateResource>()
+        let mut finish_display = world
+            .resource::<NpcStateResource>()
             .active_npc_dialog
-            .as_mut()
+            .as_ref()
             .expect("active quest dialog")
-            .links = vec![NpcDialogLinkState {
+            .clone();
+        finish_display.links = vec![NpcDialogLinkState {
             text: "Complete".to_string(),
             target: format!("@FinishQuest:{GUIDE_QUEST_ID}"),
         }];
+        set_dialog(world, finish_display);
         assert!(active_npc_allows_quest_request(
             &world,
             GUIDE_QUEST_ID,
@@ -3901,13 +4168,22 @@ pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Ve
     match ensure_runtime_quest(world, quest_id) {
         QuestStage::Available => {
             begin_quest(world, quest_id);
-            vec![stage5_quest_change_packet(
+            let mut packets = vec![stage5_quest_change_packet(
                 world,
                 quest_id,
                 CRYSTAL_QUEST_STATE_ADD,
                 true,
                 true,
-            )]
+            )];
+            if mir2_game_data::periodic_quests::is_periodic(quest_id) {
+                if let Some(packet) = super::quests::periodic_quests::info_packet(world, quest_id) {
+                    packets.push(packet);
+                }
+                packets.push(ServerPacket::CompleteQuest {
+                    completed_quests: completed_quest_ids(world),
+                });
+            }
+            packets
         }
         QuestStage::InProgress | QuestStage::ReadyToTurnIn => vec![stage5_quest_change_packet(
             world,
@@ -3953,10 +4229,7 @@ pub(super) fn stage5_finish_quest_packet(
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
     let mut packets = vec![
-        stage5_quest_remove_packet(
-            quest_id,
-            quest_completion_is_permanent(world, quest_id),
-        ),
+        stage5_quest_remove_packet(quest_id, quest_completion_is_permanent(world, quest_id)),
         ServerPacket::CompleteQuest {
             completed_quests: completed_quest_ids(world),
         },
@@ -4471,27 +4744,41 @@ fn stage5_deposit_refine_item_packet(world: &mut World, from: i32, to: i32) -> V
         return failure();
     }
     let inventory = world.resource::<InventoryResource>();
-    if !is_valid_inventory_slot(from_slot, inventory.inventory_capacity) {
+    if u16::from(from_slot) >= inventory.inventory_capacity || from_slot >= 86 {
         return failure();
     }
-    let Some(index) = inventory
-        .inventory_items
-        .iter()
-        .position(|i| inventory_item_matches_index(i, from_slot))
-    else {
+    let collection = if from_slot < 6 {
+        &inventory.belt_items
+    } else {
+        &inventory.inventory_items
+    };
+    let Some(index) = collection.iter().position(|item| {
+        if from_slot < 6 {
+            item.container == ItemContainer::Belt && item.slot == from_slot
+        } else {
+            inventory_item_matches_index(item, from_slot - 6)
+        }
+    }) else {
         return failure();
     };
-    let item = inventory.inventory_items[index].clone();
+    let item = collection[index].clone();
     let Some(encoded) = item_custody::encode(&item) else {
         return failure();
     };
     if !item_custody::can_take(inventory, &item) {
         return failure();
     }
-    world
-        .resource_mut::<InventoryResource>()
-        .inventory_items
-        .remove(index);
+    if from_slot < 6 {
+        world
+            .resource_mut::<InventoryResource>()
+            .belt_items
+            .remove(index);
+    } else {
+        world
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .remove(index);
+    }
     let mut state = world.resource_mut::<Stage5SystemsResource>();
     state.stage5_systems.refine.slots.insert(to_slot, item.key);
     state
@@ -4537,11 +4824,10 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
     else {
         return failure();
     };
-    let Some((inventory, _)) = item_custody::plan_return(
+    let Some((inventory, _)) = item_custody::plan_return_crystal_array(
         world.resource::<InventoryResource>(),
         &item,
         Some(to_slot),
-        false,
     ) else {
         return failure();
     };
@@ -4583,12 +4869,18 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
         else {
             continue;
         };
-        let Some((inventory, changed)) =
-            item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, false)
-        else {
+        let Some((inventory, changed)) = item_custody::plan_return_crystal_array(
+            world.resource::<InventoryResource>(),
+            &item,
+            None,
+        ) else {
             continue;
         };
-        let destination = inventory_index_for_item(&changed[0]).expect("bag destination");
+        let destination = if changed[0].container == ItemContainer::Belt {
+            changed[0].slot
+        } else {
+            inventory_index_for_item(&changed[0]).expect("bag destination") + 6
+        };
         *world.resource_mut::<InventoryResource>() = inventory;
         let mut state = world.resource_mut::<Stage5SystemsResource>();
         state.stage5_systems.refine.slots.remove(&slot);
@@ -4608,6 +4900,9 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
         .is_empty()
     {
         packets.push(ServerPacket::RefineCancel);
+    } else {
+        packets.push(system_message_key(world, "server.BagNoRoomForItem"));
+        packets.push(ServerPacket::NPCCollectRefine { success: false });
     }
     packets
 }
@@ -4941,6 +5236,7 @@ fn request_npc_info_packet(world: &World, npc_index: i32) -> Vec<ServerPacket> {
     let Some(npc) = crystal_npc_info_manifest()
         .npcs
         .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
         .find(|npc| npc.npc_index == npc_index)
     else {
         return Vec::new();
@@ -6444,6 +6740,21 @@ fn revalidate_cached_gm_authorization(world: &mut World) -> Option<ActiveGmAutho
     Some(identity)
 }
 
+pub(super) fn trusted_npc_is_gm(world: &World) -> bool {
+    let Some((identity, account_level)) = strict_active_account_authorization(world) else {
+        return false;
+    };
+    let bound_password = world
+        .get_resource::<AccountGmAuthorizationState>()
+        .and_then(|state| state.password_authorized_identity.as_ref())
+        .is_some_and(|bound| bound == &identity);
+    let cached = world.resource::<PlayerPermissionResource>().gm_level;
+    // Require the already enabled, identity-bound command permission. An
+    // account role, a pending password prompt, or a test-server flag alone
+    // cannot turn an NPC condition into an administrator capability.
+    cached > 0 && cached <= account_level.max(u8::from(bound_password))
+}
+
 fn gm_command_keyword(message: &str) -> Option<&str> {
     message
         .trim_start()
@@ -6523,6 +6834,16 @@ pub(super) fn handle_chat_packet(
             bind_gm_login_prompt(world, identity);
         }
         if let Some(packets) = super::gm_commands::dispatch_gm_command(world, &message) {
+            if let Some(name) = gm_command_keyword(&message)
+                .filter(|name| super::default_npc_events::is_custom_command(name))
+            {
+                let _ = super::default_npc_events::enqueue(
+                    world,
+                    super::default_npc_events::DefaultNpcEvent::CustomCommand {
+                        name: name.to_string(),
+                    },
+                );
+            }
             return packets;
         }
     }
@@ -6783,15 +7104,26 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         .selected_character
         .as_ref()
         .map(|character| (character.level, character.class));
-    let hero_viewer=stage5.stage5_systems.hero.as_ref().map(|hero|(hero.level,hero.class));
-    let hero_stats=super::hero_stats::compute(world);
-    let hero_vitals=stage5.stage5_systems.hero.as_ref().map(|_| {
-        let live=hero_entity(world).and_then(|entity|entity_player_vitals(world,entity));
-        let saved=hero_inventory.saved_vitals;
+    let hero_viewer = stage5
+        .stage5_systems
+        .hero
+        .as_ref()
+        .map(|hero| (hero.level, hero.class));
+    let hero_stats = super::hero_stats::compute(world);
+    let hero_vitals = stage5.stage5_systems.hero.as_ref().map(|_| {
+        let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
+        let saved = hero_inventory.saved_vitals;
         crate::config::HeroVitalsSnapshot {
-            hp:live.map(|v|v.hp).or_else(||saved.map(|v|v.hp)).unwrap_or(hero_stats.get(12)),
-            mp:live.map(|v|v.mp).or_else(||saved.map(|v|v.mp)).unwrap_or(hero_stats.get(13)),
-            max_hp:hero_stats.get(12),max_mp:hero_stats.get(13),
+            hp: live
+                .map(|v| v.hp)
+                .or_else(|| saved.map(|v| v.hp))
+                .unwrap_or(hero_stats.get(12)),
+            mp: live
+                .map(|v| v.mp)
+                .or_else(|| saved.map(|v| v.mp))
+                .unwrap_or(hero_stats.get(13)),
+            max_hp: hero_stats.get(12),
+            max_mp: hero_stats.get(13),
         }
     });
     let tick = super::session::runtime_tick(world);
@@ -6853,7 +7185,14 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         credit: player_runtime.credit,
         city_currencies,
         current_weight: current_weight(resources),
-        player_weights: tooltip_viewer.and_then(|(level,class)| super::player_weights::compute(resources,level,class,world.resource::<MountResource>().riding_mount)),
+        player_weights: tooltip_viewer.and_then(|(level, class)| {
+            super::player_weights::compute(
+                resources,
+                level,
+                class,
+                world.resource::<MountResource>().riding_mount,
+            )
+        }),
         max_weight,
         free_bag_slots: free_bag_slots(resources),
         max_bag_slots: crate::config::crystal_bag_slot_capacity(resources.inventory_capacity),
@@ -6905,23 +7244,32 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .iter()
             .map(|item| {
                 let mut snapshot = item.snapshot(language);
-                resolve_item_tooltip_source_for_viewer(
-                    &mut snapshot.tooltip_source,
-                    hero_viewer,
-                );
+                resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source, hero_viewer);
                 snapshot
             })
             .collect(),
-        hero_equipment_items:hero_inventory.equipment.iter().map(|item| {
-            let mut snapshot=item.snapshot(language);
-            resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source,hero_viewer);
-            snapshot
-        }).collect(),
-        hero_inventory_capacity:hero_inventory.capacity,
-        hero_stats:hero_stats.snapshot(),
+        hero_equipment_items: hero_inventory
+            .equipment
+            .iter()
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source, hero_viewer);
+                snapshot
+            })
+            .collect(),
+        hero_inventory_capacity: hero_inventory.capacity,
+        hero_stats: hero_stats.snapshot(),
         hero_vitals,
-        hero_weights:crate::config::HeroWeightsSnapshot {bag:hero_stats.bag,wear:hero_stats.wear,hand:hero_stats.hand},
-        hero_max_experience: stage5.stage5_systems.hero.as_ref().map(|hero| mir2_game_data::crystal_hero_settings().max_experience(hero.level)),
+        hero_weights: crate::config::HeroWeightsSnapshot {
+            bag: hero_stats.bag,
+            wear: hero_stats.wear,
+            hand: hero_stats.hand,
+        },
+        hero_max_experience: stage5
+            .stage5_systems
+            .hero
+            .as_ref()
+            .map(|hero| mir2_game_data::crystal_hero_settings().max_experience(hero.level)),
         native_npc_shop: super::npc_purchase_snapshot::current_shop(world),
         storage_items: resources
             .storage_items
@@ -7093,15 +7441,12 @@ pub(super) fn object_mana_info_for_entity(world: &World, entity: Entity) -> Opti
 }
 
 pub(super) fn health_percent(hp: i32, max_hp: i32) -> u8 {
-    let max_hp = max_hp.max(1);
-    let percent = ((hp.max(0) * 100) / max_hp).clamp(0, 100);
-    u8::try_from(percent).expect("health percent should fit")
+    crate::crystal_health::crystal_health_percent(hp, max_hp)
 }
 
 pub(super) fn mana_percent(mp: i32, max_mp: i32) -> u8 {
-    let max_mp = max_mp.max(1);
-    let percent = ((mp.max(0) * 100) / max_mp).clamp(0, 100);
-    u8::try_from(percent).expect("mana percent should fit")
+    // HeroObject.PercentMana uses the same float division/byte conversion.
+    crate::crystal_health::crystal_health_percent(mp, max_mp)
 }
 
 pub(super) fn object_died_info_for_entity(
@@ -7344,7 +7689,20 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
-pub(super) fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+pub(super) fn apply_start_game_dynamic_game_shop_stock(
+    world: &World,
+    packets: &mut Vec<ServerPacket>,
+) {
+    if let Some((item, stock_level)) = super::billing_monthly_card::game_shop_product(
+        &world.resource::<RuntimeConfigResource>().config,
+    ) {
+        if !packets.iter().any(|packet| {
+            matches!(packet, ServerPacket::GameShopInfo { item: existing, .. }
+            if existing.g_index == item.g_index)
+        }) {
+            packets.push(ServerPacket::GameShopInfo { item, stock_level });
+        }
+    }
     let individual_purchases = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -7498,7 +7856,11 @@ pub(super) fn start_game_static_visible_object_packets(
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
     let mut objects = Vec::<(i32, i32, u32, ServerPacket)>::new();
 
-    for npc in crystal_npc_info_manifest().npcs {
+    for npc in crystal_npc_info_manifest()
+        .npcs
+        .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
+    {
         if npc
             .map_file_name
             .as_deref()
@@ -7527,8 +7889,12 @@ pub(super) fn start_game_static_visible_object_packets(
             .get(&object_id)
             .map(|ids| ids.iter().copied().collect())
             .unwrap_or_default();
-        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id).into_iter()
-            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(object_id))
+        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id)
+            .into_iter()
+            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(
+                object_id,
+            ))
+            .chain(super::quests::periodic_quests::ids_for_npc(object_id))
         {
             if !quest_ids.contains(&quest_id) {
                 quest_ids.push(quest_id);
@@ -7857,6 +8223,36 @@ pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<Serv
     })
 }
 
+/// Use the same authoritative shape selection as the owner's sprite snapshot.
+/// An empty weapon stays -1 instead of synthesizing CWeapon/00.
+pub(super) fn self_zone_player_appearance(world: &World) -> Option<crate::ZonePlayerAppearance> {
+    let player = player_entity(world)?;
+    let body = world.entity(player).get::<CharacterBody>()?;
+    let equipment = &world.resource::<InventoryResource>().equipment_items;
+    let shape = |slot, fallback| {
+        equipment_shape(Some(equipment), slot)
+            .or(fallback)
+            .and_then(|shape| i16::try_from(shape).ok())
+            .unwrap_or(-1)
+    };
+    let mount = world.resource::<MountResource>();
+    Some(crate::ZonePlayerAppearance {
+        hair: world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .appearance
+            .hair,
+        light: crystal_self_player_light(world, equipment),
+        weapon: shape(EquipmentSlot::Weapon, body.weapon_shape),
+        weapon_effect: 0,
+        armour: shape(EquipmentSlot::Armour, body.armour_shape),
+        wing_effect: crystal_player_wing_effect(body, equipment),
+        mount_type: mount.mount_type,
+        riding_mount: mount.riding_mount,
+        fishing: world.resource::<FishingResource>().fishing,
+    })
+}
+
 pub(super) fn collect_world_entities(
     world: &World,
     scene_view: Option<&mir2_game_data::SceneView>,
@@ -7934,7 +8330,7 @@ pub(super) fn collect_world_entities(
             (
                 WorldEntityKind::SelfPlayer,
                 WorldEntityDisposition::Friendly,
-                player_vitals.map(|v| v.hp <= 0).unwrap_or(false),
+                current_player_is_dead(world),
                 player_vitals.map(|v| v.hp),
                 player_vitals.map(|v| v.max_hp),
                 body.map(|v| v.level),
@@ -8477,7 +8873,7 @@ pub(super) fn visible_object_bundle_for_entity(
         let position = entry.get::<Position>()?.0.clone();
         let facing = entry.get::<Facing>()?.0;
         let body = entry.get::<CharacterBody>()?;
-        let looks=super::hero_inventory::appearance(world);
+        let looks = super::hero_inventory::appearance(world);
         return Some((
             object_id,
             VisibleObjectBundle {
@@ -8499,7 +8895,7 @@ pub(super) fn visible_object_bundle_for_entity(
                         weapon_effect: looks.weapon_effect,
                         armour: looks.armour,
                         poison: 0,
-                        dead: entry.get::<PlayerVitals>().is_some_and(|v|v.hp<=0),
+                        dead: entry.get::<PlayerVitals>().is_some_and(|v| v.hp <= 0),
                         hidden: false,
                         effect: 0,
                         wing_effect: looks.wing_effect,
@@ -8693,6 +9089,61 @@ pub(super) fn use_item_ack(
         success,
         grid,
     })
+}
+
+// ItemType.Script is consumed by the ordinary inventory packet, then dispatches
+// the trusted DefaultNPC shape hook inside the enclosing source checkpoint.
+fn use_original_script_item_packet(
+    world: &mut World,
+    unique_id: u64,
+    grid: MirGridType,
+) -> Option<Vec<ServerPacket>> {
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Belt) {
+        return None;
+    }
+    let key = item_key_for_client_reference(world, unique_id, grid)?;
+    let location = find_use_item_location(
+        world.resource::<InventoryResource>(),
+        &key,
+        Some((unique_id, grid)),
+    )?;
+    let item = item_at_use_location(world.resource::<InventoryResource>(), location)?;
+    let template = crystal_item_template_for_item_key(&item.key)
+        .or_else(|| crystal_item_template_for_dynamic_key(&item.key))?;
+    if template.item_type != 21 {
+        return None;
+    }
+    let ack = Some((unique_id, grid));
+    if !is_in_world(world)
+        || world.resource::<SessionResource>().account_id.is_none()
+        || current_player_is_dead(world)
+        || item.quantity == 0
+        || item_unique_id(&item) != unique_id
+        || validate_committed_item_state_carrier(&item).is_err()
+    {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), vec![]));
+    }
+    if let CrystalUseItemEligibility::Rejected(packet) =
+        crystal_use_item_eligibility(world, &template)
+    {
+        return Some(prepend_optional_packet(
+            use_item_ack(ack, false),
+            packet.into_iter().collect(),
+        ));
+    }
+    let Ok(shape) = u16::try_from(template.shape) else {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), vec![]));
+    };
+    if super::default_npc_events::enqueue(
+        world,
+        super::default_npc_events::DefaultNpcEvent::UseItem { shape },
+    )
+    .is_err()
+    {
+        return Some(prepend_optional_packet(use_item_ack(ack, false), vec![]));
+    }
+    consume_item_at_use_location(world, location);
+    Some(prepend_optional_packet(use_item_ack(ack, true), vec![]))
 }
 
 #[derive(Debug, Clone)]
@@ -8889,11 +9340,15 @@ fn ranking_inspect_requester_identity(world: &World) -> Option<RankingInspectIde
     let character = session.selected_character.as_ref()?;
     session.active_save_revision()?;
     session.ranking_inspect_generation()?;
-    if !is_in_world(world) { return None; }
+    if !is_in_world(world) {
+        return None;
+    }
     let config = &world.resource::<RuntimeConfigResource>().config;
     let store = config.account_store.lock().ok()?;
     let identity = RankingInspectIdentity {
-        account_id, character_index: character.index, name: character.name.clone(),
+        account_id,
+        character_index: character.index,
+        name: character.name.clone(),
     };
     ranking_inspect_requester_matches_store(&store, &identity).then_some(identity)
 }
@@ -8902,10 +9357,16 @@ fn ranking_inspect_requester_matches_store(
     store: &crate::config::AccountStore,
     identity: &RankingInspectIdentity,
 ) -> bool {
-    let Some(account) = store.accounts.get(&identity.account_id) else { return false; };
-    let mut characters = account.characters.iter()
+    let Some(account) = store.accounts.get(&identity.account_id) else {
+        return false;
+    };
+    let mut characters = account
+        .characters
+        .iter()
         .filter(|character| character.index == identity.character_index);
-    characters.next().is_some_and(|character| character.name == identity.name)
+    characters
+        .next()
+        .is_some_and(|character| character.name == identity.name)
         && characters.next().is_none()
 }
 
@@ -8921,13 +9382,17 @@ pub struct RankingInspectRequest {
 }
 
 impl RankingInspectRequest {
-    pub fn target_identity(&self) -> &RankingInspectIdentity { &self.target }
+    pub fn target_identity(&self) -> &RankingInspectIdentity {
+        &self.target
+    }
 }
 
 impl std::fmt::Debug for RankingInspectRequest {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.debug_struct("RankingInspectRequest")
-            .field("player_id", &self.player_id).finish_non_exhaustive()
+        formatter
+            .debug_struct("RankingInspectRequest")
+            .field("player_id", &self.player_id)
+            .finish_non_exhaustive()
     }
 }
 
@@ -8936,14 +9401,32 @@ impl SimulationSession {
         i32::try_from(player_id).ok()?;
         let requester = ranking_inspect_requester_identity(self.app.world())?;
         let requester_entity = player_entity(self.app.world())?;
-        let requester_save_revision = self.app.world().resource::<SessionResource>().active_save_revision()?;
-        let requester_game_generation = self.app.world().resource::<SessionResource>().ranking_inspect_generation()?;
+        let requester_save_revision = self
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .active_save_revision()?;
+        let requester_game_generation = self
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .ranking_inspect_generation()?;
         let config = &self.app.world().resource::<RuntimeConfigResource>().config;
         let store = config.ranking_inspect_authority_snapshot().ok()?;
-        if !ranking_inspect_requester_matches_store(&store, &requester) { return None; }
-        let target = resolve_ranking_inspect_target(&store, player_id).ok()?.identity();
+        if !ranking_inspect_requester_matches_store(&store, &requester) {
+            return None;
+        }
+        let target = resolve_ranking_inspect_target(&store, player_id)
+            .ok()?
+            .identity();
         Some(RankingInspectRequest {
-            requester, requester_entity, requester_save_revision, requester_game_generation, target, player_id, store,
+            requester,
+            requester_entity,
+            requester_save_revision,
+            requester_game_generation,
+            target,
+            player_id,
+            store,
         })
     }
 
@@ -8953,32 +9436,48 @@ impl SimulationSession {
         let world = self.app.world();
         let identity = ranking_inspect_requester_identity(world)?;
         let player_id = u32::try_from(identity.character_index).ok()?;
-        let character = world.resource::<SessionResource>().selected_character.as_ref()?;
+        let character = world
+            .resource::<SessionResource>()
+            .selected_character
+            .as_ref()?;
         let systems = &world.resource::<Stage5SystemsResource>().stage5_systems;
         let config = &world.resource::<RuntimeConfigResource>().config;
         let store = config.account_store.lock().ok()?;
         let target = resolve_ranking_inspect_target(&store, player_id).ok()?;
-        if target.identity() != identity { return None; }
+        if target.identity() != identity {
+            return None;
+        }
         let facts = ranking_inspect_live_facts(
-            &store, &target, systems.appearance.hair,
+            &store,
+            &target,
+            systems.appearance.hair,
             systems.relationship.partner_identity.as_ref(),
             world.resource::<GmRuntimeResource>().allow_observe,
             RANKING_INSPECT_SERVER_ALLOWS_OBSERVE,
-        ).ok()?;
+        )
+        .ok()?;
         let guild = facts.guild?;
         let info = mir2_protocol::PlayerInspectInfo {
-            name: character.name.clone(), guild_name: guild.name, guild_rank: guild.rank,
+            name: character.name.clone(),
+            guild_name: guild.name,
+            guild_rank: guild.rank,
             equipment: ranking_inspect_equipment_projection(
                 &world.resource::<InventoryResource>().equipment_items,
-            ).ok()?,
-            class: character.class, gender: character.gender, level: character.level,
-            hair: systems.appearance.hair, lover_name: facts.lover_name?,
+            )
+            .ok()?,
+            class: character.class,
+            gender: character.gender,
+            level: character.level,
+            hair: systems.appearance.hair,
+            lover_name: facts.lover_name?,
             allow_observe: RANKING_INSPECT_SERVER_ALLOWS_OBSERVE
                 && world.resource::<GmRuntimeResource>().allow_observe,
             is_hero: false,
         };
         Some(RankingInspectOnlineProjection {
-            identity, info, partner_identity: systems.relationship.partner_identity.clone(),
+            identity,
+            info,
+            partner_identity: systems.relationship.partner_identity.clone(),
         })
     }
 
@@ -8987,48 +9486,140 @@ impl SimulationSession {
         request: RankingInspectRequest,
         presence: RankingInspectPresence,
     ) -> Vec<ServerPacket> {
-        if ranking_inspect_requester_identity(self.app.world()).as_ref() != Some(&request.requester) {
+        if ranking_inspect_requester_identity(self.app.world()).as_ref() != Some(&request.requester)
+        {
             return Vec::new();
         }
         if player_entity(self.app.world()) != Some(request.requester_entity)
-            || self.app.world().resource::<SessionResource>().active_save_revision()
+            || self
+                .app
+                .world()
+                .resource::<SessionResource>()
+                .active_save_revision()
                 != Some(request.requester_save_revision)
-            || self.app.world().resource::<SessionResource>().ranking_inspect_generation()
+            || self
+                .app
+                .world()
+                .resource::<SessionResource>()
+                .ranking_inspect_generation()
                 != Some(request.requester_game_generation)
-        { return Vec::new(); }
+        {
+            return Vec::new();
+        }
         let Ok(target) = resolve_ranking_inspect_target(&request.store, request.player_id) else {
             return Vec::new();
         };
-        if target.identity() != request.target { return Vec::new(); }
+        if target.identity() != request.target {
+            return Vec::new();
+        }
         let result = match &presence {
             RankingInspectPresence::Unknown => return Vec::new(),
             RankingInspectPresence::Online(projection) => {
-                let Some(projection) = projection else { return Vec::new(); };
+                let Some(projection) = projection else {
+                    return Vec::new();
+                };
                 let Ok(facts) = ranking_inspect_live_facts(
-                    &request.store, &target, projection.info.hair,
-                    projection.partner_identity.as_ref(), projection.info.allow_observe,
+                    &request.store,
+                    &target,
+                    projection.info.hair,
+                    projection.partner_identity.as_ref(),
+                    projection.info.allow_observe,
                     RANKING_INSPECT_SERVER_ALLOWS_OBSERVE,
-                ) else { return Vec::new(); };
-                let Some(guild) = facts.guild else { return Vec::new(); };
-                let Some(lover_name) = facts.lover_name else { return Vec::new(); };
+                ) else {
+                    return Vec::new();
+                };
+                let Some(guild) = facts.guild else {
+                    return Vec::new();
+                };
+                let Some(lover_name) = facts.lover_name else {
+                    return Vec::new();
+                };
                 let mut projection = projection.clone();
                 projection.info.guild_name = guild.name;
                 projection.info.guild_rank = guild.rank;
                 projection.info.lover_name = lover_name;
-                projection.info.allow_observe = RANKING_INSPECT_SERVER_ALLOWS_OBSERVE
-                    && projection.info.allow_observe;
+                projection.info.allow_observe =
+                    RANKING_INSPECT_SERVER_ALLOWS_OBSERVE && projection.info.allow_observe;
                 project_ranking_inspect(
-                    &target, RankingInspectSource::OnlinePlayer { projection: Some(&projection) },
+                    &target,
+                    RankingInspectSource::OnlinePlayer {
+                        projection: Some(&projection),
+                    },
                 )
             }
             RankingInspectPresence::Offline => {
                 let Ok(facts) = saved_ranking_inspect_facts(
-                    &request.store, &target, Some(RANKING_INSPECT_SERVER_ALLOWS_OBSERVE),
-                ) else { return Vec::new(); };
-                project_ranking_inspect(&target, RankingInspectSource::OfflinePlayer { facts: Some(&facts) })
+                    &request.store,
+                    &target,
+                    Some(RANKING_INSPECT_SERVER_ALLOWS_OBSERVE),
+                ) else {
+                    return Vec::new();
+                };
+                project_ranking_inspect(
+                    &target,
+                    RankingInspectSource::OfflinePlayer {
+                        facts: Some(&facts),
+                    },
+                )
             }
         };
-        result.map(|info| vec![ServerPacket::PlayerInspect { info }]).unwrap_or_default()
+        result
+            .map(|info| vec![ServerPacket::PlayerInspect { info }])
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn dispatch_default_npc_source_packets(&mut self, packets: &mut Vec<ServerPacket>) {
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), packets);
+    }
+
+    pub(crate) fn use_item_from_source_command(&mut self, key: &str) -> Vec<ServerPacket> {
+        let reference = {
+            let inventory = self.app.world().resource::<InventoryResource>();
+            inventory
+                .inventory_items
+                .iter()
+                .find(|item| item.key == key)
+                .map(|item| (item_unique_id(item), MirGridType::Inventory))
+                .or_else(|| {
+                    inventory
+                        .belt_items
+                        .iter()
+                        .find(|item| item.key == key)
+                        .map(|item| (item_unique_id(item), MirGridType::Belt))
+                })
+        };
+        if let Some((unique_id, grid)) = reference {
+            if let Some(packets) =
+                use_original_script_item_packet(self.app.world_mut(), unique_id, grid)
+            {
+                return packets;
+            }
+        }
+        self.use_item(key)
+    }
+
+    pub(crate) fn select_npc_dialog_from_source_command(
+        &mut self,
+        target: &str,
+    ) -> Vec<ServerPacket> {
+        if self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .is_some_and(|dialog| dialog.npc_object_id == 0)
+        {
+            return match super::default_npc_events::follow_up(self.app.world_mut(), target) {
+                Ok(Some(packets)) => packets,
+                Ok(None) => vec![],
+                Err(error) => {
+                    super::shared_guild_experience::reject_source(self.app.world(), error);
+                    vec![]
+                }
+            };
+        }
+        self.select_npc_dialog_target(target)
     }
 
     pub fn friends_with_online_characters(
@@ -9083,19 +9674,32 @@ impl SimulationSession {
 
     /// Local typed ordinary purchase. Existing session authentication and StartGame
     /// are required independently of any trusted caller's authentication flag.
-    pub fn try_npc_gold_buy_with_outcome(&mut self, request: NpcGoldBuyRequest)
-        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+    pub fn try_npc_gold_buy_with_outcome(
+        &mut self,
+        request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
         self.run_npc_gold_buy_with_outcome(request, |result| result)
     }
 
-    fn run_npc_gold_buy_with_outcome<F>(&mut self, request: NpcGoldBuyRequest, postprocess: F)
-        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError>
-    where F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String> {
-        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>()).is_none() {
-            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
+    fn run_npc_gold_buy_with_outcome<F>(
+        &mut self,
+        request: NpcGoldBuyRequest,
+        postprocess: F,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError>
+    where
+        F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String>,
+    {
+        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>())
+            .is_none()
+        {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            ));
         }
         if !is_in_world(self.app.world()) {
-            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotInGame));
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotInGame,
+            ));
         }
         // Capture belongs to this invocation only, including any later pipeline error.
         let mut outcome = None;
@@ -9103,57 +9707,86 @@ impl SimulationSession {
         // Abort/process loss cannot yield processing evidence. Legacy packet entry
         // intentionally retains its original panic behavior.
         let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            let packets = self.try_handle_packet_recording_buy(request.packet(), Some(&mut outcome), None);
+            let packets =
+                self.try_handle_packet_recording_buy(request.packet(), Some(&mut outcome), None);
             postprocess(packets)
-        })).unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
+        }))
+        .unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
         finish_npc_gold_buy_processing(packets, outcome)
     }
 
     #[cfg(test)]
-    pub(super) fn npc_gold_buy_with_postprocessing_failure(&mut self, request: NpcGoldBuyRequest)
-        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
-        self.run_npc_gold_buy_with_outcome(request, |result| result.and_then(|_| Err("controlled postprocessing failure".into())))
+    pub(super) fn npc_gold_buy_with_postprocessing_failure(
+        &mut self,
+        request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        self.run_npc_gold_buy_with_outcome(request, |result| {
+            result.and_then(|_| Err("controlled postprocessing failure".into()))
+        })
     }
 
     #[cfg(test)]
-    pub(super) fn npc_gold_buy_with_postprocessing_panic(&mut self, request: NpcGoldBuyRequest)
-        -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+    pub(super) fn npc_gold_buy_with_postprocessing_panic(
+        &mut self,
+        request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
         self.run_npc_gold_buy_with_outcome(request, |_| panic!("controlled postprocessing panic"))
     }
 
     /// All NPC currencies and goods sources use the actual handler's local result.
     /// This requires authentication and StartGame; it does not provide a durable receipt.
-    pub fn try_npc_purchase_with_outcome(&mut self, request: NpcPurchaseRequest)
-        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+    pub fn try_npc_purchase_with_outcome(
+        &mut self,
+        request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
         self.run_npc_purchase_with_outcome(request, |result| result)
     }
 
-    fn run_npc_purchase_with_outcome<F>(&mut self, request: NpcPurchaseRequest, postprocess: F)
-        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError>
-    where F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String> {
-        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>()).is_none() {
-            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotAuthenticated));
+    fn run_npc_purchase_with_outcome<F>(
+        &mut self,
+        request: NpcPurchaseRequest,
+        postprocess: F,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError>
+    where
+        F: FnOnce(Result<Vec<ServerPacket>, String>) -> Result<Vec<ServerPacket>, String>,
+    {
+        if active_session_mutating_account_id(self.app.world().resource::<SessionResource>())
+            .is_none()
+        {
+            return Err(NpcPurchaseProcessingError::BeforeExecution(
+                NpcPurchaseBeforeExecution::NotAuthenticated,
+            ));
         }
         if !is_in_world(self.app.world()) {
-            return Err(NpcPurchaseProcessingError::BeforeExecution(NpcPurchaseBeforeExecution::NotInGame));
+            return Err(NpcPurchaseProcessingError::BeforeExecution(
+                NpcPurchaseBeforeExecution::NotInGame,
+            ));
         }
         let mut outcome = None;
         let packets = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            let packets = self.try_handle_packet_recording_buy(request.packet(), None, Some(&mut outcome));
+            let packets =
+                self.try_handle_packet_recording_buy(request.packet(), None, Some(&mut outcome));
             postprocess(packets)
-        })).unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
+        }))
+        .unwrap_or_else(|_| Err("purchase processing panicked; outcome may be unknown".into()));
         finish_npc_purchase_processing(packets, outcome)
     }
 
     #[cfg(test)]
-    pub(super) fn npc_purchase_with_postprocessing_failure(&mut self, request: NpcPurchaseRequest)
-        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
-        self.run_npc_purchase_with_outcome(request, |result| result.and_then(|_| Err("controlled postprocessing failure".into())))
+    pub(super) fn npc_purchase_with_postprocessing_failure(
+        &mut self,
+        request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+        self.run_npc_purchase_with_outcome(request, |result| {
+            result.and_then(|_| Err("controlled postprocessing failure".into()))
+        })
     }
 
     #[cfg(test)]
-    pub(super) fn npc_purchase_with_postprocessing_panic(&mut self, request: NpcPurchaseRequest)
-        -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
+    pub(super) fn npc_purchase_with_postprocessing_panic(
+        &mut self,
+        request: NpcPurchaseRequest,
+    ) -> Result<NpcPurchaseProcessingExecution, NpcPurchaseProcessingError> {
         self.run_npc_purchase_with_outcome(request, |_| panic!("controlled postprocessing panic"))
     }
 
@@ -9161,10 +9794,14 @@ impl SimulationSession {
         self.try_handle_packet_recording_buy(packet, None, None)
     }
 
-    fn try_handle_packet_recording_buy(&mut self, packet: ClientPacket,
+    fn try_handle_packet_recording_buy(
+        &mut self,
+        packet: ClientPacket,
         buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
         purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
     ) -> Result<Vec<ServerPacket>, String> {
+        // Journal capabilities must never survive into a client packet flow.
+        super::recovery::clear_binding(self.app.world_mut());
         if matches!(
             packet,
             ClientPacket::Disconnect | ClientPacket::LogOut | ClientPacket::StartGame { .. }
@@ -9176,15 +9813,16 @@ impl SimulationSession {
                 return self.submit_shared_guild_name(name);
             }
         }
-        let mut recurrence_packets = if matches!(packet, ClientPacket::StartGame { .. }) {
-            Vec::new()
-        } else {
-            refresh_quest_recurrence(self.app.world_mut())
-        };
+        let mut recurrence_packets = Vec::new();
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
             // Failed saving retains personal state for recovery. Inspect
             // authority still retires before that potentially failing write.
-            self.app.world_mut().resource_mut::<SessionResource>().retire_ranking_inspect();
+            self.app
+                .world_mut()
+                .resource_mut::<SessionResource>()
+                .retire_ranking_inspect();
+            super::npc_input::invalidate(self.app.world_mut());
+            recurrence_packets = refresh_quest_recurrence(self.app.world_mut());
             if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 return Err(error);
@@ -9192,6 +9830,27 @@ impl SimulationSession {
         }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);
+            let started = packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. }));
+            if started {
+                super::default_npc_events::reset_transient(self.app.world_mut());
+            }
+            let before = if started {
+                self.begin_guild_experience_command(true)?
+            } else {
+                None
+            };
+            if started {
+                let _ = super::default_npc_events::enqueue(
+                    self.app.world_mut(),
+                    super::default_npc_events::DefaultNpcEvent::Login,
+                );
+                super::default_npc_events::dispatch_source_packets(
+                    self.app.world_mut(),
+                    &mut packets,
+                );
+            }
             let _ = refresh_quest_recurrence(self.app.world_mut());
             let completed_quests = completed_quest_ids(self.app.world());
             for packet in &mut packets {
@@ -9210,24 +9869,102 @@ impl SimulationSession {
                     }
                 }
             }
-            return Ok(packets);
+            return self.finish_guild_experience_command(before, packets);
         }
 
-        let xp_source = matches!(&packet,
-            ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
-            |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
-        let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
+        let xp_source = matches!(
+            &packet,
+            ClientPacket::Attack { .. }
+                | ClientPacket::RangeAttack { .. }
+                | ClientPacket::Magic { .. }
+                | ClientPacket::CallNpc { .. }
+                | ClientPacket::NpcConfirmInput { .. }
+                | ClientPacket::FinishQuest { .. }
+        );
+        let default_source = is_in_world(self.app.world())
+            && !matches!(&packet, ClientPacket::Disconnect | ClientPacket::LogOut)
+            && (super::default_npc_events::has_pending(self.app.world())
+                || super::default_npc_events::daily_due(self.app.world())
+                || xp_source
+                || matches!(
+                    &packet,
+                    ClientPacket::UseItem { .. }
+                        | ClientPacket::Walk { .. }
+                        | ClientPacket::Run { .. }
+                        | ClientPacket::AcceptQuest { .. }
+                        | ClientPacket::Chat { .. }
+                ));
+        let periodic_checkpoint =
+            super::quests::periodic_quests::packet_requires_checkpoint(&packet);
+        let force_save = matches!(
+            &packet,
+            ClientPacket::DepositRefineItem { .. }
+                | ClientPacket::RetrieveRefineItem { .. }
+                | ClientPacket::RefineCancel
+                | ClientPacket::RefineItem { .. }
+                | ClientPacket::CheckRefine { .. }
+        ) || matches!(&packet, ClientPacket::CallNpc{key,..}
+                if key.trim_start_matches('@').eq_ignore_ascii_case("REFINECOLLECT"));
+        // Periodic requests need the full Source checkpoint, including native
+        // accept/finish/abandon. Views, rejections and retries must not force a
+        // write; the actual full postimage and successful claim decide that.
+        let before = if periodic_checkpoint
+            || matches!(
+                &packet,
+                ClientPacket::CallNpc { .. } | ClientPacket::NpcConfirmInput { .. }
+            ) {
+            self.begin_npc_dialog_source_command(force_save)?
+        } else if force_save {
+            self.begin_guild_experience_command(true)?
+        } else if default_source {
+            self.begin_default_npc_source_command()?
+        } else if xp_source {
+            self.begin_guild_experience_command(false)?
+        } else {
+            None
+        };
+        let silent_if_empty = match &packet {
+            ClientPacket::Chat { message, .. } => {
+                super::gm_commands::gm_login_pending(self.app.world())
+                    || (super::gm_commands::is_gm_command(message)
+                        && !gm_command_keyword(message)
+                            .is_some_and(super::default_npc_events::is_custom_command))
+            }
+            ClientPacket::GetRanking { .. } => true,
+            _ => false,
+        };
+        // A silent refusal must not consume a rollover notification. Defer
+        // recurrence for these requests until the handler has a response.
+        if !silent_if_empty && !matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
+            recurrence_packets.extend(refresh_quest_recurrence(self.app.world_mut()));
+        }
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
         let mut packets = self.handle_packet_impl(packet, buy_outcome, purchase_outcome);
+        // Crystal's rejected command and ranking requests are silent. Do not
+        // let unrelated queued hooks or a first AOI flush turn that refusal
+        // into an observable response. Custom NPC commands still dispatch their
+        // explicitly queued event through the normal source transaction.
+        if silent_if_empty && packets.is_empty() {
+            return self.finish_guild_experience_command(before, Vec::new());
+        }
+        if silent_if_empty {
+            recurrence_packets.extend(refresh_quest_recurrence(self.app.world_mut()));
+        }
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
-            self.app.world_mut(), journey_context, &packets);
+            self.app.world_mut(),
+            journey_context,
+            &packets,
+        );
         packets.append(&mut journey_packets);
+        super::default_npc_events::dispatch_source_packets(self.app.world_mut(), &mut packets);
         recurrence_packets.append(&mut packets);
         let packets = self.finalize_packets(recurrence_packets);
-        self.finish_guild_experience_command(before,packets)
+        self.finish_guild_experience_command(before, packets)
     }
 
-    fn handle_packet_impl(&mut self, packet: ClientPacket,
+    fn handle_packet_impl(
+        &mut self,
+        packet: ClientPacket,
         buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
         purchase_outcome: Option<&mut Option<NpcPurchaseProcessingOutcome>>,
     ) -> Vec<ServerPacket> {
@@ -9305,7 +10042,9 @@ impl SimulationSession {
                 stage5_check_refine_packet(self.app.world_mut(), unique_id)
             }
             ClientPacket::SetAutoPotValue { stat, value } => {
-                if !matches!(stat, 12 | 13) { return Vec::new(); }
+                if !matches!(stat, 12 | 13) {
+                    return Vec::new();
+                }
                 let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
                 let Some(hero) = resources.stage5_systems.hero.as_mut() else {
                     return Vec::new();
@@ -9327,9 +10066,13 @@ impl SimulationSession {
                 }
                 // The Crystal dialog admits only normal/sun potions. Enforce
                 // that same restriction at the authoritative packet boundary.
-                if item_index != 0 && !crystal_item_by_index(item_index).is_some_and(|item|
-                    item.item_type == CRYSTAL_ITEM_TYPE_POTION && item.shape <= 1
-                ) { return Vec::new(); }
+                if item_index != 0
+                    && !crystal_item_by_index(item_index).is_some_and(|item| {
+                        item.item_type == CRYSTAL_ITEM_TYPE_POTION && item.shape <= 1
+                    })
+                {
+                    return Vec::new();
+                }
                 let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
                 let Some(hero) = resources.stage5_systems.hero.as_mut() else {
                     return Vec::new();
@@ -9659,11 +10402,16 @@ impl SimulationSession {
             ClientPacket::MailLockedItem { unique_id, locked } => {
                 vec![ServerPacket::MailLockedItem { unique_id, locked }]
             }
-            ClientPacket::MailCost { gold, stamped, items_idx } => {
+            ClientPacket::MailCost {
+                gold,
+                stamped,
+                items_idx,
+            } => {
                 vec![ServerPacket::MailCost {
                     // This packet has no error field. An invalid quote must
                     // clear any old cheap/free quote, never authorize delivery.
-                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped).unwrap_or(u32::MAX),
+                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped)
+                        .unwrap_or(u32::MAX),
                 }]
             }
             ClientPacket::RequestIntelligentCreatureUpdates { update } => {
@@ -10103,11 +10851,23 @@ impl SimulationSession {
                 count,
             } => split_item_impl(self.app.world_mut(), grid, unique_id, count),
             ClientPacket::UseItem { unique_id, grid } => {
+                if let Some(packets) = super::billing_monthly_card::use_card_packet(
+                    self.app.world_mut(),
+                    unique_id,
+                    grid,
+                ) {
+                    return packets;
+                }
                 if grid == MirGridType::HeroInventory {
                     return use_hero_inventory_item_packet(self.app.world_mut(), unique_id);
                 }
                 if grid == MirGridType::Equipment {
                     return use_item(self.app.world_mut(), "", Some((unique_id, grid)));
+                }
+                if let Some(packets) =
+                    use_original_script_item_packet(self.app.world_mut(), unique_id, grid)
+                {
+                    return packets;
                 }
                 let key = item_key_for_client_reference(self.app.world(), unique_id, grid);
                 match key {
@@ -10209,7 +10969,31 @@ impl SimulationSession {
                 self.range_attack_impl(direction, target_id, target_location)
             }
             ClientPacket::Harvest { direction } => self.harvest_impl(direction),
-            ClientPacket::CallNpc { object_id, key } => self.call_npc_impl(object_id, &key),
+            ClientPacket::CallNpc { object_id, key } => {
+                if object_id == u32::MAX {
+                    if is_in_world(self.app.world())
+                        && strict_active_account_authorization(self.app.world()).is_some()
+                        && key.len() <= 30
+                    {
+                        let _ = super::default_npc_events::enqueue(
+                            self.app.world_mut(),
+                            super::default_npc_events::DefaultNpcEvent::Client,
+                        );
+                    }
+                    return Vec::new();
+                }
+                if object_id == 0 {
+                    return match super::default_npc_events::follow_up(self.app.world_mut(), &key) {
+                        Ok(Some(packets)) => packets,
+                        Ok(None) => Vec::new(),
+                        Err(error) => {
+                            super::shared_guild_experience::reject_source(self.app.world(), error);
+                            Vec::new()
+                        }
+                    };
+                }
+                self.call_npc_impl(object_id, &key)
+            }
             ClientPacket::NpcConfirmInput {
                 npc_id,
                 page_name,
@@ -10219,16 +11003,60 @@ impl SimulationSession {
                 item_index,
                 count,
                 panel_type,
-            } => match (buy_outcome, purchase_outcome) {
-                (_, Some(outcome)) => super::npc::buy_item_with_purchase_outcome(self.app.world_mut(),
-                    NpcPurchaseRequest { item_index, count, panel_type }, outcome),
-                (Some(outcome), None) => super::npc::buy_item_with_processing_outcome(self.app.world_mut(),
-                    NpcGoldBuyRequest { item_index, count, panel_type }, outcome),
-                (None, None) => buy_item_impl(self.app.world_mut(), item_index, count, panel_type),
-            },
-            ClientPacket::SellItem { unique_id, count } => {
-                sell_item_impl(self.app.world_mut(), unique_id, count)
+            } => {
+                let mut buy_outcome = buy_outcome;
+                let mut purchase_outcome = purchase_outcome;
+                let conquest_result = if buy_outcome.is_some() || purchase_outcome.is_some() {
+                    self.try_shared_conquest_buy_recording(
+                        NpcPurchaseRequest {
+                            item_index,
+                            count,
+                            panel_type,
+                        },
+                        buy_outcome.as_deref_mut(),
+                        purchase_outcome.as_deref_mut(),
+                    )
+                } else {
+                    None
+                };
+                if let Some(result) = conquest_result {
+                    result.unwrap_or_else(|error| {
+                        // The outcome capture stays empty on an unconfirmed
+                        // publication, so the typed caller reports Unknown.
+                        eprintln!("typed castle NPC purchase unavailable: {error}");
+                        Vec::new()
+                    })
+                } else {
+                    match (buy_outcome, purchase_outcome) {
+                        (_, Some(outcome)) => super::npc::buy_item_with_purchase_outcome(
+                            self.app.world_mut(),
+                            NpcPurchaseRequest {
+                                item_index,
+                                count,
+                                panel_type,
+                            },
+                            outcome,
+                        ),
+                        (Some(outcome), None) => super::npc::buy_item_with_processing_outcome(
+                            self.app.world_mut(),
+                            NpcGoldBuyRequest {
+                                item_index,
+                                count,
+                                panel_type,
+                            },
+                            outcome,
+                        ),
+                        (None, None) => self
+                            .try_shared_conquest_buy(item_index, count, panel_type)
+                            .unwrap_or_else(|| {
+                                buy_item_impl(self.app.world_mut(), item_index, count, panel_type)
+                            }),
+                    }
+                }
             }
+            ClientPacket::SellItem { unique_id, count } => self
+                .try_shared_conquest_sell(unique_id, count)
+                .unwrap_or_else(|| sell_item_impl(self.app.world_mut(), unique_id, count)),
             ClientPacket::RepairItem { unique_id } => prepend_packet(
                 ServerPacket::RepairItem { unique_id },
                 repair_item_impl(self.app.world_mut(), unique_id, false),
@@ -10259,7 +11087,14 @@ impl SimulationSession {
                     return Vec::new();
                 }
                 if Some(object_id) == current_hero_object_id(self.app.world()) {
-                    return super::hero_ai::hero_cast::manual_magic(self.app.world_mut(),object_id,spell,direction,target_id,location);
+                    return super::hero_ai::hero_cast::manual_magic(
+                        self.app.world_mut(),
+                        object_id,
+                        spell,
+                        direction,
+                        target_id,
+                        location,
+                    );
                 }
                 if object_id != 0 && Some(object_id) != current_player_object_id(self.app.world()) {
                     return Vec::new();
@@ -10551,11 +11386,15 @@ mod mail_status_transaction_tests {
         let mail: Stage5MailMessage = serde_json::from_value(serde_json::json!({
             "id": 42, "from": "System", "to": "Scout", "subject": "Old mail",
             "body": "No persisted date", "gold": 0, "claimed": false, "deleted": false
-        })).unwrap();
+        }))
+        .unwrap();
         let first = stage5_mail_to_client_mail(&mail);
         let again = stage5_mail_to_client_mail(&mail);
         assert_eq!(first.date_sent_binary_datetime, 0);
-        assert_eq!(again.date_sent_binary_datetime, first.date_sent_binary_datetime);
+        assert_eq!(
+            again.date_sent_binary_datetime,
+            first.date_sent_binary_datetime
+        );
         assert_eq!(again.mail_id, 42);
     }
     use crate::config::{
@@ -10641,16 +11480,17 @@ mod mail_status_transaction_tests {
             items_idx: [0; 5],
             stamped: false,
         });
-        assert!(packets.iter().any(
-            |packet| matches!(packet, ServerPacket::MailSent { result: 1 })
-        ));
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
         assert!(packets.iter().any(|packet| {
             matches!(packet, ServerPacket::ReceiveMail { mail }
                 if mail.iter().any(|entry| entry.sender_name == "Scout" && entry.message == message))
         }));
         drop(session);
 
-        let reloaded = start_test_session(SimulationConfig::default().with_account_store_path(path));
+        let reloaded =
+            start_test_session(SimulationConfig::default().with_account_store_path(path));
         assert!(reloaded
             .world_snapshot()
             .stage5_systems

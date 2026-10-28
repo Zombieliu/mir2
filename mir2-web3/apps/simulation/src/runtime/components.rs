@@ -6,7 +6,7 @@ use mir2_protocol::{MirClass, MirDirection, MirGender, Point};
 
 use crate::config::WorldEntityDisposition;
 
-use super::resources::SessionResource;
+use super::resources::{PlayerRuntimeResource, SessionResource};
 
 #[derive(Component)]
 pub(super) struct WorldObject;
@@ -300,5 +300,7 @@ pub(super) fn entity_player_vitals(world: &World, entity: Entity) -> Option<Play
 pub(super) fn current_player_is_dead(world: &World) -> bool {
     player_entity(world)
         .and_then(|entity| entity_player_vitals(world, entity))
-        .is_some_and(|vitals| vitals.hp <= 0)
+        .is_some_and(|vitals| {
+            vitals.hp <= 0 || world.resource::<PlayerRuntimeResource>().player_dead
+        })
 }

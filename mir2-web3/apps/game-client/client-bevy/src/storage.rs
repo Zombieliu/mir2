@@ -424,9 +424,9 @@ mod tests {
         let mut unlocked = storage;
         unlocked.unlocked = true;
         assert!(storage_deposit_enabled(&unlocked, &inv));
-        unlocked.items.extend(
-            (0..STORAGE_BASE_SIZE).map(|slot| item(u32::from(slot), 4)),
-        );
+        unlocked
+            .items
+            .extend((0..STORAGE_BASE_SIZE).map(|slot| item(u32::from(slot), 4)));
         assert!(!storage_deposit_enabled(&unlocked, &inv)); // no free slot
     }
 
@@ -510,7 +510,10 @@ mod tests {
         assert!(model.is_valid_slot(78));
         assert!(!model.is_valid_slot(79));
         assert!(!model.page(1).locked);
-        assert!(!model.page(1).rental_locked, "expanded authority has no rental cover");
+        assert!(
+            !model.page(1).rental_locked,
+            "expanded authority has no rental cover"
+        );
     }
 
     #[test]
@@ -575,36 +578,70 @@ mod tests {
         assert!(model.selection_for_slot(3).is_none());
     }
 
-
     #[test]
     fn storage_expiry_reads_exact_i64_text_and_legacy_numbers() {
-        for expiry in [0_i64, 1000, -1000, 639_028_224_000_000_001,
-            -8_584_900_000_000_000_001, i64::MIN, i64::MAX] {
+        for expiry in [
+            0_i64,
+            1000,
+            -1000,
+            639_028_224_000_000_001,
+            -8_584_900_000_000_000_001,
+            i64::MIN,
+            i64::MAX,
+        ] {
             for field in ["expiry", "expiryTimeBinaryDatetime"] {
-                for carrier in [serde_json::json!(expiry), serde_json::json!(expiry.to_string())] {
+                for carrier in [
+                    serde_json::json!(expiry),
+                    serde_json::json!(expiry.to_string()),
+                ] {
                     let mut payload = serde_json::Map::new();
                     payload.insert(field.into(), carrier);
                     let model: StorageModel = serde_json::from_value(payload.into()).unwrap();
                     assert_eq!(model.expiry, expiry);
                     assert_eq!(model.page(1).expiry, expiry);
-                    assert_eq!(serde_json::to_value(&model).unwrap()["expiry"].as_i64(), Some(expiry),
-                        "the existing Native numeric serialization stays unchanged");
+                    assert_eq!(
+                        serde_json::to_value(&model).unwrap()["expiry"].as_i64(),
+                        Some(expiry),
+                        "the existing Native numeric serialization stays unchanged"
+                    );
                 }
             }
         }
-        assert_eq!(serde_json::from_str::<StorageModel>("{}").unwrap().expiry, 0);
+        assert_eq!(
+            serde_json::from_str::<StorageModel>("{}").unwrap().expiry,
+            0
+        );
     }
 
     #[test]
     fn storage_expiry_rejects_noncanonical_or_out_of_range_json() {
-        for token in [r#""+1""#, r#""-0""#, r#""01""#, r#""-01""#,
-            r#"" 1""#, r#""1 ""#, r#""""#, r#""1e3""#, r#""1.0""#,
-            r#""9223372036854775808""#, r#""-9223372036854775809""#,
-            "9223372036854775808", "-9223372036854775809", "1000.0", "1e3",
-            "null", "true", "{}", "[]"] {
+        for token in [
+            r#""+1""#,
+            r#""-0""#,
+            r#""01""#,
+            r#""-01""#,
+            r#"" 1""#,
+            r#""1 ""#,
+            r#""""#,
+            r#""1e3""#,
+            r#""1.0""#,
+            r#""9223372036854775808""#,
+            r#""-9223372036854775809""#,
+            "9223372036854775808",
+            "-9223372036854775809",
+            "1000.0",
+            "1e3",
+            "null",
+            "true",
+            "{}",
+            "[]",
+        ] {
             for field in ["expiry", "expiryTimeBinaryDatetime"] {
                 let payload = format!("{{\"{field}\":{token}}}");
-                assert!(serde_json::from_str::<StorageModel>(&payload).is_err(), "{payload}");
+                assert!(
+                    serde_json::from_str::<StorageModel>(&payload).is_err(),
+                    "{payload}"
+                );
             }
         }
     }

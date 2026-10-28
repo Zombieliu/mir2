@@ -1,5 +1,5 @@
 use super::*;
-use crate::crystal_ui::skill_page_shared::{SkillPageAction, assignment_label};
+use crate::crystal_ui::skill_page_shared::{assignment_label, SkillPageAction};
 pub use crate::skill_page_state::{SkillAssignUi, SkillAuthorityUi};
 impl SkillAssignUi {
     // Native alone retains the existing process-wide player/Hero namespace.
@@ -282,12 +282,11 @@ mod tests {
             app.world().resource::<SkillModel>().binding_for(2).hotkey,
             Some(0)
         );
-        assert!(
-            app.world()
-                .resource::<SkillModel>()
-                .skill_for_shortcut(1)
-                .is_none()
-        );
+        assert!(app
+            .world()
+            .resource::<SkillModel>()
+            .skill_for_shortcut(1)
+            .is_none());
         let skills = app.world().resource::<SkillModel>().clone();
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
@@ -300,12 +299,11 @@ mod tests {
             app.world().resource::<SkillModel>().binding_for(1).hotkey,
             Some(0)
         );
-        assert!(
-            app.world()
-                .resource::<SkillModel>()
-                .skill_for_shortcut(16)
-                .is_none()
-        );
+        assert!(app
+            .world()
+            .resource::<SkillModel>()
+            .skill_for_shortcut(16)
+            .is_none());
         let path = app
             .world()
             .resource::<SkillBindingPersistenceRuntime>()

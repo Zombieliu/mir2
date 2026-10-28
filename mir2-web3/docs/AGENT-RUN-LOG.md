@@ -1,5 +1,11 @@
 # Agent Run Log
 
+## 五远程分支集成：最终本地收据（2026-10-15，北京时间）
+
+冲突处理和本地验证完成，见[冻结输入、语义修复与完整收据](REMOTE-PLAYER-RECHARGE-INTEGRATION-20261015.md)。实际 Windows1138/原7忽略、Native UI1556/原14忽略、Core196、Web505/Quest24/packaging59、严格 standalone Next13页、两次本地化21、NPC456、File handoff/Refine/导师17、Runtime521/原4忽略、portable31及两配置 WASM静态check均通过。Gateway Root独立11与相邻105分别通过，有交集不相加；充值 Node29/Python20收据保留，全测试目标类型检查通过。旧失败与8份公共进度文档历史字节均保留。
+
+最终提交、精确 SHA CI/真 PG资格及合入以 PR和 Actions为准；本地未执行真 PG。RPC正例为真实 Passkey Source，普通密码跨Zone healing风险仍开放；durable Sabuk重合商人仍 BeforeExecution。原41份未提交差异及 HEAD再次逐字节SHA复核不变；服务器仍 bad3737 / Stripe TEST，本轮不部署。新完整签名包、GUI/实机/人类验收未完成，Candidate100=false。
+
 ## Progress66 · 2026-10-04 UTC · Web普通商店共同控件接线
 
 Web普通Gold/unlimited/panel0商店已接入Windows同一Rust controller/painter与既有持久Core购买dispatcher；完整584×334布局及两块实际输入区域确认就绪后，才交接整棵React Buy树。arming期间旧树可见但不可输入，键盘、场景定时移动、手柄和移动控件均使用实时阻断；较窄触屏及混合/特殊目录仍整棵legacy。
@@ -69,6 +75,155 @@ Native 两个购买入口与 Web 实际页面已接入同一 Rust planner，使�
 ## Progress59 · 2026-10-04 · 普通仓库共享源码回归
 
 完成共同 Storage painter、portable/runtime host 和 Web 接入，Source490（16 变更、464 保护、10 新增）。实际 Node 150/150、Native 113/113、portable 56/56、runtime 20/20、严格 TSC 与 shared WASM check 通过；每次 Cargo 顺序执行且保留 50 GiB 守卫/Policy B 完成证据。未操作 UI、HTTP、renderer Instance 或真实账号，未重建生产包，goal active。原失败证据保留，下一轮组合构建。详见 [Progress59 QA](generated/player-qa/client-core-20260930/shared-storage-ui/README.md)。
+
+
+## Preserved gameplay and release branch checkpoints
+
+The following entries retain their original dates, source identities and evidence limits from the gameplay/release branches. They do not report verification of this integration.
+
+## 2026-10-12 — preserve actually live activity schema9 with NPC spawn/P4 changes
+
+Merged790 local checks pass; original32a7 and actually publishedbad histories,
+activity rights/save fences and prior failures are preserved. Strict stale-source
+preflight rejected before mutation; independently verified livebad/current env.
+Real isolated activity PostgreSQL workflow is now part of the main release gate.
+Two other original PostgreSQL checks remain locally ignored. Exact merge commit,
+Linux qualification and drained rollout remain pending; R25/feed20 preserved.
+[Source-bound merged evidence](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
+## 2026-10-12 — NPC spawn declarations and actual Skeleton damage task receipt
+
+621 distinct final local checks pass; thirteen new. Original634-script
+corpus, RED/parent/intermediate failures and actual normal Skeleton delayed
+HP deduction are retained. One PostgreSQL check is locally ignored; newcomer
+Gateway cadence checks run separately. Linux qualification and publication
+remain pending; live stays8fee/R25/feed20. Full world/native/human remains open.
+[Source-bound evidence](CLASSIC-NPC-SPAWN-ACTLIST-20261012.md).
+
+
+## 2026-10-12 — NPC random rollback actually published
+
+Source8fee exact Linux38193711006, explicit six RNG checks, original gates and
+whole archive/log/ELF qualification pass. Fresh empty realm was backed up and
+normally switched; unchanged strict44 ordinary+18 resume and final protected
+empty readback pass. R25/feed20 stays unchanged. Personal known-failure RNG
+rewind, unknown freeze and no-write Lottery are bounded; shared world outbox,
+fullP1–P7/Mentor and native/human remain open. Original failures are retained.
+[Actual delivery evidence](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+
+
+## 2026-10-12 — Gateway catalogue transport actually published
+
+Source28f1 exact Linux38189025721 and whole artifact/log/ELF qualification pass.
+The fresh empty realm was backed up and normally switched; unchanged strict44
+ordinary +18 resume checks and protected final empty readback pass. Eight actual
+owner scenes retain526 catalogue packets each: first1.182s, maximum8.763s.
+Fourteen server writes measure16.920–44.451ms. Parent38s failure remains retained;
+root cause/long-term/native/human acceptance are not claimed. R25/feed20 stays
+unchanged. RNG source8fee is pushed and its Linux38193711006 is still pending.
+[Actual delivery evidence](CLASSIC-GATEWAY-CATALOGUE-TRANSPORT-20261012.md).
+
+
+## 2026-10-12 — Genuine NPC random Source rollback Candidate
+
+Root remains sole code, common-doc and Git writer in the lifecycle lane. Genuine
+VillageChief MAIN/displayed Tmove reproduces memory/file save failures that
+restored position but leaked RNG, plus a known newer personal Source CAS reject.
+The command and prepared-kill checkpoints now preserve that transient resource.
+Unknown publication stays frozen without a guessed rewind; Lottery no-write
+views retain their original transient behavior. No RNG algorithm, persisted
+schema, original script, packet or client change is introduced.
+
+Actual final local checks: 532 distinct passes (395 unit +137 integration), with
+six new checks included and one original isolated PostgreSQL check ignored
+locally. Original red and compiler failures are retained. The release workflow
+adds the explicit new module gate. Exact-source Linux package/publication and
+native/human acceptance remain pending; f574/R25/feed20 is still live at freeze.
+[Source-bound evidence and remaining scope](CLASSIC-NPC-RANDOM-ROLLBACK-20261012.md).
+Full Source/Zone invocation, durable world outbox and P1–P7/Mentor stay open.
+
+## 2026-10-10 — Actual sandbox payment and ordinary monthly lifecycle
+
+The operator refilled the private test key. Official CLI1.53.1 forwards signed
+Endive events outbound to an independent loopback Gateway at7121; no public
+tunnel or permanent webhook endpoint is created. Ordinary NewAccount/password
+Login/NewCharacter and expired StartGame denial pass. One Hosted Checkout
+payment uses the official fake card, explicitly selects USD10 and disables
+saved information. The signed completed callback returns200 and actual provider
+readback confirms paid Checkout and succeeded PaymentIntent, canonical1000/usd.
+Source applies1000 Credits to the frozen owner/character. A1000-Credit purchase
+and same-ID replay create one exact-UID card. Activation and consumed-UID replay
+produce one30-day term; ordinary StartGame/LogOutSuccess and relogin retain
+credit0 and unchanged expiry. No admin grant, Passkey shortcut or fixture event
+substitutes for this story.
+
+Preserved initial failures: the helper rejected blank email before any socket or
+registration; only its private config/generator changed to a fictional address.
+Stripe initially failed a JS chunk, then recovered after reload; Chrome connector
+was unavailable. A fill call timed out, but observed fields were already filled,
+so it was not repeated. Exactly one simulated payment was submitted. Initial SGD
+display is Adaptive Pricing presentation, not evidence of a canonical tuple bug;
+read-only primary-source review confirms the USD validators should remain strict.
+
+Exact code703ebadb CI37969367117 passes. Compatible nativefd660003 is launched
+with isolated preferences and no autologin; the empty1024×768 login screen is
+observed. Later UI input/minimize is left to the user; no native login or billing
+human acceptance is claimed. Gateway/listener stay running locally; the native
+client later returns normally with exit0 and can be reopened with its isolated
+launcher. No further UI input is performed after user-input detection.
+Observed post-helper health is one anonymous native socket, zero active
+sessions/admissions/reconnect leases and a healthy empty route/session cache.
+Private credentials, hashes/saves and Checkout URLs are not published. Public
+R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+[Redacted actual evidence and remaining gates](generated/player-qa/stripe-billing-20261009/trial-20261010/README.md).
+
+## 2026-10-10 — Prepare a local Stripe trial; key refill pending
+
+Built compatible native and Gateway binaries for the user's trial request.
+Automatic approval rejected the proposed Quick Tunnel startup with "blocked by
+policy" and no detailed reason; no tunnel ran or was retried through another
+tool. Prepared official Stripe CLI1.53.1 outbound loopback forwarding instead,
+with an explicit test-only HTTP cosmetic return guard. Read-only security review
+and Gateway38/38 pass; root owns all guard edits. The current private key entry
+is empty (earlier provider verification remains retained), so the listener
+helper refuses startup before any request/process. Key refill was requested.
+No Gateway/client/account/Checkout/wallet/monthly activation ran. Test helpers
+and instructions remain outside Git, with independent files and clean child
+environments. Public R22/Gatewaya41/feed17 and P1–P7 remain unchanged.
+[Exact hashes, retained logs and remaining acceptance](generated/player-qa/stripe-billing-20261009/local-sandbox-20261010/README.md).
+
+## 2026-10-10 — Real Stripe sandbox credential verification
+
+Read the operator's private test-mode server key without printing or copying
+it into Git. Four provider GETs return200. Real Checkout initially returns400
+because Endive no longer accepts `payment_method_types`; the supported
+`allowed_payment_method_types` card filter returns200. The unpaid probe is
+expired200. A separate temporary webhook and signing secret are created200
+and the endpoint is deleted200. No charge or game order is created.
+The matching Gateway request and captured-form contract are corrected, with
+all36 billing tests passing. USD1/100 Credits and30-day monthly1000 prices are
+saved only in disabled private configuration; public services/feeds/saves are
+unchanged. A permanent callback, completed payment/refund, live key, fleet
+rollout and native purchase remain open. Original provider failure is retained.
+[Secret-free evidence](generated/player-qa/stripe-billing-20261009/provider-20261010/README.md).
+
+## 2026-10-09 — Stripe Credits / monthly consumable Candidate
+
+Implemented the user's one-time Stripe recharge and monthly GameShop item
+request in the existing isolated worktree, led by the coordinator with bounded
+writers/reviewers. No live credentials, payment, service, feed or save was changed.
+Local final simulation44, Gateway billing36/shared4/adjacent4 and native
+host5/model10/URL2 checks pass. The initial compilation/fixture failures remain
+in evidence; the actual socket test now supplies the mandatory fixture MAC key
+and permits the ordinary full bootstrap within its bounded ten-second deadline.
+All financial/identity/packet-order assertions remain. Exact code4a26 is pushed;
+Stripe CI37946216332 passes35 Source/1 actual isolated PG/36 Gateway/4 shared
+tests. Adjacent monthly CI37946216237 passes9 Source/1 PG/4 Gateway checks.
+Real prices/Stripe configuration, paired schema8 rollout and native
+human acceptance remain open; public R22/Gatewaya41/feed17 and P1–P7 are unchanged.
+[Feature](STRIPE-CREDITS-MONTHLY-CARD-20261009.md),
+[evidence](generated/player-qa/stripe-billing-20261009/README.md).
 
 > Latest fresh-native visual parity sync: 2026-07-18. Logged the local Crystal
 > QA character into Bichon `0 @ 332,275` through the rebuilt Release Gateway,
