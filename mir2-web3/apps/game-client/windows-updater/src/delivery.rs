@@ -165,6 +165,96 @@ impl Delivery {
     }
 }
 
+// A 100 ms request at 5 MiB/s costs about 512 KiB. This deliberately
+// underestimates a CDN miss followed by an origin request. Only bulk repairs
+// use this tradeoff; the successful mixed-bundle plan is capped at twice the
+// remaining raw payload bytes. Full initial bundles retain their old behavior.
+const BULK_REPAIR_PAYLOADS: usize = 256;
+const REQUEST_EQUIVALENT_BYTES: u64 = 512 * 1024;
+const MIXED_PLAN_WIRE_MULTIPLIER: u64 = 2;
+
+struct BundlePlanner<'a> {
+    pending: BTreeMap<&'a str, &'a FileEntry>,
+    remaining: BTreeMap<&'a str, u64>,
+    remaining_bytes: u64,
+    archive_bytes: u64,
+    wire_budget: u64,
+    bulk: bool,
+}
+
+impl<'a> BundlePlanner<'a> {
+    fn new(pending: BTreeMap<&'a str, &'a FileEntry>) -> Self {
+        // The content cache downloads one payload per hash, even when several
+        // target paths share it. Do not let aliases inflate the request budget.
+        let mut remaining: BTreeMap<&str, u64> = BTreeMap::new();
+        for entry in pending.values() {
+            remaining
+                .entry(entry.sha256.as_str())
+                .and_modify(|size| *size = (*size).max(entry.size))
+                .or_insert(entry.size);
+        }
+        let remaining_bytes = remaining
+            .values()
+            .fold(0u64, |sum, size| sum.saturating_add(*size));
+        Self {
+            bulk: remaining.len() >= BULK_REPAIR_PAYLOADS,
+            pending,
+            remaining,
+            remaining_bytes,
+            archive_bytes: 0,
+            wire_budget: remaining_bytes.saturating_mul(MIXED_PLAN_WIRE_MULTIPLIER),
+        }
+    }
+
+    fn needed_cost(&self, expected: &[&FileEntry]) -> (usize, u64) {
+        let mut seen = BTreeSet::new();
+        let mut count = 0;
+        let mut bytes = 0u64;
+        for entry in expected {
+            if seen.insert(entry.sha256.as_str()) {
+                if let Some(size) = self.remaining.get(entry.sha256.as_str()) {
+                    count += 1;
+                    bytes = bytes.saturating_add(*size);
+                }
+            }
+        }
+        (count, bytes)
+    }
+
+    fn should_download(&self, bundle: &Bundle, expected: &[&FileEntry]) -> bool {
+        let (requests, bytes) = self.needed_cost(expected);
+        if requests == 0 {
+            return false;
+        }
+        let full = bundle.files.iter().all(|path| {
+            self.pending
+                .get(path.as_str())
+                .is_some_and(|entry| self.remaining.contains_key(entry.sha256.as_str()))
+        });
+        let raw_cost = bytes.saturating_add(
+            (requests.saturating_sub(1) as u64).saturating_mul(REQUEST_EQUIVALENT_BYTES),
+        );
+        let planned_wire = self
+            .archive_bytes
+            .checked_add(bundle.archive.size)
+            .and_then(|wire| wire.checked_add(self.remaining_bytes.saturating_sub(bytes)));
+        full || (self.bulk
+            && bundle.archive.size <= raw_cost
+            && planned_wire.is_some_and(|wire| wire <= self.wire_budget))
+    }
+
+    fn completed(&mut self, bundle: &Bundle, expected: &[&FileEntry]) {
+        self.archive_bytes = self.archive_bytes.saturating_add(bundle.archive.size);
+        for entry in expected {
+            self.remaining.remove(entry.sha256.as_str());
+        }
+        self.remaining_bytes = self
+            .remaining
+            .values()
+            .fold(0u64, |sum, size| sum.saturating_add(*size));
+    }
+}
+
 fn fallback(
     root: &Path,
     status: &impl super::Status,
@@ -300,30 +390,18 @@ impl<S: super::Source, T: super::Status> Acceleration<'_, S, T> {
             }
         }
         let entries = manifest.map();
+        // Construct after a successful executable delta removed that target;
+        // cached payloads were already excluded when `needed` was collected.
+        let mut planner = BundlePlanner::new(needed);
         for bundle in &delivery.bundles {
-            let count = bundle
-                .files
-                .iter()
-                .filter(|path| needed.contains_key(path.as_str()))
-                .count();
-            let bytes = bundle
-                .files
-                .iter()
-                .filter_map(|path| needed.get(path.as_str()))
-                .map(|entry| entry.size)
-                .sum::<u64>();
-            // A full initial bundle amortizes many requests. A small repair should
-            // not fetch a large bundle just because one contained asset is missing.
-            if count == 0
-                || !(count == bundle.files.len() || (count >= 256 && bundle.archive.size <= bytes))
-            {
-                continue;
-            }
             let expected = bundle
                 .files
                 .iter()
                 .map(|path| entries[path.as_str()])
                 .collect::<Vec<_>>();
+            if !planner.should_download(bundle, &expected) {
+                continue;
+            }
             let started = Instant::now();
             let before = transfers.wire_bytes;
             let result = (|| -> Result<()> {
@@ -354,9 +432,7 @@ impl<S: super::Source, T: super::Status> Acceleration<'_, S, T> {
             match result {
                 Ok(()) => {
                     stats.bundles += 1;
-                    for path in &bundle.files {
-                        needed.remove(path.as_str());
-                    }
+                    planner.completed(bundle, &expected);
                     super::log(
                         root,
                         "delivery-bundle",

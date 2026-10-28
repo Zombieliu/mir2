@@ -704,6 +704,456 @@ fn cache_and_stage(
         .collect()
 }
 
+fn planner_files(count: usize, size: u64) -> Vec<FileEntry> {
+    (0..count)
+        .map(|index| {
+            let mut file = entry(
+                &format!("mir2-assets/planner/{index}.bin"),
+                index.to_string().as_bytes(),
+            );
+            file.size = size;
+            file
+        })
+        .collect()
+}
+
+fn planned_bundle(files: &[&FileEntry], size: u64) -> Bundle {
+    let mut archive = entry("delivery/planner.m2b.gz", b"planner-only artifact");
+    archive.size = size;
+    Bundle {
+        archive,
+        files: files.iter().map(|file| file.path.clone()).collect(),
+    }
+}
+
+#[test]
+fn mixed_bundle_planner_prices_saved_requests_and_keeps_small_repairs_and_fresh_behavior() {
+    let files = planner_files(257, 1024 * 1024);
+    let pending = files[..256]
+        .iter()
+        .map(|file| (file.path.as_str(), file))
+        .collect();
+    let planner = BundlePlanner::new(pending);
+    let expected = vec![&files[0], &files[1], &files[256]];
+    let threshold = 2 * 1024 * 1024 + REQUEST_EQUIVALENT_BYTES;
+    assert!(planner.should_download(&planned_bundle(&expected, threshold), &expected));
+    assert!(!planner.should_download(&planned_bundle(&expected, threshold + 1), &expected));
+    let small = BundlePlanner::new(
+        files[..255]
+            .iter()
+            .map(|file| (file.path.as_str(), file))
+            .collect(),
+    );
+    assert!(!small.should_download(&planned_bundle(&expected, 1), &expected));
+    let all = vec![&files[0], &files[1]];
+    assert!(small.should_download(&planned_bundle(&all, MAX_COMPRESSED), &all));
+    assert!(!planner.should_download(&planned_bundle(&[&files[256]], 1), &[&files[256]]));
+}
+
+#[test]
+fn mixed_bundle_planner_caps_all_selected_archives_plus_all_remaining_raw_at_exact_boundary() {
+    let files = planner_files(257, 1);
+    let mut planner = BundlePlanner::new(
+        files[..256]
+            .iter()
+            .map(|file| (file.path.as_str(), file))
+            .collect(),
+    );
+    let mut first = files[..128].iter().collect::<Vec<_>>();
+    first.push(&files[256]);
+    assert_eq!(planner.wire_budget, 512);
+    assert!(!planner.should_download(&planned_bundle(&first, 385), &first));
+    let bundle = planned_bundle(&first, 384);
+    assert!(planner.should_download(&bundle, &first));
+    assert_eq!(
+        planner.archive_bytes, 0,
+        "planning cannot claim completed/cache bytes"
+    );
+    planner.completed(&bundle, &first);
+    assert_eq!(
+        planner.archive_bytes + planner.remaining_bytes,
+        planner.wire_budget
+    );
+    let mut second = files[128..192].iter().collect::<Vec<_>>();
+    second.push(&files[256]);
+    assert!(!planner.should_download(&planned_bundle(&second, 65), &second));
+    let bundle = planned_bundle(&second, 64);
+    assert!(planner.should_download(&bundle, &second));
+    planner.completed(&bundle, &second);
+    assert_eq!(planner.archive_bytes, 448);
+    assert_eq!(planner.remaining_bytes, 64);
+    assert_eq!(planner.archive_bytes + planner.remaining_bytes, 512);
+}
+
+#[test]
+fn mixed_bundle_planner_deduplicates_cache_hashes_and_uses_post_delta_baseline() {
+    let mut files = planner_files(257, 4096);
+    for index in 0..300 {
+        let mut alias = files[0].clone();
+        alias.path = format!("mir2-assets/alias/{index}.bin");
+        files.push(alias);
+    }
+    let mut pending = files
+        .iter()
+        .map(|file| (file.path.as_str(), file))
+        .collect::<BTreeMap<_, _>>();
+    pending.remove(files[256].path.as_str()); // Already verified by the executable delta/cache.
+    let mut planner = BundlePlanner::new(pending);
+    assert_eq!(planner.remaining.len(), 256);
+    assert_eq!(planner.remaining_bytes, 256 * 4096);
+    let mut expected = files[257..].iter().collect::<Vec<_>>();
+    expected.push(&files[256]);
+    assert_eq!(planner.needed_cost(&expected), (1, 4096));
+    assert!(!planner.should_download(&planned_bundle(&expected, 4097), &expected));
+    let bundle = planned_bundle(&expected, 4096);
+    assert!(planner.should_download(&bundle, &expected));
+    planner.completed(&bundle, &expected);
+    assert_eq!(planner.remaining_bytes, 255 * 4096);
+    assert_eq!(planner.needed_cost(&expected), (0, 0));
+    assert!(!planner.should_download(&bundle, &expected));
+    let aliases_only = BundlePlanner::new(
+        files[257..]
+            .iter()
+            .map(|file| (file.path.as_str(), file))
+            .collect(),
+    );
+    assert!(
+        !aliases_only.bulk,
+        "300 aliases are still only one raw HTTP request"
+    );
+}
+
+#[test]
+fn mixed_bundle_planner_saturates_untrusted_costs_and_rejects_overflowing_total_wire() {
+    let mut files = planner_files(257, 1);
+    files[0].size = u64::MAX;
+    let mut planner = BundlePlanner::new(
+        files[..256]
+            .iter()
+            .map(|file| (file.path.as_str(), file))
+            .collect(),
+    );
+    assert_eq!(planner.remaining_bytes, u64::MAX);
+    assert_eq!(planner.wire_budget, u64::MAX);
+    let expected = vec![&files[0], &files[256]];
+    let bundle = planned_bundle(&expected, u64::MAX);
+    assert!(planner.should_download(&bundle, &expected));
+    planner.completed(&bundle, &expected);
+    assert_eq!(
+        planner.remaining_bytes, 255,
+        "saturated sums must not erase remaining payload costs"
+    );
+    let next = vec![&files[1], &files[256]];
+    assert!(!planner.should_download(&planned_bundle(&next, 1), &next));
+}
+
+#[test]
+fn matching_delta_is_removed_before_bulk_bundle_budget_and_request_count_are_built() {
+    let root = TempDir::new().unwrap();
+    let base_bytes = vec![b'a'; 4096];
+    let target_bytes = vec![b'b'; 4096];
+    let base = entry("mir2-platform-windows.exe", &base_bytes);
+    let target = entry("mir2-platform-windows.exe", &target_bytes);
+    safe::write_new(&root.path().join("game").join(&base.path), &base_bytes).unwrap();
+    let data = (0..256)
+        .map(|index| {
+            (
+                format!("mir2-assets/post-delta/{index}.json"),
+                index.to_string().into_bytes(),
+            )
+        })
+        .collect::<Vec<_>>();
+    let assets = data
+        .iter()
+        .map(|(path, bytes)| entry(path, bytes))
+        .collect::<Vec<_>>();
+    let compressed = gzip(&pack_raw(
+        &data
+            .iter()
+            .map(|(path, bytes)| (path.as_str(), bytes.as_slice()))
+            .collect::<Vec<_>>(),
+    ));
+    let archive = entry("delivery/post-delta.m2b.gz", &compressed);
+    let patch_bytes = gzip(&delta_raw(target.size, &[literal_op(&target_bytes)]));
+    let patch = entry("delivery/post-delta.m2d.gz", &patch_bytes);
+    let mut delivery = descriptor(Bundle {
+        archive: archive.clone(),
+        files: assets.iter().map(|file| file.path.clone()).collect(),
+    });
+    delivery.patches.push(Delta {
+        path: target.path.clone(),
+        base_size: base.size,
+        base_sha256: base.sha256.clone(),
+        patch: patch.clone(),
+    });
+    let mut files = vec![
+        target.clone(),
+        entry("BUILD-ATTESTATION.json", b"attestation"),
+    ];
+    files.extend(assets.iter().cloned());
+    let manifest = manifest(&files);
+    let mut pending = vec![target.clone()];
+    pending.extend(assets[..255].iter().cloned());
+    assert_eq!(pending.len(), 256);
+    let source = MemorySource::new(BTreeMap::from([
+        (
+            format!("{}/{}", component().directory, patch.path),
+            patch_bytes,
+        ),
+        (
+            format!("{}/{}", component().directory, archive.path),
+            compressed,
+        ),
+    ]));
+    let mut transfers = update::Transfers::default();
+    let mut stats = Stats::default();
+    Acceleration {
+        root: root.path(),
+        source: &source,
+        component: &component(),
+        status: &Quiet::default(),
+        total: pending.iter().map(|file| file.size).sum(),
+        transfers: &mut transfers,
+        stats: &mut stats,
+    }
+    .run(&delivery, &manifest, &pending)
+    .unwrap();
+    assert_eq!((stats.patches, stats.bundles), (1, 0));
+    assert_eq!(
+        source.downloads.borrow().as_slice(),
+        &[format!("{}/{}", component().directory, patch.path)]
+    );
+    assert!(safe::matches(&payload_cache(root.path(), &target).unwrap(), &target).unwrap());
+    assert!(!payload_cache(root.path(), &assets[0]).unwrap().exists());
+    assert_eq!(
+        fs::read(root.path().join("game").join(&base.path)).unwrap(),
+        base_bytes
+    );
+}
+
+#[test]
+fn mixed_bulk_bundle_reconstructs_real_cache_bytes_with_one_request_and_preserves_live_files() {
+    let data = (0..300)
+        .map(|index| {
+            let mut state = index as u64 + 1;
+            let bytes = (0..4096)
+                .map(|_| {
+                    state ^= state << 13;
+                    state ^= state >> 7;
+                    state ^= state << 17;
+                    state as u8
+                })
+                .collect::<Vec<_>>();
+            (format!("mir2-assets/mixed/{index}.png"), bytes)
+        })
+        .collect::<Vec<_>>();
+    let files = data
+        .iter()
+        .map(|(path, bytes)| entry(path, bytes))
+        .collect::<Vec<_>>();
+    let compressed = gzip(&pack_raw(
+        &data
+            .iter()
+            .map(|(path, bytes)| (path.as_str(), bytes.as_slice()))
+            .collect::<Vec<_>>(),
+    ));
+    let archive = entry("delivery/mixed.m2b.gz", &compressed);
+    assert!(archive.size > files[..256].iter().map(|file| file.size).sum::<u64>());
+    let bundle = descriptor(Bundle {
+        archive: archive.clone(),
+        files: files.iter().map(|file| file.path.clone()).collect(),
+    });
+    let mut package_files = vec![
+        entry("mir2-platform-windows.exe", b"manifest fixture exe"),
+        entry("BUILD-ATTESTATION.json", b"manifest fixture attestation"),
+    ];
+    package_files.extend(files.iter().cloned());
+    for count in [255, 256] {
+        let root = TempDir::new().unwrap();
+        safe::write_new(&root.path().join("game/personal-file.txt"), b"personal").unwrap();
+        safe::write_new(
+            &root.path().join("game").join(&files[0].path),
+            b"old live asset",
+        )
+        .unwrap();
+        let mut objects = data
+            .iter()
+            .map(|(path, bytes)| (format!("{}/{path}", component().directory), bytes.clone()))
+            .collect::<BTreeMap<_, _>>();
+        objects.insert(
+            format!("{}/{}", component().directory, archive.path),
+            compressed.clone(),
+        );
+        let source = MemorySource::new(objects);
+        let mut transfers = update::Transfers::default();
+        let mut stats = Stats::default();
+        let manifest = manifest(&package_files);
+        Acceleration {
+            root: root.path(),
+            source: &source,
+            component: &component(),
+            status: &Quiet::default(),
+            total: files[..count].iter().map(|file| file.size).sum(),
+            transfers: &mut transfers,
+            stats: &mut stats,
+        }
+        .run(&bundle, &manifest, &files[..count])
+        .unwrap();
+        cache_and_stage(root.path(), &source, &files[..count], &mut transfers);
+        assert_eq!(stats.bundles, usize::from(count == 256));
+        assert_eq!(
+            source.downloads.borrow().len(),
+            if count == 256 { 1 } else { 255 }
+        );
+        for file in &files[..count] {
+            assert!(safe::matches(&payload_cache(root.path(), file).unwrap(), file).unwrap());
+        }
+        assert_eq!(
+            fs::read(root.path().join("game").join(&files[0].path)).unwrap(),
+            b"old live asset"
+        );
+        assert_eq!(
+            fs::read(root.path().join("game/personal-file.txt")).unwrap(),
+            b"personal"
+        );
+    }
+}
+
+#[test]
+#[ignore = "requires MIR2_PLANNER_OLD_PACKAGE, MIR2_PLANNER_NEW_PACKAGE, MIR2_PLANNER_DELIVERY and MIR2_PLANNER_REPORT"]
+fn real_signed_r25_to_candidate28_planner_forecast_without_download_or_cache_population() {
+    fn signed_package(root: &Path) -> (BTreeMap<String, Vec<u8>>, Manifest) {
+        let metadata = META
+            .iter()
+            .map(|name| {
+                (
+                    (*name).to_owned(),
+                    safe::read_bounded(&root.join(name), MAX_META).unwrap(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        crate::platform::verify_cms(
+            &metadata["RELEASE-STATEMENT.json"],
+            &metadata["RELEASE-STATEMENT.p7s"],
+            crate::SIGNING_KEY,
+        )
+        .unwrap();
+        let manifest = bind_game(&metadata).unwrap();
+        (metadata, manifest)
+    }
+    let old_root = PathBuf::from(std::env::var_os("MIR2_PLANNER_OLD_PACKAGE").unwrap());
+    let new_root = PathBuf::from(std::env::var_os("MIR2_PLANNER_NEW_PACKAGE").unwrap());
+    let delivery_root = PathBuf::from(std::env::var_os("MIR2_PLANNER_DELIVERY").unwrap());
+    let (_, old) = signed_package(&old_root);
+    let (metadata, new) = signed_package(&new_root);
+    let delivery_bytes =
+        safe::read_bounded(&delivery_root.join("DELIVERY.json"), MAX_META).unwrap();
+    let signature = safe::read_bounded(&delivery_root.join("DELIVERY.p7s"), MAX_META).unwrap();
+    crate::platform::verify_cms(&delivery_bytes, &signature, crate::SIGNING_KEY).unwrap();
+    let version: serde_json::Value = serde_json::from_slice(&metadata["VERSION.json"]).unwrap();
+    let delivery = Delivery::parse(
+        &delivery_bytes,
+        version["candidate"].as_str().unwrap(),
+        &metadata["PACKAGE-MANIFEST.json"],
+        &metadata["VERSION.json"],
+        &new,
+        update::now(),
+    )
+    .unwrap();
+    let old_entries = old.map();
+    let entries = new.map();
+    let mut pending = new
+        .files
+        .iter()
+        .filter(|file| {
+            old_entries
+                .get(file.path.as_str())
+                .is_none_or(|previous| previous.size != file.size || previous.sha256 != file.sha256)
+        })
+        .map(|file| (file.path.as_str(), file))
+        .collect::<BTreeMap<_, _>>();
+    let changed_paths = pending.len();
+    let exe = *pending.get("mir2-platform-windows.exe").unwrap();
+    let base = old_entries["mir2-platform-windows.exe"];
+    assert!(safe::matches(&old_root.join(&base.path), base).unwrap());
+    let delta = delivery
+        .patches
+        .iter()
+        .find(|delta| {
+            delta.base_size == base.size
+                && delta.base_sha256 == base.sha256
+                && delta.patch.size < exe.size
+        })
+        .unwrap();
+    pending.remove("mir2-platform-windows.exe");
+    let mut previous = pending.clone();
+    let mut previous_bundles = 0;
+    for bundle in &delivery.bundles {
+        let count = bundle
+            .files
+            .iter()
+            .filter(|path| previous.contains_key(path.as_str()))
+            .count();
+        let bytes = bundle
+            .files
+            .iter()
+            .filter_map(|path| previous.get(path.as_str()))
+            .map(|file| file.size)
+            .sum::<u64>();
+        if count != 0
+            && (count == bundle.files.len() || (count >= 256 && bundle.archive.size <= bytes))
+        {
+            previous_bundles += 1;
+            for path in &bundle.files {
+                previous.remove(path.as_str());
+            }
+        }
+    }
+    let mut planner = BundlePlanner::new(pending.clone());
+    let raw_baseline = planner.remaining_bytes;
+    let mut selected = vec![];
+    for bundle in &delivery.bundles {
+        let expected = bundle
+            .files
+            .iter()
+            .map(|path| entries[path.as_str()])
+            .collect::<Vec<_>>();
+        if planner.should_download(bundle, &expected) {
+            let (requests, raw_bytes) = planner.needed_cost(&expected);
+            selected.push(serde_json::json!({"path":bundle.archive.path,"compressedBytes":bundle.archive.size,"neededRequests":requests,"neededRawBytes":raw_bytes}));
+            planner.completed(bundle, &expected);
+        }
+    }
+    let remaining_paths = pending
+        .values()
+        .filter(|file| planner.remaining.contains_key(file.sha256.as_str()))
+        .count();
+    assert_eq!(changed_paths, 101331);
+    assert_eq!((previous_bundles, previous.len()), (2, 33992));
+    assert!(remaining_paths < previous.len());
+    assert!(planner.archive_bytes + planner.remaining_bytes <= planner.wire_budget);
+    let report = serde_json::json!({"schema":"mir2.windows.delivery-planner-forecast.v1","passed":true,
+        "forecastOnly":true,"networkDownloadTested":false,"cachePrepopulated":false,"cmsVerified":true,
+        "baseExecutableHashVerified":true,"deltaApplied":false,"changedPaths":changed_paths,
+        "previousBundles":previous_bundles,"previousRemainingPaths":previous.len(),
+        "requestEquivalentBytes":REQUEST_EQUIVALENT_BYTES,"minimumBulkUniquePayloads":BULK_REPAIR_PAYLOADS,
+        "rawBaselineAfterDeltaDeduplicated":raw_baseline,"wireBudget":planner.wire_budget,
+        "selectedBundles":selected,"matchingDeltaBytes":delta.patch.size,
+        "remainingPaths":remaining_paths,"remainingRawRequests":planner.remaining.len(),"remainingRawBytes":planner.remaining_bytes,
+        "plannedArchiveBytes":planner.archive_bytes,"plannedPayloadWireBytes":planner.archive_bytes+planner.remaining_bytes,
+        "plannedWireIncludingDelta":planner.archive_bytes+planner.remaining_bytes+delta.patch.size});
+    let output = PathBuf::from(std::env::var_os("MIR2_PLANNER_REPORT").unwrap());
+    assert!(output.is_absolute());
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&output)
+        .unwrap();
+    file.write_all(&serde_json::to_vec_pretty(&report).unwrap())
+        .unwrap();
+    println!("{}", serde_json::to_string(&report).unwrap());
+}
+
 #[test]
 fn initial_bundle_avoids_hundreds_of_requests_and_transaction_preserves_personal_files() {
     let root = TempDir::new().unwrap();
