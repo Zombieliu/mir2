@@ -222,6 +222,137 @@ class DeployTests(unittest.TestCase):
             with mock.patch.object(server, 'ROOT', self.root / 'other-root'), self.assertRaisesRegex(ValueError, 'unsupported fixed release root'):
                 server.promote_immutable(self.stage, component, files[component], helper, release_root)
 
+    def published_legacy_projection(self):
+        component = server.LEGACY_DELIVERY_COMPONENT
+        self.assertEqual(component, 'releases/game-WN-CANDIDATE-20261011-invited-25')
+        self.assertEqual(len(server.LEGACY_CANDIDATE_PROJECTION), 17)
+        self.assertIn('mir2-assets/generated/native-map-keyed/resource-input-provenance.json',
+                      server.LEGACY_CANDIDATE_PROJECTION)
+        self.assertEqual(len(server.LEGACY_DELIVERY_EXTRAS), 18)
+        # Keep the production 17+18 path layout, but use small synthetic bytes.
+        # The archive/manifest verifier still binds every candidate fixture byte;
+        # these fake signatures and CDN payloads do not assert real CMS validity.
+        for path in server.LEGACY_CANDIDATE_PROJECTION - set(helper.META):
+            target = self.candidate / path
+            if not target.exists():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(('admitted projection fixture: ' + path).encode('ascii'))
+        (self.candidate / 'mir2-assets/nested/second.txt').write_bytes(b'another full-only signed asset')
+        entries = []
+        for file in sorted(self.candidate.rglob('*')):
+            if file.is_file():
+                path = file.relative_to(self.candidate).as_posix()
+                if path not in helper.META:
+                    data = file.read_bytes()
+                    entries.append({'path': path, 'size': len(data), 'sha256': helper.sha256(data)})
+        entries.sort(key=lambda entry: entry['path'])
+        canonical = ''.join(f"{entry['path']}\t{entry['size']}\t{entry['sha256']}\n" for entry in entries)
+        manifest = json.loads((self.candidate / 'PACKAGE-MANIFEST.json').read_bytes())
+        manifest.update(files=entries, fileCount=len(entries), totalBytes=sum(entry['size'] for entry in entries),
+                        aggregateSha256=helper.sha256(canonical.encode('ascii')))
+        manifest_bytes = fixtures.dumped(manifest)
+        (self.candidate / 'PACKAGE-MANIFEST.json').write_bytes(manifest_bytes)
+        version = json.loads((self.candidate / 'VERSION.json').read_bytes())
+        version.update(packageManifestSha256=helper.sha256(manifest_bytes),
+                       packageManifestAggregateSha256=manifest['aggregateSha256'],
+                       packageManifestFileCount=len(entries), packageFileCount=len(entries) + 4)
+        version_bytes = fixtures.dumped(version)
+        (self.candidate / 'VERSION.json').write_bytes(version_bytes)
+        statement = json.loads((self.candidate / 'RELEASE-STATEMENT.json').read_bytes())
+        statement.update(packageManifestSha256=helper.sha256(manifest_bytes),
+                         packageManifestAggregateSha256=manifest['aggregateSha256'],
+                         versionSha256=helper.sha256(version_bytes))
+        (self.candidate / 'RELEASE-STATEMENT.json').write_bytes(fixtures.dumped(statement))
+        archive = self.root / 'projection.tar.gz'
+        receipt = helper.build_archive({component: str(self.candidate), 'releases/updater-v1': str(self.engine)}, archive)
+        feed = json.loads(json.dumps(self.feed))
+        feed['game']['directory'] = component
+        for entry in feed['game']['metadata']:
+            data = (self.candidate / entry['path']).read_bytes()
+            entry.update(size=len(data), sha256=helper.sha256(data))
+        stage = self.root / 'projection-stage'
+        stage.mkdir()
+        files = server.extract_checked(archive, receipt, feed, stage, helper)[component]
+        self.assertEqual(len(files), 19)  # 17 retained files plus two full-only assets.
+        release_root = self.root / 'published'
+        target = release_root / component
+        target.mkdir(parents=True)
+        for path in server.LEGACY_CANDIDATE_PROJECTION:
+            destination = target / path
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes((stage / component / path).read_bytes())
+        extras = {}
+        for path in server.LEGACY_DELIVERY_EXTRAS:
+            data = ('frozen CDN fixture: ' + path).encode('ascii')
+            destination = target / path
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(data)
+            extras[path] = (len(data), helper.sha256(data))
+        return release_root, component, target, stage, files, extras
+
+    def test_exact_published_35_file_projection_is_read_only_and_full_forms_still_match(self):
+        release_root, component, target, stage, files, extras = self.published_legacy_projection()
+        before = {path.relative_to(target).as_posix(): path.read_bytes() for path in target.rglob('*') if path.is_file()}
+        self.assertEqual(len(before), 35)
+        with mock.patch.object(server, 'ROOT', release_root), mock.patch.object(server, 'LEGACY_DELIVERY_EXTRAS', extras):
+            with mock.patch.object(server.os, 'rename', side_effect=AssertionError('existing tree cannot be moved')), \
+                 mock.patch.object(server.os, 'chmod', side_effect=AssertionError('existing tree cannot be changed')):
+                self.assertEqual(server.promote_immutable(stage, component, files, helper, release_root), 'verified-existing')
+            self.assertEqual(before, {path.relative_to(target).as_posix(): path.read_bytes()
+                                      for path in target.rglob('*') if path.is_file()})
+            for path in set(files) - server.LEGACY_CANDIDATE_PROJECTION:
+                destination = target / path
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes((stage / component / path).read_bytes())
+            self.assertEqual(server.promote_immutable(stage, component, files, helper, release_root), 'verified-existing')
+            for path in extras:
+                (target / path).unlink()
+            self.assertEqual(server.promote_immutable(stage, component, files, helper, release_root), 'verified-existing')
+
+    def test_projection_rejects_every_missing_or_changed_file_unknown_and_other_partial_trees(self):
+        release_root, component, target, stage, files, extras = self.published_legacy_projection()
+        original = {path.relative_to(target).as_posix(): path.read_bytes() for path in target.rglob('*') if path.is_file()}
+        with mock.patch.object(server, 'ROOT', release_root), mock.patch.object(server, 'LEGACY_DELIVERY_EXTRAS', extras):
+            for path, data in original.items():
+                destination = target / path
+                for mutation in ('missing', 'same-size-change', 'size-change'):
+                    if mutation == 'missing':
+                        destination.unlink()
+                    else:
+                        destination.write_bytes(bytes([data[0] ^ 1]) + data[1:] if mutation == 'same-size-change' else data + b'x')
+                    with self.subTest(path=path, mutation=mutation), self.assertRaisesRegex(ValueError, 'refusing overwrite'):
+                        server.promote_immutable(stage, component, files, helper, release_root)
+                    destination.write_bytes(data)
+            for path, data in [('unexpected.txt', b'unknown'), ('mir2-assets/nested/data.txt', (stage / component / 'mir2-assets/nested/data.txt').read_bytes())]:
+                destination = target / path
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(data)
+                with self.subTest(unexpected=path), self.assertRaisesRegex(ValueError, 'refusing overwrite'):
+                    server.promote_immutable(stage, component, files, helper, release_root)
+                destination.unlink()
+            missing_admitted_file = {path: entry for path, entry in files.items() if path != 'mir2-client.toml'}
+            with self.assertRaisesRegex(ValueError, 'refusing overwrite'):
+                server.promote_immutable(stage, component, missing_admitted_file, helper, release_root)
+            self.assertEqual(original, {path.relative_to(target).as_posix(): path.read_bytes()
+                                        for path in target.rglob('*') if path.is_file()})
+
+    def test_projection_is_rejected_for_other_release_components_and_five_class_scope(self):
+        release_root, component, target, stage, files, extras = self.published_legacy_projection()
+        original = {path.relative_to(target).as_posix(): path.read_bytes() for path in target.rglob('*') if path.is_file()}
+        modern = release_root / 'five-class'
+        other = 'releases/game-other'
+        for base, name in [(modern, component), (release_root, other)]:
+            for path, data in original.items():
+                destination = base / name / path
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(data)
+        with mock.patch.object(server, 'ROOT', release_root), mock.patch.object(server, 'LEGACY_DELIVERY_EXTRAS', extras):
+            for base, name in [(modern, component), (release_root, other)]:
+                with self.subTest(root=base, component=name), self.assertRaisesRegex(ValueError, 'refusing overwrite'):
+                    server.promote_immutable(stage, name, files, helper, base)
+            self.assertEqual(original, {path.relative_to(target).as_posix(): path.read_bytes()
+                                        for path in target.rglob('*') if path.is_file()})
+
     def test_modern_origin_readback_never_uses_legacy_alias_or_hidden_directory(self):
         base = '/client-updates/five-class/'
         feed_bytes, signature = b'new signed fixture feed', b'fixture signature'

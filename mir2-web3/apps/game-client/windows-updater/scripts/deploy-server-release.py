@@ -59,6 +59,18 @@ LEGACY_DELIVERY_EXTRAS = {
     'delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz': (60049370, 'E14BB6681791C37AC1DDB771841DB1756B7E9DF00DF46D240E529CDBB087CEB9'),
     'delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz': (65610644, 'E83E50787DF75D6E3D4A64AEF7640E0D36B849E17AAAE87568F8A1D526D6B25B'),
 }
+# The original R25 origin published exactly these 17 candidate files alongside
+# the 18 fixed CDN files above. Bind every retained byte to the verified archive;
+# this is one complete published projection, never an arbitrary partial tree.
+LEGACY_CANDIDATE_PROJECTION = frozenset({
+    'BUILD-ATTESTATION.json', 'CONTROLS.txt', 'KNOWN-ISSUES.md',
+    'MULTILINGUAL-SOURCES.json', 'NotoSansTC-OFL.txt', 'OFL-NotoSans.txt',
+    'OFL-NotoSansArabic.txt', 'OFL-NotoSansDevanagari.txt', 'OFL-NotoSansThai.txt',
+    'PACKAGE-MANIFEST.json', 'README-START.txt', 'RELEASE-STATEMENT.json',
+    'RELEASE-STATEMENT.p7s', 'VERSION.json',
+    'mir2-assets/generated/native-map-keyed/resource-input-provenance.json',
+    'mir2-client.toml', 'mir2-platform-windows.exe',
+})
 BLOCK = b'''
     # BEGIN MIR2 NATIVE CLIENT UPDATES V1
     @mir2_native_updates path /client-updates /client-updates/*
@@ -339,7 +351,12 @@ def promote_immutable(stage, component, files, helper, release_root=ROOT):
         found = {p: (e.size, e.sha256) for p, e in actual[component].items()}
         if found != wanted and release_root == ROOT and component == LEGACY_DELIVERY_COMPONENT:
             need(not set(wanted).intersection(LEGACY_DELIVERY_EXTRAS), 'delivery closure overlaps candidate files')
-            wanted = {**wanted, **LEGACY_DELIVERY_EXTRAS}
+            full = {**wanted, **LEGACY_DELIVERY_EXTRAS}
+            if found != full and LEGACY_CANDIDATE_PROJECTION.issubset(wanted):
+                wanted = {**{path: wanted[path] for path in LEGACY_CANDIDATE_PROJECTION},
+                          **LEGACY_DELIVERY_EXTRAS}
+            else:
+                wanted = full
         need(found == wanted, 'existing immutable release differs; refusing overwrite')
         return 'verified-existing'
     for folder, dirs, names in os.walk(source, followlinks=False):
