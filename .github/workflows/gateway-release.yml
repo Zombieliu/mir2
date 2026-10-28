@@ -293,6 +293,7 @@ jobs:
         run: rustup toolchain install 1.95.0 --profile minimal
 
       - name: Reuse native Rust dependencies and build outputs
+        id: rust-cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
@@ -331,6 +332,16 @@ jobs:
             mir2-web3/dist/playtest-wallet-release/*.sha256
             mir2-web3/dist/playtest-wallet-release/*.json
           if-no-files-found: error
+
+      - name: Retain native compiler cache after package diagnostics
+        if: ${{ always() && !cancelled() && steps.rust-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            mir2-web3/target
+          key: playtest-wallet-ubuntu24-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
 
       - name: Upload playtest verification evidence
         if: ${{ always() }}

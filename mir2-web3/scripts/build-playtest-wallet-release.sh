@@ -26,6 +26,26 @@ git diff --quiet --ignore-submodules -- || fail 'tracked source is dirty'
 git diff --cached --quiet --ignore-submodules -- || fail 'source index is dirty'
 mkdir -p "$task_evidence"
 
+# Git archive applies the current repository prefix even to a subtree object.
+# Run from the repository root, and inspect maps before the expensive builds.
+task_repository_root="$(git rev-parse --show-toplevel)"
+task_maps="$task_output/mir2-crystal-map-pack-$task_revision.tar.gz"
+git -C "$task_repository_root" archive --format=tar.gz --prefix=crystal-map-pack/ "$task_revision:mir2-web3/apps/web/lib/generated/crystal-map-pack" >"$task_maps"
+python3 - "$task_maps" <<'PY'
+import pathlib
+import sys
+import tarfile
+with tarfile.open(sys.argv[1], 'r:gz') as bundle:
+    files = [member for member in bundle.getmembers() if not member.isdir()]
+    if not files or not any(member.name.endswith('.map.gz') for member in files):
+        raise SystemExit('authenticated map tree has no collision maps')
+    for member in files:
+        path = pathlib.PurePosixPath(member.name)
+        if not member.isfile() or not path.is_relative_to('crystal-map-pack') or '..' in path.parts:
+            raise SystemExit('map package contains an unsafe member')
+print(f'PASS: authenticated map archive contains {len(files)} files')
+PY
+
 task_pg_bin=''
 for task_candidate in /usr/lib/postgresql/*/bin; do
   if [[ -x "$task_candidate/initdb" && -x "$task_candidate/pg_ctl" && -x "$task_candidate/psql" ]]; then
@@ -112,8 +132,6 @@ grep -q '^PASS:' "$task_evidence/linux-release-security.log" || fail 'Linux secu
 
 # Archive exactly the authenticated Git tree, rather than an untracked local
 # map directory. No archive member is extracted or executed here.
-task_maps="$task_output/mir2-crystal-map-pack-$task_revision.tar.gz"
-git archive --format=tar.gz --prefix=crystal-map-pack/ "$task_revision:mir2-web3/apps/web/lib/generated/crystal-map-pack" >"$task_maps"
 python3 - "$task_revision" "$task_maps" "$task_output" "$task_release_tag" <<'PY'
 import hashlib
 import json
