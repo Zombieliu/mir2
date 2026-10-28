@@ -105,11 +105,13 @@ export async function packageRelease(revision) {
   });
   verifySourceRevision(revision);
   await mkdir(outputRoot, { recursive: true });
-  const stage = await mkdtemp(path.join(outputRoot, ".wallet-login-stage-"));
-  requireChild(outputRoot, stage);
+  const stageRoot = await mkdtemp(path.join(outputRoot, ".wallet-login-stage-"));
+  requireChild(outputRoot, stageRoot);
+  // cp(errorOnExist) needs a fresh destination on Linux as well as Windows.
+  const stage = path.join(stageRoot, "payload");
   const archiveName = `mir2-wallet-login-${revision}.tar.gz`;
   const archivePath = path.join(outputRoot, archiveName);
-  const temporaryArchive = `${stage}.tar.gz`;
+  const temporaryArchive = `${stageRoot}.tar.gz`;
   try {
     const standaloneRoot = path.join(appRoot, ".next/standalone");
     // Validate the build output before copying so source links cannot be followed.
@@ -144,8 +146,8 @@ export async function packageRelease(revision) {
     console.log(JSON.stringify(latest));
     return latest;
   } finally {
-    requireChild(outputRoot, stage);
-    await rm(stage, { recursive: true, force: true });
+    requireChild(outputRoot, stageRoot);
+    await rm(stageRoot, { recursive: true, force: true });
     requireChild(outputRoot, temporaryArchive);
     await rm(temporaryArchive, { force: true });
   }

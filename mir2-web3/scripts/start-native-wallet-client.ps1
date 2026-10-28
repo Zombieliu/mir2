@@ -35,7 +35,11 @@ try {
 
     $taskHealthUri = [UriBuilder]::new($taskGatewayUri)
     $taskHealthUri.Scheme = if ($taskGatewayUri.Scheme -eq 'wss') { 'https' } else { 'http' }
-    $taskHealthUri.Path = '/health'
+    $taskGatewayPath = $taskGatewayUri.AbsolutePath.TrimEnd('/')
+    if (-not $taskGatewayPath.EndsWith('/ws')) {
+        throw 'GatewayWsUrl 路径必须以 /ws 结尾。'
+    }
+    $taskHealthUri.Path = $taskGatewayPath.Substring(0, $taskGatewayPath.Length - 3) + '/health'
     $taskHealthUri.Query = ''
     $taskHealthUri.Fragment = ''
     try {
