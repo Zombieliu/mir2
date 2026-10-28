@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-28T08:30:27.402Z",
+  "profile": "server-only-preconfigured-pvp-full-combat-v1",
+  "storageBackend": "postgres-source-of-truth-isolated",
+  "freshFullLifecycle": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v5/integration-v1.json",
+    "bytes": 643,
+    "sha256": "df0b9aace778113118c28d976c04dcfd349b57155484d4108ba42e887031ead6"
+  },
+  "diagnostics": {
+    "deliveryTrace": false,
+    "slowStage": false,
+    "spectator": true,
+    "recording": true,
+    "captureMs": 250
+  },
+  "measureCutoff": "2026-10-28T08:35:00Z",
+  "userDeadline": "2026-10-28T08:42:10Z",
+  "sessionCache": "development-in-memory",
+  "postgresImportValidation": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-postgres-v4/import-validation-v1.json",
+    "bytes": 713,
+    "sha256": "a722f8a4d1449b4f5aca053e4ca7d001ece7c86aedeba5b4e3a43b7a7db0dbfb"
+  },
+  "backend": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v5/bin/mir2-gateway.exe",
+    "bytes": 87418880,
+    "sha256": "f9e45cd39325d5d04a0894ded8e5582f1cbb598743c2022b9d8b644c65630675"
+  },
+  "driver": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-pvp-stress.mjs",
+    "bytes": 46798,
+    "sha256": "a28701928adec72e401d004ad0bd5590b1a52d51ee1c275bdb03b49558bda3ca"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\fixture\\public\\fixture-manifest-v1.json",
+    "bytes": 135982,
+    "sha256": "e8ee7864ed8050b1a4d674588013691f3c62b7f3982d222ae8818951e64dfc5c"
+  },
+  "normalPasswordLogin": true,
+  "authenticationBucket": "prior stress-v10 same-endpoint auth ledger copied unchanged; ordinary-run ledger and authentication controls unchanged",
+  "normalCombatAndHealing": true,
+  "legalPreconfiguredLevel40EquipmentAndLargeHp194": true,
+  "ordinarySupplyAccepted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

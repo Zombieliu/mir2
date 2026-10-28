@@ -7343,7 +7343,8 @@ async fn handle_socket_work(
 
                 let flush_result = {
                     let _slow_stage = GatewaySlowStage::for_socket("session_action.flush", &diagnostics);
-                    flush_session_updates(
+                    if native_attack_request.is_some() {
+                        flush_session_updates_with_deferred_snapshot(
                         &sender,
                         session,
                         session_cache.as_ref(),
@@ -7356,25 +7357,47 @@ async fn handle_socket_work(
                         low_latency_action,
                         should_queue_save_by_action,
                         force_route_refresh,
+                        true,
                     )
                     .await
+                    } else {
+                        flush_session_updates(
+                            &sender,
+                            session,
+                            session_cache.as_ref(),
+                            save_queue,
+                            route_refresh,
+                            responses,
+                            server_catalog_gzip_v1,
+                            quest_operation_ack.as_ref(),
+                            should_send_snapshot_by_action,
+                            low_latency_action,
+                            should_queue_save_by_action,
+                            force_route_refresh,
+                        )
+                        .await
+                        .map(|_| false)
+                    }
                 };
-                if let Err(error) = flush_result {
-                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
-                        eprintln!(
-                            "native GameShop post-execution flush failed; closing without receipt: {error}"
-                        );
+                let pending_attack_snapshot = match flush_result {
+                    Ok(pending_snapshot) => pending_snapshot,
+                    Err(error) => {
+                        if native_game_shop_request.is_some() || native_attack_request.is_some() {
+                            eprintln!(
+                                "native GameShop post-execution flush failed; closing without receipt: {error}"
+                            );
+                            return;
+                        }
+                        eprintln!("web session state flush failed; internal detail: {error}");
+                        let _ = send_fixed_error_event(
+                            &sender,
+                            "stateSyncUnavailable",
+                            "Player state synchronization is temporarily unavailable.",
+                        )
+                        .await;
                         return;
                     }
-                    eprintln!("web session state flush failed; internal detail: {error}");
-                    let _ = send_fixed_error_event(
-                        &sender,
-                        "stateSyncUnavailable",
-                        "Player state synchronization is temporarily unavailable.",
-                    )
-                    .await;
-                    return;
-                }
+                };
                 if send_monthly_status {
                     if let Some(account) = authenticated_account_id.as_deref() {
                         if monthly_card::send_status(&sender, session, account).await.is_err() { return; }
@@ -7430,6 +7453,13 @@ async fn handle_socket_work(
                     });
                     let Ok(frame) = frame else { return; };
                     if sender.send(Message::Text(frame.to_string().into())).await.is_err() { return; }
+                    if pending_attack_snapshot
+                        && send_world_snapshot_with_quest_ack(
+                            &sender, session, quest_operation_ack.as_ref(),
+                        ).await.is_err()
+                    {
+                        return;
+                    }
                 }
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
@@ -7904,6 +7934,40 @@ async fn flush_session_updates(
     should_queue_save_by_action: bool,
     force_route_refresh: bool,
 ) -> Result<(), String> {
+    flush_session_updates_with_deferred_snapshot(
+        sender,
+        session,
+        session_cache,
+        save_queue,
+        route_refresh,
+        responses,
+        server_catalog_gzip_v1,
+        quest_operation_ack,
+        should_send_snapshot_by_action,
+        low_latency_action,
+        should_queue_save_by_action,
+        force_route_refresh,
+        false,
+    )
+    .await
+    .map(|_| ())
+}
+
+async fn flush_session_updates_with_deferred_snapshot(
+    sender: &SharedWebSocketSender,
+    session: &mut GatewaySession,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
+    responses: Vec<ServerPacket>,
+    server_catalog_gzip_v1: bool,
+    quest_operation_ack: Option<&QuestOperationAck>,
+    should_send_snapshot_by_action: bool,
+    low_latency_action: bool,
+    should_queue_save_by_action: bool,
+    force_route_refresh: bool,
+    defer_snapshot: bool,
+) -> Result<bool, String> {
     let response_requires_snapshot = responses_require_world_snapshot(&responses);
     let low_latency_response_requires_snapshot =
         low_latency_responses_require_world_snapshot(&responses);
@@ -7918,10 +7982,10 @@ async fn flush_session_updates(
         // Calendar/kill progress and committed player progression are folded
         // from the authoritative snapshot by the native client. Keep ordinary
         // movement and world deltas on the packet-only fast path.
-        if low_latency_response_requires_snapshot {
+        if low_latency_response_requires_snapshot && !defer_snapshot {
             send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
         }
-        return Ok(());
+        return Ok(defer_snapshot && low_latency_response_requires_snapshot);
     }
 
     let external_state_changed = {
@@ -7931,7 +7995,7 @@ async fn flush_session_updates(
     let should_send_snapshot =
         should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
 
-    if should_send_snapshot {
+    if should_send_snapshot && !defer_snapshot {
         send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
     }
 
@@ -7968,7 +8032,9 @@ async fn flush_session_updates(
         eprintln!("web session route lease refresh skipped: {error}");
     }
 
-    Ok(())
+    // The caller may publish its correlated receipt only after these original
+    // persistence and route-refresh steps, then send this presentation snapshot.
+    Ok(defer_snapshot && should_send_snapshot)
 }
 
 fn route_lease_ttl_seconds() -> u64 {
