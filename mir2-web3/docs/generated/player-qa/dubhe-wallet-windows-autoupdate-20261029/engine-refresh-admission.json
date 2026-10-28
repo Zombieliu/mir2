@@ -1,0 +1,88 @@
+{
+  "schema": "mir2.windows.engine-refresh-admission.v1",
+  "passed": true,
+  "engineSourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+  "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+  "cleanEngineCheckout": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\refresh-engine-source",
+  "proofs": {
+    "23": {
+      "build": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\refresh-s23-s24\\bridge-s23\\BUILD-UPDATER.json",
+        "sha256": "609F4F4BF4CC7744031B47724AEB5ACF0E8AEE79536D214581281F2A267C603C",
+        "record": {
+          "schema": "mir2.windows.updater-build.v1",
+          "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+          "sourceClean": true,
+          "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+          "launcherSha256": "8FA60AC803234A19B19757680FFFDAF5E363CF273FBE6B5594EFDE4889366299",
+          "gameCandidate": "WN-CANDIDATE-20261011-invited-25",
+          "gameSourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+          "sequence": 23,
+          "builtUnix": 1793218753,
+          "command": "cargo +1.95.0 build --locked --release --target x86_64-pc-windows-msvc",
+          "publicAuthenticode": "not provided by detached CMS; public publisher signing remains separate"
+        }
+      },
+      "bundleCmsVerification": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\refresh-s23-s24\\bridge-s23\\BUNDLE-VERIFICATION.json",
+        "sha256": "76EF1F07B54458D01E68130E87BDC798A61D3B82E5789D1E297A29C70AA03CE5",
+        "record": {
+          "passed": true,
+          "schema": "mir2.windows.updater-bundle-verification.v1",
+          "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+          "gameCandidate": "WN-CANDIDATE-20261011-invited-25",
+          "gameSourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+          "files": 9,
+          "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+          "launcherSha256": "8FA60AC803234A19B19757680FFFDAF5E363CF273FBE6B5594EFDE4889366299",
+          "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+          "publicAuthenticode": "NotSigned"
+        }
+      }
+    },
+    "24": {
+      "build": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\refresh-s23-s24\\target-s24\\BUILD-UPDATER.json",
+        "sha256": "ED4294063A38FF43790B9436A54D2DEE01751A66A0AEA04BEB25D88124FDFCEB",
+        "record": {
+          "schema": "mir2.windows.updater-build.v1",
+          "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+          "sourceClean": true,
+          "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+          "launcherSha256": "8FA60AC803234A19B19757680FFFDAF5E363CF273FBE6B5594EFDE4889366299",
+          "gameCandidate": "WN-CANDIDATE-20261029-wallet-28",
+          "gameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+          "sequence": 24,
+          "builtUnix": 1793218757,
+          "command": "cargo +1.95.0 build --locked --release --target x86_64-pc-windows-msvc",
+          "publicAuthenticode": "not provided by detached CMS; public publisher signing remains separate"
+        }
+      },
+      "bundleCmsVerification": {
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\refresh-s23-s24\\target-s24\\BUNDLE-VERIFICATION.json",
+        "sha256": "1FB9259E8AFC548D4AA92902E851FE975FDDDCAB11EDB9F69D7F4419751A89AF",
+        "record": {
+          "passed": true,
+          "schema": "mir2.windows.updater-bundle-verification.v1",
+          "sourceRevision": "0164ae44637cbac06f967a5732ca62a74221063f",
+          "gameCandidate": "WN-CANDIDATE-20261029-wallet-28",
+          "gameSourceRevision": "33f0b8c252f65cc4a24b133292cd1f9eba122dae",
+          "files": 9,
+          "engineSha256": "C8241025681123CE3E9B24F3E78AAC17577B24833395F7BB2644B8905AAFC5DE",
+          "launcherSha256": "8FA60AC803234A19B19757680FFFDAF5E363CF273FBE6B5594EFDE4889366299",
+          "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+          "publicAuthenticode": "NotSigned"
+        }
+      }
+    }
+  },
+  "unitTests": {
+    "passed": 87,
+    "failed": 0,
+    "ignored": 5,
+    "logPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-wallet-windows-release-20261029\\updater\\refresh-s23-s24\\tests-serial.log",
+    "logSha256": "2A2891B2EB1F367AA60462132DFAA230FFB5683C2409D93CB517B596BD6BD831"
+  },
+  "actualPublic23To24E2E": "pending-public-ready",
+  "game28HealthAccepted": false
+}

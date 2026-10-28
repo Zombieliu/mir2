@@ -1,5 +1,8 @@
 # Windows 原生版 Dubhe Wallet 扫码登录
 
+Windows 签名包及旧客户端自动更新的发布状态、两次启动步骤见
+[2026-10-29 自动更新记录](DUBHE-WALLET-WINDOWS-AUTOUPDATE-20261029.zh-CN.md)。
+
 更新日期：2026-10-28（Asia/Shanghai）。本次需求目标为 Windows 游戏 `.exe`。
 此前完成的浏览器 Web 登录界面是另一端的实现；本次补上 Windows 原生 Bevy 登录入口，
 复用已有服务端鉴权接口。此记录不代表游戏整体、安装包或最终玩家验收通过。

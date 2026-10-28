@@ -1,0 +1,59 @@
+{
+  "schema": "mir2.windows.delivery-planner-fix-verification.v1",
+  "checkedUtc": "2026-10-28T20:13:59.5146786+00:00",
+  "passed": true,
+  "diffCheckPassed": true,
+  "sourceFrozen": true,
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/delivery.rs",
+      "sha256": "693b1a2d73644acbed38c88aae810b303dd585ce0b1bfade6e39397dcf909b80"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/delivery_tests.rs",
+      "sha256": "8bd1a6f4563ffe397494edc76afc5c5c54219d95765098ada8daaadade8357dd"
+    }
+  ],
+  "checks": [
+    {
+      "log": "updater-delivery-planner-tests.log",
+      "passed": 25,
+      "ignored": 4,
+      "sha256": "a3474206d65d5915e87d897bba23c2298828f9df59ac4f9ef52954ec981565df"
+    },
+    {
+      "log": "updater-resume-planner-regression.log",
+      "passed": 14,
+      "ignored": 0,
+      "sha256": "48798f09d9ad78908f68bcb3e4fe724ff58932c26c30e71d254f6919dba81062"
+    },
+    {
+      "log": "delivery-planner-real-forecast-02.log",
+      "passed": 1,
+      "ignored": 0,
+      "sha256": "c68c04037d1f5b437de9f0225154dbaefca7e3024f862670b181d0eec301a5c4"
+    }
+  ],
+  "forecastFile": "delivery-planner-real-forecast-02.json",
+  "forecastSha256": "51dae0cdd345cee05d324822d21c28b2a7dadbe7831df02819b33357a054d740",
+  "forecastOnly": true,
+  "actualNetworkPerformancePassed": false,
+  "cachePrepopulated": false,
+  "serverAccessed": false,
+  "signedReleaseBuilt": false,
+  "gameSourceChanged": false,
+  "minimumBulkUniquePayloads": 256,
+  "requestEquivalentBytes": 524288,
+  "maximumSuccessfulMixedPlanMultiplier": 2,
+  "rawBaselineAfterMatchingDeltaUniqueBytes": 355323298,
+  "selectedBundles": 11,
+  "remainingPaths": 153,
+  "remainingRequests": 151,
+  "plannedPayloadWireBytes": 627335803,
+  "wireBudget": 710646596,
+  "plannedWireIncludingDelta": 654357224,
+  "executableHashAliasesRemovedBeforeBudget": true,
+  "completeDiffBase": "1dc986d6f^",
+  "diffFile": "delivery-planner.patch",
+  "diffSha256": "8c4d0c699db39aa0c45579846f5342d7759fc5e145fbeb5e12151fdf6e382551"
+}

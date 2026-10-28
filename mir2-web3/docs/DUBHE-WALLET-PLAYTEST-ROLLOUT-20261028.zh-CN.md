@@ -4,6 +4,10 @@
 测试网关为 `mir2-playtest.service`；同机的 `mir2-gateway.service` 属于另一环境。
 本次不启动 Docker，不发布或覆盖 Windows 签名更新渠道。
 
+后续 Windows 签名渠道发布独立记录于
+[2026-10-29 自动更新记录](DUBHE-WALLET-WINDOWS-AUTOUPDATE-20261029.zh-CN.md)；
+以下内容保留本次服务端部署当日的范围和证据。
+
 ## 构建与发布来源
 
 已部署源码：`00ca0f93f0c7e367afec495711e0e04334f4deb8`，分支

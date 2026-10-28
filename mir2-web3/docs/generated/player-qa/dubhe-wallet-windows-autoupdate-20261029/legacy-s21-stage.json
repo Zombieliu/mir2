@@ -1,0 +1,215 @@
+{
+  "schema": "mir2.windows.r2-publication-receipt.v1",
+  "mode": "stage",
+  "passed": true,
+  "startedUtc": "2026-10-28T18:56:55.020107+00:00",
+  "planSha256": "3282c9c65c9c77292f54db8ad7659f2bd2fef6b51e3b867bedfb66aac0b674ae",
+  "candidate": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 21,
+    "sourceRevision": "1f2b71e841673d785bb4f0ca05802dae4c24627d",
+    "feedSha256": "4ead3d8fdbc12838a03141f229585a997374346fde566333d44860eae7b78650",
+    "signatureSha256": "13d6d1ddd986b208ade876ac32caf7887af138fbf7c71b9b554232a80fff3a7a"
+  },
+  "expectedCurrent": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 20,
+    "sourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+    "feedSha256": "a08a45735bffc7d6f1eaff9eb4edf4c210e1a27b278d7cb411f4afc20f141a9d",
+    "signatureSha256": "0f88d31feb50b69970e43108a65245ef899eb7b72133d4ced04c342408acd9d3"
+  },
+  "uploadedObjects": [
+    "feeds/s21-4ead3d8fdbc12838a03141f229585a997374346fde566333d44860eae7b78650/latest.json",
+    "feeds/s21-4ead3d8fdbc12838a03141f229585a997374346fde566333d44860eae7b78650/latest.p7s",
+    "releases/updater-F2F1AB36F3ECA608-s21/ENGINE.json",
+    "releases/updater-F2F1AB36F3ECA608-s21/ENGINE.p7s",
+    "releases/updater-F2F1AB36F3ECA608-s21/Mir2Updater.exe"
+  ],
+  "resumedObjects": [
+    "releases/game-WN-CANDIDATE-20261011-invited-25/BUILD-ATTESTATION.json",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/DELIVERY.json",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/DELIVERY.p7s",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/PACKAGE-MANIFEST.json",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/RELEASE-STATEMENT.json",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/RELEASE-STATEMENT.p7s",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/VERSION.json",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/03b1c2db23884e4a788c7fb26b531a1fc351221cf53fe924ec1cb1d5cc0f47ac.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/4c3aa21d7af37f75712d590053becfbcbc0f38cd9ac587f211b1c290fbe54a75.m2d.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/811700518373572d264b4e1be7038e998cff34ee7d50e8dc8f796b9aa282ce82.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/93d1178705571c26c519f4cf261fecc9ca141eb94b6a769b011f66a68c14cf81.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/c65c391a223f05cc86b1279b98c0a802c96d2d5110b462ecfa92723a3a4e15cd.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/d3fc86bf6782a5480de4409e23113346ef8857af0c936b19814745d1798231b1.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/mir2-client.toml",
+    "releases/game-WN-CANDIDATE-20261011-invited-25/mir2-platform-windows.exe"
+  ],
+  "verifiedObjects": [
+    {
+      "path": "feeds/s21-4ead3d8fdbc12838a03141f229585a997374346fde566333d44860eae7b78650/latest.json",
+      "size": 1159,
+      "sha256": "4ead3d8fdbc12838a03141f229585a997374346fde566333d44860eae7b78650"
+    },
+    {
+      "path": "feeds/s21-4ead3d8fdbc12838a03141f229585a997374346fde566333d44860eae7b78650/latest.p7s",
+      "size": 1614,
+      "sha256": "13d6d1ddd986b208ade876ac32caf7887af138fbf7c71b9b554232a80fff3a7a"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/BUILD-ATTESTATION.json",
+      "size": 2416,
+      "sha256": "6b2ace138e321b1d893ae6c3e71cdf433c5e3fc5e988001b4290296cb854939f"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/DELIVERY.json",
+      "size": 10560382,
+      "sha256": "f40000a8d2890bba1b41138f4c693e450efbb59c91c07f0e857b91d698b5a3fd"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/DELIVERY.p7s",
+      "size": 1614,
+      "sha256": "bd02462095e2d5f8b226b82f1b607f2f6fc099f599afd39d6ef8a28e8c62dfbe"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "8f50807c9171b28d77424a113c2a55a8ab5dcdd507e3051222c49863e2efc748"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "60405c35155aedff69fa87b42212780bf5a02d9e668fcca567f3a45dca7acf10"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "88c2aa59547fc111fb94338e542327130be7f4429db87915b3ca39b018ad171f"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/VERSION.json",
+      "size": 1221,
+      "sha256": "481da3f3ee5afab88a9b20f2deb5a70e359b859c53671d9099b6213e5748fbab"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/03b1c2db23884e4a788c7fb26b531a1fc351221cf53fe924ec1cb1d5cc0f47ac.m2b.gz",
+      "size": 60714254,
+      "sha256": "03b1c2db23884e4a788c7fb26b531a1fc351221cf53fe924ec1cb1d5cc0f47ac"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "size": 46880707,
+      "sha256": "41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/4c3aa21d7af37f75712d590053becfbcbc0f38cd9ac587f211b1c290fbe54a75.m2d.gz",
+      "size": 25653268,
+      "sha256": "4c3aa21d7af37f75712d590053becfbcbc0f38cd9ac587f211b1c290fbe54a75"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "size": 65601792,
+      "sha256": "53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "size": 12699904,
+      "sha256": "541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "size": 66861961,
+      "sha256": "565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "size": 65556826,
+      "sha256": "6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/811700518373572d264b4e1be7038e998cff34ee7d50e8dc8f796b9aa282ce82.m2b.gz",
+      "size": 63782933,
+      "sha256": "811700518373572d264b4e1be7038e998cff34ee7d50e8dc8f796b9aa282ce82"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "size": 66910012,
+      "sha256": "84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/93d1178705571c26c519f4cf261fecc9ca141eb94b6a769b011f66a68c14cf81.m2b.gz",
+      "size": 55864927,
+      "sha256": "93d1178705571c26c519f4cf261fecc9ca141eb94b6a769b011f66a68c14cf81"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "size": 60066659,
+      "sha256": "a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "size": 59737743,
+      "sha256": "ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/c65c391a223f05cc86b1279b98c0a802c96d2d5110b462ecfa92723a3a4e15cd.m2b.gz",
+      "size": 36495612,
+      "sha256": "c65c391a223f05cc86b1279b98c0a802c96d2d5110b462ecfa92723a3a4e15cd"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/d3fc86bf6782a5480de4409e23113346ef8857af0c936b19814745d1798231b1.m2b.gz",
+      "size": 55171856,
+      "sha256": "d3fc86bf6782a5480de4409e23113346ef8857af0c936b19814745d1798231b1"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "size": 60049370,
+      "sha256": "e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "size": 65610644,
+      "sha256": "e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/mir2-client.toml",
+      "size": 231,
+      "sha256": "58a5a7cf2ed6e880a7a7f259243dd9ab96150fc43e1a346e6fc79b8de6ee3641"
+    },
+    {
+      "path": "releases/game-WN-CANDIDATE-20261011-invited-25/mir2-platform-windows.exe",
+      "size": 111788032,
+      "sha256": "901c47188259b5f2a6b73070b12456d4ecc13aab02c68b975e1843fffc507348"
+    },
+    {
+      "path": "releases/updater-F2F1AB36F3ECA608-s21/ENGINE.json",
+      "size": 421,
+      "sha256": "e2fb71018a88abc95d879890210296c70ae6230c6ec45072fdd7d20585cb8756"
+    },
+    {
+      "path": "releases/updater-F2F1AB36F3ECA608-s21/ENGINE.p7s",
+      "size": 1614,
+      "sha256": "e4e35e8cf744a38ada77203a1e56bdeeb1dd402e356ae9eaaf2621c617b92d58"
+    },
+    {
+      "path": "releases/updater-F2F1AB36F3ECA608-s21/Mir2Updater.exe",
+      "size": 1952256,
+      "sha256": "f2f1ab36f3eca608f990d08db0eec045222b50af97a960476623dc374d8f33a2"
+    }
+  ],
+  "pointerAttempted": false,
+  "pointerChanged": false,
+  "transport": "fixed-expiring-worker-v1",
+  "finishedUtc": "2026-10-28T19:01:53.870161+00:00"
+}

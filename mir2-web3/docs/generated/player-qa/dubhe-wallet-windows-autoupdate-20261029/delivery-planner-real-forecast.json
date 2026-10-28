@@ -1,0 +1,92 @@
+{
+  "baseExecutableHashVerified": true,
+  "cachePrepopulated": false,
+  "changedPaths": 101331,
+  "cmsVerified": true,
+  "deltaApplied": false,
+  "forecastOnly": true,
+  "matchingDeltaBytes": 27021421,
+  "minimumBulkUniquePayloads": 256,
+  "networkDownloadTested": false,
+  "passed": true,
+  "plannedArchiveBytes": 607741149,
+  "plannedPayloadWireBytes": 627335803,
+  "plannedWireIncludingDelta": 654357224,
+  "previousBundles": 2,
+  "previousRemainingPaths": 33992,
+  "rawBaselineAfterDeltaDeduplicated": 355323298,
+  "remainingPaths": 153,
+  "remainingRawBytes": 19594654,
+  "remainingRawRequests": 151,
+  "requestEquivalentBytes": 524288,
+  "schema": "mir2.windows.delivery-planner-forecast.v1",
+  "selectedBundles": [
+    {
+      "compressedBytes": 66823848,
+      "neededRawBytes": 59377873,
+      "neededRequests": 196,
+      "path": "delivery/0660b1bea31bc32faed4b606386c95c117e0d177041613fa2e0ecb18ed930007.m2b.gz"
+    },
+    {
+      "compressedBytes": 66806762,
+      "neededRawBytes": 58581277,
+      "neededRequests": 233,
+      "path": "delivery/5886c5d25d0a90c289a7e2494523e750423ce944ca973515e4441ef5afdcaa15.m2b.gz"
+    },
+    {
+      "compressedBytes": 64522695,
+      "neededRawBytes": 7531596,
+      "neededRequests": 998,
+      "path": "delivery/f54b4f5f4ed82482813ef252b412a32d59c819e30130bf3595faa45c3ac45bc7.m2b.gz"
+    },
+    {
+      "compressedBytes": 55794863,
+      "neededRawBytes": 55652518,
+      "neededRequests": 19536,
+      "path": "delivery/c61d33d1332a42c0bc1c33eed9dd5b39f635b1c5f41f5bf0ded3970ef585bc0e.m2b.gz"
+    },
+    {
+      "compressedBytes": 42260655,
+      "neededRawBytes": 61126342,
+      "neededRequests": 45977,
+      "path": "delivery/5ff0d35d92bc07de09d021bb4e3c319b460d4a40a6b29710a6a4b0a530e5c079.m2b.gz"
+    },
+    {
+      "compressedBytes": 57404494,
+      "neededRawBytes": 8956524,
+      "neededRequests": 3446,
+      "path": "delivery/825b8c0622b02140db13912509f636fe5d9346666b5f6f04dbb29ddb3b81d63a.m2b.gz"
+    },
+    {
+      "compressedBytes": 56007392,
+      "neededRawBytes": 64969385,
+      "neededRequests": 21361,
+      "path": "delivery/953a9ff948d9560be335cc706d3441f4715f5482e15a0c79720dae9f1612d01b.m2b.gz"
+    },
+    {
+      "compressedBytes": 52650793,
+      "neededRawBytes": 8464484,
+      "neededRequests": 8673,
+      "path": "delivery/528847d0fd96267dc50905fbd5f2848a689586f88ea74b529ffdb820976da0d1.m2b.gz"
+    },
+    {
+      "compressedBytes": 60170742,
+      "neededRawBytes": 1558343,
+      "neededRequests": 225,
+      "path": "delivery/0c9821cccd25bb8300680bf8f99f1b8c2bb6c88b3ed22b33bf99bd429ff3d714.m2b.gz"
+    },
+    {
+      "compressedBytes": 52789118,
+      "neededRawBytes": 1359961,
+      "neededRequests": 418,
+      "path": "delivery/9d3a7a8998ae90a5e0f6875e66ba536110790177f92c2ec99073b6e0eb17c486.m2b.gz"
+    },
+    {
+      "compressedBytes": 32509787,
+      "neededRawBytes": 8150341,
+      "neededRequests": 57,
+      "path": "delivery/15bd89df769bb25fcd44203244aee3ca2e81986f7918df13d809d41e559cacc7.m2b.gz"
+    }
+  ],
+  "wireBudget": 710646596
+}
