@@ -685,32 +685,34 @@ impl SpectatorHub {
 }
 
 fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value, String> {
-    let value = serde_json::to_value(snapshot.client_view())
-        .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))?;
-    let source = value
-        .as_object()
-        .ok_or_else(|| "world snapshot did not encode to an object".to_string())?;
-    let entities = source
-        .get("entities")
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
+    // Project only spectator fields. Serializing the complete client view first
+    // also encodes private inventory and systems which this boundary discards.
+    let entities = snapshot
+        .entities
+        .iter()
         .take(max_entities)
-        .map(sanitize_entity)
-        .collect::<Vec<_>>();
-    let drops = source
-        .get("groundDrops")
-        .and_then(Value::as_array)
-        .cloned()
-        .unwrap_or_default();
+        .map(|entity| {
+            serde_json::to_value(entity)
+                .map(sanitize_entity)
+                .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    let drops = snapshot
+        .ground_drops
+        .iter()
+        .map(|drop| {
+            serde_json::to_value(drop)
+                .map(sanitize_ground_drop)
+                .map_err(|error| format!("encode world snapshot for spectator failed: {error}"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
 
     Ok(json!({
-        "tick": source.get("tick").cloned().unwrap_or(json!(0)),
-        "mapTitle": source.get("mapTitle").cloned().unwrap_or(Value::Null),
-        "mapFileName": source.get("mapFileName").cloned().unwrap_or(Value::Null),
-        "inSafeZone": source.get("inSafeZone").cloned().unwrap_or(json!(false)),
-        "lightSetting": source.get("lightSetting").cloned().unwrap_or(json!(0)),
+        "tick": snapshot.tick,
+        "mapTitle": &snapshot.map_title,
+        "mapFileName": &snapshot.map_file_name,
+        "inSafeZone": snapshot.in_safe_zone,
+        "lightSetting": snapshot.light_setting,
         "playerObjectId": Value::Null,
         "playerHp": Value::Null,
         "playerMaxHp": Value::Null,
@@ -729,9 +731,9 @@ fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value
         "hasExpandedStorage": false,
         "hasStoragePassword": false,
         "requireStoragePassword": false,
-        "sceneView": source.get("sceneView").cloned().unwrap_or(Value::Null),
-        "terrainPatches": source.get("terrainPatches").cloned().unwrap_or(json!([])),
-        "decorObjects": source.get("decorObjects").cloned().unwrap_or(json!([])),
+        "sceneView": &snapshot.scene_view,
+        "terrainPatches": &snapshot.terrain_patches,
+        "decorObjects": &snapshot.decor_objects,
         "entities": entities,
         "groundDrops": drops,
         "beltItems": [],
@@ -744,9 +746,18 @@ fn sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Result<Value
         "knownSkills": [],
         "activeBuffs": [],
         "stage5Systems": {},
-        "mapTransfers": source.get("mapTransfers").cloned().unwrap_or(json!([])),
+        "mapTransfers": &snapshot.map_transfers,
         "interactionHints": []
     }))
+}
+
+fn sanitize_ground_drop(mut drop: Value) -> Value {
+    if let Some(loot) = drop.get_mut("loot").and_then(Value::as_object_mut) {
+        // Preserve the client-view boundary for exact server-owned item data.
+        loot.remove("exactItem");
+        loot.remove("exact_item");
+    }
+    drop
 }
 
 fn sanitize_entity(mut entity: Value) -> Value {
@@ -1281,6 +1292,113 @@ mod tests {
             mir2_protocol::ServerPacket::StartGame { result: 4, .. }
         )));
         session
+    }
+
+    // Independent pre-optimization boundary: serialize the complete client view
+    // before projecting spectator fields, as the production code previously did.
+    fn legacy_sanitize_world(snapshot: &WorldSnapshot, max_entities: usize) -> Value {
+        let value = serde_json::to_value(snapshot.client_view()).unwrap();
+        let source = value.as_object().unwrap();
+        let entities = source["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .take(max_entities)
+            .cloned()
+            .map(|mut entity| {
+                entity
+                    .as_object_mut()
+                    .unwrap()
+                    .insert("questIds".into(), json!([]));
+                entity
+            })
+            .collect::<Vec<_>>();
+        json!({
+            "tick": source["tick"], "mapTitle": source["mapTitle"],
+            "mapFileName": source["mapFileName"], "inSafeZone": source["inSafeZone"],
+            "lightSetting": source["lightSetting"],
+            "playerObjectId": null, "playerHp": null, "playerMaxHp": null,
+            "playerMp": null, "playerMaxMp": null, "playerExperience": 0,
+            "playerMaxExperience": 1, "gold": 0, "credit": 0, "cityCurrencies": {},
+            "currentWeight": 0, "maxWeight": 0, "freeBagSlots": 0, "maxBagSlots": 0,
+            "storageSize": 0, "hasExpandedStorage": false,
+            "hasStoragePassword": false, "requireStoragePassword": false,
+            "sceneView": source["sceneView"], "terrainPatches": source["terrainPatches"],
+            "decorObjects": source["decorObjects"], "entities": entities,
+            "groundDrops": source["groundDrops"], "beltItems": [], "inventoryItems": [],
+            "storageItems": [], "equipmentItems": [], "questLog": [],
+            "activeNpcDialog": null, "npcScriptDiagnostics": [], "knownSkills": [],
+            "activeBuffs": [], "stage5Systems": {}, "mapTransfers": source["mapTransfers"],
+            "interactionHints": []
+        })
+    }
+
+    #[test]
+    fn direct_spectator_projection_matches_legacy_complete_snapshot() {
+        let mut snapshot = started_demo_session().world_snapshot();
+        snapshot.tick = 91;
+        snapshot.map_title = Some("spectator projection fixture".into());
+        snapshot.light_setting = 7;
+        snapshot.gold = 123_456;
+        snapshot.credit = 654_321;
+        snapshot
+            .city_currencies
+            .insert("private-currency".into(), 77);
+        snapshot
+            .interaction_hints
+            .push("private-spectator-marker".into());
+        snapshot.stage5_systems.mail.push(
+            serde_json::from_value(json!({
+                "id": 91, "deliveryNonce": "private-spectator-marker", "from": "fixture",
+                "to": "fixture", "subject": "private", "body": "private-spectator-marker",
+                "gold": 19, "claimed": false, "deleted": false
+            }))
+            .unwrap(),
+        );
+        snapshot.ground_drops.push(exact_ground_drop());
+        let mut second = snapshot.entities.first().unwrap().clone();
+        second.object_id = 91_002;
+        second.name = "second projection entity".into();
+        snapshot.entities.push(second);
+        let full = sanitize_world(&snapshot, usize::MAX).unwrap();
+        assert_eq!(full, legacy_sanitize_world(&snapshot, usize::MAX));
+        assert_eq!(full["stage5Systems"], json!({}));
+        assert!(!full.to_string().contains("private-spectator-marker"));
+        assert!(full["groundDrops"][0]["loot"].get("exactItem").is_none());
+        for maximum in [0, 1, snapshot.entities.len(), usize::MAX] {
+            let actual = sanitize_world(&snapshot, maximum).unwrap();
+            assert_eq!(actual, legacy_sanitize_world(&snapshot, maximum));
+            assert_eq!(
+                actual["entities"].as_array().unwrap().len(),
+                maximum.min(snapshot.entities.len())
+            );
+        }
+        snapshot.map_title = None;
+        snapshot.map_file_name = None;
+        snapshot.scene_view = None;
+        snapshot.terrain_patches.clear();
+        snapshot.decor_objects.clear();
+        snapshot.map_transfers.clear();
+        assert_eq!(
+            sanitize_world(&snapshot, 1).unwrap(),
+            legacy_sanitize_world(&snapshot, 1)
+        );
+    }
+
+    #[test]
+    fn direct_spectator_projection_removes_both_exact_aliases_and_quest_ids() {
+        let drop = json!({"objectId": 91, "loot": {
+            "name": "visible", "exactItem": {"secret": 1}, "exact_item": {"secret": 2}
+        }});
+        assert_eq!(
+            sanitize_ground_drop(drop),
+            json!({"objectId": 91, "loot": {"name": "visible"}})
+        );
+        let entity = json!({"objectId": 92, "name": "visible", "questIds": [11, 12]});
+        assert_eq!(
+            sanitize_entity(entity),
+            json!({"objectId": 92, "name": "visible", "questIds": []})
+        );
     }
 
     #[derive(Default)]

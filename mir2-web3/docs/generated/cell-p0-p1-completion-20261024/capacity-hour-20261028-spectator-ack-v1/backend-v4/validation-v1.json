@@ -1,0 +1,73 @@
+{
+  "at": "2026-10-28T08:09:52.630Z",
+  "baseCommit": "b75c0f29ddd22bcbbf8cc37f13d177653b081f8e",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\spectator.rs",
+      "bytes": 63760,
+      "sha256": "18f888c4e27cee7be2ed79af34130cf4c034f46eb92e2f7a580f0de083869dfe"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+      "bytes": 888946,
+      "sha256": "5f6a59c8735a42e2f884d94492ed43fb36647857e5dc81b035ab74436b6ca655"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 338599,
+      "sha256": "aa6194d0a7409452c2e44ed5deac9b2383ad61908ceb85f7cbea209c6199cb94"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\Cargo.lock",
+      "bytes": 250739,
+      "sha256": "1b5b2a34fb5d6c055c089d17ca6ce15ffd2a9f363504b9390d648c0be9831a98"
+    }
+  ],
+  "tests": [
+    {
+      "prefix": "spectator-tests",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\spectator-tests.stdout.log",
+        "bytes": 1495,
+        "sha256": "1139ca19ab230113cd490a8990b7e7040dd9ea8359349b5b6575698ead530a3e"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\spectator-tests.stderr.log",
+        "bytes": 55123,
+        "sha256": "12e86ac435aa6288c52d3964f3b15487823ef64220621849da9d83b7741f1236"
+      }
+    },
+    {
+      "prefix": "web-snapshot-tests",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\web-snapshot-tests.stdout.log",
+        "bytes": 386,
+        "sha256": "f81962d56432db6b1ccd6a8d58a83dee36bccf4c61d41f47f2841910c7929a23"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\web-snapshot-tests.stderr.log",
+        "bytes": 54737,
+        "sha256": "4fa3101461d7654e0fc7b5cc1d657fb24a4c2c02fa12284675e3997273dafc0b"
+      }
+    }
+  ],
+  "releaseBuildRootObservedExitCode": 0,
+  "releaseLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\gateway-release.stderr.log",
+    "bytes": 57273,
+    "sha256": "a23315d41e668667e8e80da766696c567b15c5b0bcd537720aab6e86138c8812"
+  },
+  "immutableExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\bin\\mir2-gateway.exe",
+    "bytes": 87398400,
+    "sha256": "10066df8252d16c4a845d2124e71798f4b6733555357d661fa39cd6773c15b68"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

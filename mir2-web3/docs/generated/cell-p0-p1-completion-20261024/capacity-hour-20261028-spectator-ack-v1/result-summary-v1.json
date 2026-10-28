@@ -1,0 +1,28 @@
+{
+  "userHour": {
+    "startedAt": "2026-10-28T07:42:10Z",
+    "deadline": "2026-10-28T08:42:10Z"
+  },
+  "spectatorProjection": {
+    "actualRustChecks": 18,
+    "freshFullLifecycle": 16,
+    "captureAndRecordingPreserved": true
+  },
+  "pvpV10": {
+    "diagnosticDeliveryTrace": false,
+    "diagnosticSlowStage": false,
+    "admission25Ms": 74731,
+    "totalElapsedMs": 231999,
+    "completedStages": 0,
+    "failureCategory": "attack-outcome-not-received-by2s",
+    "actorIndex": 18,
+    "requestId": "126",
+    "lastObservedRequestId": "125",
+    "normalLogouts": 25,
+    "gatewayExit": 0,
+    "postgresExit": 0
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}
