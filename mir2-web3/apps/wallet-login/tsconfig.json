@@ -19,7 +19,7 @@
     "incremental": true,
     "paths": {
       "@mysten/sui/*": [
-        "./node_modules/@mysten/sui/dist/*"
+        "./node_modules/@mysten/sui/dist/*/index.d.mts"
       ]
     },
     "plugins": [

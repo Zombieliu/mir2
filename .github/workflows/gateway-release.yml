@@ -272,7 +272,8 @@ jobs:
 
   build-playtest-wallet-gateway:
     if: ${{ inputs.playtest_wallet_no_docker }}
-    runs-on: ubuntu-latest
+    # Match the playtest host's glibc baseline; ubuntu-latest can advance.
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     env:
       CARGO_BUILD_JOBS: "2"
@@ -298,11 +299,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             mir2-web3/target
-          key: playtest-wallet-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
+          key: playtest-wallet-ubuntu24-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-${{ github.sha }}
           restore-keys: |
-            playtest-wallet-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
-            activities-linux-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
-            Linux-cargo-${{ hashFiles('mir2-web3/Cargo.lock') }}
+            playtest-wallet-ubuntu24-rust195-${{ hashFiles('mir2-web3/Cargo.lock') }}-
 
       - name: Locate native PostgreSQL tools
         run: |
@@ -343,7 +342,7 @@ jobs:
 
   build-playtest-wallet-login:
     if: ${{ inputs.playtest_wallet_no_docker }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:
       run:
