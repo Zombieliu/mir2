@@ -21,6 +21,81 @@ pub use mir2_client_core::auth_ui::{
     safe_key_permutation, SafeKeyState, SAFE_KEY_ALPHABET, SAFE_KEY_DEFAULT_SEED,
 };
 
+pub const CHARACTER_CREATION_CLASSES: [&str; 5] =
+    ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"];
+
+/// Local deployment presentation policy; the server still authorizes character creation.
+/// This never filters the authenticated roster or an existing character's StartGame.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CharacterCreationClasses {
+    allowed: [bool; 5],
+}
+
+impl Default for CharacterCreationClasses {
+    fn default() -> Self {
+        Self { allowed: [true; 5] }
+    }
+}
+
+impl CharacterCreationClasses {
+    pub fn from_names(names: &[&str]) -> Result<Self, &'static str> {
+        if names.is_empty() || names.len() > CHARACTER_CREATION_CLASSES.len() {
+            return Err("allowed_classes must contain one to five canonical class names");
+        }
+        let mut allowed = [false; 5];
+        for name in names {
+            let Some(index) = CHARACTER_CREATION_CLASSES
+                .iter()
+                .position(|known| known == name)
+            else {
+                return Err("allowed_classes contains an unknown or noncanonical class name");
+            };
+            if allowed[index] {
+                return Err("allowed_classes contains a duplicate class name");
+            }
+            allowed[index] = true;
+        }
+        Ok(Self { allowed })
+    }
+
+    pub fn allows(&self, name: &str) -> bool {
+        CHARACTER_CREATION_CLASSES
+            .iter()
+            .position(|known| known.eq_ignore_ascii_case(name))
+            .is_some_and(|index| self.allowed[index])
+    }
+
+    pub fn first(&self) -> &'static str {
+        CHARACTER_CREATION_CLASSES
+            .iter()
+            .enumerate()
+            .find(|(index, _)| self.allowed[*index])
+            .map(|(_, name)| *name)
+            .expect("creation policy always has an allowed class")
+    }
+
+    pub fn cycle(&self, current: &str, reverse: bool) -> &'static str {
+        let Some(current) = CHARACTER_CREATION_CLASSES
+            .iter()
+            .position(|known| known.eq_ignore_ascii_case(current) && self.allows(known))
+        else {
+            return self.first();
+        };
+        for offset in 1..=CHARACTER_CREATION_CLASSES.len() {
+            let index = if reverse {
+                (current + CHARACTER_CREATION_CLASSES.len() - offset)
+                    % CHARACTER_CREATION_CLASSES.len()
+            } else {
+                (current + offset) % CHARACTER_CREATION_CLASSES.len()
+            };
+            if self.allowed[index] {
+                return CHARACTER_CREATION_CLASSES[index];
+            }
+        }
+        self.first()
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NativeShellScreen {
     Connecting,
@@ -469,6 +544,7 @@ pub struct NativeShellModel {
     pub registration: RegistrationForm,
     pub register_request_in_flight: bool,
     pub character_create: CharacterCreateForm,
+    pub character_creation_classes: CharacterCreationClasses,
     pub create_character_request_in_flight: bool,
     pub change_password: ChangePasswordForm,
     pub change_password_request_in_flight: bool,
@@ -529,6 +605,38 @@ impl fmt::Debug for NativeShellModel {
 }
 
 impl NativeShellModel {
+    pub fn set_character_creation_classes(&mut self, classes: CharacterCreationClasses) {
+        self.character_creation_classes = classes;
+        self.ensure_creatable_class();
+    }
+
+    fn ensure_creatable_class(&mut self) {
+        if !self
+            .character_creation_classes
+            .allows(&self.character_create.class_name)
+        {
+            self.character_create.class_name = self.character_creation_classes.first().to_owned();
+        }
+    }
+
+    pub fn cycle_creation_class(&mut self, reverse: bool) {
+        self.character_create.class_name = self
+            .character_creation_classes
+            .cycle(&self.character_create.class_name, reverse)
+            .to_owned();
+    }
+
+    /// Reject stale or programmatic create intents at the native send boundary.
+    pub fn reject_unavailable_creation_class(&mut self, class_name: &str) -> bool {
+        if self.character_creation_classes.allows(class_name) {
+            return false;
+        }
+        self.create_character_request_in_flight = false;
+        // Reuse the existing nine-locale notice; unavailable choices are hidden in normal UI.
+        self.set_error("intent is not valid for this screen");
+        true
+    }
+
     pub fn billing_character_index(&self) -> Option<i32> {
         if self.screen == NativeShellScreen::InGame {
             self.active_character.as_ref().map(|c| c.index)
@@ -1002,6 +1110,7 @@ impl NativeShellModel {
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::OpenCharacterCreate) => {
                 self.character_create.reset();
+                self.ensure_creatable_class();
                 self.screen = NativeShellScreen::CharacterCreate;
                 self.notice = None;
                 true
@@ -1019,6 +1128,8 @@ impl NativeShellModel {
                     false
                 } else if self.create_character_request_in_flight {
                     self.set_error("character creation request is still pending");
+                    false
+                } else if self.reject_unavailable_creation_class(&class_name) {
                     false
                 } else {
                     self.create_character_request_in_flight = true;
@@ -1554,6 +1665,96 @@ impl NativeShellModel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn creation_policy_defaults_to_five_and_rejects_invalid_explicit_names() {
+        let default = CharacterCreationClasses::default();
+        for class in CHARACTER_CREATION_CLASSES {
+            assert!(default.allows(class));
+        }
+        for invalid in [
+            vec![],
+            vec!["Warrior", "Warrior"],
+            vec!["warrior"],
+            vec!["Unknown"],
+            vec![""],
+            vec![" Warrior"],
+        ] {
+            assert!(CharacterCreationClasses::from_names(&invalid).is_err());
+        }
+        let classic =
+            CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap();
+        assert_eq!(classic.cycle("Taoist", false), "Warrior");
+        assert_eq!(classic.cycle("Warrior", true), "Taoist");
+        assert_eq!(classic.cycle("Assassin", false), "Warrior");
+        assert!(!classic.allows("Assassin"));
+        assert!(!classic.allows("Archer"));
+    }
+
+    #[test]
+    fn creation_policy_keeps_reset_default_and_keyboard_cycle_on_allowed_classes() {
+        let mut model = NativeShellModel::default();
+        model.set_character_creation_classes(
+            CharacterCreationClasses::from_names(&["Wizard", "Archer"]).unwrap(),
+        );
+        model.screen = NativeShellScreen::CharacterSelect;
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenCharacterCreate));
+        assert_eq!(model.character_create.class_name, "Wizard");
+        assert_eq!(model.character_create.focus, CharacterCreateFocus::Name);
+        model.cycle_creation_class(false);
+        assert_eq!(model.character_create.class_name, "Archer");
+        model.cycle_creation_class(false);
+        assert_eq!(model.character_create.class_name, "Wizard");
+        assert!(model.apply_ui_intent(NativeUiIntent::CancelCharacterCreate));
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenCharacterCreate));
+        assert_eq!(model.character_create.class_name, "Wizard");
+    }
+
+    #[test]
+    fn creation_policy_rejects_every_disabled_create_intent_before_pending_state() {
+        let mut model = NativeShellModel::default();
+        model.set_character_creation_classes(
+            CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+        );
+        model.screen = NativeShellScreen::CharacterCreate;
+        for class in ["Assassin", "Archer", "Unknown"] {
+            assert!(!model.apply_ui_intent(NativeUiIntent::CreateCharacter {
+                name: "Unavailable".into(),
+                class_name: class.into(),
+                gender_name: "Male".into(),
+            }));
+            assert!(!model.create_character_request_in_flight);
+            assert_eq!(model.screen, NativeShellScreen::CharacterCreate);
+        }
+    }
+
+    #[test]
+    fn creation_policy_never_filters_existing_assassin_or_archer_roster_and_start_game() {
+        for class in ["Assassin", "Archer"] {
+            let mut model = NativeShellModel::default();
+            let character = CharacterSummary::new(7, "ExistingHero", 40, class, "Female");
+            model.characters = vec![character.clone()];
+            model.set_character_creation_classes(
+                CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+            );
+            model.screen = NativeShellScreen::CharacterSelect;
+            assert_eq!(model.characters, vec![character.clone()]);
+            assert!(model.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index: 7 }));
+            assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+            assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
+                accepted: true,
+                reason: None
+            }));
+            assert!(
+                model.apply_gateway_event(NativeGatewayEvent::PlayerBootstrapped {
+                    character: character.clone()
+                })
+            );
+            assert_eq!(model.screen, NativeShellScreen::InGame);
+            assert_eq!(model.active_character.as_ref(), Some(&character));
+            assert!(!model.character_creation_classes.allows(class));
+        }
+    }
 
     #[test]
     fn login_door_uses_original_frames_and_blocks_start_until_completion() {
@@ -2106,7 +2307,8 @@ mod tests {
         assert!(!model.begin_verified_identity_login(account));
         let roster = starter_characters();
         assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-            account: account.into(), characters: roster.clone(),
+            account: account.into(),
+            characters: roster.clone(),
         }));
         assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
         model.advance_login_opening(Duration::from_millis(1800));
@@ -2123,7 +2325,12 @@ mod tests {
         assert!(!model.begin_verified_identity_login(" \t "));
         assert_eq!(model.screen, NativeShellScreen::Login);
         assert!(!model.login_request_in_flight);
-        for screen in [NativeShellScreen::Connecting, NativeShellScreen::CharacterSelect, NativeShellScreen::InGame, NativeShellScreen::ConnectionLost] {
+        for screen in [
+            NativeShellScreen::Connecting,
+            NativeShellScreen::CharacterSelect,
+            NativeShellScreen::InGame,
+            NativeShellScreen::ConnectionLost,
+        ] {
             model.screen = screen;
             assert!(!model.begin_verified_identity_login("obl_00112233445566778899aabbccddeeff"));
             assert_eq!(model.screen, screen);

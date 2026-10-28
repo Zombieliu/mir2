@@ -509,6 +509,59 @@ fn write_fixture_report(path: &Path, cases: &[Value], complete: bool) {
 }
 
 #[test]
+#[ignore = "explicit real-asset offscreen three-class policy screenshot; run alone with MIR2_PREVIEW_VISUAL_ASSET_ROOT and MIR2_PREVIEW_VISUAL_OUTPUT"]
+fn creation_policy_three_class_offscreen() {
+    use crate::native_shell::CharacterCreationClasses;
+    let assets = required_absolute_path("MIR2_PREVIEW_VISUAL_ASSET_ROOT")
+        .canonicalize()
+        .expect("real asset root");
+    preflight_real_assets(&assets);
+    let output = required_absolute_path("MIR2_PREVIEW_VISUAL_OUTPUT");
+    assert!(!output.starts_with(&assets));
+    fs::create_dir_all(&output).unwrap();
+    let output = output.canonicalize().unwrap();
+    assert!(!output.starts_with(&assets));
+    let path = output.join("creation-policy-three-class.png");
+    let _fresh = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&path)
+        .expect("fresh screenshot output required");
+    let mut model = NativeShellModel::default();
+    model.screen = NativeShellScreen::CharacterCreate;
+    model.set_character_creation_classes(
+        CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+    );
+    model.character_create.name = "ClassicHero".to_owned();
+    let (mut app, target, camera) = preview_offscreen_app(&assets);
+    redraw_preview_screen(&mut app, camera, &model, PreviewScreen::Create);
+    warm_real_images(&mut app);
+    let mut query = app.world_mut().query::<&NativeShellButton>();
+    let mut indices = query
+        .iter(app.world())
+        .filter_map(|button| match button {
+            NativeShellButton::SelectCreateClass(index) => Some(*index),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+    indices.sort_unstable();
+    assert_eq!(indices, [0, 1, 2]);
+    let pixels = capture_preview(&mut app, &target, &path);
+    assert_eq!(pixels.len(), (WIDTH * HEIGHT * 4) as usize);
+    fs::write(
+        output.join("creation-policy-report.json"),
+        serde_json::to_vec_pretty(&json!({
+            "kind":"offline_production_creation_policy_gpu_fixture", "passed":true,
+            "allowedClasses":["Warrior","Wizard","Taoist"], "buttonIndices":indices,
+            "screenshot":"creation-policy-three-class.png", "serverConnected":false,
+            "accountCreated":false, "liveAcceptance":false,
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+}
+
+#[test]
 #[ignore = "explicit real-asset offscreen GPU screenshots; run alone with MIR2_PREVIEW_VISUAL_ASSET_ROOT and MIR2_PREVIEW_VISUAL_OUTPUT"]
 fn all_character_previews_animate_and_wizard_glow_adds_offscreen() {
     let assets = required_absolute_path("MIR2_PREVIEW_VISUAL_ASSET_ROOT")

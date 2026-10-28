@@ -2,6 +2,7 @@
 
 use std::{fmt, fs, net::IpAddr, path::PathBuf, time::Duration};
 
+use mir2_client_bevy::native_shell::CharacterCreationClasses;
 use tokio_tungstenite::tungstenite::http::Uri;
 
 use crate::wallet_login_http::NativeWalletAuthConfig;
@@ -130,6 +131,7 @@ pub struct NativeSessionConfig {
     pub gateway_url: String,
     /// Explicit web authentication origin. No gateway/website guessing is allowed.
     pub wallet_auth: Option<NativeWalletAuthConfig>,
+    pub character_creation_classes: CharacterCreationClasses,
     pub quest_guidance: Option<String>,
     /// Explicit development convenience only. Normal players enter credentials
     /// in the visible native login screen, so missing environment credentials
@@ -146,6 +148,7 @@ pub struct NativeSessionConfig {
 struct ClientFileConfig {
     gateway_ws_url: Option<String>,
     auth_http_url: Option<String>,
+    allowed_classes: Option<CharacterCreationClasses>,
     quest_guidance: Option<String>,
     window_width: Option<u32>,
     window_height: Option<u32>,
@@ -173,6 +176,9 @@ impl NativeSessionConfig {
         )?;
         config.reconnect = NativeReconnectConfig::from_env()?;
         if let Some(file) = file {
+            if let Some(classes) = file.allowed_classes {
+                config.character_creation_classes = classes;
+            }
             config.quest_guidance = file.quest_guidance;
             if let Some(force_daylight) = file.force_daylight {
                 config.force_daylight = force_daylight;
@@ -245,6 +251,7 @@ impl NativeSessionConfig {
         Ok(Self {
             gateway_url,
             wallet_auth: None,
+            character_creation_classes: CharacterCreationClasses::default(),
             quest_guidance: None,
             auto_login,
             window_width: DEFAULT_WINDOW_WIDTH,
@@ -311,6 +318,23 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                             let origin = parse_toml_string(server_value, "server.auth_http_url")?;
                             NativeWalletAuthConfig::from_origin(&origin)?;
                             config.auth_http_url = Some(origin);
+                        }
+                        "allowed_classes" => {
+                            let values = server_value.as_array().ok_or_else(|| {
+                                format!(
+                                    "{CONFIG_FILE_NAME} server.allowed_classes must be an array"
+                                )
+                            })?;
+                            let names = values
+                                .iter()
+                                .map(|value| value.as_str().ok_or_else(|| {
+                                    format!("{CONFIG_FILE_NAME} server.allowed_classes entries must be strings")
+                                }))
+                                .collect::<Result<Vec<_>, _>>()?;
+                            config.allowed_classes =
+                                Some(CharacterCreationClasses::from_names(&names).map_err(
+                                    |error| format!("{CONFIG_FILE_NAME} server.{error}"),
+                                )?);
                         }
                         other => {
                             return Err(format!("{CONFIG_FILE_NAME} unknown key server.{other}"));
@@ -499,6 +523,51 @@ fn duration_env(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn client_toml_creation_policy_is_explicit_and_old_configs_keep_five_classes() {
+        let parsed =
+            parse_client_toml("[server]\nallowed_classes = [\"Warrior\", \"Wizard\", \"Taoist\"]")
+                .unwrap();
+        let policy = parsed.allowed_classes.unwrap();
+        for class in ["Warrior", "Wizard", "Taoist"] {
+            assert!(policy.allows(class));
+        }
+        for class in ["Assassin", "Archer"] {
+            assert!(!policy.allows(class));
+        }
+        assert!(
+            parse_client_toml("[server]\ngateway_ws_url = 'wss://gateway.example/ws'")
+                .unwrap()
+                .allowed_classes
+                .is_none()
+        );
+        let default =
+            NativeSessionConfig::from_values(None, None, None, None, "wss://gateway.example/ws")
+                .unwrap();
+        assert!(default.character_creation_classes.allows("Assassin"));
+        assert!(default.character_creation_classes.allows("Archer"));
+    }
+
+    #[test]
+    fn client_toml_creation_policy_rejects_empty_duplicate_unknown_and_nonarray_values() {
+        for value in [
+            "[]",
+            "['Warrior', 'Warrior']",
+            "['warrior']",
+            "['Unknown']",
+            "[1]",
+            "'Warrior'",
+            "['']",
+            "[' Warrior']",
+            "['Warrior', 'Wizard', 'Taoist', 'Assassin', 'Archer', 'Warrior']",
+        ] {
+            assert!(
+                parse_client_toml(&format!("[server]\nallowed_classes = {value}")).is_err(),
+                "{value}"
+            );
+        }
+    }
 
     #[test]
     fn native_entry_loads_invited_wss_and_keeps_explicit_local_overrides() {

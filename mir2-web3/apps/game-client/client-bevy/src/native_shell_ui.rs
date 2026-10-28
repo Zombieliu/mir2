@@ -30,7 +30,7 @@ use crate::native_login_locale::NativeUiLocale;
 use crate::native_shell::{
     validate_registration_field, validate_registration_fields, ChangePasswordFocus,
     CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen, NativeUiIntent,
-    NativeUiIntentQueue, RegistrationFocus,
+    NativeUiIntentQueue, RegistrationFocus, CHARACTER_CREATION_CLASSES,
 };
 use crate::native_wallet_login::{
     NativeWalletLogin, NativeWalletLoginAction, NativeWalletLoginActionQueue,
@@ -50,7 +50,7 @@ const MAX_PASSWORD: usize = 32;
 const MAX_CHANGE_ACCOUNT: usize = 15;
 const MAX_CHANGE_PASSWORD: usize = 15;
 const MAX_NAME: usize = 18;
-const CLASSES: [&str; 5] = ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"];
+const CLASSES: [&str; 5] = CHARACTER_CREATION_CLASSES;
 const GENDERS: [&str; 2] = ["Male", "Female"];
 
 const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
@@ -791,6 +791,9 @@ fn shell_pointer_input(
             }
             NativeShellButton::SelectCreateClass(class_index) => {
                 if let Some(class_name) = CLASSES.get(*class_index as usize) {
+                    if !shell.character_creation_classes.allows(class_name) {
+                        continue;
+                    }
                     shell.character_create.focus = CharacterCreateFocus::Class;
                     shell.character_create.class_name = (*class_name).to_owned();
                 }
@@ -807,8 +810,7 @@ fn shell_pointer_input(
             }
             NativeShellButton::CycleClass => {
                 shell.character_create.focus = CharacterCreateFocus::Class;
-                shell.character_create.class_name =
-                    rotate_choice(&shell.character_create.class_name, &CLASSES, false);
+                shell.cycle_creation_class(false);
             }
             NativeShellButton::CycleGender => {
                 shell.character_create.focus = CharacterCreateFocus::Gender;
@@ -1037,10 +1039,7 @@ fn shell_keyboard_input(
                     CharacterCreateFocus::Name => {
                         shell.character_create.focus = CharacterCreateFocus::Class
                     }
-                    CharacterCreateFocus::Class => {
-                        shell.character_create.class_name =
-                            rotate_choice(&shell.character_create.class_name, &CLASSES, false)
-                    }
+                    CharacterCreateFocus::Class => shell.cycle_creation_class(false),
                     CharacterCreateFocus::Gender => {
                         shell.character_create.gender_name =
                             rotate_choice(&shell.character_create.gender_name, &GENDERS, false)
@@ -1743,6 +1742,9 @@ fn render_character_create(
     );
 
     for (index, rect) in NEW_CHARACTER_CLASS_BUTTONS.into_iter().enumerate() {
+        if !model.character_creation_classes.allows(CLASSES[index]) {
+            continue;
+        }
         let selected = character_class_index(&model.character_create.class_name) == index as u16;
         if crate::native_i18n::active() {
             spawn_aux_text_button(
@@ -1828,7 +1830,10 @@ fn render_character_create(
         CrystalButtonAssetSet::from_spec(create_spec),
         NativeShellButton::SubmitCreate,
         model.character_create.focus == CharacterCreateFocus::CreateButton,
-        model.character_create.is_ready(),
+        model.character_create.is_ready()
+            && model
+                .character_creation_classes
+                .allows(&model.character_create.class_name),
     );
     spawn_crystal_image_button(
         parent,
@@ -3797,6 +3802,122 @@ mod tests {
                 rotate_choice(class, &CLASSES, true),
                 CLASSES[(index + CLASSES.len() - 1) % CLASSES.len()]
             );
+        }
+    }
+
+    #[test]
+    fn creation_policy_renders_only_three_classes_in_all_nine_locales() {
+        use crate::native_i18n::{self, Locale};
+        use crate::native_shell::CharacterCreationClasses;
+        for locale in Locale::ALL {
+            native_i18n::with_locale(locale, || {
+                let mut model = NativeShellModel::default();
+                model.screen = NativeShellScreen::CharacterCreate;
+                model.set_character_creation_classes(
+                    CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+                );
+                let mut app = multilingual_shell_app(model);
+                app.update();
+                let mut query = app.world_mut().query::<&NativeShellButton>();
+                let mut indices = query
+                    .iter(app.world())
+                    .filter_map(|button| match button {
+                        NativeShellButton::SelectCreateClass(index) => Some(*index),
+                        _ => None,
+                    })
+                    .collect::<Vec<_>>();
+                indices.sort_unstable();
+                assert_eq!(indices, [0, 1, 2], "{locale:?}");
+            });
+        }
+    }
+
+    #[test]
+    fn creation_policy_keyboard_cycles_only_allowed_choices_and_blocks_injected_submit() {
+        use crate::native_shell::CharacterCreationClasses;
+        let mut app = wallet_keyboard_app(NativeWalletLogin::default());
+        {
+            let mut model = app.world_mut().resource_mut::<NativeShellModel>();
+            model.screen = NativeShellScreen::CharacterCreate;
+            model.set_character_creation_classes(
+                CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+            );
+            model.character_create.class_name = "Taoist".into();
+            model.character_create.focus = CharacterCreateFocus::Name;
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Tab);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .character_create
+                .focus,
+            CharacterCreateFocus::Class
+        );
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.clear();
+            keys.press(KeyCode::Enter);
+        }
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .character_create
+                .class_name,
+            "Warrior"
+        );
+        {
+            let mut model = app.world_mut().resource_mut::<NativeShellModel>();
+            model.character_create.name = "Unavailable".into();
+            model.character_create.class_name = "Assassin".into();
+            model.character_create.focus = CharacterCreateFocus::CreateButton;
+        }
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.clear();
+            keys.press(KeyCode::Enter);
+        }
+        app.update();
+        assert!(
+            !app.world()
+                .resource::<NativeShellModel>()
+                .create_character_request_in_flight
+        );
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativeUiIntentQueue>()
+                .drain()
+                .count(),
+            0
+        );
+    }
+
+    #[test]
+    fn creation_policy_ignores_disabled_pointer_class_selection() {
+        use crate::native_shell::CharacterCreationClasses;
+        for index in [3, 4] {
+            let mut app = wallet_keyboard_app(NativeWalletLogin::default());
+            app.add_message::<AppExit>()
+                .add_systems(Update, shell_pointer_input);
+            {
+                let mut model = app.world_mut().resource_mut::<NativeShellModel>();
+                model.screen = NativeShellScreen::CharacterCreate;
+                model.set_character_creation_classes(
+                    CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+                );
+            }
+            app.world_mut().spawn((
+                Button,
+                Interaction::Pressed,
+                NativeShellButton::SelectCreateClass(index),
+            ));
+            app.update();
+            let model = app.world().resource::<NativeShellModel>();
+            assert_eq!(model.character_create.class_name, "Warrior");
+            assert_eq!(model.character_create.focus, CharacterCreateFocus::Name);
         }
     }
 

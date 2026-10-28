@@ -309,9 +309,9 @@ fn run_native_client() -> bevy::app::AppExit {
     // explicit capture directory is configured for native acceptance.
     app.add_plugins(capture::Mir2NativeScreenshotPlugin);
     // Native input: WASD / arrows → walk/run intents forwarded to the gateway.
-    app.insert_resource(shell_bridge::initial_shell_model(
-        session.auto_login.as_ref(),
-    ));
+    let mut shell = shell_bridge::initial_shell_model(session.auto_login.as_ref());
+    shell.set_character_creation_classes(session.character_creation_classes.clone());
+    app.insert_resource(shell);
     app.insert_resource(mir2_client_bevy::native_shell::NativeUiIntentQueue::default());
     app.insert_resource(shell_bridge::GatewayEventInbox::new_owned(event_rx));
     app.insert_resource(gameplay_bridge::GameplayEventInbox::new(gameplay_rx));

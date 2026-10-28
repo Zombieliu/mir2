@@ -331,6 +331,9 @@ pub fn forward_native_ui_intents(
                 class_name,
                 gender_name,
             } if shell.create_character_request_in_flight && !create_character_command_sent => {
+                if shell.reject_unavailable_creation_class(&class_name) {
+                    continue;
+                }
                 create_character_command_sent = true;
                 Some(NativeOutboundCommand::NewCharacter {
                     name: name.trim().to_owned(),
@@ -537,6 +540,64 @@ mod tests {
     }
 
     use mir2_client_bevy::native_shell::CharacterSummary;
+
+    #[test]
+    fn creation_policy_blocks_disabled_stale_queued_commands_at_send_boundary() {
+        use mir2_client_bevy::native_shell::CharacterCreationClasses;
+        for class in ["Assassin", "Archer", "Unknown"] {
+            let mut model = NativeShellModel::default();
+            model.screen = NativeShellScreen::CharacterCreate;
+            model.set_character_creation_classes(
+                CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+            );
+            model.create_character_request_in_flight = true;
+            let (sent, model) = forward(
+                model,
+                [NativeUiIntent::CreateCharacter {
+                    name: "Unavailable".into(),
+                    class_name: class.into(),
+                    gender_name: "Male".into(),
+                }],
+            );
+            assert!(sent.is_empty());
+            assert!(!model.create_character_request_in_flight);
+        }
+    }
+
+    #[test]
+    fn creation_policy_keeps_allowed_creation_and_existing_other_class_start_commands() {
+        use mir2_client_bevy::native_shell::CharacterCreationClasses;
+        let policy =
+            CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap();
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterCreate;
+        model.set_character_creation_classes(policy.clone());
+        let create = NativeUiIntent::CreateCharacter {
+            name: "ClassicHero".into(),
+            class_name: "Taoist".into(),
+            gender_name: "Male".into(),
+        };
+        assert!(model.apply_ui_intent(create.clone()));
+        let (sent, _) = forward(model, [create]);
+        assert!(
+            matches!(sent.as_slice(), [GatewayCommand::Wire(NativeOutboundCommand::NewCharacter { class, .. })] if class == "Taoist")
+        );
+        for class in ["Assassin", "Archer"] {
+            let mut model = NativeShellModel::default();
+            model.screen = NativeShellScreen::CharacterSelect;
+            model.characters = vec![CharacterSummary::new(7, "ExistingHero", 40, class, "Male")];
+            model.set_character_creation_classes(policy.clone());
+            assert!(model.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index: 7 }));
+            assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+            let (sent, _) = forward(model, [NativeUiIntent::StartGame]);
+            assert!(matches!(
+                sent.as_slice(),
+                [GatewayCommand::Wire(NativeOutboundCommand::StartGame {
+                    character_index: 7
+                })]
+            ));
+        }
+    }
 
     #[test]
     fn verified_identity_login_sends_only_version_and_signed_login() {

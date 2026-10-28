@@ -12,6 +12,7 @@ param(
     [string]$PublisherThumbprint = '',
     [string]$GatewayWsUrl = $env:MIR2_CANDIDATE_GATEWAY_WS_URL,
     [string]$AuthHttpUrl = '',
+    [string[]]$AllowedClasses = $null,
     [ValidateSet('crystal', 'newcomer-v1', 'newcomer-v2')][string]$QuestGuidance = 'newcomer-v2',
     [bool]$ForceDaylight = $true,
     [string[]]$NativeMapFileNames = @(),
@@ -868,7 +869,7 @@ if ($invalid.Count -gt 0) { throw ('mandatory attested inputs missing or invalid
 $GatewayWsUrl = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
 $candidateMapScope = Resolve-CandidateMapScope -MapNames $NativeMapFileNames
 $NativeMapFileNames = @($candidateMapScope.expectedMaps)
-$candidateToml = New-CandidateClientConfiguration -GatewayWsUrl $GatewayWsUrl -AuthHttpUrl $AuthHttpUrl -QuestGuidance $QuestGuidance -ForceDaylight $ForceDaylight
+$candidateToml = New-CandidateClientConfiguration -GatewayWsUrl $GatewayWsUrl -AuthHttpUrl $AuthHttpUrl -AllowedClasses $AllowedClasses -QuestGuidance $QuestGuidance -ForceDaylight $ForceDaylight
 Assert-CandidateClientConfiguration -Text $candidateToml | Out-Null
 
 $ScriptDir = Split-Path -Parent $PSCommandPath
