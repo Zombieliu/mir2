@@ -1,0 +1,144 @@
+{
+  "writtenAt": "2026-10-29T20:26:41.170868+00:00",
+  "status": "failed-no-retry",
+  "sourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "gatewayBinarySha256": "010c6627c9a18663eb56a5618c220f46f6051b88e3c944e621166072d9aef2ea",
+  "toolingHead": "bb690060d599d6d224f0ca708af2e75a1d4b533c",
+  "runnerExitCode": 1,
+  "executions": 1,
+  "preparation": {
+    "ok": true,
+    "readyAccounts": 2,
+    "preparationStartsGame": false,
+    "registrationMethod": "ordinary NewAccount/Login/NewCharacter; two new dedicated accounts"
+  },
+  "stage2": {
+    "completed": true,
+    "passed": true,
+    "measuredSeconds": 60.013,
+    "movementPassed": true,
+    "chatPassed": true,
+    "fanoutPassed": true,
+    "aoi": {
+      "samples": 60,
+      "expectedPairs": 120,
+      "observedPairs": 120,
+      "persistentMissing": 0,
+      "ghosts": 0,
+      "duplicates": 0,
+      "minimumCoverage": 1,
+      "maximumExpectedPerObserver": 1
+    },
+    "timeoutRatio": 0,
+    "correctionRatio": 0,
+    "runP95Ms": 198,
+    "walkP95Ms": 387,
+    "chatP95Ms": 291,
+    "perActorMoves": [
+      {
+        "moves": 77,
+        "runs": 71,
+        "cells": 148,
+        "completionRatio": 1,
+        "actorOrdinal": 1
+      },
+      {
+        "moves": 77,
+        "runs": 71,
+        "cells": 148,
+        "completionRatio": 1,
+        "actorOrdinal": 2
+      }
+    ]
+  },
+  "incompleteSoak": {
+    "name": "soak",
+    "kind": "measurement",
+    "targetActors": 2,
+    "startedAtMs": 1793305491442,
+    "endedAtMs": 1793305532217,
+    "completed": false
+  },
+  "cleanupErrors": [],
+  "normalLogoutAcknowledged": "not established; original finally drains only still-open connections, so empty cleanupErrors is not two successful LogOutSuccess receipts",
+  "nativeResumeTested": false,
+  "saveReloginTested": false,
+  "actualLoginAttempts": 4,
+  "registrationAttempts": 2,
+  "combatTested": false,
+  "capacityAccepted": false,
+  "saturationEstablished": false,
+  "failedRunRetained": true,
+  "retryPerformed": false,
+  "sourceLedgerOrParametersChangedDuringRun": false,
+  "monitorEvidence": {
+    "samples": 46,
+    "firstSampledAt": 1793305402393,
+    "lastSampledAt": 1793305525790,
+    "maxObservedCgroupMemoryBytes": 132915200,
+    "maxDriverLagP99Ms": 150.994943,
+    "afterExitSnapshotCapturedAt": "2026-10-29T20:26:41.170868+00:00",
+    "afterExitSnapshotSampledAt": 1793305525790,
+    "afterExitSnapshotActiveSessions": 2,
+    "afterExitSnapshotStop": false,
+    "afterExitSnapshotIsFresh": false,
+    "serverActiveSessionsZeroConfirmed": false,
+    "limitation": "Local monitor forwarding stopped updating before the transport failure; remote final health/process status requires root observations. Do not attribute this run to Gateway saturation or confirm normal save/relogin."
+  },
+  "schema": "mir2.capacity.actual-first-two-pilot.public.v1",
+  "firstFailure": {
+    "reason": "A participating actor received a real gameplay failure",
+    "evidence": {
+      "phase": "soak",
+      "kind": "run",
+      "status": "transportError",
+      "actorOrdinal": 2
+    }
+  },
+  "failureEvents": [
+    {
+      "type": "continuousFailure",
+      "at": 1793305532141,
+      "reason": "A participating actor received a real gameplay failure",
+      "evidence": {
+        "phase": "soak",
+        "kind": "run",
+        "status": "transportError"
+      }
+    },
+    {
+      "type": "safetyStop",
+      "at": 1793305532141,
+      "reason": "A participating actor received a real gameplay failure"
+    },
+    {
+      "type": "action",
+      "at": 1793305532141,
+      "phase": "soak",
+      "kind": "run",
+      "status": "transportError",
+      "plannedGameplay": true,
+      "scheduledAtMs": 130091.71429999999,
+      "sentAtMs": 130113.0187,
+      "nativeOpportunity": true,
+      "plannedIntervalMs": 750,
+      "pacingKnown": true,
+      "latencyMs": 31.023000000001048,
+      "plannedLatencyMs": 52.32880000000296,
+      "ambiguousTargetQuarantined": false,
+      "actorOrdinal": 2
+    }
+  ],
+  "publicProjection": {
+    "originalCompleteFileSha256": "e38d0cea0e5642eb2bcf0ce1bd23fe50b048f3159be69a4b4ece0bef9fa72b21",
+    "removed": [
+      "local file inventory/paths",
+      "loopback connection details",
+      "generated actor names",
+      "raw failure strings containing actor names"
+    ],
+    "actorOrdinalsAreAnonymized": true,
+    "rawAccountPoolOrLedgerIncluded": false,
+    "sourcePrivateFileInventoryIncluded": false
+  }
+}
