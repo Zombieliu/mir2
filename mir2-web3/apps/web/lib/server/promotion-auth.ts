@@ -322,4 +322,3 @@ export async function promotionLogout(request: Request): Promise<Response> {
     const response = promotionJson({ accepted: true }); clear(response, SESSION_COOKIE); clear(response, CHALLENGE_COOKIE); clear(response, CLICK_COOKIE); return response;
   } catch (error) { return promotionError(error); }
 }
-
