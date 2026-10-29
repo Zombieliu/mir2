@@ -29,6 +29,16 @@ with `verify-updater-bundle.ps1`; generate the fresh literal
 lists are required by this recipe. Use the same immutable game Candidate for
 the installer's game inputs and the authenticated update seed.
 
+A clean source checkout also needs the runtime asset inputs before packaging.
+Generate the base floor atlas from the committed original-map images with
+`node apps/web/scripts/build-map-atlas-pack.mjs --outDir apps/web/public/generated/map-atlas`
+(local asset-manifest mode). The package tool then creates and audits the full
+profile's native map images and completes every required floor from the pinned
+Crystal pack. Pass the pack's real physical directory as `FullCrystalPackRoot`;
+junctions and other reparse ancestors are rejected. Exported player-sprite PNGs
+must likewise satisfy their committed manifests before invoking the package
+tool. A clean Git status alone does not prove that ignored asset exports exist.
+
 ```text
 python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-commit>
 ISCC.exe /Qp Mir2-Invite.iss
