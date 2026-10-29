@@ -46,7 +46,7 @@ jobs:
           node --input-type=module <<'NODE'
           const team = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
           const project = 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz';
-          const baseline = 'dpl_48nA9MP31zPZXMHxgmfciatquZyd';
+          const baseline = 'dpl_Hmab1y6vYULtdHJZ4Zy6fsWwMbzm';
           if (process.env.GITHUB_REF !== 'refs/heads/codex/promotion-vercel-20261029') throw Error('Unexpected release branch');
           if (!process.env.VERCEL_TOKEN) throw Error('Missing existing Vercel CI credential');
           if (process.env.VERCEL_ORG_ID !== team || process.env.VERCEL_PROJECT_ID !== project) {
@@ -177,7 +177,7 @@ jobs:
           ../promotion-backend-release/runtime/node --check ../promotion-backend-release/usdc-recharge/service/cli.mjs
           git rev-parse HEAD > ../promotion-backend-release/SOURCE-SHA.txt
           cd ../promotion-backend-release
-          find . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
           ldd mir2-gateway
           ldd runtime/node
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
