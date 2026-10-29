@@ -112,25 +112,121 @@ function Assert-PackedSameSource($Before, $After) {
     }
     if ($Before.clean -ne $true -or $Before.sourceFilesChecked -lt 1) { throw 'Committed compiler source inventory required' }
 }
-function Copy-PackedExecutable([string]$Python, [string]$PrepareScript, [string]$InputPath, [string]$OutputPath) {
+function Copy-PackedExecutable([string]$Python, [string]$PrepareScript, [string]$BuildTargetDir, [string]$OutputPath) {
     $code = @'
-import importlib.util,json,os,sys
+import ctypes,hashlib,importlib.util,json,msvcrt,os,sys
+from ctypes import wintypes as w
 from pathlib import Path
 sys.dont_write_bytecode=True
 spec=importlib.util.spec_from_file_location("packed_native_preparation",sys.argv[1])
 module=importlib.util.module_from_spec(spec)
 sys.modules[spec.name]=module
 spec.loader.exec_module(module)
+require=module.require
+kernel=ctypes.WinDLL("kernel32",use_last_error=True)
+kernel.CreateFileW.argtypes=[w.LPCWSTR,w.DWORD,w.DWORD,ctypes.c_void_p,w.DWORD,w.DWORD,w.HANDLE]
+kernel.CreateFileW.restype=w.HANDLE
+kernel.CloseHandle.argtypes=[w.HANDLE]
+kernel.CloseHandle.restype=w.BOOL
+kernel.GetFinalPathNameByHandleW.argtypes=[w.HANDLE,w.LPWSTR,w.DWORD,w.DWORD]
+kernel.GetFinalPathNameByHandleW.restype=w.DWORD
+kernel.CompareStringOrdinal.argtypes=[w.LPCWSTR,ctypes.c_int,w.LPCWSTR,ctypes.c_int,w.BOOL]
+kernel.CompareStringOrdinal.restype=ctypes.c_int
+class Info(ctypes.Structure):
+    _fields_=[("attributes",w.DWORD),("created",w.FILETIME),("accessed",w.FILETIME),
+              ("written",w.FILETIME),("volume",w.DWORD),("sizeHigh",w.DWORD),("sizeLow",w.DWORD),
+              ("links",w.DWORD),("indexHigh",w.DWORD),("indexLow",w.DWORD)]
+kernel.GetFileInformationByHandle.argtypes=[w.HANDLE,ctypes.POINTER(Info)]
+kernel.GetFileInformationByHandle.restype=w.BOOL
+def opened(path,directory=False,new=False):
+    # Directory ancestors deny delete; the EXE denies both write and delete,
+    # including writes through its Cargo deps hardlink. Never alter the cache.
+    access=0x80 if directory else 0xC0000000 if new else 0x80000000
+    sharing=3 if directory else 0 if new else 1
+    flags=0x00200000 | (0x02000000 if directory else 0)
+    handle=kernel.CreateFileW(str(path),access,sharing,None,1 if new else 3,flags,None)
+    if handle==ctypes.c_void_p(-1).value: raise ctypes.WinError(ctypes.get_last_error())
+    return handle
+def normalized(path):
+    if path.startswith("\\\\?\\"): path=path[4:]
+    return os.path.normpath(path)
+def inspect(handle,path,directory=False,single=False):
+    info=Info()
+    if not kernel.GetFileInformationByHandle(handle,ctypes.byref(info)):
+        raise ctypes.WinError(ctypes.get_last_error())
+    require(not info.attributes & 0x400 and bool(info.attributes & 0x10)==directory,
+            "plain actual file/directory handle required")
+    require(directory or (info.links==1 if single else info.links>=1),"invalid handle hardlink count")
+    buffer=ctypes.create_unicode_buffer(32768)
+    length=kernel.GetFinalPathNameByHandleW(handle,buffer,len(buffer),0)
+    if not length: raise ctypes.WinError(ctypes.get_last_error())
+    require(length<len(buffer),"actual handle path bound")
+    expected=normalized(os.path.realpath(path))
+    require(kernel.CompareStringOrdinal(normalized(buffer.value),-1,expected,-1,True)==2,
+            "actual handle path binding mismatch")
+    return info
+def identity(info):
+    return (info.volume,info.indexHigh,info.indexLow,info.sizeHigh,info.sizeLow,
+            info.written.dwHighDateTime,info.written.dwLowDateTime,info.links)
+def as_stream(handle,mode):
+    try: descriptor=msvcrt.open_osfhandle(handle,os.O_BINARY | (os.O_RDWR if mode=="w+b" else os.O_RDONLY))
+    except BaseException:
+        kernel.CloseHandle(handle)
+        raise
+    return os.fdopen(descriptor,mode)
+leases=[]
 try:
+    cache=module.a.absolute_directory(sys.argv[2])
+    require(os.name=="nt" and cache.drive.lower()=="c:","fixed local C Cargo target required")
+    source=cache/"x86_64-pc-windows-msvc/release/mir2-platform-windows.exe"
     target=Path(sys.argv[3])
-    module.require(not os.path.lexists(target),"executable output must be create-only")
-    entry=module.file_entry(Path(sys.argv[2]),target.name,512*1024**2)
-    module.require(module.copy_new(entry,target),"executable output must be new")
+    require(target.is_absolute() and target.name=="mir2-platform-windows.exe","fixed executable output name required")
+    module.a.absolute_directory(str(target.parent))
+    require(not os.path.lexists(target),"executable output must be create-only")
+    # Hold every ancestor through copy/readback; junction swaps and directory
+    # rename cannot move either checked path while its file handle is open.
+    seen=set()
+    for parent in (source.parent,target.parent):
+        for folder in reversed((parent,*parent.parents)):
+            key=os.path.normcase(str(folder))
+            if key in seen: continue
+            handle=opened(folder,directory=True)
+            leases.append(handle)
+            inspect(handle,folder,directory=True)
+            seen.add(key)
+    with as_stream(opened(source),"rb") as input_file:
+        input_handle=msvcrt.get_osfhandle(input_file.fileno())
+        before=inspect(input_handle,source)
+        expected=(before.sizeHigh<<32)|before.sizeLow
+        require(0<expected<=512*1024**2,"input file size bound")
+        with as_stream(opened(target,new=True),"w+b") as output_file:
+            output_handle=msvcrt.get_osfhandle(output_file.fileno())
+            inspect(output_handle,target,single=True)
+            state,count=hashlib.sha256(),0
+            while chunk:=input_file.read(1024**2):
+                count+=len(chunk)
+                require(count<=expected,"copy input size changed")
+                state.update(chunk)
+                output_file.write(chunk)
+            require(count==expected and identity(before)==identity(inspect(input_handle,source)),
+                    "copy input changed")
+            output_file.flush()
+            os.fsync(output_file.fileno())
+            output_file.seek(0)
+            require(hashlib.file_digest(output_file,"sha256").hexdigest()==state.hexdigest(),"copy readback SHA mismatch")
+            actual=inspect(output_handle,target,single=True)
+            require(((actual.sizeHigh<<32)|actual.sizeLow)==count,"copy readback size mismatch")
+    # The generic source/archive rule remains strict for the new output and
+    # every other input. Only the fixed readonly Cargo output permits links.
+    entry=module.file_entry(target,target.name,512*1024**2)
+    require(entry.size==count and entry.sha256==state.hexdigest().upper(),"strict output readback mismatch")
     print(json.dumps(module.entry_dict(entry),separators=(",",":")))
 except Exception as error:
     sys.exit(str(error))
+finally:
+    for handle in reversed(leases): kernel.CloseHandle(handle)
 '@
-    return Invoke-PackedPython $Python $code @($PrepareScript, $InputPath, $OutputPath)
+    return Invoke-PackedPython $Python $code @($PrepareScript, $BuildTargetDir, $OutputPath)
 }
 function Write-PackedNewJson([string]$Path, $Value) {
     Assert-PackedPlainPath $Path
@@ -216,8 +312,7 @@ try {
         Assert-PackedSameSource $sourceBefore $receipt.sourceAfter
     }
     if ($receipt.buildExitCode -ne 0) { throw "Native release build failed (exit $($receipt.buildExitCode))" }
-    $built = Join-Path $TargetDir 'x86_64-pc-windows-msvc/release/mir2-platform-windows.exe'
-    $receipt.executable = Copy-PackedExecutable $PythonPath $prepareScript $built (Join-Path $OutputRoot 'mir2-platform-windows.exe')
+    $receipt.executable = Copy-PackedExecutable $PythonPath $prepareScript $TargetDir (Join-Path $OutputRoot 'mir2-platform-windows.exe')
     $receipt.passed = $true
 } catch {
     $receipt['error'] = $_.Exception.Message
