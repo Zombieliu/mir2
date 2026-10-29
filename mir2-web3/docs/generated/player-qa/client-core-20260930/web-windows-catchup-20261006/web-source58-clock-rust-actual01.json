@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Actual Source58 original runtime clock regression",
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source58-combat-clock-20261011-01\\preparation\\source58-isolated-snapshot01.json",
+    "bytes": 486003,
+    "sha256": "a95e6bae639c1a6bcd6acb0bd6df36da1d1160d77953e8f0c7a2bc91e1376632"
+  },
+  "staticInputs": 623,
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 56452,
+    "kind": "Source58 runtime combat_input_host clock regression Root accepted original execution",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 42336,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/combat-clock-test02-config02.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "tests": {
+    "passed": 4,
+    "failed": 0,
+    "ignored": 1,
+    "newRegressions": 3,
+    "originalIgnoredRetained": true
+  },
+  "policyB": {
+    "childPid": 41824,
+    "childStartedUtc": "/Date(1791688661385)/",
+    "childStartMs": 1011.182,
+    "completed": true,
+    "exited": true,
+    "disposed": true,
+    "exitCode": 0,
+    "exitBits": "0",
+    "completedUtc": "/Date(1791688702670)/",
+    "completionMs": 42296.1287,
+    "postChildPolicy": "B",
+    "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close"
+  },
+  "probe": {
+    "schemaVersion": 1,
+    "mode": "real-cargo",
+    "nonce": "e4c3e1fd8beb40b2891faf3349848441",
+    "policyPath": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/combat-clock-test02-policy02.json",
+    "policySha": "0238446ee23e454d1c4d1337f27996e94e33cb5f20205dbc5298a6d242afe2df",
+    "args": [
+      "+1.95.0",
+      "test",
+      "--manifest-path",
+      "apps/game-client/runtime/Cargo.toml",
+      "--locked",
+      "--offline",
+      "--jobs",
+      "1",
+      "--lib",
+      "combat_input_host::tests",
+      "--",
+      "--test-threads=1"
+    ],
+    "cwd": "C:\\mir2-cross-platform-storage-20261002\\web-source58-combat-clock-20261011-01\\preparation\\mir2-web3",
+    "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+    "sample": {
+      "schemaVersion": "1",
+      "driveLetter": "C",
+      "sampleBeginUtc": "2026-10-11T03:17:40.6116052Z",
+      "sampleEndUtc": "2026-10-11T03:17:41.3182444Z",
+      "remainingBytes": "187612581888",
+      "requiredBytes": "53687091200"
+    },
+    "probePid": 51940,
+    "probeLaunchMs": 86.9295,
+    "probeEndMs": 989.7539,
+    "decision": "FORWARD",
+    "thresholdBytes": "53687091200",
+    "sampleProof": "actualGetVolumeC"
+  },
+  "firstGuardRefusal": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source58-combat-clock-20261011-01/root-approved01/combat-clock-test01/outer.json",
+    "exitCode": 90,
+    "cargoForwarded": false,
+    "retained": true,
+    "repair": "Control authority retains original flat string-only schema; receipt directory preexists. Guard source/tool/policy unchanged."
+  },
+  "scope": "Original guarded Rust host tests on matched isolated baseline; no browser/play parity inferred.",
+  "uiOperated": false,
+  "candidate100": false,
+  "goalComplete": false
+}

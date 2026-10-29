@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "source": "Source68",
+  "normalSaveLogout": true,
+  "ownedPid": 76640,
+  "originalParentPid": 64804,
+  "originalSession": 80381,
+  "ownedIdentityAndListenerVerified": true,
+  "stopOwnedOnly": true,
+  "originalCallerClosed": true,
+  "exitCode": -1,
+  "exited": true,
+  "disposed": true,
+  "sourcePostGuardPassed": true,
+  "elapsedMs": 4443972,
+  "closedLogs": [
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\runtime-start02\\outer.json",
+      "bytes": 520,
+      "sha256": "eb12de7b680e7eda1268df798175a5c351a6be7b6b7dca9c2904875680d06789"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\runtime-start02\\stdout.log",
+      "bytes": 117,
+      "sha256": "274297c61c29155ff784e9ab9cbe5cf1e002c600d7d2045746d64c76c1997de5"
+    },
+    {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\web-source68-storage-tooltip-20261011-01\\runtime-start02\\stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "gatewayModified": false,
+  "source68TooltipAndSaveReloginAccepted": true,
+  "source68PackageModified": false
+}

@@ -33,7 +33,9 @@ import { FriendsWindow, type FriendEntry, type FriendsSummary, type FriendsWindo
 import { GroupWindow, type GroupMember, type GroupSummary, type GroupWindowProps } from "./original-client-group-window";
 import { GuildWindow, type GuildSummary, type GuildWindowProps } from "./original-client-guild-window";
 import { HelpWindow, type HelpWindowProps } from "./original-client-help-window";
+import { OptionsWindow, type OptionsWindowProps } from "./original-client-options-window";
 import { HeroPetWindow, type CreatureSummary, type HeroSummary, type HeroPetWindowProps } from "./original-client-hero-pet-window";
+import { HeroManagementWindow, type HeroManagementWindowProps } from "./original-client-hero-management-window";
 import {
   DEFAULT_HOTKEY_GROUPS,
   HotkeyWindow,
@@ -50,6 +52,8 @@ import {
 import { MarketWindow, type MarketListing, type MarketWindowProps } from "./original-client-market-window";
 import { QuestLogWindow, type QuestLogEntry, type QuestLogWindowProps } from "./original-client-quest-log-window";
 import { RankingWindow, type RankingEntry, type RankingPage, type RankingTabKey, type RankingWindowProps } from "./original-client-ranking-window";
+import { OriginalInspectWindow, type OriginalInspectWindowProps } from "./original-client-inspect-window";
+import type { RankingPlayerInspect } from "../../lib/shared-ranking-inspect";
 import { TradeWindow, type TradeSummary, type TradeWindowProps } from "./original-client-trade-window";
 import {
   WorldMapWindow,
@@ -92,6 +96,8 @@ export type {
   RankingPage,
   RankingTabKey,
   RankingWindowProps,
+  OriginalInspectWindowProps,
+  RankingPlayerInspect,
   RelationshipSummary,
   TradeSummary,
   TradeWindowProps,
@@ -114,6 +120,7 @@ export {
   MarketWindow,
   QuestLogWindow,
   RankingWindow,
+  OriginalInspectWindow,
   TradeWindow,
   WorldMapWindow,
 };
@@ -166,9 +173,14 @@ export type ExtraWindowsProps = {
       | "onFinishQuest"
       | "canAcceptQuest"
       | "canFinishQuest"
+      | "isQuestActionPending"
+      | "questClientStatus"
+      | "onRetryQuestClient"
       | "playerClass"
+      | "playerLevel"
     >;
 
+  heroManagement?: WindowToggle & Omit<HeroManagementWindowProps, "t" | "onClose">;
   heroPet?: WindowToggle &
     Pick<
       HeroPetWindowProps,
@@ -181,6 +193,10 @@ export type ExtraWindowsProps = {
       | "onCyclePickupMode"
       | "onSetHeroBehaviour"
       | "onRecallHero"
+      | "creatureSource"
+      | "petActionPending"
+      | "onPetAction"
+      | "onOpenHeroManagement"
     >;
 
   guild?: WindowToggle &
@@ -196,6 +212,23 @@ export type ExtraWindowsProps = {
       | "onSaveRank"
       | "onDepositGold"
       | "onWithdrawGold"
+      | "inventoryItems"
+      | "emptyInventorySlots"
+      | "itemsReady"
+      | "itemActionPending"
+      | "itemSourceKey"
+      | "onDepositItem"
+      | "onRetrieveItem"
+      | "onMoveItem"
+      | "onRefreshStorage"
+      | "canStoreItem"
+      | "canRetrieveItem"
+      | "incomingInvite"
+      | "onReplyInvite"
+      | "buffSource"
+      | "buffPending"
+      | "onBuffAction"
+      | "onReadStorageItemTooltip"
     >;
 
   group?: WindowToggle &
@@ -208,6 +241,8 @@ export type ExtraWindowsProps = {
       | "onLeaveGroup"
       | "onToggleLootMode"
       | "onToggleAllowInvites"
+      | "incomingInvite"
+      | "onReplyInvite"
     >;
 
   friends?: WindowToggle &
@@ -221,6 +256,7 @@ export type ExtraWindowsProps = {
       | "onWhisper"
       | "onMail"
       | "onEditMemo"
+      | "onRefresh"
     >;
 
   bonds?: WindowToggle &
@@ -231,16 +267,25 @@ export type ExtraWindowsProps = {
       | "onAllowMarriage"
       | "onProposeMarriage"
       | "onDivorce"
+      | "onMailPartner"
+      | "onWhisperPartner"
       | "onAllowMentor"
       | "onAddMentor"
       | "onCancelMentor"
+      | "incomingRequests"
+      | "onReplyRequest"
     >;
 
   ranking?: WindowToggle &
     Pick<
       RankingWindowProps,
       "activeTab" | "page" | "playerName" | "onSelectTab" | "onRefresh" | "onToggleOnlineOnly"
+      | "requestPending" | "onlineOnly" | "onPrevious" | "onNext"
+      | "onInspect"
     >;
+
+  inspect?: WindowToggle & { info: RankingPlayerInspect | null }
+    & Pick<OriginalInspectWindowProps, "onReadItemTooltip">;
 
   market?: WindowToggle &
     Pick<
@@ -266,6 +311,14 @@ export type ExtraWindowsProps = {
       | "onClaimAttachment"
       | "onDeleteMail"
       | "onSendMail"
+      | "composeState"
+      | "onDraftChange"
+      | "normalizeMessage"
+      | "parcelState"
+      | "parcelItems"
+      | "onParcelAction"
+      | "presentation"
+      | "onPresentationChange"
     >;
 
   conquest?: WindowToggle &
@@ -285,6 +338,16 @@ export type ExtraWindowsProps = {
       | "onConfirm"
       | "onCancel"
       | "onSetGold"
+      | "myItems"
+      | "onReadItemTooltip"
+      | "inventoryItems"
+      | "emptyInventorySlots"
+      | "itemsReady"
+      | "itemActionPending"
+      | "itemSourceKey"
+      | "onDepositItem"
+      | "onRetrieveItem"
+      | "availableGold"
     >;
 
   buffs?: WindowToggle & Pick<BuffWindowProps, "buffs" | "ticksPerSecond" | "onRemoveBuff">;
@@ -292,11 +355,10 @@ export type ExtraWindowsProps = {
   worldMap?: WindowToggle &
     Pick<WorldMapWindowProps, "currentMap" | "playerPosition" | "markers" | "onTeleport">;
 
-  /** Static help reference overlay (no server data required). */
-  help?: WindowToggle;
+  help?: WindowToggle & Omit<HelpWindowProps, "t" | "onClose">;
+  options?: WindowToggle & Omit<OptionsWindowProps, "t" | "onClose">;
 
-  /** Static keyboard-layout overlay; pass `groups` to show rebound keys. */
-  hotkeys?: WindowToggle & Pick<HotkeyWindowProps, "groups">;
+  hotkeys?: WindowToggle & Omit<HotkeyWindowProps, "t" | "onClose">;
 
   chatSettings?: WindowToggle & Pick<ChatSettingsWindowProps, "settings" | "onApply">;
 };
@@ -305,11 +367,13 @@ function ExtraWindowsInner({
   t,
   questLog,
   heroPet,
+  heroManagement,
   guild,
   group,
   friends,
   bonds,
   ranking,
+  inspect,
   market,
   mail,
   conquest,
@@ -317,6 +381,7 @@ function ExtraWindowsInner({
   buffs,
   worldMap,
   help,
+  options,
   hotkeys,
   chatSettings,
 }: ExtraWindowsProps) {
@@ -339,6 +404,7 @@ function ExtraWindowsInner({
           t={t}
           quests={questLog.quests}
           playerClass={questLog.playerClass}
+          playerLevel={questLog.playerLevel}
           onTrackQuest={questLog.onTrackQuest}
           onAbandonQuest={questLog.onAbandonQuest}
           onShareQuest={questLog.onShareQuest}
@@ -346,15 +412,23 @@ function ExtraWindowsInner({
           onFinishQuest={questLog.onFinishQuest}
           canAcceptQuest={questLog.canAcceptQuest}
           canFinishQuest={questLog.canFinishQuest}
+          isQuestActionPending={questLog.isQuestActionPending}
+          questClientStatus={questLog.questClientStatus}
+          onRetryQuestClient={questLog.onRetryQuestClient}
           onClose={questLog.onClose}
         />
       ) : null}
 
+      {heroManagement?.open ? <HeroManagementWindow {...heroManagement} t={t} /> : null}
       {heroPet?.open ? (
         <HeroPetWindow
           t={t}
           hero={heroPet.hero}
           creatures={heroPet.creatures}
+          creatureSource={heroPet.creatureSource}
+          petActionPending={heroPet.petActionPending}
+          onPetAction={heroPet.onPetAction}
+          onOpenHeroManagement={heroPet.onOpenHeroManagement}
           onSummonHero={heroPet.onSummonHero}
           onDismissHero={heroPet.onDismissHero}
           onSummonCreature={heroPet.onSummonCreature}
@@ -370,6 +444,12 @@ function ExtraWindowsInner({
         <GuildWindow
           t={t}
           guild={guild.guild}
+          buffSource={guild.buffSource}
+          buffPending={guild.buffPending}
+          onBuffAction={guild.onBuffAction}
+          onReadStorageItemTooltip={guild.onReadStorageItemTooltip}
+          incomingInvite={guild.incomingInvite}
+          onReplyInvite={guild.onReplyInvite}
           playerName={guild.playerName}
           onEditNotice={guild.onEditNotice}
           onInviteMember={guild.onInviteMember}
@@ -379,6 +459,17 @@ function ExtraWindowsInner({
           onSaveRank={guild.onSaveRank}
           onDepositGold={guild.onDepositGold}
           onWithdrawGold={guild.onWithdrawGold}
+          inventoryItems={guild.inventoryItems}
+          emptyInventorySlots={guild.emptyInventorySlots}
+          itemsReady={guild.itemsReady}
+          itemActionPending={guild.itemActionPending}
+          itemSourceKey={guild.itemSourceKey}
+          onDepositItem={guild.onDepositItem}
+          onRetrieveItem={guild.onRetrieveItem}
+          onMoveItem={guild.onMoveItem}
+          onRefreshStorage={guild.onRefreshStorage}
+          canStoreItem={guild.canStoreItem}
+          canRetrieveItem={guild.canRetrieveItem}
           onClose={guild.onClose}
         />
       ) : null}
@@ -393,6 +484,8 @@ function ExtraWindowsInner({
           onLeaveGroup={group.onLeaveGroup}
           onToggleLootMode={group.onToggleLootMode}
           onToggleAllowInvites={group.onToggleAllowInvites}
+          incomingInvite={group.incomingInvite}
+          onReplyInvite={group.onReplyInvite}
           onClose={group.onClose}
         />
       ) : null}
@@ -408,6 +501,7 @@ function ExtraWindowsInner({
           onWhisper={friends.onWhisper}
           onMail={friends.onMail}
           onEditMemo={friends.onEditMemo}
+          onRefresh={friends.onRefresh}
           onClose={friends.onClose}
         />
       ) : null}
@@ -420,9 +514,13 @@ function ExtraWindowsInner({
           onAllowMarriage={bonds.onAllowMarriage}
           onProposeMarriage={bonds.onProposeMarriage}
           onDivorce={bonds.onDivorce}
+          onMailPartner={bonds.onMailPartner}
+          onWhisperPartner={bonds.onWhisperPartner}
           onAllowMentor={bonds.onAllowMentor}
           onAddMentor={bonds.onAddMentor}
           onCancelMentor={bonds.onCancelMentor}
+          incomingRequests={bonds.incomingRequests}
+          onReplyRequest={bonds.onReplyRequest}
           onClose={bonds.onClose}
         />
       ) : null}
@@ -436,9 +534,17 @@ function ExtraWindowsInner({
           onSelectTab={ranking.onSelectTab}
           onRefresh={ranking.onRefresh}
           onToggleOnlineOnly={ranking.onToggleOnlineOnly}
+          requestPending={ranking.requestPending}
+          onlineOnly={ranking.onlineOnly}
+          onPrevious={ranking.onPrevious}
+          onNext={ranking.onNext}
+          onInspect={ranking.onInspect}
           onClose={ranking.onClose}
         />
       ) : null}
+
+      {inspect?.open && inspect.info ? <OriginalInspectWindow t={t} info={inspect.info}
+        onClose={inspect.onClose} onReadItemTooltip={inspect.onReadItemTooltip} /> : null}
 
       {market?.open ? (
         <MarketWindow
@@ -458,6 +564,7 @@ function ExtraWindowsInner({
 
       {mail?.open ? (
         <MailWindow
+          key={mail.presentation?.key}
           t={t}
           mail={mail.mail}
           gold={mail.gold}
@@ -466,7 +573,15 @@ function ExtraWindowsInner({
           onClaimAttachment={mail.onClaimAttachment}
           onDeleteMail={mail.onDeleteMail}
           onSendMail={mail.onSendMail}
+          composeState={mail.composeState}
+          onDraftChange={mail.onDraftChange}
+          normalizeMessage={mail.normalizeMessage}
+          parcelState={mail.parcelState}
+          parcelItems={mail.parcelItems}
+          onParcelAction={mail.onParcelAction}
           onClose={mail.onClose}
+          presentation={mail.presentation}
+          onPresentationChange={mail.onPresentationChange}
         />
       ) : null}
 
@@ -494,6 +609,16 @@ function ExtraWindowsInner({
           onConfirm={trade.onConfirm}
           onCancel={trade.onCancel}
           onSetGold={trade.onSetGold}
+          myItems={trade.myItems}
+          onReadItemTooltip={trade.onReadItemTooltip}
+          inventoryItems={trade.inventoryItems}
+          emptyInventorySlots={trade.emptyInventorySlots}
+          itemsReady={trade.itemsReady}
+          itemActionPending={trade.itemActionPending}
+          itemSourceKey={trade.itemSourceKey}
+          onDepositItem={trade.onDepositItem}
+          onRetrieveItem={trade.onRetrieveItem}
+          availableGold={trade.availableGold}
           onClose={trade.onClose}
         />
       ) : null}
@@ -519,10 +644,11 @@ function ExtraWindowsInner({
         />
       ) : null}
 
-      {help?.open ? <HelpWindow t={t} onClose={help.onClose} /> : null}
+      {help?.open ? <HelpWindow {...help} t={t} /> : null}
+      {options?.open ? <OptionsWindow {...options} t={t} /> : null}
 
       {hotkeys?.open ? (
-        <HotkeyWindow t={t} groups={hotkeys.groups} onClose={hotkeys.onClose} />
+        <HotkeyWindow {...hotkeys} t={t} />
       ) : null}
 
       {chatSettings?.open ? (

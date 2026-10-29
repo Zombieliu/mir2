@@ -1,0 +1,34 @@
+{
+  "owner": "Root",
+  "kind": "Source74 DATA-only verification continuation after natural kernel allocation failure",
+  "originalProductNext02Closed": true,
+  "originalProductNext02ExitCode": 0,
+  "originalCallerPostguardCompleted": true,
+  "productArtifactAndInputFilesPreserved": true,
+  "manualResetToolUsed": false,
+  "normalDataToolCallRestoredSession": true,
+  "boundedChunkedFileHashing": true,
+  "productExecutionRepeatedForDataRecovery": false,
+  "mainNewCodeOverlayPins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+      "bytes": 36920,
+      "sha256": "b1056f6b22b4502c145a6c4028b4ee6697165a0a792bd5b4446b12ec47a8abe3"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+      "bytes": 59634,
+      "sha256": "73999db384aa1b7cf3c8669b65d8d8eeaebe5dc5c50009ff3b6cf6d195041959"
+    }
+  ],
+  "fullNftAcceptance": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\source74-next-actual02.json",
+    "bytes": 4284,
+    "sha256": "b8e64919f6bd39d0a5b5f329bf457f0ffc279433a6ca55ff838e3886818ae5bd"
+  },
+  "runningWebOriginalSession": 55613,
+  "runningWebChangedByFailure": false,
+  "gatewayChangedByFailure": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

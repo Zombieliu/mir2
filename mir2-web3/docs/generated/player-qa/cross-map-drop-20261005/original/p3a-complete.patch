@@ -1,0 +1,4058 @@
+diff --git a/mir2-web3/apps/gateway/src/routing.rs b/mir2-web3/apps/gateway/src/routing.rs
+index c25f46202..2f812e6ae 100644
+--- a/mir2-web3/apps/gateway/src/routing.rs
++++ b/mir2-web3/apps/gateway/src/routing.rs
+@@ -2312,6 +2312,8 @@ struct ZoneMapSnapshotLayer {
+     removed_drop_ids: BTreeSet<u32>,
+     drop_ownership_expires_at_ms: BTreeMap<u32, u64>,
+     drop_expires_at_ms: BTreeMap<u32, u64>,
++    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
++    original_monster_owner_drop_ids: BTreeSet<u32>,
+ }
+ 
+ impl ZoneMapSnapshotLayer {
+@@ -2545,6 +2547,24 @@ struct ZoneJourneyEventProgress {
+     committed: BTreeSet<ZoneJourneyEventIdentity>,
+ }
+ 
++#[derive(Debug, Clone, Serialize, Deserialize)]
++struct PendingOwnedMonsterKillProof {
++    session_id: SessionId,
++    source: ZoneKey,
++    online_owner: String,
++}
++
++fn pending_owned_kill_proof_key(key: &ZonePresenceKey, award: &ZoneMonsterKillAward) -> String {
++    let mut payload = award.clone();
++    // Receipt preparation can enrich these fields during an unknown-outcome
++    // retry. The source-born gameplay payload and its live authority stay fixed.
++    payload.source_receipt_key = None;
++    payload.experience_selection = None;
++    let bytes = serde_json::to_vec(&(key.account_id.as_str(), key.character_index, payload))
++        .expect("owned kill payload encodes");
++    Sha256::digest(bytes).iter().map(|byte|format!("{byte:02x}")).collect()
++}
++
+ #[derive(Debug)]
+ struct SharedInProcessZoneState {
+     next_zone_object_id: u32,
+@@ -2563,6 +2583,7 @@ struct SharedInProcessZoneState {
+     pending_zone_shout_consumes: BTreeMap<ZonePresenceKey, (bool, bool)>,
+     pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropClaimTicket>>,
+     pending_zone_monster_kill_awards: BTreeMap<ZonePresenceKey, Vec<ZoneMonsterKillAward>>,
++    pending_zone_monster_kill_proofs: BTreeMap<String, PendingOwnedMonsterKillProof>,
+     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>>,
+     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
+     vital_receipt_progress: BTreeMap<ZonePresenceKey, ZoneVitalReceiptProgress>,
+@@ -2630,6 +2651,8 @@ struct SharedInProcessZoneStateCheckpoint {
+     pending_zone_shout_consumes: Vec<(ZonePresenceKey, (bool, bool))>,
+     pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropClaimTicket>)>,
+     pending_zone_monster_kill_awards: Vec<(ZonePresenceKey, Vec<ZoneMonsterKillAward>)>,
++    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
++    pending_zone_monster_kill_proofs: BTreeMap<String, PendingOwnedMonsterKillProof>,
+     pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<QueuedZoneVitalDelta>)>,
+     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
+     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+@@ -2790,6 +2813,7 @@ impl SharedInProcessZoneStateCheckpoint {
+         self.pending_zone_shout_consumes.clear();
+         self.pending_zone_ground_drop_claims.clear();
+         self.pending_zone_monster_kill_awards.clear();
++        self.pending_zone_monster_kill_proofs.clear();
+         self.pending_zone_player_damages.clear();
+         self.pending_zone_player_heals.clear();
+         self.vital_receipt_progress.clear();
+@@ -2869,6 +2893,7 @@ impl SharedInProcessZoneState {
+             pending_zone_shout_consumes: BTreeMap::new(),
+             pending_zone_ground_drop_claims: BTreeMap::new(),
+             pending_zone_monster_kill_awards: BTreeMap::new(),
++            pending_zone_monster_kill_proofs: BTreeMap::new(),
+             pending_zone_player_damages: BTreeMap::new(),
+             pending_zone_player_heals: BTreeMap::new(),
+             vital_receipt_progress: BTreeMap::new(),
+@@ -2944,6 +2969,7 @@ impl SharedInProcessZoneState {
+                 .clone()
+                 .into_iter()
+                 .collect(),
++            pending_zone_monster_kill_proofs: self.pending_zone_monster_kill_proofs.clone(),
+             pending_zone_player_damages: self
+                 .pending_zone_player_damages
+                 .clone()
+@@ -3008,6 +3034,7 @@ impl SharedInProcessZoneState {
+             pending_zone_shout_consumes: Vec::new(),
+             pending_zone_ground_drop_claims: Vec::new(),
+             pending_zone_monster_kill_awards: Vec::new(),
++            pending_zone_monster_kill_proofs: BTreeMap::new(),
+             pending_zone_player_damages: Vec::new(),
+             pending_zone_player_heals: Vec::new(),
+             vital_receipt_progress: Vec::new(),
+@@ -3262,6 +3289,7 @@ impl SharedInProcessZoneState {
+                 .pending_zone_monster_kill_awards
+                 .into_iter()
+                 .collect(),
++            pending_zone_monster_kill_proofs: checkpoint.pending_zone_monster_kill_proofs,
+             pending_zone_player_damages: {
+                 let mut deltas: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>> =
+                     checkpoint.pending_zone_player_damages.into_iter().collect();
+@@ -3452,6 +3480,8 @@ impl SharedInProcessZoneState {
+         self.pending_zone_shout_consumes.remove(key);
+         self.pending_zone_ground_drop_claims.remove(key);
+         self.pending_zone_monster_kill_awards.remove(key);
++        let departed_session = Self::zone_session_id_for_key(key);
++        self.pending_zone_monster_kill_proofs.retain(|_,proof|proof.session_id != departed_session);
+         self.pending_zone_player_damages.remove(key);
+         self.pending_zone_player_heals.remove(key);
+         self.vital_receipt_progress.remove(key);
+@@ -4179,6 +4209,7 @@ impl SharedInProcessZoneState {
+             return None;
+         }
+         let outbounds = if committed {
++            self.zone_manager.forget_detached_ground_custody(&expected.zone_key, &expected.ticket);
+             Vec::new()
+         } else {
+             let outbounds = self.zone_manager.restore_detached_ground_drop_claim(
+@@ -4207,6 +4238,8 @@ impl SharedInProcessZoneState {
+     }
+ 
+     fn queue_zone_monster_kill_award(&mut self, key: ZonePresenceKey, award: ZoneMonsterKillAward) {
++        // Queuing cannot mint a new proof from the recipient's current map.
++        // Only the source-issued Owned envelope installs this sidecar.
+         self.pending_zone_monster_kill_awards
+             .entry(key)
+             .or_default()
+@@ -4242,13 +4275,54 @@ impl SharedInProcessZoneState {
+         }
+     }
+ 
++    fn sync_authoritative_zone_drops_for_source(&mut self, source: &ZoneKey, drops: &[GroundDropSnapshot]) {
++        let snapshots: Vec<_> = drops.iter().map(|drop| (
++            self.zone_manager.ground_drop_snapshot_for_key(source, drop.object_id).unwrap_or_else(||drop.clone()),
++            self.zone_manager.ground_drop_absolute_clocks_for_key(source, drop.object_id),
++            self.zone_manager.native_ground_drop_deadline_for_key(source, drop.object_id))).collect();
++        let map = self.maps.entry(source.map_file_name.clone()).or_default();
++        for (mut drop, clocks, native) in snapshots {
++            if map.removed_drop_ids.contains(&drop.object_id) { continue; }
++            if let Some(native_deadline) = native {
++                map.original_monster_owner_drop_ids.insert(drop.object_id);
++                match native_deadline {
++                    Some(deadline) => { map.drop_ownership_expires_at_ms.insert(drop.object_id, deadline); }
++                    None => { map.drop_ownership_expires_at_ms.remove(&drop.object_id); drop.ownership_remaining_ticks = None; }
++                }
++            } else { Self::sync_drop_ownership_deadline(map, &drop, shared_gateway_now_ms()); }
++            if let Some((_, ttl)) = clocks {
++                match ttl {
++                    Some(deadline) => { map.drop_expires_at_ms.insert(drop.object_id, deadline); }
++                    None => { map.drop_expires_at_ms.remove(&drop.object_id); }
++                }
++            }
++            map.ground_drops.insert(drop.object_id, drop);
++        }
++    }
++
+     fn take_pending_zone_monster_kill_awards(
+         &mut self,
+         key: &ZonePresenceKey,
+     ) -> Vec<ZoneMonsterKillAward> {
+-        self.pending_zone_monster_kill_awards
++        let session_id = Self::zone_session_id_for_key(key);
++        let awards = self.pending_zone_monster_kill_awards
+             .remove(key)
+-            .unwrap_or_default()
++            .unwrap_or_default();
++        awards.into_iter().filter(|award|self.pending_zone_monster_kill_proofs
++            .get(&pending_owned_kill_proof_key(key,award))
++            .is_some_and(|proof|self.zone_manager.issued_monster_award_is_current(&proof.source,&session_id,&proof.online_owner,award)))
++            .collect()
++    }
++
++    fn forget_owned_monster_kill_proof(&mut self, key: &ZonePresenceKey, award: &ZoneMonsterKillAward) {
++        if let Some(proof) = self.pending_zone_monster_kill_proofs.remove(&pending_owned_kill_proof_key(key,award)) {
++            self.zone_manager.acknowledge_issued_monster_award(&proof.source,&proof.session_id,award);
++        }
++    }
++    fn owned_monster_kill_proof_is_current(&self, key: &ZonePresenceKey, award: &ZoneMonsterKillAward) -> bool {
++        self.pending_zone_monster_kill_proofs.get(&pending_owned_kill_proof_key(key,award))
++            .is_some_and(|proof|self.zone_manager.issued_monster_award_is_current(&proof.source,
++                &Self::zone_session_id_for_key(key),&proof.online_owner,award))
+     }
+ 
+     // Signed settled vital deltas preserve interleaved healing and damage.
+@@ -4474,21 +4548,18 @@ impl SharedInProcessZoneState {
+                         self.queue_zone_ground_drop_claim(key, ticket);
+                     }
+                 }
+-                ZoneOutbound::MonsterKillAward { session_id, award } => {
+-                    let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
+-                        continue;
+-                    };
+-                    if self.teardown_fenced(&key)
+-                        && !(allow_fenced_current && current_key == Some(&key))
+-                    {
+-                        continue;
+-                    }
+-                    self.sync_authoritative_zone_drops_for_key(&key, &award.drops);
+-                    if current_key == Some(&key) {
+-                        current_monster_kill_awards.push(award);
+-                    } else {
+-                        self.queue_zone_monster_kill_award(key, award);
+-                    }
++                // Standalone personal compatibility has no authority over the
++                // shared manager's native experience or ground-item births.
++                ZoneOutbound::MonsterKillAward { .. } => {}
++                ZoneOutbound::OwnedMonsterKillAward { session_id, source, online_owner, award } => {
++                    if !self.zone_manager.issued_monster_award_is_current(&source,&session_id,&online_owner,&award) { continue; }
++                    let Some(key) = self.zone_session_keys.get(&session_id).cloned() else { continue; };
++                    if self.teardown_fenced(&key) && !(allow_fenced_current && current_key == Some(&key)) { continue; }
++                    self.sync_authoritative_zone_drops_for_source(&source, &award.drops);
++                    self.pending_zone_monster_kill_proofs.insert(pending_owned_kill_proof_key(&key,&award),
++                        PendingOwnedMonsterKillProof { session_id, source, online_owner });
++                    if current_key == Some(&key) { current_monster_kill_awards.push(award); }
++                    else { self.queue_zone_monster_kill_award(key, award); }
+                 }
+                 ZoneOutbound::MagicPractice { receipt } => {
+                     let Some(key) = self.zone_session_keys.get(&receipt.session_id).cloned() else {
+@@ -4745,6 +4816,7 @@ impl SharedInProcessZoneState {
+         drop: &GroundDropSnapshot,
+         now_ms: u64,
+     ) {
++        if map.original_monster_owner_drop_ids.contains(&drop.object_id) { return; }
+         map.drop_expires_at_ms
+             .entry(drop.object_id)
+             .or_insert_with(|| {
+@@ -4772,7 +4844,9 @@ impl SharedInProcessZoneState {
+         if map
+             .drop_ownership_expires_at_ms
+             .get(&object_id)
+-            .is_some_and(|expires_at_ms| now_ms >= *expires_at_ms)
++            .is_some_and(|expires_at_ms| if map.original_monster_owner_drop_ids.contains(&object_id) {
++                now_ms > *expires_at_ms
++            } else { now_ms >= *expires_at_ms })
+         {
+             map.drop_ownership_expires_at_ms.remove(&object_id);
+             if let Some(drop) = map.ground_drops.get_mut(&object_id) {
+@@ -5501,6 +5575,16 @@ impl SharedInProcessZoneState {
+     }
+ 
+     fn restore_drop(&mut self, map_file_name: &str, drop: GroundDropSnapshot) {
++        let source = ZoneKey::for_map(map_file_name);
++        if self.zone_manager.zone(&source).is_some() {
++            // The Zone restored the exact immutable custody clocks first.
++            // Missing means the original TTL elapsed; never mirror the ticket
++            // into a newly born item with a fresh lifetime.
++            let Some(drop) = self.zone_manager.ground_drop_snapshot_for_key(&source, drop.object_id) else { return; };
++            self.maps.entry(map_file_name.into()).or_default().removed_drop_ids.remove(&drop.object_id);
++            self.sync_authoritative_zone_drops_for_source(&source, &[drop]);
++            return;
++        }
+         let map = self.maps.entry(map_file_name.to_string()).or_default();
+         map.removed_drop_ids.remove(&drop.object_id);
+         Self::sync_drop_ownership_deadline(map, &drop, shared_gateway_now_ms());
+@@ -10914,6 +10998,8 @@ impl SharedInProcessZoneSessionRuntime {
+         let mut awards = awards.into_iter();
+         while let Some(award) = awards.next() {
+             let mut retry_award = award.clone();
++            if !self.zone_state.lock().map_err(|_|"shared zone presence mutex is poisoned".to_string())?
++                .owned_monster_kill_proof_is_current(key,&award) { continue; }
+             let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+                 identity: identity.clone(),
+                 command: SharedAccountInventoryCommand::MonsterKillAward(award),
+@@ -10937,6 +11023,8 @@ impl SharedInProcessZoneSessionRuntime {
+                     "monster kill award economy commit failed during teardown drain".to_string(),
+                 );
+             }
++            self.zone_state.lock().map_err(|_|"shared zone presence mutex is poisoned".to_string())?
++                .forget_owned_monster_kill_proof(key,&retry_award);
+             if receipt.packets.iter().any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })) {
+                 self.sync_current_zone_vitals_from_inner();
+             }
+@@ -10956,6 +11044,8 @@ impl SharedInProcessZoneSessionRuntime {
+         let mut remaining = awards.into_iter();
+         let mut packets = Vec::new();
+         while let Some(mut award) = remaining.next() {
++            if !self.zone_state.lock().expect("shared zone presence mutex")
++                .owned_monster_kill_proof_is_current(&key,&award) { continue; }
+             let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+                 identity: identity.clone(),
+                 command: SharedAccountInventoryCommand::MonsterKillAward(award.clone()),
+@@ -10964,7 +11054,11 @@ impl SharedInProcessZoneSessionRuntime {
+                 award.source_receipt_key = Some(idempotency_key.clone());
+             }
+             match outcome {
+-                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed => packets.extend(receipt.packets),
++                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed => {
++                    self.zone_state.lock().expect("shared zone presence mutex")
++                        .forget_owned_monster_kill_proof(&key,&award);
++                    packets.extend(receipt.packets);
++                }
+                 _ => {
+                     // Keep the exact original envelope on known failure and
+                     // unknown publication alike. A frozen source rejects later
+@@ -15590,6 +15684,8 @@ impl fmt::Debug for ZoneRegistry {
+ 
+ #[cfg(test)]
+ mod tests {
++    #[path = "cross_map_drop_lifecycle_tests.rs"]
++    mod cross_map_drop_lifecycle_tests;
+     #[path = "dead_experience_chain_tests.rs"]
+     mod dead_experience_chain_tests;
+     #[path = "crowded_escape_tests.rs"]
+@@ -18451,7 +18547,7 @@ mod tests {
+     }
+ 
+     #[test]
+-    fn shared_zone_state_dispatches_current_and_pending_monster_kill_awards() {
++    fn shared_zone_state_rejects_unbound_legacy_monster_kill_awards() {
+         let mut state = SharedInProcessZoneState::new();
+         let current_key = ZonePresenceKey {
+             account_id: "current".to_string(),
+@@ -18513,10 +18609,10 @@ mod tests {
+             Some(&current_key),
+         );
+ 
+-        assert_eq!(current_awards, vec![award.clone()]);
++        assert!(current_awards.is_empty());
+         assert_eq!(
+             state.take_pending_zone_monster_kill_awards(&remote_key),
+-            vec![award]
++            Vec::new()
+         );
+         state.apply_shared_entity_packets("0", &[ground_drop_spawn_packet(&drop)]);
+         let shared_drop = state
+@@ -18524,7 +18620,7 @@ mod tests {
+             .get("0")
+             .and_then(|map| map.ground_drops.get(&drop.object_id))
+             .expect("kill award should replace the legacy packet snapshot");
+-        assert_eq!(shared_drop, &drop);
++        assert_ne!(shared_drop, &drop, "unbound legacy award cannot replace canonical ground metadata");
+     }
+ 
+     #[test]
+@@ -18534,7 +18630,7 @@ mod tests {
+         start_new_runtime(&mut runtime, "zone-kill-award", "Blade");
+         let before_experience = runtime.inner.world_snapshot().player_experience;
+ 
+-        let packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
++        let input = ZoneMonsterKillAward {
+             source_receipt_key: None,
+             experience_selection: None,
+             monster_object_id: 9100,
+@@ -18543,7 +18639,9 @@ mod tests {
+             experience: 6,
+             drops: Vec::new(),
+             boss_audit: None,
+-        }]);
++        };
++        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, input);
++        let packets = runtime.apply_zone_monster_kill_awards(generated);
+ 
+         assert!(packets.iter().any(|packet| matches!(
+             packet,
+@@ -20384,7 +20482,7 @@ mod tests {
+         start_new_runtime(&mut runtime, "zone-account-inventory-service", "Blade");
+         let before_experience = runtime.inner.world_snapshot().player_experience;
+ 
+-        let award_packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
++        let input = ZoneMonsterKillAward {
+             source_receipt_key: None,
+             experience_selection: None,
+             monster_object_id: 9100,
+@@ -20393,7 +20491,9 @@ mod tests {
+             experience: 6,
+             drops: Vec::new(),
+             boss_audit: None,
+-        }]);
++        };
++        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, input);
++        let award_packets = runtime.apply_zone_monster_kill_awards(generated);
+         assert_eq!(
+             *monster_award_calls
+                 .lock()
+@@ -26669,14 +26769,16 @@ mod tests {
+             drops: Vec::new(),
+             boss_audit: None,
+         };
+-        let first_packets = runtime.apply_zone_monster_kill_awards(vec![award(95)]);
++        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award(95));
++        let first_packets = runtime.apply_zone_monster_kill_awards(generated);
+         assert!(first_packets.iter().any(|packet| matches!(
+             packet,
+             ServerPacket::GainExperience { amount } if *amount == 95
+         )));
+         assert_eq!(runtime.inner.world_snapshot().player_experience, 95);
+ 
+-        let level_packets = runtime.apply_zone_monster_kill_awards(vec![award(5)]);
++        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award(5));
++        let level_packets = runtime.apply_zone_monster_kill_awards(generated);
+         assert!(level_packets.iter().any(|packet| matches!(
+             packet,
+             ServerPacket::LevelChanged { level: 2, .. }
+diff --git a/mir2-web3/apps/simulation/src/runtime/drops.rs b/mir2-web3/apps/simulation/src/runtime/drops.rs
+index ab3d2b57e..0aabe32a1 100644
+--- a/mir2-web3/apps/simulation/src/runtime/drops.rs
++++ b/mir2-web3/apps/simulation/src/runtime/drops.rs
+@@ -60,7 +60,9 @@ pub(super) struct PendingHarvestDrops {
+     pub(super) drops: Vec<ResolvedDropTemplate>,
+ }
+ 
+-pub(super) const CRYSTAL_DROP_OWNER_WINDOW_TICKS: u64 = 60;
++// Legacy snapshot projection at the existing 300 ms server cadence. Shared
++// native ground authority uses a fixed 60,000 ms absolute deadline instead.
++pub(super) const CRYSTAL_DROP_OWNER_WINDOW_TICKS: u64 = 200;
+ pub(super) const CRYSTAL_DROP_EXPIRE_TICKS: u64 = 30 * 60;
+ pub(super) const CRYSTAL_DROP_RANGE: i32 = 4;
+ pub(super) const CRYSTAL_PLAYER_DROP_ITEM_RANGE: i32 = 1;
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/manager.rs b/mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+index 4f3bac6d9..97d6682ea 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/manager.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+@@ -5,17 +5,19 @@ use base64::Engine as _;
+ use bevy_tasks::{ComputeTaskPool, TaskPool};
+ use mir2_protocol::{MirDirection, Point, Spell};
+ use serde::{Deserialize, Serialize};
++use sha2::{Digest, Sha256};
++use super::online_identity::{OnlineIdentityBook, OnlinePresenceSnapshot};
+ 
+ /// Below this many zones, parallel ticking's task overhead outweighs the gain,
+ /// so `tick_all` runs inline. Measured break-even; see the multi-zone scaling
+ /// section of `examples/zone_load.rs` and docs/L2-ECS-ZONE-DESIGN.md.
+ const PARALLEL_TICK_MIN_ZONES: usize = 4;
+-const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 2;
++const ZONE_MANAGER_CHECKPOINT_VERSION: u32 = 3;
+ 
+ use super::runtime::ZoneRuntime;
+ use super::types::{
+     GroundDropClaimTicket, SessionId, ZoneCommand, ZoneJoin, ZoneKey, ZoneNativeMonsterSnapshot,
+-    ZoneOutbound,
++    ZoneMonsterKillAward, ZoneOutbound,
+ };
+ 
+ // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
+@@ -24,6 +26,7 @@ use super::types::{
+ pub struct ZoneManager {
+     zones: BTreeMap<ZoneKey, ZoneRuntime>,
+     session_zones: BTreeMap<SessionId, ZoneKey>,
++    online_identities: OnlineIdentityBook,
+ }
+ 
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+@@ -31,9 +34,67 @@ struct ZoneManagerCheckpoint {
+     version: u32,
+     zones: Vec<(ZoneKey, String)>,
+     session_zones: BTreeMap<SessionId, ZoneKey>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    online_identities: Option<OnlineIdentityBook>,
++    #[serde(default, skip_serializing_if = "String::is_empty")]
++    state_root: String,
++}
++
++impl ZoneManagerCheckpoint {
++    fn canonical_root(&self) -> Result<String, String> {
++        let mut canonical = self.clone();
++        canonical.state_root.clear();
++        let bytes = serde_json::to_vec(&canonical).map_err(|e|format!("manager commitment: {e}"))?;
++        let mut hasher = Sha256::new();
++        hasher.update(b"obelisk.mir2.zone-manager.v3\0");
++        hasher.update(bytes);
++        Ok(hasher.finalize().iter().map(|byte|format!("{byte:02x}")).collect())
++    }
+ }
+ 
+ impl ZoneManager {
++    fn online_snapshot(&self) -> OnlinePresenceSnapshot {
++        self.zones.values().flat_map(|zone|zone.online_player_snapshot(&self.online_identities)).collect()
++    }
++    fn refresh_online_presence(&mut self) {
++        let snapshot = self.online_snapshot();
++        for zone in self.zones.values_mut() { zone.ingest_online_presence(snapshot.clone(), true); }
++    }
++    /// Server-only proof: no packet handler admits or chooses its epoch.
++    pub fn online_owner_proof_is_current(&self, encoded: &str) -> bool {
++        self.online_identities.validates_encoded(encoded)
++    }
++    pub fn online_owner_proof_matches_session(&self, encoded: &str, session_id: &SessionId) -> bool {
++        self.online_identities.validates_for_session(encoded, session_id)
++    }
++    pub fn online_owner_proof_for_session(&self, session_id: &SessionId) -> Option<String> {
++        Some(self.online_identities.owner(session_id)?.encoded())
++    }
++    /// An online Node alone cannot choose an award's source map or payload.
++    /// Only the named source Zone's retained issuance can authorize delivery.
++    pub fn issued_monster_award_is_current(&self, source: &ZoneKey, session_id: &SessionId,
++        encoded: &str, award: &ZoneMonsterKillAward) -> bool {
++        self.online_owner_proof_matches_session(encoded, session_id)
++            && self.zones.get(source).is_some_and(|zone|zone.issued_monster_award_matches(session_id, encoded, award))
++    }
++    pub fn acknowledge_issued_monster_award(&mut self, source: &ZoneKey, session_id: &SessionId,
++        award: &ZoneMonsterKillAward) {
++        if let Some(zone) = self.zones.get_mut(source) { zone.acknowledge_issued_monster_award(session_id, award); }
++    }
++    pub fn ground_drop_snapshot_for_key(&self, key: &ZoneKey, object_id: u32) -> Option<crate::config::GroundDropSnapshot> {
++        self.zones.get(key)?.active_ground_drop_snapshot(object_id)
++    }
++    pub fn ground_drop_absolute_clocks_for_key(&self, key: &ZoneKey, object_id: u32) -> Option<(Option<u64>, Option<u64>)> {
++        self.zones.get(key)?.ground_drop_absolute_clocks(object_id)
++    }
++    /// Some(None) means original native protection was released. None means
++    /// this is not a source-owned native monster drop and has a different policy.
++    pub fn native_ground_drop_deadline_for_key(&self, key: &ZoneKey, object_id: u32) -> Option<Option<u64>> {
++        self.zones.get(key)?.native_ground_drop_deadline(object_id)
++    }
++    pub fn forget_detached_ground_custody(&mut self, key: &ZoneKey, ticket: &GroundDropClaimTicket) -> bool {
++        self.zones.get_mut(key).is_some_and(|zone|zone.forget_detached_ground_custody(ticket))
++    }
+     pub fn conquest_projection_ready(&self, session_id: &SessionId) -> bool {
+         self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+             .is_some_and(|zone| zone.conquest_projection_ready())
+@@ -199,6 +260,7 @@ impl ZoneManager {
+         Self {
+             zones: BTreeMap::new(),
+             session_zones: BTreeMap::new(),
++            online_identities: OnlineIdentityBook::default(),
+         }
+     }
+ 
+@@ -208,11 +270,15 @@ impl ZoneManager {
+             .iter()
+             .map(|(key, runtime)| Ok((key.clone(), STANDARD.encode(runtime.checkpoint_bytes()?))))
+             .collect::<Result<Vec<_>, String>>()?;
+-        serde_json::to_vec(&ZoneManagerCheckpoint {
++        let mut checkpoint = ZoneManagerCheckpoint {
+             version: ZONE_MANAGER_CHECKPOINT_VERSION,
+             zones,
+             session_zones: self.session_zones.clone(),
+-        })
++            online_identities: Some(self.online_identities.clone()),
++            state_root: String::new(),
++        };
++        checkpoint.state_root = checkpoint.canonical_root()?;
++        serde_json::to_vec(&checkpoint)
+         .map_err(|error| format!("failed to encode zone manager checkpoint: {error}"))
+     }
+ 
+@@ -233,12 +299,15 @@ impl ZoneManager {
+     ) -> Result<Self, String> {
+         let checkpoint: ZoneManagerCheckpoint = serde_json::from_slice(bytes)
+             .map_err(|error| format!("failed to decode zone manager checkpoint: {error}"))?;
+-        if checkpoint.version != ZONE_MANAGER_CHECKPOINT_VERSION {
++        if checkpoint.version != 2 && checkpoint.version != ZONE_MANAGER_CHECKPOINT_VERSION {
+             return Err(format!(
+                 "unsupported zone manager checkpoint version {}, expected {}",
+                 checkpoint.version, ZONE_MANAGER_CHECKPOINT_VERSION
+             ));
+         }
++        if checkpoint.version == ZONE_MANAGER_CHECKPOINT_VERSION && checkpoint.state_root != checkpoint.canonical_root()? {
++            return Err("zone manager checkpoint state root mismatch".into());
++        }
+         let mut zones = BTreeMap::new();
+         for (expected_key, runtime_encoded) in checkpoint.zones {
+             let runtime_bytes = STANDARD
+@@ -246,13 +315,16 @@ impl ZoneManager {
+                 .map_err(|error| {
+                     format!("failed to decode zone manager runtime checkpoint: {error}")
+                 })?;
+-            let runtime = restore_runtime(&runtime_bytes)?;
++            let mut runtime = restore_runtime(&runtime_bytes)?;
+             if runtime.key() != &expected_key {
+                 return Err(format!(
+                     "zone manager checkpoint key mismatch for map {}",
+                     expected_key.map_file_name
+                 ));
+             }
++            // Integrity (including a verified outer checkpoint) is not live
++            // admission. A cold restore has no original spawned Nodes.
++            runtime.clear_online_authority();
+             if zones.insert(expected_key.clone(), runtime).is_some() {
+                 return Err(format!(
+                     "zone manager checkpoint contains duplicate map {}",
+@@ -277,6 +349,7 @@ impl ZoneManager {
+         Ok(Self {
+             zones,
+             session_zones: checkpoint.session_zones,
++            online_identities: OnlineIdentityBook::default(),
+         })
+     }
+ 
+@@ -443,6 +516,16 @@ impl ZoneManager {
+             let mut transferred_action_clock = None;
+             let mut transferred_poison_clock = None;
+             let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
++            let retain_online = online_map_transfer && self.online_identities.owner(&session_id)
++                .is_some_and(|owner|owner.matches_join(&join));
++            if !retain_online {
++                self.online_identities.revoke(&session_id);
++                for zone in self.zones.values_mut() { zone.revoke_online_session(&session_id); }
++            }
++            if self.online_identities.admit(&join, retain_online).is_none() { return Vec::new(); }
++            // Retain the same trusted snapshot across the atomic map detach /
++            // attach gap. There is no global despawn in that interval.
++            let snapshot = self.online_snapshot();
+             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                 transferred_poison_clock = self.zones.get(&previous_key)
+                     .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
+@@ -452,18 +535,17 @@ impl ZoneManager {
+                     .zones
+                     .get(&previous_key)
+                     .and_then(|zone| zone.player_vital_clock(&session_id));
+-                outbounds.extend(self.handle_for_key(
+-                    previous_key,
+-                    ZoneCommand::Leave {
+-                        session_id: session_id.clone(),
+-                    },
+-                ));
++                // Map.Remove is not global Despawn. Preserve the Node book.
++                if let Some(zone) = self.zones.get_mut(&previous_key) {
++                    outbounds.extend(zone.handle(ZoneCommand::Leave { session_id: session_id.clone() }));
++                }
+             }
+             self.session_zones.insert(session_id.clone(), key.clone());
+             let zone = self
+                 .zones
+                 .entry(key.clone())
+                 .or_insert_with(|| ZoneRuntime::new(key));
++            zone.ingest_online_presence(snapshot, true);
+             let mut joined = zone.handle(ZoneCommand::Join(join));
+             if let Some(clock) = transferred_clock {
+                 zone.restore_player_vital_clock(&session_id, clock);
+@@ -481,20 +563,27 @@ impl ZoneManager {
+                 zone.calibrate_online_join_poison(&session_id, &mut joined);
+             }
+             outbounds.extend(joined);
++            self.refresh_online_presence();
+             return outbounds;
+         }
+         match &command {
+             ZoneCommand::Leave { session_id } => {
+                 self.session_zones.remove(session_id);
++                self.online_identities.revoke(session_id);
++                for zone in self.zones.values_mut() { zone.revoke_online_session(session_id); }
+             }
+             _ => {}
+         }
+ 
++        self.refresh_online_presence();
++
+         let zone = self
+             .zones
+             .entry(key.clone())
+             .or_insert_with(|| ZoneRuntime::new(key));
+-        zone.handle(command)
++        let outbounds = zone.handle(command);
++        self.refresh_online_presence();
++        outbounds
+     }
+ 
+     /// Tick every zone. Zones are fully independent (each owns its own ECS
+@@ -506,6 +595,7 @@ impl ZoneManager {
+     /// threshold (the common case, including today's single "primary" zone) it
+     /// ticks inline to avoid task overhead.
+     pub fn tick_all(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
++        self.refresh_online_presence();
+         let zone_count = self.zones.len();
+         if zone_count < PARALLEL_TICK_MIN_ZONES {
+             return self.tick_all_sequential(now_ms);
+@@ -587,6 +677,7 @@ impl ZoneManager {
+     /// used to force single-threaded execution (constrained environments) and as
+     /// the benchmark baseline that proves the parallel path's speedup.
+     pub fn tick_all_sequential(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
++        self.refresh_online_presence();
+         self.zones
+             .values_mut()
+             .flat_map(|zone| zone.tick(now_ms))
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/mod.rs b/mir2-web3/apps/simulation/src/runtime/zone/mod.rs
+index c2d2df6e2..20b310160 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/mod.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/mod.rs
+@@ -5,6 +5,7 @@ mod ecs;
+ mod experience;
+ pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+ mod manager;
++mod online_identity;
+ mod movement;
+ mod packets;
+ mod replay;
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+index 3e19f58d2..eb2c65a80 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+@@ -48,6 +48,9 @@ use crate::runtime::map_events::{
+ pub(super) mod armadillo_ai;
+ mod checkpoint;
+ mod experience_ownership;
++mod ground_ownership;
++use super::online_identity::{OnlineIdentityBook, OnlineOwner, OnlinePresence, OnlinePresenceSnapshot};
++use super::types::ZoneGroundDropCustody;
+ use experience_ownership::{apply_native_experience_impact, NativeExperienceActor};
+ pub(super) mod town_archer_ai;
+ use town_archer_ai::*;
+@@ -331,6 +334,12 @@ pub struct ZoneRuntime {
+     /// Crystal/V1 zones must not produce unbounded newcomer-V2 receipt traffic.
+     journey_evidence_enabled: bool,
+     players: BTreeMap<SessionId, ZonePlayer>,
++    // Immutable manager snapshot for one operation; never client-selected.
++    online_presence: OnlinePresenceSnapshot,
++    managed_online_identity: bool,
++    local_online_identities: OnlineIdentityBook,
++    detached_ground_drop_custody: BTreeMap<u32, ZoneGroundDropCustody>,
++    issued_native_monster_awards: BTreeMap<String, OnlineOwner>,
+     objects: BTreeMap<u32, ZoneObject>,
+     dead_object_ids: BTreeMap<u32, ZoneObjectDeadState>,
+     revived_object_ids: BTreeSet<u32>,
+@@ -636,6 +645,11 @@ impl ZoneRuntime {
+             pending_native_ground_spells: Vec::new(),
+             ground_drops: BTreeMap::new(),
+             claimed_ground_drops: BTreeMap::new(),
++            online_presence: BTreeMap::new(),
++            managed_online_identity: false,
++            local_online_identities: OnlineIdentityBook::default(),
++            detached_ground_drop_custody: BTreeMap::new(),
++            issued_native_monster_awards: BTreeMap::new(),
+             next_ground_drop_generation: 1,
+             next_ground_drop_claim_id: 1,
+             occupancy: BTreeMap::new(),
+@@ -778,6 +792,13 @@ impl ZoneRuntime {
+             && self.removed_object_ids.contains(&ticket.object_id)
+             && !self.ground_drops.contains_key(&ticket.object_id)
+             && !self.claimed_ground_drops.contains_key(&ticket.object_id)
++            && self.detached_ground_drop_custody.get(&ticket.object_id).is_none_or(|c|c.matches(&self.key, ticket))
++    }
++
++    pub(crate) fn forget_detached_ground_custody(&mut self, ticket: &GroundDropClaimTicket) -> bool {
++        if !self.has_detached_ground_drop_claim_ticket(ticket) { return false; }
++        self.detached_ground_drop_custody.remove(&ticket.object_id);
++        true
+     }
+ 
+     /// Move an unresolved claim out of session-owned state while retaining the
+@@ -791,6 +812,9 @@ impl ZoneRuntime {
+         if !self.has_pending_ground_drop_claim_ticket(session_id, ticket) {
+             return false;
+         }
++        if let Some(custody) = self.claimed_ground_drops.get(&ticket.object_id).and_then(|claim|claim.custody.clone()) {
++            self.detached_ground_drop_custody.insert(ticket.object_id, custody);
++        }
+         self.claimed_ground_drops.remove(&ticket.object_id);
+         self.removed_object_ids.insert(ticket.object_id);
+         true
+@@ -816,22 +840,9 @@ impl ZoneRuntime {
+         if !self.has_detached_ground_drop_claim_ticket(ticket) {
+             return None;
+         }
++        let custody = self.detached_ground_drop_custody.remove(&ticket.object_id);
+         self.removed_object_ids.remove(&ticket.object_id);
+-        self.ground_drops.insert(
+-            ticket.object_id,
+-            ZoneGroundDrop {
+-                owner_expires_at_ms: ticket
+-                    .drop
+-                    .ownership_remaining_ticks
+-                    .filter(|ticks| *ticks > 0)
+-                    .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300))),
+-                drop: ticket.drop.clone(),
+-                drop_generation: ticket.drop_generation,
+-                payload_digest: ticket.payload_digest.clone(),
+-            },
+-        );
+-        self.apply_zone_object_packets(&[ground_drop_spawn_packet(&ticket.drop)], now_ms);
+-        Some(self.diff_all_zone_object_visibility())
++        self.restore_ground_custody(ticket, custody, now_ms)
+     }
+ 
+     fn allocate_ground_drop_generation(&mut self) -> Option<u64> {
+@@ -859,6 +870,7 @@ impl ZoneRuntime {
+             drop_generation,
+             drop,
+             owner_expires_at_ms,
++            native_owner: None,
+         })
+     }
+ 
+@@ -1432,6 +1444,7 @@ impl ZoneRuntime {
+     }
+ 
+     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
++        self.refresh_local_online_presence();
+         // A physical combat intent supersedes earlier movement even when its
+         // action/cooldown admission rejects the attack. Otherwise an abandoned
+         // run can execute on the next movement tick. Keep the action deadlines
+@@ -2004,6 +2017,7 @@ impl ZoneRuntime {
+     }
+ 
+     pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
++        self.refresh_local_online_presence();
+         self.expire_native_experience_owners(now_ms);
+         let sessions = self.players.keys().cloned().collect::<Vec<_>>();
+         let mut outbounds = Vec::new();
+@@ -2462,7 +2476,12 @@ impl ZoneRuntime {
+         }
+ 
+         let object_id = self.unique_object_id(join.object_id);
+-        self.revoke_same_map_experience_owner_on_join(&join.session_id, object_id);
++        if !self.managed_online_identity {
++            self.revoke_same_map_experience_owner_on_join(&join.session_id, object_id);
++            let mut identity_join = join.clone();
++            identity_join.object_id = object_id;
++            if self.local_online_identities.admit(&identity_join, false).is_none() { return outbounds; }
++        }
+         let requested_position = join.position.clone();
+         let requested_direction = join.direction;
+         join.position = self.first_available_position(join.position.clone(), None);
+@@ -2476,6 +2495,7 @@ impl ZoneRuntime {
+         self.ecs
+             .upsert_player(&session_id, object_id, &player.position);
+         self.players.insert(session_id.clone(), player);
++        self.refresh_local_online_presence();
+         if let Some(clock) = previous_clock {
+             self.restore_player_vital_clock(&session_id, clock);
+         }
+@@ -2506,6 +2526,10 @@ impl ZoneRuntime {
+         let Some(player) = self.players.remove(session_id) else {
+             return Vec::new();
+         };
++        if !self.managed_online_identity {
++            self.local_online_identities.revoke(session_id);
++            self.refresh_local_online_presence();
++        }
+         self.clear_native_player_life_actions(player.object_id);
+         self.pending_native_hits
+             .retain(|hit| &hit.session_id != session_id);
+@@ -3358,6 +3382,11 @@ impl ZoneRuntime {
+         }
+         let mut spawn_packets = Vec::new();
+         for drop in drops {
++            if self.ground_drops.get(&drop.object_id).is_some_and(|stored|stored.native_owner.is_some()) {
++                // A projection cannot replace a source-born identity, payload,
++                // absolute owner deadline, or ground-object TTL.
++                continue;
++            }
+             if self.removed_object_ids.contains(&drop.object_id)
+                 || self.claimed_ground_drops.contains_key(&drop.object_id)
+             {
+@@ -3388,6 +3417,7 @@ impl ZoneRuntime {
+                     owner_expires_at_ms,
+                     drop_generation,
+                     payload_digest,
++                    native_owner: None,
+                 },
+             );
+             if !self.objects.contains_key(&drop.object_id) {
+@@ -9497,22 +9527,9 @@ impl ZoneRuntime {
+         }
+ 
+         if killed {
+-            if let Some(reward_owner_session_id) = reward_owner_session_id {
+-                let drop_owner_object_id = self
+-                    .players
+-                    .get(&reward_owner_session_id)
+-                    .map(|player| player.object_id)
+-                    .unwrap_or(owner_object_id);
+-                let spawned_drops = self.spawn_native_monster_drops(
+-                    &monster_name,
++                outbounds.extend(self.native_monster_kill_outbounds(
++                    reward_owner_session_id,
+                     &position,
+-                    drop_owner_object_id,
+-                    drops,
+-                    now_ms,
+-                );
+-                outbounds.extend(self.diff_all_zone_object_visibility());
+-                outbounds.extend(self.group_monster_kill_awards(
+-                    &reward_owner_session_id,
+                     ZoneMonsterKillAward {
+                         source_receipt_key: None,
+                         experience_selection: None,
+@@ -9520,11 +9537,10 @@ impl ZoneRuntime {
+                         killed_at_ms: now_ms,
+                         monster_name,
+                         experience,
+-                        drops: spawned_drops,
++                        drops,
+                         boss_audit,
+                     },
+                 ));
+-            }
+         }
+ 
+         outbounds
+@@ -10188,12 +10204,17 @@ impl ZoneRuntime {
+     /// deterministic remainder goes to the killer when
+     /// eligible, otherwise to the first eligible session.
+     fn group_monster_kill_awards(
+-        &self,
++        &mut self,
+         owner_session_id: &SessionId,
+         award: ZoneMonsterKillAward,
+     ) -> Vec<ZoneOutbound> {
+         let Some(owner) = self.players.get(owner_session_id) else {
+-            return Vec::new();
++            // This first closure covers ordinary solo EXPOwner across maps.
++            // The existing same-map Candidate group formula is left intact.
++            return if self.online_presence.get(owner_session_id)
++                .is_some_and(|presence|presence.group_members.is_empty()) {
++                self.monster_award_envelope(owner_session_id.clone(), award).into_iter().collect()
++            } else { Vec::new() };
+         };
+         let owner_group_members = &owner.chat_profile.group_members;
+         let mut recipients = self
+@@ -10228,7 +10249,7 @@ impl ZoneRuntime {
+             .unwrap_or_else(|| recipients[0].clone());
+         recipients
+             .into_iter()
+-            .map(|session_id| {
++            .filter_map(|session_id| {
+                 let is_owner = &session_id == owner_session_id;
+                 let mut recipient_award = award.clone();
+                 recipient_award.experience =
+@@ -10241,14 +10262,47 @@ impl ZoneRuntime {
+                     recipient_award.drops.clear();
+                     recipient_award.boss_audit = None;
+                 }
+-                ZoneOutbound::MonsterKillAward {
+-                    session_id,
+-                    award: recipient_award,
+-                }
++                self.monster_award_envelope(session_id, recipient_award)
+             })
+             .collect()
+     }
+ 
++    fn native_monster_award_identity(&self, session_id: &SessionId, award: &ZoneMonsterKillAward) -> String {
++        let mut canonical = award.clone();
++        // Personal settlement adds these fields on retry. They cannot change
++        // the source-issued recipient, amount, provenance or item payload.
++        canonical.source_receipt_key = None;
++        canonical.experience_selection = None;
++        let bytes = serde_json::to_vec(&(&self.key, session_id, canonical))
++            .expect("server monster award encodes");
++        let mut hash = Sha256::new();
++        hash.update(b"obelisk.mir2.native-owner-award.v1\0");
++        hash.update(bytes);
++        zone_hex_lower(&hash.finalize())
++    }
++
++    fn monster_award_envelope(&mut self, session_id: SessionId, award: ZoneMonsterKillAward) -> Option<ZoneOutbound> {
++        if self.managed_online_identity {
++            let owner = self.online_presence.get(&session_id)?.owner.clone();
++            self.issued_native_monster_awards.insert(self.native_monster_award_identity(&session_id, &award), owner.clone());
++            return Some(ZoneOutbound::OwnedMonsterKillAward { session_id, source: self.key.clone(),
++                online_owner: owner.encoded(), award });
++        }
++        Some(ZoneOutbound::MonsterKillAward { session_id, award })
++    }
++
++    pub(crate) fn issued_monster_award_matches(&self, session_id: &SessionId, encoded: &str,
++        award: &ZoneMonsterKillAward) -> bool {
++        self.issued_native_monster_awards.get(&self.native_monster_award_identity(session_id, award))
++            .is_some_and(|owner| &owner.session_id == session_id && owner.encoded() == encoded
++                && self.online_presence.get(session_id).is_some_and(|p| p.owner == *owner))
++    }
++
++    pub(crate) fn acknowledge_issued_monster_award(&mut self, session_id: &SessionId,
++        award: &ZoneMonsterKillAward) {
++        self.issued_native_monster_awards.remove(&self.native_monster_award_identity(session_id, award));
++    }
++
+     fn resolve_pending_native_player_hits(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+         let pending_hits = std::mem::take(&mut self.pending_native_player_hits);
+         let mut remaining_hits = Vec::new();
+@@ -12633,16 +12687,13 @@ impl ZoneRuntime {
+                 drop.source_monster = monster_name.to_string();
+             }
+             drop.owner_object_id = Some(owner_object_id);
+-            if drop.ownership_remaining_ticks.is_none() {
+-                drop.ownership_remaining_ticks = Some(100);
+-            }
+-            let owner_expires_at_ms = drop
+-                .ownership_remaining_ticks
+-                .filter(|ticks| *ticks > 0)
+-                .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300)));
+-            let Some(stored) = self.new_zone_ground_drop(drop.clone(), owner_expires_at_ms) else {
++            let native_owner = self.bind_native_ground_owner(owner_object_id, now_ms);
++            drop.ownership_remaining_ticks = Some(200);
++            let owner_expires_at_ms = native_owner.as_ref().map(|owner|owner.expires_at_ms);
++            let Some(mut stored) = self.new_zone_ground_drop(drop.clone(), owner_expires_at_ms) else {
+                 break;
+             };
++            stored.native_owner = native_owner;
+             self.ground_drops.insert(drop.object_id, stored);
+             packets.push(ground_drop_spawn_packet(&drop));
+             spawned.push(drop);
+@@ -12704,6 +12755,7 @@ impl ZoneRuntime {
+         let Some(stored) = self.ground_drops.remove(&object_id) else {
+             return Vec::new();
+         };
++        let custody = self.capture_ground_drop_custody(&stored);
+         let ticket = GroundDropClaimTicket {
+             claim_id,
+             object_id,
+@@ -12725,6 +12777,7 @@ impl ZoneRuntime {
+                 session_id: session_id.clone(),
+                 drop: stored.drop,
+                 ticket: Some(ticket.clone()),
++                custody: Some(custody),
+             },
+         );
+         let mut outbounds = self.remove_ground_drop_object_for_claim(object_id);
+@@ -12844,21 +12897,7 @@ impl ZoneRuntime {
+             .remove(&ticket.object_id)
+             .expect("validated ground-drop claim should still exist");
+         self.removed_object_ids.remove(&ticket.object_id);
+-        self.ground_drops.insert(
+-            ticket.object_id,
+-            ZoneGroundDrop {
+-                owner_expires_at_ms: claim
+-                    .drop
+-                    .ownership_remaining_ticks
+-                    .filter(|ticks| *ticks > 0)
+-                    .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300))),
+-                drop: claim.drop.clone(),
+-                drop_generation: ticket.drop_generation,
+-                payload_digest: ticket.payload_digest.clone(),
+-            },
+-        );
+-        self.apply_zone_object_packets(&[ground_drop_spawn_packet(&claim.drop)], now_ms);
+-        self.diff_all_zone_object_visibility()
++        self.restore_ground_custody(ticket, claim.custody, now_ms).unwrap_or_default()
+     }
+ 
+     fn broadcast_shared_object_packets(
+@@ -13563,10 +13602,11 @@ impl ZoneRuntime {
+ 
+     fn expire_ground_drop_ownerships(&mut self, now_ms: u64) {
+         for drop in self.ground_drops.values_mut() {
+-            if drop
+-                .owner_expires_at_ms
+-                .is_some_and(|expires_at_ms| now_ms >= expires_at_ms)
+-            {
++            let due = drop.native_owner.as_ref().map(|owner|
++                now_ms > owner.expires_at_ms || self.online_presence.get(&owner.owner.session_id)
++                    .is_none_or(|presence|presence.owner != owner.owner))
++                .unwrap_or_else(||drop.owner_expires_at_ms.is_some_and(|expires|now_ms >= expires));
++            if due {
+                 drop.owner_expires_at_ms = None;
+                 drop.drop.ownership_remaining_ticks = None;
+             }
+@@ -14407,9 +14447,9 @@ impl ZoneRuntime {
+         if owner_object_id == picker_object_id {
+             return true;
+         }
+-        self.players
++        self.online_presence
+             .values()
+-            .find(|player| player.object_id == owner_object_id)
++            .find(|player| player.owner.object_id == owner_object_id)
+             .is_some_and(|owner| {
+                 group_members
+                     .iter()
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+index ce691d125..121f85056 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+@@ -22,6 +22,8 @@ use crate::runtime::zone::types::{
+     ZoneNativeMonster, ZoneNativeMonsterRespawn, ZoneObject, ZonePlayer, ZonePlayerBuff,
+ };
+ use crate::runtime::zone::ZoneCollision;
++use crate::runtime::zone::online_identity::{OnlineOwner, OnlinePresenceSnapshot};
++use crate::runtime::zone::types::ZoneGroundDropCustody;
+ 
+ const LEGACY_CANONICAL_ZONE_STATE_VERSION: u32 = 1;
+ const LEGACY_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v1\0";
+@@ -31,13 +33,15 @@ const LEGACY_V3_CANONICAL_ZONE_STATE_VERSION: u32 = 3;
+ const LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
+ const LEGACY_V4_CANONICAL_ZONE_STATE_VERSION: u32 = 4;
+ const LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
+-const CANONICAL_ZONE_STATE_VERSION: u32 = 5;
+-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
++const LEGACY_V5_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
++const CANONICAL_ZONE_STATE_VERSION: u32 = 6;
++const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v6\0";
+ const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
+ const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
+ const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
+ const LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
+-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
++const LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
++const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 6;
+ 
+ fn legacy_v2_ground_drop_claim_idempotency_key(
+     key: &ZoneKey,
+@@ -141,6 +145,12 @@ struct CanonicalZoneStateV4<'a> {
+     intelligent_creature_intents: &'a Vec<CreaturePickupIntent>,
+     #[serde(skip_serializing_if = "Vec::is_empty")]
+     intelligent_creature_operations: &'a Vec<CreatureOperation>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    online_presence: Option<&'a OnlinePresenceSnapshot>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    detached_ground_drop_custody: Option<&'a BTreeMap<u32, ZoneGroundDropCustody>>,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    issued_native_monster_awards: Option<&'a BTreeMap<String, OnlineOwner>>,
+ }
+ 
+ #[derive(Serialize)]
+@@ -229,6 +239,12 @@ struct ZoneRuntimeCheckpoint {
+     intelligent_creature_intents: Vec<CreaturePickupIntent>,
+     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+     intelligent_creature_operations: Vec<CreatureOperation>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    online_presence: Option<OnlinePresenceSnapshot>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    detached_ground_drop_custody: Option<BTreeMap<u32, ZoneGroundDropCustody>>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    issued_native_monster_awards: Option<BTreeMap<String, OnlineOwner>>,
+ }
+ 
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+@@ -288,7 +304,17 @@ impl ZoneRuntime {
+         native_monsters: &BTreeMap<u32, ZoneNativeMonster>,
+         pending_native_hits: &[PendingNativeMonsterHit],
+     ) -> Result<String, String> {
++        let mut monsters = native_monsters.clone();
++        let (ground_drops, claimed_ground_drops) = if version < 6 {
++            for monster in monsters.values_mut() {
++                if let Some(owner) = monster.experience_owner.as_mut() { owner.online_owner = None; }
++            }
++            self.legacy_ground_metadata_free_state()
++        } else { (self.ground_drops.clone(), self.claimed_ground_drops.clone()) };
+         let state = CanonicalZoneStateV4 {
++            online_presence: (version >= 6).then_some(&self.online_presence),
++            detached_ground_drop_custody: (version >= 6).then_some(&self.detached_ground_drop_custody),
++            issued_native_monster_awards: (version >= 6).then_some(&self.issued_native_monster_awards),
+             intelligent_creatures: &self.intelligent_creatures,
+             intelligent_creature_intents: &self.intelligent_creature_intents,
+             intelligent_creature_operations: &self.intelligent_creature_operations,
+@@ -301,7 +327,7 @@ impl ZoneRuntime {
+             revived_object_ids: &self.revived_object_ids,
+             removed_object_ids: &self.removed_object_ids,
+             harvested_object_ids: &self.harvested_object_ids,
+-            native_monsters,
++            native_monsters: &monsters,
+             native_monster_respawns: &self.native_monster_respawns,
+             pending_native_hits,
+             pending_native_projectiles: &self.pending_native_projectiles,
+@@ -309,8 +335,8 @@ impl ZoneRuntime {
+             pending_native_player_heals: &self.pending_native_player_heals,
+             pending_native_summons: &self.pending_native_summons,
+             pending_native_ground_spells: &self.pending_native_ground_spells,
+-            ground_drops: &self.ground_drops,
+-            claimed_ground_drops: &self.claimed_ground_drops,
++            ground_drops: &ground_drops,
++            claimed_ground_drops: &claimed_ground_drops,
+             next_ground_drop_generation: self.next_ground_drop_generation,
+             next_ground_drop_claim_id: self.next_ground_drop_claim_id,
+             open_doors: &self.open_doors,
+@@ -340,6 +366,19 @@ impl ZoneRuntime {
+         )
+     }
+ 
++    fn legacy_v5_canonical_state_root(&self) -> Result<String, String> {
++        self.canonical_state_root_for_schema(5, LEGACY_V5_CANONICAL_ZONE_STATE_DOMAIN,
++            &self.native_monsters, &self.pending_native_hits)
++    }
++    fn legacy_ground_metadata_free_state(&self)
++        -> (BTreeMap<u32, ZoneGroundDrop>, BTreeMap<u32, ZoneGroundDropClaim>) {
++        let mut drops = self.ground_drops.clone();
++        let mut claims = self.claimed_ground_drops.clone();
++        for stored in drops.values_mut() { stored.native_owner = None; }
++        for claim in claims.values_mut() { claim.custody = None; }
++        (drops, claims)
++    }
++
+     fn legacy_ownership_free_monsters_and_hits(
+         &self,
+     ) -> (BTreeMap<u32, ZoneNativeMonster>, Vec<PendingNativeMonsterHit>) {
+@@ -415,6 +454,7 @@ impl ZoneRuntime {
+ 
+     fn legacy_v2_canonical_state_root(&self) -> Result<String, String> {
+         let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
++        let (ground_drops, claimed_ground_drops) = self.legacy_ground_metadata_free_state();
+         // v2 committed the original claim-scoped idempotency key. Keep this
+         // schema exact so a v2 checkpoint is authenticated before the
+         // post-verification v3 re-anchor removes claim_id from the economic
+@@ -437,8 +477,8 @@ impl ZoneRuntime {
+             pending_native_player_heals: &self.pending_native_player_heals,
+             pending_native_summons: &self.pending_native_summons,
+             pending_native_ground_spells: &self.pending_native_ground_spells,
+-            ground_drops: &self.ground_drops,
+-            claimed_ground_drops: &self.claimed_ground_drops,
++            ground_drops: &ground_drops,
++            claimed_ground_drops: &claimed_ground_drops,
+             next_ground_drop_generation: self.next_ground_drop_generation,
+             next_ground_drop_claim_id: self.next_ground_drop_claim_id,
+             open_doors: &self.open_doors,
+@@ -456,6 +496,7 @@ impl ZoneRuntime {
+ 
+     fn legacy_v3_canonical_state_root(&self) -> Result<String, String> {
+         let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
++        let (ground_drops, claimed_ground_drops) = self.legacy_ground_metadata_free_state();
+         let state = CanonicalZoneState {
+             version: LEGACY_V3_CANONICAL_ZONE_STATE_VERSION,
+             key: &self.key,
+@@ -473,8 +514,8 @@ impl ZoneRuntime {
+             pending_native_player_heals: &self.pending_native_player_heals,
+             pending_native_summons: &self.pending_native_summons,
+             pending_native_ground_spells: &self.pending_native_ground_spells,
+-            ground_drops: &self.ground_drops,
+-            claimed_ground_drops: &self.claimed_ground_drops,
++            ground_drops: &ground_drops,
++            claimed_ground_drops: &claimed_ground_drops,
+             next_ground_drop_generation: self.next_ground_drop_generation,
+             next_ground_drop_claim_id: self.next_ground_drop_claim_id,
+             open_doors: &self.open_doors,
+@@ -661,6 +702,9 @@ impl ZoneRuntime {
+ 
+     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
+         let checkpoint = ZoneRuntimeCheckpoint {
++            online_presence: Some(self.online_presence.clone()),
++            detached_ground_drop_custody: Some(self.detached_ground_drop_custody.clone()),
++            issued_native_monster_awards: Some(self.issued_native_monster_awards.clone()),
+             intelligent_creatures: self.intelligent_creatures.clone(),
+             intelligent_creature_intents: self.intelligent_creature_intents.clone(),
+             intelligent_creature_operations: self.intelligent_creature_operations.clone(),
+@@ -730,15 +774,17 @@ impl ZoneRuntime {
+             && checkpoint.version != LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION
+             && checkpoint.version != LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION
+             && checkpoint.version != LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION
++            && checkpoint.version != LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION
+             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
+         {
+             return Err(format!(
+-                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, or {}",
++                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, or {}",
+                 checkpoint.version,
+                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION,
++                LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 ZONE_RUNTIME_CHECKPOINT_VERSION
+             ));
+         }
+@@ -794,7 +840,7 @@ impl ZoneRuntime {
+                 monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile);
+         }
+         runtime.pending_native_hits = checkpoint.pending_native_hits;
+-        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
++        if checkpoint_version < LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION {
+             // v1-v4 roots never committed generic EXPOwner or the successful
+             // TurnUndead impact flag. Ignore injected forward fields before
+             // legacy authentication; they cannot become reward authority.
+@@ -812,6 +858,9 @@ impl ZoneRuntime {
+         runtime.pending_native_ground_spells = checkpoint.pending_native_ground_spells;
+         runtime.ground_drops = checkpoint.ground_drops;
+         runtime.claimed_ground_drops = checkpoint.claimed_ground_drops;
++        runtime.online_presence = checkpoint.online_presence.unwrap_or_default();
++        runtime.detached_ground_drop_custody = checkpoint.detached_ground_drop_custody.unwrap_or_default();
++        runtime.issued_native_monster_awards = checkpoint.issued_native_monster_awards.unwrap_or_default();
+         runtime.next_ground_drop_generation = checkpoint.next_ground_drop_generation;
+         runtime.next_ground_drop_claim_id = checkpoint.next_ground_drop_claim_id;
+         runtime.open_doors = checkpoint.open_doors;
+@@ -870,6 +919,7 @@ impl ZoneRuntime {
+             LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                 runtime.legacy_v4_canonical_state_root()?
+             }
++            LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.legacy_v5_canonical_state_root()?,
+             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
+             _ => unreachable!("checkpoint version was validated above"),
+         };
+@@ -879,6 +929,15 @@ impl ZoneRuntime {
+                 expected_state_root
+             ));
+         }
++        // Only now has the ORIGINAL legacy canonical shape been verified.
++        // New-looking metadata on v1-v5 bytes was never committed by that root.
++        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
++            for stored in runtime.ground_drops.values_mut() { stored.native_owner = None; }
++            for claim in runtime.claimed_ground_drops.values_mut() { claim.custody = None; }
++            runtime.detached_ground_drop_custody.clear();
++        } else {
++            runtime.validate_native_ground_custody()?;
++        }
+         match checkpoint_version {
+             LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                 runtime.hydrate_legacy_ground_drop_claim_authority()?;
+@@ -888,7 +947,7 @@ impl ZoneRuntime {
+                 runtime.reanchor_legacy_v2_ground_drop_claim_idempotency_keys();
+                 runtime.validate_ground_drop_claim_authority()?;
+             }
+-            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION => {
++            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                 runtime.validate_ground_drop_claim_authority()?;
+             }
+             ZONE_RUNTIME_CHECKPOINT_VERSION => {
+@@ -897,6 +956,9 @@ impl ZoneRuntime {
+             _ => unreachable!("checkpoint version was validated above"),
+         }
+         runtime.validate_intelligent_creature_checkpoint()?;
++        // Public deserialization is cold recovery, never an online Node mint.
++        // Retained live-runtime resume does not deserialize these bytes.
++        runtime.clear_online_authority();
+         Ok(runtime)
+     }
+ }
+@@ -921,6 +983,53 @@ mod tests {
+     };
+     use mir2_protocol::{MirClass, MirDirection, MirGender};
+ 
++    #[test]
++    fn legacy_v5_authenticates_original_item_before_ignoring_unbound_forward_owner_fields() {
++        let mut runtime=ZoneRuntime::new(ZoneKey::for_map("legacy-v5-native-policy"));
++        let mut drop=checkpoint_gold_drop(701); drop.owner_object_id=Some(501);
++        let stored=runtime.new_zone_ground_drop(drop,Some(6_000)).unwrap();
++        runtime.ground_drops.insert(701,stored);
++        let mut fixture:serde_json::Value=serde_json::from_slice(&runtime.checkpoint_bytes().unwrap()).unwrap();
++        fixture["version"]=serde_json::json!(5);
++        fixture["state_root"]=serde_json::json!(runtime.legacy_v5_canonical_state_root().unwrap());
++        let proof=serde_json::json!({"namespace":"00112233445566778899aabbccddeeff","epoch":7,
++            "session_id":"forged-old-online","account_id":"forged-account","character_index":1,"object_id":501});
++        fixture["ground_drops"]["701"]["native_owner"]=serde_json::json!({
++            "owner":proof,"source":runtime.key,"born_at_ms":0,"expires_at_ms":60000});
++        fixture["online_presence"]=serde_json::json!({"forged-old-online":{
++            "owner":proof,"key":runtime.key,"dead":false,"name":"forged-name","group_members":[]}});
++        fixture["issued_native_monster_awards"]=serde_json::json!({"forged-issued-key":proof});
++        let restored=ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&fixture).unwrap()).unwrap();
++        assert!(restored.online_presence.is_empty()); assert!(restored.issued_native_monster_awards.is_empty());
++        assert!(restored.ground_drops[&701].native_owner.is_none());
++        assert_eq!(restored.ground_drops[&701].owner_expires_at_ms,None);
++        assert_eq!(restored.ground_drops[&701].drop.loot,GroundDropLootSnapshot::Gold{amount:25});
++        fixture["ground_drops"]["701"]["drop"]["loot"]["amount"]=serde_json::json!(26);
++        assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&fixture).unwrap()).unwrap_err().contains("state root mismatch"));
++    }
++
++    #[test]
++    fn new_online_metadata_is_integrity_bound_but_cold_decode_never_grants_authority() {
++        let mut runtime=ZoneRuntime::new(ZoneKey::for_map("cold-native-policy"));
++        runtime.handle(ZoneCommand::Join(ZoneJoin{session_id:SessionId::new("original-online"),
++            account_id:"original-account".into(),character_index:1,object_id:501,name:"Owner".into(),
++            class:MirClass::Warrior,gender:MirGender::Male,level:20,hp:100,max_hp:100,mp:0,
++            map_file_name:"cold-native-policy".into(),position:Point{x:11,y:34},direction:MirDirection::Right,
++            chat_profile:Default::default(),combat_stats:Default::default()}));
++        let mut drop=checkpoint_gold_drop(702); drop.owner_object_id=Some(501);
++        let mut stored=runtime.new_zone_ground_drop(drop,Some(60_100)).unwrap();
++        stored.native_owner=runtime.bind_native_ground_owner(501,100);
++        runtime.ground_drops.insert(702,stored);
++        let bytes=runtime.checkpoint_bytes().unwrap();
++        let restored=ZoneRuntime::restore_checkpoint(&bytes).unwrap();
++        assert!(restored.online_presence.is_empty());
++        assert_eq!(restored.ground_drops[&702].owner_expires_at_ms,None);
++        assert_eq!(restored.ground_drops[&702].drop.owner_object_id,Some(501),"immutable loot identity remains");
++        let mut changed:serde_json::Value=serde_json::from_slice(&bytes).unwrap();
++        changed["ground_drops"]["702"]["native_owner"]["owner"]["epoch"]=serde_json::json!(99);
++        assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed).unwrap()).unwrap_err().contains("state root mismatch"));
++    }
++
+     fn checkpoint_gold_drop(object_id: u32) -> GroundDropSnapshot {
+         GroundDropSnapshot {
+             object_id,
+@@ -986,6 +1095,7 @@ mod tests {
+                 session_id: SessionId::new("legacy-claimer"),
+                 drop: claimed,
+                 ticket: None,
++                custody: None,
+             },
+         );
+         let legacy_root = runtime
+@@ -1122,6 +1232,7 @@ mod tests {
+                 session_id: claim_session_id,
+                 drop: claimed_snapshot.clone(),
+                 ticket: Some(ticket),
++                custody: None,
+             },
+         );
+ 
+@@ -1198,6 +1309,7 @@ mod tests {
+                 session_id: session_id.clone(),
+                 drop: claimed_snapshot,
+                 ticket: Some(legacy_ticket.clone()),
++                custody: None,
+             },
+         );
+         let legacy_root = runtime
+@@ -1420,12 +1532,24 @@ mod tests {
+ 
+         let expected_root = runtime.canonical_state_root().expect("state root");
+         let bytes = runtime.checkpoint_bytes().expect("checkpoint bytes");
++        let saved: ZoneRuntimeCheckpoint = serde_json::from_slice(&bytes).expect("saved state");
++        assert_eq!(saved.state_root, expected_root, "original checkpoint is authenticated before cold revocation");
++        assert!(saved.online_presence.as_ref().unwrap().contains_key(&session_id));
++        let mut tampered = saved.clone();
++        tampered.players.get_mut(&session_id).unwrap().hp += 1;
++        assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&tampered).unwrap())
++            .unwrap_err().contains("state root mismatch"));
+         let mut restored = ZoneRuntime::restore_checkpoint(&bytes).expect("checkpoint restore");
+ 
+-        assert_eq!(
++        assert_ne!(
+             restored.canonical_state_root().expect("restored root"),
+             expected_root
+         );
++        assert!(restored.online_presence.is_empty());
++        assert!(restored.issued_native_monster_awards.is_empty());
++        assert_eq!(serde_json::to_value(&restored.players).unwrap(), serde_json::to_value(&saved.players).unwrap(),
++            "cold revocation must retain the complete authoritative player payload");
++        assert_eq!(serde_json::to_value(&restored.hazard).unwrap(), serde_json::to_value(&saved.hazard).unwrap());
+         assert_eq!(
+             restored.player_position(&session_id),
+             Some(Point { x: 14, y: 27 })
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
+index 434758c8e..393243ac7 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
+@@ -1,6 +1,4 @@
+-//! Ordinary same-map Crystal EXPOwner. Damage actor, reward owner, and pet
+-//! master are distinct identities. Online cross-map references belong to the
+-//! manager follow-up; this module does not turn a personal Session into world.
++//! Crystal EXPOwner under one manager's global online Node lifetime.
+ use super::*;
+ use crate::runtime::zone::types::ZoneExperienceOwner;
+ 
+@@ -21,24 +19,98 @@ pub(super) struct NativeExperienceImpact {
+     current_owner_mismatched: bool,
+ }
+ 
+-fn matches_player(owner: &ZoneExperienceOwner, player: &ZonePlayer) -> bool {
+-    owner.session_id == player.session_id
+-        && owner.account_id == player.account_id
+-        && owner.character_index == player.character_index
+-        && owner.object_id == player.object_id
+-}
+-
+-fn claimant(player: &ZonePlayer, now_ms: u64) -> ZoneExperienceOwner {
++fn claimant(player: &ZonePlayer, online_owner: Option<OnlineOwner>, now_ms: u64) -> ZoneExperienceOwner {
+     ZoneExperienceOwner {
+         session_id: player.session_id.clone(),
+         account_id: player.account_id.clone(),
+         character_index: player.character_index,
+         object_id: player.object_id,
+         expires_at_ms: now_ms.saturating_add(EXPERIENCE_OWNER_DELAY_MS),
++        online_owner,
+     }
+ }
+ 
+ impl ZoneRuntime {
++    pub(crate) fn online_player_snapshot(&self, book: &OnlineIdentityBook) -> OnlinePresenceSnapshot {
++        self.players.iter().filter_map(|(sid, player)| {
++            let owner = book.owner(sid).filter(|owner|owner.matches_player(player))?.clone();
++            Some((sid.clone(), OnlinePresence { owner, key: self.key.clone(), dead: player.dead,
++                name: player.name.clone(), group_members: player.chat_profile.group_members.clone() }))
++        }).collect()
++    }
++    pub(super) fn refresh_local_online_presence(&mut self) {
++        if !self.managed_online_identity {
++            let snapshot = self.online_player_snapshot(&self.local_online_identities);
++            self.ingest_online_presence(snapshot, false);
++        }
++    }
++    pub(crate) fn ingest_online_presence(&mut self, snapshot: OnlinePresenceSnapshot, managed: bool) {
++        self.online_presence = snapshot;
++        self.managed_online_identity = managed;
++        for monster in self.native_monsters.values_mut() {
++            if monster.experience_owner.as_ref().is_some_and(|owner|
++                owner.online_owner.as_ref().is_none_or(|proof|self.online_presence.get(&proof.session_id)
++                    .is_none_or(|presence|presence.owner != *proof))) {
++                monster.experience_owner = None;
++            }
++            if monster.damage_poison_owner_session_id.as_ref().is_some_and(|sid|
++                self.online_presence.get(sid).is_none_or(|p|p.owner.object_id != monster.damage_poison_owner_object_id)) {
++                monster.damage_poison_owner_session_id = None;
++                monster.damage_poison_owner_object_id = 0;
++            }
++        }
++        for stored in self.ground_drops.values_mut() {
++            if stored.native_owner.as_ref().is_some_and(|owner|
++                self.online_presence.get(&owner.owner.session_id).is_none_or(|p|p.owner != owner.owner)) {
++                stored.owner_expires_at_ms = None;
++                stored.drop.ownership_remaining_ticks = None;
++            }
++        }
++    }
++    pub(crate) fn revoke_online_session(&mut self, session_id: &SessionId) {
++        self.online_presence.remove(session_id);
++        self.issued_native_monster_awards.retain(|_, owner| &owner.session_id != session_id);
++        // Clear historical poison before a reused session/object can be admitted.
++        for monster in self.native_monsters.values_mut() {
++            if monster.experience_owner.as_ref().is_some_and(|o|&o.session_id == session_id) {
++                monster.experience_owner = None;
++            }
++            if monster.damage_poison_owner_session_id.as_ref() == Some(session_id) {
++                monster.damage_poison_owner_session_id = None;
++                monster.damage_poison_owner_object_id = 0;
++            }
++        }
++        self.pending_native_hits.retain(|hit|&hit.session_id != session_id);
++        let snapshot = self.online_presence.clone();
++        self.ingest_online_presence(snapshot, self.managed_online_identity);
++    }
++    pub(crate) fn clear_online_authority(&mut self) {
++        self.issued_native_monster_awards.clear();
++        for monster in self.native_monsters.values_mut() {
++            monster.experience_owner = None;
++            monster.damage_poison_owner_session_id = None;
++            monster.damage_poison_owner_object_id = 0;
++        }
++        self.ingest_online_presence(BTreeMap::new(), self.managed_online_identity);
++        // Legacy owner ids never authenticate a fresh spawned Node either.
++        // This does not add an owner to manual/player-death loot.
++        for stored in self.ground_drops.values_mut().filter(|s|s.drop.owner_object_id.is_some()) {
++            stored.owner_expires_at_ms = None;
++            stored.drop.ownership_remaining_ticks = None;
++        }
++        self.local_online_identities = OnlineIdentityBook::default();
++    }
++    fn player_claimant(&self, player: &ZonePlayer, now_ms: u64) -> Option<ZoneExperienceOwner> {
++        let owner = self.online_presence.get(&player.session_id)
++            .filter(|p|p.owner.matches_player(player))?.owner.clone();
++        Some(claimant(player, Some(owner), now_ms))
++    }
++    fn online_claimant(&self, session_id: &SessionId, object_id: u32, now_ms: u64) -> Option<ZoneExperienceOwner> {
++        let owner = &self.online_presence.get(session_id).filter(|p|p.owner.object_id == object_id)?.owner;
++        Some(ZoneExperienceOwner { session_id: owner.session_id.clone(), account_id: owner.account_id.clone(),
++            character_index: owner.character_index, object_id: owner.object_id,
++            expires_at_ms: now_ms.saturating_add(EXPERIENCE_OWNER_DELAY_MS), online_owner: Some(owner.clone()) })
++    }
+     pub(super) fn native_experience_impact(
+         &self,
+         target_id: u32,
+@@ -50,14 +122,14 @@ impl ZoneRuntime {
+             .native_monsters
+             .get(&target_id)
+             .and_then(|m| m.experience_owner.as_ref());
+-        let old_player = old.and_then(|o| self.players.get(&o.session_id).map(|p| (o, p)));
++        let old_player = old.and_then(|o| self.online_presence.get(&o.session_id).map(|p| (o, p)));
+         let mut impact = NativeExperienceImpact {
+             claimant: None,
+             clears_owner: false,
+             force_owner: false,
+             current_owner_dead: old_player
+-                .is_some_and(|(o, p)| matches_player(o, p) && (p.dead || p.hp <= 0)),
+-            current_owner_mismatched: old_player.is_some_and(|(o, p)| !matches_player(o, p)),
++                .is_some_and(|(o, p)| o.online_owner.as_ref() == Some(&p.owner) && p.dead),
++            current_owner_mismatched: old.is_some_and(|o|o.online_owner.as_ref().is_none_or(|proof|!self.online_owner_current(proof))),
+         };
+         match actor {
+             Some(NativeExperienceActor::Object {
+@@ -83,7 +155,7 @@ impl ZoneRuntime {
+                                 MASTER_CREDIT_RANGE,
+                             )
+                         }) {
+-                            impact.claimant = Some(claimant(master, now_ms));
++                            impact.claimant = self.player_claimant(master, now_ms);
+                         } else {
+                             // One Zone implies the same map. Missing/different
+                             // master or out-of-range pet still applies damage.
+@@ -94,26 +166,21 @@ impl ZoneRuntime {
+                     .and_then(|sid| self.players.get(sid))
+                     .filter(|p| p.object_id == object_id)
+                 {
+-                    impact.claimant = Some(claimant(player, now_ms));
++                    impact.claimant = self.player_claimant(player, now_ms);
+                     impact.force_owner = force_owner;
+                 }
+             }
+             Some(NativeExperienceActor::PeriodicPoison { owner_object_id }) => {
+                 // Source periodic poison renews before PoisonDamage and does
+                 // not reject a dead owner that remains a spawned object.
+-                if let Some(player) = session_id
+-                    .and_then(|sid| self.players.get(sid))
+-                    .filter(|p| p.object_id == owner_object_id)
+-                {
+-                    impact.claimant = Some(claimant(player, now_ms));
+-                }
++                impact.claimant = session_id.and_then(|sid|self.online_claimant(sid, owner_object_id, now_ms));
+             }
+             None => {
+                 // Internal player spells and scripted special-AI trackers use
+                 // their trusted acting session; no target ID invents credit.
+                 impact.claimant = session_id
+                     .and_then(|sid| self.players.get(sid))
+-                    .map(|p| claimant(p, now_ms));
++                    .and_then(|p| self.player_claimant(p, now_ms));
+             }
+         }
+         impact
+@@ -133,9 +200,7 @@ impl ZoneRuntime {
+             return None;
+         }
+         // No alive gate here: MonsterObject.Die permits a spawned dead owner.
+-        self.players
+-            .get(&owner.session_id)
+-            .filter(|p| matches_player(owner, p))
++        owner.online_owner.as_ref().filter(|proof|self.online_owner_current(proof))
+             .map(|_| owner.session_id.clone())
+     }
+ 
+@@ -198,7 +263,7 @@ impl ZoneRuntime {
+         {
+             return Vec::new();
+         }
+-        let Some(owner_object_id) = self.players.get(&owner_session_id).map(|p| p.object_id) else {
++        let Some(owner_object_id) = self.online_presence.get(&owner_session_id).map(|p| p.owner.object_id) else {
+             return Vec::new();
+         };
+         award.drops = self.spawn_native_monster_drops(
+@@ -242,6 +307,7 @@ pub(super) fn apply_native_experience_impact(
+             && old.account_id == new_owner.account_id
+             && old.character_index == new_owner.character_index
+             && old.object_id == new_owner.object_id
++            && old.online_owner == new_owner.online_owner
+     }) {
+         monster.experience_owner.as_mut().unwrap().expires_at_ms = new_owner.expires_at_ms;
+     }
+@@ -466,7 +532,7 @@ mod tests {
+         assert_eq!(restored.native_monsters[&201].hp, 80);
+         let reanchored: serde_json::Value =
+             serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
+-        assert_eq!(reanchored["version"], 5);
++        assert_eq!(reanchored["version"], 6);
+         assert!(reanchored["native_monsters"]["201"]
+             .get("experience_owner")
+             .is_none());
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/types.rs b/mir2-web3/apps/simulation/src/runtime/zone/types.rs
+index 57538d219..063efb022 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/types.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/types.rs
+@@ -780,6 +780,14 @@ pub enum ZoneOutbound {
+         session_id: SessionId,
+         award: ZoneMonsterKillAward,
+     },
++    /// Server-only envelope. No client packet accepts this proof; the manager
++    /// validates its typed online Node identity again at live delivery.
++    OwnedMonsterKillAward {
++        session_id: SessionId,
++        source: ZoneKey,
++        online_owner: String,
++        award: ZoneMonsterKillAward,
++    },
+     MagicPractice {
+         receipt: ZoneMagicPracticeReceipt,
+     },
+@@ -971,6 +979,8 @@ pub(crate) struct ZoneGroundDrop {
+     pub drop_generation: u64,
+     #[serde(default)]
+     pub payload_digest: String,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub native_owner: Option<NativeGroundOwner>,
+ }
+ 
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+@@ -979,6 +989,33 @@ pub(crate) struct ZoneGroundDropClaim {
+     pub drop: GroundDropSnapshot,
+     #[serde(default)]
+     pub ticket: Option<GroundDropClaimTicket>,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub custody: Option<ZoneGroundDropCustody>,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub(crate) struct NativeGroundOwner {
++    pub owner: super::online_identity::OnlineOwner,
++    pub source: ZoneKey,
++    pub born_at_ms: u64,
++    pub expires_at_ms: u64,
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub(crate) struct ZoneGroundDropCustody {
++    pub source: ZoneKey,
++    pub object_id: u32,
++    pub drop_generation: u64,
++    pub payload_digest: String,
++    pub owner_expires_at_ms: Option<u64>,
++    pub native_owner: Option<NativeGroundOwner>,
++    pub object_expires_at_ms: Option<u64>,
++}
++impl ZoneGroundDropCustody {
++    pub fn matches(&self, key: &ZoneKey, ticket: &GroundDropClaimTicket) -> bool {
++        &self.source == key && self.object_id == ticket.object_id
++            && self.drop_generation == ticket.drop_generation && self.payload_digest == ticket.payload_digest
++    }
+ }
+ 
+ /// Authoritative internal capability for a ground-drop claim. This type is
+@@ -1005,6 +1042,8 @@ pub(crate) struct ZoneExperienceOwner {
+     pub character_index: i32,
+     pub object_id: u32,
+     pub expires_at_ms: u64,
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub online_owner: Option<super::online_identity::OnlineOwner>,
+ }
+ 
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+diff --git a/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs b/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs
+index 49703f3bf..5ef165963 100644
+--- a/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs
++++ b/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs
+@@ -446,18 +446,52 @@ fn successful_turn_undead_forces_caster_ownership() {
+ }
+ 
+ #[test]
+-fn authenticated_checkpoint_retains_owner_without_extending_deadline() {
++fn authenticated_cold_checkpoint_preserves_state_but_revokes_live_owner() {
+     let mut zone = fixture(100);
+     melee(&mut zone, "a", 20, 200);
+     let bytes = zone.checkpoint_bytes().unwrap();
+-    let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
++    let saved: Value = serde_json::from_slice(&bytes).unwrap();
+     assert_eq!(
+-        restored.canonical_state_root().unwrap(),
++        saved["state_root"],
+         zone.canonical_state_root().unwrap()
+     );
+-    award(&melee(&mut restored, "b", 80, 5_200), "a", 101);
+-    let mut expired = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
+-    award(&melee(&mut expired, "b", 80, 5_201), "b", 102);
++    let mut expected_monster = saved["native_monsters"][MONSTER.to_string()].clone();
++    assert_eq!(expected_monster["hp"], 80);
++    assert_eq!(expected_monster["experience_owner"]["expires_at_ms"], 5_200);
++    let old_owner = expected_monster["experience_owner"]["online_owner"].clone();
++    assert_eq!(old_owner, saved["online_presence"]["a"]["owner"]);
++    expected_monster.as_object_mut().unwrap().remove("experience_owner");
++    for path in ["hp", "experience"] {
++        let mut changed = saved.clone();
++        changed["native_monsters"][MONSTER.to_string()][path] = json!(999);
++        assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed).unwrap())
++            .unwrap_err().contains("state root mismatch"));
++    }
++    let mut changed_owner = saved.clone();
++    changed_owner["native_monsters"][MONSTER.to_string()]["experience_owner"]["online_owner"]["epoch"] = json!(999);
++    assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&changed_owner).unwrap())
++        .unwrap_err().contains("state root mismatch"));
++
++    for at in [5_200, 5_201] {
++        let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
++        let cold: Value = serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
++        assert_ne!(cold["state_root"], saved["state_root"], "cold live authority was cleared");
++        assert_eq!(cold["online_presence"], json!({}));
++        assert_eq!(cold["issued_native_monster_awards"], json!({}));
++        assert_eq!(cold["players"], saved["players"], "complete player payload is retained");
++        assert_eq!(checkpoint_monster(&restored), expected_monster,
++            "all monster payload and original absolute clocks survive except revoked EXPOwner");
++        for (name, id, position) in [("a", 101, point(9, 10)), ("b", 102, point(10, 11))] {
++            restored.handle(ZoneCommand::Join(join(name, id, position, MirClass::Warrior)));
++            admit(&mut restored, name, MirClass::Warrior);
++        }
++        let rejoined: Value = serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
++        assert_ne!(rejoined["online_presence"]["a"]["owner"], old_owner);
++        assert!(checkpoint_monster(&restored).get("experience_owner").is_none());
++        let killed = melee(&mut restored, "b", 80, at);
++        assert_eq!(damage(&killed), 80, "B earns the kill by its own positive damage");
++        award(&killed, "b", 102);
++    }
+ }
+ 
+ #[test]
+@@ -480,6 +514,8 @@ fn fresh_same_map_join_revokes_old_claim_and_old_poison_identity() {
+     let mut zone = taoist_fixture(100);
+     melee(&mut zone, "a", 20, 100);
+     taoist_poison(&mut zone, 700);
++    let before = checkpoint_monster(&zone);
++    let old: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
+     zone.handle(ZoneCommand::Leave {
+         session_id: sid("a"),
+     });
+@@ -494,13 +530,44 @@ fn fresh_same_map_join_revokes_old_claim_and_old_poison_identity() {
+         "fresh Join cannot inherit a former spawned owner"
+     );
+     assert_eq!(state["damage_poison_owner_object_id"], 0);
+-    assert_eq!(state["damage_poison_value"], 0);
++    assert!(state["damage_poison_owner_session_id"].is_null());
++    for field in ["damage_poison", "damage_poison_value", "damage_poison_next_damage_at_ms", "damage_poison_expires_at_ms"] {
++        assert_eq!(state[field], before[field], "despawn revokes the caster but never rebases/erases active green poison: {field}");
++    }
++    assert_eq!(state["damage_poison_value"], 3);
++    let fresh: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    assert_ne!(fresh["online_presence"]["a"]["owner"], old["online_presence"]["a"]["owner"]);
+     let killed = melee(&mut zone, "b", 80, 800);
++    assert_eq!(damage(&killed), 80, "B must deal its own positive killing damage");
+     award(&killed, "b", 102);
+     assert!(!zone
+         .tick(2_700)
+         .iter()
+         .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })));
++
++    // Reusing every durable id still creates a fresh Node. Let the old green
++    // poison actually kill, proving neither old nor replacement epoch is paid.
++    let mut poisoned = taoist_fixture(3);
++    taoist_poison(&mut poisoned, 700);
++    let before = checkpoint_monster(&poisoned);
++    let old: Value = serde_json::from_slice(&poisoned.checkpoint_bytes().unwrap()).unwrap();
++    assert_eq!(before["hp"], 3);
++    poisoned.handle(ZoneCommand::Leave { session_id: sid("a") });
++    poisoned.handle(ZoneCommand::Join(join("a", 101, point(9, 10), MirClass::Taoist)));
++    admit(&mut poisoned, "a", MirClass::Taoist);
++    let fresh: Value = serde_json::from_slice(&poisoned.checkpoint_bytes().unwrap()).unwrap();
++    assert_ne!(fresh["online_presence"]["a"]["owner"], old["online_presence"]["a"]["owner"]);
++    let state = checkpoint_monster(&poisoned);
++    for field in ["damage_poison", "damage_poison_value", "damage_poison_next_damage_at_ms", "damage_poison_expires_at_ms"] {
++        assert_eq!(state[field], before[field], "fresh Join must not restart poison: {field}");
++    }
++    let killed = poisoned.tick(2_700);
++    assert_eq!(damage(&killed), 3);
++    assert_eq!(checkpoint_monster(&poisoned)["hp"], 0);
++    assert!(checkpoint_monster(&poisoned)["experience_owner"].is_null());
++    assert!(!killed.iter().any(|o| matches!(o,
++        ZoneOutbound::MonsterKillAward { .. } | ZoneOutbound::OwnedMonsterKillAward { .. })),
++        "the old poison effect cannot reward either revoked epoch or fresh epoch");
+ }
+ 
+ #[test]
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/online_identity.rs b/mir2-web3/apps/simulation/src/runtime/zone/online_identity.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/src/runtime/zone/online_identity.rs
+@@ -0,0 +1,136 @@
++//! Server-owned counterpart of Crystal's spawned global MapObject.Node.
++//! Membership, combat life, transport credentials and this identity are distinct.
++use super::types::{SessionId, ZoneJoin, ZoneKey, ZonePlayer};
++use rand_core::{OsRng, RngCore};
++use serde::{Deserialize, Serialize};
++use std::collections::BTreeMap;
++
++#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
++#[serde(deny_unknown_fields)]
++pub(crate) struct OnlineOwner {
++    pub namespace: String,
++    pub epoch: u64,
++    pub session_id: SessionId,
++    pub account_id: String,
++    pub character_index: i32,
++    pub object_id: u32,
++}
++impl OnlineOwner {
++    pub fn matches_join(&self, join: &ZoneJoin) -> bool {
++        self.session_id == join.session_id
++            && self.account_id == join.account_id
++            && self.character_index == join.character_index
++            && self.object_id == join.object_id
++    }
++    pub fn matches_player(&self, player: &ZonePlayer) -> bool {
++        self.session_id == player.session_id
++            && self.account_id == player.account_id
++            && self.character_index == player.character_index
++            && self.object_id == player.object_id
++    }
++    pub fn encoded(&self) -> String {
++        serde_json::to_string(self).expect("online identity encodes")
++    }
++}
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub(crate) struct OnlinePresence {
++    pub owner: OnlineOwner,
++    pub key: ZoneKey,
++    pub dead: bool,
++    pub name: String,
++    pub group_members: Vec<String>,
++}
++pub(crate) type OnlinePresenceSnapshot = BTreeMap<SessionId, OnlinePresence>;
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++pub(crate) struct OnlineIdentityBook {
++    namespace: String,
++    next_epoch: u64,
++    owners: BTreeMap<SessionId, OnlineOwner>,
++}
++impl Default for OnlineIdentityBook {
++    fn default() -> Self {
++        let mut bytes = [0_u8; 16];
++        OsRng.fill_bytes(&mut bytes);
++        Self {
++            namespace: bytes.iter().map(|b| format!("{b:02x}")).collect(),
++            next_epoch: 1,
++            owners: BTreeMap::new(),
++        }
++    }
++}
++impl OnlineIdentityBook {
++    pub fn admit(&mut self, join: &ZoneJoin, retain: bool) -> Option<OnlineOwner> {
++        if retain {
++            if let Some(owner) = self
++                .owners
++                .get(&join.session_id)
++                .filter(|o| o.matches_join(join))
++            {
++                return Some(owner.clone());
++            }
++        }
++        let epoch = self.next_epoch;
++        self.next_epoch = epoch.checked_add(1)?;
++        let owner = OnlineOwner {
++            namespace: self.namespace.clone(),
++            epoch,
++            session_id: join.session_id.clone(),
++            account_id: join.account_id.clone(),
++            character_index: join.character_index,
++            object_id: join.object_id,
++        };
++        self.owners.insert(join.session_id.clone(), owner.clone());
++        Some(owner)
++    }
++    pub fn revoke(&mut self, session_id: &SessionId) {
++        self.owners.remove(session_id);
++    }
++    pub fn owner(&self, session_id: &SessionId) -> Option<&OnlineOwner> {
++        self.owners.get(session_id)
++    }
++    pub fn validates_encoded(&self, encoded: &str) -> bool {
++        serde_json::from_str::<OnlineOwner>(encoded)
++            .ok()
++            .is_some_and(|owner| self.owner(&owner.session_id) == Some(&owner))
++    }
++    pub fn validates_for_session(&self, encoded: &str, session_id: &SessionId) -> bool {
++        serde_json::from_str::<OnlineOwner>(encoded)
++            .ok()
++            .is_some_and(|owner| {
++                &owner.session_id == session_id && self.owner(session_id) == Some(&owner)
++            })
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn online_epoch_exhaustion_fails_closed_without_recycling() {
++        let mut book = OnlineIdentityBook::default();
++        book.next_epoch = u64::MAX;
++        let join = ZoneJoin {
++            session_id: SessionId::new("exhausted"),
++            account_id: "account".into(),
++            character_index: 0,
++            object_id: 1,
++            name: "character".into(),
++            class: mir2_protocol::MirClass::Warrior,
++            gender: mir2_protocol::MirGender::Male,
++            level: 1,
++            hp: 10,
++            max_hp: 10,
++            mp: 0,
++            map_file_name: "0".into(),
++            position: mir2_protocol::Point { x: 1, y: 1 },
++            direction: mir2_protocol::MirDirection::Up,
++            chat_profile: Default::default(),
++            combat_stats: Default::default(),
++        };
++        assert!(book.admit(&join, false).is_none());
++        assert!(book.owners.is_empty());
++        assert_eq!(book.next_epoch, u64::MAX);
++    }
++}
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/ground_ownership.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/ground_ownership.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/ground_ownership.rs
+@@ -0,0 +1,177 @@
++//! Crystal-owned monster loot clocks. A countdown is only a projection.
++use super::*;
++use crate::runtime::zone::online_identity::OnlineOwner;
++use crate::runtime::zone::types::{NativeGroundOwner, ZoneGroundDropCustody};
++
++pub(super) const ORIGINAL_MONSTER_ITEM_OWNER_MS: u64 = 60_000;
++
++impl ZoneRuntime {
++    pub(crate) fn active_ground_drop_snapshot(&self, object_id: u32) -> Option<GroundDropSnapshot> {
++        Some(self.ground_drops.get(&object_id)?.drop.clone())
++    }
++    pub(crate) fn ground_drop_absolute_clocks(
++        &self,
++        object_id: u32,
++    ) -> Option<(Option<u64>, Option<u64>)> {
++        if let Some(drop) = self.ground_drops.get(&object_id) {
++            return Some((
++                drop.owner_expires_at_ms,
++                self.objects.get(&object_id).and_then(|o| o.expires_at_ms),
++            ));
++        }
++        self.claimed_ground_drops
++            .get(&object_id)
++            .and_then(|c| c.custody.as_ref())
++            .or_else(|| self.detached_ground_drop_custody.get(&object_id))
++            .map(|c| (c.owner_expires_at_ms, c.object_expires_at_ms))
++    }
++    pub(super) fn validate_native_ground_custody(&self) -> Result<(), String> {
++        let valid_native = |native: &NativeGroundOwner| {
++            native.source == self.key
++                && native.owner.epoch > 0
++                && native.owner.namespace.len() == 32
++                && native.expires_at_ms
++                    == native
++                        .born_at_ms
++                        .saturating_add(ORIGINAL_MONSTER_ITEM_OWNER_MS)
++        };
++        for (id, stored) in &self.ground_drops {
++            if stored.native_owner.as_ref().is_some_and(|native| {
++                !valid_native(native)
++                    || stored.drop.owner_object_id != Some(native.owner.object_id)
++                    || stored
++                        .owner_expires_at_ms
++                        .is_some_and(|t| t != native.expires_at_ms)
++            }) {
++                return Err(format!("invalid native ground ownership {id}"));
++            }
++        }
++        for (id, claim) in &self.claimed_ground_drops {
++            if claim.custody.as_ref().is_some_and(|c| {
++                claim
++                    .ticket
++                    .as_ref()
++                    .is_none_or(|t| !c.matches(&self.key, t))
++                    || c.native_owner.as_ref().is_some_and(|n| !valid_native(n))
++            }) {
++                return Err(format!("invalid ground claim custody {id}"));
++            }
++        }
++        for (id, custody) in &self.detached_ground_drop_custody {
++            if custody.source != self.key
++                || *id != custody.object_id
++                || !self.removed_object_ids.contains(id)
++                || self.ground_drops.contains_key(id)
++                || self.claimed_ground_drops.contains_key(id)
++                || custody.drop_generation == 0
++                || custody.payload_digest.is_empty()
++                || custody
++                    .native_owner
++                    .as_ref()
++                    .is_some_and(|n| !valid_native(n))
++            {
++                return Err(format!("invalid detached ground custody {id}"));
++            }
++        }
++        Ok(())
++    }
++    pub(crate) fn native_ground_drop_deadline(&self, object_id: u32) -> Option<Option<u64>> {
++        self.ground_drops
++            .get(&object_id)
++            .filter(|drop| drop.native_owner.is_some())
++            .map(|drop| drop.owner_expires_at_ms)
++    }
++
++    pub(super) fn bind_native_ground_owner(
++        &self,
++        owner_object_id: u32,
++        born_at_ms: u64,
++    ) -> Option<NativeGroundOwner> {
++        let owner = self
++            .online_presence
++            .values()
++            .find(|p| p.owner.object_id == owner_object_id)?
++            .owner
++            .clone();
++        Some(NativeGroundOwner {
++            owner,
++            source: self.key.clone(),
++            born_at_ms,
++            expires_at_ms: born_at_ms.saturating_add(ORIGINAL_MONSTER_ITEM_OWNER_MS),
++        })
++    }
++
++    pub(super) fn online_owner_current(&self, owner: &OnlineOwner) -> bool {
++        self.online_presence
++            .get(&owner.session_id)
++            .is_some_and(|p| p.owner == *owner)
++    }
++
++    pub(super) fn capture_ground_drop_custody(
++        &self,
++        stored: &ZoneGroundDrop,
++    ) -> ZoneGroundDropCustody {
++        ZoneGroundDropCustody {
++            source: self.key.clone(),
++            object_id: stored.drop.object_id,
++            drop_generation: stored.drop_generation,
++            payload_digest: stored.payload_digest.clone(),
++            owner_expires_at_ms: stored.owner_expires_at_ms,
++            native_owner: stored.native_owner.clone(),
++            object_expires_at_ms: self
++                .objects
++                .get(&stored.drop.object_id)
++                .and_then(|o| o.expires_at_ms),
++        }
++    }
++
++    pub(super) fn restore_ground_custody(
++        &mut self,
++        ticket: &GroundDropClaimTicket,
++        custody: Option<ZoneGroundDropCustody>,
++        now_ms: u64,
++    ) -> Option<Vec<ZoneOutbound>> {
++        if custody
++            .as_ref()
++            .is_some_and(|c| !c.matches(&self.key, ticket))
++        {
++            return None;
++        }
++        if custody
++            .as_ref()
++            .is_some_and(|c| c.object_expires_at_ms.is_some_and(|t| now_ms > t))
++        {
++            // The held item keeps its original TTL. A rejected claim cannot
++            // resurrect a ground object that would already have despawned.
++            self.removed_object_ids.insert(ticket.object_id);
++            return Some(Vec::new());
++        }
++        let native_owner = custody.as_ref().and_then(|c| c.native_owner.clone());
++        let deadline = custody.as_ref().and_then(|c| c.owner_expires_at_ms);
++        let mut drop = ticket.drop.clone();
++        let still_protected = native_owner
++            .as_ref()
++            .map(|o| self.online_owner_current(&o.owner) && now_ms <= o.expires_at_ms)
++            .unwrap_or_else(|| deadline.is_some_and(|t| now_ms < t));
++        if !still_protected {
++            drop.ownership_remaining_ticks = None;
++        }
++        self.ground_drops.insert(
++            ticket.object_id,
++            ZoneGroundDrop {
++                drop: drop.clone(),
++                drop_generation: ticket.drop_generation,
++                payload_digest: ticket.payload_digest.clone(),
++                owner_expires_at_ms: still_protected.then_some(deadline).flatten(),
++                native_owner,
++            },
++        );
++        self.apply_zone_object_packets(&[ground_drop_spawn_packet(&drop)], now_ms);
++        if let Some(custody) = custody {
++            if let Some(object) = self.objects.get_mut(&ticket.object_id) {
++                object.expires_at_ms = custody.object_expires_at_ms;
++            }
++        }
++        Some(self.diff_all_zone_object_visibility())
++    }
++}
+diff --git a/mir2-web3/apps/simulation/tests/shared_cross_map_drop_lifecycle.rs b/mir2-web3/apps/simulation/tests/shared_cross_map_drop_lifecycle.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/tests/shared_cross_map_drop_lifecycle.rs
+@@ -0,0 +1,649 @@
++//! Prepared shared-manager fixtures, not network/player-journey acceptance.
++//! Positive damage, ordinary Join/Leave and custody use public server commands.
++use mir2_protocol::{MirClass, MirDirection, MirGender, Point, Spell};
++use mir2_simulation::{
++    GroundDropClaimTicket, GroundDropLootSnapshot, GroundDropSnapshot, SessionId,
++    WorldEntityDisposition, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterKillAward,
++    ZoneMonsterSpawn, ZoneOutbound,
++};
++
++const SOURCE: &str = "cross-map-owner-source";
++const DEST: &str = "cross-map-owner-destination";
++const MONSTER: u32 = 90_101;
++fn sid(name: &str) -> SessionId {
++    SessionId::new(name)
++}
++fn point(x: i32, y: i32) -> Point {
++    Point { x, y }
++}
++fn join(name: &str, map: &str) -> ZoneJoin {
++    ZoneJoin {
++        session_id: sid(name),
++        account_id: format!("{name}-account"),
++        character_index: 0,
++        object_id: if name == "a" { 101 } else { 102 },
++        name: name.into(),
++        class: MirClass::Warrior,
++        gender: MirGender::Male,
++        level: 40,
++        hp: 100_000,
++        max_hp: 100_000,
++        mp: 100,
++        map_file_name: map.into(),
++        position: if name == "a" {
++            point(9, 10)
++        } else {
++            point(10, 11)
++        },
++        direction: MirDirection::Right,
++        chat_profile: Default::default(),
++        combat_stats: Default::default(),
++    }
++}
++fn admit(manager: &mut ZoneManager, name: &str, map: &str) {
++    manager.join(join(name, map));
++    manager.handle(ZoneCommand::sync_player_combat_state(
++        sid(name),
++        MirClass::Warrior,
++        true,
++        false,
++        false,
++        false,
++        false,
++        false,
++    ));
++}
++fn fixture() -> ZoneManager {
++    fixture_hp(100)
++}
++fn fixture_hp(hp: i32) -> ZoneManager {
++    let mut manager = ZoneManager::new();
++    admit(&mut manager, "a", SOURCE);
++    admit(&mut manager, "b", SOURCE);
++    manager.handle(ZoneCommand::SpawnMonster {
++        session_id: sid("a"),
++        now_ms: 0,
++        monster: ZoneMonsterSpawn {
++            crystal_drop_seed: None,
++            object_id: MONSTER,
++            name: "Skeleton".into(),
++            name_colour_argb: -1,
++            image: 3,
++            ai: 3,
++            disposition: Some(WorldEntityDisposition::Hostile),
++            level: 20,
++            hp,
++            max_hp: hp,
++            experience: 123,
++            move_speed_ms: 100_000,
++            attack_speed_ms: 100_000,
++            friendly_guild: None,
++            defense: Default::default(),
++            respawn: None,
++            position: point(10, 10),
++            direction: MirDirection::Down,
++            drops: vec![GroundDropSnapshot {
++                object_id: 0,
++                name: "Gold".into(),
++                name_colour_argb: -1,
++                icon: 0,
++                x: 0,
++                y: 0,
++                quantity: 7,
++                source_monster: "Skeleton".into(),
++                owner_object_id: None,
++                ownership_remaining_ticks: Some(60),
++                loot: GroundDropLootSnapshot::Gold { amount: 7 },
++            }],
++        },
++    });
++    manager
++}
++fn hit(manager: &mut ZoneManager, name: &str, damage: i32, now_ms: u64) -> Vec<ZoneOutbound> {
++    let mut out = manager.handle(ZoneCommand::PlayerAttackObject {
++        session_id: sid(name),
++        object_id: MONSTER,
++        direction: if name == "a" {
++            MirDirection::Right
++        } else {
++            MirDirection::Up
++        },
++        spell: 0,
++        level: 0,
++        attack_type: 0,
++        damage,
++        now_ms,
++    });
++    out.extend(manager.tick_all(now_ms));
++    out
++}
++fn awards(out: &[ZoneOutbound]) -> Vec<(&SessionId, &ZoneMonsterKillAward)> {
++    out.iter()
++        .filter_map(|event| match event {
++            ZoneOutbound::MonsterKillAward { session_id, award } => Some((session_id, award)),
++            ZoneOutbound::OwnedMonsterKillAward {
++                session_id, award, ..
++            } => Some((session_id, award)),
++            _ => None,
++        })
++        .collect()
++}
++fn kill(manager: &mut ZoneManager) -> GroundDropSnapshot {
++    let out = hit(manager, "a", 100, 100);
++    let awards = awards(&out);
++    assert_eq!(
++        awards.len(),
++        1,
++        "fixture must perform a real positive fatal impact: {out:?}"
++    );
++    assert_eq!(awards[0].1.experience, 123);
++    awards[0].1.drops[0].clone()
++}
++fn claim(
++    manager: &mut ZoneManager,
++    name: &str,
++    drop: &GroundDropSnapshot,
++    at: u64,
++) -> Option<GroundDropClaimTicket> {
++    manager
++        .handle(ZoneCommand::ClaimGroundDrop {
++            session_id: sid(name),
++            object_id: Some(drop.object_id),
++            target: point(drop.x, drop.y),
++            group_members: vec![],
++            now_ms: at,
++        })
++        .into_iter()
++        .find_map(|event| match event {
++            ZoneOutbound::GroundDropClaimedWithTicket { ticket, .. } => Some(ticket),
++            _ => None,
++        })
++}
++
++#[test]
++fn owner_cross_map_retains_experience_and_source_drop() {
++    let mut manager = fixture();
++    assert!(awards(&hit(&mut manager, "a", 20, 100)).is_empty());
++    admit(&mut manager, "a", DEST);
++    let out = hit(&mut manager, "b", 80, 1_100);
++    let awarded = awards(&out);
++    assert_eq!(
++        awarded.len(),
++        1,
++        "ordinary death emits one owner award: {out:?}"
++    );
++    assert_eq!(
++        awarded[0].0,
++        &sid("a"),
++        "map membership must not despawn Crystal EXPOwner"
++    );
++    assert_eq!(awarded[0].1.drops[0].owner_object_id, Some(101));
++    assert_eq!(
++        manager
++            .zone(&ZoneKey::for_map(SOURCE))
++            .unwrap()
++            .ground_drop_count(),
++        1
++    );
++    assert_eq!(
++        manager
++            .zone(&ZoneKey::for_map(DEST))
++            .unwrap()
++            .ground_drop_count(),
++        0
++    );
++}
++
++#[test]
++fn owner_return_to_source_does_not_revoke_claim() {
++    let mut manager = fixture();
++    hit(&mut manager, "a", 20, 100);
++    admit(&mut manager, "a", DEST);
++    admit(&mut manager, "a", SOURCE);
++    let out = hit(&mut manager, "b", 80, 1_100);
++    let awarded = awards(&out);
++    assert_eq!(awarded.len(), 1);
++    assert_eq!(
++        awarded[0].0,
++        &sid("a"),
++        "return Join is membership, not a new spawned owner"
++    );
++}
++
++#[test]
++fn owned_native_drop_has_strict_original_one_minute_boundary() {
++    for (at, open) in [(60_099, false), (60_100, false), (60_101, true)] {
++        let mut manager = fixture();
++        let drop = kill(&mut manager);
++        assert_eq!(
++            claim(&mut manager, "b", &drop, at).is_some(),
++            open,
++            "owned native monster ItemOwner expires strictly after killedAt+60000, at={at}"
++        );
++    }
++}
++
++#[test]
++fn repeated_sync_does_not_restart_original_protection() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    manager.handle(ZoneCommand::SyncGroundDrops {
++        session_id: sid("a"),
++        drops: vec![drop.clone()],
++        now_ms: 50_000,
++    });
++    assert!(
++        claim(&mut manager, "b", &drop, 60_101).is_some(),
++        "sync is projection, not a new birth"
++    );
++}
++
++#[test]
++fn cancelled_claim_does_not_restart_original_protection() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    let ticket = claim(&mut manager, "a", &drop, 15_000).expect("actual owner can reserve drop");
++    manager.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
++        session_id: sid("a"),
++        ticket,
++        now_ms: 50_000,
++    });
++    assert!(
++        claim(&mut manager, "b", &drop, 60_101).is_some(),
++        "rollback must retain original birth"
++    );
++}
++
++#[test]
++fn true_leave_from_other_map_releases_original_ground_owner() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    admit(&mut manager, "a", DEST);
++    manager.handle(ZoneCommand::Leave {
++        session_id: sid("a"),
++    });
++    assert!(
++        claim(&mut manager, "b", &drop, 1_000).is_some(),
++        "global Node despawn releases source ItemOwner"
++    );
++}
++
++#[test]
++fn fresh_join_cannot_inherit_old_epoch_even_with_reused_ids() {
++    let mut manager = fixture();
++    hit(&mut manager, "a", 20, 100);
++    admit(&mut manager, "a", DEST);
++    let old = manager.online_owner_proof_for_session(&sid("a")).unwrap();
++    manager.handle(ZoneCommand::Leave {
++        session_id: sid("a"),
++    });
++    admit(&mut manager, "a", SOURCE);
++    let new = manager.online_owner_proof_for_session(&sid("a")).unwrap();
++    assert_ne!(old, new);
++    assert!(!manager.online_owner_proof_is_current(&old));
++    let out = hit(&mut manager, "b", 80, 1_100);
++    assert_eq!(awards(&out)[0].0, &sid("b"));
++}
++
++#[test]
++fn encoded_owner_binds_manager_epoch_account_character_object_and_session() {
++    let manager = fixture();
++    let original = manager.online_owner_proof_for_session(&sid("a")).unwrap();
++    assert!(manager.online_owner_proof_matches_session(&original, &sid("a")));
++    assert!(!manager.online_owner_proof_matches_session(&original, &sid("b")));
++    for (field, value) in [
++        ("namespace", serde_json::json!("forged")),
++        ("epoch", serde_json::json!(999)),
++        ("account_id", serde_json::json!("b-account")),
++        ("character_index", serde_json::json!(1)),
++        ("object_id", serde_json::json!(102)),
++        ("session_id", serde_json::json!("b")),
++        ("unknown_authority", serde_json::json!(true)),
++    ] {
++        let mut forged: serde_json::Value = serde_json::from_str(&original).unwrap();
++        forged[field] = value;
++        assert!(
++            !manager.online_owner_proof_is_current(&forged.to_string()),
++            "accepted forged {field}"
++        );
++    }
++    assert!(
++        !fixture().online_owner_proof_is_current(&original),
++        "another manager is another Node namespace"
++    );
++}
++
++#[test]
++fn strict_expiration_can_be_renewed_only_by_source_legal_current_owner() {
++    for (at, expected) in [(5_100, "a"), (5_101, "b")] {
++        let mut manager = fixture();
++        hit(&mut manager, "a", 20, 100);
++        admit(&mut manager, "a", DEST);
++        let out = hit(&mut manager, "b", 80, at);
++        assert_eq!(
++            awards(&out)[0].0,
++            &sid(expected),
++            "five second strict boundary at={at}"
++        );
++    }
++}
++
++#[test]
++fn periodic_poison_renews_owner_after_caster_changed_map() {
++    let mut manager = fixture_hp(12);
++    manager.handle(ZoneCommand::sync_player_combat_state(
++        sid("a"),
++        MirClass::Taoist,
++        true,
++        false,
++        false,
++        false,
++        false,
++        false,
++    ));
++    let cast = manager.handle(ZoneCommand::PlayerCastMagicWithItem {
++        session_id: sid("a"),
++        object_id: MONSTER,
++        spell: Spell::Poisoning,
++        direction: MirDirection::Right,
++        target: point(10, 10),
++        cast: true,
++        level: 3,
++        damage: 5,
++        mp_cost: 0,
++        cooldown_ms: 0,
++        item_param: 1,
++        now_ms: 100,
++    });
++    assert!(
++        !cast.is_empty(),
++        "public prepared poison command must be admitted"
++    );
++    admit(&mut manager, "a", DEST);
++    assert!(awards(&manager.tick_all(2_100)).is_empty());
++    assert!(awards(&manager.tick_all(4_100)).is_empty());
++    let out = manager.tick_all(6_100);
++    let award = awards(&out);
++    assert_eq!(
++        award.len(),
++        1,
++        "periodic positive poison renews across initial 5s: {out:?}"
++    );
++    assert_eq!(award[0].0, &sid("a"));
++}
++
++#[test]
++fn detached_custody_retains_deadline_ttl_and_stable_ledger_key() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    let before = manager
++        .ground_drop_absolute_clocks_for_key(&ZoneKey::for_map(SOURCE), drop.object_id)
++        .unwrap();
++    let ticket = claim(&mut manager, "a", &drop, 15_000).unwrap();
++    let source = manager
++        .detach_ground_drop_claim(&sid("a"), &ticket)
++        .unwrap();
++    let mut forged = ticket.clone();
++    forged.drop_generation += 1;
++    assert!(!manager.has_detached_ground_drop_claim_ticket(&source, &forged));
++    manager
++        .restore_detached_ground_drop_claim(&source, &ticket, 50_000)
++        .unwrap();
++    assert_eq!(
++        manager
++            .ground_drop_absolute_clocks_for_key(&source, drop.object_id)
++            .unwrap(),
++        before
++    );
++    let next = claim(&mut manager, "b", &drop, 60_101).unwrap();
++    assert_ne!(next.claim_id, ticket.claim_id);
++    assert_eq!(next.idempotency_key, ticket.idempotency_key);
++    assert_eq!(next.payload_digest, ticket.payload_digest);
++}
++
++#[test]
++fn expired_held_ground_ttl_never_resurrects_on_cancel() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    let ttl = manager
++        .ground_drop_absolute_clocks_for_key(&ZoneKey::for_map(SOURCE), drop.object_id)
++        .unwrap()
++        .1
++        .unwrap();
++    let ticket = claim(&mut manager, "a", &drop, 1_000).unwrap();
++    manager.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
++        session_id: sid("a"),
++        ticket,
++        now_ms: ttl + 1,
++    });
++    assert!(manager
++        .ground_drop_snapshot_for_key(&ZoneKey::for_map(SOURCE), drop.object_id)
++        .is_none());
++    assert!(claim(&mut manager, "b", &drop, ttl + 1).is_none());
++}
++
++#[test]
++fn cold_manager_checkpoint_never_recreates_original_online_nodes() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    let proof = manager.online_owner_proof_for_session(&sid("a")).unwrap();
++    let bytes = manager.checkpoint_bytes().unwrap();
++    let mut restored = ZoneManager::restore_checkpoint(&bytes).unwrap();
++    assert!(!restored.online_owner_proof_is_current(&proof));
++    admit(&mut restored, "a", SOURCE);
++    admit(&mut restored, "b", SOURCE);
++    assert!(
++        claim(&mut restored, "b", &drop, 1_000).is_some(),
++        "cold owner Nodes no longer exist"
++    );
++    let mut forged: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
++    forged["online_identities"]["next_epoch"] = serde_json::json!(99_999);
++    assert!(
++        ZoneManager::restore_checkpoint(&serde_json::to_vec(&forged).unwrap())
++            .unwrap_err()
++            .contains("root mismatch")
++    );
++}
++
++#[test]
++fn source_issuance_binds_original_reward_before_and_after_map_membership_change() {
++    let mut manager = fixture();
++    let killed = hit(&mut manager, "a", 100, 100);
++    let (proof, award) = killed
++        .iter()
++        .find_map(|out| match out {
++            ZoneOutbound::OwnedMonsterKillAward {
++                online_owner,
++                award,
++                ..
++            } => Some((online_owner.clone(), award.clone())),
++            _ => None,
++        })
++        .unwrap();
++    let source = ZoneKey::for_map(SOURCE);
++    let destination = ZoneKey::for_map(DEST);
++    assert!(manager.issued_monster_award_is_current(&source, &sid("a"), &proof, &award));
++    admit(&mut manager, "a", DEST);
++    assert!(manager.issued_monster_award_is_current(&source, &sid("a"), &proof, &award));
++    assert!(!manager.issued_monster_award_is_current(&destination, &sid("a"), &proof, &award));
++    assert!(!manager.issued_monster_award_is_current(&source, &sid("b"), &proof, &award));
++    let mut forged = award.clone();
++    forged.experience += 1;
++    assert!(!manager.issued_monster_award_is_current(&source, &sid("a"), &proof, &forged));
++    forged = award.clone();
++    forged.drops[0].quantity += 1;
++    assert!(!manager.issued_monster_award_is_current(&source, &sid("a"), &proof, &forged));
++    let cold = ZoneManager::restore_checkpoint(&manager.checkpoint_bytes().unwrap()).unwrap();
++    assert!(!cold.issued_monster_award_is_current(&source, &sid("a"), &proof, &award));
++    manager.acknowledge_issued_monster_award(&source, &sid("a"), &award);
++    assert!(!manager.issued_monster_award_is_current(&source, &sid("a"), &proof, &award));
++}
++
++#[test]
++fn same_map_fresh_admission_releases_old_ground_owner_and_experience() {
++    let mut manager = fixture();
++    hit(&mut manager, "a", 20, 100);
++    let old = manager.online_owner_proof_for_session(&sid("a")).unwrap();
++    // A same-map re-admission is a newly spawned object, unlike atomic transfer.
++    admit(&mut manager, "a", SOURCE);
++    assert_ne!(
++        manager.online_owner_proof_for_session(&sid("a")).unwrap(),
++        old
++    );
++    assert_eq!(awards(&hit(&mut manager, "b", 80, 1_100))[0].0, &sid("b"));
++}
++
++#[test]
++fn manual_unowned_drop_projection_never_invents_native_item_owner() {
++    let mut manager = fixture();
++    let mut drop = GroundDropSnapshot {
++        object_id: 91_001,
++        name: "manual-gold".into(),
++        name_colour_argb: -1,
++        icon: 0,
++        x: 10,
++        y: 11,
++        quantity: 2,
++        source_monster: "manual-or-player-death".into(),
++        owner_object_id: None,
++        ownership_remaining_ticks: None,
++        loot: GroundDropLootSnapshot::Gold { amount: 2 },
++    };
++    manager.handle(ZoneCommand::SyncGroundDrops {
++        session_id: sid("a"),
++        drops: vec![drop.clone()],
++        now_ms: 100,
++    });
++    assert_eq!(
++        manager.native_ground_drop_deadline_for_key(&ZoneKey::for_map(SOURCE), drop.object_id),
++        None
++    );
++    assert!(claim(&mut manager, "b", &drop, 101).is_some());
++    // An unrelated legacy supplied policy is kept separate from native births.
++    drop.object_id += 1;
++    drop.owner_object_id = Some(101);
++    drop.ownership_remaining_ticks = Some(20);
++    manager.handle(ZoneCommand::SyncGroundDrops {
++        session_id: sid("a"),
++        drops: vec![drop.clone()],
++        now_ms: 100,
++    });
++    assert_eq!(
++        manager.native_ground_drop_deadline_for_key(&ZoneKey::for_map(SOURCE), drop.object_id),
++        None
++    );
++}
++
++#[test]
++fn dead_online_owner_keeps_source_ground_protection_until_true_despawn() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    admit(&mut manager, "a", DEST);
++    manager.handle(ZoneCommand::SyncPlayerVitalsAndLife {
++        session_id: sid("a"),
++        hp: 100,
++        max_hp: 100,
++        mp: 0,
++        dead: true,
++    });
++    assert!(
++        claim(&mut manager, "b", &drop, 1_000).is_none(),
++        "full-HP Dead still has an online global Node"
++    );
++    manager.handle(ZoneCommand::Leave {
++        session_id: sid("a"),
++    });
++    assert!(claim(&mut manager, "b", &drop, 1_001).is_some());
++}
++
++#[test]
++fn irregular_tick_cadence_does_not_replace_birth_with_latest_sync_or_tick() {
++    let mut manager = fixture();
++    let drop = kill(&mut manager);
++    let source = ZoneKey::for_map(SOURCE);
++    let clocks = manager
++        .ground_drop_absolute_clocks_for_key(&source, drop.object_id)
++        .unwrap();
++    for at in [999, 3_124, 18_441, 50_009, 60_100] {
++        manager.tick_all(at);
++        assert_eq!(
++            manager
++                .ground_drop_absolute_clocks_for_key(&source, drop.object_id)
++                .unwrap(),
++            clocks
++        );
++    }
++    assert!(claim(&mut manager, "b", &drop, 60_100).is_none());
++    assert!(claim(&mut manager, "b", &drop, 60_101).is_some());
++}
++
++#[test]
++fn parallel_source_zone_tick_matches_sequential_cross_map_owner_and_payload() {
++    fn prepared() -> ZoneManager {
++        let mut m = fixture_hp(12);
++        m.handle(ZoneCommand::sync_player_combat_state(
++            sid("a"),
++            MirClass::Taoist,
++            true,
++            false,
++            false,
++            false,
++            false,
++            false,
++        ));
++        m.handle(ZoneCommand::PlayerCastMagicWithItem {
++            session_id: sid("a"),
++            object_id: MONSTER,
++            spell: Spell::Poisoning,
++            direction: MirDirection::Right,
++            target: point(10, 10),
++            cast: true,
++            level: 3,
++            damage: 5,
++            mp_cost: 0,
++            cooldown_ms: 0,
++            item_param: 1,
++            now_ms: 100,
++        });
++        admit(&mut m, "a", DEST);
++        for (i, map) in ["cross-map-extra-1", "cross-map-extra-2"]
++            .into_iter()
++            .enumerate()
++        {
++            let mut j = join(&format!("extra-{i}"), map);
++            j.object_id = 200 + i as u32;
++            m.join(j);
++        }
++        m
++    }
++    let mut parallel = prepared();
++    let mut sequential = prepared();
++    for at in [2_100, 4_100] {
++        assert!(awards(&parallel.tick_all(at)).is_empty());
++        assert!(awards(&sequential.tick_all_sequential(at)).is_empty());
++    }
++    let p = parallel.tick_all(6_100);
++    let s = sequential.tick_all_sequential(6_100);
++    let pa = awards(&p);
++    let sa = awards(&s);
++    assert_eq!(pa.len(), 1);
++    assert_eq!(sa.len(), 1);
++    assert_eq!(pa[0].0, sa[0].0);
++    assert_eq!(pa[0].1, sa[0].1);
++    assert_eq!(pa[0].0, &sid("a"));
++    for (m, out) in [(&parallel, &p), (&sequential, &s)] {
++        let (sid, source, proof, award) = out
++            .iter()
++            .find_map(|o| match o {
++                ZoneOutbound::OwnedMonsterKillAward {
++                    session_id,
++                    source,
++                    online_owner,
++                    award,
++                } => Some((session_id, source, online_owner, award)),
++                _ => None,
++            })
++            .unwrap();
++        assert!(m.issued_monster_award_is_current(source, sid, proof, award));
++    }
++}
+diff --git a/mir2-web3/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs b/mir2-web3/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs
+@@ -0,0 +1,1106 @@
++//! Ordinary local packets over a prepared saved character and source fixture.
++//! This is not TCP/WSS, natural drop odds, level progression or player QA.
++use super::*;
++use crate::routing::pending_owned_kill_proof_key;
++use serde_json::json;
++use sha2::{Digest, Sha256};
++
++const SOURCE: &str = "D001";
++const DEST: &str = "D002";
++const TARGET: u32 = 401_001;
++const EXP: u32 = 20;
++
++/// Narrow replacement for old internal tests' fabricated scalar award input.
++/// Public Manager Join is already performed by normal StartGame in the caller.
++/// This helper causes a prepared HP1 monster's real positive impact/death and
++/// consumes its new source envelope; it never manufactures an online proof.
++pub(super) fn issue_prepared_award(
++    runtime: &mut SharedInProcessZoneSessionRuntime,
++    wanted: ZoneMonsterKillAward,
++) -> Vec<ZoneMonsterKillAward> {
++    static STEP: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
++    let now = SharedInProcessZoneSessionRuntime::zone_now_ms()
++        + 2_000
++        + STEP.fetch_add(2_000, std::sync::atomic::Ordering::Relaxed);
++    let sid = runtime.current_zone_session_id().unwrap();
++    let key = runtime.current_presence_key().unwrap();
++    let mut state = runtime.zone_state.lock().unwrap();
++    let position = state.zone_manager.player_transform(&sid).unwrap().0;
++    let target = Point {
++        x: position.x + 1,
++        y: position.y,
++    };
++    let mut out = state.zone_manager.handle(ZoneCommand::SpawnMonster {
++        session_id: sid.clone(),
++        now_ms: now,
++        monster: ZoneMonsterSpawn {
++            crystal_drop_seed: None,
++            object_id: wanted.monster_object_id,
++            name: wanted.monster_name,
++            name_colour_argb: -1,
++            image: 0,
++            ai: 0,
++            disposition: Some(WorldEntityDisposition::Hostile),
++            level: 1,
++            hp: 1,
++            max_hp: 1,
++            experience: wanted.experience,
++            move_speed_ms: 100_000,
++            attack_speed_ms: 100_000,
++            friendly_guild: None,
++            position: target,
++            direction: MirDirection::Down,
++            defense: Default::default(),
++            respawn: None,
++            drops: wanted.drops,
++        },
++    });
++    out.extend(
++        state
++            .zone_manager
++            .handle(ZoneCommand::sync_player_combat_state(
++                sid.clone(),
++                MirClass::Warrior,
++                true,
++                false,
++                false,
++                false,
++                false,
++                false,
++            )),
++    );
++    out.extend(state.zone_manager.handle(ZoneCommand::PlayerAttackObject {
++        session_id: sid,
++        object_id: wanted.monster_object_id,
++        direction: MirDirection::Right,
++        spell: 0,
++        level: 0,
++        attack_type: 0,
++        damage: 1,
++        now_ms: now,
++    }));
++    out.extend(state.zone_manager.tick_all(now + 1_000));
++    let awards = state.dispatch_zone_outbounds(out, Some(&key)).4;
++    drop(state);
++    assert_eq!(
++        awards.len(),
++        1,
++        "prepared old fixture requires an actual positive source death"
++    );
++    awards
++}
++
++fn fixture(
++    name: &str,
++    config: Option<mir2_simulation::SimulationConfig>,
++    seed: Option<u64>,
++) -> SharedInProcessZoneSessionRuntime {
++    let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
++    let mut runtime = shared_session_runtime(shared.clone());
++    if let Some(config) = config {
++        runtime.inner = InProcessWorldRuntime::new(config);
++    }
++    start_new_runtime_with_class(&mut runtime, name, name, MirClass::Taoist);
++    let mut save = runtime.inner.active_character_checkpoint().unwrap();
++    save.character.level = 14;
++    save.map_file_name = SOURCE.into();
++    save.map_title = "OmaCave_1F".into();
++    save.position = Point { x: 30, y: 329 };
++    save.hp = 100;
++    save.mp = 100;
++    save.max_mp = 100;
++    save.experience = 0;
++    save.max_experience = 10_000;
++    save.gold = 0;
++    let powder = mir2_game_data::crystal_item_by_name("GreenPoison").unwrap();
++    save.inventory_items_json = vec![json!({
++        "key": format!("crystal-item-{}",powder.item_index), "name":powder.name,
++        "icon":powder.image,"slot":1,"unique_id":71_001,"container":"bag1","quantity":3,
++        "description":"prepared lawful source poison carrier","weight":powder.weight,
++        "equip_slot":"amulet","attack":0,"defence":0,"heal_hp":0,"heal_mp":0,
++        "user_item_metadata":{"item_index":powder.item_index}
++    })
++    .to_string()];
++    save.skill_states_json = vec![json!({"key":"poisoning","name":"Poisoning",
++        "description":"prepared learned skill","level":3,"experience":0,
++        "cooldown_ticks":1,"cooldown_ends_at":0})
++    .to_string()];
++    runtime
++        .inner
++        .restore_active_character_checkpoint(&save)
++        .unwrap();
++    runtime
++        .inner
++        .force_authoritative_player_transform(save.position, MirDirection::Up);
++    runtime.force_next_zone_transform_sync = true;
++    runtime.sync_zone_snapshot();
++    let sid = runtime.current_zone_session_id().unwrap();
++    runtime.sync_authoritative_zone_combat_state(&sid).unwrap();
++    assert_eq!(
++        runtime.inner.world_snapshot().map_file_name.as_deref(),
++        Some(SOURCE)
++    );
++    let mut target = shared_monster_entity(TARGET);
++    target.name = "Skeleton".into();
++    target.ai = Some(3);
++    target.x = 31;
++    target.y = 330;
++    target.hp = Some(1);
++    target.max_hp = Some(1);
++    target.disposition = WorldEntityDisposition::Hostile;
++    target.sprite = None;
++    let mut gold = shared_gold_drop(0, 0, 0, None, Some(60));
++    gold.source_monster = "Skeleton".into();
++    gold.quantity = 25;
++    let mut state = shared.lock().unwrap();
++    state.sync_map_layer(
++        SOURCE.into(),
++        vec![target],
++        BTreeSet::new(),
++        vec![],
++        BTreeSet::new(),
++    );
++    let out = state.zone_manager.handle(ZoneCommand::SpawnMonster {
++        session_id: sid,
++        now_ms: SharedInProcessZoneSessionRuntime::zone_now_ms(),
++        monster: ZoneMonsterSpawn {
++            crystal_drop_seed: seed,
++            object_id: TARGET,
++            name: "Skeleton".into(),
++            name_colour_argb: -1,
++            image: 3,
++            ai: 3,
++            disposition: Some(WorldEntityDisposition::Hostile),
++            level: 20,
++            hp: 1,
++            max_hp: 1,
++            experience: EXP,
++            move_speed_ms: 100_000,
++            attack_speed_ms: 100_000,
++            friendly_guild: None,
++            position: Point { x: 31, y: 330 },
++            direction: MirDirection::Up,
++            defense: Default::default(),
++            respawn: None,
++            drops: if let Some(seed) = seed {
++                mir2_simulation::zone_ground_drop_snapshots_for_monster_at_tick(
++                    TARGET, "Skeleton", seed,
++                )
++            } else {
++                vec![gold]
++            },
++        },
++    });
++    state.dispatch_zone_outbounds(out, None);
++    drop(state);
++    runtime.apply_pending_zone_packets();
++    runtime
++}
++
++fn tick(runtime: &mut SharedInProcessZoneSessionRuntime, at: u64) {
++    super::super::run_shared_zone_cadence_tick(&runtime.zone_state, at).unwrap();
++}
++fn source_proof(runtime: &SharedInProcessZoneSessionRuntime) -> String {
++    runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .online_owner_proof_for_session(&runtime.current_zone_session_id().unwrap())
++        .unwrap()
++}
++fn walk(
++    runtime: &mut SharedInProcessZoneSessionRuntime,
++    direction: MirDirection,
++    at: u64,
++    expected_map: &str,
++    expected: Point,
++) -> Vec<ServerPacket> {
++    let mut packets = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::Walk { direction }))
++        .unwrap();
++    tick(runtime, at);
++    packets.extend(runtime.apply_pending_zone_packets());
++    let save = runtime.inner.active_character_checkpoint().unwrap();
++    assert_eq!(
++        save.map_file_name, expected_map,
++        "ordinary movement must consume the imported route: {packets:?}"
++    );
++    assert_eq!(save.position, expected);
++    packets
++}
++fn poison_and_depart(runtime: &mut SharedInProcessZoneSessionRuntime) -> u64 {
++    let proof = source_proof(runtime);
++    let cast = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::Magic {
++            object_id: runtime.inner.world_snapshot().player_object_id.unwrap(),
++            spell: Spell::Poisoning,
++            direction: MirDirection::DownRight,
++            target_id: TARGET,
++            location: Point { x: 31, y: 330 },
++            spell_target_lock: true,
++        }))
++        .unwrap();
++    assert!(
++        cast.iter().any(|p| matches!(
++            p,
++            ServerPacket::Magic {
++                spell: Spell::Poisoning,
++                cast: true,
++                ..
++            }
++        )),
++        "{cast:?}"
++    );
++    assert!(
++        cast.iter().any(|p| matches!(
++            p,
++            ServerPacket::ObjectPoisoned {
++                object_id: TARGET,
++                poison: 1
++            }
++        )),
++        "{cast:?}"
++    );
++    assert!(
++        cast.iter().any(|p| matches!(
++            p,
++            ServerPacket::DeleteItem {
++                unique_id: 71_001,
++                count: 1
++            }
++        )),
++        "{cast:?}"
++    );
++    let base = SharedInProcessZoneSessionRuntime::zone_now_ms();
++    let moved = walk(
++        runtime,
++        MirDirection::Up,
++        base + 1_500,
++        DEST,
++        Point { x: 34, y: 323 },
++    );
++    assert!(moved
++        .iter()
++        .any(|p| matches!(p,ServerPacket::MapInformation{info} if info.file_name==DEST)));
++    assert_eq!(
++        source_proof(runtime),
++        proof,
++        "membership transfer must keep the global online Node"
++    );
++    base
++}
++fn source_kill(runtime: &mut SharedInProcessZoneSessionRuntime, base: u64) -> ZoneMonsterKillAward {
++    tick(runtime, base + 2_100);
++    let key = runtime.current_presence_key().unwrap();
++    let mut shared = runtime.zone_state.lock().unwrap();
++    let awards = shared.take_pending_zone_monster_kill_awards(&key);
++    let owner_id = shared.players[&key].zone_object_id;
++    let source_ids = shared.maps[SOURCE]
++        .ground_drops
++        .keys()
++        .copied()
++        .collect::<BTreeSet<_>>();
++    let wrong_map_has_drop = shared.maps.get(DEST).is_some_and(|m| {
++        m.ground_drops
++            .values()
++            .any(|d| d.source_monster == "Skeleton")
++    });
++    let source_birth_stays_in_source = awards.iter().flat_map(|a| &a.drops).all(|d| {
++        shared
++            .zone_manager
++            .ground_drop_snapshot_for_key(&ZoneKey::for_map(DEST), d.object_id)
++            .is_none()
++    });
++    shared.prepend_zone_monster_kill_awards(key, awards.clone());
++    drop(shared);
++    assert_eq!(
++        awards.len(),
++        1,
++        "actual positive periodic damage must choose one cross-map owner"
++    );
++    assert_eq!(awards[0].monster_object_id, TARGET);
++    assert_eq!(awards[0].experience, EXP);
++    assert!(!awards[0].drops.is_empty());
++    assert!(awards[0]
++        .drops
++        .iter()
++        .all(|d| d.owner_object_id == Some(owner_id)));
++    assert!(!wrong_map_has_drop);
++    assert!(awards[0]
++        .drops
++        .iter()
++        .all(|d| source_ids.contains(&d.object_id)));
++    assert!(source_birth_stays_in_source);
++    awards.into_iter().next().unwrap()
++}
++fn assert_private_proof_absent(
++    runtime: &SharedInProcessZoneSessionRuntime,
++    proof: &str,
++    packets: &[ServerPacket],
++) {
++    let snapshot = serde_json::to_string(&runtime.inner.world_snapshot()).unwrap();
++    for name in [
++        "online_owner",
++        "online_presence",
++        "online_identities",
++        "pending_zone_monster_kill_proofs",
++        "issued_native_monster_awards",
++    ] {
++        assert!(
++            !snapshot.contains(&format!("\"{name}\"")),
++            "proof field leaked in WorldSnapshot: {name}"
++        );
++    }
++    for packet in packets {
++        let wire = mir2_protocol::encode_server_packet(packet).unwrap();
++        assert!(
++            !wire.windows(proof.len()).any(|w| w == proof.as_bytes()),
++            "online proof leaked in client packet"
++        );
++    }
++}
++fn walk_to_drop(
++    runtime: &mut SharedInProcessZoneSessionRuntime,
++    drop: &GroundDropSnapshot,
++    base: u64,
++) {
++    // Spawn scatter is authoritative. Follow its actual reachable birth tile,
++    // not the monster's former position or a direct transform/debug command.
++    for step in 0..4_u64 {
++        let p = runtime
++            .inner
++            .active_character_checkpoint()
++            .unwrap()
++            .position;
++        let dx = (drop.x - p.x).signum();
++        let dy = (drop.y - p.y).signum();
++        let direction = match (dx, dy) {
++            (0, 0) => return,
++            (0, -1) => MirDirection::Up,
++            (1, -1) => MirDirection::UpRight,
++            (1, 0) => MirDirection::Right,
++            (1, 1) => MirDirection::DownRight,
++            (0, 1) => MirDirection::Down,
++            (-1, 1) => MirDirection::DownLeft,
++            (-1, 0) => MirDirection::Left,
++            (-1, -1) => MirDirection::UpLeft,
++            _ => unreachable!(),
++        };
++        walk(
++            runtime,
++            direction,
++            base + 4_000 + step * 1_000,
++            SOURCE,
++            Point {
++                x: p.x + dx,
++                y: p.y + dy,
++            },
++        );
++    }
++    let p = runtime
++        .inner
++        .active_character_checkpoint()
++        .unwrap()
++        .position;
++    assert_eq!(
++        p,
++        Point {
++            x: drop.x,
++            y: drop.y
++        },
++        "bounded ordinary path must reach actual source drop"
++    );
++}
++fn reconnect(runtime: &mut SharedInProcessZoneSessionRuntime) -> SharedInProcessZoneSessionRuntime {
++    let identity = runtime.inner.active_identity().unwrap();
++    let config = runtime.inner.shared_mentor_config().unwrap();
++    let shared = runtime.zone_state.clone();
++    let logout = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
++        .unwrap();
++    assert!(
++        logout
++            .iter()
++            .any(|p| matches!(p, ServerPacket::LogOutSuccess { .. })),
++        "normal logout must save: {logout:?}"
++    );
++    let mut next = shared_session_runtime(shared);
++    next.inner = InProcessWorldRuntime::new(config);
++    let login = next
++        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
++            account_id: identity.account_id.clone(),
++            password: identity.account_id,
++        }))
++        .unwrap();
++    assert!(
++        login
++            .iter()
++            .any(|p| matches!(p, ServerPacket::LoginSuccess { .. })),
++        "{login:?}"
++    );
++    let started = next
++        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
++            character_index: identity.character_index,
++        }))
++        .unwrap();
++    assert!(
++        started
++            .iter()
++            .any(|p| matches!(p, ServerPacket::UserInformation { .. })),
++        "{started:?}"
++    );
++    next
++}
++
++#[test]
++fn ordinary_walk_source_route_and_carried_poison_award_are_source_bound() {
++    let bytes = include_bytes!(
++        "../../../../../packages/game-data/data/generated/crystal_respawn_manifest.json"
++    );
++    let hash: String = Sha256::digest(bytes)
++        .iter()
++        .map(|byte| format!("{byte:02x}"))
++        .collect();
++    assert_eq!(
++        hash,
++        "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
++    );
++    let source: serde_json::Value = serde_json::from_slice(bytes).unwrap();
++    let maps = source["maps"].as_array().unwrap();
++    let a = maps.iter().find(|m| m["map_file_name"] == SOURCE).unwrap();
++    let b = maps.iter().find(|m| m["map_file_name"] == DEST).unwrap();
++    assert_eq!(
++        a["movements"][0],
++        json!({"map_index":40,"source":{"x":30,"y":328},"destination":{"x":34,"y":323},"need_hole":false,"need_move":false,"conquest_index":0,"show_on_big_map":true,"icon":34})
++    );
++    assert_eq!(b["movements"][0]["map_index"], 39);
++    let mut runtime = fixture("CrossRoute", None, None);
++    let proof = source_proof(&runtime);
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let packets = runtime.apply_pending_zone_packets();
++    assert_eq!(
++        packets
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::GainExperience { amount: EXP }))
++            .count(),
++        1
++    );
++    assert!(
++        !packets
++            .iter()
++            .any(|p| matches!(p,ServerPacket::ObjectDied{info} if info.object_id==TARGET)),
++        "source AOI death must not reach a different map"
++    );
++    assert_private_proof_absent(&runtime, &proof, &packets);
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 20);
++    let identity = runtime.inner.active_identity().unwrap();
++    let config = runtime.inner.shared_mentor_config().unwrap();
++    let saved = config.account_store.lock().unwrap().accounts[&identity.account_id].saves
++        [&identity.character_index]
++        .clone();
++    assert_eq!(saved.experience, 20);
++    assert_eq!(
++        saved.guild_experience_journal.applied_kill_receipts.len(),
++        1
++    );
++    let returned = walk(
++        &mut runtime,
++        MirDirection::Up,
++        base + 3_000,
++        SOURCE,
++        Point { x: 30, y: 329 },
++    );
++    assert!(returned
++        .iter()
++        .any(|p| matches!(p,ServerPacket::MapInformation{info} if info.file_name==SOURCE)));
++    assert_eq!(source_proof(&runtime), proof);
++    walk_to_drop(&mut runtime, &award.drops[0], base);
++    let pickup = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::PickUp))
++        .unwrap();
++    let amount = award
++        .drops
++        .iter()
++        .filter_map(|d| match d.loot {
++            GroundDropLootSnapshot::Gold { amount } => Some(amount),
++            _ => None,
++        })
++        .sum::<u32>();
++    assert!(
++        pickup
++            .iter()
++            .any(|p| matches!(p,ServerPacket::GainedGold{gold} if *gold==amount)),
++        "{pickup:?}"
++    );
++    assert_eq!(
++        runtime.inner.active_character_checkpoint().unwrap().gold,
++        amount
++    );
++    runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::PickUp))
++        .unwrap();
++    assert_eq!(
++        runtime.inner.active_character_checkpoint().unwrap().gold,
++        amount
++    );
++    let next = reconnect(&mut runtime);
++    assert_eq!(
++        next.inner.active_character_checkpoint().unwrap().gold,
++        amount
++    );
++    assert_eq!(next.inner.world_snapshot().player_experience, 20);
++    assert_ne!(
++        source_proof(&next),
++        proof,
++        "fresh Login spawns a new global Node"
++    );
++}
++
++#[test]
++fn source_issued_award_rejects_every_identity_source_and_payload_substitution() {
++    let mut runtime = fixture("CrossForgery", None, None);
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let sid = runtime.current_zone_session_id().unwrap();
++    let original = source_proof(&runtime);
++    let key = runtime.current_presence_key().unwrap();
++    let proof_key = pending_owned_kill_proof_key(&key, &award);
++    let original_record = runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .pending_zone_monster_kill_proofs[&proof_key]
++        .clone();
++    for (field, value) in [
++        ("namespace", json!("wrong")),
++        ("epoch", json!(999)),
++        ("session_id", json!("other")),
++        ("account_id", json!("another-account")),
++        ("character_index", json!(1)),
++        ("object_id", json!(999)),
++        ("extra", json!(true)),
++    ] {
++        let mut proof: serde_json::Value = serde_json::from_str(&original).unwrap();
++        proof[field] = value;
++        let mut state = runtime.zone_state.lock().unwrap();
++        state.pending_zone_monster_kill_proofs.remove(&proof_key);
++        state.dispatch_zone_outbounds(
++            vec![ZoneOutbound::OwnedMonsterKillAward {
++                session_id: sid.clone(),
++                source: ZoneKey::for_map(SOURCE),
++                online_owner: proof.to_string(),
++                award: award.clone(),
++            }],
++            None,
++        );
++        assert!(
++            !state
++                .pending_zone_monster_kill_proofs
++                .contains_key(&proof_key),
++            "accepted forged {field}"
++        );
++    }
++    let mut state = runtime.zone_state.lock().unwrap();
++    for (source, mut changed) in [
++        (ZoneKey::for_map(DEST), award.clone()),
++        (ZoneKey::for_map(SOURCE), award.clone()),
++    ] {
++        if source.map_file_name == SOURCE {
++            changed.experience += 1;
++        }
++        assert!(!state
++            .zone_manager
++            .issued_monster_award_is_current(&source, &sid, &original, &changed));
++        state.dispatch_zone_outbounds(
++            vec![ZoneOutbound::OwnedMonsterKillAward {
++                session_id: sid.clone(),
++                source,
++                online_owner: original.clone(),
++                award: changed,
++            }],
++            None,
++        );
++    }
++    state
++        .pending_zone_monster_kill_proofs
++        .insert(proof_key, original_record);
++    drop(state);
++    assert_eq!(
++        runtime
++            .apply_pending_zone_packets()
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::GainExperience { amount: EXP }))
++            .count(),
++        1
++    );
++    let mut state = runtime.zone_state.lock().unwrap();
++    assert!(
++        !state.zone_manager.issued_monster_award_is_current(
++            &ZoneKey::for_map(SOURCE),
++            &sid,
++            &original,
++            &award
++        ),
++        "confirmed issuance is consumed"
++    );
++    state.dispatch_zone_outbounds(
++        vec![ZoneOutbound::OwnedMonsterKillAward {
++            session_id: sid,
++            source: ZoneKey::for_map(SOURCE),
++            online_owner: original,
++            award,
++        }],
++        None,
++    );
++    drop(state);
++    assert!(runtime
++        .apply_pending_zone_packets()
++        .iter()
++        .all(|p| !matches!(p, ServerPacket::GainExperience { .. })));
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 20);
++}
++
++#[test]
++fn known_reward_save_failure_keeps_source_epoch_for_one_exact_retry() {
++    let mut runtime = fixture("CrossRetry", None, None);
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let proof = source_proof(&runtime);
++    let config = runtime.inner.shared_mentor_config().unwrap();
++    config.inject_account_store_transaction_fault(
++        mir2_simulation::AccountStoreTransactionFault::BeforePersist,
++    );
++    let failed = runtime.apply_pending_zone_packets();
++    assert!(!failed
++        .iter()
++        .any(|p| matches!(p, ServerPacket::GainExperience { .. })));
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 0);
++    assert_eq!(source_proof(&runtime), proof);
++    let sid = runtime.current_zone_session_id().unwrap();
++    assert!(runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .zone_manager
++        .issued_monster_award_is_current(&ZoneKey::for_map(SOURCE), &sid, &proof, &award));
++    let success = runtime.apply_pending_zone_packets();
++    assert_eq!(
++        success
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::GainExperience { amount: EXP }))
++            .count(),
++        1
++    );
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 20);
++    assert!(runtime
++        .apply_pending_zone_packets()
++        .iter()
++        .all(|p| !matches!(p, ServerPacket::GainExperience { .. })));
++}
++
++#[test]
++fn fresh_login_never_accepts_a_replayed_previous_online_award() {
++    let mut runtime = fixture("CrossRelog", None, None);
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let sid = runtime.current_zone_session_id().unwrap();
++    let old = source_proof(&runtime);
++    runtime.apply_pending_zone_packets();
++    let mut next = reconnect(&mut runtime);
++    assert_ne!(source_proof(&next), old);
++    next.zone_state.lock().unwrap().dispatch_zone_outbounds(
++        vec![ZoneOutbound::OwnedMonsterKillAward {
++            session_id: sid,
++            source: ZoneKey::for_map(SOURCE),
++            online_owner: old,
++            award,
++        }],
++        None,
++    );
++    assert!(next
++        .apply_pending_zone_packets()
++        .iter()
++        .all(|p| !matches!(p, ServerPacket::GainExperience { .. })));
++    assert_eq!(next.inner.world_snapshot().player_experience, 20);
++}
++
++#[test]
++fn unknown_publication_retains_exact_source_receipt_without_faked_exp_success() {
++    let root = std::path::PathBuf::from(
++        std::env::var("MIR2_P3_RECEIPT_DIR").expect("isolated P3 receipt root"),
++    )
++    .join("fault-fixtures")
++    .join(format!(
++        "unknown-{}-{}",
++        std::process::id(),
++        std::time::SystemTime::now()
++            .duration_since(std::time::UNIX_EPOCH)
++            .unwrap()
++            .as_nanos()
++    ));
++    std::fs::create_dir_all(&root).unwrap();
++    let config = mir2_simulation::SimulationConfig::default()
++        .with_account_store_path(root.join("accounts.json"));
++    config.save_account_store().unwrap();
++    let mut runtime = fixture("CrossUnknown", Some(config.clone()), None);
++    let base = poison_and_depart(&mut runtime);
++    let actual = source_kill(&mut runtime, base);
++    let proof = source_proof(&runtime);
++    let key = runtime.current_presence_key().unwrap();
++    config.inject_account_store_transaction_fault(
++        mir2_simulation::AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
++    );
++    let failed = runtime.apply_pending_zone_packets();
++    assert!(failed.iter().all(|p| !matches!(
++        p,
++        ServerPacket::GainExperience { .. } | ServerPacket::LevelChanged { .. }
++    )));
++    assert!(
++        config.save_account_store().is_err(),
++        "unknown publication keeps repository frozen"
++    );
++    assert_eq!(source_proof(&runtime), proof);
++    let queued = {
++        let mut shared = runtime.zone_state.lock().unwrap();
++        let awards = shared.take_pending_zone_monster_kill_awards(&key);
++        shared.prepend_zone_monster_kill_awards(key.clone(), awards.clone());
++        awards
++    };
++    assert_eq!(queued.len(), 1);
++    assert_eq!(queued[0].drops, actual.drops);
++    assert_eq!(queued[0].monster_object_id, actual.monster_object_id);
++    assert_eq!(queued[0].killed_at_ms, actual.killed_at_ms);
++    assert!(queued[0].source_receipt_key.is_some());
++    assert!(runtime.apply_zone_monster_kill_awards(queued).is_empty());
++    let lease = ZoneOwnerLease::in_process(&ZoneId::new("test-shared-zone"));
++    assert!(
++        runtime.prepare_teardown_checkpoint(&lease).is_err(),
++        "unconfirmed reward cannot become successful logout"
++    );
++    assert!(
++        runtime
++            .execute(WorldCommand::ClientPacket(ClientPacket::LogOut))
++            .is_err(),
++        "ordinary logout must reject an unconfirmed save"
++    );
++    assert_eq!(
++        source_proof(&runtime),
++        proof,
++        "rejected logout has not despawned the original online Node"
++    );
++}
++
++#[test]
++fn lost_proof_is_not_recreated_from_new_membership_or_fresh_login() {
++    let mut runtime = fixture("CrossNoProof", None, None);
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let key = runtime.current_presence_key().unwrap();
++    let proof_key = pending_owned_kill_proof_key(&key, &award);
++    runtime
++        .zone_state
++        .lock()
++        .unwrap()
++        .pending_zone_monster_kill_proofs
++        .remove(&proof_key);
++    assert!(runtime
++        .apply_zone_monster_kill_awards(vec![award.clone()])
++        .is_empty());
++    {
++        let mut state = runtime.zone_state.lock().unwrap();
++        state.queue_zone_monster_kill_award(key.clone(), award.clone());
++        assert!(state.take_pending_zone_monster_kill_awards(&key).is_empty());
++    }
++    assert_eq!(runtime.inner.world_snapshot().player_experience, 0);
++    let mut next = reconnect(&mut runtime);
++    assert!(next
++        .apply_zone_monster_kill_awards(vec![award.clone()])
++        .is_empty());
++    {
++        let mut state = next.zone_state.lock().unwrap();
++        state.queue_zone_monster_kill_award(key.clone(), award);
++        assert!(state.take_pending_zone_monster_kill_awards(&key).is_empty());
++    }
++    assert_eq!(next.inner.world_snapshot().player_experience, 0);
++}
++
++#[test]
++fn cold_world_checkpoint_keeps_source_item_payload_and_ttl_but_revokes_all_online_owners() {
++    let mut runtime = fixture("CrossCold", None, None);
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let proof = source_proof(&runtime);
++    let source = ZoneKey::for_map(SOURCE);
++    let drop = &award.drops[0];
++    let (checkpoint, clocks) = {
++        let state = runtime.zone_state.lock().unwrap();
++        (
++            state.world_checkpoint().unwrap(),
++            state
++                .zone_manager
++                .ground_drop_absolute_clocks_for_key(&source, drop.object_id)
++                .unwrap(),
++        )
++    };
++    assert_eq!(
++        source_proof(&runtime),
++        proof,
++        "capturing cold state must not revoke a retained live runtime"
++    );
++    let cold = SharedInProcessZoneState::restore(checkpoint).unwrap();
++    assert!(cold.players.is_empty());
++    assert!(cold.pending_zone_monster_kill_proofs.is_empty());
++    assert!(!cold.zone_manager.online_owner_proof_is_current(&proof));
++    assert_eq!(
++        cold.zone_manager
++            .native_ground_drop_deadline_for_key(&source, drop.object_id),
++        Some(None)
++    );
++    let restored = cold
++        .zone_manager
++        .ground_drop_snapshot_for_key(&source, drop.object_id)
++        .unwrap();
++    assert_eq!(restored.loot, drop.loot);
++    assert_eq!(restored.owner_object_id, drop.owner_object_id);
++    assert_eq!(
++        cold.zone_manager
++            .ground_drop_absolute_clocks_for_key(&source, drop.object_id)
++            .unwrap()
++            .1,
++        clocks.1
++    );
++    assert_eq!(restored.ownership_remaining_ticks, None);
++}
++
++#[test]
++fn source_item_exact_payload_receives_one_uid_and_survives_normal_save_login() {
++    let mut selected = None;
++    let mut non_single_item_rolls = Vec::new();
++    for seed in 0..256_u64 {
++        let rolls = mir2_simulation::zone_ground_drop_snapshots_for_monster_at_tick(
++            TARGET, "Skeleton", seed,
++        );
++        let inventory = rolls
++            .into_iter()
++            .filter(|d| {
++                matches!(
++                    &d.loot,
++                    GroundDropLootSnapshot::InventoryItem {
++                        exact_item: Some(_),
++                        ..
++                    }
++                )
++            })
++            .collect::<Vec<_>>();
++        if inventory.len() == 1 {
++            selected = Some((seed, inventory.into_iter().next().unwrap()));
++            break;
++        }
++        non_single_item_rolls.push(seed);
++    }
++    let (seed, expected) =
++        selected.expect("bounded source-rate seed search must keep its non-drop attempts");
++    eprintln!("prepared source-rate roll seed={seed}; earlier empty/multiple-item rolls={non_single_item_rolls:?}; naturalBossDropAcceptance=false");
++    let mut runtime = fixture("CrossItem", None, Some(seed));
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    let item = award
++        .drops
++        .iter()
++        .find(|d| d.loot == expected.loot)
++        .unwrap()
++        .clone();
++    let GroundDropLootSnapshot::InventoryItem {
++        exact_item: Some(exact),
++        ..
++    } = &item.loot
++    else {
++        panic!("source-exact inventory drop")
++    };
++    assert!(!exact.uid_assigned);
++    assert_eq!(exact.item.unique_id, 0);
++    runtime.apply_pending_zone_packets();
++    walk(
++        &mut runtime,
++        MirDirection::Up,
++        base + 3_000,
++        SOURCE,
++        Point { x: 30, y: 329 },
++    );
++    walk_to_drop(&mut runtime, &item, base);
++    let before = runtime.inner.active_character_checkpoint().unwrap();
++    let pickup = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::PickUp))
++        .unwrap();
++    assert!(
++        pickup
++            .iter()
++            .any(|p| matches!(p, ServerPacket::GainedItem { .. })),
++        "source item must use ordinary PickUp: {pickup:?}"
++    );
++    let delivered = pickup
++        .iter()
++        .find_map(|p| match p {
++            ServerPacket::GainedItem { item } => Some(item.clone()),
++            _ => None,
++        })
++        .unwrap();
++    let mut expected_wire = exact.item.clone();
++    expected_wire.unique_id = delivered.unique_id;
++    assert_eq!(
++        delivered, expected_wire,
++        "UID assignment cannot alter the source-exact item payload"
++    );
++    let after = runtime.inner.active_character_checkpoint().unwrap();
++    let old_uids = before
++        .inventory_items_json
++        .iter()
++        .map(|s| {
++            serde_json::from_str::<serde_json::Value>(s).unwrap()["unique_id"]
++                .as_u64()
++                .unwrap()
++        })
++        .collect::<BTreeSet<_>>();
++    let added = after
++        .inventory_items_json
++        .iter()
++        .map(|s| serde_json::from_str::<serde_json::Value>(s).unwrap())
++        .filter(|v| !old_uids.contains(&v["unique_id"].as_u64().unwrap()))
++        .collect::<Vec<_>>();
++    assert_eq!(added.len(), 1, "one source item produces one canonical UID");
++    assert_ne!(added[0]["unique_id"].as_u64().unwrap(), 0);
++    assert_eq!(
++        added[0]["user_item_metadata"]["item_index"]
++            .as_i64()
++            .unwrap(),
++        i64::from(exact.item.item_index)
++    );
++    assert_eq!(
++        added[0]["quantity"].as_u64().unwrap(),
++        u64::from(exact.item.count)
++    );
++    runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::PickUp))
++        .unwrap();
++    assert_eq!(
++        runtime
++            .inner
++            .active_character_checkpoint()
++            .unwrap()
++            .inventory_items_json,
++        after.inventory_items_json
++    );
++    let next = reconnect(&mut runtime);
++    assert_eq!(
++        next.inner
++            .active_character_checkpoint()
++            .unwrap()
++            .inventory_items_json,
++        after.inventory_items_json
++    );
++}
++
++#[test]
++fn ordinary_pickup_with_a_prepared_full_bag_restores_exact_original_custody_clocks() {
++    let seed = 6; // Same retained source-rate roll verified by the item test.
++    let mut runtime = fixture("CrossBagFull", None, Some(seed));
++    let base = poison_and_depart(&mut runtime);
++    let award = source_kill(&mut runtime, base);
++    runtime.apply_pending_zone_packets();
++    let item = award
++        .drops
++        .iter()
++        .find(|d| {
++            matches!(
++                &d.loot,
++                GroundDropLootSnapshot::InventoryItem {
++                    exact_item: Some(_),
++                    ..
++                }
++            )
++        })
++        .unwrap()
++        .clone();
++    walk(
++        &mut runtime,
++        MirDirection::Up,
++        base + 3_000,
++        SOURCE,
++        Point { x: 30, y: 329 },
++    );
++    walk_to_drop(&mut runtime, &item, base);
++    let source = ZoneKey::for_map(SOURCE);
++    let (original, clocks, before_claim) = {
++        let state = runtime.zone_state.lock().unwrap();
++        let zone = state.zone_manager.zone(&source).unwrap();
++        let checkpoint: serde_json::Value =
++            serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++        (
++            state
++                .zone_manager
++                .ground_drop_snapshot_for_key(&source, item.object_id)
++                .unwrap(),
++            state
++                .zone_manager
++                .ground_drop_absolute_clocks_for_key(&source, item.object_id)
++                .unwrap(),
++            checkpoint["next_ground_drop_claim_id"].as_u64().unwrap(),
++        )
++    };
++    let proof = source_proof(&runtime);
++    let mut save = runtime.inner.active_character_checkpoint().unwrap();
++    let carrier: serde_json::Value = serde_json::from_str(&save.inventory_items_json[0]).unwrap();
++    save.inventory_items_json = (0..save.inventory_capacity - 6)
++        .map(|slot| {
++            let mut item = carrier.clone();
++            item["unique_id"] = json!(800_000 + u64::from(slot));
++            item["slot"] = json!(slot % 40);
++            item["container"] = json!(if slot < 40 { "bag1" } else { "bag2" });
++            item["quantity"] = json!(1);
++            item.to_string()
++        })
++        .collect();
++    runtime
++        .inner
++        .restore_active_character_checkpoint(&save)
++        .unwrap();
++    let before = runtime.inner.active_character_checkpoint().unwrap();
++    let rejected = runtime
++        .execute(WorldCommand::ClientPacket(ClientPacket::PickUp))
++        .unwrap();
++    assert!(rejected
++        .iter()
++        .all(|p| !matches!(p, ServerPacket::GainedItem { .. })));
++    assert_eq!(
++        runtime
++            .inner
++            .active_character_checkpoint()
++            .unwrap()
++            .inventory_items_json,
++        before.inventory_items_json
++    );
++    assert_eq!(source_proof(&runtime), proof);
++    let (restored, after_clocks, after_claim) = {
++        let state = runtime.zone_state.lock().unwrap();
++        let zone = state.zone_manager.zone(&source).unwrap();
++        let checkpoint: serde_json::Value =
++            serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++        (
++            state
++                .zone_manager
++                .ground_drop_snapshot_for_key(&source, item.object_id),
++            state
++                .zone_manager
++                .ground_drop_absolute_clocks_for_key(&source, item.object_id),
++            checkpoint["next_ground_drop_claim_id"].as_u64().unwrap(),
++        )
++    };
++    assert!(
++        after_claim > before_claim,
++        "ordinary request actually reserved then canceled source custody"
++    );
++    assert_eq!(restored, Some(original));
++    assert_eq!(after_clocks, Some(clocks));
++}
+diff --git a/mir2-web3/docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md b/mir2-web3/docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md
+@@ -0,0 +1,170 @@
++# P3a: one-manager cross-map ownership and original ground protection
++
++Implementation baseline: `57729ba8c1473ca920a8ea8b3d6e11105d9d4d93`.
++The eight existing production inputs are byte-identical to the reviewed
++`51e8e49132bfb6fbce7582a9d1c21d8f685d09c9` death18 baseline. This round
++does not publish a client, replace a Gateway, or establish complete P3 parity.
++
++The delivery is limited to ordinary solo native-monster ownership inside one
++`SharedInProcessZoneState` / `ZoneManager`. Prepared local protocol tests use
++normal credential Login, StartGame, Poisoning, Walk, PickUp and LogOut packets.
++Prepared level, HP, inventory, saved position and deterministic source drop
++rolls are explicitly fixtures; they are not a leveled player journey, live
++network test, human acceptance, or a natural Boss drop result.
++
++## Original source contract
++
++Source bytes and line excerpts are frozen under
++`C:/mir2-playtest-releases/20261004-native-r17/cross-map-drop-plan-01/baseline-51e8-review/`.
++`source-hashes.json` and `original-excerpts.json` bind the following rules.
++
++| Crystal source | Rule retained | SHA-256 |
++| --- | --- | --- |
++| `Server/MirObjects/MapObject.cs` 204–225, 339–375, 780–800 | Global spawned Node is separate from map membership; invalid Node clears owner references; teleport does not despawn. EXPOwner expires strictly after its five-second deadline. | `f465ee5fe84bc9fe6ab3ef9dd0c138c8c6b1dee83d1ea5b007cc5cb3afe53f7f` |
++| `Server/MirObjects/MonsterObject.cs` 1152–1183, 1493–1509, 2627–2633 | Owned monster item/gold has an absolute one-minute OwnerTime; periodic green poison renews a valid caster reference; a legal positive attacker may replace a dead owner. | `2cc4e673c589ad57452b4682c3bcb155b4b6b3027b1d3ee52a18a5ae1b7df98e` |
++| `Server/MirObjects/ItemObject.cs` 53–141 | Strict `Time > OwnerTime` expiry; manual/player-death constructors do not automatically receive monster ownership. | `da52f31cd9d7ae51e05bae2f14c435c06048a6647e273d74b6be1312e18372e1` |
++| `Server/MirObjects/PlayerObject.cs` 400–406, 643–650, 7519–7535 | StopGame despawns; death retains Node. Dead players cannot pick up; ordinary ownership and pickup group rules are distinct. | `48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11` |
++| `Server/MirNetwork/MirConnection.cs` 790, 1122, 1130–1139 | Disconnect/accepted logout remove the old spawned player; a fresh login constructs a new player object. | `fc7b59487d21171e48cb8ce0bfa29141f8bd52160298cc0069aee1cf4812d292` |
++| `Server/MirObjects/HumanObject.cs` 845–865 | LevelUp refills HP/MP without changing Dead; death18 behavior must remain. | `c4a4e060a6c88c41d869b4b3b6a78fe5a935e0456b8ee7c230db3d0596b299d3` |
++| `Server/Settings.cs` 16 | One second is 1000 ms; the minute is elapsed time rather than scheduling tick count. | `c9fbfa492e33b1a4e07a79a86a002c7918418531b7bdf4ba6671916a38f2faec` |
++
++This does not substitute contribution points or the existing Candidate equal
++group share for Crystal's EXPOwner/LastHitter/group algorithms.
++
++## Implementation
++
++The manager owns a random incarnation namespace and a checked monotonic online
++spawn epoch, bound to session, account, character and object. A normal map
++transfer within this manager retains that identity. True leave, fresh same-map
++admission and cold restore revoke it across every source map. Death only
++changes typed life state. Epoch exhaustion fails closed through actual admission.
++
++Each Zone reads an immutable manager presence snapshot. Native EXPOwner and
++periodic poison therefore resolve the original online object after it changes
++map. Five-second expiry remains strict `>` and only source-legal damage or
++poison refresh can renew it. Despawn clears a poison caster reference while
++the existing green poison value and original absolute effect clocks continue.
++A replacement login cannot inherit that old effect's reward.
++
++Shared native kills emit the server-only `OwnedMonsterKillAward`. Delivery must
++match both the current online identity and an issuance retained by the named
++source Zone for the original gameplay payload. A valid online identity alone
++cannot choose another source, experience amount or loot. The old unbound
++`MonsterKillAward` branch is rejected by the shared Gateway; queueing and the
++missing-proof path cannot mint authority from current membership. Confirmation
++consumes the source issuance. Known/unknown save failures retain the same source
++receipt and payload under the existing durability fence.
++
++The opaque identity JSON is an internal adapter across the simulation/Gateway
++boundary. It is never a ClientPacket capability and is never serialized into
++WorldSnapshot, AOI or server packet frames. It grants no authority without the
++manager's current book and the source's retained issuance.
++
++Native monster drops retain their source key, birth and absolute
++`birth + 60_000` protection deadline. At exactly 60 seconds they are still
++protected; strictly later they open. A dead online owner retains protection;
++true despawn releases it. The old 300 ms countdown projection changes from 60
++to 200 ticks, while authoritative protection uses elapsed milliseconds.
++Repeated sync, irregular ticks, rejected pickup and detached claim rollback do
++not restart protection or the independent object TTL. Custody retains source,
++object, generation, payload digest, protection and TTL; an expired held object
++cannot resurrect on cancellation. Manual/player-death drops do not gain this
++native ownership policy.
++
++Zone checkpoint v6 and manager checkpoint v3 bind the new private metadata.
++Original v1–v5 canonical payloads validate before uncommitted forward metadata
++is ignored. Cold decode always removes live owners and pending award authority,
++even when the original state commitment is valid. The complete authenticated
++player/loot payload, UID, generation, digest, tombstone and absolute TTL survive.
++Capturing a checkpoint does not revoke a still-retained in-memory runtime;
++deserializing that image is cold recovery and cannot restore its live Node.
++These state roots are integrity commitments, not a client authority signature.
++
++## Focused verification
++
++All commands use `cargo +1.95.0 test --locked --jobs 2`, only
++`C:/mir2-build/gateway-tests-r50`, and isolated local fixtures. Final focused
++selection contains **89 distinct passing tests**, with zero current failures:
++
++| Selection | Passing |
++| --- | ---: |
++| `mir2-simulation --test shared_cross_map_drop_lifecycle` | 19 |
++| `mir2-gateway --lib cross_map_drop_lifecycle_tests` | 9 |
++| `mir2-simulation --test shared_monster_ownership` | 21 |
++| `mir2-simulation --lib runtime::zone::runtime::checkpoint::tests` | 17 |
++| `mir2-simulation --lib runtime::zone::runtime::experience_ownership::tests` | 6 |
++| `mir2-simulation --lib runtime::zone::online_identity::tests` | 1 |
++| Four approved Gateway award fixture selectors | 4 |
++| Frozen `mir2-gateway --lib dead_experience_chain_tests` | 12 |
++
++The ordinary packet variant uses the imported D001 `(30,328)` → D002
++`(34,323)` walk transition and its normal return, with the exact respawn
++manifest SHA-256
++`5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3`.
++The caster crosses before a real poison tick kills the prepared Skeleton.
++The source drop remains in D001, the caster receives one experience receipt in
++D002, and ordinary source pickup/LogOut/Login retain gold and exact item payload.
++InventoryItem gets one real UID; repeated pickup does not duplicate it. A source
++rate roll with deterministic seed 6 gives the single-item payload fixture;
++earlier empty/multiple-item rolls and the original mistaken-repeat failure are
++retained. This cannot count as natural Boss, equipment or skill-book acceptance.
++
++Negative tests include all online identity substitutions, another manager
++namespace, changed source/payload, missing proof, consumed issuance, fresh-login
++replay, metadata tampering, valid cold recovery, strict clock boundaries, full
++bag cancellation, original expired TTL, and known/unknown reward publication.
++Proof absence is checked in actual server packet encodings and WorldSnapshot.
++Unknown publication uses the isolated file-store fault after rename before
++directory sync; it is not a SQL/network/recovery-journal test.
++
++The original six-test RED precedes production edits. Raw compiler failures,
++process abort, wrong prepared HP, scatter-position and multiple-item fixture
++failures are retained, not rewritten as successful runs. Adjacent old tests
++failed under the new cold/Node policy before their approved adaptation.
++
++## Approved test fixture adaptations
++
++These are fixture maintenance, not new RED or network acceptance:
++
++- `shared_in_process_runtime_emits_gain_experience_after_kill_award_commit`,
++  `shared_in_process_runtime_uses_account_inventory_service_boundary`, and
++  `gateway_kill_award_level_up_updates_zone_and_personal_vitals` now obtain the
++  award through real Manager Join, a prepared HP-1 monster and valid positive
++  damage. Original experience, inventory boundary, life and vitals assertions
++  remain. They cannot directly invent a shared native award.
++- `shared_zone_state_dispatches_current_and_pending_monster_kill_awards` is
++  renamed `shared_zone_state_rejects_unbound_legacy_monster_kill_awards` and
++  verifies rejection of both current and pending forged legacy delivery.
++- `authenticated_checkpoint_retains_owner_without_extending_deadline` is
++  renamed `authenticated_cold_checkpoint_preserves_state_but_revokes_live_owner`.
++  It verifies the original root, player/monster payload and absolute clocks,
++  payload/epoch tamper rejection, empty cold authority, fresh admission and B's
++  own positive killing damage at both former five-second boundaries.
++- `fresh_same_map_join_revokes_old_claim_and_old_poison_identity` preserves
++  green poison instead of erasing it. It verifies original next/expiry clocks,
++  new epoch, B's positive damage and an actual old-poison lethal tick that awards
++  neither former nor replacement epoch despite reusing all durable IDs.
++- `complete_zone_checkpoint_restores_authoritative_and_derived_state` validates
++  the original root and rejects changed HP before checking cleared online
++  authority, complete player/hazard payload, position, vitals and ECS mirror.
++
++Adaptation-before full bytes/SHA and exact hunks are separate receipts. The
++death18 real Magic/poison-death test source is byte-unchanged.
++
++## Delivery and remaining boundaries
++
++The authorized delivery is eight production files, four new Rust files, this
++scoped document and one additional existing test file: **14 files**.
++Full patch, before/after hashes, case-to-test mapping, failure history and raw
++logs are frozen under
++`C:/mir2-playtest-releases/20261004-native-r18/cross-map-drop-implementation-01/`.
++Global roadmap/progress/parity documents are reserved for parent integration.
++
++Still open: cross-Gateway ZoneId/process handoff, original level-weighted
++object-reference party experience/pickup, Boss and PK LastHitter parity, full
++transport resume-token lifecycle, both database and recovery-journal failure,
++live network rollout, natural Boss/equipment/book drops, leveled journeys and
++human frontend acceptance. The 34 planned cases are individually classified in
++the receipt; bounded variants or partial coverage are not upgraded to complete
++planned-scenario acceptance. No current player saves, services, generated
++resources, P2/v27 inputs or published R18 artifacts were changed.

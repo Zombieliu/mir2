@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/production_review",
+  "reviewedAtUtc": "2026-10-09T15:15:07.8573934+00:00",
+  "acceptedForFocusedTests": true,
+  "authoredSourcePath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\frontend-authored-source-01.json",
+  "authoredSourceSha256": "2aea2fb7ebb03dcbbf1f5829ad96111df2843ffcf65d571133c80d6ee0efa99e",
+  "authoredFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "length": 5038,
+      "sha256": "0bb26ff4298628cc47507ade4004dd70bb43f05898ef7208fedd3c78b5c516e5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "length": 531988,
+      "sha256": "8c50c1e03c660159bd6032fee5ea58c7361c2b588ad4eb982934c8baa7cfc9fd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "length": 903736,
+      "sha256": "f7b692680fe0f16e412e9991c6eb4161b5c2b9286b455484219f9ddd883abdfc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "length": 11240,
+      "sha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/lib.rs",
+      "length": 167647,
+      "sha256": "56266851a23632b1844bea8cd9a9cd5781f2a9bed308988b39f22d74c485f614"
+    },
+    {
+      "path": "mir2-web3/packages/game-data/src/stone_items.rs",
+      "length": 1411,
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    }
+  ],
+  "declaredAuthoredPathCount": 6,
+  "frontendProductPathCount": 4,
+  "sharedGameDataDependencyPathCount": 2,
+  "authoredLengthAndHashMismatches": [],
+  "handoffPath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\frontend-sidebar-handoff-01.json",
+  "handoffSha256": "79ffb5f46f6132ebec05e13fa4013b0fc88fd1873ce350e384d73c5210b7ce08",
+  "confirmedP0P1Blockers": [],
+  "noCargoRun": true,
+  "noGuardRun": true,
+  "noProbeRun": true,
+  "noUiRun": true,
+  "noProductEdits": true,
+  "actualResultAccepted": false,
+  "rawFinal": "FrontendSource01 accepted only for original CargoGuard serial Native workshop_8, portable-only workshop_5 and full platform Native compile checks. All6 declared file lengths/hashes and4 handoff product paths match. Actual right-side layout uses authenticated server model/current opaque target strings, no client economy or outcome computation. Existing global NPC input modality is intentionally retained; this is a visible right panel, not a world-interactive sidebar promise. No tests, rendering/screenshots/live playability/gateway/PG/installer/deployment acceptance inferred.",
+  "acceptedChecks": [
+    "client-bevy --features native-ui --lib workshop_ (expected8: model4 + native renderer2 + actual Bag renderer2)",
+    "client-bevy --no-default-features --features portable-quest-ui --lib workshop_ (expected5: model4 + portable computed renderer1)",
+    "platform-windows full Native cargo check",
+    "Optional bounded existing NPC dialog/Bag transition regression before outcome acceptance"
+  ],
+  "expectedTestExecutions": 13,
+  "expectedDistinctAuthoredFunctionNames": 9,
+  "originalTools": [
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.cs",
+      "sha256": "f1eeaaf4bddf13e8e3bae1379100095c4b22fa91c6d6696ad30bd218f9516689"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/LICENSE.0BSD.txt",
+      "sha256": "0715e35609fae3255502eab08ba3afea7ae64899c199c02fd2c7f32c5b98516d"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+    },
+    {
+      "path": "C:/Users/Administrator/.cargo/bin/rustup.exe",
+      "sha256": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7"
+    },
+    {
+      "path": "C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "sha256": "8bb6fa8c283b4d92120b1ef249a9b311b0f804d4cabbe9981159976c8be76a5e"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "sha256": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab"
+    },
+    {
+      "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/CargoGuard.exe",
+      "sha256": "2025bdd29ff4df3d9f772ba7f0d44856243204909b6185cb2ab184dfcd0ab82e"
+    }
+  ],
+  "originalPolicy": {
+    "templatePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-transport-source37-native-transport-test01.policy.json",
+    "templateSha256": "0510be32e885c39302f7d4f278b651c7c949eddcff40b7a4e5a797833eb92ca9",
+    "mode": "real-cargo",
+    "probeMode": "actual",
+    "thresholdBytes": "53687091200",
+    "freshnessMs": "2000",
+    "probeTimeoutMs": "15000",
+    "postChildPolicy": "B"
+  },
+  "helper": {
+    "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\run-frontend-check.ps1",
+    "sha256": "9dcd6aca6fe0c17a8708445a8b2a99ee223d77771db09c58db7007ef28d0cf5c",
+    "requiredReviewReference": "independent-stone-frontend-source-review-01.json",
+    "generatorPath": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\make-frontend-runner.py",
+    "generatorSha256": "dcb07e41dbea23c0daf65a6651a16cc0483829f6085f13a6177946e89e127121",
+    "originalGuardControlBlockUnchanged": true,
+    "controlBlockComparison": "Normalized line endings only, replace acceptance scope prose with the same marker; Guard root/template, policy/authority/acceptance/source/receipt binding and saved environment list exactly match accepted runtime wrapper.",
+    "allowedChanges": [
+      "frontend review path",
+      "declared client/protocol/game-data/guidance/original UI dependencies",
+      "standalone client manifests/features/workshop filter/full Native check",
+      "existing C Windows target reuse",
+      "scoped summary prose/name"
+    ],
+    "targetDirectory": "C:/mir2-cross-platform-storage-20261002/rust-target/windows",
+    "serialRequired": true
+  },
+  "reviewedInvariants": [
+    "lib.rs exposes stone_workshop_ui only when native-ui or portable-quest-ui is enabled. UI Scale, Window and PrimaryWindow are real Bevy0.19 APIs present in the current Cargo feature graph.",
+    "Classifier reads the current NpcDialogModel, requires live positive NPC identity, exact four-language title/footer, bounded lines/options, unique targets, at least one enabled non-home valid workshop link and enabled Exit. It never grants economic authority.",
+    "Decimal identities remain opaque canonical u64 strings; no floating-point identifier conversion, no random outcome/seed/economic calculation on client.",
+    "Native transform_npc_dialog maps server title, then body, then footer to model lines, and copies opaque link targets; the strict title/footer classifier matches actual server payload structure.",
+    "Supplied host geometry wins including invalid values which fail closed. Native fallback uses real PrimaryWindow logical width/height divided by actual UiScale; missing/nonfinite/touch/small geometry retains prior modal/sheet.",
+    "Layout cache includes workshop rectangle so native resize/scale changes invalidate it without a new dialog; ordinary/Unknown pages restore original dimensions.",
+    "Bag placement preserves already separate drags; overlap uses below with8 gap or left fallback, clamps both axes on geometry change and restores ordinary/close origins.",
+    "Existing full-stage modal capture, enabled current-link SelectNpcDialog validation, Escape/back and server authority are intentionally retained.",
+    "Tests use actual plugin/Node/ComputedNode/UiGlobalTransform and current-link intent queue; no test fixture replaces economic decisions or normal network authorization.",
+    "Changes compared to actual HEAD are the documented layout/model/new tests; no exact immediate pre-edit working-file byte archive exists and HEAD blobs are not presented as that evidence.",
+    "Original unchanged Guard/template/probe/callee/toolchain caps50GiB/freshness2000ms/probe15000ms/PolicyB and serial lifecycle remain required on each actual call."
+  ],
+  "limitations": [
+    "Reviewer ran no Cargo, Guard/probe, UI, screenshot, game or gateway. Static source qualification does not establish compilation or passing tests.",
+    "Actual old Windows dynamic ItemInfo catalog application, item assets, rendered text/fonts, font sizes, full end-to-end server-to-client flow and final human acceptance remain unverified.",
+    "Native8 and portable5 share4 function names:13 executions represent9 distinct authored functions; actual logs must supply counts, not this prediction.",
+    "Global NPC modality remains: the new right panel does not allow world movement outside it. This preserves the explicitly selected bounded implementation behavior.",
+    "Four actual current repository NPC languages are handled; no nine-language or traditional-Chinese localization acceptance is claimed.",
+    "Worker retained no immediate pre-edit byte snapshots for the3 edited tracked frontend files. Handoff explicitly separates earlier observations and Git-normalized HEAD blobs; review does not invent missing baseline evidence.",
+    "Default workshop binding, public UID authority/census, actual PG transactions, Unknown end-to-end reconciliation, external process recovery, installers and deployments remain outside this frontend permit.",
+    "Existing C target reuse may encounter ordinary locked-output failures; retain any real failure/refusal without stopping user games or loosening original Guard controls."
+  ],
+  "references": [
+    "client-bevy/src/stone_workshop_ui.rs:1-226",
+    "client-bevy/src/quest_ui.rs:2011,3280,3426,8922,8965,11247",
+    "client-bevy/src/crystal_ui/overlays.rs:6821,17729,17778",
+    "platform-windows/src/gameplay_bridge.rs:3942-3994",
+    "simulation/src/runtime/stone_npc.rs:89,282-300"
+  ]
+}

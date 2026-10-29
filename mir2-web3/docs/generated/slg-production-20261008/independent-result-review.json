@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.production-independent-result-review.v1",
+  "reviewer": "/root/production_review",
+  "accepted": true,
+  "recordedUtc": "2026-10-08T07:37:45.1663928Z",
+  "rawFinal": "Accepted: both finite checks verified.\n\n- Rehashed all **14 + 450** declared inputs; **zero exclusions, zero drift**. Snapshot and Cargo-log hashes match recorded results.\n- Both nonces show `FORWARD`, actual `GetVolume C`, and **completed/exited/disposed = true**, exit **0**.\n- C free space: **247,523,606,528 / 247,515,983,872 bytes**, above **53,687,091,200**.\n- Conservative freshness bounds, including timestamp rounding: **995.0175 / 880.2193 ms**, below 2,000 ms.\n- Production log: **19 passed, 0 failed, 0 ignored**.\n- Simulation log: `Finished dev` and exit **0**; **84 warnings** remain.\n\nOriginal receipt filenames are `before.json` and `after.json`. Earlier audit date coercion was a reader issue; final verification used raw UTC stamps. No Cargo rerun, UI, edits or broader work.\n\nEvidence covers preparation rules and compile integration only; no gameplay route or durable inventory commit was tested.",
+  "noCargoRun": true,
+  "noUiRun": true
+}

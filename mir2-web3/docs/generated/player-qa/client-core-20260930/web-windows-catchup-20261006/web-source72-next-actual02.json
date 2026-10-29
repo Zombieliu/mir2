@@ -1,0 +1,61 @@
+{
+  "owner": "Root",
+  "kind": "Source72 actual strict Next production build",
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\source72-final-source-snapshot01.json",
+    "bytes": 30486653,
+    "sha256": "54d7971f517a34a58675b9c1606eda65d5957ec2d8353a44329e7fab075dc9b1"
+  },
+  "nodeActualProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source72-node-actual01.json",
+    "bytes": 1305,
+    "sha256": "b3195b04c1f42cc27560d9949c5c38173d9e644535fb5b78915ef381b24ed5b7"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\next01-config.json",
+    "bytes": 5446,
+    "sha256": "0a7ccb775056fc5cfd42da1f697978fb43c747211029a0a162976753efb91183"
+  },
+  "outer": {
+    "exitCode": 0,
+    "builderPid": 81124,
+    "elapsedMs": 69796,
+    "exited": true,
+    "disposed": true
+  },
+  "originalCallerBytes": 4569,
+  "originalCallerSha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+  "compilerFlagsUnchanged": true,
+  "strictTypeScriptPassed": true,
+  "compiledSeconds": 22.6,
+  "typeScriptSeconds": 21.1,
+  "staticPages": 13,
+  "stderrBytes": 0,
+  "preAndPostGuardsPassed": true,
+  "outputManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source72-storage-takeback-20261012-01\\root-approved01\\next-output-manifest02.json",
+    "bytes": 9520284,
+    "sha256": "c53aee244df063bb1fddfffaa86f0d21fcc810de7861e9d349d03c07cafe8c13"
+  },
+  "ordinaryOutputFiles": 21036,
+  "ordinaryOutputDirectories": 631,
+  "gamePageChunks": [
+    {
+      "path": "E:/mir2-player-journey/work/web-source72-storage-takeback-next01/mir2-web3/apps/web/.next-web-windows-catchup-source72-20261012-01/static/chunks/app/page-9f95d58aafb15678.js",
+      "bytes": 2596130,
+      "sha256": "bb6c877595bb5af2ae8c3a7bad4999c1b7006c49be40f419ea92c1f2a91d911a",
+      "relativePath": "static/chunks/app/page-9f95d58aafb15678.js"
+    }
+  ],
+  "productionBuildAccepted": true,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "metadataCorrection": "Manifest01 retained all exact absolute input bytes but its relative fields mistakenly resolved againstcwd. Manifest02 replaces only file/directory relative metadata from already-read actual output tree; no product execution repeated.",
+  "enospcPublicQaWrite": {
+    "requestedPath": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source72-next-actual01.json",
+    "actualFailed": true,
+    "accepted": false,
+    "reason": "ENOSPC",
+    "retainedOnC": true
+  }
+}

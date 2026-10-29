@@ -204,7 +204,8 @@ export function adaptHero(hero: UnknownRecord | null | undefined): HeroSummary |
   }
 
   const spawnState = readNumber(record, ["spawnState"]);
-  const active = readBool(record, ["active", "summoned"]) ?? (spawnState !== undefined ? spawnState > 0 : undefined);
+  const active = spawnState !== undefined ? spawnState === 2 : readBool(record, ["active", "summoned"]);
+  const behaviour = readNumber(record, ["behaviour"]);
 
   return {
     name: name ?? "Hero",
@@ -221,6 +222,8 @@ export function adaptHero(hero: UnknownRecord | null | undefined): HeroSummary |
     attack: readNumber(record, ["attack", "ac"]),
     defence: readNumber(record, ["defence", "defense", "dc"]),
     active,
+    spawnState: spawnState === 2 ? "summoned" : spawnState === 1 ? "unsummoned" : spawnState === 0 ? "none" : undefined,
+    behaviour: behaviour === 0 ? "attack" : behaviour === 1 ? "counterAttack" : behaviour === 2 ? "follow" : behaviour === 3 ? "custom" : undefined,
   };
 }
 
@@ -379,6 +382,7 @@ export function adaptGroup(
  */
 type RawFriendEntry = {
   name?: unknown;
+  index?: unknown;
   online?: unknown;
   memo?: unknown;
   level?: unknown;
@@ -417,6 +421,8 @@ export function adaptFriends(
 
       const base: FriendEntry = { name };
       if (record) {
+        const index = record.index;
+        if (typeof index === "number" && Number.isSafeInteger(index) && index >= 0 && index <= 2147483647) base.index = index;
         const online = readBool(record, ["online"]);
         if (online !== undefined) base.online = online;
         const memo = readString(record, ["memo"]);
@@ -428,7 +434,12 @@ export function adaptFriends(
       }
 
       const extra = options?.enrich?.(name);
-      return [extra ? { ...base, ...extra, name } : base];
+      if (!extra) return [base];
+      const enriched = { ...base, ...extra, name };
+      const index = base.index ?? extra.index;
+      if (typeof index === "number" && Number.isSafeInteger(index) && index >= 0 && index <= 2147483647) enriched.index = index;
+      else delete enriched.index;
+      return [enriched];
     });
   };
   // Prefer the enriched *Infos lists (online/memo) when the host provides them,
@@ -485,9 +496,8 @@ const RANKING_TAB_BY_RANK_TYPE: Record<number, RankingTabKey> = {
   5: "archer",
 };
 
-/** Maps a `(rankType, onlineOnly)` pair to the Ranking window tab key. */
-export function rankingTabKey(rankType: number, onlineOnly: boolean): RankingTabKey {
-  if (onlineOnly) return "online";
+/** Class board identity is independent of its online-only filter. */
+export function rankingTabKey(rankType: number, _onlineOnly: boolean): RankingTabKey {
   return RANKING_TAB_BY_RANK_TYPE[rankType] ?? "overall";
 }
 
@@ -517,6 +527,8 @@ export function rankingPageKeyForTab(tab: RankingTabKey): string {
 
 type RankingStateLike = {
   rankType?: number;
+  /** Captured request row offset; absent when the host cannot correlate it. */
+  rankIndex?: number;
   onlineOnly?: boolean;
   myRank?: number;
   count?: number;
@@ -532,6 +544,8 @@ type RankingStateLike = {
 /** Adapts a page `RankingState` into the Ranking window's `RankingPage`. */
 export function adaptRankingPage(page: RankingStateLike | null | undefined): RankingPage | null {
   if (!page || typeof page !== "object") return null;
+  const rankIndex = Number.isSafeInteger(page.rankIndex) && page.rankIndex! >= 0 && page.rankIndex! <= 2147483647
+    ? page.rankIndex : undefined;
   const entries: RankingEntry[] = (Array.isArray(page.entries) ? page.entries : []).flatMap(
     (entry, index) => {
       if (!entry || typeof entry !== "object") return [];
@@ -539,7 +553,7 @@ export function adaptRankingPage(page: RankingStateLike | null | undefined): Ran
       if (!name) return [];
       return [
         {
-          rank: typeof entry.rank === "number" ? entry.rank : index + 1,
+          rank: typeof entry.rank === "number" ? entry.rank : (rankIndex ?? 0) + index + 1,
           playerId: typeof entry.playerId === "number" ? entry.playerId : 0,
           name,
           level: typeof entry.level === "number" ? entry.level : 0,
@@ -550,6 +564,7 @@ export function adaptRankingPage(page: RankingStateLike | null | undefined): Ran
   );
   return {
     rankType: typeof page.rankType === "number" ? page.rankType : 0,
+    rankIndex,
     onlineOnly: page.onlineOnly === true,
     myRank: typeof page.myRank === "number" ? page.myRank : 0,
     count: typeof page.count === "number" ? page.count : entries.length,
@@ -681,30 +696,21 @@ export function adaptGuildTerritory(
 // Trade
 // ---------------------------------------------------------------------------
 
-/**
- * Reads an enriched trade item array into the window's `TradeItemSlot[]`.
- *
- * The gateway sends each slot as `{ name, count?, grade? }` (exact camelCase
- * keys from the trade contract). The window's `TradeItemSlot` keys items by a
- * stable `id`; since the contract carries no per-slot id, we synthesise one
- * from the array index. `grade` has no slot on `TradeItemSlot`, so it is read
- * (for validation) but not surfaced. Entries without a usable name are dropped.
- */
-function readTradeItems(value: unknown): TradeItemSlot[] | undefined {
-  if (!Array.isArray(value)) return undefined;
-  const items = value.flatMap((entry, index) => {
-    const record = asRecord(entry);
-    if (!record) return [];
+/** Preserve the physical ten-cell partner grid. Malformed display rows retain their holes. */
+function readTradeItems(value: unknown): Array<TradeItemSlot | null> | undefined {
+  if (!Array.isArray(value) || value.length > 10) return undefined;
+  return Array.from({length: 10}, (_, index) => {
+    const record = asRecord(value[index]);
+    if (!record) return null;
     const name = readString(record, ["name", "itemName"]);
-    if (name === undefined) return [];
-    const slot: TradeItemSlot = { id: index, name };
+    if (name === undefined) return null;
+    const item: TradeItemSlot = {id: index, slot: index, name};
     const count = readNumber(record, ["count", "quantity"]);
-    if (count !== undefined) slot.count = count;
+    if (count !== undefined) item.count = count;
     const icon = readNumber(record, ["icon"]);
-    if (typeof icon === "number" && icon > 0) slot.icon = icon;
-    return [slot];
+    if (typeof icon === "number" && icon >= 0) item.icon = icon;
+    return item;
   });
-  return items.length > 0 ? items : undefined;
 }
 
 /**
@@ -747,7 +753,7 @@ export function adaptTrade(trade: UnknownRecord | null | undefined): TradeSummar
     summary.partnerItems = partnerItems;
     // Keep the count consistent with the enriched slot list when the server did
     // not also send an explicit partnerItemCount.
-    if (summary.partnerItemCount === undefined) summary.partnerItemCount = partnerItems.length;
+    if (summary.partnerItemCount === undefined) summary.partnerItemCount = partnerItems.filter(item => item !== null).length;
   }
 
   // Net-new currency selector for the partner's offered amount.

@@ -1,0 +1,9 @@
+
+running 4 tests
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_walk_survives_autosave_before_tick ... ok
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 792 filtered out; finished in 121.06s
+

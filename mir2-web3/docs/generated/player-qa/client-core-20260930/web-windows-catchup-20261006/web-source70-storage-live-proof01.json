@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source70 ordinary compatibility warehouse save/relogin QA",
+  "scope": "React compatibility warehouse; sharedStorageOwner is not accepted",
+  "store": {
+    "normalNpcStoreItem": true,
+    "normalCandleSelection": true,
+    "normalEmptyWarehouseSlotClick": true,
+    "bagBefore": 5,
+    "bagAfter": 4,
+    "storageBefore": 0,
+    "storageAfter": 1,
+    "gold": 180
+  },
+  "hover": {
+    "normalMouseMove": true,
+    "elapsedMs": 1119,
+    "outgoingFrames": 0,
+    "captureTruncated": false,
+    "tooltipText": [
+      "CandleTorchW: 1  Durability: 8/8Selling Price : 5 Gold"
+    ],
+    "screenshot": "web-source70-storage-tooltip-hover01.png"
+  },
+  "focus": {
+    "normalLocatorShiftFocus": true,
+    "elapsedMs": 1131,
+    "outgoingFrames": 0,
+    "captureTruncated": false,
+    "tooltipText": [
+      "CandleTorchW: 1  Durability: 8/8Selling Price : 5 Gold"
+    ]
+  },
+  "takeBack": {
+    "normalTargetEmptyBagISlot8": true,
+    "bagCount": 5,
+    "storageCount": 0,
+    "gold180Visible": true,
+    "storageStatus": "Choose a warehouse item, then click an inventory slot.",
+    "normalItemsIReselectionAfterTakeBack": true,
+    "bagBefore": 4,
+    "storageBefore": 1,
+    "gold": 180
+  },
+  "existingTakeBackTabBehaviour": {
+    "takeBackSelectsQuest": true,
+    "questPageNormalBagCards": 0,
+    "emptyBagIIAlsoCards": 0,
+    "normalItemsIReselectionRestoresCards": 4,
+    "notAnItemLossClaim": true,
+    "source": "original-client-inventory-window.tsx onTabChange(\"quest\")",
+    "remainingFrontendGap": true,
+    "evidence": "web-source70-storage-tab-empty01.png"
+  },
+  "saveRelogin": {
+    "normalSaveLogout": true,
+    "normalLogin": true,
+    "normalStartGame": true,
+    "normalNpcAccess": true,
+    "bagCount": 5,
+    "storageCount": 0,
+    "gold180Visible": true,
+    "storageWindowVisible": true,
+    "gold": 180,
+    "screenshot": "web-source70-storage-relogin01.png"
+  },
+  "reloginVersionedSceneResponses": [
+    {
+      "mapFileName": "0140.map",
+      "assetRelease": "897f1c8804b37877",
+      "status": 200,
+      "sprites": 116,
+      "missingAssets": 0,
+      "fromDiskCache": true,
+      "fromServiceWorker": true
+    }
+  ],
+  "reloginSceneCaptureTruncated": false,
+  "noQaOrAdminCommands": true,
+  "noAppOrWasmGlobalAccess": true,
+  "noBrowserCacheClear": true,
+  "candidateAccepted": false,
+  "humanAccepted": false,
+  "overallPercentage": null,
+  "goalComplete": false
+}

@@ -14,6 +14,10 @@ import {
 } from "./crystal-capture-visual-state.mjs";
 import { decodeCdpMessage, isCriticalConsoleError } from "./cdp-message.mjs";
 import { redactCaptureSecrets } from "./capture-secret-redaction.mjs";
+import {
+  buildQaParityExpectation,
+  compareQaParityState,
+} from "./crystal-parity-state.mjs";
 
 const require = createRequire(import.meta.url);
 const CdpWebSocket = require("next/dist/compiled/ws");
@@ -452,24 +456,7 @@ async function applyQaCharacterStateIfConfigured(client) {
 
   const rawPayload = await readJsonFile(path.resolve(qaCharacterStatePath));
   const payload = rawPayload.qaCharacterState ?? rawPayload.characterState ?? rawPayload;
-  const expected = {
-    mapFileName: payload.mapFileName ?? payload.map_file_name ?? null,
-    x: payload.position?.x ?? payload.x ?? null,
-    y: payload.position?.y ?? payload.y ?? null,
-    hp: Number(payload.hp),
-    maxHp: Number(payload.maxHp ?? payload.max_hp),
-    mp: Number(payload.mp),
-    maxMp: payload.maxMp == null && payload.max_mp == null ? null : Number(payload.maxMp ?? payload.max_mp),
-    experience: payload.experience == null ? null : Number(payload.experience),
-    maxExperience: payload.maxExperience == null && payload.max_experience == null
-      ? null
-      : Number(payload.maxExperience ?? payload.max_experience),
-    gold: Number(payload.gold),
-    inventoryItemCount: (payload.inventoryItemsJson ?? payload.inventory_items_json ?? []).length,
-    beltItemCount: (payload.beltItemsJson ?? payload.belt_items_json ?? []).length,
-    storageItemCount: (payload.storageItemsJson ?? payload.storage_items_json ?? []).length,
-    equipmentItemCount: (payload.equipmentItemsJson ?? payload.equipment_items_json ?? []).length,
-  };
+  const expected = buildQaParityExpectation(payload);
   const before = await readQaAlignmentState(client);
   const probe = await sendCommandProbe(client, {
     type: "qaControl",
@@ -484,44 +471,7 @@ async function applyQaCharacterStateIfConfigured(client) {
     throw new Error(`qaControl qa.applyNativeState was not accepted by the browser bridge: ${JSON.stringify(probe)}`);
   }
 
-  await waitUntil(
-    client,
-    `
-      (() => {
-        const state = window.__mir2Stage5?.state ?? {};
-        const world = state.world ?? {};
-        const inventoryItems = world.inventoryItems ?? state.inventoryItems ?? [];
-        const beltItems = world.beltItems ?? state.beltItems ?? [];
-        const storageItems = world.storageItems ?? state.storageItems ?? [];
-        const equipmentItems = world.equipmentItems ?? state.equipmentItems ?? [];
-        const player = state.player ?? world.player ?? {};
-        const playerHp = world.playerHp ?? state.playerHp ?? null;
-        const playerMaxHp = world.playerMaxHp ?? state.playerMaxHp ?? null;
-        const playerMp = world.playerMp ?? state.playerMp ?? null;
-        const playerMaxMp = world.playerMaxMp ?? state.playerMaxMp ?? null;
-        const gold = world.gold ?? state.gold ?? null;
-        const expected = ${JSON.stringify(expected)};
-        const positionMatches = expected.mapFileName == null || (
-          state.mapFileName === String(expected.mapFileName)
-            && Number(player?.x) === Number(expected.x)
-            && Number(player?.y) === Number(expected.y)
-        );
-        return state.screen === "game"
-          && positionMatches
-          && Number(playerHp) === expected.hp
-          && Number(playerMaxHp) === expected.maxHp
-          && Number(playerMp) === expected.mp
-          && (expected.maxMp == null || Number(playerMaxMp) === expected.maxMp)
-          && Number(gold) === expected.gold
-          && inventoryItems.length === expected.inventoryItemCount
-          && beltItems.length === expected.beltItemCount
-          && storageItems.length === expected.storageItemCount
-          && equipmentItems.length === expected.equipmentItemCount;
-      })()
-    `,
-    "QA native character state applied",
-    30_000,
-  );
+  const alignment = await waitForQaParityState(client, expected, 30_000);
 
   return {
     ok: true,
@@ -530,9 +480,29 @@ async function applyQaCharacterStateIfConfigured(client) {
     qaCharacterStatePath: path.resolve(qaCharacterStatePath),
     expected,
     before,
-    after: await readQaAlignmentState(client),
+    after: alignment.actual,
+    comparison: alignment.comparison,
     probe,
   };
+}
+
+async function waitForQaParityState(client, expected, timeoutMs) {
+  const startedAt = Date.now();
+  let lastActual = null;
+  let lastComparison = null;
+  while (Date.now() - startedAt < timeoutMs) {
+    lastActual = await readQaAlignmentState(client);
+    lastComparison = compareQaParityState(expected, lastActual);
+    if (lastActual.screen === "game" && lastComparison.ok) {
+      return { actual: lastActual, comparison: lastComparison };
+    }
+    await delay(100);
+  }
+  throw new Error(
+    `Timed out waiting for exact QA native character state; mismatches=${JSON.stringify(
+      redactCaptureSecrets(lastComparison?.mismatches?.slice(0, 20) ?? []),
+    )}; actual=${JSON.stringify(redactCaptureSecrets(lastActual))}`,
+  );
 }
 
 async function transferIfNeeded(client, targetMap, targetX, targetY) {
@@ -650,12 +620,42 @@ async function readQaAlignmentState(client) {
       const beltItems = world.beltItems ?? state.beltItems ?? [];
       const storageItems = world.storageItems ?? state.storageItems ?? [];
       const equipmentItems = world.equipmentItems ?? state.equipmentItems ?? [];
+      const quests = world.questLog ?? state.questLog ?? [];
+      const skills = world.knownSkills ?? state.knownSkills ?? [];
+      const buffs = world.activeBuffs ?? state.activeBuffs ?? [];
+      const entities = world.entities ?? state.entities ?? [];
+      const playerObjectId = String(world.playerObjectId ?? state.playerObjectId ?? "");
+      const selfPlayer = entities.find((entity) => String(entity?.objectId ?? "") === playerObjectId) ?? null;
+      const systems = world.stage5Systems ?? state.stage5Systems ?? {};
+      const itemSummary = (item) => ({
+        key: item?.key ?? null,
+        uniqueId: item?.uniqueId ?? item?.unique_id ?? null,
+        slot: item?.slot ?? null,
+        container: item?.container ?? null,
+        quantity: item?.quantity ?? item?.count ?? null,
+        icon: item?.icon ?? null,
+        durabilityCurrent: item?.durabilityCurrent ?? item?.durability_current ?? null,
+        durabilityMax: item?.durabilityMax ?? item?.durability_max ?? null,
+      });
+      const equipmentSummary = (item) => ({
+        ...itemSummary(item),
+        slot: item?.slot ?? null,
+        shape: item?.shape ?? null,
+      });
       return {
         screen: state.screen ?? null,
         wsState: state.wsState ?? null,
         mapFileName: state.mapFileName ?? null,
         mapTitle: state.mapTitle ?? null,
         player: state.player ?? null,
+        authoritativePlayer: state.authoritativePlayer ?? null,
+        selfPlayer: selfPlayer ? {
+          name: selfPlayer.name ?? null,
+          level: selfPlayer.level ?? null,
+          classKey: selfPlayer.classKey ?? selfPlayer.class ?? null,
+          genderKey: selfPlayer.genderKey ?? selfPlayer.gender ?? null,
+          direction: selfPlayer.direction ?? null,
+        } : null,
         playerHp: world.playerHp ?? state.playerHp ?? null,
         playerMaxHp: world.playerMaxHp ?? state.playerMaxHp ?? null,
         playerMp: world.playerMp ?? state.playerMp ?? null,
@@ -667,10 +667,47 @@ async function readQaAlignmentState(client) {
         maxWeight: world.maxWeight ?? state.maxWeight ?? null,
         freeBagSlots: world.freeBagSlots ?? state.freeBagSlots ?? null,
         maxBagSlots: world.maxBagSlots ?? state.maxBagSlots ?? null,
+        inventoryCapacity: world.inventoryCapacity ?? state.inventoryCapacity ?? null,
         inventoryItemCount: inventoryItems.length,
         beltItemCount: beltItems.length,
         storageItemCount: storageItems.length,
         equipmentItemCount: equipmentItems.length,
+        inventoryItems: inventoryItems.map(itemSummary),
+        beltItems: beltItems.map(itemSummary),
+        storageItems: storageItems.map(itemSummary),
+        equipmentItems: equipmentItems.map(equipmentSummary),
+        quests: quests.map((quest) => ({
+          questId: quest?.questId ?? quest?.quest_id ?? null,
+          title: quest?.title ?? null,
+          stage: quest?.stage ?? null,
+          current: quest?.current ?? null,
+          required: quest?.required ?? null,
+        })),
+        skills: skills.map((skill) => ({
+          key: skill?.key ?? null,
+          name: skill?.name ?? null,
+          level: skill?.level ?? null,
+          experience: skill?.experience ?? null,
+          hotkey: skill?.hotkey ?? null,
+          delayMs: skill?.delayMs ?? skill?.delay_ms ?? null,
+          castTimeMs: skill?.castTimeMs ?? skill?.cast_time_ms ?? null,
+        })),
+        buffs: buffs.map((buff) => ({
+          key: buff?.key ?? null,
+          name: buff?.name ?? null,
+          attackBonus: buff?.attackBonus ?? buff?.attack_bonus ?? null,
+          defenceBonus: buff?.defenceBonus ?? buff?.defence_bonus ?? null,
+          stats: Array.isArray(buff?.stats) ? buff.stats.map((stat) => ({
+            stat: stat?.stat ?? null,
+            value: stat?.value ?? null,
+          })) : [],
+        })),
+        stage5: {
+          hair: systems.appearance?.hair ?? null,
+          attackMode: systems.attackMode ?? null,
+          petMode: systems.petMode ?? null,
+          allowGroup: systems.group?.allowGroup ?? null,
+        },
       };
     })()
   `);

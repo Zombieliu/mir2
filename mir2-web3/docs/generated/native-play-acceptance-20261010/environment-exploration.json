@@ -1,0 +1,349 @@
+{
+  "schema": "mir2.native-play-environment-exploration.v1",
+  "reviewer": "/root/production_review",
+  "createdAtUtc": "2026-10-09T17:21:37.442562+00:00",
+  "scope": "Read-only current environment, public update-route diagnosis and ordinary QA entry discovery; no UI authentication, Cargo, service/account writes or deployment.",
+  "currentInstalledClient": {
+    "directory": "D:\\Mir2Invite\\game",
+    "candidate": "WN-CANDIDATE-20261007-invited-19",
+    "gitRevision": "2b04e82c4f42b22f895f5f95b5bd79a8147eacdf",
+    "exeSha256": "3ABC0C7B74AF234D797705AC9CE32A68ABEFAC70BF43095093A353C81145F297",
+    "exeSizeBytes": 111107072,
+    "accepted": false,
+    "clientOnly": true,
+    "versionMetadata": {
+      "path": "D:\\Mir2Invite\\game\\VERSION.json",
+      "length": 1221,
+      "sha256": "66e60b50a181511acb7a9076c959d1d23c9d890d9e2fa6caa168e42ccbf52681"
+    },
+    "exeDiskPin": {
+      "path": "D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+      "length": 111107072,
+      "sha256": "3abc0c7b74af234d797705ac9ce32a68abefac70bf43095093a353c81145f297"
+    },
+    "endpoint": "wss://165.154.65.136.sslip.io/playtest/ws",
+    "candidateOnly": true,
+    "wholeGameAccepted": false,
+    "packagedKnownLimits": "0-30 invited test scope; Warrior prior human route accepted, Wizard/Taoist full routes still pending. No stable50/100-player claim."
+  },
+  "currentServerReadOnlyObservation": {
+    "url": "https://165.154.65.136.sslip.io/playtest/health",
+    "observedUtc": "2026-10-09T16:56:24.385567+00:00",
+    "httpStatus": 200,
+    "revision": "c70436f34eabb432d769e0082c0afa23303294b0",
+    "http": "ready",
+    "ws": "ready",
+    "identity_backend": "postgres",
+    "channel_identity": {
+      "backend": "postgres",
+      "durable": true
+    },
+    "session_cache": {
+      "backend": "redis",
+      "configured": true,
+      "healthy": true
+    },
+    "gate15": null,
+    "notGameplayAcceptance": true,
+    "sourceCommitSubject": "fix(simulation): retain live purification across maps and admit player powder casts"
+  },
+  "updateTarget": {
+    "candidate": "WN-CANDIDATE-20261009-invited-23",
+    "gitRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+    "exeSha256": "CF7BDB16AD307A744A910F3E17B7D21C78482E556676788BAB7B0682913171E1",
+    "exeSizeBytes": 111343104,
+    "accepted": false,
+    "clientOnly": true,
+    "sourceRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+    "gameSourceIsSeparateFromCurrentServerRevision": true,
+    "sequence": 18,
+    "engineDirectory": "releases/updater-9213EC3FE1A992F7-s15",
+    "localSignedFeedPayload": {
+      "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\feed-18-01\\latest.json",
+      "length": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2"
+    },
+    "feedReadOnlyObservation": {
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json",
+      "observedUtc": "2026-10-09T17:09:48.085165+00:00",
+      "httpStatus": 200,
+      "length": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2",
+      "cacheControl": "no-store",
+      "server": "Caddy",
+      "matchesLocalFeedBytes": true
+    },
+    "publicVersionObservation": {
+      "url": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/VERSION.json",
+      "observedUtc": "2026-10-09T17:09:48.506917+00:00",
+      "httpStatus": 200,
+      "length": 1221,
+      "sha256": "d8c2e7d380c4b37e90695c825e89e1c75ecf6738ce04e67780b4439a002957ee",
+      "matchesLocalVersionBytes": true,
+      "cacheControl": "public, max-age=31536000, immutable",
+      "server": "Caddy"
+    },
+    "packageManifest": {
+      "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\packages-03\\WN-CANDIDATE-20261009-invited-23\\PACKAGE-MANIFEST.json",
+      "length": 31538315,
+      "sha256": "2012c0163c8ec418ed09ed9d3953337db1a246bb1b2d3191abe6b0ba485eb03e"
+    },
+    "publicationPlan": {
+      "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\publication-18-01\\PUBLICATION-PLAN.json",
+      "length": 15719,
+      "sha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0"
+    },
+    "publicationObjectCount": 40,
+    "sevenInstalledManifestDifferences": [
+      {
+        "path": "BUILD-ATTESTATION.json",
+        "size": 2416,
+        "sha256": "62254955D4376366DFDBE2976C93BCAF4A688CCA8E6B283AC1ED61B5AB85FF90"
+      },
+      {
+        "path": "README-START.txt",
+        "size": 49328,
+        "sha256": "5BC26223994015306280EE17952CAFE2D30D61B1649F8A0FF7F1DE3CC40B8BBD"
+      },
+      {
+        "path": "mir2-assets/generated/native-map-keyed/coverage-audit.json",
+        "size": 723520,
+        "sha256": "014C18E1E49666877EBCDA9E21935C22B46D8950AA2BD1B35A67824946CAE42B"
+      },
+      {
+        "path": "mir2-assets/generated/native-map-keyed/resource-input-provenance.json",
+        "size": 32275,
+        "sha256": "E8CA68605B5C27E925476CAE6E055CCEB9552157075D6E45B8AA9D4CB76F05A8"
+      },
+      {
+        "path": "mir2-assets/original-ui/Prguse/1002.png",
+        "size": 15671,
+        "sha256": "72F73B42BC7B95A91144FE0F135EDE2AD343FBFED488C75095F98ED427CAF497"
+      },
+      {
+        "path": "mir2-assets/original-ui/Title/18.png",
+        "size": 697,
+        "sha256": "3B8A6097B20B32FC1BB8D371EFDEFFFE564AF7BF1C75BC098BFD10BE097C02AD"
+      },
+      {
+        "path": "mir2-platform-windows.exe",
+        "size": 111343104,
+        "sha256": "CF7BDB16AD307A744A910F3E17B7D21C78482E556676788BAB7B0682913171E1"
+      }
+    ],
+    "normalFileRouteResults": {
+      "BUILD-ATTESTATION.json": {
+        "httpStatus": 200,
+        "fullSizeAndShaMatched": true,
+        "observedUtc": "2026-10-09T17:13:36.385624+00:00"
+      },
+      "README-START.txt": {
+        "httpStatus": 200,
+        "fullSizeAndShaMatched": true,
+        "observedUtc": "2026-10-09T17:13:36.600936+00:00"
+      },
+      "mir2-platform-windows.exe": {
+        "httpStatus": 206,
+        "range": "bytes 0-0/111343104",
+        "receivedBytes": 1,
+        "fullRemoteExeShaNotChecked": true,
+        "observedUtc": "2026-10-09T17:13:37.646124+00:00"
+      }
+    },
+    "missingLocalResources": [
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\packages-03\\WN-CANDIDATE-20261009-invited-23\\mir2-assets\\generated\\native-map-keyed\\coverage-audit.json",
+        "length": 723520,
+        "sha256": "014c18e1e49666877ebcda9e21935c22b46d8950aa2bd1b35a67824946cae42b",
+        "manifestRelativePath": "mir2-assets/generated/native-map-keyed/coverage-audit.json",
+        "manifestSize": 723520,
+        "manifestSha256": "014c18e1e49666877ebcda9e21935c22b46d8950aa2bd1b35a67824946cae42b",
+        "publicUrl": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/coverage-audit.json",
+        "observedHttpStatus": 404,
+        "observedUtc": "2026-10-09T17:13:36.922758+00:00",
+        "observedCacheControl": "public, max-age=31536000, immutable",
+        "proposedRemotePath": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/coverage-audit.json"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\packages-03\\WN-CANDIDATE-20261009-invited-23\\mir2-assets\\generated\\native-map-keyed\\resource-input-provenance.json",
+        "length": 32275,
+        "sha256": "e8ca68605b5c27e925476cae6e055cceb9552157075d6e45b8aa9d4cb76f05a8",
+        "manifestRelativePath": "mir2-assets/generated/native-map-keyed/resource-input-provenance.json",
+        "manifestSize": 32275,
+        "manifestSha256": "e8ca68605b5c27e925476cae6e055cceb9552157075d6e45b8aa9d4cb76f05a8",
+        "publicUrl": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/resource-input-provenance.json",
+        "observedHttpStatus": 404,
+        "observedUtc": "2026-10-09T17:13:37.096927+00:00",
+        "observedCacheControl": "public, max-age=31536000, immutable",
+        "proposedRemotePath": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/generated/native-map-keyed/resource-input-provenance.json"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\packages-03\\WN-CANDIDATE-20261009-invited-23\\mir2-assets\\original-ui\\Prguse\\1002.png",
+        "length": 15671,
+        "sha256": "72f73b42bc7b95a91144fe0f135ede2ad343fbfed488c75095f98ed427caf497",
+        "manifestRelativePath": "mir2-assets/original-ui/Prguse/1002.png",
+        "manifestSize": 15671,
+        "manifestSha256": "72f73b42bc7b95a91144fe0f135ede2ad343fbfed488c75095f98ed427caf497",
+        "publicUrl": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Prguse/1002.png",
+        "observedHttpStatus": 404,
+        "observedUtc": "2026-10-09T17:13:37.284205+00:00",
+        "observedCacheControl": "public, max-age=31536000, immutable",
+        "proposedRemotePath": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Prguse/1002.png"
+      },
+      {
+        "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\packages-03\\WN-CANDIDATE-20261009-invited-23\\mir2-assets\\original-ui\\Title\\18.png",
+        "length": 697,
+        "sha256": "3b8a6097b20b32fc1bb8d371efdefffe564af7bf1c75bc098bfd10be097c02ad",
+        "manifestRelativePath": "mir2-assets/original-ui/Title/18.png",
+        "manifestSize": 697,
+        "manifestSha256": "3b8a6097b20b32fc1bb8d371efdefffe564af7bf1c75bc098bfd10be097c02ad",
+        "publicUrl": "https://165.154.65.136.sslip.io/client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Title/18.png",
+        "observedHttpStatus": 404,
+        "observedUtc": "2026-10-09T17:13:37.459717+00:00",
+        "observedCacheControl": "public, max-age=31536000, immutable",
+        "proposedRemotePath": "/srv/mir2-client-updates/releases/game-WN-CANDIDATE-20261009-invited-23/mir2-assets/original-ui/Title/18.png"
+      }
+    ],
+    "diagnosis": "The published feed and metadata point to R23, but all four changed asset file URLs needed by the older installed updater return404. The40-object R2 publication plan contains metadata and delivery blobs, not these individual asset routes. Valid bundled delivery does not establish the individual-file update fallback's resource availability.",
+    "stagingFailureIsNotInstallation": true,
+    "doNotAlterManifestOrSignatureToBypassFailure": true
+  },
+  "rootOnlyRepairPlan": [
+    "Read the current remote release directory and Caddy mapping before any write; distinguish absent files from incorrect mount/path or blocked route.",
+    "Use only the four exact locally pinned resources in missingLocalResources, with packageManifest authority and expected paths/lengths/SHA. No full publisher or repeated feed promotion is required by these findings.",
+    "Create only missing ordinary files and necessary parent directories within the mapped R23 root after safe target checks; do not overwrite existing differing bytes or change signature/manifest/feed.",
+    "GET each repaired public route and verify complete size/SHA, with TLS; do not retain long immutable cache headers on errors. Consider any CDN/browser negative cache separately.",
+    "Preserve current game/launcher state; at a safe normal client exit, retry the ordinary updater and verify actual installed VERSION and EXE before recording R23 UI acceptance. Game gateway restart is unrelated to this static file repair."
+  ],
+  "operatorLocationsOnly": [
+    {
+      "kind": "Existing protected DPAPI SSH input",
+      "path": "C:\\mir2-ui-repair-20260921\\playtest-release-20260928\\private\\server-password.dpapi",
+      "exists": true,
+      "contentsRead": false,
+      "decrypted": false,
+      "credentialsPrinted": false,
+      "usernameNotIndependentlyDetermined": true
+    },
+    {
+      "kind": "Existing SSH/runtime dependencies",
+      "path": "C:/mir2-ui-repair-20260921/playtest-release-20260928/python-deps",
+      "role": "Existing operator dependency directory; do not rerun a full deployment script for four static files."
+    },
+    {
+      "kind": "Origin distribution source",
+      "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\operators-02\\origin_r23_s18.py",
+      "publicRoot": "/srv/mir2-client-updates",
+      "caddyConfig": "/etc/caddy/Caddyfile",
+      "publisherLock": "/var/backups/mir2-client-updates/.publisher.lock",
+      "notExecuted": true
+    },
+    {
+      "kind": "Prior gateway operator source",
+      "path": "C:\\mir2-playtest-releases\\20261009-target-r23\\server-rollout-01\\deploy-target-gateway-02.py",
+      "notExecuted": true
+    },
+    {
+      "kind": "Protected test server configuration",
+      "path": "/etc/mir2-playtest/gateway.env",
+      "contentsNotRead": true
+    }
+  ],
+  "historicalOrdinaryQaCharacters": [
+    {
+      "class": "Warrior",
+      "name": "R2100cccbba",
+      "level": 1,
+      "evidence": "C:\\mir2-playtest-releases\\20261009-target-r23\\server-rollout-01\\target-public-02\\warrior-R2100cccbba.jsonl"
+    },
+    {
+      "class": "Wizard",
+      "name": "R2110cccbba",
+      "level": 1,
+      "evidence": "C:\\mir2-playtest-releases\\20261009-target-r23\\server-rollout-01\\target-public-02\\wizard-R2110cccbba.jsonl"
+    },
+    {
+      "class": "Taoist",
+      "name": "R2120cccbba",
+      "level": 1,
+      "evidence": "C:\\mir2-playtest-releases\\20261009-target-r23\\server-rollout-01\\target-public-02\\taoist-R2120cccbba.jsonl"
+    }
+  ],
+  "historicalMiningQaIdentifiers": [
+    {
+      "class": "Warrior",
+      "accountId": "MiningR19A07",
+      "characterName": "MinerR19A07",
+      "level": 12,
+      "characterIndex": 1
+    },
+    {
+      "class": "Wizard",
+      "accountId": "MiningR19B07",
+      "characterName": "MinerR19B07",
+      "level": 12,
+      "characterIndex": 2
+    },
+    {
+      "class": "Taoist",
+      "accountId": "MiningR19C07",
+      "characterName": "MinerR19C07",
+      "level": 12,
+      "characterIndex": 3
+    }
+  ],
+  "qaEntryLimitations": [
+    "QA names/levels above are historical server-protocol evidence, not freshly confirmed current account access, native play or a high-level character guarantee. R23 public cohort RESULT passed9 scenarios at sourcefaef, ordinaryCommandsOnly true/newAccounts0/newCharacters0/adminStatePreparation false/nativeUiAccepted false/humanAccepted false.",
+    "Normal user login must be performed manually under computer-use authentication guidance. Use authenticated Login/NewCharacter/StartGame and actual server level/class shown on character selection; never demo fallback, raw passkey, client QA grants or debug teleport.",
+    "No verified30+ three-class cohort was established by this bounded exploration. Use legitimately progressed characters already owned by the operator, or a separately authorized isolated setup; do not edit the public PG accounts to manufacture acceptance.",
+    "seed_playtest_pg_accounts.rs is an offline protected account-provisioning tool, not a public QA entrance or character/level/grant tool; its documented default is read-only preflight."
+  ],
+  "publishedFeatureEvidence": [
+    {
+      "feature": "Ordinary shared mining",
+      "source": "c70436f34eabb432d769e0082c0afa23303294b0:mir2-web3/docs/SHARED-CRYSTAL-MINING-20261007.md",
+      "recordedRelease": "R19/source2b04 and signed update15",
+      "route": "Level12 PickAxe,2500gold; Vincent at0103(19,18) via0(335,299/300), or Smith0(296,613); equipWeapon;0(663/664,215) toD401(24/25,181); left-click wall; right-click cancels.",
+      "stillOpen": "Sustained input/human sound acceptance, weapon refinement and full P1-P8; old failed mining trials remain historical, not counted as current success."
+    },
+    {
+      "feature": "Current deployed purification/poison and ordinary movement compatibility",
+      "sourceRevision": "c70436f34eabb432d769e0082c0afa23303294b0",
+      "boundary": "Live health identifies the deployed source. Source implementation/conditional tests do not establish native spell playback or complete class routes."
+    },
+    {
+      "feature": "Monthly card",
+      "source": "c70436f34eabb432d769e0082c0afa23303294b0:mir2-web3/docs/MONTHLY-CARD-ACCESS-20261006.md",
+      "boundary": "Source and native entry exist with default REQUIRED=0, no payment provider; actual live access policy was not read from private env and not independently accepted."
+    }
+  ],
+  "unpublishedFeatureConditions": {
+    "stones": {
+      "implementedSource": "mir2-web3/apps/simulation/src/runtime/stones.rs:41",
+      "enable": "MIR2_STONE_WORKSHOPS=1",
+      "ordinaryNpcEntry": "Authenticated Bill0(302,221) or Bruce0159(5,9) dialogue with current active link/range.",
+      "requirements": "Build and stage matched current server/client/resources, with real persistent sole authority, preserved existing save/schema/monthly fields and sealed registry transaction. File authority accepted by bounded tests; actual PG migration0015 and real PG application are still unverified. Do not enable in the current public store on the basis of unit checks.",
+      "currentR19R23NotContainingNewFeature": true,
+      "reviewedProductionBranchDoesNotContainCurrentDeployedServerAsAncestor": true,
+      "physicalUidPreservedReclassification": "Stone flow preserves incoming ore UID rather than clearing global fresh-issuer migration gates.",
+      "acceptanceStillPending": "Actual renderer/sidebar, normal native authenticated flow, nine languages, raw stone two-account transfer, external restart and Unknown reconciliation."
+    },
+    "composableProduction": {
+      "source": "mir2-web3/apps/simulation/src/runtime/production.rs:449",
+      "entry": "configure_personal_production/begin_personal_production/execute_personal_production are backend opt-in integration APIs; normal public catalog, NPC and client gateway route are not enabled.",
+      "requirements": "Real material/template/source/facility catalog bindings; authenticated account/character incarnation; exact atomic account/ledger/inventory commit; shared durable UID service migrated to ALL issuers before public enable; normal UI/transport/output acceptance and archival. File staged tests are not a public workshop deployment.",
+      "cannotBeUiTestedInExistingR19R23": true
+    }
+  },
+  "humanPlayabilityAccepted": false,
+  "noUiRun": true,
+  "noCargoRun": true,
+  "noServiceStartOrRestart": true,
+  "noAccountWrite": true,
+  "noDeployOrUpload": true,
+  "noCredentialsDecodedOrPrinted": true,
+  "onlyWorkReceiptWritten": true,
+  "readerLimitations": [
+    "A first metadata stdout reader hit a Windows GBK encoding error; the UTF8-only reader then read public metadata successfully. A discovery rg used invalid literal Windows wildcards and was corrected. These were read-only tooling issues, not product or update test failures."
+  ]
+}

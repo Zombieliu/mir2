@@ -1,0 +1,114 @@
+{
+  "schema": "mir2.p3a.root-preflight.v1",
+  "createdUtc": "2026-10-04T17:35:33.109969+00:00",
+  "rootRevision": "1b5e64dcf43ae5b8b543cbed4becb6da285a631d",
+  "workerBaseline": "57729ba8c1473ca920a8ea8b3d6e11105d9d4d93",
+  "files": [
+    {
+      "file": "apps/simulation/src/runtime/zone/mod.rs",
+      "new": false,
+      "beforeSha256": "13dd169ffcb2144b07e41957e066926beacfa93ceb717888199ded7686677916",
+      "frozenSha256": "f0a639fa95bdcf11a0b45c8b08abfcc5e38029a62da8c50e62f95d0e193b5118",
+      "frozenBytes": 1433
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/online_identity.rs",
+      "new": true,
+      "beforeSha256": null,
+      "frozenSha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03",
+      "frozenBytes": 4684
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/types.rs",
+      "new": false,
+      "beforeSha256": "3c16e1a6b7aa191735cf5b7da0398f154c52599e4ce7df0639465669f25a4e39",
+      "frozenSha256": "3d0cb53c0da4144da4e7b6969a7442c6934ef0e5833646ea8c0f95407bfb3bd6",
+      "frozenBytes": 51349
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/manager.rs",
+      "new": false,
+      "beforeSha256": "523fea1cdcaaa720c4bd6c2adad0b4a386e0e5b8b3f2ee4d8452b48790c677a3",
+      "frozenSha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70",
+      "frozenBytes": 37240
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "new": false,
+      "beforeSha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0",
+      "frozenSha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5",
+      "frozenBytes": 21889
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "new": false,
+      "beforeSha256": "d0598c4ce418a26f696ec4efc07dfd1d0db3f1e5a6202f86cdbcc73a703390c3",
+      "frozenSha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3",
+      "frozenBytes": 673600
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/ground_ownership.rs",
+      "new": true,
+      "beforeSha256": null,
+      "frozenSha256": "ba03d424261d54c132bf8a097e46a1b0f556c69ec572cdc2997ad3c520aa0ef8",
+      "frozenBytes": 6875
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "new": false,
+      "beforeSha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f",
+      "frozenSha256": "5c3cdd2f93b10c6052a157da2354a14e3e1f49388cf6310d0e8690d642f512f4",
+      "frozenBytes": 86552
+    },
+    {
+      "file": "apps/simulation/src/runtime/drops.rs",
+      "new": false,
+      "beforeSha256": "9b47435fc671c0c60467ff53d4d6518fb9d243ad056612a1e05eb038ac0c6be5",
+      "frozenSha256": "8c1adf2f6956376e407ed2f09a917bfcba0108cc97d7f7c02671499c26524851",
+      "frozenBytes": 173405
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "new": false,
+      "beforeSha256": "938bb54d16ce8c6028eeb1164dd2509c5f3887a49c3bd9e262ceab8b67fa949f",
+      "frozenSha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+      "frozenBytes": 1240679
+    },
+    {
+      "file": "apps/simulation/tests/shared_cross_map_drop_lifecycle.rs",
+      "new": true,
+      "beforeSha256": null,
+      "frozenSha256": "40b35a2b11141247d49062d770c809143afc8baf9eab7f187ad210941cafe0cf",
+      "frozenBytes": 21191
+    },
+    {
+      "file": "apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs",
+      "new": true,
+      "beforeSha256": null,
+      "frozenSha256": "31cf61152aa5835255332fd979c2490cdbbd4d671935cc65e46ddb50dbb30a7b",
+      "frozenBytes": 38114
+    },
+    {
+      "file": "docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md",
+      "new": true,
+      "beforeSha256": null,
+      "frozenSha256": "cc0404b896f020a3055d627945a3f0abd94ea1f62192831dbad25c40ca74f5c5",
+      "frozenBytes": 11433
+    },
+    {
+      "file": "apps/simulation/tests/shared_monster_ownership.rs",
+      "new": false,
+      "beforeSha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e",
+      "frozenSha256": "7571f60473f04fdbf247364613df4ef18e6071ca8f6389ce012589c204564c33",
+      "frozenBytes": 27240
+    }
+  ],
+  "frozenArtifactsVerified": 100,
+  "originalSourcesVerified": 9,
+  "patchSha256": "57b26653d284164c7122baa4f7de72fb441b08eeb394d473c57df238db9f7ded",
+  "forwardCheckPassed": true,
+  "applied": false,
+  "productReviewPendingSameTickLifeIssue": true,
+  "liveServicesChanged": false,
+  "playerSavesChanged": false
+}

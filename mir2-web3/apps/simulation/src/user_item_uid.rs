@@ -73,6 +73,7 @@ impl fmt::Display for UserItemUid {
 pub enum UserItemUidReason {
     CharacterStartItem,
     PlayerPartialDrop,
+    ItemStackSplit,
     MonsterDrop,
     QuestReward,
     QuestCarryItem,
@@ -80,6 +81,7 @@ pub enum UserItemUidReason {
     NpcTradePurchase,
     GameShopGrant,
     SystemMailGrant,
+    CreatureRewardBox,
     Mining,
     Fishing,
     Crafting,
@@ -264,6 +266,11 @@ impl UserItemUidAllocator {
         Ok(Self {
             inner: Arc::new(FileUserItemUidAuthority::open_existing(state_path)?),
         })
+    }
+
+    /// True only for clones of the same server-owned service handle.
+    pub fn shares_authority_with(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.inner, &other.inner)
     }
 
     pub fn issue(&self, reason: UserItemUidReason) -> Result<UserItemUid, UserItemUidError> {
@@ -649,6 +656,10 @@ impl UserItemUidStore for FileUserItemUidAuthority {
                 issued_through,
                 generation: current.generation,
             })?;
+        // Monthly-card consumables use deterministic replay identities in a
+        // reserved range. Skip it at the durable authority so every issuer,
+        // including production and inventory, shares the same exclusion.
+        let next = crate::monthly_card::skip_monthly_card_reserved_unique_id(next);
         let next_generation =
             current
                 .generation

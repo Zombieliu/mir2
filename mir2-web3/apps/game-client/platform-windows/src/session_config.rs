@@ -2,12 +2,16 @@
 
 use std::{fmt, fs, net::IpAddr, path::PathBuf, time::Duration};
 
+use mir2_client_bevy::native_shell::CharacterCreationClasses;
 use tokio_tungstenite::tungstenite::http::Uri;
+
+use crate::wallet_login_http::NativeWalletAuthConfig;
 
 pub const ACCOUNT_ENV: &str = "MIR2_NATIVE_ACCOUNT";
 pub const PASSWORD_ENV: &str = "MIR2_NATIVE_PASSWORD";
 pub const CHARACTER_INDEX_ENV: &str = "MIR2_NATIVE_CHARACTER_INDEX";
 pub const GATEWAY_URL_ENV: &str = "MIR2_GATEWAY_WS_URL";
+pub const AUTH_HTTP_URL_ENV: &str = "MIR2_NATIVE_AUTH_HTTP_URL";
 pub const CONFIG_FILE_NAME: &str = "mir2-client.toml";
 pub const DEFAULT_WINDOW_WIDTH: u32 = 1024;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 768;
@@ -125,20 +129,30 @@ impl fmt::Debug for NativeAutoLogin {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NativeSessionConfig {
     pub gateway_url: String,
+    /// Explicit web authentication origin. No gateway/website guessing is allowed.
+    pub wallet_auth: Option<NativeWalletAuthConfig>,
+    pub character_creation_classes: CharacterCreationClasses,
+    pub quest_guidance: Option<String>,
     /// Explicit development convenience only. Normal players enter credentials
     /// in the visible native login screen, so missing environment credentials
     /// must not prevent the window from opening.
     pub auto_login: Option<NativeAutoLogin>,
     pub window_width: u32,
     pub window_height: u32,
+    /// Development display preference; server time and gameplay stay authoritative.
+    pub force_daylight: bool,
     pub reconnect: NativeReconnectConfig,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 struct ClientFileConfig {
     gateway_ws_url: Option<String>,
+    auth_http_url: Option<String>,
+    allowed_classes: Option<CharacterCreationClasses>,
+    quest_guidance: Option<String>,
     window_width: Option<u32>,
     window_height: Option<u32>,
+    force_daylight: Option<bool>,
 }
 
 impl NativeSessionConfig {
@@ -155,8 +169,20 @@ impl NativeSessionConfig {
             env_gateway.or(file_gateway),
             default_gateway_url,
         )?;
+        config.wallet_auth = select_wallet_auth(
+            std::env::var(AUTH_HTTP_URL_ENV).ok(),
+            file.as_ref()
+                .and_then(|config| config.auth_http_url.clone()),
+        )?;
         config.reconnect = NativeReconnectConfig::from_env()?;
         if let Some(file) = file {
+            if let Some(classes) = file.allowed_classes {
+                config.character_creation_classes = classes;
+            }
+            config.quest_guidance = file.quest_guidance;
+            if let Some(force_daylight) = file.force_daylight {
+                config.force_daylight = force_daylight;
+            }
             if let Some(width) = file.window_width {
                 config.window_width = width;
             }
@@ -224,9 +250,13 @@ impl NativeSessionConfig {
 
         Ok(Self {
             gateway_url,
+            wallet_auth: None,
+            character_creation_classes: CharacterCreationClasses::default(),
+            quest_guidance: None,
             auto_login,
             window_width: DEFAULT_WINDOW_WIDTH,
             window_height: DEFAULT_WINDOW_HEIGHT,
+            force_daylight: true,
             reconnect: NativeReconnectConfig::default(),
         })
     }
@@ -284,10 +314,49 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                             config.gateway_ws_url =
                                 Some(parse_toml_string(server_value, "server.gateway_ws_url")?);
                         }
+                        "auth_http_url" => {
+                            let origin = parse_toml_string(server_value, "server.auth_http_url")?;
+                            NativeWalletAuthConfig::from_origin(&origin)?;
+                            config.auth_http_url = Some(origin);
+                        }
+                        "allowed_classes" => {
+                            let values = server_value.as_array().ok_or_else(|| {
+                                format!(
+                                    "{CONFIG_FILE_NAME} server.allowed_classes must be an array"
+                                )
+                            })?;
+                            let names = values
+                                .iter()
+                                .map(|value| value.as_str().ok_or_else(|| {
+                                    format!("{CONFIG_FILE_NAME} server.allowed_classes entries must be strings")
+                                }))
+                                .collect::<Result<Vec<_>, _>>()?;
+                            config.allowed_classes =
+                                Some(CharacterCreationClasses::from_names(&names).map_err(
+                                    |error| format!("{CONFIG_FILE_NAME} server.{error}"),
+                                )?);
+                        }
                         other => {
                             return Err(format!("{CONFIG_FILE_NAME} unknown key server.{other}"));
                         }
                     }
+                }
+            }
+            "gameplay" => {
+                let table = child
+                    .as_table()
+                    .ok_or_else(|| format!("{CONFIG_FILE_NAME} [gameplay] must be a table"))?;
+                for (key, value) in table {
+                    if key != "quest_guidance" {
+                        return Err(format!("{CONFIG_FILE_NAME} unknown key gameplay.{key}"));
+                    }
+                    let profile = parse_toml_string(value, "gameplay.quest_guidance")?;
+                    if !matches!(profile.as_str(), "crystal" | "newcomer-v1" | "newcomer-v2") {
+                        return Err(format!(
+                            "{CONFIG_FILE_NAME} unsupported quest guidance {profile}"
+                        ));
+                    }
+                    config.quest_guidance = Some(profile);
                 }
             }
             "display" => {
@@ -305,6 +374,11 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                             config.window_height =
                                 Some(parse_toml_u32(display_value, "display.height")?);
                         }
+                        "force_daylight" => {
+                            config.force_daylight = Some(display_value.as_bool().ok_or_else(|| {
+                                format!("{CONFIG_FILE_NAME} display.force_daylight must be a boolean")
+                            })?);
+                        }
                         other => {
                             return Err(format!("{CONFIG_FILE_NAME} unknown key display.{other}"));
                         }
@@ -313,7 +387,7 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
             }
             other => {
                 return Err(format!(
-                    "{CONFIG_FILE_NAME} unknown section [{other}]; only [server] and [display] are allowed"
+                    "{CONFIG_FILE_NAME} unknown section [{other}]; only [server], [display] and [gameplay] are allowed"
                 ));
             }
         }
@@ -325,6 +399,16 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
         ));
     }
     Ok(config)
+}
+
+fn select_wallet_auth(
+    environment: Option<String>,
+    file: Option<String>,
+) -> Result<Option<NativeWalletAuthConfig>, String> {
+    optional_non_empty(environment, AUTH_HTTP_URL_ENV)?
+        .or(file)
+        .map(|origin| NativeWalletAuthConfig::from_origin(&origin))
+        .transpose()
 }
 
 fn reject_forbidden_keys(
@@ -441,6 +525,148 @@ mod tests {
     use super::*;
 
     #[test]
+    fn client_toml_creation_policy_is_explicit_and_old_configs_keep_five_classes() {
+        let parsed =
+            parse_client_toml("[server]\nallowed_classes = [\"Warrior\", \"Wizard\", \"Taoist\"]")
+                .unwrap();
+        let policy = parsed.allowed_classes.unwrap();
+        for class in ["Warrior", "Wizard", "Taoist"] {
+            assert!(policy.allows(class));
+        }
+        for class in ["Assassin", "Archer"] {
+            assert!(!policy.allows(class));
+        }
+        assert!(
+            parse_client_toml("[server]\ngateway_ws_url = 'wss://gateway.example/ws'")
+                .unwrap()
+                .allowed_classes
+                .is_none()
+        );
+        let default =
+            NativeSessionConfig::from_values(None, None, None, None, "wss://gateway.example/ws")
+                .unwrap();
+        assert!(default.character_creation_classes.allows("Assassin"));
+        assert!(default.character_creation_classes.allows("Archer"));
+    }
+
+    #[test]
+    fn client_toml_creation_policy_rejects_empty_duplicate_unknown_and_nonarray_values() {
+        for value in [
+            "[]",
+            "['Warrior', 'Warrior']",
+            "['warrior']",
+            "['Unknown']",
+            "[1]",
+            "'Warrior'",
+            "['']",
+            "[' Warrior']",
+            "['Warrior', 'Wizard', 'Taoist', 'Assassin', 'Archer', 'Warrior']",
+        ] {
+            assert!(
+                parse_client_toml(&format!("[server]\nallowed_classes = {value}")).is_err(),
+                "{value}"
+            );
+        }
+    }
+
+    #[test]
+    fn native_entry_loads_invited_wss_and_keeps_explicit_local_overrides() {
+        const FIXTURE_ENV: &str = "MIR2_NATIVE_CONFIG_TEST_EXPECTED_GATEWAY";
+        const TEST_NAME: &str =
+            "session_config::tests::native_entry_loads_invited_wss_and_keeps_explicit_local_overrides";
+        if let Ok(expected_gateway) = std::env::var(FIXTURE_ENV) {
+            let config = NativeSessionConfig::load(crate::gateway::DEFAULT_GATEWAY_WS_URL)
+                .expect("the normal native entry must load without credentials");
+            assert_eq!(config.gateway_url, expected_gateway);
+            assert_eq!(config.auto_login, None);
+            return;
+        }
+
+        // Separate processes isolate environment and executable/CWD file
+        // precedence without racing other tests or opening a native window.
+        struct FixtureRoot(PathBuf);
+        impl Drop for FixtureRoot {
+            fn drop(&mut self) {
+                assert_eq!(self.0.parent(), Some(std::env::temp_dir().as_path()));
+                let _ = fs::remove_dir_all(&self.0);
+            }
+        }
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let fixture = FixtureRoot(std::env::temp_dir().join(format!(
+            "mir2-native-entry-config-{}-{nonce}",
+            std::process::id()
+        )));
+        fs::create_dir(&fixture.0).unwrap();
+        let bin_dir = fixture.0.join("bin");
+        let cwd_dir = fixture.0.join("cwd");
+        fs::create_dir(&bin_dir).unwrap();
+        fs::create_dir(&cwd_dir).unwrap();
+        let test_exe = bin_dir.join("native-config-test.exe");
+        let source_exe = std::env::current_exe().unwrap();
+        fs::hard_link(&source_exe, &test_exe)
+            .or_else(|_| fs::copy(&source_exe, &test_exe).map(|_| ()))
+            .unwrap();
+        let file_config = |url: &str| format!("[server]\ngateway_ws_url = '{url}'\n");
+
+        for (scenario, expected_gateway, environment_gateway) in [
+            ("default", "wss://165.154.65.136.sslip.io/playtest/ws", None),
+            ("cwd", "ws://127.0.0.1:19010/ws", None),
+            ("sibling", "ws://127.0.0.1:19110/ws", None),
+            (
+                "environment",
+                "ws://127.0.0.1:19210/ws",
+                Some("ws://127.0.0.1:19210/ws"),
+            ),
+        ] {
+            if scenario == "cwd" {
+                fs::write(
+                    cwd_dir.join(CONFIG_FILE_NAME),
+                    file_config("ws://127.0.0.1:19010/ws"),
+                )
+                .unwrap();
+            } else if scenario == "sibling" {
+                fs::write(
+                    bin_dir.join(CONFIG_FILE_NAME),
+                    file_config("ws://127.0.0.1:19110/ws"),
+                )
+                .unwrap();
+            }
+            let mut command = std::process::Command::new(&test_exe);
+            command
+                .args(["--exact", TEST_NAME, "--nocapture"])
+                .current_dir(&cwd_dir)
+                .env(FIXTURE_ENV, expected_gateway);
+            for variable in [
+                ACCOUNT_ENV,
+                PASSWORD_ENV,
+                CHARACTER_INDEX_ENV,
+                GATEWAY_URL_ENV,
+                AUTH_HTTP_URL_ENV,
+                RESUME_DEADLINE_MS_ENV,
+                RESUME_INITIAL_BACKOFF_MS_ENV,
+                RESUME_MAX_BACKOFF_MS_ENV,
+                RESUME_JITTER_PERCENT_ENV,
+                RESUME_COMMAND_BATCH_ENV,
+            ] {
+                command.env_remove(variable);
+            }
+            if let Some(url) = environment_gateway {
+                command.env(GATEWAY_URL_ENV, url);
+            }
+            let output = command.output().expect("isolated config test process");
+            assert!(
+                output.status.success(),
+                "{scenario} config failed:\n{}\n{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+    }
+
+    #[test]
     fn missing_credentials_open_the_interactive_login_flow() {
         let config =
             NativeSessionConfig::from_values(None, None, None, None, "ws://127.0.0.1:7110/ws")
@@ -448,8 +674,13 @@ mod tests {
 
         assert_eq!(config.gateway_url, "ws://127.0.0.1:7110/ws");
         assert_eq!(config.auto_login, None);
+        assert_eq!(config.wallet_auth, None);
         assert_eq!(config.window_width, 1024);
         assert_eq!(config.window_height, 768);
+        assert!(
+            config.force_daylight,
+            "development launches default to daylight"
+        );
     }
 
     #[test]
@@ -578,6 +809,7 @@ gateway_ws_url = "wss://candidate-gateway.example/ws"
 [display]
 width = 1024
 height = 768
+force_daylight = false
 "#,
         )
         .expect("valid candidate config");
@@ -587,7 +819,23 @@ height = 768
         );
         assert_eq!(parsed.window_width, Some(1024));
         assert_eq!(parsed.window_height, Some(768));
+        assert_eq!(parsed.force_daylight, Some(false));
+        assert_eq!(
+            parse_client_toml("[display]\nforce_daylight = true")
+                .unwrap()
+                .force_daylight,
+            Some(true)
+        );
+        assert!(parse_client_toml("[display]\nforce_daylight = 'false'").is_err());
         validate_gateway_url(parsed.gateway_ws_url.as_deref().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn client_toml_persists_newcomer_guidance_without_launch_environment() {
+        let parsed = parse_client_toml("[gameplay]\nquest_guidance = 'newcomer-v2'").unwrap();
+        assert_eq!(parsed.quest_guidance.as_deref(), Some("newcomer-v2"));
+        assert!(parse_client_toml("[gameplay]\nquest_guidance = 'typo'").is_err());
+        assert!(parse_client_toml("[gameplay]\nquest_guidanc = 'newcomer-v2'").is_err());
     }
 
     #[test]
@@ -622,5 +870,33 @@ id = "player"
         )
         .expect_err("account section must be rejected");
         assert!(unknown.contains("credentials") || unknown.contains("unknown"));
+    }
+
+    #[test]
+    fn wallet_auth_uses_only_an_explicit_secure_origin_with_environment_precedence() {
+        assert_eq!(select_wallet_auth(None, None).unwrap(), None);
+        let parsed = parse_client_toml("[server]\nauth_http_url = 'https://login.example.com'")
+            .expect("authentication origin is public configuration, not a persisted credential");
+        let config = select_wallet_auth(None, parsed.auth_http_url.clone())
+            .unwrap()
+            .unwrap();
+        assert_eq!(config.origin, "https://login.example.com");
+        let overridden =
+            select_wallet_auth(Some("http://127.0.0.1:3000".into()), parsed.auth_http_url)
+                .unwrap()
+                .unwrap();
+        assert_eq!(overridden.origin, "http://127.0.0.1:3000");
+        assert!(select_wallet_auth(Some(" ".into()), None).is_err());
+        assert!(
+            parse_client_toml("[server]\nauth_http_url = 'http://public.example.com'").is_err()
+        );
+        assert!(
+            parse_client_toml("[server]\nauth_http_url = 'https://login.example.com/api'").is_err()
+        );
+        for secret in ["intent_token", "session_token", "wallet_credential"] {
+            let error = parse_client_toml(&format!("[server]\n{secret} = 'do-not-store'"))
+                .expect_err("wallet login secrets must remain memory-only");
+            assert!(error.contains("credentials"));
+        }
     }
 }

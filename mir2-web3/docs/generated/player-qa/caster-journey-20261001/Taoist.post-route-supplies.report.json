@@ -1,0 +1,141 @@
+{
+  "className": "Taoist",
+  "runId": "2026-10-01T11-01-08-039Z",
+  "startedAt": "2026-10-01T11:01:08.039Z",
+  "traceFile": "C:\\mir2-caster-qa-20261001-r2\\Taoist.post-route-supplies.2026-10-01T11-01-08-039Z.trace.jsonl",
+  "transport": "normal-local-websocket",
+  "visualAccepted": false,
+  "ordinaryRouteRunId": "2026-10-01T10-27-25-529Z",
+  "preservedFullRouteStoreSha256": "aa42cdadb56355ed60cfcad3e9e1ef96e0632888dd3013fbbde9306ff904324b",
+  "ordinaryClockNotExtended": true,
+  "postRouteOnly": true,
+  "purchases": [
+    {
+      "merchant": "Alchemist_Samuel",
+      "itemIndex": 663,
+      "name": "(MP)DrugLarge",
+      "quantity": 1,
+      "unitPrice": 225,
+      "cost": 225,
+      "before": {
+        "gold": 71255,
+        "quantity": 0,
+        "sequence": 683
+      },
+      "after": {
+        "gold": 71030,
+        "quantity": 1,
+        "sequence": 763
+      },
+      "receipts": [
+        {
+          "sequence": 761,
+          "at": "2026-10-01T11:01:32.436Z",
+          "packet": "LoseGold"
+        },
+        {
+          "sequence": 762,
+          "at": "2026-10-01T11:01:32.437Z",
+          "packet": "GainedItem"
+        }
+      ]
+    },
+    {
+      "merchant": "Merchant_Bull",
+      "itemIndex": 717,
+      "name": "RandomTeleport",
+      "quantity": 1,
+      "unitPrice": 100,
+      "cost": 100,
+      "before": {
+        "gold": 71030,
+        "quantity": 1,
+        "sequence": 763
+      },
+      "after": {
+        "gold": 70930,
+        "quantity": 2,
+        "sequence": 846
+      },
+      "receipts": [
+        {
+          "sequence": 844,
+          "at": "2026-10-01T11:01:49.988Z",
+          "packet": "LoseGold"
+        },
+        {
+          "sequence": 845,
+          "at": "2026-10-01T11:01:49.988Z",
+          "packet": "GainedItem"
+        }
+      ]
+    },
+    {
+      "merchant": "Specialist_Travis",
+      "itemIndex": 710,
+      "name": "GreenPoison",
+      "quantity": 1,
+      "unitPrice": 40,
+      "cost": 40,
+      "before": {
+        "gold": 70930,
+        "quantity": 48,
+        "sequence": 846
+      },
+      "after": {
+        "gold": 70890,
+        "quantity": 49,
+        "sequence": 997
+      },
+      "receipts": [
+        {
+          "sequence": 955,
+          "at": "2026-10-01T11:02:09.620Z",
+          "packet": "LoseGold"
+        },
+        {
+          "sequence": 956,
+          "at": "2026-10-01T11:02:09.620Z",
+          "packet": "GainedItem"
+        }
+      ]
+    },
+    {
+      "merchant": "Specialist_Travis",
+      "itemIndex": 711,
+      "name": "RedPoison",
+      "quantity": 1,
+      "unitPrice": 40,
+      "cost": 40,
+      "before": {
+        "gold": 70890,
+        "quantity": 50,
+        "sequence": 997
+      },
+      "after": {
+        "gold": 70850,
+        "quantity": 51,
+        "sequence": 1092
+      },
+      "receipts": [
+        {
+          "sequence": 1050,
+          "at": "2026-10-01T11:02:22.623Z",
+          "packet": "LoseGold"
+        },
+        {
+          "sequence": 1051,
+          "at": "2026-10-01T11:02:22.624Z",
+          "packet": "GainedItem"
+        }
+      ]
+    }
+  ],
+  "completed": true,
+  "finishedAt": "2026-10-01T11:02:31.680Z",
+  "actions": 114,
+  "normalLogout": {
+    "sequence": 1094,
+    "at": "2026-10-01T11:02:31.660Z"
+  }
+}

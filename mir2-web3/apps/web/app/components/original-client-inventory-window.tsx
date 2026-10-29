@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 
 import { ORIGINAL_UI, type InventoryTabKey } from "../../lib/original-ui";
 import {
@@ -19,8 +19,13 @@ import {
   applyOriginalItemIconFallback,
   equipmentSlotForItem,
   formatBinaryDateTimeLabel,
+  inventoryItemCanSplit,
+  inventoryItemCanStack,
   originalItemIconPath,
 } from "./original-client-inventory-utils";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+import { useActiveItemTooltip } from "./original-client-panels";
 import { OriginalItemTooltip } from "./original-client-item-tooltip";
 import { SpriteButton } from "./original-client-overlays";
 import { StoragePasswordPanel, type StoragePasswordPanelMode } from "./original-client-storage-password-panel";
@@ -36,21 +41,29 @@ import type {
 } from "./original-client-types";
 
 type InventoryWindowProps = {
+  initialDeleteMode?: boolean;
+  onCompatibilityInteraction?: () => void;
+  repairMode?: boolean;
+  onRepairPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
+  onBagBeltPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void) => boolean;
   t: TranslateFn;
   locale: string;
   activeTab: InventoryTabKey;
   world: DisplayWorld;
   storageServiceOpenVersion: number;
+  storagePasswordOpenVersion?: number;
   onClose: () => void;
+  onCloseStorage?: () => void;
   onTabChange: (tab: InventoryTabKey) => void;
   onUseItem: (item: ItemActionRef) => void;
+  onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
-  onMoveItem: (item: MoveItemRef, toSlot: number) => void;
+  onMoveItem: (item: MoveItemRef, toSlot: number, toContainer?: ItemContainer) => boolean;
   onMergeItem: (from: MergeItemRef, to: MergeItemRef) => void;
   onSplitItem: (item: ItemActionRef, count: number) => void;
-  onStoreItem: (item: MoveItemRef, toSlot: number) => void;
-  onTakeBackItem: (item: MoveItemRef, toSlot: number) => void;
+  onStoreItem: (item: MoveItemRef, toSlot: number) => boolean;
+  onTakeBackItem: (item: MoveItemRef, toSlot: number, toContainer: ItemContainer) => boolean;
   onRentExpandedStorage: () => void;
   onUnlockStorage: (password: string) => void;
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
@@ -67,14 +80,19 @@ type InventoryWindowProps = {
 };
 
 export function InventoryWindow({
+  initialDeleteMode = false,
+  onCompatibilityInteraction,
+  repairMode = false, onRepairPointerDown, onBagBeltPointerDown,
   t,
   locale,
   activeTab,
   world,
   storageServiceOpenVersion,
+  storagePasswordOpenVersion = 0,
   onClose,
+  onCloseStorage,
   onTabChange,
-  onUseItem,
+  onUseItem, onReadItemTooltip,
   onDropItem,
   onEquipItem,
   onMoveItem,
@@ -91,7 +109,8 @@ export function InventoryWindow({
   onSortBag,
   onAutoArrangeBag,
 }: InventoryWindowProps) {
-  const [deleteMode, setDeleteMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(initialDeleteMode);
+  const consumedRepairPointerRef = useRef(new WeakSet<HTMLButtonElement>());
   const [itemFilter, setItemFilter] = useState<InventoryItemFilter>("all");
   const [contextMenu, setContextMenu] = useState<{ item: DisplayItem; x: number; y: number } | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
@@ -106,13 +125,17 @@ export function InventoryWindow({
   const storageProtectionEnabled = world.requireStoragePassword || world.hasStoragePassword;
   const storageLocked = storageProtectionEnabled && !world.storageSessionUnlocked;
   const visibleItems = world.inventoryItems.filter((item) => item.container === activeTab);
+  const tooltip = useActiveItemTooltip(visibleItems, onReadItemTooltip);
+  const mailLocks=(world as DisplayWorld&{mailLockedUniqueIds?:number[]}).mailLockedUniqueIds??[];
+  function mailItemLocked(item:DisplayItem){return mailLocks.length>0&&(item.authoritativeUniqueId===undefined||mailLocks.includes(item.authoritativeUniqueId));}
   const storagePageStart = storagePageIndex * 80;
   const storagePageEnd = storagePageStart + 80;
   const storagePageLocked = storagePageIndex === 1 && !world.hasExpandedStorage;
   const visibleStorageItems = storagePageLocked
     ? []
     : world.storageItems.filter((item) => item.slot >= storagePageStart && item.slot < storagePageEnd);
-  const showStorageWindow = storageMode !== null;
+  const showStorageWindow = storageMode !== null && !repairMode;
+  const storageTooltip = useActiveItemTooltip(visibleStorageItems, onReadItemTooltip, showStorageWindow && !storagePageLocked);
   const [pendingDeleteItem, setPendingDeleteItem] = useState<DisplayItem | null>(null);
   const [pendingSellItem, setPendingSellItem] = useState<DisplayItem | null>(null);
   const [deleteFeedback, setDeleteFeedback] = useState<string | null>(null);
@@ -121,9 +144,22 @@ export function InventoryWindow({
   const [splitCount, setSplitCount] = useState("1");
   const [pendingGoldDrop, setPendingGoldDrop] = useState(false);
   const [goldDropAmount, setGoldDropAmount] = useState("100");
+  const bagBeltActivationGenerationRef = useRef(0);
+  const inventoryPointerActivationRef = useRef<{
+    item: ItemActionRef; at: number; used: boolean; moved: boolean;
+  } | null>(null);
+  useLayoutEffect(() => { inventoryPointerActivationRef.current = null; }, [activeTab, repairMode, deleteMode, sellMode, storageMode]);
+  useLayoutEffect(() => { bagBeltActivationGenerationRef.current++; }, [activeTab, world.inventoryItems, repairMode, deleteMode, sellMode, storageMode, pendingMoveItem, pendingSplitItem, pendingGoldDrop, contextMenu]);
 
   useEffect(() => {
-    if (storageServiceOpenVersion <= 0) {
+    if (!repairMode) return;
+    setDeleteMode(false); setSellMode(false); setStorageMode(null); setContextMenu(null);
+    setPendingDeleteItem(null); setPendingSellItem(null); setPendingMoveItem(null);
+    setPendingSplitItem(null); setPendingGoldDrop(false); setShowStoragePasswordPanel(false);
+  }, [repairMode]);
+
+  useEffect(() => {
+    if (storageServiceOpenVersion <= 0 || initialDeleteMode) {
       return;
     }
 
@@ -150,7 +186,7 @@ export function InventoryWindow({
       setNewStoragePassword("");
       setConfirmStoragePassword("");
     }
-  }, [storageServiceOpenVersion, storageLocked, world.hasStoragePassword, world.requireStoragePassword]);
+  }, [initialDeleteMode, storageServiceOpenVersion, storageLocked, world.hasStoragePassword, world.requireStoragePassword]);
 
   useEffect(() => {
     if (!deleteFeedback) {
@@ -255,6 +291,7 @@ export function InventoryWindow({
     newStoragePassword !== confirmStoragePassword;
 
   function closeStorageWindow() {
+    onCloseStorage?.();
     setStorageMode(null);
     setPendingMoveItem(null);
     setPendingSplitItem(null);
@@ -277,6 +314,14 @@ export function InventoryWindow({
     }
     setShowStoragePasswordPanel(true);
   }
+
+  // One consumed service handoff opens the existing set/change/unlock form.
+  const consumedStoragePasswordVersionRef = useRef(0);
+  useEffect(() => {
+    if (storagePasswordOpenVersion <= 0 || consumedStoragePasswordVersionRef.current === storagePasswordOpenVersion) return;
+    consumedStoragePasswordVersionRef.current = storagePasswordOpenVersion;
+    openStoragePasswordPanel();
+  }, [storagePasswordOpenVersion]);
 
   function closeStoragePasswordPanel() {
     setShowStoragePasswordPanel(false);
@@ -321,6 +366,7 @@ export function InventoryWindow({
   }
 
   function activateInventoryItem(item: DisplayItem) {
+    if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryActivation?: Record<string, unknown> }).__mir2LastInventoryActivation = {
       key: item.key,
       name: item.name,
@@ -364,7 +410,8 @@ export function InventoryWindow({
         return;
       }
 
-      if (pendingMoveItem.key === item.key && pendingMoveItem.container === item.container) {
+      if (pendingMoveItem.key === item.key && pendingMoveItem.container === item.container
+        && inventoryItemCanStack(pendingMoveItem) && inventoryItemCanStack(item)) {
         onMergeItem(
           {
             uniqueId: pendingMoveItem.uniqueId,
@@ -378,26 +425,34 @@ export function InventoryWindow({
           },
         );
       } else {
-        onMoveItem(
+        const submitted = onMoveItem(
           {
             uniqueId: pendingMoveItem.uniqueId,
+            authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
             slot: pendingMoveItem.slot,
             container: pendingMoveItem.container,
           },
           item.slot,
+          item.container,
         );
+        if (!submitted) {
+          setDeleteFeedback(t("ui.itemActionFailed", [], "Item action failed."));
+          setPendingMoveItem(null);
+          return;
+        }
       }
       setDeleteFeedback(`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${item.name}`);
       setPendingMoveItem(null);
       return;
     }
 
-    const equipSlot = equipmentSlotForItem(item);
+    const equipSlot = equipmentSlotForItem(item, world.equipmentItems);
     if (equipSlot) {
       onEquipItem(
         {
           key: item.key,
           uniqueId: item.uniqueId,
+          authoritativeUniqueId: item.authoritativeUniqueId,
           slot: item.slot,
           container: item.container,
         },
@@ -407,13 +462,55 @@ export function InventoryWindow({
       onUseItem({
         key: item.key,
         uniqueId: item.uniqueId,
+        authoritativeUniqueId: item.authoritativeUniqueId,
         slot: item.slot,
         container: item.container,
       });
     }
+    return true;
+  }
+
+  function sameInventoryActionItem(item: ItemActionRef, other: ItemActionRef) {
+    return item.uniqueId === other.uniqueId && item.authoritativeUniqueId === other.authoritativeUniqueId
+      && item.container === other.container && item.slot === other.slot && item.key === other.key;
+  }
+
+  function activateInventoryItemFromPointer(item: DisplayItem) {
+    if (repairMode) return;
+    const at = Date.now();
+    const previous = inventoryPointerActivationRef.current;
+    // The compatibility bag already uses items on a short primary click. The
+    // second half of a double-click must not send that operation again, even
+    // when Bag-to-Belt consumes the browser's mouse events and runs its callback.
+    if (!pendingMoveItem && storageMode === null && !deleteMode && !sellMode
+      && previous && sameInventoryActionItem(item, previous.item)
+      && at >= previous.at && at - previous.at <= 500 && (previous.used || previous.moved)) return;
+    const moved = Boolean(pendingMoveItem && !sameInventoryActionItem(item, pendingMoveItem));
+    const used = activateInventoryItem(item) === true;
+    inventoryPointerActivationRef.current = { item: { key: item.key, uniqueId: item.uniqueId,
+      authoritativeUniqueId: item.authoritativeUniqueId, slot: item.slot, container: item.container }, at, used, moved };
+  }
+
+  function activateInventoryItemDoubleClick(item: DisplayItem) {
+    if (repairMode || deleteMode || sellMode || storageMode !== null || activeTab === "quest"
+      || pendingSplitItem || pendingGoldDrop || contextMenu || mailItemLocked(item)) return;
+    const previous = inventoryPointerActivationRef.current;
+    const at = Date.now();
+    if (!previous || !sameInventoryActionItem(item, previous.item)
+      || at < previous.at || at - previous.at > 500 || previous.used || previous.moved) return;
+    const current = world.inventoryItems.filter(candidate => sameInventoryActionItem(item, candidate));
+    if (current.length !== 1) return;
+    // A first click on the picked-up source merely cancels Move. Double-click
+    // still uses that instance, independently of React's pending state update.
+    setPendingMoveItem(null);
+    setPendingSplitItem(null);
+    inventoryPointerActivationRef.current = { ...previous, used: true };
+    runContextAction(current[0], equipmentSlotForItem(current[0], world.equipmentItems) ? "equip" : "use");
   }
 
   function confirmSellItem(item: DisplayItem) {
+    if (repairMode) return;
+    if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
       action: "sell",
       key: item.key,
@@ -438,6 +535,8 @@ export function InventoryWindow({
   }
 
   function confirmDeleteItem(item: DisplayItem) {
+    if (repairMode) return;
+    if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
       action: "drop",
       key: item.key,
@@ -459,8 +558,11 @@ export function InventoryWindow({
   }
 
   function confirmSplitItem(item: DisplayItem) {
+    if (repairMode) return;
+    if(mailItemLocked(item))return;
+    if (!inventoryItemCanSplit(item)) return;
     const count = Number.parseInt(splitCount, 10);
-    if (!Number.isFinite(count) || count <= 0) {
+    if (!Number.isFinite(count) || count <= 0 || count >= item.quantity) {
       return;
     }
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
@@ -487,6 +589,7 @@ export function InventoryWindow({
   }
 
   function confirmGoldDrop() {
+    if (repairMode) return;
     const amount = Number.parseInt(goldDropAmount, 10);
     if (!Number.isFinite(amount) || amount <= 0) {
       return;
@@ -502,15 +605,17 @@ export function InventoryWindow({
   }
 
   function runContextAction(item: DisplayItem, action: InventoryContextAction) {
+    if(mailItemLocked(item))return;
     const ref: ItemActionRef = {
       key: item.key,
       uniqueId: item.uniqueId,
+      authoritativeUniqueId: item.authoritativeUniqueId,
       slot: item.slot,
       container: item.container,
     };
     switch (action) {
       case "equip": {
-        const equipSlot = equipmentSlotForItem(item);
+        const equipSlot = equipmentSlotForItem(item, world.equipmentItems);
         if (equipSlot) {
           onEquipItem(ref, equipSlot);
         }
@@ -525,6 +630,7 @@ export function InventoryWindow({
         setDeleteFeedback(`${t("ui.moveItem", [], "Move")}: ${item.name}`);
         break;
       case "split":
+        if (!inventoryItemCanSplit(item)) break;
         setPendingSplitItem(item);
         setSplitCount("1");
         setPendingMoveItem(null);
@@ -541,7 +647,9 @@ export function InventoryWindow({
   const activeSortContainer: ItemContainer = activeTab === "quest" ? "bag1" : activeTab;
 
   return (
-    <div className={`window-shell inventory-window ${showStorageWindow ? "with-storage" : ""}`}>
+    <div className={`window-shell inventory-window ${showStorageWindow ? "with-storage" : ""}`}
+      style={repairMode ? { left: "auto", right: 16, top: 86, transform: "none" } : undefined}
+      onPointerDownCapture={onCompatibilityInteraction} onKeyDownCapture={onCompatibilityInteraction}>
       <img className="window-frame" src={ORIGINAL_UI.inventory.frame} alt="" draggable={false} />
 
       <div className="inventory-tab tab-one">
@@ -559,6 +667,7 @@ export function InventoryWindow({
           type="button"
           className="window-tab-button"
           onClick={() => {
+            if (repairMode) return;
             onTabChange("quest");
             setStorageMode("takeBack");
             setPendingMoveItem(null);
@@ -594,6 +703,7 @@ export function InventoryWindow({
             setDeleteFeedback(null);
           }}
           active={deleteMode}
+          disabled={repairMode}
         />
       </div>
       <div className="inventory-sell">
@@ -602,6 +712,7 @@ export function InventoryWindow({
           aria-label={t("ui.sellItem", [], "Sell Item")}
           title={t("ui.sellItem", [], "Sell Item")}
           className={sellMode ? "active" : ""}
+          disabled={repairMode}
           onClick={() => {
             setSellMode((current) => !current);
             setDeleteMode(false);
@@ -640,6 +751,7 @@ export function InventoryWindow({
             }}
 	            title={slot.key}
 	            onClick={() => {
+	              if (repairMode) return;
 	              const takeBackItem =
 	                pendingMoveItem?.container === "storage"
 	                  ? pendingMoveItem
@@ -647,14 +759,20 @@ export function InventoryWindow({
 	                    ? (visibleStorageItems[0] ?? null)
 	                    : null;
 	              if (storageMode === "takeBack" && takeBackItem) {
-	                onTakeBackItem(
+	                const submitted = onTakeBackItem(
 	                  {
 	                    uniqueId: takeBackItem.uniqueId,
+	                    authoritativeUniqueId: takeBackItem.authoritativeUniqueId,
 	                    slot: takeBackItem.slot,
 	                    container: takeBackItem.container,
 	                  },
 	                  slotIndex,
+	                  activeTab,
 	                );
+	                if (!submitted) {
+	                  setDeleteFeedback(t("ui.itemActionFailed", [], "Item action failed."));
+	                  return;
+	                }
 	                setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${takeBackItem.name} -> ${slot.key}`);
 	                setPendingMoveItem(null);
 	                return;
@@ -664,15 +782,19 @@ export function InventoryWindow({
                 setPendingMoveItem(null);
                 return;
               }
-              onMoveItem(
+              const submitted = onMoveItem(
                 {
                   uniqueId: pendingMoveItem.uniqueId,
+                  authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
                   slot: pendingMoveItem.slot,
                   container: pendingMoveItem.container,
                 },
                 slotIndex,
+                activeTab,
               );
-              setDeleteFeedback(`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${slot.key}`);
+              setDeleteFeedback(submitted
+                ? `${t("ui.inventory")}: ${pendingMoveItem.name} -> ${slot.key}`
+                : t("ui.itemActionFailed", [], "Item action failed."));
               setPendingMoveItem(null);
             }}
           />
@@ -682,26 +804,57 @@ export function InventoryWindow({
           const slot = ORIGINAL_UI.inventory.slots[item.slot];
           if (!slot) return null;
           const dimmed = activeTab !== "quest" && !inventoryItemMatchesFilter(item, itemFilter);
+          const tooltipDocument = tooltip.document(item);
 
           return (
             <button
               key={`${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
               type="button"
               className="inventory-item-card"
-              style={{ left: slot.x, top: slot.y, ...(dimmed ? { opacity: 0.28 } : null) }}
+              disabled={mailItemLocked(item)}
+              style={{ left: slot.x, top: slot.y, ...(repairMode ? { touchAction: "none" } : null), ...(dimmed ? { opacity: 0.28 } : null) }}
               data-filtered-out={dimmed ? "true" : undefined}
               aria-label={item.name}
+              onPointerEnter={event => { if (event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
+              onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
+              onFocus={event => tooltip.activate(item, event.currentTarget)}
+              onBlur={event => { if (!event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
+              onPointerCancel={event => { inventoryPointerActivationRef.current = null; tooltip.release(item, event.currentTarget); }}
+              onPointerDown={(event) => {
+                if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); }
+                if (repairMode) {
+                  consumedRepairPointerRef.current.add(event.currentTarget);
+                  onRepairPointerDown?.(event, item);
+                } else if (!event.defaultPrevented && event.isPrimary && event.button === 0
+                  && (event.pointerType === "mouse" || event.pointerType === "touch")) {
+                  consumedRepairPointerRef.current.delete(event.currentTarget);
+                  const activationGeneration = bagBeltActivationGenerationRef.current;
+                  if ((activeTab === "bag1" || activeTab === "bag2") && !deleteMode && !sellMode && storageMode === null
+                    && !pendingMoveItem && !pendingSplitItem && !pendingGoldDrop && !contextMenu && !mailItemLocked(item)
+                    && onBagBeltPointerDown?.(event, item, () => { if (bagBeltActivationGenerationRef.current === activationGeneration) activateInventoryItemFromPointer(item); })) consumedRepairPointerRef.current.add(event.currentTarget);
+                }
+              }}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;
                 event.preventDefault();
-                activateInventoryItem(item);
+                if (consumedRepairPointerRef.current.has(event.currentTarget) || repairMode) return;
+                if (event.detail > 1) return;
+                activateInventoryItemFromPointer(item);
               }}
               onClick={(event) => {
+                if (repairMode) { event.preventDefault(); return; }
                 if (event.detail !== 0) return;
                 activateInventoryItem(item);
               }}
+              onDoubleClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                activateInventoryItemDoubleClick(item);
+              }}
 	              onContextMenu={(event) => {
 	                event.preventDefault();
+                    inventoryPointerActivationRef.current = null;
+	                if (repairMode) return;
 	                if (storageMode === "store" && item.container !== "storage") {
 	                  setPendingMoveItem(item);
 	                  setPendingSplitItem(null);
@@ -737,6 +890,7 @@ export function InventoryWindow({
                 onError={(event) => applyOriginalItemIconFallback(event.currentTarget)}
               />
               {item.quantity > 1 ? <span className="item-stack-count inventory-item-count">{item.quantity}</span> : null}
+              {tooltipDocument ? <OriginalCrystalItemTooltip document={tooltipDocument} align={slot.x > 210 ? "left" : "right"} /> : (
               <OriginalItemTooltip
                 t={t}
                 name={item.name}
@@ -746,12 +900,13 @@ export function InventoryWindow({
                 durabilityMax={item.durabilityMax}
                 align={slot.x > 210 ? "left" : "right"}
               />
+              )}
             </button>
           );
         })}
       </div>
 
-      {activeTab !== "quest" ? (
+      {activeTab !== "quest" && !repairMode ? (
         <div
           style={{
             position: "absolute",
@@ -777,7 +932,7 @@ export function InventoryWindow({
         </div>
       ) : null}
 
-      {contextMenu ? (
+      {contextMenu && !repairMode ? (
         <>
           <div
             style={{ position: "fixed", inset: 0, zIndex: 55 }}
@@ -793,7 +948,7 @@ export function InventoryWindow({
             x={contextMenu.x}
             y={contextMenu.y}
             canEquip={Boolean(equipmentSlotForItem(contextMenu.item))}
-            canSplit={contextMenu.item.quantity > 1}
+            canSplit={inventoryItemCanSplit(contextMenu.item)}
             onAction={(action) => runContextAction(contextMenu.item, action)}
             onClose={() => setContextMenu(null)}
           />
@@ -844,6 +999,7 @@ export function InventoryWindow({
       <button
         type="button"
         className="inventory-gold"
+        disabled={repairMode}
         aria-label={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)} — ${t("ui.dropGold", [], "Drop Gold")}`}
         title={`${t("ui.gold", [], "Gold")}: ${world.gold.toLocaleString(locale)}`}
         onClick={() => {
@@ -911,7 +1067,7 @@ export function InventoryWindow({
 	              setDeleteFeedback(
 	                firstStorageItem ? `${t("ui.takeBackItem", [], "Take Back")}: ${firstStorageItem.name}` : null,
 	              );
-	              onTabChange("quest");
+	              onTabChange(activeTab === "bag2" ? "bag2" : "bag1");
 	            }}
 	          >
 	            {t("ui.takeBack", [], "Take Back")}
@@ -1004,14 +1160,19 @@ export function InventoryWindow({
                       !storageLocked &&
                       !storagePageLocked
                     ) {
-                      onStoreItem(
+                      const submitted = onStoreItem(
                         {
                           uniqueId: pendingMoveItem.uniqueId,
+                          authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
                           slot: pendingMoveItem.slot,
                           container: pendingMoveItem.container,
                         },
                         absoluteSlot,
                       );
+                      if (!submitted) {
+                        setDeleteFeedback(t("ui.itemActionFailed", [], "Item action failed."));
+                        return;
+                      }
                       setDeleteFeedback(
                         `${t("ui.storeItem", [], "Store Item")}: ${pendingMoveItem.name} -> ${absoluteSlot + 1}`,
                       );
@@ -1030,16 +1191,20 @@ export function InventoryWindow({
                         setPendingMoveItem(null);
                         return;
                       }
-                      onMoveItem(
+                      const submitted = onMoveItem(
                         {
                           uniqueId: pendingMoveItem.uniqueId,
+                          authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
                           slot: pendingMoveItem.slot,
                           container: pendingMoveItem.container,
                         },
                         absoluteSlot,
+                        "storage",
                       );
                       setDeleteFeedback(
-                        `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name} -> ${absoluteSlot + 1}`,
+                        submitted
+                          ? `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name} -> ${absoluteSlot + 1}`
+                          : t("ui.itemActionFailed", [], "Item action failed."),
                       );
                       setPendingMoveItem(null);
                     }
@@ -1050,6 +1215,7 @@ export function InventoryWindow({
             {visibleStorageItems.map((item) => {
               const slot = ORIGINAL_UI.storage.slots[item.slot - storagePageStart];
               if (!slot) return null;
+              const tooltipDocument = storageTooltip.document(item);
 
               return (
 	                      <button
@@ -1062,6 +1228,11 @@ export function InventoryWindow({
                   }`}
                   style={{ left: slot.x, top: slot.y }}
                   aria-label={item.name}
+                  onPointerEnter={event => { if (event.pointerType !== "touch") storageTooltip.activate(item, event.currentTarget); }}
+                  onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) storageTooltip.release(item, event.currentTarget); }}
+                  onFocus={event => storageTooltip.activate(item, event.currentTarget)}
+                  onBlur={event => { if (!event.currentTarget.matches(":hover")) storageTooltip.release(item, event.currentTarget); }}
+                  onPointerCancel={event => storageTooltip.release(item, event.currentTarget)}
 	                  onClick={() => {
 	                    if (storageLocked || storagePageLocked) {
 	                      return;
@@ -1091,7 +1262,7 @@ export function InventoryWindow({
 	                    if (storageMode !== null) {
 	                      return;
 	                    }
-	                    if (item.quantity > 1) {
+	                    if (inventoryItemCanSplit(item)) {
 	                      setPendingSplitItem(item);
                       setSplitCount("1");
                       setPendingMoveItem(null);
@@ -1112,6 +1283,7 @@ export function InventoryWindow({
                   {item.quantity > 1 ? (
                     <span className="item-stack-count storage-item-count">{item.quantity}</span>
                   ) : null}
+                  {tooltipDocument ? <OriginalCrystalItemTooltip document={tooltipDocument} align={slot.x > 270 ? "left" : "right"} /> : (
                   <OriginalItemTooltip
                     t={t}
                     name={item.name}
@@ -1121,6 +1293,7 @@ export function InventoryWindow({
                     durabilityMax={item.durabilityMax}
                     align={slot.x > 270 ? "left" : "right"}
                   />
+                  )}
                 </button>
               );
             })}
@@ -1168,7 +1341,7 @@ export function InventoryWindow({
           ) : null}
         </div>
       ) : null}
-      {pendingDeleteItem ? (
+      {pendingDeleteItem && !repairMode ? (
         <InventoryDeletePanel
           t={t}
           item={pendingDeleteItem}
@@ -1176,7 +1349,7 @@ export function InventoryWindow({
           onClose={() => setPendingDeleteItem(null)}
         />
       ) : null}
-      {pendingSellItem ? (
+      {pendingSellItem && !repairMode ? (
         <InventorySellPanel
           t={t}
           item={pendingSellItem}
@@ -1184,7 +1357,7 @@ export function InventoryWindow({
           onClose={() => setPendingSellItem(null)}
         />
       ) : null}
-      {pendingSplitItem ? (
+      {pendingSplitItem && !repairMode ? (
         <InventorySplitPanel
           t={t}
           item={pendingSplitItem}
@@ -1194,7 +1367,7 @@ export function InventoryWindow({
           onClose={() => setPendingSplitItem(null)}
         />
       ) : null}
-      {pendingGoldDrop ? (
+      {pendingGoldDrop && !repairMode ? (
         <InventoryGoldDropPanel
           t={t}
           goldDropAmount={goldDropAmount}

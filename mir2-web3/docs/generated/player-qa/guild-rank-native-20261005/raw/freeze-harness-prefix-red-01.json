@@ -1,0 +1,6 @@
+{
+  "exit_code": 1,
+  "reason": "git porcelain v1 is repository relative despite status.relativePaths; all eleven paths match approved project prefix",
+  "raw_log_sha256": "3430261bafb234c8065405dbb904d9a149a8b2fc7898359e0af32cd73317b283",
+  "source_edits": false
+}

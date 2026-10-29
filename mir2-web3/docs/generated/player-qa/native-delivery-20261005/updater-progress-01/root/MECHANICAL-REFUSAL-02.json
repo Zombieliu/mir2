@@ -1,0 +1,8 @@
+{
+  "passed": false,
+  "boundary": "before repository or selected-source writes",
+  "assertion": "issued tracked updater count == 41",
+  "actualTrackedCount": 39,
+  "explanation": "Worker 41 non-target files include two ignored Python bytecode files; root counts 39 Git tracked inputs",
+  "originalHelperSha256": "767ed853069f518cfd6623ba8ca91320a992f458848375cc09a712f02026aa4d"
+}

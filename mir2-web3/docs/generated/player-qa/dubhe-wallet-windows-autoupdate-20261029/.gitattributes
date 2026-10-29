@@ -1,0 +1,3 @@
+# Preserve exact release evidence bytes and their recorded SHA-256 values.
+# Captured Windows reports and logs retain their original whitespace.
+* -text !eol -whitespace

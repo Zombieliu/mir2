@@ -2,19 +2,26 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
-    SimulationConfig,
+    crystal_bag_slot_capacity, AccountRecord, CharacterRecord, EquipmentSlot,
+    GroundDropItemPayload, ItemContainer, ItemGrade, NpcGoldTradeCapacity, SimulationConfig,
 };
 use bevy_ecs::prelude::World;
-use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
+use mir2_game_data::{
+    crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback, CrystalItemTemplate,
+};
 use mir2_protocol::{
     ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemStat,
 };
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
-    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
-    DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
+    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_FISHING_ROD_SHAPES,
+    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_ITEM_TYPE_MOUNT, CRYSTAL_ITEM_TYPE_WEAPON,
+    CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC, DOTNET_DATETIME_KIND_LOCAL,
+    DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
+};
+use super::item_uid_issuance::{
+    issue_for_staged_inventory, refresh_world_history_floor, ItemUidIssuance,
 };
 use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
@@ -27,7 +34,13 @@ use super::items::{
     ItemStateUserItemMetadata,
 };
 use super::npc::active_crystal_storage_service;
-use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
+use super::npc_gold_trade_expiry::{fresh_expire_info, has_expiry_tag};
+use super::resources::{
+    InventoryResource, PlayerRuntimeResource, RuntimeConfigResource, SessionResource,
+};
+
+const STORAGE_RENTAL_PRICE_GOLD: u32 = 1_000_000;
+const STORAGE_RENTAL_DAYS: u64 = 10;
 
 #[allow(clippy::too_many_arguments)]
 fn seed_item(
@@ -51,6 +64,7 @@ fn seed_item(
     heal_mp: i32,
 ) -> ItemState {
     ItemState {
+        stone_serial: None,
         key: key.to_string(),
         name: name.to_string(),
         icon: item_icon_for_key(key),
@@ -118,6 +132,7 @@ pub(super) fn crystal_start_inventory_items(character: &CharacterRecord) -> Vec<
                 .tooltip
                 .unwrap_or_else(|| "Crystal start item.".to_string());
             ItemState {
+                stone_serial: None,
                 key,
                 name: template.name,
                 icon: template.image,
@@ -583,38 +598,78 @@ pub(super) fn extend_binary_datetime(base_binary_datetime: i64, days: u64) -> i6
 }
 
 pub(super) fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket> {
-    let (config, account_id) = {
+    let (config, account_id, mut save) = {
         let config = world.resource::<RuntimeConfigResource>().config.clone();
         let session = world.resource::<SessionResource>();
-        (
-            config,
-            session
-                .account_id
-                .clone()
-                .unwrap_or_else(|| "demo".to_string()),
-        )
+        let Some(account_id) = super::save::active_session_mutating_account_id(session) else {
+            return Vec::new();
+        };
+        let Some(save) = super::save::snapshot_active_character_save(world) else {
+            return Vec::new();
+        };
+        (config, account_id, save)
     };
 
-    let expiry_time_binary_datetime = {
-        let mut store = config
-            .account_store
-            .lock()
-            .expect("account store mutex should not be poisoned");
-        let account = store
-            .accounts
-            .entry(account_id)
-            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-        let expiry =
-            extend_binary_datetime(account.expanded_storage_expiry_time_binary_datetime, 30);
-        account.storage_size = EXPANDED_STORAGE_SLOTS;
-        account.has_expanded_storage = true;
-        account.expanded_storage_expiry_time_binary_datetime = expiry;
-        expiry
-    };
-
-    if let Err(error) = config.save_account_store() {
-        eprintln!("failed to persist account store: {error}");
+    if save.gold < STORAGE_RENTAL_PRICE_GOLD {
+        return vec![super::packets::system_message_key(world, "server.LowGold")];
     }
+    save.gold -= STORAGE_RENTAL_PRICE_GOLD;
+    let expected_revision = save.revision;
+    let remaining_gold = save.gold;
+
+    // Crystal's PlayerObject3663 charges before extending the rental.  Stage
+    // the active character's gold snapshot and the account-scoped capacity in
+    // one account-store transaction; the live ECS mirror changes only after
+    // that durable commit succeeds.
+    let expiry_time_binary_datetime = match super::shared_guild_experience::commit_source(
+        world,
+        &config,
+        std::slice::from_ref(&account_id),
+        |store| {
+            let expiry = {
+                let account = store
+                    .accounts
+                    .get(&account_id)
+                    .ok_or_else(|| "storage rental account changed before commit".to_string())?;
+                extend_binary_datetime(
+                    account.expanded_storage_expiry_time_binary_datetime,
+                    STORAGE_RENTAL_DAYS,
+                )
+            };
+            super::save::stage_prepared_character_save(world, store, save)?;
+            let account = store
+                .accounts
+                .get_mut(&account_id)
+                .expect("validated storage rental account should exist");
+            account.storage_size = EXPANDED_STORAGE_SLOTS;
+            account.has_expanded_storage = true;
+            account.expanded_storage_expiry_time_binary_datetime = expiry;
+            Ok(expiry)
+        },
+    ) {
+        Ok(expiry) => expiry,
+        Err(error) => {
+            eprintln!("storage rental transaction failed: {error}");
+            return vec![super::packets::system_message_key(
+                world,
+                "server.InvalidPacketReceived",
+            )];
+        }
+    };
+
+    // `stage_prepared_character_save` performed the sole durable revision
+    // increment. Advance the session's CAS cursor to that receipt exactly
+    // once before exposing the committed values to the World.
+    let committed_revision = expected_revision
+        .checked_add(1)
+        .expect("successful storage rental save revision should not overflow");
+    let advanced = world
+        .resource::<SessionResource>()
+        .advance_active_save_revision(expected_revision, committed_revision);
+    debug_assert!(
+        advanced,
+        "active storage rental revision changed during commit"
+    );
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
@@ -623,12 +678,18 @@ pub(super) fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket>
         resources.expanded_storage_expiry_time_binary_datetime = expiry_time_binary_datetime;
         resources.expanded_storage_expiry_notice_pending = false;
     }
+    world.resource_mut::<PlayerRuntimeResource>().gold = remaining_gold;
 
-    vec![ServerPacket::ResizeStorage {
-        size: i32::from(EXPANDED_STORAGE_SLOTS),
-        has_expanded_storage: true,
-        expiry_time_binary_datetime,
-    }]
+    vec![
+        ServerPacket::LoseGold {
+            gold: STORAGE_RENTAL_PRICE_GOLD,
+        },
+        ServerPacket::ResizeStorage {
+            size: i32::from(EXPANDED_STORAGE_SLOTS),
+            has_expanded_storage: true,
+            expiry_time_binary_datetime,
+        },
+    ]
 }
 
 pub(super) fn storage_password_required(
@@ -1141,12 +1202,16 @@ fn normalize_user_item_tree_unique_ids(
         // A protocol UserItem always carries an exact identity. Preserve only
         // the first exact zero; every later zero is a collision.
     } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+        *next_unique_id =
+            crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
         while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                next_unique_id.checked_add(1).unwrap_or(1),
+            );
         }
         item.unique_id = *next_unique_id;
         seen.insert(item.unique_id);
-        *next_unique_id = next_unique_id.saturating_add(1);
+        *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
     }
     for embedded in item.slots.iter_mut().flatten() {
         normalize_user_item_tree_unique_ids(embedded, seen, next_unique_id, preserve_exact_zero);
@@ -1170,7 +1235,7 @@ fn equipment_root_unique_id(equipment: &super::equipment::EquipmentState) -> u64
         .unwrap_or_else(|| super::equipment::equipment_slot_unique_id(equipment.slot).unwrap_or(0))
 }
 
-fn equipment_tree_unique_id_is_used(
+pub(super) fn equipment_tree_unique_id_is_used(
     equipment: &super::equipment::EquipmentState,
     unique_id: u64,
 ) -> bool {
@@ -1180,7 +1245,8 @@ fn equipment_tree_unique_id_is_used(
 }
 
 pub(super) fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
-    item_list_unique_id_is_used(&resources.belt_items, unique_id)
+    resources.reserved_item_unique_ids.contains(&unique_id)
+        || item_list_unique_id_is_used(&resources.belt_items, unique_id)
         || item_list_unique_id_is_used(&resources.inventory_items, unique_id)
         || item_list_unique_id_is_used(&resources.storage_items, unique_id)
         || resources
@@ -1219,6 +1285,7 @@ fn collect_item_tree_unique_ids(items: &[ItemState], seen: &mut BTreeSet<u64>) {
 }
 
 fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeSet<u64>) {
+    seen.extend(&resources.reserved_item_unique_ids);
     collect_item_tree_unique_ids(&resources.belt_items, seen);
     collect_item_tree_unique_ids(&resources.inventory_items, seen);
     collect_item_tree_unique_ids(&resources.storage_items, seen);
@@ -1229,7 +1296,7 @@ fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeS
     }
 }
 
-fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
+pub(super) fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
     resources
         .belt_items
         .iter()
@@ -1242,14 +1309,17 @@ fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
                 .iter()
                 .map(equipment_tree_max_unique_id),
         )
+        .chain(resources.reserved_item_unique_ids.iter().copied())
         .max()
         .unwrap_or(0)
 }
 
 fn next_available_unique_id(resources: &InventoryResource, minimum: u64) -> u64 {
-    let mut unique_id = minimum.max(1);
+    let mut unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(minimum.max(1));
     while inventory_unique_id_is_used(resources, unique_id) {
-        unique_id = unique_id.saturating_add(1);
+        unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+            unique_id.checked_add(1).unwrap_or(1),
+        );
     }
     unique_id
 }
@@ -1279,9 +1349,10 @@ pub(super) fn allocate_item_unique_id_avoiding(
         .iter()
         .map(item_tree_max_unique_id)
         .fold(inventory_max_unique_id(resources), u64::max);
-    let mut unique_id = next_available_unique_id(resources, max_existing.saturating_add(1));
+    let mut unique_id =
+        next_available_unique_id(resources, max_existing.checked_add(1).unwrap_or(1));
     while item_list_unique_id_is_used(reserved_items, unique_id) {
-        unique_id = next_available_unique_id(resources, unique_id.saturating_add(1));
+        unique_id = next_available_unique_id(resources, unique_id.checked_add(1).unwrap_or(1));
     }
     unique_id
 }
@@ -1319,7 +1390,8 @@ fn normalize_incoming_item_tree_unique_ids_impl(
     let mut next_unique_id = inventory_max_unique_id(resources)
         .max(reserved_max)
         .max(incoming_max)
-        .saturating_add(1)
+        .checked_add(1)
+        .unwrap_or(1)
         .max(1);
 
     fn normalize_tree(
@@ -1335,12 +1407,16 @@ fn normalize_incoming_item_tree_unique_ids_impl(
             // Preserve the first exact zero. A second zero is an impossible
             // protocol identity collision and is deterministically repaired.
         } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            *next_unique_id =
+                crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-                *next_unique_id = next_unique_id.saturating_add(1);
+                *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                    next_unique_id.checked_add(1).unwrap_or(1),
+                );
             }
             item.unique_id = *next_unique_id;
             seen.insert(item.unique_id);
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
         }
         if let Some(metadata) = item.user_item_metadata.as_mut() {
             for embedded in metadata.slots.iter_mut().flatten() {
@@ -1423,6 +1499,8 @@ fn normalize_item_list_unique_ids(
         let normalized_unique_id = if preferred_available {
             preferred
         } else {
+            *next_unique_id =
+                crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
             while local_seen.contains(&*next_unique_id)
                 || if exact_identity {
                     seen.contains(&*next_unique_id)
@@ -1430,10 +1508,12 @@ fn normalize_item_list_unique_ids(
                     exact_equipment_root_unique_ids.contains(&*next_unique_id)
                 }
             {
-                *next_unique_id = next_unique_id.saturating_add(1);
+                *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                    next_unique_id.checked_add(1).unwrap_or(1),
+                );
             }
             let allocated = *next_unique_id;
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
             allocated
         };
         item.unique_id = normalized_unique_id;
@@ -1467,12 +1547,16 @@ fn normalize_embedded_item_unique_ids(
         if current_unique_id == 0 && item.user_item_metadata.is_some() && seen.insert(0) {
             // Preserve the first exact zero; repair subsequent collisions.
         } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
+            *next_unique_id =
+                crate::monthly_card::skip_monthly_card_reserved_unique_id(*next_unique_id);
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-                *next_unique_id = next_unique_id.saturating_add(1);
+                *next_unique_id = crate::monthly_card::skip_monthly_card_reserved_unique_id(
+                    next_unique_id.checked_add(1).unwrap_or(1),
+                );
             }
             item.unique_id = *next_unique_id;
             seen.insert(item.unique_id);
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
         }
         normalize_item_state_children_unique_ids(item, seen, next_unique_id);
     }
@@ -1482,14 +1566,20 @@ pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) 
     // Exact equipped roots retain their existing precedence. Every remaining root is
     // then normalized through one global belt -> inventory -> storage identity
     // set and allocator, so only the first occurrence survives a collision.
-    let exact_equipment_root_unique_ids = resources
+    let mut exact_equipment_root_unique_ids = resources
         .equipment_items
         .iter()
         .filter_map(|equipment| equipment.user_item_unique_id)
         .collect::<BTreeSet<_>>();
-    let next_after_all_existing = inventory_max_unique_id(resources).saturating_add(1).max(1);
+    // Held identities also forbid legacy slot-derived aliases during repair.
+    exact_equipment_root_unique_ids.extend(&resources.reserved_item_unique_ids);
+    let next_after_all_existing = inventory_max_unique_id(resources)
+        .checked_add(1)
+        .unwrap_or(1)
+        .max(1);
 
     let mut seen = exact_equipment_root_unique_ids.clone();
+    seen.extend(&resources.reserved_item_unique_ids);
     let mut next_unique_id = next_after_all_existing;
     normalize_item_list_unique_ids(
         &mut resources.belt_items,
@@ -1542,6 +1632,19 @@ pub(super) fn item_heal_values_for_key(key: &str) -> (i32, i32) {
 
 fn normalize_item_list_known_metadata(items: &mut [ItemState]) {
     for item in items {
+        // This is only a fallback for legacy seed items without healing data.
+        // Acquired Crystal items already carry their template's HP/MP values
+        // (Red Potion is 30, not the old starter alias's 35). Even an explicit
+        // zero on an exact protocol carrier must survive checkpoint restore.
+        if item.heal_hp != 0
+            || item.heal_mp != 0
+            || item
+                .user_item_metadata
+                .as_ref()
+                .is_some_and(|metadata| metadata.item_index.is_some())
+        {
+            continue;
+        }
         let (heal_hp, heal_mp) = item_heal_values_for_key(&item.key);
         if heal_hp > 0 || heal_mp > 0 {
             item.heal_hp = heal_hp;
@@ -1653,7 +1756,7 @@ pub(super) fn free_bag_slots(resources: &InventoryResource) -> u16 {
         .iter()
         .filter(|item| matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2))
         .count() as u16;
-    80u16.saturating_sub(used)
+    crystal_bag_slot_capacity(resources.inventory_capacity).saturating_sub(used)
 }
 
 pub(super) fn item_containers_stack_together(
@@ -1671,20 +1774,22 @@ pub(super) fn item_containers_stack_together(
 pub(super) fn empty_slots_for_inventory_container(
     items: &[ItemState],
     container: ItemContainer,
+    inventory_capacity: u16,
 ) -> Vec<(ItemContainer, u8)> {
     match container {
-        ItemContainer::Bag1 | ItemContainer::Bag2 => [ItemContainer::Bag1, ItemContainer::Bag2]
-            .into_iter()
-            .flat_map(|container| {
-                (0..40).filter_map(move |slot| {
-                    let slot = u8::try_from(slot).expect("bag slot count should fit in u8");
+        ItemContainer::Bag1 | ItemContainer::Bag2 => {
+            (0..crystal_bag_slot_capacity(inventory_capacity))
+                .filter_map(|logical_slot| {
+                    let logical_slot = u8::try_from(logical_slot)
+                        .expect("Crystal bag slot count should fit in u8");
+                    let (container, slot) = inventory_container_and_slot_for_index(logical_slot)?;
                     let occupied = items
                         .iter()
                         .any(|item| item.container == container && item.slot == slot);
                     (!occupied).then_some((container, slot))
                 })
-            })
-            .collect(),
+                .collect()
+        }
         other => {
             let max_slots = match other {
                 ItemContainer::Quest => 40,
@@ -1708,8 +1813,9 @@ pub(super) fn empty_slots_for_inventory_container(
 pub(super) fn find_empty_inventory_item_slot(
     items: &[ItemState],
     container: ItemContainer,
+    inventory_capacity: u16,
 ) -> Option<(ItemContainer, u8)> {
-    empty_slots_for_inventory_container(items, container)
+    empty_slots_for_inventory_container(items, container, inventory_capacity)
         .into_iter()
         .next()
 }
@@ -1750,6 +1856,387 @@ pub(super) fn additional_slots_needed_for_item_quantity(
     remaining.div_ceil(max_stack)
 }
 
+fn validate_npc_gold_trade_carried_roster(resources: &InventoryResource) -> Option<()> {
+    if !crate::config::is_valid_crystal_inventory_capacity(resources.inventory_capacity) {
+        return None;
+    }
+    fn unique_tree_ids(item: &UserItem, ids: &mut BTreeSet<u64>) -> bool {
+        ids.insert(item.unique_id)
+            && item
+                .slots
+                .iter()
+                .flatten()
+                .all(|child| unique_tree_ids(child, ids))
+    }
+
+    fn carried_tree_ids(
+        item: &ItemState,
+        wire: &UserItem,
+        grid: u8,
+        roots: &mut BTreeSet<(u8, u64)>,
+        ids: &mut BTreeSet<u64>,
+        legacy_ids: &mut BTreeSet<u64>,
+    ) -> bool {
+        if !roots.insert((grid, wire.unique_id)) {
+            return false;
+        }
+        if item.user_item_metadata.is_some() {
+            unique_tree_ids(wire, ids)
+        } else {
+            legacy_ids.insert(wire.unique_id);
+            wire.slots
+                .iter()
+                .flatten()
+                .all(|child| unique_tree_ids(child, ids))
+        }
+    }
+
+    // Only sidecarless roots are grid-scoped aliases. Every captured root,
+    // nested identity and reservation retains global ownership.
+    let mut cells = BTreeSet::new();
+    let mut roots = BTreeSet::new();
+    let mut ids = resources.reserved_item_unique_ids.clone();
+    let mut legacy_ids = BTreeSet::new();
+    for item in resources.storage_items.iter().chain(
+        resources
+            .inventory_items
+            .iter()
+            .filter(|item| item.container == ItemContainer::Quest),
+    ) {
+        if item.user_item_metadata.is_some() {
+            ids.insert(inventory_item_unique_id(item));
+        } else {
+            legacy_ids.insert(inventory_item_unique_id(item));
+        }
+        collect_metadata_unique_ids(item.user_item_metadata.as_ref(), &mut ids);
+        collect_item_tree_unique_ids(&item.socketed, &mut ids);
+    }
+    for equipment in &resources.equipment_items {
+        if let Some(id) = equipment.user_item_unique_id {
+            ids.insert(id);
+        } else {
+            legacy_ids.insert(equipment_root_unique_id(equipment));
+        }
+        collect_metadata_unique_ids(equipment.user_item_metadata.as_ref(), &mut ids);
+        collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
+    }
+    for item in &resources.belt_items {
+        let (start, end) = crystal_belt_slot_range_for_item_key(&item.key)?;
+        if item.container != ItemContainer::Belt
+            || !(start..end).contains(&item.slot)
+            || !cells.insert(u16::from(item.slot))
+        {
+            return None;
+        }
+        validate_committed_item_state_carrier(item).ok()?;
+        let wire = try_user_item_from_item_state(item).ok()?;
+        if !carried_tree_ids(item, &wire, 1, &mut roots, &mut ids, &mut legacy_ids) {
+            return None;
+        }
+    }
+    for item in &resources.inventory_items {
+        if item.container == ItemContainer::Quest {
+            continue;
+        }
+        let index = match item.container {
+            ItemContainer::Bag1 if item.slot < 40 => item.slot,
+            ItemContainer::Bag2 if item.slot < 40 => 40 + item.slot,
+            _ => return None,
+        };
+        if !is_valid_inventory_slot(index, resources.inventory_capacity)
+            || !cells.insert(6 + u16::from(index))
+        {
+            return None;
+        }
+        validate_committed_item_state_carrier(item).ok()?;
+        let wire = try_user_item_from_item_state(item).ok()?;
+        if !carried_tree_ids(item, &wire, 0, &mut roots, &mut ids, &mut legacy_ids) {
+            return None;
+        }
+    }
+    if !ids.is_disjoint(&legacy_ids) {
+        return None;
+    }
+
+    Some(())
+}
+
+fn canonical_npc_gold_trade_fresh(
+    template: &CrystalItemTemplate,
+    count: u16,
+    unique_id: u64,
+    expire_info: Option<mir2_protocol::UserItemExpireInfo>,
+) -> Option<(ItemState, UserItem)> {
+    let mut fresh = embedded_item_state_from_template(template, ItemContainer::Bag1, 0);
+    fresh.unique_id = unique_id;
+    fresh.quantity = u32::from(count);
+    fresh.durability_current = Some(template.durability);
+    fresh.durability_max = Some(template.durability);
+    fresh.identified = Some(false);
+    fresh.added_attack = 0;
+    fresh.added_defence = 0;
+    fresh.added_stats.clear();
+    fresh.socket_slots = match template.item_type {
+        CRYSTAL_ITEM_TYPE_MOUNT if template.shape < 7 => 4,
+        CRYSTAL_ITEM_TYPE_MOUNT if template.shape < 12 => 5,
+        CRYSTAL_ITEM_TYPE_WEAPON if CRYSTAL_FISHING_ROD_SHAPES.contains(&template.shape) => 5,
+        _ => template.slots,
+    };
+    // Complete the wire carrier before assigning expiry; the fallible reverse
+    // conversion then captures exactly the same ExpireInfo in the live sidecar.
+    let mut incoming = try_user_item_from_item_state(&fresh).ok()?;
+    incoming.expire_info = expire_info;
+    validate_committed_user_item_carrier(&incoming).ok()?;
+    let canonical = try_item_state_from_user_item(fresh, &incoming).ok()?;
+    validate_committed_item_state_carrier(&canonical).ok()?;
+    Some((canonical, incoming))
+}
+
+/// Snapshot-only purchase capacity evidence. External identities participate
+/// in the carried conflict check; this is not an external-tree uniqueness audit.
+pub(super) fn npc_gold_trade_capacity_evidence(
+    resources: &InventoryResource,
+) -> NpcGoldTradeCapacity {
+    let mut evidence = NpcGoldTradeCapacity {
+        roster_valid: false,
+        fresh_compatible_unique_ids: Vec::new(),
+    };
+    if validate_npc_gold_trade_carried_roster(resources).is_none() {
+        return evidence;
+    }
+    for item in resources
+        .belt_items
+        .iter()
+        .chain(resources.inventory_items.iter())
+    {
+        if item.user_item_metadata.is_none()
+            || !matches!(
+                item.container,
+                ItemContainer::Belt | ItemContainer::Bag1 | ItemContainer::Bag2
+            )
+        {
+            continue;
+        }
+        let Some(template) = try_user_item_from_item_state(item)
+            .ok()
+            .and_then(|wire| crystal_item_by_index(wire.item_index))
+        else {
+            evidence.fresh_compatible_unique_ids.clear();
+            return evidence;
+        };
+        // Time-sensitive (including unknown/empty) tags never grant merge slack.
+        // This snapshot evidence is independent of any clock or future purchase.
+        if has_expiry_tag(&template.name) {
+            continue;
+        }
+        let Some((fresh, _)) = canonical_npc_gold_trade_fresh(&template, 1, 0, None) else {
+            evidence.fresh_compatible_unique_ids.clear();
+            return evidence;
+        };
+        if item_stack_identity_compatible(item, &fresh) {
+            evidence
+                .fresh_compatible_unique_ids
+                .push(inventory_item_unique_id(item));
+        }
+    }
+    evidence.fresh_compatible_unique_ids.sort_unstable();
+    evidence.roster_valid = true;
+    evidence
+}
+
+/// Plan ordinary Gold Trade delivery without changing live inventory or money.
+/// The incoming wire item remains the purchased delta even when existing stacks
+/// absorb it completely. Catalog selectors are never delivered item identities.
+pub(super) fn plan_npc_gold_trade_gain(
+    resources: &InventoryResource,
+    template: &CrystalItemTemplate,
+    count: u16,
+    catalog_uid: u64,
+    now_utc_ticks: i64,
+) -> Option<(InventoryResource, UserItem)> {
+    let max_stack = u32::from(template.stack_size.max(1));
+    if count == 0
+        || u32::from(count) > max_stack
+        || !crate::config::is_valid_crystal_inventory_capacity(resources.inventory_capacity)
+    {
+        return None;
+    }
+
+    validate_npc_gold_trade_carried_roster(resources)?;
+    let expire_info = fresh_expire_info(&template.name, now_utc_ticks).ok()?;
+    let mut staged = resources.clone();
+    // This exclusion exists only in the private allocation view. It is restored
+    // before return, including when the catalog selector was already reserved.
+    staged.reserved_item_unique_ids.insert(catalog_uid);
+    staged.reserved_item_unique_ids.insert(0);
+    let (canonical, incoming) = canonical_npc_gold_trade_fresh(
+        template,
+        count,
+        match &resources.item_uid_issuance {
+            super::item_uid_issuance::ItemUidIssuance::Legacy => {
+                allocate_item_unique_id(&staged, ItemContainer::Bag1, 0)
+            }
+            _ => {
+                let mut uid = super::item_uid_issuance::issue_for_staged_inventory(
+                    resources,
+                    crate::UserItemUidReason::NpcTradePurchase,
+                    ItemContainer::Bag1,
+                    0,
+                )
+                .ok()?;
+                if uid == catalog_uid {
+                    uid = super::item_uid_issuance::issue_for_staged_inventory(
+                        resources,
+                        crate::UserItemUidReason::NpcTradePurchase,
+                        ItemContainer::Bag1,
+                        0,
+                    )
+                    .ok()?;
+                }
+                uid
+            }
+        },
+        expire_info,
+    )?;
+    if incoming.unique_id == 0 || incoming.unique_id == catalog_uid {
+        return None;
+    }
+
+    let mut remaining = u32::from(count);
+    let belt_range = crystal_belt_slot_range_for_item_key(&canonical.key);
+    if max_stack > 1 {
+        for existing in staged
+            .belt_items
+            .iter_mut()
+            .chain(staged.inventory_items.iter_mut())
+        {
+            let legal_target = match existing.container {
+                ItemContainer::Belt => {
+                    belt_range.is_some_and(|(start, end)| (start..end).contains(&existing.slot))
+                }
+                ItemContainer::Bag1 | ItemContainer::Bag2 => true,
+                _ => false,
+            };
+            if remaining == 0 {
+                break;
+            }
+            if !legal_target
+                || existing.user_item_metadata.is_none()
+                || existing.quantity >= max_stack
+                || !item_stack_identity_compatible(existing, &canonical)
+            {
+                continue;
+            }
+            let added = remaining.min(max_stack - existing.quantity);
+            existing.quantity += added;
+            remaining -= added;
+            validate_committed_item_state_carrier(existing).ok()?;
+            try_user_item_from_item_state(existing).ok()?;
+        }
+    }
+    if remaining > 0 {
+        let (container, slot) =
+            crystal_empty_add_item_slots(&staged, ItemContainer::Bag1, &canonical.key)
+                .into_iter()
+                .next()?;
+        let mut remainder = canonical;
+        remainder.container = container;
+        remainder.slot = slot;
+        remainder.quantity = remaining;
+        validate_committed_item_state_carrier(&remainder).ok()?;
+        try_user_item_from_item_state(&remainder).ok()?;
+        if container == ItemContainer::Belt {
+            staged.belt_items.push(remainder);
+        } else {
+            staged.inventory_items.push(remainder);
+        }
+    }
+    staged.reserved_item_unique_ids = resources.reserved_item_unique_ids.clone();
+    Some((staged, incoming))
+}
+
+/// Pearl and resale purchases retain the legacy per-item delivery metadata. Unlike the
+/// generic gain helper, a failed plan cannot fall back onto an occupied cell.
+pub(super) fn plan_npc_resale_or_pearl_gain(
+    resources: &InventoryResource,
+    template: &CrystalItemTemplate,
+    quantity: u32,
+    source: &UserItem,
+) -> Option<(InventoryResource, UserItem)> {
+    if quantity == 0 || quantity > u32::from(template.stack_size.max(1)) {
+        return None;
+    }
+    super::items::validate_user_item_carrier(source).ok()?;
+    validate_npc_gold_trade_carried_roster(resources)?;
+    let key = crystal_item_key_for_template(template);
+    let (container, slot) = crystal_empty_add_item_slots(resources, ItemContainer::Bag1, &key)
+        .into_iter()
+        .next()?;
+    let (added_attack, added_defence) = super::items::user_item_added_attack_defence(source);
+    let item = ItemState {
+        stone_serial: None,
+        key: key.clone(),
+        name: template.name.clone(),
+        icon: item_icon_for_key(&key),
+        slot,
+        unique_id: super::item_uid_issuance::issue_for_staged_inventory(
+            resources,
+            crate::UserItemUidReason::NpcTradePurchase,
+            container,
+            slot,
+        )
+        .ok()?,
+        container,
+        quantity,
+        description: template
+            .tooltip
+            .as_deref()
+            .unwrap_or("Crystal NPC shop item.")
+            .to_string(),
+        durability_current: Some(source.current_dura),
+        durability_max: Some(source.max_dura),
+        weight: u16::from(template.weight.max(1)),
+        equip_slot: crystal_equipment_slot_for_item_key(&key),
+        grade: match template.grade {
+            1 => ItemGrade::Common,
+            2 => ItemGrade::Rare,
+            3 => ItemGrade::Legendary,
+            _ => ItemGrade::None,
+        },
+        added_attack,
+        added_defence,
+        added_stats: Vec::new(),
+        socketed: Vec::new(),
+        user_item_metadata: None,
+        cursed: false,
+        socket_slots: template.slots,
+        gem_count: 0,
+        identified: None,
+        soul_bound_id: None,
+        sealed_expiry_time_binary_datetime: 0,
+        sealed_next_time_binary_datetime: 0,
+        rental_binding_flags: 0,
+        rental_owner_name: String::new(),
+        rental_expiry_binary_datetime: 0,
+        rental_locked: false,
+        attack: crystal_item_stat_value(template, CRYSTAL_STAT_MAX_DC),
+        defence: crystal_item_stat_value(template, CRYSTAL_STAT_MAX_AC),
+        heal_hp: 0,
+        heal_mp: 0,
+    };
+    validate_committed_item_state_carrier(&item).ok()?;
+    let incoming = try_user_item_from_item_state(&item).ok()?;
+    validate_committed_user_item_carrier(&incoming).ok()?;
+    let mut staged = resources.clone();
+    if container == ItemContainer::Belt {
+        staged.belt_items.push(item);
+    } else {
+        staged.inventory_items.push(item);
+    }
+    validate_npc_gold_trade_carried_roster(&staged)?;
+    Some((staged, incoming))
+}
+
 pub(super) fn can_gain_item_quantity(
     resources: &InventoryResource,
     container: ItemContainer,
@@ -1771,6 +2258,83 @@ fn ground_drop_user_item_uids_are_assigned(item: &UserItem) -> bool {
             .all(ground_drop_user_item_uids_are_assigned)
 }
 
+// Exact drop previews are structural only. Minting is a separate committing
+// step; custody returns never acquire replacement identities.
+struct ExactGroundDropPlan {
+    inventory: InventoryResource,
+    changed: Vec<ItemState>,
+    fresh_locations: Vec<(bool, usize)>,
+    fresh_source: bool,
+}
+
+fn exact_ground_drop_plan(
+    inventory: InventoryResource,
+    changed: Vec<ItemState>,
+    fresh_locations: Vec<(bool, usize)>,
+    fresh_source: bool,
+) -> Option<ExactGroundDropPlan> {
+    Some(ExactGroundDropPlan {
+        inventory,
+        changed,
+        fresh_locations,
+        fresh_source,
+    })
+}
+
+fn issue_fresh_ground_drop_tree(
+    inventory: &InventoryResource,
+    item: &mut UserItem,
+    container: ItemContainer,
+    slot: u8,
+) -> Option<()> {
+    item.unique_id = issue_for_staged_inventory(
+        inventory,
+        crate::UserItemUidReason::MonsterDrop,
+        container,
+        slot,
+    )
+    .ok()?;
+    // Traverse the exact raw carrier once. Hydration later rebuilds both live
+    // sockets and captured metadata from these same issued identities.
+    for (slot, child) in item.slots.iter_mut().enumerate() {
+        if let Some(child) = child {
+            issue_fresh_ground_drop_tree(inventory, child, container, u8::try_from(slot).ok()?)?;
+        }
+    }
+    Some(())
+}
+
+// This protects cloning/temporary normalization only. It is never sufficient
+// for commit: the original complete carrier validator still runs afterwards.
+fn fresh_ground_drop_raw_shape_is_bounded(item: &UserItem) -> bool {
+    fn visit(
+        item: &UserItem,
+        depth: usize,
+        nodes: &mut usize,
+        budget: super::items::UserItemCarrierBudget,
+    ) -> bool {
+        *nodes = nodes.saturating_add(1);
+        if depth > budget.max_depth
+            || *nodes > budget.max_total_nodes
+            || item.slots.len() > budget.max_slots_per_item
+            || item.added_stats.len() > budget.max_added_stats_per_item
+            || item.awake_values.len() > budget.max_awake_values_per_item
+        {
+            return false;
+        }
+        item.slots
+            .iter()
+            .flatten()
+            .all(|child| visit(child, depth + 1, nodes, budget))
+    }
+    visit(
+        item,
+        0,
+        &mut 0,
+        super::items::UserItemCarrierBudget::default(),
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn plan_exact_ground_drop_item(
     resources: &InventoryResource,
@@ -1781,8 +2345,18 @@ fn plan_exact_ground_drop_item(
     preferred_slot: u8,
     expected_quantity: u32,
     payload: &GroundDropItemPayload,
-) -> Option<(InventoryResource, Vec<ItemState>)> {
-    validate_committed_user_item_carrier(&payload.item).ok()?;
+) -> Option<ExactGroundDropPlan> {
+    if !matches!(
+        container,
+        ItemContainer::Bag1 | ItemContainer::Bag2 | ItemContainer::Belt | ItemContainer::Quest
+    ) {
+        return None;
+    }
+    if payload.uid_assigned {
+        validate_committed_user_item_carrier(&payload.item).ok()?;
+    } else if !fresh_ground_drop_raw_shape_is_bounded(&payload.item) {
+        return None;
+    }
     if u32::from(payload.item.count) != expected_quantity || expected_quantity == 0 {
         return None;
     }
@@ -1805,7 +2379,22 @@ fn plan_exact_ground_drop_item(
     base.key = canonical_key.clone();
     base.name = name.to_string();
     base.description = description.to_string();
-    let mut canonical = try_item_state_from_user_item(base, &payload.item).ok()?;
+    let mut preview_item = payload.item.clone();
+    if !payload.uid_assigned {
+        // Fresh raw drops may have repeated child templates with all IDs zero.
+        // Give the clone temporary distinct identities before captured socket
+        // validation. No durable service/history is consulted by this preview.
+        clear_user_item_tree_unique_ids(&mut preview_item);
+        let mut seen = BTreeSet::new();
+        collect_inventory_unique_ids(resources, &mut seen);
+        let mut next = inventory_max_unique_id(resources)
+            .checked_add(1)
+            .unwrap_or(1)
+            .max(1);
+        normalize_user_item_tree_unique_ids(&mut preview_item, &mut seen, &mut next, false);
+    }
+    validate_committed_user_item_carrier(&preview_item).ok()?;
+    let mut canonical = try_item_state_from_user_item(base, &preview_item).ok()?;
     canonical.container = container;
     canonical.slot = preferred_slot;
 
@@ -1815,7 +2404,15 @@ fn plan_exact_ground_drop_item(
     }
 
     let mut staged = resources.clone();
+    let mut fresh_locations = Vec::new();
     if payload.uid_assigned {
+        // Custody must be conflict-free before even a full-stack merge. A
+        // merge cannot hide an already-present source root or nested identity.
+        let exact_before = try_user_item_from_item_state(&canonical).ok()?;
+        normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
+        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
+            return None;
+        }
         if max_stack > 1 {
             let mut merge_capacity = 0_u32;
             if matches!(container, ItemContainer::Bag1 | ItemContainer::Bag2) {
@@ -1867,7 +2464,12 @@ fn plan_exact_ground_drop_item(
                         validate_committed_item_state_carrier(existing).ok()?;
                         changed.push(existing.clone());
                         if remaining == 0 {
-                            return Some((staged, changed));
+                            return exact_ground_drop_plan(
+                                staged,
+                                changed,
+                                fresh_locations,
+                                !payload.uid_assigned,
+                            );
                         }
                     }
                 }
@@ -1886,33 +2488,22 @@ fn plan_exact_ground_drop_item(
                     validate_committed_item_state_carrier(existing).ok()?;
                     changed.push(existing.clone());
                     if remaining == 0 {
-                        return Some((staged, changed));
+                        return exact_ground_drop_plan(
+                            staged,
+                            changed,
+                            fresh_locations,
+                            !payload.uid_assigned,
+                        );
                     }
                 }
                 return None;
             }
         }
 
-        let exact_before = try_user_item_from_item_state(&canonical).ok()?;
-        normalize_incoming_item_tree_unique_ids(resources, &mut canonical, &[]);
-        if try_user_item_from_item_state(&canonical).ok()? != exact_before {
-            return None;
-        }
         let (item_container, slot) =
             crystal_empty_add_item_slots(&staged, container, &canonical_key)
                 .into_iter()
-                .next()
-                .or_else(|| {
-                    find_empty_inventory_item_slot(&staged.inventory_items, container)
-                        .or(Some((container, preferred_slot)))
-                        .filter(|(candidate_container, candidate_slot)| {
-                            !collection_slot_occupied(
-                                &staged,
-                                *candidate_container,
-                                *candidate_slot,
-                            )
-                        })
-                })?;
+                .next()?;
         canonical.container = item_container;
         canonical.slot = slot;
         validate_committed_item_state_carrier(&canonical).ok()?;
@@ -1921,7 +2512,7 @@ fn plan_exact_ground_drop_item(
         } else {
             staged.inventory_items.push(canonical.clone());
         }
-        return Some((staged, vec![canonical]));
+        return exact_ground_drop_plan(staged, vec![canonical], fresh_locations, false);
     }
 
     let mut remaining = expected_quantity;
@@ -1942,7 +2533,12 @@ fn plan_exact_ground_drop_item(
                 validate_committed_item_state_carrier(existing).ok()?;
                 changed.push(existing.clone());
                 if remaining == 0 {
-                    return Some((staged, changed));
+                    return exact_ground_drop_plan(
+                        staged,
+                        changed,
+                        fresh_locations,
+                        !payload.uid_assigned,
+                    );
                 }
             }
         }
@@ -1961,7 +2557,12 @@ fn plan_exact_ground_drop_item(
             validate_committed_item_state_carrier(existing).ok()?;
             changed.push(existing.clone());
             if remaining == 0 {
-                return Some((staged, changed));
+                return exact_ground_drop_plan(
+                    staged,
+                    changed,
+                    fresh_locations,
+                    !payload.uid_assigned,
+                );
             }
         }
     }
@@ -1970,34 +2571,28 @@ fn plan_exact_ground_drop_item(
         let (item_container, slot) =
             crystal_empty_add_item_slots(&staged, container, &canonical_key)
                 .into_iter()
-                .next()
-                .or_else(|| {
-                    find_empty_inventory_item_slot(&staged.inventory_items, container)
-                        .or(Some((container, preferred_slot)))
-                        .filter(|(candidate_container, candidate_slot)| {
-                            !collection_slot_occupied(
-                                &staged,
-                                *candidate_container,
-                                *candidate_slot,
-                            )
-                        })
-                })?;
+                .next()?;
         let mut item = canonical.clone();
         item.container = item_container;
         item.slot = slot;
         item.quantity = remaining.min(max_stack);
+        // Pure temporary identities permit lossless socket hydration even for
+        // repeated child templates. This has no durable allocator side effect.
+        // Durable commit replaces the entire tree before publishing any cell.
         normalize_fresh_item_tree_unique_ids(&staged, &mut item, &[]);
         validate_committed_item_state_carrier(&item).ok()?;
         if item_container == ItemContainer::Belt {
+            fresh_locations.push((true, staged.belt_items.len()));
             staged.belt_items.push(item.clone());
         } else {
+            fresh_locations.push((false, staged.inventory_items.len()));
             staged.inventory_items.push(item.clone());
         }
         remaining -= item.quantity;
         changed.push(item);
     }
 
-    Some((staged, changed))
+    exact_ground_drop_plan(staged, changed, fresh_locations, !payload.uid_assigned)
 }
 #[allow(clippy::too_many_arguments)]
 pub(super) fn can_gain_exact_ground_drop_item(
@@ -2060,7 +2655,7 @@ pub(super) fn add_exact_ground_drop_items(
     expected_quantity: u32,
     payload: &GroundDropItemPayload,
 ) -> Option<Vec<ItemState>> {
-    let (staged, changed_items) = {
+    let mut plan = {
         let resources = world.resource::<InventoryResource>();
         plan_exact_ground_drop_item(
             resources,
@@ -2073,7 +2668,67 @@ pub(super) fn add_exact_ground_drop_items(
             payload,
         )?
     };
-    *world.resource_mut::<InventoryResource>() = staged;
+    if plan.fresh_source
+        && matches!(
+            &plan.inventory.item_uid_issuance,
+            ItemUidIssuance::Unavailable | ItemUidIssuance::Fenced
+        )
+    {
+        return None;
+    }
+    // Capacity failure above has no mint/floor effect. The complete fresh plan
+    // may burn IDs on issuance failure, but never publishes a partial inventory.
+    refresh_world_history_floor(world).ok()?;
+    if payload.uid_assigned {
+        // A fully absorbed custody source may disappear from the live roster.
+        // Its retired ID must still remain above the shared authority floor.
+        plan.inventory
+            .item_uid_issuance
+            .raise_serialized_floor(&payload.item)
+            .ok()?;
+    }
+    // Temporary planning IDs are not issued history. Only the actual original
+    // live roster participates in the mint floor; the shared allocator itself
+    // keeps every earlier newly issued root/child and discarded ID reserved.
+    let mint_context = world.resource::<InventoryResource>().clone();
+    for (belt, index) in &plan.fresh_locations {
+        if matches!(&plan.inventory.item_uid_issuance, ItemUidIssuance::Legacy) {
+            continue;
+        }
+        let original = if *belt {
+            plan.inventory.belt_items.get(*index)?
+        } else {
+            plan.inventory.inventory_items.get(*index)?
+        }
+        .clone();
+        let mut raw = try_user_item_from_item_state(&original).ok()?;
+        issue_fresh_ground_drop_tree(&mint_context, &mut raw, original.container, original.slot)?;
+        let issued = try_item_state_from_user_item(original, &raw).ok()?;
+        validate_committed_item_state_carrier(&issued).ok()?;
+        if *belt {
+            plan.inventory.belt_items[*index] = issued;
+        } else {
+            plan.inventory.inventory_items[*index] = issued;
+        }
+    }
+    // Reproject every changed cell from the final plan, never the temporary or
+    // pre-mint clones collected during structural preview.
+    let changed_items = plan
+        .changed
+        .iter()
+        .map(|changed| {
+            let items = if changed.container == ItemContainer::Belt {
+                &plan.inventory.belt_items
+            } else {
+                &plan.inventory.inventory_items
+            };
+            items
+                .iter()
+                .find(|item| item.container == changed.container && item.slot == changed.slot)
+                .cloned()
+        })
+        .collect::<Option<Vec<_>>>()?;
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
     Some(changed_items)
 }
 pub(super) fn add_or_increment_item(
@@ -2262,13 +2917,18 @@ pub(super) fn add_or_increment_item_with_random_metadata(
         {
             Some(slot) => slot,
             None if last_changed.is_some() => break,
-            None => match find_empty_inventory_item_slot(&resources.inventory_items, container) {
+            None => match find_empty_inventory_item_slot(
+                &resources.inventory_items,
+                container,
+                resources.inventory_capacity,
+            ) {
                 Some(slot) => slot,
                 None if last_changed.is_some() => break,
                 None => (container, preferred_slot),
             },
         };
         let item = ItemState {
+            stone_serial: None,
             key: key.to_string(),
             name: name.to_string(),
             icon: item_icon_for_key(key),
@@ -2338,18 +2998,21 @@ pub(super) fn crystal_empty_add_item_slots(
             slots.extend(empty_slots_for_inventory_container(
                 &resources.inventory_items,
                 container,
+                resources.inventory_capacity,
             ));
         }
         ItemContainer::Belt => {
             slots.extend(empty_slots_for_inventory_container(
                 &resources.belt_items,
                 container,
+                resources.inventory_capacity,
             ));
         }
         other => {
             slots.extend(empty_slots_for_inventory_container(
                 &resources.inventory_items,
                 other,
+                resources.inventory_capacity,
             ));
         }
     }
@@ -2382,8 +3045,112 @@ pub(super) fn inventory_item_matches_index(item: &ItemState, index: u8) -> bool 
     inventory_index_for_item(item).is_some_and(|item_index| item_index == index)
 }
 
-pub(super) fn is_valid_inventory_slot(slot: u8) -> bool {
-    inventory_container_and_slot_for_index(slot).is_some()
+pub(super) fn is_valid_inventory_slot(slot: u8, inventory_capacity: u16) -> bool {
+    u16::from(slot) < crystal_bag_slot_capacity(inventory_capacity)
+        && inventory_container_and_slot_for_index(slot).is_some()
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CrystalInventoryMoveSlot {
+    Belt(u8),
+    Bag(ItemContainer, u8),
+}
+
+/// Decode Crystal's original unified player-inventory array for the explicit
+/// `Belt` compatibility move path. Slots 0..5 are the belt; bag cells begin at
+/// six even though snapshots keep belt and bag items in separate collections.
+fn crystal_inventory_move_slot(
+    raw_slot: u8,
+    inventory_capacity: u16,
+) -> Option<CrystalInventoryMoveSlot> {
+    if u16::from(raw_slot) >= inventory_capacity {
+        return None;
+    }
+    if raw_slot < crate::config::CRYSTAL_BELT_SLOT_COUNT as u8 {
+        return Some(CrystalInventoryMoveSlot::Belt(raw_slot));
+    }
+    let bag_index = raw_slot - crate::config::CRYSTAL_BELT_SLOT_COUNT as u8;
+    let (container, slot) = inventory_container_and_slot_for_index(bag_index)?;
+    Some(CrystalInventoryMoveSlot::Bag(container, slot))
+}
+
+fn item_matches_crystal_inventory_move_slot(
+    item: &ItemState,
+    slot: CrystalInventoryMoveSlot,
+) -> bool {
+    match slot {
+        CrystalInventoryMoveSlot::Belt(belt_slot) => {
+            item.container == ItemContainer::Belt && item.slot == belt_slot
+        }
+        CrystalInventoryMoveSlot::Bag(container, bag_slot) => {
+            item.container == container && item.slot == bag_slot
+        }
+    }
+}
+
+fn take_crystal_inventory_move_item(
+    resources: &mut InventoryResource,
+    slot: CrystalInventoryMoveSlot,
+) -> Option<ItemState> {
+    let items = match slot {
+        CrystalInventoryMoveSlot::Belt(_) => &mut resources.belt_items,
+        CrystalInventoryMoveSlot::Bag(_, _) => &mut resources.inventory_items,
+    };
+    let index = items
+        .iter()
+        .position(|item| item_matches_crystal_inventory_move_slot(item, slot))?;
+    Some(items.remove(index))
+}
+
+fn put_crystal_inventory_move_item(
+    resources: &mut InventoryResource,
+    slot: CrystalInventoryMoveSlot,
+    mut item: ItemState,
+) {
+    match slot {
+        CrystalInventoryMoveSlot::Belt(belt_slot) => {
+            item.container = ItemContainer::Belt;
+            item.slot = belt_slot;
+            resources.belt_items.push(item);
+        }
+        CrystalInventoryMoveSlot::Bag(container, bag_slot) => {
+            item.container = container;
+            item.slot = bag_slot;
+            resources.inventory_items.push(item);
+        }
+    }
+}
+
+/// Move one item using Crystal's raw player-inventory indices. The operation
+/// removes both endpoints before inserting their swapped values, so a failed
+/// lookup cannot duplicate or discard an item.
+fn move_crystal_inventory_items(
+    resources: &mut InventoryResource,
+    from: CrystalInventoryMoveSlot,
+    to: CrystalInventoryMoveSlot,
+) -> bool {
+    if from == to {
+        return match from {
+            CrystalInventoryMoveSlot::Belt(_) => resources
+                .belt_items
+                .iter()
+                .any(|item| item_matches_crystal_inventory_move_slot(item, from)),
+            CrystalInventoryMoveSlot::Bag(_, _) => resources
+                .inventory_items
+                .iter()
+                .any(|item| item_matches_crystal_inventory_move_slot(item, from)),
+        };
+    }
+
+    let Some(source) = take_crystal_inventory_move_item(resources, from) else {
+        return false;
+    };
+    let destination = take_crystal_inventory_move_item(resources, to);
+    if let Some(destination) = destination {
+        put_crystal_inventory_move_item(resources, from, destination);
+    }
+    put_crystal_inventory_move_item(resources, to, source);
+    true
 }
 
 pub(super) fn move_item_slot_matches_grid(item: &ItemState, grid: MirGridType, slot: u8) -> bool {
@@ -2457,7 +3224,9 @@ pub(super) fn remove_item_destination(
 ) -> Option<(ItemContainer, u8)> {
     let slot = u8::try_from(to).ok()?;
     match grid {
-        MirGridType::Inventory => inventory_container_and_slot_for_index(slot),
+        MirGridType::Inventory => is_valid_inventory_slot(slot, resources.inventory_capacity)
+            .then(|| inventory_container_and_slot_for_index(slot))
+            .flatten(),
         MirGridType::Storage => {
             is_valid_storage_slot(resources, slot).then_some((ItemContainer::Storage, slot))
         }
@@ -2488,7 +3257,9 @@ pub(super) fn store_item_impl(world: &mut World, from: i32, to: i32) -> Vec<Serv
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
-        if !is_valid_inventory_slot(from_slot) || !is_valid_storage_slot(&resources, to_slot) {
+        if !is_valid_inventory_slot(from_slot, resources.inventory_capacity)
+            || !is_valid_storage_slot(&resources, to_slot)
+        {
             return vec![failed_packet];
         }
         let Some(index) = resources
@@ -2556,7 +3327,9 @@ pub(super) fn take_back_item_impl(world: &mut World, from: i32, to: i32) -> Vec<
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
-        if !is_valid_storage_slot(&resources, from_slot) || !is_valid_inventory_slot(to_slot) {
+        if !is_valid_storage_slot(&resources, from_slot)
+            || !is_valid_inventory_slot(to_slot, resources.inventory_capacity)
+        {
             return vec![failed_packet];
         }
         let Some((to_container, to_inventory_slot)) =
@@ -2602,6 +3375,12 @@ pub(super) fn move_item_impl(
     from: i32,
     to: i32,
 ) -> Vec<ServerPacket> {
+    if grid == MirGridType::HeroInventory {
+        return super::hero_inventory::move_item(world, from, to);
+    }
+    if grid == MirGridType::Trade {
+        return super::packets::stage5_move_trade_item_packet(world, from, to);
+    }
     let failed_packet = ServerPacket::MoveItem {
         grid,
         from,
@@ -2611,6 +3390,7 @@ pub(super) fn move_item_impl(
     if !matches!(
         grid,
         MirGridType::Inventory
+            | MirGridType::Belt
             | MirGridType::Storage
             | MirGridType::Trade
             | MirGridType::Refine
@@ -2631,10 +3411,75 @@ pub(super) fn move_item_impl(
         return vec![failed_packet];
     };
 
-    if matches!(grid, MirGridType::Inventory)
-        && (!is_valid_inventory_slot(from_slot) || !is_valid_inventory_slot(to_slot))
-    {
-        return vec![failed_packet];
+    if grid == MirGridType::Belt {
+        let (from_location, to_location) = {
+            let resources = world.resource::<InventoryResource>();
+            let Some(from_location) =
+                crystal_inventory_move_slot(from_slot, resources.inventory_capacity)
+            else {
+                return vec![failed_packet];
+            };
+            let Some(to_location) =
+                crystal_inventory_move_slot(to_slot, resources.inventory_capacity)
+            else {
+                return vec![failed_packet];
+            };
+            (from_location, to_location)
+        };
+        if matches!(
+            (from_location, to_location),
+            (
+                CrystalInventoryMoveSlot::Belt(_),
+                CrystalInventoryMoveSlot::Belt(_)
+            ) | (
+                CrystalInventoryMoveSlot::Bag(_, _),
+                CrystalInventoryMoveSlot::Bag(_, _)
+            )
+        ) {
+            return vec![failed_packet];
+        }
+
+        let touches_reserved_item = {
+            let resources = world.resource::<InventoryResource>();
+            resources
+                .inventory_items
+                .iter()
+                .chain(resources.belt_items.iter())
+                .any(|item| {
+                    (item_matches_crystal_inventory_move_slot(item, from_location)
+                        || item_matches_crystal_inventory_move_slot(item, to_location))
+                        && super::packets::stage5_trade_reserves_item(world, item)
+                })
+        };
+        if touches_reserved_item {
+            return vec![failed_packet];
+        }
+
+        if !move_crystal_inventory_items(
+            &mut world.resource_mut::<InventoryResource>(),
+            from_location,
+            to_location,
+        ) {
+            return vec![
+                super::session::system_message_key(world, "server.ItemMoveErrorReport"),
+                failed_packet,
+            ];
+        }
+        return vec![ServerPacket::MoveItem {
+            grid,
+            from,
+            to,
+            success: true,
+        }];
+    }
+
+    if matches!(grid, MirGridType::Inventory) {
+        let resources = world.resource::<InventoryResource>();
+        if !is_valid_inventory_slot(from_slot, resources.inventory_capacity)
+            || !is_valid_inventory_slot(to_slot, resources.inventory_capacity)
+        {
+            return vec![failed_packet];
+        }
     }
 
     if matches!(grid, MirGridType::Storage) {
@@ -2646,6 +3491,19 @@ pub(super) fn move_item_impl(
         }
     }
 
+    if grid == MirGridType::Inventory
+        && world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .any(|item| {
+                (inventory_item_matches_index(item, from_slot)
+                    || inventory_item_matches_index(item, to_slot))
+                    && super::packets::stage5_trade_reserves_item(world, item)
+            })
+    {
+        return vec![failed_packet];
+    }
     let mut resources = world.resource_mut::<InventoryResource>();
     let items = match grid {
         MirGridType::Inventory => &mut resources.inventory_items,
@@ -2713,6 +3571,20 @@ pub(super) fn merge_item_impl(
     id_from: u64,
     id_to: u64,
 ) -> Vec<ServerPacket> {
+    if matches!(
+        grid_from,
+        MirGridType::HeroInventory | MirGridType::HeroEquipment
+    ) || matches!(
+        grid_to,
+        MirGridType::HeroInventory | MirGridType::HeroEquipment
+    ) {
+        return super::hero_inventory::merge_item(world, grid_from, grid_to, id_from, id_to);
+    }
+    if grid_from == MirGridType::Trade || grid_to == MirGridType::Trade {
+        return super::packets::stage5_merge_trade_item_packet(
+            world, grid_from, grid_to, id_from, id_to,
+        );
+    }
     let failed_packet = ServerPacket::MergeItem {
         grid_from,
         grid_to,
@@ -2720,11 +3592,20 @@ pub(super) fn merge_item_impl(
         id_to,
         success: false,
     };
+    let equipment_amulet_merge = matches!(
+        (grid_from, grid_to),
+        (
+            MirGridType::Equipment,
+            MirGridType::Inventory | MirGridType::Storage
+        ) | (
+            MirGridType::Inventory | MirGridType::Storage,
+            MirGridType::Equipment
+        )
+    );
     if matches!(
         grid_from,
         MirGridType::HeroInventory
             | MirGridType::HeroEquipment
-            | MirGridType::Equipment
             | MirGridType::Fishing
             | MirGridType::QuestInventory
             | MirGridType::Trade
@@ -2733,12 +3614,13 @@ pub(super) fn merge_item_impl(
         grid_to,
         MirGridType::HeroInventory
             | MirGridType::HeroEquipment
-            | MirGridType::Equipment
             | MirGridType::Fishing
             | MirGridType::QuestInventory
             | MirGridType::Trade
             | MirGridType::Refine
-    ) {
+    ) || (!equipment_amulet_merge
+        && (grid_from == MirGridType::Equipment || grid_to == MirGridType::Equipment))
+    {
         return vec![failed_packet];
     }
     if (matches!(grid_from, MirGridType::Storage) || matches!(grid_to, MirGridType::Storage))
@@ -2750,6 +3632,32 @@ pub(super) fn merge_item_impl(
         if storage_locked(world) {
             return vec![failed_packet];
         }
+    }
+
+    if world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| {
+            ((grid_from == MirGridType::Inventory && item_unique_id(item) == id_from)
+                || (grid_to == MirGridType::Inventory && item_unique_id(item) == id_to))
+                && super::packets::stage5_trade_reserves_item(world, item)
+        })
+    {
+        return vec![failed_packet];
+    }
+
+    if equipment_amulet_merge {
+        if !merge_equipped_amulet_item(world, grid_from, grid_to, id_from, id_to) {
+            return vec![failed_packet];
+        }
+        return vec![ServerPacket::MergeItem {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+            success: true,
+        }];
     }
 
     let mut resources = world.resource_mut::<InventoryResource>();
@@ -2877,7 +3785,241 @@ pub(super) fn merge_item_impl(
     }]
 }
 
-fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
+/// Crystal `PlayerObject.MergeItem` permits an equipped stack only for real
+/// `ItemType.Amulet` instances. Keep the equipment carrier in place for a
+/// partial merge; a full merge retires just that worn carrier.
+fn merge_equipped_amulet_item(
+    world: &mut World,
+    grid_from: MirGridType,
+    grid_to: MirGridType,
+    id_from: u64,
+    id_to: u64,
+) -> bool {
+    let allow_cursed_removal = world
+        .resource::<super::resources::PlayerPermissionResource>()
+        .unlock_curse;
+    let removed_cursed_equipment = {
+        let mut resources = world.resource_mut::<InventoryResource>();
+        let storage_slot_limit = accessible_storage_size(&resources);
+        match (grid_from, grid_to) {
+            (MirGridType::Equipment, MirGridType::Inventory) => {
+                let InventoryResource {
+                    equipment_items,
+                    inventory_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_from,
+                    inventory_items,
+                    grid_to,
+                    id_to,
+                    true,
+                    None,
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Equipment, MirGridType::Storage) => {
+                let InventoryResource {
+                    equipment_items,
+                    storage_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_from,
+                    storage_items,
+                    grid_to,
+                    id_to,
+                    true,
+                    Some(storage_slot_limit),
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Inventory, MirGridType::Equipment) => {
+                let InventoryResource {
+                    equipment_items,
+                    inventory_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_to,
+                    inventory_items,
+                    grid_from,
+                    id_from,
+                    false,
+                    None,
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Storage, MirGridType::Equipment) => {
+                let InventoryResource {
+                    equipment_items,
+                    storage_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_to,
+                    storage_items,
+                    grid_from,
+                    id_from,
+                    false,
+                    Some(storage_slot_limit),
+                    allow_cursed_removal,
+                )
+            }
+            _ => return false,
+        }
+    };
+
+    let Some(removed_cursed_equipment) = removed_cursed_equipment else {
+        return false;
+    };
+    if removed_cursed_equipment {
+        world
+            .resource_mut::<super::resources::PlayerPermissionResource>()
+            .unlock_curse = false;
+    }
+    super::stats::refresh_player_stats(world);
+    true
+}
+
+#[allow(clippy::too_many_arguments)]
+fn merge_equipped_amulet_with_collection(
+    equipment_items: &mut Vec<super::equipment::EquipmentState>,
+    reserved_item_unique_ids: &BTreeSet<u64>,
+    equipment_unique_id: u64,
+    collection: &mut Vec<ItemState>,
+    collection_grid: MirGridType,
+    collection_unique_id: u64,
+    equipment_is_source: bool,
+    storage_slot_limit: Option<u16>,
+    allow_cursed_removal: bool,
+) -> Option<bool> {
+    let equipment_index =
+        exact_equipment_index_for_client_reference(equipment_items, equipment_unique_id)?;
+    let collection_index =
+        item_index_for_client_reference(collection, collection_grid, collection_unique_id)?;
+    if storage_slot_limit
+        .is_some_and(|limit| !storage_slot_within_limit(collection[collection_index].slot, limit))
+    {
+        return None;
+    }
+
+    let equipment = &equipment_items[equipment_index];
+    if !crystal_item_template_for_item_key(&equipment.key)
+        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+    {
+        return None;
+    }
+    // The temporary ItemState is only a strict identity carrier. Its exact root
+    // UID and every nested UserItem field are retained by the conversion.
+    let equipment_carrier = super::equipment::item_state_from_equipment_state(
+        equipment.clone(),
+        collection[collection_index].container,
+        collection[collection_index].slot,
+    );
+    if !equipped_amulet_stack_identity_compatible(&equipment_carrier, &collection[collection_index])
+    {
+        return None;
+    }
+    if reserved_item_unique_ids.contains(&equipment_carrier.unique_id)
+        || reserved_item_unique_ids.contains(&collection[collection_index].unique_id)
+    {
+        return None;
+    }
+    if equipment_is_source && equipment.cursed && !allow_cursed_removal {
+        return None;
+    }
+    if equipment_is_source
+        && collection_grid == MirGridType::Storage
+        && (crystal_item_has_bind_flag(&equipment.key, CRYSTAL_BIND_DONT_STORE)
+            || item_has_rental_bind_flag(&equipment_carrier, CRYSTAL_BIND_DONT_STORE))
+    {
+        return None;
+    }
+
+    let max_stack = crystal_stack_size_for_item_key(&collection[collection_index].key);
+    let target_quantity = if equipment_is_source {
+        collection[collection_index].quantity
+    } else {
+        equipment.quantity
+    };
+    let source_quantity = if equipment_is_source {
+        equipment.quantity
+    } else {
+        collection[collection_index].quantity
+    };
+    if source_quantity == 0 || max_stack <= 1 || target_quantity >= max_stack {
+        return None;
+    }
+    let transferred = source_quantity.min(max_stack.saturating_sub(target_quantity));
+    if transferred == 0 {
+        return None;
+    }
+
+    if equipment_is_source {
+        collection[collection_index].quantity += transferred;
+        if transferred == source_quantity {
+            let removed = equipment_items.remove(equipment_index);
+            return Some(removed.cursed);
+        }
+        equipment_items[equipment_index].quantity -= transferred;
+    } else {
+        equipment_items[equipment_index].quantity += transferred;
+        if transferred == source_quantity {
+            collection.remove(collection_index);
+        } else {
+            collection[collection_index].quantity -= transferred;
+        }
+    }
+    Some(false)
+}
+
+fn equipped_amulet_stack_identity_compatible(
+    equipment_carrier: &ItemState,
+    collection_item: &ItemState,
+) -> bool {
+    let mut equipment_carrier = equipment_carrier.clone();
+    let mut collection_item = collection_item.clone();
+    // Amulets do not use durability (`equipment_uses_durability` explicitly
+    // excludes their slot), but the legacy equipment carrier supplies 10 when
+    // an ordinary zero-durability ItemState is worn. Canonicalize only that
+    // inert field for merge comparison; the retained carriers are unchanged.
+    equipment_carrier.durability_current = None;
+    equipment_carrier.durability_max = None;
+    collection_item.durability_current = None;
+    collection_item.durability_max = None;
+    item_stack_identity_compatible(&equipment_carrier, &collection_item)
+}
+
+fn exact_equipment_index_for_client_reference(
+    equipment_items: &[super::equipment::EquipmentState],
+    unique_id: u64,
+) -> Option<usize> {
+    let mut matches = equipment_items
+        .iter()
+        .enumerate()
+        .filter_map(|(index, item)| {
+            super::equipment::user_item_from_equipment_state(item)
+                .is_some_and(|user_item| user_item.unique_id == unique_id)
+                .then_some(index)
+        });
+    let index = matches.next()?;
+    matches.next().is_none().then_some(index)
+}
+
+pub(super) fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
     let (Ok(mut left_protocol), Ok(mut right_protocol)) = (
         try_user_item_from_item_state(left),
         try_user_item_from_item_state(right),
@@ -3088,7 +4230,10 @@ pub(super) fn split_item_impl(
         return vec![failed_packet];
     }
 
-    let mut resources = world.resource_mut::<InventoryResource>();
+    if super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+        return vec![failed_packet];
+    }
+    let mut resources = world.resource::<InventoryResource>().clone();
     let split_packet_item = match grid {
         MirGridType::Storage => {
             let Some(index) = resources
@@ -3116,7 +4261,23 @@ pub(super) fn split_item_impl(
             // Crystal's storage item identity is scoped by the Storage grid;
             // the empty slot is therefore the canonical ID even when another
             // grid uses the same numeric value.
-            split.unique_id = default_item_unique_id(split.container, next_slot);
+            let preferred = default_item_unique_id(split.container, next_slot);
+            split.unique_id = match &resources.item_uid_issuance {
+                super::item_uid_issuance::ItemUidIssuance::Legacy
+                    if !resources.reserved_item_unique_ids.contains(&preferred) =>
+                {
+                    preferred
+                }
+                _ => match super::item_uid_issuance::issue_for_staged_inventory(
+                    &resources,
+                    crate::UserItemUidReason::ItemStackSplit,
+                    split.container,
+                    next_slot,
+                ) {
+                    Ok(uid) => uid,
+                    Err(_) => return vec![failed_packet],
+                },
+            };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
                 return vec![failed_packet];
@@ -3153,7 +4314,15 @@ pub(super) fn split_item_impl(
             let mut split = resources.inventory_items[index].clone();
             split.container = next_container;
             split.slot = next_slot;
-            split.unique_id = allocate_item_unique_id(&resources, split.container, next_slot);
+            split.unique_id = match super::item_uid_issuance::issue_for_staged_inventory(
+                &resources,
+                crate::UserItemUidReason::ItemStackSplit,
+                split.container,
+                next_slot,
+            ) {
+                Ok(uid) => uid,
+                Err(_) => return vec![failed_packet],
+            };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
                 return vec![failed_packet];
@@ -3168,6 +4337,7 @@ pub(super) fn split_item_impl(
         }
         _ => unreachable!("unsupported SplitItem grids return early"),
     };
+    *world.resource_mut::<InventoryResource>() = resources;
 
     vec![
         ServerPacket::SplitItem1 {
@@ -3227,7 +4397,190 @@ mod stack_identity_tests {
     use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
     use super::super::equipment::EquipmentState;
     use super::super::npc::ActiveNpcServiceState;
-    use super::super::resources::NpcStateResource;
+    use super::super::resources::{NpcStateResource, Stage5SystemsResource};
+
+    #[test]
+    fn belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots() {
+        assert_eq!(
+            crystal_inventory_move_slot(0, 46),
+            Some(CrystalInventoryMoveSlot::Belt(0))
+        );
+        assert_eq!(
+            crystal_inventory_move_slot(8, 46),
+            Some(CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2))
+        );
+        assert_eq!(crystal_inventory_move_slot(46, 46), None);
+        assert_eq!(
+            crystal_inventory_move_slot(46, 86),
+            Some(CrystalInventoryMoveSlot::Bag(ItemContainer::Bag2, 0))
+        );
+        assert_eq!(
+            inventory_container_and_slot_for_index(8),
+            Some((ItemContainer::Bag1, 8)),
+            "the existing Inventory grid keeps its normalized bag contract"
+        );
+    }
+
+    #[test]
+    fn belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(701, 2, ItemContainer::Bag1, 7));
+
+        assert!(move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert!(resources.inventory_items.is_empty());
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 701
+                && item.quantity == 7
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_belt_grid_moves_raw_bag_slot_to_belt() {
+        let mut world = World::new();
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(705, 2, ItemContainer::Bag1, 4));
+        world.insert_resource(resources);
+        world.insert_resource(Stage5SystemsResource {
+            stage5_systems: Default::default(),
+        });
+
+        assert_eq!(
+            move_item_impl(&mut world, MirGridType::Belt, 8, 0),
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Belt,
+                from: 8,
+                to: 0,
+                success: true,
+            }]
+        );
+        let resources = world.resource::<InventoryResource>();
+        assert!(resources.inventory_items.is_empty());
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 705
+                && item.quantity == 4
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(702, 2, ItemContainer::Bag1, 3));
+        resources
+            .belt_items
+            .push(identity_stack(703, 0, ItemContainer::Belt, 5));
+
+        assert!(move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert_eq!(resources.inventory_items.len(), 1);
+        assert_eq!(resources.belt_items.len(), 1);
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.unique_id == 703
+                && item.quantity == 5
+                && item.container == ItemContainer::Bag1
+                && item.slot == 2
+        }));
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 702
+                && item.quantity == 3
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn belt_move_grid_missing_source_is_transactional() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .belt_items
+            .push(identity_stack(704, 0, ItemContainer::Belt, 2));
+        let before_inventory = resources.inventory_items.clone();
+        let before_belt = resources.belt_items.clone();
+
+        assert!(!move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert_eq!(
+            format!("{:?}", resources.inventory_items),
+            format!("{before_inventory:?}")
+        );
+        assert_eq!(
+            format!("{:?}", resources.belt_items),
+            format!("{before_belt:?}")
+        );
+    }
+
+    #[test]
+    fn known_healing_metadata_preserves_crystal_checkpoint_roundtrip() {
+        let template = crystal_item_template_for_item_key("red-potion").unwrap();
+        let mut item = embedded_item_state_from_template(&template, ItemContainer::Belt, 3);
+        item.unique_id = 41;
+        assert_eq!(
+            item.heal_hp, 30,
+            "fixture must use the imported Crystal HP stat"
+        );
+        let carrier = try_user_item_from_item_state(&item).unwrap();
+        let item = try_item_state_from_user_item(item, &carrier).unwrap();
+        assert_eq!(
+            item.user_item_metadata.as_ref().unwrap().item_index,
+            Some(template.item_index)
+        );
+        let before = serde_json::to_string(&vec![item]).unwrap();
+        let mut restored: Vec<ItemState> = serde_json::from_str(&before).unwrap();
+        normalize_item_list_known_metadata(&mut restored);
+        assert_eq!(serde_json::to_string(&restored).unwrap(), before);
+        normalize_item_list_known_metadata(&mut restored);
+        assert_eq!(
+            serde_json::to_string(&restored).unwrap(),
+            before,
+            "repeated restore is stable"
+        );
+    }
+    #[test]
+    fn known_healing_metadata_only_fills_legacy_missing_values() {
+        let mut legacy = identity_stack(41, 0, ItemContainer::Belt, 1);
+        assert_eq!((legacy.heal_hp, legacy.heal_mp), (0, 0));
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!((legacy.heal_hp, legacy.heal_mp), (35, 0));
+        legacy.heal_hp = 30;
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!(
+            legacy.heal_hp, 30,
+            "nonzero saved values need no protocol sidecar to be authoritative"
+        );
+        legacy.heal_hp = 0;
+        legacy.user_item_metadata = Some(metadata(0));
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!(
+            (legacy.heal_hp, legacy.heal_mp),
+            (0, 0),
+            "exact source-backed zero is not legacy missing data"
+        );
+        legacy.user_item_metadata.as_mut().unwrap().item_index = None;
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!(
+            legacy.heal_hp, 35,
+            "pre-index sidecars retain legacy compatibility"
+        );
+    }
 
     fn identity_stack(
         unique_id: u64,
@@ -4090,3 +5443,11 @@ mod stack_identity_tests {
         assert_ne!(fresh_child_uid, fresh.unique_id);
     }
 }
+
+#[cfg(test)]
+#[path = "npc_gold_trade_evidence_tests.rs"]
+mod npc_gold_trade_evidence_tests;
+
+#[cfg(test)]
+#[path = "exact_drop_uid_tests.rs"]
+mod exact_drop_uid_tests;

@@ -1,0 +1,150 @@
+[
+  {
+    "test": "config::config_schema_compat_tests::schema_union_preserves_version_seven_eight_and_nine_ledgers",
+    "detail": "thread 'config::config_schema_compat_tests::schema_union_preserves_version_seven_eight_and_nine_ledgers' (71328) panicked at apps\\simulation\\src\\config_schema_compat_tests.rs:96:53:\ncalled `Result::unwrap()` on an `Err` value: \"monthlyCardLedgerInvalid\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+  },
+  {
+    "test": "runtime::big_map::tests::bichon_client_map_info_uses_authoritative_catalog",
+    "detail": "thread 'runtime::big_map::tests::bichon_client_map_info_uses_authoritative_catalog' (64276) panicked at apps\\simulation\\src\\runtime\\big_map\\mod.rs:772:9:\nassertion `left == right` failed\n  left: 41\n right: 40"
+  },
+  {
+    "test": "runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_actual_precommit_panic_is_unknown_without_gold_debit",
+    "detail": "thread 'runtime::npc_gold_buy_outcome::tests::npc_gold_buy_outcome_actual_precommit_panic_is_unknown_without_gold_debit' (81616) panicked at apps\\simulation\\src\\runtime\\npc_gold_buy_outcome_tests.rs:653:44:\ncalled `Result::unwrap_err()` on an `Ok` value: NpcGoldBuyProcessingExecution { packets: [], outcome: Rejected { request: NpcGoldBuyRequest { item_index: 43122688, count: 2, panel_type: 0 }, reason: InvalidDelivery } }"
+  },
+  {
+    "test": "runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit",
+    "detail": "thread 'runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit' (70908) panicked at apps\\simulation\\src\\runtime\\npc_purchase_outcome_tests.rs:563:5:\nassertion failed: matches!(s.try_npc_purchase_with_outcome(request),\n    Err(NpcPurchaseProcessingError::Unknown { .. }))"
+  },
+  {
+    "test": "runtime::production::tests::production_double_session_cas_and_original_request_recovery",
+    "detail": "thread 'runtime::production::tests::production_double_session_cas_and_original_request_recovery' (64504) panicked at apps\\simulation\\src\\runtime\\production_tests.rs:589:52:\ncalled `Result::unwrap()` on an `Err` value: BeforeExecution(\"stale production checkpoint; reload before a new operation\")"
+  },
+  {
+    "test": "runtime::quests::newcomer_v2::newcomer_v2_fiveclass_tests::fiveclass_actual_new_character_progress_and_skills_survive_save_and_new_session_login",
+    "detail": "thread 'runtime::quests::newcomer_v2::newcomer_v2_fiveclass_tests::fiveclass_actual_new_character_progress_and_skills_survive_save_and_new_session_login' (58620) panicked at apps\\simulation\\src\\runtime\\newcomer_v2_fiveclass_tests.rs:559:9:\nsaved damage/move/new damage resumes same exercise"
+  },
+  {
+    "test": "runtime::quests::newcomer_v2::newcomer_v2_fiveclass_tests::fiveclass_all_sixteen_practice_flags_accept_only_their_authored_outcome_sequence",
+    "detail": "thread 'runtime::quests::newcomer_v2::newcomer_v2_fiveclass_tests::fiveclass_all_sixteen_practice_flags_accept_only_their_authored_outcome_sequence' (79828) panicked at apps\\simulation\\src\\runtime\\newcomer_v2_fiveclass_tests.rs:322:17:\nAssassin 2110008: DoubleSlash attack damage committed"
+  },
+  {
+    "test": "runtime::save::save_fail_closed_tests::malformed_empty_and_switched_identities_cannot_reuse_gm_or_leak_private_packets",
+    "detail": "NpcInfo { object_id: 1499, name: \"GM_Grocery\", name_colour_argb: -16711936, image: 1, colour_argb: 0, location: Point { x: 106, y: 99 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1500, name: \"GM_Potion\", name_colour_argb: -16711936, image: 5, colour_argb: 0, location: Point { x: 107, y: 99 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1501, name: \"GM_CraftingMaterial\", name_colour_argb: -16711936, image: 3, colour_argb: 0, location: Point { x: 102, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1502, name: \"GM_Fishing\", name_colour_argb: -16711936, image: 14, colour_argb: 0, location: Point { x: 103, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1503, name: \"GM_Mount\", name_colour_argb: -16711936, image: 15, colour_argb: 0, location: Point { x: 104, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1504, name: \"GM_Ore\", name_colour_argb: -16711936, image: 16, colour_argb: 0, location: Point { x: 105, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1505, name: \"GM_Script\", name_colour_argb: -16711936, image: 17, colour_argb: 0, location: Point { x: 106, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1506, name: \"GM_Nothing\", name_colour_argb: -16711936, image: 18, colour_argb: 0, location: Point { x: 95, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1507, name: \"GM_Quest\", name_colour_argb: -16711936, image: 19, colour_argb: 0, location: Point { x: 96, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1508, name: \"GM_Awakening\", name_colour_argb: -16711936, image: 0, colour_argb: 0, location: Point { x: 94, y: 105 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1509, name: \"GM_Manager\", name_colour_argb: -16711936, image: 0, colour_argb: 0, location: Point { x: 100, y: 94 }, direction: Up, quest_ids: [] } }, ObjectNpc { info: NpcInfo { object_id: 1510, name: \"GM_Teleporter\", name_colour_argb: -16711936, image: 10, colour_argb: 0, location: Point { x: 99, y: 94 }, direction: Up, quest_ids: [] } }, ObjectRemove { object_id: 2001 }, ObjectRemove { object_id: 3001 }, ObjectRemove { object_id: 3002 }, ObjectRemove { object_id: 4001 }]"
+  },
+  {
+    "test": "runtime::session::tests::combine_item_packet_dead_player_ack_fails_without_mutation",
+    "detail": "thread 'runtime::session::tests::combine_item_packet_dead_player_ack_fails_without_mutation' (62708) panicked at apps\\simulation\\src\\runtime\\tests.rs:59924:5:\nassertion `left == right` failed\n  left: [CombineItem { grid: Inventory, id_from: 31, id_to: 32, success: false, destroy: false }, NPCUpdate { npc_id: 0 }]\n right: [CombineItem { grid: Inventory, id_from: 31, id_to: 32, success: false, destroy: false }]"
+  },
+  {
+    "test": "runtime::session::tests::concurrent_same_account_mail_transactions_have_no_lost_update",
+    "detail": "simulation packet execution rejected; details suppressed\nsimulation packet execution rejected; details suppressed\n\nthread 'runtime::session::tests::concurrent_same_account_mail_transactions_have_no_lost_update' (63492) panicked at apps\\simulation\\src\\runtime\\tests.rs:63811:5:\nassertion `left == right` failed\n  left: 5\n right: 3"
+  },
+  {
+    "test": "runtime::session::tests::delete_item_packet_dead_player_acknowledges_without_mutation",
+    "detail": "thread 'runtime::session::tests::delete_item_packet_dead_player_acknowledges_without_mutation' (64648) panicked at apps\\simulation\\src\\runtime\\tests.rs:34844:5:\nassertion `left == right` failed\n  left: [DeleteItem { unique_id: 0, count: 2 }, NPCUpdate { npc_id: 0 }]\n right: [DeleteItem { unique_id: 0, count: 2 }]"
+  },
+  {
+    "test": "runtime::session::tests::drop_item_packet_dead_player_short_circuits_before_no_throw_item_message",
+    "detail": "thread 'runtime::session::tests::drop_item_packet_dead_player_short_circuits_before_no_throw_item_message' (79800) panicked at apps\\simulation\\src\\runtime\\tests.rs:33456:5:\nassertion `left == right` failed\n  left: [DropItem { unique_id: 0, count: 2, hero_inventory: false, success: false }, NPCUpdate { npc_id: 0 }]\n right: [DropItem { unique_id: 0, count: 2, hero_inventory: false, success: false }]"
+  },
+  {
+    "test": "runtime::session::tests::friendly_shinsu_hides_after_target_is_gone_and_timeout_expires",
+    "detail": "thread 'runtime::session::tests::friendly_shinsu_hides_after_target_is_gone_and_timeout_expires' (57512) panicked at apps\\simulation\\src\\runtime\\tests.rs:56458:5:\nassertion failed: hide_packets.iter().any(|packet|\n        matches!(packet, ServerPacket::ObjectHide { object_id } if *object_id\n            == shinsu_object_id))"
+  },
+  {
+    "test": "runtime::session::tests::ground_drop_expires_after_crystal_item_timeout",
+    "detail": "thread 'runtime::session::tests::ground_drop_expires_after_crystal_item_timeout' (50640) panicked at apps\\simulation\\src\\runtime\\tests.rs:35929:5:\nassertion failed: packets.iter().any(|packet|\n        matches!(packet, ServerPacket::ObjectRemove { object_id } if\n            *object_id == drop_object_id))"
+  },
+  {
+    "test": "runtime::session::tests::ground_item_object_uses_crystal_grade_and_name_colour",
+    "detail": "thread 'runtime::session::tests::ground_item_object_uses_crystal_grade_and_name_colour' (82564) panicked at apps\\simulation\\src\\runtime\\tests.rs:36471:5:\nassertion failed: packets.iter().any(|packet|\n        matches!(packet, ServerPacket::ObjectItem { info } if info.object_id\n            == drop_object_id && info.grade == template.grade &&\n            info.name_colour_argb == 0xFF00_BFFFu32 as i32))"
+  },
+  {
+    "test": "runtime::session::tests::ground_item_object_uses_cyan_name_colour_for_added_stats",
+    "detail": "thread 'runtime::session::tests::ground_item_object_uses_cyan_name_colour_for_added_stats' (56728) panicked at apps\\simulation\\src\\runtime\\tests.rs:36527:5:\nassertion failed: packets.iter().any(|packet|\n        matches!(packet, ServerPacket::ObjectItem { info } if info.object_id\n            == drop_object_id && info.grade == template.grade &&\n            info.name_colour_argb == cyan))"
+  },
+  {
+    "test": "runtime::session::tests::magic_packet_crystal_moon_light_hides_until_buff_expires",
+    "detail": "thread 'runtime::session::tests::magic_packet_crystal_moon_light_hides_until_buff_expires' (65040) panicked at apps\\simulation\\src\\runtime\\tests.rs:50084:5:\nMoonLight expiry should reveal the player"
+  },
+  {
+    "test": "runtime::session::tests::moving_out_of_aoi_emits_object_remove_packets",
+    "detail": "thread 'runtime::session::tests::moving_out_of_aoi_emits_object_remove_packets' (45060) panicked at apps\\simulation\\src\\runtime\\tests.rs:26007:5:\nassertion failed: packets.iter().any(|packet|\n        matches!(packet, ServerPacket::ObjectRemove { object_id } if\n            [2001_u32, 3002_u32, 4001_u32].contains(object_id)))"
+  },
+  {
+    "test": "runtime::session::tests::refine_packets_move_cancel_start_and_check_stage5_state",
+    "detail": "thread 'runtime::session::tests::refine_packets_move_cancel_start_and_check_stage5_state' (62868) panicked at apps\\simulation\\src\\runtime\\tests.rs:66234:5:\nassertion `left == right` failed\n  left: [DepositRefineItem { from: 2, to: 0, success: false }]\n right: [DepositRefineItem { from: 2, to: 0, success: true }]"
+  },
+  {
+    "test": "runtime::session::tests::repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold",
+    "detail": "thread 'runtime::session::tests::repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold' (78740) panicked at apps\\simulation\\src\\runtime\\tests.rs:45463:5:\nassertion `left == right` failed\n  left: [RepairItem { unique_id: 30 }, NPCUpdate { npc_id: 0 }]\n right: [RepairItem { unique_id: 30 }]"
+  },
+  {
+    "test": "runtime::session::tests::sell_item_dead_player_only_acks_and_preserves_inventory_and_gold",
+    "detail": "thread 'runtime::session::tests::sell_item_dead_player_only_acks_and_preserves_inventory_and_gold' (77276) panicked at apps\\simulation\\src\\runtime\\tests.rs:35314:5:\nassertion `left == right` failed\n  left: [SellItem { unique_id: 3, count: 1, success: false }, NPCUpdate { npc_id: 0 }]\n right: [SellItem { unique_id: 3, count: 1, success: false }]"
+  },
+  {
+    "test": "runtime::session::tests::stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item",
+    "detail": "simulation packet execution rejected; details suppressed\n\nthread 'runtime::session::tests::stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item' (80552) panicked at apps\\simulation\\src\\runtime\\tests.rs:63720:5:\nassertion `left == right` failed\n  left: 6\n right: 4"
+  },
+  {
+    "test": "runtime::session::tests::stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance",
+    "detail": "simulation packet execution rejected; details suppressed\n\nthread 'runtime::session::tests::stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance' (73004) panicked at apps\\simulation\\src\\runtime\\tests.rs:63562:9:\nassertion `left == right` failed\n  left: 5\n right: 3"
+  },
+  {
+    "test": "runtime::session::tests::summoned_charmed_snake_dies_when_totem_out_of_range",
+    "detail": "thread 'runtime::session::tests::summoned_charmed_snake_dies_when_totem_out_of_range' (73884) panicked at apps\\simulation\\src\\runtime\\tests.rs:25402:5:\nassertion failed: packets.iter().any(|packet|\n        matches!(packet, ServerPacket::ObjectDied { info } if info.object_id\n            == 98_999_u32))"
+  },
+  {
+    "test": "runtime::session::tests::use_item_packet_dead_player_ack_fails_without_mutation",
+    "detail": "thread 'runtime::session::tests::use_item_packet_dead_player_ack_fails_without_mutation' (62336) panicked at apps\\simulation\\src\\runtime\\tests.rs:39059:5:\nassertion `left == right` failed\n  left: [UseItem { unique_id: 0, success: false, grid: Inventory }, NPCUpdate { npc_id: 0 }]\n right: [UseItem { unique_id: 0, success: false, grid: Inventory }]"
+  },
+  {
+    "test": "runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll",
+    "detail": "thread 'runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll' (81544) panicked at apps\\simulation\\src\\runtime\\tests.rs:37896:5:\nassertion `left == right` failed\n  left: Point { x: 330, y: 270 }\n right: Point { x: 328, y: 264 }"
+  },
+  {
+    "test": "runtime::stones::tests::stone_save_reload_keeps_original_secret_and_physical_reference",
+    "detail": "2, 34, 104, 97, 105, 114, 92, 34, 58, 48, 125, 44, 92, 34, 110, 97, 109, 101, 76, 105, 115, 116, 115, 92, 34, 58, 91, 93, 44, 92, 34, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 116, 67, 114, 101, 97, 116, 117, 114, 101, 115, 92, 34, 58, 91, 93, 44, 92, 34, 115, 117, 109, 109, 111, 110, 101, 100, 73, 110, 116, 101, 108, 108, 105, 103, 101, 110, 116, 67, 114, 101, 97, 116, 117, 114, 101, 84, 121, 112, 101, 92, 34, 58, 57, 57, 44, 92, 34, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 116, 67, 114, 101, 97, 116, 117, 114, 101, 83, 116, 97, 116, 101, 86, 101, 114, 115, 105, 111, 110, 92, 34, 58, 49, 44, 92, 34, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 116, 67, 114, 101, 97, 116, 117, 114, 101, 80, 101, 97, 114, 108, 115, 92, 34, 58, 48, 44, 92, 34, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 116, 67, 114, 101, 97, 116, 117, 114, 101, 79, 112, 101, 114, 97, 116, 105, 111, 110, 115, 92, 34, 58, 48, 44, 92, 34, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 116, 67, 114, 101, 97, 116, 117, 114, 101, 79, 112, 101, 114, 97, 116, 105, 111, 110, 82, 101, 99, 101, 105, 112, 116, 115, 92, 34, 58, 91, 93, 44, 92, 34, 105, 116, 101, 109, 82, 101, 110, 116, 97, 108, 92, 34, 58, 123, 92, 34, 112, 97, 114, 116, 110, 101, 114, 78, 97, 109, 101, 92, 34, 58, 110, 117, 108, 108, 44, 92, 34, 102, 101, 101, 92, 34, 58, 48, 44, 92, 34, 100, 97, 121, 115, 92, 34, 58, 48, 44, 92, 34, 104, 97, 115, 68, 101, 112, 111, 115, 105, 116, 101, 100, 73, 116, 101, 109, 92, 34, 58, 102, 97, 108, 115, 101, 44, 92, 34, 100, 101, 112, 111, 115, 105, 116, 101, 100, 73, 116, 101, 109, 78, 97, 109, 101, 92, 34, 58, 110, 117, 108, 108, 44, 92, 34, 103, 111, 108, 100, 76, 111, 99, 107, 101, 100, 92, 34, 58, 102, 97, 108, 115, 101, 44, 92, 34, 105, 116, 101, 109, 76, 111, 99, 107, 101, 100, 92, 34, 58, 102, 97, 108, 115, 101, 44, 92, 34, 114, 101, 99, 111, 114, 100, 67, 111, 117, 110, 116, 92, 34, 58, 48, 44, 92, 34, 114, 101, 110, 116, 101, 100, 73, 116, 101, 109, 115, 92, 34, 58, 91, 93, 125, 44, 92, 34, 97, 116, 116, 97, 99, 107, 77, 111, 100, 101, 92, 34, 58, 48, 44, 92, 34, 112, 101, 116, 77, 111, 100, 101, 92, 34, 58, 48, 44, 92, 34, 112, 107, 68, 101, 99, 97, 121, 69, 108, 97, 112, 115, 101, 100, 84, 105, 99, 107, 115, 92, 34, 58, 48, 125, 34, 10, 32, 32, 32, 32, 32, 32, 32, 32, 125, 10, 32, 32, 32, 32, 32, 32, 125, 10, 32, 32, 32, 32, 125, 10, 32, 32, 125, 10, 125, 10]"
+  },
+  {
+    "test": "runtime::zone::runtime::entity_combat::tests::native_entity_dazed_blocks_actual_pet_attacks_but_not_pursuit_while_frozen_blocks_both",
+    "detail": "thread 'runtime::zone::runtime::entity_combat::tests::native_entity_dazed_blocks_actual_pet_attacks_but_not_pursuit_while_frozen_blocks_both' (64164) panicked at apps\\simulation\\src\\runtime\\zone\\runtime\\entity_combat.rs:988:17:\nassertion `left != right` failed: Dazed allows real pursuit at the template movement cadence\n  left: Point { x: 11, y: 20 }\n right: Point { x: 11, y: 20 }"
+  },
+  {
+    "test": "runtime::zone::runtime::entity_combat::tests::native_entity_inherited_pet_target_is_not_replaced_by_nearer_player",
+    "detail": "thread 'runtime::zone::runtime::entity_combat::tests::native_entity_inherited_pet_target_is_not_replaced_by_nearer_player' (69852) panicked at apps\\simulation\\src\\runtime\\zone\\runtime\\entity_combat.rs:784:9:\nassertion failed: packets(&out).iter().any(|p|\n        matches!(p,ServerPacket::ObjectWalk{movement}if\n            movement.object_id==9001 && movement.position==Point{x:14,y:20}))"
+  },
+  {
+    "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt",
+    "detail": "thread 'runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt' (73776) panicked at apps\\simulation\\src\\runtime\\zone\\intelligent_creature_host.rs:269:9:\nassertion `left == right` failed\n  left: \"10241e4047829e37ad1b3191e1d67b211bb19a53dab75c2f36a3f89df898cf35\"\n right: \"92762a010a57281aa278f0794d569a92828acaa943b2516470d92018a691b2ee\""
+  },
+  {
+    "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_manager_owner_scoped_delivery_preserves_other_owner_and_offline_receipts",
+    "detail": "thread 'runtime::zone::runtime::intelligent_creature_host::tests::creature_host_manager_owner_scoped_delivery_preserves_other_owner_and_offline_receipts' (68464) panicked at apps\\simulation\\src\\runtime\\zone\\intelligent_creature_host.rs:367:13:\nassertion failed: manager.request_intelligent_creature_pickup(&SessionId::new(session), false,\n    Point { x: x + 1, y: 10 })"
+  },
+  {
+    "test": "runtime::zone::runtime::intelligent_creature_host::tests::creature_host_reconnected_identity_recovers_old_session_operation_without_cross_character_access",
+    "detail": "thread 'runtime::zone::runtime::intelligent_creature_host::tests::creature_host_reconnected_identity_recovers_old_session_operation_without_cross_character_access' (78660) panicked at apps\\simulation\\src\\runtime\\zone\\intelligent_creature_host.rs:440:9:\nassertion failed: manager.request_intelligent_creature_pickup(&old_session, false,\n    Point { x: 11, y: 10 })"
+  },
+  {
+    "test": "runtime::zone::runtime::owned_pet_combat::tests::owned_shinsu_pve_hits_real_hostile_line_cells",
+    "detail": "thread 'runtime::zone::runtime::owned_pet_combat::tests::owned_shinsu_pve_hits_real_hostile_line_cells' (69768) panicked at apps\\simulation\\src\\runtime\\zone\\runtime\\owned_pet_combat_tests.rs:795:5:\nassertion `left == right` failed: both real line cells should be queued\n  left: 1\n right: 2"
+  },
+  {
+    "test": "runtime::zone::runtime::snake_totem_ai::retirement_tests::owned_totem_retirement_does_not_claim_new_same_id_children",
+    "detail": "thread 'runtime::zone::runtime::snake_totem_ai::retirement_tests::owned_totem_retirement_does_not_claim_new_same_id_children' (76616) panicked at apps\\simulation\\src\\runtime\\zone\\runtime\\snake_totem_ai.rs:311:14:\ncalled `Option::unwrap()` on a `None` value"
+  },
+  {
+    "test": "runtime::zone::runtime::stage_summons::tests::live_slave_cap_prunes_dead_children_and_death_stops_waves",
+    "detail": "thread 'runtime::zone::runtime::stage_summons::tests::live_slave_cap_prunes_dead_children_and_death_stops_waves' (63656) panicked at apps\\simulation\\src\\runtime\\zone\\runtime\\stage_summons.rs:62:9:\nassertion `left == right` failed\n  left: 1\n right: 41"
+  },
+  {
+    "test": "runtime::zone::runtime::status_poison::tests::independent_control_clocks_survive_checkpoint_and_do_not_extend_each_other",
+    "detail": "6, 34, 58, 102, 97, 108, 115, 101, 44, 34, 97, 116, 116, 97, 99, 107, 95, 109, 111, 100, 101, 34, 58, 48, 44, 34, 112, 107, 95, 112, 111, 105, 110, 116, 115, 34, 58, 48, 44, 34, 105, 110, 95, 115, 97, 102, 101, 95, 122, 111, 110, 101, 34, 58, 102, 97, 108, 115, 101, 125, 44, 34, 112, 111, 115, 105, 116, 105, 111, 110, 34, 58, 123, 34, 120, 34, 58, 49, 48, 44, 34, 121, 34, 58, 49, 48, 125, 44, 34, 108, 101, 118, 101, 108, 34, 58, 52, 48, 44, 34, 111, 119, 110, 101, 114, 34, 58, 123, 34, 110, 97, 109, 101, 115, 112, 97, 99, 101, 34, 58, 34, 100, 98, 52, 101, 51, 55, 97, 55, 55, 55, 54, 100, 52, 55, 53, 97, 98, 101, 98, 56, 98, 49, 97, 53, 52, 101, 48, 48, 51, 54, 57, 101, 34, 44, 34, 101, 112, 111, 99, 104, 34, 58, 49, 44, 34, 115, 101, 115, 115, 105, 111, 110, 95, 105, 100, 34, 58, 34, 115, 116, 97, 116, 117, 115, 45, 112, 108, 97, 121, 101, 114, 34, 44, 34, 97, 99, 99, 111, 117, 110, 116, 95, 105, 100, 34, 58, 34, 115, 116, 97, 116, 117, 115, 45, 97, 99, 99, 111, 117, 110, 116, 34, 44, 34, 99, 104, 97, 114, 97, 99, 116, 101, 114, 95, 105, 110, 100, 101, 120, 34, 58, 48, 44, 34, 111, 98, 106, 101, 99, 116, 95, 105, 100, 34, 58, 55, 125, 44, 34, 107, 101, 121, 34, 58, 123, 34, 115, 104, 97, 114, 100, 95, 105, 100, 34, 58, 34, 112, 114, 105, 109, 97, 114, 121, 34, 44, 34, 109, 97, 112, 95, 102, 105, 108, 101, 95, 110, 97, 109, 101, 34, 58, 34, 115, 116, 97, 116, 117, 115, 45, 99, 108, 111, 99, 107, 45, 102, 105, 120, 116, 117, 114, 101, 34, 44, 34, 99, 104, 97, 110, 110, 101, 108, 95, 105, 100, 34, 58, 48, 44, 34, 105, 110, 115, 116, 97, 110, 99, 101, 95, 105, 100, 34, 58, 34, 109, 97, 105, 110, 34, 125, 44, 34, 100, 101, 97, 100, 34, 58, 102, 97, 108, 115, 101, 44, 34, 110, 97, 109, 101, 34, 58, 34, 83, 116, 97, 116, 117, 115, 34, 44, 34, 103, 114, 111, 117, 112, 95, 109, 101, 109, 98, 101, 114, 115, 34, 58, 91, 93, 125, 125, 44, 34, 100, 101, 116, 97, 99, 104, 101, 100, 95, 103, 114, 111, 117, 110, 100, 95, 100, 114, 111, 112, 95, 99, 117, 115, 116, 111, 100, 121, 34, 58, 123, 125, 44, 34, 105, 115, 115, 117, 101, 100, 95, 110, 97, 116, 105, 118, 101, 95, 109, 111, 110, 115, 116, 101, 114, 95, 97, 119, 97, 114, 100, 115, 34, 58, 123, 125, 44, 34, 109, 105, 110, 105, 110, 103, 34, 58, 123, 34, 115, 112, 111, 116, 115, 34, 58, 123, 125, 44, 34, 115, 101, 113, 117, 101, 110, 99, 101, 34, 58, 48, 44, 34, 101, 102, 102, 101, 99, 116, 115, 34, 58, 91, 93, 125, 125]"
+  },
+  {
+    "test": "runtime::zone::runtime::tree_queen_ai::power_tests::hidden_root_poison_survives_queen_retirement_but_not_its_own_node",
+    "detail": "s\n    runtime::session::tests::magic_packet_crystal_moon_light_hides_until_buff_expires\n    runtime::session::tests::moving_out_of_aoi_emits_object_remove_packets\n    runtime::session::tests::refine_packets_move_cancel_start_and_check_stage5_state\n    runtime::session::tests::repair_item_dead_player_only_entry_ack_and_preserves_item_and_gold\n    runtime::session::tests::sell_item_dead_player_only_acks_and_preserves_inventory_and_gold\n    runtime::session::tests::stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item\n    runtime::session::tests::stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance\n    runtime::session::tests::summoned_charmed_snake_dies_when_totem_out_of_range\n    runtime::session::tests::use_item_packet_dead_player_ack_fails_without_mutation\n    runtime::session::tests::use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll\n    runtime::stones::tests::stone_save_reload_keeps_original_secret_and_physical_reference\n    runtime::zone::runtime::entity_combat::tests::native_entity_dazed_blocks_actual_pet_attacks_but_not_pursuit_while_frozen_blocks_both\n    runtime::zone::runtime::entity_combat::tests::native_entity_inherited_pet_target_is_not_replaced_by_nearer_player\n    runtime::zone::runtime::intelligent_creature_host::tests::creature_host_checkpoint_preserves_pending_timer_rng_and_in_flight_receipt\n    runtime::zone::runtime::intelligent_creature_host::tests::creature_host_manager_owner_scoped_delivery_preserves_other_owner_and_offline_receipts\n    runtime::zone::runtime::intelligent_creature_host::tests::creature_host_reconnected_identity_recovers_old_session_operation_without_cross_character_access\n    runtime::zone::runtime::owned_pet_combat::tests::owned_shinsu_pve_hits_real_hostile_line_cells\n    runtime::zone::runtime::snake_totem_ai::retirement_tests::owned_totem_retirement_does_not_claim_new_same_id_children\n    runtime::zone::runtime::stage_summons::tests::live_slave_cap_prunes_dead_children_and_death_stops_waves\n    runtime::zone::runtime::status_poison::tests::independent_control_clocks_survive_checkpoint_and_do_not_extend_each_other\n    runtime::zone::runtime::tree_queen_ai::power_tests::hidden_root_poison_survives_queen_retirement_but_not_its_own_node\n\ntest result: FAILED. 2871 passed; 37 failed; 23 ignored; 0 measured; 0 filtered out; finished in 1215.40s"
+  }
+]

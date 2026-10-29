@@ -1,0 +1,212 @@
+{
+  "schema": "mir2.windows.delivery-verification.v1",
+  "passed": true,
+  "cmsVerified": false,
+  "requiresExternalSignatureVerification": true,
+  "bundles": [
+    {
+      "path": "delivery/cbeaa575d8596522b34b20157cb4024c6e61e3b937110999cda3414d44605587.m2b.gz",
+      "fileCount": 1667,
+      "expandedBytes": 66881067
+    },
+    {
+      "path": "delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "fileCount": 238,
+      "expandedBytes": 66984185
+    },
+    {
+      "path": "delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "fileCount": 254,
+      "expandedBytes": 67040639
+    },
+    {
+      "path": "delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "fileCount": 7065,
+      "expandedBytes": 67105494
+    },
+    {
+      "path": "delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "fileCount": 13836,
+      "expandedBytes": 67101395
+    },
+    {
+      "path": "delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "fileCount": 13470,
+      "expandedBytes": 67094186
+    },
+    {
+      "path": "delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "fileCount": 13356,
+      "expandedBytes": 67107209
+    },
+    {
+      "path": "delivery/a20cd5f826b0430029b0bbb9498a24ff0e473086680db0483cca3ce46321db2b.m2b.gz",
+      "fileCount": 10181,
+      "expandedBytes": 67106341
+    },
+    {
+      "path": "delivery/14ef04552aadc72ca06e5c4d647a70d617eecd702c367e3d7dda706bedeecd79.m2b.gz",
+      "fileCount": 27528,
+      "expandedBytes": 67107035
+    },
+    {
+      "path": "delivery/aac8b63b1cf9e65f6143ebbaaa0c7598fd93d8ff8da145049b0d29689682f151.m2b.gz",
+      "fileCount": 24449,
+      "expandedBytes": 66604124
+    },
+    {
+      "path": "delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "fileCount": 14328,
+      "expandedBytes": 67044154
+    },
+    {
+      "path": "delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "fileCount": 16373,
+      "expandedBytes": 67106633
+    },
+    {
+      "path": "delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "fileCount": 11222,
+      "expandedBytes": 66727107
+    },
+    {
+      "path": "delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "fileCount": 611,
+      "expandedBytes": 15847665
+    },
+    {
+      "path": "delivery/7b758caf2f5a63fee7832ea243066a1cdf24bddf9c840e248418cc6f473301ba.m2b.gz",
+      "fileCount": 1,
+      "expandedBytes": 111275567
+    }
+  ],
+  "patches": [
+    {
+      "path": "delivery/55b88966ccf36fa9fe27ae9eb44eb3f152beed009aaa21eb9c1ed4ff51eddbba.m2d.gz",
+      "baseSha256": "E227A68C10042E6F7D7264B2F91A8F252A1B73D5AAD4FB6FA92FAD3E11D04FCB",
+      "baseSize": 111160320,
+      "targetSha256": "8EBB7E8E32FBF2A577B90E2341767CC34B467A021E23406003D55597B077BC22",
+      "targetBytes": 111275520,
+      "operationCount": 19,
+      "copyBytes": 23918306,
+      "literalBytes": 87357214,
+      "expandedBytes": 87357477
+    }
+  ],
+  "checkedArtifacts": [
+    {
+      "path": "delivery/cbeaa575d8596522b34b20157cb4024c6e61e3b937110999cda3414d44605587.m2b.gz",
+      "size": 60714247,
+      "sha256": "CBEAA575D8596522B34B20157CB4024C6E61E3B937110999CDA3414D44605587"
+    },
+    {
+      "path": "delivery/565af7b642a235bec7518966243b586bf4668fa93f730e96f747c9400690d2e2.m2b.gz",
+      "size": 66861961,
+      "sha256": "565AF7B642A235BEC7518966243B586BF4668FA93F730E96F747C9400690D2E2"
+    },
+    {
+      "path": "delivery/84ff6726ef8065d8b18e9ce6a796fb22782be8df1f36a65305fd4ae594d782e7.m2b.gz",
+      "size": 66910012,
+      "sha256": "84FF6726EF8065D8B18E9CE6A796FB22782BE8DF1F36A65305FD4AE594D782E7"
+    },
+    {
+      "path": "delivery/41393f2297ea383796668f549c8ceaa2aa7168382160642dee9a008270e3f710.m2b.gz",
+      "size": 46880707,
+      "sha256": "41393F2297EA383796668F549C8CEAA2AA7168382160642DEE9A008270E3F710"
+    },
+    {
+      "path": "delivery/6fb1307f7539f7454f9552ad2639f6e8ef3f75344c958b6ede94207641301a4e.m2b.gz",
+      "size": 65556826,
+      "sha256": "6FB1307F7539F7454F9552AD2639F6E8EF3F75344C958B6EDE94207641301A4E"
+    },
+    {
+      "path": "delivery/53a489c9be927fbad4087d595567604c6cfa33a4960bb48eba646a631203974b.m2b.gz",
+      "size": 65601792,
+      "sha256": "53A489C9BE927FBAD4087D595567604C6CFA33A4960BB48EBA646A631203974B"
+    },
+    {
+      "path": "delivery/e83e50787df75d6e3d4a64aef7640e0d36b849e17aaae87568f8a1d526d6b25b.m2b.gz",
+      "size": 65610644,
+      "sha256": "E83E50787DF75D6E3D4A64AEF7640E0D36B849E17AAAE87568F8A1D526D6B25B"
+    },
+    {
+      "path": "delivery/a20cd5f826b0430029b0bbb9498a24ff0e473086680db0483cca3ce46321db2b.m2b.gz",
+      "size": 63793866,
+      "sha256": "A20CD5F826B0430029B0BBB9498A24FF0E473086680DB0483CCA3CE46321DB2B"
+    },
+    {
+      "path": "delivery/14ef04552aadc72ca06e5c4d647a70d617eecd702c367e3d7dda706bedeecd79.m2b.gz",
+      "size": 55867942,
+      "sha256": "14EF04552AADC72CA06E5C4D647A70D617EECD702C367E3D7DDA706BEDEECD79"
+    },
+    {
+      "path": "delivery/aac8b63b1cf9e65f6143ebbaaa0c7598fd93d8ff8da145049b0d29689682f151.m2b.gz",
+      "size": 55155805,
+      "sha256": "AAC8B63B1CF9E65F6143EBBAAA0C7598FD93D8FF8DA145049B0D29689682F151"
+    },
+    {
+      "path": "delivery/e14bb6681791c37ac1ddb771841db1756b7e9df00df46d240e529cdbb087ceb9.m2b.gz",
+      "size": 60049370,
+      "sha256": "E14BB6681791C37AC1DDB771841DB1756B7E9DF00DF46D240E529CDBB087CEB9"
+    },
+    {
+      "path": "delivery/ba1d18a6fc2ae0e87f4b41ccf730a87e2e4d5f31188957ce348a376b36d08fbe.m2b.gz",
+      "size": 59737743,
+      "sha256": "BA1D18A6FC2AE0E87F4B41CCF730A87E2E4D5F31188957CE348A376B36D08FBE"
+    },
+    {
+      "path": "delivery/a76d6f75ee1d567ad70e5b2d48abf3859dfd1537432c4152436f5eb7885a2799.m2b.gz",
+      "size": 60066659,
+      "sha256": "A76D6F75EE1D567AD70E5B2D48ABF3859DFD1537432C4152436F5EB7885A2799"
+    },
+    {
+      "path": "delivery/541cde1e5530e736ce2e6d02a02737364dcc88df49fa088222538e265efba3fb.m2b.gz",
+      "size": 12699904,
+      "sha256": "541CDE1E5530E736CE2E6D02A02737364DCC88DF49FA088222538E265EFBA3FB"
+    },
+    {
+      "path": "delivery/7b758caf2f5a63fee7832ea243066a1cdf24bddf9c840e248418cc6f473301ba.m2b.gz",
+      "size": 36343140,
+      "sha256": "7B758CAF2F5A63FEE7832EA243066A1CDF24BDDF9C840E248418CC6F473301BA"
+    },
+    {
+      "path": "delivery/55b88966ccf36fa9fe27ae9eb44eb3f152beed009aaa21eb9c1ed4ff51eddbba.m2d.gz",
+      "size": 25720210,
+      "sha256": "55B88966CCF36FA9FE27AE9EB44EB3F152BEED009AAA21EB9C1ED4FF51EDDBBA"
+    }
+  ],
+  "startedUnix": 1791436027,
+  "candidate": "WN-CANDIDATE-20261008-invited-22",
+  "sourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "candidateRoot": "C:\\mir2-playtest-releases\\20261008-classic-r22\\packages-03\\WN-CANDIDATE-20261008-invited-22",
+  "deliveryRoot": "C:\\mir2-playtest-releases\\20261008-classic-r22\\delivery-02",
+  "manifestSha256": "00967A994D9586C574CA89D5EA4046B25F0A79C346D63FE76F261C0C23735916",
+  "versionSha256": "33DE36E552668C358ADC1EE5F7FEA2ED8BD9D79AA387F4F231C5AA4EE7BA2935",
+  "deliverySha256": "D8588A95AAA384B4FB5CC3E27F3F4B7648CDD39616FC81C699F2FC865AF56F4F",
+  "metadata": [
+    {
+      "path": "PACKAGE-MANIFEST.json",
+      "size": 31538315,
+      "sha256": "00967A994D9586C574CA89D5EA4046B25F0A79C346D63FE76F261C0C23735916"
+    },
+    {
+      "path": "VERSION.json",
+      "size": 1221,
+      "sha256": "33DE36E552668C358ADC1EE5F7FEA2ED8BD9D79AA387F4F231C5AA4EE7BA2935"
+    },
+    {
+      "path": "RELEASE-STATEMENT.json",
+      "size": 707,
+      "sha256": "EC87DBED90B51D11705BCE7002363C5B32BE5792B70D21DCA1FB069FC609B5E5"
+    },
+    {
+      "path": "RELEASE-STATEMENT.p7s",
+      "size": 1614,
+      "sha256": "EF2D6A84C22A683C5215F0BEE815F60959ED3C273A7FED7B6682A095CF3913A6"
+    }
+  ],
+  "payloadFiles": 154579,
+  "payloadBytes": 986493911,
+  "compressedBytes": 867570828,
+  "finishedUnix": 1791436052
+}

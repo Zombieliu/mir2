@@ -1,0 +1,44 @@
+# Default search scope only; this does not change Git tracking or delete files.
+# Inspect excluded evidence with: rg --no-ignore <pattern> <explicit-path>
+
+# Historical checkouts, generated QA evidence, and archived coordination history.
+/work/
+/mir2-web3/docs/generated/
+/mir2-web3/docs/AGENT-ORCHESTRATION-HISTORY-20261023.md
+
+# Packaged web copies and build output; keep source/configuration manifests visible.
+/mir2-web3/apps/web/standalone-*/
+/mir2-web3/apps/web/artifacts/
+**/node_modules/
+**/.next*/
+**/dist/
+**/out/
+**/target/
+**/target-*/
+
+# Binary media and compiled/compressed payloads are searched explicitly when needed.
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+*.ico
+*.wav
+*.ogg
+*.mp3
+*.mp4
+*.webm
+*.ttf
+*.otf
+*.woff
+*.woff2
+*.zip
+*.gz
+*.br
+*.7z
+*.exe
+*.dll
+*.pdb
+*.wasm
+*.bin

@@ -1,0 +1,122 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 Thin03 authenticated bootstrap own strict Next02 independently verified",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 103732,
+    "kind": "Root original Source78 Thin03 own fresh Next02 authenticated Spells bootstrap package",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 19599,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-thin-config03.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-config03.json",
+    "bytes": 8099,
+    "sha256": "506e62ac599a8a93d4d4a5a17081efd23b7eaf6b17e07aecc1c2800a6ba540b9"
+  },
+  "input": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-full-snapshot03.json",
+    "bytes": 44876550,
+    "sha256": "5f83771b96dd301fa13c16e997f6515bfebcb2b6bde38ab3d722d10fa7d11dc0"
+  },
+  "acceptance": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-full-input-acceptance03.json",
+    "bytes": 3049,
+    "sha256": "0bb4f4684a063a091ead0cbf6bdc843616ae790600c2c21d00a9428ad22ef6f8"
+  },
+  "actualNext": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-next-actual02.json",
+    "bytes": 2632,
+    "sha256": "16455ab926a82e5aa1e765a7862aad3cda907250d281d61b34e5841fc7abdb6b"
+  },
+  "actualNode": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-actual03.json",
+    "bytes": 3332,
+    "sha256": "91be454659a13e81ff6f5c563264be9ee5d66732b65624e82334c2e7fd8dabd7"
+  },
+  "actualPortable": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-portable-actual01.json",
+    "bytes": 2801,
+    "sha256": "6794334be0f9d7ca2523d5293d328c2a365ca60992c245203509bfaa4da8dd2a"
+  },
+  "firstFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-failure01.json",
+    "bytes": 1882,
+    "sha256": "d6337fa44eb51aedb942ce2e27b1b0806329be788288950e97d7db9c3cfe0031"
+  },
+  "caseRepair": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-input-display-case-repair01.json",
+    "bytes": 986,
+    "sha256": "e04e90cc70dcbb561a7d76056180d86ff4a2aecaba02d633eeddbf6854f32404"
+  },
+  "report": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/thin-build03/size-report.json",
+    "bytes": 82890,
+    "sha256": "261cefbfaad9dc1785dcb1604834d81ca8b6ec7f3c5129939aaf5a462b70c26d"
+  },
+  "compactionDetails": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\thin-build03\\size-report.json-compaction-details.json",
+    "bytes": 65777,
+    "sha256": "4396842b38d982a5f3df0aedec669b27c4c145e919becc819dce3b2e91c5d8c2"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\thin-build03\\stdout.txt",
+    "bytes": 82890,
+    "sha256": "261cefbfaad9dc1785dcb1604834d81ca8b6ec7f3c5129939aaf5a462b70c26d"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\thin-build03\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputManifest": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-thin-output-manifest03.json",
+    "bytes": 2731552,
+    "sha256": "afa29e5c62e85ebaf340f804049d4cdfcb400ab956bd34db770def6c755228b5"
+  },
+  "independentPackage": {
+    "files": 5260,
+    "directories": 752,
+    "bytes": 313460618,
+    "links": 0
+  },
+  "capBytes": 377487360,
+  "allOutputLeavesSourceMatched": 5260,
+  "sourceContentDifferences": 0,
+  "runtimeAliasByteExactPinnedManifest": true,
+  "actualOwnCompiledNextLeaves": 222,
+  "genuineFiniteUiPngs": 857,
+  "exactSource77FiniteImageSet": true,
+  "jsonSemanticCompactions": {
+    "all": 231,
+    "originalUi": 229,
+    "rootAssetManifest": true,
+    "differences": 0
+  },
+  "finiteMap": {
+    "files": 116,
+    "bytes": 204399,
+    "differences": 0
+  },
+  "coreFiles": 6,
+  "fontAndLicenseByteExact": true,
+  "warnings": {
+    "count": 59,
+    "priorSource78NormalizedMultisetMatch": true,
+    "originalActualOrderPreservedInReport": true,
+    "newWarnings": 0
+  },
+  "actualTests": 178,
+  "ordinaryGameplayPending": true,
+  "mobileAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

@@ -1,0 +1,11 @@
+{
+  "complete": true,
+  "success": false,
+  "testsStarted": false,
+  "phase": "old-r8-helper-self-preflight",
+  "source": null,
+  "helperSHA256": "E1996BB52C3C2979396B50031DAADB0630AB8D333DAC1F9A6789BE7D7B33BAD0",
+  "error": "clientOnly is recorded on VERSION.json; RELEASE-STATEMENT.json schema omits it",
+  "oldSource": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "finishedUtc": "2026-10-01T17:24:25.012305+00:00"
+}

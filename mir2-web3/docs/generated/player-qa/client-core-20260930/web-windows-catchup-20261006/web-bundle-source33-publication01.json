@@ -1,0 +1,158 @@
+{
+  "owner": "Root",
+  "kind": "Source33 actual scoped commit push and independently queried remote publication",
+  "createdAtUtc": "2026-10-07T21:50:15.602Z",
+  "parentCommit": "1c786cf494a7dd9394b3c5de65a9c6b7944491d5",
+  "commit": "262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04",
+  "title": "Split Web NPC purchase policy into an independent bundle",
+  "branch": "codex/windows-player-journey",
+  "actualCommitSucceeded": true,
+  "actualPushSucceeded": true,
+  "remoteHeadVerified": true,
+  "scopeFiles": [
+    "mir2-web3/apps/game-client/platform-web/Cargo.toml",
+    "mir2-web3/apps/game-client/platform-web/src/lib.rs",
+    "mir2-web3/apps/game-client/platform-web/src/mail_compose.rs",
+    "mir2-web3/apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+    "mir2-web3/apps/game-client/platform-web/src/strict_json.rs",
+    "mir2-web3/apps/web/lib/client-core-runtime.ts",
+    "mir2-web3/apps/web/scripts/build-client-core.mjs",
+    "mir2-web3/apps/web/scripts/lib/client-core-release-files.mjs",
+    "mir2-web3/apps/web/scripts/test-client-core-build.mjs",
+    "mir2-web3/apps/web/scripts/test-client-core-release-files.mjs",
+    "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+    "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+    "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+    "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+    "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+    "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+    "mir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-publication01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-finite-result01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-independent-review01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-initial-guard-config-rejection01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-raw-evidence01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-require-test01-retained-failure.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-source01-snapshot.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-source02-review.json"
+  ],
+  "productAndTestFiles": [
+    "apps/game-client/platform-web/Cargo.toml",
+    "apps/game-client/platform-web/src/lib.rs",
+    "apps/game-client/platform-web/src/strict_json.rs",
+    "apps/game-client/platform-web/src/mail_compose.rs",
+    "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+    "apps/web/lib/client-core-runtime.ts",
+    "apps/web/scripts/build-client-core.mjs",
+    "apps/web/scripts/lib/client-core-release-files.mjs",
+    "apps/web/scripts/test-client-core-build.mjs",
+    "apps/web/scripts/test-client-core-release-files.mjs"
+  ],
+  "progressDocs": [
+    "docs/AGENT-ORCHESTRATION.md",
+    "docs/AGENT-TASK-QUEUE.md",
+    "docs/CRYSTAL-1TO1-ROADMAP.md",
+    "docs/BACKEND-1TO1-PROGRESS.md",
+    "docs/CRYSTAL-SERVER-PARITY.md",
+    "docs/FRONTEND-1TO1-GAPS.md",
+    "docs/PLAYER-QA-PLAYTHROUGH.md",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md"
+  ],
+  "qaFiles": [
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-finite-result01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-source01-snapshot.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-source02-review.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-initial-guard-config-rejection01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-require-test01-retained-failure.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-raw-evidence01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-publication01.json",
+    "mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-independent-review01.json"
+  ],
+  "evidence": {
+    "localChecks": [
+      {
+        "chunk_id": "0efe7a",
+        "wall_time_seconds": 0.1425823,
+        "exit_code": 0,
+        "original_token_count": 35,
+        "output": "262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04\n1c786cf494a7dd9394b3c5de65a9c6b7944491d5\nSplit Web NPC purchase policy into an independent bundle\n"
+      },
+      {
+        "chunk_id": "244fe2",
+        "wall_time_seconds": 0.1574414,
+        "exit_code": 0,
+        "original_token_count": 493,
+        "output": "mir2-web3/apps/game-client/platform-web/Cargo.toml\nmir2-web3/apps/game-client/platform-web/src/lib.rs\nmir2-web3/apps/game-client/platform-web/src/mail_compose.rs\nmir2-web3/apps/game-client/platform-web/src/npc_purchase_receipt.rs\nmir2-web3/apps/game-client/platform-web/src/strict_json.rs\nmir2-web3/apps/web/lib/client-core-runtime.ts\nmir2-web3/apps/web/scripts/build-client-core.mjs\nmir2-web3/apps/web/scripts/lib/client-core-release-files.mjs\nmir2-web3/apps/web/scripts/test-client-core-build.mjs\nmir2-web3/apps/web/scripts/test-client-core-release-files.mjs\nmir2-web3/docs/AGENT-ORCHESTRATION.md\nmir2-web3/docs/AGENT-TASK-QUEUE.md\nmir2-web3/docs/BACKEND-1TO1-PROGRESS.md\nmir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md\nmir2-web3/docs/CRYSTAL-SERVER-PARITY.md\nmir2-web3/docs/FRONTEND-1TO1-GAPS.md\nmir2-web3/docs/PLAYER-QA-PLAYTHROUGH.md\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source32-publication01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-finite-result01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-independent-review01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-initial-guard-config-rejection01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-raw-evidence01.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-require-test01-retained-failure.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-source01-snapshot.json\nmir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-bundle-source33-source02-review.json\n"
+      },
+      {
+        "chunk_id": "c70304",
+        "wall_time_seconds": 0.1939827,
+        "exit_code": 0,
+        "original_token_count": 9,
+        "output": " M mir2-web3/apps/web/tsconfig.json\n"
+      }
+    ],
+    "remote": {
+      "chunk_id": "b1baba",
+      "wall_time_seconds": 6.2995895,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04\trefs/heads/codex/windows-player-journey\n"
+    },
+    "push": {
+      "chunk_id": "9abd70",
+      "exit_code": 0,
+      "output": "To github.com:Zombieliu/mir2.git\n   1c786cf494..262e4d4b7f  codex/windows-player-journey -> codex/windows-player-journey\n"
+    },
+    "commit": {
+      "chunk_id": "15859c",
+      "exit_code": 0,
+      "head": "262e4d4b7fc18d67cd3b8c9b5d86badeee5b6e04",
+      "parent": "1c786cf494a7dd9394b3c5de65a9c6b7944491d5",
+      "title": "Split Web NPC purchase policy into an independent bundle",
+      "fileCount": 26
+    },
+    "initialRegularAdd": {
+      "chunk_id": "1034c6",
+      "exit_code": 1,
+      "reason": "Git reported ignored QA parent while all18 intended regular paths were staged; exact8 ignored QA JSON paths explicitly force added only. Final26-path scope matched."
+    },
+    "explicitQaAdd": {
+      "chunk_id": "2cb80f",
+      "exit_code": 0
+    },
+    "diffCheck": {
+      "chunk_id": "1a12e1",
+      "exit_code": 0,
+      "output": ""
+    }
+  },
+  "finiteResult": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-finite-result01.json",
+    "bytes": 82717,
+    "sha256": "50f35c4093a7af0d4a63ada5895b4c6353dc3c23d09fcdb1a1458d6dd96361d1"
+  },
+  "independentReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-independent-review01.json",
+    "bytes": 2912,
+    "sha256": "4b46d39dc9ea01ee3de235cb973a9657a3a11890b5615f8c9eba0e54d27fb2eb"
+  },
+  "rawEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source33-raw-evidence01.json",
+    "bytes": 571756,
+    "sha256": "cd70df44e49044fd60e73e4c33fa49dc4070ac0c649b45a9b7c941b1b698d0f4"
+  },
+  "userTsconfigExcluded": true,
+  "remainingTrackedChange": "apps/web/tsconfig.json (pre-existing user change)",
+  "gitGcAutoDisabled": true,
+  "gitMaintenanceAutoDisabled": true,
+  "networkUsedForGitOnly": true,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "wasmApiUsed": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "goalStatus": "active"
+}

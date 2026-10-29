@@ -1,0 +1,50 @@
+{
+  "schema": "mir2.r18.root-independent-closed-window-review.v1",
+  "createdUtc": "2026-10-04T17:43:47.484398+00:00",
+  "sourceRevision": "321316b791120a6fe549e4006623e63333a5543f",
+  "finalPublicInventorySha256": "86bedc48020ddf1f93320ad036cb343c7d83941e6eb0c359e5fdaacd41019e1a",
+  "frozenPublicFilesVerified": 93,
+  "classes": [
+    {
+      "class": "Wizard",
+      "naturalDeathSequence": 1063,
+      "baselineSequence": 1076,
+      "actualMagicSequence": 1080,
+      "spell": "FireBall",
+      "mpCost": 3,
+      "absoluteMp": 541,
+      "absoluteObservations": 11,
+      "closedBeforeLogout": true,
+      "logoutAckSequence": 1124,
+      "freshConnectionDifferent": true,
+      "freshHp": 128,
+      "freshMp": 541,
+      "quietDurationMs": 5473,
+      "directDurableHp0Read": false
+    },
+    {
+      "class": "Taoist",
+      "naturalDeathSequence": 1462,
+      "baselineSequence": 1470,
+      "actualMagicSequence": 1474,
+      "spell": "Healing",
+      "mpCost": 3,
+      "absoluteMp": 260,
+      "absoluteObservations": 12,
+      "closedBeforeLogout": true,
+      "logoutAckSequence": 1523,
+      "freshConnectionDifferent": true,
+      "freshHp": 239,
+      "freshMp": 260,
+      "quietDurationMs": 5525,
+      "directDurableHp0Read": false
+    }
+  ],
+  "liveComparisonVerified": true,
+  "newNetworkRun": false,
+  "privateFilesRead": false,
+  "sevenMonsterAccepted": false,
+  "fullP1Accepted": false,
+  "nativeOrHumanAccepted": false,
+  "reviewScope": "raw eligible input, absolute life/MP/items, closed window, normal logout and fresh Load; existing quiet/persistence proofs read"
+}

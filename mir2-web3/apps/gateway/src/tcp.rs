@@ -7,7 +7,9 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, mpsc, Semaphore};
 
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
-use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
+use crate::routing::{
+    SharedZoneLiveOutbound, SharedZoneLiveOutboundSender, ZoneLiveOutboundRegistration,
+};
 use crate::session::{catch_gateway_panic, GatewayTeardownPersistenceOutcome};
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
@@ -17,6 +19,7 @@ pub mod chat_broadcast;
 use chat_broadcast::{recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol};
 
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
+const OWNER_LOCATION_OUTBOUND_CAPACITY: usize = 8;
 const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
 
 pub async fn run_tcp_gateway(
@@ -28,6 +31,22 @@ pub async fn run_tcp_gateway(
     serve_tcp_gateway(listener, config, chat_hub).await
 }
 
+/// Both production transports share this registry and the same authoritative world.
+pub async fn run_tcp_gateway_with_zone_registry(
+    addr: &str,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
+) -> io::Result<()> {
+    serve_tcp_gateway_with_zone_registry(
+        TcpListener::bind(addr).await?,
+        config,
+        chat_hub,
+        zone_registry,
+    )
+    .await
+}
+
 /// Serve the public Mir2 TCP protocol on a pre-bound listener.
 ///
 /// Production uses [`run_tcp_gateway`]. Acceptances use this form so the OS can
@@ -36,6 +55,25 @@ pub async fn serve_tcp_gateway(
     listener: TcpListener,
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
+) -> io::Result<()> {
+    let topology = ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let factory = topology.runtime_factory();
+    let registry = Arc::new(ZoneRegistry::with_router_and_owner_lease_authority(
+        topology.default_zone_id().clone(),
+        factory.clone(),
+        topology.router(),
+        crate::zone_lease::default_zone_owner_lease_authority_from_env(),
+    ));
+    let _conquest = crate::conquest_clock::ConquestClockService::start(config.clone(), factory)?;
+    serve_tcp_gateway_with_zone_registry(listener, config, chat_hub, registry).await
+}
+
+pub async fn serve_tcp_gateway_with_zone_registry(
+    listener: TcpListener,
+    config: GatewayConfig,
+    chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
 ) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone (see
     // `run_web_gateway`). Empty maps stay dormant regardless.
@@ -61,11 +99,6 @@ pub async fn serve_tcp_gateway(
     }
     let addr = listener.local_addr()?;
     let config = Arc::new(config);
-    let topology = ZoneTopology::from_env()
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let zone_registry = Arc::new(
-        topology.zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
-    );
     let gameplay_event_sink = default_gameplay_event_sink_from_env();
     let persistence_admission = Arc::new(Semaphore::new(tcp_persistence_session_limit_from_env()));
 
@@ -144,10 +177,16 @@ async fn handle_client_inner(
     let (mut reader, mut writer) = stream.split();
     let (zone_outbound_tx, mut zone_outbound_rx) =
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
+    let (owner_location_outbound_tx, mut owner_location_outbound_rx) =
+        mpsc::channel::<SharedZoneLiveOutbound>(OWNER_LOCATION_OUTBOUND_CAPACITY);
+    let zone_outbound_sender =
+        SharedZoneLiveOutboundSender::new(zone_outbound_tx, owner_location_outbound_tx);
     let mut active_zone_outbound_registration_id = 0;
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
     let mut authenticated_account_id: Option<String> = None;
+    let mut monthly_access_tick = tokio::time::interval(std::time::Duration::from_secs(1));
+    monthly_access_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
 
     loop {
         let frame = {
@@ -157,7 +196,34 @@ async fn handle_client_inner(
                 tokio::select! {
                     biased;
 
+                    _ = monthly_access_tick.tick() => {
+                        if session.monthly_card_expiry_pending(authenticated_account_id.as_deref())
+                            || session.has_pending_shared_personal_work() {
+                            let responses = gateway_blocking(|| session.execute_with_outcome(mir2_simulation::WorldCommand::Tick))
+                                .map_err(session_panic_io_error)?.packets;
+                            if responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })) {
+                                active_zone_outbound_registration_id = 0;
+                                _zone_live_outbound_registration = None;
+                                chat_presence = None;
+                            }
+                            for response in responses { send_packet(&mut writer, &response).await?; }
+                        }
+                    }
                     frame = &mut next_frame => break frame,
+                    outbound = owner_location_outbound_rx.recv() => {
+                        let Some(outbound) = outbound else {
+                            return Err(io::Error::new(
+                                io::ErrorKind::BrokenPipe,
+                                "shared Zone owner-location outbound channel closed",
+                            ));
+                        };
+                        if outbound.registration_id() != active_zone_outbound_registration_id {
+                            continue;
+                        }
+                        let packet = gateway_blocking(|| outbound.claim_for_send())
+                            .map_err(session_panic_io_error)?;
+                        if let Some(packet) = packet { send_packet(&mut writer, &packet).await?; }
+                    }
                     outbound = zone_outbound_rx.recv() => {
                         let Some(outbound) = outbound else {
                             return Err(io::Error::new(
@@ -168,7 +234,9 @@ async fn handle_client_inner(
                         if outbound.registration_id() != active_zone_outbound_registration_id {
                             continue;
                         }
-                        send_packet(&mut writer, &outbound.into_packet()).await?;
+                        let packet = gateway_blocking(|| outbound.claim_for_send())
+                            .map_err(session_panic_io_error)?;
+                        if let Some(packet) = packet { send_packet(&mut writer, &packet).await?; }
                     }
                     broadcast = recv_optional_chat(&mut chat_presence) => {
                         match broadcast {
@@ -276,6 +344,9 @@ async fn handle_client_inner(
                     }
                     Err(error) => return Err(session_panic_io_error(error)),
                 };
+                let map_changed = responses
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::MapChanged { .. }));
                 if responses
                     .iter()
                     .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. }))
@@ -298,18 +369,23 @@ async fn handle_client_inner(
                 if leaves_world {
                     authenticated_account_id = None;
                 }
-                let next_registration = gateway_blocking(|| {
-                    session.register_zone_live_outbound(zone_outbound_tx.clone())
-                })
-                .map_err(session_panic_io_error)?;
-                active_zone_outbound_registration_id = next_registration
-                    .as_ref()
-                    .map(|registration| registration.registration_id())
-                    .unwrap_or(0);
-                if let Some(registration) = next_registration.as_ref() {
-                    registration.activate();
+                if active_identity.is_none() {
+                    active_zone_outbound_registration_id = 0;
+                    _zone_live_outbound_registration = None;
+                } else if _zone_live_outbound_registration.is_none() || starts_game || map_changed {
+                    let next_registration = gateway_blocking(|| {
+                        session.register_zone_live_outbound(zone_outbound_sender.clone())
+                    })
+                    .map_err(session_panic_io_error)?;
+                    active_zone_outbound_registration_id = next_registration
+                        .as_ref()
+                        .map(|registration| registration.registration_id())
+                        .unwrap_or(0);
+                    if let Some(registration) = next_registration.as_ref() {
+                        registration.activate();
+                    }
+                    _zone_live_outbound_registration = next_registration;
                 }
-                _zone_live_outbound_registration = next_registration;
                 for response in responses {
                     send_packet(&mut writer, &response).await?;
                 }

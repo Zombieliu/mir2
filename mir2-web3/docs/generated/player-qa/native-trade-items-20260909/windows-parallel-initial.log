@@ -1,0 +1,941 @@
+   Compiling mir2-client-bevy v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy)
+warning: multiple variants are never constructed
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:2182:5
+     |
+2161 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+2182 |     ToggleInventory,
+     |     ^^^^^^^^^^^^^^^
+2183 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+2184 |     ToggleShop,
+     |     ^^^^^^^^^^
+2185 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+2186 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+2189 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+2194 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+2200 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+2211 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+2298 |     ShopConfirm,
+     |     ^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `render_chat_draft` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:9891:4
+     |
+9891 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+     |    ^^^^^^^^^^^^^^^^^
+
+warning: fields `side` and `slot` are never read
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\trade_dialog.rs:359:9
+    |
+358 | pub(super) struct TradeCell {
+    |                   --------- fields in this struct
+359 |     pub side: TradeSide,
+    |         ^^^^
+360 |     pub slot: usize,
+    |         ^^^^
+
+warning: field `0` is never read
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\trade_dialog.rs:363:29
+    |
+363 | pub(super) struct TradeName(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: field `0` is never read
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\trade_dialog.rs:365:29
+    |
+365 | pub(super) struct TradeGold(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: constant `BUTTON_BG` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:35:7
+   |
+35 | const BUTTON_BG: Color = Color::srgba(0.29, 0.19, 0.11, 1.0);
+   |       ^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:37:7
+   |
+37 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:291:5
+    |
+285 | enum NativeShellButton {
+    |      ----------------- variants in this enum
+...
+291 |     CycleClass,
+    |     ^^^^^^^^^^
+292 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+298 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+299 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_text_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:1846:4
+     |
+1846 | fn spawn_aux_text_button(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:1899:4
+     |
+1899 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:1935:4
+     |
+1935 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\native_shell_ui.rs:1972:4
+     |
+1972 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:44:7
+   |
+44 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+   --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:841:5
+    |
+815 | enum QuestUiButton {
+    |      ------------- variants in this enum
+...
+841 |     SelectQuestFilter {
+    |     ^^^^^^^^^^^^^^^^^
+...
+844 |     QuestHelp,
+    |     ^^^^^^^^^
+845 |     QuestPagePrevious,
+    |     ^^^^^^^^^^^^^^^^^
+846 |     QuestPageNext,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `quest_log_text_button_at` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:4272:4
+     |
+4272 | fn quest_log_text_button_at(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:4473:4
+     |
+4473 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:4663:4
+     |
+4663 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\quest_ui.rs:4802:4
+     |
+4802 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3537:9
+     |
+3537 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3538:9
+     |
+3538 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:3539:9
+     |
+3539 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:4184:17
+     |
+4184 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:4185:17
+     |
+4185 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> E:\mir2-player-journey\mir2-web3\apps\game-client\client-bevy\src\crystal_ui\overlays.rs:4186:17
+     |
+4186 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: `mir2-client-bevy` (lib) generated 24 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 6 suggestions)
+   Compiling mir2-bevy-runtime v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\runtime)
+   Compiling mir2-platform-windows v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\game-client\platform-windows)
+warning: type `effects::EffectFrameMeta` is more private than the item `effects::Animation::frames`
+   --> src\effects.rs:620:5
+    |
+620 |     pub frames: Vec<EffectFrameMeta>,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `effects::Animation::frames` is reachable at visibility `pub(crate)`
+    |
+note: but type `effects::EffectFrameMeta` is only usable at visibility `pub(self)`
+   --> src\effects.rs:458:1
+    |
+458 | struct EffectFrameMeta {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `effects::EffectFrameMeta` is more private than the item `effects::Animation::frame_at`
+   --> src\effects.rs:639:5
+    |
+639 |     pub(crate) fn frame_at(&self, elapsed_ms: u64) -> Option<&EffectFrameMeta> {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ method `effects::Animation::frame_at` is reachable at visibility `pub(crate)`
+    |
+note: but type `effects::EffectFrameMeta` is only usable at visibility `pub(self)`
+   --> src\effects.rs:458:1
+    |
+458 | struct EffectFrameMeta {
+    | ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `EffectSpec` is more private than the item `effects::EffectCatalog::resolve_animation`
+   --> src\effects.rs:802:5
+    |
+802 | /     pub(crate) fn resolve_animation(
+803 | |         &self,
+804 | |         entry: &EffectSpec,
+805 | |         direction: u32,
+806 | |         value: u32,
+807 | |     ) -> Option<Animation> {
+    | |__________________________^ method `effects::EffectCatalog::resolve_animation` is reachable at visibility `pub(crate)`
+    |
+note: but type `EffectSpec` is only usable at visibility `pub(self)`
+   --> src\effects.rs:539:1
+    |
+539 | struct EffectSpec {
+    | ^^^^^^^^^^^^^^^^^
+
+warning: fields `direction`, `base`, and `end` are never read
+   --> src\effects.rs:524:5
+    |
+523 | struct DirectionRange {
+    |        -------------- fields in this struct
+524 |     direction: i64,
+    |     ^^^^^^^^^
+525 |     base: i64,
+    |     ^^^^
+526 |     end: i64,
+    |     ^^^
+    |
+    = note: `DirectionRange` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: fields `value`, `base`, and `end` are never read
+   --> src\effects.rs:532:5
+    |
+531 | struct ValueRange {
+    |        ---------- fields in this struct
+532 |     value: i64,
+    |     ^^^^^
+533 |     base: i64,
+    |     ^^^^
+534 |     end: i64,
+    |     ^^^
+    |
+    = note: `ValueRange` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `spell_id`, `effect_id`, `direction_ranges`, `value_ranges`, and `provenance` are never read
+   --> src\effects.rs:543:5
+    |
+539 | struct EffectSpec {
+    |        ---------- fields in this struct
+...
+543 |     spell_id: Option<u32>,
+    |     ^^^^^^^^
+...
+547 |     effect_id: Option<u32>,
+    |     ^^^^^^^^^
+...
+562 |     direction_ranges: Option<Vec<DirectionRange>>,
+    |     ^^^^^^^^^^^^^^^^
+...
+568 |     value_ranges: Option<Vec<ValueRange>>,
+    |     ^^^^^^^^^^^^
+...
+586 |     provenance: Option<Value>,
+    |     ^^^^^^^^^^
+    |
+    = note: `EffectSpec` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `wait_for_retry_or_leave` is never used
+    --> src\gateway.rs:2091:10
+     |
+2091 | async fn wait_for_retry_or_leave<R: CommandSource>(
+     |          ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `handle_gateway_text` is never used
+    --> src\gateway.rs:3197:4
+     |
+3197 | fn handle_gateway_text(
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-platform-windows` (bin "mir2-platform-windows" test) generated 8 warnings
+    Finished `test` profile [optimized + debuginfo] target(s) in 50.85s
+     Running unittests src\main.rs (C:/Users/Administrator/AppData/Local/Temp/mir2-trade-completion-windows-340f7ca3b1f44af6a6ae18576bb183e1\debug\deps\mir2_platform_windows-47380c32ea8a5cce.exe)
+
+running 560 tests
+test assets::tests::asset_path_rejects_parent_traversal ... ok
+test atlas::tests::harvest_forces_crystal_cweapon_one_for_untransformed_player ... ok
+test atlas::tests::archer_walk_and_range_two_use_alt_layers_then_standing_returns_to_common_body ... ok
+test atlas::tests::manifest_parser_routes_each_rect_to_its_declared_page ... ok
+test atlas::tests::hover_scan_allows_npc_excludes_self_and_dead_and_uses_reverse_cell_order ... ok
+test atlas::tests::hover_uses_body_alpha_and_same_tile_shortcut_but_fails_closed_without_pixels ... ok
+test atlas::tests::original_frame_meta_maps_web_xy_to_crystal_draw_offsets ... ok
+test atlas::tests::highlight_setting_gates_hover_and_selection_and_selected_band_follows_hover ... ok
+test atlas::tests::npc_hover_falls_back_to_body_bounds_when_pixels_are_unavailable ... ok
+test atlas::tests::rgb_to_rgba_expands_with_alpha ... ok
+test atlas::tests::scarecrow_die_effect_phase_covers_all_directions_and_rejects_boundaries ... ok
+test atlas::tests::starter_frame_is_deterministic_and_kind_aware ... ok
+test atlas::tests::starter_frame_uses_direction_stride_to_pick_frame ... ok
+test atlas::tests::scarecrow_die_adds_source_frame_224_plus_phase_as_additive_layer ... ok
+test capture::provenance::tests::package_contract_rejects_any_executable_mismatch ... ok
+test capture::provenance::tests::package_contract_binds_revision_executable_and_manifest_bytes ... ok
+test capture::tests::capture_disabled_without_dir_env_value ... ok
+test capture::tests::capture_run_id_requires_the_pair_validator_safe_character_set ... ok
+test capture::tests::capture_path_is_unique_and_deterministic ... ok
+test capture::tests::from_values_validates_and_normalizes ... ok
+test capture::tests::gameplay_capture_targets_require_authoritative_quest_and_health_states ... ok
+test capture::tests::notice_capture_waits_for_the_authoritative_dialog_to_open ... ok
+test capture::tests::panel_capture_targets_do_not_mutate_non_game_screens ... ok
+test capture::tests::parse_shell_screen_slug_supports_stable_variants ... ok
+test capture::tests::runtime_auto_state_transitions_without_mutating_shell ... ok
+test capture::tests::sanitize_capture_dir_rejects_parent_component ... ok
+test capture::tests::panel_capture_targets_open_through_the_native_ui_reducer ... ok
+test capture::tests::sha256_and_utc_timestamp_match_known_values ... ok
+test clipboard::tests::clipboard_value_is_not_applied_to_unfocused_or_safe_key_surfaces ... ok
+test clipboard::tests::ctrl_v_is_detected_when_the_complete_chord_arrives_in_one_frame ... ok
+test capture::tests::sanitize_capture_label_is_path_traversal_safe ... ok
+test clipboard::tests::character_name_paste_keeps_its_field_specific_limits ... ok
+test clipboard::tests::focus_loss_clears_any_latched_control_modifier ... ok
+test clipboard::tests::login_account_paste_uses_existing_printable_and_length_rules ... ok
+test clipboard::tests::paste_is_ignored_for_unfocused_shell_controls ... ok
+test clipboard::tests::login_password_paste_filters_controls_without_logging_or_echoing ... ok
+test cursor::tests::crystal_hover_cursor_matrix_matches_client_source ... ok
+test effects::tests::delay_time_boundary_499_500_and_end ... ok
+test effects::tests::delay_time_elapsed_starts_at_start_at_not_started_at ... ok
+test effects::tests::delay_time_instance_survives_but_not_rendered_before_start_at ... ok
+test capture::tests::completed_auto_capture_releases_panel_and_notice_control ... ok
+test assets::tests::incomplete_root_is_not_a_complete_asset_bundle ... ok
+test effects::tests::effect_light_snapshot_publishes_across_threads_and_keeps_generation ... ok
+test assets::tests::repository_asset_root_is_discovered_without_compile_time_paths ... ok
+test effects::tests::effect_without_manifest_light_emits_no_light_snapshot ... ok
+test assets::tests::crystal_map_path_prefers_packaged_layouts_and_rejects_traversal ... ok
+test capture::tests::atomic_writer_never_replaces_an_existing_file ... ok
+test assets::tests::complete_render_manifests_without_item_icons_fail_closed ... ok
+test effects::tests::effect_light_snapshot_expires_and_clears_on_scene_reset ... ok
+test effects::tests::crystal_foreground_scene_and_actor_effects_render_after_selected_redraw ... ok
+test effects::tests::effect_shadow_uses_manifest_offsets ... ok
+test capture::tests::sidecar_freezes_observed_state_and_marks_missing_provenance_non_accepting ... ok
+test capture::tests::v1_sidecar_is_closed_only_when_every_required_field_is_present ... ok
+test capture::tests::panel_capture_scenes_are_supported_world_scenes ... ok
+test atlas::tests::native_frame_geometry_exposes_crystal_npc_frame_zero_anchor_data ... ok
+test atlas::tests::entity_render_state_preserves_native_motion_window_for_runtime_interpolation ... ok
+test atlas::tests::player_composite_uses_body_hair_weapon_offsets_and_depth_order ... ok
+test atlas::tests::entity_render_state_uses_manifest_geometry_and_viewport_coordinates ... ok
+test atlas::tests::hidden_is_half_opacity_but_dead_is_not_implicitly_faded ... ok
+test atlas::tests::assassin_melee_uses_alt_body_hair_and_dual_directional_weapons ... ok
+test atlas::tests::animation_frame_override_selects_current_draw_frame ... ok
+test atlas::tests::missing_atlas_png_or_meta_never_invents_player_geometry ... ok
+test atlas::tests::ground_item_renders_without_actor_or_name_and_disappears_when_removed ... ok
+test atlas::tests::packed_manifest_and_web_meta_share_geometry_semantics ... ok
+test atlas::tests::mounted_player_adds_mount_and_suppresses_weapon_layers ... ok
+test atlas::tests::unpacked_player_frame_keeps_pixel_hit_and_atomic_highlight ... ok
+test effects::tests::fireball_projectile_and_impact_spec ... ok
+test effects::tests::fireball_cast_false_keeps_cast_but_never_projectile_impact_or_phase_audio ... ok
+test effects::tests::duplicate_sequence_does_not_duplicate_effect ... ok
+test effects::tests::firewall_cast_false_keeps_cast_and_first_sound_but_no_completion_sound ... ok
+test effects::tests::firewall_cast_true_plays_two_source_sounds_across_spell_action ... ok
+test effects::tests::fireball_cast_animation_resolves ... ok
+test effects::tests::fire_bounce_authoritative_hop_uses_source_direction_and_crystal_clock ... ok
+test effects::tests::flaming_sword_object_attack_tracks_attacker_and_expires_at_six_frames ... ok
+test effects::tests::frame_without_shadow_creates_no_shadow_entity ... ok
+test effects::tests::fireball_map_change_clears_pending_projectile_and_all_phase_audio ... ok
+test effects::tests::frame_with_mask_emits_mask_render_state ... ok
+test effects::tests::flaming_sword_source_audio_identity_is_closed ... ok
+test effects::tests::fireball_projectile_and_impact_resolve_via_subspec ... ok
+test assets::tests::crystal_map_path_follows_directory_alias_before_sibling_lookup ... ok
+test effects::tests::fireball_unbound_target_point_has_projectile_but_no_invented_impact ... ok
+test effects::tests::fireball_effect_light_tracks_cast_projectile_and_impact ... ok
+test effects::tests::flaming_sword_ordinary_attack_is_noop_and_new_attack_restarts_per_attacker ... ok
+test effects::tests::duplicate_packet_does_not_duplicate_return_effect ... ok
+test effects::tests::guard_range_effects_fail_closed_for_other_packets_sources_and_missing_context ... ok
+test effects::tests::hallucination_cast_false_has_no_visual_or_audio_phases ... ok
+test effects::tests::blizzard_ground_has_delay_and_offset ... ok
+test effects::tests::flaming_sword_remove_map_change_and_session_reset_clear_overlay_and_audio ... ok
+test effects::tests::fireball_direction16_is_locked_from_the_target_position_at_launch ... ok
+test effects::tests::fire_bounce_object_magic_owns_delayed_first_projectile_and_legacy_dedupe ... ok
+test effects::tests::great_fireball_cast_false_keeps_cast_and_first_sound_only ... ok
+test effects::tests::fireball_object_magic_owns_cast_delayed_projectile_impact_and_three_sounds ... ok
+test effects::tests::fireball_target_revived_before_completion_restores_impact ... ok
+test effects::tests::fireball_tracks_bound_target_and_recomputes_distance_clock_before_arrival ... ok
+test effects::tests::great_fireball_map_change_clears_all_phases_and_audio ... ok
+test effects::tests::firewall_five_object_spells_repeat_until_each_authoritative_remove ... ok
+test effects::tests::frost_crunch_object_magic_owns_cast_projectile_impact_and_two_sounds ... ok
+test effects::tests::healing_target_tracks_authoritative_object_and_replay_is_one_shot ... ok
+test effects::tests::frost_crunch_target_revived_before_completion_restores_impact ... ok
+test effects::tests::lethal_struck_batch_keeps_hit_and_flinch_before_delayed_death_cry ... ok
+test effects::tests::firewall_source_cast_ground_and_audio_are_integrity_closed ... ok
+test effects::tests::hallucination_object_magic_owns_delayed_directional_projectile_and_impact_sound ... ok
+test effects::tests::firewall_map_change_clears_ground_cast_and_pending_completion_audio ... ok
+test effects::tests::hallucination_target_absence_compatibility_and_session_boundaries_fail_closed ... ok
+test effects::tests::fire_bounce_completion_suppresses_only_terminal_dead_target ... ok
+test effects::tests::healing_cast_and_target_follow_crystal_clocks_and_audio_phases ... ok
+test effects::tests::great_fireball_target_removal_suppresses_impact_and_compatibility_replay ... ok
+test effects::tests::left_guard_range_projectile_locks_launch_direction_then_tracks_target ... ok
+test effects::tests::lightning_waits_for_spell_completion_follows_caster_and_sounds_once ... ok
+test effects::tests::manifest_loads ... ok
+test effects::tests::mask_frame_tracks_primary_frame ... ok
+test effects::tests::left_guard_range_projectile_waits_four_frames_and_uses_crystal_flight_clock ... ok
+test effects::tests::missing_asset_produces_no_effect_and_no_panic ... ok
+test effects::tests::lightning_cast_false_and_session_reset_never_emit_effect_or_sound ... ok
+test effects::tests::great_fireball_object_magic_owns_three_source_phases_and_sounds ... ok
+test effects::tests::native_gameplay_audio_allowlist_contains_every_implemented_combat_clip ... ok
+test effects::tests::missing_mask_falls_back_without_placeholder ... ok
+test effects::tests::native_soak_metrics_gate_is_ten_seconds_and_saturating ... ok
+test effects::tests::native_soak_metrics_json_has_bounded_effect_fields ... ok
+test effects::tests::left_guard_hide_survives_real_adapter_tombstoned_snapshots ... ok
+test effects::tests::lightning_direction_7_resolves_base_1110 ... ok
+test effects::tests::lightning_target_anchored_no_fake_projectile ... ok
+test effects::tests::blizzard_ground_offset_applied ... ok
+test effects::tests::mine_value_7_resolves_effect_frame_56 ... ok
+test effects::tests::player_death_audio_waits_one_frame_and_lifecycle_packets_cancel_it ... ok
+test effects::tests::healing_target_missing_anchor_and_scene_boundaries_fail_closed ... ok
+test effects::tests::mine_persistent_cleared_by_object_remove ... ok
+test effects::tests::player_struck_audio_resolves_weapon_armour_mount_and_gender_families ... ok
+test effects::tests::object_magic_creates_cast_with_magic_0_frame ... ok
+test effects::tests::projectile_impact_does_not_start_before_projectile_completes ... ok
+test effects::tests::projectile_midpoint_interpolation_is_precise ... ok
+test effects::tests::object_spell_removed_by_object_remove ... ok
+test effects::tests::frost_crunch_suppresses_impact_and_sound_only_for_dead_action_at_completion ... ok
+test effects::tests::map_changed_and_logout_clear_all_effects ... ok
+test effects::tests::map_changed_and_logout_clear_runtime_retained_via_tick ... ok
+test effects::tests::object_projectile_from_player_to_monster_succeeds_with_merged_tiles ... ok
+test effects::tests::new_move_destination_uses_crystal_magic3_frames_and_expires_at_600ms ... ok
+test effects::tests::push_failure_does_not_commit_last_state ... ok
+test effects::tests::frost_crunch_target_removal_map_logout_and_reset_clear_delayed_impact ... ok
+test effects::tests::hallucination_completion_uses_current_terminal_dead_state ... ok
+test effects::tests::real_trap_hexagon_object_spell_remains_until_authoritative_remove ... ok
+test effects::tests::scarecrow_attack_audio_is_exact_and_same_batch_lifecycle_scoped ... ok
+test effects::tests::scarecrow_attack_audio_uses_exact_actor_context_and_repeats_per_action ... ok
+test effects::tests::scarecrow_death_audio_is_exact_and_lifecycle_scoped ... ok
+test effects::tests::scarecrow_death_audio_uses_crystal_numeric_file_resolution_once ... ok
+test effects::tests::scarecrow_struck_audio_dedupes_one_action_feed_tail_but_replays_after_consume ... ok
+test effects::tests::projectile_duplicate_sequence_does_not_duplicate_projectile ... ok
+test effects::tests::scarecrow_struck_audio_preserves_flinch_then_crystal_weapon_family_order ... ok
+test effects::tests::scarecrow_struck_unknown_attacker_lifecycle_and_lethal_order_are_fail_closed ... ok
+test effects::tests::shadow_does_not_move_primary_sprite ... ok
+test effects::tests::soul_fireball_cast_false_is_audio_only_and_never_creates_later_phases ... ok
+test effects::tests::healing_source_frames_and_audio_identities_are_closed ... ok
+test effects::tests::owner_revive_alias_packets_emit_one_effect_and_one_sound ... ok
+test effects::tests::map_change_clears_return_effect ... ok
+test effects::tests::soul_fireball_map_change_clears_audio_only_and_delayed_projectile_state ... ok
+test effects::tests::right_guard_range_hit_waits_four_frames_tracks_target_and_expires ... ok
+test effects::tests::visual_gate_hides_effects_without_discarding_live_instances ... ok
+test entity_health::tests::confirmed_hit_reveals_zero_expiry_health_without_snapshot_or_healing_renewal ... ok
+test entity_health::tests::health_packet_deadline_is_not_extended_by_snapshots_but_equal_health_new_packet_renews ... ok
+test entity_health::tests::health_ui_retains_actor_bar_crops_fill_and_expires_without_another_packet ... ok
+test entity_health::tests::real_damage_and_zero_expiry_health_packets_reach_the_bar_projection ... ok
+test entity_overlays::tests::argb_requires_alpha_and_preserves_channels ... ok
+test entity_overlays::tests::dead_entities_keep_crystal_nameplates_shifted_down_without_self_health ... ok
+test entity_overlays::tests::identical_payload_does_not_rebuild_entity_overlays ... ok
+test entity_overlays::tests::living_names_follow_name_view_and_hover_identity_without_duplicates ... ok
+test entity_overlays::tests::marker_entity_survives_rebuilds_animation_and_status_changes_then_leaves ... ok
+test entity_overlays::tests::motion_offsets_keep_self_locked_and_move_remote_drop_and_damage_labels ... ok
+test entity_overlays::tests::name_and_drop_view_are_independent_presentation_gates ... ok
+test entity_overlays::tests::nameplate_outline_matches_mir_label_four_pass_geometry ... ok
+test entity_overlays::tests::npc_quest_markers_follow_authoritative_quest_status ... ok
+test entity_overlays::tests::overlays_match_crystal_cell_offsets_names_and_self_health ... ok
+test entity_overlays::tests::packet_damage_events_are_deduplicated_capped_and_animated_over_target ... ok
+test entity_overlays::tests::player_guild_and_name_follow_crystal_two_line_offsets_and_color ... ok
+test entity_overlays::tests::player_guild_lines_follow_name_view_and_hover_without_duplicates ... ok
+test entity_overlays::tests::world_nameplate_is_pixel_stable_across_run_ack_center_rebase ... ok
+[frame-sets] loaded 697 Crystal library catalogs from "E:\\mir2-player-journey\\mir2-web3\\apps/web/public\\original-ui/frame-sets.generated.json"
+test entity_presentation::tests::animation_advances_without_another_gateway_payload ... ok
+test entity_presentation::tests::attack_range_two_parser_uses_the_crystal_player_action ... ok
+test entity_presentation::tests::authoritative_move_uses_wall_clock_and_keeps_self_screen_locked ... ok
+test effects::tests::player_revive_catalog_is_exact_magic2_twenty_frame_sequence ... ok
+test entity_presentation::tests::cannibal_plant_hide_finishes_before_visual_suppression_and_show_restores_it ... ok
+test effects::tests::fire_bounce_cast_false_keeps_cast_only_and_boundaries_clear_chain ... ok
+test entity_presentation::tests::crystal_selected_monster_redraw_stays_between_real_front_tiles_and_effects ... ok
+test effects::tests::right_guard_range_hit_catalog_is_exact_crystal_contract ... ok
+test effects::tests::reconnect_reset_for_new_connection_allows_sequence_one ... ok
+test entity_presentation::tests::effect_option_removes_and_restores_scarecrow_post_world_layer_without_new_packet ... ok
+test entity_presentation::tests::duplicate_action_sequence_does_not_restart_animation ... ok
+test entity_presentation::tests::hover_cursor_and_highlight_setting_republish_without_authoritative_packet ... ok
+test entity_presentation::tests::monster_run_normalizes_to_supported_walk_cycle ... ok
+test entity_presentation::tests::local_self_command_starts_pixels_immediately_and_ack_keeps_its_window ... ok
+test entity_presentation::tests::mounted_run_remains_six_phases ... ok
+test entity_presentation::tests::mounted_walk_uses_eight_phases_and_packet_carried_wall_clock ... ok
+test entity_presentation::tests::movement_collision_uses_live_payload_and_does_not_block_on_corpses ... ok
+test entity_presentation::tests::movement_phase_and_packet_time_metadata_are_bounded ... ok
+test entity_presentation::tests::movement_prediction_uses_crystal_run_distance_and_real_motion_window ... ok
+test entity_presentation::tests::movement_sort_anchor_expires_without_waiting_for_another_snapshot ... ok
+test entity_presentation::tests::native_hover_cursor_is_independent_of_highlight_and_uses_runtime_gates ... ok
+test entity_presentation::tests::native_motion_offset_matches_crystal_phase_boundaries_and_even_pixels ... ok
+test entity_presentation::tests::projectile_completion_gate_uses_dead_action_not_dead_flag ... ok
+test entity_presentation::tests::overlapping_player_moves_continue_fractional_motion_and_restart_visible_phase ... ok
+test entity_presentation::tests::rendered_hover_identity_is_published_and_cleared_fail_closed ... ok
+test entity_presentation::tests::removed_hidden_object_does_not_suppress_a_reused_object_id ... ok
+test entity_presentation::tests::same_frame_packet_payloads_retain_attack_then_struck_in_action_feed ... ok
+test entity_presentation::tests::stale_self_source_echo_keeps_the_active_target_and_motion_window ... ok
+test entity_presentation::tests::unchanged_correction_removes_only_the_local_prediction ... ok
+test effects::tests::reconnect_sequence_resets_via_generation ... ok
+test frame_sets::tests::archer_alt_library_uses_its_compact_walk_run_and_range_two_tables ... ok
+test frame_sets::tests::explicit_revive_preserves_source_reverse_flag ... ok
+test frame_sets::tests::generated_monster_dash_attack_keeps_its_library_specific_descriptor ... ok
+test frame_sets::tests::library_catalog_uses_exact_counts_skips_intervals_and_fallbacks ... ok
+test frame_sets::tests::malformed_or_unknown_library_uses_kind_default ... ok
+test frame_sets::tests::mounted_player_uses_crystal_mounted_body_offsets ... ok
+test entity_presentation::tests::crystal_selected_remote_player_redraws_exact_composite_at_thirty_percent ... ok
+test gameplay_bridge::tests::adapter_merges_definition_with_authoritative_snapshot ... ok
+test gameplay_bridge::tests::allow_observe_is_authoritative_through_adapter_and_shared_ui_state ... ok
+test gameplay_bridge::tests::attack_target_forwarding_applies_crystal_alt_shift_and_normal_click_order ... ok
+test gameplay_bridge::tests::big_map_intents_cross_only_the_ingame_gateway_boundary ... ok
+test gameplay_bridge::tests::big_map_packets_replace_duplicate_data_track_position_and_reset_boundaries ... ok
+test effects::tests::soul_fireball_locks_direction_at_launch_then_tracks_target_distance ... ok
+test gameplay_bridge::tests::cached_self_attack_cannot_separate_player_from_camera_after_movement ... ok
+test gameplay_bridge::tests::crystal_alt_click_delegates_corpse_validation_and_requires_monster_ai_and_no_mount ... ok
+test gameplay_bridge::tests::crystal_archer_range_boundary_allows_nine_tiles_and_blocks_ten ... ok
+test gameplay_bridge::tests::crystal_archer_range_two_spell_table_is_exact_and_fails_closed ... ok
+test gameplay_bridge::tests::chat_gate_drops_blocked_world_intent_and_closing_allows_one_new_action ... ok
+test gameplay_bridge::tests::crystal_click_keeps_modal_dead_and_non_ingame_gates ... ok
+test gameplay_bridge::tests::crystal_click_semantics_match_shift_and_normal_archer_range_branches ... ok
+test gameplay_bridge::tests::crystal_markup_keeps_visible_label ... ok
+test gameplay_bridge::tests::crystal_normal_archer_blocks_fishing_but_shift_keeps_crystal_semantics ... ok
+test gameplay_bridge::tests::crystal_normal_range_click_fails_closed_when_authoritative_state_is_unknown ... ok
+test effects::tests::soul_fireball_object_magic_owns_delayed_projectile_impact_and_three_sounds ... ok
+test gameplay_bridge::tests::crystal_shift_checks_dazed_but_normal_archer_branch_does_not ... ok
+test gameplay_bridge::tests::crystal_start_order_preserves_map_information_through_user_information ... ok
+test gameplay_bridge::tests::damage_indicator_preserves_authoritative_damage_fields_once ... ok
+test gameplay_bridge::tests::fallback_target_uses_only_live_hostile_entities ... ok
+test gameplay_bridge::tests::fallback_uses_nearest_hostile_without_a_valid_selection ... ok
+test gameplay_bridge::tests::guild_storage_helpers_map_typed_commands_and_reject_invalid_input ... ok
+test gameplay_bridge::tests::harvest_packets_drive_player_harvest_and_corpse_skeleton_actions ... ok
+test gameplay_bridge::tests::incremental_npc_packet_preserves_authoritative_quest_marker_fields ... ok
+test gameplay_bridge::tests::later_authoritative_snapshot_relationship_supersedes_monster_packet_overlay ... ok
+test gameplay_bridge::tests::inventory_ui_intents_map_to_exact_native_commands ... ok
+test gameplay_bridge::tests::map_information_identity_change_clears_source_population_but_preserves_self ... ok
+test gameplay_bridge::tests::gateway_world_snapshot_shape_parses_and_resolves_native_combat_intents ... ok
+test gameplay_bridge::tests::locally_rejected_stale_abandon_releases_its_pending_key ... ok
+test gameplay_bridge::tests::modal_gate_blocks_world_origins_but_keeps_modal_quest_actions_functional ... ok
+test gameplay_bridge::tests::monster_packet_preserves_snapshot_relationship_and_death_transform ... ok
+test gameplay_bridge::tests::missing_native_ui_resource_still_fails_closed_for_dialog_and_dead_state ... ok
+test gameplay_bridge::tests::movement_and_combat_packets_emit_monotonic_animation_hints ... ok
+test gameplay_bridge::tests::mount_update_overlays_the_next_struck_sound_context_before_a_snapshot ... ok
+test gameplay_bridge::tests::newer_self_combat_packet_overrides_older_movement_hint ... ok
+test gameplay_bridge::tests::object_attack_preserves_spell_fields_for_native_attack_overlays ... ok
+test gameplay_bridge::tests::newer_self_object_actions_survive_retained_owner_movement_and_struck_hints ... ok
+test gameplay_bridge::tests::object_hide_and_show_preserve_entity_for_source_animation ... ok
+test gameplay_bridge::tests::object_magic_projects_archer_range_two_into_the_native_player_action ... ok
+test gameplay_bridge::tests::object_player_packet_preserves_authoritative_appearance_for_native_rendering ... ok
+test gameplay_bridge::tests::owner_magic_fails_closed_without_authoritative_source_context ... ok
+test gameplay_bridge::tests::owner_magic_rehydrates_authoritative_source_for_native_cast_effects ... ok
+test gameplay_bridge::tests::packet_first_ground_drop_spawn_and_remove_override_snapshot ... ok
+test gameplay_bridge::tests::packet_first_monster_health_and_tombstone_override_stale_snapshot ... ok
+test gameplay_bridge::tests::packet_first_monster_uses_gateway_sprite_and_neutral_relationship ... ok
+test gameplay_bridge::tests::occupied_transaction_lane_rolls_back_all_game_shop_pending_state ... ok
+test gameplay_bridge::tests::packet_first_self_health_updates_hud_fields_and_self_entity ... ok
+test gameplay_bridge::tests::quest_nack_survives_a_later_plain_snapshot_in_the_same_bevy_frame ... ok
+test gameplay_bridge::tests::reconnect_generation_rejects_old_ack_and_releases_old_pending ... ok
+test gameplay_bridge::tests::remote_revive_always_animates_but_preserves_effect_gate_for_native_vfx ... ok
+test gameplay_bridge::tests::removed_selected_target_falls_back_to_nearest_live_hostile ... ok
+test gameplay_bridge::tests::repeated_object_health_refreshes_packet_revision_without_damage_or_animation ... ok
+test gameplay_bridge::tests::right_guard_range_attack_preserves_wire_fields_and_actor_context ... ok
+test gameplay_bridge::tests::selected_target_with_unknown_max_hp_is_retained_without_fabricated_health ... ok
+test gameplay_bridge::tests::selected_town_guard_is_not_exposed_as_a_combat_target ... ok
+test frame_sets::tests::scarecrow_revive_uses_the_exact_generated_crystal_descriptor ... ok
+test gameplay_bridge::tests::self_death_packet_overrides_stale_full_health_snapshot ... ok
+test gameplay_bridge::tests::retained_quest_retry_rebinds_after_generation_release ... ok
+test gameplay_bridge::tests::self_movement_ack_buffer_is_bounded_and_keeps_newest_order ... ok
+test gameplay_bridge::tests::self_run_death_and_revive_keep_crystal_local_action_semantics ... ok
+test gameplay_bridge::tests::self_struck_captures_authoritative_target_and_attacker_sound_context ... ok
+test gameplay_bridge::tests::set_generation_clears_zone_and_resets_sequences ... ok
+test gameplay_bridge::tests::snapshot_exposes_real_dialog_target_combat_and_drop_ids ... ok
+test gameplay_bridge::tests::unknown_show_is_a_noop_and_unknown_or_non_cannibal_hide_removes ... ok
+test gameplay_bridge::tests::trade_item_intents_preserve_slots_and_wait_for_authoritative_ack ... ok
+test gameplay_bridge::tests::trade_item_send_failure_releases_only_the_unsent_operation ... ok
+test gameplay_bridge::tests::update_notice_is_connection_scoped_and_monotonic ... ok
+test gameplay_bridge::tests::sustained_backpressure_keeps_original_pickup_ahead_of_overflow_and_sends_it_once ... ok
+test gameplay_bridge::tests::user_and_object_dash_attack_update_transform_and_native_action_once ... ok
+test gameplay_bridge::tests::user_information_bootstraps_authoritative_observe_state ... ok
+test gameplay_bridge::tests::user_location_overlays_stale_personal_snapshot ... ok
+test gameplay_bridge::tests::valid_selected_target_overrides_a_nearer_hostile ... ok
+test gameplay_bridge::tests::world_click_state_preserves_authoritative_predicates_without_inference ... ok
+test gameplay_bridge::tests::world_snapshot_decodes_exact_rejected_quest_operation_ack ... ok
+test gameplay_bridge::tests::zone_entity_tiles_merges_world_payload_and_zone_overlay ... ok
+test gameplay_bridge::tests::zone_entity_tiles_supports_player_object_id_without_zone_packet ... ok
+test gateway::tests::actual_server_skill_fixture_keeps_authoritative_spell_and_optional_mp_cost ... ok
+test gateway::tests::awaiting_resume_cancel_is_a_single_outer_data_reset_and_never_reconnects ... ok
+test gateway::tests::authoritative_world_skills_are_forwarded_to_the_native_skill_resource ... ok
+test gateway::tests::command_drain_leaves_reliable_wire_overflow_for_the_next_batch ... ok
+test gateway::tests::correlated_transaction_inserted_during_drain_waits_for_next_batch ... ok
+test gateway::tests::command_drain_coalesces_players_and_preserves_explicit_leave ... ok
+test gateway::tests::direct_chat_line_transform_preserves_system_message_and_channel ... ok
+test gateway::tests::equivalent_map_file_spellings_do_not_clear_the_live_scene ... ok
+test gateway::tests::entity_model_transform_matches_the_shared_entity_shape ... ok
+test gateway::tests::exact_receipt_before_protocol_error_is_never_changed_to_unknown ... ok
+test gateway::tests::exact_receipt_is_reserved_once_and_wrong_flood_cannot_overwrite_it ... ok
+test gateway::tests::game_shop_packet_transforms_keep_cash_catalog_and_stock_patch_separate ... ok
+test gateway::tests::game_shop_transaction_lane_survives_normal_saturation_and_delivers_exactly_once ... ok
+[gateway-client] runtime not ready; dropping snapshot
+test gateway::tests::catalogue_shop_preview_keeps_base_image_even_with_large_count ... ok
+test gateway::tests::inventory_ack_transform_requires_complete_correlatable_fields ... ok
+test gateway::tests::crystal_packet_tooltip_projection_preserves_instance_preview_and_viewer_semantics ... ok
+test gateway::tests::inventory_transform_normalizes_named_equipment_slots_and_nulls ... ok
+test gateway::tests::inventory_transform_uses_only_explicit_crystal_array_capacity ... ok
+test gateway::tests::malformed_quest_operation_ack_is_a_transport_error ... ok
+test gateway::tests::malformed_skill_packets_and_name_only_matches_fail_closed ... ok
+test gateway::tests::map_change_is_scene_only_while_true_session_boundaries_clear_personal_models ... ok
+test gateway::tests::map_information_replaces_retained_map_identity_and_source_population ... ok
+test gateway::tests::map_model_transform_matches_the_shared_map_shape ... ok
+test effects::tests::right_guard_range_hit_source_boundary_is_prestart_through_400ms ... ok
+test gateway::tests::native_resume_connect_handshake_can_be_cancelled_before_a_websocket_response ... ok
+[gateway-client] connected generation=1 resume=false
+test effects::tests::projectile_uses_authoritative_destination_after_target_moves ... ok
+test entity_presentation::tests::authoritative_turn_selects_all_eight_real_player_directions_for_every_actor_layer ... ok
+test effects::tests::spell_without_return_effect_has_no_return_phase ... ok
+[gateway-client] connected generation=1 resume=false
+[gateway-client] connected generation=1 resume=false
+[gateway-client] connected generation=1 resume=false
+test gateway::tests::inventory_transform_groups_items_by_container ... ok
+test gateway::tests::native_lighting_publisher_retries_backpressure_and_clears_per_generation ... ok
+test gateway::tests::native_ui_cursor_applies_explicit_updates_and_map_changed_identity ... ok
+test gateway::tests::native_ui_cursor_preserves_user_information_across_partial_snapshots ... ok
+[gateway-client] connected generation=1 resume=false
+test gateway::tests::native_ui_wing_effect_uses_only_self_authority_and_zero_clears_it ... ok
+test gateway::tests::npc_goods_then_npc_sell_preserves_buy_and_sell_for_one_service_session ... ok
+test gateway::tests::null_pre_bootstrap_stats_coalesce_to_typed_zeroes ... ok
+test gateway::tests::object_chat_line_transform_extracts_text_and_channel ... ok
+[gateway-client] forwarded world snapshot #1
+[gateway-client] connected generation=2 resume=true
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+[gateway-client] forwarded world snapshot #1
+test entity_presentation::tests::crystal_selected_redraw_precedes_same_and_cross_actor_flaming_sword_effects ... ok
+test effects::tests::player_revive_effect_and_audio_follow_self_remote_and_effect_gates ... ok
+test gateway::tests::personal_skill_deltas_reject_other_or_missing_object_ids ... ok
+test gateway::tests::player_intents_serialize_to_the_browser_command_protocol ... ok
+test gateway::tests::prewrite_storage_in_resume_and_pre_normal_paths_resets_without_socket_write ... ok
+test effects::tests::return_effect_reverses_source_and_destination ... ok
+test gateway::tests::prewrite_transaction_frozen_awaiting_resume_marks_all_owners_unknown_once ... ok
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+[gateway-client] StartGame ack
+[gateway-client] forwarded world snapshot #2
+test effects::tests::soul_fireball_resolves_target_presence_at_launch_and_ignores_all_compat_packets ... ok
+test gateway::tests::prewrite_transaction_in_connect_wait_resets_once_and_is_not_replayed ... ok
+test gateway::tests::production_command_queue_is_bounded_and_priority_leave_survives_full_normal_lane ... ok
+test gateway::tests::quest_operation_ack_is_removed_before_world_payload_is_cached ... ok
+[gateway-client] connected generation=2 resume=true
+test gateway::tests::quest_trade_and_guild_packet_adapters_retain_complete_tooltip_sources ... ok
+test gateway::tests::real_template_key_keeps_explicit_instance_id_through_ui_intent_and_ack ... ok
+test gateway::tests::receipt_reserve_backpressure_is_terminal_unknown_not_acknowledgement ... ok
+test gateway::tests::reconnect_defaults_are_fourteen_seconds_and_five_attempts ... ok
+test gateway::tests::reconnect_reset_policy_preserves_transient_loss_and_separates_terminal_states ... ok
+test gateway::tests::recovered_npc_goods_populates_only_the_independent_npc_shop_model ... ok
+test gateway::tests::recovered_receive_mail_feedback_is_bounded_and_waits_for_accepted_delivery ... ok
+test gateway::tests::recovered_storage_packets_decode_only_correlatable_items_and_metadata ... ok
+test gateway::tests::resumable_socket_malformed_receipt_terminates_written_purchase_once ... ok
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+[gateway-client] forwarded world snapshot #3
+test gateway::tests::resumable_socket_oversize_frame_terminates_before_parse_once ... ok
+test gateway::tests::resumable_socket_read_error_then_disconnect_resets_written_purchase_exactly_once ... ok
+test gateway::tests::resume_credential_during_resume_lifecycle_cannot_refresh_deadline_or_attempt_budget ... ok
+test gateway::tests::resume_credential_is_strictly_bounded_and_debug_redacted ... ok
+test gateway::tests::resume_handshake_failure_transitions_retry_then_terminal_and_initial ... ok
+test gateway::tests::retry_delay_is_jittered_but_bounded_by_config ... ok
+test gateway::tests::saturated_storage_patch_falls_back_to_non_evictable_reset_barrier ... ok
+test gateway::tests::second_correlated_transaction_fails_closed_while_lane_is_occupied ... ok
+test gateway::tests::second_game_shop_transaction_fails_closed_while_lane_is_occupied ... ok
+test gateway::tests::shell_dispatch_maps_change_password_banned_reason_and_expiry_without_credentials ... ok
+test gateway::tests::shell_dispatch_maps_change_password_success_and_failure_without_credentials ... ok
+test gateway::tests::shell_dispatch_maps_crystal_login_result_codes_to_actionable_messages ... ok
+test gateway::tests::shell_dispatch_maps_new_account_result_codes ... ok
+test gateway::tests::shell_dispatch_requires_start_game_result_four ... ok
+test gateway::tests::shell_dispatch_uses_real_login_roster_but_waits_for_applied_world_snapshot ... ok
+test gateway::tests::skill_packets_win_over_stale_snapshot_and_fresh_tick_retires_patch ... ok
+test gateway::tests::source_zero_image_keeps_full_frame_metadata_but_legacy_zero_stays_absent ... ok
+test gateway::tests::spell_toggle_packet_updates_can_use_without_retyping_or_cross_object_pollution ... ok
+test gateway::tests::storage_transaction_lane_survives_normal_saturation_and_delivers_exactly_once ... ok
+test gateway::tests::tickless_patch_removal_and_vitals_apply_to_next_snapshot_then_retire ... ok
+test gateway::tests::trade_item_tooltip_adapter_preserves_holes_and_rejects_malformed_wire_rows ... ok
+test gateway::tests::transform_derives_movement_duration_from_until_minus_started ... ok
+test gateway::tests::transform_extracts_player_stats_for_the_hud ... ok
+test gateway::tests::transform_preserves_core_fields_and_converts_object_ids_to_strings ... ok
+test gateway::tests::transformed_snapshot_parses_into_the_runtime_world_snapshot_shape ... ok
+test gateway::tests::typed_big_map_packets_forward_an_immediate_model_only_snapshot ... ok
+test gateway::tests::ui_read_model_transform_matches_the_shared_hud_shape ... ok
+test gateway::tests::user_information_immediately_populates_gold_and_credit_read_model ... ok
+test effects::tests::flaming_sword_all_directions_resolve_six_source_frames_at_crystal_rate ... ok
+test gateway::tests::user_item_selector_never_guesses_identity_from_names_or_partial_info ... ok
+test gateway::tests::user_location_extracts_exact_self_movement_ack_even_for_same_tile ... ok
+test gateway::tests::user_location_fast_path_does_not_republish_unrelated_aux_models ... ok
+test gateway::tests::wallet_cursor_overlays_stale_user_information_before_hud_transform ... ok
+test gateway::tests::wallet_delta_packets_update_absolute_shared_wallet_cursor ... ok
+test gateway::tests::wrong_receipt_for_in_flight_purchase_resets_to_unknown ... ok
+test gateway::trade_projection::tests::own_trade_snapshot_clears_only_explicit_own_offer_and_does_not_settle ... ok
+test gateway::trade_projection::tests::own_trade_snapshot_keeps_exact_slots_instances_metadata_and_guest_state ... ok
+test gateway::trade_projection::tests::own_trade_snapshot_never_accepts_or_reopens_an_exchange ... ok
+test gateway::trade_projection::tests::own_trade_snapshot_rejects_missing_malformed_wrong_owner_and_currency ... ok
+test gateway::trade_projection::tests::own_trade_snapshot_rejects_swapped_duplicate_or_nonbag_items_without_guessing_names ... ok
+test gateway::tests::user_item_count_images_and_true_size_refresh_across_native_surfaces ... ok
+test input::tests::active_auto_path_survives_cursor_crossing_an_actor ... ok
+test input::tests::archer_target_outside_range_does_not_walk_but_attacks_when_target_enters_range ... ok
+test input::tests::attack_request_cadence_uses_crystal_stats_and_floor ... ok
+test input::tests::authoritative_snapshot_progress_advances_auto_path_without_packet_ack ... ok
+test input::tests::closing_a_panel_restores_input_and_emits_only_once ... ok
+test input::tests::correction_clears_the_entire_speculative_movement_window ... ok
+test input::tests::crystal_auto_path_prefers_the_direct_open_route ... ok
+test gateway::tests::prewrite_transaction_in_retry_wait_resets_once_and_is_not_replayed ... ok
+test input::tests::crystal_pointer_plan_degrades_run_then_steers_around_occupied_first_tile ... ok
+test input::tests::crystal_primary_skill_bar_uses_unmodified_function_keys ... ok
+test gateway::tests::prewrite_storage_in_retry_and_connect_wait_resets_and_never_replays ... ok
+[movement] awaiting_authoritative_ack age_ms=4200.0 pending=1; additional movement paused
+test input::tests::digit1_uses_occupied_belt_slot ... ok
+test input::tests::delayed_movement_ack_does_not_queue_or_retry_after_timeout ... ok
+test input::tests::distant_npc_click_queues_interaction_immediately_without_movement ... ok
+test input::tests::e_rotates_current_facing_right_by_one_crystal_direction ... ok
+test input::tests::f2_prefers_explicit_server_hotkey_over_learned_order ... ok
+test input::tests::late_ack_does_not_renew_expired_run_eligibility ... ok
+test input::tests::f1_selects_a_server_learned_skill_with_target_and_direction ... ok
+test input::tests::later_authoritative_snapshot_can_confirm_the_whole_buffered_prefix ... ok
+test input::tests::keyboard_prediction_is_retired_by_the_shared_authoritative_ack_controller ... ok
+test input::tests::left_hold_picks_up_after_authoritative_arrival_on_cursor_tile ... ok
+test input::tests::live_d_moves_right_ingame_without_mutating_ui_state ... ok
+test input::tests::left_hold_on_empty_world_walks_only_after_authoritative_progress ... ok
+test input::tests::movement_deadlines_use_real_time_after_frame_stall ... ok
+test input::tests::missing_self_entity_clears_pending_movement_controller ... ok
+test input::tests::name_only_skill_f1_does_not_emit_magic ... ok
+test input::tests::new_player_identity_cannot_inherit_old_pursuit ... ok
+test input::tests::ordered_movement_acks_retire_only_the_confirmed_fifo_prefix ... ok
+test input::tests::npc_click_beyond_data_range_still_defers_rejection_to_the_server ... ok
+test input::tests::passive_skill_f1_does_not_emit_magic_or_toggle ... ok
+test input::tests::monster_click_chases_moving_target_then_attacks_after_ack_and_stops_on_death ... ok
+test input::tests::q_is_reserved_for_quest_log_and_never_emits_a_world_turn ... ok
+test input::tests::real_left_click_on_self_tile_queues_crystal_tile_pickup ... ok
+test input::tests::pursuit_cancels_on_escape_focus_loss_modal_and_target_removal ... ok
+test input::tests::rendered_hover_identity_maps_only_authoritative_npcs_and_monsters ... ok
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+test input::tests::real_left_click_queues_hovered_npc_or_monster_but_modal_blocks_click_through ... ok
+test gateway::tests::initial_bootstrap_waits_until_world_snapshot_ingest_is_applied ... ok
+test input::tests::repeated_npc_click_uses_crystal_five_second_same_object_guard ... ok
+test input::tests::right_click_auto_path_continues_after_mouse_release_and_authoritative_progress ... ok
+test input::tests::right_click_run_is_blocked_by_modal_or_hovered_actor ... ok
+test input::tests::right_hold_started_outside_world_does_not_arm_on_entering_world ... ok
+test input::tests::right_hold_refreshes_cursor_target_across_multiple_acknowledged_steps ... ok
+test input::tests::session_transition_to_login_suppresses_live_d_movement_intent ... ok
+test input::tests::gameplay_gate_matrix_blocks_every_registered_world_action ... ok
+test input::tests::shift_direction_starts_with_one_matching_walk ... ok
+test input::tests::skill_input_suppressed_when_dead_or_not_ingame ... ok
+test input::tests::stale_hud_press_is_cleared_on_keyboard_frame_but_real_mouse_edge_is_preserved ... ok
+test input::tests::stale_snapshot_cannot_rewind_packet_authority_after_250ms ... ok
+test input::tests::toggle_skill_f1_emits_the_next_authoritative_state ... ok
+[client-bevy/audio] background music muted by development policy; sound effects remain enabled
+
+thread 'gateway::tests::exact_receipt_then_semantic_invalid_is_quarantined_and_consumed_once_by_full_plugins' (94592) panicked at src\gateway.rs:7044:9:
+assertion `left == right` failed
+  left: None
+ right: Some(GameShopReceipt { protocol: "nativeGameShopReceiptV1", request_id: "gs-0000000000000001", success: true, g_index: 31, quantity: 2, price_type: 1, new_stock_level: Some(7), mail_id: Some(77), code: None })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test input::tests::v_key_never_triggers_town_revive_when_alive_or_unknown ... ok
+test input::tests::unchanged_user_location_blocks_immediate_resend_then_steers_around_rejection ... ok
+test input::tests::world_and_pointer_gates_cover_modal_dialog_dead_and_capture_states ... ok
+test input::tests::v_key_only_triggers_town_revive_when_dead_with_positive_max_hp ... ok
+test map_parser::lighting::tests::builder_uses_crystal_stage_anchors_motion_and_animated_map_offset ... ok
+test input::tests::unknown_cooldown_mp_and_unlearned_skill_never_emit_magic ... ok
+test map_parser::lighting::tests::capture_light_state_requires_matching_map_and_preserves_dark_override ... ok
+test map_parser::lighting::tests::effect_lighting_frame_is_generation_bound_and_rebuilt_per_frame ... ok
+test map_parser::lighting::tests::effect_lights_merge_after_entities_and_follow_fractional_tile ... ok
+test map_parser::lighting::tests::dead_object_flood_cannot_suppress_the_self_light ... ok
+test map_parser::lighting::tests::missing_assets_and_nonfinite_motion_fail_closed ... ok
+test map_parser::lighting::tests::effect_lights_respect_assets_cap_and_entity_priority ... ok
+test map_parser::lighting::tests::packet_and_generation_lifecycle_clear_stale_map_light ... ok
+test map_parser::lighting::tests::partial_snapshot_preserves_time_and_same_map_packet_preserves_map_override ... ok
+test map_parser::lighting::tests::zero_or_negative_effect_light_is_ignored ... ok
+test map_parser::tests::alpha_key_object_routes_to_standalone_without_atlas_fallback ... ok
+test map_parser::tests::additive_front_routes_to_standalone_even_when_atlas_has_rect ... ok
+test map_parser::lighting::tests::object_lights_keep_priority_at_the_two_hundred_cap ... ok
+test map_parser::tests::animation_counts_decode_like_the_web ... ok
+test map_parser::tests::animated_map_light_uses_exported_native_frame_offset_without_motion_guessing ... ok
+test map_parser::tests::atlas_rect_key_matches_map_atlas_rect_key_for_path ... ok
+test map_parser::tests::crystal_floor_sized_static_frames_stay_below_the_actor_depth_band ... ok
+test map_parser::tests::crystal_object_lookahead_keeps_bottom_anchored_buildings_below_old_window ... ok
+test map_parser::tests::destination_map_identity_is_part_of_the_render_handoff_key ... ok
+test map_parser::tests::front_layer_draws_on_top ... ok
+test map_parser::tests::incomplete_animation_family_holds_stable_base_frame ... ok
+test map_parser::tests::keyed_static_floor_frame_uses_the_same_global_floor_depth_band ... ok
+test map_parser::tests::library_key_mapping_matches_web ... ok
+test map_parser::tests::map_light_requires_front_image_and_ignores_static_frame_offsets ... ok
+test map_parser::tests::map_light_uses_offset_for_additive_flag_and_rejects_malformed_dimensions ... ok
+test map_parser::tests::map_render_revision_is_stable_and_tracks_semantic_view_changes ... ok
+test map_parser::tests::middle_animation_uses_its_own_type100_field ... ok
+test map_parser::lighting::tests::entity_candidates_are_bounded_and_order_independent ... ok
+test map_parser::tests::missing_standalone_entry_skips_black_key_objects_instead_of_using_raw_atlas ... ok
+test map_parser::tests::non_offset_standalone_uses_bottom_left_not_centered_anchor ... ok
+test map_parser::tests::non_square_type100_cells_resolve_x_major_coordinates ... ok
+test map_parser::tests::odd_cells_do_not_emit_back_layer_draws ... ok
+test map_parser::tests::parsed_map_cache_is_bounded_and_refreshes_the_current_map ... ok
+test map_parser::tests::render_state_emits_complete_animation_family_with_phase_metadata ... ok
+test map_parser::tests::resolve_map_draws_preserves_crystal_animation_family_parameters ... ok
+test map_parser::tests::resolve_tile_draws_includes_front_layer ... ok
+test map_parser::tests::source_offset_standalone_preserves_crystal_object_placement ... ok
+test map_parser::tests::standalone_keys_change_when_representation_changes ... ok
+test gateway::tests::exact_receipt_then_semantic_invalid_is_quarantined_and_consumed_once_by_full_plugins ... FAILED
+test map_parser::tests::type100_collision_bits_and_bounds_match_crystal_empty_cell ... ok
+test map_parser::tests::type100_light_byte_and_native_conversion_preserve_frame_offsets ... ok
+test map_parser::tests::missing_authoritative_map_does_not_fall_back_to_bichon ... ok
+test map_parser::tests::type100_map_parses_dimensions_and_cells ... ok
+test map_parser::tests::type1_map_decodes_xor_dimensions_cells_and_crystal_index_rules ... ok
+test map_parser::tests::type1_map_rejects_truncated_cell_payload ... ok
+test map_parser::tests::viewport_draw_resolution_fails_closed_for_zero_dimensions ... ok
+test map_parser::tests::wrong_magic_rejected ... ok
+test map_parser::tests::viewport_draw_resolution_visits_only_the_retained_map_window ... ok
+test movement_trace::tests::unix_timestamp_is_finite_and_nonzero ... ok
+test native_protocol::tests::allow_observe_packet_is_typed_and_requires_a_boolean ... ok
+test native_protocol::tests::big_map_commands_match_gateway_browser_command_wire_contract ... ok
+test movement_trace::tests::writer_emits_session_header_and_json_event ... ok
+test native_protocol::tests::big_map_packets_are_typed_bounded_and_reject_invalid_identity ... ok
+test native_protocol::tests::guild_storage_command_builders_fail_closed_at_native_boundary ... ok
+test native_protocol::tests::inbound_change_password_results_preserve_authoritative_codes ... ok
+test native_protocol::tests::inbound_disconnect_and_unknown_events_parse ... ok
+test native_protocol::tests::inbound_game_shop_receipt_uses_shared_contract_and_rejects_bad_shape ... ok
+test native_protocol::tests::inbound_login_failure_supports_packet_and_error_shapes ... ok
+test native_protocol::tests::inbound_login_success_parses_character_roster ... ok
+test native_protocol::tests::inbound_new_account_result_is_classified ... ok
+test native_protocol::tests::inbound_new_character_delete_and_start_game_events_parse ... ok
+test native_protocol::tests::inbound_update_notice_preserves_authoritative_text_and_rejects_bad_shape ... ok
+test native_protocol::tests::inbound_user_info_npc_and_quest_events_parse ... ok
+test native_protocol::tests::outbound_command_debug_redacts_login_password ... ok
+test native_protocol::tests::outbound_commands_serialize_with_camel_case_tagged_wire_contract ... ok
+test native_protocol::tests::outbound_finish_quest_keeps_default_selected_item_index_when_omitted_in_json ... ok
+test native_protocol::tests::resume_control_events_parse_without_exposing_credential_in_debug ... ok
+test native_protocol::tests::social_commands_use_only_real_typed_wire_shapes ... ok
+test session_config::tests::client_toml_accepts_wss_and_display_size ... ok
+test session_config::tests::client_toml_rejects_credentials_and_unknown_sections ... ok
+test session_config::tests::client_toml_rejects_non_loopback_ws ... ok
+test session_config::tests::debug_output_redacts_the_auto_login_password ... ok
+test session_config::tests::explicit_character_index_is_only_an_auto_login_option ... ok
+test session_config::tests::explicit_credentials_enable_opt_in_auto_login_without_auto_start ... ok
+test session_config::tests::invalid_character_index_and_gateway_scheme_are_rejected ... ok
+test session_config::tests::missing_credentials_open_the_interactive_login_flow ... ok
+test session_config::tests::partial_or_empty_credentials_are_rejected ... ok
+test session_config::tests::plaintext_gateway_is_limited_to_loopback_and_url_credentials_are_rejected ... ok
+test shell_bridge::tests::change_password_banned_clears_pending_and_returns_to_login_without_secret_notice ... ok
+test shell_bridge::tests::change_password_failure_clears_pending_and_keeps_form_without_secret_notice ... ok
+test shell_bridge::tests::change_password_success_clears_pending_and_returns_to_login ... ok
+test shell_bridge::tests::change_password_forwards_account_id_and_gateway_fields_once ... ok
+[client-bevy/audio] background music muted by development policy; sound effects remain enabled
+test shell_bridge::tests::delete_confirmation_forwards_exactly_once_for_selected_index ... ok
+test shell_bridge::tests::development_auto_start_waits_for_door_even_without_another_gateway_event ... ok
+test shell_bridge::tests::distinct_register_and_login_commands_are_not_dropped_by_final_screen_state ... ok
+test shell_bridge::tests::explicit_auto_login_prefills_but_debug_stays_redacted_upstream ... ok
+test shell_bridge::tests::duplicate_manual_intents_still_forward_once_per_logical_operation ... ok
+
+thread 'gateway::tests::outer_terminal_pending_without_receipt_still_becomes_unknown' (98604) panicked at src\gateway.rs:9791:9:
+assertion failed: model.pending_purchase.is_none()
+test shell_bridge::tests::normal_launch_has_no_credentials_or_auto_submit ... ok
+test shell_bridge::tests::late_change_password_reply_without_pending_request_is_ignored_fail_closed ... ok
+test shell_bridge::tests::resumed_bootstrap_refreshes_ingame_shell_without_login_or_start_game ... ok
+test gateway::tests::outer_terminal_pending_without_receipt_still_becomes_unknown ... FAILED
+test effects::tests::object_spell_same_object_id_replaces_previous ... ok
+test map_parser::tests::map_render_state_includes_used_manifest_rect_geometry ... ok
+test map_parser::tests::type100_back_layer_is_the_primary_floor_at_the_cell_origin ... ok
+[client-bevy/audio] background music muted by development policy; sound effects remain enabled
+
+thread 'gateway::tests::outer_terminal_transitions_preserve_and_apply_exact_receipt_to_all_owners' (94368) panicked at src\gateway.rs:9720:17:
+assertion `left == right` failed: shell boundary must not issue a second reset
+  left: 2
+ right: 1
+test gateway::tests::outer_terminal_transitions_preserve_and_apply_exact_receipt_to_all_owners ... FAILED
+test input::tests::real_right_click_on_empty_world_sends_authoritative_run_intent ... ok
+test effects::tests::left_guard_range_projectile_restarts_per_pair_and_is_source_owned ... ok
+test effects::tests::right_guard_range_hit_restarts_per_pair_and_obeys_target_lifecycle ... ok
+[gateway-client] connected generation=2 resume=true
+[map-relocation-regression] Bichon (302,634): 607 atlas tiles, 242 standalone tiles, 221 local images
+test map_parser::tests::bichon_screenshot_viewport_has_local_floor_and_object_images ... ok
+[gateway-client] connected generation=2 resume=true
+[gateway-client] connected generation=2 resume=true
+test entity_presentation::tests::vis01_bichon_actor_transcript_routes_through_candidate_manifests_and_map_state ... ok
+[gateway-client] forwarded world snapshot #1
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+test effects::tests::lightning_production_frames_and_audio_are_integrity_closed ... ok
+[gateway-client] cleared stale map: destination render unavailable for loopback-test-map
+test gateway::tests::native_resume_round_trip_preserves_only_post_resume_authority ... ok
+test effects::tests::hallucination_production_frames_and_audio_are_integrity_closed ... ok
+test effects::tests::fireball_family_suppresses_impact_and_sound_only_for_dead_action_at_completion ... ok
+test gateway::tests::native_resume_logout_cancels_pending_resume_without_retry ... ok
+test effects::tests::soul_fireball_production_direction_frames_and_audio_are_integrity_closed ... ok
+test effects::tests::fireball_production_direction_frames_and_audio_are_integrity_closed ... ok
+test gateway::tests::native_resume_rejected_is_terminal_and_never_replays_queued_input ... ok
+test entity_presentation::tests::vis01_bichon_actor_transcript_drives_packets_clocks_layers_and_real_front_occlusion ... ok
+test gateway::tests::native_resume_deadline_covers_waiting_for_resume_result_without_hanging ... ok
+test effects::tests::left_guard_range_projectile_catalog_is_exact_crystal_contract ... ok
+test effects::tests::fire_bounce_production_frames_and_audio_are_integrity_closed ... ok
+test effects::tests::great_fireball_source_frames_and_audio_are_integrity_closed ... ok
+[gateway-client] runtime not ready; dropping snapshot
+test atlas::tests::unpacked_player_library_uses_exact_meta_for_actions_directions_and_gender ... ok
+[gateway-client] forwarded world snapshot #1
+test gateway::tests::native_resume_minimal_socket_contract_reconnects_and_accepts_post_resume_snapshot ... ok
+test atlas::tests::high_armour_stand_walk_run_retains_body_hair_and_weapon_in_all_directions ... ok
+test effects::tests::active_effects_never_exceed_the_cap ... ok
+test effects::tests::mixed_200_effects_remain_bounded ... ok
+test atlas::tests::high_armour_exports_keep_every_original_frame_and_exact_geometry ... ok
+test effects::tests::continuous_200_projectiles_bounded_and_no_leak ... ok
+
+failures:
+
+failures:
+    gateway::tests::exact_receipt_then_semantic_invalid_is_quarantined_and_consumed_once_by_full_plugins
+    gateway::tests::outer_terminal_pending_without_receipt_still_becomes_unknown
+    gateway::tests::outer_terminal_transitions_preserve_and_apply_exact_receipt_to_all_owners
+
+test result: FAILED. 557 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.34s
+
+error: test failed, to rerun pass `--bin mir2-platform-windows`

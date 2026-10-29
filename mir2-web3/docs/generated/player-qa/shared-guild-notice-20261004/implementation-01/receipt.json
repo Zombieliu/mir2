@@ -1,0 +1,63 @@
+{
+  "schema": "mir2.shared-guild-notice-root-integration.v1",
+  "base": "17b44e08f4253bfc0905dfb951e978d82bf78ada",
+  "createdUtc": "2026-10-04T09:30:22.457716+00:00",
+  "sourceFiles": [
+    {
+      "path": "apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40140,
+      "sha256": "9583c034b13a532a9d0940cbab5473a404965575c73f293e2c3ae5da208307d0"
+    },
+    {
+      "path": "apps/gateway/src/shared_guilds.rs",
+      "bytes": 15795,
+      "sha256": "04a2a67cf1eb3116ef8fea094ff1a7ada4d8c5688df34d4f733fe0f806fcfb24"
+    },
+    {
+      "path": "apps/gateway/tests/shared_guild_management.rs",
+      "bytes": 11005,
+      "sha256": "5254e2ea535aab6e2274b265d58353d21397efc93e0a9128fa8867addcd757ac"
+    }
+  ],
+  "rawEvidence": [
+    {
+      "path": "source-index.json",
+      "bytes": 1723,
+      "sha256": "4d27ab0d5b91998f98ee09778231ad89504385d2b09d021e281d726c351a1647"
+    },
+    {
+      "path": "source-excerpts.txt",
+      "bytes": 4333,
+      "sha256": "4a1132f9b7631e780faf6e6b20189d0f77ed4cf01920122e6aa7782dd52d819c"
+    },
+    {
+      "path": "notice-red-01.log",
+      "bytes": 35633,
+      "sha256": "36bc814b25a273b02d31e3f7f7c0b4311f61772d265df1a2ae76a9fc72859970"
+    },
+    {
+      "path": "notice-green-and-adjacent-01.log",
+      "bytes": 33541,
+      "sha256": "199568daabf9c99adaff70f87e827df2b2ec46ac585f632dc611f170c5fb1e48"
+    }
+  ],
+  "red": {
+    "passed": 0,
+    "failed": 4,
+    "exitCode": 101
+  },
+  "green": {
+    "noticeTests": 4,
+    "adjacentOrdinaryGuildTests": 4,
+    "failed": 0,
+    "ignored": 0,
+    "exitCode": 0
+  },
+  "ordinaryPackets": true,
+  "preparedGuilds": true,
+  "fileReopenVerified": true,
+  "sqlReopenVerified": false,
+  "nativeMouseVerified": false,
+  "published": false,
+  "sourceDelta": "Source -1 terminal invalidation is followed by authoritative content for existing native clients; unrelated members do not receive it. No permanent schema, rank/kick/war or XP changes."
+}

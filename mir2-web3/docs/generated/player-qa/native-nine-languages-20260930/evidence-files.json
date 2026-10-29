@@ -1,0 +1,793 @@
+{
+  "fullEvidenceRoot": "C:\\mir2-ui-repair-20260921\\native-i18n-nine-20260930",
+  "files": [
+    {
+      "path": "shell-04/panel-pt-BR-keyboard.png",
+      "bytes": 157655,
+      "sha256": "f6b090bf4d705e6aaee193a0838916c7870d9c1bfb39ac255376f9e1db89c2d1"
+    },
+    {
+      "path": "shell-04/panel-pt-BR-ranking.png",
+      "bytes": 72905,
+      "sha256": "7c2ce0c4555e34be60283a4da24f247d40676ca4160bfcb78db85e4e7c622495"
+    },
+    {
+      "path": "shell-04/shell-ar-create.png",
+      "bytes": 1812244,
+      "sha256": "e792f3bb09bb55b88e0c37e0fca97006758fb7d98038aae5cedcbfc781f8f06e"
+    },
+    {
+      "path": "shell-04/shell-ar-language-popup.png",
+      "bytes": 2297657,
+      "sha256": "fcdeddfd0ec4e031020d11b0acd49f6cdc099cb9ef29000a5dc8b3d0f8a1e694"
+    },
+    {
+      "path": "shell-04/shell-ar-login.png",
+      "bytes": 2491032,
+      "sha256": "25814f049aa747608a03da8741b8bc1f0f864f27907b65c274b991a0d335fbd0"
+    },
+    {
+      "path": "shell-04/shell-ar-registration.png",
+      "bytes": 1740370,
+      "sha256": "e18aecc3264b17a0920d533efdd8ea39357ffb69c111e170b970c8f9e632095e"
+    },
+    {
+      "path": "shell-04/shell-ar-select.png",
+      "bytes": 330397,
+      "sha256": "e606a8f064349a5cd6660fb866e21d638e4050ac777234a495469c5b6516a0a0"
+    },
+    {
+      "path": "shell-04/shell-en-create.png",
+      "bytes": 1817036,
+      "sha256": "7f49059e590358ea22fc040677ec11c53d2de9d84418788b8821272871cd5b48"
+    },
+    {
+      "path": "shell-04/shell-en-language-popup.png",
+      "bytes": 2297426,
+      "sha256": "84694759491075eac35be6349bf343d9b4d39c947bf9656bebe7e53716c62548"
+    },
+    {
+      "path": "shell-04/shell-en-login.png",
+      "bytes": 2490757,
+      "sha256": "0bc8799f07b9c9905bccaa0c076b8bb69d3f9d3692d99baf591d7da1a5c272fe"
+    },
+    {
+      "path": "shell-04/shell-en-registration.png",
+      "bytes": 1742926,
+      "sha256": "5e8827656caafce29ee81297921a72c98e4e6167e3ae6256b6f15ce8e9bce4d0"
+    },
+    {
+      "path": "shell-04/shell-en-select.png",
+      "bytes": 330853,
+      "sha256": "65274858a6b4f4949b3009df2a8d59e3f76d85bb27b29a66458142ba72cf0658"
+    },
+    {
+      "path": "shell-04/shell-hi-create.png",
+      "bytes": 1811891,
+      "sha256": "518d383f946dacdadd61151dcc94c83d1b0930cb4778e4f928957b7c064538aa"
+    },
+    {
+      "path": "shell-04/shell-hi-login.png",
+      "bytes": 2490192,
+      "sha256": "fbe516f599b2cc3b7ee7350ebd16dfcfbf277f9bfc7627ba8ae6b43268b3dd5b"
+    },
+    {
+      "path": "shell-04/shell-hi-registration.png",
+      "bytes": 1738188,
+      "sha256": "d0be1ccbf767d974c74f8273ba4bbeffb58e15b60d24d7a9cd091fc866a1e934"
+    },
+    {
+      "path": "shell-04/shell-hi-select.png",
+      "bytes": 328643,
+      "sha256": "03e8352dbe744fbb144e7a71bdc85570986f2b71493a3443263cb17c2b648e89"
+    },
+    {
+      "path": "shell-04/shell-i18n-report.json",
+      "bytes": 287760,
+      "sha256": "c245ba2233e66581e6152a7d5dd817d64f496ca524a8db0b82eea6c3359defca"
+    },
+    {
+      "path": "shell-04/shell-id-create.png",
+      "bytes": 1821510,
+      "sha256": "09780bae0d7592c8cb809898560bb93c4f7a16121a3bceaa1667697c53ba32e8"
+    },
+    {
+      "path": "shell-04/shell-id-login.png",
+      "bytes": 2492086,
+      "sha256": "6ead232c355d38b3077168ffe878c6ee209d10f4df129297147a61baac185fac"
+    },
+    {
+      "path": "shell-04/shell-id-registration.png",
+      "bytes": 1744423,
+      "sha256": "909776156ab6cfaa2776d764b068758371937e9dbfb61298bee90c8216807dc8"
+    },
+    {
+      "path": "shell-04/shell-id-select.png",
+      "bytes": 332004,
+      "sha256": "f0da8aafdee369916ee19046279ddf3ff8d37aa0e3e52adf991eee8676a30b9e"
+    },
+    {
+      "path": "shell-04/shell-pt-BR-create.png",
+      "bytes": 1820569,
+      "sha256": "ef9231b9f2f9dea9fb69b8496cd2a6b46d43ea01db876a1b2bbefff31b00b851"
+    },
+    {
+      "path": "shell-04/shell-pt-BR-login.png",
+      "bytes": 2491975,
+      "sha256": "159742be960dab3065c8cf94541c773a8f48cc9d9d9020454b53ffde95f27795"
+    },
+    {
+      "path": "shell-04/shell-pt-BR-registration.png",
+      "bytes": 1743120,
+      "sha256": "293f99b91525cb545dc0df811ae362d47a2cc845aed80fdf154c3936f1e4da7a"
+    },
+    {
+      "path": "shell-04/shell-pt-BR-select.png",
+      "bytes": 335315,
+      "sha256": "2f0bdc160ce0113718de84b114b8157e5b284e63b723c3fc899b981fb27bd939"
+    },
+    {
+      "path": "shell-04/shell-ru-create.png",
+      "bytes": 1819531,
+      "sha256": "d8ba01d1d15217b024d02d2a9b5f74ca21de8776cf19e07852bc16153688f930"
+    },
+    {
+      "path": "shell-04/shell-ru-login.png",
+      "bytes": 2491625,
+      "sha256": "792f888ee9b2468085fc50406abe81cb5097cd73f6709b801ed1ede31a6e5d80"
+    },
+    {
+      "path": "shell-04/shell-ru-registration.png",
+      "bytes": 1748081,
+      "sha256": "ddf9a69319ba1c5deefbed4455a474f3da87c7953e5c98f291dcfa3275c178dd"
+    },
+    {
+      "path": "shell-04/shell-ru-select.png",
+      "bytes": 333369,
+      "sha256": "2b60ef7b7d6b92ab5164c9fb4e4e993d98a0f2dae0b9a636e0509c4376486ad9"
+    },
+    {
+      "path": "shell-04/shell-th-create.png",
+      "bytes": 1812322,
+      "sha256": "df544058ef2b285a960419ca568cd3e20540808d34f5a90cac3877a49ce1c755"
+    },
+    {
+      "path": "shell-04/shell-th-login.png",
+      "bytes": 2490092,
+      "sha256": "0e7c258f0938176d73980ecf5ec3d664364cd1c886001b09bc9a86e24cf2b4c1"
+    },
+    {
+      "path": "shell-04/shell-th-registration.png",
+      "bytes": 1740215,
+      "sha256": "afadd66b1aeb916a1c69ef52d4110d1a36a77f643609b78093fc6cfcd93a438b"
+    },
+    {
+      "path": "shell-04/shell-th-select.png",
+      "bytes": 328542,
+      "sha256": "04bd40f0e63b6019ca83de3a86c0b6d5c4e58d250c8c0b87fa17bd63d8ea6e10"
+    },
+    {
+      "path": "shell-04/shell-vi-create.png",
+      "bytes": 1816956,
+      "sha256": "f70a6cf45032910ab456ab4a46d7e847fbecd78d41530245955498a27b920e53"
+    },
+    {
+      "path": "shell-04/shell-vi-login.png",
+      "bytes": 2492372,
+      "sha256": "a03cb52e5bb5368a73bccb83de9771556ba5c52f74495c3db23c5379e4baaab4"
+    },
+    {
+      "path": "shell-04/shell-vi-registration.png",
+      "bytes": 1751736,
+      "sha256": "50a7c78dac65c99d1d394761914d5c84d2fb75e02137c96876918675361208ab"
+    },
+    {
+      "path": "shell-04/shell-vi-select.png",
+      "bytes": 332498,
+      "sha256": "9a38a4afc340b4950916119d3e6cb4c39d78624784634d082ffdf08fdb0c00ba"
+    },
+    {
+      "path": "shell-04/shell-zh-TW-create.png",
+      "bytes": 1812567,
+      "sha256": "f92bc616311522a4232fb08373b6ff578a082ae3916cbe007c0ada8315735697"
+    },
+    {
+      "path": "shell-04/shell-zh-TW-login.png",
+      "bytes": 2491957,
+      "sha256": "9e6d5653c5e9fe8b712edf5264b477d6f8ebc510f3c662c7e7b7dd7d201de1ae"
+    },
+    {
+      "path": "shell-04/shell-zh-TW-registration.png",
+      "bytes": 1743057,
+      "sha256": "7649a8bd4e3971a4c7f163c857e2c6d8e94778a16e45e6b4226b457475fec49c"
+    },
+    {
+      "path": "shell-04/shell-zh-TW-select.png",
+      "bytes": 335085,
+      "sha256": "62b757e6178688c2112a3d377235dfadc22fd2cc5cc4c4d9df9957fa4a333571"
+    },
+    {
+      "path": "game-05/game-ar-character-stats.png",
+      "bytes": 164641,
+      "sha256": "1c1598fd45a8e5b0c1a3a0d5378e84cc3575874d008a356a7b251ea7a0b2c459"
+    },
+    {
+      "path": "game-05/game-ar-help-detail.png",
+      "bytes": 413340,
+      "sha256": "35ceee3cfcf5e0a6a1a8684c4c2fc15f6191a34d7400299a1f3b21436d4dc77f"
+    },
+    {
+      "path": "game-05/game-ar-help.png",
+      "bytes": 714044,
+      "sha256": "6e3876676b8ac694d49e22c9a15dd3b8f68426a99fffe2953ec376c663d0271e"
+    },
+    {
+      "path": "game-05/game-ar-options-shop-bag.png",
+      "bytes": 160749,
+      "sha256": "bf35a196097fe332477228ef73fe52f35f3a860893ec99f0bf028c8c2267dd2a"
+    },
+    {
+      "path": "game-05/game-en-character-stats.png",
+      "bytes": 170161,
+      "sha256": "640dbda9cc21a07a0d72eb57ff75d376f21509964c5c82aa395d9c5306618422"
+    },
+    {
+      "path": "game-05/game-en-help-detail.png",
+      "bytes": 551123,
+      "sha256": "e4049764f9879550eb545e799acb16409df229f605a596e98344d56cac9d0c1a"
+    },
+    {
+      "path": "game-05/game-en-help.png",
+      "bytes": 713756,
+      "sha256": "069c46218372ed8609c304b655f274b718d93b3f151f49561eb02e18c6d6660a"
+    },
+    {
+      "path": "game-05/game-en-options-shop-bag.png",
+      "bytes": 160119,
+      "sha256": "fe6a6c7e98fd96a8173802ada517bb5ed55508c3d3afa43bf58b1ee10bd4ce6f"
+    },
+    {
+      "path": "game-05/game-hi-character-stats.png",
+      "bytes": 167420,
+      "sha256": "a6c306aafa806d22a04d9618d103081d5122d6027939b4ff5ecfa25a71b69364"
+    },
+    {
+      "path": "game-05/game-hi-help-detail.png",
+      "bytes": 412396,
+      "sha256": "f9e937169c6689f8800b23ae8efaa4806ee69b828f09c1ab0be4fbd7cb41aa8c"
+    },
+    {
+      "path": "game-05/game-hi-help.png",
+      "bytes": 714855,
+      "sha256": "d5e79529aab6abbfb9c9cc17070df28c673a77dedf6b03ebd8f3e90fb5dd893d"
+    },
+    {
+      "path": "game-05/game-hi-options-shop-bag.png",
+      "bytes": 159737,
+      "sha256": "e2a4d3e3d8cd20a6f7d0796ac4deb85ffd4647b6ffee177a3f95d11d722f3620"
+    },
+    {
+      "path": "game-05/game-i18n-report.json",
+      "bytes": 481612,
+      "sha256": "28712a63dc50485498c481f3af9b070b629387e8bc5d28af6def20aa15c2b8d7"
+    },
+    {
+      "path": "game-05/game-id-character-stats.png",
+      "bytes": 171929,
+      "sha256": "c8dd06563310eb71b365db242927e0747c34ab2bbc59bd319caa636bd3c80def"
+    },
+    {
+      "path": "game-05/game-id-help-detail.png",
+      "bytes": 423497,
+      "sha256": "6c9e7adf8e0c12d97e5781ae7a8b76e0fab94f5dfb579d06e85f0da89a2e87b0"
+    },
+    {
+      "path": "game-05/game-id-help.png",
+      "bytes": 712596,
+      "sha256": "8ab142586f5859840c3007a3b7493e26f2d2f10e9b18384eb8abdad2b9ad591a"
+    },
+    {
+      "path": "game-05/game-id-options-shop-bag.png",
+      "bytes": 166177,
+      "sha256": "9b3b4b283d45fcdb3d8301de55102e1e138743a60da2b9c727aedee4bc11c53d"
+    },
+    {
+      "path": "game-05/game-pt-BR-character-stats.png",
+      "bytes": 174949,
+      "sha256": "e7b6988938499553d4ac9dfb167c184aa0cdc6aef9f05e8894ea4456ddbbf636"
+    },
+    {
+      "path": "game-05/game-pt-BR-help-detail.png",
+      "bytes": 425596,
+      "sha256": "8d161f160ef01782faa3add61d8fa4b5b17c9209f8de6ebdf89c2206e85924b9"
+    },
+    {
+      "path": "game-05/game-pt-BR-help.png",
+      "bytes": 713518,
+      "sha256": "89ccdc4795cd57df1fbe6af41258f971b0dc16fffc19235bba5d1be044a3f4f8"
+    },
+    {
+      "path": "game-05/game-pt-BR-options-shop-bag.png",
+      "bytes": 168168,
+      "sha256": "ac76f9a975d2caf8b9d863da5bee1d989ab9a9c74c0c6a5285ffe5a108ea748a"
+    },
+    {
+      "path": "game-05/game-ru-character-stats.png",
+      "bytes": 175275,
+      "sha256": "cc073d333c74e1affe47711f4c817370810b497df48c32fc860addcec4eb1daf"
+    },
+    {
+      "path": "game-05/game-ru-help-detail.png",
+      "bytes": 426553,
+      "sha256": "a97da8d028b3063912c22e54b2f8b24226870fdfc2f031b4aae47d847d56293f"
+    },
+    {
+      "path": "game-05/game-ru-help.png",
+      "bytes": 715072,
+      "sha256": "ca64105162e4c9b27edc0d8245dacd528855f0cb81fbf72863f67419b4050e9d"
+    },
+    {
+      "path": "game-05/game-ru-options-shop-bag.png",
+      "bytes": 168383,
+      "sha256": "0711622587201e785cbd7776bf3ca4e59834e1121479a11fd68cb10f8f478f4f"
+    },
+    {
+      "path": "game-05/game-th-character-stats.png",
+      "bytes": 165226,
+      "sha256": "494e152b944108bc517dd86ef2c9e5d373169db281a0c4dde81ec242f8b19ac7"
+    },
+    {
+      "path": "game-05/game-th-help-detail.png",
+      "bytes": 410752,
+      "sha256": "7fb6cf47d65c3ce44c25ef855e6de0808b0c809dcf9fad312b28ca9a22215e7d"
+    },
+    {
+      "path": "game-05/game-th-help.png",
+      "bytes": 710675,
+      "sha256": "8043907883fcb8d35256d03d1b9a7d8b6ee73b13fb88f1d19256b1d3365a4a12"
+    },
+    {
+      "path": "game-05/game-th-options-shop-bag.png",
+      "bytes": 155706,
+      "sha256": "69b5b2153cb7e3a949bd8113794a38b7dbf27220ea89de2b4a61845c87cc0d2b"
+    },
+    {
+      "path": "game-05/game-vi-character-stats.png",
+      "bytes": 172186,
+      "sha256": "ffcca7d91d01595aee4fda6f2d8ec2bd69dbc59a134c700d798aeb7309540251"
+    },
+    {
+      "path": "game-05/game-vi-help-detail.png",
+      "bytes": 417493,
+      "sha256": "c4a44ac8fde9d648aca5742e877eae5e6e8ad13c39f6856961c666a520dc29c7"
+    },
+    {
+      "path": "game-05/game-vi-help.png",
+      "bytes": 716084,
+      "sha256": "35cae9484a9221ff476142f007ed22cbc47c2979c060866271dbe962029c2485"
+    },
+    {
+      "path": "game-05/game-vi-options-shop-bag.png",
+      "bytes": 163892,
+      "sha256": "3722f6ea547e3c52c2694f436bbc14b3b278e83dbea817294339805f78370db3"
+    },
+    {
+      "path": "game-05/game-zh-TW-character-stats.png",
+      "bytes": 169422,
+      "sha256": "f15be2e0d003dbdfcd900c1ff0ad73a490d0237d0948e1f897fdd2d6261eff3d"
+    },
+    {
+      "path": "game-05/game-zh-TW-help-detail.png",
+      "bytes": 423093,
+      "sha256": "cfaadb6798851e8728ef7625d394690db91f756476aa4d7b9362facf8cbe5bfc"
+    },
+    {
+      "path": "game-05/game-zh-TW-help.png",
+      "bytes": 715458,
+      "sha256": "ad3b261c3df48086b995bc40b372e0e215d76785036bb46e997306ac94fbc966"
+    },
+    {
+      "path": "game-05/game-zh-TW-options-shop-bag.png",
+      "bytes": 162661,
+      "sha256": "ab51299536a047215078f61823567d8aa908cb3b9f3b7836bfd681613436162b"
+    },
+    {
+      "path": "quest-06/ar-detail-bottom.png",
+      "bytes": 343292,
+      "sha256": "33a970ec8de3e17c82921ed19d4c2d1b7a3af807d565f2d10f7d574136760ecf"
+    },
+    {
+      "path": "quest-06/ar-detail-top.png",
+      "bytes": 341398,
+      "sha256": "f8867b17cee873361657759093627f45ca0e643a4efffce6e854b1d2018306f6"
+    },
+    {
+      "path": "quest-06/ar-npc-menu-bottom.png",
+      "bytes": 76639,
+      "sha256": "08f236cf7ee89b203d098ffea62939e2104998dd2022f82afca738f4109d5d92"
+    },
+    {
+      "path": "quest-06/ar-npc-menu-top.png",
+      "bytes": 85956,
+      "sha256": "26e0e776a82bdd00e7562e5735e2028cb045001dd0374975e041ea4277b9e72f"
+    },
+    {
+      "path": "quest-06/ar-npc-player-name.png",
+      "bytes": 83227,
+      "sha256": "8bfc1fec2a5f377f80d158014356ae680d06d3ec4fc7d93824bcc1df4966a892"
+    },
+    {
+      "path": "quest-06/ar-tracker-bottom.png",
+      "bytes": 64068,
+      "sha256": "b81cb9f8eab226670c92cdcea2cc4927dc71bf2c370e12dd65fa139b1900a8ac"
+    },
+    {
+      "path": "quest-06/ar-tracker-top.png",
+      "bytes": 64068,
+      "sha256": "b81cb9f8eab226670c92cdcea2cc4927dc71bf2c370e12dd65fa139b1900a8ac"
+    },
+    {
+      "path": "quest-06/en-detail-bottom.png",
+      "bytes": 343752,
+      "sha256": "862a08c2e7b838925709c744ed56f9c6ac8aaf5dd78d15c1090bdb9266f060cb"
+    },
+    {
+      "path": "quest-06/en-detail-top.png",
+      "bytes": 342479,
+      "sha256": "bf45636f579179f6890a0b7ada5ead201ed2fb112403070494721c7e62f5ce81"
+    },
+    {
+      "path": "quest-06/en-npc-menu-bottom.png",
+      "bytes": 75344,
+      "sha256": "33433f8842ce63685184a0d52a0662ccbf4cdf9ff105de40b9acfb8bb67d6c7a"
+    },
+    {
+      "path": "quest-06/en-npc-menu-top.png",
+      "bytes": 88119,
+      "sha256": "92741e1722943bb44605e5db1fe7d6db3450dc02afa4fb4561344a53b8b79ba7"
+    },
+    {
+      "path": "quest-06/en-npc-player-name.png",
+      "bytes": 85290,
+      "sha256": "39fc03d020b139385c9d32ea9f3aa24a9501e6bf602f408e6a5b674e216ef978"
+    },
+    {
+      "path": "quest-06/en-tracker-bottom.png",
+      "bytes": 69853,
+      "sha256": "197e0a1227a5d215c2aab522b8bf4f27ca0ced4a0f687b9ce574d441f8e06798"
+    },
+    {
+      "path": "quest-06/en-tracker-top.png",
+      "bytes": 69853,
+      "sha256": "197e0a1227a5d215c2aab522b8bf4f27ca0ced4a0f687b9ce574d441f8e06798"
+    },
+    {
+      "path": "quest-06/hi-detail-bottom.png",
+      "bytes": 347802,
+      "sha256": "8ee6df5e175b9f965d3c1643ec653ac7bc304821fe625f353256c87a7b182144"
+    },
+    {
+      "path": "quest-06/hi-detail-top.png",
+      "bytes": 343439,
+      "sha256": "f40f9008a0ce52a80e560462ae57a04fb1675a30d41c5b50dbbe8d2918556301"
+    },
+    {
+      "path": "quest-06/hi-npc-menu-bottom.png",
+      "bytes": 77909,
+      "sha256": "77910f448c1af6c93ffe03ffe56fcd7c654fa74f0d29f2547466bf4462245663"
+    },
+    {
+      "path": "quest-06/hi-npc-menu-top.png",
+      "bytes": 86976,
+      "sha256": "4b1602d90e7319211dbd1f903b1f034440bc8c241e175cdea06ee88940c30751"
+    },
+    {
+      "path": "quest-06/hi-npc-player-name.png",
+      "bytes": 86358,
+      "sha256": "f01e2b76917e654c676f212383d697f17147330aa6264db528e2c7c7cd33f04b"
+    },
+    {
+      "path": "quest-06/hi-tracker-bottom.png",
+      "bytes": 64183,
+      "sha256": "bbecc233ad019f6ed807ac57bca87aef298ebc8c3c4860ea1bd662942ae19177"
+    },
+    {
+      "path": "quest-06/hi-tracker-top.png",
+      "bytes": 64183,
+      "sha256": "bbecc233ad019f6ed807ac57bca87aef298ebc8c3c4860ea1bd662942ae19177"
+    },
+    {
+      "path": "quest-06/id-detail-bottom.png",
+      "bytes": 342521,
+      "sha256": "eac33f51b6ac730c7cc3d159926c16a992b84551ebc9a2a26de96ab235de1a75"
+    },
+    {
+      "path": "quest-06/id-detail-top.png",
+      "bytes": 341708,
+      "sha256": "6c5223f2f9a5f94bd17842805967d2b2c4c84af32d9b319d792ba7235ee6e268"
+    },
+    {
+      "path": "quest-06/id-npc-menu-bottom.png",
+      "bytes": 75953,
+      "sha256": "67feb386b18fd5e2f5df721ff4de22ede1668ae6189e1a53949b169c78811ab6"
+    },
+    {
+      "path": "quest-06/id-npc-menu-top.png",
+      "bytes": 87543,
+      "sha256": "70489b9f722dd334f218cb67d931979384910e6471c1a130fd67227da896bdb2"
+    },
+    {
+      "path": "quest-06/id-npc-player-name.png",
+      "bytes": 86342,
+      "sha256": "67bff178fe03c69759ecef72b9af0877110ad3e2364b9440f764e6af1ddfd4ca"
+    },
+    {
+      "path": "quest-06/id-tracker-bottom.png",
+      "bytes": 70887,
+      "sha256": "7073b0890a08ba1b73658a8dc6bcc5f0bb83588a922147f9552cbc656bc8b717"
+    },
+    {
+      "path": "quest-06/id-tracker-top.png",
+      "bytes": 70887,
+      "sha256": "7073b0890a08ba1b73658a8dc6bcc5f0bb83588a922147f9552cbc656bc8b717"
+    },
+    {
+      "path": "quest-06/pt-BR-detail-bottom.png",
+      "bytes": 345374,
+      "sha256": "53fa56d017354b44d6e7eba6bb1c6d28e0e38a93c2f77251f01ccf74090e53ba"
+    },
+    {
+      "path": "quest-06/pt-BR-detail-top.png",
+      "bytes": 342650,
+      "sha256": "130c95a4ef4398f0070b28ff3ead9e953d1a2356e13187c03f2631cef895c331"
+    },
+    {
+      "path": "quest-06/pt-BR-npc-menu-bottom.png",
+      "bytes": 78454,
+      "sha256": "d6f3f506e8894dab94d81b99b0476e069bbc2d62e1a5833b3a8c171d003687c9"
+    },
+    {
+      "path": "quest-06/pt-BR-npc-menu-top.png",
+      "bytes": 94015,
+      "sha256": "45ad0e082c2601a6288349da8acf4da7228f3921ac2081a043e4e2de174b49ef"
+    },
+    {
+      "path": "quest-06/pt-BR-npc-player-name.png",
+      "bytes": 85768,
+      "sha256": "122e17a55f89205a5040f913b5dadc5fd2b155f3dbdc0f7c05f8e9c44fe2a129"
+    },
+    {
+      "path": "quest-06/pt-BR-tracker-bottom.png",
+      "bytes": 77670,
+      "sha256": "edad727982afd2265f52623c5b3c847061e72585889d793ecb560e9922de26f4"
+    },
+    {
+      "path": "quest-06/pt-BR-tracker-top.png",
+      "bytes": 77670,
+      "sha256": "edad727982afd2265f52623c5b3c847061e72585889d793ecb560e9922de26f4"
+    },
+    {
+      "path": "quest-06/quest-i18n-layouts.json",
+      "bytes": 374651,
+      "sha256": "bc1d7cfdd96e398a0bfd2366f2bbbb6edd84a9ba570d35b0b01da41eaae7a21d"
+    },
+    {
+      "path": "quest-06/ru-detail-bottom.png",
+      "bytes": 346302,
+      "sha256": "4c3e297e08d99ab144bb3a3ea2cb3db9017b3d2b947e14826610a2a9bd333a8d"
+    },
+    {
+      "path": "quest-06/ru-detail-top.png",
+      "bytes": 346050,
+      "sha256": "5f4887e5ec42739fc835959e86faa957c41c7354eb87469a84087f28e14bde68"
+    },
+    {
+      "path": "quest-06/ru-npc-menu-bottom.png",
+      "bytes": 80742,
+      "sha256": "81d499b69f97bbace64719d7f839bd77159dbd29e311d70385f7a36791dda6ec"
+    },
+    {
+      "path": "quest-06/ru-npc-menu-top.png",
+      "bytes": 100514,
+      "sha256": "fc0a94a9d84374af77e1cce50d9db117e525ef28ffbb207ee20d52b9c3d2142e"
+    },
+    {
+      "path": "quest-06/ru-npc-player-name.png",
+      "bytes": 87429,
+      "sha256": "f37549dc7e44b9a4fc4e166eb523664ce9e060f18625fa967fe89f7462428eda"
+    },
+    {
+      "path": "quest-06/ru-tracker-bottom.png",
+      "bytes": 73999,
+      "sha256": "8c0131e0c9dc83602d276da795da6e2d031af0cb1535b75bb446d30b2071996b"
+    },
+    {
+      "path": "quest-06/ru-tracker-top.png",
+      "bytes": 73999,
+      "sha256": "8c0131e0c9dc83602d276da795da6e2d031af0cb1535b75bb446d30b2071996b"
+    },
+    {
+      "path": "quest-06/th-detail-bottom.png",
+      "bytes": 347269,
+      "sha256": "61d71c739c3333360c0f0da8a9d66203692a9736420cb9311684c21e43b122c2"
+    },
+    {
+      "path": "quest-06/th-detail-top.png",
+      "bytes": 341815,
+      "sha256": "0e0a6ba4465e1bf5c52880ee8b3b363ae0c7f97b3c8d3ea61d56adc40180cf1b"
+    },
+    {
+      "path": "quest-06/th-npc-menu-bottom.png",
+      "bytes": 76397,
+      "sha256": "d6ab306b5a3858791571f2b6e2ba14bc6fb0144aa0ee886ab80bdcffe3275c8e"
+    },
+    {
+      "path": "quest-06/th-npc-menu-top.png",
+      "bytes": 85998,
+      "sha256": "629bd78b2d6f578a16d1e0c3517f0249d09ca889c7d98e03e4cd1393c888929d"
+    },
+    {
+      "path": "quest-06/th-npc-player-name.png",
+      "bytes": 84023,
+      "sha256": "51d66303bf095eab1be3d8de358cd6fe803979abe86583916347d4e5859463bb"
+    },
+    {
+      "path": "quest-06/th-tracker-bottom.png",
+      "bytes": 64447,
+      "sha256": "67d336b63b52d0573ae36d762a1ba152b5930cf0af6c54dc884535ceba64608b"
+    },
+    {
+      "path": "quest-06/th-tracker-top.png",
+      "bytes": 64447,
+      "sha256": "67d336b63b52d0573ae36d762a1ba152b5930cf0af6c54dc884535ceba64608b"
+    },
+    {
+      "path": "quest-06/vi-detail-bottom.png",
+      "bytes": 345052,
+      "sha256": "0125d8c28028ca80ead9467b512be5f3b941d2f594ee877964feee4e75c0d746"
+    },
+    {
+      "path": "quest-06/vi-detail-top.png",
+      "bytes": 344015,
+      "sha256": "3c92b0a05359e244172945ac536f4f101be8a6f47c0c54b325bce3769643991e"
+    },
+    {
+      "path": "quest-06/vi-npc-menu-bottom.png",
+      "bytes": 78397,
+      "sha256": "07f58e1994195c427608597044a5b5bdcbd1343a126f01dc1351bd65694c24c5"
+    },
+    {
+      "path": "quest-06/vi-npc-menu-top.png",
+      "bytes": 92172,
+      "sha256": "fc181d29174530ca735a4d45ebfd43451069b54e8ff0aca82ad47e1d3d221410"
+    },
+    {
+      "path": "quest-06/vi-npc-player-name.png",
+      "bytes": 90665,
+      "sha256": "1da6f9e0eaa860dbaee992f26ea01ec6ca1e23fde2849ef381941411a9a24032"
+    },
+    {
+      "path": "quest-06/vi-tracker-bottom.png",
+      "bytes": 70736,
+      "sha256": "803c97a25ad200efa19a8e2b3980131088e069fa270cdb1d01754756c4a0f5c1"
+    },
+    {
+      "path": "quest-06/vi-tracker-top.png",
+      "bytes": 70736,
+      "sha256": "803c97a25ad200efa19a8e2b3980131088e069fa270cdb1d01754756c4a0f5c1"
+    },
+    {
+      "path": "quest-06/zh-TW-detail-bottom.png",
+      "bytes": 356916,
+      "sha256": "9ae019c0db19d1d9cf701d255469060b2f53458f5866cfdcc87b69ef2980a9e6"
+    },
+    {
+      "path": "quest-06/zh-TW-detail-top.png",
+      "bytes": 346391,
+      "sha256": "79a665303fe9e9eac86242a5b6a87fa317c008d0465ee76052d714363039ac5c"
+    },
+    {
+      "path": "quest-06/zh-TW-npc-menu-bottom.png",
+      "bytes": 76860,
+      "sha256": "362b7bafac3aebb084ad814d4c0bccc5eb1f65749583aecccefc190ca3c4d3ab"
+    },
+    {
+      "path": "quest-06/zh-TW-npc-menu-top.png",
+      "bytes": 88673,
+      "sha256": "26640c8f2eeaa26fddd1379397b195aba839ced562c0c29f2dad7d72fe1ec455"
+    },
+    {
+      "path": "quest-06/zh-TW-npc-player-name.png",
+      "bytes": 84793,
+      "sha256": "b98747feaa285999eeb60f1291461ac7976bdd91704f5bc7cd4e3d6d9558352c"
+    },
+    {
+      "path": "quest-06/zh-TW-tracker-bottom.png",
+      "bytes": 69419,
+      "sha256": "6cf5f6ed994862f590270b6866a3d3b1fbfe9996da9cdf046db03eddf95f5bc2"
+    },
+    {
+      "path": "quest-06/zh-TW-tracker-top.png",
+      "bytes": 69419,
+      "sha256": "6cf5f6ed994862f590270b6866a3d3b1fbfe9996da9cdf046db03eddf95f5bc2"
+    },
+    {
+      "path": "native-fonts-01/font-ar.png",
+      "bytes": 60509,
+      "sha256": "f2cf316e8c903b598f8d8f4ccdd98d37cc9e0ec5d6d5b69175854b13807cc7f4"
+    },
+    {
+      "path": "native-fonts-01/font-en.png",
+      "bytes": 59588,
+      "sha256": "fb2bb6013fd696994bc1b9ee364281d7e015738a38277218b007ef97bf147d70"
+    },
+    {
+      "path": "native-fonts-01/font-gpu-evidence.json",
+      "bytes": 45714,
+      "sha256": "d4038fcc27af6b143fe2b5f963e1f4a5325f5d87e3ee0e94496dff5b30512f67"
+    },
+    {
+      "path": "native-fonts-01/font-hi.png",
+      "bytes": 59433,
+      "sha256": "7356613055d810b7b395578320c3427e025afc34ceb23a412708148fa0b839ce"
+    },
+    {
+      "path": "native-fonts-01/font-id.png",
+      "bytes": 56972,
+      "sha256": "ac7646a2e92e5a361b2a37f4675c54af6caf0d10b511d94fedb4a409c5258f14"
+    },
+    {
+      "path": "native-fonts-01/font-pt-BR.png",
+      "bytes": 61449,
+      "sha256": "4e3079ab5091938e8fd579e3eb7287d0b13c23a0fec0fa157c2741c7f3feb70f"
+    },
+    {
+      "path": "native-fonts-01/font-ru.png",
+      "bytes": 60457,
+      "sha256": "e80b49acc8073bfe4056b83f0be9df89e5c8811e1fd73c07fa69dd52b3f1d338"
+    },
+    {
+      "path": "native-fonts-01/font-th.png",
+      "bytes": 58445,
+      "sha256": "dc70ed5ea421d180603480a8350bda0e1c014866339289b797e9328a5139da94"
+    },
+    {
+      "path": "native-fonts-01/font-vi.png",
+      "bytes": 58737,
+      "sha256": "4e61c1b04de982faf7ca4693e6538a28eff9471950843b8c916e304d61f999a0"
+    },
+    {
+      "path": "native-fonts-01/font-zh-TW.png",
+      "bytes": 61388,
+      "sha256": "a939c16e1357788d62596f0d21736c6983448d6f3dbdef233003536d23fd1f54"
+    }
+  ],
+  "trackedImageSelection": [
+    "shell-04/shell-ar-language-popup.png",
+    "shell-04/shell-hi-registration.png",
+    "shell-04/shell-th-create.png",
+    "game-05/game-pt-BR-help-detail.png",
+    "game-05/game-ar-options-shop-bag.png",
+    "game-05/game-th-help-detail.png",
+    "quest-06/ru-detail-top.png",
+    "quest-06/hi-npc-menu-top.png",
+    "quest-06/zh-TW-tracker-top.png",
+    "quest-06/en-tracker-top.png",
+    "quest-06/pt-BR-tracker-top.png",
+    "quest-06/ru-tracker-top.png",
+    "quest-06/hi-tracker-top.png",
+    "quest-06/id-tracker-top.png",
+    "quest-06/vi-tracker-top.png",
+    "quest-06/th-tracker-top.png",
+    "quest-06/ar-tracker-top.png",
+    "native-fonts-01/font-zh-TW.png",
+    "native-fonts-01/font-en.png",
+    "native-fonts-01/font-pt-BR.png",
+    "native-fonts-01/font-ru.png",
+    "native-fonts-01/font-hi.png",
+    "native-fonts-01/font-id.png",
+    "native-fonts-01/font-vi.png",
+    "native-fonts-01/font-th.png",
+    "native-fonts-01/font-ar.png"
+  ]
+}

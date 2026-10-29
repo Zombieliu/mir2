@@ -1,0 +1,11 @@
+{
+  "schema": "mir2.native-delivery-proof-archive.v1",
+  "passed": true,
+  "archiveBytes": 222613,
+  "archiveSha256": "5e32610431fdddf2186f4b01ce23bd467118eec2a2c172afd0a400611fc91e50",
+  "memberCount": 224,
+  "uncompressedBytes": 3449664,
+  "negativeFixtureLinksAreInertMetadata": true,
+  "allMembersReadBackExact": true,
+  "archiveExtracted": false
+}

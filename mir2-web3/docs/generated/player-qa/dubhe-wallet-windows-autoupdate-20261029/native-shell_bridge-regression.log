@@ -1,0 +1,25 @@
+
+running 20 tests
+test shell_bridge::ownership_control_tests::full_bounded_queue_start_game_completes_local_busy ... ok
+test shell_bridge::ownership_control_tests::not_connected_bounded_login_completes_local_busy_without_server_rejection ... ok
+test shell_bridge::tests::billing_scope_stays_local_and_closing_cancels_the_exact_request ... ok
+test shell_bridge::tests::change_password_banned_clears_pending_and_returns_to_login_without_secret_notice ... ok
+test shell_bridge::tests::change_password_failure_clears_pending_and_keeps_form_without_secret_notice ... ok
+test shell_bridge::tests::change_password_forwards_account_id_and_gateway_fields_once ... ok
+test shell_bridge::tests::change_password_success_clears_pending_and_returns_to_login ... ok
+test shell_bridge::tests::creation_policy_blocks_disabled_stale_queued_commands_at_send_boundary ... ok
+test shell_bridge::tests::creation_policy_keeps_allowed_creation_and_existing_other_class_start_commands ... ok
+test shell_bridge::tests::delete_confirmation_forwards_exactly_once_for_selected_index ... ok
+test shell_bridge::tests::development_auto_start_waits_for_door_even_without_another_gateway_event ... ok
+test shell_bridge::tests::duplicate_manual_intents_still_forward_once_per_logical_operation ... ok
+test shell_bridge::tests::explicit_auto_login_prefills_but_debug_stays_redacted_upstream ... ok
+test shell_bridge::tests::late_change_password_reply_without_pending_request_is_ignored_fail_closed ... ok
+test shell_bridge::tests::normal_launch_has_no_credentials_or_auto_submit ... ok
+test shell_bridge::tests::registration_forwards_the_submitted_crystal_packet_fields ... ok
+test shell_bridge::tests::resumed_bootstrap_refreshes_ingame_shell_without_login_or_start_game ... ok
+test shell_bridge::tests::verified_identity_login_local_command_failure_completes_pending_login ... ok
+test shell_bridge::tests::verified_identity_login_rejects_empty_proof_and_failed_transport_without_fallback ... ok
+test shell_bridge::tests::verified_identity_login_sends_only_version_and_signed_login ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 1165 filtered out; finished in 0.01s
+

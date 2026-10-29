@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/010-r23-locale-ar.jpg",
+  "purpose": "Arabic glyphs and connected text visible in basic labels; no expert RTL or full-game translation acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 317511,
+  "sha256": "d44fb0ef464acb364b987daf6fffb0e73a03a1f68d742355b2c79e36a2e84c7f",
+  "recordedUtc": "2026-10-09T18:37:51.550Z"
+}

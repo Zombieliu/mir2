@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "path": "mir2-web3/packages/production/src/lib.rs",
+      "beforeSha256": "df271e2021ccf7dac5aaf9e5e1b019c198d44103c9e67d40ad62128b5575fc6f",
+      "afterSha256": "a54d9cf7bf37ee70eb78b2b63fe1f7cc8dff4591757977e67fcc929cdb29cb9a"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "beforeSha256": "f9f7ca7fbb54d01f0edb29f9e1cb02ae3de4219448660c3ffed0c5853477e894",
+      "afterSha256": "3bf06b6f6db217f00d1e0be1c5c95a803b46972351001cbc316e5bb475a4a6cf"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/db_projection.rs",
+      "beforeSha256": "d3d289d57e3e38eb2b5d25d4d4781583db88c12ef0562cb90f40e42684bcf554",
+      "afterSha256": "f529ff63f9d924cac8dded9c313c78075d0aa47ebf905b706f80c3e43941fc73"
+    }
+  ]
+}

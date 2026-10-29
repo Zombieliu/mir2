@@ -1,0 +1,7 @@
+{
+  "gatewayExit": 101,
+  "changedDuringRun": [
+    "apps/simulation\\src\\runtime\\zone\\runtime\\entity_combat.rs"
+  ],
+  "simulationExit": 0
+}

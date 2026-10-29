@@ -1,0 +1,68 @@
+{
+  "schema": "mir2.mining.sound-freeze.v1",
+  "parentRevision": "9276bafc0f6cebd78f9dd8cd6f679f7e37aa3dfb",
+  "codeFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/audio.rs",
+      "sha256": "af5f5810b8e6f5bf04cd778c09eea35c750aa9f3e7de0ac0b4853b24e835476b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+      "sha256": "e8a8ad6065a1536d7fa55ee87875338b48aaa0e0a8b68447700c7faa2866277d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "sha256": "0d414ef1b8494859c773cf6c0be293ee5a9050e745c99d7f8fd683b5ffd380b6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "sha256": "2ee68ccfd7b6e9de801b1b3a9e416eeb1918a8e0a28eab8d31d1d81c88ba7988"
+    }
+  ],
+  "originalWave": {
+    "source": "Crystal/Build/Client/Debug/Sound/91.wav",
+    "soundListId": 10091,
+    "file": "original-ui/Sound/91.wav",
+    "sizeBytes": 164642,
+    "sha256": "ebcb5e32521cdf7256c334be1951064edd21e080264823b327bc6803acdd38f1"
+  },
+  "results": {
+    "nativePassed": 14,
+    "nativeGpuExplicitIgnored": 1,
+    "clientBevyAddedPassed": 2,
+    "clientBevyAdjacentPassed": 3,
+    "verifyFullSelfTest": true,
+    "packageFullSelfTest": false,
+    "packageFullSelfTestReason": "Current source cache has no generated/native-map-keyed directory; no old keyed pack was admitted",
+    "bothExactAudioGates": true,
+    "nativeMouseOrAudibleAcceptance": false,
+    "pairedBuildsOrDeployment": false
+  },
+  "logs": [
+    {
+      "path": "raw/mining-native-sound-20261007-tests.log",
+      "bytes": 1937,
+      "sha256": "9300d41a6b721fb1435c61a7d532b01d714c23fe9bffaca8525f9e22fce256f7"
+    },
+    {
+      "path": "raw/mining-client-bevy-sound-20261007-tests.log",
+      "bytes": 1045,
+      "sha256": "b5152d0d9edcec2cdc7ba517ecf195c50315f7ec4ade0c99bcb6a00c8a8842c4"
+    },
+    {
+      "path": "raw/mining-sound-verify-20261007-selftest.log",
+      "bytes": 941,
+      "sha256": "412ba1a9fec07c9b202c15ae1b5d5a36b2b60c751858f6f7c3965e03b43dc8c3"
+    },
+    {
+      "path": "raw/mining-sound-package-20261007-selftest.log",
+      "bytes": 409,
+      "sha256": "7a28218b196b66e5235b929a3cf2c89e28e8bf7435588b3cffa7907fe469d154"
+    },
+    {
+      "path": "raw/mining-sound-packaging-20261007-focused.log",
+      "bytes": 541,
+      "sha256": "e0010f24f37746875eac56d3f9b33b1d5a829d0e5f69cb9e91a20f8962003588"
+    }
+  ]
+}

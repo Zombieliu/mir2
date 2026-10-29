@@ -13,7 +13,7 @@
     "check:dubhe-network": "node --test scripts/check-dubhe-network.mjs"
   },
   "dependencies": {
-    "next": "16.2.11",
+    "next": "16.4.1",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
@@ -27,7 +27,7 @@
     "node": ">=22"
   },
   "overrides": {
-    "postcss": "8.5.21",
-    "sharp": "0.35.3"
+    "source-map-js": "1.2.2",
+    "baseline-browser-mapping": "2.11.0"
   }
 }

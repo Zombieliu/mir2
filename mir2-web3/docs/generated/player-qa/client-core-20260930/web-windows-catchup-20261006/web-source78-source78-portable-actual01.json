@@ -1,0 +1,65 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 portable34 allpass on own actual strict Next",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-portable-config01.json",
+    "bytes": 5593,
+    "sha256": "cc035e4ad31d3e66e5ce44ca65e737b144a48dbbbbc9fc375439d345a5789e9d"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-full-snapshot01.json",
+    "bytes": 44117766,
+    "sha256": "f557764464a335300d7a5782ec0765dcaa29fc1d130a44387949e12ab224462b"
+  },
+  "sourceAcceptance": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-full-input-acceptance01.json",
+    "bytes": 2030,
+    "sha256": "dd0ebcbc3ca1b553a9335a52e831dfabb6bb9b21129c9736b8596606f12a133d"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-code-review02.json",
+    "bytes": 13541,
+    "sha256": "f713a9a85e1e7a4595674aeadad9ee743ad51813ec2a847df9d01b792c647ba7"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 103008,
+    "kind": "Root approved original Source78 portable34 on fresh strict Next and unchanged accepted finite asset selector",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 2955,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-portable-config01.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\portable-tests01\\stdout.txt",
+    "bytes": 8863,
+    "sha256": "c3506d2b4398bc35a73592cbe67e2b5f624255a0c85931ef8ffb659eb35993ed"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\portable-tests01\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "total": 34,
+    "pass": 34,
+    "fail": 0,
+    "skip": 0
+  },
+  "focusedAdjacent": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-actual02.json",
+    "bytes": 3039,
+    "sha256": "827442f56b1ebe9004846117f5baf7a295d7262503480e96c8bb7b44232145d4"
+  },
+  "totalActualTests": 175,
+  "finite860Selection857GenuinePassed": true,
+  "originalPreAndPostSourceToolGuardPassed": true,
+  "goalComplete": false
+}

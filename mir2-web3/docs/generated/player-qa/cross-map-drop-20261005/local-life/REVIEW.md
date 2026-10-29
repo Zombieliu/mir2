@@ -1,0 +1,17 @@
+# Bounded local at-impact Dead follow-up
+
+The exact prior P3a delivery remains immutable: fourteen-source manifest, original complete patch, one hundred artifact bytes and nine original Crystal source bytes were rechecked. Only `experience_ownership.rs` is a later authorized source change; the other thirteen files remain byte-identical. No prior receipt was rewritten.
+
+Original `MonsterObject.cs` (SHA256 2cc4e673c589ad57452b4682c3bcb155b4b6b3027b1d3ee52a18a5ae1b7df98e) lines1493–1509 and2627–2633 read current `EXPOwner.Dead` when applying poison/direct damage. Batch-start presence was insufficient when the owner died earlier in the same local tick. A matching online proof and all stored identity fields are checked first. A matching local player then supplies typed `dead`; no HP inference is used. Only an owner whose presence names another Zone uses immutable global snapshot `dead`.
+
+The new prepared Manager regression uses real Wizard FireBall damage, a real Hugger delayed blast and its chance/resist-selected green poison, and a rival Taoist poison pulse. At2600 the first owner's actual poison receipt145→0 precedes the target's three-damage fatal pulse. Frozen production incorrectly selected the owner; fixed production selects the rival and issues one correctly bound source award/drop. Controls745→490 surviving owner and full-HP typed Dead both pass. These trusted prepared commands and scalar fixtures do not constitute a normal-network or human route acceptance result.
+
+RED had two controls passing and the actual same-tick case failing. The sole formatting step was rustfmt of the new test between RED/GREEN; fixture/assertion logic remained unchanged. GREEN includes all three new cases, twenty-one same-map ownership cases and nineteen cross-map/drop cases:43 passed, zero failed. No broad Gateway/death test rerun was needed because their production inputs did not change.
+
+Patch paths start at `mir2-web3/` and apply after the original P3 fourteen-file phase. Physical forward check, forward apply with SHA256-equal final two source bytes, and reverse check use `git -c core.autocrlf=false apply` on the separately created external source-only directory. No Git commit or index mutation was performed in the real worktree.
+
+Remote ownership life changing earlier/later in another Zone of the same sequential or parallel tick batch remains OPEN. There is no redesign of Zone phases, no claim of complete global mutable Node parity, no protocol change, and no custody/cold-restore/TTL changes.
+
+The independently requested object-ID finding is source-backed and remains read-only. Manager proof admission precedes managed Join remapping; matching presence can then disappear. The public Manager zero/collision path follows directly from code, but no collision test/network run was executed. Gateway uses a counter starting50000 without a destination/native/global-domain collision scan; initial fifty-to-one-hundred players are not claimed to have collided. See `object-id-collision-readonly.json` for exact source hashes/line references, original global readonly ObjectID evidence, the five-file proposed next write set, and fail-closed admission recommendation.
+
+No service, network, player-save, generated-resource, package, release-build, publish, commit, push, runtime tick-phase, Manager, routing, or global-doc changes occurred in this follow-up. This phase is frozen for parent review.

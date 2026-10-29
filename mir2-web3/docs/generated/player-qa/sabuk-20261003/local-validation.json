@@ -1,0 +1,142 @@
+{
+  "schema": "mir2.sabuk.local-validation.v1",
+  "selectedMode": "Classic / Request",
+  "focusedAndAdjacentChecksPassed": true,
+  "tests": [
+    {
+      "name": "simulation conquest",
+      "passed": 95,
+      "failed": 0,
+      "ignored": 1,
+      "logPath": "C:/mir2-sabuk-lib-tests-8.log",
+      "logSha256": "bc3b3b1161b10e39fb498a5b22ca64f9c19b90d0bf11553b874e3bb0b1391e09"
+    },
+    {
+      "name": "shared conquest integration",
+      "passed": 29,
+      "failed": 0,
+      "ignored": 0,
+      "logPath": "C:/mir2-sabuk-domain-tests-2.log",
+      "logSha256": "8445239e00c843c1ed3cb539a7a763874e759cec3b5fd749cf882df2df33e707"
+    },
+    {
+      "name": "Gateway conquest",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "logPath": "C:/mir2-sabuk-gateway-tests-3.log",
+      "logSha256": "85c6b8b6ea4d0e5cbbdb677980b5de2f0961f4d68899f191c55108f23064b238"
+    },
+    {
+      "name": "TCP and WebSocket palace flow",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "logPath": "C:/mir2-sabuk-transport-tests-2.log",
+      "logSha256": "836e048c8857ab4ca7713649fe1988b850060f450d99c4957de1a415f3fd38c4"
+    },
+    {
+      "name": "account store regressions",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "logPath": "C:/mir2-sabuk-account-regressions-1.log",
+      "logSha256": "9371b3d61c0442cd8b7d414e33a727aa45d754098f70aefc63ffa0a18df9e3fd"
+    },
+    {
+      "name": "shared Guild regressions",
+      "passed": 24,
+      "failed": 0,
+      "ignored": 2,
+      "logPath": "C:/mir2-sabuk-guild-regressions-1.log",
+      "logSha256": "f113dc04eae1693932df7364154cfc3994ecd2a89adf60f5117d10a9b980078b"
+    },
+    {
+      "name": "Windows native host",
+      "passed": 845,
+      "failed": 0,
+      "ignored": 5,
+      "logPath": "C:/mir2-sabuk-windows-tests-2.log",
+      "logSha256": "b5b219cd9a2bdc803a96f224fd5790e9bdddfd67d8d5a64ef902513ae5095bcb"
+    },
+    {
+      "name": "shared native UI after caret repair",
+      "passed": 1217,
+      "failed": 0,
+      "ignored": 12,
+      "logPath": "C:/mir2-sabuk-shared-ui-regressions-2.log",
+      "logSha256": "b66ccb191532c44067725cfd3e78657bb5066149cc7fb6eae65628a266e71491"
+    },
+    {
+      "name": "production widget GPU fixture",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "logPath": "C:/mir2-sabuk-native-visual-4.log",
+      "logSha256": "e63c7291842a9f9207dd72b7957d7d2ec3826d82ad9594417d85052c63edaef9"
+    },
+    {
+      "name": "legal-cell QA fixture rerun",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "logPath": "C:/mir2-sabuk-gateway-qa-recheck-1.log",
+      "logSha256": "4d02166e7b77cec2a2f0d95a0fd4e13ff3915360361fa0fd684b0b17345a10bf"
+    }
+  ],
+  "broadGatewayOriginal": {
+    "passed": 875,
+    "failed": 1,
+    "ignored": 18,
+    "logSha256": "251530a27abe3be054111527f65e88aa8cfd5cf0f1538a29c1a04190e28cca91",
+    "failure": "QA transform fixture requested an unavailable cell",
+    "resolution": "Fixture uses a legal available cell; focused rerun passed; production movement is unchanged",
+    "wholeSuiteRerun": false
+  },
+  "gpu": {
+    "locales": [
+      "zh-TW",
+      "en",
+      "pt-BR",
+      "ru",
+      "hi",
+      "id",
+      "vi",
+      "th",
+      "ar"
+    ],
+    "layoutReport": "gpu-layouts.json",
+    "layoutReportSha256": "656d3735892c583079a208c022970db70c5f64ec07db269d32bc84c161aa2429",
+    "representativeImages": [
+      {
+        "path": "guild-ar-ime.png",
+        "sha256": "b2fe0e72bf21875d6e4d6727df8281fa3df78a63a182beaaae5dd06e99405a7e",
+        "sizeBytes": 93638
+      },
+      {
+        "path": "sabuk-zh-TW-manage-page-0.png",
+        "sha256": "67e5332a83eefaf925d46575bba4fe73c9bdf8e786ab39b20c0230b55da7a842",
+        "sizeBytes": 111778
+      },
+      {
+        "path": "sabuk-en-archers-page-4.png",
+        "sha256": "24f16c2b19773040af9b980a582c0fd000d6d4a55e233d463a799485bf5e0f73",
+        "sizeBytes": 92480
+      }
+    ],
+    "fullCaptureDirectory": "C:/mir2-sabuk-assets/visual-guild-npc-04",
+    "liveAcceptance": false,
+    "fullLayoutReportSha256": "31642ad165d144ca58e15fa2ae0467f5d105e6f4992410294a48a14c4d16e804",
+    "screenshotCount": 146
+  },
+  "remainingGatesAtCommit": [
+    "isolated PostgreSQL concurrency",
+    "paired R16 package and rollout",
+    "human gameplay acceptance"
+  ],
+  "limits": [
+    "NPC GPU pages use controlled presentation fixtures, not authority grants",
+    "OS-specific IME candidate windows and installed-client acceptance are not covered",
+    "The existing F-drive client and its deferred update journal were not modified"
+  ]
+}

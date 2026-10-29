@@ -1,0 +1,571 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:767:5
+    |
+760 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+767 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `tick_native_snake_totem` is never used
+     --> apps\simulation\src\runtime\zone\runtime.rs:10265:8
+      |
+  452 | impl ZoneRuntime {
+      | ---------------- method in this implementation
+...
+10265 |     fn tick_native_snake_totem(
+      |        ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `retire_shared_snake_totem_children` and `expire_retired_snake_children` are never used
+  --> apps\simulation\src\runtime\zone\runtime\snake_totem_ai.rs:29:19
+   |
+26 | impl ZoneRuntime {
+   | ---------------- methods in this implementation
+...
+29 |     pub(super) fn retire_shared_snake_totem_children(&mut self, id: u32) {
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+43 |     pub(super) fn expire_retired_snake_children(&mut self, now: u64) -> Vec<ZoneOutbound> {
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:59:15
+   |
+59 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_accepts_struck` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:62:15
+   |
+62 | pub(super) fn hell_accepts_struck(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:65:15
+   |
+65 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:1671:5
+     |
+1671 |     sender.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+     = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+     |
+1671 |     let _ = sender.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2964:5
+     |
+2964 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2964 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2987:5
+     |
+2987 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2987 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3077:5
+     |
+3077 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3077 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3141:5
+     |
+3141 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3141 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3208:5
+     |
+3208 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3208 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3431:5
+     |
+3431 |     alpha.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3431 |     let _ = alpha.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3432:5
+     |
+3432 |     beta.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3432 |     let _ = beta.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:6629:5
+     |
+6629 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+6629 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:28377:5
+      |
+28377 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+28377 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:29365:5
+      |
+29365 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+29365 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:30393:5
+      |
+30393 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+30393 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:32285:5
+      |
+32285 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+32285 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:35437:5
+      |
+35437 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+35437 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42277:5
+      |
+42277 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42277 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42602:5
+      |
+42602 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42602 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:56316:5
+      |
+56316 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+56316 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:57418:5
+      |
+57418 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+57418 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:58956:5
+      |
+58956 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+58956 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:60881:5
+      |
+60881 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+60881 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62481:5
+      |
+62481 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62481 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62809:5
+      |
+62809 |     sender.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62809 |     let _ = sender.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63243:5
+      |
+63243 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63243 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63442:5
+      |
+63442 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63442 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63560:5
+      |
+63560 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63560 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63961:5
+      |
+63961 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63961 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64012:5
+      |
+64012 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64012 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64022:5
+      |
+64022 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64022 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:65145:5
+      |
+65145 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+65145 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:66262:5
+      |
+66262 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+66262 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:69716:5
+      |
+69716 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+69716 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\stage5.rs:2648:9
+     |
+2648 |         session_a.save_active_character();
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2648 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 47 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 40.49s
+     Running unittests src\lib.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\mir2_simulation-6feae3919c1325a6.exe)
+
+running 70 tests
+test runtime::zone::aoi_grid::tests::handles_negative_coordinates ... ok
+test runtime::zone::aoi_grid::tests::insert_twice_relocates_without_duplicating ... ok
+test runtime::zone::aoi_grid::tests::moved_updates_buckets_and_preserves_superset ... ok
+test runtime::zone::aoi_grid::tests::neighborhood_is_a_superset_of_everything_visible ... ok
+test runtime::zone::aoi_grid::tests::remove_clears_member_and_empty_cell ... ok
+test runtime::zone::ecs::tests::move_or_remove_unknown_session_is_noop ... ok
+test runtime::zone::ecs::tests::upsert_existing_session_does_not_leak_entities ... ok
+test runtime::zone::ecs::tests::upsert_move_remove_keeps_index_and_world_in_sync ... ok
+test runtime::zone::manager::parallel_tick_tests::leave_all_sessions_preserves_zones_but_removes_players ... ok
+test runtime::zone::manager::parallel_tick_tests::parallel_tick_all_matches_sequential_across_many_zones ... ok
+test runtime::zone::manager::parallel_tick_tests::single_zone_takes_sequential_path_and_still_works ... ok
+test runtime::zone::runtime::checkpoint::tests::checkpoint_state_root_authenticates_removed_object_tombstones ... ok
+test runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_rejects_valid_json_with_changed_state ... ok
+test runtime::zone::runtime::checkpoint::tests::complete_zone_checkpoint_restores_authoritative_and_derived_state ... ok
+test runtime::zone::runtime::checkpoint::tests::exact_ground_drop_identity_is_checkpointed_and_state_root_protected ... ok
+test runtime::zone::runtime::checkpoint::tests::ground_drop_authority_allocators_fail_closed_at_u64_exhaustion ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_checkpoint_missing_monster_disposition_fails_closed ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v2_checkpoint_verifies_old_root_then_reanchors_pending_ticket_key ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v3_checkpoint_ignores_forward_respawn_and_live_sync_rehydrates_policy ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v3_dead_monster_policy_hydration_never_revives_immediately ... ok
+test runtime::zone::runtime::checkpoint::tests::online_player_receives_world_event_monster_spawn_packet ... ok
+test runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_keeps_v2_ground_drop_authority_validation ... ok
+test runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_reanchors_a_module_dependent_state_root ... ok
+test runtime::zone::runtime::checkpoint::tests::world_event_monster_without_player_is_authoritative_and_checkpointed ... ok
+test runtime::zone::runtime::door_tests::shared_door_opens_unblocks_and_auto_closes ... ok
+test runtime::zone::runtime::door_tests::shared_open_door_unknown_index_is_noop ... ok
+test runtime::zone::runtime::gate_ai::tests::all_four_source_gate_footprints_are_distinct_and_unique ... ok
+test runtime::zone::runtime::gate_ai::tests::gate_rounding_matches_dotnet_half_even ... ok
+test runtime::zone::runtime::group_experience_tests::boss_group_keeps_contribution_from_a_member_who_dies_before_kill ... ok
+test runtime::zone::runtime::group_experience_tests::boss_reward_uses_group_contribution_instead_of_last_hit ... ok
+test runtime::zone::runtime::group_experience_tests::group_monster_kill_award_conserves_remainder_when_owner_is_dead ... ok
+test runtime::zone::runtime::group_experience_tests::group_monster_kill_award_keeps_solo_or_pet_owner_reward_whole ... ok
+test runtime::zone::runtime::group_experience_tests::group_monster_kill_award_preserves_experience_and_excludes_ineligible_players ... ok
+test runtime::zone::runtime::hazard_tests::hazard_forwards_only_the_damage_actually_applied ... ok
+test runtime::zone::runtime::hazard_tests::no_shared_hazard_strikes_without_configuration ... ok
+test runtime::zone::runtime::hazard_tests::shared_lightning_hazard_strikes_and_damages_players ... ok
+test runtime::zone::runtime::kirin_snow_ai::life_clear_tests::adoption_preserves_lethal_hit_lifecycle_clears_and_checkpoint ... ok
+test runtime::zone::runtime::movement_status_tests::dismounted_flag_without_a_mount_type_does_not_speed_up ... ok
+test runtime::zone::runtime::movement_status_tests::frozen_poison_blocks_movement_until_it_expires ... ok
+test runtime::zone::runtime::movement_status_tests::green_poison_alone_does_not_block_movement ... ok
+test runtime::zone::runtime::movement_status_tests::riding_a_mount_keeps_crystal_server_move_delay ... ok
+test runtime::zone::runtime::movement_status_tests::slow_poison_doubles_the_step_delay ... ok
+test runtime::zone::runtime::player_vital_regen_tests::shared_zone_regenerates_hp_on_crystal_cadence_after_combat_delay ... ok
+test runtime::zone::runtime::pvp_tests::all_mode_shared_magic_damages_remote_player_and_spends_mana ... ok
+test runtime::zone::runtime::pvp_tests::all_mode_shared_melee_can_kill_and_routes_authoritative_damage ... ok
+test runtime::zone::runtime::pvp_tests::all_mode_shared_range_attack_damages_remote_player ... ok
+test runtime::zone::runtime::pvp_tests::group_guild_and_enemy_guild_modes_respect_relationships ... ok
+test runtime::zone::runtime::pvp_tests::materialized_range_internal_distance_failure_rolls_back_every_zone_surface ... ok
+test runtime::zone::runtime::pvp_tests::peace_mode_and_safe_zones_block_shared_player_damage ... ok
+test runtime::zone::runtime::pvp_tests::shared_reincarnation_delays_offer_and_accept_revives_at_half_health ... ok
+test runtime::zone::runtime::qa_natural_kill_damage_multiplier_tests::defaults_to_exact_combat_damage_and_bounds_explicit_qa_acceleration ... ok
+test runtime::zone::runtime::qa_natural_movement_delay_tests::defaults_to_production_and_only_shortens_when_explicitly_enabled ... ok
+test runtime::zone::runtime::shared_world_transaction_state_tests::admitted_attack_transaction_preserves_all_shared_world_queues ... ok
+test runtime::zone::runtime::shinsu_ai::expiry_tests::shinsu_expiry_blocks_mode_attack_and_both_pending_hit_queues ... ok
+test runtime::zone::runtime::stage_summons::tests::exhausted_id_space_returns_without_aliasing_an_existing_monster ... ok
+test runtime::zone::runtime::stage_summons::tests::live_slave_cap_prunes_dead_children_and_death_stops_waves ... ok
+test runtime::zone::runtime::status_poison::tests::active_control_cannot_be_refreshed_but_can_be_reapplied_after_expiry ... ok
+test runtime::zone::runtime::status_poison::tests::independent_control_clocks_survive_checkpoint_and_do_not_extend_each_other ... ok
+test runtime::zone::runtime::status_poison::tests::legacy_single_deadline_import_preserves_existing_duration_and_other_poison_bits ... ok
+test runtime::zone::runtime::status_poison::tests::new_player_life_clears_all_status_clocks_and_aggregate_visual_bits ... ok
+test runtime::zone::runtime::status_poison::tests::personal_clear_packet_cannot_flicker_active_shared_status_for_observer ... ok
+test runtime::zone::runtime::step1_ecs_mirror_tests::mirror_matches_after_rejoin_same_session ... ok
+test runtime::zone::runtime::step1_ecs_mirror_tests::mirror_matches_players_across_join_walk_leave ... ok
+test runtime::zone::types::combat_state_tests::crystal_harvest_ai_contract_is_shared_by_session_and_zone ... ok
+test runtime::zone::types::combat_state_tests::crystal_minutes_delay_matches_private_formula_when_random_exceeds_delay ... ok
+test runtime::zone::types::combat_state_tests::fixed_tick_delay_matches_private_formula_for_every_roll ... ok
+test runtime::zone::types::combat_state_tests::old_host_defaults_missing_mount_attack_capability_to_denied ... ok
+test runtime::zone::types::combat_state_tests::poison_resistance_preserves_legacy_zero_encoding_and_round_trips_nonzero ... ok
+
+test result: ok. 70 passed; 0 failed; 0 ignored; 0 measured; 1441 filtered out; finished in 2.84s
+

@@ -1,0 +1,1102 @@
+{
+  "schema": 1,
+  "artifactKind": "sanitized-public-combat-evidence",
+  "cohort": "r2",
+  "profile": "newcomer-v2",
+  "className": "Wizard",
+  "checkedAt": "2026-10-01T14:02:15.747183Z",
+  "privacy": {
+    "authenticationPayloadsIncluded": false,
+    "playerNamesIncluded": false,
+    "identityIdentifiersIncluded": false,
+    "fullStoreRecordsIncluded": false,
+    "whitelistOnly": true
+  },
+  "eventWhitelist": {
+    "outer": [
+      "sequence",
+      "at",
+      "direction",
+      "type",
+      "packet"
+    ],
+    "command": [
+      "type",
+      "spell",
+      "objectId",
+      "targetId",
+      "x",
+      "y",
+      "spellTargetLock",
+      "questId",
+      "questIndex",
+      "index",
+      "npcObjectId",
+      "npcId",
+      "direction"
+    ],
+    "payload": [
+      "objectId",
+      "attackerId",
+      "spell",
+      "cast",
+      "targetId",
+      "damage",
+      "damageType",
+      "typed",
+      "level",
+      "questId",
+      "id",
+      "state",
+      "questState",
+      "completed",
+      "taken",
+      "completedQuests",
+      "param",
+      "target{x,y}",
+      "location{x,y}",
+      "direction",
+      "objectives{current,required,done}",
+      "characters{class,index,level}"
+    ]
+  },
+  "sources": [
+    {
+      "role": "canonical-final-report",
+      "file": "wizard/Wizard.report.json",
+      "sha256": "e2addf40681057ef74b601f5674b0a1fd5910a770fe46658e8d80c85ff4eda17"
+    },
+    {
+      "role": "final-route-trace",
+      "file": "wizard/Wizard.2026-10-01T13-34-42-695Z.trace.jsonl",
+      "sha256": "d9e1117e50e433c034e280a8b2e2920aac2008844b1e3e80ad678f0b1256f7bd"
+    },
+    {
+      "role": "practice-trace",
+      "file": "wizard/Wizard.2026-10-01T12-14-14-284Z.trace.jsonl",
+      "sha256": "95bf9c3fe11c6e4170c08d05e4d482ae7ca3ec642e8a04be956628bf5baf1f2a"
+    },
+    {
+      "role": "practice-report",
+      "file": "wizard/Wizard.2026-10-01T12-14-14-284Z.report.json",
+      "sha256": "8887966889b5e2a6795906f7d1962ce2fb047673fe49351cfd36aec6c19684d1"
+    },
+    {
+      "role": "stable-initial-final-audit",
+      "file": "caster-audit-r2-final-before-post-route.json",
+      "sha256": "5d476e28986d91ba564423b771e21a28d55627b53c932c73a7df8bd5abee9d4a"
+    },
+    {
+      "role": "frozen-final-save",
+      "file": "wizard/full-route-accounts.private.json",
+      "sha256": "b87b3335703652d78293aa989094c1b810936f39a1742637118373f764ac844f"
+    },
+    {
+      "role": "runner-final-snapshot",
+      "file": "wizard/Wizard.snapshot.json",
+      "sha256": "065240c13b145c489393feee69fc03a485d386cc3d2f4db9df4b5f3a25b9e535"
+    }
+  ],
+  "finalRunId": "2026-10-01T13-34-42-695Z",
+  "ordinaryLightning": {
+    "status": "notObserved",
+    "liveVerified": false,
+    "finalRunLightningCastCount": 0,
+    "finalRunActualMagic": "GreatFireBall",
+    "finalRunActualMagicCount": 13,
+    "reason": "The only recorded Lightning casts in this cohort are the earlier N21 class-practice casts. No post-tactic ordinary Lightning send exists in the route traces; practice evidence is not ordinary branch acceptance.",
+    "cohortTraceScan": [
+      {
+        "file": "wizard/Wizard.2026-10-01T09-12-39-083Z.trace.jsonl",
+        "sha256": "3db8ce09b47676afa8665756c11cbc6663a3a062f6c2dc2a3ea1d135bdd1fd8a",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T09-31-51-355Z.trace.jsonl",
+        "sha256": "953a2ea237a814c36f7dfa21a3252e399e4049f1cd84ffff99fe6ff9ede03d57",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T09-49-41-731Z.trace.jsonl",
+        "sha256": "2e389e91e4b360a4d62b6a7ad3c5a3394b99ae3f54d5fdb01c2bc06be9ae16d0",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T10-16-16-279Z.trace.jsonl",
+        "sha256": "a8c8bac80182852c3c86b6c6d764fc12080e6192bd636d21601238a85a8cbe5b",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T10-46-12-434Z.trace.jsonl",
+        "sha256": "27b2d1d355aa651eb79d654deed044aae16be9a32135466a9137e6e2951d0c5d",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T10-49-16-050Z.trace.jsonl",
+        "sha256": "64fb395f3679a9a7d4947e2ffd15e49c03cc38938052af8472e10fc3cfb2f838",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T10-52-57-812Z.trace.jsonl",
+        "sha256": "882b4a3bcb3edb2b2b619d55c58401ef426bc4d5b3cf57ae7cd2a41220c6d77f",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T10-55-55-783Z.trace.jsonl",
+        "sha256": "0a5f7507ee90c2e1a7974f95de6a83cec6785677def8ae8a9606ea16e23341f3",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T11-01-08-172Z.trace.jsonl",
+        "sha256": "95597936438b20fbb3aba818e7da488f420e5fee77c30c0419efcd75ada4dbe8",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T11-04-27-925Z.trace.jsonl",
+        "sha256": "f54fbc5f9f79c5d96d8f272e7e9f9c4abe01628368614b51285f75cef1646015",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T11-44-21-633Z.trace.jsonl",
+        "sha256": "f94c3594a880e7436710002f325709ad568dd64ba0f39cb6148652bc12735902",
+        "lightningSentSequences": [
+          4134
+        ]
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T12-14-14-284Z.trace.jsonl",
+        "sha256": "95bf9c3fe11c6e4170c08d05e4d482ae7ca3ec642e8a04be956628bf5baf1f2a",
+        "lightningSentSequences": [
+          612
+        ]
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T12-33-48-682Z.trace.jsonl",
+        "sha256": "e3a57163105155bf2c203acf8c2fddb4b1e4593ad105ec6058551f9ce704e604",
+        "lightningSentSequences": []
+      },
+      {
+        "file": "wizard/Wizard.2026-10-01T13-34-42-695Z.trace.jsonl",
+        "sha256": "d9e1117e50e433c034e280a8b2e2920aac2008844b1e3e80ad678f0b1256f7bd",
+        "lightningSentSequences": []
+      }
+    ]
+  },
+  "practiceLightning": {
+    "runId": "2026-10-01T12-14-14-284Z",
+    "phase": "N21 class practice",
+    "phaseClassification": "The ordered practice cast precedes the FireWall practice completion; this is not the later ordinary combat chooser.",
+    "verified": true,
+    "send": {
+      "sequence": 612,
+      "at": "2026-10-01T12:14:28.997Z",
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "type": "magic",
+        "spell": "Lightning",
+        "objectId": 1000,
+        "targetId": 1000,
+        "x": 311,
+        "y": 378,
+        "spellTargetLock": false,
+        "direction": "Left"
+      }
+    },
+    "ownerAccepted": {
+      "sequence": 613,
+      "at": "2026-10-01T12:14:29.180Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "Magic",
+      "payload": {
+        "spell": "Lightning",
+        "cast": true,
+        "targetId": 1000,
+        "level": 0,
+        "target": {
+          "x": 311,
+          "y": 378
+        }
+      }
+    },
+    "damageReceipts": [
+      {
+        "targetObjectId": 1202100,
+        "ownerStruck": {
+          "sequence": 620,
+          "at": "2026-10-01T12:14:29.680Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 1202100,
+            "attackerId": 1000,
+            "location": {
+              "x": 309,
+              "y": 378
+            },
+            "direction": "Right"
+          }
+        },
+        "positiveDamage": {
+          "sequence": 621,
+          "at": "2026-10-01T12:14:29.680Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 1202100,
+            "damage": 22,
+            "damageType": 0,
+            "typed": true
+          }
+        }
+      },
+      {
+        "targetObjectId": 1202101,
+        "ownerStruck": {
+          "sequence": 623,
+          "at": "2026-10-01T12:14:29.680Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 1202101,
+            "attackerId": 1000,
+            "location": {
+              "x": 308,
+              "y": 378
+            },
+            "direction": "Right"
+          }
+        },
+        "positiveDamage": {
+          "sequence": 624,
+          "at": "2026-10-01T12:14:29.680Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 1202101,
+            "damage": 22,
+            "damageType": 0,
+            "typed": true
+          }
+        }
+      },
+      {
+        "targetObjectId": 1202102,
+        "ownerStruck": {
+          "sequence": 626,
+          "at": "2026-10-01T12:14:29.680Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "ObjectStruck",
+          "payload": {
+            "objectId": 1202102,
+            "attackerId": 1000,
+            "location": {
+              "x": 307,
+              "y": 378
+            },
+            "direction": "Right"
+          }
+        },
+        "positiveDamage": {
+          "sequence": 627,
+          "at": "2026-10-01T12:14:29.680Z",
+          "direction": "received",
+          "type": "packet",
+          "packet": "DamageIndicator",
+          "payload": {
+            "objectId": 1202102,
+            "damage": 22,
+            "damageType": 0,
+            "typed": true
+          }
+        }
+      }
+    ]
+  },
+  "fireWallPractice": {
+    "runId": "2026-10-01T12-14-14-284Z",
+    "phase": "N21 class practice",
+    "verified": true,
+    "send": {
+      "sequence": 653,
+      "at": "2026-10-01T12:14:31.083Z",
+      "direction": "sent",
+      "type": "magic",
+      "command": {
+        "type": "magic",
+        "spell": "FireWall",
+        "objectId": 1000,
+        "targetId": 0,
+        "x": 308,
+        "y": 377,
+        "spellTargetLock": false,
+        "direction": "Left"
+      }
+    },
+    "ownerAccepted": [
+      {
+        "sequence": 654,
+        "at": "2026-10-01T12:14:31.242Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "Magic",
+        "payload": {
+          "spell": "FireWall",
+          "cast": true,
+          "targetId": 0,
+          "level": 0,
+          "target": {
+            "x": 308,
+            "y": 377
+          }
+        }
+      },
+      {
+        "sequence": 655,
+        "at": "2026-10-01T12:14:31.242Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectMagic",
+        "payload": {
+          "objectId": 1000,
+          "spell": "FireWall",
+          "cast": true,
+          "targetId": 0,
+          "level": 0,
+          "target": {
+            "x": 308,
+            "y": 377
+          },
+          "location": {
+            "x": 313,
+            "y": 377
+          },
+          "direction": "Left"
+        }
+      }
+    ],
+    "groundEffectReceipts": [
+      {
+        "sequence": 665,
+        "at": "2026-10-01T12:14:31.996Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 130011,
+          "spell": 39,
+          "param": false,
+          "location": {
+            "x": 308,
+            "y": 377
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "sequence": 666,
+        "at": "2026-10-01T12:14:31.996Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 130012,
+          "spell": 39,
+          "param": false,
+          "location": {
+            "x": 308,
+            "y": 376
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "sequence": 667,
+        "at": "2026-10-01T12:14:31.996Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 130013,
+          "spell": 39,
+          "param": false,
+          "location": {
+            "x": 309,
+            "y": 377
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "sequence": 668,
+        "at": "2026-10-01T12:14:31.996Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 130014,
+          "spell": 39,
+          "param": false,
+          "location": {
+            "x": 308,
+            "y": 378
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "sequence": 669,
+        "at": "2026-10-01T12:14:31.996Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectSpell",
+        "payload": {
+          "objectId": 130015,
+          "spell": 39,
+          "param": false,
+          "location": {
+            "x": 307,
+            "y": 377
+          },
+          "direction": "Up"
+        }
+      }
+    ],
+    "ownerStruck": {
+      "sequence": 670,
+      "at": "2026-10-01T12:14:31.996Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectStruck",
+      "payload": {
+        "objectId": 1202102,
+        "attackerId": 1000,
+        "location": {
+          "x": 309,
+          "y": 377
+        },
+        "direction": "Right"
+      }
+    },
+    "positiveDamage": {
+      "sequence": 671,
+      "at": "2026-10-01T12:14:31.996Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "DamageIndicator",
+      "payload": {
+        "objectId": 1202102,
+        "damage": 12,
+        "damageType": 0,
+        "typed": true
+      }
+    },
+    "practiceObjectiveReceipt": {
+      "sequence": 673,
+      "at": "2026-10-01T12:14:31.996Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "ChangeQuest",
+      "payload": {
+        "questId": 2110021,
+        "id": 2110021,
+        "state": 1,
+        "questState": 1,
+        "completed": false,
+        "taken": true,
+        "objectives": [
+          {
+            "current": 0,
+            "required": 3,
+            "done": false
+          },
+          {
+            "current": 1,
+            "required": 1,
+            "done": true
+          }
+        ]
+      }
+    }
+  },
+  "finalQuestReceipts": [
+    {
+      "questId": 2110021,
+      "verified": true,
+      "ready": {
+        "sequence": 1157,
+        "at": "2026-10-01T13:36:02.641Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ChangeQuest",
+        "payload": {
+          "questId": 2110021,
+          "id": 2110021,
+          "state": 1,
+          "questState": 1,
+          "completed": true,
+          "taken": true,
+          "objectives": [
+            {
+              "current": 3,
+              "required": 3,
+              "done": true
+            },
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            },
+            {}
+          ]
+        }
+      },
+      "finish": {
+        "sequence": 1161,
+        "at": "2026-10-01T13:36:02.728Z",
+        "direction": "sent",
+        "type": "finishQuest",
+        "command": {
+          "type": "finishQuest",
+          "questIndex": 2110021
+        }
+      },
+      "completedChange": {
+        "sequence": 1162,
+        "at": "2026-10-01T13:36:03.078Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ChangeQuest",
+        "payload": {
+          "questId": 2110021,
+          "id": 2110021,
+          "state": 2,
+          "questState": 2,
+          "completed": true,
+          "taken": false,
+          "objectives": []
+        }
+      },
+      "completedList": {
+        "sequence": 1163,
+        "at": "2026-10-01T13:36:03.078Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "CompleteQuest",
+        "payload": {
+          "completedQuests": [
+            2110001,
+            2110002,
+            2110003,
+            2110004,
+            2110005,
+            2110006,
+            2110007,
+            2120015,
+            2110008,
+            2110009,
+            2110010,
+            2110011,
+            2110012,
+            2120020,
+            2110013,
+            2110014,
+            2110015,
+            2110016,
+            2120025,
+            2110017,
+            2110018,
+            2110019,
+            2110020,
+            2110021
+          ]
+        }
+      }
+    },
+    {
+      "questId": 2110022,
+      "verified": true,
+      "ready": {
+        "sequence": 1205,
+        "at": "2026-10-01T13:36:08.583Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ChangeQuest",
+        "payload": {
+          "questId": 2110022,
+          "id": 2110022,
+          "state": 1,
+          "questState": 1,
+          "completed": true,
+          "taken": true,
+          "objectives": [
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            },
+            {}
+          ]
+        }
+      },
+      "finish": {
+        "sequence": 1213,
+        "at": "2026-10-01T13:36:09.380Z",
+        "direction": "sent",
+        "type": "finishQuest",
+        "command": {
+          "type": "finishQuest",
+          "questIndex": 2110022
+        }
+      },
+      "completedChange": {
+        "sequence": 1215,
+        "at": "2026-10-01T13:36:10.400Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ChangeQuest",
+        "payload": {
+          "questId": 2110022,
+          "id": 2110022,
+          "state": 2,
+          "questState": 2,
+          "completed": true,
+          "taken": false,
+          "objectives": []
+        }
+      },
+      "completedList": {
+        "sequence": 1216,
+        "at": "2026-10-01T13:36:10.400Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "CompleteQuest",
+        "payload": {
+          "completedQuests": [
+            2110001,
+            2110002,
+            2110003,
+            2110004,
+            2110005,
+            2110006,
+            2110007,
+            2120015,
+            2110008,
+            2110009,
+            2110010,
+            2110011,
+            2110012,
+            2120020,
+            2110013,
+            2110014,
+            2110015,
+            2110016,
+            2120025,
+            2110017,
+            2110018,
+            2110019,
+            2110020,
+            2110021,
+            2110022
+          ]
+        }
+      }
+    }
+  ],
+  "finalKillReceipts": [
+    {
+      "targetObjectId": 1202602,
+      "lastOwnerStruck": {
+        "sequence": 1063,
+        "at": "2026-10-01T13:35:51.525Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 1202602,
+          "attackerId": 1000,
+          "location": {
+            "x": 304,
+            "y": 336
+          },
+          "direction": "DownRight"
+        }
+      },
+      "lastPositiveDamage": {
+        "sequence": 1064,
+        "at": "2026-10-01T13:35:51.525Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 1202602,
+          "damage": 12,
+          "damageType": 0,
+          "typed": true
+        }
+      },
+      "objectDied": {
+        "sequence": 1066,
+        "at": "2026-10-01T13:35:51.525Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 1202602,
+          "location": {
+            "x": 304,
+            "y": 336
+          },
+          "direction": "DownRight"
+        }
+      },
+      "questIncrement": {
+        "sequence": 1068,
+        "at": "2026-10-01T13:35:51.525Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ChangeQuest",
+        "payload": {
+          "questId": 2110021,
+          "id": 2110021,
+          "state": 1,
+          "questState": 1,
+          "completed": false,
+          "taken": true,
+          "objectives": [
+            {
+              "current": 2,
+              "required": 3,
+              "done": false
+            },
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "targetObjectId": 1202700,
+      "lastOwnerStruck": {
+        "sequence": 1152,
+        "at": "2026-10-01T13:36:02.641Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 1202700,
+          "attackerId": 1000,
+          "location": {
+            "x": 303,
+            "y": 333
+          },
+          "direction": "DownLeft"
+        }
+      },
+      "lastPositiveDamage": {
+        "sequence": 1153,
+        "at": "2026-10-01T13:36:02.641Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 1202700,
+          "damage": 6,
+          "damageType": 0,
+          "typed": true
+        }
+      },
+      "objectDied": {
+        "sequence": 1155,
+        "at": "2026-10-01T13:36:02.641Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 1202700,
+          "location": {
+            "x": 303,
+            "y": 333
+          },
+          "direction": "DownLeft"
+        }
+      },
+      "questIncrement": {
+        "sequence": 1157,
+        "at": "2026-10-01T13:36:02.641Z",
+        "direction": "received",
+        "type": "packet",
+        "packet": "ChangeQuest",
+        "payload": {
+          "questId": 2110021,
+          "id": 2110021,
+          "state": 1,
+          "questState": 1,
+          "completed": true,
+          "taken": true,
+          "objectives": [
+            {
+              "current": 3,
+              "required": 3,
+              "done": true
+            },
+            {
+              "current": 1,
+              "required": 1,
+              "done": true
+            },
+            {}
+          ]
+        }
+      }
+    }
+  ],
+  "completion": {
+    "wizardCompletedUnits": 26,
+    "wizardDenominator": 26,
+    "snapshotCompletedIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2110020,
+      2110021,
+      2110022,
+      2120015,
+      2120020,
+      2120025,
+      2120030
+    ],
+    "savedCompletedIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2110020,
+      2110021,
+      2110022,
+      2120015,
+      2120020,
+      2120025,
+      2120030
+    ],
+    "strictReceiptedCompletedIds": [
+      2110001,
+      2110002,
+      2110003,
+      2110004,
+      2110005,
+      2110006,
+      2110007,
+      2110008,
+      2110009,
+      2110010,
+      2110011,
+      2110012,
+      2110013,
+      2110014,
+      2110015,
+      2110016,
+      2110017,
+      2110018,
+      2110019,
+      2110020,
+      2110021,
+      2110022,
+      2120015,
+      2120020,
+      2120025,
+      2120030
+    ],
+    "allClassesCompleted": true,
+    "cohortCompletedUnits": 52,
+    "cohortDenominator": 52,
+    "strictReasons": [],
+    "visualAccepted": false,
+    "freshTimedCompletion": false,
+    "measuredTime": false,
+    "globalFunctionalCompletionWithinDeadline": false
+  },
+  "timing": {
+    "ordinary": {
+      "startedAt": "2026-10-01T09:12:39.084Z",
+      "deadlineAt": "2026-10-01T11:12:39.084Z",
+      "durationMs": 7200000,
+      "expiredAtAudit": true,
+      "completedWithinDeadline": false,
+      "elapsedToFinalLogoutMs": 15817477
+    },
+    "functional": {
+      "startedAt": "2026-10-01T11:42:19.812Z",
+      "deadlineAt": "2026-10-01T13:42:19.812Z",
+      "durationMs": 7200000,
+      "expiredAtAudit": true,
+      "inheritedCompletedIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2120015,
+        2120020,
+        2120025
+      ],
+      "newlyReceiptedIds": [
+        2110020,
+        2110021,
+        2110022,
+        2120030
+      ],
+      "completedWithinDeadline": true
+    },
+    "freshTimedCompletion": false,
+    "clarification": "The original fresh 120-minute Wizard clock failed. The same-character functional recheck inherited earlier completed nodes and finished before its separate fixed deadline; it is not fresh full-route timing acceptance."
+  },
+  "saveAndLogout": {
+    "verified": true,
+    "frozenSaveRevision": 348,
+    "frozenSaveState": {
+      "className": "Wizard",
+      "characterIndex": 1,
+      "level": 30,
+      "mapFileName": "0",
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "direction": "UpLeft",
+      "gold": 77080,
+      "experience": 15649
+    },
+    "authoritativeFinalFrame": {
+      "sequence": 1240,
+      "at": "2026-10-01T13:36:13.312Z",
+      "playerObjectId": 1000,
+      "className": "Wizard",
+      "level": 30,
+      "mapFileName": "0",
+      "position": {
+        "x": 328,
+        "y": 264
+      },
+      "direction": "UpLeft",
+      "gold": 77080,
+      "experience": 15649,
+      "completedQuestIds": [
+        2110001,
+        2110002,
+        2110003,
+        2110004,
+        2110005,
+        2110006,
+        2110007,
+        2110008,
+        2110009,
+        2110010,
+        2110011,
+        2110012,
+        2110013,
+        2110014,
+        2110015,
+        2110016,
+        2110017,
+        2110018,
+        2110019,
+        2110020,
+        2110021,
+        2110022,
+        2120015,
+        2120020,
+        2120025,
+        2120030
+      ]
+    },
+    "normalLogoutSent": {
+      "sequence": 1241,
+      "at": "2026-10-01T13:36:13.313Z",
+      "direction": "sent",
+      "type": "logOut",
+      "command": {
+        "type": "logOut"
+      }
+    },
+    "normalLogoutSuccess": {
+      "sequence": 1242,
+      "at": "2026-10-01T13:36:16.561Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "LogOutSuccess",
+      "payload": {
+        "characters": [
+          {
+            "class": "Wizard",
+            "index": 1,
+            "level": 30
+          }
+        ]
+      }
+    },
+    "laterMutableStoreUsedForRouteCertification": false,
+    "note": "A separate normal post-route shopping QA advanced the mutable save later. This proof uses the frozen full-route save and stable initial final audit."
+  },
+  "deaths": {
+    "observedOwnerDeathReceipts": [],
+    "confirmedRecoveries": 0,
+    "originalOrdinaryLedger": [],
+    "retainedLedger": [],
+    "preserved": true
+  }
+}

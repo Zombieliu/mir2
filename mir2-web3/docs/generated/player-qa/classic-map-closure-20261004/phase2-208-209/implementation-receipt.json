@@ -1,0 +1,1157 @@
+{
+  "schema": "mir2.classic-map-phase2-implementation-receipt.v1",
+  "createdAt": "2026-10-04T05:38:11.878Z",
+  "projectRoot": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3",
+  "branch": "codex/classic-map-closure-20261004",
+  "sourceHead": "38a64de2985c82008a596a34768f36185980f62e",
+  "sourceCommittedByThisAgent": false,
+  "phase": "208-runtime-plus-209-native-source-exact-classic-resource-closure",
+  "completeClassicWorld": false,
+  "runtimeGameplayAccepted": false,
+  "writeSet": [
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+      "bytes": 25611,
+      "sha256": "d547295c914f68558bbba26291d3b19a06df9c58b6e4cff3066ef0fe2de5be77",
+      "relative": "apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "bytes": 36103,
+      "sha256": "8d506187b6c869e84ce6868b57ee456f23c3ccbed01e1082b352fe225200c0b7",
+      "relative": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+      "bytes": 10306,
+      "sha256": "dafdd340e664e8ec0217a6d694df24c7e0d7d9a5c9b9a5bd0c7d4b781fd0f369",
+      "relative": "apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+      "bytes": 10510,
+      "sha256": "a0a0edfae603a4e8e6337de5e9bcec294c732e64423d09d5c4a8d64ac601134c",
+      "relative": "apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs",
+      "bytes": 13091,
+      "sha256": "a8b551ed009a661250155da997f679c3e106d0523ffaf2d3f7ae3f2479ec6939",
+      "relative": "apps/web/scripts/quest-agent/test-route-manifest.mjs",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md",
+      "bytes": 9683,
+      "sha256": "4d76d2bb7d408094629edd94273461a25c00ad55087419d41a42b5a6060f2db1",
+      "relative": "docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md",
+      "kind": "new"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "bytes": 47442,
+      "sha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9",
+      "relative": "packages/game-data/data/content_profiles/platinum_176.json",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+      "bytes": 3417,
+      "sha256": "a797faeab556d1160d32f772ed3fbfb56a8e1d2de82c35163ceff76dcf87d32e",
+      "relative": "packages/game-data/data/generated/platinum_176_bundle.json",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/src/lib.rs",
+      "bytes": 170658,
+      "sha256": "5f9f5e97412e73c73a8218e84dd22ed50e24a1193f8883e747565fcd50b20f08",
+      "relative": "packages/game-data/src/lib.rs",
+      "kind": "modified"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/packages/game-data/tests/classic_native_resource_scope.rs",
+      "bytes": 4488,
+      "sha256": "ab0ee96815f13c5bf4c02a14320e29b12d16bc26df316b51ffcc5861ed492f95",
+      "relative": "packages/game-data/tests/classic_native_resource_scope.rs",
+      "kind": "new"
+    },
+    {
+      "path": "C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/scripts/build-platinum-176-profile-bundle.mjs",
+      "bytes": 4641,
+      "sha256": "48823366426a671976a7bd4e51c12e8e8e56747af3e9ed886de8ac6e6371523e",
+      "relative": "scripts/build-platinum-176-profile-bundle.mjs",
+      "kind": "modified"
+    }
+  ],
+  "sourceDiff": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/source-diff.patch",
+    "bytes": 74779,
+    "sha256": "58addd5cae73b1e8737702c91295c62ce5161514647e7297054371e78ae21228",
+    "numstat": [
+      "55\t6\tmir2-web3/apps/game-client/platform-windows/scripts/audit-candidate-map-coverage.mjs",
+      "87\t7\tmir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "62\t12\tmir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-coverage.mjs",
+      "63\t8\tmir2-web3/apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1",
+      "1\t1\tmir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs",
+      "48\t1\tmir2-web3/packages/game-data/data/content_profiles/platinum_176.json",
+      "9\t7\tmir2-web3/packages/game-data/data/generated/platinum_176_bundle.json",
+      "89\t1\tmir2-web3/packages/game-data/src/lib.rs",
+      "2\t0\tmir2-web3/scripts/build-platinum-176-profile-bundle.mjs",
+      "163\t0\tmir2-web3/docs/CLASSIC-MAP-CLOSURE-PHASE2-20261004.md",
+      "123\t0\tmir2-web3/packages/game-data/tests/classic_native_resource_scope.rs"
+    ],
+    "reverseApplyCheckPassed": true
+  },
+  "preserved": {
+    "existing164RulesEqual": true,
+    "unrelatedProfileFieldsEqual": true,
+    "originalMonsterOrderPreserved": true,
+    "runtimeReachabilitySourceEqualsBaseline": true,
+    "reachabilitySourceLfSha256": "fa9eadbd022a914e9300784efa4d8d05002a99e4b9e7fb2156d3cd314fc2e4c2",
+    "trackedPublicDiffEmpty": true,
+    "phase1DocUnchanged": true,
+    "phase1Native": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/native-keyed-map-profile-164/manifest.json",
+      "bytes": 11293865,
+      "sha256": "cabe0b8789be7b9fe8791c1abbe7361807fa7d4654e9b3d8dea6ad149072ce74"
+    },
+    "phase1Atlas": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/native-keyed-map-atlas-profile-164/manifest.json",
+      "bytes": 411350,
+      "sha256": "4d21069b64cd6c6cbb67c9aa6fec1387944bd4cd73e7c96f9467ea6c0821d511"
+    },
+    "phase1Receipt": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/implementation-receipt.json",
+      "bytes": 20458,
+      "sha256": "951bd405d2f57977fe90be24b8e39137514d934ce345668b3960cf9aa6c5305f"
+    }
+  },
+  "additions": {
+    "runtimeMaps": [
+      "D10012",
+      "D10013",
+      "D10032",
+      "D5062",
+      "D5063",
+      "D5064",
+      "D5065",
+      "D5066",
+      "D5067",
+      "D5069",
+      "D511",
+      "D512",
+      "D513",
+      "D514",
+      "D716",
+      "D71601",
+      "D71602",
+      "D71603",
+      "D71604",
+      "D71605",
+      "D71606",
+      "D71607",
+      "D71608",
+      "D71609",
+      "D71610",
+      "D71611",
+      "D71612",
+      "D71613",
+      "D71614",
+      "D71615",
+      "D71616",
+      "D71617",
+      "D71618",
+      "D71619",
+      "D71620",
+      "D71621",
+      "D71622",
+      "D71623",
+      "D71624",
+      "D71625",
+      "D71650",
+      "D71651",
+      "D71652",
+      "D717"
+    ],
+    "runtimeCount": 44,
+    "nativeResourceOnlyMaps": [
+      "D71653"
+    ],
+    "monsters": [
+      "EvilSnake",
+      "WhiteBoar0"
+    ]
+  },
+  "scope": {
+    "schema": "mir2.windows.candidate-map-scope.v1",
+    "mode": "profile",
+    "profileId": "platinum_176",
+    "profileVersion": 27,
+    "profileSha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9",
+    "profileMapCount": 208,
+    "expectedMaps": [
+      "0",
+      "0100",
+      "0101",
+      "0102",
+      "0103",
+      "0104",
+      "01041",
+      "0105",
+      "0106",
+      "0107",
+      "0108",
+      "0109",
+      "0110",
+      "0111",
+      "0112",
+      "0115",
+      "0116",
+      "0117",
+      "0120",
+      "0121",
+      "0122",
+      "0123",
+      "0124",
+      "0125",
+      "0127",
+      "0128",
+      "0129",
+      "0130",
+      "0131",
+      "0132",
+      "0136",
+      "0137",
+      "0138",
+      "0140",
+      "0141",
+      "0142",
+      "0143",
+      "0144",
+      "0145",
+      "0146",
+      "0148",
+      "0149",
+      "0150",
+      "0151",
+      "0152",
+      "0153",
+      "0154",
+      "0155",
+      "0156",
+      "0157",
+      "0158",
+      "0159",
+      "0160",
+      "1",
+      "1001",
+      "1002",
+      "1003",
+      "1006",
+      "11",
+      "12",
+      "2",
+      "3",
+      "4",
+      "5",
+      "b354",
+      "bonguk1",
+      "d001",
+      "d002",
+      "d003",
+      "d011",
+      "d012",
+      "d021",
+      "d022",
+      "d023",
+      "d024",
+      "d10011",
+      "d10012",
+      "d10013",
+      "d1002",
+      "d10031",
+      "d10032",
+      "d1004",
+      "d10051",
+      "d10052",
+      "d10053",
+      "d10054",
+      "d10061",
+      "d10062",
+      "d2031",
+      "d2041",
+      "d2042",
+      "d2061",
+      "d2062",
+      "d2070",
+      "d2071",
+      "d2072",
+      "d2073",
+      "d2074",
+      "d2075",
+      "d401",
+      "d402",
+      "d403",
+      "d404",
+      "d405",
+      "d406",
+      "d411",
+      "d413",
+      "d414",
+      "d415",
+      "d416",
+      "d421",
+      "d422",
+      "d501",
+      "d502",
+      "d503",
+      "d504",
+      "d505",
+      "d5061",
+      "d5062",
+      "d5063",
+      "d5064",
+      "d5065",
+      "d5066",
+      "d5067",
+      "d5068",
+      "d5069",
+      "d5071",
+      "d5072",
+      "d5073",
+      "d5074",
+      "d511",
+      "d512",
+      "d513",
+      "d514",
+      "d515",
+      "d601",
+      "d602",
+      "d603",
+      "d604",
+      "d605",
+      "d606",
+      "d607",
+      "d608",
+      "d609",
+      "d610",
+      "d611",
+      "d612",
+      "d613",
+      "d614",
+      "d615",
+      "d618",
+      "d701",
+      "d710",
+      "d710a",
+      "d711",
+      "d711a",
+      "d712",
+      "d712a",
+      "d713",
+      "d713a",
+      "d714",
+      "d715",
+      "d716",
+      "d71601",
+      "d71602",
+      "d71603",
+      "d71604",
+      "d71605",
+      "d71606",
+      "d71607",
+      "d71608",
+      "d71609",
+      "d71610",
+      "d71611",
+      "d71612",
+      "d71613",
+      "d71614",
+      "d71615",
+      "d71616",
+      "d71617",
+      "d71618",
+      "d71619",
+      "d71620",
+      "d71621",
+      "d71622",
+      "d71623",
+      "d71624",
+      "d71625",
+      "d71650",
+      "d71651",
+      "d71652",
+      "d71653",
+      "d717",
+      "dm001",
+      "hell00",
+      "r01",
+      "r02",
+      "r03",
+      "r04",
+      "r05",
+      "r06",
+      "r07",
+      "r08",
+      "r09",
+      "r10",
+      "r11",
+      "r12",
+      "rck",
+      "whitevillage"
+    ],
+    "expectedMapsSha256": "b3fc689ed59c7293917ffe4f5df7080a19018779cdd59155c8ac80ef20e8df69",
+    "resourceOnlyMaps": [
+      "d71653"
+    ],
+    "resourceOnlyMapsSha256": "3f13f1b233827f8b5cf1d4d5c892f4840594a55ee44eb02b74057ca5fb9f4872",
+    "profileNativeMapCount": 209,
+    "sourceTopology": [
+      {
+        "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+        "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+      },
+      {
+        "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+        "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+      },
+      {
+        "path": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+        "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29"
+      }
+    ],
+    "sourceTopologySha256": "5cc2488e0c621d56f62d57a20243365c011c5a2df3f63c03a2cf0983793d5ccd",
+    "completeClassicWorld": false
+  },
+  "topology": {
+    "schema": "mir2.windows.candidate-map-topology.v1",
+    "expectedMapCount": 209,
+    "unreachableMaps": [
+      "d71653"
+    ],
+    "unreachableRuntimeMaps": [],
+    "conditionalEntries": [
+      {
+        "map": "5",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "b354",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d10061",
+        "conditions": [
+          {
+            "from": "D10051",
+            "to": "D10061",
+            "kind": "map-movement",
+            "needHole": false,
+            "needMove": true,
+            "portals": [
+              {
+                "source": {
+                  "x": 178,
+                  "y": 53
+                },
+                "destination": {
+                  "x": 20,
+                  "y": 25
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "map": "d2061",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2062",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2070",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2071",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2072",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2073",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2074",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d2075",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "5",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 2000,
+            "minimumGoldExclusive": 2000
+          }
+        ]
+      },
+      {
+        "map": "d710a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "d711a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "d712a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "d713a",
+        "conditions": [
+          {
+            "from": "D715",
+            "to": "D710A",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "MongchonProvince/StoneTemple/Stone",
+            "targetSequence": [
+              "@stonetomba"
+            ],
+            "requiredItems": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "itemCosts": [
+              {
+                "item": "StoneHeart",
+                "count": 1
+              }
+            ],
+            "goldCost": 0,
+            "minimumGoldExclusive": null
+          }
+        ]
+      },
+      {
+        "map": "whitevillage",
+        "conditions": [
+          {
+            "from": "0",
+            "to": "WhiteVillage",
+            "kind": "npc-script",
+            "needHole": false,
+            "needMove": false,
+            "scriptKey": "BichonProvince/Sailor",
+            "targetSequence": [
+              "@brdmove1"
+            ],
+            "requiredItems": [],
+            "itemCosts": [],
+            "goldCost": 10000,
+            "minimumGoldExclusive": 10000
+          }
+        ]
+      }
+    ],
+    "excludedClassicMaps": [
+      "d71653"
+    ],
+    "sourceOrphanRooms": [
+      {
+        "map": "d71653",
+        "includedInExpectedScope": true,
+        "reason": "source-has-no-imported-entry",
+        "outgoingMapIndices": [
+          209
+        ]
+      }
+    ],
+    "resourceOnlyRooms": [
+      {
+        "map": "d71653",
+        "mapIndex": 235,
+        "reason": "source-has-no-imported-entry",
+        "runtimeAdmitted": false,
+        "outgoingMapIndices": [
+          209
+        ],
+        "source": {
+          "x": 17,
+          "y": 12
+        },
+        "destination": {
+          "x": 36,
+          "y": 34
+        }
+      }
+    ],
+    "runtimeGameplayAccepted": false
+  },
+  "actualResources": {
+    "nativeManifest": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/native-keyed-map-profile-209/manifest.json",
+      "bytes": 11320827,
+      "sha256": "42cc002dd0f7c211916a976fadcc91af5c16cf2aa851200e464ac80aeeccb5b9"
+    },
+    "nativeStats": {
+      "mapCount": 209,
+      "referenceCount": 54041,
+      "emittedEntryCount": 52333,
+      "keyedEntryCount": 51257,
+      "additiveEntryCount": 1076,
+      "fullPackEntryCount": 41569,
+      "noDrawReferenceCount": 531,
+      "missingSourceCount": 1177,
+      "removedArtifacts": 0,
+      "imageBytes": 250336128
+    },
+    "atlasManifest": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/native-keyed-map-atlas-profile-209/manifest.json",
+      "bytes": 419097,
+      "sha256": "32aa4e7e56550b1067a880bc29ca279f13a699aac6c71e8917154676f0092288"
+    },
+    "atlasStats": {
+      "libraryCount": 13,
+      "atlasPageCount": 546,
+      "sourceCount": 16940,
+      "imageBytes": 149452428,
+      "maxPageBytes": 475728,
+      "maxPagePixels": 262144
+    },
+    "coverageAudit": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/native-keyed-map-profile-209/coverage-audit.json",
+      "bytes": 723520,
+      "sha256": "d28e2e9413ad25f13050166e1f587b3ca1d1fb729f15c51a81ac4a2e65631b05"
+    },
+    "referenceCount": 69826,
+    "packagedReferenceCount": 67993,
+    "blockingReferenceCount": 0,
+    "sourceOmissions": {
+      "source-out-of-range": 1283,
+      "source-no-draw": 550
+    },
+    "phase1ImageByteDelta": 3424213,
+    "actorRoot": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-input\\original-ui",
+    "actor049": {
+      "originalSource": {
+        "path": "E:/mir2/Crystal/Build/Client/Debug/Data/Monster/049.Lib",
+        "bytes": 1137879,
+        "sha256": "b52c0eadaf06a015360fbf9d9e68e877b8ca912fbdea6d99d9b1c7785497c4e3"
+      },
+      "sourceSha256": "b52c0eadaf06a015360fbf9d9e68e877b8ca912fbdea6d99d9b1c7785497c4e3",
+      "sourceBytes": 1137879,
+      "frames": 224,
+      "masks": 0,
+      "actions": [
+        {
+          "actionId": 0,
+          "actionName": "Standing",
+          "start": 0,
+          "count": 4,
+          "skip": 0,
+          "interval": 500,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": false,
+          "blend": false
+        },
+        {
+          "actionId": 1,
+          "actionName": "Walking",
+          "start": 32,
+          "count": 6,
+          "skip": 0,
+          "interval": 100,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": false,
+          "blend": false
+        },
+        {
+          "actionId": 9,
+          "actionName": "Attack1",
+          "start": 80,
+          "count": 6,
+          "skip": 0,
+          "interval": 100,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": false,
+          "blend": false
+        },
+        {
+          "actionId": 18,
+          "actionName": "Struck",
+          "start": 128,
+          "count": 2,
+          "skip": 0,
+          "interval": 200,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": false,
+          "blend": false
+        },
+        {
+          "actionId": 21,
+          "actionName": "Die",
+          "start": 144,
+          "count": 10,
+          "skip": 0,
+          "interval": 100,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": false,
+          "blend": false
+        },
+        {
+          "actionId": 22,
+          "actionName": "Dead",
+          "start": 153,
+          "count": 1,
+          "skip": 9,
+          "interval": 1000,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": false,
+          "blend": false
+        },
+        {
+          "actionId": 28,
+          "actionName": "Revive",
+          "start": 144,
+          "count": 10,
+          "skip": 0,
+          "interval": 100,
+          "effectStart": 0,
+          "effectCount": 0,
+          "effectSkip": 0,
+          "effectInterval": 0,
+          "reverse": true,
+          "blend": false
+        }
+      ],
+      "verification": {
+        "checkedFrames": 224,
+        "fullyTransparentSourceFrames": [],
+        "allPngPixelsDecodedAndMatchedToSource": true,
+        "pngBytes": 1133317,
+        "failures": []
+      },
+      "metadata": {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-input/original-ui/Monster/049/meta.json",
+        "bytes": 107294,
+        "sha256": "6173faeac54c9708d791c1546c0566e97af70a86c12497f7b08b63eb6a961b63"
+      }
+    },
+    "frameSetCatalog": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-input/original-ui/frame-sets.generated.json",
+      "bytes": 1375659,
+      "sha256": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9"
+    },
+    "sourceActorLibraries": 140,
+    "sourceActorFrames": 60780,
+    "sourceActorPngBytes": 139993251,
+    "nativeCandidateActorGuard": {
+      "libraryCount": 128,
+      "frameCount": 25597
+    }
+  },
+  "verification": {
+    "focusedNode": {
+      "passed": 12,
+      "failed": 0
+    },
+    "combinedAdjacentNode": {
+      "passed": 64,
+      "failed": 0,
+      "includesFocused": true
+    },
+    "rustResourceScope": {
+      "passed": 5,
+      "failed": 0
+    },
+    "rustNaturalContentLoop": {
+      "passed": 3,
+      "failed": 0
+    },
+    "rustProfileUnits": {
+      "passed": 4,
+      "failed": 0
+    },
+    "powershellFocusedPassed": true,
+    "powershellActualResourcesPassed": true,
+    "sourceActorVerificationPassed": true,
+    "finalSourceSyntaxAndWhitespacePassed": true,
+    "generatedBundleCheckPassed": true,
+    "retainedFirstFailure": {
+      "log": "focused-powershell-first.log",
+      "reason": "Single resource-room digest incorrectly called the legacy journey-list digest; replaced with its own exact empty-or-d71653 digest without relaxing legacy minimum."
+    },
+    "evidence": [
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-node-first.log",
+        "bytes": 3000,
+        "sha256": "42e61d2ff853e9d554d29485569b72b4f914622abae7ff22eabe9560b840a46f"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-and-adjacent-first.log",
+        "bytes": 13659,
+        "sha256": "f32783b7dc500f46cf77fb464cb8b093ad0675715a37bae37a76eddc22e6f466"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-powershell-first.log",
+        "bytes": 612,
+        "sha256": "4ba20dff8c123a60f50be73fdcfff347da577bde79ed495f98f39527acf17794"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-powershell-second.log",
+        "bytes": 407,
+        "sha256": "3ac390a642e1fcf80a1fc16ae8578171116379c96c1bf6906aa436169a7ac1d1"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/focused-rust-first.log",
+        "bytes": 1975,
+        "sha256": "9b975bc251340e586e37a7df7b5bed130871727299fa30eda0f49e6274576df3"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/profile-unit-tests.log",
+        "bytes": 871,
+        "sha256": "825113fb762cd7f2f4ad16db12ef36619ccd9435313c81b07de57d851051bd32"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/generation-input.json",
+        "bytes": 11570,
+        "sha256": "9544011b80569c6fffa73a46eb602630e884104f8e28c3e77b26a989d9711f63"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/generation-pipeline.log",
+        "bytes": 423,
+        "sha256": "fe71f30fd3d11cdba60e981f3bea5813d28be5cce5ee1d972b4db90f2f76e648"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/generate.log",
+        "bytes": 789,
+        "sha256": "2606bafcb185b3e53bc1078413a9e84ce73b4f7a7e25eb839a13b3dda08d4bf5"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/complete-floors.log",
+        "bytes": 20414,
+        "sha256": "55dc84c258f6497d032131986c02e66303aaa166d986898e9a7f622f04158e1d"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/audit.log",
+        "bytes": 20032,
+        "sha256": "eb532a06f20520dcad5f500796897d772e2e63326b868d20e67b9b2dcb647228"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-049-export.log",
+        "bytes": 258,
+        "sha256": "d60d68ed6fdef0e2522308320bf16469ca13e1f5cac232d84fe6c7a711405821"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-source-verify-first.log",
+        "bytes": 25971,
+        "sha256": "79095f3c49b783a8d45e7d438aa6ab82bf29f097e65556b18d63976ce4b056d8"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-closure-verified.json",
+        "bytes": 1151628,
+        "sha256": "908918fc7e7e59505b11ddd060bee79e3510218cc0acc9a1ecba874f9315357a"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/actor-input-receipt.json",
+        "bytes": 3435,
+        "sha256": "6c7f41a687a72800b83dc3313f79cb530c4c673bfd7f27e0cde0c2db5eec8c74"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/powershell-generated-guards.json",
+        "bytes": 8178,
+        "sha256": "4422d316dc2562c7b51fea48f237989b59e5b30a09a46e3d0a799778b85f7873"
+      },
+      {
+        "path": "C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/final-source-checks.json",
+        "bytes": 1203,
+        "sha256": "ee6ac04b3f2d28cda5b62df4bd5f5ca5ea97c3e8c6be001be2aa8e58d3c19acc"
+      }
+    ]
+  },
+  "performed": {
+    "generatedOnlyOutsideCheckout": true,
+    "profileDataTestsCompiled": true,
+    "windowsBuild": false,
+    "package": false,
+    "signing": false,
+    "installation": false,
+    "gatewayRestart": false,
+    "upload": false,
+    "publication": false,
+    "commit": false
+  },
+  "remaining": [
+    "Root integration and consumer compile compatibility",
+    "Ordinary three-class Gateway travel and source conditional predicates",
+    "Boss combat/drops/item acquisition",
+    "Saving/reconnect and repeated map handoff/image retention",
+    "Signed client staging and measured installer/update size",
+    "Human visual/gameplay acceptance"
+  ]
+}

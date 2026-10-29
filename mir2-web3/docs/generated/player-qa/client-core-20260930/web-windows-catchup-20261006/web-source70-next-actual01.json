@@ -1,0 +1,68 @@
+{
+  "owner": "Root",
+  "kind": "Source70 actual original strict Next build",
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 78132,
+    "kind": "Source70 actual original strict Next build after actual Node267pass",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 74005,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source70-scene-release-cache-20261011-01/root-approved01/next-build01-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "closed": true,
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\next-build01-config.json",
+    "bytes": 5486,
+    "sha256": "6a9c9efc124571899b23a9e849a83b8c4d3fbef8df79d8499f78057658d74d65"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\preparation01\\source70-isolated-source-snapshot01.json",
+    "bytes": 20633764,
+    "sha256": "0bbc93f3632fba8917116a6e4d1ee24691b73ec6e45eb64ca43e1ea3be5b9bda"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source70-scene-release-cache-20261011-01\\root-approved01\\next-source-review01.json",
+    "bytes": 8553,
+    "sha256": "33a68223883794ff04a02d45aaf4bd614de15a6850c11c7330e7d654495b3894"
+  },
+  "actualNodeProof": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-source70-node-actual02.json",
+    "bytes": 2923,
+    "sha256": "970a3e6f35f2244ab2345f950bd573480fb46eab27929b1dd7ea1386f067d272"
+  },
+  "originalArgs": [
+    "node_modules/next/dist/bin/next",
+    "build",
+    "--webpack"
+  ],
+  "strictTypeScriptPassed": true,
+  "typeScriptSeconds": 22.1,
+  "compiledSuccessfully": true,
+  "compileSeconds": 23.9,
+  "generatedPages": 13,
+  "stderrBytes": 0,
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source70-scene-release-cache-20261011-01/next-build01/stdout.log",
+    "bytes": 2026,
+    "sha256": "a283febdc44380cd902c82fe3013d28c4eb2310b4979ded6dc820d3073de83e0"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source70-scene-release-cache-20261011-01/next-build01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "postSourceAndToolGuardSucceeded": true,
+  "newCompiledOutput": true,
+  "thinBuildPassed": false,
+  "browserGameplayVerified": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

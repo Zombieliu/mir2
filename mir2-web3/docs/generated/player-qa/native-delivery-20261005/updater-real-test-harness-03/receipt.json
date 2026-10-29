@@ -1,0 +1,14 @@
+{
+  "schema": "mir2.updater.real-package-harness-adaptation.v1",
+  "testOnly": true,
+  "productionUpdaterModified": false,
+  "beforeSha256": "477272185a2f130d87954ff023343c3f632a407c44ce7777571c3aac6d18a7e5",
+  "afterSha256": "73d68d18c3f11ae3ebf5520d8f5309b3fa5e925bd4f888b0b6aa6c60ca0a348a",
+  "reason": "Authenticated changed paths can share content SHA; assert unique fetched hashes, every new target hash, exact removals and every old rollback hash.",
+  "priorFailureLogsPreserved": [
+    "real-update-r18-01.log",
+    "real-update-r18-02.log"
+  ],
+  "gameLaunched": false,
+  "protectedInstallationTouched": false
+}

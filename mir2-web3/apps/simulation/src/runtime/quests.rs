@@ -6,10 +6,9 @@ use serde::{Deserialize, Serialize};
 use crate::config::{ItemContainer, QuestObjectiveSnapshot, QuestSnapshot, QuestStage};
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
-    crystal_item_by_index, crystal_item_by_name, crystal_npc_info_manifest,
-    crystal_quest_packet_manifest, localized_text_or_fallback, starter_server_data,
-    CrystalQuestItemTaskTemplate, CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy,
-    QuestTemplate,
+    crystal_item_by_index, crystal_item_by_name, crystal_quest_packet_manifest,
+    localized_text_or_fallback, starter_server_data, CrystalQuestItemTaskTemplate,
+    CrystalQuestPacketTemplate, LanguageCode, QuestStageCopy, QuestTemplate,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatType, ClientQuestInfo, ItemInfo, MirClass,
@@ -18,18 +17,71 @@ use mir2_protocol::{
 
 use super::crystal_compat::GUIDE_QUEST_ID;
 use super::equipment::{equipment_template_to_state, replace_equipment};
+use super::item_grants::{FreshItemGrant, prepare_world_grants};
+#[cfg(test)]
+use super::inventory::add_or_increment_item;
 use super::inventory::{
-    add_or_increment_item, additional_slots_needed_for_item_quantity, can_gain_item_quantity,
+    additional_slots_needed_for_item_quantity, can_gain_item_quantity,
     free_bag_slots,
 };
 use super::items::{
     crystal_item_key_for_template, item_info_from_crystal_template, normalize_crystal_item_key,
 };
-use super::npc::{localized_npc_dialog_base_key, npc_script_for_object_id, NpcDialogLinkState};
+use super::npc::{
+    canonical_crystal_quest_npc_info, canonical_crystal_quest_npc_object_id,
+    localized_npc_dialog_base_key, npc_script_for_object_id, NpcDialogLinkState,
+};
 use super::npc_script::{NpcInteractionContext, NpcQuestDialog};
 use super::resources::{
     InventoryResource, PlayerRuntimeResource, QuestResource, RuntimeConfigResource, SessionResource,
 };
+
+#[path = "newcomer_progression.rs"]
+pub(super) mod newcomer_progression;
+
+#[path = "newcomer_v2.rs"]
+pub(super) mod newcomer_v2;
+
+#[path = "newcomer_v2_events.rs"]
+pub(super) mod newcomer_v2_events;
+
+#[path = "quest_recurrence.rs"]
+pub(super) mod quest_recurrence;
+
+#[path = "periodic_quests.rs"]
+pub(crate) mod periodic_quests;
+
+#[cfg(test)]
+#[path = "periodic_quest_rules_tests.rs"]
+mod periodic_quest_rules_tests;
+
+#[cfg(test)]
+#[path = "quest_level15_tests.rs"]
+mod quest_level15_tests;
+
+#[cfg(test)]
+#[path = "quest_recurrence_tests.rs"]
+mod quest_recurrence_tests;
+
+#[cfg(test)]
+#[path = "newcomer_progression_tests.rs"]
+mod newcomer_progression_tests;
+
+#[cfg(test)]
+#[path = "newcomer_journey_tests.rs"]
+mod newcomer_journey_tests;
+
+#[cfg(test)]
+#[path = "quest_reconcile_tests.rs"]
+mod quest_reconcile_tests;
+
+#[cfg(test)]
+#[path = "quest_endpoint_identity_tests.rs"]
+mod quest_endpoint_identity_tests;
+
+#[cfg(test)]
+#[path = "quest_uid_tests.rs"]
+mod uid_tests;
 
 const CRYSTAL_NORMAL_QUEST_MIN_LEVEL: i32 = 1;
 const CRYSTAL_NORMAL_QUEST_MAX_LEVEL: i32 = 45;
@@ -58,6 +110,16 @@ pub(super) struct QuestState {
     pub(super) stage: QuestStage,
     #[serde(default)]
     pub(super) task_progress: BTreeMap<String, u32>,
+    /// Last server-local daily/weekly period in which rewards were claimed.
+    /// Missing metadata in an old save is migrated conservatively on refresh.
+    #[serde(default)]
+    pub(super) cadence_last_claimed_period: Option<u64>,
+    /// Greatest observed period prevents a rolled-back server clock from
+    /// reopening an already claimed daily/weekly quest.
+    #[serde(default)]
+    pub(super) cadence_high_watermark_period: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(super) accepted_periodic_reward: Option<periodic_quests::AcceptedPeriodicReward>,
 }
 
 impl QuestState {
@@ -72,6 +134,9 @@ impl QuestState {
             current: 0,
             stage: QuestStage::Available,
             task_progress: BTreeMap::new(),
+            cadence_last_claimed_period: None,
+            cadence_high_watermark_period: None,
+            accepted_periodic_reward: None,
         }
     }
 
@@ -86,6 +151,9 @@ impl QuestState {
             current: 0,
             stage,
             task_progress: BTreeMap::new(),
+            cadence_last_claimed_period: None,
+            cadence_high_watermark_period: None,
+            accepted_periodic_reward: None,
         }
     }
 
@@ -102,6 +170,17 @@ impl QuestState {
     }
 
     pub(super) fn snapshot(&self, language: LanguageCode) -> QuestSnapshot {
+        self.snapshot_with_template(
+            language,
+            crystal_quest_template_by_id(self.quest_id).as_ref(),
+        )
+    }
+
+    fn snapshot_with_template(
+        &self,
+        language: LanguageCode,
+        template: Option<&CrystalQuestPacketTemplate>,
+    ) -> QuestSnapshot {
         QuestSnapshot {
             quest_id: self.quest_id,
             title: localized_quest_title(language, self.quest_id, &self.title),
@@ -117,12 +196,15 @@ impl QuestState {
                 self.quest_id,
                 &self.reward_preview,
             ),
-            objectives: self.objective_snapshots(),
+            objectives: self.objective_snapshots(template),
         }
     }
 
-    fn objective_snapshots(&self) -> Vec<QuestObjectiveSnapshot> {
-        let Some(template) = crystal_quest_template_by_id(self.quest_id) else {
+    fn objective_snapshots(
+        &self,
+        template: Option<&CrystalQuestPacketTemplate>,
+    ) -> Vec<QuestObjectiveSnapshot> {
+        let Some(template) = template else {
             return Vec::new();
         };
         let mut objectives = Vec::with_capacity(
@@ -225,9 +307,17 @@ pub(super) fn crystal_quest_info_by_id(quest_id: i32) -> Option<ClientQuestInfo>
         .find(|info| info.index == quest_id)
 }
 
-fn effective_crystal_quest_info_by_id(world: &World, quest_id: i32) -> Option<ClientQuestInfo> {
-    let mut info = crystal_quest_info_by_id(quest_id)?;
+pub(super) fn effective_crystal_quest_info_by_id(
+    world: &World,
+    quest_id: i32,
+) -> Option<ClientQuestInfo> {
+    let mut info = crystal_quest_info_by_id(quest_id)
+        .or_else(|| newcomer_progression::quest_info_by_id(world, quest_id))
+        .or_else(|| newcomer_v2::quest_info_by_id(world, quest_id))
+        .or_else(|| periodic_quests::info(world, quest_id))?;
     apply_content_profile_quest_reward_overrides(world, &mut info);
+    newcomer_progression::apply_quest_info_override(world, &mut info);
+    quest_recurrence::apply_cadence_quest_info(world, &mut info);
     Some(info)
 }
 
@@ -266,8 +356,13 @@ fn apply_content_profile_quest_reward_overrides(world: &World, info: &mut Client
 pub(super) fn effective_crystal_quest_info_packets(world: &World) -> Vec<ServerPacket> {
     crystal_client_quest_infos()
         .into_iter()
+        .chain(newcomer_progression::quest_infos(world))
+        .chain(newcomer_v2::quest_infos(world))
+        .chain(periodic_quests::infos(world))
         .map(|mut info| {
             apply_content_profile_quest_reward_overrides(world, &mut info);
+            newcomer_progression::apply_quest_info_override(world, &mut info);
+            quest_recurrence::apply_cadence_quest_info(world, &mut info);
             ServerPacket::NewQuestInfo { info }
         })
         .collect()
@@ -278,10 +373,23 @@ pub(super) fn crystal_quest_template_by_id(quest_id: i32) -> Option<CrystalQuest
         .quests
         .into_iter()
         .find(|quest| quest.index == quest_id)
+        .or_else(|| newcomer_progression::quest_template_by_id(quest_id))
+        .or_else(|| mir2_game_data::periodic_quests::quest(quest_id).map(|quest| quest.template()))
 }
 
-pub(super) fn quest_definition_exists(quest_id: i32) -> bool {
-    quest_template_by_id(quest_id).is_some() || crystal_quest_info_by_id(quest_id).is_some()
+pub(super) fn effective_crystal_quest_template_by_id(
+    world: &World,
+    quest_id: i32,
+) -> Option<CrystalQuestPacketTemplate> {
+    let mut template = crystal_quest_template_by_id(quest_id)
+        .or_else(|| newcomer_v2::quest_template_by_id(world, quest_id))?;
+    newcomer_progression::apply_quest_template_override(world, &mut template);
+    Some(template)
+}
+
+pub(super) fn quest_definition_exists(world: &World, quest_id: i32) -> bool {
+    quest_template_by_id(quest_id).is_some()
+        || effective_crystal_quest_info_by_id(world, quest_id).is_some()
 }
 
 fn decode_crystal_quest_packet_payload(payload_hex: &str) -> Option<ClientQuestInfo> {
@@ -341,13 +449,22 @@ fn crystal_quest_reward_preview(info: &ClientQuestInfo) -> String {
     if info.reward_credit > 0 {
         rewards.push(format!("Credit {}", info.reward_credit));
     }
-    for reward in &info.rewards_fixed_item {
+    for reward in info
+        .rewards_fixed_item
+        .iter()
+        .filter(|reward| reward.count > 0)
+    {
         rewards.push(format!("{} x{}", reward.item.name, reward.count.max(1)));
     }
-    if !info.rewards_select_item.is_empty() {
+    if info
+        .rewards_select_item
+        .iter()
+        .any(|reward| reward.count > 0)
+    {
         let names = info
             .rewards_select_item
             .iter()
+            .filter(|reward| reward.count > 0)
             .map(|reward| reward.item.name.as_str())
             .collect::<Vec<_>>()
             .join(" / ");
@@ -361,6 +478,9 @@ fn crystal_quest_reward_preview(info: &ClientQuestInfo) -> String {
 }
 
 fn crystal_quest_required_count(info: &ClientQuestInfo) -> u32 {
+    if info.index == newcomer_progression::DAILY_BONUS_ID {
+        return 2;
+    }
     let Some(template) = crystal_quest_template_by_id(info.index) else {
         return 1;
     };
@@ -381,8 +501,38 @@ fn crystal_quest_required_count(info: &ClientQuestInfo) -> u32 {
     total.max(1)
 }
 
+fn effective_crystal_quest_required_count(world: &World, info: &ClientQuestInfo) -> u32 {
+    if info.index == newcomer_progression::DAILY_BONUS_ID {
+        return 2;
+    }
+    effective_crystal_quest_template_by_id(world, info.index)
+        .as_ref()
+        .map(crystal_quest_template_required_count)
+        .unwrap_or(1)
+}
+
+fn crystal_quest_template_required_count(template: &CrystalQuestPacketTemplate) -> u32 {
+    let kill_total = template
+        .kill_tasks
+        .iter()
+        .map(|task| task.count.max(1))
+        .sum::<u32>();
+    let item_total = template
+        .item_tasks
+        .iter()
+        .map(|task| u32::from(task.count.max(1)))
+        .sum::<u32>();
+    let flag_total = u32::try_from(template.flag_tasks.len()).unwrap_or(0);
+    kill_total
+        .saturating_add(item_total)
+        .saturating_add(flag_total)
+        .max(1)
+}
+
 pub(super) fn stage_copy(quest: &QuestState, language: LanguageCode) -> QuestStageCopy {
-    if let Some(info) = crystal_quest_info_by_id(quest.quest_id) {
+    if let Some(info) = crystal_quest_info_by_id(quest.quest_id)
+        .or_else(|| newcomer_progression::quest_info_by_id_unchecked(quest.quest_id))
+    {
         return crystal_stage_copy(quest, &info);
     }
     let fallback_template =
@@ -434,21 +584,66 @@ fn crystal_stage_copy(quest: &QuestState, info: &ClientQuestInfo) -> QuestStageC
     }
 }
 
+fn quest_state_from_effective_info(
+    world: &World,
+    info: &ClientQuestInfo,
+    stage: QuestStage,
+) -> QuestState {
+    let mut state = QuestState::from_crystal_info(info, stage);
+    state.required = effective_crystal_quest_required_count(world, info);
+    state
+}
+
+fn effective_quest_snapshot(
+    world: &World,
+    quest: &QuestState,
+    language: LanguageCode,
+) -> QuestSnapshot {
+    let template = effective_crystal_quest_template_by_id(world, quest.quest_id);
+    let mut snapshot = quest.snapshot_with_template(language, template.as_ref());
+    if let Some(info) = effective_crystal_quest_info_by_id(world, quest.quest_id) {
+        if mir2_game_data::periodic_quests::is_periodic(quest.quest_id) {
+            // Completed legacy rows are reconciled only after reacceptance.
+            // A reset Available offer must already display the current count.
+            snapshot.summary =
+                localized_quest_summary(language, quest.quest_id, &crystal_quest_summary(&info));
+            snapshot.required = effective_crystal_quest_required_count(world, &info);
+            snapshot.current = quest.current.min(snapshot.required);
+        }
+        let copy = crystal_stage_copy(quest, &info);
+        snapshot.objective = copy.objective;
+        snapshot.progress_label = copy.progress_label;
+        snapshot.tracker = copy.tracker;
+        if (newcomer_progression::enabled(world)
+            && newcomer_progression::is_journey_quest(quest.quest_id))
+            || (newcomer_v2::enabled(world) && newcomer_v2::is_v2_quest(quest.quest_id))
+            || mir2_game_data::periodic_quests::is_periodic(quest.quest_id)
+        {
+            snapshot.reward_preview = crystal_quest_reward_preview(&info);
+        }
+    }
+    snapshot
+}
+
 pub(super) fn crystal_quest_task_list(world: &World, quest_id: i32) -> Option<Vec<String>> {
-    let info = crystal_quest_info_by_id(quest_id)?;
+    let info = effective_crystal_quest_info_by_id(world, quest_id)?;
     let quest = world
         .resource::<QuestResource>()
         .quests
         .iter()
         .find(|quest| quest.quest_id == quest_id)?;
-    let Some(template) = crystal_quest_template_by_id(quest_id) else {
+    let Some(template) = effective_crystal_quest_template_by_id(world, quest_id) else {
         return Some(info.task_description.clone());
     };
+    let newcomer_journey = (newcomer_progression::enabled(world)
+        && newcomer_progression::is_journey_quest(quest_id))
+        || (newcomer_v2::enabled(world) && newcomer_v2::is_v2_quest(quest_id))
+        || mir2_game_data::periodic_quests::is_periodic(quest_id);
     let mut tasks = Vec::new();
     for task in &template.kill_tasks {
         push_task_line(
             &mut tasks,
-            &task.message,
+            if newcomer_journey { "" } else { &task.message },
             &format!(
                 "Kill {} {}/{}",
                 task.monster_name,
@@ -460,7 +655,7 @@ pub(super) fn crystal_quest_task_list(world: &World, quest_id: i32) -> Option<Ve
     for task in &template.item_tasks {
         push_task_line(
             &mut tasks,
-            &task.message,
+            if newcomer_journey { "" } else { &task.message },
             &format!(
                 "Collect {} {}/{}",
                 task.item_name,
@@ -470,6 +665,14 @@ pub(super) fn crystal_quest_task_list(world: &World, quest_id: i32) -> Option<Ve
         );
     }
     for task in &template.flag_tasks {
+        if newcomer_v2::is_v2_quest(quest_id) {
+            tasks.push(format!(
+                "{} {}/1",
+                task.message,
+                crystal_quest_task_progress(quest, &crystal_flag_task_key(task.number)).min(1)
+            ));
+            continue;
+        }
         push_task_line(
             &mut tasks,
             &task.message,
@@ -540,8 +743,63 @@ fn recompute_crystal_quest_current(quest: &mut QuestState, template: &CrystalQue
         );
     }
     quest.current = total.min(quest.required);
-    if quest.current >= quest.required {
-        quest.stage = QuestStage::ReadyToTurnIn;
+    if !matches!(quest.stage, QuestStage::Available | QuestStage::Completed) {
+        quest.stage = if quest.current >= quest.required {
+            QuestStage::ReadyToTurnIn
+        } else {
+            QuestStage::InProgress
+        };
+    }
+}
+
+pub(super) fn reconcile_effective_quest_states(world: &mut World) {
+    let quest_ids = world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .map(|quest| quest.quest_id)
+        .filter(|quest_id| {
+            newcomer_progression::is_journey_quest(*quest_id)
+                || newcomer_v2::is_v2_quest(*quest_id)
+                || mir2_game_data::periodic_quests::is_periodic(*quest_id)
+        })
+        .collect::<Vec<_>>();
+    let effective = quest_ids
+        .into_iter()
+        .filter_map(|quest_id| {
+            let info = effective_crystal_quest_info_by_id(world, quest_id)?;
+            let template = effective_crystal_quest_template_by_id(world, quest_id)?;
+            Some((quest_id, info, template))
+        })
+        .collect::<Vec<_>>();
+
+    let mut quests = world.resource_mut::<QuestResource>();
+    for (quest_id, info, template) in effective {
+        let Some(quest) = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == quest_id)
+        else {
+            continue;
+        };
+        if quest.stage == QuestStage::Completed {
+            continue;
+        }
+        quest.title = info.name.clone();
+        quest.summary = crystal_quest_summary(&info);
+        quest.reward_preview = crystal_quest_reward_preview(&info);
+        quest.required = crystal_quest_template_required_count(&template);
+        if quest.stage == QuestStage::Available {
+            quest.current = 0;
+        } else if crystal_quest_has_progress_tasks(&template) {
+            recompute_crystal_quest_current(quest, &template);
+        } else {
+            // `begin_quest` makes dialogue-only and carry-only quests ready
+            // immediately. Preserve that state across save/load reconciliation;
+            // recomputing an empty task set would otherwise regress it to 0/1.
+            quest.current = quest.required;
+            quest.stage = QuestStage::ReadyToTurnIn;
+        }
     }
 }
 
@@ -723,9 +981,12 @@ pub(super) fn ensure_runtime_quest(world: &mut World, quest_id: i32) -> QuestSta
             current: 0,
             stage: QuestStage::Available,
             task_progress: BTreeMap::new(),
+            cadence_last_claimed_period: None,
+            cadence_high_watermark_period: None,
+            accepted_periodic_reward: None,
         }
     } else if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
-        QuestState::from_crystal_info(&info, QuestStage::Available)
+        quest_state_from_effective_info(world, &info, QuestStage::Available)
     } else {
         return QuestStage::Available;
     };
@@ -763,9 +1024,29 @@ pub(super) fn set_quest_stage(world: &mut World, quest_id: i32, stage: QuestStag
 }
 
 pub(super) fn begin_quest(world: &mut World, quest_id: i32) -> QuestStage {
+    let previous = quest_stage(world, quest_id).unwrap_or(QuestStage::Available);
+    let stage = begin_quest_impl(world, quest_id);
+    if previous == QuestStage::Available
+        && matches!(stage, QuestStage::InProgress | QuestStage::ReadyToTurnIn)
+        && super::resources::is_in_world(world)
+    {
+        let _ = super::default_npc_events::enqueue(
+            world,
+            super::default_npc_events::DefaultNpcEvent::OnAcceptQuest { quest_id },
+        );
+    }
+    stage
+}
+
+fn begin_quest_impl(world: &mut World, quest_id: i32) -> QuestStage {
     let stage = ensure_runtime_quest(world, quest_id);
     if stage != QuestStage::Available {
         return stage;
+    }
+    if mir2_game_data::periodic_quests::is_periodic(quest_id)
+        && (!can_accept_quest(world, quest_id) || !periodic_quests::lock_reward(world, quest_id))
+    {
+        return QuestStage::Available;
     }
     if let Some(template) = quest_template_by_id(quest_id) {
         set_quest_stage(world, template.quest_id, QuestStage::InProgress);
@@ -774,12 +1055,27 @@ pub(super) fn begin_quest(world: &mut World, quest_id: i32) -> QuestStage {
     let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
         return QuestStage::Available;
     };
-    let Some(template) = crystal_quest_template_by_id(quest_id) else {
+    let Some(template) = effective_crystal_quest_template_by_id(world, quest_id) else {
         set_quest_stage(world, quest_id, QuestStage::InProgress);
         return QuestStage::InProgress;
     };
 
-    grant_crystal_carry_items(world, &template);
+    if let Some((next_stage, current)) = newcomer_progression::begin_stage(world, quest_id) {
+        if let Some(quest) = world
+            .resource_mut::<QuestResource>()
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == info.index)
+        {
+            quest.stage = next_stage;
+            quest.current = current.min(quest.required);
+        }
+        return next_stage;
+    }
+
+    if !grant_crystal_carry_items(world, &template) {
+        return QuestStage::Available;
+    }
     let next_stage = if crystal_quest_has_progress_tasks(&template) {
         QuestStage::InProgress
     } else {
@@ -791,10 +1087,24 @@ pub(super) fn begin_quest(world: &mut World, quest_id: i32) -> QuestStage {
         .iter_mut()
         .find(|quest| quest.quest_id == info.index)
     {
+        if mir2_game_data::periodic_quests::is_periodic(quest_id) {
+            // A completed saved row can retain the previous release's target
+            // total through a cadence reset. Reaccept with the current catalog
+            // requirement so reduced counters can actually reach Ready.
+            quest.required = crystal_quest_template_required_count(&template);
+            quest.title = info.name.clone();
+            quest.summary = crystal_quest_summary(&info);
+            quest.reward_preview = crystal_quest_reward_preview(&info);
+        }
         quest.stage = next_stage;
         if next_stage == QuestStage::ReadyToTurnIn {
             quest.current = quest.required;
         }
+    }
+    if newcomer_v2::is_v2_quest(quest_id) {
+        newcomer_v2_events::record_acceptance(world, quest_id);
+        let _ = newcomer_v2_events::refresh_state_conditions(world);
+        return quest_stage(world, quest_id).unwrap_or(next_stage);
     }
     next_stage
 }
@@ -805,10 +1115,14 @@ fn crystal_quest_has_progress_tasks(template: &CrystalQuestPacketTemplate) -> bo
         || !template.flag_tasks.is_empty()
 }
 
-fn grant_crystal_carry_items(world: &mut World, template: &CrystalQuestPacketTemplate) {
-    for task in &template.carry_items {
-        grant_crystal_quest_task_item(world, task, u32::from(task.count.max(1)));
-    }
+fn grant_crystal_carry_items(world: &mut World, template: &CrystalQuestPacketTemplate) -> bool {
+    let grants = template.carry_items.iter().map(|task|
+        crystal_quest_task_grant(task, u32::from(task.count.max(1)))
+    ).collect::<Result<Vec<_>, _>>();
+    let Ok(grants) = grants else { return false; };
+    let Ok(plan) = prepare_world_grants(world, &grants) else { return false; };
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
+    true
 }
 
 pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
@@ -820,10 +1134,39 @@ pub(super) fn complete_quest_with_selection(
     quest_id: i32,
     selected_item_index: Option<i32>,
 ) -> bool {
+    let success = complete_quest_with_selection_impl(world, quest_id, selected_item_index);
+    if success && super::resources::is_in_world(world) {
+        let _ = super::default_npc_events::enqueue(
+            world,
+            super::default_npc_events::DefaultNpcEvent::OnFinishQuest { quest_id },
+        );
+    }
+    success
+}
+
+fn complete_quest_with_selection_impl(
+    world: &mut World,
+    quest_id: i32,
+    selected_item_index: Option<i32>,
+) -> bool {
+    // Keep reward settlement idempotent even when an ordinary FinishQuest
+    // packet is retried or a caller bypasses the packet-layer stage check.
+    if quest_stage(world, quest_id) != Some(QuestStage::ReadyToTurnIn) {
+        return false;
+    }
+    if !newcomer_progression::can_finish(world, quest_id)
+        || !newcomer_v2::can_finish(world, quest_id)
+        || !periodic_quests::can_finish(world, quest_id)
+    {
+        return false;
+    }
     if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
         return complete_crystal_quest(world, &info, selected_item_index);
     }
     let Some(quest) = quest_template_by_id(quest_id) else {
+        return false;
+    };
+    let Some(reward_gold) = world.resource::<PlayerRuntimeResource>().gold.checked_add(quest.completion_rewards.gold) else {
         return false;
     };
     {
@@ -845,13 +1188,30 @@ pub(super) fn complete_quest_with_selection(
             return false;
         }
     }
-    {
-        let mut resources = world.resource_mut::<InventoryResource>();
-        resources
-            .inventory_items
-            .retain(|item| item.key != quest.quest_item.key);
+    let grants = quest.completion_rewards.items.iter().map(|item| FreshItemGrant::plain(
+        ItemContainer::Bag1, &item.key, &item.name, &item.description,
+        item.preferred_slot, item.quantity, item.weight, crate::UserItemUidReason::QuestReward,
+    )).collect::<Result<Vec<_>, _>>();
+    let Ok(grants) = grants else { return false; };
+    let Ok(mut plan) = prepare_world_grants(world, &grants) else { return false; };
+    let mut equipment_rewards = Vec::new();
+    for template in &quest.completion_rewards.equipment {
+        let mut equipment = equipment_template_to_state(template);
+        // Legacy fixture equipment keeps its old identity convention. Trusted
+        // live bindings must issue before any quest or currency is published.
+        if !matches!(plan.inventory.item_uid_issuance, super::item_uid_issuance::ItemUidIssuance::Legacy) {
+            if super::equipment::user_item_from_equipment_state(&equipment).is_none() { return false; }
+            let Ok(uid) = super::item_uid_issuance::issue_for_staged_inventory(
+                &plan.inventory, crate::UserItemUidReason::QuestReward, ItemContainer::Bag1, 0,
+            ) else { return false; };
+            equipment.user_item_unique_id = Some(uid);
+            plan.inventory.reserved_item_unique_ids.insert(uid);
+        }
+        equipment_rewards.push(equipment);
     }
-    world.resource_mut::<PlayerRuntimeResource>().gold += quest.completion_rewards.gold;
+    plan.inventory.inventory_items.retain(|item| item.key != quest.quest_item.key);
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
+    world.resource_mut::<PlayerRuntimeResource>().gold = reward_gold;
     if let Some(quest) = world
         .resource_mut::<QuestResource>()
         .quests
@@ -861,21 +1221,10 @@ pub(super) fn complete_quest_with_selection(
         quest.stage = QuestStage::Completed;
         quest.current = quest.required;
     }
+    quest_recurrence::record_quest_completion(world, quest_id);
 
-    for item in quest.completion_rewards.items {
-        add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item.key,
-            &item.name,
-            &item.description,
-            item.preferred_slot,
-            item.quantity,
-            item.weight,
-        );
-    }
-    for equipment in quest.completion_rewards.equipment {
-        replace_equipment(world, equipment_template_to_state(&equipment));
+    for equipment in equipment_rewards {
+        replace_equipment(world, equipment);
     }
     true
 }
@@ -898,6 +1247,12 @@ fn complete_crystal_quest(
         return false;
     }
 
+    let grants = fixed_rewards.iter().chain(selected_reward.iter()).filter(|reward| reward.count > 0)
+        .map(crystal_quest_reward_grant).collect::<Result<Vec<_>, _>>();
+    let Ok(grants) = grants else { return false; };
+    let Ok(plan) = prepare_world_grants(world, &grants) else { return false; };
+    *world.resource_mut::<InventoryResource>() = plan.inventory;
+
     {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
         player.gold = player.gold.saturating_add(info.reward_gold);
@@ -905,12 +1260,17 @@ fn complete_crystal_quest(
     }
     // Crystal `GainExp`: quest experience rolls into levels via the shared curve;
     // the new level/exp/HP reach the client through the post-completion snapshot.
-    let _ = super::leveling::apply_experience_gain(world, i64::from(info.reward_exp));
+    let reward_exp = if mir2_game_data::periodic_quests::is_periodic(info.index) {
+        info.reward_exp
+    } else {
+        super::shared_experience_profile::crystal_apply_quest_experience_source(
+            world,
+            info.reward_exp,
+        )
+    };
+    let _ = super::leveling::apply_experience_gain(world, i64::from(reward_exp));
 
-    for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
-        grant_crystal_quest_reward_item(world, reward);
-    }
-    if let Some(template) = crystal_quest_template_by_id(info.index) {
+    if let Some(template) = effective_crystal_quest_template_by_id(world, info.index) {
         take_crystal_quest_task_items(world, &template);
     }
 
@@ -923,6 +1283,8 @@ fn complete_crystal_quest(
         quest.stage = QuestStage::Completed;
         quest.current = quest.required;
     }
+    quest_recurrence::record_quest_completion(world, info.index);
+    newcomer_progression::sync_daily_bonus(world);
     true
 }
 
@@ -961,35 +1323,35 @@ fn crystal_quest_reward_slots_needed<'a>(
 ) -> u32 {
     let resources = world.resource::<InventoryResource>();
     rewards
+        .filter(|reward| reward.count > 0)
         .map(|reward| {
             let key = crystal_quest_reward_item_key(&reward.item);
             additional_slots_needed_for_item_quantity(
                 resources,
                 ItemContainer::Bag1,
                 &key,
-                u32::from(reward.count.max(1)),
+                u32::from(reward.count),
             )
         })
         .sum()
 }
 
+#[cfg(test)]
 fn grant_crystal_quest_reward_item(world: &mut World, reward: &QuestItemReward) {
-    let quantity = u32::from(reward.count.max(1));
-    let key = crystal_quest_reward_item_key(&reward.item);
-    add_or_increment_item(
-        world,
-        ItemContainer::Bag1,
-        &key,
-        &reward.item.name,
-        reward
-            .item
-            .tooltip
-            .as_deref()
-            .unwrap_or("Original Crystal quest reward."),
-        0,
-        quantity,
-        u16::from(reward.item.weight),
-    );
+    // Crystal's reward loop runs only while count > 0.
+    if reward.count == 0 {
+        return;
+    }
+    let Ok(grant) = crystal_quest_reward_grant(reward) else { return; };
+    let _ = super::item_grants::publish_world_grants(world, &[grant]);
+}
+
+fn crystal_quest_reward_grant(reward: &QuestItemReward) -> Result<FreshItemGrant, String> {
+    FreshItemGrant::plain(
+        ItemContainer::Bag1, &crystal_quest_reward_item_key(&reward.item), &reward.item.name,
+        reward.item.tooltip.as_deref().unwrap_or("Original Crystal quest reward."),
+        0, u32::from(reward.count), u16::from(reward.item.weight), crate::UserItemUidReason::QuestReward,
+    )
 }
 
 fn crystal_quest_reward_item_key(item: &ItemInfo) -> String {
@@ -1010,11 +1372,10 @@ fn crystal_quest_task_item_key(task: &CrystalQuestItemTaskTemplate) -> String {
         .unwrap_or_else(|| normalize_crystal_item_key(&task.item_name))
 }
 
-fn grant_crystal_quest_task_item(
-    world: &mut World,
+fn crystal_quest_task_grant(
     task: &CrystalQuestItemTaskTemplate,
     quantity: u32,
-) {
+) -> Result<FreshItemGrant, String> {
     let quantity = quantity.max(1);
     let key = crystal_quest_task_item_key(task);
     let (name, description, weight) = crystal_item_by_index(task.item_index)
@@ -1034,8 +1395,7 @@ fn grant_crystal_quest_task_item(
                 1,
             )
         });
-    add_or_increment_item(
-        world,
+    FreshItemGrant::plain(
         ItemContainer::Quest,
         &key,
         &name,
@@ -1043,7 +1403,8 @@ fn grant_crystal_quest_task_item(
         0,
         quantity,
         weight,
-    );
+        crate::UserItemUidReason::QuestCarryItem,
+    )
 }
 
 fn take_crystal_quest_task_items(world: &mut World, template: &CrystalQuestPacketTemplate) {
@@ -1069,7 +1430,7 @@ pub(super) fn abandon_quest(world: &mut World, quest_id: i32) -> bool {
 
     let legacy_quest_item_key =
         quest_template_by_id(quest_id).map(|template| template.quest_item.key);
-    let crystal_template = crystal_quest_template_by_id(quest_id);
+    let crystal_template = effective_crystal_quest_template_by_id(world, quest_id);
     {
         let mut quests = world.resource_mut::<QuestResource>();
         let Some(quest) = quests
@@ -1082,6 +1443,7 @@ pub(super) fn abandon_quest(world: &mut World, quest_id: i32) -> bool {
         quest.stage = QuestStage::Available;
         quest.current = 0;
         quest.task_progress.clear();
+        quest.accepted_periodic_reward = None;
     }
 
     if let Some(key) = legacy_quest_item_key {
@@ -1097,18 +1459,48 @@ pub(super) fn abandon_quest(world: &mut World, quest_id: i32) -> bool {
 }
 
 pub(super) fn can_accept_quest(world: &World, quest_id: i32) -> bool {
+    if newcomer_v2::has_v2_progress(world)
+        && !newcomer_v2::is_v2_quest(quest_id)
+        && (quest_template_by_id(quest_id).is_some()
+            || newcomer_progression::is_journey_quest(quest_id)
+            || newcomer_progression::is_newcomer_quest(quest_id))
+    {
+        return false;
+    }
+    if newcomer_v2::enabled(world) && quest_template_by_id(quest_id).is_some() {
+        return false;
+    }
     if quest_template_by_id(quest_id).is_some() {
         return !matches!(
             quest_stage(world, quest_id),
             Some(QuestStage::InProgress | QuestStage::ReadyToTurnIn | QuestStage::Completed)
         );
     }
-    crystal_quest_info_by_id(quest_id)
+    effective_crystal_quest_info_by_id(world, quest_id)
         .as_ref()
         .is_some_and(|info| can_accept_crystal_quest(world, info))
 }
 
 pub(super) fn can_accept_crystal_quest(world: &World, info: &ClientQuestInfo) -> bool {
+    if mir2_game_data::periodic_quests::is_periodic(info.index)
+        && !periodic_quests::can_accept(world, info.index)
+    {
+        return false;
+    }
+    if newcomer_v2::has_v2_progress(world)
+        && !newcomer_v2::is_v2_quest(info.index)
+        && (newcomer_progression::is_journey_quest(info.index)
+            || newcomer_progression::is_newcomer_quest(info.index))
+    {
+        return false;
+    }
+    if newcomer_v2::enabled(world)
+        && !newcomer_v2::is_v2_quest(info.index)
+        && (newcomer_progression::is_journey_quest(info.index)
+            || newcomer_progression::is_newcomer_quest(info.index))
+    {
+        return false;
+    }
     if matches!(
         quest_stage(world, info.index),
         Some(QuestStage::InProgress | QuestStage::ReadyToTurnIn | QuestStage::Completed)
@@ -1134,6 +1526,14 @@ pub(super) fn can_accept_crystal_quest(world: &World, info: &ClientQuestInfo) ->
     if !crystal_quest_class_matches(character.class, info.class_needed) {
         return false;
     }
+    if newcomer_progression::is_newcomer_quest(info.index)
+        && !newcomer_progression::can_accept(world, info.index)
+    {
+        return false;
+    }
+    if newcomer_v2::is_v2_quest(info.index) && !newcomer_v2::can_accept(world, info.index) {
+        return false;
+    }
     crystal_required_quest_chain_completed(
         world,
         effective_crystal_required_quest_id(world, info.index, info.quest_needed),
@@ -1145,6 +1545,11 @@ fn effective_crystal_required_quest_id(
     quest_id: i32,
     imported_required_quest_id: i32,
 ) -> i32 {
+    if newcomer_progression::overrides_required_quest(world, quest_id)
+        || newcomer_v2::is_v2_quest(quest_id)
+    {
+        return imported_required_quest_id;
+    }
     world
         .resource::<RuntimeConfigResource>()
         .config
@@ -1176,7 +1581,7 @@ fn crystal_required_quest_chain_completed(world: &World, required_quest_id: i32)
         {
             return false;
         }
-        current = crystal_quest_info_by_id(current)
+        current = effective_crystal_quest_info_by_id(world, current)
             .map(|info| effective_crystal_required_quest_id(world, info.index, info.quest_needed))
             .unwrap_or(0);
     }
@@ -1188,6 +1593,34 @@ pub(super) fn advance_crystal_quest_kill(
     monster_name: &str,
 ) -> Vec<ServerPacket> {
     let mut changed = Vec::new();
+    let newcomer_v1 = newcomer_progression::enabled(world);
+    let current_map = world
+        .resource::<super::resources::MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let templates = world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .filter(|quest| quest.stage == QuestStage::InProgress)
+        .filter_map(|quest| {
+            if newcomer_v2::is_v2_quest(quest.quest_id)
+                && !newcomer_v2::objective_map_matches(
+                    world,
+                    quest.quest_id,
+                    &world
+                        .resource::<super::resources::MapRuntimeResource>()
+                        .current_map
+                        .file_name,
+                )
+            {
+                return None;
+            }
+            effective_crystal_quest_template_by_id(world, quest.quest_id)
+                .map(|template| (quest.quest_id, template))
+        })
+        .collect::<BTreeMap<_, _>>();
     {
         let mut quests = world.resource_mut::<QuestResource>();
         for quest in quests
@@ -1195,11 +1628,23 @@ pub(super) fn advance_crystal_quest_kill(
             .iter_mut()
             .filter(|quest| quest.stage == QuestStage::InProgress)
         {
-            let Some(template) = crystal_quest_template_by_id(quest.quest_id) else {
+            if newcomer_progression::is_newcomer_quest(quest.quest_id) && !newcomer_v1 {
+                continue;
+            }
+            let Some(template) = templates.get(&quest.quest_id) else {
                 continue;
             };
             for task in &template.kill_tasks {
-                if !monster_name.starts_with(&task.monster_name) {
+                // Respawn/kill awards carry the template name, not an instance
+                // suffix. Oma0 and OmaFighter are distinct Crystal monsters.
+                if !monster_name.eq_ignore_ascii_case(&task.monster_name) {
+                    continue;
+                }
+                if !periodic_quests::objective_map_matches(
+                    quest.quest_id,
+                    task.monster_index,
+                    &current_map,
+                ) {
                     continue;
                 }
                 if increment_crystal_quest_task(
@@ -1231,6 +1676,17 @@ pub(super) fn advance_crystal_quest_kill(
 
 pub(super) fn advance_crystal_quest_flag(world: &mut World, flag_number: i32) -> Vec<ServerPacket> {
     let mut changed = Vec::new();
+    let newcomer_v1 = newcomer_progression::enabled(world);
+    let templates = world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .filter(|quest| quest.stage == QuestStage::InProgress)
+        .filter_map(|quest| {
+            effective_crystal_quest_template_by_id(world, quest.quest_id)
+                .map(|template| (quest.quest_id, template))
+        })
+        .collect::<BTreeMap<_, _>>();
     {
         let mut quests = world.resource_mut::<QuestResource>();
         for quest in quests
@@ -1238,7 +1694,14 @@ pub(super) fn advance_crystal_quest_flag(world: &mut World, flag_number: i32) ->
             .iter_mut()
             .filter(|quest| quest.stage == QuestStage::InProgress)
         {
-            let Some(template) = crystal_quest_template_by_id(quest.quest_id) else {
+            // V2 flags are reserved for committed server events, never NPC SET flags.
+            if newcomer_v2::is_v2_quest(quest.quest_id) {
+                continue;
+            }
+            if newcomer_progression::is_newcomer_quest(quest.quest_id) && !newcomer_v1 {
+                continue;
+            }
+            let Some(template) = templates.get(&quest.quest_id) else {
                 continue;
             };
             for task in &template.flag_tasks {
@@ -1290,13 +1753,17 @@ pub(super) fn crystal_quest_item_task_drop(
     quantity: u32,
 ) -> Option<CrystalQuestItemTaskDrop> {
     let resources = world.resource::<InventoryResource>();
+    let newcomer_v1 = newcomer_progression::enabled(world);
     world
         .resource::<QuestResource>()
         .quests
         .iter()
         .filter(|quest| quest.stage == QuestStage::InProgress)
         .find_map(|quest| {
-            let template = crystal_quest_template_by_id(quest.quest_id)?;
+            if newcomer_progression::is_newcomer_quest(quest.quest_id) && !newcomer_v1 {
+                return None;
+            }
+            let template = effective_crystal_quest_template_by_id(world, quest.quest_id)?;
             for task in &template.item_tasks {
                 if !crystal_quest_task_item_matches_drop(task, key, name) {
                     continue;
@@ -1341,13 +1808,36 @@ pub(super) fn crystal_quest_item_task_drop(
         })
 }
 
+pub(super) fn active_crystal_quest_item_task_remaining(
+    world: &World,
+    quest_id: i32,
+    item_name: &str,
+) -> Option<u32> {
+    let quest = world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == quest_id && quest.stage == QuestStage::InProgress)?;
+    let template = effective_crystal_quest_template_by_id(world, quest_id)?;
+    let task = template
+        .item_tasks
+        .iter()
+        .find(|task| task.item_name.eq_ignore_ascii_case(item_name.trim()))?;
+    let required = u32::from(task.count.max(1));
+    let current = crystal_quest_task_progress(quest, &crystal_item_task_key(task.item_index));
+    (current < required).then_some(required - current)
+}
+
 pub(super) fn advance_crystal_quest_item_task(
     world: &mut World,
     quest_id: i32,
     task_key: &str,
     quantity: u32,
 ) -> bool {
-    let Some(template) = crystal_quest_template_by_id(quest_id) else {
+    if newcomer_progression::is_newcomer_quest(quest_id) && !newcomer_progression::enabled(world) {
+        return false;
+    }
+    let Some(template) = effective_crystal_quest_template_by_id(world, quest_id) else {
         return false;
     };
     let mut quests = world.resource_mut::<QuestResource>();
@@ -1407,16 +1897,56 @@ pub(super) fn quest_log_snapshots(world: &World, language: LanguageCode) -> Vec<
     let mut seen = BTreeSet::<i32>::new();
     let mut snapshots = Vec::new();
     for quest in &quests.quests {
+        if newcomer_v2::enabled(world)
+            && quest_template_by_id(quest.quest_id).is_some()
+            && quest.stage == QuestStage::Available
+        {
+            continue;
+        }
+        if newcomer_v2::is_v2_quest(quest.quest_id) && !newcomer_v2::enabled(world) {
+            continue;
+        }
+        if newcomer_progression::is_newcomer_quest(quest.quest_id) && !quests.newcomer_v1_cadence {
+            continue;
+        }
+        if newcomer_progression::is_daily_option(quest.quest_id)
+            && quest.stage == QuestStage::Available
+        {
+            let Some(info) = effective_crystal_quest_info_by_id(world, quest.quest_id) else {
+                continue;
+            };
+            if !can_accept_crystal_quest(world, &info) {
+                continue;
+            }
+        }
+        if mir2_game_data::periodic_quests::is_periodic(quest.quest_id)
+            && quest.stage == QuestStage::Available
+            && !can_accept_quest(world, quest.quest_id)
+        {
+            continue;
+        }
         seen.insert(quest.quest_id);
-        snapshots.push(quest.snapshot(language));
+        snapshots.push(effective_quest_snapshot(world, quest, language));
     }
     for mut info in crystal_normal_quest_infos_1_to_45() {
         apply_content_profile_quest_reward_overrides(world, &mut info);
+        newcomer_progression::apply_quest_info_override(world, &mut info);
         if seen.contains(&info.index) || !can_accept_crystal_quest(world, &info) {
             continue;
         }
-        snapshots
-            .push(QuestState::from_crystal_info(&info, QuestStage::Available).snapshot(language));
+        let state = quest_state_from_effective_info(world, &info, QuestStage::Available);
+        snapshots.push(effective_quest_snapshot(world, &state, language));
+    }
+    for info in newcomer_progression::quest_infos(world)
+        .into_iter()
+        .chain(newcomer_v2::quest_infos(world))
+        .chain(periodic_quests::infos(world))
+    {
+        if seen.contains(&info.index) || !can_accept_crystal_quest(world, &info) {
+            continue;
+        }
+        let state = quest_state_from_effective_info(world, &info, QuestStage::Available);
+        snapshots.push(effective_quest_snapshot(world, &state, language));
     }
     snapshots
 }
@@ -1427,8 +1957,8 @@ pub(super) fn quest_dialog_links_for_npc(
     quest_ids: &[i32],
 ) -> Vec<NpcDialogLinkState> {
     let mut links = Vec::new();
-    for quest_id in quest_ids {
-        let Some(info) = effective_crystal_quest_info_by_id(world, *quest_id) else {
+    for quest_id in effective_quest_ids_for_npc(world, npc_object_id, quest_ids) {
+        let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
             continue;
         };
         let stage = quest_stage(world, info.index).unwrap_or(QuestStage::Available);
@@ -1472,6 +2002,24 @@ pub(super) fn quest_dialog_links_for_npc(
     links.sort_by(|left, right| left.text.cmp(&right.text));
     links.dedup_by(|left, right| left.target == right.target);
     links
+}
+
+pub(super) fn effective_quest_ids_for_npc(
+    world: &World,
+    npc_object_id: u32,
+    source_ids: &[i32],
+) -> Vec<i32> {
+    let mut ids = source_ids.to_vec();
+    for quest_id in newcomer_progression::quest_ids_for_npc(world, npc_object_id)
+        .into_iter()
+        .chain(newcomer_v2::quest_ids_for_npc(world, npc_object_id))
+        .chain(periodic_quests::ids_for_npc(npc_object_id))
+    {
+        if !ids.contains(&quest_id) {
+            ids.push(quest_id);
+        }
+    }
+    ids
 }
 
 pub(super) fn crystal_quest_dialog_for_target(
@@ -1528,6 +2076,14 @@ fn accept_crystal_quest_from_npc(
         );
     }
     let stage = begin_quest(world, info.index);
+    if mir2_game_data::periodic_quests::is_periodic(info.index) {
+        if let Some(packet) = periodic_quests::info_packet(world, info.index) {
+            packets.push(packet);
+        }
+        packets.push(ServerPacket::CompleteQuest {
+            completed_quests: completed_quest_ids(world),
+        });
+    }
     packets.push(ServerPacket::ChangeQuest {
         quest_id: info.index,
         task_list: crystal_quest_task_list(world, info.index)
@@ -1570,7 +2126,7 @@ fn finish_crystal_quest_from_npc(
                 quest_id: info.index,
                 task_list: Vec::new(),
                 taken: false,
-                completed: true,
+                completed: quest_recurrence::quest_completion_is_permanent(world, info.index),
                 new: false,
                 quest_state: 2,
                 track_quest: false,
@@ -1578,6 +2134,9 @@ fn finish_crystal_quest_from_npc(
             packets.push(ServerPacket::CompleteQuest {
                 completed_quests: completed_quest_ids(world),
             });
+            if let Some(packet) = newcomer_daily_bonus_update_packet(world, info.index) {
+                packets.push(packet);
+            }
         } else {
             packets.push(ServerPacket::Chat {
                 message: "Cannot hand in quest; your bag is full.".to_string(),
@@ -1589,6 +2148,21 @@ fn finish_crystal_quest_from_npc(
         crystal_quest_dialog_copy(info, quest_stage(world, info.index).unwrap_or(stage), false),
         packets,
     )
+}
+
+pub(super) fn newcomer_daily_bonus_update_packet(
+    world: &World,
+    completed_quest_id: i32,
+) -> Option<ServerPacket> {
+    if !newcomer_progression::is_daily_option(completed_quest_id)
+        || !matches!(
+            quest_stage(world, newcomer_progression::DAILY_BONUS_ID),
+            Some(QuestStage::InProgress | QuestStage::ReadyToTurnIn)
+        )
+    {
+        return None;
+    }
+    crystal_quest_update_packet(world, newcomer_progression::DAILY_BONUS_ID)
 }
 
 fn crystal_quest_reward_selection_dialog(
@@ -1670,10 +2244,28 @@ fn crystal_quest_dialog_copy(
 }
 
 pub(super) fn crystal_quest_start_npc_matches(info: &ClientQuestInfo, npc_object_id: u32) -> bool {
+    if mir2_game_data::periodic_quests::is_periodic(info.index) {
+        return mir2_game_data::periodic_quests::npc(npc_object_id).is_some();
+    }
+    if newcomer_v2::is_v2_quest(info.index) {
+        return info.npc_index == npc_object_id;
+    }
+    if newcomer_progression::is_newcomer_quest(info.index) {
+        return npc_object_id == newcomer_progression::NEWCOMER_BOARD_OBJECT_ID;
+    }
     crystal_quest_npc_index_matches(info.npc_index, npc_object_id)
 }
 
 pub(super) fn crystal_quest_finish_npc_matches(info: &ClientQuestInfo, npc_object_id: u32) -> bool {
+    if mir2_game_data::periodic_quests::is_periodic(info.index) {
+        return mir2_game_data::periodic_quests::npc(npc_object_id).is_some();
+    }
+    if newcomer_v2::is_v2_quest(info.index) {
+        return info.finish_npc_index == npc_object_id;
+    }
+    if newcomer_progression::is_newcomer_quest(info.index) {
+        return npc_object_id == newcomer_progression::NEWCOMER_BOARD_OBJECT_ID;
+    }
     if info.finish_npc_index == 0 {
         return crystal_quest_start_npc_matches(info, npc_object_id);
     }
@@ -1714,7 +2306,7 @@ pub(super) fn crystal_npc_quest_icon(
     // Only when no current quest targets this NPC does Crystal inspect the
     // NPC's quest list, including the authoritative level/class/prerequisite
     // acceptance gates.
-    for &quest_id in quest_ids {
+    for quest_id in effective_quest_ids_for_npc(world, npc_object_id, quest_ids) {
         let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
             continue;
         };
@@ -1752,11 +2344,7 @@ fn crystal_completed_quest_icon(quest_type: u8) -> Option<u8> {
 }
 
 fn crystal_quest_npc_index_matches(npc_index: u32, npc_object_id: u32) -> bool {
-    npc_index == npc_object_id
-        || crystal_npc_info_manifest().npcs.into_iter().any(|npc| {
-            npc.npc_index == i32::try_from(npc_index).unwrap_or(i32::MAX)
-                && npc.loaded_object_id == Some(npc_object_id)
-        })
+    canonical_crystal_quest_npc_object_id(npc_index) == npc_object_id
 }
 
 fn crystal_quest_finish_npc_label(info: &ClientQuestInfo) -> String {
@@ -1765,25 +2353,29 @@ fn crystal_quest_finish_npc_label(info: &ClientQuestInfo) -> String {
     } else {
         info.finish_npc_index
     };
-    crystal_npc_info_manifest()
-        .npcs
-        .into_iter()
-        .find(|npc| {
-            npc.npc_index == i32::try_from(index).unwrap_or(i32::MAX)
-                || npc.loaded_object_id == Some(index)
-        })
+    canonical_crystal_quest_npc_info(index)
         .map(|npc| npc.name)
         .unwrap_or_else(|| format!("NPC {index}"))
 }
 
 pub(super) fn completed_quest_ids(world: &World) -> Vec<i32> {
-    world
+    let mut ids: Vec<i32> = world
         .resource::<QuestResource>()
         .quests
         .iter()
-        .filter(|quest| quest.stage == QuestStage::Completed)
+        .filter(|quest| {
+            quest.stage == QuestStage::Completed
+                && (!newcomer_progression::is_newcomer_quest(quest.quest_id)
+                    || newcomer_progression::enabled(world))
+                && (!newcomer_v2::is_v2_quest(quest.quest_id) || newcomer_v2::enabled(world))
+                && quest_recurrence::quest_completion_is_permanent(world, quest.quest_id)
+        })
         .map(|quest| quest.quest_id)
-        .collect()
+        .collect();
+    ids.extend(periodic_quests::unavailable_ids(world));
+    ids.sort_unstable();
+    ids.dedup();
+    ids
 }
 
 pub(super) fn npc_stage_dialog_for_object(

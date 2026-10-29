@@ -1,0 +1,33 @@
+{
+  "cwd": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01",
+  "green": {
+    "driverReceipt": "RUN-02-GREEN.json",
+    "expectedExit": 0,
+    "rawLog": "local-tests-02-green.log",
+    "rawTestReceipt": "TEST-RECEIPT-1791153782846518900.json",
+    "result": "32 run / 32 pass / 0 errors / 0 skips"
+  },
+  "integration": "root must pin final source, preserve only two GETs, require process exit0 plus complete receipt; never infer write rights",
+  "localOfflineTests": [
+    "C:/Python313/python.exe",
+    "-B",
+    "C:\\mir2-playtest-releases\\20261004-native-r18\\native-ci-account-auth-probe-worker-01\\test_cloudflare_read_authority_probe.py"
+  ],
+  "opaqueCliNotExecutedByWorker": true,
+  "python": "C:/Python313/python.exe",
+  "red": {
+    "driverReceipt": "RUN-01-RED.json",
+    "expectedExit": 1,
+    "rawLog": "local-tests-01-red.log",
+    "rawTestReceipt": "TEST-RECEIPT-1791153742646789500.json",
+    "result": "32 run / 31 pass / 1 literal-endpoint failure",
+    "sourceSnapshot": "RED01-cloudflare_read_authority_probe.py",
+    "testSnapshot": "RED01-test_cloudflare_read_authority_probe.py"
+  },
+  "rootOnlyFutureOpaqueCliExample": [
+    "python3",
+    "cloudflare_read_authority_probe.py",
+    "--receipt",
+    "<fresh CI artifact path>/cloudflare-read-authority.json"
+  ]
+}

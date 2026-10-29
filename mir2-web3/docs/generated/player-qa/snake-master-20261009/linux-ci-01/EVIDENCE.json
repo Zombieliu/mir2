@@ -1,0 +1,49 @@
+{
+  "schema": "mir2.snake-master.linux-ci-evidence.v1",
+  "run": "https://github.com/Zombieliu/mir2/actions/runs/37889758213",
+  "revision": "97a942a66dc184aeb0731e02dbf59c22414a1513",
+  "passed": true,
+  "artifactDigest": "sha256:058fe8a379cf7b9912b21ef7c28187767de328bb49f57a888a09bb594c072f02",
+  "artifactBytes": 33753568,
+  "gatewaySha256": "e2fb8e2adda59ca7acbaf723f816772d59dccbec0b52d1a1c642c8a329844e83",
+  "entries": [
+    {
+      "path": "CI-VERIFIED.json",
+      "size": 1227,
+      "sha256": "009ca9c02d57d29dce122369519322931de80b4e64bef026b6f96394a0e86ca1"
+    },
+    {
+      "path": "ci-status-original.json",
+      "size": 4908,
+      "sha256": "4bac3f991ec7338143b2b0071b2093cd718fd0231cc0a5b55bad0f28bfa82787"
+    },
+    {
+      "path": "ci-artifacts-original.json",
+      "size": 751,
+      "sha256": "3b7748b56e46f53cc25572715b823141940f72b555eda2cebd7b2da66da361b2"
+    },
+    {
+      "path": "ci-log-original.txt",
+      "size": 3452929,
+      "sha256": "25c59ab0caf410eaf8d13494d3a4ce4291fc4c7c665a9eac03e6041a4a326b3c"
+    },
+    {
+      "path": "RELEASE.json",
+      "size": 1553,
+      "sha256": "07631dc1501facb285b0027b4f4bb075a5ec8d78340bb7dc8aed4ff7e326efce"
+    },
+    {
+      "path": "VERIFIED-FILES.json",
+      "size": 412,
+      "sha256": "81444c10123f877a6f600d93e31032ffd598a5315dc8214550267d5fc319d923"
+    },
+    {
+      "path": "latest-mir2-gateway-release.json",
+      "size": 1721,
+      "sha256": "5e0b07461d576dc3082f65b778b8362e849cb50aedd53389bc9d9c0d33689337"
+    }
+  ],
+  "archiveSize": 324506,
+  "archiveSha256": "a90d5503c93f9f2faf27f35f06d8e3b76e0ffd405cb653a6392e45a82bd83639",
+  "published": false
+}

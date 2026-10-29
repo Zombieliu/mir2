@@ -1,0 +1,93 @@
+{
+  "schema": "mir2.static-update-deployment.v1",
+  "sequence": 12,
+  "feedSha256": "7EFDDDF34FBF58FFA0BF8C4F7FCB1A9AD2BAC869CB3F003CEA0A0C9C53356C88",
+  "signatureSha256": "7DD131DDDCEF9107EA0C80363CC9CA44746603C586A1E23E00FF6AA178006916",
+  "archiveSha256": "E6C58DD2B59FDB36A6A2B5D771777F7323103FE852CAE4594CBF1556DB8B1649",
+  "caddyBeforeSha256": "C9EB1149DD23BED11B94B921E812FF111822410E487C4EF61B3C9BB351C649BD",
+  "caddyAfterSha256": "C9EB1149DD23BED11B94B921E812FF111822410E487C4EF61B3C9BB351C649BD",
+  "signatureValidation": "externally-verified-before-SHA256-pinned-upload",
+  "immutableReleases": {
+    "releases/game-WN-CANDIDATE-20261004-invited-17": "promoted",
+    "releases/updater-FB3505D6D84D997C-s12": "promoted"
+  },
+  "healthBefore": [
+    {
+      "port": 7110,
+      "revision": null,
+      "capacity": {
+        "maxWsConnections": 100,
+        "maxActiveSessions": 100,
+        "maxReconnectLeases": 100,
+        "maxLoginInFlight": 8,
+        "maxNewCharacterInFlight": 4,
+        "maxStartGameInFlight": 4,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      }
+    },
+    {
+      "port": 7210,
+      "revision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+      "capacity": {
+        "maxWsConnections": 66,
+        "maxActiveSessions": 51,
+        "maxReconnectLeases": 51,
+        "maxLoginInFlight": 2,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      }
+    }
+  ],
+  "healthAfter": [
+    {
+      "port": 7110,
+      "revision": null,
+      "capacity": {
+        "maxWsConnections": 100,
+        "maxActiveSessions": 100,
+        "maxReconnectLeases": 100,
+        "maxLoginInFlight": 8,
+        "maxNewCharacterInFlight": 4,
+        "maxStartGameInFlight": 4,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      }
+    },
+    {
+      "port": 7210,
+      "revision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+      "capacity": {
+        "maxWsConnections": 66,
+        "maxActiveSessions": 51,
+        "maxReconnectLeases": 51,
+        "maxLoginInFlight": 2,
+        "maxNewCharacterInFlight": 1,
+        "maxStartGameInFlight": 2,
+        "currentWsConnections": 0,
+        "currentActiveSessions": 0,
+        "currentReconnectLeases": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentStartGameInFlight": 0
+      }
+    }
+  ],
+  "backupDirectory": "/var/backups/mir2-client-updates/20261004T025514Z-60775afde4",
+  "retainedStageDirectory": "/srv/.mir2-client-update-stage-20261004T025514Z-60775afde4",
+  "latestUrl": "https://165.154.65.136.sslip.io/client-updates/latest.json"
+}

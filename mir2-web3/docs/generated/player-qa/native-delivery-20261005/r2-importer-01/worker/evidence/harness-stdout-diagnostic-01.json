@@ -1,0 +1,6 @@
+{
+  "nodeExit": 1,
+  "nodeLogsAndReceiptWritten": true,
+  "harnessPostReceiptPrintFailed": "UnicodeEncodeError: gbk cannot encode U+FEFF in test title",
+  "rawFailuresPreserved": true
+}

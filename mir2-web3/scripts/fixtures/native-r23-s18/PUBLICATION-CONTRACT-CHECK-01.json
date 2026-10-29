@@ -1,0 +1,221 @@
+{
+  "schema": "mir2.r23.s18.local-publication-contracts.v1",
+  "passed": true,
+  "gameSourceRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+  "gameCandidate": "WN-CANDIDATE-20261009-invited-23",
+  "engineSourceRevision": "b4390ee4c987bbf000ba1d95761151e39fc0d54f",
+  "sequence": 18,
+  "predecessorSequence": 17,
+  "sourcePlanSha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0",
+  "rootVerificationSha256": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf",
+  "nativePlanSha256": "3588054ce0863124c7995a3a05509a82c88d91d7767211d0cfac5c3ef46d759b",
+  "literalSha256": "66a6b73900111f2f3044f1ed1cf110091d5a02e52b57e50e097b79df577f6a69",
+  "objects": 40,
+  "totalBytes": 1052144037,
+  "tests": {
+    "offline": {
+      "pass": 16,
+      "fail": 0
+    },
+    "delivery": {
+      "pass": 76,
+      "fail": 0
+    },
+    "interruptWindows": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 1,
+      "skipReason": "GNU timeout requires Linux CI"
+    },
+    "workerBeforeRootEntryIntegration": {
+      "pass": 137,
+      "fail": 1,
+      "retained": true,
+      "failure": "Actual index dispatch missing new route; 405 versus401"
+    },
+    "workerAllSixAfterRootEntryIntegration": {
+      "pass": 828,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "outputs": [
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication-plan.json",
+      "size": 28527,
+      "sha256": "66a6b73900111f2f3044f1ed1cf110091d5a02e52b57e50e097b79df577f6a69"
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/src/native-r23-s18-publication.mjs",
+      "size": 76039,
+      "sha256": "23a4f53b14f89f6528b49ef6390a1cc02d3785ddb3d9dc0ceeee0d36ea34512d"
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/test/native-r23-s18-publication.test.mjs",
+      "size": 55720,
+      "sha256": "f5cd31585189c00987b8f14f6758513dfbc66d1b88f84b35fc57626275921f6c"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/actual-cms18/PUBLICATION-PLAN.json",
+      "size": 15719,
+      "sha256": "a6bbad7431913438fb50d378ec76eeaedf96a6c5dc077e6625e9247860c026a0"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/actual-cms18/ROOT-VERIFICATION.json",
+      "size": 424,
+      "sha256": "6465c2919c92a31930350d0f147bac76d7a235f1544575bae4ed725b6b133dbf"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/predecessor17/PUBLICATION-PLAN.json",
+      "size": 15756,
+      "sha256": "ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/predecessor17/ROOT-VERIFICATION.json",
+      "size": 424,
+      "sha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/predecessor17/latest.json",
+      "size": 1159,
+      "sha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/predecessor17/latest.p7s",
+      "size": 1614,
+      "sha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/preview/artifacts/feed/latest.json",
+      "size": 1159,
+      "sha256": "2d87c59edb2aff2b55237dad1fcc418eac6ba03b6514720982ac16c1215f20d2"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/preview/artifacts/feed/latest.p7s",
+      "size": 1614,
+      "sha256": "1f94346017807b0d6a2c24a3f4cdd3226461cc9618ed6dc0daa43460e7c0f8f4"
+    },
+    {
+      "path": "scripts/native_r23_s18_r2_delivery.py",
+      "size": 93204,
+      "sha256": "305c22cee63558d80288371df58eb491d3ef6522a34c019ec3f6be6ddea4b694"
+    },
+    {
+      "path": "scripts/test_native_r23_s18_interrupt.py",
+      "size": 4784,
+      "sha256": "8c028af2d647f1cb62af921e187744ea7637a84a3c0a005736f26c3138fb4ec9"
+    },
+    {
+      "path": "scripts/test_native_r23_s18_r2_delivery.py",
+      "size": 83441,
+      "sha256": "7bce1a900484b6f4d4994b8336bbf8f4b286af3e09b4a26500ed01ffc229bade"
+    },
+    {
+      "path": "scripts/prepare_native_r23_s18_fixed.py",
+      "size": 32384,
+      "sha256": "f39abd5c10ed568bee58eddfdc6be9f04d242e3d77737ae9a30eef29c23f1510"
+    },
+    {
+      "path": "scripts/test_prepare_native_r23_s18_offline.py",
+      "size": 16072,
+      "sha256": "3995fb3cc461350e86aae257b77e78c5ab350bcb5c3743970a5678811ae24b5e"
+    },
+    {
+      "path": "scripts/fixtures/native-r23-s18/GENERATOR-REPORT.json",
+      "size": 6595,
+      "sha256": "a686b9740fc37fde131735b0f5d461a26fe6dfb6252d5d9a2b9b53d6e0e9048c"
+    }
+  ],
+  "originalTenR22Inputs": [
+    {
+      "path": "scripts/native_r22_s17_r2_delivery.py",
+      "sha256": "5026c3820c79734c696372433532ff7fcc84d0678b047ddff8e332c0b1c402e7",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/test_native_r22_s17_r2_delivery.py",
+      "sha256": "861d51aa5abf6731ddbea09aeab4b9bf15ab550f381abe0c91de0c014f59d416",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/test_native_r22_s17_interrupt.py",
+      "sha256": "f8e26c75fd57c8d712895993412059ef28ba0943875f6adea3d59e528bfd02a9",
+      "unchanged": true
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/src/native-r22-s17-publication.mjs",
+      "sha256": "ad7881d6b2b86eaf5eb1aa23993cfd86ac06b6ed8052f85114a540d1dba748b6",
+      "unchanged": true
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/src/native-r22-s17-publication-plan.json",
+      "sha256": "fb1dee3e31f8f1b2fbd78b9f41f4c93001b533cc0504096f6fc07d826b022c26",
+      "unchanged": true
+    },
+    {
+      "path": "infra/cloudflare/mir2-r2-bulk-upload/test/native-r22-s17-publication.test.mjs",
+      "sha256": "137eab76a48fe0e68779427c50f95d62cf3f145168045f385dbf07f4fc824373",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/fixtures/native-r22-s17/actual-cms17/PUBLICATION-PLAN.json",
+      "sha256": "ed5e6d25c508e2c9f5bccac7a1e2d258617364926f186fbde7eec9b753e330ee",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/fixtures/native-r22-s17/actual-cms17/ROOT-VERIFICATION.json",
+      "sha256": "8ec73ca7d1e7c500a46a9c58af41789307087f6cd7d3b74a77dc5e056981cabf",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/fixtures/native-r22-s17/preview/artifacts/feed/latest.json",
+      "sha256": "e7efebcb6b897e15f3b93b8a7a8eeb354d0eb01ccf799bb155c26c394f6efc4f",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/fixtures/native-r22-s17/preview/artifacts/feed/latest.p7s",
+      "sha256": "84145fbabc752cd648d81415a5d45aba464ee67ddd0a7d2a1a9f296c31844276",
+      "unchanged": true
+    }
+  ],
+  "logs": [
+    {
+      "path": "scripts\\fixtures\\native-r23-s18\\qa-runs\\GENERATION-ACTUAL-01.log",
+      "size": 744,
+      "sha256": "2fc5f8238ffb6afac3164ded14047009b3659d716f48ee882fa145797feec9ea"
+    },
+    {
+      "path": "scripts\\fixtures\\native-r23-s18\\qa-runs\\PREPARATION-OFFLINE-03-ACTUAL.log",
+      "size": 2588,
+      "sha256": "c5ed5ebf5e0b0f8066358fe1a360959c097c1d943eba767facf624fa3d5daa4c"
+    },
+    {
+      "path": "scripts\\fixtures\\native-r23-s18\\qa-runs\\DELIVERY-CONTRACT-01.log",
+      "size": 12429,
+      "sha256": "ec4ab1e73c689d1fcb0185f2231481d00a51835133698afbf7c99da7f9e1ef4e"
+    },
+    {
+      "path": "scripts\\fixtures\\native-r23-s18\\qa-runs\\INTERRUPT-CONTRACT-01.log",
+      "size": 507,
+      "sha256": "191e0b47bdf8b2b0b5815a588efe458c4eefa1a1cdd11c0fcd7f9e5239e1f4a5"
+    },
+    {
+      "path": "scripts\\fixtures\\native-r23-s18\\qa-runs\\WORKER-CONTRACT-01.log",
+      "size": 30068,
+      "sha256": "b0538892e3145bb4ba1b8d413c032d91bff19a490f8c106d1fc329611610514a"
+    },
+    {
+      "path": "scripts\\fixtures\\native-r23-s18\\qa-runs\\WORKER-ALL-SIX-CONTRACT-02.log",
+      "size": 175210,
+      "sha256": "d353a9dfa45be4f5d91aa5c2cf3e666a145e8b8783d6df5ac9edc3267f2151b1"
+    }
+  ],
+  "generatorRootCmsReverified": false,
+  "rootIssuedActualReceiptConsumed": true,
+  "cloudWrites": false,
+  "actualStageAccepted": false,
+  "actualPromoteAccepted": false,
+  "actualNetworkGameAcceptance": false,
+  "actualHumanAcceptance": false,
+  "gitMutationsByWorker": false
+}

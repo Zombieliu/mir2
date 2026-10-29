@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "runId": 37165934500,
+  "sourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "artifactId": 11289148904,
+  "artifactZipSha256": "41d83ecc5afe0eb859be811d86bb263754a9cd199b8243f79d58a29f03255d56",
+  "archiveSha256": "621267dace508259d9a796d4f075fd2357d5590cff27fe41c98dc37bb884164a",
+  "binarySha256": "1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab",
+  "binarySizeBytes": 79743656,
+  "operatorManifestSha256": "a54be4aa897ec1612352787c9c18e77fd9af036a4108a53463d88fc5d8f14e67",
+  "deployed": false
+}

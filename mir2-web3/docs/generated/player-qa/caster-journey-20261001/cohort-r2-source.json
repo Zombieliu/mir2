@@ -1,0 +1,64 @@
+{
+  "startedAt": "2026-10-01T09:07:30.9302190+00:00",
+  "sourceCommit": "b39cf9b38a9c8d4ac0a8160f70e128aee89c3120",
+  "sourceDirty": true,
+  "sourceFileHashes": [
+    {
+      "path": "apps/game-client/platform-windows/src/buried_monster_replay_tests.rs",
+      "sha256": "9871CC97F4D7AF02D07D6C67F3C39558F40FC59AD59D616FA063251F2549F5DA"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis03-buried-zombie2-wizard-20261001.json",
+      "sha256": "A2BC2ADE3D091D4A2E481A4F209567D558F2847397F8A818136FA662F2BE50D6"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/map_transfer_poison_tests.rs",
+      "sha256": "BD6B7807FBBEAB08A26F1571BD5F79C867D43B4E26AF3B8AA9E0B8B10ABA316B"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/private_monster_snapshot_tests.rs",
+      "sha256": "23E86792E62DBA86CA381A39A3B4FE1562E989B7EB580A11F79555688EBD3E82"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/finite_control_poison_handoff_tests.rs",
+      "sha256": "87A58013385187347AC9236AB27335DE2AA81C59CC332AC9BABB885A3CBCC58D"
+    },
+    {
+      "path": "apps/simulation/tests/crystal_mana_projection.rs",
+      "sha256": "C5E824D010CE9754E552B891F8DBA75C560E48351973B0AC0896ED14E71A8A03"
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone_poison_transfer.rs",
+      "sha256": "672D35F45CAA745703E73DD7B2D0A15987CA0622161E0D02BA908D9873CD78F6"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/protocol-newcomer-v2-recovery.mjs",
+      "sha256": "1139ADEECE5249C1EA7BBA3214AA8017B1D482F7B4E189AB4F57E61A52F9DD54"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/test-protocol-newcomer-v2-recovery.mjs",
+      "sha256": "2EEC65006429A2B64E7E3CC3AF260E265AF8C122B1D810BD4098283DE13BE45E"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/test-verify-caster-newcomer-v2-evidence.mjs",
+      "sha256": "011EAB9EF594B6933FEA500857D6465DA7A47141DA49A97BA37A672A8F6BA6A3"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/verify-caster-newcomer-v2-evidence.mjs",
+      "sha256": "A6C8B63AA47BABCB7C16F88F5C7338A8F4EDA7E9CF1054A0CBD136ACA96AB564"
+    }
+  ],
+  "gatewayExe": "C:\\mir2-caster-qa-20261001-r2\\mir2-gateway-candidate.exe",
+  "gatewaySha256": "EBE0894BCE30E2671C79F5567624C0D4AEEAA8D539D6BA6EE096BA69BD5F1A51",
+  "classes": [
+    "Wizard",
+    "Taoist"
+  ],
+  "scope": "independent fresh ordinary local WebSocket newcomer-v2 after caster fixes",
+  "originalCohort": "C:/mir2-caster-qa-20261001",
+  "originalCohortReset": false,
+  "humanStoreTouched": false,
+  "publicServerTouched": false,
+  "visualAccepted": false,
+  "qaAcceleration": false
+}

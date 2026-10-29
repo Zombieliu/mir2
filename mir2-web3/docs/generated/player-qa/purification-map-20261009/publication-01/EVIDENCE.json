@@ -1,0 +1,474 @@
+{
+  "schema": "mir2.purification-map-actual-ci-and-publication.v1",
+  "createdUtc": "2026-10-09T12:47:46.175642+00:00",
+  "revision": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "ciRunId": "37918999132",
+  "ciConclusion": "success",
+  "binarySha256": "952fe0c77ab9b3b13b9c96dab0b1d5503baa77fc90006e15e009d11d2c85c243",
+  "binaryBytes": 83457496,
+  "githubFullArtifactDigest": "sha256:cf530a2279c6b4d198984e1abb46748e5d3ff898721d31d25665f42f8e01f1ad",
+  "originalLargeBinariesAndArchiveRetainedExternally": true,
+  "completeLargeArchiveReadbackAndElfsVerified": true,
+  "clientSource": "faefb69671272843958f68781b4f8ca2f4014522",
+  "clientRelease": "R23",
+  "signedClientFeedSequence": 18,
+  "gatewaySource": "c70436f34eabb432d769e0082c0afa23303294b0",
+  "ordinaryPublicChecks": 44,
+  "nativeProtocolResumeChecks": 18,
+  "confirmedNormalLogouts": 14,
+  "originalRealmUnchanged": true,
+  "clientReinstallRequired": false,
+  "ownedTestAccountsSavedNormalMovements": true,
+  "nativeRenderedGameplayAccepted": false,
+  "fullGoalComplete": false,
+  "postdeployCompletion": {
+    "schema": "mir2.purification-map.postdeploy-completion.v1",
+    "createdUtc": "2026-10-09T12:34:22.341271+00:00",
+    "revision": "c70436f34eabb432d769e0082c0afa23303294b0",
+    "previousRevision": "faefb69671272843958f68781b4f8ca2f4014522",
+    "serverSwitched": true,
+    "applyRepeated": false,
+    "ciRunId": "37918999132",
+    "binarySha256": "952fe0c77ab9b3b13b9c96dab0b1d5503baa77fc90006e15e009d11d2c85c243",
+    "ordinaryChecks": 44,
+    "nativeResumeChecks": 18,
+    "confirmedNormalLogouts": 14,
+    "nativeResumeLogouts": [
+      {
+        "path": "cycle-1-cold-login-R2100cccbba.jsonl",
+        "sha256": "6d086ecc423943cdb27822e511080d6d91c003f9338b50c34a1b98c23f0ad724",
+        "requestSequence": 700,
+        "ackSequence": 701
+      },
+      {
+        "path": "cycle-1-resumed-R2100cccbba.jsonl",
+        "sha256": "e810f12e4d2d12606d99228334cdbe0b4daf5514f8c0e5f18eb833e6b9a2d7fc",
+        "requestSequence": 19,
+        "ackSequence": 20
+      },
+      {
+        "path": "cycle-2-cold-login-R2100cccbba.jsonl",
+        "sha256": "c5599e8ecfaf9ee8177c6f024fafd14488a9ddc8db13bed2bd1e51f13b59fbba",
+        "requestSequence": 702,
+        "ackSequence": 703
+      },
+      {
+        "path": "cycle-2-resumed-R2100cccbba.jsonl",
+        "sha256": "57191b8b7df2ed553dadf2d11e937eae22fdef6c53d9367dc24046cd6a574da0",
+        "requestSequence": 19,
+        "ackSequence": 20
+      },
+      {
+        "path": "cycle-3-cold-login-R2100cccbba.jsonl",
+        "sha256": "e92141c69d102b881bcf19bfd2b22b4a6410019e9c396ba50a3288b9a9590842",
+        "requestSequence": 700,
+        "ackSequence": 701
+      },
+      {
+        "path": "cycle-3-resumed-R2100cccbba.jsonl",
+        "sha256": "8cb2da7adbed907750ac4ec6eb18789d708100331e9eeda9cd61730eaf5e5818",
+        "requestSequence": 19,
+        "ackSequence": 20
+      }
+    ],
+    "afterReadbackSha256": "61714540086ab754c62b5cd25b434e77b83746bb0a0086763b0335cea55d54e3",
+    "originalRealmUnchanged": true,
+    "clientReinstallRequired": false,
+    "nativeRenderedGameplayAcceptance": false,
+    "fullGoalComplete": false,
+    "observedDriverFailures": [
+      {
+        "script": "deploy-purification-gateway-01.py",
+        "exit": 1,
+        "phase": "After successful server switch",
+        "error": "FileNotFoundError: local ordinary-public-01/PREPARATION.json missing",
+        "stdoutEvidence": "Tool session 80258 returned output; inner remote apply log retained"
+      },
+      {
+        "script": "verify-purification-postdeploy-01.py",
+        "exit": 1,
+        "phase": "After original 62 checks and PUBLIC-VERIFIED-01.json succeeded",
+        "error": "KeyError: 'normalLogouts' in newly added metadata finalization",
+        "stdoutEvidence": "Tool session 30212 returned output; both original result/trace logs retained"
+      }
+    ],
+    "metadataRecoveryOnly": true,
+    "productCodeOrTestsWeakened": false
+  },
+  "excluded": [
+    "Private account/SSH/env ledgers",
+    "Raw Caddy configuration",
+    "Signed HTTP redirect headers",
+    "Large ZIP/tar/ELF binaries (their exact digest and full verification are retained)"
+  ],
+  "limits": [
+    "Both original server CI jobs and package gates passed; original 51/66 capacity/resource limits preserved.",
+    "Public checks use existing six owned class/gender variants without QA provisioning; not real native rendering or natural level50 skill qualification.",
+    "First driver failed after successful apply; subsequent original 62 checks passed before newly added metadata KeyError. Both errors retained, apply not repeated.",
+    "Purification actor/buff transfer and Player magic preflight are published; general Hiding audience and Curse SC aggregation remain open."
+  ],
+  "archive": {
+    "file": "original-evidence.zip",
+    "bytes": 1655718,
+    "sha256": "6836a3a9fd86bca7db14e60e8903f693c98d641d63309edee32d729699a4894a",
+    "entries": [
+      {
+        "path": "ci-dispatch/DISPATCH-REQUEST.json",
+        "bytes": 353,
+        "sha256": "741f0f6a5b7733faf667ee718d84b8ddfca8cffa10f3662a18500715e9dd7229"
+      },
+      {
+        "path": "ci-dispatch/DISPATCH-RESULT.json",
+        "bytes": 425,
+        "sha256": "966ac7cea77cbda5b754091f98efe0f995cd9acd048b8866ecbd226fd1dda849"
+      },
+      {
+        "path": "ci-dispatch/dispatch.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "ci-dispatch/dispatch.stdout.log",
+        "bytes": 59,
+        "sha256": "c5a18012b02da5a80221a33bce0663b14fa1e5b0840c083d38894154ee9e306a"
+      },
+      {
+        "path": "ci-dispatch/DOWNLOADER-DERIVATION.json",
+        "bytes": 1046,
+        "sha256": "8135a75d8b766a96d58dd97ae6042fd1fbd8d8640ca620ee1588bc3dff8f132e"
+      },
+      {
+        "path": "ci-dispatch/remote-head.log",
+        "bytes": 41,
+        "sha256": "05d8e5f313808d50bfb7d3fef47e9828ce47d48bd951455de59490e60e30ad0a"
+      },
+      {
+        "path": "linux-ci/ci-artifacts-original.json",
+        "bytes": 751,
+        "sha256": "bde81c00d3758ae10334fb1c272083fc495163073edb5d8fcc96101ba13d4485"
+      },
+      {
+        "path": "linux-ci/ci-log-original.txt",
+        "bytes": 4022346,
+        "sha256": "6cc6b48119b7bb0cdc1fc19d164662cf38387a30659339d7b36b5b0723d6f40e"
+      },
+      {
+        "path": "linux-ci/ci-status-original.json",
+        "bytes": 5106,
+        "sha256": "cdfe14f873ef8d919cccaa3e8465c30f82b1d1f7a8c2e571c2027b6b228e7e74"
+      },
+      {
+        "path": "linux-ci/CI-VERIFIED.json",
+        "bytes": 1231,
+        "sha256": "c9cedf7c4d15bec027812edc8aa29fbf48bc73d7a1208eeb1162bfca7c8b098f"
+      },
+      {
+        "path": "linux-ci/latest-mir2-gateway-release.json",
+        "bytes": 1729,
+        "sha256": "071a567413d0a4ef38761c559efd293706b8c7039632dcdb05d9cf63216a2d19"
+      },
+      {
+        "path": "linux-ci/README.txt",
+        "bytes": 7476,
+        "sha256": "7cde83e530a922405c2d87b278dd9446537a8abf553b9b8b0a4c2e8425a1f3c2"
+      },
+      {
+        "path": "linux-ci/RELEASE.json",
+        "bytes": 1557,
+        "sha256": "324aa86445ea550d6d518dc50338640a387cbe713510ad405219a6fe4b36dce3"
+      },
+      {
+        "path": "linux-ci/VERIFIED-FILES.json",
+        "bytes": 412,
+        "sha256": "4c8bac55946f772699d420fd5930ddabcbfd4d36086eff2f6d2b78ba91ce7d10"
+      },
+      {
+        "path": "rollout/deploy-after-01.log",
+        "bytes": 2894,
+        "sha256": "61714540086ab754c62b5cd25b434e77b83746bb0a0086763b0335cea55d54e3"
+      },
+      {
+        "path": "rollout/deploy-apply-01.log",
+        "bytes": 2180,
+        "sha256": "ea0f6c0552bcad592609f9519314f2f43a0e43b16adca797e0d85f7808e5f8f1"
+      },
+      {
+        "path": "rollout/deploy-before-01.log",
+        "bytes": 2894,
+        "sha256": "e727820a886df52b5952e1de6287857b5f132fde47849ce8454d5f83d1f15d02"
+      },
+      {
+        "path": "rollout/deploy-preflight-01.log",
+        "bytes": 1452,
+        "sha256": "d686e19d2620025de6226ed23d5261949ea615a2ef16fed05a896cdc8bb1480d"
+      },
+      {
+        "path": "rollout/deploy-purification-gateway-01.py",
+        "bytes": 11672,
+        "sha256": "3a319f0fb367d9e677f99d0e268577ae6c9c5e205dd464ac38df18a7580202f2"
+      },
+      {
+        "path": "rollout/deploy-stage-created-01.log",
+        "bytes": 24,
+        "sha256": "4c71e2bbea8fd742c6963efc5ef891142587cd47dc4f286729a97d21c170bfc5"
+      },
+      {
+        "path": "rollout/deploy-stage-verified-01.log",
+        "bytes": 120,
+        "sha256": "7ac831bae8629af24d917b3dda625bfb4eb8c307725605b1f228167d35d08c41"
+      },
+      {
+        "path": "rollout/deploy-upload-01.log",
+        "bytes": 34,
+        "sha256": "e5730f28940662d448e21f72e570e68ff57f3c82ef1610ececb09a591b1c47be"
+      },
+      {
+        "path": "rollout/DEPLOYED-01.json",
+        "bytes": 2383,
+        "sha256": "e2d49d289b0245a8bcfd751ffebcb768e54c336f94589226d14506a2704a5b4e"
+      },
+      {
+        "path": "rollout/operator-prepared-01.json",
+        "bytes": 1307,
+        "sha256": "7bfb795a5acfc77c7f764eeaef3f5f08d16fd28ec56b8152086532280c003df7"
+      },
+      {
+        "path": "rollout/postdeploy-before-01.log",
+        "bytes": 2891,
+        "sha256": "3468ebb819b72056ac199948421e8ee00f4ac62693c88faac4d9bc2643c47b8e"
+      },
+      {
+        "path": "rollout/POSTDEPLOY-COMPLETED-01.json",
+        "bytes": 2823,
+        "sha256": "8c0b7a387cbd73fce29ab49b84bac10972f3745f512c55ba40a2aa87acf5bc85"
+      },
+      {
+        "path": "rollout/postdeploy-final-read-01.log",
+        "bytes": 2894,
+        "sha256": "61714540086ab754c62b5cd25b434e77b83746bb0a0086763b0335cea55d54e3"
+      },
+      {
+        "path": "rollout/POSTDEPLOY-PREPARATION-01.json",
+        "bytes": 1504,
+        "sha256": "5ee4aafda672555d5aa0e273569832f42750f355b2cfb2c7cffded715047c3b3"
+      },
+      {
+        "path": "rollout/preflight-read-01.json",
+        "bytes": 678,
+        "sha256": "0d8990d46d7620eaa00601928c9bede0dd3c82a495eb2eb7b9fa5aba318ad031"
+      },
+      {
+        "path": "rollout/preflight-read-01.log",
+        "bytes": 2894,
+        "sha256": "e727820a886df52b5952e1de6287857b5f132fde47849ce8454d5f83d1f15d02"
+      },
+      {
+        "path": "rollout/PREPARATION.json",
+        "bytes": 2578,
+        "sha256": "c9f9ada1bf16219cb8137d56cb579a7a7fdd166d913ac45742d0e9683cf22c76"
+      },
+      {
+        "path": "rollout/public-native-resume-01.log",
+        "bytes": 2460,
+        "sha256": "c1d1e737acef6851b070cd96c4706c5a034812696825cab409d769a9f800dd9b"
+      },
+      {
+        "path": "rollout/public-ordinary-01.log",
+        "bytes": 8724,
+        "sha256": "7c7c65393f6788bcb5380f550cadce08b85bb5f36b963bd5d7fe7c4b800dfa30"
+      },
+      {
+        "path": "rollout/PUBLIC-VERIFIED-01.json",
+        "bytes": 4216,
+        "sha256": "894d2905c0d5ac3ce24430dbae1d5a3d29ae4e9e8d3f3381c0ba7448f7b42114"
+      },
+      {
+        "path": "rollout/remote-apply-01.sh",
+        "bytes": 389,
+        "sha256": "215afdc37ba943428d62f02cc0e0f040710bf446e51cc0213cfd7214a2747e30"
+      },
+      {
+        "path": "rollout/remote-preflight-01.sh",
+        "bytes": 381,
+        "sha256": "258b801a7106ce8433190a9da969d9689545181d1aa0d3f811bad2adbe872cc4"
+      },
+      {
+        "path": "rollout/remote-stage-setup-01.sh",
+        "bytes": 511,
+        "sha256": "f0a5f5cd050c9a64d6d852fb9676ceb5211c78514786234887495310797b45a0"
+      },
+      {
+        "path": "rollout/remote-stage-verify-01.sh",
+        "bytes": 2071,
+        "sha256": "049e30666e20a26583a2f3d63f383eaa03fa7520d0931830029daee402a79807"
+      },
+      {
+        "path": "rollout/upgrade-purification-gateway-01.py",
+        "bytes": 31552,
+        "sha256": "348aae49431bc4cdff465cc10fbb5f998a53deb45bd6e71c0e1ed6b1dcbad478"
+      },
+      {
+        "path": "rollout/upload-batch-01.json",
+        "bytes": 806,
+        "sha256": "94702b1eb35a3184276145e9974e4385a300515a0dc43ac9fa47b7f2fd188800"
+      },
+      {
+        "path": "rollout/verify-purification-postdeploy-01.py",
+        "bytes": 6546,
+        "sha256": "6f4aa7a9ae439ad85c6299aac1a347665298c7e05d86848d3be8068d0bb0dc50"
+      },
+      {
+        "path": "rollout/ordinary-public-01/female-taoist-R2121cccbba.jsonl",
+        "bytes": 972852,
+        "sha256": "d0ca66cd527b0c9368f966d56d904da780a1d040dde46944c37a27bba4967424"
+      },
+      {
+        "path": "rollout/ordinary-public-01/female-taoist-relogin-R2121cccbba.jsonl",
+        "bytes": 973933,
+        "sha256": "e17f4ab3cb7a55ba59023f8a0f039613f65407ee454d3a95bec099a843a61991"
+      },
+      {
+        "path": "rollout/ordinary-public-01/initial-R2100cccbba.jsonl",
+        "bytes": 1003573,
+        "sha256": "d3a7bb5cd32e8ad0a6adb235269c99a97d4b16063587784600af3bd724ceb00d"
+      },
+      {
+        "path": "rollout/ordinary-public-01/initial-R2101cccbba.jsonl",
+        "bytes": 979949,
+        "sha256": "f3b8b74c4ea2a51f37877766aed3b5654e283ae818e44f0d13a766fc250c0a7b"
+      },
+      {
+        "path": "rollout/ordinary-public-01/initial-R2110cccbba.jsonl",
+        "bytes": 988556,
+        "sha256": "000c0adb1afedef7f4a41eda67ea1f375664e379f6edea5f7a5847ee2a4673fe"
+      },
+      {
+        "path": "rollout/ordinary-public-01/initial-R2111cccbba.jsonl",
+        "bytes": 984170,
+        "sha256": "e9383e360a8ee6f5daf8115ddb6180234c58ed246f7cd0bc9a17ab6b8a6917c3"
+      },
+      {
+        "path": "rollout/ordinary-public-01/initial-R2120cccbba.jsonl",
+        "bytes": 980916,
+        "sha256": "ebcbf596680354eba1f3a0f300db8495855539c2a6ed29ee49263b3eeeac6b9d"
+      },
+      {
+        "path": "rollout/ordinary-public-01/PREPARATION.json",
+        "bytes": 462,
+        "sha256": "f545b5b753f98dee2c45e2739d5f621b05a9d362d97f44138405213e41b2bbaf"
+      },
+      {
+        "path": "rollout/ordinary-public-01/public-smoke.mjs",
+        "bytes": 11450,
+        "sha256": "45e77c3726c96d8ae84bee6bb5c2132bf4e4bc64df1dffe050d8ed37125c10a6"
+      },
+      {
+        "path": "rollout/ordinary-public-01/RESULT.json",
+        "bytes": 12631,
+        "sha256": "cf01513fb8b8fbca670d52082a787f11a1d24fe6861abb438df7546698466a4f"
+      },
+      {
+        "path": "rollout/ordinary-public-01/warrior-relogin-R2100cccbba.jsonl",
+        "bytes": 979694,
+        "sha256": "f80ec8940f9d3b0513bc4dc0c81c5bbc7316ac05795296f971117f897897b2f4"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-1-cold-login-R2100cccbba.jsonl",
+        "bytes": 955901,
+        "sha256": "6d086ecc423943cdb27822e511080d6d91c003f9338b50c34a1b98c23f0ad724"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-1-original-R2100cccbba.jsonl",
+        "bytes": 925331,
+        "sha256": "5e88ff6ddb4f15f96e69af696583339971eb67492c7a245bf5f579baeb1604a0"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-1-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "be1c965bac794f52e56f13ed8465d143bbf767629d23f90b3d4ecd59ff63758d"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-1-resumed-R2100cccbba.jsonl",
+        "bytes": 186649,
+        "sha256": "e810f12e4d2d12606d99228334cdbe0b4daf5514f8c0e5f18eb833e6b9a2d7fc"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-2-cold-login-R2100cccbba.jsonl",
+        "bytes": 956153,
+        "sha256": "c5599e8ecfaf9ee8177c6f024fafd14488a9ddc8db13bed2bd1e51f13b59fbba"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-2-original-R2100cccbba.jsonl",
+        "bytes": 919540,
+        "sha256": "a0261963720eb1632afcfd479107caeb2a827be130a72fd9c5955d6ca962bfd4"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-2-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "fca5982560b3b978607b91070127720145018e60f3e74d39d9efa8023f0f593e"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-2-resumed-R2100cccbba.jsonl",
+        "bytes": 186649,
+        "sha256": "57191b8b7df2ed553dadf2d11e937eae22fdef6c53d9367dc24046cd6a574da0"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-3-cold-login-R2100cccbba.jsonl",
+        "bytes": 955901,
+        "sha256": "e92141c69d102b881bcf19bfd2b22b4a6410019e9c396ba50a3288b9a9590842"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-3-original-R2100cccbba.jsonl",
+        "bytes": 920296,
+        "sha256": "d42f6f5f7d0ae01a18b1fcce703e3893f2c895d4358197d92949b4c7c1cdcc2d"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-3-replay-R2100cccbba.jsonl",
+        "bytes": 103758,
+        "sha256": "094af3958d56da8ea5c6dcc2ab17555a5c6e280b3a80e10b055fde3ad514b836"
+      },
+      {
+        "path": "rollout/native-resume-public-01/cycle-3-resumed-R2100cccbba.jsonl",
+        "bytes": 186649,
+        "sha256": "8cb2da7adbed907750ac4ec6eb18789d708100331e9eeda9cd61730eaf5e5818"
+      },
+      {
+        "path": "rollout/native-resume-public-01/native-resume-smoke.mjs",
+        "bytes": 13778,
+        "sha256": "0de07dcff4070eadda4f9477c58f452012074cf056c32131ce6232810f26bbbd"
+      },
+      {
+        "path": "rollout/native-resume-public-01/PREPARATION.json",
+        "bytes": 462,
+        "sha256": "01c1f3c496d0cad15bb1daf49259c1968438eab0f100515006278635cf2c0545"
+      },
+      {
+        "path": "rollout/native-resume-public-01/RESULT.json",
+        "bytes": 3810,
+        "sha256": "4aebbd8dc1fd9d2e9ec02547c9773cda62aad1e9bc4fb68feaaa2c433957be57"
+      },
+      {
+        "path": "root-followup/Prepare-C704PostdeployChecks.py",
+        "bytes": 6584,
+        "sha256": "39e03f5bb7f9780a46cb3722b16f613ab70869153adcaa94dba809878eb4d71e"
+      },
+      {
+        "path": "root-followup/Complete-C704PostdeployEvidence.py",
+        "bytes": 5753,
+        "sha256": "4aa4872a22d4483b5bfdfaaa1384a37ac38d4262d55717b87f07e130eefbf8f4"
+      },
+      {
+        "path": "exact-source-publication/PUBLISHED-VERIFIED.json",
+        "bytes": 508,
+        "sha256": "7b11f502af737dc9534e8c77a022489538c1d128d063d3014584b83ef583666d"
+      },
+      {
+        "path": "exact-source-publication/REMOTE-FINAL-READBACK.json",
+        "bytes": 459,
+        "sha256": "965d8870669161d38c3668ef4fd49f7b65dd6e4496a42e531c43ae17ab5b4b14"
+      }
+    ],
+    "wholeOriginalBytesVerified": true,
+    "zipCrcVerified": true
+  }
+}

@@ -1,0 +1,353 @@
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
+index 393243ac7..df7fb620a 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
+@@ -127,8 +127,23 @@ impl ZoneRuntime {
+             claimant: None,
+             clears_owner: false,
+             force_owner: false,
+-            current_owner_dead: old_player
+-                .is_some_and(|(o, p)| o.online_owner.as_ref() == Some(&p.owner) && p.dead),
++            current_owner_dead: old_player.is_some_and(|(owner, presence)| {
++                if owner.online_owner.as_ref() != Some(&presence.owner)
++                    || owner.session_id != presence.owner.session_id
++                    || owner.account_id != presence.owner.account_id
++                    || owner.character_index != presence.owner.character_index
++                    || owner.object_id != presence.owner.object_id
++                {
++                    return false;
++                }
++                // Crystal reads EXPOwner.Dead at the impact, after earlier
++                // damage in this tick. The global snapshot is batch-start
++                // state and remains the fallback only for another Zone.
++                match self.players.get(&owner.session_id) {
++                    Some(player) => presence.owner.matches_player(player) && player.dead,
++                    None => presence.key != self.key && presence.dead,
++                }
++            }),
+             current_owner_mismatched: old.is_some_and(|o|o.online_owner.as_ref().is_none_or(|proof|!self.online_owner_current(proof))),
+         };
+         match actor {
+diff --git a/mir2-web3/apps/simulation/tests/shared_experience_owner_tick_life.rs b/mir2-web3/apps/simulation/tests/shared_experience_owner_tick_life.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/tests/shared_experience_owner_tick_life.rs
+@@ -0,0 +1,318 @@
++//! Prepared public Manager commands exercise real tick ordering, not a network
++//! journey. Source ArcherGuard scalars and the real Hugger FSM create the
++//! player's poison lease; no checkpoint injection or fake kill award is used.
++use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
++use mir2_simulation::{
++    GroundDropLootSnapshot, GroundDropSnapshot, SessionId, WorldEntityDisposition, ZoneCommand,
++    ZoneJoin, ZoneKey, ZoneManager, ZoneMonsterSpawn, ZoneOutbound,
++};
++
++const MAP: &str = "experience-owner-tick-life";
++const OWNER: u32 = 101;
++const RIVAL: u32 = 102;
++const TARGET: u32 = 90_101;
++fn sid(name: &str) -> SessionId {
++    SessionId::new(name)
++}
++fn point(x: i32, y: i32) -> Point {
++    Point { x, y }
++}
++fn join(name: &str, object_id: u32, class: MirClass, position: Point, hp: i32) -> ZoneJoin {
++    ZoneJoin {
++        session_id: sid(name),
++        account_id: format!("{name}-account"),
++        character_index: 0,
++        object_id,
++        name: name.into(),
++        class,
++        gender: MirGender::Male,
++        level: 40,
++        hp,
++        max_hp: hp,
++        mp: 100,
++        map_file_name: MAP.into(),
++        position,
++        direction: MirDirection::Right,
++        chat_profile: Default::default(),
++        combat_stats: Default::default(),
++    }
++}
++fn packets<'a>(out: &'a [ZoneOutbound], recipient: &str) -> Vec<&'a ServerPacket> {
++    let session = sid(recipient);
++    out.iter()
++        .flat_map(|event| match event {
++            ZoneOutbound::ToSession {
++                session_id,
++                packets,
++            } if *session_id == session => packets.as_slice(),
++            ZoneOutbound::ToMany {
++                session_ids,
++                packets,
++            } if session_ids.contains(&session) => packets.as_slice(),
++            ZoneOutbound::ToAll { packets } => packets.as_slice(),
++            _ => &[],
++        })
++        .collect()
++}
++fn fixture(hugger_id: u32, owner_hp: i32) -> ZoneManager {
++    let mut manager = ZoneManager::new();
++    for player in [
++        join("owner", OWNER, MirClass::Wizard, point(21, 20), owner_hp),
++        join("rival", RIVAL, MirClass::Taoist, point(27, 20), 10_000),
++    ] {
++        let session_id = player.session_id.clone();
++        let class = player.class;
++        manager.join(player);
++        manager.handle(ZoneCommand::sync_player_combat_state(
++            session_id, class, true, false, false, false, false, false,
++        ));
++    }
++    for monster in [
++        ZoneMonsterSpawn {
++            crystal_drop_seed: None,
++            object_id: TARGET,
++            name: "Skeleton".into(),
++            name_colour_argb: -1,
++            image: 3,
++            ai: 3,
++            disposition: Some(WorldEntityDisposition::Hostile),
++            level: 20,
++            hp: 23,
++            max_hp: 23,
++            experience: 123,
++            move_speed_ms: 100_000,
++            attack_speed_ms: 100_000,
++            friendly_guild: None,
++            position: point(26, 20),
++            direction: MirDirection::Down,
++            defense: Default::default(),
++            respawn: None,
++            drops: vec![GroundDropSnapshot {
++                object_id: 0,
++                name: "Gold".into(),
++                name_colour_argb: -1,
++                icon: 0,
++                x: 0,
++                y: 0,
++                quantity: 7,
++                source_monster: "Skeleton".into(),
++                owner_object_id: None,
++                ownership_remaining_ticks: Some(60),
++                loot: GroundDropLootSnapshot::Gold { amount: 7 },
++            }],
++        },
++        // The source name supplies DC/SC=255; AI69 selects the real Hugger
++        // delayed blast and resist/chance gates, as in shared_player_death_zone.
++        ZoneMonsterSpawn {
++            crystal_drop_seed: None,
++            object_id: hugger_id,
++            name: "ArcherGuard".into(),
++            name_colour_argb: -1,
++            image: 139,
++            ai: 69,
++            disposition: Some(WorldEntityDisposition::Hostile),
++            level: 0,
++            hp: 9_999,
++            max_hp: 9_999,
++            experience: 0,
++            move_speed_ms: 300,
++            attack_speed_ms: 2_000,
++            friendly_guild: None,
++            position: point(20, 20),
++            direction: MirDirection::Right,
++            defense: Default::default(),
++            respawn: None,
++            drops: Vec::new(),
++        },
++    ] {
++        manager.handle(ZoneCommand::SpawnMonster {
++            session_id: sid("owner"),
++            monster,
++            now_ms: 0,
++        });
++    }
++    // The owner claims only when this positive FireBall impact resolves.
++    manager.handle(ZoneCommand::PlayerCastMagic {
++        session_id: sid("owner"),
++        object_id: TARGET,
++        spell: Spell::FireBall,
++        direction: MirDirection::Right,
++        target: point(26, 20),
++        cast: true,
++        level: 2,
++        damage: 20,
++        mp_cost: 0,
++        cooldown_ms: 0,
++        now_ms: 100,
++    });
++    // Casting green does not replace the first effective owner. Its first
++    // actual three-damage pulse is due at 2600, after the player's poison.
++    manager.handle(ZoneCommand::PlayerCastMagicWithItem {
++        session_id: sid("rival"),
++        object_id: TARGET,
++        spell: Spell::Poisoning,
++        direction: MirDirection::Left,
++        target: point(26, 20),
++        cast: true,
++        level: 2,
++        damage: 5,
++        mp_cost: 0,
++        cooldown_ms: 0,
++        item_param: 1,
++        now_ms: 600,
++    });
++    manager
++}
++fn prepared_poison(owner_hp: i32) -> ZoneManager {
++    // Preserve the source chance gates. Choose a bounded deterministic source
++    // identity whose actual blast emits green poison; do not force the branch.
++    for hugger_id in 9_100..9_164 {
++        let mut manager = fixture(hugger_id, owner_hp);
++        let impact = manager.tick_all_sequential(2_001);
++        assert!(
++            packets(&impact, "owner").iter().any(|packet| matches!(
++                packet,
++                ServerPacket::DamageIndicator {
++                    object_id: TARGET,
++                    damage: 20,
++                    ..
++                }
++            )),
++            "real initial positive FireBall impact must establish the owner"
++        );
++        let target = manager
++            .zone(&ZoneKey::for_map(MAP))
++            .unwrap()
++            .native_monster_snapshots()
++            .into_iter()
++            .find(|monster| monster.object_id == TARGET)
++            .unwrap();
++        assert_eq!(target.hp, 3);
++        let blast = manager.tick_all_sequential(2_501);
++        if packets(&blast, "owner").iter().any(|packet| {
++            matches!(packet,
++                ServerPacket::ObjectPoisoned { object_id: OWNER, poison } if poison & 1 != 0
++            )
++        }) {
++            assert_eq!(
++                manager.player_vitals(&sid("owner")).unwrap().0,
++                owner_hp - 255
++            );
++            assert!(!packets(&blast, "owner")
++                .iter()
++                .any(|p| matches!(p, ServerPacket::Death { .. })));
++            return manager;
++        }
++    }
++    panic!("bounded real Hugger poison branch did not occur");
++}
++fn assert_owned_kill(
++    manager: &ZoneManager,
++    out: &[ZoneOutbound],
++    owner: &str,
++    object_id: u32,
++) -> usize {
++    let awards: Vec<_> = out
++        .iter()
++        .enumerate()
++        .filter_map(|(index, event)| match event {
++            ZoneOutbound::OwnedMonsterKillAward {
++                session_id,
++                source,
++                online_owner,
++                award,
++            } if award.monster_object_id == TARGET => {
++                Some((index, session_id, source, online_owner, award))
++            }
++            _ => None,
++        })
++        .collect();
++    assert_eq!(awards.len(), 1, "one actual source-issued award: {out:?}");
++    let (index, session, source, proof, award) = awards[0];
++    assert_eq!(
++        session,
++        &sid(owner),
++        "the original current Dead state decides EXPOwner at impact"
++    );
++    assert_eq!(source, &ZoneKey::for_map(MAP));
++    assert_eq!(award.killed_at_ms, 2_600);
++    assert_eq!(award.experience, 123);
++    assert_eq!(award.monster_name, "Skeleton");
++    assert_eq!(award.drops.len(), 1);
++    assert_eq!(award.drops[0].owner_object_id, Some(object_id));
++    assert_eq!(
++        award.drops[0].loot,
++        GroundDropLootSnapshot::Gold { amount: 7 }
++    );
++    assert!(manager.issued_monster_award_is_current(source, session, proof, award));
++    assert!(packets(out, "rival").iter().any(|packet| matches!(
++        packet,
++        ServerPacket::DamageIndicator {
++            object_id: TARGET,
++            damage: 3,
++            ..
++        }
++    )));
++    index
++}
++
++#[test]
++fn owner_dies_earlier_in_same_tick_rival_poison_claims_current_dead_owner() {
++    let mut manager = prepared_poison(400);
++    let out = manager.tick_all_sequential(2_600);
++    let death_index = out.iter().position(|event| matches!(event,
++        ZoneOutbound::PlayerDamaged { session_id, settlement: Some(receipt), .. }
++            if *session_id == sid("owner") && receipt.hp_before == 145 && receipt.hp_after == 0
++                && receipt.death_transition
++    )).expect("actual periodic player poison must kill the owner during this tick");
++    assert_eq!(manager.player_vitals(&sid("owner")).unwrap().0, 0);
++    assert_eq!(
++        packets(&out, "owner")
++            .iter()
++            .filter(|p| matches!(p, ServerPacket::Death { .. }))
++            .count(),
++        1
++    );
++    let award_index = assert_owned_kill(&manager, &out, "rival", RIVAL);
++    assert!(
++        death_index < award_index,
++        "native death precedes competing monster poison in the same tick"
++    );
++}
++
++#[test]
++fn surviving_owner_damaged_earlier_in_same_tick_keeps_first_claim() {
++    let mut manager = prepared_poison(1_000);
++    let out = manager.tick_all_sequential(2_600);
++    let damage_index = out.iter().position(|event| matches!(event,
++        ZoneOutbound::PlayerDamaged { session_id, settlement: Some(receipt), .. }
++            if *session_id == sid("owner") && receipt.hp_before == 745 && receipt.hp_after == 490
++                && !receipt.death_transition
++    )).expect("living control must take the actual earlier periodic player poison");
++    assert_eq!(manager.player_vitals(&sid("owner")).unwrap().0, 490);
++    assert!(!packets(&out, "owner")
++        .iter()
++        .any(|p| matches!(p, ServerPacket::Death { .. })));
++    let award_index = assert_owned_kill(&manager, &out, "owner", OWNER);
++    assert!(damage_index < award_index);
++}
++
++#[test]
++fn full_hp_typed_dead_owner_is_replaceable_without_hp_inference() {
++    let mut manager = prepared_poison(400);
++    // Public trusted lifecycle command can carry Dead with a prepared HP
++    // scalar. It is not a normal-client command or a claim about human play.
++    manager.handle(ZoneCommand::SyncPlayerVitalsAndLife {
++        session_id: sid("owner"),
++        hp: 400,
++        max_hp: 400,
++        mp: 100,
++        dead: true,
++    });
++    let out = manager.tick_all_sequential(2_600);
++    assert_eq!(manager.player_vitals(&sid("owner")).unwrap().0, 400);
++    assert!(!out.iter().any(|event| matches!(event,
++        ZoneOutbound::PlayerDamaged { session_id, .. } if *session_id == sid("owner")
++    )));
++    assert_owned_kill(&manager, &out, "rival", RIVAL);
++}

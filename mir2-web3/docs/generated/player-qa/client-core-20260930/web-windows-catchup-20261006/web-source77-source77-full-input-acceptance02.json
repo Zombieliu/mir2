@@ -1,0 +1,49 @@
+{
+  "owner": "Root",
+  "kind": "Root independent final Source77 full closure after public Trade regression definition repair",
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-full-snapshot02.json",
+    "bytes": 45640815,
+    "sha256": "4949e4f3b02adc889d293f4e9d34f580e2d60d896e263d84a2f322c2822327e0"
+  },
+  "counts": {
+    "sources": 71887,
+    "internalSources": 71885,
+    "externalSources": 2,
+    "directoriesIncludingRoot": 6023,
+    "links": 0,
+    "bytes": 2434875711
+  },
+  "hashDifferences": 0,
+  "membership": {
+    "missing": 0,
+    "extra": 0
+  },
+  "nft": {
+    "files": 61,
+    "rawBytes": 9011653,
+    "targetRows": 130518,
+    "unknown": 0,
+    "nftModified": false
+  },
+  "dependencyCopy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\dependency-preparation01\\ordinary-dependency-copy-result01.json",
+    "bytes": 3419,
+    "sha256": "36133937954e79f9bdaab9e47f31e7559e365bcbbd712ade54a8ac2e04f565ac"
+  },
+  "oldCompiledOutputCopied": false,
+  "acceptedForOriginalPortableAndThin": true,
+  "goalComplete": false,
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-code-review02.json",
+    "bytes": 10161,
+    "sha256": "0953cf544e5e3d7f7f421e99d283239e972f529285578e6b9e41af79494c8e6c"
+  },
+  "previousAcceptance": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-full-input-acceptance01.json",
+    "bytes": 1172,
+    "sha256": "4c82572023941d6fb1626226f50d3b0d8f3724db255afbd4f268aa91f7b350da"
+  },
+  "testOnlyRepair": true,
+  "applicationNextOutputAndAll61RawNftUnchanged": true
+}

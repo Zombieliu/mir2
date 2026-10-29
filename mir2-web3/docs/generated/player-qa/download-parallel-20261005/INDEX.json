@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.download.root-durable-parallel-evidence.v1",
+  "files": [
+    {
+      "file": "probe.py",
+      "bytes": 4408,
+      "sha256": "e82bf24dc0eca5a78a975e7414814634aa51786b55c5c39fef8b596ea16e95ef"
+    },
+    {
+      "file": "RESULT-01.json",
+      "bytes": 4820,
+      "sha256": "6691da97d6187cf378a69c71f593cf284b49775cfb95c1ae1d94519f53f7f780"
+    },
+    {
+      "file": "connections-1-01.json",
+      "bytes": 616,
+      "sha256": "1360fe383a531053046fdcefcab813329c6ed04159184293ba01d47d64ccb2ac"
+    },
+    {
+      "file": "connections-2-01.json",
+      "bytes": 1070,
+      "sha256": "103023e66f6cf29be06d2c51bbf6a6c5312dd6dcc9d7c492edbbeddb914b8b2c"
+    },
+    {
+      "file": "connections-4-01.json",
+      "bytes": 1973,
+      "sha256": "e29c3a0c92485ed5a526dcc05cfd4318e2bc4276c2c6b8fe8cfbb47c5bf6fe5e"
+    }
+  ],
+  "r2OrUpdaterSpeedAcceptance": false,
+  "serverChanges": false
+}

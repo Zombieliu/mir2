@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+  "oldSource": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "oldPayloadFiles": 123031,
+  "newPayloadFiles": 123031,
+  "changedPayload": [
+    {
+      "path": "BUILD-ATTESTATION.json",
+      "size": 1493,
+      "sha256": "1FD9D1D881054D7BAFAA1B71A9E80816C8F54FD5BC62E77F06433CF24A92BA10"
+    },
+    {
+      "path": "KNOWN-ISSUES.md",
+      "size": 2152,
+      "sha256": "D2A2FFCA1D2170EE0A0F2E3D3FDF0EFF644F2FE4472C5BA7E6120CE12C4EADC9"
+    },
+    {
+      "path": "MULTILINGUAL-SOURCES.json",
+      "size": 8618,
+      "sha256": "1528B614DEDB07860E22AC2E1CF62528B0ED126230657DC008FB88D2F01F6D11"
+    },
+    {
+      "path": "NotoSansTC-OFL.txt",
+      "size": 4481,
+      "sha256": "E35FFDEBB2225B49814C31889CBB3CE69CB3509E6A9F431EDABA5E1A6DE8CD15"
+    },
+    {
+      "path": "README-START.txt",
+      "size": 49328,
+      "sha256": "AFB94862413D66D544E14075C10A5BA6EC899D394FA0D3CA5B884B9920034DE8"
+    },
+    {
+      "path": "mir2-platform-windows.exe",
+      "size": 110583296,
+      "sha256": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488"
+    }
+  ],
+  "changedPayloadBytes": 110649368,
+  "unchangedPayloadFiles": 123025,
+  "newAggregateSHA256": "1ACE314B6D2D45A7570B88F907ECD3F945CC234CEF37E147195AE728CE176C8A",
+  "newManifestSHA256": "E9797953F1F6A14CE7EE83EAD71CE94C5E22AEC75200624DCD97AA110E95201B",
+  "newExeSHA256": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488",
+  "scope": "Exact build/Candidate metadata binding and derived payload delta; updater bundle and actual integration tests still pending",
+  "testsStarted": false,
+  "gameLaunched": false,
+  "finishedUtc": "2026-10-01T18:16:10.075338+00:00"
+}

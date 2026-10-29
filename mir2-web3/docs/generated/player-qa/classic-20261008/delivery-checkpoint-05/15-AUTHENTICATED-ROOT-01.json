@@ -1,0 +1,36 @@
+{
+  "schema": "mir2.r22.promote.authenticated-artifact.v1",
+  "passed": true,
+  "runId": 37772462840,
+  "source": "e7850e9aef9ea038907bee621f331f3286c1ac9b",
+  "branch": "codex/classic-r22-publication-20261008",
+  "artifactId": 11548034036,
+  "archiveBytes": 6839,
+  "archiveSha256": "9baa2c67aa176f5e6e2d9b1d9b3ede0142e4e3bfc16751c9d94337a419f6d73c",
+  "jobsConfirmed": true,
+  "zipBytesMatchAuthenticatedDigest": true,
+  "entries": [
+    {
+      "file": "receipt.json",
+      "bytes": 2587,
+      "sha256": "76460c31ae35194d3fbe5dc350265d9d009b202bd4f93a4871d9729f6663ac6b"
+    },
+    {
+      "file": "stage/receipt.json",
+      "bytes": 43978,
+      "sha256": "0a8b88330fd302af8a9cff7d0fe98234c35993e9188e7ad14405f1e7fcc7d73f"
+    },
+    {
+      "file": "stage/receipt.sha256",
+      "bytes": 125,
+      "sha256": "0fa840613d21a85779622aa41426a6ab6d6b9225d34c6b00cd3c0421f7048b6f"
+    },
+    {
+      "file": "stage-run.json",
+      "bytes": 186,
+      "sha256": "7c8b8a568028b93dd4e50a689da3e5264816f28e8d1ae6268d82aa99d255d060"
+    }
+  ],
+  "tokenValuesReadOrPrinted": false,
+  "promotionRerun": false
+}

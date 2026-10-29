@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.periodic.pg-resource-stop.v1",
+  "observedAt": "2026-10-02T00:48:57.834081+00:00",
+  "unit": "mir2-periodic-pgcheck-20261002-r1.service",
+  "memAvailableBeforeBytes": 306253824,
+  "reason": "less than 128MiB host available during compilation; stop owned test compile to preserve running realms",
+  "testPassed": false,
+  "gameplayTimersChanged": false,
+  "humanServicesModified": false
+}

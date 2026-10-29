@@ -1,0 +1,122 @@
+{
+  "firstBundleProof": {
+    "path": "delivery/f7d89de99e3bc3f565c58e4713870d78d9b446bfee9651d30ba9d7c559a73cfe.m2b.gz",
+    "sha256": "F7D89DE99E3BC3F565C58E4713870D78D9B446BFEE9651D30BA9D7C559A73CFE",
+    "size": 60853297
+  },
+  "generationCompleted": true,
+  "health": [
+    {
+      "capacity": {
+        "currentActiveSessions": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentReconnectLeases": 0,
+        "currentStartGameInFlight": 0,
+        "currentWsConnections": 0
+      },
+      "port": 7110,
+      "ready": true,
+      "revision": null
+    },
+    {
+      "capacity": {
+        "currentActiveSessions": 0,
+        "currentLoginInFlight": 0,
+        "currentNewCharacterInFlight": 0,
+        "currentReconnectLeases": 0,
+        "currentStartGameInFlight": 0,
+        "currentWsConnections": 1
+      },
+      "port": 7210,
+      "ready": true,
+      "revision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b"
+    }
+  ],
+  "loadAverage": [
+    1.83544921875,
+    1.73046875,
+    1.4814453125
+  ],
+  "memoryAvailableBytes": 2116833280,
+  "outputs": [
+    {
+      "name": "0a685ad8d38e5bb86db4aff061a884408ea390a74170030e77cad7059509d8b0.m2b.gz",
+      "size": 60629129
+    },
+    {
+      "name": "112d1f77a20d0da51f62bcbc488827530f5b854f91f7d423d101caedb0109ecc.m2b.gz",
+      "size": 58054864
+    },
+    {
+      "name": "1e4052aa3f158a98b8d33306dda36e788662ea58e625bb7c1f7a8e7ca3153b3e.m2b.gz",
+      "size": 58094559
+    },
+    {
+      "name": "25fed6bdb5bba24c651b90ebabe0805dcbd1429149d61241a4d7a0ca48bb8059.m2b.gz",
+      "size": 42095227
+    },
+    {
+      "name": "3e8b19dfd08f94aa7eac46ef88001d199b6e6be1ba3f9382be2f9d39b5cf6bb3.m2b.gz",
+      "size": 63353851
+    },
+    {
+      "name": "3ff41a0e69a58faaea5b1327ac5900079a043607d94999ffc18ed312bd7f6945.m2b.gz",
+      "size": 65515198
+    },
+    {
+      "name": "567dfae85cc7e726e99dfe74f7c9b6a3e1ab868f6c6727f5153a1d5abeac92c1.m2b.gz",
+      "size": 65945319
+    },
+    {
+      "name": "792db75e22e4d9066f2529c3f117655c0ec794eb47b431b49fba6c78760f052e.m2b.gz",
+      "size": 59469514
+    },
+    {
+      "name": "ac4d15842886a496f093d585e02f9adcc6c3cf3cc3c763a3021b0c56e01431e3.m2b.gz",
+      "size": 49934822
+    },
+    {
+      "name": "d528c7149953768ed25b77f5da5d84a4f514ee7ab1e7b8c1684cab25e1823a63.m2d.gz",
+      "size": 25424169
+    },
+    {
+      "name": "f176d5dba713d8bd9be0de94b7a7fe1fec48493049a0218c2baa144d3312d0b5.m2b.gz",
+      "size": 36243793
+    },
+    {
+      "name": "f7d89de99e3bc3f565c58e4713870d78d9b446bfee9651d30ba9d7c559a73cfe.m2b.gz",
+      "size": 60853297
+    }
+  ],
+  "passed": true,
+  "privateGenerationProofCount": 11,
+  "publicDescriptorExists": false,
+  "services": [
+    {
+      "ActiveState": "active",
+      "MainPID": "2639318",
+      "NRestarts": "0",
+      "Result": "success",
+      "SubState": "running",
+      "unit": "mir2-playtest.service"
+    },
+    {
+      "ActiveState": "active",
+      "MainPID": "3855184",
+      "NRestarts": "0",
+      "Result": "success",
+      "SubState": "running",
+      "unit": "mir2-gateway.service"
+    },
+    {
+      "ActiveState": "active",
+      "MainPID": "2107428",
+      "NRestarts": "0",
+      "Result": "success",
+      "SubState": "running",
+      "unit": "caddy.service"
+    }
+  ],
+  "timestampUnix": 1791146836
+}

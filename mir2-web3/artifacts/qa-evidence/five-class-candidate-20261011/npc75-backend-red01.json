@@ -1,0 +1,23 @@
+{
+  "schema": "mir2.five-class-original-red.v3",
+  "createdUtc": "2026-10-11T22:33:54.177352+00:00",
+  "run": "npc75-merged-simulation-input01",
+  "exitCode": 101,
+  "passed": 24,
+  "failed": 1,
+  "originalIgnored": 0,
+  "sourceDrift": [],
+  "compiledSourceSnapshotSha256": "e2a361156b500440d03a78126e0462b476af49c659bc129cd7c5cc433ce62d61",
+  "cargoLogSha256": "b4bbc60500b17fae7b7dd21139ac64dcd606290f2b5231bde0e104a623b0b853",
+  "releaseBuilt": false,
+  "published": false,
+  "humanAccepted": false,
+  "originalFailuresRetained": true,
+  "archive": {
+    "path": "npc75-backend-red-original-evidence01.zip",
+    "sha256": "112b0244efc03964d5b0d845b212e86715b4fe6acb28a8b220776520fa9b43d5",
+    "bytes": 74025
+  },
+  "scope": "24 original NPC cases pass; the new matrix fails for the first Warrior before other classes execute.",
+  "publicGA10OrNewFiveClassMatrixAccepted": false
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "source": "Source66",
+  "status": "normal-ui-npc-open-passed",
+  "uiOrigin": "http://127.0.0.1:19205/",
+  "runtime": {
+    "source": "Source66",
+    "ownedPid": 57816,
+    "ownedParentPid": 63652,
+    "gatewaySource": "Source65"
+  },
+  "actions": [
+    "ordinary account login",
+    "Start Game",
+    "single ordinary visible InnKeeper Anthony click from Warehouse 2,10",
+    "ordinary Access menu click"
+  ],
+  "visible": {
+    "map": "Warehouse",
+    "position": {
+      "x": 2,
+      "y": 10
+    },
+    "npc": "InnKeeper Anthony",
+    "dialogDistanceTiles": 6,
+    "accessOpened": true,
+    "gold": 180,
+    "bagItems": 5,
+    "storageItems": 0,
+    "storageCapacity": 80
+  },
+  "passiveAccessCapture": {
+    "truncated": false,
+    "hasMore": false,
+    "positivePackets": [
+      {
+        "seq": 784975,
+        "name": "UserStorage"
+      },
+      {
+        "seq": 784976,
+        "name": "NPCStorage"
+      }
+    ],
+    "absenceClaims": false
+  },
+  "npcScreenshot": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source66-npc-visible-range01.png",
+    "bytes": 90278,
+    "sha256": "0f08c1ed1bf42493da94bdc5951b49c778126e24343f5d576d240947d9c7272c"
+  },
+  "storageTransferPassed": false,
+  "candidate100": false,
+  "overallPercentage": null,
+  "limitations": [
+    "Shared Storage takeover is not claimed.",
+    "Storage transaction and save/relogin remained pending at this observation.",
+    "Warehouse ground visual fallback remains visible."
+  ]
+}

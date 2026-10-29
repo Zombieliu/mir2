@@ -1,0 +1,2895 @@
+{
+  "owner": "Root",
+  "stage": "Source23 Rust06 reuse strict Value input parser for existing Bag ABI; source freeze only",
+  "projectRoot": "E:/mir2-player-journey/mir2-web3",
+  "baseline": "f72e36fb84c3574fff0aeb2abed856454b14289d",
+  "previousPublishedHead": "4cc32c3f9a3348ebbcd4dce9475acc4c6c7d91ef",
+  "previousSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust05-snapshot.json",
+    "bytes": 146647,
+    "sha256": "8bed82448c33442fff8c0ea567d797aba5fe8802b01254139cdaecad847caa37"
+  },
+  "sourceCount": 432,
+  "sources": [
+    {
+      "relativePath": "apps/game-client/client-bevy/Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\Cargo.lock",
+      "bytes": 123266,
+      "sha256": "57ccc62235497c6d2fe93d4d2f851974b15c8fb8a9e92dcfa2dda10d6d687297"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\Cargo.toml",
+      "bytes": 1485,
+      "sha256": "b7ac37faa72c3355fab43d12100386deade12dab932d31221ee8f603cbe83670"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/audio.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\audio.rs",
+      "bytes": 57245,
+      "sha256": "cea873b2df5aa520972b669e0400c8189c0ec893f371b089526b219fd90078b1"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/bag_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\bag_ui.rs",
+      "bytes": 13164,
+      "sha256": "99c97d001c410a2d2c29f760b9268377fddc486bafb3f630e7a017be4d0efae6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\big_map_geometry.rs",
+      "bytes": 4157,
+      "sha256": "e34f4900608a157441ff9ba3760c689fa617a42e8e10007c0e37876598afe2dc"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/big_map.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\big_map.rs",
+      "bytes": 47469,
+      "sha256": "93de3f8eee64e465cfbf8056f51f8f379946ac9441498b94fc41d2d481868605"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/character.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\character.rs",
+      "bytes": 3525,
+      "sha256": "a88338e21f6f26c59f5f91c5501eda3a7740d646159f221745b9ab74d241fb50"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\chat_settings_effects.rs",
+      "bytes": 10554,
+      "sha256": "04357156a342fef53328b49e72e18c860c64f400f8ba498fabc77d5ad6f4ad8b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/chat.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\chat.rs",
+      "bytes": 9148,
+      "sha256": "42cad272298ee37a5605c0d582bc299317762e76ce9d6e40c98f39029d58dc7f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/combat_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\combat_input_tests.rs",
+      "bytes": 28587,
+      "sha256": "dd215f108653287a7293f285989b5eb9c8dbbf2abba6ef4957b4ebed1059de25"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/combat_input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\combat_input.rs",
+      "bytes": 38414,
+      "sha256": "5a4bf89f4e5ae86af2b6b311d33e9c3ab7b993de1864c1cbabdb00cc65339742"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\amount_input.rs",
+      "bytes": 4167,
+      "sha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\assets.rs",
+      "bytes": 5081,
+      "sha256": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/bag_paint.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\bag_paint.rs",
+      "bytes": 24357,
+      "sha256": "0eff3d77b309afd809f4b2521adc05d3a467a9e0cbb7a086f640437fb2fa59ac"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\big_map_coordinates_tests.rs",
+      "bytes": 12593,
+      "sha256": "1b71977b7c33c5b3ba5e969f21413cd3cc929e4c9608872db33d60b03e8b9eaf"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\big_map_coordinates.rs",
+      "bytes": 5558,
+      "sha256": "09452c2c893731518a40cdf10e3f2e2877602c3061af6075e5385561736a65be"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\change_password.rs",
+      "bytes": 6471,
+      "sha256": "4afdf9690f0a989b5be41d7597320511ec5a84435e9dec9ae2621120a232d3bf"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\character_materials.rs",
+      "bytes": 3399,
+      "sha256": "67f377a018cf795c5e9051d7ffd155d3d3b5a1e2d03700cf39c47b861b7a3f91"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/character_page_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\character_page_tests.rs",
+      "bytes": 3723,
+      "sha256": "70fa9085774fdd40dc1fca51021680f208f57200d471fa3292d30373a99ed5f0"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\character_page.rs",
+      "bytes": 10327,
+      "sha256": "295eeb5b95da2a4c2f39a577072097d5c238a4ac5e0de2e933b47ee6d004aaf2"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\character_stats_portable.rs",
+      "bytes": 10337,
+      "sha256": "61d320eb6f47abf321577488bd7cccc45bc36c332a5aa6b6c1747d04a003d469"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\character_stats.rs",
+      "bytes": 8611,
+      "sha256": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\chat.rs",
+      "bytes": 94152,
+      "sha256": "80fdc60f05983c41fb1e1e340046df463e1e58717464455d3b4cb4dc3e4f8efe"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\combat_mode_keys.rs",
+      "bytes": 4945,
+      "sha256": "c515029e2757eb4293a5e803b548f4205c842faf31c7d5882ff8c124a439560f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\creature_dialog_render.rs",
+      "bytes": 25025,
+      "sha256": "d6795e47484c7bfa668d756a3fb63a8ef9e84dc19e8d3a1b34fb6e36fdd360b6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\creature_dialog_tests.rs",
+      "bytes": 6764,
+      "sha256": "27583b21b786a7ee8f85ee1a3161bb894e4f109456c1d2d82a898771029cec38"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\creature_dialog.rs",
+      "bytes": 17156,
+      "sha256": "e5ebfda4f3e01fd414f1736bf19225f1ab4b994678150f418adbd8e6e37a7e86"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/crystal_additive_ui.wgsl",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\crystal_additive_ui.wgsl",
+      "bytes": 296,
+      "sha256": "7528835165fe6aea1c6375df8b87b310a04e5e50a23c7e99ac5dc5ec02e5a39c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_frames.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\equipment_creature_frames.json",
+      "bytes": 42219,
+      "sha256": "85f11ac54f47fd5a2fb9d036d5abfa3696b028335e70a214fe54907ebf1d6087"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\equipment_creature_host.rs",
+      "bytes": 25764,
+      "sha256": "923a86cb46b34a166924cda77d5dbfaea25ddc2cf0d51a391b9dd1b040762121"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\equipment_storage_tests.rs",
+      "bytes": 12155,
+      "sha256": "2773bad1d7339aa8f49549825e66d45738805a9a3c4f33cd62e0bb64382116b1"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\friend_dialog_host.rs",
+      "bytes": 27469,
+      "sha256": "e1fea76f25a2799061c9d28c94b004dbf1735ebaa36464137c0b81563052c74e"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\friend_dialog_render.rs",
+      "bytes": 17380,
+      "sha256": "e2d998235c354ad5ebe91c922d64ad5b507275a072cb6d6080379fd49c622c5c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\friend_dialog_tests.rs",
+      "bytes": 5972,
+      "sha256": "0fccd0406d8f6ebc5fddd30f0730ac065029ea6618c55e8017ac0141032aca0a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\friend_dialog.rs",
+      "bytes": 12416,
+      "sha256": "bf753efa55761572605605455bedb596586a45a70b0ada920827874127eb81ec"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\friend_text_editor_tests.rs",
+      "bytes": 4710,
+      "sha256": "c8d037635dab159243428f95b1f6a5e7fc5b3d50e5d8443cc751ef80f0101c0d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\friend_text_editor.rs",
+      "bytes": 10750,
+      "sha256": "d883fb09df661f9ab197f6c444821d6ed5df88bd5be4e1530a4a69685dbfb28d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\game_shop_dialog.rs",
+      "bytes": 70625,
+      "sha256": "bdd14dc28248e7a13db318118ec4e91829d8efe137a1e1e9aeb70d7fc6154e53"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\group_dialog.rs",
+      "bytes": 20025,
+      "sha256": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\guild_buff_dialog_tests.rs",
+      "bytes": 5742,
+      "sha256": "94198f0805ef0d67155ec489fc7aa7488987cfb9f730226b29fcfa2350d77e98"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\guild_buff_dialog.rs",
+      "bytes": 7830,
+      "sha256": "08098a1605cf1be6f5171da323072fe6ad2455ed95457b0ee55bb4d8849ab851"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\guild_panel.rs",
+      "bytes": 44328,
+      "sha256": "6bd734cec03e550ec370388c8ad67c1426719711434bb1714bbbafc1cabacaab"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\guild_storage_tests.rs",
+      "bytes": 41551,
+      "sha256": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\guild_storage.rs",
+      "bytes": 12243,
+      "sha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_assign_dialog.rs",
+      "bytes": 9046,
+      "sha256": "b4935dc36d12f48b563457149db579c668fde070e84e262c204b05556ea401d6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_buff_hud_tests.rs",
+      "bytes": 3994,
+      "sha256": "501b39d47e14d8bad22f9442889a94e0b4ccb30f16930573b3af42683b367a66"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_buff_hud.rs",
+      "bytes": 9944,
+      "sha256": "1bc4ad1314ccfecc06cce93142391d05d1449713020bcb37ec4e071b54361606"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_cross_inventory_tests.rs",
+      "bytes": 8158,
+      "sha256": "2b0634dcd27a4a428fc250138a12c1d69b94a7a03a26638dfc76dc8a42339117"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_cross_inventory.rs",
+      "bytes": 10578,
+      "sha256": "d51a50e465ca153d02dd648884c57ceb1031f56e0c33ed40f4e8593007203ca0"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_dialog_geometry.rs",
+      "bytes": 9145,
+      "sha256": "72e6df988fd4c3e6a486963826da3d91a3c048b55645d601ac22a4fb6a627922"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_dialog_host.rs",
+      "bytes": 27795,
+      "sha256": "021e175e686ba0d9d605f1181abf2f27530567d218c2169ad203484fa2ecd17e"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_dialog_render.rs",
+      "bytes": 37596,
+      "sha256": "090d3dc6985ed0e159dd1b599214ce61766f3a81ae66baf764ba5fcad66756c5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_dialog.rs",
+      "bytes": 15826,
+      "sha256": "9cdb6bb6216d1eaa2309d85d8073939a827520558062a67c1312689420f76764"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_item_use_tests.rs",
+      "bytes": 4446,
+      "sha256": "466ed3dfa5176a5cda58dfa3fc7fad9f7da5a5f4ca2444eb311f9a9f82c92117"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_item_use.rs",
+      "bytes": 6252,
+      "sha256": "c4ebdea0f878d59374a3803b77af259e54f927686985b8de84fbbe20d13305d5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hero_pointer_settings.rs",
+      "bytes": 340,
+      "sha256": "c1ff409f274b58ab5c80b93a5772f2f14fbd47cc83ef4770be9cb9d77193b3db"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hud_bar.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hud_bar.rs",
+      "bytes": 1288,
+      "sha256": "18850cad9b755d21a8805f3bde1c19938031053c1329795f6229cad6ba36a3c3"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hud_item_image_tests.rs",
+      "bytes": 6725,
+      "sha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hud_orb.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hud_orb.rs",
+      "bytes": 8631,
+      "sha256": "a1a05bede2bbffc408be649bd8b6ab7ab90cca3864b0cadca12c927142078703"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hud_portable.rs",
+      "bytes": 6932,
+      "sha256": "dd91221007d2c164952a99b8d2efdedb96d69ce1c4802d6dc47f46ee7f1190d2"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\hud.rs",
+      "bytes": 78404,
+      "sha256": "3aa487fb039aed74faa0493aceab20dbf64538aab821b131617cc07fbe739b87"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\item_image.rs",
+      "bytes": 9415,
+      "sha256": "13e78acb5381eaeba99273f46130cf1d76e8a55c88a06d9afd8b4ce9240f675c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\item_tooltip.rs",
+      "bytes": 14498,
+      "sha256": "1a06feb416dd1b8c11ba763b2faf97f7473dbb48865e1718afed3bd9f4d63efe"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\keyboard_defaults.json",
+      "bytes": 18294,
+      "sha256": "95bfa457220e6e1811730794aaafb831d2362b46de0303a5ee1b4f5a721ca9d6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\keyboard_dialog_host.rs",
+      "bytes": 32239,
+      "sha256": "b1b764687f69e81bd24076a20a60e7d3b76248498766d92ce1a02ace16fbbeba"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\keyboard_dialog_render.rs",
+      "bytes": 9568,
+      "sha256": "1b5765a0bdd88daf91bf310aa22b984d21f0cdf4cf5425cdb42170598c1d651b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\keyboard_dialog_tests.rs",
+      "bytes": 7823,
+      "sha256": "21cf6735a436d140d3c9be6ad7e71dd45692f52c3e4eb4a9a9f6d8828222e409"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\keyboard_dialog.rs",
+      "bytes": 14280,
+      "sha256": "b1dc4b27efa32781eb47f0436691cac2824959038e01ee5923195cad9909c153"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\leave_game_dialog.rs",
+      "bytes": 6659,
+      "sha256": "b4a81c83c085a46196b9383228a8f475041cb1551ca49dccc83dd8e6241b9f65"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\leave_game_input_tests.rs",
+      "bytes": 2722,
+      "sha256": "d43815d47d9c73bd678852e80f3be0ff828834648ac8c6fefcbf9d72761d1339"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\local_keyboard_ui.rs",
+      "bytes": 1936,
+      "sha256": "f235a96e71ee6a873703e33879bd51c7cb7b35280f29d0ea9a132ed53da9e07e"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\login.rs",
+      "bytes": 9653,
+      "sha256": "8d67b5b73274b5252a017361598e60ad1e9f8bc5dbf29defab5739feb3de2d38"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_compose_drag.rs",
+      "bytes": 9217,
+      "sha256": "1898828073c769ddebd53b63e16540968bec4cff371473de02eafef0c069387e"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_compose_input_tests.rs",
+      "bytes": 3804,
+      "sha256": "4a379f1fee1d8e7be98d4dd37ad7b11a790c5864acc77c70492c1824d95ab156"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_compose_shared.rs",
+      "bytes": 35747,
+      "sha256": "19731f41acb4332f81cbecf0a195d457af0d2e204b544f47ef149e1293f54f9c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_compose_tests.rs",
+      "bytes": 27242,
+      "sha256": "a33af9c8105ace104209e68ced2dd4fc71470f704d70f937aad5ee9d69dabb61"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_delete_tests.rs",
+      "bytes": 14539,
+      "sha256": "f567993a5f824ae3e706b4b45057890116f3e82e0f8ef9ea44278f9ded11eb5a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_editor_tests.rs",
+      "bytes": 56943,
+      "sha256": "40efb05d7216e740929c03d813a4d9b2265250efe1c773f86a599b048d1c789c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_editor.rs",
+      "bytes": 38379,
+      "sha256": "49ac51c3d80c09c484dafac4f311b88d0b3c2a8640726cb00467c48ab01edd0f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_feedback_tests.rs",
+      "bytes": 24631,
+      "sha256": "815d2a7f2097f9fb4e210fb6d1b562329b6f5520212cdb04fad959c1268f50b5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_list.rs",
+      "bytes": 2157,
+      "sha256": "d43dddf3492a7f7af7a7d37f1955660ec896c3ee8e547d0990bee0deaa8f19b6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_page_shared.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_page_shared.rs",
+      "bytes": 26529,
+      "sha256": "1774f94b2b4a3057b96b7b006f88af17c70e5c3fc2692e6606029af90e96dd75"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_parcel_tests.rs",
+      "bytes": 35609,
+      "sha256": "22ed6a9049e043cb16eff0a4521c1a7135c3bfec6bf72ca7c1d83fb24cf9a859"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_parcel.rs",
+      "bytes": 20282,
+      "sha256": "09b3556fff7f0b5bd3e82c39b4d2d349c7d15bb256ae447608fadb34d9eb0a8d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_reader_drag.rs",
+      "bytes": 9101,
+      "sha256": "65371fe97bbf328ea890b9afa2b3fc8731aa1014e1f9795aa2ed01d70c72c876"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_reader_tests.rs",
+      "bytes": 15770,
+      "sha256": "448e4c2464542710195c153f0133501996fe7ca93dc0785cd667b43c7b0fa987"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_text_adapter_tests.rs",
+      "bytes": 3092,
+      "sha256": "927335edf0333257ce990d818d1da5cbcf2a83eb06cec1cf5976f1250d8e065f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mail_text_adapter.rs",
+      "bytes": 2615,
+      "sha256": "2bd88a0cc407aac513ff8d2140a2d27eb88db4ab5d47f084c83fe96d41c14817"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\metrics.rs",
+      "bytes": 9833,
+      "sha256": "efd4ec3904fb98b1400350c0fe89d0a44c8201020e827016234a1e8691e751f7"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\minimap.rs",
+      "bytes": 18097,
+      "sha256": "ac54aee1debc3370d47498c6eb0748c4924a2f444e06a9662251f0c28561da14"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mod.rs",
+      "bytes": 2439,
+      "sha256": "bfe191d62fd43d2a54b40352ce7623872f601792aba4543db5c45f005b348c0b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_dialog.rs",
+      "bytes": 16447,
+      "sha256": "9494e5ba9042b3915f3429318732015a62ddbd3a983dbcda2bd2505eb4297117"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_render.rs",
+      "bytes": 19979,
+      "sha256": "66e79c7ec4c6b0e5494fdb9b4659f46b0d0dfccd37aecdff7d65a984458216a7"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_tests.rs",
+      "bytes": 8152,
+      "sha256": "57689fef43667dd00e2eb04a11309cde539a87d7182845dfb4fb57f316800016"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\notice.rs",
+      "bytes": 21942,
+      "sha256": "e53c29fd454cc86c6d8a34cf9c3925d7c349476fd3dc79d1317bd9ce1c98fb25"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\npc_item_quote.rs",
+      "bytes": 10798,
+      "sha256": "5ca3e4e39d3a07b7a27e3e216cfb763b9a824700d32328c23dfd1f2027f307ba"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\npc_item_service.rs",
+      "bytes": 41905,
+      "sha256": "ad062fb91777e2449c03d5d3b99fd5d829712c46648576bbca2a9b36eabc3038"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\options_volume_tests.rs",
+      "bytes": 13061,
+      "sha256": "47090774678f4675efc107cb096e1fec5507478041cbfcda2c928abb00caa698"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\options_volume.rs",
+      "bytes": 6800,
+      "sha256": "b8f95910747b706e680daf95a053bd914717118b6f6e44278577509e8a5f0581"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/overlays_portable.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\overlays_portable.rs",
+      "bytes": 1916,
+      "sha256": "6c744b45910bffbfe4aac4ded289344d96ad2cf41beda27cc3de49e2ea448386"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\overlays.rs",
+      "bytes": 897533,
+      "sha256": "2545ce7104060e3de7143983908f65165c57a881651d7e90942edc2e31e7b703"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\panel_layouts.rs",
+      "bytes": 66450,
+      "sha256": "f4da839373cbdf9616575f98dbe4ef1f52a3a87a006e66d0953c82d992c966fa"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\panel_navigation.rs",
+      "bytes": 2772,
+      "sha256": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\player_inspect.rs",
+      "bytes": 15674,
+      "sha256": "09a9e71be0bf22053ee9e7834aecfb1d3c2e40dbc5066ab2ff7d035b4437aaa3"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\preview_data.rs",
+      "bytes": 12982,
+      "sha256": "892be3b94a0a9a3159c5184d56fdcdeb4a039097090282fac5cc74a98fa4ead1"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\primary_item_image_tests.rs",
+      "bytes": 17405,
+      "sha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\quest_targets.rs",
+      "bytes": 9308,
+      "sha256": "b17bea53ab0f29344a9c15c47c5e9bcac4dfaf7c0849ad256755aede172465df"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\ranking_dialog_tests.rs",
+      "bytes": 4665,
+      "sha256": "478c53622ef7ff83641660e3fc6911a08548ba48fa7ecd786a99fe41e98b3c68"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\ranking_dialog.rs",
+      "bytes": 24545,
+      "sha256": "218ece48d708f5829759ee2fbb23690079ef5d18ac330c439bdc4d8d8efa4ede"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\select.rs",
+      "bytes": 20676,
+      "sha256": "e626e2a9904b83874b9dc8d8d5e54afd4a052c0104725b5bd6c441666e243b7c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\shared_hud.rs",
+      "bytes": 16596,
+      "sha256": "3e6fcdc241efdec0f8c1bdae402957b036e2651a30415fe496ccdd605217dee5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/shop_paint_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\shop_paint_tests.rs",
+      "bytes": 16555,
+      "sha256": "4141f5218d20f6be8e71b9dbfda15254211d61689f2db200322a5217db25513d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/shop_paint.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\shop_paint.rs",
+      "bytes": 15477,
+      "sha256": "eaf8a797181f08608ac1a94b1aa60162bd969424559bbb125cd16df635c06f6c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\skill_assign_dialog.rs",
+      "bytes": 12924,
+      "sha256": "891e6fcff5826907e426b9ee63ec9627b200b3d82060c343cf6a8bb1e4e42da5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\skill_bars_host.rs",
+      "bytes": 11845,
+      "sha256": "15d063a71128425ef6773a386c90b431beaf5b9ddd4fbd1e2efa78695775be20"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\skill_bars.rs",
+      "bytes": 3529,
+      "sha256": "29eda37d5aefec57b8f7ce91de1a49f94b99bc1c1642349ce705e88c352baef0"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\skill_page_shared_tests.rs",
+      "bytes": 3894,
+      "sha256": "d4557b8a4f360a891251fcd32f0cbe6bafd2951494345abfd0781213edab086d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\skill_page_shared.rs",
+      "bytes": 13461,
+      "sha256": "5124f9a2210c23717df4cba8f2145c7c80a5d957ec87c464af67b446be93a368"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\skill_page.rs",
+      "bytes": 5794,
+      "sha256": "22a87ba44bc7809fb7a8013946373676e9e7cfb46c5364933c25842332b92731"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\social_bond_dialog_host.rs",
+      "bytes": 13449,
+      "sha256": "38e1d9bd9d08b6be959a53b49b196d249a1c18299c0b5924ac48cc7457000ba7"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\social_bond_dialog_render.rs",
+      "bytes": 12624,
+      "sha256": "734068c2ccef7e6e3ae0cdbe9d20a6a67adec6de564f4911a106f271dee83286"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\social_bond_dialog_tests.rs",
+      "bytes": 8199,
+      "sha256": "c4e3e1e2887b832ac8bb39dc12e70663ae69b9b8552ed760982d661e40eb3115"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\social_bond_dialog.rs",
+      "bytes": 20415,
+      "sha256": "049991cb6496aa9dd146d3834dd9a4ddcdb07ae3b254857fd78c11c3eb93c3a2"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\spec.rs",
+      "bytes": 17307,
+      "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\status_hud_source.json",
+      "bytes": 30968,
+      "sha256": "dc9febe271cb7b5d7c3cf4c6f291fd3e8d46b5219a30b6d1b61a31ada2146c68"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\status_hud_tests.rs",
+      "bytes": 8556,
+      "sha256": "98c4ddd5528254bdbb78f396b0614b68090382812cf108548d345d1e7536b148"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\status_hud.rs",
+      "bytes": 27576,
+      "sha256": "f2821907c77c95818a89d854a40bcf373b64bbb4a5a1333f079a7fb24e5ca712"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\storage_drag_tests.rs",
+      "bytes": 21550,
+      "sha256": "27aa9e9846d9e205f815e1e55d8d4ba126e9a3fe76e2b6358f4683bfce9c4769"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/storage_paint_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\storage_paint_tests.rs",
+      "bytes": 12135,
+      "sha256": "8de63630c86aa00d681349bce7d5b27675388c1f62ab2617460f55687540d8ee"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/storage_paint.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\storage_paint.rs",
+      "bytes": 15468,
+      "sha256": "fa705cb5cea381a872c7eacbf253c7c05679a6bccbd073fccca30e76578748d2"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\storage_password_tests.rs",
+      "bytes": 12665,
+      "sha256": "b1de73c89e5514b0adfcbaa359b0723a9eb5d06df4087e72d17fd6307f0e1f81"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\storage_password.rs",
+      "bytes": 5080,
+      "sha256": "d779200f6fec869418324f8b2b85f73960af927ff3e732a66f69bd3ca767b4d5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\storage_rental_tests.rs",
+      "bytes": 9407,
+      "sha256": "8040e842d63189c68fd1f2cfb437469e0d15264318612f1cd6def72a9538129e"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\text_input_tests.rs",
+      "bytes": 14312,
+      "sha256": "89ee0a465cf510af7bd7798677edfa3ae56efc0db4ec00424b2197a62a9197ce"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\text_input.rs",
+      "bytes": 15798,
+      "sha256": "693ed802703ed990888f472170710c98599e2fed8e2f913fb091f2de6dab2ba2"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\trade_dialog_tests.rs",
+      "bytes": 33158,
+      "sha256": "57088e60edf1c18a24b44b6c4b683f11302f30e5eb70ddb253653b909e0de5f7"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\trade_dialog.rs",
+      "bytes": 27577,
+      "sha256": "096c2234d8ab65df2d87e284480600a09906eeb8772b2a7b0313cc50e732411f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\trade_item_input.rs",
+      "bytes": 17157,
+      "sha256": "d3022d83e31e199decccabc24db4601cf4560c8276663dc92a54a1e3a3326d98"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\trade_item_tests.rs",
+      "bytes": 28376,
+      "sha256": "093ec8546f3d4a7a531811648725ac3ab2d8cba696964fb69f3d5515220b35a1"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\typography.rs",
+      "bytes": 1525,
+      "sha256": "cd89a25e7ee9e5065ebf294af4cf86ab428005cf22d3563a5479a54302eac514"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\widget.rs",
+      "bytes": 66965,
+      "sha256": "5f98ba8ee1a34d8f994cca612254fc1c31b926e5d6a6ba113f2421ce62ba385b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/entities.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\entities.rs",
+      "bytes": 9192,
+      "sha256": "da2c85d305d97ad03dadef22f7eb4211ec69ec4948abe4a43d91a079e694cd2c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/game_shop.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\game_shop.rs",
+      "bytes": 27408,
+      "sha256": "85472574682a0e476d00321d17f0d02161e5e480b19a46c0e5785b83e383f448"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/graduation_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\graduation_tests.rs",
+      "bytes": 3683,
+      "sha256": "3e941caba423a34b92a65304a4acf1fd3d8b203fbf6deb548e05949d6203f507"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/hero_model.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hero_model.rs",
+      "bytes": 38514,
+      "sha256": "f1a7a586acc294f65fed774f8293087e85acee13019d42835abd8e96a1cd9b4f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/hud.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hud.rs",
+      "bytes": 6225,
+      "sha256": "b23c5f5b19b4b02b5aec27cb8f4b1440d8a9822748a69e91500933cab41704a9"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/inventory.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\inventory.rs",
+      "bytes": 32107,
+      "sha256": "f748995a9b28afff30ab6dba356de8155bba95c3e76047b1fecf9d1504c40af4"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\lib.rs",
+      "bytes": 4628,
+      "sha256": "e8d8b2ae9e8781bb440cf332ba4a68c0d579ed15fd20784d4bed521fc8d35952"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/mail_service.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\mail_service.rs",
+      "bytes": 19827,
+      "sha256": "1ae04be341f0c8e93da6ef9b5a90cb2f89ed8d34808d6b2948ea8dcac99b8e29"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/mail.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\mail.rs",
+      "bytes": 23110,
+      "sha256": "1ae7aee8e9c8cd5facdbabdb0371858b247d0e7d002e8755d28520fa5c411e21"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/map.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\map.rs",
+      "bytes": 11276,
+      "sha256": "fdc36d937978844bd4c59092129c83bb8904ffbfda0dd78b9a515a3fc32b1297"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\native_shell_ui.rs",
+      "bytes": 106352,
+      "sha256": "55cc25f1fa757061db22536eb60fe9182a63b5d9965f6f85c03e2082daf65927"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/native_shell.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\native_shell.rs",
+      "bytes": 79510,
+      "sha256": "7e4090f4551301ee0a2f807ac2510fc6be42b33e9afcd187671911a6a0f766f9"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\newcomer_v2_guidance_tests.rs",
+      "bytes": 5530,
+      "sha256": "cc66e1000f8949e470b36d7309c259179e8c70564b666a9b2356a768df10ddc8"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\npc_gold_buy_attempt.rs",
+      "bytes": 18915,
+      "sha256": "fe7d6a5ca598c1b34b00d4e0ae2995c23a127450139bb27dcf0d753b05e82d44"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/npc_shop_buy_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\npc_shop_buy_tests.rs",
+      "bytes": 29203,
+      "sha256": "89b8009ec72158ba1f8544a7fdff9a70085caa7e7ff966a7ac4f52a7c400643d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/npc_shop_buy.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\npc_shop_buy.rs",
+      "bytes": 17992,
+      "sha256": "2d2cf7fceae57773fddecec1038af870475ebbe0eb3d7e367c302cccf80143ad"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/npc_shop_ui_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\npc_shop_ui_tests.rs",
+      "bytes": 19254,
+      "sha256": "62ff113f8c2ec7b8a2e53ad1f43158a14cca99528d43ed360a2048edce9b488c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/npc_shop_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\npc_shop_ui.rs",
+      "bytes": 18622,
+      "sha256": "984aad5de9c89a2b32b6c9d4602008951a6ee10caaa1ca5d5f5b78b48afe3cfe"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/options_effects.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\options_effects.rs",
+      "bytes": 28290,
+      "sha256": "d086e5faa0c6e20a659da1fe5b35636a374021135d97ea84300b9279a8901a7a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/pending_operations.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\pending_operations.rs",
+      "bytes": 126908,
+      "sha256": "80c77efc4f7e8ff4022f89eff4bcdfb412a08b54b17828735cba483f3b87800d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/player_text.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\player_text.rs",
+      "bytes": 29080,
+      "sha256": "3935f1cb83801f69ed4c64ea7b211fe419d126a2e9ae3b207451b8e09ae6f22a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_bag_ui.rs",
+      "bytes": 131082,
+      "sha256": "711306f13b98ab711df3a6f128e45016acb72cd9931e74b5f9a7ffee41baa36b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_character_ui_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_character_ui_tests.rs",
+      "bytes": 6521,
+      "sha256": "e02a7386e939a1196224848dc69cde6bbbdf50532a3346867f1f702639c607fe"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_character_ui.rs",
+      "bytes": 19402,
+      "sha256": "ff1dff6df4cb8d624b0c82817f89fabac9965bdac2f54a6616cce8181af6b62f"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_experience_bar_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_experience_bar_ui.rs",
+      "bytes": 18563,
+      "sha256": "6e835c5d6bcb62db12204888014dfcdfa55db2687825f28e23386fe06ebe6796"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hp_orb_ui.rs",
+      "bytes": 60674,
+      "sha256": "322e9c46e31108cd588f525a218ec2251a7cae347a6faebc85409cbe1c1f9c04"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_hud_bar_draw_plan.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hud_bar_draw_plan.rs",
+      "bytes": 12781,
+      "sha256": "8f7ef2a307289e479a3696e79e25c05ce6022e44be4da075fff54f6d7d893d2a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_mail_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_mail_ui.rs",
+      "bytes": 31756,
+      "sha256": "036a60a223d04336cd46e608461ada81d8bec7302b4fa2e13f1bf5bf910c397b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_npc_shop_ui_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_npc_shop_ui_tests.rs",
+      "bytes": 31069,
+      "sha256": "cda369038a2f47ae348c05850ae135859c03212ca6199c34e96e389fa3f38088"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_npc_shop_ui.rs",
+      "bytes": 40279,
+      "sha256": "138aca0904f37e7c4cbc14476cb6b16f6849e386f6ea0fbb926fc628fe6dcbd0"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_quest_ui.rs",
+      "bytes": 43975,
+      "sha256": "aad6210f03aa1728785ac33d5e71ee83981f53f813d5004cb6cf08338b724e49"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_spells_ui_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_spells_ui_tests.rs",
+      "bytes": 8110,
+      "sha256": "f470b9a430d1ad1e25c960bf6ad958c0cad09ccd56705111138b74983501af0b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_spells_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_spells_ui.rs",
+      "bytes": 15429,
+      "sha256": "c858933be07fe1f994d2248ed3a5cf642ea421bae167efa67c51e484d172673a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_storage_ui.rs",
+      "bytes": 57788,
+      "sha256": "77a24f82f167b999c43f320297722f3255db96762e040c8064fdd34016bc9ee6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/portable_weight_bar_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_weight_bar_ui.rs",
+      "bytes": 17598,
+      "sha256": "700a492ee2e8de661aa2026f66a71fe19a8d1973db396b75e79f10c7f7444c02"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_destination.rs",
+      "bytes": 3534,
+      "sha256": "e8f66fcbb6e53747cd015d8bab1f35783a0a6086b32590b3fd7411727260998b"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_guidance.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_guidance.rs",
+      "bytes": 5675,
+      "sha256": "202a7faa12f0d2e635512570fb05616ee29900275f0d0f9341e758745b787c2c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_hunt_regions.rs",
+      "bytes": 9663,
+      "sha256": "2e1f728f1911652486027b57d7faf1c376e8ee58dcd39c67cc3fe77cf7e63399"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_intents.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_intents.rs",
+      "bytes": 6706,
+      "sha256": "8b542ec7a771ec443c720fa389234de7f57cebe19c2ac6a2201c9f0d505709db"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_journey.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_journey.rs",
+      "bytes": 36822,
+      "sha256": "a591c6e926e3af87f0f5f46ca7cd6586bd26ceca3ee429d03efa821a8b519456"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_model.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_model.rs",
+      "bytes": 32330,
+      "sha256": "3d99a0b1d67615d08c0281e5eca180eee9e16462fc368d77a0996e44511b0798"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_multi_guidance.rs",
+      "bytes": 42019,
+      "sha256": "9dd030b4d6821300cef538d7304fc24eb49693ac09adddee275fa6bc6568b291"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_practice.rs",
+      "bytes": 9064,
+      "sha256": "61514931d40165eff565cb822dfc91cc6992ddb837c9abb636f0f3d099fc0cb0"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_presentation_text.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_presentation_text.rs",
+      "bytes": 3447,
+      "sha256": "b9168aaa3a54e16335cf386b0411fc1a9eb354b49beadf760879a3d797ad0bb8"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_route_search.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_route_search.rs",
+      "bytes": 292,
+      "sha256": "879b0634c0a76d4f88a0dff03da3103f81e556b49b8a06c28ff8a9e9a58dca45"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_route.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_route.rs",
+      "bytes": 6346,
+      "sha256": "3c8a535c2395bc968b25c63d884d33ae88ef66de8ae1bba20a4f6a1d1da09de9"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_supplies.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_supplies.rs",
+      "bytes": 30592,
+      "sha256": "8761ea24c787bf8866f1a83d079d0e468d8493087ad0c05f09415662993a450e"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_supply_visual_tests.rs",
+      "bytes": 19277,
+      "sha256": "52a2fd145a0adf2b28a29cb1a11474aa8c11b32314cf6a3434f9a9af8be33453"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_turn_in.rs",
+      "bytes": 17505,
+      "sha256": "54de8bd98b31385597920d30311686d665a97b0ce65921399f6a58be1c103e0c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\quest_ui.rs",
+      "bytes": 522828,
+      "sha256": "ea45cbde1817652aa6f050a06d34215bca758a67c7a434417bb661cff80ee92d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/read_model.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\read_model.rs",
+      "bytes": 11721,
+      "sha256": "f570ee71ed883051062e385a745eb6b00dfc6973136878cc50c2b519af7a1373"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/shop.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\shop.rs",
+      "bytes": 17640,
+      "sha256": "56d287cc0b277d980bb70669b7a00a54fd8ee5d7463f618358cd77cdca25ae1a"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_binding_persistence.rs",
+      "bytes": 16878,
+      "sha256": "6a6b5216e4c306a63236a2132a0ab745bf3501936c68ad31e1aa4a9204ef5d5c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_binding_ui.rs",
+      "bytes": 21495,
+      "sha256": "5d73ec6765b3df04ad357686d6abe2d10910e0e3cad628d5dd7ce4156322bbd5"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/skill_model.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_model.rs",
+      "bytes": 26210,
+      "sha256": "0c81025f3e4794532e07cc562cfda006105e043010e946931cf6cda12b83507d"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/skill_page_state_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_page_state_tests.rs",
+      "bytes": 10024,
+      "sha256": "68b5ec253f88d5d4deac53c7c3e43a94a60f661bff1267921a8af6f3b0991548"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/skill_page_state.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\skill_page_state.rs",
+      "bytes": 12884,
+      "sha256": "fdc9aebeab2e702c6adf57263ebe263b46e4ea4dcbebd0ce1768d9ae287e8732"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\social_trade_tests.rs",
+      "bytes": 10477,
+      "sha256": "5ad3148fda7f25ea47b1754ebcbfdad9c8fb5b54ba7106bd550ecf2fc6b832c6"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/social.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\social.rs",
+      "bytes": 76619,
+      "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/storage_interaction.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\storage_interaction.rs",
+      "bytes": 20497,
+      "sha256": "0d5a9c6ffd58082dca6cfb3b8dd9d45f91b7e8d03474628c711f1a8aae48b761"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/src/storage.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\storage.rs",
+      "bytes": 20289,
+      "sha256": "04207db0d6156dc7f032cc5cb76dce4d847def9400825cc90b07ad014a6e7367"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/tests/quest_presentation_locale.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\tests\\quest_presentation_locale.rs",
+      "bytes": 12080,
+      "sha256": "1ca88bd0c175ac4c9ded0e40dabe3c66687240e27f1a0a93e66b420aafa45c3c"
+    },
+    {
+      "relativePath": "apps/game-client/client-bevy/tests/shared_hud_navigation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\tests\\shared_hud_navigation.rs",
+      "bytes": 9784,
+      "sha256": "722eb8688dc9a1daca679c629d8a6d50664c3744f39f180514fd78327a749808"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\Cargo.lock",
+      "bytes": 167,
+      "sha256": "55d34e3a9050a26360e9fb635a52c248752efc9557b1339bf9ce9afc94e6d8a8"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\Cargo.toml",
+      "bytes": 390,
+      "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/auth_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\auth_ui.rs",
+      "bytes": 16041,
+      "sha256": "99eb021f190ddda8681e59cb155d41938cbe78c542943042efd29c258a818147"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/cash_preview.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\cash_preview.rs",
+      "bytes": 6202,
+      "sha256": "8f75b889dd2b697673b106ff62cfe9083d60993d38e5048deb3fba52adb3a91f"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/chat_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\chat_ui.rs",
+      "bytes": 10371,
+      "sha256": "79cbe01bfe0d239111c7f3d86dae7d3f4d8f23d38264fe9fb579f655c5567c1e"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/clock.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\clock.rs",
+      "bytes": 1543,
+      "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\entity_animation.rs",
+      "bytes": 63457,
+      "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/equipment_pending.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\equipment_pending.rs",
+      "bytes": 13569,
+      "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\fishing_click.rs",
+      "bytes": 14575,
+      "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/intent.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\intent.rs",
+      "bytes": 7513,
+      "sha256": "adeec3ffbab3ddee1399e73280682dd120201bdb591a2505264bf5c5df8b8a1f"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/interpolation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\interpolation.rs",
+      "bytes": 3723,
+      "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/item_names.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\item_names.rs",
+      "bytes": 10185,
+      "sha256": "797c07b2d38ba868e4eda0f812aaad74f4ca54fbf70fd19a3d4110a1cadea160"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/item_tooltip_types.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\item_tooltip_types.rs",
+      "bytes": 5441,
+      "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/item_tooltip.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\item_tooltip.rs",
+      "bytes": 72929,
+      "sha256": "b1eaee082e6b4f570302d9ed2e5a929faa4b51f60e67c4c20b42e0bd57746552"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\lib.rs",
+      "bytes": 766,
+      "sha256": "d76537b2f6485221f042249c7633e2fa66aaeaedd74d546b7039bc93f62dadf7"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/mail_compose.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\mail_compose.rs",
+      "bytes": 10789,
+      "sha256": "388afe73f95401a00c9ff17e45c0f7989a83e0554e037da17457207d3a119fc2"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/mail_parcel.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\mail_parcel.rs",
+      "bytes": 17544,
+      "sha256": "bfd8447860543832e1277e830187c72add6de5b718d4652a9b12ce15e0d65889"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/map_route.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\map_route.rs",
+      "bytes": 6374,
+      "sha256": "02de643f0ffd8657190b9e9227c3885492193d18a577537f175d7913bd784fdd"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/motion.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\motion.rs",
+      "bytes": 2181,
+      "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_gold_buy_attempt_tests.rs",
+      "bytes": 17439,
+      "sha256": "8b483ae46733d7de4e50a9d22c2e04fe5502db41cf69777f300c4646d237ff29"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_gold_buy_attempt.rs",
+      "bytes": 11292,
+      "sha256": "18b22d9f8a22e2f02e2c6d197ed562b3a56647c85f359dd099860b6544c00f97"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/npc_repair_quote.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\npc_repair_quote.rs",
+      "bytes": 7948,
+      "sha256": "6c299f148e2bbafd55cec749f8ba65076b07d17fef65d469af8f779be06a9cee"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/ordered_map.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\ordered_map.rs",
+      "bytes": 9323,
+      "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/quest.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\quest.rs",
+      "bytes": 11249,
+      "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/reconciliation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\reconciliation.rs",
+      "bytes": 3579,
+      "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+    },
+    {
+      "relativePath": "apps/game-client/platform-android/Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-android\\Cargo.lock",
+      "bytes": 121424,
+      "sha256": "bf3b3901c89e28b9309d31be4e322dd98994e66ee50c333b8a0d07ac1a099d22"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\Cargo.lock",
+      "bytes": 4919,
+      "sha256": "fa33ff948c37683e27f0347f436faa8a4ea0ce994a629b12136963da46ba4151"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\Cargo.toml",
+      "bytes": 532,
+      "sha256": "7d69c61c1ff03f66bfe30487e73ec721fc75525490a5c3af0ed1de887cef12a9"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/rust-toolchain.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\rust-toolchain.toml",
+      "bytes": 113,
+      "sha256": "2502bc508cb09537bb43e98698911ccc2109aa947b3beba56f535119fd750cf6"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/auth_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\auth_ui.rs",
+      "bytes": 2773,
+      "sha256": "93f11a325c7c52eb74973269601f36bc31fc7c85140bba74efaa874bf61a6c52"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\bag_to_belt.rs",
+      "bytes": 16516,
+      "sha256": "03c1cd10368bc775a7a71dc0bf0fa2d1b63162779f6194ddbb3a8a0376f18d24"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/cash_preview.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\cash_preview.rs",
+      "bytes": 2661,
+      "sha256": "c92beffad40a5069dbb8a93e3be09dcc69630764fe6f2d03f177187ec1375c38"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/chat_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\chat_ui.rs",
+      "bytes": 3487,
+      "sha256": "7f66ee40f459d580a5cfa4c62ec511cc1bea50271deda9a3d565ca810aec25ed"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/core_api.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\core_api.rs",
+      "bytes": 8244,
+      "sha256": "5743271b90f2f6a25d45b47b0a83be2d5154c69ae0a15908d04471fa14d2cd7a"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation_state.rs",
+      "bytes": 36055,
+      "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation.rs",
+      "bytes": 4527,
+      "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/equipment_pending.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\equipment_pending.rs",
+      "bytes": 17345,
+      "sha256": "5d27eff8a70f165a0d96bddf8e99113d8bb3d66ab7c63b367f3969595bb91a99"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+      "bytes": 34144,
+      "sha256": "aed8af65acd91c1189a4c3b23d4500ac9747c7dcb64363472c22b6fadcb59b4c"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\item_tooltip.rs",
+      "bytes": 63748,
+      "sha256": "a33c21d6ccb557d064fd36121c0a5be07b75fff3a077f8ced91645fc0ee84654"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+      "bytes": 1663,
+      "sha256": "6aed377283d57e95654063e2e9ecb411e0687d89c67ce77913fe7489f9c18829"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/mail_compose.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\mail_compose.rs",
+      "bytes": 35410,
+      "sha256": "f0cb1102d7f27e4bfde5eb64bc417ab6dec520b590cfc6195b987e50fc9130c3"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/mail_parcel.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\mail_parcel.rs",
+      "bytes": 11810,
+      "sha256": "8f645711c71c277c63a61224ddcfd50b4c4a45b301aeb6fbb3afa35b2c97fd3e"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/map_route.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\map_route.rs",
+      "bytes": 4626,
+      "sha256": "661ce8827a1bc136d125aa5e16d473d71c7a8e135af8785e85db45abaee5df76"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/npc_gold_buy_attempt_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_gold_buy_attempt_tests.rs",
+      "bytes": 25660,
+      "sha256": "7e6949114c9c0961274a69a2cd91abdaf700508cd83084317e7b3f40e427104f"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/npc_gold_buy_attempt.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_gold_buy_attempt.rs",
+      "bytes": 8128,
+      "sha256": "d8b8813cb7a81c9a2e51fed9cfa6ce55d327e6daaf902f634b46a2c9ccf12605"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/npc_repair_quote.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\npc_repair_quote.rs",
+      "bytes": 4623,
+      "sha256": "70d27fa8a1cc1151401b3c0d184a65b431e423965fbaeaf51cfb5aae1e508259"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/build.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\build.rs",
+      "bytes": 400,
+      "sha256": "9063303d223f5bc7476f63f39e14d22e242ee6073ca6fb5ee90d2fc3027b4c6a"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.lock",
+      "bytes": 148747,
+      "sha256": "7b481ca0f94fe847cc94045872173af2f15faa3051d3271df0e2f429bd05b681"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\Cargo.toml",
+      "bytes": 2074,
+      "sha256": "54cb8adcc69d90f0c0d5cc21d53f8e393584914c92a56f833407d01d812e1d20"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/resources/numeron.ico",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\resources\\numeron.ico",
+      "bytes": 9353,
+      "sha256": "bbef08e9fe5c6fa674a80aaf7e94c12d21739583c89b8024f669e3106b013d38"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/resources/numeron.png",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\resources\\numeron.png",
+      "bytes": 7853,
+      "sha256": "e463f7b3326c1147ec707ddaa40e5f225b0b33ed75f90bedef4f24ac55f1222b"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/resources/numeron.rc",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\resources\\numeron.rc",
+      "bytes": 629,
+      "sha256": "3520135d170b9a9844b04469eddcfcf14d99186aadd7a3b814c8141c6368e5d5"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/assets.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\assets.rs",
+      "bytes": 35827,
+      "sha256": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/atlas.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\atlas.rs",
+      "bytes": 146998,
+      "sha256": "9f5f7acd6a4743cc8cac0ac14caa765c5b6b5b895779cd484975968891923034"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/big_map_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\big_map_input_tests.rs",
+      "bytes": 17113,
+      "sha256": "877347cb5fd04813ac6e07028cda2df84e7af5de283bbde075e43a18e79ae3cc"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/big_map_input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\big_map_input.rs",
+      "bytes": 9718,
+      "sha256": "5d0e30af55b74396b212449a228f6b3e32793973c5410636d9be83afa8e6995d"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/branding.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\branding.rs",
+      "bytes": 2012,
+      "sha256": "999dcde18d74c5161e9c02453a3034ed00ce5f42e63d7df73976399c321edea1"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/capture.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\capture.rs",
+      "bytes": 71518,
+      "sha256": "6fd0ff841655660dadba8a81c3d9667df54b563190cc0b2dcd61ac4de3d73bf9"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/capture/provenance.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\capture\\provenance.rs",
+      "bytes": 6284,
+      "sha256": "a4396ffecdbaf1d17b50fc41e5b161c68f6a36937bdd53d0ca1c56243c86c8f5"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/clipboard.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\clipboard.rs",
+      "bytes": 26979,
+      "sha256": "fbc38e1064bd20fcbbc45ed4f7a780f5bc61e3808f735ed86a1c9cd058f61c4d"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/cursor.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\cursor.rs",
+      "bytes": 6232,
+      "sha256": "1bf6166fbfa866623be079be0c9984d959dff93624d06cdfbfc9eca74c1a3e4d"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/effects.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\effects.rs",
+      "bytes": 419572,
+      "sha256": "9720b7920dcaa59acd0c115ae1d5e4be1ae483fa85986cea2ed751126ac6a44c"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/entity_health.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\entity_health.rs",
+      "bytes": 16623,
+      "sha256": "89e882263dd97b7f46ca4deb75ffaa029735873fc3788883ad1cbc429540e9f2"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/entity_overlays.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\entity_overlays.rs",
+      "bytes": 88975,
+      "sha256": "57f64cbbf509b8c14f06af95086220116be1d7628ed90d291edddd33a259d7b0"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/entity_presentation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\entity_presentation.rs",
+      "bytes": 159884,
+      "sha256": "a7ee21b709e585cab3092472cd14da3039c9767c7aa9d7c17d6e260882634d4b"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\equipment_creature_wire.rs",
+      "bytes": 9696,
+      "sha256": "537602df77c31189ffee93dbbbe775b35905abb54f58d668fdf16d18e3c22d97"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/frame_sets.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\frame_sets.rs",
+      "bytes": 19005,
+      "sha256": "91e81ee8493937c7f36cc36aba8fe78d3e505463dfa513ba936e2c41063e32ea"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gameplay_bridge.rs",
+      "bytes": 360984,
+      "sha256": "bada4f46375a0212591fbeadfdb5d596c25237e022c7b8eedb6c6f08834541ea"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway_catalog_transport.rs",
+      "bytes": 12021,
+      "sha256": "3da0c9a6ff12ec8b640c7d5d1d3df2e5d7e44d7fe67ab835aa365fc32b673690"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway_handshake_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway_handshake_tests.rs",
+      "bytes": 6652,
+      "sha256": "00adc0100280164dac2c980bb5957443d340ad95d86a66120c1e883906ae8123"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway_map_identity_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway_map_identity_tests.rs",
+      "bytes": 11862,
+      "sha256": "e1b5813a1ece2717339bcc51105c30aa4f87cfd6991e6ad413e5c7a046baf31a"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway_quest_tooltip_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway_quest_tooltip_tests.rs",
+      "bytes": 4675,
+      "sha256": "b54c78c820b825e4e7f26a48188bc9a9c074858a04d00744e494eb5871483f2d"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/gateway.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\gateway.rs",
+      "bytes": 667776,
+      "sha256": "44ddf6e16589cc941eb823803b00f8b7ff11d21442103f096e9eb6d122611f52"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/hero_pointer_settings.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\hero_pointer_settings.rs",
+      "bytes": 599,
+      "sha256": "811e218f65588532fe23e9d4f81596f48ff8b6fae62ce02ea418061a0b217e1b"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/hero_wire.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\hero_wire.rs",
+      "bytes": 3584,
+      "sha256": "2c42694b507d0787d3aa8adf7d99c264703cfe5670e59cbd41781596738365b5"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\input.rs",
+      "bytes": 367623,
+      "sha256": "6d67ff71dc910e76f452ec468e42e9da15780e306ae7a35b01046da91c4f36c9"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\keyboard_world_actions.rs",
+      "bytes": 9337,
+      "sha256": "5fd4cfa4b37c0ef2810bb9f42094188f598e319f62388f4fd5d738c721cabc43"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/lifecycle.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\lifecycle.rs",
+      "bytes": 2648,
+      "sha256": "fa273895f7100c749a690f75836bdc9ba6398bd1cd34e14fb48c3c1cf0a45083"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/lighting.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\lighting.rs",
+      "bytes": 45813,
+      "sha256": "da4750ef952584c5d7e9f85f64db5fb4686a284949c410c7e36e029621a78286"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/main.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\main.rs",
+      "bytes": 19751,
+      "sha256": "7aa8060771128a1ba7a0ef741355d45edb51520dca1ae057fc0bc9921e6f7fea"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/map_parser.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+      "bytes": 105184,
+      "sha256": "376d1f6416032c93484bfd8ca91fec39f6aa67a4bba6a1c3d3fd694d5d6d78c9"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/map_player_movement_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_player_movement_tests.rs",
+      "bytes": 4208,
+      "sha256": "89620d464fc6a51a925096bb5bbb47792fe9302214c91ffc334ded5ca86f0585"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/minimap_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\minimap_input_tests.rs",
+      "bytes": 11412,
+      "sha256": "ec852356b9d68af66afb7d4838eb80c58d7cce58853da1c760d27813ca0f5fd4"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/minimap_input.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\minimap_input.rs",
+      "bytes": 2408,
+      "sha256": "d982d2018d4b5306ac20de638c2de8c254d8e2b446637c20592bb46c460a8fc1"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/movement_trace.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\movement_trace.rs",
+      "bytes": 6217,
+      "sha256": "3791e450cdfe0d60dfb5ca8aea9b9195af2a9952e31e06f96b71b50abd321b77"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\native_fonts_gpu_tests.rs",
+      "bytes": 7253,
+      "sha256": "3148b82a4731f906bd03688eca0d87b3fdf857cf8bd860eaca8bbbd584403305"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\native_fonts_soak_tests.rs",
+      "bytes": 11353,
+      "sha256": "4dca3ea1ad5bf04c7bc53b28c2280803269583c320e1eb6ab2b346e5235762a0"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\native_fonts.rs",
+      "bytes": 7962,
+      "sha256": "03f91a9822a526f9d5aa35341accbc82b4522d62d0784f033522af8e33065e88"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\native_protocol.rs",
+      "bytes": 82980,
+      "sha256": "b258df7ca548a7e104f5a9a17328083a856dc943269471eace8dbad02894aad8"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/npc_gold_buy_transport_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\npc_gold_buy_transport_tests.rs",
+      "bytes": 51091,
+      "sha256": "44934c0ac73d8eb55f49a7c60e360e441413b2bd40875a036a863b6f3f92faa3"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/pet_effects.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\pet_effects.rs",
+      "bytes": 10229,
+      "sha256": "7dd52c7afc1ed20dbcb48c7e00b06a2c15244548a0df55a07ecf986f02413c8e"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\quest_route_input_tests.rs",
+      "bytes": 39259,
+      "sha256": "502745e43ef25de776b09bc7fe070df62fa1aa4085e9f4f1fd3013223a546dde"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\self_occlusion_redraw_tests.rs",
+      "bytes": 4349,
+      "sha256": "180e96e5a5066a459cc06a3ad3f4d06bdde575d5d580a2ee92282fdfb684dc04"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/session_config.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\session_config.rs",
+      "bytes": 22913,
+      "sha256": "56b100adb3cc320c77886a9a693081ac47d3e0ac5815f92a956da15dc3081e2e"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\shell_bridge.rs",
+      "bytes": 30849,
+      "sha256": "d0166ef611eba6d626abce6b57671c76ece1531979de5e1d4d9edeabbe67b4b8"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\social_bond_wire.rs",
+      "bytes": 4165,
+      "sha256": "81cdd23d1ef56b700a2f013f386fb31d24994313568731ade9154672b98cca40"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/spell_targeting.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\spell_targeting.rs",
+      "bytes": 6636,
+      "sha256": "e809a9d431fb6b2d7e7d95397ed9d8f5ef2c04ffbeb4f0ab2b1bf034663c5c5a"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/timing.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\timing.rs",
+      "bytes": 3340,
+      "sha256": "e799d74f488107455312a8f1c78b3dc477b06e453cdaccc7ed2e6dcdfe7c82a6"
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/trade_projection.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\trade_projection.rs",
+      "bytes": 12404,
+      "sha256": "24ee8e1b34c06dcf1d29a9d4105a6109e11f7e585376952f7a9d55251245183d"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\Cargo.lock",
+      "bytes": 125951,
+      "sha256": "e92a1a1f64aff9031e840a03bd1a81ad677d2079c9e60fbe92b00ae17d2e69dd"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\Cargo.toml",
+      "bytes": 1382,
+      "sha256": "dea6dd2b14135260c6bf409499f5327ef8d3520016e50a19db3f1eb94b988c45"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/rust-toolchain.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\rust-toolchain.toml",
+      "bytes": 113,
+      "sha256": "2502bc508cb09537bb43e98698911ccc2109aa947b3beba56f535119fd750cf6"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\additive_material_gpu_tests.rs",
+      "bytes": 12441,
+      "sha256": "79ccebe5d0dd38a515795dcf13e9eec1b4393c8d9584b1853b58841045d13af9"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/additive_material.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\additive_material.rs",
+      "bytes": 13668,
+      "sha256": "478ebde3f15e1d1cfda49f32a18e1cbda6a6da87de183c0e085057939708e464"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/bag_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\bag_ui_host.rs",
+      "bytes": 51366,
+      "sha256": "7aa523c8761cdfdb5feb8235654775cd28b5ed89306b1cb229451c851fbfb489"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/capture_context.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\capture_context.rs",
+      "bytes": 7956,
+      "sha256": "00754168779eda8591989226d9985c0fc2ce5b02a687dbd19b7aeccba7604ab5"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/character_ui_host_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\character_ui_host_tests.rs",
+      "bytes": 3682,
+      "sha256": "07011de04cdb4e1ae0b93f66b8d6d02729f39e2d62b8ba4c9204633ddc82221b"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/character_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\character_ui_host.rs",
+      "bytes": 18887,
+      "sha256": "35c8c2294de5301e68be961cc0a9fad747005df56cf3688c46e9b0db866e8070"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/combat_input_host_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\combat_input_host_tests.rs",
+      "bytes": 2479,
+      "sha256": "6673e6e4e4313298e5300234e526ee593140ebb7c6ba3086314f2093846cd3bd"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/combat_input_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\combat_input_host.rs",
+      "bytes": 5865,
+      "sha256": "6b81e706a2350be9f80fd656ddffd11d7278df3bf21d2a29b8530ec531d53ea8"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/combat_modes_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\combat_modes_host.rs",
+      "bytes": 21337,
+      "sha256": "14a9cc0ffd6a28d5d901dbef30bcc695ca07ed8d76f66f520677db5a702f8334"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\crystal_additive_material.wgsl",
+      "bytes": 1118,
+      "sha256": "bf65c023b73f01a3544674aa023f7bb8b6e52e19dba78e5f2dbb55c8e99fb969"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\crystal_multiply_material.wgsl",
+      "bytes": 1611,
+      "sha256": "2987f0445638356b2559bc2cf69bc7affcb2d5c2a75d7b9026d8156d6dda001c"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation_bridge.rs",
+      "bytes": 236,
+      "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation.rs",
+      "bytes": 203,
+      "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\fallback_hierarchy_tests.rs",
+      "bytes": 4326,
+      "sha256": "754e5fd395941d82f98402483f05092dd7e87b0d3a657ebfa850b3352ad99316"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/hud_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hud_ui_host.rs",
+      "bytes": 20782,
+      "sha256": "3f0f4a4953b2672ce8549d1022a87c09c41eec5860dd235934610c63d8f28c10"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/interpolation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\interpolation.rs",
+      "bytes": 8462,
+      "sha256": "d31c211204e35750913bb2c252f60af30edb6227fac4d9e59e6f2b9ced41abb6"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/item_tooltip_query.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\item_tooltip_query.rs",
+      "bytes": 63868,
+      "sha256": "94f4693d0a6030780d40a30065f44347e217606339eb8eb029912da0160d79a1"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+      "bytes": 435227,
+      "sha256": "751be21351e0dd01902fced467e46aeee43e560ec80147a8b92c366cb1091041"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/lighting.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lighting.rs",
+      "bytes": 21670,
+      "sha256": "537a9316c5f63e82b623cff8fbc0bd6c67df24e07cc614c0b52ac2ffcbf1fc33"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/local_motion.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\local_motion.rs",
+      "bytes": 66528,
+      "sha256": "a9bcf833a68bf2503ada77d94b8b90b4a4af85500e2848c1606b6f08c42a955d"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\mail_service_runtime_tests.rs",
+      "bytes": 13272,
+      "sha256": "e446b10ef84e66538320a20ecc1446c25b10ddd7a582bbda19fbf47c2d8a60b4"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/mail_ui_host_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\mail_ui_host_tests.rs",
+      "bytes": 55584,
+      "sha256": "0b8978022054eb103da73779bf8e0f6aa01507160f8e1941321dd6fb1fc6dff7"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/mail_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\mail_ui_host.rs",
+      "bytes": 47798,
+      "sha256": "514278fb0528b871c75f5982d7b5230d18fdebb3b53edc0c8207067ee46c828d"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/motion.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\motion.rs",
+      "bytes": 43896,
+      "sha256": "c88ef6b70fabda4cd1cd1c54b62e470e3a046414c63748abaf3d8d25f12d4948"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/movement_shadow.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\movement_shadow.rs",
+      "bytes": 53217,
+      "sha256": "ca24171396c5566ce0a4ce510763590a3fbf680d3811bc512e8f8e961521a369"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\native_ingest_wasm.rs",
+      "bytes": 2409,
+      "sha256": "1847401cb1903edf26d97ba80359fa98e344dac33351939474f9c4d2524f7d2f"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/native_ingest.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\native_ingest.rs",
+      "bytes": 107629,
+      "sha256": "891f23f430b8235dcaf3de7fcab1e5ce3d3bbae7c50e0fac903f8d8f8be94ac0"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/npc_shop_ui_host_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_shop_ui_host_tests.rs",
+      "bytes": 25346,
+      "sha256": "50cc0cd99f66c02ecb0ed536ad25869c27e834e98a643cac7bd9d72ac49a8d75"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\npc_shop_ui_host.rs",
+      "bytes": 31911,
+      "sha256": "f5df4d937f9fb181422d3cbcca93807e725f44d0a368f3e1c7a19751ec9a2a02"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/presentation_pose.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\presentation_pose.rs",
+      "bytes": 26877,
+      "sha256": "9d28250412fabd3890626d58cc2492982a21fdbc4fa988222e27198786ac984b"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/quest_route_plan.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\quest_route_plan.rs",
+      "bytes": 11027,
+      "sha256": "0ddeeb223245154e103c406608efb33f8865c15e6f2af8b6d6894c1d9e1fc94d"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/quest_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\quest_ui_host.rs",
+      "bytes": 123409,
+      "sha256": "083ae140f32c75476889bd7bba0f636961108256f204753eeb5f1ec07f85f759"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/remote_motion.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\remote_motion.rs",
+      "bytes": 29209,
+      "sha256": "d44aea56e9f6bfdf2a530fe19eb015fbdef0191f7f743d5f6ad7e9dff40d821e"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/render_diagnostics.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\render_diagnostics.rs",
+      "bytes": 27764,
+      "sha256": "0a89afcd1067c657cb65766792e67969122a5904eeb4ae97214866e746cb3cd0"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/runtime_ui_capabilities.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\runtime_ui_capabilities.rs",
+      "bytes": 12610,
+      "sha256": "d88f5a3adcee45c6d562fc14340fa138e5da4f45430f1789b08840b31c83e749"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/skill_bar_query.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\skill_bar_query.rs",
+      "bytes": 11849,
+      "sha256": "70f7e119a02d9d068bb02415174acf64d00ea198d56325c0794bd4a4b0a4f146"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/spells_ui_host_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\spells_ui_host_tests.rs",
+      "bytes": 3410,
+      "sha256": "48c3dd5c785c5e0e1e4c3849713fba63b85b2138091f5b73d4d36d817e4789cc"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/spells_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\spells_ui_host.rs",
+      "bytes": 24563,
+      "sha256": "953618b188eea3bade8fc387d3a30eb7b95e7ee8f5a51cede2a703263b190c9d"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\storage_ui_host_tests.rs",
+      "bytes": 13692,
+      "sha256": "1d8d9ee4c7fc6efde5903038312be7563743e91eff1638264e0146a04ba137ce"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/storage_ui_host.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\storage_ui_host.rs",
+      "bytes": 22503,
+      "sha256": "5df835d2c3a88f6bc51047f213bcb4370b5e88907494b2675b9fee4b8b7f2b01"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/webgl2_shared_ui.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\webgl2_shared_ui.rs",
+      "bytes": 11391,
+      "sha256": "06bc8aecfdabc2026a6e3bee302451959f2fafcdc5ebb4aa5e8c51f3e8f2defd"
+    },
+    {
+      "relativePath": "apps/game-client/runtime/tests/shared_hud_ingest.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\tests\\shared_hud_ingest.rs",
+      "bytes": 6289,
+      "sha256": "995aeae5f73ea2e49c6b93e3bb3fede97b3727bb860fd08aeb1f7a4b5df38212"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\Cargo.toml",
+      "bytes": 421,
+      "sha256": "781a69888a9a50d5d2b1a8a490871c53076cb1269fcf57265f47992574a08a30"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/action.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\action.rs",
+      "bytes": 6653,
+      "sha256": "d95e0b339619179d361ba076576ba036b711d52c2c032c443a9879335ae28ae0"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/effect.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\effect.rs",
+      "bytes": 7369,
+      "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/game_shop.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\game_shop.rs",
+      "bytes": 9660,
+      "sha256": "ce9a43af84fce92e4ba437cdabc1978889bd1661916ed338a63ef15dfcdc267c"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\lib.rs",
+      "bytes": 443,
+      "sha256": "fa2548bb42f386f8b01084f143d8865d2ad61a09696cb965a7345106f326093b"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/reducer.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\reducer.rs",
+      "bytes": 68848,
+      "sha256": "abf822121a46cdd7ea13b2b6f0043d6a3071c7c3b73c98e09cc2dbe67e96fd4d"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/registry.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\registry.rs",
+      "bytes": 90227,
+      "sha256": "896697af135cde3d21c163f7d5b5ec9f26fd3ab2475cf00ccfc93bac13d0e217"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/state.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\state.rs",
+      "bytes": 25125,
+      "sha256": "4ceef78bfb111542480b10c054d269fc8c5e57b8882c819fb099e5ef38fe0dc9"
+    },
+    {
+      "relativePath": "apps/game-client/ui-core/src/storage.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\ui-core\\src\\storage.rs",
+      "bytes": 4363,
+      "sha256": "8b080cde6b3321d77b2d0f0865c6b196d0241ee4a546ca50e6f6a7edb9fafce0"
+    },
+    {
+      "relativePath": "apps/web/lib/bevy-runtime-manifest.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-runtime-manifest.mjs",
+      "bytes": 4860,
+      "sha256": "f67118d9e09beefdf99e7f182179b1d7f993ec889b6f7f49fd8f255a9d52fb06"
+    },
+    {
+      "relativePath": "apps/web/scripts/build-bevy-runtime.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\build-bevy-runtime.mjs",
+      "bytes": 51952,
+      "sha256": "b4039cdbf075857b4cb4a649bb114d4af20abeb513bcb94d8ee6ba62994daf22"
+    },
+    {
+      "relativePath": "apps/web/scripts/build-client-core.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\build-client-core.mjs",
+      "bytes": 9249,
+      "sha256": "99feb0205c2a2ebad07c8fc6635d8ec2e341c05006e280dd0d1068006adfd4e3"
+    },
+    {
+      "relativePath": "apps/web/scripts/build-thin-client.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\build-thin-client.mjs",
+      "bytes": 17160,
+      "sha256": "3421180c5e023de2d38991b1052ed5d5f54cdde70ab4703c9ff36fbdc660affb"
+    },
+    {
+      "relativePath": "apps/web/scripts/lib/bevy-runtime-version.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\bevy-runtime-version.mjs",
+      "bytes": 1678,
+      "sha256": "3d6e569f20778bba67a7b0741ce7cddab9d0a1046955d846d1b698d06bf09d06"
+    },
+    {
+      "relativePath": "apps/web/scripts/lib/client-core-release-files.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\client-core-release-files.mjs",
+      "bytes": 6496,
+      "sha256": "68eeb5a0871ee536a6084cb848cdea9437fd5d72270a5d0f7b68eae26edd7d0b"
+    },
+    {
+      "relativePath": "apps/web/scripts/lib/immutable-bevy-runtime-bundle.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\immutable-bevy-runtime-bundle.mjs",
+      "bytes": 7591,
+      "sha256": "35bd55776262085f008b32d0adcb73f3dd17f89d070cf7a633e0d4f47b527f63"
+    },
+    {
+      "relativePath": "apps/web/scripts/lib/portable-next-standalone.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\portable-next-standalone.mjs",
+      "bytes": 31410,
+      "sha256": "6b296f46b17b25890b56259cc7308165f1cb52a4f781042a12ff25d778ec853e"
+    },
+    {
+      "relativePath": "apps/web/scripts/lib/renderer-wasm-opt.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\lib\\renderer-wasm-opt.mjs",
+      "bytes": 14946,
+      "sha256": "b26db9e19ebccb8358afbd7f2048b5970689bc5c4c4f31744d65c1c052a3e7bb"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-runtime-build-identity.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-build-identity.mjs",
+      "bytes": 8181,
+      "sha256": "91835894f274a6f75327e8e414f0edf45df06a8c95529dcef1dc186d3556fdde"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-runtime-manifest.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-manifest.mjs",
+      "bytes": 5987,
+      "sha256": "3573a5645337810685c0d817156e8cc89d3ad62b5b6a828d07d4ba0391d35e7a"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-runtime-package-selection.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-package-selection.mjs",
+      "bytes": 16400,
+      "sha256": "704bcd50a14085ab7d8153fddaebfe2eb521e85b6411b95d4e212cf0f6b1846c"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-runtime-release-files.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-release-files.mjs",
+      "bytes": 8932,
+      "sha256": "a72c304013d2f59d83c631a4305dfa2ba0b31c5a1dd3c73c138599875e5c2fc3"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-bevy-runtime-version.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-bevy-runtime-version.mjs",
+      "bytes": 3968,
+      "sha256": "47c37eb9baf544baac0bd999d5f023b7e242b8ad15474de2ed8ebefb45910944"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-client-core-build.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-client-core-build.mjs",
+      "bytes": 7145,
+      "sha256": "53df09ad1b076c2d5732c05ed92982846b0e0fe30687bcf26277cb797a96ce2c"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-client-core-release-files.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-client-core-release-files.mjs",
+      "bytes": 20235,
+      "sha256": "13b5c6cbd0f2aea1e344438cc223bd640f6ba0b7fb3c90f6db81986f9b148372"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-immutable-bevy-runtime-bundle.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-immutable-bevy-runtime-bundle.mjs",
+      "bytes": 13557,
+      "sha256": "d0b22f79bb29904cb715d3f038cb0f068f0b4256b5a7a90a8734af1708ab0185"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-portable-next-standalone.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-portable-next-standalone.mjs",
+      "bytes": 37692,
+      "sha256": "658af9bbc8f0ee8cfa708afeed011209457a6b7041e5faec285fd26cedf08c7e"
+    },
+    {
+      "relativePath": "apps/web/scripts/test-renderer-wasm-opt.mjs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-renderer-wasm-opt.mjs",
+      "bytes": 38308,
+      "sha256": "0fd0063ae9db00b22d3679e3c81c0cde82fceb2f302ccce6bded538180b18622"
+    },
+    {
+      "relativePath": "Cargo.lock",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\Cargo.lock",
+      "bytes": 240392,
+      "sha256": "182b1c362f1511bb14477461b3bdbf4830e5401fbcfd596eb96160e49e87a691"
+    },
+    {
+      "relativePath": "Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\Cargo.toml",
+      "bytes": 306,
+      "sha256": "64e765be6833b1064b83f67d90512e260e75d1a4bdc33fc53ca85ce24fa49791"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-journey-v1.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v1.json",
+      "bytes": 41856,
+      "sha256": "6952068b9827aa90f44a0b58296637cf83b298d57483912ca274fdfba3c0822e"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-journey-v2-ui.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v2-ui.json",
+      "bytes": 5436,
+      "sha256": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-journey-v2.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-journey-v2.json",
+      "bytes": 28606,
+      "sha256": "e72e9ac2131af268f637097e3472618b93c539a1b59a5a168a31b875c13efd11"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-supplies.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-supplies.json",
+      "bytes": 1152,
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-v1.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-v1.json",
+      "bytes": 28662,
+      "sha256": "49c1ba49d4c3af4fadf3a53ea2618ba5d998ec829fd72f45349498e246e941b3"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-v2-graduation.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-v2-graduation.json",
+      "bytes": 2664,
+      "sha256": "4e3b37f8ac9969219e1e03b566c391f59860f083e1156b7cf88d5f433ccb5655"
+    },
+    {
+      "relativePath": "config/quest-guidance/newcomer-v2.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\config\\quest-guidance\\newcomer-v2.json",
+      "bytes": 4624,
+      "sha256": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819"
+    },
+    {
+      "relativePath": "packages/game-data/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\Cargo.toml",
+      "bytes": 327,
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091"
+    },
+    {
+      "relativePath": "packages/game-data/data/content_profiles/platinum_176.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\content_profiles\\platinum_176.json",
+      "bytes": 42725,
+      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_base_stats_packet_manifest.json",
+      "bytes": 3449,
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_buff_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_buff_manifest.json",
+      "bytes": 10919,
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_creature_settings.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_creature_settings.json",
+      "bytes": 166,
+      "sha256": "cf098d6df97e50217f212fc13873964a096c156611835f2d5654668db8da7297"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_drop_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_drop_manifest.json",
+      "bytes": 24076631,
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_game_shop_packet_manifest.json",
+      "bytes": 96259,
+      "sha256": "ff5bce2f32b0013f3ccd2705fdf7e4a93de89e1c8a6ea1ee58050e52f4124571"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_guild_buff_packet_manifest.json",
+      "bytes": 1492,
+      "sha256": "21a00a9feabb53542cee7f05fe65f93463eede949c56cf6e4feffea8464dd94b"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_guild_settings.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_guild_settings.json",
+      "bytes": 1015,
+      "sha256": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_hero_settings.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_hero_settings.json",
+      "bytes": 23460,
+      "sha256": "1cd6aea695708bca17dd66e535477854fb332a744155ea472919dffc1e964754"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_magic_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_magic_manifest.json",
+      "bytes": 51696,
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_map_event_manifest.json",
+      "bytes": 50155,
+      "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_ai_summary.json",
+      "bytes": 134815,
+      "sha256": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_monster_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_monster_manifest.json",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_command_summary.json",
+      "bytes": 59118,
+      "sha256": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_info_manifest.json",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_npc_manifest.json",
+      "bytes": 5244108,
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_quest_packet_manifest.json",
+      "bytes": 189239,
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_random_item_stats_manifest.json",
+      "bytes": 25753,
+      "sha256": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_recipe_packet_manifest.json",
+      "bytes": 64271,
+      "sha256": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_respawn_manifest.json",
+      "bytes": 6741323,
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/crystal_starter_map_collision.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\crystal_starter_map_collision.json",
+      "bytes": 57421,
+      "sha256": "38ac56c53ce6c9ba0e1849e7750fd48636754f4e33113c63b19b6a61d8f3f690"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/localization_bundle.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\localization_bundle.json",
+      "bytes": 737385,
+      "sha256": "60b425e830bdbd538c2257b8cba4ca8eb2a3f0331b5db4eecbd3403ac1d6b6f8"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/platinum_176_bundle.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\platinum_176_bundle.json",
+      "bytes": 3361,
+      "sha256": "6ab5d376e3f43f540329e776fa3a971aedd0ebe78cefc0d36b10508adfa47c59"
+    },
+    {
+      "relativePath": "packages/game-data/data/generated/quest_presentation_text.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\generated\\quest_presentation_text.rs",
+      "bytes": 2168,
+      "sha256": "2b7bf21b2518dadb6ff92603021885453e9e5e85ccc898df2fbd220dabe68e03"
+    },
+    {
+      "relativePath": "packages/game-data/data/i18n-overrides.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\i18n-overrides.json",
+      "bytes": 328063,
+      "sha256": "9e57e1b4a4dac063601e2d3ed36f2ebf8601de83c0b40f59e77e234324d189a1"
+    },
+    {
+      "relativePath": "packages/game-data/data/starter_scene.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\starter_scene.json",
+      "bytes": 2893,
+      "sha256": "f06c92e72843f7c8bfd8f78aeb1714098107a184f4012a3f86649620ab5451f7"
+    },
+    {
+      "relativePath": "packages/game-data/data/starter_server_data.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\data\\starter_server_data.json",
+      "bytes": 8207,
+      "sha256": "d4349ff4e2d2753d0be95de27341a8a9bb59ea04d3062868b03c7e1d80f72e4d"
+    },
+    {
+      "relativePath": "packages/game-data/src/crystal_creature_settings.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_creature_settings.rs",
+      "bytes": 2162,
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95"
+    },
+    {
+      "relativePath": "packages/game-data/src/crystal_guild_settings.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_guild_settings.rs",
+      "bytes": 4046,
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38"
+    },
+    {
+      "relativePath": "packages/game-data/src/crystal_hero_settings.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_hero_settings.rs",
+      "bytes": 7918,
+      "sha256": "58a19687be4d6794dfed69f6a16608f76adb82722b9cf000eaca2f6b73daaf27"
+    },
+    {
+      "relativePath": "packages/game-data/src/crystal_item_image.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_item_image.rs",
+      "bytes": 2932,
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+    },
+    {
+      "relativePath": "packages/game-data/src/crystal_map_events.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\crystal_map_events.rs",
+      "bytes": 6669,
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8"
+    },
+    {
+      "relativePath": "packages/game-data/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\game-data\\src\\lib.rs",
+      "bytes": 167262,
+      "sha256": "0981721fff2ec9f609500a194341d85ec8083cc943d49a03677256c84bf63664"
+    },
+    {
+      "relativePath": "packages/protocol/Cargo.toml",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\Cargo.toml",
+      "bytes": 378,
+      "sha256": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3"
+    },
+    {
+      "relativePath": "packages/protocol/crystal-mvp-v1.json",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\crystal-mvp-v1.json",
+      "bytes": 10992,
+      "sha256": "6dbb3af8f20dd13a7812fce28be77ae7d877f6aa5c74e30ddf61bd9a78a610c0"
+    },
+    {
+      "relativePath": "packages/protocol/src/catalog_transport.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\catalog_transport.rs",
+      "bytes": 11788,
+      "sha256": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d"
+    },
+    {
+      "relativePath": "packages/protocol/src/error.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\error.rs",
+      "bytes": 3373,
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba"
+    },
+    {
+      "relativePath": "packages/protocol/src/frame.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\frame.rs",
+      "bytes": 1275,
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad"
+    },
+    {
+      "relativePath": "packages/protocol/src/ids.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\ids.rs",
+      "bytes": 30620,
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126"
+    },
+    {
+      "relativePath": "packages/protocol/src/io.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\io.rs",
+      "bytes": 5117,
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046"
+    },
+    {
+      "relativePath": "packages/protocol/src/item_image.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\item_image.rs",
+      "bytes": 1218,
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+    },
+    {
+      "relativePath": "packages/protocol/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\lib.rs",
+      "bytes": 1969,
+      "sha256": "b5fc91187079005e0b19945c3c43e68736bb1786f7098e83134dead5e302766d"
+    },
+    {
+      "relativePath": "packages/protocol/src/packets.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\packets.rs",
+      "bytes": 307016,
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7"
+    },
+    {
+      "relativePath": "packages/protocol/src/trace.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\trace.rs",
+      "bytes": 29621,
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89"
+    },
+    {
+      "relativePath": "packages/protocol/src/types.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\packages\\protocol\\src\\types.rs",
+      "bytes": 120048,
+      "sha256": "c25a956e371aee4e1b56276c3203c541473d04235cb52feaf391480662a1a7d6"
+    }
+  ],
+  "changes": [
+    {
+      "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_dialog.rs",
+        "bytes": 16275,
+        "sha256": "2b9ebb9c0845d8acf1e10648cd3107eb92d12f47fe1505796e043a21025ab91b",
+        "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\crystal_ui\\mount_fishing_dialog.rs",
+        "bytes": 16447,
+        "sha256": "9494e5ba9042b3915f3429318732015a62ddbd3a983dbcda2bd2505eb4297117",
+        "relativePath": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/lib.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\lib.rs",
+        "bytes": 696,
+        "sha256": "4d793f736cd35e6fdb2d8d781e42d0bfa1602b7a5a315406f43c36d2dea03a41",
+        "relativePath": "apps/game-client/client-core/src/lib.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\lib.rs",
+        "bytes": 745,
+        "sha256": "5c6bbe03606f965a61af2f425955b4f4a3c5181da9216191fb3253c9c52ddaee",
+        "relativePath": "apps/game-client/client-core/src/lib.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/lib.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+        "bytes": 1288,
+        "sha256": "d3c5ac8c8060d2b37bdec94eb4c2401d1853c2de228dbe0828cf4db41f0065b8",
+        "relativePath": "apps/game-client/platform-web/src/lib.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\lib.rs",
+        "bytes": 1663,
+        "sha256": "6aed377283d57e95654063e2e9ecb411e0687d89c67ce77913fe7489f9c18829",
+        "relativePath": "apps/game-client/platform-web/src/lib.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/input.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\input.rs",
+        "bytes": 366516,
+        "sha256": "c55424e0ff16eb78f5766b7affbf90545d2c1102a292ac991be4ded9e35bd8e3",
+        "relativePath": "apps/game-client/platform-windows/src/input.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\input.rs",
+        "bytes": 367623,
+        "sha256": "1684d0c0785281eb959776b0ba92f44c4175125cf10f09a7a7f7b10c887f073f",
+        "relativePath": "apps/game-client/platform-windows/src/input.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-windows/src/map_parser.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+        "bytes": 104984,
+        "sha256": "a8bcd20bca37d1f5c90f23bc2387e8197e42e10e10e26d5003e63ac90e52b4a9",
+        "relativePath": "apps/game-client/platform-windows/src/map_parser.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-windows\\src\\map_parser.rs",
+        "bytes": 105184,
+        "sha256": "9cb5f2f2a0c9f78af4a90c346526e00b7a82d7908fee5fe844b9e6138c18abbe",
+        "relativePath": "apps/game-client/platform-windows/src/map_parser.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation.rs",
+        "bytes": 63419,
+        "sha256": "5cecf77412f5029398a35edd838566d35ca5db4b467bbab07e952ad61d64a7f2",
+        "relativePath": "apps/game-client/runtime/src/entity_animation.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation.rs",
+        "bytes": 203,
+        "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4",
+        "relativePath": "apps/game-client/runtime/src/entity_animation.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation_bridge.rs",
+        "bytes": 15382,
+        "sha256": "2b0c40f7202e680edc881ea36172183868142a01de317e68cba87936e90c2829",
+        "relativePath": "apps/game-client/runtime/src/entity_animation_bridge.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\entity_animation_bridge.rs",
+        "bytes": 236,
+        "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0",
+        "relativePath": "apps/game-client/runtime/src/entity_animation_bridge.rs"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/runtime/src/lib.rs",
+      "previous": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+        "bytes": 435047,
+        "sha256": "1d3b7513b5fa7c3401d3994241eafe494b016af667d20ff702d4720b7a1b9a3b",
+        "relativePath": "apps/game-client/runtime/src/lib.rs"
+      },
+      "current": {
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\lib.rs",
+        "bytes": 435227,
+        "sha256": "751be21351e0dd01902fced467e46aeee43e560ec80147a8b92c366cb1091041",
+        "relativePath": "apps/game-client/runtime/src/lib.rs"
+      }
+    }
+  ],
+  "added": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\entity_animation.rs",
+      "bytes": 63419,
+      "sha256": "5cecf77412f5029398a35edd838566d35ca5db4b467bbab07e952ad61d64a7f2",
+      "relativePath": "apps/game-client/client-core/src/entity_animation.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\fishing_click.rs",
+      "bytes": 14575,
+      "sha256": "b022699aef538a4cf70d550cecb0c9abec31bf629b961bf249816200c1d8f0aa",
+      "relativePath": "apps/game-client/client-core/src/fishing_click.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation.rs",
+      "bytes": 4527,
+      "sha256": "091ef8e7ee6282a14cca14fcff464e25352bb74fe6e0edf2673e289bb3bfd38f",
+      "relativePath": "apps/game-client/platform-web/src/entity_animation.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation_state.rs",
+      "bytes": 33968,
+      "sha256": "f9aceb29e71970333cd8c94b4cd30d3e0810e2d261ba6d37368c669350cfa2b6",
+      "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+      "bytes": 16707,
+      "sha256": "62335282509cf1345a9da482e14636e808cf8ebcf91b6a74da779740399ff9eb",
+      "relativePath": "apps/game-client/platform-web/src/fishing_click.rs"
+    }
+  ],
+  "scope": "432 conservative declared members; only existing presentation-ui Bag ABI codec changes from Rust05. Original strict integer, exact fields, optional UID, four-element root and two/three-element source positional arrays, 4096-byte cap retained. Old5 tests/planner/response body retained, two new typed full-facts/output oracle tests; no Core/state/geometry/pending/host rule changed. Finite CPU checks and original strict optimized byte budget pending.",
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "changesFromRust01": [
+    "apps/game-client/platform-web/src/entity_animation_state.rs"
+  ],
+  "changesFromRust02": [
+    "apps/game-client/client-bevy/src/lib.rs",
+    "apps/game-client/platform-windows/src/input.rs",
+    "apps/game-client/platform-windows/src/map_parser.rs"
+  ],
+  "priorFailedExecution": {
+    "kind": "Native input actual compile failed; zero tests executed",
+    "exitCode": 101,
+    "outer": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-input01.outer.json",
+      "bytes": 451,
+      "sha256": "daef11f0f058bfef32c0a7345a6ca8dab8ad7646ff6b4e1c27c9e00795b7a2f1"
+    },
+    "stdout": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-input01.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-native-input01.stderr.log",
+      "bytes": 44075,
+      "sha256": "a27565f90793e1a294f86c7deab8f115d18a0143baea347121158a11aaf6b31c"
+    }
+  },
+  "changesFromRust03": [
+    {
+      "relativePath": "apps/game-client/client-core/src/entity_animation.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\entity_animation.rs",
+      "bytes": 63457,
+      "sha256": "48afc568bb2e7e867dd30906b020ac1039a2b913ac7e6145abacea0666ab5d1e"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/lib.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\lib.rs",
+      "bytes": 766,
+      "sha256": "d76537b2f6485221f042249c7633e2fa66aaeaedd74d546b7039bc93f62dadf7"
+    },
+    {
+      "relativePath": "apps/game-client/client-core/src/ordered_map.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-core\\src\\ordered_map.rs",
+      "bytes": 9323,
+      "sha256": "e01db4fc2679d8174948d9820fb3d971c0cb041d9b64373bec667b0e4f754a31"
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/entity_animation_state.rs",
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\entity_animation_state.rs",
+      "bytes": 36055,
+      "sha256": "cb49aff50076dfd29669cb191651e1a6185a066d09727ed50f68a6a6d4b71552"
+    }
+  ],
+  "addedOrderedProductModule": "apps/game-client/client-core/src/ordered_map.rs",
+  "priorBudgetFailure": {
+    "coreBuild01": {
+      "coreWasmBytes": 252868,
+      "presentationWasmBytes": 317770,
+      "exitCode": 1,
+      "published": false
+    },
+    "coreBuild02": {
+      "coreWasmBytes": 252590,
+      "presentationWasmBytes": 281772,
+      "exitCode": 1,
+      "published": false
+    },
+    "strictPresentationWasmBudget": 262144,
+    "budgetPredicate": "bytes < 262144",
+    "coreBuild03": {
+      "coreWasmBytes": 252590,
+      "presentationWasmBytes": 264237,
+      "exitCode": 1,
+      "published": false
+    }
+  },
+  "changesFromRust04": [
+    {
+      "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+      "before": {
+        "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+        "bytes": 16707,
+        "sha256": "62335282509cf1345a9da482e14636e808cf8ebcf91b6a74da779740399ff9eb"
+      },
+      "after": {
+        "relativePath": "apps/game-client/platform-web/src/fishing_click.rs",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\fishing_click.rs",
+        "bytes": 34144,
+        "sha256": "aed8af65acd91c1189a4c3b23d4500ac9747c7dcb64363472c22b6fadcb59b4c"
+      }
+    },
+    {
+      "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs",
+      "before": {
+        "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\item_tooltip.rs",
+        "bytes": 52649,
+        "sha256": "b88ceec0182e90bb628f60551c23f2a80b220bf460090908fb465746315c5eb1"
+      },
+      "after": {
+        "relativePath": "apps/game-client/platform-web/src/item_tooltip.rs",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\item_tooltip.rs",
+        "bytes": 63748,
+        "sha256": "a33c21d6ccb557d064fd36121c0a5be07b75fff3a077f8ced91645fc0ee84654"
+      }
+    }
+  ],
+  "finiteRustChecksAccepted": false,
+  "productionBuildAccepted": false,
+  "changesFromRust05": [
+    {
+      "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs",
+      "before": {
+        "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\bag_to_belt.rs",
+        "bytes": 8601,
+        "sha256": "c5acd2e6580c7e20605e388439550be0bc6db416c010a504dffb7d36d4836682"
+      },
+      "after": {
+        "relativePath": "apps/game-client/platform-web/src/bag_to_belt.rs",
+        "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\platform-web\\src\\bag_to_belt.rs",
+        "bytes": 16516,
+        "sha256": "03c1cd10368bc775a7a71dc0bf0fa2d1b63162779f6194ddbb3a8a0376f18d24"
+      }
+    }
+  ]
+}

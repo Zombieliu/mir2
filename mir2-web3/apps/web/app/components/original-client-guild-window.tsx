@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { currentSocialItem, sameSocialItem, SOCIAL_GUILD_SLOT_COUNT, validSocialItem, validSocialItemSlot, type SocialItemSlot } from "../../lib/social-item-window-model";
+import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
+import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
+import { captureGuildBuffAction, guildBuffActionCurrent, guildBuffRows, guildBuffStatLabel,
+  type GuildBuffActionDto, type GuildBuffActionPlan, type GuildBuffDefinition, type GuildBuffPending,
+  type GuildBuffRow, type GuildBuffSource } from "../../lib/guild-buff-ui";
 
 type TranslateFn = (
   key: string,
@@ -47,13 +54,22 @@ export type GuildRank = {
 export type GuildStorageItem = {
   /** Slot index within the storage grid. */
   slot: number;
+  uniqueId?: number;
+  icon?: number;
   name?: string;
   /** Optional icon URL when the host can resolve item art. */
   iconUrl?: string;
   count?: number;
+  itemIndex?: number;
+  /** Received snake UserItem, when available; never synthesized from display fields. */
+  userItem?: Readonly<Record<string, unknown>>;
   /** Tooltip / grade hint shown on hover. */
   hint?: string;
 };
+export type GuildStorageTooltipItem = Readonly<SocialItemSlot & {
+  itemIndex: number;
+  userItem?: Readonly<Record<string, unknown>>;
+}>;
 
 /**
  * Compatible with the `stage5Systems.guild` payload shape
@@ -93,6 +109,8 @@ export type GuildSummary = {
 export type GuildWindowProps = {
   t: TranslateFn;
   guild: GuildSummary | null;
+  incomingInvite?: Readonly<{ name: string; epoch: number }> | null;
+  onReplyInvite?: (epoch: number, acceptInvite: boolean) => void;
   /** Viewer name, used to highlight the player's own roster row. */
   playerName?: string | null;
   onEditNotice?: (notice: string) => void;
@@ -108,10 +126,25 @@ export type GuildWindowProps = {
   onDepositGold?: (amount: number) => void;
   /** Retrieve gold from guild storage. */
   onWithdrawGold?: (amount: number) => void;
+  inventoryItems?: readonly SocialItemSlot[];
+  emptyInventorySlots?: readonly number[];
+  itemsReady?: boolean;
+  itemActionPending?: boolean;
+  itemSourceKey?: string;
+  canStoreItem?: boolean;
+  canRetrieveItem?: boolean;
+  onDepositItem?: (from: number, to: number, uniqueId: number) => void;
+  onRetrieveItem?: (from: number, to: number, uniqueId: number) => void;
+  onMoveItem?: (from: number, to: number, uniqueId: number) => void;
+  onRefreshStorage?: () => void;
+  onReadStorageItemTooltip?: (item: GuildStorageTooltipItem) => CrystalTooltipDocument | null;
+  buffSource?: GuildBuffSource | null;
+  buffPending?: GuildBuffPending | null;
+  onBuffAction?: (dto: GuildBuffActionDto) => void;
   onClose: () => void;
 };
 
-type GuildTab = "overview" | "members" | "storage" | "ranks" | "notice";
+type GuildTab = "overview" | "members" | "storage" | "ranks" | "notice" | "buffs";
 
 const PERMISSION_KEYS: GuildPermissionKey[] = [
   "CanChangeRank",
@@ -143,11 +176,14 @@ const GUILD_TABS: { key: GuildTab; labelKey: string; fallback: string }[] = [
   { key: "storage", labelKey: "ui.guildStorage", fallback: "Storage" },
   { key: "ranks", labelKey: "ui.guildRanks", fallback: "Ranks" },
   { key: "notice", labelKey: "ui.guildNotice", fallback: "Notice" },
+  { key: "buffs", labelKey: "ui.guildSkills", fallback: "Skills" },
 ];
 
 export function GuildWindow({
   t,
   guild,
+  incomingInvite,
+  onReplyInvite,
   playerName,
   onEditNotice,
   onInviteMember,
@@ -157,6 +193,21 @@ export function GuildWindow({
   onSaveRank,
   onDepositGold,
   onWithdrawGold,
+  inventoryItems,
+  emptyInventorySlots,
+  itemsReady,
+  itemActionPending,
+  itemSourceKey,
+  canStoreItem,
+  canRetrieveItem,
+  onDepositItem,
+  onRetrieveItem,
+  onMoveItem,
+  onRefreshStorage,
+  onReadStorageItemTooltip,
+  buffSource,
+  buffPending,
+  onBuffAction,
   onClose,
 }: GuildWindowProps) {
   const [tab, setTab] = useState<GuildTab>("overview");
@@ -166,6 +217,92 @@ export function GuildWindow({
   const [noticeDraft, setNoticeDraft] = useState(guild?.notice ?? "");
   const [showOffline, setShowOffline] = useState(true);
   const [goldDraft, setGoldDraft] = useState("");
+  const [itemSelection, setItemSelection] = useState<{ source: "bag" | "storage"; item: SocialItemSlot; key: string } | null>(null);
+  const [activeStorageTooltip, setActiveStorageTooltip] = useState<GuildStorageItem | null>(null);
+  const [buffStart, setBuffStart] = useState(0);
+  const [buffConfirmation, setBuffConfirmation] = useState<{ dto: GuildBuffActionDto; definition: GuildBuffDefinition; plan: GuildBuffActionPlan } | null>(null);
+  const buffDialogRef = useRef<HTMLDivElement>(null);
+  const buffReturnFocus = useRef<HTMLElement | null>(null);
+  const currentBuffSource = buffSource && buffSource.guildName === guild?.name ? buffSource : null;
+  const buffRows = currentBuffSource ? guildBuffRows(currentBuffSource) : [];
+  const maxBuffStart = Math.max(0, buffRows.length - 8);
+  const visibleBuffStart = Math.min(buffStart, maxBuffStart);
+  const buffConfirmCurrent = !!buffConfirmation && !!currentBuffSource
+    && guildBuffActionCurrent(buffConfirmation.dto, currentBuffSource) && !buffPending && !!onBuffAction;
+  useEffect(() => { setBuffStart(0); setBuffConfirmation(null); }, [guild?.name]);
+  useEffect(() => {
+    if (buffConfirmation) {
+      buffReturnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      buffDialogRef.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
+    } else { buffReturnFocus.current?.focus(); buffReturnFocus.current = null; }
+  }, [!!buffConfirmation]);
+  const requestBuffList = () => {
+    if (!currentBuffSource || buffPending || !onBuffAction) return;
+    const dto = captureGuildBuffAction(currentBuffSource, 0, 0); if (dto) onBuffAction(dto);
+  };
+  const beginBuff = (buff: GuildBuffRow) => {
+    if (!currentBuffSource || buffPending || !onBuffAction || !buff.plan) return;
+    const dto = captureGuildBuffAction(currentBuffSource, buff.plan.wire.action, buff.definition.id);
+    if (dto) setBuffConfirmation({ dto, definition: buff.definition, plan: buff.plan });
+  };
+  const confirmBuff = () => {
+    if (!buffConfirmation || !buffConfirmCurrent) return;
+    onBuffAction?.(buffConfirmation.dto); setBuffConfirmation(null);
+  };
+  const onBuffDialogKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    if (event.key === "Escape") { event.preventDefault(); setBuffConfirmation(null); }
+    if (event.key === "Enter" && !(event.target instanceof HTMLButtonElement)) { event.preventDefault(); confirmBuff(); }
+    if (event.key === "Tab") {
+      const buttons = buffDialogRef.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)");
+      if (!buttons?.length) { event.preventDefault(); return; }
+      const first = buttons[0], last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+  };
+  const storageSlots = buildStorageSlots(guild?.storage, guild?.storageSize);
+  const storageItems = storageSlots.flatMap((row, slot) => {
+    const item = row && { slot, uniqueId: row.uniqueId, name: row.name, icon: row.icon, count: row.count };
+    return item && validSocialItem(item, SOCIAL_GUILD_SLOT_COUNT) ? [item] : [];
+  });
+  const bagItems = inventoryItems ?? [], emptySlots = emptyInventorySlots ?? [];
+  const storageTooltipReady = Array.isArray(guild?.storage)
+    && guild.storage.every(row => validSocialItem(row, SOCIAL_GUILD_SLOT_COUNT))
+    && guild.storage.length === storageItems.length
+    && new Set(guild.storage.map(row => row.slot)).size === guild.storage.length
+    && new Set(storageItems.map(row => row.uniqueId)).size === storageItems.length;
+  const itemEditing = itemsReady === true && itemActionPending !== true && Boolean(itemSourceKey)
+    && inventoryItems !== undefined && emptyInventorySlots !== undefined
+    && guild?.storageSize === SOCIAL_GUILD_SLOT_COUNT && Array.isArray(guild.storage)
+    && guild.storage.every(row => validSocialItem(row, SOCIAL_GUILD_SLOT_COUNT))
+    && guild.storage.length === storageItems.length
+    && new Set(storageItems.map(item => item.uniqueId)).size === storageItems.length
+    && bagItems.every(item => validSocialItem(item, 256))
+    && new Set(bagItems.map(item => item.slot)).size === bagItems.length
+    && new Set(bagItems.map(item => item.uniqueId)).size === bagItems.length
+    && !storageItems.some(item => bagItems.some(bag => bag.uniqueId === item.uniqueId))
+    && emptySlots.every(slot => validSocialItemSlot(slot, 256) && !bagItems.some(item => item.slot === slot))
+    && new Set(emptySlots).size === emptySlots.length;
+  const selectedItem = itemSelection;
+  const selection = itemEditing && selectedItem !== null && selectedItem.key === itemSourceKey
+    && currentSocialItem(selectedItem.source === "bag" ? bagItems : storageItems, selectedItem.item)
+    ? selectedItem : null;
+  useEffect(() => { setItemSelection(null); setActiveStorageTooltip(null); }, [guild?.name, itemSourceKey, itemActionPending, itemsReady, tab]);
+  useEffect(() => { if (itemSelection && !selection) setItemSelection(null); }, [itemSelection, selection]);
+  const selectStorageSlot = (slot: number) => {
+    if (!itemEditing || !validSocialItemSlot(slot, SOCIAL_GUILD_SLOT_COUNT)) return;
+    const item = storageItems.find(row => row.slot === slot);
+    if (item) {
+      if (canRetrieveItem === true) setItemSelection({ source: "storage", item, key: itemSourceKey! });
+      return;
+    }
+    if (selection?.source === "bag" && canStoreItem === true && onDepositItem) {
+      onDepositItem(selection.item.slot, slot, selection.item.uniqueId); setItemSelection(null);
+    } else if (selection?.source === "storage" && canStoreItem === true && canRetrieveItem === true && onMoveItem) {
+      onMoveItem(selection.item.slot, slot, selection.item.uniqueId); setItemSelection(null);
+    }
+  };
 
   const members = useMemo(() => normalizeMembers(guild?.members), [guild?.members]);
   const ranks = guild?.ranks ?? [];
@@ -188,7 +325,12 @@ export function GuildWindow({
     setNoticeDraft(guild?.notice ?? "");
   }, [guild?.notice]);
 
-  if (!guild || !guild.name) {
+  const invite = incomingInvite && typeof incomingInvite.name === "string"
+    && incomingInvite.name.trim().length > 0 && incomingInvite.name.length <= 256
+    && !incomingInvite.name.includes("\0") && Number.isSafeInteger(incomingInvite.epoch)
+    && incomingInvite.epoch > 0 ? incomingInvite : null;
+
+  if (!guild || !guild.name || invite) {
     return (
       <section aria-label={t("ui.guild", [], "Guild")} style={style.window}>
         <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
@@ -196,7 +338,24 @@ export function GuildWindow({
         <div style={style.close}>
           <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
         </div>
-        <div style={style.noGuild}>{t("ui.guildNone", [], "You are not in a guild.")}</div>
+        {invite ? (
+          <div role="dialog" aria-label={t("ui.guildInvite", [], "Guild invitation")}
+            data-guild-invite-epoch={invite.epoch} style={style.incomingInvite}>
+            <p style={style.invitePrompt}>
+              {t("ui.guildInvitePrompt", [invite.name], `Do you want to join the ${invite.name} guild?`)}
+            </p>
+            <div style={style.actions}>
+              <button type="button" disabled={!onReplyInvite} style={style.inviteReply}
+                onClick={() => onReplyInvite?.(invite.epoch, true)}>
+                {t("ui.accept", [], "Accept")}
+              </button>
+              <button type="button" disabled={!onReplyInvite} style={style.inviteReply}
+                onClick={() => onReplyInvite?.(invite.epoch, false)}>
+                {t("ui.decline", [], "Decline")}
+              </button>
+            </div>
+          </div>
+        ) : <div style={style.noGuild}>{t("ui.guildNone", [], "You are not in a guild.")}</div>}
       </section>
     );
   }
@@ -208,6 +367,7 @@ export function GuildWindow({
       data-guild-tab={tab}
       style={style.window}
     >
+      <style>{'[data-guild-storage-tooltip-cell] > .original-item-tooltip { opacity: 1; visibility: visible; transform: translateY(0); }'}</style>
       <img style={style.frame} src={FRAME.frame} alt="" draggable={false} />
       <div style={style.titleText}>{guild.name}</div>
       <div style={style.subtitle}>
@@ -233,7 +393,7 @@ export function GuildWindow({
               role="tab"
               aria-selected={active}
               data-guild-tab={entry.key}
-              onClick={() => setTab(entry.key)}
+              onClick={() => { setTab(entry.key); if (entry.key === "buffs" && !currentBuffSource?.catalogReady) requestBuffList(); }}
               style={{ ...style.tab, ...(active ? style.tabActive : null) }}
             >
               {t(entry.labelKey, [], entry.fallback)}
@@ -528,24 +688,68 @@ export function GuildWindow({
             </button>
           </form>
 
-          <div style={style.noticeLabel}>{t("ui.guildStorageItems", [], "Storage")}</div>
+          <div style={{ ...style.noticeLabel, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {t("ui.guildStorageItems", [], "Storage")}
+            {onRefreshStorage ? <button type="button" style={style.pickerButton} disabled={itemActionPending === true}
+              onClick={onRefreshStorage}>{t("ui.refresh", [], "Refresh")}</button> : null}
+          </div>
           <div style={style.storageGrid} aria-label={t("ui.guildStorageItems", [], "Storage")}>
-            {buildStorageSlots(guild.storage, guild.storageSize).map((item, index) => (
-              <div
-                key={`slot-${index}`}
-                style={style.storageSlot}
+            {storageSlots.map((item, index) => {
+              const tooltipItem = storageTooltipReady && item ? guildStorageTooltipItem(item) : null;
+              const document = item === activeStorageTooltip && tooltipItem ? onReadStorageItemTooltip?.(tooltipItem) : null;
+              const disabled = !itemEditing || (item ? canRetrieveItem !== true : canStoreItem !== true || !selection);
+              return <div key={`slot-${index}`} data-guild-storage-tooltip-cell="true" style={{position:"relative"}}
+                tabIndex={tooltipItem && disabled ? 0 : undefined} aria-label={tooltipItem && disabled ? item?.name : undefined}
+                onMouseEnter={() => setActiveStorageTooltip(item)} onMouseLeave={() => setActiveStorageTooltip(null)}
+                onFocus={() => setActiveStorageTooltip(item)} onBlur={() => setActiveStorageTooltip(null)}>
+              <button type="button"
+                style={{ ...style.storageSlot, padding: 0, width:"100%", ...(selection?.source === "storage" && selection.item.slot === index
+                  ? { borderColor: "#f4dcaf" } : null) }}
                 data-storage-slot={index}
-                title={item?.hint ?? item?.name ?? ""}
+                disabled={disabled}
+                aria-label={item?.name ?? t("ui.emptyStorageSlot", [index + 1], `Empty storage ${index + 1}`)}
+                aria-pressed={selection?.source === "storage" && selection.item.slot === index}
+                onClick={() => selectStorageSlot(index)}
+                title={document ? undefined : item?.hint ?? item?.name ?? ""}
               >
                 {item?.iconUrl ? (
                   <img style={style.storageIcon} src={item.iconUrl} alt={item.name ?? ""} draggable={false} />
+                ) : item?.icon !== undefined ? (
+                  <img style={style.storageIcon} src={originalItemIconPath(item.icon)} alt="" draggable={false} />
                 ) : item?.name ? (
                   <span style={style.storageName}>{item.name}</span>
                 ) : null}
                 {item && (item.count ?? 0) > 1 ? <span style={style.storageCount}>{item.count}</span> : null}
-              </div>
-            ))}
+              </button>
+              {document ? <OriginalCrystalItemTooltip document={document} align={index % 10 > 4 ? "left" : "right"} /> : null}
+              </div>;
+            })}
           </div>
+          {inventoryItems && emptyInventorySlots ? <div style={style.itemPicker} aria-label={t("ui.guildBagItems", [], "Guild storage bag items")}>
+            <div style={style.sideHint} aria-live="polite">{itemActionPending
+              ? t("ui.itemActionPending", [], "Waiting for item update...")
+              : !itemEditing ? t("ui.itemDataUnavailable", [], "Item actions unavailable")
+              : selection?.source === "storage" ? t("ui.guildRetrieveHint", [], "Choose an empty bag slot to retrieve, or an empty storage slot to move.")
+              : t("ui.guildDepositHint", [], "Choose a bag item, then an empty storage slot.")}</div>
+            <div style={style.pickerCells}>
+              {bagItems.map(item => <button type="button" key={`bag-${item.slot}-${item.uniqueId}`} style={style.pickerButton}
+                disabled={!itemEditing || canStoreItem !== true || !onDepositItem}
+                aria-pressed={selection?.source === "bag" && sameSocialItem(selection.item, item)}
+                title={`${item.name} ×${item.count} (${item.slot + 1})`}
+                onClick={() => setItemSelection({ source: "bag", item, key: itemSourceKey! })}>
+                {item.icon !== undefined ? <img style={{ width: 20, height: 20, imageRendering: "pixelated" }}
+                  src={originalItemIconPath(item.icon)} alt="" draggable={false} /> : null}
+                {item.name} ×{item.count}
+              </button>)}
+              {emptySlots.map(slot => <button type="button" key={`empty-${slot}`} style={style.pickerButton}
+                disabled={!itemEditing || canRetrieveItem !== true || selection?.source !== "storage" || !onRetrieveItem}
+                onClick={() => { if (itemEditing && canRetrieveItem === true && selection?.source === "storage" && onRetrieveItem) {
+                  onRetrieveItem(selection.item.slot, slot, selection.item.uniqueId); setItemSelection(null);
+                } }}>
+                {t("ui.emptyBagSlot", [slot + 1], `Empty bag ${slot + 1}`)}
+              </button>)}
+            </div>
+          </div> : null}
         </div>
       ) : null}
 
@@ -628,8 +832,78 @@ export function GuildWindow({
           </form>
         </div>
       ) : null}
+      {tab === "buffs" ? (
+        <div style={{ ...style.panel, overflowY: "auto" }} role="tabpanel" aria-label={t("ui.guildSkills", [], "Guild skills")}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span>{t("ui.guildLevel", [], "Guild level")}: {currentBuffSource?.level ?? "—"}</span>
+            <span>{t("ui.guildSparePoints", [], "Spare points")}: {currentBuffSource?.sparePoints ?? "—"}</span>
+            <span>{t("ui.guildGold", [], "Guild gold")}: {currentBuffSource?.gold.toLocaleString() ?? "—"}</span>
+            <button type="button" style={style.buffActionButton} disabled={!currentBuffSource || !!buffPending || !onBuffAction} onClick={requestBuffList}>{t("ui.refresh", [], "Refresh")}</button>
+          </div>
+          {buffPending ? <div role="status">{t("ui.waiting", [], "Waiting for the server…")}</div> : null}
+          {!currentBuffSource || !currentBuffSource.catalogReady ? <div role="status">{t("ui.guildBuffUnavailable", [], "Guild skills are unavailable.")}</div> : null}
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}
+            onWheel={event => { if (event.deltaY) { event.preventDefault(); event.stopPropagation(); setBuffStart(Math.max(0, Math.min(maxBuffStart, visibleBuffStart + (event.deltaY > 0 ? 1 : -1)))); } }}>
+            {buffRows.slice(visibleBuffStart, visibleBuffStart + 8).map(buff => <div key={buff.definition.id} style={{ display: "flex", alignItems: "flex-start", gap: 4 }}>
+              <button type="button"
+              data-guild-buff-id={buff.definition.id} data-guild-buff-action={buff.plan?.wire.action}
+              title={guildBuffHint(t, buff)} disabled={!buff.plan || !!buffPending || !onBuffAction}
+              onClick={() => beginBuff(buff)} style={{ ...style.buffActionButton, flex: 1, display: "flex", alignItems: "center", gap: 8, textAlign: "left" }}>
+              {buff.icon >= 0 && buff.icon < 48 ? <img src={`/original-ui/GuildSkill/${buff.icon}.png`} alt="" width={36} height={34} draggable={false} style={{ imageRendering: "pixelated" }} /> : null}
+              <span style={{ flex: 1 }}><strong>{buff.definition.name}</strong><br />
+                <span>{guildBuffStatus(t, buff)}{buff.state ? ` · ${buff.state.active ? t("ui.active", [], "Active") : t("ui.inactive", [], "Inactive")}` : ""}</span>
+                {buff.error && buff.error !== "active" ? <span style={{ display: "block", color: "#e4a284" }}>{guildBuffError(t, buff.error)}</span> : null}
+              </span>
+              <span>{buff.state ? t("ui.activate", [], "Activate") : t("ui.acquire", [], "Acquire")}</span>
+              </button>
+              <details style={{ maxWidth: 220 }}>
+                <summary style={{ ...style.buffActionButton, display: "flex", alignItems: "center", boxSizing: "border-box" }}>{t("ui.details", [], "Details")}</summary>
+                <pre style={{ whiteSpace: "pre-wrap", font: "inherit", margin: "4px 0", color: "#f0d69b" }}>{guildBuffHint(t, buff)}</pre>
+              </details>
+            </div>)}
+          </div>
+          <div style={{ display: "flex", gap: 4 }}>
+            <button type="button" style={style.buffActionButton} disabled={visibleBuffStart === 0} onClick={() => setBuffStart(Math.max(0, visibleBuffStart - 1))}>{t("ui.previous", [], "Previous")}</button>
+            <button type="button" style={style.buffActionButton} disabled={visibleBuffStart >= maxBuffStart} onClick={() => setBuffStart(Math.min(maxBuffStart, visibleBuffStart + 1))}>{t("ui.next", [], "Next")}</button>
+          </div>
+        </div>
+      ) : null}
+      {buffConfirmation ? <div style={style.buffModalBackdrop} onPointerDown={event => event.stopPropagation()} onPointerUp={event => event.stopPropagation()}>
+        <div ref={buffDialogRef} role="alertdialog" aria-modal="true" aria-label={t("ui.confirm", [], "Confirm")} onKeyDown={onBuffDialogKey} style={style.buffModal}>
+          <p>{buffConfirmation.dto.wire.action === 1
+            ? t("ui.guildBuffAcquireConfirm", [buffConfirmation.definition.name], `Acquire ${buffConfirmation.definition.name}?`)
+            : t("ui.guildBuffActivateConfirm", [buffConfirmation.definition.name], `Activate ${buffConfirmation.definition.name}?`)}</p>
+          <p>{t("ui.guildSparePoints", [], "Spare points")}: {buffConfirmation.plan.pointsCost} · {t("ui.guildGold", [], "Guild gold")}: {buffConfirmation.plan.goldCost.toLocaleString()}</p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button type="button" style={style.buffActionButton} disabled={!buffConfirmCurrent} onClick={confirmBuff}>{t("ui.confirm", [], "Confirm")}</button>
+            <button type="button" style={style.buffActionButton} onClick={() => setBuffConfirmation(null)}>{t("ui.cancel", [], "Cancel")}</button>
+          </div>
+        </div>
+      </div> : null}
     </section>
   );
+}
+
+function guildBuffStatus(t: TranslateFn, buff: GuildBuffRow): string {
+  const labels = { insufficientLevel: "Insufficient level", available: "Available", countingDown: "Counting down", expired: "Expired", obtained: "Obtained" };
+  const status = t(`ui.guildBuff${buff.status[0].toUpperCase()}${buff.status.slice(1)}`, [], labels[buff.status]);
+  return buff.status === "countingDown" ? `${status} · ${t("ui.minutes", [buff.state?.activeTimeRemaining ?? 0], `${buff.state?.activeTimeRemaining ?? 0} minutes`)}` : status;
+}
+function guildBuffError(t: TranslateFn, error: NonNullable<GuildBuffRow["error"]>): string {
+  const labels = { unavailable: "Guild skill information is unavailable.", permission: "Your rank cannot activate guild skills.", level: "Guild level is too low.", points: "Insufficient spare points.", funds: "Insufficient guild gold.", active: "This skill is already active." };
+  return t(`ui.guildBuffError${error[0].toUpperCase()}${error.slice(1)}`, [], labels[error]);
+}
+function guildBuffHint(t: TranslateFn, buff: GuildBuffRow): string {
+  const d = buff.definition;
+  const lines = [d.name, `${t("ui.guildLevel", [], "Guild level")}: ${d.levelRequirement}`,
+    `${t("ui.guildSparePoints", [], "Spare points")}: ${d.pointsRequirement}`,
+    `${t("ui.guildGold", [], "Guild gold")}: ${d.activationCost}`];
+  if (d.timeLimit > 0) lines.push(t("ui.minutes", [buff.state?.active ? buff.state.activeTimeRemaining : d.timeLimit], `${buff.state?.active ? buff.state.activeTimeRemaining : d.timeLimit} minutes`));
+  for (const stat of d.stats) {
+    const label = guildBuffStatLabel(stat.stat);
+    lines.push(`${t(`client.${label}`, [], label)} ${stat.value > 0 ? "+" : ""}${stat.value}${label.includes("Percent") ? "%" : ""}`);
+  }
+  return lines.join("\n");
 }
 
 function Info({ label, value }: { label: string; value: string }) {
@@ -732,6 +1006,17 @@ function permissionLabel(t: TranslateFn, permission: string): string {
   return entry ? t(entry.key, [], entry.fallback) : permission;
 }
 
+/** Read-only source identity; missing catalogue identity preserves the basic hint. */
+function guildStorageTooltipItem(item: GuildStorageItem): GuildStorageTooltipItem | null {
+  const itemIndex = item.itemIndex, raw = item.userItem;
+  if (!validSocialItem(item, SOCIAL_GUILD_SLOT_COUNT) || typeof itemIndex !== "number"
+    || !Number.isSafeInteger(itemIndex) || itemIndex < 0 || itemIndex > 0x7fff_ffff) return null;
+  if (raw !== undefined && (!raw || typeof raw !== "object" || Array.isArray(raw)
+    || raw.item_index !== itemIndex || raw.unique_id !== item.uniqueId || raw.count !== item.count)) return null;
+  return {slot:item.slot,uniqueId:item.uniqueId,name:item.name,icon:item.icon,count:item.count,itemIndex,
+    ...(raw !== undefined ? {userItem:raw} : {})};
+}
+
 /** Pad the storage payload out to `storageSize` slots so empty cells render. */
 function buildStorageSlots(
   storage?: GuildStorageItem[],
@@ -740,10 +1025,12 @@ function buildStorageSlots(
   const bySlot = new Map<number, GuildStorageItem>();
   let maxSlot = -1;
   for (const item of storage ?? []) {
+    if (!item || !validSocialItemSlot(item.slot, SOCIAL_GUILD_SLOT_COUNT)) continue;
     bySlot.set(item.slot, item);
     if (item.slot > maxSlot) maxSlot = item.slot;
   }
-  const size = Math.max(storageSize ?? 0, maxSlot + 1, storage?.length ? 16 : 0);
+  const size = Math.min(SOCIAL_GUILD_SLOT_COUNT, Math.max(
+    Number.isSafeInteger(storageSize) && storageSize! >= 0 ? storageSize! : 0, maxSlot + 1, storage?.length ? 16 : 0));
   const slots: Array<GuildStorageItem | null> = [];
   for (let i = 0; i < size; i += 1) {
     slots.push(bySlot.get(i) ?? null);
@@ -763,6 +1050,17 @@ function formatNumber(value: number) {
 }
 
 const style: Record<string, CSSProperties> = {
+  incomingInvite: { position: "absolute", left: 22, top: 80, width: 652, padding: 16,
+    boxSizing: "border-box", border: "1px solid #9c8d6f", background: "rgba(20,13,7,0.95)" },
+  invitePrompt: { margin: "0 0 16px", whiteSpace: "pre-wrap", overflowWrap: "anywhere", color: "#f4dcaf" },
+  inviteReply: { minWidth: 120, minHeight: 44, border: "1px solid #9c8d6f", background: "#24180c",
+    color: "#f4dcaf", fontSize: 12, fontFamily: "inherit", cursor: "pointer" },
+  itemPicker: { flex: "0 0 auto", maxHeight: 100, overflowY: "auto", padding: 5,
+    border: "1px solid #9c8d6f", background: "rgba(20,13,7,0.85)" },
+  sideHint: { color: "#cbb38a", fontSize: 10 },
+  pickerCells: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 },
+  pickerButton: { display: "flex", alignItems: "center", gap: 3, minHeight: 28, maxWidth: 180,
+    border: "1px solid #9c8d6f", background: "#24180c", color: "#f0eee8", fontSize: 10, fontFamily: "inherit" },
   window: {
     position: "absolute",
     left: 164,
@@ -775,6 +1073,9 @@ const style: Record<string, CSSProperties> = {
     textShadow: "1px 1px 0 #000",
     fontFamily: "inherit",
   },
+  buffActionButton: { minWidth: 44, minHeight: 44, padding: "6px 10px", border: "1px solid #9c8d6f", background: "#24180c", color: "#f0eee8", fontSize: 12, fontFamily: "inherit", cursor: "pointer" },
+  buffModalBackdrop: { position: "absolute", inset: 0, zIndex: 4, background: "#000a", display: "grid", placeItems: "center", padding: 18 },
+  buffModal: { background: "#24180c", border: "2px solid #9c8d6f", padding: 18, maxWidth: 480 },
   frame: { position: "absolute", inset: 0, width: FRAME.width, height: FRAME.height, pointerEvents: "none" },
   titleText: {
     position: "absolute",

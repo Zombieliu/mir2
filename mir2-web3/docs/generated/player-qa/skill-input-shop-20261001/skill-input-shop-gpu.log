@@ -1,0 +1,6 @@
+
+running 1 test
+test crystal_ui::overlays::native_i18n_game_visual_tests::nine_locale_medicine_shop_opens_beside_inventory_offscreen ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1192 filtered out; finished in 6.72s
+

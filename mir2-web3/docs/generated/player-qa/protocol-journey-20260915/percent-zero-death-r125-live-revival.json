@@ -1,0 +1,84 @@
+{
+  "trace": "C:/mir2-protocol-journey-20260911/Taoist.2026-09-15T19-57-11-682Z.trace.jsonl",
+  "events": 1358,
+  "latest": {
+    "sequence": 1358,
+    "at": "2026-09-15T19:59:05.880Z",
+    "direction": "received",
+    "type": "packet",
+    "packet": "UserLocation"
+  },
+  "owner": {
+    "objectId": 1000,
+    "level": 25,
+    "x": 288,
+    "y": 609,
+    "hp": 180,
+    "maxHp": 180,
+    "dead": false
+  },
+  "map": "0",
+  "mp": 184,
+  "heldMp": [
+    {
+      "name": "(MP)DrugSmall",
+      "quantity": 3
+    },
+    {
+      "name": "(MP)DrugSmall",
+      "quantity": 9
+    }
+  ],
+  "q89": {
+    "stage": "inProgress",
+    "objectives": [
+      {
+        "current": 1,
+        "done": false,
+        "label": "Kill CursedPriest",
+        "required": 3
+      },
+      {
+        "current": 3,
+        "done": true,
+        "label": "Kill ShiZombie",
+        "required": 3
+      },
+      {
+        "current": 2,
+        "done": false,
+        "label": "Kill CursedZombie",
+        "required": 3
+      }
+    ]
+  },
+  "diagnosticCounts": {},
+  "recentDiagnostics": [],
+  "protectedBlockers": [],
+  "blockerDeathReceipts": [],
+  "blockerStatesAtClearance": [],
+  "revivalRequests": [
+    {
+      "sequence": 578,
+      "at": "2026-09-15T19:57:16.056Z",
+      "direction": "sent",
+      "type": "townRevive",
+      "snapshotSequence": 577,
+      "hp": 0,
+      "dead": true
+    }
+  ],
+  "selfRevivalReceipts": [
+    {
+      "sequence": 613,
+      "at": "2026-09-15T19:57:17.974Z",
+      "direction": "received",
+      "type": "packet",
+      "packet": "Revived",
+      "snapshotSequence": 661,
+      "map": "0",
+      "hp": 180,
+      "dead": false
+    }
+  ]
+}

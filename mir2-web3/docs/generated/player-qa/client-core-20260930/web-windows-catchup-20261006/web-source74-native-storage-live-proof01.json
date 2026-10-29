@@ -1,0 +1,269 @@
+{
+  "owner": "Root",
+  "kind": "Source74 normal native warehouse pointer and persistence acceptance",
+  "runtimeEvidence": "web-source74-runtime-actual01.json",
+  "actualThinEvidence": "web-source74-thin-actual01.json",
+  "publicResponsesEvidence": "web-source74-public-ui-observations01.json",
+  "localUrl": "http://127.0.0.1:19205/",
+  "entry": "ordinary cache-retaining Login/Start Game/Anthony Access",
+  "compatibilityStorageActionsUsed": false,
+  "productOrWasmGlobalsRead": false,
+  "qaAdminOrTeleportUsed": false,
+  "browserCacheCleared": false,
+  "focusOverridden": false,
+  "credentialsCaptured": false,
+  "mainNativePointerTargetsVerifiedCanvas": true,
+  "countsSource": "Visible native PNG item grids and gold; persistence read back by ordinary full reload/login",
+  "nativeAcceptance": {
+    "firstSettledOwner": "bevy",
+    "phase": "active",
+    "reason": null,
+    "nativeCancelThenEmptyDestinationNoStore": true,
+    "nativeStore": true,
+    "storedStateSurvivedSaveRelogin": true,
+    "nativeTakeback": true,
+    "restoredStateSurvivedSecondSaveRelogin": true,
+    "nativeClose": true
+  },
+  "baseline": {
+    "visibleBagIcons": 5,
+    "visibleWarehouseIcons": 0,
+    "visibleGold": 180
+  },
+  "afterStore": {
+    "visibleBagIcons": 4,
+    "visibleWarehouseIcons": 1,
+    "visibleGold": 180
+  },
+  "finalRestored": {
+    "visibleBagIcons": 5,
+    "visibleWarehouseIcons": 0,
+    "visibleGold": 180
+  },
+  "stages": [
+    {
+      "stage": "native-first-open-stable-before-compat-actions",
+      "dom": {
+        "finiteHits": [
+          {
+            "className": "shared-quest-ui-visible",
+            "id": "mir2-quest-ui-canvas",
+            "tag": "CANVAS",
+            "x": 156,
+            "y": 251
+          },
+          {
+            "className": "shared-quest-ui-visible",
+            "id": "mir2-quest-ui-canvas",
+            "tag": "CANVAS",
+            "x": 154,
+            "y": 200
+          },
+          {
+            "className": "shared-quest-ui-visible",
+            "id": "mir2-quest-ui-canvas",
+            "tag": "CANVAS",
+            "x": 325,
+            "y": 266
+          }
+        ],
+        "sharedCanvas": {
+          "height": 483,
+          "pointerEvents": "auto",
+          "width": 644,
+          "x": 1,
+          "y": 173
+        },
+        "storageUiStatus": "{\"owner\":\"bevy\",\"phase\":\"active\",\"reason\":null}"
+      },
+      "htmlCounts": {
+        "candle": 0,
+        "cancel": 0,
+        "takeBack": 0
+      },
+      "visibleBagIcons": 5,
+      "visibleWarehouseIcons": 0,
+      "visibleGold": 180,
+      "screenshot": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-first-open01.png"
+    },
+    {
+      "stage": "native-cancel-then-empty-target",
+      "storageUiStatus": "{\"owner\":\"bevy\",\"phase\":\"active\",\"reason\":null}",
+      "actions": [
+        {
+          "type": "ordinary_canvas_click",
+          "x": 156,
+          "y": 251
+        },
+        {
+          "type": "ordinary_canvas_click",
+          "x": 154,
+          "y": 200
+        },
+        {
+          "type": "ordinary_canvas_click",
+          "x": 325,
+          "y": 266
+        }
+      ],
+      "visibleBagIcons": 5,
+      "visibleWarehouseIcons": 0,
+      "visibleGold": 180,
+      "selectionWithdrawalVerifiedByEmptyTarget": true,
+      "screenshot": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-cancel01.png"
+    },
+    {
+      "stage": "native-store-complete",
+      "storageUiStatus": "{\"owner\":\"bevy\",\"phase\":\"active\",\"reason\":null}",
+      "actions": [
+        {
+          "type": "ordinary_canvas_click",
+          "x": 156,
+          "y": 251
+        },
+        {
+          "type": "ordinary_canvas_click",
+          "x": 325,
+          "y": 266
+        }
+      ],
+      "visibleBagIcons": 4,
+      "visibleWarehouseIcons": 1,
+      "visibleGold": 180,
+      "screenshot": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-store01.png"
+    },
+    {
+      "stage": "native-deposit-normal-save-logout",
+      "actions": [
+        {
+          "type": "ordinary_canvas_click",
+          "x": 194,
+          "y": 200
+        },
+        {
+          "type": "ordinary_canvas_click",
+          "x": 448,
+          "y": 235
+        },
+        {
+          "type": "ordinary_key",
+          "key": "Alt+x"
+        }
+      ],
+      "inputSentOnce": true,
+      "firstLoginSelectorWaitDeadline": true,
+      "loginObservedByLaterFreshStateRead": true,
+      "credentialsHidden": true
+    },
+    {
+      "stage": "deposit-relogin-scene",
+      "startGameSentOnce": true,
+      "firstNpcSelectorWaitDeadline": true,
+      "npcObservedByLaterFreshStateRead": true,
+      "credentialsHidden": true
+    },
+    {
+      "stage": "native-store-persistence-relogin",
+      "ordinaryReload": true,
+      "browserCacheRetained": true,
+      "ordinaryCredentialsLogin": true,
+      "ordinaryStartGame": true,
+      "ordinaryAnthonyAccess": true,
+      "beforeAnyCompatibilityStorageAction": true,
+      "initialStatus": "{\"owner\":\"react\",\"phase\":\"prepare\",\"reason\":\"controlsNotReady\"}",
+      "settledDom": {
+        "mainHudShell": 0,
+        "passiveHud": 1,
+        "sceneHeight": "768",
+        "sceneWidth": "1024",
+        "storageUiStatus": "{\"owner\":\"bevy\",\"phase\":\"active\",\"reason\":null}"
+      },
+      "visibleBagIcons": 4,
+      "visibleWarehouseIcons": 1,
+      "visibleGold": 180,
+      "screenshot": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-store-relogin01.png"
+    },
+    {
+      "stage": "native-takeback-complete",
+      "storageUiStatus": "{\"owner\":\"bevy\",\"phase\":\"active\",\"reason\":null}",
+      "actions": [
+        {
+          "type": "ordinary_canvas_click",
+          "x": 325,
+          "y": 266
+        },
+        {
+          "type": "ordinary_canvas_click",
+          "x": 156,
+          "y": 251
+        }
+      ],
+      "visibleBagIcons": 5,
+      "visibleWarehouseIcons": 0,
+      "visibleGold": 180,
+      "screenshot": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-takeback01.png"
+    },
+    {
+      "stage": "native-takeback-normal-save-logout",
+      "actions": [
+        {
+          "type": "ordinary_canvas_click",
+          "x": 194,
+          "y": 200
+        },
+        {
+          "type": "ordinary_canvas_click",
+          "x": 448,
+          "y": 235
+        },
+        {
+          "type": "ordinary_key",
+          "key": "Alt+x"
+        }
+      ],
+      "inputSentOnce": true,
+      "loginObservedByFreshStateRead": true,
+      "credentialsHidden": true
+    },
+    {
+      "stage": "native-takeback-persistence-final-relogin",
+      "ordinaryReload": true,
+      "browserCacheRetained": true,
+      "ordinaryCredentialsLogin": true,
+      "ordinaryStartGame": true,
+      "ordinaryAnthonyAccess": true,
+      "beforeAnyCompatibilityStorageAction": true,
+      "initialStatus": "{\"owner\":\"react\",\"phase\":\"prepare\",\"reason\":\"controlsNotReady\"}",
+      "settledDom": {
+        "mainHudShell": 0,
+        "passiveHud": 1,
+        "sceneHeight": "768",
+        "sceneWidth": "1024",
+        "storageUiStatus": "{\"owner\":\"bevy\",\"phase\":\"active\",\"reason\":null}"
+      },
+      "visibleBagIcons": 5,
+      "visibleWarehouseIcons": 0,
+      "visibleGold": 180,
+      "screenshot": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source74-native-restored-relogin01.png"
+    }
+  ],
+  "reloginTransient": {
+    "prepareControlsNotReadySeen": 2,
+    "settledToBevyActiveWithoutCompatibilityActions": true,
+    "partialSharedPaintOverlapDuringPrepareObserved": true,
+    "preparePaintClearanceAccepted": false
+  },
+  "selectorWaits": {
+    "firstDepositLogoutWaitDeadline": true,
+    "depositReloginNpcWaitDeadline": true,
+    "actionsNotRepeated": true,
+    "bothResolvedByLaterFreshStateRead": true
+  },
+  "unlockedBag2ActualAcceptance": false,
+  "mobileActualAcceptance": false,
+  "otherSharedPanelsAcceptance": false,
+  "wholeParityPercentage": null,
+  "candidate100": false,
+  "finalHumanAcceptance": false,
+  "goalComplete": false
+}

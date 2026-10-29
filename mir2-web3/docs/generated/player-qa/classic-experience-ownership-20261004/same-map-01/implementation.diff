@@ -1,0 +1,2212 @@
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+index bce55e30e..b8b2d4e3e 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+@@ -47,6 +47,8 @@ use crate::runtime::map_events::{
+ 
+ pub(super) mod armadillo_ai;
+ mod checkpoint;
++mod experience_ownership;
++use experience_ownership::{apply_native_experience_impact, NativeExperienceActor};
+ pub(super) mod town_archer_ai;
+ use town_archer_ai::*;
+ pub(super) mod great_fox_ai;
+@@ -409,6 +411,9 @@ struct PendingNativeMonsterHit {
+     attacker_object_id: u32,
+     object_id: u32,
+     damage: i32,
++    /// Successful TurnUndead replaces EXPOwner at impact, unlike an ordinary hit.
++    #[serde(default, skip_serializing_if = "experience_owner_flag_is_false")]
++    force_experience_owner: bool,
+     #[serde(default, skip_serializing_if = "Option::is_none")]
+     fire_bounce: Option<PendingNativeFireBounce>,
+     #[serde(default, skip_serializing_if = "Option::is_none")]
+@@ -422,6 +427,10 @@ struct PendingNativeMonsterHit {
+     journey_event: Option<ZoneJourneyEventReceipt>,
+ }
+ 
++fn experience_owner_flag_is_false(value: &bool) -> bool {
++    !*value
++}
++
+ type NativeMonsterDamageResult = (
+     i32,
+     u8,
+@@ -1985,6 +1994,7 @@ impl ZoneRuntime {
+     }
+ 
+     pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
++        self.expire_native_experience_owners(now_ms);
+         let sessions = self.players.keys().cloned().collect::<Vec<_>>();
+         let mut outbounds = Vec::new();
+         for session_id in sessions {
+@@ -2442,6 +2452,7 @@ impl ZoneRuntime {
+         }
+ 
+         let object_id = self.unique_object_id(join.object_id);
++        self.revoke_same_map_experience_owner_on_join(&join.session_id, object_id);
+         let requested_position = join.position.clone();
+         let requested_direction = join.direction;
+         join.position = self.first_available_position(join.position.clone(), None);
+@@ -4115,6 +4126,7 @@ impl ZoneRuntime {
+                     resolved_damage
+                 };
+             self.pending_native_hits.push(PendingNativeMonsterHit {
++                force_experience_owner: false,
+                 ready_at_ms: if attack_spell == Spell::TwinDrakeBlade {
+                     now_ms.saturating_add(300)
+                 } else {
+@@ -4141,6 +4153,7 @@ impl ZoneRuntime {
+             });
+             if attack_spell == Spell::TwinDrakeBlade {
+                 self.pending_native_hits.push(PendingNativeMonsterHit {
++                    force_experience_owner: false,
+                     ready_at_ms: now_ms.saturating_add(400),
+                     session_id: session_id.clone(),
+                     attacker_object_id: player.object_id,
+@@ -4257,6 +4270,7 @@ impl ZoneRuntime {
+                     hit,
+                 ) {
+                     self.pending_native_hits.push(PendingNativeMonsterHit {
++                        force_experience_owner: false,
+                         ready_at_ms: if secondary
+                             && matches!(spell, Spell::HalfMoon | Spell::CrossHalfMoon)
+                         {
+@@ -4731,6 +4745,7 @@ impl ZoneRuntime {
+             zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
+         {
+             self.pending_native_hits.push(PendingNativeMonsterHit {
++                force_experience_owner: false,
+                 ready_at_ms: now_ms,
+                 session_id: session_id.clone(),
+                 attacker_object_id: player.object_id,
+@@ -5229,6 +5244,9 @@ impl ZoneRuntime {
+                     )
+                 };
+                 self.pending_native_hits.push(PendingNativeMonsterHit {
++                    force_experience_owner: spell == Spell::TurnUndead
++                        && hit_damage > 0
++                        && hit_damage >= hit_monster.hp,
+                     ready_at_ms: now_ms,
+                     session_id: session_id.clone(),
+                     attacker_object_id: player.object_id,
+@@ -7155,6 +7173,7 @@ impl ZoneRuntime {
+         .unwrap_or_default()
+         .saturating_mul(50);
+         self.pending_native_hits.push(PendingNativeMonsterHit {
++            force_experience_owner: false,
+             ready_at_ms: now_ms
+                 .saturating_add(ZONE_FIRE_BOUNCE_INITIAL_DELAY_MS)
+                 .saturating_add(travel_ms),
+@@ -7900,6 +7919,7 @@ impl ZoneRuntime {
+                 })
+                 .flatten();
+             self.pending_native_hits.push(PendingNativeMonsterHit {
++                force_experience_owner: false,
+                 ready_at_ms: now_ms.saturating_add(500),
+                 session_id: session_id.clone(),
+                 attacker_object_id: player.object_id,
+@@ -8005,6 +8025,7 @@ impl ZoneRuntime {
+             });
+         } else if let Some(object_id) = pushed_object_id {
+             self.pending_native_hits.push(PendingNativeMonsterHit {
++                force_experience_owner: false,
+                 ready_at_ms: now_ms,
+                 session_id: session_id.clone(),
+                 attacker_object_id: player.object_id,
+@@ -8607,6 +8628,7 @@ impl ZoneRuntime {
+                 );
+                 outbounds.extend(self.resolve_pending_native_monster_hit(
+                     PendingNativeMonsterHit {
++                        force_experience_owner: false,
+                         ready_at_ms: now_ms,
+                         session_id: action.caster_session_id.clone(),
+                         attacker_object_id: caster.object_id,
+@@ -8899,6 +8921,7 @@ impl ZoneRuntime {
+             );
+             outbounds.extend(self.resolve_pending_native_monster_hit(
+                 PendingNativeMonsterHit {
++                    force_experience_owner: false,
+                     ready_at_ms: now_ms,
+                     session_id: action.caster_session_id.clone(),
+                     attacker_object_id: caster.object_id,
+@@ -9415,7 +9438,14 @@ impl ZoneRuntime {
+             reward_owner_session_id,
+             drops,
+             boss_audit,
+-        )) = self.apply_native_monster_damage(object_id, damage, owner_session_id.as_ref(), now_ms)
++        )) = self.apply_native_monster_damage_internal(
++            object_id,
++            damage,
++            owner_session_id.as_ref(),
++            now_ms,
++            NativeMonsterDamageCause::Indirect,
++            Some(NativeExperienceActor::PeriodicPoison { owner_object_id }),
++        )
+         else {
+             return Vec::new();
+         };
+@@ -9636,6 +9666,7 @@ impl ZoneRuntime {
+                             });
+                         outbounds.extend(self.resolve_pending_native_monster_hit(
+                             PendingNativeMonsterHit {
++                                force_experience_owner: false,
+                                 ready_at_ms: now_ms,
+                                 session_id: action.caster_session_id.clone(),
+                                 attacker_object_id: action.caster_object_id,
+@@ -9859,11 +9890,16 @@ impl ZoneRuntime {
+             reward_owner_session_id,
+             drops,
+             boss_audit,
+-        )) = self.apply_native_monster_direct_damage(
++        )) = self.apply_native_monster_damage_internal(
+             hit.object_id,
+             resolved_hit_damage,
+             Some(&hit.session_id),
+             now_ms,
++            NativeMonsterDamageCause::Direct,
++            Some(NativeExperienceActor::Object {
++                object_id: hit.attacker_object_id,
++                force_owner: hit.force_experience_owner,
++            }),
+         )
+         else {
+             return Vec::new();
+@@ -9966,29 +10002,9 @@ impl ZoneRuntime {
+         }
+ 
+         if killed {
+-            let reward_owner_session_id =
+-                reward_owner_session_id.unwrap_or_else(|| hit.session_id.clone());
+-            let drop_owner_object_id = self
+-                .players
+-                .get(&reward_owner_session_id)
+-                .map(|player| player.object_id)
+-                .unwrap_or_else(|| {
+-                    self.native_monsters
+-                        .get(&hit.attacker_object_id)
+-                        .filter(|monster| zone_native_summon_owner_player_object_id(monster) != 0)
+-                        .map(zone_native_summon_owner_player_object_id)
+-                        .unwrap_or(hit.attacker_object_id)
+-                });
+-            let spawned_drops = self.spawn_native_monster_drops(
+-                &monster_name,
++            outbounds.extend(self.native_monster_kill_outbounds(
++                reward_owner_session_id,
+                 &position,
+-                drop_owner_object_id,
+-                drops,
+-                now_ms,
+-            );
+-            outbounds.extend(self.diff_all_zone_object_visibility());
+-            outbounds.extend(self.group_monster_kill_awards(
+-                &reward_owner_session_id,
+                 ZoneMonsterKillAward {
+                     source_receipt_key: None,
+                     experience_selection: None,
+@@ -9996,7 +10012,7 @@ impl ZoneRuntime {
+                     killed_at_ms: now_ms,
+                     monster_name,
+                     experience,
+-                    drops: spawned_drops,
++                    drops,
+                     boss_audit,
+                 },
+             ));
+@@ -10138,6 +10154,7 @@ impl ZoneRuntime {
+             .unwrap_or_default()
+             .saturating_mul(50);
+         self.pending_native_hits.push(PendingNativeMonsterHit {
++            force_experience_owner: false,
+             ready_at_ms: now_ms.saturating_add(travel_ms),
+             session_id: hit.session_id.clone(),
+             attacker_object_id: hit.attacker_object_id,
+@@ -10155,9 +10172,10 @@ impl ZoneRuntime {
+ 
+     /// Split one authoritative monster reward across the killer's eligible
+     /// group without creating or losing base experience. A group member must
+-    /// still be present in this map-owned zone and alive when the monster dies;
+-    /// offline, cross-map, and dead members receive neither experience nor
+-    /// quest-kill credit. The deterministic remainder goes to the killer when
++    /// still be present in this map-owned zone. Dead grouped members receive
++    /// no reward; a spawned dead solo EXPOwner retains Crystal's kill credit.
++    /// Offline/cross-map references require the manager follow-up. The
++    /// deterministic remainder goes to the killer when
+     /// eligible, otherwise to the first eligible session.
+     fn group_monster_kill_awards(
+         &self,
+@@ -10172,10 +10190,12 @@ impl ZoneRuntime {
+             .players
+             .iter()
+             .filter_map(|(session_id, player)| {
+-                if player.dead || player.hp <= 0 {
++                let is_owner = session_id == owner_session_id;
++                if (player.dead || player.hp <= 0)
++                    && !(is_owner && owner_group_members.is_empty())
++                {
+                     return None;
+                 }
+-                let is_owner = session_id == owner_session_id;
+                 let is_named_group_member = owner_group_members
+                     .iter()
+                     .any(|name| name.eq_ignore_ascii_case(&player.name));
+@@ -10537,6 +10557,7 @@ impl ZoneRuntime {
+             let damage = zone_apply_melee_skill_damage(Spell::CounterAttack, level, base_damage);
+             if damage > 0 {
+                 self.pending_native_hits.push(PendingNativeMonsterHit {
++                    force_experience_owner: false,
+                     ready_at_ms: now_ms.saturating_add(300),
+                     session_id: target_session_id.clone(),
+                     attacker_object_id: player.object_id,
+@@ -11186,6 +11207,7 @@ impl ZoneRuntime {
+         for target_object_id in target_object_ids {
+             outbounds.extend(self.resolve_pending_native_monster_hit(
+                 PendingNativeMonsterHit {
++                    force_experience_owner: false,
+                     ready_at_ms: now_ms,
+                     session_id: owner_session_id.clone(),
+                     attacker_object_id: object_id,
+@@ -11915,6 +11937,7 @@ impl ZoneRuntime {
+             })
+             .flatten();
+         self.pending_native_hits.push(PendingNativeMonsterHit {
++            force_experience_owner: false,
+             ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
+             session_id: owner_session_id.clone(),
+             attacker_object_id: object_id,
+@@ -12008,6 +12031,7 @@ impl ZoneRuntime {
+                 })
+                 .flatten();
+             self.pending_native_hits.push(PendingNativeMonsterHit {
++                force_experience_owner: false,
+                 ready_at_ms: now_ms.saturating_add(hit_delay_ms),
+                 session_id: owner_session_id.clone(),
+                 attacker_object_id: object_id,
+@@ -12250,6 +12274,7 @@ impl ZoneRuntime {
+             attacker_session_id,
+             now_ms,
+             NativeMonsterDamageCause::Indirect,
++            None,
+         )
+     }
+ 
+@@ -12266,6 +12291,7 @@ impl ZoneRuntime {
+             attacker_session_id,
+             now_ms,
+             NativeMonsterDamageCause::Direct,
++            None,
+         )
+     }
+ 
+@@ -12282,6 +12308,7 @@ impl ZoneRuntime {
+             attacker_session_id,
+             now_ms,
+             NativeMonsterDamageCause::Repulsion,
++            None,
+         )
+     }
+ 
+@@ -12298,6 +12325,7 @@ impl ZoneRuntime {
+             owner,
+             now_ms,
+             NativeMonsterDamageCause::ScriptedDeath,
++            None,
+         )
+     }
+ 
+@@ -12308,9 +12336,12 @@ impl ZoneRuntime {
+         attacker_session_id: Option<&SessionId>,
+         now_ms: u64,
+         cause: NativeMonsterDamageCause,
++        actor: Option<NativeExperienceActor>,
+     ) -> Option<NativeMonsterDamageResult> {
+         let managed_conquest=self.conquest_is_defense(object_id);
+         if managed_conquest && !self.conquest_defense_accepts_damage(object_id,attacker_session_id,now_ms) {return None;}
++        let experience_impact =
++            self.native_experience_impact(object_id, attacker_session_id, actor, now_ms);
+         let (
+             damage,
+             health_percent,
+@@ -12345,6 +12376,14 @@ impl ZoneRuntime {
+             }
+ 
+             let damage = damage.max(0).min(monster.hp);
++            // ProcessPoison claims/renews before PoisonDamage, even for a
++            // zero-value tick. Direct zero/rejected hits never claim. Existing
++            // public green-poison producers normalize values to at least one.
++            if damage > 0
++                || matches!(actor, Some(NativeExperienceActor::PeriodicPoison { .. }))
++            {
++                apply_native_experience_impact(monster, experience_impact, now_ms);
++            }
+             let is_boss = crystal_monster_by_name(&monster.name)
+                 .is_some_and(|template| template.is_boss)
+                 || platinum_176_monster_is_boss(&monster.name);
+@@ -12425,20 +12464,28 @@ impl ZoneRuntime {
+                 respawn.due_at_ms = respawn.spawn.respawn.map(|policy| policy.due_at_ms(now_ms));
+             }
+         }
+-        let reward_owner_session_id =
+-            killed
+-                .then(|| attacker_session_id.cloned())
+-                .flatten()
+-                .map(|last_hit_session_id| {
+-                    if is_boss {
+-                        self.boss_reward_owner(
+-                            &last_hit_session_id,
+-                            contributions.as_ref().expect("Boss contributions captured"),
+-                        )
+-                    } else {
+-                        last_hit_session_id
+-                    }
+-                });
++        let has_master = self.native_monsters.get(&object_id)
++            .is_some_and(|m| m.master_object_id != 0 || m.owner_session_id.is_some());
++        let reward_owner_session_id = if killed && !has_master {
++            if is_boss {
++                // Existing contribution policy is deliberately unchanged. It
++                // remains a separate generic Crystal Boss parity gate.
++                attacker_session_id.map(|last_hit| {
++                    self.boss_reward_owner(
++                        last_hit,
++                        contributions.as_ref().expect("Boss contributions captured"),
++                    )
++                })
++            } else {
++                self.native_experience_reward_owner(object_id, now_ms)
++            }
++        } else {
++            None
++        };
++        if killed && has_master {
++            experience = 0;
++            drops.clear();
++        }
+         if killed {
+             let bonus = reward_owner_session_id.as_ref()
+                 .and_then(|owner| self.players.get(owner))
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+index 69bbdb57f..ce691d125 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+@@ -29,12 +29,15 @@ const LEGACY_V2_CANONICAL_ZONE_STATE_VERSION: u32 = 2;
+ const LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v2\0";
+ const LEGACY_V3_CANONICAL_ZONE_STATE_VERSION: u32 = 3;
+ const LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
+-const CANONICAL_ZONE_STATE_VERSION: u32 = 4;
+-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
++const LEGACY_V4_CANONICAL_ZONE_STATE_VERSION: u32 = 4;
++const LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
++const CANONICAL_ZONE_STATE_VERSION: u32 = 5;
++const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
+ const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
+ const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
+ const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
+-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
++const LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
++const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
+ 
+ fn legacy_v2_ground_drop_claim_idempotency_key(
+     key: &ZoneKey,
+@@ -272,11 +275,24 @@ impl ZoneRuntime {
+     /// BTree collections and struct field order make the JSON byte stream
+     /// deterministic for a fixed signed game-module version.
+     pub fn canonical_state_root(&self) -> Result<String, String> {
++        self.canonical_state_root_for_schema(
++            CANONICAL_ZONE_STATE_VERSION, CANONICAL_ZONE_STATE_DOMAIN,
++            &self.native_monsters, &self.pending_native_hits,
++        )
++    }
++
++    fn canonical_state_root_for_schema(
++        &self,
++        version: u32,
++        domain: &[u8],
++        native_monsters: &BTreeMap<u32, ZoneNativeMonster>,
++        pending_native_hits: &[PendingNativeMonsterHit],
++    ) -> Result<String, String> {
+         let state = CanonicalZoneStateV4 {
+             intelligent_creatures: &self.intelligent_creatures,
+             intelligent_creature_intents: &self.intelligent_creature_intents,
+             intelligent_creature_operations: &self.intelligent_creature_operations,
+-            version: CANONICAL_ZONE_STATE_VERSION,
++            version,
+             key: &self.key,
+             collision: &self.collision,
+             players: &self.players,
+@@ -285,9 +301,9 @@ impl ZoneRuntime {
+             revived_object_ids: &self.revived_object_ids,
+             removed_object_ids: &self.removed_object_ids,
+             harvested_object_ids: &self.harvested_object_ids,
+-            native_monsters: &self.native_monsters,
++            native_monsters,
+             native_monster_respawns: &self.native_monster_respawns,
+-            pending_native_hits: &self.pending_native_hits,
++            pending_native_hits,
+             pending_native_projectiles: &self.pending_native_projectiles,
+             pending_native_player_hits: &self.pending_native_player_hits,
+             pending_native_player_heals: &self.pending_native_player_heals,
+@@ -311,12 +327,35 @@ impl ZoneRuntime {
+         let bytes = serde_json::to_vec(&state)
+             .map_err(|error| format!("failed to serialize canonical zone state: {error}"))?;
+         let mut hasher = Sha256::new();
+-        hasher.update(CANONICAL_ZONE_STATE_DOMAIN);
++        hasher.update(domain);
+         hasher.update(bytes);
+         Ok(hex_lower(&hasher.finalize()))
+     }
+ 
++    pub(super) fn legacy_v4_canonical_state_root(&self) -> Result<String, String> {
++        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
++        self.canonical_state_root_for_schema(
++            LEGACY_V4_CANONICAL_ZONE_STATE_VERSION, LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN,
++            &monsters, &hits,
++        )
++    }
++
++    fn legacy_ownership_free_monsters_and_hits(
++        &self,
++    ) -> (BTreeMap<u32, ZoneNativeMonster>, Vec<PendingNativeMonsterHit>) {
++        let mut monsters = self.native_monsters.clone();
++        let mut hits = self.pending_native_hits.clone();
++        for monster in monsters.values_mut() {
++            monster.experience_owner = None;
++        }
++        for hit in &mut hits {
++            hit.force_experience_owner = false;
++        }
++        (monsters, hits)
++    }
++
+     fn legacy_canonical_state_root(&self) -> Result<String, String> {
++        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
+         let ground_drops = self
+             .ground_drops
+             .iter()
+@@ -353,8 +392,8 @@ impl ZoneRuntime {
+             revived_object_ids: &self.revived_object_ids,
+             removed_object_ids: &self.removed_object_ids,
+             harvested_object_ids: &self.harvested_object_ids,
+-            native_monsters: &self.native_monsters,
+-            pending_native_hits: &self.pending_native_hits,
++            native_monsters: &monsters,
++            pending_native_hits: &hits,
+             pending_native_projectiles: &self.pending_native_projectiles,
+             pending_native_player_hits: &self.pending_native_player_hits,
+             pending_native_player_heals: &self.pending_native_player_heals,
+@@ -375,6 +414,7 @@ impl ZoneRuntime {
+     }
+ 
+     fn legacy_v2_canonical_state_root(&self) -> Result<String, String> {
++        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
+         // v2 committed the original claim-scoped idempotency key. Keep this
+         // schema exact so a v2 checkpoint is authenticated before the
+         // post-verification v3 re-anchor removes claim_id from the economic
+@@ -390,8 +430,8 @@ impl ZoneRuntime {
+             revived_object_ids: &self.revived_object_ids,
+             removed_object_ids: &self.removed_object_ids,
+             harvested_object_ids: &self.harvested_object_ids,
+-            native_monsters: &self.native_monsters,
+-            pending_native_hits: &self.pending_native_hits,
++            native_monsters: &monsters,
++            pending_native_hits: &hits,
+             pending_native_projectiles: &self.pending_native_projectiles,
+             pending_native_player_hits: &self.pending_native_player_hits,
+             pending_native_player_heals: &self.pending_native_player_heals,
+@@ -415,6 +455,7 @@ impl ZoneRuntime {
+     }
+ 
+     fn legacy_v3_canonical_state_root(&self) -> Result<String, String> {
++        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
+         let state = CanonicalZoneState {
+             version: LEGACY_V3_CANONICAL_ZONE_STATE_VERSION,
+             key: &self.key,
+@@ -425,8 +466,8 @@ impl ZoneRuntime {
+             revived_object_ids: &self.revived_object_ids,
+             removed_object_ids: &self.removed_object_ids,
+             harvested_object_ids: &self.harvested_object_ids,
+-            native_monsters: &self.native_monsters,
+-            pending_native_hits: &self.pending_native_hits,
++            native_monsters: &monsters,
++            pending_native_hits: &hits,
+             pending_native_projectiles: &self.pending_native_projectiles,
+             pending_native_player_hits: &self.pending_native_player_hits,
+             pending_native_player_heals: &self.pending_native_player_heals,
+@@ -688,14 +729,16 @@ impl ZoneRuntime {
+         if checkpoint.version != LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION
+             && checkpoint.version != LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION
+             && checkpoint.version != LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION
++            && checkpoint.version != LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION
+             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
+         {
+             return Err(format!(
+-                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, or {}",
++                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, or {}",
+                 checkpoint.version,
+                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION,
++                LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                 ZONE_RUNTIME_CHECKPOINT_VERSION
+             ));
+         }
+@@ -732,12 +775,12 @@ impl ZoneRuntime {
+         runtime.harvested_object_ids = checkpoint.harvested_object_ids;
+         runtime.native_monsters = checkpoint.native_monsters;
+         runtime.native_monster_respawns = checkpoint.native_monster_respawns;
+-        if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
++        if checkpoint_version >= LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION {
+             runtime.intelligent_creatures = checkpoint.intelligent_creatures;
+             runtime.intelligent_creature_intents = checkpoint.intelligent_creature_intents;
+             runtime.intelligent_creature_operations = checkpoint.intelligent_creature_operations;
+         }
+-        if checkpoint_version != ZONE_RUNTIME_CHECKPOINT_VERSION {
++        if checkpoint_version < LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION {
+             // v1-v3 roots did not commit respawn policy/due state. Ignore any
+             // forward fields injected into legacy JSON before authenticating
+             // and re-anchoring it under the current schema.
+@@ -751,6 +794,17 @@ impl ZoneRuntime {
+                 monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile);
+         }
+         runtime.pending_native_hits = checkpoint.pending_native_hits;
++        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
++            // v1-v4 roots never committed generic EXPOwner or the successful
++            // TurnUndead impact flag. Ignore injected forward fields before
++            // legacy authentication; they cannot become reward authority.
++            for monster in runtime.native_monsters.values_mut() {
++                monster.experience_owner = None;
++            }
++            for hit in &mut runtime.pending_native_hits {
++                hit.force_experience_owner = false;
++            }
++        }
+         runtime.pending_native_projectiles = checkpoint.pending_native_projectiles;
+         runtime.pending_native_player_hits = checkpoint.pending_native_player_hits;
+         runtime.pending_native_player_heals = checkpoint.pending_native_player_heals;
+@@ -762,7 +816,7 @@ impl ZoneRuntime {
+         runtime.next_ground_drop_claim_id = checkpoint.next_ground_drop_claim_id;
+         runtime.open_doors = checkpoint.open_doors;
+         runtime.hazard = checkpoint.hazard;
+-        if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
++        if checkpoint_version >= LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION {
+             runtime.hell_world = checkpoint.hell_world;
+             runtime.horned_encounter_world = checkpoint.horned_encounter_world;
+             runtime.pet_special_world = checkpoint.pet_special_world;
+@@ -813,6 +867,9 @@ impl ZoneRuntime {
+             LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                 runtime.legacy_v3_canonical_state_root()?
+             }
++            LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION => {
++                runtime.legacy_v4_canonical_state_root()?
++            }
+             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
+             _ => unreachable!("checkpoint version was validated above"),
+         };
+@@ -831,7 +888,7 @@ impl ZoneRuntime {
+                 runtime.reanchor_legacy_v2_ground_drop_claim_idempotency_keys();
+                 runtime.validate_ground_drop_claim_authority()?;
+             }
+-            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
++            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                 runtime.validate_ground_drop_claim_authority()?;
+             }
+             ZONE_RUNTIME_CHECKPOINT_VERSION => {
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs
+index fa1bfe2dc..865a391c1 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/entity_combat.rs
+@@ -2005,7 +2005,17 @@ impl ZoneRuntime {
+         let result = if struck {
+             self.apply_native_monster_damage(object_id, damage, None, now)
+         } else {
+-            self.apply_native_monster_direct_damage(object_id, damage, None, now)
++            self.apply_native_monster_damage_internal(
++                object_id,
++                damage,
++                None,
++                now,
++                NativeMonsterDamageCause::Direct,
++                Some(NativeExperienceActor::Object {
++                    object_id: source_id,
++                    force_owner: false,
++                }),
++            )
+         };
+         let Some(result) = result else {
+             return (0, Vec::new());
+@@ -2105,11 +2115,7 @@ impl ZoneRuntime {
+         struck_attacker: Option<u32>,
+         now: u64,
+     ) -> (i32, Vec<ZoneOutbound>) {
+-        let (damage, percent, killed, _, _, position, direction, owner, _, _) = result;
+-        debug_assert!(
+-            owner.is_none(),
+-            "unattributed damage never fabricates player credit"
+-        );
++        let (damage, percent, killed, name, experience, position, direction, owner, drops, audit) = result;
+         let mut packets = Vec::new();
+         if let Some(attacker_id) = struck_attacker {
+             packets.push(ServerPacket::ObjectStruck {
+@@ -2145,12 +2151,28 @@ impl ZoneRuntime {
+             });
+         }
+         self.apply_zone_object_packets(&packets, now);
+-        let out = vec![ZoneOutbound::ToMany {
++        let mut out = vec![ZoneOutbound::ToMany {
+             session_ids: self.native_monster_combat_recipients(source_id, object_id, &position),
+             packets,
+         }];
+-        // Wild→pet has Master!=null; environmental Struck has no owner.
+-        // Existing EXPOwner arbitration is not invented from target/session IDs.
++        // A real Master target has no wild rewards. Environmental Struck may
++        // finish an existing player claim; it never invents one from the source.
++        if killed {
++            out.extend(self.native_monster_kill_outbounds(
++                owner,
++                &position,
++                ZoneMonsterKillAward {
++                    source_receipt_key: None,
++                    experience_selection: None,
++                    monster_object_id: object_id,
++                    killed_at_ms: now,
++                    monster_name: name,
++                    experience,
++                    drops,
++                    boss_audit: audit,
++                },
++            ));
++        }
+         (damage, out)
+     }
+ 
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/journey_events.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/journey_events.rs
+index 9501f8fd7..467f78a6a 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/journey_events.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/journey_events.rs
+@@ -138,6 +138,7 @@ fn journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_
+     // A pending/launch record is not an outbound receipt. Its eventual zero
+     // damage result is also not proof of an exercise hit.
+     let launch = PendingNativeMonsterHit {
++        force_experience_owner: false,
+         ready_at_ms: 20,
+         session_id: owner.clone(),
+         attacker_object_id: 101,
+@@ -154,6 +155,7 @@ fn journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_
+     let mut skeleton_draft = physical_draft(&zone, &owner, 30, 777);
+     skeleton_draft.kind = ZoneJourneyEventKind::SummonSkeletonDamage;
+     let hit = PendingNativeMonsterHit {
++        force_experience_owner: false,
+         ready_at_ms: 40,
+         session_id: owner.clone(),
+         attacker_object_id: 777,
+@@ -175,6 +177,7 @@ fn journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_
+     // A delayed hit captured for a previous owner incarnation cannot become a
+     // receipt after that owner has revived/rejoined.
+     let stale = PendingNativeMonsterHit {
++        force_experience_owner: false,
+         ready_at_ms: 60,
+         session_id: owner.clone(),
+         attacker_object_id: 101,
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs
+index 1bff4448f..6e1773166 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs
+@@ -170,6 +170,7 @@ impl ZoneRuntime {
+             if damage > 0 {
+                 out.extend(self.resolve_pending_native_monster_hit(
+                     PendingNativeMonsterHit {
++                        force_experience_owner: false,
+                         ready_at_ms: now,
+                         session_id: h.owner.clone(),
+                         attacker_object_id: h.source,
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs
+index 1920bd20c..c421aec80 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs
+@@ -447,6 +447,7 @@ impl ZoneRuntime {
+                 );
+                 out.extend(self.resolve_pending_native_monster_hit(
+                     PendingNativeMonsterHit {
++                        force_experience_owner: false,
+                         ready_at_ms: now,
+                         session_id: h.owner,
+                         attacker_object_id: id,
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs
+index e8aacd4fd..7e1cc71c7 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs
+@@ -167,16 +167,9 @@ impl ZoneRuntime {
+                     });
+                 }
+                 if killed {
+-                    let owner = owner.unwrap_or(hit.session_id);
+-                    let owner_id = self
+-                        .players
+-                        .get(&owner)
+-                        .map_or(hit.attacker_object_id, |p| p.object_id);
+-                    let drops =
+-                        self.spawn_native_monster_drops(&name, &position, owner_id, drops, now);
+-                    out.extend(self.diff_all_zone_object_visibility());
+-                    out.extend(self.group_monster_kill_awards(
+-                        &owner,
++                    out.extend(self.native_monster_kill_outbounds(
++                        owner,
++                        &position,
+                         ZoneMonsterKillAward {
+                             source_receipt_key: None,
+                             experience_selection: None,
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs
+index 589127ef9..e04d98ed3 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs
+@@ -454,7 +454,17 @@ impl ZoneRuntime {
+             reward_owner,
+             drops,
+             boss_audit,
+-        )) = self.apply_native_monster_direct_damage(target_id, damage, Some(&owner), now)
++        )) = self.apply_native_monster_damage_internal(
++            target_id,
++            damage,
++            Some(&owner),
++            now,
++            NativeMonsterDamageCause::Direct,
++            Some(NativeExperienceActor::Object {
++                object_id: id,
++                force_owner: false,
++            }),
++        )
+         else {
+             return Vec::new();
+         };
+@@ -507,25 +517,20 @@ impl ZoneRuntime {
+             packets,
+         }];
+         if killed {
+-            let reward = reward_owner.unwrap_or(owner);
+-            if let Some(player) = self.players.get(&reward) {
+-                let owner_id = player.object_id;
+-                let drops = self.spawn_native_monster_drops(&name, &position, owner_id, drops, now);
+-                out.extend(self.diff_all_zone_object_visibility());
+-                out.extend(self.group_monster_kill_awards(
+-                    &reward,
+-                    ZoneMonsterKillAward {
+-                        source_receipt_key: None,
+-                        experience_selection: None,
+-                        monster_object_id: target_id,
+-                        killed_at_ms: now,
+-                        monster_name: name,
+-                        experience,
+-                        drops,
+-                        boss_audit,
+-                    },
+-                ));
+-            }
++            out.extend(self.native_monster_kill_outbounds(
++                reward_owner,
++                &position,
++                ZoneMonsterKillAward {
++                    source_receipt_key: None,
++                    experience_selection: None,
++                    monster_object_id: target_id,
++                    killed_at_ms: now,
++                    monster_name: name,
++                    experience,
++                    drops,
++                    boss_audit,
++                },
++            ));
+         }
+         out
+     }
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/types.rs b/mir2-web3/apps/simulation/src/runtime/zone/types.rs
+index 81eb139e0..6a4691e75 100644
+--- a/mir2-web3/apps/simulation/src/runtime/zone/types.rs
++++ b/mir2-web3/apps/simulation/src/runtime/zone/types.rs
+@@ -986,6 +986,18 @@ pub struct GroundDropClaimTicket {
+     pub drop: GroundDropSnapshot,
+ }
+ 
++/// Transient spawned-player ownership, separate from combat life_generation.
++/// Same-map fresh Join revokes old references; death/revive does not replace
++/// the spawned object. Cross-map online identity is a manager-level follow-up.
++#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
++pub(crate) struct ZoneExperienceOwner {
++    pub session_id: SessionId,
++    pub account_id: String,
++    pub character_index: i32,
++    pub object_id: u32,
++    pub expires_at_ms: u64,
++}
++
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+ pub(crate) struct ZoneNativeMonster {
+     /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+@@ -1044,6 +1056,10 @@ pub(crate) struct ZoneNativeMonster {
+     pub damage_poison_expires_at_ms: u64,
+     pub damage_poison_owner_session_id: Option<SessionId>,
+     pub damage_poison_owner_object_id: u32,
++    /// Crystal EXPOwner is retained until strictly after its five-second
++    /// deadline. Omitted legacy state never infers a claimant from a target.
++    #[serde(default, skip_serializing_if = "Option::is_none")]
++    pub experience_owner: Option<ZoneExperienceOwner>,
+     /// Authoritative damage credited to player sessions for Boss ownership.
+     /// Summon and damage-over-time attacks use their owning player's session.
+     #[serde(default)]
+@@ -1146,6 +1162,7 @@ impl ZoneNativeMonster {
+             damage_poison_expires_at_ms: 0,
+             damage_poison_owner_session_id: None,
+             damage_poison_owner_object_id: 0,
++            experience_owner: None,
+             damage_contributions: BTreeMap::new(),
+             buffs: BTreeMap::new(),
+         };
+diff --git a/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs b/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/src/runtime/zone/runtime/experience_ownership.rs
+@@ -0,0 +1,474 @@
++//! Ordinary same-map Crystal EXPOwner. Damage actor, reward owner, and pet
++//! master are distinct identities. Online cross-map references belong to the
++//! manager follow-up; this module does not turn a personal Session into world.
++use super::*;
++use crate::runtime::zone::types::ZoneExperienceOwner;
++
++const EXPERIENCE_OWNER_DELAY_MS: u64 = 5_000;
++const MASTER_CREDIT_RANGE: i32 = 16;
++
++#[derive(Debug, Clone, Copy)]
++pub(super) enum NativeExperienceActor {
++    Object { object_id: u32, force_owner: bool },
++    PeriodicPoison { owner_object_id: u32 },
++}
++
++pub(super) struct NativeExperienceImpact {
++    claimant: Option<ZoneExperienceOwner>,
++    clears_owner: bool,
++    force_owner: bool,
++    current_owner_dead: bool,
++    current_owner_mismatched: bool,
++}
++
++fn matches_player(owner: &ZoneExperienceOwner, player: &ZonePlayer) -> bool {
++    owner.session_id == player.session_id
++        && owner.account_id == player.account_id
++        && owner.character_index == player.character_index
++        && owner.object_id == player.object_id
++}
++
++fn claimant(player: &ZonePlayer, now_ms: u64) -> ZoneExperienceOwner {
++    ZoneExperienceOwner {
++        session_id: player.session_id.clone(),
++        account_id: player.account_id.clone(),
++        character_index: player.character_index,
++        object_id: player.object_id,
++        expires_at_ms: now_ms.saturating_add(EXPERIENCE_OWNER_DELAY_MS),
++    }
++}
++
++impl ZoneRuntime {
++    pub(super) fn native_experience_impact(
++        &self,
++        target_id: u32,
++        session_id: Option<&SessionId>,
++        actor: Option<NativeExperienceActor>,
++        now_ms: u64,
++    ) -> NativeExperienceImpact {
++        let old = self
++            .native_monsters
++            .get(&target_id)
++            .and_then(|m| m.experience_owner.as_ref());
++        let old_player = old.and_then(|o| self.players.get(&o.session_id).map(|p| (o, p)));
++        let mut impact = NativeExperienceImpact {
++            claimant: None,
++            clears_owner: false,
++            force_owner: false,
++            current_owner_dead: old_player
++                .is_some_and(|(o, p)| matches_player(o, p) && (p.dead || p.hp <= 0)),
++            current_owner_mismatched: old_player.is_some_and(|(o, p)| !matches_player(o, p)),
++        };
++        match actor {
++            Some(NativeExperienceActor::Object {
++                object_id,
++                force_owner,
++            }) => {
++                if let Some(monster) = self.native_monsters.get(&object_id) {
++                    // These source species clear EXPOwner even when Master exists.
++                    if matches!(monster.ai, 6 | 58 | 113) {
++                        impact.clears_owner = true;
++                    } else if monster.master_object_id != 0 || monster.owner_session_id.is_some() {
++                        let master = monster
++                            .owner_session_id
++                            .as_ref()
++                            .and_then(|sid| self.players.get(sid))
++                            .filter(|p| {
++                                p.object_id == zone_native_summon_owner_player_object_id(monster)
++                            });
++                        if let Some(master) = master.filter(|p| {
++                            points_within_action_range(
++                                &p.position,
++                                &monster.position,
++                                MASTER_CREDIT_RANGE,
++                            )
++                        }) {
++                            impact.claimant = Some(claimant(master, now_ms));
++                        } else {
++                            // One Zone implies the same map. Missing/different
++                            // master or out-of-range pet still applies damage.
++                            impact.clears_owner = true;
++                        }
++                    }
++                } else if let Some(player) = session_id
++                    .and_then(|sid| self.players.get(sid))
++                    .filter(|p| p.object_id == object_id)
++                {
++                    impact.claimant = Some(claimant(player, now_ms));
++                    impact.force_owner = force_owner;
++                }
++            }
++            Some(NativeExperienceActor::PeriodicPoison { owner_object_id }) => {
++                // Source periodic poison renews before PoisonDamage and does
++                // not reject a dead owner that remains a spawned object.
++                if let Some(player) = session_id
++                    .and_then(|sid| self.players.get(sid))
++                    .filter(|p| p.object_id == owner_object_id)
++                {
++                    impact.claimant = Some(claimant(player, now_ms));
++                }
++            }
++            None => {
++                // Internal player spells and scripted special-AI trackers use
++                // their trusted acting session; no target ID invents credit.
++                impact.claimant = session_id
++                    .and_then(|sid| self.players.get(sid))
++                    .map(|p| claimant(p, now_ms));
++            }
++        }
++        impact
++    }
++
++    pub(super) fn native_experience_reward_owner(
++        &self,
++        monster_id: u32,
++        now_ms: u64,
++    ) -> Option<SessionId> {
++        let owner = self
++            .native_monsters
++            .get(&monster_id)?
++            .experience_owner
++            .as_ref()?;
++        if now_ms > owner.expires_at_ms {
++            return None;
++        }
++        // No alive gate here: MonsterObject.Die permits a spawned dead owner.
++        self.players
++            .get(&owner.session_id)
++            .filter(|p| matches_player(owner, p))
++            .map(|_| owner.session_id.clone())
++    }
++
++    pub(super) fn expire_native_experience_owners(&mut self, now_ms: u64) {
++        for monster in self.native_monsters.values_mut() {
++            if monster
++                .experience_owner
++                .as_ref()
++                .is_some_and(|o| now_ms > o.expires_at_ms)
++            {
++                monster.experience_owner = None;
++            }
++        }
++    }
++
++    pub(super) fn revoke_same_map_experience_owner_on_join(
++        &mut self,
++        session_id: &SessionId,
++        object_id: u32,
++    ) {
++        for monster in self.native_monsters.values_mut() {
++            if monster
++                .experience_owner
++                .as_ref()
++                .is_some_and(|o| &o.session_id == session_id || o.object_id == object_id)
++            {
++                monster.experience_owner = None;
++            }
++            // Reused same-map IDs cannot make an old despawned poison's owner
++            // become the fresh spawned object. Normal map transfer is not yet
++            // represented by this fresh-Join security boundary.
++            if monster.damage_poison_owner_session_id.as_ref() == Some(session_id)
++                || (monster.damage_poison_owner_object_id != 0
++                    && monster.damage_poison_owner_object_id == object_id)
++            {
++                monster.damage_poison_owner_session_id = None;
++                monster.damage_poison_owner_object_id = 0;
++                monster.damage_poison_expires_at_ms = 0;
++                monster.damage_poison_value = 0;
++            }
++        }
++    }
++
++    /// Consume the common death arbitration once, without a fatal-actor
++    /// fallback. Ground ownership and the durable personal award envelope
++    /// continue to use their existing contracts and drop duration.
++    pub(super) fn native_monster_kill_outbounds(
++        &mut self,
++        owner_session_id: Option<SessionId>,
++        position: &Point,
++        mut award: ZoneMonsterKillAward,
++    ) -> Vec<ZoneOutbound> {
++        let Some(owner_session_id) = owner_session_id else {
++            return Vec::new();
++        };
++        if self
++            .native_monsters
++            .get(&award.monster_object_id)
++            .is_some_and(|m| m.master_object_id != 0 || m.owner_session_id.is_some())
++        {
++            return Vec::new();
++        }
++        let Some(owner_object_id) = self.players.get(&owner_session_id).map(|p| p.object_id) else {
++            return Vec::new();
++        };
++        award.drops = self.spawn_native_monster_drops(
++            &award.monster_name,
++            position,
++            owner_object_id,
++            award.drops,
++            award.killed_at_ms,
++        );
++        let mut out = self.diff_all_zone_object_visibility();
++        out.extend(self.group_monster_kill_awards(&owner_session_id, award));
++        out
++    }
++}
++
++pub(super) fn apply_native_experience_impact(
++    monster: &mut ZoneNativeMonster,
++    impact: NativeExperienceImpact,
++    now_ms: u64,
++) {
++    if impact.clears_owner || impact.current_owner_mismatched {
++        monster.experience_owner = None;
++    }
++    if impact.clears_owner {
++        return;
++    }
++    if monster
++        .experience_owner
++        .as_ref()
++        .is_some_and(|o| now_ms > o.expires_at_ms)
++    {
++        monster.experience_owner = None;
++    }
++    let Some(new_owner) = impact.claimant else {
++        return;
++    };
++    if impact.force_owner || monster.experience_owner.is_none() || impact.current_owner_dead {
++        monster.experience_owner = Some(new_owner);
++    } else if monster.experience_owner.as_ref().is_some_and(|old| {
++        old.session_id == new_owner.session_id
++            && old.account_id == new_owner.account_id
++            && old.character_index == new_owner.character_index
++            && old.object_id == new_owner.object_id
++    }) {
++        monster.experience_owner.as_mut().unwrap().expires_at_ms = new_owner.expires_at_ms;
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use crate::config::WorldEntityDisposition;
++    use mir2_protocol::MirGender;
++
++    // Internal ownership-rule fixture only. It deliberately does not claim
++    // that generic AI6/58/113 target selection can choose a wild monster.
++    fn rule_fixture(source_ai: u8) -> ZoneRuntime {
++        let mut zone = ZoneRuntime::new(ZoneKey::for_map("ownership-rule-fixture"));
++        let sid = SessionId::new("owner");
++        zone.handle(ZoneCommand::Join(ZoneJoin {
++            session_id: sid.clone(),
++            account_id: "owner-account".into(),
++            character_index: 3,
++            object_id: 101,
++            name: "Owner".into(),
++            class: MirClass::Warrior,
++            gender: MirGender::Male,
++            level: 40,
++            hp: 100,
++            max_hp: 100,
++            mp: 100,
++            map_file_name: "ownership-rule-fixture".into(),
++            position: Point { x: 9, y: 10 },
++            direction: MirDirection::Right,
++            chat_profile: Default::default(),
++            combat_stats: Default::default(),
++        }));
++        for (id, ai, position) in [
++            (201, 3, Point { x: 10, y: 10 }),
++            (301, source_ai, Point { x: 11, y: 10 }),
++        ] {
++            zone.handle(ZoneCommand::SpawnMonster {
++                session_id: sid.clone(),
++                now_ms: 0,
++                monster: ZoneMonsterSpawn {
++                    crystal_drop_seed: None,
++                    object_id: id,
++                    name: "Skeleton".into(),
++                    name_colour_argb: -1,
++                    image: 3,
++                    ai,
++                    disposition: Some(WorldEntityDisposition::Hostile),
++                    level: 20,
++                    hp: 100,
++                    max_hp: 100,
++                    experience: 123,
++                    move_speed_ms: 100_000,
++                    attack_speed_ms: 100_000,
++                    friendly_guild: None,
++                    defense: Default::default(),
++                    respawn: None,
++                    position,
++                    direction: MirDirection::Left,
++                    drops: Vec::new(),
++                },
++            });
++        }
++        let hit = zone
++            .apply_native_monster_direct_damage(201, 20, Some(&sid), 100)
++            .unwrap();
++        assert_eq!(hit.0, 20);
++        assert!(zone.native_monsters[&201].experience_owner.is_some());
++        zone
++    }
++
++    fn assert_clearing_source_rule(ai: u8) {
++        let mut zone = rule_fixture(ai);
++        let result = zone
++            .apply_native_monster_damage_internal(
++                201,
++                80,
++                None,
++                200,
++                NativeMonsterDamageCause::Direct,
++                Some(NativeExperienceActor::Object {
++                    object_id: 301,
++                    force_owner: false,
++                }),
++            )
++            .unwrap();
++        assert_eq!(
++            result.0, 80,
++            "clearing credit cannot suppress actual HP damage"
++        );
++        assert!(result.2);
++        assert!(result.7.is_none());
++        assert!(zone.native_monsters[&201].experience_owner.is_none());
++    }
++
++    #[test]
++    fn source_ai6_clears_prior_exp_owner_rule() {
++        assert_clearing_source_rule(6);
++    }
++    #[test]
++    fn source_ai58_clears_prior_exp_owner_rule() {
++        assert_clearing_source_rule(58);
++    }
++    #[test]
++    fn source_ai113_clears_prior_exp_owner_rule() {
++        assert_clearing_source_rule(113);
++    }
++
++    #[test]
++    fn ordinary_unowned_source_retains_prior_exp_owner_rule() {
++        let mut zone = rule_fixture(0);
++        let result = zone
++            .apply_native_monster_damage_internal(
++                201,
++                80,
++                None,
++                200,
++                NativeMonsterDamageCause::Direct,
++                Some(NativeExperienceActor::Object {
++                    object_id: 301,
++                    force_owner: false,
++                }),
++            )
++            .unwrap();
++        assert_eq!(result.0, 80);
++        assert_eq!(result.7, Some(SessionId::new("owner")));
++    }
++
++    #[test]
++    fn zero_direct_damage_does_not_claim_but_periodic_poison_rule_claims_and_renews() {
++        let mut zone = rule_fixture(0);
++        let sid = SessionId::new("owner");
++        zone.native_monsters.get_mut(&201).unwrap().experience_owner = None;
++        let before = zone.native_monsters[&201].hp;
++        let direct = zone
++            .apply_native_monster_direct_damage(201, 0, Some(&sid), 200)
++            .unwrap();
++        assert_eq!(direct.0, 0);
++        assert!(zone.native_monsters[&201].experience_owner.is_none());
++        let poison = zone
++            .apply_native_monster_damage_internal(
++                201,
++                0,
++                Some(&sid),
++                200,
++                NativeMonsterDamageCause::Indirect,
++                Some(NativeExperienceActor::PeriodicPoison {
++                    owner_object_id: 101,
++                }),
++            )
++            .unwrap();
++        assert_eq!(poison.0, 0);
++        assert_eq!(zone.native_monsters[&201].hp, before);
++        assert_eq!(
++            zone.native_monsters[&201]
++                .experience_owner
++                .as_ref()
++                .unwrap()
++                .expires_at_ms,
++            5_200
++        );
++        zone.apply_native_monster_direct_damage(201, 0, Some(&sid), 5_000);
++        assert_eq!(
++            zone.native_monsters[&201]
++                .experience_owner
++                .as_ref()
++                .unwrap()
++                .expires_at_ms,
++            5_200
++        );
++        zone.apply_native_monster_damage_internal(
++            201,
++            0,
++            Some(&sid),
++            5_000,
++            NativeMonsterDamageCause::Indirect,
++            Some(NativeExperienceActor::PeriodicPoison {
++                owner_object_id: 101,
++            }),
++        );
++        assert_eq!(zone.native_monsters[&201].hp, before);
++        assert_eq!(
++            zone.native_monsters[&201]
++                .experience_owner
++                .as_ref()
++                .unwrap()
++                .expires_at_ms,
++            10_000
++        );
++        // This is an internal rule test, not evidence that current public
++        // player green-poison producers create a zero-valued tick.
++    }
++
++    #[test]
++    fn legacy_v4_forward_claim_and_forced_impact_are_neutralized() {
++        let mut zone = rule_fixture(0);
++        zone.pending_native_hits.push(PendingNativeMonsterHit {
++            ready_at_ms: 1_000,
++            session_id: SessionId::new("owner"),
++            attacker_object_id: 101,
++            object_id: 201,
++            damage: 20,
++            force_experience_owner: false,
++            fire_bounce: None,
++            soulfire_practice: None,
++            journey_event: None,
++        });
++        let root = zone.legacy_v4_canonical_state_root().unwrap();
++        let mut state: serde_json::Value =
++            serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++        state["version"] = serde_json::json!(4);
++        state["state_root"] = serde_json::json!(root);
++        state["native_monsters"]["201"]["experience_owner"]["expires_at_ms"] =
++            serde_json::json!(99_999);
++        state["pending_native_hits"][0]["force_experience_owner"] = serde_json::json!(true);
++        let restored =
++            ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&state).unwrap()).unwrap();
++        assert!(restored.native_monsters[&201].experience_owner.is_none());
++        assert!(!restored.pending_native_hits[0].force_experience_owner);
++        assert_eq!(restored.pending_native_hits[0].ready_at_ms, 1_000);
++        assert_eq!(restored.native_monsters[&201].hp, 80);
++        let reanchored: serde_json::Value =
++            serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
++        assert_eq!(reanchored["version"], 5);
++        assert!(reanchored["native_monsters"]["201"]
++            .get("experience_owner")
++            .is_none());
++    }
++}
+diff --git a/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs b/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/tests/shared_monster_ownership.rs
+@@ -0,0 +1,723 @@
++//! Ordinary same-map EXPOwner through public shared commands. Spawned HP,
++//! loot, and fallback attack scalars are deterministic server-side fixtures,
++//! not an authenticated network journey or human acceptance result.
++use mir2_protocol::{MirClass, MirDirection, MirGender, Point, ServerPacket, Spell};
++use mir2_simulation::{
++    GroundDropLootSnapshot, GroundDropSnapshot, SessionId, WorldEntityDisposition, ZoneCollision,
++    ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
++    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
++};
++use serde_json::{json, Value};
++
++const MONSTER: u32 = 90_101;
++const MAP: &str = "same-map-experience-owner-fixture";
++const EXP: u32 = 123;
++
++fn sid(name: &str) -> SessionId {
++    SessionId::new(name)
++}
++fn point(x: i32, y: i32) -> Point {
++    Point { x, y }
++}
++
++fn join(name: &str, id: u32, position: Point, class: MirClass) -> ZoneJoin {
++    ZoneJoin {
++        session_id: sid(name),
++        account_id: format!("{name}-account"),
++        character_index: 0,
++        object_id: id,
++        name: name.into(),
++        class,
++        gender: MirGender::Male,
++        level: 40,
++        hp: 100_000,
++        max_hp: 100_000,
++        mp: 100,
++        map_file_name: MAP.into(),
++        position,
++        direction: MirDirection::Right,
++        chat_profile: Default::default(),
++        combat_stats: Default::default(),
++    }
++}
++
++fn admit(zone: &mut ZoneRuntime, name: &str, class: MirClass) {
++    zone.handle(ZoneCommand::sync_player_combat_state(
++        sid(name),
++        class,
++        true,
++        false,
++        false,
++        false,
++        false,
++        false,
++    ));
++}
++
++fn empty_zone() -> ZoneRuntime {
++    let mut zone =
++        ZoneRuntime::new_with_collision(ZoneKey::for_map(MAP), ZoneCollision::unbounded());
++    for (name, id, position) in [("a", 101, point(9, 10)), ("b", 102, point(10, 11))] {
++        zone.handle(ZoneCommand::Join(join(
++            name,
++            id,
++            position,
++            MirClass::Warrior,
++        )));
++        admit(&mut zone, name, MirClass::Warrior);
++    }
++    zone
++}
++
++fn monster(hp: i32) -> ZoneMonsterSpawn {
++    ZoneMonsterSpawn {
++        crystal_drop_seed: None,
++        object_id: MONSTER,
++        name: "Skeleton".into(),
++        name_colour_argb: -1,
++        image: 3,
++        ai: 3,
++        disposition: Some(WorldEntityDisposition::Hostile),
++        level: 20,
++        hp,
++        max_hp: hp,
++        experience: EXP,
++        move_speed_ms: 100_000,
++        attack_speed_ms: 100_000,
++        friendly_guild: None,
++        defense: Default::default(),
++        respawn: None,
++        position: point(10, 10),
++        direction: MirDirection::Down,
++        drops: vec![GroundDropSnapshot {
++            object_id: 0,
++            name: "Gold".into(),
++            name_colour_argb: -1,
++            icon: 0,
++            x: 0,
++            y: 0,
++            quantity: 7,
++            source_monster: "Skeleton".into(),
++            owner_object_id: None,
++            ownership_remaining_ticks: Some(60),
++            loot: GroundDropLootSnapshot::Gold { amount: 7 },
++        }],
++    }
++}
++
++fn spawn(zone: &mut ZoneRuntime, spawn: ZoneMonsterSpawn, now_ms: u64) {
++    zone.handle(ZoneCommand::SpawnMonster {
++        session_id: sid("a"),
++        monster: spawn,
++        now_ms,
++    });
++}
++
++fn fixture(hp: i32) -> ZoneRuntime {
++    let mut zone = empty_zone();
++    spawn(&mut zone, monster(hp), 0);
++    zone
++}
++
++fn packets<'a>(out: &'a [ZoneOutbound], recipient: &str) -> Vec<&'a ServerPacket> {
++    let recipient = sid(recipient);
++    out.iter()
++        .flat_map(|o| match o {
++            ZoneOutbound::ToMany {
++                session_ids,
++                packets,
++            } if session_ids.contains(&recipient) => packets.iter(),
++            ZoneOutbound::ToSession {
++                session_id,
++                packets,
++            } if session_id == &recipient => packets.iter(),
++            ZoneOutbound::ToAll { packets } => packets.iter(),
++            _ => [].iter(),
++        })
++        .collect()
++}
++
++fn melee(zone: &mut ZoneRuntime, name: &str, damage: i32, at: u64) -> Vec<ZoneOutbound> {
++    let mut out = zone.handle(ZoneCommand::PlayerAttackObject {
++        session_id: sid(name),
++        object_id: MONSTER,
++        direction: if name == "a" {
++            MirDirection::Right
++        } else {
++            MirDirection::Up
++        },
++        spell: 0,
++        level: 0,
++        attack_type: 0,
++        damage,
++        now_ms: at,
++    });
++    out.extend(zone.tick(at));
++    out
++}
++
++fn cast(
++    zone: &mut ZoneRuntime,
++    name: &str,
++    spell: Spell,
++    damage: i32,
++    at: u64,
++) -> Vec<ZoneOutbound> {
++    let mut out = zone.handle(ZoneCommand::PlayerCastMagic {
++        session_id: sid(name),
++        object_id: MONSTER,
++        spell,
++        direction: MirDirection::Right,
++        target: point(10, 10),
++        cast: true,
++        level: 2,
++        damage,
++        mp_cost: 0,
++        cooldown_ms: 0,
++        now_ms: at,
++    });
++    out.extend(zone.tick(at));
++    out
++}
++
++fn damage(out: &[ZoneOutbound]) -> i32 {
++    packets(out, "b")
++        .into_iter()
++        .filter_map(|p| match p {
++            ServerPacket::DamageIndicator {
++                object_id, damage, ..
++            } if *object_id == MONSTER => Some(*damage),
++            _ => None,
++        })
++        .sum()
++}
++
++fn award<'a>(
++    out: &'a [ZoneOutbound],
++    expected: &str,
++    expected_owner: u32,
++) -> &'a ZoneMonsterKillAward {
++    let awards: Vec<_> = out
++        .iter()
++        .filter_map(|o| match o {
++            ZoneOutbound::MonsterKillAward { session_id, award } => Some((session_id, award)),
++            _ => None,
++        })
++        .collect();
++    assert_eq!(
++        awards.len(),
++        1,
++        "exactly one EXP/quest-credit award: {out:?}"
++    );
++    assert_eq!(
++        awards[0].0,
++        &sid(expected),
++        "EXPOwner must receive the kill, not the final actor"
++    );
++    let award = awards[0].1;
++    assert_eq!(award.monster_object_id, MONSTER);
++    assert_eq!(
++        award.monster_name, "Skeleton",
++        "quest credit preserves the actual target"
++    );
++    assert_eq!(award.experience, EXP);
++    assert_eq!(award.drops.len(), 1);
++    assert_eq!(award.drops[0].owner_object_id, Some(expected_owner));
++    assert_eq!(
++        award.drops[0].loot,
++        GroundDropLootSnapshot::Gold { amount: 7 }
++    );
++    assert_ne!(
++        award.drops[0].object_id, 0,
++        "actual shared ground identity is allocated"
++    );
++    assert!(packets(out, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectDied { info } if info.object_id == MONSTER)));
++    award
++}
++
++fn checkpoint_monster(zone: &ZoneRuntime) -> Value {
++    let value: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    value["native_monsters"][MONSTER.to_string()].clone()
++}
++
++fn taoist_poison(zone: &mut ZoneRuntime, at: u64) -> Vec<ZoneOutbound> {
++    let mut out = zone.handle(ZoneCommand::PlayerCastMagicWithItem {
++        session_id: sid("a"),
++        object_id: MONSTER,
++        spell: Spell::Poisoning,
++        direction: MirDirection::Right,
++        target: point(10, 10),
++        cast: true,
++        level: 2,
++        damage: 5,
++        mp_cost: 0,
++        cooldown_ms: 0,
++        item_param: 1,
++        now_ms: at,
++    });
++    out.extend(zone.tick(at));
++    out
++}
++
++fn taoist_fixture(hp: i32) -> ZoneRuntime {
++    let mut zone = empty_zone();
++    zone.handle(ZoneCommand::Leave {
++        session_id: sid("a"),
++    });
++    zone.handle(ZoneCommand::Join(join(
++        "a",
++        101,
++        point(9, 10),
++        MirClass::Taoist,
++    )));
++    admit(&mut zone, "a", MirClass::Taoist);
++    spawn(&mut zone, monster(hp), 0);
++    zone
++}
++
++#[test]
++fn first_effective_player_hit_retains_exp_quest_and_drop_credit_on_rival_kill() {
++    let mut zone = fixture(100);
++    assert_eq!(damage(&melee(&mut zone, "a", 20, 200)), 20);
++    let killed = melee(&mut zone, "b", 80, 800);
++    assert_eq!(damage(&killed), 80);
++    award(&killed, "a", 101);
++    assert_eq!(checkpoint_monster(&zone)["hp"], 0);
++    assert!(!zone
++        .tick(801)
++        .iter()
++        .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })));
++}
++
++#[test]
++fn exact_five_second_deadline_keeps_original_owner() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 20, 200);
++    let killed = melee(&mut zone, "b", 80, 5_200);
++    assert_eq!(damage(&killed), 80);
++    award(&killed, "a", 101);
++}
++
++#[test]
++fn strictly_after_five_seconds_next_effective_attacker_claims_owner() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 20, 200);
++    let killed = melee(&mut zone, "b", 80, 5_201);
++    award(&killed, "b", 102);
++}
++
++#[test]
++fn same_owner_effective_hit_renews_five_seconds() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 10, 200);
++    assert_eq!(damage(&melee(&mut zone, "a", 10, 4_800)), 10);
++    let killed = melee(&mut zone, "b", 80, 5_500);
++    award(&killed, "a", 101);
++}
++
++#[test]
++fn competing_damage_neither_claims_nor_renews_current_owner() {
++    let mut zone = fixture(100);
++    zone.handle(ZoneCommand::Join(join(
++        "c",
++        103,
++        point(11, 10),
++        MirClass::Warrior,
++    )));
++    admit(&mut zone, "c", MirClass::Warrior);
++    melee(&mut zone, "a", 10, 200);
++    melee(&mut zone, "b", 10, 4_800);
++    let killed = melee(&mut zone, "c", 80, 5_201);
++    award(&killed, "c", 103);
++}
++
++#[test]
++fn armour_rejected_direct_hit_never_claims_or_renews() {
++    let mut zone = empty_zone();
++    let mut target = monster(100);
++    target.defense = ZoneMonsterDefense {
++        min_ac: 50,
++        max_ac: 50,
++        ..Default::default()
++    };
++    spawn(&mut zone, target, 0);
++    for (name, dc) in [("a", 40), ("b", 150)] {
++        zone.handle(ZoneCommand::UpdatePlayerCombatStats {
++            session_id: sid(name),
++            stats: ZonePlayerCombatStats {
++                min_dc: dc,
++                max_dc: dc,
++                accuracy: 100,
++                ..Default::default()
++            },
++        });
++    }
++    assert_eq!(damage(&melee(&mut zone, "a", 40, 200)), 0);
++    assert_eq!(checkpoint_monster(&zone)["hp"], 100);
++    let killed = melee(&mut zone, "b", 150, 800);
++    assert_eq!(damage(&killed), 100);
++    award(&killed, "b", 102);
++}
++
++#[test]
++fn only_resolved_damage_claims_before_a_delayed_swing() {
++    let mut zone = fixture(100);
++    let launch = zone.handle(ZoneCommand::PlayerAttackObject {
++        session_id: sid("a"),
++        object_id: MONSTER,
++        direction: MirDirection::Right,
++        spell: Spell::TwinDrakeBlade as u8,
++        level: 0,
++        attack_type: 0,
++        damage: 100,
++        now_ms: 200,
++    });
++    assert_eq!(damage(&launch), 0);
++    let killed = melee(&mut zone, "b", 100, 400);
++    award(&killed, "b", 102);
++    assert!(!zone
++        .tick(500)
++        .iter()
++        .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })));
++}
++
++#[test]
++fn rival_periodic_poison_does_not_steal_living_melee_owner() {
++    let mut zone = taoist_fixture(23);
++    melee(&mut zone, "b", 20, 100);
++    assert_eq!(
++        damage(&taoist_poison(&mut zone, 200)),
++        0,
++        "casting poison alone does not claim EXP"
++    );
++    let killed = zone.tick(2_200);
++    assert_eq!(damage(&killed), 3);
++    award(&killed, "b", 102);
++}
++
++#[test]
++fn solo_dead_poison_owner_keeps_source_kill_credit() {
++    let mut zone = taoist_fixture(3);
++    taoist_poison(&mut zone, 200);
++    zone.handle(ZoneCommand::SyncPlayerVitals {
++        session_id: sid("a"),
++        hp: 0,
++        max_hp: 100_000,
++        mp: 100,
++    });
++    let killed = zone.tick(2_200);
++    assert_eq!(damage(&killed), 3);
++    assert_eq!(zone.player_vitals(&sid("a")).unwrap().0, 0);
++    award(&killed, "a", 101);
++}
++
++#[test]
++fn new_effective_attacker_replaces_dead_exp_owner() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 20, 200);
++    zone.handle(ZoneCommand::SyncPlayerVitals {
++        session_id: sid("a"),
++        hp: 0,
++        max_hp: 100_000,
++        mp: 100,
++    });
++    let killed = melee(&mut zone, "b", 80, 800);
++    award(&killed, "b", 102);
++}
++
++#[test]
++fn successful_turn_undead_forces_caster_ownership() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 20, 100);
++    zone.handle(ZoneCommand::Leave {
++        session_id: sid("b"),
++    });
++    zone.handle(ZoneCommand::Join(join(
++        "b",
++        102,
++        point(10, 11),
++        MirClass::Wizard,
++    )));
++    admit(&mut zone, "b", MirClass::Wizard);
++    let killed = cast(&mut zone, "b", Spell::TurnUndead, 1, 200);
++    assert_eq!(damage(&killed), 80);
++    award(&killed, "b", 102);
++}
++
++#[test]
++fn authenticated_checkpoint_retains_owner_without_extending_deadline() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 20, 200);
++    let bytes = zone.checkpoint_bytes().unwrap();
++    let mut restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
++    assert_eq!(
++        restored.canonical_state_root().unwrap(),
++        zone.canonical_state_root().unwrap()
++    );
++    award(&melee(&mut restored, "b", 80, 5_200), "a", 101);
++    let mut expired = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
++    award(&melee(&mut expired, "b", 80, 5_201), "b", 102);
++}
++
++#[test]
++fn checkpoint_exp_owner_tampering_cannot_bypass_root_authentication() {
++    let mut zone = fixture(100);
++    melee(&mut zone, "a", 20, 200);
++    let mut tampered: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    tampered["native_monsters"][MONSTER.to_string()]["experience_owner"] = json!({
++        "session_id": "b", "account_id": "b-account", "character_index": 0,
++        "object_id": 102, "expires_at_ms": 99_999,
++    });
++    assert!(
++        ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&tampered).unwrap()).is_err(),
++        "typed current-schema EXPOwner must be covered by canonical root"
++    );
++}
++
++#[test]
++fn fresh_same_map_join_revokes_old_claim_and_old_poison_identity() {
++    let mut zone = taoist_fixture(100);
++    melee(&mut zone, "a", 20, 100);
++    taoist_poison(&mut zone, 700);
++    zone.handle(ZoneCommand::Leave {
++        session_id: sid("a"),
++    });
++    let mut replacement = join("a", 101, point(9, 10), MirClass::Taoist);
++    replacement.account_id = "different-account".into();
++    replacement.character_index = 7;
++    zone.handle(ZoneCommand::Join(replacement));
++    admit(&mut zone, "a", MirClass::Taoist);
++    let state = checkpoint_monster(&zone);
++    assert!(
++        state.get("experience_owner").is_none(),
++        "fresh Join cannot inherit a former spawned owner"
++    );
++    assert_eq!(state["damage_poison_owner_object_id"], 0);
++    assert_eq!(state["damage_poison_value"], 0);
++    let killed = melee(&mut zone, "b", 80, 800);
++    award(&killed, "b", 102);
++    assert!(!zone
++        .tick(2_700)
++        .iter()
++        .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })));
++}
++
++#[test]
++fn fresh_monster_incarnation_does_not_inherit_previous_life_owner() {
++    let mut zone = fixture(100);
++    award(&melee(&mut zone, "a", 100, 200), "a", 101);
++    spawn(&mut zone, monster(100), 300);
++    let state = checkpoint_monster(&zone);
++    assert_eq!(state["hp"], 100);
++    assert!(state.get("experience_owner").is_none());
++    award(&melee(&mut zone, "b", 100, 400), "b", 102);
++}
++
++#[test]
++fn pending_turn_undead_force_owner_flag_is_authenticated() {
++    let mut zone = fixture(100);
++    zone.handle(ZoneCommand::PlayerAttackObject {
++        session_id: sid("a"),
++        object_id: MONSTER,
++        direction: MirDirection::Right,
++        spell: Spell::TwinDrakeBlade as u8,
++        level: 0,
++        attack_type: 0,
++        damage: 20,
++        now_ms: 200,
++    });
++    let mut state: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    assert!(!state["pending_native_hits"].as_array().unwrap().is_empty());
++    state["pending_native_hits"][0]["force_experience_owner"] = json!(true);
++    assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&state).unwrap()).is_err());
++}
++
++fn summoned_fixture(hp: i32) -> (ZoneRuntime, u32) {
++    let mut zone = empty_zone();
++    zone.handle(ZoneCommand::Leave {
++        session_id: sid("a"),
++    });
++    zone.handle(ZoneCommand::Join(join(
++        "a",
++        101,
++        point(8, 10),
++        MirClass::Taoist,
++    )));
++    admit(&mut zone, "a", MirClass::Taoist);
++    zone.handle(ZoneCommand::PlayerCastMagic {
++        session_id: sid("a"),
++        object_id: 0,
++        spell: Spell::SummonSkeleton,
++        direction: MirDirection::Right,
++        target: point(9, 10),
++        cast: true,
++        level: 2,
++        damage: 0,
++        mp_cost: 0,
++        cooldown_ms: 0,
++        now_ms: 100,
++    });
++    let spawned = zone.tick(600);
++    let pet = packets(&spawned, "a")
++        .into_iter()
++        .find_map(|p| match p {
++            ServerPacket::ObjectMonster { info }
++                if info.master_object_id == 101 && info.name == "BoneFamiliar" =>
++            {
++                Some(info.object_id)
++            }
++            _ => None,
++        })
++        .expect("real delayed owned summon must spawn");
++    spawn(&mut zone, monster(hp), 700);
++    (zone, pet)
++}
++
++#[test]
++fn owned_summon_first_hit_keeps_master_credit_and_actual_pet_attacker_id() {
++    let (mut zone, pet) = summoned_fixture(40);
++    zone.tick(1_200);
++    let hit = zone.tick(1_800);
++    assert!(damage(&hit) > 0);
++    assert!(packets(&hit, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectStruck { info } if info.object_id == MONSTER && info.attacker_id == pet)));
++    let killed = melee(&mut zone, "b", 100, 2_000);
++    award(&killed, "a", 101);
++}
++
++#[test]
++fn pet_with_master_sixteen_tiles_away_cannot_steal_rival_claim() {
++    let (mut zone, pet) = summoned_fixture(21);
++    melee(&mut zone, "b", 20, 800);
++    zone.tick(1_200);
++    zone.handle(ZoneCommand::SyncPlayerTransform {
++        session_id: sid("a"),
++        position: point(-7, 10),
++        direction: MirDirection::Right,
++    });
++    let killed = zone.tick(1_800);
++    assert_eq!(damage(&killed), 1);
++    assert!(packets(&killed, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectStruck { info } if info.object_id == MONSTER && info.attacker_id == pet)));
++    award(&killed, "b", 102);
++}
++
++#[test]
++fn pet_outside_sixteen_tile_master_range_clears_credit_without_losing_damage() {
++    let (mut zone, pet) = summoned_fixture(21);
++    melee(&mut zone, "b", 20, 800);
++    zone.tick(1_200);
++    zone.handle(ZoneCommand::SyncPlayerTransform {
++        session_id: sid("a"),
++        position: point(-8, 10),
++        direction: MirDirection::Right,
++    });
++    let killed = zone.tick(1_800);
++    assert_eq!(damage(&killed), 1);
++    assert!(packets(&killed, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectStruck { info } if info.object_id == MONSTER && info.attacker_id == pet)));
++    assert!(
++        !killed
++            .iter()
++            .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })),
++        "out-of-range pet clears EXPOwner rather than falling back to its master"
++    );
++    assert!(checkpoint_monster(&zone)["dead"].as_bool().unwrap());
++    let cp: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    assert!(
++        cp["ground_drops"].as_object().unwrap().is_empty(),
++        "no owner means no loot"
++    );
++}
++
++#[test]
++fn map_quake_lethal_damage_preserves_an_existing_player_claim() {
++    let mut zone = empty_zone();
++    for (name, position) in [("a", point(40, 41)), ("b", point(42, 42))] {
++        zone.handle(ZoneCommand::SyncPlayerTransform {
++            session_id: sid(name),
++            position,
++            direction: MirDirection::Right,
++        });
++    }
++    let mut lord = monster(100_000);
++    lord.object_id = 90_198;
++    lord.name = "Guard".into(); // Explicit nonzero DC/MC=255, not balance evidence.
++    lord.ai = 98;
++    lord.image = 902;
++    lord.position = point(40, 40);
++    lord.drops.clear();
++    assert!(zone.spawn_world_event_monster(&lord, 0).0);
++    zone.tick(1);
++    let state: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    let quake = state["hell_world"]["quakes"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|q| {
++            q["value"].as_i64().unwrap() > 0
++                && q["start"].as_u64().unwrap() > 200
++                && q["position"] != json!(point(40, 40))
++                && q["position"] != json!(point(40, 41))
++        })
++        .expect("real AI98 generates a delayed, nonzero environmental quake");
++    let position: Point = serde_json::from_value(quake["position"].clone()).unwrap();
++    let start = quake["start"].as_u64().unwrap();
++    assert!(
++        start <= 5_200,
++        "the claim remains within its five-second window"
++    );
++    zone.despawn_world_event_monster(lord.object_id, 2);
++    for (name, position) in [
++        ("a", point(position.x - 1, position.y)),
++        ("b", point(position.x, position.y + 1)),
++    ] {
++        zone.handle(ZoneCommand::SyncPlayerTransform {
++            session_id: sid(name),
++            position,
++            direction: MirDirection::Right,
++        });
++    }
++    let mut victim = monster(21);
++    victim.position = position;
++    spawn(&mut zone, victim, 3);
++    assert_eq!(damage(&melee(&mut zone, "a", 20, 200)), 20);
++    let killed = zone.tick(start);
++    assert_eq!(damage(&killed), 1);
++    assert!(
++        packets(&killed, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectStruck { info } if info.object_id == MONSTER && info.attacker_id == 0))
++    );
++    award(&killed, "a", 101);
++    assert!(!zone
++        .tick(start + 500)
++        .iter()
++        .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })));
++}
++
++#[test]
++fn wild_lethal_hit_on_real_master_pet_never_becomes_a_wild_kill_reward() {
++    let (mut zone, pet) = summoned_fixture(21);
++    zone.despawn_world_event_monster(MONSTER, 701);
++    let mut source = monster(100_000);
++    source.object_id = 90_199;
++    source.name = "ArcherGuard".into(); // Fixed nonzero DC255 kills the real pet.
++    source.image = 139;
++    source.ai = 0;
++    source.move_speed_ms = 300;
++    source.attack_speed_ms = 2_000;
++    assert!(zone.spawn_world_event_monster(&source, 702).0);
++    let launch = zone.tick(800);
++    assert!(packets(&launch, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectAttack { info } if info.object_id == source.object_id)));
++    let killed = zone.tick(1_100);
++    assert!(packets(&killed, "b").iter().any(|p| matches!(p,
++        ServerPacket::ObjectDied { info } if info.object_id == pet)));
++    assert!(!killed
++        .iter()
++        .any(|o| matches!(o, ZoneOutbound::MonsterKillAward { .. })));
++    let state: Value = serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
++    assert!(state["ground_drops"].as_object().unwrap().is_empty());
++    assert_eq!(zone.player_vitals(&sid("a")).unwrap().0, 100_000);
++}
+diff --git a/mir2-web3/docs/CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md b/mir2-web3/docs/CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/docs/CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md
+@@ -0,0 +1,138 @@
++# 经典经验和掉落归属：第一轮同图实现 — 2026-10-04
++
++本轮基于 R17 游戏逻辑 `6032ef8b3e27dd97bad0b20c8676ef9f185db64b`，
++实现工作基线为 `3e1f9167097ff239faeffdde809a17b2c0009b6c`。结果仅支持
++**普通怪同图归属的部分 Candidate**，不是阶段 3 全部完成，也不是真人 Accepted。
++没有发布、修改现有服务器、玩家存档或 F 盘安装；日常约 5 级、周常约 10 级的
++用户自定义奖励和现有奖励倍率/持久化合同保持原实现。
++
++## 原版规则与本轮行为
++
++来源为本地 Crystal 源码，路径相对于 `E:/mir2/Crystal`。完整冻结源码节选、
++SHA-256 和原分析保存在
++`C:/mir2-playtest-releases/20261004-native-r17/exp-drop-audit`。
++
++| 原版来源 | 本轮行为 |
++| --- | --- |
++| `Server/MirObjects/MonsterObject.cs:602,2573–2633` | 普通玩家经防御/命中判定后实际造成正伤害，才认领空归属或替换死亡归属；本人后续有效伤害延长 5 秒，竞争者伤害不抢占、不延期。 |
++| `Server/MirObjects/MapObject.cs:204–225` | 在 `now > expires_at` 时过期；恰好 5,000 ms 仍保留原归属。 |
++| `MonsterObject.cs:2686–2737`、`Shared/Globals.cs:37` | 区分真正攻击物体和奖励主人。宝宝与主人同图、矩形距离不超过 16 格时归主人；超出范围清空已有归属，但真实 HP 伤害照常发生。源 AI6/58/113 清空规则有私有仲裁单测。 |
++| `MonsterObject.cs:1495–1509` | 周期毒在伤害结算时认领/延期，施毒动作本身不认领；允许仍在场的死亡毒主人。可信周期毒仲裁保留零值例外，普通直接零伤害不认领。零值毒全链仍有单独限制，见下文。 |
++| `Server/MirObjects/HumanObject.cs:6211–6219` | 成功 TurnUndead 仅在有效 impact 强制归属，未生效 cast 不抢占。 |
++| `MonsterObject.cs:966–1002` | 普通死亡采用保留归属发经验、击杀任务信息和掉落；真正有 Master 的召唤物死亡无野怪经验/掉落。仍在场的死亡单人主人可得到 Zone 奖励；到账/升级复活风险尚待端到端验证。 |
++
++攻击 `ObjectStruck.attacker_id` 保留真正玩家/宝宝 ID，不替换成奖励主人。
++真实 AI98 产生的地图震动以 `attacker_id = 0` 击杀已经被玩家命中的怪物，
++也会采用该怪物保留的归属，不凭环境或目标 ID 构造新奖励主人。
++
++本轮没有改现有 Boss 贡献分配或特殊 AI 奖励 tracker。这里的保留是实现范围
++决定，**不表示用户已明确认可该 Boss 策略，也不表示原版 generic Boss 归属已闭合**。
++经典 WoomaTaurus/ZumaTaurus 的 Crystal 通用死亡沿用 EXPOwner；与当前贡献策略
++的差异仍是独立来源一致性 Gate。
++
++## 代码范围
++
++- `apps/simulation/src/runtime/zone/types.rs`：增加可缺省的怪物归属，记录可信
++  session/account/character/player object 与绝对截止时间；新怪构造为 `None`。
++- `apps/simulation/src/runtime/zone/runtime/experience_ownership.rs`：同图认领、
++  更新、过期、身份核对、Master 距离和死亡奖励消费；私有仲裁/旧 v4 注入测试。
++- `apps/simulation/src/runtime/zone/runtime.rs`：仅有效伤害、周期毒和成功
++  TurnUndead 的接线、tick 过期、fresh Join 撤销、死亡单人奖励和默认 hit 字段。
++- `apps/simulation/src/runtime/zone/runtime/checkpoint.rs`：Zone schema/root v5；
++  v1–v4 归属与 forced-impact 注入默认中性化，保留旧 v4 已认证的其他世界状态。
++- `apps/simulation/src/runtime/zone/runtime/entity_combat.rs`：仅普通 Attacked
++  传递真实 source/cause、环境 Struck 保留旧归属、死亡结果消费；没有改目标选择/PK。
++- `apps/simulation/src/runtime/zone/runtime/vampire_ai.rs`、`thunder_ai.rs`：真实
++  宠物 actor 接线及移除致死攻击者回退，采用结算返回的实际归属。
++- 编译 companion：`shinsu_ai.rs`、`pet_special_ai.rs` 各 1 行，
++  `journey_events.rs` 3 行，共 5 个已有 hit literal 仅补
++  `force_experience_owner: false`；无额外行为改动。
++- `apps/simulation/tests/shared_monster_ownership.rs`：公开 Zone 命令回归。
++  HP、固定伤害和 EXP123/Gold7 是可信服务端 fixture，不是普通网络生成或真人验收。
++
++## 身份、生命周期和存档边界
++
++本轮不把 `life_generation` 当作登录/生成身份。它用于战斗死亡/复活屏障，
++死亡同一物体仍可能合法获得毒杀经验。归属检查使用 account、character、
++session 与 player object；同图 **fresh Join 会撤销旧归属和旧玩家毒来源**，
++避免相同 ID 被新角色继承。新怪 incarnation 的构造不继承上一生命的归属。
++
++这只是同图 fresh Join 的身份安全边界，**尚未完成正常换图后返回和离线生命周期**。
++Crystal `MapObject.Teleport:780–800` 保留 global Node，而 `Despawn:266,405`
++移除 Node；当前 manager 的 Leave 同时服务两种情况。本轮不在 Leave 无条件清空，
++但旧 Zone 不能为已经转移到另一 Zone 的主人发奖励/读取其当前组队信息；离线引用
++也尚无全世界撤销。后续必须由单写 manager 区分 teleport 与真正 logout/despawn，
++保留正常在线生成身份并对所有 Zone 完成撤销和跨图奖励路由。
++
++同一在线 epoch 的真实 checkpoint 保留原绝对截止时间，不重置 5 秒。当前 v5
++canonical root 覆盖归属、截止时间和成功 TurnUndead flag；改字段而不匹配 root
++会拒绝。旧 v1–v4 的未知 forward 字段在旧 root 核对前清空；不会据此认领奖励。
++旧 v4 的 respawn、实体战斗和其他已认证字段继续恢复。升级后导出 v5；旧 R17
++二进制不能读取 v5，今后发布/回滚必须保留升级前的相配世界 checkpoint，不能
++把新版本世界文件直接交给旧二进制。这一轮没有实际执行升级或回滚。
++
++## 零值毒与死亡角色到账限制
++
++普通玩家当前绿毒赋值都至少为 1：Taoist 的 `damage/15 + level+1`、PoisonShot、
++CrippleShot 和 PoisonCloud 都有下限。既有 `tick_native_monster_damage_poison`
++显式跳过 `value <= 0`；实体毒允许 value0 的入口也仍在 tick 时只结算正值。
++本轮只让可信 `PeriodicPoison` 仲裁保留“零值可认领/延期”的原规则，并做私有
++规则测试；**没有实现或验收零值绿毒/实体毒全链**，也没有新增公共测试 API。
++
++只读消费链核对：`runtime/drops.rs` 的共享杀怪事务、`shared_kill_experience.rs`、
++`prepared_kill_experience.rs` 和 Gateway 奖励队列未再次按 alive 拒绝，而是检查
++在场/活动身份和 durable receipt。此分析不是死亡角色实际经验到账的证据。
++`runtime/leveling.rs` 升级会恢复 HP/MP，Gateway 收到 LevelChanged 会同步 vitals，
++所以 **死亡角色收到经验是否导致意外复活仍须 personal/Gateway 端到端 Gate**。
++现有活人升级用例通过不能替代这一检查。
++
++## 红绿证据
++
++所有测试使用 Rust1.95.0、`CARGO_BUILD_JOBS=2`，显式复用
++`C:/mir2-build/gateway-tests-r49`。完整 stdout/stderr 留在 `C:/mir2-build`。
++
++| 日志 | 真实结果及范围 |
++| --- | --- |
++| `shared-monster-ownership-red-01-20261004.log` | 16 项，5 通过/11 失败；其中 1 条防御 fixture 使用已结算 fallback scalar，不能用来证明护甲拒绝，保留记录。 |
++| `shared-monster-ownership-red-02-20261004.log` | 修正该 fixture 用权威 DC/AC 后 6 通过/10 个真正归属失败：首击、5 秒边界/延期、毒杀/死亡单人、宝宝距离和存档认证。生产接线尚未改动。 |
++| `shared-monster-ownership-environment-red-03-20261004.log` | 公开真实 AI98 地图震动致死，伤害1/ObjectDied 已发生却丢弃已有归属，0 个 kill award；1 失败。此时仅新类型/未接线模块，伤害行为仍旧。 |
++| `shared-monster-ownership-master-baseline-04-20261004.log` | 真 Master 宠物死亡无奖励的旧保护，1/1 通过。 |
++| `shared-monster-ownership-green-01-20261004.log` | 公开同图 21/21 通过；断言实际伤害、真正攻击物体、奖励 recipient/EXP/任务怪 identity、掉落 owner/物品 identity、checkpoint/新怪/Join 边界。 |
++| `shared-monster-ownership-private-green-02-20261004.log` | 最初 5/5 私有规则/旧 v4 forward 注入。AI6/58/113 是内部规则 fixture，不是普通实体目标选择验收。 |
++| `shared-monster-ownership-current-return-07-20261004.log` | 回到当前工作区重新编译；6/6 私有仲裁通过，包括 direct0 与可信 periodic0 区分。该全局过滤令公开 target 0 执行，不能算公开回归通过。 |
++| `shared-monster-ownership-final-green-08-20261004.log` | 最终当前代码公开回归 21/21；并未把先前过滤的 0 项执行当作验收。 |
++| `shared-monster-ownership-checkpoint-adjacent-03-20261004.log` | 15/15 既有 v1–v3、ground claim authority、module reanchor、当前 checkpoint/世界事件检查。 |
++| `shared-monster-ownership-adjacent-summon-ai-04-20261004.log` | 实体4/4；Hell16通过/1失败；Cargo 在失败后未执行剩余 target。 |
++| `shared-monster-ownership-hell-r17-baseline-06-20261004.log` | 冻结原 R17 checkout 的 exact Hell 净化失败对照，1 项同样失败在同一断言，未改旧 fixture/runtime。 |
++| `shared-monster-ownership-adjacent-summon-ai-05-20261004.log` | 剩余 11 个宝宝/特殊 AI target 合计 92/92 通过，保留原 tracker/死亡/延迟/存档保护。 |
++| `shared-monster-ownership-lib-*-20261004.log` | group/Boss5、真实宝宝 DC1、技能练习9、实体25、奖励倍率2，各组全通过；只证明原分配行为未变。 |
++| `shared-monster-ownership-shared-zone-*-20261004.log` | 既有 poison8、summon9，各组全通过。 |
++| `shared-monster-ownership-gateway-*-20261004.log` | 活人 kill award3、world checkpoint4、真实 drop AOI/pickup2、durable kill source failure/replay2，各组全通过；不是死亡角色实际到账/复活 Gate。 |
++
++冻结基线目录为
++`C:/Users/Administrator/.codex/worktrees/r17/mir2-player-journey/mir2-web3`，
++HEAD 确认为 `6032ef8b3e27dd97bad0b20c8676ef9f185db64b`。唯一 Hell 失败用例
++`purification_then_same_bit_reapplication_starts_a_fresh_counted_lease` 在旧/新都未
++得到预期清毒包；Join 仍是 Warrior，却只把 combat_state 切 Taoist，并在受击
++后 1ms 施放净化。这里保留实际失败并作基线对照，不擅改职业/cast/状态逻辑来
++获得全绿，也不宣称已修好这个独立 fixture/资格问题。
++
++最终精确命令、每个 target/filter 的实际执行数、日志 SHA-256、授权文件 SHA-256
++和完整 diff 保存在外部 `exp-drop-audit/implementation-01`，不覆盖冻结旧证据。
++
++## 后续 Gate
++
++1. 单写 manager 的 online spawned identity、转图/返回、真正 logout/despawn
++   撤销和跨图正常奖励投递；checkpoint/重启不能恢复已经离线的引用。
++2. 原版 ground Owner 的 60,000ms、strict `>` 和实际 despawn 释放；当前生成
++   `60 * 300ms = 18,000ms` 未改，EXP 的 5 秒与地面保护不能合并。
++3. 原版组队的等级权重、16 格、奖励倍率/截断、跨图和死亡成员差异；现有同图
++   等额公式未改。generic Boss 与贡献策略需独立决策/来源一致性 Gate。
++4. 原版 PK LastHitter、宝宝 PvP 和额外 species 路径仍按独立阶段推进，不能从
++   怪物 EXPOwner 推断已经完整实现。
++5. 死亡单人 poison kill 的 personal/Gateway 实际经验到账、保存/reload、重复
++   投递、失败重试与不意外复活；普通两账号 TCP/WSS 和原生客户端可见掉落/
++   技能归属验收。没有使用真人存档或正常客户端 QA/调试指令代替这条链。
++
++root 负责本轮整合、全局 ledger 与后续独立 Gate；本 worker 在限定验证和证据
++交付后停止编辑，不开始 manager/drop/party 或发布下一轮。

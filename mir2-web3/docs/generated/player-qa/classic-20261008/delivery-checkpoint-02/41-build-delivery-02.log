@@ -1,0 +1,29 @@
+{"stage": "bundle", "index": 0, "files": 1667, "bytes": 60714247}
+{"stage": "bundle", "index": 1, "files": 238, "bytes": 66861961}
+{"stage": "bundle", "index": 2, "files": 254, "bytes": 66910012}
+{"stage": "bundle", "index": 3, "files": 7065, "bytes": 46880707}
+{"stage": "bundle", "index": 4, "files": 13836, "bytes": 65556826}
+{"stage": "bundle", "index": 5, "files": 13470, "bytes": 65601792}
+{"stage": "bundle", "index": 6, "files": 13356, "bytes": 65610644}
+{"stage": "bundle", "index": 7, "files": 10181, "bytes": 63793866}
+{"stage": "bundle", "index": 8, "files": 27528, "bytes": 55867942}
+{"stage": "bundle", "index": 9, "files": 24449, "bytes": 55155805}
+{"stage": "bundle", "index": 10, "files": 14328, "bytes": 60049370}
+{"stage": "bundle", "index": 11, "files": 16373, "bytes": 59737743}
+{"stage": "bundle", "index": 12, "files": 11222, "bytes": 60066659}
+{"stage": "bundle", "index": 13, "files": 611, "bytes": 12699904}
+{"stage": "bundle", "index": 14, "files": 1, "bytes": 36343140}
+{"stage": "delta", "baseSha256": "E227A68C10042E6F7D7264B2F91A8F252A1B73D5AAD4FB6FA92FAD3E11D04FCB", "bytes": 25720210, "operationCount": 19, "copyBytes": 23918306, "literalBytes": 87357214}
+{
+  "schema": "mir2.windows.delivery-build.v1",
+  "passed": true,
+  "cmsVerified": false,
+  "candidate": "WN-CANDIDATE-20261008-invited-22",
+  "gameSourceRevision": "7fea5cdba8cd160d4f2c5536f14fb7ce98c6bfbc",
+  "manifestSha256": "00967A994D9586C574CA89D5EA4046B25F0A79C346D63FE76F261C0C23735916",
+  "deliverySha256": "D8588A95AAA384B4FB5CC3E27F3F4B7648CDD39616FC81C699F2FC865AF56F4F",
+  "payloadFiles": 154579,
+  "payloadBytes": 986493911,
+  "compressedBundleBytes": 841850618,
+  "elapsedSeconds": 193.938
+}

@@ -16,8 +16,15 @@ pub const CRYSTAL_DEFAULT_FONT_FAMILY: &str = "Arial";
 pub const CRYSTAL_DEFAULT_FONT_SIZE_PX: f32 = 8.0 * 96.0 / 72.0;
 
 pub fn crystal_text_font(font_size_px: f32) -> TextFont {
+    let family = CRYSTAL_DEFAULT_FONT_FAMILY;
+    #[cfg(feature = "native-ui")]
+    let family = if crate::native_i18n::active() {
+        crate::native_i18n::locale().font_family()
+    } else {
+        family
+    };
     TextFont {
-        font: FontSource::Family(CRYSTAL_DEFAULT_FONT_FAMILY.into()),
+        font: FontSource::Family(family.into()),
         font_size: FontSize::Px(font_size_px),
         ..Default::default()
     }

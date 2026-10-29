@@ -686,6 +686,7 @@ function OriginalClientSceneOverlaysInner({
   registerEntityEl: RegisterEntityElement;
   chatBubbles: SceneChatBubble[];
   damageFloaters: DisplayDamageFloater[];
+  hpView?: boolean;
   targetActionLabel: string | null;
   entityKindClassName: (kind: EntityKind) => string;
   viewportLayout?: ViewportLayout;

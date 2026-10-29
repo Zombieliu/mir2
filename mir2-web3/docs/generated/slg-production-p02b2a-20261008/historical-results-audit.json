@@ -1,0 +1,32 @@
+{
+  "schema": "mir2.production-grants-history.v1",
+  "actualHistoricalRuns": 2,
+  "runs": [
+    {
+      "run": "grant-tests-01",
+      "exitCode": 101,
+      "actualPassed": 0,
+      "actualFailed": 0,
+      "includedInFinalTotal": false,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "note": "Four ItemGrade root-path compile errors, zero executed tests; product enum path corrected"
+    },
+    {
+      "run": "grant-tests-02",
+      "exitCode": 101,
+      "actualPassed": 4,
+      "actualFailed": 4,
+      "includedInFinalTotal": false,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "note": "New fixture used a nonexistent potion name; five literals corrected to original (HP)DrugSmall, all assertions unchanged"
+    }
+  ],
+  "serialPreflightOrWaitCount": 2,
+  "serialPreflightCargoStarted": false,
+  "serialPreflightTests": 0,
+  "serialPreflightNonces": 0
+}

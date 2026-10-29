@@ -1,0 +1,38 @@
+{
+  "owner": "Root",
+  "kind": "Source32 Rust02 ABI new differential failure retained",
+  "source": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-rust02-snapshot.json",
+    "bytes": 271973,
+    "sha256": "953259c3f3f7068eef96fc81e7653afc1785e521176b1710879a45d475075b43"
+  },
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-abi-test01.config.json",
+    "bytes": 4163,
+    "sha256": "0bf27552259120f19aac9396e3ed5676d08bdd4da00ecfa0109e839e629f7a31"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-abi-test01.outer.json",
+    "bytes": 451,
+    "sha256": "8b0f87c5ebb1cad00e09ac2284eadf85cd2c9daaa4ddc9ae37a0d083e653782d"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-abi-test01.stdout.log",
+    "bytes": 2913,
+    "sha256": "b7fb3bcc9283a280c2e3544ff3067e7959266cbccf2df0d32cabd5bf4b9c2057"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-web-bundle-source32-abi-test01.stderr.log",
+    "bytes": 465,
+    "sha256": "c7cef555082aec3d58b33e71cdbe011e56b35aa1b8138022fca720c9dbdad28d"
+  },
+  "actualPassed": 14,
+  "actualFailed": 1,
+  "actualIgnored": 0,
+  "actualRegistered": 15,
+  "failedTest": "npc_purchase_receipt::tests::compact_request_nested_numeric_proofs_and_enum_spellings_match_existing_serde",
+  "reason": "Legacy tagged Serde Content unit enum singleton map accepts emptyObject payload as unit, alongside Null. Compact standalone helper rejected emptyObject. Preserve context-specific exact null/emptyObject behavior; no arbitrary payload, no assertion weakening.",
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

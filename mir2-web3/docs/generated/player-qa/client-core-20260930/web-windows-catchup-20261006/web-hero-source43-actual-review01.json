@@ -1,0 +1,92 @@
+{
+  "owner": "Root",
+  "ownedSourcePins": [
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\lib.rs",
+      "bytes": 4945,
+      "sha256": "a9b655974e1cbeb1ff2098f5c5363fa6861bdf1ba697ba94e3e14d6207b7dd88"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\portable_hero_ui.rs",
+      "bytes": 46962,
+      "sha256": "9c9aae3b071920ed91fad713e7555309a3d3abbe44204b942bfc1aa4a0b8b063"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hero_action_basis.rs",
+      "bytes": 30883,
+      "sha256": "a7935d5bf3bf0e5781a5527cb43b0e19d7ea24fe111cb0a3d730a168f43f7496"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\runtime\\src\\hero_ui_host.rs",
+      "bytes": 88469,
+      "sha256": "32a9facb6b74ed83ff3eddd3c29dcf14259dcb31a758429504ff2593042b1919"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\app\\page.tsx",
+      "bytes": 1051801,
+      "sha256": "e13b4a5368bc339459c02f7765b06711ab1371d5f684112de5f662db141b53dc"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\bevy-hero-ui.ts",
+      "bytes": 25050,
+      "sha256": "1b4c3ed35081ea49feea043ff23de23e18def7c5d3c42ae1d660370d0311e084"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\hero-player-ui.ts",
+      "bytes": 55255,
+      "sha256": "f348516026b6aad3cca7e4df2d01afe61aa03a37ec9e804222d643c2b7f3ae1d"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-stage5-adapters.mjs",
+      "bytes": 682017,
+      "sha256": "ee49b59b5817cbf904d7ce447bfa1a2db98b627e10ed62808bc1473a8c094f70"
+    },
+    {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\game-client\\client-bevy\\src\\hero_source_witness.rs",
+      "bytes": 21916,
+      "sha256": "fb741169f6a3d6b43a0769105b89dbd0c76b146e5a7e358b9cc3d9837cd01f91"
+    }
+  ],
+  "rustSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source43-rust05-snapshot.json",
+    "bytes": 1080512,
+    "sha256": "14ca690347c899ed8dcc28e72f23b852c3f1c0bba114719ac45985d9c979a2ba"
+  },
+  "webSnapshot": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source43-web02-snapshot.json",
+    "bytes": 5973828,
+    "sha256": "7a6eb789f26b18d2c4846e48f2330839320c1cc705515c5286d74c6b6614c3e6"
+  },
+  "reviewers": [
+    {
+      "agent": "/root/audit_transport_state",
+      "scope": "Source43 frozen owned implementation and exact876B golden read-only accepted; Source44 real Page/Shell takeover audit remains open."
+    },
+    {
+      "agent": "/root/source30_native_client",
+      "scope": "All181 prior Host assertion expressions retained; two genuine fixture/reset issues corrected. Selected client closure excludes simulation. Source44 prepared/visibility/capturesEscape/strict input-queue transition fixes still required."
+    },
+    {
+      "agent": "/root/source30_native_bundle",
+      "scope": "Original immutable tools/templates/argv/gates and exact source/config/review/authority references reviewed. Generation05 retains914+3 actual JSON includes=917; byte-identical original PNG/JSON assets, no test/code weakening. Only finite client scope accepted; not complete server workspace or whole-primary/Web package."
+    },
+    {
+      "agent": "/root",
+      "scope": "Actual original final five Guard calls each C/Freshness/PolicyB closed serially, all917 copied/reference inputs and9 primary owned pins match after calls. Actual primary Web/TSC generation02 interval records retained and clearly separate."
+    }
+  ],
+  "actualRustExecutions": 111,
+  "normalizedRustFunctions": 98,
+  "newRustFunctions": 13,
+  "actualWebTap": 184,
+  "stage5LogicalGroups": 477,
+  "newStage5Groups": 11,
+  "strictTscVersion": "5.9.3",
+  "sourceScopeQualified": true,
+  "wholePrimaryRepositoryAccepted": false,
+  "wasmApiUsed": false,
+  "actualApiReadyVerified": false,
+  "uiOperated": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

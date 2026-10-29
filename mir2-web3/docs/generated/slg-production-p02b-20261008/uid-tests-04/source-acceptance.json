@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "630e490bda5d6660f916ee6a795a8e8300d4190080fafee46e3a82db8f1bfb15"
+  },
+  "independentSourceReview": {
+    "sha256": "cee5454bbd80e602b0243eedee6fb7a9fd831428cf85446b1cd9057a744fed53",
+    "path": "E:\\mir2-player-journey\\work\\slg-production-p02b-20261008\\independent-source-review-04.json"
+  },
+  "scope": "Controlled File UID binding and actual staged NPC/split/production paths; remaining issuers, Postgres, live gateway, UI and installers are not accepted."
+}

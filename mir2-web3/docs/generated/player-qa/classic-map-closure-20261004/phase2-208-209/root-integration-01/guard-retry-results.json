@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:\\Users\\Administrator\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\native\\powershell\\pwsh.EXE",
+    "-NoProfile",
+    "-File",
+    "apps/game-client/platform-windows/scripts/test-candidate-map-scope.ps1"
+  ],
+  "exitCode": 0,
+  "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\guard-04-pwsh.log",
+  "bytes": 407,
+  "sha256": "3ac390a642e1fcf80a1fc16ae8578171116379c96c1bf6906aa436169a7ac1d1",
+  "reason": "The inherited runtime modules belong to pwsh; Windows PowerShell child could not import Get-FileHash. Same source test, no guard changes."
+}

@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-10-01T12:09:04.0842882+08:00",
+  "sourceCommit": "b39cf9b38a9c8d4ac0a8160f70e128aee89c3120",
+  "gatewayExe": "C:/mir2-build/gateway-tests-r49/debug/mir2-gateway.exe",
+  "gatewaySha256": "3206AB38B82ED92C3C0E377B297DA776C5BE614AFE79D536144342D952E9671B",
+  "classes": [
+    "Wizard",
+    "Taoist"
+  ],
+  "scope": "fresh normal local WebSocket newcomer-v2 journeys",
+  "humanStoreTouched": false,
+  "publicServerTouched": false,
+  "uiAcceptance": false
+}

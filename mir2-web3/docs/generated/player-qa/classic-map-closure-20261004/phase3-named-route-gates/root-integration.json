@@ -1,0 +1,259 @@
+{
+  "schema": "mir2.classic-named-route-root-integration.v1",
+  "createdUtc": "2026-10-04T10:32:23.010042+00:00",
+  "rootSourceHead": "95e18e8ebd5e05f1d6baf3523a853716d3026b70",
+  "workerBaseline": "38a64de2985c82008a596a34768f36185980f62e",
+  "workerReceiptSha256": "a921e182654e9754e2d59c7d0e6594a5bcba92ea40add75f2f910d46ed891b85",
+  "sixReviewedSourceFiles": [
+    {
+      "path": "apps/simulation/src/runtime/npc_script.rs",
+      "bytes": 137918,
+      "sha256": "a99c170c8a73c3a34d6800b4902d6b782f41ae3eb469cb21e34c828eb9090a8e"
+    },
+    {
+      "path": "apps/simulation/tests/classic_late_route_gates.rs",
+      "bytes": 17468,
+      "sha256": "36709597bddb08add8963cabec2b5118be4bf350bb39fb571d00af11cfd24e70"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/classic-late-route-policy.mjs",
+      "bytes": 13700,
+      "sha256": "78616bc62ac448c883be5085f36b0cddb83ed517279eaf9174e7b94dca014349"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/run-classic-late-route.mjs",
+      "bytes": 28820,
+      "sha256": "420c44f60d606513083822176b9d082b02ad2a1fe3232a2d62888e7727165d60"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/test-classic-late-route.mjs",
+      "bytes": 23607,
+      "sha256": "9c4141e17a94859aa5c84034479c0dc8d0fdbf13e7f7844d72a276db70fdf75b"
+    },
+    {
+      "path": "apps/web/scripts/quest-agent/verify-classic-late-route-evidence.mjs",
+      "bytes": 25772,
+      "sha256": "ba93419273199836e26a257091c0e51a49c157b6bd2f2eee4dc145708c73d1e1"
+    }
+  ],
+  "rawFiles": [
+    {
+      "path": "worker/node-source-first-failure-01.log",
+      "bytes": 1203,
+      "sha256": "87b02cb6eae6a650e834054735d7b06ecdeeacc031ddd704b3e09f508d381779"
+    },
+    {
+      "path": "worker/node-tests-01.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/node-tests-01.log",
+      "bytes": 7163,
+      "sha256": "9ddd1ab246d495893e4fa86fd65b9eda85f58bbc9eae0d336ef5c949327fa4da"
+    },
+    {
+      "path": "worker/node-tests-02.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/node-tests-02.log",
+      "bytes": 8858,
+      "sha256": "fa5f61d05b742e0401ecc5315be232c7a70f330b58d65ba1cd866b9880a9e4f4"
+    },
+    {
+      "path": "worker/node-tests-03.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/node-tests-03.log",
+      "bytes": 9140,
+      "sha256": "5f5099ffb93142c40b68bb8211509608a99eb35003ba5b67a28bcb6330e4d114"
+    },
+    {
+      "path": "worker/patch-reverse-apply-check.log",
+      "bytes": 7,
+      "sha256": "19eaf43821a7660ec323a87c8457bf74823beb296c39f5e01aa8a683aa50f061"
+    },
+    {
+      "path": "worker/rust-final-clean-01.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/rust-final-clean-01.log",
+      "bytes": 30166,
+      "sha256": "6c6d6e6484c5a4759559f39ffbd1344d214b4f9694f6ff320344d1b7063edeb1"
+    },
+    {
+      "path": "worker/rust-final-targeted-01.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/rust-final-targeted-01.log",
+      "bytes": 29211,
+      "sha256": "39a092f8cab76acd298310f915c9b00585c9eea4442841e3459bd1df32b52c08"
+    },
+    {
+      "path": "worker/rust-green-01.exit.txt",
+      "bytes": 5,
+      "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+    },
+    {
+      "path": "worker/rust-green-01.log",
+      "bytes": 5610,
+      "sha256": "81ea0ee04a2c926b0a01bd12a7cd3e9121f01016c55714b6f2f95866dcbc7946"
+    },
+    {
+      "path": "worker/rust-green-02.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/rust-green-02.log",
+      "bytes": 29742,
+      "sha256": "cb05702d8ac63232085dcdc586e9d667daf91eb194214bf39a8979947ad47b96"
+    },
+    {
+      "path": "worker/rust-green-03.exit.txt",
+      "bytes": 5,
+      "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+    },
+    {
+      "path": "worker/rust-green-03.log",
+      "bytes": 30731,
+      "sha256": "87050f2445d89ed93b3c2567100fd00b96bd11b216bc37c4af8ddb96c4582854"
+    },
+    {
+      "path": "worker/rust-needmove-01.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/rust-needmove-01.log",
+      "bytes": 29223,
+      "sha256": "305ced4714de36d9d0977c35337b4a8f911da8174ef806012c1ed080a5c09ed2"
+    },
+    {
+      "path": "worker/rust-red-01.exit.txt",
+      "bytes": 5,
+      "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+    },
+    {
+      "path": "worker/rust-red-01.log",
+      "bytes": 38340,
+      "sha256": "bfc83b5a9b4b3467da4fbbae5dc0a9c7c50377c2ccaf0d410de39e05269c368b"
+    },
+    {
+      "path": "worker/rust-red-02.exit.txt",
+      "bytes": 5,
+      "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+    },
+    {
+      "path": "worker/rust-red-02.log",
+      "bytes": 32794,
+      "sha256": "06dd5d642d4e221c68b1175135af2a22fc3a30e39f88154ada4acf3e4332166f"
+    },
+    {
+      "path": "worker/rust-red-03.exit.txt",
+      "bytes": 5,
+      "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+    },
+    {
+      "path": "worker/rust-red-03.log",
+      "bytes": 32503,
+      "sha256": "438bd371e4b0bb9acc6133a0aa0fe3e85ee431e6da5285cfa05903aeb33cca82"
+    },
+    {
+      "path": "worker/rust-source-proof-01.exit.txt",
+      "bytes": 5,
+      "sha256": "bdc830287616dae1818ced3e7c186e1387155900ad30d5983ec02da1519c4a95"
+    },
+    {
+      "path": "worker/rust-source-proof-01.log",
+      "bytes": 38724,
+      "sha256": "cd67ffd57ed33789b1c85aa63222f4cd0f4dd3dea83052e74ceb66472b88b8ae"
+    },
+    {
+      "path": "worker/rust-source-proof-02.exit.txt",
+      "bytes": 3,
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354"
+    },
+    {
+      "path": "worker/rust-source-proof-02.log",
+      "bytes": 37846,
+      "sha256": "c3cdb51a337f6b3daea11f80c2809739750010a7f058c9b310b836d922ec1e19"
+    },
+    {
+      "path": "worker/source-diff.patch",
+      "bytes": 122056,
+      "sha256": "3deb445fe0080f74ec6153060f61d1334c2e5e55ce55a221701080746dcb0272"
+    },
+    {
+      "path": "worker/README.md",
+      "bytes": 13358,
+      "sha256": "9b5ec5e752011117b64091f3edda74d518df64abdad9209bff2756d8e157a1de"
+    },
+    {
+      "path": "worker/derived-plan-01.json",
+      "bytes": 2650,
+      "sha256": "95e95b3a2b1fe204ea1c6d7423899589a41b27afb28df3d9ebc236a647c062d9"
+    },
+    {
+      "path": "worker/implementation-receipt.json",
+      "bytes": 39971,
+      "sha256": "a921e182654e9754e2d59c7d0e6594a5bcba92ea40add75f2f910d46ed891b85"
+    },
+    {
+      "path": "root/root-node-route-evidence-01.log",
+      "bytes": 9141,
+      "sha256": "690244f871ed989852e108e0deef84be451fb01155dd2263c8ae05ce55861743"
+    },
+    {
+      "path": "root/root-rust-ordinary-gates-01.log",
+      "bytes": 31106,
+      "sha256": "3148aef930b92a78413a47ed3171c1411766e5d8a7e3f58e53e4993b05c09ce4"
+    },
+    {
+      "path": "root/root-rust-results-01.json",
+      "bytes": 217,
+      "sha256": "b2a428b39c140e3f6acf657a851383d02670ffeff85d3cbd6f415b9c540f9c6d"
+    },
+    {
+      "path": "root/root-rust-source-proof-01.log",
+      "bytes": 37854,
+      "sha256": "a41d4424e4c4c0e507916449fffb15e938aa29aee9b9902cbb9792a2a1952db5"
+    },
+    {
+      "path": "root/root-static-plan-01.json",
+      "bytes": 2522,
+      "sha256": "edb976e58355eb22592c9b60e729969b8043ff49c2d2e4affd780e7e95935ede"
+    }
+  ],
+  "sourceInputsVerified": 10,
+  "rootOrdinaryPreparedGatesPassed": 13,
+  "rootSourceProofTestsPassed": 2,
+  "rootNodeTestsPassed": 44,
+  "originalTrueRed": {
+    "passed": 1,
+    "failed": 7
+  },
+  "sourceScope": "Named exact-hash Stone/BigTaoist numeric predicates and canonical item1080 debit only",
+  "routesStaticPlannedOnly": true,
+  "plannedMainHops": 76,
+  "naturalNetworkRun": false,
+  "rawDurableStoreVerified": false,
+  "nativeAccepted": false,
+  "published": false,
+  "deathWorkerWipNotUsedByIsolatedRootRustTests": true,
+  "remaining": [
+    "actual three-class route cohort and exact committed source-coordinate proof",
+    "real natural Boss/drop source identity/acquired book activation",
+    "D10061 authored NeedMove has no ordinary inbound binding",
+    "Ancient D710A-D713A has no authored outer walking exit; owned escape item separately",
+    "native visuals and full saved gameplay acceptance"
+  ]
+}

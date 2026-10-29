@@ -1,0 +1,56 @@
+{
+  "owner": "Root",
+  "kind": "actual CargoGuard refusal before Cargo forwarding",
+  "config": {
+    "path": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source40-runtime-hero-test01.reviewed02.config.json",
+    "bytes": 5839,
+    "sha256": "672be44780deffd3acac59a04b1a16a3e76e3f51781f8129067971b0ec4d76b9"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source40-runtime-hero-test01.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source40-runtime-hero-test01.stderr.log",
+    "bytes": 31,
+    "sha256": "9d6432779bfeaef725f60d3965831eb0bd7b8eca3f16265733553b4fe2de9e9f"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source40-runtime-hero-test01.outer.json",
+    "bytes": 459,
+    "sha256": "ed1277b2e9a8a027fd92ad24c052a48045e5fb65803114ccd9795719b83db3e5"
+  },
+  "actualOuter": {
+    "owner": "Root",
+    "exitCode": 90,
+    "guardPid": 165668,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 86,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-hero-source40-runtime-hero-test01.reviewed02.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "receiptRoot": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-hero-source40-runtime-hero-test01-cargo-receipts",
+  "nonceCount": 0,
+  "cargoForwarded": false,
+  "testsExecuted": 0,
+  "CVolumeSampleOccurred": false,
+  "diagnosis": {
+    "qualification": "Root inference from immutable original Guard source, not a detailed refusal file; stderr only QA_CARGO_GUARD_NOT_FORWARDING",
+    "field": "independentShimReviewAccepted",
+    "actualType": "boolean",
+    "expectedType": "string",
+    "source": "CargoGuard.cs Flat() lines41-56 and authority read85-86"
+  },
+  "toolsModified": false,
+  "templatesModified": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

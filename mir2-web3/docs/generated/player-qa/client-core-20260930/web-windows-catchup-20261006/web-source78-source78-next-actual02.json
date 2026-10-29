@@ -1,0 +1,60 @@
+{
+  "owner": "Root",
+  "kind": "actual original Source78 strict Next02 after authenticated Spells bootstrap",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-next-config02.json",
+    "bytes": 5215,
+    "sha256": "8d553b0bd05b4ef855f5628bf0f8edce5b84f180aaeb313297dfcc3e704301df"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-strict-snapshot03.json",
+    "bytes": 20522564,
+    "sha256": "86859054aba26372cc0ecab5571af49a07edab95c2dfed5d593fb0226facd8dd"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-code-review03.json",
+    "bytes": 12754,
+    "sha256": "9cb2a7d64e108fcd51e8f32483b214e2df24218e45fe62fa4132d83b33a35df0"
+  },
+  "actualNode": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\root-approved01\\source78-node-actual03.json",
+    "bytes": 3332,
+    "sha256": "91be454659a13e81ff6f5c563264be9ee5d66732b65624e82334c2e7fd8dabd7"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 103136,
+    "kind": "Root original Source78 strict Next02 after actual144 authenticated baseline gate",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 46194,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source78-spells-readiness-20261012-01/root-approved01/source78-next-config02.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\next-build02\\stdout.txt",
+    "bytes": 2026,
+    "sha256": "4e153cafcf2f816c53e551bac24e15c668c472eb90a42978babd61e7be765f43"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source78-spells-readiness-20261012-01\\next-build02\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputFiles": 21036,
+  "outputBytes": 669882130,
+  "ownFreshNextDist": ".next-web-windows-catchup-source78-20261012-02",
+  "allNewOutputWithinOwnNext": true,
+  "oldCompiledApplicationCopied": false,
+  "originalPreAndPostSourceToolGuardPassed": true,
+  "actualTypeScriptPassed": true,
+  "generatedPages": 13,
+  "actualNftAndPackageAcceptancePending": true,
+  "goalComplete": false
+}

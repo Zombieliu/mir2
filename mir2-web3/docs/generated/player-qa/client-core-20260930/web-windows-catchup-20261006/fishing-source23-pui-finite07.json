@@ -1,0 +1,169 @@
+{
+  "owner": "Root",
+  "kind": "Source23 Rust07 final affected presentation-ui CPU64 passes after typed facts compatibility correction",
+  "configuration": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06.config.json",
+    "bytes": 3965,
+    "sha256": "d309407b5156e9fefbbc35f94ba1c5817eed502162edf7b803369b9709a9fba8"
+  },
+  "sourceSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-snapshot.json",
+    "bytes": 148546,
+    "sha256": "37211548ac2b7a6b81d8e7462e660a60ecc7eeca3154ecf1d64d450432723753"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-rust07-review.json",
+    "bytes": 2948,
+    "sha256": "eb320ca5f0c239ee672e5ad4ed23f85772e0f8fcbc074e6aac9b46a999f3af66"
+  },
+  "policy": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06.policy.json",
+    "bytes": 2317,
+    "sha256": "b4e8e00661e3be2d4dc4a7cf6f745bdeeabd42939098c4e52a21a95596982899"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "guardPid": 113176,
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 4040,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/repo-qa-web-windows-catchup-20261006-01/w0-fishing-source23-pui06.config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false,
+    "pin": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06.outer.json",
+      "bytes": 438,
+      "sha256": "5c3d28fac6a40bc8bd67133a960c2c2841ce83754957633130e6f4bb7b209256"
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06.stdout.log",
+    "bytes": 6882,
+    "sha256": "4f73227eca2697873e61e615fcb38dd1d2742fca9798ab96aeaff5ff98e0f009"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06.stderr.log",
+    "bytes": 1144,
+    "sha256": "ca1f0537a6f6433e5d88ac59563a58aeb42a794a928d67c76a5ef23612d0d3c0"
+  },
+  "guardReceipts": {
+    "before": {
+      "schemaVersion": 1,
+      "mode": "real-cargo",
+      "nonce": "daff7a46a00c43f9a7f3156a789777c9",
+      "policyPath": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06.policy.json",
+      "policySha": "b4e8e00661e3be2d4dc4a7cf6f745bdeeabd42939098c4e52a21a95596982899",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "apps/game-client/platform-web/Cargo.toml",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "1",
+        "--features",
+        "presentation-ui",
+        "--lib",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "E:\\mir2-player-journey\\mir2-web3",
+      "calleePath": "C:/Users/Administrator/.cargo/bin/cargo.exe",
+      "calleeSha": "86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
+      "sample": {
+        "schemaVersion": "1",
+        "driveLetter": "C",
+        "sampleBeginUtc": "2026-10-07T01:20:08.8630860Z",
+        "sampleEndUtc": "2026-10-07T01:20:09.5150079Z",
+        "remainingBytes": "464131362816",
+        "requiredBytes": "53687091200"
+      },
+      "probePid": 106668,
+      "probeLaunchMs": 84.98960000000001,
+      "probeEndMs": 922.6291,
+      "decision": "FORWARD",
+      "thresholdBytes": "53687091200",
+      "sampleProof": "actualGetVolumeC",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06-cargo-receipts\\daff7a46a00c43f9a7f3156a789777c9\\before.json",
+        "bytes": 1028,
+        "sha256": "f93477e706f6e0360191ef33a97ab483aa8d5de34bec7c1a87509771df98ba95"
+      }
+    },
+    "after": {
+      "childPid": 100456,
+      "childStartedUtc": "/Date(1791336009586)/",
+      "childStartMs": 951.0721000000001,
+      "completed": true,
+      "exited": true,
+      "disposed": true,
+      "exitCode": 0,
+      "exitBits": "0",
+      "completedUtc": "/Date(1791336012634)/",
+      "completionMs": 3998.8595,
+      "postChildPolicy": "B",
+      "lifecycle": ".NET Start/Exited/WaitForExit/Dispose; not Node close",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06-cargo-receipts\\daff7a46a00c43f9a7f3156a789777c9\\after.json",
+        "bytes": 328,
+        "sha256": "06592403669fdce52566a6f4de14d573db2af28f918444961c69c0b7526a7ddb"
+      }
+    },
+    "probe": {
+      "probePid": 106668,
+      "probeKilled": false,
+      "probeCode": 0,
+      "probeLaunchUtc": "/Date(1791336008719)/",
+      "probeEndUtc": "/Date(1791336009557)/",
+      "probeLaunchMs": 84.98960000000001,
+      "probeEndMs": 922.6291,
+      "probeMode": "actual",
+      "probePath": "C:/mir2-cross-platform-storage-20261002/repo-qa-shared-quest-heading-locale-01/cargo-per-call-guard-implementation01/probe-volume-C.ps1",
+      "probeSha": "45e14d26e608c36c8073fa9e8e61562062b2d5d2df142d35e90f7213fb72f1ab",
+      "pin": {
+        "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui06-cargo-receipts\\daff7a46a00c43f9a7f3156a789777c9\\probe-process.json",
+        "bytes": 441,
+        "sha256": "dd8da575dd45864cd5d24dc8ee31ef1ec178c64709650f94829e71670d7c74bb"
+      }
+    },
+    "freshnessUpperBoundMs": 71
+  },
+  "passed": 64,
+  "failed": 0,
+  "ignored": 0,
+  "newManualDecodeOracleTests": 6,
+  "originalFishingTestsBytePreserved": 12,
+  "originalTooltipTestsBytePreserved": 11,
+  "priorRust04FiniteEvidence": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-client-finite04.json",
+    "bytes": 34573,
+    "sha256": "96ffe3aab62c2eb87cba02bf29ae4703d3a5757a2d1e90880e90e13be2f4fe4f"
+  },
+  "priorEffectiveInputQualification": "FinalRust07 PUI64 is a newactual CPU run of whole PUI suite. Prior Rust04 Core141/default44+3oldignored/Native-fishing6/Runtime-animation17 and prior Rust03 Native-input133 are historical actual executions; final epochs only modified presentation-ui-gated codecs whose source consumption is separate from these unchanged effective configurations. Do not claim all432 or all executions freshly rerun in Rust07.",
+  "finiteCpuAccepted": true,
+  "productionBuildAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "networkUsed": false,
+  "wasmApiUsed": false,
+  "candidateAccepted": false,
+  "playerAccepted": false,
+  "goalComplete": false,
+  "originalBagTestsBytePreserved": 5,
+  "priorRust06Failure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui-failure06.json",
+    "bytes": 6520,
+    "sha256": "af90afcfd7b00e4fd6a5ce749e51709e8bb3f80c7f591aeb042822e8f52bc30a"
+  },
+  "priorActualRust05Pui62": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-fishing-source23-pui-finite05.json",
+    "bytes": 6776,
+    "sha256": "135dec2b074b7d93dc5e55006ad07d07ddc3aef9960aac3c4f1d799728eb74c5"
+  }
+}

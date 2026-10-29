@@ -8,20 +8,106 @@
 
 use core::fmt;
 use std::collections::VecDeque;
-use std::time::{SystemTime, UNIX_EPOCH};
+use web_time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::Resource;
+use mir2_client_core::auth_ui::{
+    parse_registration_birth_date as parse_shared_registration_birth_date, safe_key_edit,
+    valid_registration_email as shared_valid_registration_email,
+    validate_change_password_fields as validate_shared_change_password_fields,
+    validate_registration_fields as validate_shared_registration_fields, AuthUiError,
+};
+pub use mir2_client_core::auth_ui::{
+    safe_key_permutation, SafeKeyState, SAFE_KEY_ALPHABET, SAFE_KEY_DEFAULT_SEED,
+};
+
+pub const CHARACTER_CREATION_CLASSES: [&str; 5] =
+    ["Warrior", "Wizard", "Taoist", "Assassin", "Archer"];
+
+/// Local deployment presentation policy; the server still authorizes character creation.
+/// This never filters the authenticated roster or an existing character's StartGame.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CharacterCreationClasses {
+    allowed: [bool; 5],
+}
+
+impl Default for CharacterCreationClasses {
+    fn default() -> Self {
+        Self { allowed: [true; 5] }
+    }
+}
+
+impl CharacterCreationClasses {
+    pub fn from_names(names: &[&str]) -> Result<Self, &'static str> {
+        if names.is_empty() || names.len() > CHARACTER_CREATION_CLASSES.len() {
+            return Err("allowed_classes must contain one to five canonical class names");
+        }
+        let mut allowed = [false; 5];
+        for name in names {
+            let Some(index) = CHARACTER_CREATION_CLASSES
+                .iter()
+                .position(|known| known == name)
+            else {
+                return Err("allowed_classes contains an unknown or noncanonical class name");
+            };
+            if allowed[index] {
+                return Err("allowed_classes contains a duplicate class name");
+            }
+            allowed[index] = true;
+        }
+        Ok(Self { allowed })
+    }
+
+    pub fn allows(&self, name: &str) -> bool {
+        CHARACTER_CREATION_CLASSES
+            .iter()
+            .position(|known| known.eq_ignore_ascii_case(name))
+            .is_some_and(|index| self.allowed[index])
+    }
+
+    pub fn first(&self) -> &'static str {
+        CHARACTER_CREATION_CLASSES
+            .iter()
+            .enumerate()
+            .find(|(index, _)| self.allowed[*index])
+            .map(|(_, name)| *name)
+            .expect("creation policy always has an allowed class")
+    }
+
+    pub fn cycle(&self, current: &str, reverse: bool) -> &'static str {
+        let Some(current) = CHARACTER_CREATION_CLASSES
+            .iter()
+            .position(|known| known.eq_ignore_ascii_case(current) && self.allows(known))
+        else {
+            return self.first();
+        };
+        for offset in 1..=CHARACTER_CREATION_CLASSES.len() {
+            let index = if reverse {
+                (current + CHARACTER_CREATION_CLASSES.len() - offset)
+                    % CHARACTER_CREATION_CLASSES.len()
+            } else {
+                (current + offset) % CHARACTER_CREATION_CLASSES.len()
+            };
+            if self.allowed[index] {
+                return CHARACTER_CREATION_CLASSES[index];
+            }
+        }
+        self.first()
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NativeShellScreen {
     Connecting,
     Login,
     Authenticating,
+    OpeningLogin,
     CharacterSelect,
     CharacterCreate,
     StartingGame,
     InGame,
     ConnectionLost,
+    Registration,
     ChangePassword,
     SafeKey,
     DeleteConfirm { index: i32 },
@@ -105,6 +191,70 @@ pub enum ChangePasswordFocus {
     CancelButton,
 }
 
+/// Focus order in Crystal's `NewAccountDialog` (Prguse/63).  The original
+/// dialog keeps all optional profile/recovery fields in the same modal rather
+/// than reusing the login credentials.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RegistrationFocus {
+    AccountId,
+    Password,
+    ConfirmPassword,
+    UserName,
+    BirthDate,
+    SecretQuestion,
+    SecretAnswer,
+    EmailAddress,
+    SubmitButton,
+    CancelButton,
+}
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct RegistrationForm {
+    pub account_id: String,
+    pub password: String,
+    pub confirm_password: String,
+    pub user_name: String,
+    /// Optional ISO calendar date.  `NewAccount` carries the matching .NET
+    /// `DateTime.ToBinary()` tick representation, with zero for an empty date.
+    pub birth_date: String,
+    pub secret_question: String,
+    pub secret_answer: String,
+    pub email_address: String,
+    pub focus: RegistrationFocus,
+}
+
+impl Default for RegistrationForm {
+    fn default() -> Self {
+        Self {
+            account_id: String::new(),
+            password: String::new(),
+            confirm_password: String::new(),
+            user_name: String::new(),
+            birth_date: String::new(),
+            secret_question: String::new(),
+            secret_answer: String::new(),
+            email_address: String::new(),
+            focus: RegistrationFocus::AccountId,
+        }
+    }
+}
+
+impl fmt::Debug for RegistrationForm {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RegistrationForm")
+            .field("account_id", &self.account_id)
+            .field("password", &"<redacted>")
+            .field("confirm_password", &"<redacted>")
+            .field("user_name", &"<redacted>")
+            .field("birth_date", &"<redacted>")
+            .field("secret_question", &"<redacted>")
+            .field("secret_answer", &"<redacted>")
+            .field("email_address", &"<redacted>")
+            .field("focus", &self.focus)
+            .finish()
+    }
+}
+
 #[derive(Clone, PartialEq, Eq)]
 pub struct ChangePasswordForm {
     pub account_id: String,
@@ -147,83 +297,11 @@ impl ChangePasswordForm {
     }
 }
 
-const MIN_ACCOUNT_ID_LENGTH: usize = 3;
-const MAX_ACCOUNT_ID_LENGTH: usize = 15;
-const MIN_PASSWORD_LENGTH: usize = 5;
-const MAX_PASSWORD_LENGTH: usize = 15;
-const SAFE_KEY_DEFAULT_SEED: u64 = 0x4D49_5232_5341_4645;
-const SAFE_KEY_ALPHABET: [char; 36] = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-    'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-];
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SafeKeyState {
-    pub keys: Vec<char>,
-    seed: u64,
-}
-
-impl Default for SafeKeyState {
-    fn default() -> Self {
-        Self::from_seed(SAFE_KEY_DEFAULT_SEED)
-    }
-}
-
-impl SafeKeyState {
-    pub fn from_seed(seed: u64) -> Self {
-        Self {
-            keys: safe_key_permutation(seed),
-            seed,
-        }
-    }
-
-    fn reshuffle(&mut self) {
-        self.seed = next_safe_key_seed(self.seed);
-        self.keys = safe_key_permutation(self.seed);
-    }
-}
-
-pub fn safe_key_permutation(seed: u64) -> Vec<char> {
-    let mut keys = SAFE_KEY_ALPHABET.to_vec();
-    let mut state = if seed == 0 {
-        SAFE_KEY_DEFAULT_SEED
-    } else {
-        seed
-    };
-
-    for i in (1..keys.len()).rev() {
-        state = splitmix64(state);
-        let j = (state % (i as u64 + 1)) as usize;
-        keys.swap(i, j);
-    }
-    keys
-}
-
-fn splitmix64(mut state: u64) -> u64 {
-    state = state.wrapping_add(0x9E37_79B9_7F4A_7C15);
-    let mut z = state;
-    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
-    z ^ (z >> 31)
-}
-
-fn next_safe_key_seed(seed: u64) -> u64 {
-    splitmix64(seed)
-}
-
 fn random_safe_key_seed() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_nanos() as u64)
         .unwrap_or(SAFE_KEY_DEFAULT_SEED)
-}
-
-fn valid_alphanumeric(value: &str, min: usize, max: usize) -> bool {
-    let length = value.chars().count();
-    (min..=max).contains(&length)
-        && value
-            .chars()
-            .all(|character| character.is_ascii_alphanumeric())
 }
 
 pub fn validate_change_password_fields(
@@ -232,22 +310,101 @@ pub fn validate_change_password_fields(
     new_password: &str,
     confirm_password: &str,
 ) -> Result<(), &'static str> {
-    if !valid_alphanumeric(account_id, MIN_ACCOUNT_ID_LENGTH, MAX_ACCOUNT_ID_LENGTH) {
-        return Err("account ID must be 3-15 alphanumeric characters");
+    validate_shared_change_password_fields(account_id, old_password, new_password, confirm_password)
+        .map_err(AuthUiError::message)
+}
+
+/// Converts the documented native ISO date entry to unspecified .NET DateTime ticks.
+pub fn parse_registration_birth_date(value: &str) -> Result<i64, &'static str> {
+    parse_shared_registration_birth_date(value).map_err(AuthUiError::message)
+}
+
+pub(crate) fn valid_registration_email(value: &str) -> bool {
+    shared_valid_registration_email(value)
+}
+
+pub(crate) fn validate_registration_field(
+    form: &RegistrationForm,
+    focus: RegistrationFocus,
+) -> Result<(), &'static str> {
+    fn valid_alphanumeric(value: &str, min: usize, max: usize) -> bool {
+        (min..=max).contains(&value.len()) && value.bytes().all(|byte| byte.is_ascii_alphanumeric())
     }
-    if !valid_alphanumeric(old_password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("current password must be 5-15 alphanumeric characters");
-    }
-    if !valid_alphanumeric(new_password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("new password must be 5-15 alphanumeric characters");
-    }
-    if new_password != confirm_password {
-        return Err("new password confirmation does not match");
-    }
-    if !valid_alphanumeric(confirm_password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("new password confirmation must be 5-15 alphanumeric characters");
+    match focus {
+        RegistrationFocus::AccountId => {
+            if !valid_alphanumeric(&form.account_id, 3, 15) {
+                return Err("账号需为 3–15 位英文字母或数字。");
+            }
+        }
+        RegistrationFocus::Password => {
+            if !valid_alphanumeric(&form.password, 10, 15) {
+                return Err("注册密码需为 10–15 位英文字母或数字。");
+            }
+            if form.password.eq_ignore_ascii_case(&form.account_id) {
+                return Err("密码不能与账号相同（不区分大小写）。");
+            }
+            // Same denylist as the production identity policy in save.rs.
+            if matches!(
+                form.password.to_ascii_lowercase().as_str(),
+                "1234567890" | "password123" | "qwerty12345" | "mir2password"
+            ) {
+                return Err("这个密码过于常见，请换一个密码。");
+            }
+        }
+        RegistrationFocus::ConfirmPassword => {
+            validate_registration_field(form, RegistrationFocus::Password)?;
+            if form.confirm_password != form.password {
+                return Err("两次输入的密码不一致。");
+            }
+        }
+        RegistrationFocus::UserName if form.user_name.chars().count() > 20 => {
+            return Err("姓名最多 20 个字符，也可以留空。");
+        }
+        RegistrationFocus::BirthDate => {
+            parse_registration_birth_date(&form.birth_date)?;
+        }
+        RegistrationFocus::SecretQuestion if form.secret_question.chars().count() > 30 => {
+            return Err("密保问题最多 30 个字符，也可以留空。");
+        }
+        RegistrationFocus::SecretAnswer if form.secret_answer.chars().count() > 30 => {
+            return Err("密保答案最多 30 个字符，也可以留空。");
+        }
+        RegistrationFocus::EmailAddress => {
+            if form.email_address.chars().count() > 50
+                || !valid_registration_email(&form.email_address)
+            {
+                return Err("请输入完整有效的邮箱地址（最多 50 个字符），也可以留空。");
+            }
+        }
+        _ => {}
     }
     Ok(())
+}
+
+pub fn validate_registration_fields(form: &RegistrationForm) -> Result<i64, &'static str> {
+    for focus in [
+        RegistrationFocus::AccountId,
+        RegistrationFocus::Password,
+        RegistrationFocus::ConfirmPassword,
+        RegistrationFocus::UserName,
+        RegistrationFocus::BirthDate,
+        RegistrationFocus::SecretQuestion,
+        RegistrationFocus::SecretAnswer,
+        RegistrationFocus::EmailAddress,
+    ] {
+        validate_registration_field(form, focus)?;
+    }
+    validate_shared_registration_fields(
+        &form.account_id,
+        &form.password,
+        &form.confirm_password,
+        &form.user_name,
+        &form.birth_date,
+        &form.secret_question,
+        &form.secret_answer,
+        &form.email_address,
+    )
+    .map_err(AuthUiError::message)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -288,6 +445,7 @@ pub struct CharacterSummary {
     pub level: u16,
     pub class_name: String,
     pub gender_name: String,
+    pub last_access_binary_datetime: i64,
 }
 
 impl fmt::Debug for CharacterSummary {
@@ -298,18 +456,34 @@ impl fmt::Debug for CharacterSummary {
             .field("level", &self.level)
             .field("class_name", &self.class_name)
             .field("gender_name", &self.gender_name)
+            .field(
+                "last_access_binary_datetime",
+                &self.last_access_binary_datetime,
+            )
             .finish()
     }
 }
 
 impl CharacterSummary {
     pub fn new(index: i32, name: &str, level: u16, class_name: &str, gender_name: &str) -> Self {
+        Self::new_with_last_access(index, name, level, class_name, gender_name, 0)
+    }
+
+    pub fn new_with_last_access(
+        index: i32,
+        name: &str,
+        level: u16,
+        class_name: &str,
+        gender_name: &str,
+        last_access_binary_datetime: i64,
+    ) -> Self {
         Self {
             index,
             name: name.to_string(),
             level,
             class_name: class_name.to_owned(),
             gender_name: gender_name.to_owned(),
+            last_access_binary_datetime,
         }
     }
 }
@@ -361,11 +535,16 @@ impl ShellNotice {
 
 #[derive(Clone, Default, PartialEq, Eq, Resource)]
 pub struct NativeShellModel {
+    pub billing: crate::native_billing::BillingPanel,
+    pub monthly_card: crate::native_monthly_card::MonthlyCardPanel,
     pub screen: NativeShellScreen,
+    pub login_opening_elapsed: Duration,
     pub login: LoginForm,
     pub login_request_in_flight: bool,
+    pub registration: RegistrationForm,
     pub register_request_in_flight: bool,
     pub character_create: CharacterCreateForm,
+    pub character_creation_classes: CharacterCreationClasses,
     pub create_character_request_in_flight: bool,
     pub change_password: ChangePasswordForm,
     pub change_password_request_in_flight: bool,
@@ -375,6 +554,9 @@ pub struct NativeShellModel {
     pub delete_request_in_flight: bool,
     pub delete_command_sent: bool,
     pub start_game_request_in_flight: bool,
+    /// A normal world snapshot may only enter the game after its own accepted
+    /// StartGame response. This fact is consumed by PlayerBootstrapped.
+    pub start_game_acknowledged: bool,
     pub retry_request_in_flight: bool,
     pub logout_request_in_flight: bool,
     pub notice: Option<ShellNotice>,
@@ -390,6 +572,7 @@ impl fmt::Debug for NativeShellModel {
             .field("screen", &self.screen)
             .field("login", &self.login)
             .field("login_request_in_flight", &self.login_request_in_flight)
+            .field("registration", &self.registration)
             .field(
                 "register_request_in_flight",
                 &self.register_request_in_flight,
@@ -409,6 +592,7 @@ impl fmt::Debug for NativeShellModel {
                 "start_game_request_in_flight",
                 &self.start_game_request_in_flight,
             )
+            .field("start_game_acknowledged", &self.start_game_acknowledged)
             .field("retry_request_in_flight", &self.retry_request_in_flight)
             .field("logout_request_in_flight", &self.logout_request_in_flight)
             .field("notice", &self.notice)
@@ -421,11 +605,96 @@ impl fmt::Debug for NativeShellModel {
 }
 
 impl NativeShellModel {
+    pub fn set_character_creation_classes(&mut self, classes: CharacterCreationClasses) {
+        self.character_creation_classes = classes;
+        self.ensure_creatable_class();
+    }
+
+    fn ensure_creatable_class(&mut self) {
+        if !self
+            .character_creation_classes
+            .allows(&self.character_create.class_name)
+        {
+            self.character_create.class_name = self.character_creation_classes.first().to_owned();
+        }
+    }
+
+    pub fn cycle_creation_class(&mut self, reverse: bool) {
+        self.character_create.class_name = self
+            .character_creation_classes
+            .cycle(&self.character_create.class_name, reverse)
+            .to_owned();
+    }
+
+    /// Reject stale or programmatic create intents at the native send boundary.
+    pub fn reject_unavailable_creation_class(&mut self, class_name: &str) -> bool {
+        if self.character_creation_classes.allows(class_name) {
+            return false;
+        }
+        self.create_character_request_in_flight = false;
+        // Reuse the existing nine-locale notice; unavailable choices are hidden in normal UI.
+        self.set_error("intent is not valid for this screen");
+        true
+    }
+
+    pub fn billing_character_index(&self) -> Option<i32> {
+        if self.screen == NativeShellScreen::InGame {
+            self.active_character.as_ref().map(|c| c.index)
+        } else {
+            self.selected_character_index
+                .filter(|index| self.has_character_index(*index))
+        }
+    }
+
+    pub fn open_billing(&mut self) -> bool {
+        if !matches!(
+            self.screen,
+            NativeShellScreen::CharacterSelect | NativeShellScreen::InGame
+        ) {
+            return false;
+        }
+        let Some(character) = self.billing_character_index() else {
+            self.set_error("billing.selectCharacter");
+            return false;
+        };
+        let Some(account) = self.last_account.as_deref() else {
+            return false;
+        };
+        self.billing
+            .open_for(account, character, crate::native_billing::now_ms());
+        true
+    }
+
+    /// Crystal shows idle ChrSel/0, then frames 1..18 at 100 ms each.
+    /// The nineteenth offset completes the animation instead of being drawn.
+    pub fn login_opening_frame(&self) -> u32 {
+        if self.screen == NativeShellScreen::OpeningLogin {
+            (1 + self.login_opening_elapsed.as_millis() / 100).min(18) as u32
+        } else {
+            0
+        }
+    }
+
+    pub fn advance_login_opening(&mut self, delta: Duration) {
+        if self.screen != NativeShellScreen::OpeningLogin {
+            return;
+        }
+        self.login_opening_elapsed = self.login_opening_elapsed.saturating_add(delta);
+        if self.login_opening_elapsed >= Duration::from_millis(1800) {
+            self.screen = NativeShellScreen::CharacterSelect;
+            self.login_opening_elapsed = Duration::ZERO;
+        }
+    }
+
     fn clear_session_payload(&mut self) {
+        self.billing = Default::default();
+        self.monthly_card = Default::default();
+        self.login_opening_elapsed = Duration::ZERO;
         self.characters.clear();
         self.selected_character_index = None;
         self.active_character = None;
         self.change_password = ChangePasswordForm::default();
+        self.registration = RegistrationForm::default();
         self.change_password_request_in_flight = false;
         self.change_password_command_sent = false;
         self.safe_key = SafeKeyState::default();
@@ -436,6 +705,7 @@ impl NativeShellModel {
         self.register_request_in_flight = false;
         self.create_character_request_in_flight = false;
         self.start_game_request_in_flight = false;
+        self.start_game_acknowledged = false;
         self.retry_request_in_flight = false;
         self.logout_request_in_flight = false;
         self.notice = None;
@@ -481,8 +751,23 @@ impl NativeShellModel {
 /// User intents from Bevy UI widgets.
 #[derive(Clone, PartialEq, Eq)]
 pub enum NativeUiIntent {
+    OpenMonthlyCard,
+    RedeemMonthlyCard,
+    CloseMonthlyCard,
     Login,
-    RegisterAccount,
+    OpenRegistration,
+    SubmitRegistration {
+        account_id: String,
+        password: String,
+        confirm_password: String,
+        birth_date: String,
+        birth_date_binary: i64,
+        user_name: String,
+        secret_question: String,
+        secret_answer: String,
+        email_address: String,
+    },
+    CancelRegistration,
     OpenChangePassword,
     SubmitChangePassword {
         account_id: String,
@@ -524,6 +809,21 @@ pub enum NativeUiIntent {
 impl fmt::Debug for NativeUiIntent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::OpenMonthlyCard => f.write_str("OpenMonthlyCard"),
+            Self::RedeemMonthlyCard => f.write_str("RedeemMonthlyCard"),
+            Self::CloseMonthlyCard => f.write_str("CloseMonthlyCard"),
+            Self::SubmitRegistration { account_id, .. } => f
+                .debug_struct("SubmitRegistration")
+                .field("account_id", account_id)
+                .field("password", &"<redacted>")
+                .field("confirm_password", &"<redacted>")
+                .field("birth_date", &"<redacted>")
+                .field("birth_date_binary", &"<redacted>")
+                .field("user_name", &"<redacted>")
+                .field("secret_question", &"<redacted>")
+                .field("secret_answer", &"<redacted>")
+                .field("email_address", &"<redacted>")
+                .finish(),
             Self::SubmitChangePassword { account_id, .. } => f
                 .debug_struct("SubmitChangePassword")
                 .field("account_id", account_id)
@@ -532,7 +832,8 @@ impl fmt::Debug for NativeUiIntent {
                 .field("confirm_password", &"<redacted>")
                 .finish(),
             Self::Login
-            | Self::RegisterAccount
+            | Self::OpenRegistration
+            | Self::CancelRegistration
             | Self::OpenChangePassword
             | Self::CancelChangePassword
             | Self::OpenSafeKey
@@ -553,7 +854,8 @@ impl fmt::Debug for NativeUiIntent {
                 "{}",
                 match self {
                     Self::Login => "Login",
-                    Self::RegisterAccount => "RegisterAccount",
+                    Self::OpenRegistration => "OpenRegistration",
+                    Self::CancelRegistration => "CancelRegistration",
                     Self::OpenChangePassword => "OpenChangePassword",
                     Self::CancelChangePassword => "CancelChangePassword",
                     Self::OpenSafeKey => "OpenSafeKey",
@@ -600,6 +902,8 @@ impl fmt::Debug for NativeUiIntent {
 /// Gateway callbacks for shell transitions.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NativeGatewayEvent {
+    BillingReply(crate::native_billing::BillingReply),
+    MonthlyCardReply(crate::native_monthly_card::MonthlyCardReply),
     Connected,
     AccountCreated,
     AccountCreationFailed {
@@ -666,6 +970,25 @@ impl NativeUiIntentQueue {
 }
 
 impl NativeShellModel {
+    /// Start an identity login after the host has verified the wallet proof.
+    /// The token remains in the host transport and never enters this UI model.
+    pub fn begin_verified_identity_login(&mut self, account_id: &str) -> bool {
+        if self.screen != NativeShellScreen::Login || self.login_request_in_flight {
+            return false;
+        }
+        let account_id = account_id.trim();
+        if account_id.is_empty() {
+            self.set_error("verified account is required");
+            return false;
+        }
+        self.login.account = account_id.to_owned();
+        self.login.clear_password();
+        self.screen = NativeShellScreen::Authenticating;
+        self.login_request_in_flight = true;
+        self.notice = None;
+        true
+    }
+
     fn begin_login(&mut self) -> bool {
         if self.login_request_in_flight {
             self.set_error("login request is still pending");
@@ -683,18 +1006,93 @@ impl NativeShellModel {
 
     pub fn apply_ui_intent(&mut self, intent: NativeUiIntent) -> bool {
         match (self.screen, intent) {
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::OpenMonthlyCard) => {
+                self.monthly_card.open = true;
+                self.monthly_card.focus = crate::native_monthly_card::MonthlyCardFocus::Code;
+                true
+            }
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::CloseMonthlyCard) => {
+                self.monthly_card.open = false;
+                true
+            }
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::RedeemMonthlyCard)
+                if self.monthly_card.open && self.monthly_card.can_submit() =>
+            {
+                let Some(request_id) = self.monthly_card.request_id.checked_add(1) else {
+                    return false;
+                };
+                self.monthly_card.request_id = request_id;
+                self.monthly_card.submitted_code = self.monthly_card.code.clone();
+                self.monthly_card.pending = true;
+                self.monthly_card.command_sent = false;
+                self.monthly_card.request_started_at_ms = SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .map_or(0, |d| d.as_millis() as u64);
+                self.monthly_card.message = None;
+                true
+            }
             (NativeShellScreen::Login, NativeUiIntent::Login) => self.begin_login(),
-            (NativeShellScreen::Login, NativeUiIntent::RegisterAccount) => {
+            (NativeShellScreen::Login, NativeUiIntent::OpenRegistration) => {
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
-                if !self.login.is_ready() {
-                    self.set_error("account and password are required");
+                self.registration = RegistrationForm::default();
+                self.screen = NativeShellScreen::Registration;
+                self.notice = None;
+                true
+            }
+            (NativeShellScreen::Registration, NativeUiIntent::CancelRegistration) => {
+                if self.register_request_in_flight {
+                    self.set_error("注册请求正在处理中，请稍候。");
+                    return false;
+                }
+                self.registration = RegistrationForm::default();
+                self.screen = NativeShellScreen::Login;
+                self.notice = None;
+                true
+            }
+            (
+                NativeShellScreen::Registration,
+                NativeUiIntent::SubmitRegistration {
+                    account_id,
+                    password,
+                    confirm_password,
+                    birth_date,
+                    birth_date_binary,
+                    user_name,
+                    secret_question,
+                    secret_answer,
+                    email_address,
+                },
+            ) => {
+                self.registration.account_id = account_id;
+                self.registration.password = password;
+                self.registration.confirm_password = confirm_password;
+                self.registration.birth_date = birth_date;
+                self.registration.user_name = user_name;
+                self.registration.secret_question = secret_question;
+                self.registration.secret_answer = secret_answer;
+                self.registration.email_address = email_address;
+
+                if self.register_request_in_flight {
+                    self.set_error("注册请求正在处理中，请稍候。");
+                    return false;
+                }
+                let expected_birth_date_binary =
+                    match validate_registration_fields(&self.registration) {
+                        Ok(value) => value,
+                        Err(message) => {
+                            self.set_error(message);
+                            return false;
+                        }
+                    };
+                if expected_birth_date_binary != birth_date_binary {
+                    self.set_error("出生日期校验失败，请重新填写。");
                     return false;
                 }
                 self.register_request_in_flight = true;
-                self.set_info("account creation requested");
+                self.notice = None;
                 true
             }
             (
@@ -712,6 +1110,7 @@ impl NativeShellModel {
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::OpenCharacterCreate) => {
                 self.character_create.reset();
+                self.ensure_creatable_class();
                 self.screen = NativeShellScreen::CharacterCreate;
                 self.notice = None;
                 true
@@ -730,6 +1129,8 @@ impl NativeShellModel {
                 } else if self.create_character_request_in_flight {
                     self.set_error("character creation request is still pending");
                     false
+                } else if self.reject_unavailable_creation_class(&class_name) {
+                    false
                 } else {
                     self.create_character_request_in_flight = true;
                     self.set_info(format!(
@@ -745,6 +1146,19 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::StartGame) => {
+                if self.monthly_card.open || self.billing.open {
+                    return false;
+                }
+                if self
+                    .monthly_card
+                    .status
+                    .as_ref()
+                    .is_some_and(|status| !status.can_enter_game)
+                {
+                    self.monthly_card.open = true;
+                    self.monthly_card.message = Some("monthlyCardRequired".into());
+                    return false;
+                }
                 if self.start_game_request_in_flight {
                     self.set_error("start game request is still pending");
                     return false;
@@ -753,6 +1167,7 @@ impl NativeShellModel {
                     Some(index) if self.has_character_index(index) => {
                         self.screen = NativeShellScreen::StartingGame;
                         self.start_game_request_in_flight = true;
+                        self.start_game_acknowledged = false;
                         self.notice = None;
                         true
                     }
@@ -847,14 +1262,12 @@ impl NativeShellModel {
                 }
                 match self.login.focus {
                     LoginFocus::Account => {
-                        if self.login.account.chars().count() < 24 {
-                            self.login.account.push(key.to_ascii_lowercase());
-                        }
+                        self.login.account =
+                            safe_key_edit(&self.login.account, &key.to_string(), true, false);
                     }
                     LoginFocus::Password => {
-                        if self.login.password.chars().count() < 32 {
-                            self.login.password.push(key.to_ascii_lowercase());
-                        }
+                        self.login.password =
+                            safe_key_edit(&self.login.password, &key.to_string(), false, false);
                     }
                     LoginFocus::LoginButton | LoginFocus::NewAccountButton => {
                         self.login.focus = LoginFocus::Account;
@@ -866,10 +1279,10 @@ impl NativeShellModel {
             (NativeShellScreen::SafeKey, NativeUiIntent::SafeKeyDelete) => {
                 match self.login.focus {
                     LoginFocus::Account => {
-                        self.login.account.pop();
+                        self.login.account = safe_key_edit(&self.login.account, "", true, true);
                     }
                     LoginFocus::Password => {
-                        self.login.password.pop();
+                        self.login.password = safe_key_edit(&self.login.password, "", false, true);
                     }
                     LoginFocus::LoginButton | LoginFocus::NewAccountButton => {
                         self.login.focus = LoginFocus::Account;
@@ -946,9 +1359,9 @@ impl NativeShellModel {
                     self.set_error("logout request is still pending");
                     return false;
                 }
-                self.screen = NativeShellScreen::Login;
-                self.selected_character_index = None;
-                self.active_character = None;
+                // Stay in the current scene until the server saves the character
+                // and supplies its refreshed roster through LogOutSuccess.
+                self.start_game_acknowledged = false;
                 self.logout_request_in_flight = true;
                 self.notice = None;
                 self.login.clear_password();
@@ -963,6 +1376,32 @@ impl NativeShellModel {
 
     pub fn apply_gateway_event(&mut self, event: NativeGatewayEvent) -> bool {
         match (self.screen, event) {
+            (_, NativeGatewayEvent::BillingReply(reply)) => {
+                let character = self.billing_character_index();
+                let account = self.last_account.as_deref().unwrap_or_default();
+                let accepted =
+                    self.billing
+                        .accept(reply, account, character, crate::native_billing::now_ms());
+                if accepted {
+                    if let Some(status) = &self.billing.status {
+                        self.monthly_card.status = Some(status.monthly_card.clone());
+                    }
+                }
+                accepted
+            }
+            (_, NativeGatewayEvent::MonthlyCardReply(reply)) => {
+                self.monthly_card.accept(reply);
+                if self.screen == NativeShellScreen::CharacterSelect
+                    && self
+                        .monthly_card
+                        .status
+                        .as_ref()
+                        .is_some_and(|status| !status.can_enter_game)
+                {
+                    self.monthly_card.open = true;
+                }
+                true
+            }
             (_, NativeGatewayEvent::Disconnect { reason }) => {
                 self.screen = NativeShellScreen::ConnectionLost;
                 self.clear_session_payload();
@@ -978,6 +1417,8 @@ impl NativeShellModel {
             }
             (_, NativeGatewayEvent::AccountCreated) if self.register_request_in_flight => {
                 self.register_request_in_flight = false;
+                self.registration = RegistrationForm::default();
+                self.screen = NativeShellScreen::Login;
                 self.set_info("account created; use Login to continue");
                 true
             }
@@ -997,7 +1438,8 @@ impl NativeShellModel {
             ) if self.login_request_in_flight => {
                 self.login_request_in_flight = false;
                 self.logout_request_in_flight = false;
-                self.screen = NativeShellScreen::CharacterSelect;
+                self.screen = NativeShellScreen::OpeningLogin;
+                self.login_opening_elapsed = Duration::ZERO;
                 self.last_account = Some(account);
                 self.selected_character_index = characters.first().map(|character| character.index);
                 self.characters = characters;
@@ -1060,6 +1502,7 @@ impl NativeShellModel {
                 },
             ) => {
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.set_error(reason.unwrap_or_else(|| "start game rejected".to_owned()));
                 true
@@ -1069,14 +1512,16 @@ impl NativeShellModel {
                 NativeGatewayEvent::StartGameAck { accepted: true, .. },
             ) => {
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = true;
                 self.set_info("start game acknowledged");
                 true
             }
             (
                 NativeShellScreen::StartingGame,
                 NativeGatewayEvent::PlayerBootstrapped { character },
-            ) => {
+            ) if self.start_game_acknowledged => {
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = false;
                 self.screen = NativeShellScreen::InGame;
                 self.active_character = Some(character);
                 self.set_info("entered game");
@@ -1142,6 +1587,10 @@ impl NativeShellModel {
                 true
             }
             (_, NativeGatewayEvent::OperationFailure { message }) => {
+                if self.logout_request_in_flight {
+                    self.logout_request_in_flight = false;
+                    self.start_game_acknowledged = self.screen == NativeShellScreen::InGame;
+                }
                 match self.screen {
                     NativeShellScreen::Authenticating => {
                         self.login_request_in_flight = false;
@@ -1151,11 +1600,15 @@ impl NativeShellModel {
                         self.register_request_in_flight = false;
                         self.logout_request_in_flight = false;
                     }
+                    NativeShellScreen::Registration => {
+                        self.register_request_in_flight = false;
+                    }
                     NativeShellScreen::CharacterCreate => {
                         self.create_character_request_in_flight = false;
                     }
                     NativeShellScreen::StartingGame => {
                         self.start_game_request_in_flight = false;
+                        self.start_game_acknowledged = false;
                         self.screen = NativeShellScreen::CharacterSelect;
                     }
                     NativeShellScreen::ChangePassword => {
@@ -1179,15 +1632,23 @@ impl NativeShellModel {
                 self.register_request_in_flight = false;
                 self.create_character_request_in_flight = false;
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = false;
                 self.retry_request_in_flight = false;
                 self.logout_request_in_flight = false;
                 self.change_password_request_in_flight = false;
                 self.change_password_command_sent = false;
                 self.delete_request_in_flight = false;
                 self.delete_command_sent = false;
-                self.screen = NativeShellScreen::Login;
+                self.screen = NativeShellScreen::CharacterSelect;
                 self.characters = characters;
-                self.selected_character_index = None;
+                self.selected_character_index = self
+                    .selected_character_index
+                    .filter(|index| {
+                        self.characters
+                            .iter()
+                            .any(|character| character.index == *index)
+                    })
+                    .or_else(|| self.characters.first().map(|character| character.index));
                 self.active_character = None;
                 self.notice = None;
                 self.login.clear_password();
@@ -1204,6 +1665,152 @@ impl NativeShellModel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn creation_policy_defaults_to_five_and_rejects_invalid_explicit_names() {
+        let default = CharacterCreationClasses::default();
+        for class in CHARACTER_CREATION_CLASSES {
+            assert!(default.allows(class));
+        }
+        for invalid in [
+            vec![],
+            vec!["Warrior", "Warrior"],
+            vec!["warrior"],
+            vec!["Unknown"],
+            vec![""],
+            vec![" Warrior"],
+        ] {
+            assert!(CharacterCreationClasses::from_names(&invalid).is_err());
+        }
+        let classic =
+            CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap();
+        assert_eq!(classic.cycle("Taoist", false), "Warrior");
+        assert_eq!(classic.cycle("Warrior", true), "Taoist");
+        assert_eq!(classic.cycle("Assassin", false), "Warrior");
+        assert!(!classic.allows("Assassin"));
+        assert!(!classic.allows("Archer"));
+    }
+
+    #[test]
+    fn creation_policy_keeps_reset_default_and_keyboard_cycle_on_allowed_classes() {
+        let mut model = NativeShellModel::default();
+        model.set_character_creation_classes(
+            CharacterCreationClasses::from_names(&["Wizard", "Archer"]).unwrap(),
+        );
+        model.screen = NativeShellScreen::CharacterSelect;
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenCharacterCreate));
+        assert_eq!(model.character_create.class_name, "Wizard");
+        assert_eq!(model.character_create.focus, CharacterCreateFocus::Name);
+        model.cycle_creation_class(false);
+        assert_eq!(model.character_create.class_name, "Archer");
+        model.cycle_creation_class(false);
+        assert_eq!(model.character_create.class_name, "Wizard");
+        assert!(model.apply_ui_intent(NativeUiIntent::CancelCharacterCreate));
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenCharacterCreate));
+        assert_eq!(model.character_create.class_name, "Wizard");
+    }
+
+    #[test]
+    fn creation_policy_rejects_every_disabled_create_intent_before_pending_state() {
+        let mut model = NativeShellModel::default();
+        model.set_character_creation_classes(
+            CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+        );
+        model.screen = NativeShellScreen::CharacterCreate;
+        for class in ["Assassin", "Archer", "Unknown"] {
+            assert!(!model.apply_ui_intent(NativeUiIntent::CreateCharacter {
+                name: "Unavailable".into(),
+                class_name: class.into(),
+                gender_name: "Male".into(),
+            }));
+            assert!(!model.create_character_request_in_flight);
+            assert_eq!(model.screen, NativeShellScreen::CharacterCreate);
+        }
+    }
+
+    #[test]
+    fn creation_policy_never_filters_existing_assassin_or_archer_roster_and_start_game() {
+        for class in ["Assassin", "Archer"] {
+            let mut model = NativeShellModel::default();
+            let character = CharacterSummary::new(7, "ExistingHero", 40, class, "Female");
+            model.characters = vec![character.clone()];
+            model.set_character_creation_classes(
+                CharacterCreationClasses::from_names(&["Warrior", "Wizard", "Taoist"]).unwrap(),
+            );
+            model.screen = NativeShellScreen::CharacterSelect;
+            assert_eq!(model.characters, vec![character.clone()]);
+            assert!(model.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index: 7 }));
+            assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+            assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
+                accepted: true,
+                reason: None
+            }));
+            assert!(
+                model.apply_gateway_event(NativeGatewayEvent::PlayerBootstrapped {
+                    character: character.clone()
+                })
+            );
+            assert_eq!(model.screen, NativeShellScreen::InGame);
+            assert_eq!(model.active_character.as_ref(), Some(&character));
+            assert!(!model.character_creation_classes.allows(class));
+        }
+    }
+
+    #[test]
+    fn login_door_uses_original_frames_and_blocks_start_until_completion() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Authenticating;
+        model.login_request_in_flight = true;
+        let event = NativeGatewayEvent::LoginSuccess {
+            account: "door-test".to_owned(),
+            characters: vec![CharacterSummary::new(7, "Hero", 1, "Warrior", "Male")],
+        };
+        assert!(model.apply_gateway_event(event.clone()));
+        assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
+        assert_eq!(model.login_opening_frame(), 1);
+        assert!(!model.apply_ui_intent(NativeUiIntent::StartGame));
+        model.advance_login_opening(Duration::from_millis(99));
+        assert_eq!(model.login_opening_frame(), 1);
+        model.advance_login_opening(Duration::from_millis(1));
+        assert_eq!(model.login_opening_frame(), 2);
+        assert!(!model.apply_gateway_event(event));
+        assert_eq!(
+            model.login_opening_frame(),
+            2,
+            "duplicate success restarted door"
+        );
+        model.advance_login_opening(Duration::from_millis(1699));
+        assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
+        assert_eq!(model.login_opening_frame(), 18);
+        model.advance_login_opening(Duration::from_millis(1));
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert_eq!(model.selected_character_index, Some(7));
+        assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+    }
+
+    #[test]
+    fn disconnect_during_door_cannot_later_reveal_stale_characters() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Authenticating;
+        model.login_request_in_flight = true;
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            account: "door-test".to_owned(),
+            characters: Vec::new(),
+        }));
+        model.advance_login_opening(Duration::from_millis(900));
+        assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect { reason: None }));
+        model.advance_login_opening(Duration::from_secs(10));
+        assert_eq!(model.screen, NativeShellScreen::ConnectionLost);
+    }
+
+    impl NativeShellModel {
+        // Existing post-login scenarios start after the visual transition.
+        fn apply_completed_login_for_test(&mut self, event: NativeGatewayEvent) -> bool {
+            let applied = self.apply_gateway_event(event);
+            self.advance_login_opening(Duration::from_millis(1800));
+            applied
+        }
+    }
 
     fn model_with_valid_login() -> NativeShellModel {
         let mut model = NativeShellModel::default();
@@ -1239,15 +1846,149 @@ mod tests {
     }
 
     #[test]
+    fn registration_date_encoding_matches_dotnet_unspecified_datetime_ticks() {
+        assert_eq!(parse_registration_birth_date("").unwrap(), 0);
+        assert_eq!(
+            parse_registration_birth_date("2000-01-01").unwrap(),
+            630_822_816_000_000_000
+        );
+        assert!(parse_registration_birth_date("01/01/2000").is_err());
+        assert!(parse_registration_birth_date("2000-02-30").is_err());
+        assert!(parse_registration_birth_date("0000-01-01").is_err());
+        assert!(parse_registration_birth_date("2000-1-01").is_err());
+        assert!(parse_registration_birth_date("10000-01-01").is_err());
+    }
+
+    #[test]
+    fn registration_email_validation_matches_crystals_shared_pattern() {
+        assert!(valid_registration_email(""));
+        assert!(valid_registration_email("hero@example.test"));
+        assert!(valid_registration_email("note hero@example.test."));
+        assert!(!valid_registration_email("1S"));
+        assert!(!valid_registration_email("hero!@example.test"));
+        assert!(!valid_registration_email("hero@example"));
+    }
+
+    fn valid_registration_form() -> RegistrationForm {
+        RegistrationForm {
+            account_id: "newhero".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn registration_password_boundaries_and_production_weak_passwords_are_rejected() {
+        for (password, accepted) in [
+            ("Alpha1234", false),
+            ("Alpha12345", true),
+            ("Alpha1234567890", true),
+            ("Alpha12345678901", false),
+            ("2468135790", true),
+            ("Alpha1234!", false),
+            ("Alpha1234 ", false),
+            ("Alpha1234\n", false),
+            ("密码Alpha12345", false),
+            ("1234567890", false),
+            ("PASSWORD123", false),
+            ("Qwerty12345", false),
+            ("Mir2Password", false),
+        ] {
+            let mut form = valid_registration_form();
+            form.password = password.to_owned();
+            form.confirm_password = password.to_owned();
+            assert_eq!(validate_registration_fields(&form).is_ok(), accepted);
+            assert_eq!(
+                validate_registration_field(&form, RegistrationFocus::Password).is_ok(),
+                accepted
+            );
+            assert_eq!(
+                validate_registration_field(&form, RegistrationFocus::ConfirmPassword).is_ok(),
+                accepted
+            );
+        }
+        let mut form = valid_registration_form();
+        form.account_id = "NewAccount9".to_owned();
+        form.password = "newaccount9".to_owned();
+        form.confirm_password = form.password.clone();
+        assert_eq!(
+            validate_registration_fields(&form),
+            Err("密码不能与账号相同（不区分大小写）。")
+        );
+        form.account_id = "different".to_owned();
+        assert!(validate_registration_fields(&form).is_ok());
+        form.confirm_password = "Newaccount9".to_owned();
+        assert_eq!(
+            validate_registration_fields(&form),
+            Err("两次输入的密码不一致。")
+        );
+    }
+
+    #[test]
+    fn registration_optional_fields_accept_empty_values_and_keep_their_bounds() {
+        let mut form = valid_registration_form();
+        assert_eq!(validate_registration_fields(&form), Ok(0));
+        for (account, accepted) in [
+            ("ab", false),
+            ("abc", true),
+            ("abcdefghijklmno", true),
+            ("abcdefghijklmnop", false),
+            ("bad id", false),
+        ] {
+            form.account_id = account.to_owned();
+            assert_eq!(validate_registration_fields(&form).is_ok(), accepted);
+        }
+        form.account_id = "newhero".to_owned();
+        form.user_name = "名".repeat(20);
+        form.secret_question = "问".repeat(30);
+        form.secret_answer = "答".repeat(30);
+        form.birth_date = "2000-02-29".to_owned();
+        form.email_address = "hero@example.test".to_owned();
+        assert!(validate_registration_fields(&form).is_ok());
+        form.user_name.push('名');
+        assert!(validate_registration_field(&form, RegistrationFocus::UserName).is_err());
+        form.secret_question.push('问');
+        assert!(validate_registration_field(&form, RegistrationFocus::SecretQuestion).is_err());
+        form.secret_answer.push('答');
+        assert!(validate_registration_field(&form, RegistrationFocus::SecretAnswer).is_err());
+        form.birth_date = "2001-02-29".to_owned();
+        assert!(validate_registration_field(&form, RegistrationFocus::BirthDate).is_err());
+        form.email_address = format!("{}@example.test", "a".repeat(40));
+        assert!(validate_registration_field(&form, RegistrationFocus::EmailAddress).is_err());
+    }
+
+    #[test]
+    fn registration_password_policy_does_not_block_legacy_login_credentials() {
+        let mut model = model_with_valid_login();
+        model.login.password = "short".to_owned();
+        assert!(model.apply_ui_intent(NativeUiIntent::Login));
+        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.login_request_in_flight);
+    }
+
+    #[test]
+    fn empty_login_fields_do_not_block_opening_the_new_account_dialog() {
+        let mut model = NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..Default::default()
+        };
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenRegistration));
+        assert_eq!(model.screen, NativeShellScreen::Registration);
+    }
+
+    #[test]
     fn login_flow_transitions_to_character_select_after_success() {
         let mut model = model_with_valid_login();
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
         assert_eq!(model.screen, NativeShellScreen::Authenticating);
 
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: starter_characters(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: starter_characters(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.login.password, "");
         assert_eq!(model.characters.len(), 2);
@@ -1256,14 +1997,39 @@ mod tests {
     }
 
     #[test]
-    fn account_registration_stays_on_login_and_surfaces_authoritative_result() {
+    fn registration_requires_a_dedicated_validated_dialog_and_returns_to_login_on_success() {
         let mut model = model_with_valid_login();
-        assert!(model.apply_ui_intent(NativeUiIntent::RegisterAccount));
-        assert_eq!(model.screen, NativeShellScreen::Login);
-        assert_eq!(
-            model.notice.as_ref().map(|notice| notice.message.as_str()),
-            Some("account creation requested")
-        );
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenRegistration));
+        assert_eq!(model.screen, NativeShellScreen::Registration);
+        assert!(!model.apply_ui_intent(NativeUiIntent::Login));
+
+        let invalid = NativeUiIntent::SubmitRegistration {
+            account_id: "bad id".to_owned(),
+            password: "secret".to_owned(),
+            confirm_password: "secret".to_owned(),
+            birth_date: String::new(),
+            birth_date_binary: 0,
+            user_name: String::new(),
+            secret_question: String::new(),
+            secret_answer: String::new(),
+            email_address: String::new(),
+        };
+        assert!(!model.apply_ui_intent(invalid));
+        assert!(!model.register_request_in_flight);
+
+        let valid = NativeUiIntent::SubmitRegistration {
+            account_id: "newhero".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
+            birth_date: "2001-02-03".to_owned(),
+            birth_date_binary: parse_registration_birth_date("2001-02-03").unwrap(),
+            user_name: "New Hero".to_owned(),
+            secret_question: "first pet?".to_owned(),
+            secret_answer: "cat".to_owned(),
+            email_address: "hero@example.test".to_owned(),
+        };
+        assert!(model.apply_ui_intent(valid));
+        assert!(model.register_request_in_flight);
 
         assert!(model.apply_gateway_event(NativeGatewayEvent::AccountCreated));
         assert_eq!(model.screen, NativeShellScreen::Login);
@@ -1284,162 +2050,34 @@ mod tests {
     }
 
     #[test]
-    fn registration_and_login_receipts_are_operation_scoped_in_either_order() {
-        let mut register_then_login = model_with_valid_login();
-        assert!(register_then_login.apply_ui_intent(NativeUiIntent::RegisterAccount));
-        assert!(register_then_login.apply_ui_intent(NativeUiIntent::Login));
-        assert!(register_then_login.login_request_in_flight);
-        assert!(register_then_login.register_request_in_flight);
-
-        assert!(register_then_login.apply_gateway_event(NativeGatewayEvent::AccountCreated));
-        assert!(!register_then_login.register_request_in_flight);
-        assert!(register_then_login.login_request_in_flight);
-        assert_eq!(
-            register_then_login.screen,
-            NativeShellScreen::Authenticating
-        );
-
-        assert!(
-            register_then_login.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-                account: "test-account".to_owned(),
-                characters: starter_characters(),
-            })
-        );
-        assert!(!register_then_login.login_request_in_flight);
-        assert!(!register_then_login.register_request_in_flight);
-        assert_eq!(
-            register_then_login.screen,
-            NativeShellScreen::CharacterSelect
-        );
-
-        let mut login_then_register = model_with_valid_login();
-        assert!(login_then_register.apply_ui_intent(NativeUiIntent::RegisterAccount));
-        assert!(login_then_register.apply_ui_intent(NativeUiIntent::Login));
-
-        assert!(
-            login_then_register.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-                account: "test-account".to_owned(),
-                characters: starter_characters(),
-            })
-        );
-        assert!(!login_then_register.login_request_in_flight);
-        assert!(login_then_register.register_request_in_flight);
-        assert_eq!(
-            login_then_register.screen,
-            NativeShellScreen::CharacterSelect
-        );
-
-        assert!(login_then_register.apply_gateway_event(NativeGatewayEvent::AccountCreated));
-        assert!(!login_then_register.login_request_in_flight);
-        assert!(!login_then_register.register_request_in_flight);
-        assert_eq!(
-            login_then_register.screen,
-            NativeShellScreen::CharacterSelect
-        );
-    }
-
-    #[test]
-    fn registration_and_login_failure_receipts_are_operation_scoped_in_either_order() {
-        let mut registration_first = model_with_valid_login();
-        assert!(registration_first.apply_ui_intent(NativeUiIntent::RegisterAccount));
-        assert!(registration_first.apply_ui_intent(NativeUiIntent::Login));
-
-        assert!(registration_first.apply_gateway_event(
-            NativeGatewayEvent::AccountCreationFailed {
-                message: "account already exists".to_owned(),
-            },
-        ));
-        assert!(!registration_first.register_request_in_flight);
-        assert!(registration_first.login_request_in_flight);
-        assert_eq!(registration_first.screen, NativeShellScreen::Authenticating);
-
-        assert!(
-            registration_first.apply_gateway_event(NativeGatewayEvent::LoginFailure {
-                message: "bad account".to_owned(),
-            })
-        );
-        assert!(!registration_first.login_request_in_flight);
-        assert!(!registration_first.register_request_in_flight);
-        assert_eq!(registration_first.screen, NativeShellScreen::Login);
-        assert_eq!(
-            registration_first
-                .notice
-                .as_ref()
-                .map(|notice| notice.message.as_str()),
-            Some("bad account")
-        );
-
-        let mut login_first = model_with_valid_login();
-        assert!(login_first.apply_ui_intent(NativeUiIntent::RegisterAccount));
-        assert!(login_first.apply_ui_intent(NativeUiIntent::Login));
-
-        assert!(
-            login_first.apply_gateway_event(NativeGatewayEvent::LoginFailure {
-                message: "bad account".to_owned(),
-            })
-        );
-        assert!(!login_first.login_request_in_flight);
-        assert!(login_first.register_request_in_flight);
-        assert_eq!(login_first.screen, NativeShellScreen::Login);
-
-        assert!(
-            login_first.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
-                message: "account already exists".to_owned(),
-            },)
-        );
-        assert!(!login_first.login_request_in_flight);
-        assert!(!login_first.register_request_in_flight);
-        assert_eq!(login_first.screen, NativeShellScreen::Login);
-        assert_eq!(
-            login_first
-                .notice
-                .as_ref()
-                .map(|notice| notice.message.as_str()),
-            Some("account already exists")
-        );
-    }
-
-    #[test]
-    fn duplicate_and_late_login_registration_receipts_are_ignored() {
-        let mut model = model_with_valid_login();
-        assert!(model.apply_ui_intent(NativeUiIntent::RegisterAccount));
-        assert!(model.apply_ui_intent(NativeUiIntent::Login));
-
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: starter_characters(),
+    fn registration_failure_keeps_the_dialog_and_late_receipts_are_ignored() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Registration;
+        model.registration.account_id = "newhero".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
+        assert!(model.apply_ui_intent(NativeUiIntent::SubmitRegistration {
+            account_id: model.registration.account_id.clone(),
+            password: model.registration.password.clone(),
+            confirm_password: model.registration.confirm_password.clone(),
+            birth_date: String::new(),
+            birth_date_binary: 0,
+            user_name: String::new(),
+            secret_question: String::new(),
+            secret_answer: String::new(),
+            email_address: String::new(),
         }));
-        let screen = model.screen;
-        let characters = model.characters.clone();
-        let notice = model.notice.clone();
-        assert!(model.register_request_in_flight);
-
         assert!(
-            !model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-                account: "stale-account".to_owned(),
-                characters: vec![CharacterSummary::new(9, "stale", 99, "Wizard", "Male")],
+            model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+                message: "account already exists".to_owned(),
             })
         );
-        assert!(
-            !model.apply_gateway_event(NativeGatewayEvent::LoginFailure {
-                message: "stale login failure".to_owned(),
-            })
-        );
-        assert_eq!(model.screen, screen);
-        assert_eq!(model.characters, characters);
-        assert_eq!(model.notice, notice);
-        assert!(model.register_request_in_flight);
-
-        assert!(model.apply_gateway_event(NativeGatewayEvent::AccountCreated));
+        assert_eq!(model.screen, NativeShellScreen::Registration);
+        assert!(!model.register_request_in_flight);
+        assert_eq!(model.registration.account_id, "newhero");
         let notice = model.notice.clone();
         assert!(!model.apply_gateway_event(NativeGatewayEvent::AccountCreated));
-        assert!(
-            !model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
-                message: "late registration failure".to_owned(),
-            })
-        );
         assert_eq!(model.notice, notice);
-        assert!(!model.register_request_in_flight);
     }
 
     #[test]
@@ -1491,10 +2129,12 @@ mod tests {
     fn empty_roster_is_supported_after_login_success() {
         let mut model = model_with_valid_login();
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: Vec::new(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: Vec::new(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.characters.len(), 0);
     }
@@ -1548,14 +2188,17 @@ mod tests {
     fn start_game_ack_does_not_enter_game() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::StartingGame;
+        model.start_game_request_in_flight = true;
 
         assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
             accepted: false,
             reason: Some("blocked".to_owned()),
         }));
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert!(!model.start_game_acknowledged);
 
         model.screen = NativeShellScreen::StartingGame;
+        model.start_game_request_in_flight = true;
 
         assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
             accepted: true,
@@ -1566,14 +2209,30 @@ mod tests {
             model.notice.as_ref().map(|notice| notice.message.as_str()),
             Some("start game acknowledged")
         );
+        assert!(model.start_game_acknowledged);
     }
 
     #[test]
-    fn player_bootstrap_enters_game() {
+    fn ordinary_player_bootstrap_requires_accepted_start_game_ack() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::StartingGame;
+        model.start_game_request_in_flight = true;
         let character = CharacterSummary::new(1, "Warrior", 11, "Warrior", "Female");
 
+        assert!(
+            !model.apply_gateway_event(NativeGatewayEvent::PlayerBootstrapped {
+                character: character.clone(),
+            })
+        );
+        assert_eq!(model.screen, NativeShellScreen::StartingGame);
+        assert!(model.active_character.is_none());
+        assert!(!model.start_game_acknowledged);
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
+            accepted: true,
+            reason: None,
+        }));
+        assert!(model.start_game_acknowledged);
         assert!(
             model.apply_gateway_event(NativeGatewayEvent::PlayerBootstrapped {
                 character: character.clone(),
@@ -1581,10 +2240,38 @@ mod tests {
         );
         assert_eq!(model.screen, NativeShellScreen::InGame);
         assert_eq!(model.active_character.as_ref(), Some(&character));
+        assert!(!model.start_game_acknowledged);
         assert_eq!(
             model.notice.as_ref().map(|notice| notice.message.as_str()),
             Some("entered game")
         );
+    }
+
+    #[test]
+    fn start_game_ack_fact_is_reset_for_new_entry_logout_and_disconnect() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        model.characters = starter_characters();
+        model.selected_character_index = Some(1);
+        model.start_game_acknowledged = true;
+        assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+        assert!(!model.start_game_acknowledged);
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
+            accepted: false,
+            reason: None,
+        }));
+        assert!(!model.start_game_acknowledged);
+
+        model.screen = NativeShellScreen::InGame;
+        model.start_game_acknowledged = true;
+        assert!(model.apply_ui_intent(NativeUiIntent::Logout));
+        assert!(!model.start_game_acknowledged);
+
+        model.screen = NativeShellScreen::StartingGame;
+        model.start_game_acknowledged = true;
+        assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect { reason: None }));
+        assert!(!model.start_game_acknowledged);
     }
 
     #[test]
@@ -1609,16 +2296,60 @@ mod tests {
     }
 
     #[test]
+    fn verified_identity_login_uses_normal_roster_transition_without_a_password() {
+        let mut model = model_with_valid_login();
+        let account = "obl_00112233445566778899aabbccddeeff";
+        assert!(model.begin_verified_identity_login(&format!(" {account} ")));
+        assert_eq!(model.login.account, account);
+        assert!(model.login.password.is_empty());
+        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.login_request_in_flight);
+        assert!(!model.begin_verified_identity_login(account));
+        let roster = starter_characters();
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            account: account.into(),
+            characters: roster.clone(),
+        }));
+        assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
+        model.advance_login_opening(Duration::from_millis(1800));
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert_eq!(model.characters, roster);
+        assert_eq!(model.last_account.as_deref(), Some(account));
+        assert!(!model.login_request_in_flight);
+        assert!(!model.start_game_request_in_flight);
+    }
+
+    #[test]
+    fn verified_identity_login_rejects_empty_accounts_and_other_screens() {
+        let mut model = model_with_valid_login();
+        assert!(!model.begin_verified_identity_login(" \t "));
+        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert!(!model.login_request_in_flight);
+        for screen in [
+            NativeShellScreen::Connecting,
+            NativeShellScreen::CharacterSelect,
+            NativeShellScreen::InGame,
+            NativeShellScreen::ConnectionLost,
+        ] {
+            model.screen = screen;
+            assert!(!model.begin_verified_identity_login("obl_00112233445566778899aabbccddeeff"));
+            assert_eq!(model.screen, screen);
+        }
+    }
+
+    #[test]
     fn debug_output_never_contains_password_and_login_clears_it() {
         let mut model = model_with_valid_login();
         let before = format!("{:?}", model);
         assert!(!before.contains("secret-pass"));
 
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: Vec::new(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: Vec::new(),
+            })
+        );
         let after = format!("{:?}", model);
         assert!(!after.contains("secret-pass"));
         assert_eq!(model.login.password, "");
@@ -1672,7 +2403,7 @@ mod tests {
     }
 
     #[test]
-    fn logged_out_returns_to_login_with_server_roster() {
+    fn logged_out_returns_to_character_select_with_server_roster() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::InGame;
         model.login.password = "super-secret".to_owned();
@@ -1682,8 +2413,12 @@ mod tests {
         assert!(model.apply_gateway_event(NativeGatewayEvent::LoggedOut {
             characters: roster.clone(),
         }));
-        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.characters, roster);
+        assert_eq!(
+            model.selected_character_index,
+            roster.first().map(|character| character.index)
+        );
         assert!(model.active_character.is_none());
         assert!(model.login.password.is_empty());
         let debug = format!("{model:?}");
@@ -1697,12 +2432,39 @@ mod tests {
         model.login.password = "super-secret".to_owned();
         model.active_character = starter_characters().into_iter().next();
         assert!(model.apply_ui_intent(NativeUiIntent::Logout));
-        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert_eq!(model.screen, NativeShellScreen::InGame);
         assert!(model.login.password.is_empty());
-        assert!(model.active_character.is_none());
+        assert!(model.active_character.is_some());
+        assert!(model.logout_request_in_flight);
+        assert!(!model.apply_ui_intent(NativeUiIntent::Logout));
         assert_ne!(model.screen, NativeShellScreen::Connecting);
         let debug = format!("{model:?}");
         assert!(!debug.contains("super-secret"));
+    }
+
+    #[test]
+    fn logout_failure_keeps_character_and_allows_retry_then_switch() {
+        let mut model = model_with_valid_login();
+        model.screen = NativeShellScreen::InGame;
+        model.characters = starter_characters();
+        model.active_character = model.characters.first().cloned();
+        assert!(model.apply_ui_intent(NativeUiIntent::Logout));
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::OperationFailure {
+                message: "log out failed".into(),
+            })
+        );
+        assert_eq!(model.screen, NativeShellScreen::InGame);
+        assert!(model.active_character.is_some());
+        assert!(!model.logout_request_in_flight);
+        assert!(model.apply_ui_intent(NativeUiIntent::Logout));
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoggedOut {
+            characters: starter_characters(),
+        }));
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert!(model.active_character.is_none());
+        assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+        assert_eq!(model.screen, NativeShellScreen::StartingGame);
     }
 
     #[test]

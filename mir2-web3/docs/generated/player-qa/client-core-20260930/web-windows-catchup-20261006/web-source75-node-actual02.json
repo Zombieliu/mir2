@@ -1,0 +1,82 @@
+{
+  "owner": "Root",
+  "kind": "Source75 original focused and adjacent actual Node02 accepted",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\node-tests02-config.json",
+    "bytes": 4225,
+    "sha256": "4dc62f925ffae6ef671e929b503dffcca01ad2d06f8568fee95cd4d231396d2d"
+  },
+  "snapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-strict-snapshot02.json",
+    "bytes": 19908529,
+    "sha256": "40aecdd1b00c7b5e68e05aa20c56fe468d2f5fa1a452b26069730bda75827616"
+  },
+  "actual": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 80256,
+    "kind": "Root approved original Source75 focused/adjacent Node02 after exact stale fixture repairs",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1205,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source75-storage-prepare-paint-20261012-01/root-approved01/node-tests02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "unchanged": true,
+    "closed": true,
+    "exitCode": 0,
+    "postExitFullInputGuardCompleted": true
+  },
+  "tap": {
+    "tests": 107,
+    "pass": 107,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "scripts": [
+    "scripts/test-bevy-storage-ui.mjs",
+    "scripts/test-bevy-bag-ui.mjs",
+    "scripts/test-bevy-bag-shell.mjs",
+    "scripts/test-bevy-hud-ui.mjs",
+    "scripts/test-bevy-npc-shop-ui.mjs"
+  ],
+  "storageTests": 50,
+  "originalStorage43AssertionsPreserved": true,
+  "newStorage7Executed": true,
+  "npcShop25Tests224AssertionsPreserved": true,
+  "hudExactCurrentEffectPrefixesRequired": true,
+  "priorFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\root-approved01\\source75-node-failed01.json",
+    "bytes": 2863,
+    "sha256": "764fbc0f6ba441232bd8a66d86069f5ba8a637fc81a028f6012be86d8fff82fb"
+  },
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\node-tests02\\stdout.txt",
+    "bytes": 27258,
+    "sha256": "c0c3a6fab1e5b71435209f067fae8a54f12afecb6bdbf90bb3124e499a6869bf"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\node-tests02\\stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source75-storage-prepare-paint-20261012-01\\node-tests02\\outer.json",
+    "bytes": 553,
+    "sha256": "f0e571a2a2bb9cb1d820cf9c6b82143b3434991fb1c6149054a1e04280ddb788"
+  },
+  "actualRenderer": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "accepted": true
+}

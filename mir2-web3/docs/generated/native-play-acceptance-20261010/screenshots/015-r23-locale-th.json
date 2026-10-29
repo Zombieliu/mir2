@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/015-r23-locale-th.jpg",
+  "purpose": "Thai basic labels rendered without apparent tofu; no full game translation acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\game\\mir2-platform-windows.exe",
+    "id": 18419886,
+    "title": "numeron-legend of rebirth"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 1026,
+  "height": 800,
+  "mime": "image/jpeg",
+  "bytes": 317536,
+  "sha256": "61f6e1f4c2491873969a7c2a736bf39d73f83c6a0dc4fb4f34527cead34d6fb3",
+  "recordedUtc": "2026-10-09T19:02:18.873Z"
+}

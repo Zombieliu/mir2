@@ -48,19 +48,12 @@ TOOLCHAIN="${RUST_TOOLCHAIN_VERSION:-1.89.0}"
 export PATH="$HOME/.cargo/bin:$PATH"
 
 RUNTIME_LOCK="$(pwd)/../game-client/runtime/Cargo.lock"
-PREBUILT_RUNTIME_WEBGPU_JS="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js"
-PREBUILT_RUNTIME_WEBGPU_WASM="$(pwd)/public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm"
-PREBUILT_RUNTIME_WEBGL2_JS="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js"
-PREBUILT_RUNTIME_WEBGL2_WASM="$(pwd)/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm"
-
 prebuilt_runtime_ready() {
-  [ -s "$PREBUILT_RUNTIME_WEBGPU_JS" ] \
-    && [ -s "$PREBUILT_RUNTIME_WEBGPU_WASM" ] \
-    && [ -s "$PREBUILT_RUNTIME_WEBGL2_JS" ] \
-    && [ -s "$PREBUILT_RUNTIME_WEBGL2_WASM" ]
+  node scripts/check-prebuilt-bevy-runtime.mjs >/dev/null 2>&1
 }
 
-# Hosted production releases pin immutable WebGPU/WebGL2 packages that were
+# Hosted production releases pin every immutable package declared by the manifest,
+# including shared GL2 only when compiled with that capability. These were
 # already built and uploaded by the asset release gate. Do not install a Rust
 # toolchain merely because the source tree is present in the deployment
 # archive; `npm run runtime:build:release` validates and reuses these packages.

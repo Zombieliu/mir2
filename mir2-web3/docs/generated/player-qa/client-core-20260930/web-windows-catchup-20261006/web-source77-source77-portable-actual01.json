@@ -1,0 +1,72 @@
+{
+  "owner": "Root",
+  "kind": "actual original portable34 second run allpass with honest first failure retained",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\portable-tests02-config.json",
+    "bytes": 4738,
+    "sha256": "de4c682d86642ce690cec8cb1d0ffd84d0e81cedc3fcfa0a8c1b2cd59eb80485"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-full-snapshot02.json",
+    "bytes": 45640815,
+    "sha256": "4949e4f3b02adc889d293f4e9d34f580e2d60d896e263d84a2f322c2822327e0"
+  },
+  "sourceAcceptance": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-full-input-acceptance02.json",
+    "bytes": 1844,
+    "sha256": "d99502ff7c14c845b8e2a8c741435162c8b4af59503fbeb05769e3c4dd99c351"
+  },
+  "sourceReview": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-code-review02.json",
+    "bytes": 10161,
+    "sha256": "0953cf544e5e3d7f7f421e99d283239e972f529285578e6b9e41af79494c8e6c"
+  },
+  "outer": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 98464,
+    "kind": "Root approved original Source77 portable34 final public Trade classification",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 3852,
+    "configPath": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/root-approved01/portable-tests02-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "stdout": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/portable-tests02/stdout.txt",
+    "bytes": 8871,
+    "sha256": "318db40ca27530237c41fb92f41d8302e1968d0e3a9ae6b84d849d25ddaccf04"
+  },
+  "stderr": {
+    "path": "C:/mir2-cross-platform-storage-20261002/web-source77-public-catalog-starter-20261012-01/portable-tests02/stderr.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "tests": {
+    "total": 34,
+    "pass": 34,
+    "fail": 0,
+    "skip": 0
+  },
+  "focusedAdjacent107": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-node-actual01.json",
+    "bytes": 2205,
+    "sha256": "3992e00b16115aef0c334773e946363bb8a658335fc7b6c5680ba9bdb3e8a184"
+  },
+  "totalActualTests": 141,
+  "firstFailure": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source77-public-catalog-starter-20261012-01\\root-approved01\\source77-portable-first-failure01.json",
+    "bytes": 3614,
+    "sha256": "e43d6c94311a446be0beacbb6ddeb239a5e142dc069e87d3dd0fab67d6b47f94"
+  },
+  "old31BytePrefixPreserved": true,
+  "all860ExactSelectorGatePassed": true,
+  "genuine709CopyAndMissingRemoteNegativesPassed": true,
+  "originalPostGuardReturned": true,
+  "goalComplete": false
+}

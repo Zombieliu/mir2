@@ -57,6 +57,7 @@ pub(crate) fn parse_grid(value: &str) -> Result<MirGridType, String> {
         "heroequipment" | "hero_equipment" => Ok(MirGridType::HeroEquipment),
         "questinventory" | "quest_inventory" => Ok(MirGridType::QuestInventory),
         "fishing" => Ok(MirGridType::Fishing),
+        "mount" => Ok(MirGridType::Mount),
         "belt" => Ok(MirGridType::Belt),
         other => Err(format!("unsupported grid: {other}")),
     }

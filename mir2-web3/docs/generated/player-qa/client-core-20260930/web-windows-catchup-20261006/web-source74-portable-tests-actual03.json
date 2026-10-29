@@ -1,0 +1,74 @@
+{
+  "owner": "Root",
+  "kind": "Source74 original final portable27 actual complete",
+  "config": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\portable-tests03-config.json",
+    "bytes": 4066,
+    "sha256": "69c116b9e07f8cd414a7c949143f5a9c46ee73b9f83cc4392194eab6afa5b59c"
+  },
+  "inputSnapshot": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\standalone-preparation01\\full-source-snapshot01.json",
+    "bytes": 75654375,
+    "sha256": "0fcb5f772f50625011fbd97738527fe44ba96114f698723496dc6a47993771bc"
+  },
+  "inputAcceptance": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\full-input-root-acceptance01.json",
+    "bytes": 2372,
+    "sha256": "b4ec2253b4f1bbdbd854fec537fe948d8b3cb863b7bcc7ddf30c93c8adc12f3c"
+  },
+  "originalCaller": {
+    "bytes": 4569,
+    "sha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+    "sessionId": 99188,
+    "closed": true,
+    "callerExitCode": 0,
+    "postExitFullInputGuardCompleted": true
+  },
+  "actualProduct": {
+    "owner": "Root",
+    "exitCode": 0,
+    "builderPid": 87676,
+    "kind": "Source74 final original portable27 with real strict standalone dependencies",
+    "exited": true,
+    "disposed": true,
+    "elapsedMs": 1903,
+    "configPath": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\root-approved01\\portable-tests03-config.json",
+    "uiOperated": false,
+    "runtimeLaunched": false,
+    "networkUsed": false,
+    "productionBuildAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "counts": {
+    "tests": 27,
+    "pass": 27,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "stderrBytes": 0,
+  "stdout": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\portable-tests03\\stdout.log",
+    "bytes": 6899,
+    "sha256": "8e5c77105a62be01053617d176083b2273ba7c03066ef23cfcc9b9476911d1be"
+  },
+  "stderr": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\portable-tests03\\stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outer": {
+    "path": "C:\\mir2-cross-platform-storage-20261002\\web-source74-bag-storage-skins-20261012-01\\portable-tests03\\outer.json",
+    "bytes": 543,
+    "sha256": "2a96c06f61a96d16f6a9fb6af8b643a4a221401f2a14e9076a806d37581388a8"
+  },
+  "actualProductionDist": ".next-web-windows-catchup-source74-20261012-01",
+  "installedSharpRealTarget": true,
+  "previous25TestBodiesRetained": true,
+  "newMeaningfulTests": 2,
+  "accepted": true,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

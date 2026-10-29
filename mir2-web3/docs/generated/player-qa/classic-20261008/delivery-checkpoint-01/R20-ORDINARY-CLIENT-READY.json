@@ -1,0 +1,41 @@
+{
+  "schema": "mir2.r20.ordinary-user-runtime-ready.v1",
+  "ready": true,
+  "createdUtc": "2026-10-08T03:07:18.7065368+00:00",
+  "exe": "C:/mir2-playtest-releases/20261008-classic-r22/user-client-r20-01/mir2-platform-windows.exe",
+  "workingDirectory": "C:/mir2-playtest-releases/20261008-classic-r22/user-client-r20-01",
+  "environment": {
+    "MIR2_NATIVE_ASSET_ROOT": "C:/mir2-playtest-releases/20261007-npc-map-r20/native-assets-01"
+  },
+  "signedCandidate": "WN-CANDIDATE-20261007-invited-20",
+  "sourceRevision": "8faedd89fbcdda7d4f814c05f7d2f56979ab5bf5",
+  "gateway": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "cmsMetadataEvidence": "C:/mir2-playtest-releases/20261008-classic-r22/user-client-r20-01/preparation/METADATA-COPY-01.json",
+  "assetVerificationEvidence": "C:/mir2-playtest-releases/20261008-classic-r22/user-client-r20-01/preparation/ASSETS-VERIFICATION-01.json",
+  "assetVerificationSha256": "0AA1FDEE1C566A8592F8AAD352FB48731DB01EADA16C47C43C2EAC9478E3421F",
+  "signedRuntimeBindings": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\user-client-r20-01\\mir2-client.toml",
+      "bytes": 231,
+      "sha256": "58A5A7CF2ED6E880A7A7F259243DD9AB96150FC43E1A346E6FC79B8DE6EE3641",
+      "matchesSignedManifest": true
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261008-classic-r22\\user-client-r20-01\\mir2-platform-windows.exe",
+      "bytes": 111160320,
+      "sha256": "E227A68C10042E6F7D7264B2F91A8F252A1B73D5AAD4FB6FA92FAD3E11D04FCB",
+      "matchesSignedManifest": true
+    }
+  ],
+  "exactOriginalAssetEnvSupported": true,
+  "assetEnvSource": "8faedd89:mir2-web3/apps/game-client/platform-windows/src/assets.rs",
+  "completeCandidateVerification": false,
+  "credentialsPresent": false,
+  "applicationLaunched": false,
+  "applicationClosed": false,
+  "assetRootCopied": false,
+  "assetRootLinked": false,
+  "installedDFModified": false,
+  "desktopModified": false,
+  "userLoginPerformed": false
+}

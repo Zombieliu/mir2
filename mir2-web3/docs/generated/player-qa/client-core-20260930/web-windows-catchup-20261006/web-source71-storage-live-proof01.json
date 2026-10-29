@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "kind": "Source71 finite normal storage first-refusal and persistence live QA",
+  "runtime": {
+    "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-runtime-actual01.json",
+    "bytes": 1804,
+    "sha256": "615b369b410b489fce1bec7b93c1bf7efa8beff20e0fa4bbdd419cefa36e97b1"
+  },
+  "interaction": "Ordinary Login then Start Game, InnKeeper_Anthony, Access; no QA/admin/teleport/global/runtime reads",
+  "beforeAnyReactStorageSlotOrKey": {
+    "firstOpen": {
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "controlsNotReady"
+    },
+    "settled": {
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "controlsNotReady"
+    },
+    "sharedBagOwnerDoesNotImplyStorageOwner": true
+  },
+  "ordinaryCompatibilityStoreClick": {
+    "owner": "react",
+    "phase": "inactive",
+    "reason": "compatibility"
+  },
+  "deposit": {
+    "bagBefore": 5,
+    "bagAfter": 4,
+    "storageBefore": 0,
+    "storageAfter": 1
+  },
+  "ordinaryTakeBackObserved": {
+    "defaultQuestTab": true,
+    "ordinaryBagHidden": true,
+    "requiresManualBag1": true
+  },
+  "withdraw": {
+    "bagBefore": 4,
+    "bagAfter": 5,
+    "storageBefore": 1,
+    "storageAfter": 0
+  },
+  "normalPersistence": {
+    "normalAltXSaveLogout": true,
+    "ordinaryReloadRetainedCache": true,
+    "existingCredentialsNormalAuthentication": true,
+    "normalStartGameAndNpcAccess": true,
+    "bagAfter": 5,
+    "storageAfter": 0,
+    "goldBefore": 180,
+    "goldAfter": 180,
+    "diagnosticAfter": {
+      "owner": "react",
+      "phase": "prepare",
+      "reason": "controlsNotReady"
+    }
+  },
+  "screenshots": [
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-storage-first-open01.png",
+      "bytes": 144523,
+      "sha256": "077d38f6424c5c861c6a7a50bbb7c8ecb7dc604b8a3fe76ceb3a773e459599aa"
+    },
+    {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source71-storage-relogin01.png",
+      "bytes": 63606,
+      "sha256": "9ace03acd807aad8d6721765300f0b9099f094e384125ae1f73975e9ca1d64ef"
+    }
+  ],
+  "limits": [
+    "Ready=false is actual. Specific Rust readiness gate not yet accepted; current ready diagnostic precedes renderer error.",
+    "Shared storage ready/owner, pointer handoff and overlay clearance remain open.",
+    "Take Back quest tab is a proven local Web gap; Source72 fix awaiting actual build/live QA.",
+    "No additional raw storage getter, product/WASM globals, force focus/visibility, QA commands, Cargo execution or live logs read.",
+    "Finite normal test only; no overall progress percentage/Candidate100/human acceptance/goalComplete claim."
+  ],
+  "sharedStorageHandoffAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false
+}

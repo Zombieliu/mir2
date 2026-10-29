@@ -1,0 +1,69 @@
+{
+  "schema": "mir2.web.publication.source72.v1",
+  "dateBeijing": "2026-10-12",
+  "branch": "codex/windows-player-journey",
+  "implementationCommit": "e07ddce1668246c19fd652d1be3496e6ff6edf8a",
+  "implementationCommitClosedExit0": true,
+  "normalPushClosedExit0": true,
+  "independentLsRemoteClosedExit0": true,
+  "verifiedRemoteRef": "refs/heads/codex/windows-player-journey",
+  "verifiedRemoteCommit": "e07ddce1668246c19fd652d1be3496e6ff6edf8a",
+  "forcePush": false,
+  "scope": {
+    "codeFiles": 3,
+    "ownedDocPrefixes": 7,
+    "finiteQaFiles": 12,
+    "totalPaths": 22,
+    "normalizedLeafBlobsVerified": 15,
+    "foreignDocBodiesExcluded": true
+  },
+  "validation": {
+    "nodeTestsPassed": 278,
+    "nodeTestsFailed": 0,
+    "nodeTestsSkipped": 0,
+    "storageTests": 43,
+    "sceneTests": 10,
+    "customGroupsSeparatelyCounted": 506,
+    "strictNextPassed": true,
+    "strictNextPages": 13,
+    "mainTsconfigOriginal4932Bytes": true,
+    "thinFiles": 4182,
+    "thinDirectories": 517,
+    "thinBytes": 285115179,
+    "thinLinks": 0,
+    "thinCapBytes": 377487360,
+    "normalTakeBackBag1Retained": true,
+    "normalQuestTakeBackReturnsBag1": true,
+    "normalDepositWithdrawalSaveReloginPassed": true,
+    "reloginInventoryCards": 5,
+    "reloginStorageCards": 0,
+    "reloginGold": 180
+  },
+  "limits": {
+    "sharedStorageOwnershipAccepted": false,
+    "sharedStorageFirstFailedRustReadyGateKnown": false,
+    "mobileActualAccepted": false,
+    "wholeParityPercentage": null,
+    "candidate100": false,
+    "goalStatus": "active",
+    "source72StartupCallerRemainsOpen": true,
+    "startupPostExitGuardPending": true
+  },
+  "cleanup": {
+    "exactDuplicateUserAuthorized": true,
+    "automaticReviewRejectedBeforeLaunch": true,
+    "statedReason": "blocked by policy",
+    "deletionExecuted": false,
+    "compressionExecuted": false
+  },
+  "liveProof": {
+    "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-live-proof01.json",
+    "bytes": 4430,
+    "sha256": "e93912b097b59ef50ccc229e4de1af7d35dce71dce18399994a8edf40cb79d53"
+  },
+  "reloginScreenshot": {
+    "path": "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source72-storage-relogin01.png",
+    "bytes": 64746,
+    "sha256": "febb21893f8573fdbfbec708642bb6c445fb4f93abd4f52a298db36302b63ef4"
+  }
+}

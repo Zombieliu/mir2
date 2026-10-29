@@ -1,0 +1,79 @@
+{
+  "kind": "actual-local-monthly-mail-paired-startup",
+  "observedAtUtc": "2026-10-10T13:17:35.229396+00:00",
+  "preparedReceipt": "MAIL-CANDIDATE-PREPARED.json",
+  "newNative": {
+    "sourceCommit": "8aafbb60dbe6955c943e0a00f10614005bc89a24",
+    "path": "C:\\mir2-build\\stripe-sandbox-20261010\\native\\mir2-platform-windows-shop-mail.next.exe",
+    "sha256": "60bdf6347bed7fa1ef2826c8429b7884f07ead78fad369335afd256163fcdf14",
+    "size": 127696896,
+    "pid": 289764
+  },
+  "newGateway": {
+    "sourceCommit": "92912f25c142ba3533fd7d59a73269d5d0b0db09",
+    "path": "F:\\mir2-build\\stripe-sandbox-20261010\\mir2-gateway-shop-mail.next.exe",
+    "sha256": "f402e44ac637ca36d8db057660b1e0ec941be564a8768c9c323efd2d83f716b1",
+    "size": 115455488,
+    "pid": 285912
+  },
+  "verifiedBackend": {
+    "sourceCommit": "1429e70e9032689327c345e884c5ca4d528d0396",
+    "ciRun": 38050349344,
+    "conclusion": "success"
+  },
+  "nativeRegression": {
+    "bevyMailPassed": 94,
+    "windowsMailPassed": 8
+  },
+  "oldNativePid": 277304,
+  "oldNativeExitedAfterUserNormalLogout": true,
+  "drainedCapacityBeforeSwitch": {
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "oldGatewayPid": 278076,
+  "oldGatewayStopped": true,
+  "oldGatewayStopMethod": "drained-process-stop-after-closed-operator-stdin",
+  "operatorStdinAttempt": "existing tool session stdin was closed; no shutdown command reached the Gateway",
+  "privateBackupCreated": true,
+  "stoppedSnapshotCreated": true,
+  "publicationMarkerEmptyAfterStop": true,
+  "savedAccountsPreservedAfterStop": true,
+  "savedAccountsPreservedAfterGatewayStartBeforeClient": true,
+  "privateGatewaySettingsUnchanged": true,
+  "clientConfigSha256": "c18d73c4960dbdb423d9c3824bb2700efbf14f2a4832328d4b6a20dbec7e7d18",
+  "sameNativeProfileAndReadOnlyAssets": true,
+  "testListenerPid": 280220,
+  "listenerAndWebhookSecretRetained": true,
+  "sandboxShortcutUpdated": true,
+  "healthOk": true,
+  "capacityAtObservation": {
+    "currentWsConnections": 1,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "nativeLaunchEvents": 7,
+  "nativeStartupStages": [
+    "configuration",
+    "asset_validation_and_map_decode",
+    "build_runtime_app",
+    "host_configured",
+    "enter_event_loop",
+    "first_main_update"
+  ],
+  "returnHtmlSha256": "b3476392d221966a03ac09a6bebd02b33c44b3a10cce991f9cb7b99e1196fc94",
+  "returnSecurityHeadersVerified": true,
+  "realPaymentPerformed": false,
+  "userParcelClaimedByAgent": false,
+  "userCardActivatedByAgent": false,
+  "publicPublished": false,
+  "humanNativeMailAcceptance": "open; user can log in normally and inspect the existing parcel",
+  "nativeVisualCapture": "not available; no human native screenshot acceptance claimed"
+}

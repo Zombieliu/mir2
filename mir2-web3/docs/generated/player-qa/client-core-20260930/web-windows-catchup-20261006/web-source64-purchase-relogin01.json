@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "owner": "Root",
+  "source": "Source64 actual normal browser gameplay",
+  "url": "http://127.0.0.1:19205/",
+  "webRuntime": {
+    "source": "Source64",
+    "owner": "Root",
+    "runtime": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/runtime-preparation01/runtime-snapshot01.json",
+      "bytes": 3090706,
+      "sha256": "a15fcfead8ed0de7f297089750ad897f9ce1147b325a146eba8b67c83dca93e4"
+    },
+    "review": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/source64-runtime-review01.json",
+      "bytes": 3054,
+      "sha256": "a1a1898966930f515a5fea61f834ffb8e8177e5a59bee3972e40e5dbc2bf429f"
+    },
+    "config": {
+      "path": "C:/mir2-cross-platform-storage-20261002/web-source64-npc-capabilities-20261011-01/root-approved01/web-start01-config.json",
+      "bytes": 2746,
+      "sha256": "e2d8b9d4094b4746a8435014fe6e9c455f15df9fe8bb6258c04cfcb407bdbd96"
+    },
+    "regularFiles": 7331,
+    "directoriesIncludingRoot": 778,
+    "links": 0,
+    "bytes": 374017832,
+    "packageCapBytes": 377487360,
+    "sourceAndRuntimeFreshHashDifferences": 0,
+    "membershipDifferences": 0,
+    "originalCaller": {
+      "bodyBytes": 4569,
+      "bodySha256": "497a5b184074ca9591cb666b0124097f7fe4e4a5fae28dbd9f54807b423e8383",
+      "sessionId": 6982
+    },
+    "oldWeb": {
+      "pid": 56584,
+      "parentPid": 58712,
+      "exitCode": -1,
+      "exited": true,
+      "disposed": true,
+      "originalCallerPostPinsPassed": true
+    },
+    "newWeb": {
+      "pid": 53752,
+      "parentPid": 61460,
+      "exeAndExactArgvVerified": true,
+      "loopbackPort": 19205,
+      "running": true,
+      "exited": false,
+      "disposed": false
+    },
+    "gateway": {
+      "source": "Source62",
+      "pid": 58656,
+      "unchanged": true
+    },
+    "compiledWs": "ws://127.0.0.1:19110/ws",
+    "privateConfigRead": false,
+    "productionAccepted": false,
+    "candidateAccepted": false,
+    "goalComplete": false
+  },
+  "actions": [
+    "normal Scott View and Candle quantity 1 purchase",
+    "normal F9 inventory and Candle selection",
+    "normal Alt+X saved exit",
+    "normal Login and StartGame",
+    "normal F9 inventory",
+    "normal Scott View owner producer observation"
+  ],
+  "purchase": {
+    "startingGold": 200,
+    "charged": 10,
+    "admittedCount": 1,
+    "replayed": false,
+    "ownerSnapshotGold": 190,
+    "temporaryDisplayedGold": 180
+  },
+  "relogin": {
+    "displayedGold": 190,
+    "ownerProducerGold": 190,
+    "inventoryCount": 4,
+    "inventoryNames": [
+      "Candle",
+      "CopperRing",
+      "GoldenPendant",
+      "Candle"
+    ],
+    "allFourItemsVisuallyPresent": true
+  },
+  "transportObservation": {
+    "boundedEvents": 6,
+    "truncated": false,
+    "hasMore": false,
+    "rawCredentialsOrAuthorityPublished": false
+  },
+  "screenshots": {
+    "purchase": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source64-purchase-double-gold01.png",
+      "bytes": 290035,
+      "sha256": "f6b53dd0d08379f44a6d8ca30812eb922ed9d0f8d1ad28a71982c1731d49806f"
+    },
+    "candle": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source64-candle-admitted01.png",
+      "bytes": 294162,
+      "sha256": "10fc80b1e0251bdc683a2b82b07b5968a77a0ca9431afc364530c001acabfa08"
+    },
+    "relogin": {
+      "path": "E:/mir2-player-journey/mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source64-purchase-relogin01.png",
+      "bytes": 297854,
+      "sha256": "e20749244a1e170fa42b1e3dae5a4e7e66c404399a390bea9b2d2a7e7980eeea"
+    }
+  },
+  "limitations": [
+    "Purchase presentation was React compatibility at 1280x900; this does not prove shared Bevy NPC shop takeover.",
+    "The temporary double delta display remains a real failure pending Source65 runtime verification.",
+    "Storage and mobile device acceptance remain pending."
+  ],
+  "normalUiOnly": true,
+  "qaAdminOrInternalGameApis": false,
+  "overallPercentage": null,
+  "candidate100": false,
+  "goalComplete": false
+}

@@ -1,0 +1,187 @@
+{
+  "sourceRevision": "c6c32381a646dae1067dafdeec57691f606b1779",
+  "archiveSha256": "929f84052ad06eafed83bbda6db5caf9dc85703eab287912235200cd90373cdf",
+  "entries": [
+    {
+      "path": "ci/authenticated-run.json",
+      "sizeBytes": 11917,
+      "sha256": "e174b027c15db9d54d8fd980b50dc05a4eb463079faf0bd3638bbdfe1fbc1e7a"
+    },
+    {
+      "path": "ci/authenticated-jobs.json",
+      "sizeBytes": 5324,
+      "sha256": "b0ff30be59efac7857edf40837bd1f0fb84ec3ed95e2b317520a402766ad7f62"
+    },
+    {
+      "path": "ci/authenticated-artifacts.json",
+      "sizeBytes": 747,
+      "sha256": "abcf48f6e3d01ec8cf8fc3b64ff89b9fdf015b242ad08af257671860c8a3c877"
+    },
+    {
+      "path": "ci/latest-mir2-gateway-release.json",
+      "sizeBytes": 1705,
+      "sha256": "63cda32721750fbb031a86ecc045b6453a9523be4c0bb4813326f699b30617af"
+    },
+    {
+      "path": "ci/RELEASE.json",
+      "sizeBytes": 1545,
+      "sha256": "7e1c4c2ed048b803ca803e559a9cb534af8d7a48c234c8d655496a225c673c5c"
+    },
+    {
+      "path": "ci/operator-verification.json",
+      "sizeBytes": 531,
+      "sha256": "1e48034c40c28b1dfbaf0fe2f190ae3a510313f98fa8888f1db61c170626f703"
+    },
+    {
+      "path": "ci/raw-ci.log",
+      "sizeBytes": 1160549,
+      "sha256": "412d7b2b0fed534afc1a1e6f58b06f59d191352beb42db10ab1ef2a7f2ffb610"
+    },
+    {
+      "path": "operators/OPERATOR-RECIPES.json",
+      "sizeBytes": 639,
+      "sha256": "ae05b18bec86d405accae634eee2f0c9e106f79f7e308af7ea6ede20968c0afa"
+    },
+    {
+      "path": "operators/VERIFIED-FILES.json",
+      "sizeBytes": 412,
+      "sha256": "cd1be39e45b7d368bd7733e69732b11f161597ed98c50bd18ee10526345c6c9e"
+    },
+    {
+      "path": "operators/upgrade-appearance-gateway-01.py",
+      "sizeBytes": 30748,
+      "sha256": "2e6259a3bd9649d47464019143ebe14ef45096612a92023d5d6d53a8240186e3"
+    },
+    {
+      "path": "operators/GATEWAY-CREATE-01.command",
+      "sizeBytes": 469,
+      "sha256": "7329b570dca75993db0cc342f44a9e5e07915958f74f5e2bdac64b6c83e9f849"
+    },
+    {
+      "path": "operators/GATEWAY-EXTRACT-01.command",
+      "sizeBytes": 2039,
+      "sha256": "f407b5272c6dc8a2114e633d4cd7c7206a1574a088806744ab62b5f2e068afb8"
+    },
+    {
+      "path": "operators/GATEWAY-SEAL-01.command",
+      "sizeBytes": 1196,
+      "sha256": "8eb5b45577a1d9f5ad7040124291c390fd877ff48e70d80856879456410404a3"
+    },
+    {
+      "path": "operators/GATEWAY-PREFLIGHT-01.command",
+      "sizeBytes": 961,
+      "sha256": "3e08ecb019320e7aef726efe7a1dc572ca27d44bed6dff6706af1149f042bee2"
+    },
+    {
+      "path": "operators/GATEWAY-APPLY-01.command",
+      "sizeBytes": 972,
+      "sha256": "51d247ac2b5135ea6bf012e5b1e33b74b449b67ba901fc11f1b4fe8497bd9de4"
+    },
+    {
+      "path": "tooling/verify-ci-artifact-01.py",
+      "sizeBytes": 5298,
+      "sha256": "2d4561b72ea4b01f5a6e0c183c592443feddbc874c4af866643e01c6c2684cb9"
+    },
+    {
+      "path": "tooling/prepare-server-operator-01.py",
+      "sizeBytes": 6091,
+      "sha256": "1c297d2715952c6f5ac25ccece003c3d465f982ddade051fcdc82ba1a3db2245"
+    },
+    {
+      "path": "tooling/public-appearance-01.mjs",
+      "sizeBytes": 9913,
+      "sha256": "36135d61ca4b4a8d3455e8189d4726a0c45673372af17f076c9c32f7884b39a0"
+    },
+    {
+      "path": "tooling/protocol-observation.mjs",
+      "sizeBytes": 14376,
+      "sha256": "b69ba03e9f6ee05286d401341c6dbbe6dac4a6e5014fa6a67e9c6167c072d097"
+    },
+    {
+      "path": "local-logs/remote-player-zone-red-01.log",
+      "sizeBytes": 35484,
+      "sha256": "57b400f29316939a5ae8b9aa7a06d1137ad9f6dda2a97c372b5808f703189e6b"
+    },
+    {
+      "path": "local-logs/remote-player-zone-green-01.log",
+      "sizeBytes": 4935,
+      "sha256": "06ff7c5cd3710e73790aad0fa3ada3ab561c078445b52402784888664f07881d"
+    },
+    {
+      "path": "local-logs/remote-player-zone-green-02.log",
+      "sizeBytes": 29580,
+      "sha256": "36bab0a69f353dc343db99581f81a6bbe060106db6874eecedad813e3461c16b"
+    },
+    {
+      "path": "local-logs/remote-player-zone-green-03.log",
+      "sizeBytes": 29851,
+      "sha256": "82cabdb60d34b3370c25740951d076c94b308e4cadf5fc6495e213189a323651"
+    },
+    {
+      "path": "local-logs/remote-player-gateway-green-01.log",
+      "sizeBytes": 37744,
+      "sha256": "897dd2e20e0074ef4b6a618a7620a0d2ef3a55dca477a09810b0c6edb127a993"
+    },
+    {
+      "path": "local-logs/remote-player-gateway-green-02.log",
+      "sizeBytes": 30241,
+      "sha256": "79659294fb8ec606e145cfdcffcc61d4c4c2fd93797d12ca8c4e92ac03b218c4"
+    },
+    {
+      "path": "local-logs/remote-player-zone-regression-01.log",
+      "sizeBytes": 45799,
+      "sha256": "813676efc060f26e174fefa6fc61aa79b9d480d4da72af8ff242685d072f660e"
+    },
+    {
+      "path": "local-logs/remote-player-zone-baseline-drop-01.log",
+      "sizeBytes": 30256,
+      "sha256": "73189b37540b4b444b140f3f1cc4534ba1366f931628a9753b68ce79d8d6d24c"
+    },
+    {
+      "path": "local-logs/remote-player-world-checkpoint-01.log",
+      "sizeBytes": 29915,
+      "sha256": "28168667b6e2f758cbedbb59103bcfe12e915bf4558e8868aa364e9c25f45739"
+    },
+    {
+      "path": "local-logs/remote-player-world-clean-rejoin-01.log",
+      "sizeBytes": 39606,
+      "sha256": "c588c0c6008737501073d29cfc4f5ce2e3ec207d5534b0074a6e038ed1507a79"
+    },
+    {
+      "path": "local-logs/remote-player-world-clean-rejoin-direct-01.log",
+      "sizeBytes": 210,
+      "sha256": "6e413adbaf897dbb4d2f305fd554096320c499a8bbfd5396398a782271218d8e"
+    },
+    {
+      "path": "local-logs/remote-player-artifact-verify-01.log",
+      "sizeBytes": 410,
+      "sha256": "5a47e34d7dbfc829129717005f5bd1fbcd2b3a67ac363b25712e60ba9705a9d6"
+    },
+    {
+      "path": "local-logs/remote-player-artifact-verify-02.log",
+      "sizeBytes": 498,
+      "sha256": "2acc430b728a8a75eaad32c41b6e0cda99548ee3a6f2f52970508ccbebeb1ab1"
+    },
+    {
+      "path": "local-logs/remote-player-operator-recipes-01.log",
+      "sizeBytes": 308,
+      "sha256": "b1dd89d54d1dfa35397e37295592074f727c0c5e85907c56d5b8c6c99dba7b1d"
+    },
+    {
+      "path": "local-logs/remote-player-server-stage-create-01.log",
+      "sizeBytes": 62,
+      "sha256": "de4129625b36975ef04b0f3c372623986c0e00448c59d69f1d7e9fe6eebf3725"
+    },
+    {
+      "path": "local-logs/remote-player-server-stage-extract-01.log",
+      "sizeBytes": 425,
+      "sha256": "dd37ef1f6c743a6036fb9096c6a18f98e72b1b067ac3133cbfd3f90592e73c4e"
+    },
+    {
+      "path": "local-logs/remote-player-server-stage-seal-01.log",
+      "sizeBytes": 51,
+      "sha256": "29873cf560196067a7d0911332fa3aa51bc8199839bf8ca5c9a4e7bf98a9353d"
+    }
+  ],
+  "actualLiveRollout": false
+}

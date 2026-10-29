@@ -1,0 +1,198 @@
+{
+  "owner": "Root",
+  "generatedAtUtc": "2026-10-07T13:21:01.653Z",
+  "kind": "Source29 actual commit/push and remote branch verification; separate post-commit ordinary record",
+  "commit": "a04462cb48e1d22acff1a2c532ba8faaabb5e474",
+  "parent": "fdd3abc37d3ab6df45b428013dda85501d7404c5",
+  "committedAt": "2026-10-07T21:15:44+08:00",
+  "title": "feat: add durable purchase wire and retained client receipt host",
+  "branch": "codex/windows-player-journey",
+  "filesCommitted": 33,
+  "insertions": 9019,
+  "deletions": 12,
+  "scopedPaths": [
+    "Cargo.lock",
+    "Cargo.toml",
+    "apps/game-client/client-core/src/lib.rs",
+    "apps/game-client/client-core/src/npc_purchase_host.rs",
+    "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+    "apps/game-client/client-wire/Cargo.lock",
+    "apps/game-client/client-wire/Cargo.toml",
+    "apps/game-client/client-wire/src/lib.rs",
+    "apps/game-client/platform-web/Cargo.lock",
+    "apps/game-client/platform-web/Cargo.toml",
+    "apps/game-client/platform-web/src/lib.rs",
+    "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+    "apps/gateway/Cargo.toml",
+    "apps/gateway/src/lib.rs",
+    "apps/gateway/src/npc_purchase_browser.rs",
+    "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+    "apps/gateway/src/web.rs",
+    "apps/web/lib/client-core-runtime.ts",
+    "apps/web/lib/npc-purchase-receipt.ts",
+    "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+    "docs/AGENT-ORCHESTRATION.md",
+    "docs/AGENT-TASK-QUEUE.md",
+    "docs/BACKEND-1TO1-PROGRESS.md",
+    "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+    "docs/CRYSTAL-1TO1-ROADMAP.md",
+    "docs/CRYSTAL-SERVER-PARITY.md",
+    "docs/FRONTEND-1TO1-GAPS.md",
+    "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-publication01.json",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result01.json",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result02.json",
+    "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-independent-review01.json"
+  ],
+  "toolEvidence": {
+    "commit": {
+      "sha": "a04462cb48e1d22acff1a2c532ba8faaabb5e474",
+      "parent": "fdd3abc37d3ab6df45b428013dda85501d7404c5",
+      "committedAt": "2026-10-07T21:15:44+08:00",
+      "title": "feat: add durable purchase wire and retained client receipt host",
+      "tool": {
+        "chunk_id": "01d03d",
+        "wall_time_seconds": 0.1856095,
+        "exit_code": 0,
+        "original_token_count": 44,
+        "output": "a04462cb48e1d22acff1a2c532ba8faaabb5e474\nfdd3abc37d3ab6df45b428013dda85501d7404c5\n2026-10-07T21:15:44+08:00\nfeat: add durable purchase wire and retained client receipt host\n"
+      }
+    },
+    "pushInitial": {
+      "chunk_id": "9978d7",
+      "wall_time_seconds": 10.0092652,
+      "session_id": 6701,
+      "original_token_count": 0,
+      "output": ""
+    },
+    "pushCompletion": {
+      "chunk_id": "c13781",
+      "wall_time_seconds": 0.0000082,
+      "exit_code": 0,
+      "original_token_count": 27,
+      "output": "To https://github.com/Zombieliu/mir2.git\n   fdd3abc37d..a04462cb48  HEAD -> codex/windows-player-journey\n"
+    },
+    "remote": {
+      "chunk_id": "94b534",
+      "wall_time_seconds": 5.2517072,
+      "exit_code": 0,
+      "original_token_count": 21,
+      "output": "a04462cb48e1d22acff1a2c532ba8faaabb5e474\trefs/heads/codex/windows-player-journey\n"
+    },
+    "status": {
+      "chunk_id": "748b5c",
+      "wall_time_seconds": 0.2175681,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": " M apps/web/tsconfig.json\n"
+    },
+    "commitTool": {
+      "chunk_id": "81748c",
+      "wall_time_seconds": 0.4430657,
+      "exit_code": 0,
+      "original_token_count": 320,
+      "output": "[codex/windows-player-journey a04462cb48] feat: add durable purchase wire and retained client receipt host\n 33 files changed, 9019 insertions(+), 12 deletions(-)\n create mode 100644 mir2-web3/apps/game-client/client-core/src/npc_purchase_host.rs\n create mode 100644 mir2-web3/apps/game-client/client-wire/Cargo.lock\n create mode 100644 mir2-web3/apps/game-client/client-wire/Cargo.toml\n create mode 100644 mir2-web3/apps/game-client/client-wire/src/lib.rs\n create mode 100644 mir2-web3/apps/game-client/platform-web/src/npc_purchase_receipt.rs\n create mode 100644 mir2-web3/apps/gateway/src/npc_purchase_browser.rs\n create mode 100644 mir2-web3/apps/web/lib/npc-purchase-receipt.ts\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result02.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-independent-review01.json\n"
+    },
+    "scopedPaths": [
+      "Cargo.lock",
+      "Cargo.toml",
+      "apps/game-client/client-core/src/lib.rs",
+      "apps/game-client/client-core/src/npc_purchase_host.rs",
+      "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "apps/game-client/client-wire/Cargo.lock",
+      "apps/game-client/client-wire/Cargo.toml",
+      "apps/game-client/client-wire/src/lib.rs",
+      "apps/game-client/platform-web/Cargo.lock",
+      "apps/game-client/platform-web/Cargo.toml",
+      "apps/game-client/platform-web/src/lib.rs",
+      "apps/game-client/platform-web/src/npc_purchase_receipt.rs",
+      "apps/gateway/Cargo.toml",
+      "apps/gateway/src/lib.rs",
+      "apps/gateway/src/npc_purchase_browser.rs",
+      "apps/gateway/src/npc_purchase_owner_route_tests.rs",
+      "apps/gateway/src/web.rs",
+      "apps/web/lib/client-core-runtime.ts",
+      "apps/web/lib/npc-purchase-receipt.ts",
+      "apps/web/scripts/test-bevy-npc-shop-buy.mjs",
+      "docs/AGENT-ORCHESTRATION.md",
+      "docs/AGENT-TASK-QUEUE.md",
+      "docs/BACKEND-1TO1-PROGRESS.md",
+      "docs/CROSS-PLATFORM-CLIENT-GOAL.md",
+      "docs/CRYSTAL-1TO1-ROADMAP.md",
+      "docs/CRYSTAL-SERVER-PARITY.md",
+      "docs/FRONTEND-1TO1-GAPS.md",
+      "docs/WEB-WINDOWS-CATCHUP-GOAL-20261006.md",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source28-publication01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result01.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-finite-result02.json",
+      "docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/npc-purchase-source29-independent-review01.json"
+    ]
+  },
+  "finiteResult": {
+    "repo": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\npc-purchase-source29-finite-result02.json",
+      "bytes": 159338,
+      "sha256": "20aa294a4eed1e8fc164cd213af184ad0dfa9b36e41e27fa61e4c5afcc77c180"
+    },
+    "qa": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source29-finite-result02.json",
+      "bytes": 159338,
+      "sha256": "20aa294a4eed1e8fc164cd213af184ad0dfa9b36e41e27fa61e4c5afcc77c180"
+    }
+  },
+  "independentReview": {
+    "repo": {
+      "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\npc-purchase-source29-independent-review01.json",
+      "bytes": 3451,
+      "sha256": "1e299dde4bd1c0269687cec6c695e97430f0f7578995260fb054d785a5d0e77c"
+    },
+    "qa": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source29-independent-review01.json",
+      "bytes": 3451,
+      "sha256": "1e299dde4bd1c0269687cec6c695e97430f0f7578995260fb054d785a5d0e77c"
+    }
+  },
+  "sourceSnapshots": {
+    "rust": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source29-rust02-snapshot.json",
+      "bytes": 283760,
+      "sha256": "40d3fb2e7eca3206c63b123df0b2ba899cb19f52ce1532b0ae5cd4020cad0249"
+    },
+    "node": {
+      "path": "C:\\mir2-cross-platform-storage-20261002\\repo-qa-web-windows-catchup-20261006-01\\w0-npc-purchase-source29-node01-snapshot.json",
+      "bytes": 10038968,
+      "sha256": "0e7e6c39d5f791e76983167d9ef8730b8eb730f1f0d81f735f092a5b11fb153b"
+    }
+  },
+  "postCommitRustUniqueInputCount": 897,
+  "postCommitRustInputDrift": 0,
+  "unrelatedTrackedChangePreserved": "apps/web/tsconfig.json",
+  "actualCommitAccepted": true,
+  "actualPushAccepted": true,
+  "remoteExactShaAccepted": true,
+  "finiteCpuAccepted": true,
+  "strictTypecheckAccepted": true,
+  "currentSelectedTests": {
+    "rust": 245,
+    "web": 106,
+    "newDistinct": 60
+  },
+  "latestActuallyBuiltSource": "Source25",
+  "source29PackageBuilt": false,
+  "nativeWebActualReceiverAndCompleteApplicationAccepted": false,
+  "uiOperated": false,
+  "runtimeLaunched": false,
+  "gameNetworkUsed": false,
+  "gitNetworkUsed": true,
+  "wasmApiUsed": false,
+  "playerAccepted": false,
+  "productionBuildAccepted": false,
+  "candidateAccepted": false,
+  "goalComplete": false,
+  "overallPercentage": null,
+  "goalStatus": "active",
+  "scope": "Git push/ls-remote only. Goal remains active for actual Native/Web receiver/complete economic application, client-wire build fingerprint and matched rebuild. Original UI restriction remains in force.",
+  "selfCommitNote": "This ordinary post-commit record is not part of its own commit; carry into the next scoped source commit without changing frozen finite records."
+}

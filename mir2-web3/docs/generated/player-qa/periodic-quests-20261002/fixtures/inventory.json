@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "file": "seed-check-v3-fixture-prep.json",
+      "bytes": 169598,
+      "sha256": "b341e2503ac0356808586b8af6345ec62d3c18fd3e49eb72a9993740bca86cfe"
+    },
+    {
+      "file": "seed-final-validation-v1.json",
+      "bytes": 6889,
+      "sha256": "8828497cae10345f51158817668324ec247fbea40c381fec0095681b467bb852"
+    },
+    {
+      "file": "seed-guard-evidence-v2.json",
+      "bytes": 1861,
+      "sha256": "79a100217cf92a4bce0ac76fe8d933185803ea19c8f8b26810c5435b454f11a1"
+    },
+    {
+      "file": "seed-periodic-build-attempt-1.log",
+      "bytes": 45550,
+      "sha256": "9dcca3d4d48224352ac530fb4c8d550b11b1e19f77e8dd8b31cffc595c1ba697"
+    },
+    {
+      "file": "seed-periodic-run-attempt-1.log",
+      "bytes": 84,
+      "sha256": "8b3feaac3a8261c6ba9ffbccd6502e2af4d2dbaa8b34ace6def052c8df8154f0"
+    }
+  ]
+}

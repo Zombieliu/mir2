@@ -1,0 +1,81 @@
+{
+  "className": "Wizard",
+  "runId": "2026-10-01T13-42-59-010Z",
+  "startedAt": "2026-10-01T13:42:59.010Z",
+  "traceFile": "C:\\mir2-caster-qa-20261001-r2\\Wizard.post-route-supplies.2026-10-01T13-42-59-010Z.trace.jsonl",
+  "transport": "normal-local-websocket",
+  "visualAccepted": false,
+  "ordinaryRouteRunId": "2026-10-01T13-34-42-695Z",
+  "preservedFullRouteStoreSha256": "b87b3335703652d78293aa989094c1b810936f39a1742637118373f764ac844f",
+  "ordinaryClockNotExtended": true,
+  "postRouteOnly": true,
+  "purchases": [
+    {
+      "merchant": "Alchemist_Samuel",
+      "itemIndex": 663,
+      "name": "(MP)DrugLarge",
+      "quantity": 1,
+      "unitPrice": 225,
+      "cost": 225,
+      "before": {
+        "gold": 77080,
+        "quantity": 0,
+        "sequence": 685
+      },
+      "after": {
+        "gold": 76855,
+        "quantity": 1,
+        "sequence": 763
+      },
+      "receipts": [
+        {
+          "sequence": 761,
+          "at": "2026-10-01T13:43:27.586Z",
+          "packet": "LoseGold"
+        },
+        {
+          "sequence": 762,
+          "at": "2026-10-01T13:43:27.586Z",
+          "packet": "GainedItem"
+        }
+      ]
+    },
+    {
+      "merchant": "Merchant_Bull",
+      "itemIndex": 717,
+      "name": "RandomTeleport",
+      "quantity": 1,
+      "unitPrice": 100,
+      "cost": 100,
+      "before": {
+        "gold": 76855,
+        "quantity": 0,
+        "sequence": 763
+      },
+      "after": {
+        "gold": 76755,
+        "quantity": 1,
+        "sequence": 848
+      },
+      "receipts": [
+        {
+          "sequence": 846,
+          "at": "2026-10-01T13:43:45.859Z",
+          "packet": "LoseGold"
+        },
+        {
+          "sequence": 847,
+          "at": "2026-10-01T13:43:45.859Z",
+          "packet": "GainedItem"
+        }
+      ]
+    }
+  ],
+  "completed": true,
+  "finishedAt": "2026-10-01T13:43:49.169Z",
+  "actions": 50,
+  "normalLogout": {
+    "sequence": 850,
+    "at": "2026-10-01T13:43:49.145Z"
+  }
+}

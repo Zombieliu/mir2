@@ -1,0 +1,968 @@
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src\crystal_ui\hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused imports: `GAME_SHOP_QUANTITY_MAX` and `GAME_SHOP_QUANTITY_MIN`
+  --> src\crystal_ui\overlays.rs:46:58
+   |
+46 |     GameShopModel, GameShopPaymentType, GameShopRequest, GAME_SHOP_QUANTITY_MAX,
+   |                                                          ^^^^^^^^^^^^^^^^^^^^^^
+47 |     GAME_SHOP_QUANTITY_MIN,
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `item_icon_path`
+  --> src\crystal_ui\overlays.rs:49:51
+   |
+49 | use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
+   |                                                   ^^^^^^^^^^^^^^
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src\crystal_ui\overlays.rs:72:5
+   |
+72 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `GAME_SHOP_CELL_SIZE`, `GAME_SHOP_COLUMN_STEP`, `GAME_SHOP_GRID_ORIGIN`, `GAME_SHOP_PAGE_COLUMNS`, `GAME_SHOP_ROW_STEP`, and `SKILL_ROW_SIZE`
+   --> src\crystal_ui\overlays.rs:114:5
+    |
+114 |     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
+    |     ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+115 |     GAME_SHOP_PAGE_SIZE as CRYSTAL_GAME_SHOP_PAGE_SIZE, GAME_SHOP_PANEL_SIZE, GAME_SHOP_ROW_STEP,
+    |                                                                               ^^^^^^^^^^^^^^^^^^
+...
+122 |     SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+    |                                                          ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src\crystal_ui\social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src\crystal_ui\overlays.rs:7628:8
+     |
+7628 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7629 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7628 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7629 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:110:9
+    |
+110 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:155:9
+    |
+155 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:1180:5
+     |
+1180 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6761:17
+     |
+6761 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:6762:28
+     |
+6762 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:6762:28
+     |
+6762 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src\crystal_ui\overlays.rs:7197:18
+     |
+7197 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7881:25
+     |
+7881 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src\crystal_ui\overlays.rs:7882:36
+     |
+7882 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src\crystal_ui\overlays.rs:7866:5
+     |
+7866 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src\crystal_ui\overlays.rs:7882:36
+     |
+7882 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src\crystal_ui\overlays.rs:11248:9
+      |
+11248 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src\crystal_ui\overlays.rs:11249:9
+      |
+11249 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src\crystal_ui\overlays.rs:15367:5
+      |
+15367 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src\crystal_ui\overlays.rs:15368:5
+      |
+15368 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src\crystal_ui\overlays.rs:15369:5
+      |
+15369 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src\crystal_ui\mail_parcel_tests.rs:212:9
+    |
+212 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src\quest_ui.rs:1926:5
+     |
+1926 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::OverlayInventory` is more private than the item `render_order`
+    --> src\crystal_ui\hero_cross_inventory.rs:290:1
+     |
+ 290 | / pub fn render_order(
+ 291 | |     mut commands: Commands,
+ 292 | |     state: Res<NativePlayerUiState>,
+ 293 | |     panels: Query<Entity, With<OverlayInventory>>,
+ 294 | | ) {
+     | |_^ function `render_order` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayInventory` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2987:1
+     |
+2987 | struct OverlayInventory;
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+     = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_dialog::render::render`
+    --> src\crystal_ui\hero_dialog_render.rs:234:1
+     |
+ 234 | / pub fn render(
+ 235 | |     mut commands: Commands,
+ 236 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 237 | |     old: Query<Entity, With<HeroRoot>>,
+...    |
+ 242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+ 243 | | ) {
+     | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> src\crystal_ui\hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> src\crystal_ui\overlays.rs:202:1
+    |
+202 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `skill_bars::host::render`
+    --> src\crystal_ui\skill_bars_host.rs:131:1
+     |
+ 131 | / pub fn render(
+ 132 | |     mut commands: Commands,
+ 133 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 134 | |     old: Query<Entity, With<SkillBarRoot>>,
+...    |
+ 138 | |     assets: Option<Res<AssetServer>>,
+ 139 | | ) {
+     | |_^ function `skill_bars::host::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::render`
+    --> src\crystal_ui\hero_buff_hud.rs:121:1
+     |
+ 121 | / pub fn render(
+ 122 | |     mut commands: Commands,
+ 123 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 124 | |     old: Query<Entity, With<HeroBuffRoot>>,
+...    |
+ 127 | |     assets: Option<Res<AssetServer>>,
+ 128 | | ) {
+     | |_^ function `hero_buff_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `hero_buff_hud::hint`
+    --> src\crystal_ui\hero_buff_hud.rs:213:1
+     |
+ 213 | / pub fn hint(
+ 214 | |     mut commands: Commands,
+ 215 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 216 | |     old: Query<(Entity, &ComputedNode), With<HeroBuffHint>>,
+...    |
+ 219 | |     shell: Res<NativeShellModel>,
+ 220 | | ) {
+     | |_^ function `hero_buff_hud::hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `overlays::status_hud::render`
+    --> src\crystal_ui\status_hud.rs:407:1
+     |
+ 407 | / pub fn render(
+ 408 | |     mut commands: Commands,
+ 409 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 410 | |     old: Query<Entity, With<StatusRoot>>,
+...    |
+ 414 | |     assets: Option<Res<AssetServer>>,
+ 415 | | ) {
+     | |_^ function `overlays::status_hud::render` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayRoot` is more private than the item `render_hint`
+    --> src\crystal_ui\status_hud.rs:685:1
+     |
+ 685 | / pub fn render_hint(
+ 686 | |     mut commands: Commands,
+ 687 | |     roots: Query<Entity, With<OverlayRoot>>,
+ 688 | |     old: Query<(Entity, &ComputedNode), With<StatusHint>>,
+...    |
+ 691 | |     shell: Res<NativeShellModel>,
+ 692 | | ) {
+     | |_^ function `render_hint` is reachable at visibility `pub`
+     |
+note: but type `overlays::OverlayRoot` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:2984:1
+     |
+2984 | struct OverlayRoot;
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: type `overlays::OverlayButton` is more private than the item `press_real_button`
+    --> src\crystal_ui\npc_shop_layout_tests.rs:107:1
+     |
+ 107 | pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `press_real_button` is reachable at visibility `pub(crate)`
+     |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+    --> src\crystal_ui\overlays.rs:3162:1
+     |
+3162 | enum OverlayButton {
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src\crystal_ui\overlays.rs:3191:5
+     |
+3162 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3191 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3192 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3193 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3194 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3195 |     ToggleInventory,
+3196 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3197 |     ToggleShop,
+     |     ^^^^^^^^^^
+3198 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3199 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3202 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3207 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3226 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3227 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3230 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3234 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3238 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3239 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3240 |     GuildKickMember(u8),
+3241 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3244 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3253 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3312 |     MailRecipientFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+3313 |     MailMessageFocus,
+     |     ^^^^^^^^^^^^^^^^
+3314 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+3315 |     MailGoldFocus,
+3316 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+3317 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+3318 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+3355 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3356 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3368 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `overlay_compact_item_button` is never used
+     --> src\crystal_ui\overlays.rs:13204:4
+      |
+13204 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src\crystal_ui\overlays.rs:14816:4
+      |
+14816 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src\crystal_ui\overlays.rs:15023:4
+      |
+15023 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> src\crystal_ui\overlays.rs:15508:4
+      |
+15508 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src\crystal_ui\mail_editor.rs:11:18
+   |
+11 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src\native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> src\native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src\native_shell_ui.rs:379:5
+    |
+373 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+379 |     CycleClass,
+    |     ^^^^^^^^^^
+380 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+388 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+389 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> src\native_shell_ui.rs:2186:4
+     |
+2186 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src\native_shell_ui.rs:2306:4
+     |
+2306 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src\native_shell_ui.rs:2342:4
+     |
+2342 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src\native_shell_ui.rs:2379:4
+     |
+2379 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src\quest_ui.rs:73:7
+   |
+73 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> src\quest_ui.rs:1185:5
+     |
+1141 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1185 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1188 |     QuestHelp,
+     |     ^^^^^^^^^
+1189 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1190 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wrap_guidance_hint` is never used
+    --> src\quest_ui.rs:4512:4
+     |
+4512 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> src\quest_ui.rs:6182:4
+     |
+6182 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src\quest_ui.rs:6392:4
+     |
+6392 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src\skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:6760:9
+     |
+6760 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:6761:9
+     |
+6761 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:6762:9
+     |
+6762 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7880:17
+     |
+7880 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7881:17
+     |
+7881 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src\crystal_ui\overlays.rs:7882:17
+     |
+7882 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:104:5
+    |
+104 |     drop(compose);
+    |     ^^^^^-------^
+    |          |
+    |          argument has type `&overlays::MailComposeUi`
+    |
+    = note: `#[warn(dropping_references)]` on by default
+help: use `let _ = ...` to ignore the expression or result
+    |
+104 -     drop(compose);
+104 +     let _ = compose;
+    |
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src\crystal_ui\mail_parcel_tests.rs:105:5
+    |
+105 |     drop(state);
+    |     ^^^^^-----^
+    |          |
+    |          argument has type `&overlays::NativePlayerUiState`
+    |
+help: use `let _ = ...` to ignore the expression or result
+    |
+105 -     drop(state);
+105 +     let _ = state;
+    |
+
+warning: `mir2-client-bevy` (lib test) generated 70 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 40 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running unittests src\lib.rs (C:/mir2-build/client-bevy-r29-tests\debug\deps\mir2_client_bevy-4c1babf0437d187a.exe)
+
+running 215 tests
+test crystal_ui::chat::tests::source_trade_button_queues_trade_request_without_changing_chat_filter ... ok
+test crystal_ui::minimap::tests::quest_target_marker_is_larger_and_gold ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::list_request_failure_retries_and_character_change_clears_authority ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::only_exact_unsent_request_releases_wait_without_dropping_draft ... ok
+test crystal_ui::overlays::leave_game_dialog::tests::confirmation_uses_original_single_request_gate ... ok
+test crystal_ui::overlays::mail_compose_tests::queued_friend_inspect_and_bond_letter_request_uses_the_safe_letter_transition ... ok
+test crystal_ui::overlays::mail_parcel::tests::local_close_keeps_an_unanswered_cost_request_reserved ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::ordered_exit_closes_real_service_and_rejects_late_goods_but_a_new_request_can_reopen ... ok
+test crystal_ui::overlays::ranking_dialog::tests::unsent_release_matches_exact_request_and_retries_without_duplicate_inflight ... ok
+test crystal_ui::overlays::tests::guild_tabs_request_the_matching_authoritative_page ... ok
+test crystal_ui::overlays::tests::hud_controls_remain_above_quest_world_blocker_and_options_switches_panel ... ok
+test crystal_ui::overlays::tests::inspect_and_equip_mapping_cover_quest_rewards ... ok
+test crystal_ui::overlays::tests::quest_inventory_items_are_inspectable_but_read_only ... ok
+test crystal_ui::overlays::tests::storage_request_ids_survive_queue_clear_for_connection_reset ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_cancel_hides_pair_sends_one_request_and_keeps_backpack_and_offers ... ok
+test crystal_ui::quest_targets::tests::authored_target_arrival_flag_never_marks_a_named_monster ... ok
+test crystal_ui::quest_targets::tests::authored_target_hunts_use_configured_kill_order_not_flag_or_display_text ... ok
+test crystal_ui::quest_targets::tests::matches_crystal_plural_possessive_and_camel_case_labels ... ok
+test crystal_ui::quest_targets::tests::nearest_target_is_selected_for_the_requested_quest ... ok
+test crystal_ui::quest_targets::tests::only_incomplete_in_progress_objectives_mark_targets ... ok
+test game_shop::tests::request_sequence_exhaustion_fails_closed_instead_of_repeating ... ok
+test game_shop::tests::shared_ui_and_model_mirror_the_same_request_exactly ... ok
+test native_i18n::tests::npc_return_keeps_menu_context_separate_from_quest_heading ... ok
+test native_shell_ui::tests::draining_does_not_reopen_a_request_before_its_ack ... ok
+test native_shell_ui::tests::localized_create_request_translates_only_typed_class_and_gender ... ok
+test pending_operations::tests::cash_game_shop_refresh_is_diagnostic_only_without_request_id ... ok
+test pending_operations::tests::quest_ack_and_nack_release_only_the_exact_submission ... ok
+test pending_operations::tests::quest_refresh_releases_abandon_only_after_authoritative_lifecycle_change ... ok
+test pending_operations::tests::quest_refresh_releases_only_the_quest_with_a_proven_lifecycle_change ... ok
+test pending_operations::tests::storage_request_id_generation_is_monotonic_and_fails_closed_on_overflow ... ok
+test pending_operations::tests::storage_v2_ack_releases_exact_request_only_even_for_same_coordinates ... ok
+test player_text::tests::native_quest_locales_cover_all_authored_ids ... ok
+test quest_destination::tests::bichon_destination_matches_imported_safe_zone ... ok
+test quest_destination::tests::v2_oma_task_resolves_to_the_imported_oma_map_identity ... ok
+test quest_guidance::tests::configured_order_precedes_unconfigured_server_order ... ok
+test quest_guidance::tests::crystal_mode_is_the_default_and_unknown_values_are_ignored ... ok
+test quest_guidance::tests::newcomer_profile_loads_unique_classified_entries ... ok
+test quest_guidance::tests::newcomer_v2_profile_loads_every_server_owned_journey_task ... ok
+test quest_hunt_regions::tests::a1_remaining_cats_use_real_bichon_spawn_and_completed_targets_disappear ... ok
+test quest_hunt_regions::tests::wooma_practice_uses_three_actual_footholds_even_after_kill_quota ... ok
+test quest_journey::graduation_tests::graduation_projects_only_the_matching_class_three_local_targets ... ok
+test quest_journey::graduation_tests::graduation_requires_the_authoritative_v2_route_growth_claims_and_level ... ok
+test quest_journey::graduation_tests::v1_and_crystal_profiles_never_project_v2_graduation_choices ... ok
+test quest_journey::newcomer_v2_guidance_tests::v1_bundle_and_profile_selection_remain_available ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_bundle_has_six_chapters_and_projects_all_twenty_six_server_tasks ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_chapter_selection_never_treats_level_as_completion ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_keeps_at_most_three_server_objective_groups_in_the_hud_projection ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_uses_reviewed_jane_and_board_endpoints ... ok
+test quest_journey::tests::bundled_profile_has_six_contiguous_chapters_through_level_thirty ... ok
+test quest_journey::tests::chapter_progress_uses_only_authoritative_completed_ids ... ok
+test quest_journey::tests::class_hint_is_presentation_text_and_never_a_completion_signal ... ok
+test quest_journey::tests::completed_full_class_route_is_a_graduated_journey_even_when_overleveled ... ok
+test quest_journey::tests::crystal_mode_has_no_journey_projection ... ok
+test quest_journey::tests::diary_accept_and_finish_take_priority_over_npc_fallbacks ... ok
+test quest_journey::tests::extra_experience_does_not_skip_an_unfinished_earlier_chapter_quest ... ok
+test quest_journey::tests::main_step_prefers_turn_in_and_does_not_promote_optional_teaching_quest ... ok
+test quest_journey::tests::next_step_objective_collapses_multiline_server_text_to_one_layout_line ... ok
+test quest_journey::tests::next_step_omits_fixed_items_with_zero_authoritative_quantity ... ok
+test quest_journey::tests::next_step_uses_reviewed_location_when_giver_is_outside_live_entities ... ok
+test quest_journey::tests::unknown_history_keeps_an_active_earlier_chapter_visible_when_overleveled ... ok
+test quest_model::tests::authoritative_quest_apply_change_complete_and_remove_work ... ok
+test quest_model::tests::completed_history_distinguishes_unknown_empty_and_authoritative_ids ... ok
+test quest_model::tests::dialog_updates_replace_then_close_cleanly ... ok
+test quest_model::tests::no_duplicate_quest_entry_after_apply_or_upsert ... ok
+test quest_model::tests::pickup_feedback_keeps_recent_list_and_preserves_label ... ok
+test quest_model::tests::progress_and_completion_reward_labels_are_stable ... ok
+test quest_model::tests::target_hp_is_clamped_and_displayed ... ok
+test quest_model::tests::unknown_quest_status_and_npc_text_are_preserved ... ok
+test quest_practice::tests::every_authored_class_requirement_has_player_instructions ... ok
+test quest_practice::tests::graduation_requires_both_warrior_skills_without_other_classes ... ok
+test quest_practice::tests::native_lightning_practice_uses_its_own_spell_name_and_keeps_legacy_copy ... ok
+test quest_practice::tests::native_practice_and_supplies_cover_every_class_without_mutating_requirements ... ok
+test quest_supplies::tests::canonical_item_ids_override_translated_or_conflicting_display_names ... ok
+test quest_supplies::tests::expiry_seals_and_broken_instances_use_actual_tooltip_metadata ... ok
+test quest_supplies::tests::learned_material_skills_require_a_matching_authoritative_skill_entry ... ok
+test quest_supplies::tests::material_inventory_includes_equipment_without_counting_storage_or_duplicates ... ok
+test quest_supplies::tests::potion_tiers_and_known_weight_do_not_fabricate_inventory_readiness ... ok
+test quest_supplies::tests::requirements_shapes_and_equipment_slots_reject_unusable_materials_before_deduplication ... ok
+test quest_supplies::tests::travel_recommendations_do_not_become_unconfigured_departure_requirements ... ok
+test quest_supplies::tests::vendor_routes_use_imported_npcs_and_acknowledged_map_leg ... ok
+test quest_supplies::tests::wizard_late_route_shows_real_mp_and_upgraded_purchase_size ... ok
+test quest_ui::multi_guidance::tests::authored_cat_region_is_nearby_without_live_entities_and_completed_or_absent_progress_is_not_inferred ... ok
+test quest_ui::multi_guidance::tests::authored_target_map_takes_priority_over_a_monster_on_the_wrong_map ... ok
+test quest_ui::multi_guidance::tests::authored_target_oma_arrival_card_keeps_navigation_when_oma_appears ... ok
+test quest_ui::multi_guidance::tests::chapter_recommendation_wins_unless_player_pins_an_active_task ... ok
+test quest_ui::multi_guidance::tests::d401_route_card_displays_navigation_feedback_with_its_outcome_color ... ok
+test quest_ui::multi_guidance::tests::forced_line_breaks_preserve_indic_thai_and_combining_graphemes ... ok
+test quest_ui::multi_guidance::tests::full_counters_are_never_truncated ... ok
+test quest_ui::multi_guidance::tests::hud_renders_all_counters_and_switches_only_the_chosen_primary ... ok
+test quest_ui::multi_guidance::tests::hunt_navigation_card_keeps_region_action_with_or_without_visible_skeletons ... ok
+test quest_ui::multi_guidance::tests::long_route_and_other_map_rows_reserve_every_wrapped_line ... ok
+test quest_ui::multi_guidance::tests::long_unbroken_word_after_short_label_keeps_word_boundary ... ok
+test quest_ui::multi_guidance::tests::manual_choice_survives_server_reordering_and_ready_state_then_falls_back ... ok
+test quest_ui::multi_guidance::tests::native_portuguese_practice_wraps_before_height_and_keeps_controls_reachable ... ok
+test quest_ui::multi_guidance::tests::native_supply_vendor_names_match_the_routed_npc_in_every_locale ... ok
+test quest_ui::multi_guidance::tests::native_tracker_wheel_only_scrolls_hovered_viewport_and_clamps_to_content ... ok
+test quest_ui::multi_guidance::tests::nearest_two_other_tasks_only_use_actual_visible_targets ... ok
+test quest_ui::multi_guidance::tests::oma_route_card_uses_the_imported_bichon_entrance_and_navigation_intent ... ok
+test quest_ui::multi_guidance::tests::practice_card_names_skills_for_the_players_class_and_keeps_server_completion ... ok
+test quest_ui::multi_guidance::tests::remote_map_labels_require_known_map_and_authored_target ... ok
+test quest_ui::multilingual_visual_tests::nine_locale_longest_quests_and_real_npc_menus_offscreen ... ignored, explicit offline GPU fixture; run alone with real packaged assets and fresh output
+test quest_ui::multilingual_visual_tests::nine_locale_selected_supply_vendors_have_no_missing_glyphs_offscreen ... ignored, explicit offline GPU fixture; run alone with real packaged assets and fresh output
+test quest_ui::nonmodal_input_tests::actual_confirmation_and_alert_keep_full_stage_and_keyboard_capture ... ok
+test quest_ui::nonmodal_input_tests::authoritative_removal_clears_hidden_detail_and_diary_selection_capture ... ok
+test quest_ui::nonmodal_input_tests::npc_dialog_and_native_transactions_keep_their_existing_global_guard ... ok
+test quest_ui::nonmodal_input_tests::q_and_escape_hide_only_diary_while_independent_detail_keeps_its_pointer_bounds ... ok
+test quest_ui::nonmodal_input_tests::rendered_diary_and_detail_capture_only_their_source_frame_bounds ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_accept_in_both_towns_requires_this_npcs_actual_server_offer ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_actual_npc_list_accept_button_sends_the_offering_towns_id_once ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_daily_and_weekly_tabs_keep_old_active_band_and_do_not_mix_main_or_side ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_detail_finish_selects_current_town_waits_for_offer_and_submits_once ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_hunt_guidance_uses_canonical_species_and_unfinished_server_counters ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_nine_language_catalog_covers_actual_server_copy_without_losing_reset_rules ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_pending_finish_rejects_map_transfer_distance_missing_npc_and_completion ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_ready_guidance_prefers_current_town_then_fewest_legal_entrances ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_ready_tracker_names_either_town_and_emits_the_current_towns_npc_route ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_tabs_and_eight_rows_stay_above_the_existing_pagination_controls ... ok
+test quest_ui::periodic_quest_ui_tests::periodic_task_npc_route_validates_status_coordinate_id_map_and_epoch ... ok
+test quest_ui::periodic_quest_ui_tests::visual::periodic_nine_locale_diary_details_and_steward_widgets_offscreen ... ignored, explicit offline GPU fixture; requires packaged assets and fresh evidence output
+test quest_ui::route::tests::bichon_to_oma_uses_the_imported_public_entrance_not_the_cave_landing ... ok
+test quest_ui::route::tests::hidden_normal_exit_remains_legal_but_visible_exit_is_preferred ... ok
+test quest_ui::route::tests::target_switch_and_authoritative_map_change_recompute_the_next_step ... ok
+test quest_ui::route::tests::unknown_or_unroutable_targets_never_fabricate_an_entrance ... ok
+test quest_ui::supply_visual_tests::caster_supplies_and_chinese_quest_cards_offscreen ... ignored, explicit offscreen GPU screenshots; run alone after ordinary tests
+test quest_ui::tests::abandon_button_requires_yes_and_preserves_quest_id ... ok
+test quest_ui::tests::abandon_is_allowed_for_both_current_quest_states ... ok
+test quest_ui::tests::accept_and_finish_enabled_logic ... ok
+test quest_ui::tests::action_to_intent_preserves_payload ... ok
+test quest_ui::tests::back_history_removes_stale_quest_operation_links ... ok
+test quest_ui::tests::bichon_arrival_card_has_readable_destination_and_local_map_button ... ok
+test quest_ui::tests::blocks_gameplay_when_modal_open ... ok
+test quest_ui::tests::combat_target_panel_uses_compact_crystal_safe_geometry ... ok
+test quest_ui::tests::compact_native_labels_are_bounded_and_keep_quantities ... ok
+test quest_ui::tests::compact_quest_labels_never_truncate_inside_a_grapheme ... ok
+test quest_ui::tests::crystal_quest_diary_assets_are_source_bound_and_non_placeholder ... ok
+test quest_ui::tests::diary_right_click_toggles_tracking_without_opening_detail ... ok
+test quest_ui::tests::disabled_npc_option_rejects_a_stale_button_event ... ok
+test quest_ui::tests::escape_closes_npc_dialog_and_queues_authoritative_exit ... ok
+test quest_ui::tests::escape_closes_quest_without_falling_through_to_menu ... ok
+test quest_ui::tests::explicit_starter_dialog_links_map_to_exact_quest_actions ... ok
+test quest_ui::tests::fixed_and_selectable_quest_rewards_are_both_rich_hover_targets ... ok
+test quest_ui::tests::full_queue_reports_pickup_not_queued_instead_of_success ... ok
+test quest_ui::tests::graduation_target_selection_is_local_and_clears_with_the_session ... ok
+test quest_ui::tests::guided_diary_side_pages_fit_inside_the_crystal_frame ... ok
+test quest_ui::tests::helper_queue_keeps_zero_id_payloads ... ok
+test quest_ui::tests::hunt_navigation_click_checks_the_specific_unfinished_kill_and_authoritative_region ... ok
+test quest_ui::tests::hunt_navigation_ready_status_means_turn_in_not_reward_already_claimed ... ok
+test quest_ui::tests::input_blocking_prevents_world_shortcuts_when_quest_log_open ... ok
+test quest_ui::tests::intent_queue_keeps_oldest_fifo_and_reports_rejected_overflow ... ok
+test quest_ui::tests::is_quest_log_open_reads_the_single_source ... ok
+test quest_ui::tests::localized_detail_title_uses_only_the_unused_header_strip ... ok
+test quest_ui::tests::manual_input_clears_only_stale_attacks_from_both_intent_lanes ... ok
+test quest_ui::tests::native_detail_title_renders_the_full_caption_in_all_nine_languages ... ok
+test quest_ui::tests::native_npc_wrapped_opaque_values_never_receive_a_second_translation ... ok
+test quest_ui::tests::native_quest_filters_keep_quest_context_for_shared_words ... ok
+test quest_ui::tests::native_quest_player_targets_never_translate_player_chosen_names ... ok
+test quest_ui::tests::native_quest_titles_use_scroll_rows_and_fixed_labels_ellipsize_after_translation ... ok
+test quest_ui::tests::newcomer_detail_wraps_hint_into_scrollable_logical_lines ... ok
+test quest_ui::tests::newcomer_diary_accept_and_finish_work_without_an_npc_dialog ... ok
+test quest_ui::tests::newcomer_diary_authority_requires_explicit_zero_template_indices ... ok
+test quest_ui::tests::newcomer_diary_lists_only_explicitly_authorized_available_quests ... ok
+test quest_ui::tests::newcomer_diary_preserves_server_cadence_over_static_category ... ok
+test quest_ui::tests::newcomer_hides_only_fixed_zero_rewards_and_keeps_choice_indices ... ok
+test quest_ui::tests::newcomer_sorting_is_shared_and_prioritizes_ready_quests ... ok
+test quest_ui::tests::newcomer_tracker_hides_behind_open_windows_without_changing_crystal_tracker ... ok
+test quest_ui::tests::newcomer_v2_diary_keeps_main_visible_and_pages_all_imported_tasks ... ok
+test quest_ui::tests::npc_dialog_click_pushes_history_and_close_clears ... ok
+test quest_ui::tests::npc_dialog_nav_push_pop_and_return ... ok
+test quest_ui::tests::npc_dialog_pages_keep_all_service_links_inside_the_content_area ... ok
+test quest_ui::tests::npc_dialog_wrap_prefers_words_and_hard_breaks_weighted_text ... ok
+test quest_ui::tests::npc_exit_link_requests_service_exit_only_after_its_intent_is_accepted ... ok
+test quest_ui::tests::npc_list_accept_after_stale_previous_dialog_emits_selected_quest ... ok
+test quest_ui::tests::npc_list_accept_is_bound_to_current_npc_and_available_quest ... ok
+test quest_ui::tests::npc_list_message_omits_progress_and_uses_finish_copy_at_distinct_npc ... ok
+test quest_ui::tests::npc_quest_list_assets_and_geometry_match_crystal_source ... ok
+test quest_ui::tests::npc_quest_membership_and_five_row_selection_follow_current_npc ... ok
+test quest_ui::tests::npc_quest_operations_accept_crystal_runtime_link_forms ... ok
+test quest_ui::tests::pickup_button_requires_a_current_authoritative_ground_object ... ok
+test quest_ui::tests::plugin_schedule_supports_repeated_authoritative_panel_refreshes ... ok
+test quest_ui::tests::pressed_d401_route_button_enqueues_the_current_oma_entrance ... ok
+test quest_ui::tests::quest_detail_assets_and_geometry_match_crystal_source ... ok
+test quest_ui::tests::quest_detail_preserves_source_sections_and_independent_window_state ... ok
+test quest_ui::tests::quest_diary_contains_only_current_quests_and_preserves_source_group_order ... ok
+test quest_ui::tests::quest_diary_geometry_matches_crystal_source_at_100_125_and_150_percent ... ok
+test quest_ui::tests::quest_diary_groups_expand_by_default_and_toggle_locally ... ok
+test quest_ui::tests::quest_finish_enabled_requires_reward_selection_when_needed ... ok
+test quest_ui::tests::quest_log_accept_without_exact_dialog_is_rejected_locally ... ok
+test quest_ui::tests::quest_log_filter_and_page_state_reset_selection_without_touching_authority ... ok
+test quest_ui::tests::quest_log_open_close_via_q_and_escape ... ok
+test quest_ui::tests::quest_message_box_geometry_and_copy_match_crystal_source ... ok
+test quest_ui::tests::quest_operations_deduplicate_until_authoritative_quest_refresh ... ok
+test quest_ui::tests::quest_selection_updates_state_and_clears_reward ... ok
+test quest_ui::tests::queue_is_empty_after_draining ... ok
+test quest_ui::tests::real_click_accept_quest_produces_intent_and_feedback ... ok
+test quest_ui::tests::real_click_finish_without_reward_selection_is_blocked ... ok
+test quest_ui::tests::retry_saturation_returns_every_dropped_intent_for_pending_release ... ok
+test quest_ui::tests::reward_selection_is_required_only_for_selectable_item_rewards ... ok
+test quest_ui::tests::route_navigation_is_discarded_after_leaving_the_game_session ... ok
+test quest_ui::tests::route_navigation_queue_is_bounded_and_preserves_the_configured_source_coordinate ... ok
+test quest_ui::tests::route_navigation_rechecks_primary_task_and_current_entrance ... ok
+test quest_ui::tests::select_quest_and_track_flow ... ok
+test quest_ui::tests::stale_target_click_cannot_emit_attack_intent ... ok
+test quest_ui::tests::tile_pickup_button_requires_an_authoritative_tile_entry ... ok
+test quest_ui::tests::tracker_has_no_implicit_fallback_when_nothing_is_tracked ... ok
+test quest_ui::tests::tracker_uses_explicit_order_and_ignores_non_current_entries ... ok
+test quest_ui::tests::tracking_sets_feedback_and_state ... ok
+test quest_ui::tests::tracking_toggle_preserves_order_caps_five_and_removes ... ok
+test quest_ui::tests::unknown_combat_target_health_has_no_zero_bar_or_zero_label ... ok
+test quest_ui::tests::wrapped_text_and_disabled_action_hitboxes_keep_their_bounds ... ok
+test quest_ui::turn_in::tests::quest_turn_in_at_kyle_points_back_to_board_without_sending_any_operation ... ok
+test quest_ui::turn_in::tests::quest_turn_in_cancels_stale_or_closed_detail_before_server_reply ... ok
+test quest_ui::turn_in::tests::quest_turn_in_detail_click_waits_for_correct_server_offer_and_submits_once ... ok
+test quest_ui::turn_in::tests::quest_turn_in_detail_renders_finish_and_card_locates_board_before_opening_map ... ok
+test quest_ui::turn_in::tests::quest_turn_in_v2_board_and_growth_claim_use_loaded_id_not_kyle_static_index ... ok
+test social::trade_source_tests::trade_own_gold_request_requires_exact_same_exchange_snapshot_delta ... ok
+
+test result: ok. 211 passed; 0 failed; 4 ignored; 0 measured; 1004 filtered out; finished in 2.52s
+

@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: N16 and N21 FireWall practice use the public ground-cast packet and require the target-zero cast receipt
+ok 1 - N16 and N21 FireWall practice use the public ground-cast packet and require the target-zero cast receipt
+  ---
+  duration_ms: 3.1986
+  type: 'test'
+  ...
+# Subtest: FireWall reveals a buried Zombie2 through public visibility before casting
+ok 2 - FireWall reveals a buried Zombie2 through public visibility before casting
+  ---
+  duration_ms: 0.3222
+  type: 'test'
+  ...
+# Subtest: FireWall does not cast at a still-buried snapshot monster
+ok 3 - FireWall does not cast at a still-buried snapshot monster
+  ---
+  duration_ms: 0.4445
+  type: 'test'
+  ...
+# Subtest: FireWall rejects a monster-target or non-cast acknowledgement even when the live target is struck
+ok 4 - FireWall rejects a monster-target or non-cast acknowledgement even when the live target is struck
+  ---
+  duration_ms: 0.8385
+  type: 'test'
+  ...
+# Subtest: FireWall practice reaims the same moving target only after an accepted ground miss
+ok 5 - FireWall practice reaims the same moving target only after an accepted ground miss
+  ---
+  duration_ms: 0.8101
+  type: 'test'
+  ...
+# Subtest: FireWall practice stops after three accepted misses without inventing damage or navigation
+ok 6 - FireWall practice stops after three accepted misses without inventing damage or navigation
+  ---
+  duration_ms: 0.5592
+  type: 'test'
+  ...
+# Subtest: FireWall practice never sends a retry after its original twelve-second window
+ok 7 - FireWall practice never sends a retry after its original twelve-second window
+  ---
+  duration_ms: 0.3659
+  type: 'test'
+  ...
+# Subtest: FireWall retry validates range again after authoritative readiness changes
+ok 8 - FireWall retry validates range again after authoritative readiness changes
+  ---
+  duration_ms: 201.272
+  type: 'test'
+  ...
+# Subtest: FireWall never retries an accepted cast after a non-timeout observation failure
+ok 9 - FireWall never retries an accepted cast after a non-timeout observation failure
+  ---
+  duration_ms: 0.662
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 286.7198

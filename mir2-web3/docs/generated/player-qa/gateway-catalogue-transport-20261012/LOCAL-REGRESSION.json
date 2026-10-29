@@ -1,0 +1,161 @@
+{
+  "schema": "mir2.gateway.catalogue-transport-local.v1",
+  "utc": "2026-10-12T00:38:22.242442+00:00",
+  "baseRevision": "ed231291596f0ca50dddec8084c338013ae81082",
+  "sourceFiles": {
+    "apps/gateway/src/web.rs": {
+      "bytes": 780246,
+      "sha256": "6bca135ab52bfed844745ef11cfb14b3949a77abe1b173d4837ab70d01d736f3"
+    },
+    "apps/gateway/src/web_transport.rs": {
+      "bytes": 15354,
+      "sha256": "dc8c7ac981d937e252b9d9f9b0ab3f4563215deb652a4c15444bf96df536d496"
+    },
+    "apps/gateway/src/web_packet_batch.rs": {
+      "bytes": 10941,
+      "sha256": "f429ca6fb1c69375ce79e4f6ce4cef533606eed1ce34bbb3f98b4f4f85899166"
+    },
+    "apps/gateway/src/web_transport_batch_tests.rs": {
+      "bytes": 6650,
+      "sha256": "2a93af7b90bde8a74d5ed5b43f73b69752b618797f094bd6f418301bc792ba5b"
+    }
+  },
+  "distinctPassedChecks": 331,
+  "focusedPassedSubset": 25,
+  "newChecks": 13,
+  "newCheckNames": [
+    "web::packet_batch::tests::accepted_tcp_stream_has_nodelay_before_http_or_websocket",
+    "web::packet_batch::tests::catalogue_empty_response_list_does_not_touch_writer",
+    "web::packet_batch::tests::catalogue_frames_keep_exact_json_and_order_with_bounded_flushes",
+    "web::packet_batch::tests::catalogue_real_websocket_keeps_all_individual_frames",
+    "web::packet_batch::tests::catalogue_utf8_bytes_and_oversized_single_frames_are_preserved",
+    "web::transport::batch_tests::batch_external_cancellation_fences_sink_before_unlock",
+    "web::transport::batch_tests::batch_feed_error_cannot_flush_or_reuse_partial_frames",
+    "web::transport::batch_tests::batch_lock_wait_uses_original_write_deadline",
+    "web::transport::batch_tests::batch_partial_flush_timeout_fences_waiting_single_writer",
+    "web::transport::batch_tests::batch_partial_readiness_timeout_fences_all_producers",
+    "web::transport::batch_tests::batch_reader_close_keeps_original_terminal_reason",
+    "web::transport::batch_tests::batch_size_rejection_is_before_any_sink_write",
+    "web::transport::batch_tests::batch_success_preserves_frames_and_flushes_once"
+  ],
+  "ignoredChecks": 0,
+  "originalRedChecks": {
+    "passed": 3,
+    "failed": 2,
+    "names": [
+      "web::packet_batch::tests::accepted_tcp_stream_has_nodelay_before_http_or_websocket",
+      "web::packet_batch::tests::catalogue_frames_keep_exact_json_and_order_with_bounded_flushes"
+    ]
+  },
+  "compileFailuresRetained": [
+    "red-baseline-01",
+    "green-focused-01"
+  ],
+  "maxBatchMessages": 32,
+  "maxBatchPayloadBytes": 65536,
+  "writeDeadlineSeconds": 10,
+  "individualProtocolFramesAndOrderPreserved": true,
+  "acceptedTcpNodelayVerified": true,
+  "partialWriteCancellationBeforeUnlockVerified": true,
+  "fullAdjacentCheckIncludesAuthenticatedWebsocketAndSaveRecovery": true,
+  "linuxReleaseQualified": false,
+  "newSourcePublished": false,
+  "firstScene37571msRootCauseConfirmed": false,
+  "coldFirstSceneLatencyFixed": false,
+  "nativeCrowdOrHumanAccepted": false,
+  "fullClassicAccepted": false,
+  "liveGatewaySource": "f574d214a10c7efd62176ec94cea37821095b8fe",
+  "liveClient": "R25",
+  "signedFeedSequence": 20,
+  "evidenceFiles": {
+    "SOURCE-DIFF-01.patch": {
+      "bytes": 6509,
+      "sha256": "8ed877132b9b19c2558cd3e0c6f42999fad2a4c84c6d391df4ba1f216d66460c"
+    },
+    "web_packet_batch.rs": {
+      "bytes": 10941,
+      "sha256": "f429ca6fb1c69375ce79e4f6ce4cef533606eed1ce34bbb3f98b4f4f85899166"
+    },
+    "web_transport_batch_tests.rs": {
+      "bytes": 6650,
+      "sha256": "2a93af7b90bde8a74d5ed5b43f73b69752b618797f094bd6f418301bc792ba5b"
+    },
+    "PARENT-RESPONSE-TIMING-01.log": {
+      "bytes": 939,
+      "sha256": "bc61706fea94ccd994071ce40be8271b3875c1ea500f2bf05d11fc59838ccf36"
+    },
+    "PARENT-PUBLIC-LATENCY-01.json": {
+      "bytes": 1243,
+      "sha256": "77ce62d261768d64cbca3df837773c41d40899a3f0c0fe8bfa8bbe902007ec79"
+    },
+    "READONLY-PARENT-RESPONSE-TIMING.command": {
+      "bytes": 678,
+      "sha256": "36791ff5b8958646e2eb7b91672e3462264035fe4b301a65b8228a049a12e5f9"
+    },
+    "red-baseline-01.log": {
+      "bytes": 55698,
+      "sha256": "ff7c651e09a71e8f053aa257d8f6dadd53e30b57eac26d6784ba6620a7911509"
+    },
+    "red-baseline-01-before.json": {
+      "bytes": 715,
+      "sha256": "fc3fbce7d00c36e5f77d6ee9d05a36f3409cd4896056fa5b10d78addfc042cb0"
+    },
+    "red-baseline-01-result.json": {
+      "bytes": 1332,
+      "sha256": "1697f3de857fad77d997bdcdec9687f3e7e8c522086a07c993dff5dec880a007"
+    },
+    "red-baseline-02.log": {
+      "bytes": 48857,
+      "sha256": "b37dcdfa3c7e2d48f0d147c9a72fe763c651acfb87b157023b1b5aded13ef373"
+    },
+    "red-baseline-02-before.json": {
+      "bytes": 715,
+      "sha256": "f5ed562bc3680567afae9b28ea36e1e7ca00a85df5d9fc7792d1291f79bf20e1"
+    },
+    "red-baseline-02-result.json": {
+      "bytes": 2059,
+      "sha256": "cea1a50abb4806cec7d3c7761eb0ba82b9006d154d3c9bf826290d9084fceaf5"
+    },
+    "green-focused-01.log": {
+      "bytes": 46745,
+      "sha256": "7f1ddf10932889314e6b714e09e91f1fed16cdc173d8634c16405b78270b18c3"
+    },
+    "green-focused-01-before.json": {
+      "bytes": 903,
+      "sha256": "338a5684429c6f6db48922c72bf69437a688f1038467879c2a03645867a252e2"
+    },
+    "green-focused-01-result.json": {
+      "bytes": 1642,
+      "sha256": "b586bf67da60fe067074c3fb2e3e57d1ae34d7031678c5e630abf451ca00d44e"
+    },
+    "green-focused-02.log": {
+      "bytes": 49150,
+      "sha256": "baed0936397853cabc3638566f9a6258b89d0c61ab096c66b0678aaaa1892bcf"
+    },
+    "green-focused-02-before.json": {
+      "bytes": 903,
+      "sha256": "0e53e9f41c3c7dd01c2686c3a6477a93e8391201248e9790b7c4204e4a05cf48"
+    },
+    "green-focused-02-result.json": {
+      "bytes": 4724,
+      "sha256": "d0a1a9135fe2588464040aa82c935082777a609e6595fcb6084633be23d9e696"
+    },
+    "adjacent-web-01.log": {
+      "bytes": 78454,
+      "sha256": "d410f32b8a0f9555861e09f88b1935e82fe18d5914f36a14e6314a8cefcaf220"
+    },
+    "adjacent-web-01-before.json": {
+      "bytes": 1059,
+      "sha256": "980bf803db83be79d6ec909f9d24f58cee30b4cc766ca8108a14e682cf31093c"
+    },
+    "adjacent-web-01-result.json": {
+      "bytes": 41949,
+      "sha256": "ac8fe8d213839491405e4d8a666cb3fabcba048e8053668a91902d6de211224b"
+    }
+  },
+  "archive": {
+    "file": "original-evidence.zip",
+    "bytes": 75820,
+    "sha256": "d0379cdd90ab9fc1458f4b8734a6d2d3d54babb096bb801c98e5e5e6a8eb27e3"
+  }
+}

@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: default covers every admitted map, retaining merchants, Sabuk and classic branches
+ok 1 - default covers every admitted map, retaining merchants, Sabuk and classic branches
+  ---
+  duration_ms: 1.1328
+  type: 'test'
+  ...
+# Subtest: omitting one admitted Red Moon side branch cannot pass the old journey minimum
+ok 2 - omitting one admitted Red Moon side branch cannot pass the old journey minimum
+  ---
+  duration_ms: 0.2064
+  type: 'test'
+  ...
+# Subtest: explicit legacy maps remain exactly selected and cannot be called full profile
+ok 3 - explicit legacy maps remain exactly selected and cannot be called full profile
+  ---
+  duration_ms: 149.5717
+  type: 'test'
+  ...
+# Subtest: scope rejects another profile, unbound bytes and duplicate or unsafe profile identities
+ok 4 - scope rejects another profile, unbound bytes and duplicate or unsafe profile identities
+  ---
+  duration_ms: 47.4495
+  type: 'test'
+  ...
+# Subtest: unsafe, duplicated and unexpected manifest identities are rejected or identified
+ok 5 - unsafe, duplicated and unexpected manifest identities are rejected or identified
+  ---
+  duration_ms: 0.4609
+  type: 'test'
+  ...
+# Subtest: topology records conditional entries separately from ordinary walking and live acceptance
+ok 6 - topology records conditional entries separately from ordinary walking and live acceptance
+  ---
+  duration_ms: 183.5015
+  type: 'test'
+  ...
+# Subtest: source orphan D71653 is classified without inventing entry or expanding the actual profile
+ok 7 - source orphan D71653 is classified without inventing entry or expanding the actual profile
+  ---
+  duration_ms: 322.4441
+  type: 'test'
+  ...
+# Subtest: every added classic room is required, including the resource-only original orphan
+ok 8 - every added classic room is required, including the resource-only original orphan
+  ---
+  duration_ms: 3.3908
+  type: 'test'
+  ...
+# Subtest: another unreachable runtime branch is not excused by the named resource-only room
+ok 9 - another unreachable runtime branch is not excused by the named resource-only room
+  ---
+  duration_ms: 154.8431
+  type: 'test'
+  ...
+# Subtest: resource-only metadata cannot forge another room or runtime admission
+ok 10 - resource-only metadata cannot forge another room or runtime admission
+  ---
+  duration_ms: 4.2775
+  type: 'test'
+  ...
+# Subtest: original no-entry proof rejects new inbound moves, scripts, spawns and changed original geometry
+ok 11 - original no-entry proof rejects new inbound moves, scripts, spawns and changed original geometry
+  ---
+  duration_ms: 939.9757
+  type: 'test'
+  ...
+# Subtest: CLI fails omitted scope before any atlas completion or asset read
+ok 12 - CLI fails omitted scope before any atlas completion or asset read
+  ---
+  duration_ms: 95.7071
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2111.4181

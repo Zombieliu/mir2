@@ -1,0 +1,688 @@
+TAP version 13
+# Subtest: explicit objective map preference resolves equal-length dungeon routes
+ok 1 - explicit objective map preference resolves equal-length dungeon routes
+  ---
+  duration_ms: 1.1667
+  type: 'test'
+  ...
+# Subtest: retreat route bias preserves cave-exit progress without accepting an adjacent hostile
+ok 2 - retreat route bias preserves cave-exit progress without accepting an adjacent hostile
+  ---
+  duration_ms: 0.1804
+  type: 'test'
+  ...
+# Subtest: direct ranged hit evidence identifies a q89 aggressor up to eight tiles away
+ok 3 - direct ranged hit evidence identifies a q89 aggressor up to eight tiles away
+  ---
+  duration_ms: 0.8217
+  type: 'test'
+  ...
+# Subtest: q2 kills a live Scarecrow and trusts authoritative GingerTea progress
+ok 4 - q2 kills a live Scarecrow and trusts authoritative GingerTea progress
+  ---
+  duration_ms: 3.5106
+  type: 'test'
+  ...
+# Subtest: q5 completes Deer and Scarecrow kill objectives without treating monster level as a gate
+ok 5 - q5 completes Deer and Scarecrow kill objectives without treating monster level as a gate
+  ---
+  duration_ms: 0.6101
+  type: 'test'
+  ...
+# Subtest: a multi-objective hunt clears a visible later target while the first target is respawning
+ok 6 - a multi-objective hunt clears a visible later target while the first target is respawning
+  ---
+  duration_ms: 0.5857
+  type: 'test'
+  ...
+# Subtest: a multi-objective spawn search stops for another safe required monster entering AOI
+ok 7 - a multi-objective spawn search stops for another safe required monster entering AOI
+  ---
+  duration_ms: 1.5119
+  type: 'test'
+  ...
+# Subtest: a multi-map quest clears an incomplete same-map objective before crossing to the first listed source
+ok 8 - a multi-map quest clears an incomplete same-map objective before crossing to the first listed source
+  ---
+  duration_ms: 0.3955
+  type: 'test'
+  ...
+# Subtest: a live objective omitted from the spawn manifest is fought on the current map
+ok 9 - a live objective omitted from the spawn manifest is fought on the current map
+  ---
+  duration_ms: 1.2874
+  type: 'test'
+  ...
+# Subtest: an allowed wounded objective is resumed before a closer full-health peer
+ok 10 - an allowed wounded objective is resumed before a closer full-health peer
+  ---
+  duration_ms: 0.501
+  type: 'test'
+  ...
+# Subtest: a healthy player keeps approaching a 25-percent objective when a pack appears
+ok 11 - a healthy player keeps approaching a 25-percent objective when a pack appears
+  ---
+  duration_ms: 0.3737
+  type: 'test'
+  ...
+# Subtest: an expedition can prefer its configured objective map over a denser same-map spawn
+ok 12 - an expedition can prefer its configured objective map over a denser same-map spawn
+  ---
+  duration_ms: 0.4269
+  type: 'test'
+  ...
+# Subtest: a post-travel supply checkpoint can leave and replan before objective combat
+ok 13 - a post-travel supply checkpoint can leave and replan before objective combat
+  ---
+  duration_ms: 0.3327
+  type: 'test'
+  ...
+# Subtest: multi-map travel evades a proven adjacent aggressor before retrying the ordinary route
+ok 14 - multi-map travel evades a proven adjacent aggressor before retrying the ordinary route
+  ---
+  duration_ms: 1.2144
+  type: 'test'
+  ...
+# Subtest: a repeated interruption on the same travel edge clears the proven aggressor
+ok 15 - a repeated interruption on the same travel edge clears the proven aggressor
+  ---
+  duration_ms: 0.7141
+  type: 'test'
+  ...
+# Subtest: multi-map travel clears a hostile doorway blocker and retries the same route
+ok 16 - multi-map travel clears a hostile doorway blocker and retries the same route
+  ---
+  duration_ms: 0.4253
+  type: 'test'
+  ...
+# Subtest: doorway blocker retreats when aggressor clearing discovers a dense pack
+ok 17 - doorway blocker retreats when aggressor clearing discovers a dense pack
+  ---
+  duration_ms: 0.7944
+  type: 'test'
+  ...
+# Subtest: stocked expedition travel clears a proven aggressor before retrying the route
+ok 18 - stocked expedition travel clears a proven aggressor before retrying the route
+  ---
+  duration_ms: 0.4314
+  type: 'test'
+  ...
+# Subtest: travel retries when the proven threat leaves before fallback combat
+ok 19 - travel retries when the proven threat leaves before fallback combat
+  ---
+  duration_ms: 0.3832
+  type: 'test'
+  ...
+# Subtest: healthy expedition keeps crossing after a glancing hit and interrupts once health is low
+ok 20 - healthy expedition keeps crossing after a glancing hit and interrupts once health is low
+  ---
+  duration_ms: 0.3516
+  type: 'test'
+  ...
+# Subtest: chooses an isolated quest target before a closer target inside a hostile pack
+ok 21 - chooses an isolated quest target before a closer target inside a hostile pack
+  ---
+  duration_ms: 0.2317
+  type: 'test'
+  ...
+# Subtest: defers a clustered target for its current life and selects another target
+ok 22 - defers a clustered target for its current life and selects another target
+  ---
+  duration_ms: 0.4889
+  type: 'test'
+  ...
+# Subtest: reconsiders the only deferred target after enough events prove its pack dispersed
+ok 23 - reconsiders the only deferred target after enough events prove its pack dispersed
+  ---
+  duration_ms: 0.6306
+  type: 'test'
+  ...
+# Subtest: disengages when a second hostile joins an attack already in progress
+ok 24 - disengages when a second hostile joins an attack already in progress
+  ---
+  duration_ms: 0.4513
+  type: 'test'
+  ...
+# Subtest: clears only proven adjacent monster aggressors by lowest HP before the quest target
+ok 25 - clears only proven adjacent monster aggressors by lowest HP before the quest target
+  ---
+  duration_ms: 0.8348
+  type: 'test'
+  ...
+# Subtest: low health under two established aggressors retreats instead of standing to clear both
+ok 26 - low health under two established aggressors retreats instead of standing to clear both
+  ---
+  duration_ms: 0.644
+  type: 'test'
+  ...
+# Subtest: a stocked mine expedition clears two aggressors above its lower retreat threshold
+ok 27 - a stocked mine expedition clears two aggressors above its lower retreat threshold
+  ---
+  duration_ms: 0.3345
+  type: 'test'
+  ...
+# Subtest: a mine expedition retreats from three active aggressors before waiting for low health
+ok 28 - a mine expedition retreats from three active aggressors before waiting for low health
+  ---
+  duration_ms: 0.5556
+  type: 'test'
+  ...
+# Subtest: a focused snake pull wakes its response wait on the first extra aggressor
+ok 29 - a focused snake pull wakes its response wait on the first extra aggressor
+  ---
+  duration_ms: 0.5616
+  type: 'test'
+  ...
+# Subtest: a newly revived adjacent aggressor pre-empts one established aggressor without target ping-pong
+ok 30 - a newly revived adjacent aggressor pre-empts one established aggressor without target ping-pong
+  ---
+  duration_ms: 0.4846
+  type: 'test'
+  ...
+# Subtest: an objective target cannot interrupt clearing the aggressor that joined its fight
+ok 31 - an objective target cannot interrupt clearing the aggressor that joined its fight
+  ---
+  duration_ms: 0.3907
+  type: 'test'
+  ...
+# Subtest: interrupts target navigation to clear a newly proven adjacent aggressor, then resumes the exact target
+ok 32 - interrupts target navigation to clear a newly proven adjacent aggressor, then resumes the exact target
+  ---
+  duration_ms: 0.3087
+  type: 'test'
+  ...
+# Subtest: an unreachable proven aggressor is recorded, escaped, and does not abort the objective
+ok 33 - an unreachable proven aggressor is recorded, escaped, and does not abort the objective
+  ---
+  duration_ms: 0.5039
+  type: 'test'
+  ...
+# Subtest: a healthy focused ranged hunt finishes its quest target through one proven aggressor
+ok 34 - a healthy focused ranged hunt finishes its quest target through one proven aggressor
+  ---
+  duration_ms: 0.298
+  type: 'test'
+  ...
+# Subtest: a survivable Taoist lands the last bounded hit before retreating from a joining snake
+ok 35 - a survivable Taoist lands the last bounded hit before retreating from a joining snake
+  ---
+  duration_ms: 0.2928
+  type: 'test'
+  ...
+# Subtest: a proven current target forces retreat below forty percent health before combat resumes
+ok 36 - a proven current target forces retreat below forty percent health before combat resumes
+  ---
+  duration_ms: 0.4419
+  type: 'test'
+  ...
+# Subtest: interrupts an in-progress target fight when a new adjacent aggressor lands a hit
+ok 37 - interrupts an in-progress target fight when a new adjacent aggressor lands a hit
+  ---
+  duration_ms: 0.3111
+  type: 'test'
+  ...
+# Subtest: a supplied harvest hunt focuses its unique target and carves before clearing aggressors
+ok 38 - a supplied harvest hunt focuses its unique target and carves before clearing aggressors
+  ---
+  duration_ms: 0.6175
+  type: 'test'
+  ...
+# Subtest: a focused harvest hunt retreats after two proven attackers converge, then retries the target
+ok 39 - a focused harvest hunt retreats after two proven attackers converge, then retries the target
+  ---
+  duration_ms: 0.6224
+  type: 'test'
+  ...
+# Subtest: trusts objective progress from a proven same-species aggressor without an extra target kill
+ok 40 - trusts objective progress from a proven same-species aggressor without an extra target kill
+  ---
+  duration_ms: 0.7404
+  type: 'test'
+  ...
+# Subtest: applies the same threat interrupt when sustain makes a second target approach necessary
+ok 41 - applies the same threat interrupt when sustain makes a second target approach necessary
+  ---
+  duration_ms: 1.0366
+  type: 'test'
+  ...
+# Subtest: does not guess that an adjacent hostile is an aggressor without attack-recipient evidence
+ok 42 - does not guess that an adjacent hostile is an aggressor without attack-recipient evidence
+  ---
+  duration_ms: 0.3841
+  type: 'test'
+  ...
+# Subtest: searches the nearest same-map spawn when no target is in AOI
+ok 43 - searches the nearest same-map spawn when no target is in AOI
+  ---
+  duration_ms: 0.8985
+  type: 'test'
+  ...
+# Subtest: waits for a visible unique target pack to disperse before bounded search failure
+ok 44 - waits for a visible unique target pack to disperse before bounded search failure
+  ---
+  duration_ms: 0.7332
+  type: 'test'
+  ...
+# Subtest: unsafe-target observation retreats on the first proven hit instead of waiting in place
+ok 45 - unsafe-target observation retreats on the first proven hit instead of waiting in place
+  ---
+  duration_ms: 0.9275
+  type: 'test'
+  ...
+# Subtest: interrupts spawn navigation for a proven aggressor, clears it within budget, and resumes search
+ok 46 - interrupts spawn navigation for a proven aggressor, clears it within budget, and resumes search
+  ---
+  duration_ms: 0.5677
+  type: 'test'
+  ...
+# Subtest: a failed spawn route sustains the player and interrupts immediately for a proven aggressor
+ok 47 - a failed spawn route sustains the player and interrupts immediately for a proven aggressor
+  ---
+  duration_ms: 0.642
+  type: 'test'
+  ...
+# Subtest: retreats from a clustered proven aggressor and resumes the spawn search
+ok 48 - retreats from a clustered proven aggressor and resumes the spawn search
+  ---
+  duration_ms: 0.6055
+  type: 'test'
+  ...
+# Subtest: accepts a material pack retreat that isolates one follower inside the global clearance
+ok 49 - accepts a material pack retreat that isolates one follower inside the global clearance
+  ---
+  duration_ms: 0.6772
+  type: 'test'
+  ...
+# Subtest: low-health pack retreat requires the full safety radius
+ok 50 - low-health pack retreat requires the full safety radius
+  ---
+  duration_ms: 0.1047
+  type: 'test'
+  ...
+# Subtest: severe packs use the open-cell emergency escape before conservative path retries
+ok 51 - severe packs use the open-cell emergency escape before conservative path retries
+  ---
+  duration_ms: 0.5581
+  type: 'test'
+  ...
+# Subtest: a partial cave escape replans when the proven pursuer has left
+ok 52 - a partial cave escape replans when the proven pursuer has left
+  ---
+  duration_ms: 1.0336
+  type: 'test'
+  ...
+# Subtest: a cave dead end replans after its only proven blocker is defeated
+ok 53 - a cave dead end replans after its only proven blocker is defeated
+  ---
+  duration_ms: 0.8902
+  type: 'test'
+  ...
+# Subtest: a fully occupied retreat cuts down one proven adjacent attacker to open an escape tile
+ok 54 - a fully occupied retreat cuts down one proven adjacent attacker to open an escape tile
+  ---
+  duration_ms: 0.759
+  type: 'test'
+  ...
+# Subtest: a fully occupied retreat waits out paralysis before breakout combat
+ok 55 - a fully occupied retreat waits out paralysis before breakout combat
+  ---
+  duration_ms: 1.5562
+  type: 'test'
+  ...
+# Subtest: low-health no-step retreat uses the optional emergency escape before breaking out
+ok 56 - low-health no-step retreat uses the optional emergency escape before breaking out
+  ---
+  duration_ms: 0.8581
+  type: 'test'
+  ...
+# Subtest: low-health multi-aggressor pressure uses emergency escape before a temporary walk route
+ok 57 - low-health multi-aggressor pressure uses emergency escape before a temporary walk route
+  ---
+  duration_ms: 0.5364
+  type: 'test'
+  ...
+# Subtest: a failed low-health emergency escape falls back to bounded hostile breakout
+ok 58 - a failed low-health emergency escape falls back to bounded hostile breakout
+  ---
+  duration_ms: 0.9156
+  type: 'test'
+  ...
+# Subtest: a multi-kill breakout continues through a second proven attacker before escaping
+ok 59 - a multi-kill breakout continues through a second proven attacker before escaping
+  ---
+  duration_ms: 0.8215
+  type: 'test'
+  ...
+# Subtest: an unreachable breakout attacker is skipped for the next proven blocker
+ok 60 - an unreachable breakout attacker is skipped for the next proven blocker
+  ---
+  duration_ms: 1.2016
+  type: 'test'
+  ...
+# Subtest: iterative pack retreat replans from each live position and sustains during escape
+ok 61 - iterative pack retreat replans from each live position and sustains during escape
+  ---
+  duration_ms: 0.6929
+  type: 'test'
+  ...
+# Subtest: a pursuing pack that preserves exposure is broken after bounded retreat progress
+ok 62 - a pursuing pack that preserves exposure is broken after bounded retreat progress
+  ---
+  duration_ms: 0.7447
+  type: 'test'
+  ...
+# Subtest: moving hostiles can extend retreat across bounded batches until exposure is safe
+ok 63 - moving hostiles can extend retreat across bounded batches until exposure is safe
+  ---
+  duration_ms: 0.8383
+  type: 'test'
+  ...
+# Subtest: search stays in the nearest local field instead of visiting every distant center first
+ok 64 - search stays in the nearest local field instead of visiting every distant center first
+  ---
+  duration_ms: 0.3346
+  type: 'test'
+  ...
+# Subtest: item search prefers an abundant source field over a nearby rare variant
+ok 65 - item search prefers an abundant source field over a nearby rare variant
+  ---
+  duration_ms: 0.6661
+  type: 'test'
+  ...
+# Subtest: a remembered corpse is revisited once without treating it as live, then its candidate is deprioritized
+ok 66 - a remembered corpse is revisited once without treating it as live, then its candidate is deprioritized
+  ---
+  duration_ms: 0.3947
+  type: 'test'
+  ...
+# Subtest: offline monster observations are location hints and require a fresh live AOI target
+ok 67 - offline monster observations are location hints and require a fresh live AOI target
+  ---
+  duration_ms: 0.3036
+  type: 'test'
+  ...
+# Subtest: a same-map world refresh preserves monster locations observed earlier in the visit
+ok 68 - a same-map world refresh preserves monster locations observed earlier in the visit
+  ---
+  duration_ms: 0.3008
+  type: 'test'
+  ...
+# Subtest: a remembered CannibalPlant location gets one close bounded reveal observation
+ok 69 - a remembered CannibalPlant location gets one close bounded reveal observation
+  ---
+  duration_ms: 0.3845
+  type: 'test'
+  ...
+# Subtest: nearest-neighbor traversal does not zigzag between distant full-spread regions
+ok 70 - nearest-neighbor traversal does not zigzag between distant full-spread regions
+  ---
+  duration_ms: 0.4683
+  type: 'test'
+  ...
+# Subtest: spawn search obeys one global waypoint budget
+ok 71 - spawn search obeys one global waypoint budget
+  ---
+  duration_ms: 0.3806
+  type: 'test'
+  ...
+# Subtest: full-spread exhaustion waits for a bounded respawn and resumes the active objective
+ok 72 - full-spread exhaustion waits for a bounded respawn and resumes the active objective
+  ---
+  duration_ms: 0.4064
+  type: 'test'
+  ...
+# Subtest: profiled respawn delay extends the default bounded wait window
+ok 73 - profiled respawn delay extends the default bounded wait window
+  ---
+  duration_ms: 3.3469
+  type: 'test'
+  ...
+# Subtest: a proven adjacent attack interrupts a respawn wait and is cleared before waiting again
+ok 74 - a proven adjacent attack interrupts a respawn wait and is cleared before waiting again
+  ---
+  duration_ms: 0.3992
+  type: 'test'
+  ...
+# Subtest: full-spread grid covers the observed CannibalPlant offset beyond the old 48-tile ring
+ok 75 - full-spread grid covers the observed CannibalPlant offset beyond the old 48-tile ring
+  ---
+  duration_ms: 0.4845
+  type: 'test'
+  ...
+# Subtest: full-spread grid closes RakingCat holes while bare ObjectRevived creates no phantom target
+ok 76 - full-spread grid closes RakingCat holes while bare ObjectRevived creates no phantom target
+  ---
+  duration_ms: 0.3493
+  type: 'test'
+  ...
+# Subtest: known map bounds clip every full-spread waypoint
+ok 77 - known map bounds clip every full-spread waypoint
+  ---
+  duration_ms: 0.9039
+  type: 'test'
+  ...
+# Subtest: wall-clock search timeout reports partial coverage and emits bounded diagnostics
+ok 78 - wall-clock search timeout reports partial coverage and emits bounded diagnostics
+  ---
+  duration_ms: 0.724
+  type: 'test'
+  ...
+# Subtest: harvest item source uses the corpse direction and waits for quest progress
+ok 79 - harvest item source uses the corpse direction and waits for quest progress
+  ---
+  duration_ms: 0.3402
+  type: 'test'
+  ...
+# Subtest: an already-consumed shared corpse is skipped without claiming progress
+ok 80 - an already-consumed shared corpse is skipped without claiming progress
+  ---
+  duration_ms: 0.6353
+  type: 'test'
+  ...
+# Subtest: three distinct unavailable corpses fail with an explicit bounded error
+ok 81 - three distinct unavailable corpses fail with an explicit bounded error
+  ---
+  duration_ms: 0.5916
+  type: 'test'
+  ...
+# Subtest: player death during unavailable-corpse probing still fails immediately
+ok 82 - player death during unavailable-corpse probing still fails immediately
+  ---
+  duration_ms: 0.2559
+  type: 'test'
+  ...
+# Subtest: fails closed when an objective has no source on the current map
+ok 83 - fails closed when an objective has no source on the current map
+  ---
+  duration_ms: 0.1281
+  type: 'test'
+  ...
+# Subtest: cross-map fallback skips an unreachable first source and travels only to a reachable map
+ok 84 - cross-map fallback skips an unreachable first source and travels only to a reachable map
+  ---
+  duration_ms: 0.2334
+  type: 'test'
+  ...
+# Subtest: cross-map objective prefers its quest NPC map over a closer dangerous source
+ok 85 - cross-map objective prefers its quest NPC map over a closer dangerous source
+  ---
+  duration_ms: 0.2855
+  type: 'test'
+  ...
+# Subtest: diary material objective prefers its quest group map over a shorter wasteland source
+ok 86 - diary material objective prefers its quest group map over a shorter wasteland source
+  ---
+  duration_ms: 0.2472
+  type: 'test'
+  ...
+# Subtest: cross-map fallback fails explicitly without travelling when all source maps are unreachable
+ok 87 - cross-map fallback fails explicitly without travelling when all source maps are unreachable
+  ---
+  duration_ms: 0.2428
+  type: 'test'
+  ...
+# Subtest: stops immediately when the player is dead
+ok 88 - stops immediately when the player is dead
+  ---
+  duration_ms: 0.1263
+  type: 'test'
+  ...
+# Subtest: bounds a target that never reports combat progress
+ok 89 - bounds a target that never reports combat progress
+  ---
+  duration_ms: 1.204
+  type: 'test'
+  ...
+# Subtest: a non-responsive revived target is quarantined while another live target completes combat
+ok 90 - a non-responsive revived target is quarantined while another live target completes combat
+  ---
+  duration_ms: 0.4186
+  type: 'test'
+  ...
+# Subtest: a fleeing Deer is re-approached instead of being quarantined as unresponsive
+ok 91 - a fleeing Deer is re-approached instead of being quarantined as unresponsive
+  ---
+  duration_ms: 0.3249
+  type: 'test'
+  ...
+# Subtest: a same-speed passive target is bounded after prolonged movement without a confirmed hit
+ok 92 - a same-speed passive target is bounded after prolonged movement without a confirmed hit
+  ---
+  duration_ms: 0.3125
+  type: 'test'
+  ...
+# Subtest: travel blocker combat clears a nearer live monster sealing the target approach
+ok 93 - travel blocker combat clears a nearer live monster sealing the target approach
+  ---
+  duration_ms: 0.3264
+  type: 'test'
+  ...
+# Subtest: continues ordinary attacks across HP acknowledgements until target death
+ok 94 - continues ordinary attacks across HP acknowledgements until target death
+  ---
+  duration_ms: 0.2784
+  type: 'test'
+  ...
+# Subtest: dynamic approach uses Wizard spell range, closes without MP, and waits without an attack
+ok 95 - dynamic approach uses Wizard spell range, closes without MP, and waits without an attack
+  ---
+  duration_ms: 0.5888
+  type: 'test'
+  ...
+# Subtest: combat approach retries with bounded clearance when the full buffer seals the path
+ok 96 - combat approach retries with bounded clearance when the full buffer seals the path
+  ---
+  duration_ms: 0.2585
+  type: 'test'
+  ...
+# Subtest: an unreachable live monster is quarantined while combat continues with another target
+ok 97 - an unreachable live monster is quarantined while combat continues with another target
+  ---
+  duration_ms: 0.2866
+  type: 'test'
+  ...
+# Subtest: a stationary target is retried after its temporary corridor blocker can move
+ok 98 - a stationary target is retried after its temporary corridor blocker can move
+  ---
+  duration_ms: 0.5288
+  type: 'test'
+  ...
+# Subtest: an opted-in objective clears one nearby monster occupying its only approach
+ok 99 - an opted-in objective clears one nearby monster occupying its only approach
+  ---
+  duration_ms: 0.4791
+  type: 'test'
+  ...
+# Subtest: spawn search retries the same cave waypoint with bounded hostile clearance
+ok 100 - spawn search retries the same cave waypoint with bounded hostile clearance
+  ---
+  duration_ms: 0.4175
+  type: 'test'
+  ...
+# Subtest: cooldown waits preserve the attack budget and refresh from authoritative snapshots
+ok 101 - cooldown waits preserve the attack budget and refresh from authoritative snapshots
+  ---
+  duration_ms: 0.3096
+  type: 'test'
+  ...
+# Subtest: positive hits reset consecutive cooldown time during a long spell pull
+ok 102 - positive hits reset consecutive cooldown time during a long spell pull
+  ---
+  duration_ms: 1.0867
+  type: 'test'
+  ...
+# Subtest: a server cooldown that never changes fails after a bounded total wait
+ok 103 - a server cooldown that never changes fails after a bounded total wait
+  ---
+  duration_ms: 0.4285
+  type: 'test'
+  ...
+# Subtest: a sustain callback cannot mask authoritative player death
+ok 104 - a sustain callback cannot mask authoritative player death
+  ---
+  duration_ms: 0.2054
+  type: 'test'
+  ...
+# Subtest: a target that leaves during approach is deferred and another live target completes the objective
+ok 105 - a target that leaves during approach is deferred and another live target completes the objective
+  ---
+  duration_ms: 0.5748
+  type: 'test'
+  ...
+# Subtest: target removal waits three seconds so a delayed authoritative player death wins the error classification
+ok 106 - target removal waits three seconds so a delayed authoritative player death wins the error classification
+  ---
+  duration_ms: 0.2942
+  type: 'test'
+  ...
+# Subtest: a living player defers an exact removed target but still fails without quest progress
+ok 107 - a living player defers an exact removed target but still fails without quest progress
+  ---
+  duration_ms: 0.9887
+  type: 'test'
+  ...
+# Subtest: authoritative quest progress accepts a target removed before its death packet settles
+ok 108 - authoritative quest progress accepts a target removed before its death packet settles
+  ---
+  duration_ms: 0.2942
+  type: 'test'
+  ...
+# Subtest: proven remote-player last blow is recorded and retries without claiming quest credit
+ok 109 - proven remote-player last blow is recorded and retries without claiming quest credit
+  ---
+  duration_ms: 0.2959
+  type: 'test'
+  ...
+# Subtest: unknown last-blow identity preserves the missing-award failure
+ok 110 - unknown last-blow identity preserves the missing-award failure
+  ---
+  duration_ms: 0.3062
+  type: 'test'
+  ...
+# Subtest: a bystander death is not accepted as the current target death
+ok 111 - a bystander death is not accepted as the current target death
+  ---
+  duration_ms: 0.5178
+  type: 'test'
+  ...
+# Subtest: picks up a visible non-harvest quest drop and requires objective confirmation
+ok 112 - picks up a visible non-harvest quest drop and requires objective confirmation
+  ---
+  duration_ms: 0.3562
+  type: 'test'
+  ...
+# Subtest: same-tile harvest preserves a valid authoritative facing
+ok 113 - same-tile harvest preserves a valid authoritative facing
+  ---
+  duration_ms: 0.0511
+  type: 'test'
+  ...
+1..113
+# tests 113
+# suites 0
+# pass 113
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 284.5769

@@ -1,0 +1,16 @@
+{
+  "path": "E:/mir2-player-journey/work/native-play-acceptance-20261010/screenshots/002-r23-checking.jpg",
+  "purpose": "Normal updater retry after origin resource repair; not a completed installation or gameplay acceptance.",
+  "observedWindow": {
+    "app": "process:D:\\Mir2Invite\\.update\\engine-9213EC3FE1A992F757EA48C53981AFA661765B42E637C1AD811E326060B170B8.exe",
+    "id": 71831420,
+    "title": "Numeron - Legend of Rebirth · 遊戲更新"
+  },
+  "screenshotId": "screenshot-0",
+  "width": 582,
+  "height": 284,
+  "mime": "image/jpeg",
+  "bytes": 19377,
+  "sha256": "db1b97032017abc528de5ded8ed51bd96df8f720f7adf346c277b07fcccd3fef",
+  "recordedUtc": "2026-10-09T18:13:31.462Z"
+}

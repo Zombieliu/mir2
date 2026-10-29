@@ -1,0 +1,348 @@
+{
+  "utc": "2026-10-11T05:50:48.536816+00:00",
+  "parent": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+  "mailSourceSha256": "08c85c9cb713819c4e43fc8988a28ac8c3f04f149b6b598a0889e4f9acfeddad",
+  "checks": [
+    {
+      "name": "mail-format",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "fmt",
+        "--manifest-path",
+        "apps/game-client/client-bevy/Cargo.toml",
+        "--check"
+      ],
+      "exitCode": 0,
+      "passedNames": [],
+      "ignored": 0,
+      "mailSourceUnchanged": true
+    },
+    {
+      "name": "mail-default",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "2",
+        "--manifest-path",
+        "apps/game-client/client-bevy/Cargo.toml",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "mail::tests::"
+      ],
+      "exitCode": 0,
+      "passedNames": [
+        "mail::tests::full_mailbox_keeps_appended_receipt_without_evicting_real_mail",
+        "mail::tests::mail_claim_and_delete_rules",
+        "mail::tests::mail_dates_follow_source_format_and_leave_unknown_values_blank",
+        "mail::tests::mail_deserialization_is_backward_compatible_and_bounded",
+        "mail::tests::mail_pages_are_ten_rows_and_clamp_after_refresh_delete",
+        "mail::tests::mailbox_limits_real_messages_and_feedback_independently",
+        "mail::tests::renderer_neutral_mail_keeps_shop_metadata_and_opaque_text",
+        "mail::tests::renderer_neutral_unknown_mail_date_has_placeholder_without_timestamp",
+        "mail::tests::serde_roundtrip",
+        "mail::tests::stale_mail_selection_fails_closed",
+        "mail::tests::user_item_metadata_roundtrips_without_string_loss"
+      ],
+      "ignored": 0,
+      "mailSourceUnchanged": true
+    },
+    {
+      "name": "mail-native",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "2",
+        "--manifest-path",
+        "apps/game-client/client-bevy/Cargo.toml",
+        "--features",
+        "native-ui",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "mail::tests::"
+      ],
+      "exitCode": 0,
+      "passedNames": [
+        "mail::tests::full_mailbox_keeps_appended_receipt_without_evicting_real_mail",
+        "mail::tests::mail_claim_and_delete_rules",
+        "mail::tests::mail_dates_follow_source_format_and_leave_unknown_values_blank",
+        "mail::tests::mail_deserialization_is_backward_compatible_and_bounded",
+        "mail::tests::mail_pages_are_ten_rows_and_clamp_after_refresh_delete",
+        "mail::tests::mailbox_limits_real_messages_and_feedback_independently",
+        "mail::tests::missing_mail_date_has_a_visible_placeholder_without_inventing_a_timestamp",
+        "mail::tests::monthly_card_mail_display_uses_exact_identity_and_does_not_rewrite_letters",
+        "mail::tests::monthly_card_mail_keeps_wrong_quantity_and_opaque_shop_text_unchanged",
+        "mail::tests::monthly_card_mail_localizes_actual_source_purchase_and_gift_templates_in_all_languages",
+        "mail::tests::serde_roundtrip",
+        "mail::tests::stale_mail_selection_fails_closed",
+        "mail::tests::user_item_metadata_roundtrips_without_string_loss"
+      ],
+      "ignored": 0,
+      "mailSourceUnchanged": true
+    },
+    {
+      "name": "renderer-neutral-runtime",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "check",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "2",
+        "--manifest-path",
+        "apps/game-client/runtime/Cargo.toml"
+      ],
+      "exitCode": 0,
+      "passedNames": [],
+      "ignored": 0,
+      "mailSourceUnchanged": true
+    }
+  ],
+  "passedTestExecutions": 24,
+  "distinctTestFunctionNames": 15,
+  "originalSharedAndNativeOverlap": 9,
+  "newDefaultFeatureTests": 2,
+  "ignoredTests": 0,
+  "allOldNativeBranchesAndAssertionsExactlyReconstructed": true,
+  "gameDataNativeUiDependenciesRemainOptional": true,
+  "wholeWindowsCiStillRequired": true,
+  "originalWindowsRun": {
+    "id": 38114465530,
+    "source": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+    "androidJob": 114396495291,
+    "sharedRustJob": 114396495307,
+    "originalFailuresRetained": true,
+    "newRunQualified": false
+  },
+  "actualParentLedgerCi": {
+    "utc": "2026-10-11T05:48:33.634112+00:00",
+    "source": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+    "actualLedgerGates": [
+      {
+        "kind": "monthly",
+        "runId": 38114406092,
+        "source": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+        "conclusion": "success",
+        "actualPostgresSteps": [
+          {
+            "jobId": 114396323679,
+            "name": "PostgreSQL competing gateways and persistent renewal",
+            "conclusion": "success"
+          }
+        ],
+        "pipelineAttempts": 1
+      },
+      {
+        "kind": "stripe",
+        "runId": 38114406100,
+        "source": "4006d988b3922d0106278720abfa9b3d384c8d5e",
+        "conclusion": "success",
+        "actualPostgresSteps": [
+          {
+            "jobId": 114396323662,
+            "name": "Real PostgreSQL competing writers and restart",
+            "conclusion": "success"
+          },
+          {
+            "jobId": 114396323662,
+            "name": "Real PostgreSQL independent gift writers and online recipient",
+            "conclusion": "success"
+          }
+        ],
+        "pipelineAttempts": 1
+      }
+    ],
+    "realProviderChargingOrProductionTests": false,
+    "sourceRelabeled": false
+  },
+  "compileAndFormatFailuresPreserved": true,
+  "commandLengthReaderFailureLaunchedNoProcess": true,
+  "sourcePushed": false,
+  "artifactSourceRelabeled": false,
+  "productionSwitch": false,
+  "nativeHumanAcceptance": false,
+  "fullGoalComplete": false,
+  "archive": {
+    "bytes": 80498,
+    "sha256": "88b79b94be7b2f230cd8d9aeb94d9484c613b1efda75885eae25ab802991cc97",
+    "entries": 33
+  },
+  "entries": [
+    {
+      "path": "ci-01/ledger-gates-01/GATES-VERIFIED.json",
+      "bytes": 1187,
+      "sha256": "263ffe31a4f3eb747803f01c884902ea6bdab6bd52abdf32abfeceae70f2b449"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/monthly-jobs.json",
+      "bytes": 2589,
+      "sha256": "baecc2f61d47f6b2bb50adb4c898172ccf2436a078a31fd00a8db8d40893ee99"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/monthly-jobs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/monthly-run.json",
+      "bytes": 12032,
+      "sha256": "965b4641b8daef2ba4ef030af86e72ffb42ca41e7a41fa5d346c19d739ad6eb8"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/monthly-run.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/stripe-jobs.json",
+      "bytes": 3792,
+      "sha256": "3d94f2c8ee8ab051044369df21c0033c82947d70566f6d04c94b0c15f344b68d"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/stripe-jobs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/stripe-run.json",
+      "bytes": 12037,
+      "sha256": "b72621008c734e8504325239b9bf70a28c4839a344c559eedee49cd5c6263839"
+    },
+    {
+      "path": "ci-01/ledger-gates-01/stripe-run.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci-fix-01/FIX-PREPARED.json",
+      "bytes": 6584,
+      "sha256": "50a4470d348136135cc104a9211d559403e54f9add8f6af48e853145228b3e48"
+    },
+    {
+      "path": "ci-fix-01/mail-format-before.json",
+      "bytes": 537,
+      "sha256": "fe712381905b8753d44f177f304786ecf4bc6d07c2a0040e56944b3b792acbfd"
+    },
+    {
+      "path": "ci-fix-01/mail-format-result.json",
+      "bytes": 209,
+      "sha256": "84cbef22f02438853ccea3e197735efde3d4190b4a6d66a666ff9dcc872b662f"
+    },
+    {
+      "path": "ci-fix-01/mail-format.log",
+      "bytes": 567,
+      "sha256": "954f904587fd57d5a080a286da0b894f60602c53bae97cad1da6f95cf3e777af"
+    },
+    {
+      "path": "ci-fix-01/mail.original.rs",
+      "bytes": 30776,
+      "sha256": "179a99b4553c3cfd019694b7d16f5cf22169ac375207f65aeb153133c02e6b02"
+    },
+    {
+      "path": "ci-fix-01/original-job-114396495291.json",
+      "bytes": 114513,
+      "sha256": "3f981ed219e7ed3ce3908176da54438b2311a590af4cf108f364cf84c7530044"
+    },
+    {
+      "path": "ci-fix-01/original-job-114396495307.json",
+      "bytes": 80404,
+      "sha256": "bf2a15865349010e6213ee016db2cda58b1894c27f882d53ad1d19b6a27de18b"
+    },
+    {
+      "path": "ci-fix-02/FIX-PREPARED.json",
+      "bytes": 7076,
+      "sha256": "c5b1ca8b9c57a5105b070a4aad0dc1ea012b961e4ab96736e2af37d166cf0991"
+    },
+    {
+      "path": "ci-fix-02/FORMAT-CORRECTION.json",
+      "bytes": 391,
+      "sha256": "7cd4adad021f97427e8303b584719189f4e2ba060787168e8b5c5d766ebe274a"
+    },
+    {
+      "path": "ci-fix-02/mail-default-before.json",
+      "bytes": 654,
+      "sha256": "996549398e3cbe1c8955dd32a2c3f82b27984221b87391521a1393368e84941b"
+    },
+    {
+      "path": "ci-fix-02/mail-default-result.json",
+      "bytes": 1099,
+      "sha256": "3b7108363da2a5b9328f2d383b45f8ff5ef889673720f9e2e83382eea4f96aa4"
+    },
+    {
+      "path": "ci-fix-02/mail-default.log",
+      "bytes": 2064,
+      "sha256": "edbc475b30d3867af12a70e861214714d54480f820d56b76ddc91ebdada74658"
+    },
+    {
+      "path": "ci-fix-02/mail-format-before.json",
+      "bytes": 537,
+      "sha256": "8c95c5c4edb27951cbaffa9af4af2d7acd19c629d8bd20f823626540701ab591"
+    },
+    {
+      "path": "ci-fix-02/mail-format-result.json",
+      "bytes": 209,
+      "sha256": "0b686fb28472811be1b094ef17d8563d3962518d78ce5bd7c76033e36b530469"
+    },
+    {
+      "path": "ci-fix-02/mail-format.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "ci-fix-02/mail-native-before.json",
+      "bytes": 691,
+      "sha256": "ba2028fbc4872325ce74230af6ee9ae065682d95e5afc8337329b96ef25ec8be"
+    },
+    {
+      "path": "ci-fix-02/mail-native-result.json",
+      "bytes": 1321,
+      "sha256": "a3a6a3c52f82836cf2712612e527733eb6e048ae948696749fcdb2e0bac1e8bd"
+    },
+    {
+      "path": "ci-fix-02/mail-native.log",
+      "bytes": 27572,
+      "sha256": "1762db91b7f63df2068bc8e16b8cf75a454bb5677cd6b56ff8220a9703153271"
+    },
+    {
+      "path": "ci-fix-02/renderer-neutral-runtime-before.json",
+      "bytes": 579,
+      "sha256": "ac6b57c01e1575cd31fd1f1ce4c375e285f8efaf0580e24ba1e6892c1be52c71"
+    },
+    {
+      "path": "ci-fix-02/renderer-neutral-runtime-result.json",
+      "bytes": 209,
+      "sha256": "824137fec9c7ccbb5a1a6b71b2fcd3cb279dfc2754ccca1f398dbd979199123f"
+    },
+    {
+      "path": "ci-fix-02/renderer-neutral-runtime.log",
+      "bytes": 7020,
+      "sha256": "702234c8c5929e83c3fa7fb4160b8f4ce4c670174a6b1876ad7cba908327832c"
+    },
+    {
+      "path": "Fix-MailPresentationFeatureBoundary.py",
+      "bytes": 6830,
+      "sha256": "a2e7bd367324ab17dadbb42abee486ef125e341b040a5e54e492a35a946f8a61"
+    },
+    {
+      "path": "Run-MailBoundaryChecks.py",
+      "bytes": 2421,
+      "sha256": "2bb748740ae199ceb956ed4c0b474e433c688d2b76bf79f4c693ff129bf05d0a"
+    },
+    {
+      "path": "Run-MailBoundaryChecks02.py",
+      "bytes": 2439,
+      "sha256": "7d2660490e1178708be587e33d83719e2733c2ee94cb32577a92a89d9c9fcbbe"
+    }
+  ]
+}

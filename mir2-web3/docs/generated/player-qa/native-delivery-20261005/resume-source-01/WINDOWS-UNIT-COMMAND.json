@@ -1,0 +1,67 @@
+{
+  "argv": [
+    "C:/Users/Administrator/.cargo/bin/cargo.exe",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "--target-dir",
+    "C:/mir2-build/native-updater-progress-root-20261005",
+    "--lib",
+    "--",
+    "--test-threads=1",
+    "--nocapture"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater",
+  "startedUtc": "2026-10-05T02:50:29.152886+00:00",
+  "pid": 60188,
+  "exitCode": 0,
+  "elapsedSeconds": 17.163074700016296,
+  "minimumCFreeBytes": 167851143168,
+  "guard": null,
+  "networkScope": "test-only loopback HTTP; no external origin or CDN",
+  "ownedTemp": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-resume-root-01\\owned-temp",
+  "processExited": true,
+  "sourceBefore": {
+    "src/update.rs": {
+      "bytes": 44294,
+      "sha256": "af016af792a3fc2bdf809ae6199ef410ca651a339236db73aa7c509f301b3fcb"
+    },
+    "src/resume_tests.rs": {
+      "bytes": 26663,
+      "sha256": "9916d3165ae9af2d2ca495794fcbdd58c8bcfb0196e7e1e725d6d87ac73dc8e2"
+    },
+    "src/fs_safe.rs": {
+      "bytes": 9421,
+      "sha256": "ecfe5ca1f6747c5b555d7c53382dcb3d83017a76891d3cb293b4811c7911d610"
+    },
+    "src/delivery.rs": {
+      "bytes": 24256,
+      "sha256": "644330f79af7e8a49bdb923f4273b479cebe74937156c71223057247551b40b2"
+    },
+    "Cargo.toml": {
+      "bytes": 1074,
+      "sha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355"
+    },
+    "Cargo.lock": {
+      "bytes": 21776,
+      "sha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a"
+    },
+    "src/download.rs": {
+      "bytes": 9157,
+      "sha256": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+    }
+  },
+  "stdout": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-resume-root-01\\commands\\adjacent-library-final-02.stdout.log",
+    "bytes": 7711,
+    "sha256": "f7857086a0477d9a590ee0094a6e459aa96cc7788fdf282c7fe149ac45d5ef86"
+  },
+  "stderr": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-resume-root-01\\commands\\adjacent-library-final-02.stderr.log",
+    "bytes": 214,
+    "sha256": "d41dfb2477ee30d78721d6b999c29481864a60aab72e519096673caeef6e38d2"
+  }
+}

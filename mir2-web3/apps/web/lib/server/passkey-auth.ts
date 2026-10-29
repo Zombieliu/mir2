@@ -101,7 +101,7 @@ function verifySignedPayload(token: string): unknown {
   }
 }
 
-function passkeyGatewaySecret() {
+export function passkeyGatewaySecret() {
   const secret = process.env.MIR2_PASSKEY_AUTH_SECRET;
   if (secret && secret.length >= 32) return secret;
   if (passkeySecretRequiredFromEnv()) {

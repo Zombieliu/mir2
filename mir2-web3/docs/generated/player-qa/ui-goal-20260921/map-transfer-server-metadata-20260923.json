@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "kind": "ordinary-entrance-packet-and-save-recheck",
+  "sourceStoreSha256": "A1789431540E8FB145F025CABDD87E564635CA06CA94F1747E2911A9653EA20C",
+  "liveUserStoreWritten": false,
+  "visualAccepted": false,
+  "before": {
+    "status": "metadata_mismatch",
+    "ordinaryProtocol": true,
+    "isolatedStoreCopy": true,
+    "liveUserStoreWritten": false,
+    "visualAccepted": false,
+    "transfers": [
+      {
+        "source": "D401",
+        "destination": "0",
+        "sequence": 561,
+        "actual": {
+          "mapIndex": 47,
+          "fileName": "0",
+          "title": "BichonProvince",
+          "miniMapIndex": 8,
+          "bigMapIndex": 8,
+          "lights": 4,
+          "music": 0
+        },
+        "expected": {
+          "mapIndex": 1,
+          "miniMapIndex": 101,
+          "bigMapIndex": 101,
+          "lights": 0,
+          "music": 0
+        },
+        "mismatches": [
+          {
+            "field": "mapIndex",
+            "expected": 1,
+            "actual": 47
+          },
+          {
+            "field": "miniMapIndex",
+            "expected": 101,
+            "actual": 8
+          },
+          {
+            "field": "bigMapIndex",
+            "expected": 101,
+            "actual": 8
+          },
+          {
+            "field": "lights",
+            "expected": 0,
+            "actual": 4
+          }
+        ]
+      },
+      {
+        "source": "0",
+        "destination": "D401",
+        "sequence": 584,
+        "actual": {
+          "mapIndex": 47,
+          "fileName": "D401",
+          "title": "DeadMineEntrance",
+          "miniMapIndex": 8,
+          "bigMapIndex": 8,
+          "lights": 4,
+          "music": 0
+        },
+        "expected": {
+          "mapIndex": 47,
+          "miniMapIndex": 8,
+          "bigMapIndex": 8,
+          "lights": 4,
+          "music": 0
+        },
+        "mismatches": []
+      }
+    ],
+    "commands": 3,
+    "logoutSuccess": true,
+    "initial": {
+      "fileName": "D401",
+      "x": 24,
+      "y": 181
+    },
+    "finalSnapshot": {
+      "name": "a1",
+      "map": "D401",
+      "title": "DeadMineEntrance",
+      "x": 24,
+      "y": 181,
+      "direction": "Down",
+      "gold": 6960,
+      "experience": 2580
+    },
+    "saved": {
+      "name": "a1",
+      "map": "D401",
+      "title": "DeadMineEntrance",
+      "x": 24,
+      "y": 181,
+      "direction": "Down",
+      "gold": 6960,
+      "experience": 2580
+    },
+    "saveMismatches": []
+  },
+  "after": {
+    "status": "passed",
+    "ordinaryProtocol": true,
+    "isolatedStoreCopy": true,
+    "liveUserStoreWritten": false,
+    "visualAccepted": false,
+    "transfers": [
+      {
+        "source": "D401",
+        "destination": "0",
+        "sequence": 570,
+        "actual": {
+          "mapIndex": 1,
+          "fileName": "0",
+          "title": "BichonProvince",
+          "miniMapIndex": 101,
+          "bigMapIndex": 101,
+          "lights": 0,
+          "music": 0
+        },
+        "expected": {
+          "mapIndex": 1,
+          "miniMapIndex": 101,
+          "bigMapIndex": 101,
+          "lights": 0,
+          "music": 0
+        },
+        "mismatches": []
+      },
+      {
+        "source": "0",
+        "destination": "D401",
+        "sequence": 595,
+        "actual": {
+          "mapIndex": 47,
+          "fileName": "D401",
+          "title": "DeadMineEntrance",
+          "miniMapIndex": 8,
+          "bigMapIndex": 8,
+          "lights": 4,
+          "music": 0
+        },
+        "expected": {
+          "mapIndex": 47,
+          "miniMapIndex": 8,
+          "bigMapIndex": 8,
+          "lights": 4,
+          "music": 0
+        },
+        "mismatches": []
+      }
+    ],
+    "commands": 4,
+    "logoutSuccess": true,
+    "initial": {
+      "fileName": "D401",
+      "x": 26,
+      "y": 180
+    },
+    "finalSnapshot": {
+      "name": "a1",
+      "map": "D401",
+      "title": "DeadMineEntrance",
+      "x": 24,
+      "y": 181,
+      "direction": "Down",
+      "gold": 6960,
+      "experience": 2580
+    },
+    "saved": {
+      "name": "a1",
+      "map": "D401",
+      "title": "DeadMineEntrance",
+      "x": 24,
+      "y": 181,
+      "direction": "Down",
+      "gold": 6960,
+      "experience": 2580
+    },
+    "saveMismatches": []
+  }
+}

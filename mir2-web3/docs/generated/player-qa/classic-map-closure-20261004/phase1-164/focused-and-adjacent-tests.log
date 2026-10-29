@@ -1,0 +1,397 @@
+TAP version 13
+# Subtest: default covers every admitted map, retaining merchants, Sabuk and classic branches
+ok 1 - default covers every admitted map, retaining merchants, Sabuk and classic branches
+  ---
+  duration_ms: 1.2973
+  type: 'test'
+  ...
+# Subtest: omitting one admitted Red Moon side branch cannot pass the old journey minimum
+ok 2 - omitting one admitted Red Moon side branch cannot pass the old journey minimum
+  ---
+  duration_ms: 0.3304
+  type: 'test'
+  ...
+# Subtest: explicit legacy maps remain exactly selected and cannot be called full profile
+ok 3 - explicit legacy maps remain exactly selected and cannot be called full profile
+  ---
+  duration_ms: 5.0735
+  type: 'test'
+  ...
+# Subtest: scope rejects another profile, unbound bytes and duplicate or unsafe profile identities
+ok 4 - scope rejects another profile, unbound bytes and duplicate or unsafe profile identities
+  ---
+  duration_ms: 2.4041
+  type: 'test'
+  ...
+# Subtest: unsafe, duplicated and unexpected manifest identities are rejected or identified
+ok 5 - unsafe, duplicated and unexpected manifest identities are rejected or identified
+  ---
+  duration_ms: 0.274
+  type: 'test'
+  ...
+# Subtest: topology records conditional entries separately from ordinary walking and live acceptance
+ok 6 - topology records conditional entries separately from ordinary walking and live acceptance
+  ---
+  duration_ms: 122.9538
+  type: 'test'
+  ...
+# Subtest: source orphan D71653 is classified without inventing entry or expanding the actual profile
+ok 7 - source orphan D71653 is classified without inventing entry or expanding the actual profile
+  ---
+  duration_ms: 261.4443
+  type: 'test'
+  ...
+# Subtest: CLI fails omitted scope before any atlas completion or asset read
+ok 8 - CLI fails omitted scope before any atlas completion or asset read
+  ---
+  duration_ms: 43.6936
+  type: 'test'
+  ...
+# Subtest: level-15 routes bound every segment and preserve each class instructor branch
+ok 9 - level-15 routes bound every segment and preserve each class instructor branch
+  ---
+  duration_ms: 499.0331
+  type: 'test'
+  ...
+# Subtest: decodes authoritative Crystal ClientQuestInfo headers
+ok 10 - decodes authoritative Crystal ClientQuestInfo headers
+  ---
+  duration_ms: 0.206
+  type: 'test'
+  ...
+# Subtest: resolves quest NPC object IDs to real map positions
+ok 11 - resolves quest NPC object IDs to real map positions
+  ---
+  duration_ms: 0.1603
+  type: 'test'
+  ...
+# Subtest: binds kill tasks to real respawns
+ok 12 - binds kill tasks to real respawns
+  ---
+  duration_ms: 0.1086
+  type: 'test'
+  ...
+# Subtest: q113 casters retain Crystal D711's shared BlackMaggot and WedgeMoth rows
+ok 13 - q113 casters retain Crystal D711's shared BlackMaggot and WedgeMoth rows
+  ---
+  duration_ms: 1581.7474
+  type: 'test'
+  ...
+# Subtest: distinguishes ordinary Q-drops from harvest Q-drops
+ok 14 - distinguishes ordinary Q-drops from harvest Q-drops
+  ---
+  duration_ms: 0.1849
+  type: 'test'
+  ...
+# Subtest: marks Crystal HarvestMonster subclasses as corpse-harvest item sources
+ok 15 - marks Crystal HarvestMonster subclasses as corpse-harvest item sources
+  ---
+  duration_ms: 0.1791
+  type: 'test'
+  ...
+# Subtest: models zero-index quest endpoints as visible Quest Diary actions
+ok 16 - models zero-index quest endpoints as visible Quest Diary actions
+  ---
+  duration_ms: 0.0604
+  type: 'test'
+  ...
+# Subtest: harvest monster drops can satisfy Crystal item tasks
+ok 17 - harvest monster drops can satisfy Crystal item tasks
+  ---
+  duration_ms: 0.1901
+  type: 'test'
+  ...
+# Subtest: binds q140 GoldChestnut to the imported chestnut-tree fields
+ok 18 - binds q140 GoldChestnut to the imported chestnut-tree fields
+  ---
+  duration_ms: 0.242
+  type: 'test'
+  ...
+# Subtest: safe supply loot is derived from ordinary drops, class stats, and merchant trade lists
+ok 19 - safe supply loot is derived from ordinary drops, class stats, and merchant trade lists
+  ---
+  duration_ms: 1.6616
+  type: 'test'
+  ...
+# Subtest: progression skill books are class-compatible and level-bounded Crystal items
+ok 20 - progression skill books are class-compatible and level-bounded Crystal items
+  ---
+  duration_ms: 0.4691
+  type: 'test'
+  ...
+# Subtest: binds flag tasks to visible scripted-world NPC interactions
+ok 21 - binds flag tasks to visible scripted-world NPC interactions
+  ---
+  duration_ms: 0.2727
+  type: 'test'
+  ...
+# Subtest: summarizes the complete Warrior 1-50 data surface
+ok 22 - summarizes the complete Warrior 1-50 data surface
+  ---
+  duration_ms: 0.0659
+  type: 'test'
+  ...
+# Subtest: records current runtime-profile gaps separately from Crystal content gaps
+not ok 23 - records current runtime-profile gaps separately from Crystal content gaps
+  ---
+  duration_ms: 0.5522
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\maps\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-route-manifest.mjs:283:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    26 !== 25
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 25
+  actual: 26
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/maps/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-route-manifest.mjs:285:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: builds distinct Warrior, Wizard, and Taoist instructor branches
+ok 24 - builds distinct Warrior, Wizard, and Taoist instructor branches
+  ---
+  duration_ms: 1840.908
+  type: 'test'
+  ...
+# Subtest: floor atlases are split into bounded streaming pages
+ok 25 - floor atlases are split into bounded streaming pages
+  ---
+  duration_ms: 7.5749
+  type: 'test'
+  ...
+# Subtest: dev ensure rejects stale oversized manifests
+ok 26 - dev ensure rejects stale oversized manifests
+  ---
+  duration_ms: 0.1786
+  type: 'test'
+  ...
+# Subtest: the packed index contains only raw-upload-safe floor libraries
+ok 27 - the packed index contains only raw-upload-safe floor libraries
+  ---
+  duration_ms: 0.6417
+  type: 'test'
+  ...
+# Subtest: detects uniform opaque near-black source PNGs without flagging real or transparent art
+ok 28 - detects uniform opaque near-black source PNGs without flagging real or transparent art
+  ---
+  duration_ms: 37.8563
+  type: 'test'
+  ...
+# [mir2-map-atlas] warning: found 1 uniform opaque near-black source image(s) outside ground-tile libraries; continuing without making these known placeholder objects fatal.
+#   - placeholder.png (RGBA 8,0,0,255)
+# [mir2-map-atlas] warning: found 1 uniform opaque near-black ground-tile source image(s). Use --strictSourceQuality to make this release-blocking:
+#   - placeholder.png (RGBA 8,0,0,255)
+# Subtest: ground-tile placeholders are actionable and non-ground placeholders stay non-fatal
+ok 29 - ground-tile placeholders are actionable and non-ground placeholders stay non-fatal
+  ---
+  duration_ms: 11.9711
+  type: 'test'
+  ...
+# Subtest: remote production builds require a verified content-addressed map atlas
+ok 30 - remote production builds require a verified content-addressed map atlas
+  ---
+  duration_ms: 1.078
+  type: 'test'
+  ...
+# Subtest: repeat builds remove only stale content-addressed atlas artifacts
+ok 31 - repeat builds remove only stale content-addressed atlas artifacts
+  ---
+  duration_ms: 4.6157
+  type: 'test'
+  ...
+# Subtest: the generated map atlas never exceeds the WebGL2 compatibility budget
+ok 32 - the generated map atlas never exceeds the WebGL2 compatibility budget
+  ---
+  duration_ms: 1.7098
+  type: 'test'
+  ...
+# Subtest: packed frames own separate gutters across columns, rows and pages
+ok 33 - packed frames own separate gutters across columns, rows and pages
+  ---
+  duration_ms: 43.2856
+  type: 'test'
+  ...
+# Subtest: atlas preserves every source RGBA pixel and copies edge/corner alpha exactly
+ok 34 - atlas preserves every source RGBA pixel and copies edge/corner alpha exactly
+  ---
+  duration_ms: 10.8412
+  type: 'test'
+  ...
+# map render routing tests passed
+# Subtest: apps\\web\\scripts\\test-map-render-routing.mjs
+ok 5 - apps\\web\\scripts\\test-map-render-routing.mjs
+  ---
+  duration_ms: 318.4657
+  type: 'test'
+  ...
+# Subtest: full fallback placement follows Crystal draw rules
+    # Subtest: ordinary front stays bottom-left
+    ok 1 - ordinary front stays bottom-left
+      ---
+      duration_ms: 1.3572
+      type: 'test'
+      ...
+    # Subtest: ordinary middle DrawUp ignores library offset
+    ok 2 - ordinary middle DrawUp ignores library offset
+      ---
+      duration_ms: 0.9289
+      type: 'test'
+      ...
+    # Subtest: 48x32 middle floor ignores library offset
+    ok 3 - 48x32 middle floor ignores library offset
+      ---
+      duration_ms: 0.7913
+      type: 'test'
+      ...
+    # Subtest: ordinary front blend ignores library offset
+    ok 4 - ordinary front blend ignores library offset
+      ---
+      duration_ms: 0.7935
+      type: 'test'
+      ...
+    # Subtest: Objects27 keeps its nonzero source offset
+    ok 5 - Objects27 keeps its nonzero source offset
+      ---
+      duration_ms: 0.9369
+      type: 'test'
+      ...
+    # Subtest: Objects27 zero offset uses ordinary placement
+    ok 6 - Objects27 zero offset uses ordinary placement
+      ---
+      duration_ms: 0.805
+      type: 'test'
+      ...
+    # Subtest: Objects27 middle DrawUp ignores source offset
+    ok 7 - Objects27 middle DrawUp ignores source offset
+      ---
+      duration_ms: 0.8464
+      type: 'test'
+      ...
+    # Subtest: Objects27 ordinary front blend ignores source offset
+    ok 8 - Objects27 ordinary front blend ignores source offset
+      ---
+      duration_ms: 0.9827
+      type: 'test'
+      ...
+    # Subtest: library 14 blend retains offset exception
+    ok 9 - library 14 blend retains offset exception
+      ---
+      duration_ms: 0.8986
+      type: 'test'
+      ...
+    # Subtest: library 27 blend retains offset exception
+    ok 10 - library 27 blend retains offset exception
+      ---
+      duration_ms: 1.0081
+      type: 'test'
+      ...
+    # Subtest: Shanda front blend retains offset exception
+    ok 11 - Shanda front blend retains offset exception
+      ---
+      duration_ms: 0.8018
+      type: 'test'
+      ...
+    # Subtest: special blend lower boundary 2723 retains offset
+    ok 12 - special blend lower boundary 2723 retains offset
+      ---
+      duration_ms: 0.8803
+      type: 'test'
+      ...
+    # Subtest: special blend upper boundary 2732 retains offset
+    ok 13 - special blend upper boundary 2732 retains offset
+      ---
+      duration_ms: 1.0104
+      type: 'test'
+      ...
+    # Subtest: blend frame 2722 ignores offset
+    ok 14 - blend frame 2722 ignores offset
+      ---
+      duration_ms: 0.7387
+      type: 'test'
+      ...
+    # Subtest: blend frame 2733 ignores offset
+    ok 15 - blend frame 2733 ignores offset
+      ---
+      duration_ms: 0.8091
+      type: 'test'
+      ...
+    # Subtest: non-blended special frame uses ordinary draw
+    ok 16 - non-blended special frame uses ordinary draw
+      ---
+      duration_ms: 0.8428
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 0 ignores library offset
+    ok 17 - middle DrawUpBlend phase 0 ignores library offset
+      ---
+      duration_ms: 0.9066
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 1 ignores library offset
+    ok 18 - middle DrawUpBlend phase 1 ignores library offset
+      ---
+      duration_ms: 0.8439
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 2 ignores library offset
+    ok 19 - middle DrawUpBlend phase 2 ignores library offset
+      ---
+      duration_ms: 1.0525
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 3 ignores library offset
+    ok 20 - middle DrawUpBlend phase 3 ignores library offset
+      ---
+      duration_ms: 0.9666
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 4 ignores library offset
+    ok 21 - middle DrawUpBlend phase 4 ignores library offset
+      ---
+      duration_ms: 0.8351
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 5 ignores library offset
+    ok 22 - middle DrawUpBlend phase 5 ignores library offset
+      ---
+      duration_ms: 0.8571
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 6 ignores library offset
+    ok 23 - middle DrawUpBlend phase 6 ignores library offset
+      ---
+      duration_ms: 0.8243
+      type: 'test'
+      ...
+    # Subtest: middle DrawUpBlend phase 7 ignores library offset
+    ok 24 - middle DrawUpBlend phase 7 ignores library offset
+      ---
+      duration_ms: 0.8121
+      type: 'test'
+      ...
+    1..24
+ok 36 - full fallback placement follows Crystal draw rules
+  ---
+  duration_ms: 56.9194
+  type: 'test'
+  ...
+# native keyed map pack tests passed
+1..36
+# tests 60
+# suites 0
+# pass 59
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4716.124

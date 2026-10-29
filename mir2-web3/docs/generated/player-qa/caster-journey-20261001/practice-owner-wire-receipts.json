@@ -1,0 +1,226 @@
+{
+  "kind": "selected actual r2 traces before controller-only wire fix",
+  "sanitized": true,
+  "groups": [
+    {
+      "class": "Wizard",
+      "sourceTrace": "wizard/Wizard.2026-10-01T09-31-51-355Z.trace.jsonl",
+      "rawTraceSha256": "953a2ea237a814c36f7dfa21a3252e399e4049f1cd84ffff99fe6ff9ede03d57",
+      "events": [
+        {
+          "at": "2026-10-01T09:32:27.798Z",
+          "sequence": 711,
+          "direction": "sent",
+          "type": "walk",
+          "command": {
+            "type": "walk",
+            "movementDirection": "Down"
+          }
+        },
+        {
+          "at": "2026-10-01T09:32:27.799Z",
+          "sequence": 712,
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "Down",
+            "x": 458,
+            "y": 405
+          }
+        },
+        {
+          "at": "2026-10-01T09:32:28.450Z",
+          "sequence": 716,
+          "direction": "sent",
+          "type": "run",
+          "command": {
+            "type": "run",
+            "movementDirection": "Right"
+          }
+        },
+        {
+          "at": "2026-10-01T09:32:28.452Z",
+          "sequence": 717,
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "Right",
+            "x": 460,
+            "y": 405
+          }
+        },
+        {
+          "at": "2026-10-01T09:32:28.497Z",
+          "sequence": 718,
+          "direction": "sent",
+          "type": "magic",
+          "command": {
+            "type": "magic",
+            "spell": "GreatFireBall",
+            "targetId": 203503,
+            "movementDirection": "DownRight",
+            "x": 468,
+            "y": 413
+          }
+        },
+        {
+          "at": "2026-10-01T09:32:28.571Z",
+          "sequence": 722,
+          "direction": "received",
+          "type": "worldSnapshot",
+          "payload": {
+            "mapFileName": "0",
+            "playerObjectId": 1000,
+            "playerMp": 178,
+            "knownSkills": [
+              {
+                "spell": "FireBall",
+                "mpCost": 3,
+                "cooldownRemainingTicks": 1,
+                "cooldownRemainingMs": 486
+              },
+              {
+                "spell": "GreatFireBall",
+                "mpCost": 5,
+                "cooldownRemainingTicks": 1,
+                "cooldownRemainingMs": 486
+              }
+            ]
+          }
+        },
+        {
+          "at": "2026-10-01T09:32:28.647Z",
+          "sequence": 723,
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "Right",
+            "x": 460,
+            "y": 405
+          }
+        }
+      ]
+    },
+    {
+      "class": "Taoist",
+      "sourceTrace": "taoist/Taoist.2026-10-01T09-12-39-082Z.trace.jsonl",
+      "rawTraceSha256": "ab71ed80206e2a7ac1a5743dee8943a552b0be235b22f7f2ce6f28be1da96053",
+      "events": [
+        {
+          "at": "2026-10-01T09:31:36.538Z",
+          "sequence": 11025,
+          "direction": "sent",
+          "type": "run",
+          "command": {
+            "type": "run",
+            "movementDirection": "Left"
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:36.538Z",
+          "sequence": 11026,
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "Left",
+            "x": 165,
+            "y": 318
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:37.202Z",
+          "sequence": 11028,
+          "direction": "sent",
+          "type": "run",
+          "command": {
+            "type": "run",
+            "movementDirection": "Left"
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:37.251Z",
+          "sequence": 11032,
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "Left",
+            "x": 163,
+            "y": 318
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:37.855Z",
+          "sequence": 11035,
+          "direction": "sent",
+          "type": "walk",
+          "command": {
+            "type": "walk",
+            "movementDirection": "UpLeft"
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:37.861Z",
+          "sequence": 11036,
+          "direction": "received",
+          "type": "packet",
+          "packet": "UserLocation",
+          "payload": {
+            "direction": "UpLeft",
+            "x": 162,
+            "y": 317
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:37.903Z",
+          "sequence": 11037,
+          "direction": "sent",
+          "type": "magic",
+          "command": {
+            "type": "magic",
+            "spell": "SoulFireBall",
+            "targetId": 240335,
+            "movementDirection": "UpLeft",
+            "x": 154,
+            "y": 309
+          }
+        },
+        {
+          "at": "2026-10-01T09:31:37.994Z",
+          "sequence": 11038,
+          "direction": "received",
+          "type": "worldSnapshot",
+          "payload": {
+            "mapFileName": "D001",
+            "playerObjectId": 1000,
+            "playerMp": 102,
+            "knownSkills": [
+              {
+                "spell": "Healing",
+                "mpCost": 3,
+                "cooldownRemainingTicks": 1,
+                "cooldownRemainingMs": 471
+              },
+              {
+                "spell": "SpiritSword",
+                "mpCost": 0,
+                "cooldownRemainingTicks": 0,
+                "cooldownRemainingMs": null
+              },
+              {
+                "spell": "SoulFireBall",
+                "mpCost": 3,
+                "cooldownRemainingTicks": 1,
+                "cooldownRemainingMs": 471
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "sourceAccepted": true,
+  "independentReviewAccepted": true,
+  "sourceSnapshot": {
+    "sha256": "d8ba60d6d626792c865f39a186c7c8086c43ea8264586a82efb8a4e82b261efd"
+  },
+  "independentSourceReview": {
+    "sha256": "d0b2376232660b68f4a7d4022056fdc0dc5a1d859e56d47a2141cdc9aa17d8d5",
+    "path": "E:\\mir2-player-journey\\work\\slg-stonecutting-20261009\\independent-stone-frontend-source-review-01.json"
+  },
+  "scope": "Current Stone NPC sidebar headless layout/input-model tests and Native compile only. Original modality is retained. No renderer, screenshot, gateway, PostgreSQL, installer, live gameplay or human acceptance is established."
+}

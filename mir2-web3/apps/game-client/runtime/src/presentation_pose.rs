@@ -125,8 +125,9 @@ impl Default for PresentationPoseSnapshot {
 }
 
 #[derive(Debug, Default, Resource)]
-pub(crate) struct PresentationPoseBuffer {
+pub struct PresentationPoseBuffer {
     enabled: bool,
+    native_consumer_enabled: bool,
     frame_id: u64,
     generated_at_ms: f64,
     renderer_enabled: bool,
@@ -139,9 +140,33 @@ pub(crate) struct PresentationPoseBuffer {
 }
 
 impl PresentationPoseBuffer {
+    /// Keep the exact renderer-owned entity poses available to a native UI
+    /// consumer without enabling the serialized DOM bridge.
+    pub fn set_native_consumer_enabled(&mut self, enabled: bool) {
+        self.native_consumer_enabled = enabled;
+        if !enabled && !self.enabled {
+            self.entities.clear();
+        }
+    }
+
+    /// Whether a native overlay consumer can use this frame's renderer-owned
+    /// camera pose. A coherent center can still be temporarily unavailable
+    /// while the map and entity snapshots rendezvous.
+    pub fn native_overlay_active(&self) -> bool {
+        self.native_consumer_enabled && self.renderer_enabled
+    }
+
+    pub(crate) fn reset_scene(&mut self) {
+        let native_consumer_enabled = self.native_consumer_enabled;
+        *self = Self {
+            native_consumer_enabled,
+            ..Self::default()
+        };
+    }
+
     pub(crate) fn set_enabled(&mut self, enabled: bool) {
         self.enabled = enabled;
-        if !enabled {
+        if !enabled && !self.native_consumer_enabled {
             self.entities.clear();
         }
     }
@@ -188,7 +213,11 @@ impl PresentationPoseBuffer {
         offset: Vec2,
         source: EntityPoseSource,
     ) {
-        if !self.enabled || !self.renderer_enabled || object_id.is_empty() || !offset.is_finite() {
+        if (!self.enabled && !self.native_consumer_enabled)
+            || !self.renderer_enabled
+            || object_id.is_empty()
+            || !offset.is_finite()
+        {
             return;
         }
 
@@ -298,8 +327,43 @@ impl PresentationPoseBuffer {
         self.camera.source
     }
 
+    /// Grid center currently committed by both the map and entity renderers.
+    /// Native screen-space overlays must use this instead of the newest packet
+    /// center so a command/ACK handoff cannot move them by a whole cell.
+    pub fn native_overlay_center(&self) -> Option<(i32, i32)> {
+        if !self.native_overlay_active() {
+            return None;
+        }
+        self.coherent_applied_center()
+            .map(|center| (center.x, center.y))
+    }
+
+    /// Exact screen-space camera offset applied by `follow_player` this frame.
+    pub fn native_overlay_camera_offset(&self) -> (f32, f32) {
+        if !self.native_overlay_active() {
+            return (0.0, 0.0);
+        }
+        (self.camera.x, self.camera.y)
+    }
+
+    /// Exact entity-local screen offset used by the retained sprite layers.
+    /// The caller composes this with [`Self::native_overlay_camera_offset`].
+    pub fn native_overlay_entity_offset(&self, object_id: &str) -> Option<(f32, f32)> {
+        if !self.native_overlay_active() {
+            return None;
+        }
+        self.entities
+            .iter()
+            .find(|pose| pose.object_id == object_id)
+            .map(|pose| (pose.x, pose.y))
+    }
+
     pub(crate) fn publish(&self) -> String {
-        let mut entities = self.entities.clone();
+        let mut entities = if self.enabled {
+            self.entities.clone()
+        } else {
+            Vec::new()
+        };
         entities.sort_by(|left, right| left.object_id.cmp(&right.object_id));
         let coherent_center = matches!(
             (self.provenance.map_center, self.provenance.entity_center),
@@ -431,6 +495,36 @@ mod tests {
         assert_eq!(value["entities"][0]["objectId"], "remote");
         assert_eq!(value["entities"][0]["source"], "remotePacket");
         assert_eq!(value["entities"][1]["objectId"], "self");
+    }
+
+    #[test]
+    fn native_consumer_reads_exact_pose_without_enabling_the_dom_bridge() {
+        let mut buffer = PresentationPoseBuffer::default();
+        buffer.set_native_consumer_enabled(true);
+        let center = PresentationGridCenter { x: 330, y: 268 };
+        buffer.set_applied_map_provenance(Some(center), Some(17));
+        buffer.set_applied_entity_center(Some(center));
+        buffer.begin_frame(1_234.0, true);
+        buffer.set_camera(Vec2::new(-16.0, -10.0), CameraPoseSource::LocalCommand);
+        buffer.record_entity("npc", Vec2::new(8.0, -4.0), EntityPoseSource::RemotePacket);
+
+        assert_eq!(buffer.native_overlay_center(), Some((330, 268)));
+        assert!(buffer.native_overlay_active());
+        assert_eq!(buffer.native_overlay_camera_offset(), (-16.0, -10.0));
+        assert_eq!(
+            buffer.native_overlay_entity_offset("npc"),
+            Some((8.0, -4.0))
+        );
+
+        let value: serde_json::Value =
+            serde_json::from_str(&buffer.publish()).expect("valid bridge-disabled pose json");
+        assert_eq!(value["bridgeEnabled"], false);
+        assert_eq!(value["ready"], false);
+        assert_eq!(value["entities"].as_array().map(Vec::len), Some(0));
+
+        buffer.reset_scene();
+        assert!(buffer.native_consumer_enabled);
+        assert_eq!(buffer.native_overlay_center(), None);
     }
 
     #[test]

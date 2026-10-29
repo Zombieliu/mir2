@@ -1,0 +1,12 @@
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\maps\mir2-player-journey\mir2-web3\packages\game-data)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.34s
+     Running unittests src\lib.rs (C:/mir2-playtest-releases/20261004-native-r17/map-implementation/phase2-208-runtime-209-resources/cargo-test-target\debug\deps\mir2_game_data-f7d317b682c196a8.exe)
+
+running 4 tests
+test tests::platinum_176_exposes_every_source_three_class_book_through_level_50 ... ok
+test tests::platinum_176_prajna_island_requires_the_visible_round_trip_sailor_scripts ... ok
+test tests::platinum_176_profile_bundle_matches_the_compiled_profile ... ok
+test tests::platinum_176_profile_is_reference_complete_and_has_a_1_to_50_curve ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 54 filtered out; finished in 0.48s
+

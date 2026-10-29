@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "sourceCommit": "83c157b46519aa255ce3b50631bb52a6e5fa8617",
+  "executable": "C:/mir2-newcomer-v2-20260918/mir2-gateway-83c157b46.exe",
+  "sha256": "FD658D1881417FA4B5B42C6A0838C3891E010342FB6888722B7E50E9BEF961D3",
+  "verifiedAt": "2026-09-17T19:29:43.3606138Z",
+  "cargoCommand": "cargo +1.95.0 build -p mir2-gateway --bin mir2-gateway --release --locked --offline -j1",
+  "cargoExitCode": 0,
+  "profile": "newcomer-v2",
+  "contentProfile": "platinum_176",
+  "ports": [
+    18800,
+    18810
+  ],
+  "accountStore": "C:/mir2-newcomer-v2-20260918/gateway/accounts.json",
+  "rustSourceSha256": [
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "sha256": "263C0D6D8A2BFA46F4C0FFE0EFEFAECCE6F4B87ECEA639AEE53D1CC5310526CB"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_journey_event_bridge_tests.rs",
+      "sha256": "1F0D6BF4E65C90F2DAC00F171B56A53994C7117D902F23D4ADDAD226A69FE221"
+    },
+    {
+      "path": "apps/simulation/src/runtime/newcomer_v2_events.rs",
+      "sha256": "C4F3B5342AF58D3692212B15FDEEC21C124336A51C9FA1ED2030037BE63DE1D2"
+    }
+  ],
+  "launcherPid": 56068,
+  "gatewayPid": 55808,
+  "zoneProfileFixIncluded": false,
+  "visualAccepted": false,
+  "measuredTime": false
+}

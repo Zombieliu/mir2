@@ -1,0 +1,23 @@
+Full retained log: C:/mir2-build/crowded-gateway-status-red2-20261003.log
+SHA256: 64b88f3ffd8e030d198a03ce237ad89149bc0248d42fdee6b7b4872a5b29410e
+
+running 2 tests
+test routing::tests::crowded_escape_tests::crowded_dazed_owner_cannot_bypass_physical_admission_with_normal_packet ... ok
+test routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet ... FAILED
+---- routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet stdout ----
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 894 filtered out; finished in 2.24s
+
+Failure details:
+---- routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet stdout ----
+
+thread 'routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet' (47096) panicked at apps\gateway\src\routing\tests\crowded_escape_tests.rs:40:5:
+trusted personal admission must not turn STUN into an attack/movement lock: [UserLocation { location: UserLocation { position: Point { x: 330, y: 270 }, direction: Down } }, GuildStatus { guild_name: "", guild_rank_name: "", level: 0, experience: 0, max_experience: 0, gold: 0, spare_points: 0, member_count: 0, max_members: 0, voting: false, item_count: 0, buff_count: 0, my_options: 0, my_rank_id: -1 }, GuildMemberChange { name: "", rank_index: 0, status: 255, ranks: [] }, GuildBuffList { remove: 0, active_buffs: [], guild_buffs: [] }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    routing::tests::crowded_escape_tests::crowded_stunned_owner_can_send_normal_melee_packet
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 894 filtered out; finished in 2.24s
+
+error: test failed, to rerun pass `-p mir2-gateway --lib`

@@ -1,0 +1,87 @@
+{
+  "kind": "Source40 actual scoped Git publication",
+  "generatedAtUtc": "2026-10-08 06:05:38 UTC",
+  "branch": "codex/windows-player-journey",
+  "commit": "8e64c987849137b56a67fda4b64f18b0645917eb",
+  "parent": "4b922c51fc8a0c3b873c6a95209561c893d59bee",
+  "title": "Connect Web Hero runtime with scoped input and readiness",
+  "commitActual": {
+    "chunk_id": "6da0da",
+    "wall_time_seconds": 0.3259052,
+    "exit_code": 0,
+    "original_token_count": 237,
+    "output": "[codex/windows-player-journey 8e64c98784] Connect Web Hero runtime with scoped input and readiness\n 16 files changed, 9055 insertions(+), 8 deletions(-)\n create mode 100644 mir2-web3/apps/game-client/runtime/src/hero_ui_host.rs\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source39-publication01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-actual-review01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-finite-result01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-guard-refusal01.json\n create mode 100644 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-hero-source40-raw-evidence01.json\n"
+  },
+  "pushAttempts": [
+    {
+      "chunk_id": "90753c",
+      "wall_time_seconds": 5.1460138,
+      "exit_code": 1,
+      "original_token_count": 43,
+      "output": "Connection closed by 198.18.0.132 port 22\r\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n"
+    },
+    {
+      "chunk_id": "42c949",
+      "wall_time_seconds": 9.8167813,
+      "exit_code": 0,
+      "original_token_count": 31,
+      "output": "To github.com:Zombieliu/mir2.git\n   4b922c51fc..8e64c98784  codex/windows-player-journey -> codex/windows-player-journey\n"
+    }
+  ],
+  "remoteQueryInitial": {
+    "chunk_id": "321fee",
+    "wall_time_seconds": 10.0094348,
+    "session_id": 87547,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "remoteQueryCompletion": {
+    "chunk_id": "57ea27",
+    "wall_time_seconds": 0.0000092,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "8e64c987849137b56a67fda4b64f18b0645917eb\trefs/heads/codex/windows-player-journey\n"
+  },
+  "originUrlActual": {
+    "chunk_id": "8da28c",
+    "wall_time_seconds": 0.1186505,
+    "exit_code": 0,
+    "original_token_count": 9,
+    "output": "git@github.com:Zombieliu/mir2.git\n"
+  },
+  "trackedStatusActual": {
+    "chunk_id": "97027b",
+    "wall_time_seconds": 0.181089,
+    "exit_code": 0,
+    "original_token_count": 9,
+    "output": " M mir2-web3/apps/web/tsconfig.json\n"
+  },
+  "indexAfterCommitActual": {
+    "chunk_id": "f7f0af",
+    "wall_time_seconds": 0.1283003,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "independentRemoteMatches": true,
+  "forceUsed": false,
+  "persistentRemoteOrSshChanged": false,
+  "qualification": "Actual code commit/push; no new complete Web package, GUI, Ready/player acceptance, or whole-goal completion.",
+  "result": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source40-finite-result01.json",
+    "bytes": 406234,
+    "sha256": "2e6ce24b2df867bb039482288474b5705cf76d8ed8866ab34988af102ba993aa"
+  },
+  "actualReview": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\client-core-20260930\\web-windows-catchup-20261006\\web-hero-source40-actual-review01.json",
+    "bytes": 2893,
+    "sha256": "586efbdb73a1ef9e3f36a3f692f9c838255f6a1314f3857d6acff94d21bd2f08"
+  },
+  "userTsconfig": {
+    "path": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\tsconfig.json",
+    "bytes": 4932,
+    "sha256": "08fed5308fee3466445cad5b0f4c0cc0f8e00f4fa53823999ff1bed0bcde3182"
+  },
+  "goalStatus": "active",
+  "goalComplete": false
+}

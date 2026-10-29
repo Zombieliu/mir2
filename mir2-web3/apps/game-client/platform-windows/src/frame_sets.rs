@@ -6,7 +6,6 @@
 //! libraries whose action counts, skips, or intervals differ.
 
 use std::collections::HashMap;
-use std::fs;
 use std::sync::OnceLock;
 
 use mir2_bevy_runtime::entity_animation::{
@@ -164,12 +163,9 @@ fn build_mounted_player_catalog() -> AnimationCatalog {
 }
 
 fn load_frame_set_catalog() -> NativeFrameSetCatalog {
-    let Some(path) = assets::asset_path("original-ui/frame-sets.generated.json") else {
+    let path = "original-ui/frame-sets.generated.json";
+    let Some(source) = assets::read_text(path) else {
         eprintln!("[frame-sets] generated frame-set catalog is unavailable; using defaults");
-        return NativeFrameSetCatalog::default();
-    };
-    let Ok(source) = fs::read_to_string(&path) else {
-        eprintln!("[frame-sets] failed to read {path:?}; using defaults");
         return NativeFrameSetCatalog::default();
     };
     let Ok(payload) = serde_json::from_str::<Value>(&source) else {
@@ -250,6 +246,7 @@ fn build_animation_catalog(source: &HashMap<String, SourceAction>) -> Option<Ani
     for (action, source_name) in [
         (AnimationAction::Show, "Show"),
         (AnimationAction::Hide, "Hide"),
+        (AnimationAction::Jump, "Jump"),
     ] {
         if let Some(source_action) = source.get(source_name) {
             catalog.insert(action, source_action.descriptor).ok()?;
@@ -276,6 +273,7 @@ fn resolve_source_action<'a>(
         AnimationAction::AttackRange1 => &["AttackRange1", "Attack1", "Standing"],
         AnimationAction::AttackRange2 => &["AttackRange2", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::DashAttack => &["DashAttack", "Attack1", "Walking", "Standing"],
+        AnimationAction::Jump => &["Jump"],
         AnimationAction::Spell => &["Spell", "AttackRange1", "Attack1", "Standing"],
         AnimationAction::Struck => &["Struck", "Standing"],
         AnimationAction::Die => &["Die", "Dead", "Standing"],
@@ -487,6 +485,31 @@ mod tests {
         assert_eq!(
             catalog.descriptor(AnimationAction::AttackRange2),
             Some(&FrameDescriptor::from_crystal(160, 8, 0, 100, false))
+        );
+    }
+}
+
+#[cfg(test)]
+mod pet_frames_tests {
+    use super::*;
+    #[test]
+    fn all_fifteen_pet_libraries_load_embedded_frame_sets_instead_of_generic_monster() {
+        let catalog = load_frame_set_catalog();
+        for i in 0..=14 {
+            let library = format!("Pet/{i:02}");
+            assert!(catalog.libraries.contains_key(&library), "{library}");
+        }
+        let flame = catalog.catalog_for(EntityKind::Monster, "Pet/08");
+        let third = flame.descriptor(AnimationAction::Attack3).unwrap();
+        assert_eq!(
+            (third.start, third.frame_count, third.frame_interval_ms),
+            (176, 10, 100)
+        );
+        let snow = catalog.catalog_for(EntityKind::Monster, "Pet/09");
+        let second = snow.descriptor(AnimationAction::Attack2).unwrap();
+        assert_eq!(
+            (second.start, second.frame_count, second.frame_interval_ms),
+            (152, 7, 100)
         );
     }
 }

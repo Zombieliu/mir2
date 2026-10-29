@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::{
     EquipmentSlot, ItemContainer, ItemGrade, Stage5HeroMagicState, WorldItemSnapshot,
+    WorldItemTooltipSource,
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
@@ -27,7 +28,7 @@ use super::components::{
 use super::crystal_compat::*;
 use super::drops::drop_item_packet;
 use super::equipment::{
-    equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
+    automatic_equipment_slot, equip_item_impl, equipment_slot_index, feed_mount_with_crystal_food,
     repair_equipped_weapon_with_oil, slugify_name, toggle_mount_ride_from_use_item, try_equip_item,
     try_luck_weapon, CrystalLuckWeaponOutcome, EquipmentState,
 };
@@ -44,7 +45,9 @@ use super::map::{
     current_map_disallows_town_teleport,
 };
 use super::monsters::deterministic_roll;
-use super::movement::{crystal_random_same_map_teleport_packets, town_teleport_packets};
+use super::movement::{
+    crystal_dungeon_escape_packets, crystal_random_same_map_teleport_packets, town_teleport_packets,
+};
 use super::npc::crystal_sell_value_for_item;
 use super::npc_script::gain_credit;
 use super::packets::{
@@ -66,6 +69,9 @@ use super::skills::{
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ItemState {
+    /// Server registry reference only; no hidden outcome or random seed.
+    #[serde(default, skip_serializing_if="Option::is_none")]
+    pub(super) stone_serial: Option<u64>,
     pub(super) key: String,
     pub(super) name: String,
     pub(super) icon: u16,
@@ -477,10 +483,48 @@ fn validate_item_state_key_for_exact_index(
 
 impl ItemState {
     pub(super) fn snapshot(&self, language: LanguageCode) -> WorldItemSnapshot {
+        let tooltip_source = exact_item_index_for_item_state(self)
+            .ok()
+            .and_then(|item_index| unique_crystal_item_by_index(item_index).ok())
+            .map(|info| {
+                let user_item = try_user_item_from_item_state(self).ok();
+                let socket_infos = user_item
+                    .as_ref()
+                    .map(|item| {
+                        item.slots
+                            .iter()
+                            .map(|slot| {
+                                slot.as_ref().and_then(|socket| {
+                                    unique_crystal_item_by_index(socket.item_index).ok()
+                                })
+                            })
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                WorldItemTooltipSource {
+                    info,
+                    real_info: None,
+                    user_item,
+                    socket_infos,
+                    real_socket_infos: Vec::new(),
+                }
+            });
         WorldItemSnapshot {
             key: self.key.clone(),
             name: localized_item_name(language, &self.key, &self.name),
-            icon: self.icon,
+            // Derive from source identity and live quantity. A legacy saved
+            // icon must not override a known ItemInfo.Image, and split/merge/
+            // use/save must not leave a cached count-band image behind.
+            icon: tooltip_source.as_ref().map_or(self.icon, |source| {
+                let info = &source.info;
+                mir2_game_data::crystal_user_item_image(
+                    info.item_type,
+                    info.shape,
+                    info.stack_size,
+                    info.image,
+                    self.quantity,
+                )
+            }),
             unique_id: item_unique_id(self),
             slot: self.slot,
             container: self.container,
@@ -499,6 +543,7 @@ impl ItemState {
             grade: self.grade,
             added_attack: self.added_attack,
             added_defence: self.added_defence,
+            tooltip_source,
         }
     }
 
@@ -872,6 +917,7 @@ pub(super) fn embedded_item_state_from_template(
     slot: u8,
 ) -> ItemState {
     ItemState {
+        stone_serial: None,
         key: crystal_item_key_for_template(template),
         name: template.name.clone(),
         icon: template.image,
@@ -1047,7 +1093,7 @@ fn captured_sealed_matches_live(captured: &UserItemSealedInfo, item: &ItemState)
         && captured.next_seal_binary_datetime == item.sealed_next_time_binary_datetime
 }
 
-fn rental_information_from_item_state(
+pub(super) fn rental_information_from_item_state(
     item: &ItemState,
     metadata: Option<&ItemStateUserItemMetadata>,
 ) -> Option<UserItemRentalInformation> {
@@ -1368,6 +1414,31 @@ fn try_user_item_from_item_state_inner(
 ) -> Result<UserItem, UserItemCarrierError> {
     enter_user_item_node(depth, nodes, budget)?;
     let item_index = exact_item_index_for_item_state(item)?;
+    // Crystal allocates five rod attachments independently of ItemInfo.Slots.
+    // Old saves captured an empty zero-width array; preserve all other metadata.
+    let mut normalized;
+    let item = if item.socket_slots == 0
+        && item.socketed.is_empty()
+        && item.user_item_metadata.as_ref().is_none_or(|metadata| {
+            metadata.slots.is_empty()
+                && metadata
+                    .captured_socket_positions
+                    .as_ref()
+                    .is_none_or(Vec::is_empty)
+        })
+        && mir2_game_data::crystal_item_by_index(item_index).is_some_and(|template| {
+            template.item_type == super::crystal_compat::CRYSTAL_ITEM_TYPE_WEAPON
+                && super::crystal_compat::CRYSTAL_FISHING_ROD_SHAPES.contains(&template.shape)
+        }) {
+        normalized = item.clone();
+        normalized.socket_slots = 5;
+        if let Some(metadata) = normalized.user_item_metadata.as_mut() {
+            metadata.captured_socket_positions = Some(vec![None; 5]);
+        }
+        &normalized
+    } else {
+        item
+    };
     let count = check_item_state_quantity(item.quantity)?;
     let metadata = item.user_item_metadata.as_ref();
     let awake_values_len = metadata.map_or(0, |metadata| metadata.awake_values.len());
@@ -2655,7 +2726,12 @@ pub(super) fn revive_current_player_from_resurrection_scroll(
         *vitals
     };
 
-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = revived_vitals;
+        runtime.player_dead = false;
+    }
+    super::npc_input::invalidate(world);
 
     let mut packets = Vec::new();
     if let Some(info) = object_revived_info_for_entity(world, player, true) {
@@ -2764,7 +2840,7 @@ pub(super) fn use_dynamic_crystal_template_item(
                     packets,
                 ));
             }
-            let Some(teleport_packets) = crystal_random_same_map_teleport_packets(world, 20) else {
+            let Some(teleport_packets) = crystal_dungeon_escape_packets(world) else {
                 return Some(prepend_optional_packet(
                     use_item_ack(packet_ack, false),
                     packets,
@@ -2924,6 +3000,15 @@ pub(super) fn use_item(
     let Some(item) = item_at_use_location(world.resource::<InventoryResource>(), location) else {
         return prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new());
     };
+    if super::billing_monthly_card::is_card(&item) {
+        // A key selects the next matching item and cannot identify a retry.
+        let Some((uid, grid)) = packet_ack else {
+            return Vec::new();
+        };
+        return super::billing_monthly_card::use_card_packet(world, uid, grid).unwrap_or_else(
+            || prepend_optional_packet(use_item_ack(packet_ack, false), Vec::new()),
+        );
+    }
     let mut packets = Vec::new();
     let item_template = crystal_item_template_for_item_key(&item.key);
     let dynamic_item_template = crystal_item_template_for_dynamic_key(&item.key);
@@ -2981,6 +3066,24 @@ pub(super) fn use_item(
         return prepend_optional_packet(use_item_ack(packet_ack, true), packets);
     }
 
+    if let Some(template) = item_template.as_ref().or(dynamic_item_template.as_ref()) {
+        if let Some((success, creature_packets)) =
+            super::intelligent_creatures::use_creature_special_item(
+                world, template, &item, location,
+            )
+        {
+            return prepend_optional_packet(use_item_ack(packet_ack, success), creature_packets);
+        }
+        if let Some((success, creature_packets)) =
+            super::intelligent_creatures::use_creature_template(world, template)
+        {
+            if success {
+                consume_item_at_use_location(world, location);
+            }
+            return prepend_optional_packet(use_item_ack(packet_ack, success), creature_packets);
+        }
+    }
+
     if let Some(template) = dynamic_item_template.as_ref() {
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION
             && template.shape == CRYSTAL_POTION_SHAPE_NORMAL
@@ -3011,11 +3114,7 @@ pub(super) fn use_item(
         }
     }
 
-    let equip_slot = item.equip_slot.or_else(|| {
-        item_template
-            .as_ref()
-            .and_then(crystal_equipment_slot_for_template)
-    });
+    let equip_slot = automatic_equipment_slot(world.resource::<InventoryResource>(), &item);
     if let Some(slot) = equip_slot {
         let UseItemLocation::Inventory(_) = location else {
             return prepend_optional_packet(use_item_ack(packet_ack, false), packets);
@@ -3397,15 +3496,10 @@ fn hero_inventory_requirement_stat(item: &ItemState, stat: u8) -> i32 {
 }
 
 fn current_hero_required_stat_total(world: &World, stat: u8) -> i32 {
-    world
-        .resource::<HeroInventoryResource>()
-        .items
-        .iter()
-        .map(|item| hero_inventory_requirement_stat(item, stat))
-        .sum()
+    super::hero_ai::hero_authoritative_stat(world, stat)
 }
 
-fn crystal_hero_item_requirement_rejected(
+pub(super) fn crystal_hero_item_requirement_rejected(
     world: &World,
     hero_level: u16,
     hero_class: MirClass,
@@ -3846,6 +3940,30 @@ mod item_identity_roundtrip_tests {
 
         validate_item_state_carrier(&reloaded).expect("saved carrier should validate");
         assert_eq!(user_item_from_item_state(&reloaded), expected);
+    }
+
+    #[test]
+    fn world_snapshot_carries_exact_tooltip_catalogue_instance_and_socket_order() {
+        let expected = complex_user_item();
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+
+        let snapshot = state.snapshot(LanguageCode::English);
+        let source = snapshot
+            .tooltip_source
+            .expect("known unambiguous Crystal item should expose tooltip source");
+        assert_eq!(source.info.item_index, expected.item_index);
+        assert_eq!(source.user_item.as_ref(), Some(&expected));
+        assert_eq!(source.socket_infos.len(), expected.slots.len());
+        assert_eq!(source.socket_infos[0], None);
+        assert_eq!(
+            source.socket_infos[1].as_ref().map(|info| info.item_index),
+            expected.slots[1].as_ref().map(|item| item.item_index)
+        );
+        assert_eq!(
+            source.socket_infos[2].as_ref().map(|info| info.item_index),
+            expected.slots[2].as_ref().map(|item| item.item_index)
+        );
     }
 
     #[test]

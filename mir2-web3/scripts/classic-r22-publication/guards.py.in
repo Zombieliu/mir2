@@ -1,0 +1,918 @@
+#!/usr/bin/env python3
+"""Narrow, fixed-R17, add-only Linux accelerator publisher.
+
+No CMS implementation, network, credentials, service control, feed writes or
+deletion. Consumes the exact frozen root-verified envelope; hashes are not CMS.
+All CLI roots are production-fixed or fresh private /srv staging siblings.
+Tests may call the explicitly bounded internal fixture API; CLI cannot select it.
+"""
+from __future__ import annotations
+
+import argparse
+from contextlib import contextmanager
+import ctypes
+from dataclasses import dataclass
+import errno
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import stat
+import struct
+import sys
+import threading
+import time
+import zlib
+
+sys.dont_write_bytecode = True
+PUBLIC_ROOT = Path('/srv/mir2-client-updates')
+GAME_DIRECTORY = 'releases/game-WN-CANDIDATE-20261004-invited-17'
+OLD_DIRECTORY = 'releases/game-WN-CANDIDATE-20261003-invited-16'
+CANDIDATE = 'WN-CANDIDATE-20261004-invited-17'
+GAME_SOURCE = '6032ef8b3e27dd97bad0b20c8676ef9f185db64b'
+TOOL_SOURCE = '4c60c323aed11829abae6ee5ce6e13c675a3c1c3'
+LOCK_PATH = Path('/var/backups/mir2-client-updates/.publisher.lock')
+PRIVATE_STAGE = Path('/srv/.mir2-origin-r17-acceleration-20261005-01')
+PUBLIC_KEY_SHA = '6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e'
+META_NAMES = ('PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
+CHUNK = 64 * 1024
+MAX_META = 32 * 1024**2
+MAX_COMPRESSED = 128 * 1024**2
+MAX_EXPANDED = 512 * 1024**2
+MAX_TOTAL = 4 * 1024**3
+FIXTURE_BASE = Path(__file__).resolve().parent / 'fixtures'
+
+
+class Refusal(Exception):
+    pass
+
+
+def need(condition, code):
+    if not condition:
+        raise Refusal(code)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def canonical(value):
+    return (json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True) + '\n').encode('ascii')
+
+
+def parse(data):
+    def pairs(items):
+        result = {}
+        for key, value in items:
+            need(key not in result, 'duplicate-json-key')
+            result[key] = value
+        return result
+    try:
+        def constant(_value):
+            raise Refusal('nonfinite-json-number')
+        return json.loads(data, object_pairs_hook=pairs, parse_constant=constant)
+    except (UnicodeError, ValueError, TypeError):
+        raise Refusal('invalid-json') from None
+
+
+def keys(value, expected, code):
+    need(isinstance(value, dict) and set(value) == set(expected), code)
+
+
+def relative(value):
+    need(isinstance(value, str) and 0 < len(value) <= 230
+         and re.fullmatch(r'[A-Za-z0-9._/#% +()\[\]-]+', value) is not None,
+         'unsafe-relative-path')
+    for component in value.split('/'):
+        need(component not in ('', '.', '..') and not component.startswith('.')
+             and not component.endswith(('.', ' ')) and ':' not in component,
+             'unsafe-path-component')
+        need(component.split('.', 1)[0].upper() not in {'CON', 'PRN', 'AUX', 'NUL',
+            *(f'COM{n}' for n in range(1, 10)), *(f'LPT{n}' for n in range(1, 10))},
+            'reserved-path-component')
+    return value
+
+
+def item(value, limit=MAX_EXPANDED):
+    keys(value, ('path', 'size', 'sha256'), 'file-entry-fields')
+    relative(value['path'])
+    need(type(value['size']) is int and 0 <= value['size'] <= limit
+         and isinstance(value['sha256'], str)
+         and re.fullmatch(r'[0-9a-fA-F]{64}', value['sha256']) is not None,
+         'file-entry-bounds')
+    return {'path': value['path'], 'size': value['size'], 'sha256': value['sha256'].lower()}
+
+
+def plan_item(value):
+    # The original workstation source field is inert evidence, never a path input.
+    keys(value, ('path', 'source', 'size', 'sha256'), 'plan-entry-fields')
+    need(isinstance(value['source'], str) and 0 < len(value['source']) <= 4096,
+         'plan-source-evidence-bound')
+    return item({key: value[key] for key in ('path', 'size', 'sha256')},
+                MAX_META if value['path'].endswith(('.json', '.p7s', '.txt')) else MAX_COMPRESSED)
+
+
+def fingerprint(info):
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid,
+            info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def posix_metadata(info, directory, private=False):
+    need(info.st_uid == 0 and not info.st_mode & 0o022, 'non-root-or-shared-writable-path')
+    need(stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode), 'wrong-path-type')
+    if not directory:
+        need(info.st_nlink == 1, 'hardlinked-file')
+    if private:
+        need(not info.st_mode & 0o077, 'non-private-path')
+
+
+@dataclass(frozen=True)
+class Pins:
+    inputs: dict
+    feed: dict
+    metadata: dict
+    exe: dict
+    old_exe: dict
+    payload_files: int
+    payload_bytes: int
+    bundle_count: int = 11
+    patch_count: int = 1
+
+
+PINS = Pins(
+    inputs={
+        'ORIGIN-ADDITIONS.json': 'c47b91cc9ad01f57256a97bfb9ce56fe3475706fee50ce2c81a5b72a5827cd09',
+        'ROOT-VERIFICATION.json': '6b36134597180ad2b423c2015c05b3c48447fbd766e858c2fb0ce6f45e2565b9',
+        'PUBLICATION-PLAN.json': '04bdb9d5f891bba38752e4ba4029db2d638dc7f4674d494ce0c6b5ab354f3b87',
+        'SIGN-DELIVERY.json': 'b733b8eca497d61a84db1c9bc0d3cce46ab19a291eea47f71e55692bee8588c1',
+        'EXPECTED.json': '0e68a80cb1f77118d239a908f5392daccf13f649810f1e311adf65988990e92b',
+    },
+    feed={'latest.json': {'size': 1159, 'sha256': '7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88'},
+          'latest.p7s': {'size': 1614, 'sha256': '7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916'}},
+    metadata={
+        'PACKAGE-MANIFEST.json': {'size': 24360174, 'sha256': 'ceae366bebca1c19c3f529eb22f016ccc80dff5b8655694e76682e31ab12cb18'},
+        'VERSION.json': {'size': 1221, 'sha256': '1409e21c9f1ae7a04b71603ce1220fe38c37f222d54859af2592cdd72ce99b16'},
+        'RELEASE-STATEMENT.json': {'size': 707, 'sha256': 'e64a8ef4fc62e6e9f6fe16625321fc8a88a0c8c29a661aeda46025b08015da82'},
+        'RELEASE-STATEMENT.p7s': {'size': 1614, 'sha256': 'bee84b574f43f6411eb1bc3ab23a3ce0c389b853fb0f8b63f6ad9bdb1287856e'},
+    },
+    exe={'size': 111013376, 'sha256': 'd0780475efa9f9c1ecd730dfcfc11e38b9b0659f05b3b1f7d93b4f80c3d734e0'},
+    old_exe={'size': 111005696, 'sha256': '9930c82045df5e6a25eb7201265090e690200698b18ea526ca5e66173e7c6869'},
+    payload_files=125965, payload_bytes=753611651,
+)
+
+
+class Guard:
+    def __init__(self, fixture_root=None):
+        self.fixture_root = fixture_root
+        if fixture_root is not None:
+            need(fixture_root.is_absolute() and fixture_root.is_relative_to(FIXTURE_BASE)
+                 and fixture_root != FIXTURE_BASE, 'fixture-root-outside-bounded-evidence')
+
+    def identity(self, info):
+        value = fingerprint(info)
+        if self.fixture_root is not None and os.name == 'nt':
+            # Python 3.13 NTFS path-stat ctime is creation time, fd-stat ctime
+            # may be change time; path-stat infers .exe permission bits that
+            # fd-stat lacks. Keep inode/type/write bits/uid/nlink/size/mtime;
+            # production Linux retains full mode and ctime without exceptions.
+            return value[:2] + (value[2] & ~0o111,) + value[3:-1]
+        return value
+
+    def check_info(self, info, directory, private=False):
+        need(not stat.S_ISLNK(info.st_mode), 'symlink-path')
+        need(not (getattr(info, 'st_file_attributes', 0) & 0x400), 'reparse-path')
+        need(stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode), 'wrong-path-type')
+        if not directory:
+            need(info.st_nlink == 1, 'hardlinked-file')
+        if self.fixture_root is None:
+            posix_metadata(info, directory, private)
+        elif os.name != 'nt':
+            need(not info.st_mode & 0o022, 'fixture-shared-writable-path')
+            if private:
+                need(not info.st_mode & 0o077, 'fixture-non-private-path')
+
+    def parents(self, path):
+        need(path.is_absolute() and '..' not in path.parts, 'absolute-safe-path-required')
+        if self.fixture_root is not None:
+            need(path.is_relative_to(self.fixture_root), 'fixture-path-escape')
+            ancestors = [self.fixture_root, *reversed(path.parent.parents), path.parent]
+            ancestors = [p for p in ancestors if p.is_relative_to(self.fixture_root)]
+        else:
+            ancestors = [*reversed(path.parent.parents), path.parent]
+        for parent in dict.fromkeys(ancestors):
+            self.check_info(parent.lstat(), True)
+
+    def directory(self, path, private=False):
+        self.parents(path)
+        info = path.lstat()
+        self.check_info(info, True, private)
+        return info
+
+    def file_info(self, path):
+        self.parents(path)
+        info = path.lstat()
+        self.check_info(info, False)
+        return info
+
+    @contextmanager
+    def opened(self, path):
+        before = self.file_info(path)
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_CLOEXEC', 0))
+        with os.fdopen(descriptor, 'rb') as stream:
+            need(self.identity(os.fstat(stream.fileno())) == self.identity(before), 'file-open-race')
+            yield stream, before
+            need(self.identity(os.fstat(stream.fileno())) == self.identity(before)
+                 and self.identity(self.file_info(path)) == self.identity(before), 'file-changed-during-read')
+
+    def read(self, path, maximum=MAX_META, expected=None):
+        with self.opened(path) as (stream, before):
+            need(before.st_size <= maximum, 'input-size-bound')
+            data = stream.read(maximum + 1)
+            need(len(data) == before.st_size and len(data) <= maximum, 'input-read-bound')
+        if expected is not None:
+            need(len(data) == expected['size'] and sha(data) == expected['sha256'].lower(), 'pinned-file-mismatch:' + path.name)
+        return data
+
+    def match(self, path, expected):
+        digest, count = hashlib.sha256(), 0
+        with self.opened(path) as (stream, before):
+            need(before.st_size == expected['size'], 'pinned-file-size:' + path.name)
+            while data := stream.read(CHUNK):
+                digest.update(data)
+                count += len(data)
+                need(count <= expected['size'], 'pinned-file-overrun')
+        need(count == expected['size'] and digest.hexdigest() == expected['sha256'].lower(),
+             'pinned-file-hash:' + path.name)
+        return fingerprint(before)
+
+    @contextmanager
+    def dir_fd(self, path):
+        before = self.directory(path)
+        fd = os.open(path, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0) | getattr(os, 'O_NOFOLLOW', 0))
+        try:
+            need(self.identity(os.fstat(fd)) == self.identity(before), 'directory-open-race')
+            yield fd
+        finally:
+            os.close(fd)
+
+
+class SingleGzip:
+    def __init__(self, guard, path, expected):
+        self.guard, self.path, self.expected = guard, path, expected
+        self.ctx = guard.opened(path)
+        self.stream, info = self.ctx.__enter__()
+        try:
+            need(0 < info.st_size == expected['size'] <= MAX_COMPRESSED, 'compressed-size-mismatch')
+        except Exception:
+            self.ctx.__exit__(*sys.exc_info())
+            raise
+        self.decoder = zlib.decompressobj(31)
+        self.pending = self.buffer = b''
+        self.compressed = self.expanded = 0
+        self.digest = hashlib.sha256()
+        self.finished = False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return self.ctx.__exit__(*args)
+
+    def pump(self):
+        if self.finished:
+            return
+        if not self.pending:
+            self.pending = self.stream.read(CHUNK)
+            need(bool(self.pending), 'truncated-gzip')
+            self.compressed += len(self.pending)
+            need(self.compressed <= self.expected['size'] <= MAX_COMPRESSED, 'compressed-bound')
+            self.digest.update(self.pending)
+        try:
+            decoded = self.decoder.decompress(self.pending, CHUNK)
+        except zlib.error:
+            raise Refusal('invalid-gzip-or-crc') from None
+        self.pending = self.decoder.unconsumed_tail
+        self.expanded += len(decoded)
+        need(self.expanded <= MAX_EXPANDED, 'expanded-artifact-bound')
+        self.buffer += decoded
+        if self.decoder.eof:
+            need(not self.decoder.unused_data and not self.pending and self.stream.read(1) == b'',
+                 'extra-gzip-member-or-trailing-bytes')
+            need(self.compressed == self.expected['size'] and self.digest.hexdigest() == self.expected['sha256'],
+                 'compressed-artifact-hash')
+            self.finished = True
+
+    def read(self, count):
+        need(0 <= count <= CHUNK, 'unbounded-gzip-read')
+        while len(self.buffer) < count and not self.finished:
+            self.pump()
+        result, self.buffer = self.buffer[:count], self.buffer[count:]
+        return result
+
+    def exact(self, count):
+        result = self.read(count)
+        need(len(result) == count, 'truncated-decoded-artifact')
+        return result
+
+    def finish(self):
+        need(self.read(1) == b'' and self.finished, 'trailing-decoded-data')
+
+
+class Operations:
+    def __init__(self, fixture=False):
+        self.fixture = fixture
+        self.local_lock = threading.Lock()
+
+    @contextmanager
+    def lock(self, guard, path):
+        # This is the existing full-release publisher lock. Never create/truncate it.
+        before = guard.file_info(path)
+        guard.check_info(before, False, private=True)
+        fd = os.open(path, os.O_RDWR | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_CLOEXEC', 0))
+        try:
+            need(guard.identity(os.fstat(fd)) == guard.identity(before), 'lock-open-race')
+            guard.check_info(os.fstat(fd), False, private=True)
+            if os.name == 'nt':
+                need(self.fixture, 'linux-required')
+                need(self.local_lock.acquire(blocking=False), 'publisher-busy')
+                try:
+                    yield
+                finally:
+                    self.local_lock.release()
+            else:
+                import fcntl
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except OSError:
+                    raise Refusal('publisher-busy') from None
+                try:
+                    yield
+                finally:
+                    fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
+
+    def sync_dir(self, guard, directory):
+        if os.name == 'nt':
+            need(self.fixture, 'linux-required')
+            return  # Explicit Windows fixture limitation, not Linux fsync acceptance.
+        with guard.dir_fd(directory) as descriptor:
+            os.fsync(descriptor)
+
+    def rename_new(self, guard, source, target):
+        guard.file_info(source)
+        guard.directory(source.parent)
+        guard.directory(target.parent)
+        need(source.parent.stat().st_dev == target.parent.stat().st_dev, 'cross-filesystem-promotion')
+        if os.name == 'nt':
+            need(self.fixture, 'linux-required')
+            os.rename(source, target)  # Windows rename is create-only; real tiny fixture files.
+        else:
+            need(sys.platform.startswith('linux'), 'linux-required')
+            library = ctypes.CDLL(None, use_errno=True)
+            rename = getattr(library, 'renameat2', None)
+            need(rename is not None, 'renameat2-unavailable')
+            rename.argtypes = (ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint)
+            rename.restype = ctypes.c_int
+            with guard.dir_fd(source.parent) as src_fd, guard.dir_fd(target.parent) as dst_fd:
+                result = rename(src_fd, os.fsencode(source.name), dst_fd, os.fsencode(target.name), 1)
+            if result != 0:
+                code = ctypes.get_errno()
+                if code == errno.EEXIST:
+                    raise FileExistsError(code, 'create-only target exists', str(target))
+                raise Refusal('renameat2-failed:' + str(code))
+        self.sync_dir(guard, source.parent)
+        self.sync_dir(guard, target.parent)
+
+
+class Context:
+    def __init__(self, inputs, generated, run_dir, *, cms_receipt_sha,
+                 fixture_root=None, pins=PINS, ops=None, hook=None):
+        self.inputs, self.generated, self.run_dir = inputs, generated, run_dir
+        self.guard = Guard(fixture_root)
+        self.pins = pins
+        self.cms_receipt_sha = cms_receipt_sha
+        self.ops = ops or Operations(fixture=fixture_root is not None)
+        self.hook = hook or (lambda _event, _ctx: None)
+        self.public_root = fixture_root / 'public' if fixture_root is not None else PUBLIC_ROOT
+        self.lock_path = fixture_root / 'private/publisher.lock' if fixture_root is not None else LOCK_PATH
+        self.target = self.public_root / GAME_DIRECTORY
+        self.old_exe = self.public_root / OLD_DIRECTORY / 'mir2-platform-windows.exe'
+        self.events, self.created, self.existing, self.validation = [], [], [], {}
+        self.artifacts = []
+        self.objects = []
+        self.audit_sequence = 0
+        self.mode = None
+
+    def validate_paths(self):
+        if self.guard.fixture_root is None:
+            need(os.name == 'posix' and sys.platform.startswith('linux') and os.geteuid() == 0,
+                 'production-linux-root-required')
+            need(self.pins is PINS, 'production-pins-cannot-be-overridden')
+            parents = []
+            for path in (self.inputs, self.generated, self.run_dir):
+                need(path.is_absolute() and path.parent == PRIVATE_STAGE,
+                     'fresh-private-srv-stage-required')
+                self.guard.directory(path.parent, private=True)
+                parents.append(path.parent)
+            need(len(set(parents)) == 1, 'separate-sibling-stage-required')
+            need(self.inputs.name == 'inputs' and self.generated.name == 'generated'
+                 and re.fullmatch(r'run(?:-[A-Za-z0-9-]{1,64})?', self.run_dir.name),
+                 'fixed-stage-child-names-required')
+        need(re.fullmatch(r'[0-9a-f]{64}', self.cms_receipt_sha or '') is not None,
+             'fresh-root-cms-receipt-sha-required')
+        for path in (self.inputs, self.generated, self.run_dir):
+            self.guard.directory(path, private=True)
+        need(len({self.inputs, self.generated, self.run_dir}) == 3
+             and all(not a.is_relative_to(b) for a in (self.inputs, self.generated, self.run_dir)
+                     for b in (self.inputs, self.generated, self.run_dir) if a != b), 'stage-path-overlap')
+        need(not any(self.public_root.is_relative_to(p) or p.is_relative_to(self.public_root)
+                     for p in (self.inputs, self.generated, self.run_dir)), 'public-input-output-overlap')
+        need(not list(self.run_dir.iterdir()), 'run-directory-not-fresh')
+        self.guard.directory(self.public_root)
+        self.guard.directory(self.target)
+        need(self.run_dir.stat().st_dev == self.target.stat().st_dev, 'stage-not-same-filesystem')
+
+    def audit(self, event, **fields):
+        self.events.append({'event': event, 'unix': int(time.time()), **fields})
+        self.hook(event, self)
+        value = self.receipt('running')
+        path = self.run_dir / f'{self.audit_sequence:04}-audit.json'
+        self.audit_sequence += 1
+        self.write_private(path, canonical(value))
+
+    def receipt(self, status, error=None):
+        return {'schema': 'mir2.origin-r17-append-receipt.v1', 'mode': self.mode, 'status': status,
+                'error': error, 'targetDirectory': str(self.target), 'runDirectory': str(self.run_dir),
+                'sourceRevision': TOOL_SOURCE, 'gameSourceRevision': GAME_SOURCE,
+                'rootCmsAttestationConsumed': bool(self.validation.get('freshRootCmsEnvelope')),
+                'cmsVerifiedByPython': False, 'networkOrServiceAction': False,
+                'externalHealthPidGate': 'root-owned; not evaluated by this tool',
+                'feedOrCandidateChangedByTool': False, 'createdObjects': self.created,
+                'existingExactObjects': self.existing, 'validation': self.validation, 'events': self.events}
+
+    def write_private(self, path, data):
+        self.guard.parents(path)
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0), 0o600)
+        with os.fdopen(fd, 'wb') as stream:
+            stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
+        self.guard.file_info(path)
+        self.ops.sync_dir(self.guard, path.parent)
+
+    def load_envelope(self):
+        values = {}
+        for name, expected_sha in self.pins.inputs.items():
+            raw = self.guard.read(self.inputs / name)
+            need(sha(raw) == expected_sha, 'root-envelope-input-hash:' + name)
+            values[name] = parse(raw)
+        approved = values['ROOT-VERIFICATION.json']
+        need(approved.get('schema') == 'mir2.windows.r2-verification.v1'
+             and approved.get('passed') is True and approved.get('candidateVerified') is True
+             and approved.get('cmsVerified') is True and approved.get('sourceRevision') == TOOL_SOURCE
+             and approved.get('sequence') == 12
+             and approved.get('feedSha256') == self.pins.feed['latest.json']['sha256']
+             and approved.get('signatureSha256') == self.pins.feed['latest.p7s']['sha256'],
+             'root-verification-binding')
+        publication = values['PUBLICATION-PLAN.json']
+        all_objects = publication.get('objects')
+        need(isinstance(all_objects, list) and 0 < len(all_objects) <= 512, 'publication-object-bound')
+        closure = sorted([plan_item(o) for o in all_objects], key=lambda o: o['path'])
+        need(len({o['path'] for o in closure}) == len(closure), 'duplicate-publication-object')
+        need(sha(canonical(closure)) == approved.get('objectsSha256'), 'root-envelope-object-closure')
+        origin = values['ORIGIN-ADDITIONS.json']
+        need(origin.get('targetRoot') == PUBLIC_ROOT.as_posix() and origin.get('published') is False,
+             'origin-plan-binding')
+        raw_objects = origin.get('objects')
+        need(isinstance(raw_objects, list) and len(raw_objects) == self.pins.bundle_count + self.pins.patch_count + 2,
+             'origin-object-count')
+        self.objects = [plan_item(o) for o in raw_objects]
+        names = {o['path'] for o in self.objects}
+        need(len(names) == len(self.objects), 'duplicate-origin-object')
+        prefix = GAME_DIRECTORY + '/'
+        allowed = [o for o in closure if o['path'].startswith(prefix) and
+                   (o['path'][len(prefix):] in ('DELIVERY.json', 'DELIVERY.p7s')
+                    or o['path'][len(prefix):].startswith('delivery/'))]
+        need(sorted(self.objects, key=lambda o: o['path']) == allowed, 'origin-root-envelope-object-mismatch')
+        expected = values['EXPECTED.json']
+        keys(expected, ('candidateDirectory', 'objects', 'sourceFiles'), 'expected-envelope-fields')
+        need(expected['candidateDirectory'] == GAME_DIRECTORY
+             and sorted([item(o, MAX_META if o['path'].endswith(('.json', '.p7s')) else MAX_COMPRESSED)
+                         for o in expected['objects']], key=lambda o: o['path'])
+             == sorted(self.objects, key=lambda o: o['path']), 'expected-origin-object-closure')
+        source_pins = [
+            {'path': 'feed-current/' + name, **pin} for name, pin in self.pins.feed.items()
+        ] + [
+            {'path': GAME_DIRECTORY + '/' + name, **pin} for name, pin in self.pins.metadata.items()
+        ] + [
+            {'path': GAME_DIRECTORY + '/mir2-platform-windows.exe', **self.pins.exe},
+            {'path': OLD_DIRECTORY + '/mir2-platform-windows.exe', **self.pins.old_exe},
+        ]
+        need(sorted([item(o, MAX_COMPRESSED) for o in expected['sourceFiles']], key=lambda o: o['path'])
+             == sorted(source_pins, key=lambda o: o['path']), 'expected-current-source-closure')
+        for o in self.objects:
+            need(o['path'].startswith(prefix), 'origin-target-escape')
+            suffix = o['path'][len(prefix):]
+            need(suffix in ('DELIVERY.json', 'DELIVERY.p7s') or
+                 re.fullmatch(r'delivery/[0-9a-f]{64}\.m2[bd]\.gz', suffix) is not None,
+                 'origin-object-path')
+            o['relative'] = suffix
+        signing = values['SIGN-DELIVERY.json']
+        by_name = {o['relative']: o for o in self.objects}
+        need(signing.get('passed') is True and signing.get('cmsVerified') is True
+             and signing.get('decodedPayloadVerified') is True and signing.get('candidate') == CANDIDATE
+             and signing.get('gameSourceRevision') == GAME_SOURCE and signing.get('sourceRevision') == TOOL_SOURCE
+             and signing.get('deliverySha256', '').lower() == by_name['DELIVERY.json']['sha256']
+             and signing.get('signatureSha256', '').lower() == by_name['DELIVERY.p7s']['sha256'],
+             'signed-delivery-root-binding')
+        self.fresh_cms_binding(by_name)
+        self.validation['rootEnvelope'] = {'inputHashes': self.pins.inputs,
+            'objectsSha256': approved['objectsSha256'], 'trust': 'exact frozen root verification; Python hashes are not CMS'}
+        return by_name
+
+    def fresh_cms_binding(self, by_name):
+        raw = self.guard.read(self.inputs / 'CMS-RECHECK.json', 32768)
+        need(sha(raw) == self.cms_receipt_sha, 'fresh-root-cms-envelope-hash')
+        approved = parse(raw)
+        now = int(time.time())
+        need(approved.get('schema') == 'mir2.origin.public-cms-verification.v1'
+             and approved.get('passed') is True and approved.get('cmsVerified') is True
+             and approved.get('privateKeyUsed') is False and approved.get('published') is False
+             and approved.get('candidate') == CANDIDATE
+             and approved.get('gameSourceRevision') == GAME_SOURCE
+             and approved.get('manifestSha256') == self.pins.metadata['PACKAGE-MANIFEST.json']['sha256']
+             and approved.get('versionSha256') == self.pins.metadata['VERSION.json']['sha256']
+             and type(approved.get('createdUnix')) is int
+             and now - 86400 <= approved['createdUnix'] <= now + 300,
+             'fresh-root-cms-envelope-binding')
+        pairs = {
+            'feed': (self.pins.feed['latest.json'], self.pins.feed['latest.p7s']),
+            'statement': (self.pins.metadata['RELEASE-STATEMENT.json'], self.pins.metadata['RELEASE-STATEMENT.p7s']),
+            'delivery': (by_name['DELIVERY.json'], by_name['DELIVERY.p7s']),
+        }
+        for name, (payload, signature) in pairs.items():
+            record = approved.get(name, {})
+            need(isinstance(record, dict) and record.get('payloadSha256') == payload['sha256']
+                 and record.get('signatureSha256') == signature['sha256']
+                 and record.get('pinnedPublicKeySha256') == PUBLIC_KEY_SHA
+                 and record.get('privateKeyUsed') is False
+                 and type(record.get('verifiedAtUnix')) is int
+                 and 0 < record['verifiedAtUnix'] <= approved['createdUnix'],
+                 'fresh-root-cms-pair-binding:' + name)
+        self.validation['freshRootCmsEnvelope'] = {
+            'sha256': self.cms_receipt_sha, 'createdUnix': approved['createdUnix'],
+            'trust': 'root separately verified pinned CMS; this tool only binds raw receipt and object hashes',
+        }
+
+    def stable_feed(self):
+        snapshots = {}
+        for name, expected in self.pins.feed.items():
+            snapshots['feed/' + name] = self.guard.read(self.public_root / 'feed-current' / name, 32768, expected)
+        feed = parse(snapshots['feed/latest.json'])
+        now = int(time.time())
+        need(feed.get('sequence') == 12 and feed.get('game', {}).get('identity') == CANDIDATE
+             and feed.get('game', {}).get('directory') == GAME_DIRECTORY
+             and type(feed.get('createdUnix')) is int and type(feed.get('expiresUnix')) is int
+             and 0 < feed['createdUnix'] <= now + 300 and feed['expiresUnix'] >= now
+             and 0 < feed['expiresUnix'] - feed['createdUnix'] <= 31 * 86400,
+             'current-feed-binding-or-expiry')
+        return snapshots
+
+    def stable_baseline(self, include_manifest=False):
+        snapshots = self.stable_feed()
+        for name, expected in self.pins.metadata.items():
+            if name == 'PACKAGE-MANIFEST.json' and not include_manifest:
+                self.guard.match(self.target / name, expected)
+            else:
+                snapshots[name] = self.guard.read(self.target / name, MAX_META, expected)
+        self.guard.match(self.target / 'mir2-platform-windows.exe', self.pins.exe)
+        version = parse(snapshots['VERSION.json'])
+        need(version.get('candidate') == CANDIDATE and version.get('gitRevision') == GAME_SOURCE
+             and version.get('exeSizeBytes') == self.pins.exe['size']
+             and version.get('exeSha256', '').lower() == self.pins.exe['sha256'], 'candidate-version-exe-binding')
+        if include_manifest:
+            self.validation['baseline'] = {'feed': self.pins.feed, 'metadata': self.pins.metadata,
+                'exe': self.pins.exe, 'sequence': 12, 'candidate': CANDIDATE}
+            return snapshots
+
+    def descriptor(self, by_name, snapshots):
+        raw = self.guard.read(self.inputs / 'DELIVERY.json', MAX_META, by_name['DELIVERY.json'])
+        self.guard.read(self.inputs / 'DELIVERY.p7s', 32768, by_name['DELIVERY.p7s'])
+        descriptor = parse(raw)
+        keys(descriptor, ('schema', 'candidate', 'packageManifestSha256', 'versionSha256',
+                          'builtUnix', 'bundles', 'patches'), 'delivery-fields')
+        need(descriptor['schema'] == 'mir2.windows.delivery.v1' and descriptor['candidate'] == CANDIDATE
+             and descriptor['packageManifestSha256'].lower() == sha(snapshots['PACKAGE-MANIFEST.json'])
+             and descriptor['versionSha256'].lower() == sha(snapshots['VERSION.json'])
+             and type(descriptor['builtUnix']) is int and 0 < descriptor['builtUnix'] <= int(time.time()) + 300,
+             'delivery-release-binding')
+        manifest = parse(snapshots['PACKAGE-MANIFEST.json'])
+        keys(manifest, ('schema', 'coverage', 'fileCount', 'totalBytes', 'aggregateSha256', 'files'), 'manifest-fields')
+        need(manifest['schema'] == 'mir2.windows.package-manifest.v4'
+             and manifest['fileCount'] == self.pins.payload_files
+             and manifest['totalBytes'] == self.pins.payload_bytes
+             and 0 < manifest['totalBytes'] <= MAX_TOTAL
+             and isinstance(manifest['files'], list)
+             and isinstance(manifest['coverage'], dict)
+             and set(manifest['coverage']) == {'excludes', 'rule'}
+             and isinstance(manifest['coverage']['rule'], str) and bool(manifest['coverage']['rule'])
+             and manifest['coverage'].get('excludes') == list(META_NAMES), 'manifest-count-and-coverage')
+        entries, original_hashes = {}, {}
+        lowered = set()
+        for value in manifest['files']:
+            target = item(value)
+            need(target['path'] not in META_NAMES and target['path'].lower() not in lowered, 'manifest-path-collision')
+            lowered.add(target['path'].lower())
+            entries[target['path']] = target
+            original_hashes[target['path']] = value['sha256']
+        need(len(entries) == self.pins.payload_files and sum(e['size'] for e in entries.values()) == self.pins.payload_bytes,
+             'manifest-payload-closure')
+        aggregate = ''.join(f"{p}\t{entries[p]['size']}\t{original_hashes[p]}\n" for p in sorted(entries))
+        need(sha(aggregate.encode('ascii')) == manifest['aggregateSha256'].lower(), 'manifest-aggregate')
+        need(entries.get('mir2-platform-windows.exe') == {'path': 'mir2-platform-windows.exe', **self.pins.exe},
+             'manifest-exe-binding')
+        need(isinstance(descriptor['bundles'], list) and len(descriptor['bundles']) == self.pins.bundle_count
+             and isinstance(descriptor['patches'], list) and len(descriptor['patches']) == self.pins.patch_count,
+             'delivery-count-bound')
+        seen, artifacts = set(), {}
+        for bundle in descriptor['bundles']:
+            keys(bundle, ('archive', 'files'), 'bundle-fields')
+            artifact = item(bundle['archive'], MAX_COMPRESSED)
+            self.artifact_binding(artifact, by_name, '.m2b.gz', artifacts)
+            need(isinstance(bundle['files'], list) and 0 < len(bundle['files']) <= 200000, 'bundle-file-count')
+            expanded = 12
+            for name in bundle['files']:
+                relative(name)
+                need(name in entries and name not in seen, 'bundle-target-closure')
+                seen.add(name)
+                expanded += 10 + len(name.encode('ascii')) + entries[name]['size']
+            need(expanded <= MAX_EXPANDED, 'bundle-expanded-bound')
+        need(seen == set(entries), 'bundles-do-not-cover-exact-target')
+        for patch in descriptor['patches']:
+            keys(patch, ('path', 'baseSize', 'baseSha256', 'patch'), 'patch-fields')
+            need(patch['path'] == 'mir2-platform-windows.exe' and patch['baseSize'] == self.pins.old_exe['size']
+                 and patch['baseSha256'].lower() == self.pins.old_exe['sha256'], 'patch-base-binding')
+            self.artifact_binding(item(patch['patch'], MAX_COMPRESSED), by_name, '.m2d.gz', artifacts)
+        need(set(artifacts) == set(by_name) - {'DELIVERY.json', 'DELIVERY.p7s'}, 'artifact-object-closure')
+        self.artifacts = [by_name[name] for name in sorted(artifacts)]
+        return descriptor, entries
+
+    def artifact_binding(self, artifact, by_name, suffix, collected):
+        need(artifact['path'].startswith('delivery/') and artifact['path'].endswith(suffix)
+             and artifact['size'] > 0 and artifact['path'] not in collected, 'artifact-path-or-duplicate')
+        expected = by_name.get(artifact['path'])
+        need(expected is not None and artifact['size'] == expected['size']
+             and artifact['sha256'] == expected['sha256']
+             and Path(artifact['path']).name == artifact['sha256'] + suffix,
+             'artifact-signed-envelope-mismatch')
+        collected[artifact['path']] = artifact
+
+    def verify_decoded(self, descriptor, entries):
+        proof = []
+        for bundle in descriptor['bundles']:
+            artifact = item(bundle['archive'], MAX_COMPRESSED)
+            with SingleGzip(self.guard, self.generated / artifact['path'], artifact) as stream:
+                need(stream.exact(8) == b'MIR2PK01', 'bundle-magic')
+                count, = struct.unpack('<I', stream.exact(4))
+                need(count == len(bundle['files']), 'bundle-raw-count')
+                for name in bundle['files']:
+                    length, = struct.unpack('<H', stream.exact(2))
+                    need(0 < length <= 230, 'bundle-raw-path-bound')
+                    need(stream.exact(length) == name.encode('ascii'), 'bundle-raw-path-order')
+                    size, = struct.unpack('<Q', stream.exact(8))
+                    need(size == entries[name]['size'], 'bundle-raw-target-size')
+                    remaining, digest = size, hashlib.sha256()
+                    while remaining:
+                        block = stream.exact(min(CHUNK, remaining))
+                        digest.update(block)
+                        remaining -= len(block)
+                    need(digest.hexdigest() == entries[name]['sha256'], 'decoded-target-hash:' + name)
+                stream.finish()
+                need(stream.expanded == 12 + sum(10 + len(n) + entries[n]['size'] for n in bundle['files']),
+                     'bundle-decoded-size')
+                proof.append({'path': artifact['path'], 'files': count, 'expandedBytes': stream.expanded,
+                              'compressedSha256': artifact['sha256']})
+        self.guard.match(self.old_exe, self.pins.old_exe)
+        for patch in descriptor['patches']:
+            artifact = item(patch['patch'], MAX_COMPRESSED)
+            with SingleGzip(self.guard, self.generated / artifact['path'], artifact) as stream, \
+                    self.guard.opened(self.old_exe) as (base, _info):
+                need(stream.exact(8) == b'MIR2DP01', 'delta-magic')
+                count, size = struct.unpack('<IQ', stream.exact(12))
+                need(0 < count <= 65536 and size == self.pins.exe['size'], 'delta-declared-bound')
+                produced, digest = 0, hashlib.sha256()
+                for _ in range(count):
+                    tag = stream.exact(1)[0]
+                    need(tag in (0, 1), 'delta-operation-tag')
+                    offset = struct.unpack('<Q', stream.exact(8))[0] if tag == 0 else None
+                    length, = struct.unpack('<Q', stream.exact(8))
+                    need(0 < length <= size - produced, 'delta-output-bound')
+                    if offset is not None:
+                        need(offset + length <= self.pins.old_exe['size'], 'delta-copy-outside-base')
+                        base.seek(offset)
+                    remaining = length
+                    while remaining:
+                        block = base.read(min(CHUNK, remaining)) if offset is not None else stream.exact(min(CHUNK, remaining))
+                        need(len(block) == min(CHUNK, remaining), 'delta-source-truncated')
+                        digest.update(block)
+                        produced += len(block)
+                        remaining -= len(block)
+                stream.finish()
+                need(produced == size and digest.hexdigest() == self.pins.exe['sha256'], 'delta-target-hash')
+                proof.append({'path': artifact['path'], 'operations': count, 'targetBytes': produced,
+                              'compressedSha256': artifact['sha256']})
+        self.validation['decodedArtifacts'] = proof
+
+    def status_targets(self, by_name):
+        statuses = {}
+        delivery_dir = self.target / 'delivery'
+        if os.path.lexists(delivery_dir):
+            self.guard.directory(delivery_dir)
+        for name, expected in by_name.items():
+            target = self.target / name
+            if target.parent == self.target or os.path.lexists(delivery_dir):
+                self.guard.parents(target)
+            else:
+                self.guard.directory(self.target)
+            if os.path.lexists(target):
+                self.guard.match(target, expected)
+                statuses[name] = 'exact'
+            else:
+                statuses[name] = 'absent'
+        return statuses
+
+    def preflight(self):
+        by_name = self.load_envelope()
+        snapshots = self.stable_baseline(include_manifest=True)
+        descriptor, entries = self.descriptor(by_name, snapshots)
+        self.verify_decoded(descriptor, entries)
+        statuses = self.status_targets(by_name)
+        self.validation['targetsBefore'] = statuses
+        self.validation['allPreflightPassed'] = True
+        self.audit('preflight-complete', objects=len(by_name))
+        return by_name, statuses
+
+    def prepare_ready(self, by_name):
+        ready = self.run_dir / 'ready'
+        ready.mkdir(mode=0o700)
+        self.guard.directory(ready, private=True)
+        self.ops.sync_dir(self.guard, self.run_dir)
+        for name, expected in by_name.items():
+            source = self.inputs / name if name.startswith('DELIVERY.') else self.generated / name
+            dest = ready / Path(name).name
+            digest, count = hashlib.sha256(), 0
+            with self.guard.opened(source) as (reader, before):
+                need(before.st_size == expected['size'], 'source-size-after-validation')
+                fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0), 0o600)
+                with os.fdopen(fd, 'wb') as writer:
+                    while block := reader.read(CHUNK):
+                        digest.update(block)
+                        count += len(block)
+                        need(count <= expected['size'], 'source-size-after-validation')
+                        writer.write(block)
+                    writer.flush()
+                    os.fsync(writer.fileno())
+            need(count == expected['size'] and digest.hexdigest() == expected['sha256'], 'source-hash-after-validation')
+            os.chmod(dest, 0o444)
+            self.guard.match(dest, expected)
+        self.ops.sync_dir(self.guard, ready)
+        self.audit('ready-complete', copied=len(by_name))
+        return ready
+
+    def apply(self, by_name):
+        ready = self.prepare_ready(by_name)
+        self.stable_baseline()
+        self.status_targets(by_name)  # All conflicts before the first public write.
+        delivery_dir = self.target / 'delivery'
+        if not os.path.lexists(delivery_dir):
+            delivery_dir.mkdir(mode=0o755)
+            self.ops.sync_dir(self.guard, self.target)
+            self.audit('delivery-directory-created')
+        self.guard.directory(delivery_dir)
+        order = sorted(name for name in by_name if name.startswith('delivery/')) + ['DELIVERY.p7s', 'DELIVERY.json']
+        for name in order:
+            expected, target = by_name[name], self.target / name
+            self.hook('before-promote:' + name, self)
+            # Large Candidate pins are checked before the first write and again
+            # before the discovery descriptor; small exact feed pair every step.
+            if name == 'DELIVERY.json':
+                self.stable_baseline()
+                status = self.status_targets(by_name)
+                need(all(status[n] == 'exact' for n in by_name if n != 'DELIVERY.json'),
+                     'descriptor-prerequisite-not-visible')
+            else:
+                self.stable_feed()
+            if os.path.lexists(target):
+                self.guard.match(target, expected)
+                self.existing.append({'path': name, 'size': expected['size'], 'sha256': expected['sha256']})
+                self.audit('existing-exact', path=name)
+                continue
+            source = ready / Path(name).name
+            self.guard.match(source, expected)
+            try:
+                self.ops.rename_new(self.guard, source, target)
+            except FileExistsError:
+                self.guard.match(target, expected)
+                self.existing.append({'path': name, 'size': expected['size'], 'sha256': expected['sha256']})
+                self.audit('existing-exact-race', path=name)
+                continue
+            self.created.append({'path': name, 'size': expected['size'], 'sha256': expected['sha256'],
+                                 'fingerprint': list(fingerprint(self.guard.file_info(target)))})
+            self.audit('created', path=name, descriptorVisible=name == 'DELIVERY.json')
+        self.stable_baseline()
+        need(all(status == 'exact' for status in self.status_targets(by_name).values()),
+             'append-not-complete')
+        self.audit('append-complete')
+
+    def retire(self, receipt_path, receipt_sha):
+        need(receipt_path.name == 'RESULT.json' and receipt_path.parent != self.run_dir
+             and receipt_path.parent.parent == self.run_dir.parent
+             and re.fullmatch(r'run(?:-[A-Za-z0-9-]{1,64})?', receipt_path.parent.name),
+             'retirement-receipt-private-stage-scope')
+        raw = self.guard.read(receipt_path)
+        need(sha(raw) == receipt_sha, 'retirement-receipt-hash')
+        receipt = parse(raw)
+        need(receipt.get('schema') == 'mir2.origin-r17-append-receipt.v1'
+             and receipt.get('mode') == 'apply' and receipt.get('status') == 'passed'
+             and receipt.get('sourceRevision') == TOOL_SOURCE and receipt.get('gameSourceRevision') == GAME_SOURCE
+             and receipt.get('targetDirectory') == str(self.target), 'retirement-receipt-scope')
+        created = [o for o in receipt.get('createdObjects', []) if o.get('path') == 'DELIVERY.json']
+        need(len(created) == 1, 'descriptor-not-created-by-that-apply')
+        by_name = self.load_envelope()
+        expected = by_name['DELIVERY.json']
+        proof = created[0]
+        need(proof.get('size') == expected['size'] and proof.get('sha256') == expected['sha256'],
+             'retirement-descriptor-receipt-binding')
+        self.stable_baseline()
+        target = self.target / 'DELIVERY.json'
+        self.guard.match(target, expected)
+        need(list(fingerprint(self.guard.file_info(target))) == proof.get('fingerprint'),
+             'descriptor-identity-changed-since-apply')
+        retired = self.run_dir / 'retired-DELIVERY.json'
+        self.audit('retirement-validated', descriptorSha256=expected['sha256'])
+        self.stable_baseline()
+        self.guard.match(target, expected)
+        need(list(fingerprint(self.guard.file_info(target))) == proof.get('fingerprint'),
+             'descriptor-identity-changed-before-retirement')
+        self.ops.rename_new(self.guard, target, retired)
+        self.audit('descriptor-retired', backupPath=str(retired), onlyDescriptorMoved=True)
+        self.stable_baseline()
+
+    def execute(self, mode, receipt_path=None, receipt_sha=None):
+        self.mode = mode
+        self.validate_paths()
+        try:
+            with self.ops.lock(self.guard, self.lock_path):
+                self.audit('locked')
+                if mode == 'retire-descriptor':
+                    need(receipt_path is not None and re.fullmatch(r'[0-9a-f]{64}', receipt_sha or '') is not None,
+                         'retirement-receipt-required')
+                    self.retire(receipt_path, receipt_sha)
+                else:
+                    by_name, statuses = self.preflight()
+                    if mode == 'apply':
+                        self.apply(by_name)
+                    else:
+                        need(mode == 'preflight', 'unsupported-mode')
+                result = self.receipt('passed')
+                self.write_private(self.run_dir / 'RESULT.json', canonical(result))
+        except Exception as error:
+            result = self.receipt('failed', type(error).__name__ + ':' + str(error))
+            if not os.path.lexists(self.run_dir / 'RESULT.json'):
+                self.write_private(self.run_dir / 'RESULT.json', canonical(result))
+            raise
+        return result
+
+
+def absolute_argument(value):
+    need(isinstance(value, str) and value.startswith('/') and '\\' not in value
+         and all(segment not in ('', '.', '..') for segment in value.split('/')[1:]), 'unsafe-absolute-argument')
+    return Path(value)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=('preflight', 'apply', 'retire-descriptor'))
+    parser.add_argument('--inputs', required=True)
+    parser.add_argument('--generated', required=True)
+    parser.add_argument('--run-dir', required=True)
+    parser.add_argument('--cms-receipt-sha256', required=True)
+    parser.add_argument('--receipt')
+    parser.add_argument('--receipt-sha256')
+    args = parser.parse_args()
+    try:
+        context = Context(absolute_argument(args.inputs), absolute_argument(args.generated), absolute_argument(args.run_dir),
+                          cms_receipt_sha=args.cms_receipt_sha256)
+        result = context.execute(args.mode, absolute_argument(args.receipt) if args.receipt else None, args.receipt_sha256)
+        print(json.dumps(result, sort_keys=True))
+        return 0
+    except Exception as error:
+        print(json.dumps({'passed': False, 'error': type(error).__name__ + ':' + str(error),
+                          'cmsVerifiedByPython': False, 'networkOrServiceAction': False}), file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
