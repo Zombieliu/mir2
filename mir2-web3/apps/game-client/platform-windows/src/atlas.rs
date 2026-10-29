@@ -1,6 +1,7 @@
 //! Native entity-atlas loading and viewport render-state construction.
 
 use std::collections::{HashMap, HashSet, VecDeque};
+#[cfg(test)]
 use std::fs;
 use std::path::PathBuf;
 use std::sync::{
@@ -261,8 +262,8 @@ fn starter_atlas_index() -> Option<&'static StarterAtlasIndex> {
 }
 
 fn load_starter_atlas_index() -> Option<StarterAtlasIndex> {
-    let path = assets::asset_path("bevy-entity-atlases/manifest.json")?;
-    let manifest: Value = serde_json::from_str(&fs::read_to_string(path).ok()?).ok()?;
+    let manifest: Value =
+        serde_json::from_slice(&assets::read_bytes("bevy-entity-atlases/manifest.json")?).ok()?;
     parse_starter_atlas_manifest(&manifest)
 }
 
@@ -397,8 +398,8 @@ fn decode_starter_entity_atlas_pages(
     let mut decoded = Vec::new();
     for page in &index.pages {
         let page_started = std::time::Instant::now();
-        let path = assets::asset_path(&page.image_url)?;
-        let bytes = fs::read(&path).ok()?;
+        let path = PathBuf::from(&page.image_url); // logical provenance, never a materialized pack path
+        let bytes = assets::read_bytes(&page.image_url)?;
         if page
             .expected_image_bytes
             .is_some_and(|expected| expected != bytes.len() as u64)
@@ -708,8 +709,7 @@ fn parse_original_frame_geometry(
 
 fn load_original_frame_geometry(library: &str) -> Option<HashMap<i64, OriginalFrameGeometry>> {
     let meta_path = format!("original-ui/{}/meta.json", normalized_library_key(library));
-    let path = assets::asset_path(&meta_path)?;
-    let payload: Value = serde_json::from_str(&fs::read_to_string(path).ok()?).ok()?;
+    let payload: Value = serde_json::from_slice(&assets::read_bytes(&meta_path)?).ok()?;
     parse_original_frame_geometry(&payload, library)
 }
 
@@ -755,7 +755,7 @@ pub(crate) fn native_frame_geometry(library: &str, frame: i64) -> Option<Origina
 
 fn verified_player_frame_geometry(frame_path: &str) -> Option<OriginalFrameGeometry> {
     let (library, frame, relative) = player_frame_path_parts(frame_path)?;
-    assets::asset_path(&relative).filter(|path| path.is_file())?;
+    assets::exists(&relative).then_some(())?;
     original_frame_geometry(&library, frame)
 }
 
@@ -768,8 +768,7 @@ fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>>
         }
     }
 
-    let loaded = assets::asset_path(&cache_key)
-        .and_then(|path| fs::read(path).ok())
+    let loaded = assets::read_bytes(&cache_key)
         .and_then(|bytes: Vec<u8>| decode_png_rgba(&bytes))
         .map(|(width, height, rgba)| {
             Arc::new(StarterAtlasPixelPage {
@@ -804,7 +803,7 @@ fn sprite_library_in_atlas(index: &StarterAtlasIndex, library: &str) -> bool {
 
 fn sprite_library_exists(library: &str) -> bool {
     starter_atlas_index().is_some_and(|index| sprite_library_in_atlas(index, library))
-        || assets::asset_path(library.trim_start_matches('/')).is_some_and(|path| path.is_dir())
+        || assets::is_directory(library.trim_start_matches('/'))
 }
 
 fn available_sprite_library(

@@ -156,6 +156,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.104"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
+
+[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3350,6 +3356,7 @@ dependencies = [
 name = "mir2-platform-windows"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bevy",
  "console_error_panic_hook",
  "embed-resource",
@@ -3362,12 +3369,15 @@ dependencies = [
  "mir2-client-wire",
  "mir2-game-data",
  "mir2-protocol",
+ "mir2-resource-pack",
  "mir2-ui-core",
+ "mir2-windows-updater",
  "png",
  "qrcode",
  "serde",
  "serde_json",
  "sha2",
+ "tempfile",
  "tokio",
  "tokio-tungstenite",
  "toml 0.8.23",
@@ -3385,12 +3395,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-resource-pack"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "sha2",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "mir2-ui-core"
 version = "0.1.0"
 dependencies = [
  "bevy",
  "mir2-client-core",
  "serde",
+]
+
+[[package]]
+name = "mir2-windows-updater"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "flate2",
+ "mir2-resource-pack",
+ "serde",
+ "serde_json",
+ "sha2",
+ "ureq",
+ "url",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -4908,6 +4944,19 @@ dependencies = [
  "grid",
  "serde",
  "slotmap",
+]
+
+[[package]]
+name = "tempfile"
+version = "3.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
+dependencies = [
+ "fastrand",
+ "getrandom 0.4.3",
+ "once_cell",
+ "rustix 1.1.4",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

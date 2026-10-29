@@ -398,6 +398,7 @@ pub(crate) fn initialize_native_audio(
     mut sources: ResMut<Assets<AudioSource>>,
     mut commands: Commands,
     music_entities: Query<Entity, bevy::ecs::query::With<NativeMusicTrack>>,
+    provider: Option<Res<NativeAudioAssetProvider>>,
 ) {
     // Startup may be scheduled more than once by a host/reload path. Commands
     // are deferred, so checking the ECS query alone would still allow two
@@ -408,9 +409,13 @@ pub(crate) fn initialize_native_audio(
     }
     runtime.initialized = true;
 
-    let (music_path, music_source) =
-        load_first_valid_wav(&[MUSIC_FILE, PACKAGED_MUSIC_FALLBACK_FILE], &mut sources);
-    let (sound_path, sound_source) = load_first_valid_wav(&[SOUND_FILE], &mut sources);
+    let (music_path, music_source) = load_first_valid_wav_with_provider(
+        &[MUSIC_FILE, PACKAGED_MUSIC_FALLBACK_FILE],
+        &mut sources,
+        provider.as_deref(),
+    );
+    let (sound_path, sound_source) =
+        load_first_valid_wav_with_provider(&[SOUND_FILE], &mut sources, provider.as_deref());
     runtime.music_path = music_path;
     runtime.sound_path = sound_path;
     runtime.music_source = music_source;
@@ -418,7 +423,8 @@ pub(crate) fn initialize_native_audio(
     runtime.gameplay_paths.clear();
     runtime.gameplay_sources.clear();
     for file_name in NATIVE_GAMEPLAY_SOUND_FILES {
-        let (path, source) = load_first_valid_wav(&[file_name], &mut sources);
+        let (path, source) =
+            load_first_valid_wav_with_provider(&[file_name], &mut sources, provider.as_deref());
         if let (Some(path), Some(source)) = (path, source) {
             runtime.gameplay_paths.insert((*file_name).to_owned(), path);
             runtime
@@ -434,7 +440,8 @@ pub(crate) fn initialize_native_audio(
         NATIVE_UI_BUTTON_C_FILE,
         NATIVE_LOGIN_DOOR_FILE,
     ] {
-        let (path, source) = load_first_valid_wav(&[file_name], &mut sources);
+        let (path, source) =
+            load_first_valid_wav_with_provider(&[file_name], &mut sources, provider.as_deref());
         if let (Some(path), Some(source)) = (path, source) {
             runtime.ui_paths.insert(file_name.to_owned(), path);
             runtime.ui_sources.insert(file_name.to_owned(), source);
@@ -780,6 +787,43 @@ fn sound_volume(value: u8) -> Volume {
     Volume::Linear(f32::from(value.min(100)) / 100.0)
 }
 
+/// Native hosts may supply authenticated virtual resources. When installed,
+/// a missing/invalid clip never falls back to filesystem discovery.
+#[derive(Resource, Clone)]
+pub struct NativeAudioAssetProvider {
+    read: Arc<dyn Fn(&str) -> Result<Vec<u8>, String> + Send + Sync>,
+}
+impl NativeAudioAssetProvider {
+    pub fn new(read: impl Fn(&str) -> Result<Vec<u8>, String> + Send + Sync + 'static) -> Self {
+        Self {
+            read: Arc::new(read),
+        }
+    }
+}
+fn load_first_valid_wav_with_provider(
+    file_names: &[&str],
+    sources: &mut Assets<AudioSource>,
+    provider: Option<&NativeAudioAssetProvider>,
+) -> (Option<PathBuf>, Option<bevy::asset::Handle<AudioSource>>) {
+    let Some(provider) = provider else {
+        return load_first_valid_wav(file_names, sources);
+    };
+    for name in file_names {
+        let key = format!("original-ui/Sound/{name}");
+        match (provider.read)(&key) {
+            Ok(bytes) if is_wav(&bytes) => {
+                let handle = sources.add(AudioSource {
+                    bytes: Arc::from(bytes),
+                });
+                return (Some(PathBuf::from(key)), Some(handle));
+            }
+            Ok(_) => eprintln!("[client-bevy/audio] packed WAV is invalid: {key}"),
+            Err(error) => eprintln!("[client-bevy/audio] packed WAV unavailable: {error}"),
+        }
+    }
+    (None, None)
+}
+
 fn read_wav_source(
     path: &Path,
     sources: &mut Assets<AudioSource>,
@@ -1020,6 +1064,43 @@ mod tests {
         assert!(is_wav(&wav));
         assert!(!is_wav(b"RIFFxxxxWAVEfmt "));
         assert!(!is_wav(b"not-audio"));
+    }
+
+    #[test]
+    fn virtual_audio_reads_exact_bytes_and_preserves_in_pack_music_choice() {
+        let wav = make_wav(1, 1, 44_100, 16, 2);
+        let expected = wav.clone();
+        let calls = Arc::new(Mutex::new(Vec::new()));
+        let observed = calls.clone();
+        let provider = NativeAudioAssetProvider::new(move |key| {
+            observed.lock().unwrap().push(key.to_owned());
+            if key == "original-ui/Sound/Main.wav" {
+                return Ok(b"invalid WAV".to_vec());
+            }
+            if key == "original-ui/Sound/Login2.wav" {
+                return Ok(wav.clone());
+            }
+            Err("not in authenticated generation".into())
+        });
+        let mut sources = Assets::<AudioSource>::default();
+        let (path, handle) = load_first_valid_wav_with_provider(
+            &["Main.wav", "Login2.wav"],
+            &mut sources,
+            Some(&provider),
+        );
+        assert_eq!(path, Some(PathBuf::from("original-ui/Sound/Login2.wav")));
+        assert_eq!(
+            sources.get(&handle.unwrap()).unwrap().bytes.as_ref(),
+            expected
+        );
+        assert_eq!(
+            *calls.lock().unwrap(),
+            ["original-ui/Sound/Main.wav", "original-ui/Sound/Login2.wav"]
+        );
+        let (path, handle) =
+            load_first_valid_wav_with_provider(&["missing.wav"], &mut sources, Some(&provider));
+        assert!(path.is_none() && handle.is_none());
+        assert_eq!(sources.len(), 1);
     }
 
     #[test]

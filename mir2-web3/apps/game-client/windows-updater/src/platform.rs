@@ -425,6 +425,25 @@ mod windows {
         }
     }
 
+    /// Publish a durable immutable object without replacing a concurrent path.
+    /// COPY_ALLOWED is deliberately absent: both paths must share a volume.
+    pub fn promote_new(source: &Path, destination: &Path) -> io::Result<()> {
+        let source = wide(source)?;
+        let destination = wide(destination)?;
+        if unsafe {
+            MoveFileExW(
+                source.as_ptr(),
+                destination.as_ptr(),
+                MOVEFILE_WRITE_THROUGH,
+            )
+        } == 0
+        {
+            Err(io::Error::last_os_error())
+        } else {
+            Ok(())
+        }
+    }
+
     pub fn free_bytes(path: &Path) -> io::Result<u64> {
         let path = wide(path)?;
         let mut bytes = 0;
@@ -799,6 +818,14 @@ pub fn verify_cms_at(content: &[u8], signature: &[u8], pin: &str, _: i64) -> Res
 #[cfg(not(windows))]
 pub fn replace_file(source: &Path, destination: &Path) -> io::Result<()> {
     std::fs::rename(source, destination)
+}
+#[cfg(not(windows))]
+pub fn promote_new(source: &Path, destination: &Path) -> io::Result<()> {
+    // A create-only hard-link publication is immediately reduced to one link.
+    // Incomplete publication is never selected and fails single-link checks.
+    std::fs::hard_link(source, destination)?;
+    std::fs::remove_file(source)?;
+    std::fs::File::open(destination.parent().unwrap())?.sync_all()
 }
 #[cfg(not(windows))]
 pub fn free_bytes(_: &Path) -> io::Result<u64> {

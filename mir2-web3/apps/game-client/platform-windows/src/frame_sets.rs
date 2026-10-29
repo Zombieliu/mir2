@@ -6,7 +6,6 @@
 //! libraries whose action counts, skips, or intervals differ.
 
 use std::collections::HashMap;
-use std::fs;
 use std::sync::OnceLock;
 
 use mir2_bevy_runtime::entity_animation::{
@@ -164,12 +163,9 @@ fn build_mounted_player_catalog() -> AnimationCatalog {
 }
 
 fn load_frame_set_catalog() -> NativeFrameSetCatalog {
-    let Some(path) = assets::asset_path("original-ui/frame-sets.generated.json") else {
+    let path = "original-ui/frame-sets.generated.json";
+    let Some(source) = assets::read_text(path) else {
         eprintln!("[frame-sets] generated frame-set catalog is unavailable; using defaults");
-        return NativeFrameSetCatalog::default();
-    };
-    let Ok(source) = fs::read_to_string(&path) else {
-        eprintln!("[frame-sets] failed to read {path:?}; using defaults");
         return NativeFrameSetCatalog::default();
     };
     let Ok(payload) = serde_json::from_str::<Value>(&source) else {

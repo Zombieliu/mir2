@@ -324,11 +324,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-resource-pack"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+ "sha2",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "mir2-windows-updater"
 version = "1.0.0"
 dependencies = [
  "anyhow",
  "flate2",
+ "mir2-resource-pack",
  "serde",
  "serde_json",
  "sha2",

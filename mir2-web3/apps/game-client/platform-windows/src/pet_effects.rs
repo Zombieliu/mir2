@@ -26,8 +26,10 @@ fn pet_effect_animation(index: u8, base: u32, count: u32, duration: u64) -> Opti
         return None;
     }
     let library = format!("Pet/{index:02}");
-    let path = crate::assets::asset_path(&format!("original-ui/{library}/meta.json"))?;
-    let raw: Value = serde_json::from_slice(&std::fs::read(path).ok()?).ok()?;
+    let raw: Value = serde_json::from_slice(&crate::assets::read_bytes(&format!(
+        "original-ui/{library}/meta.json"
+    ))?)
+    .ok()?;
     let source = raw.get("frames")?.as_array()?;
     let frames = (base..base + count)
         .map(|i| {

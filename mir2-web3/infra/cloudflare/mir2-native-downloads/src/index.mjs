@@ -5,14 +5,33 @@ export const POINTER_KEY = OBJECT_PREFIX + "channels/invited.json";
 export const FIVE_CLASS_PUBLIC_BASE = PUBLIC_BASE + "five-class/";
 export const FIVE_CLASS_OBJECT_PREFIX = OBJECT_PREFIX + "five-class/";
 export const FIVE_CLASS_POINTER_KEY = FIVE_CLASS_OBJECT_PREFIX + "channels/invited.json";
+export const PACKED_PUBLIC_BASE = PUBLIC_BASE + "packed/";
+export const PACKED_OBJECT_PREFIX = OBJECT_PREFIX + "packed/";
+export const PACKED_POINTER_KEY = PACKED_OBJECT_PREFIX + "channels/invited.json";
 export const MAX_ARTIFACT = 128 * 1024 * 1024;
 export const MAX_METADATA = 32 * 1024 * 1024;
 export const MAX_FIVE_CLASS_METADATA = 64 * 1024 * 1024;
 export const MAX_POINTER = 4096;
+export const MAX_PACKED_CATALOG = 128 * 1024 * 1024;
+export const MAX_PACKED_OBJECT = 64 * 1024 * 1024;
+export const MAX_PACKED_MANIFEST = 4 * 1024 * 1024;
+export const MAX_PACKED_SMALL = 32768;
 const IMMUTABLE = "public, max-age=31536000, immutable";
 const POINTER_SCHEMA = "mir2.windows.r2-channel.v1";
 const POINTER_FIELDS = ["schema", "channel", "platform", "sequence", "sourceRevision", "feedSha256", "signatureSha256"];
 const ALIASES = new Set(["latest.json", "latest.p7s"]);
+const GENERATION_CONTROLS = new Map([
+  ["GENERATION.json", MAX_PACKED_MANIFEST], ["GENERATION.p7s", MAX_PACKED_SMALL],
+  ["catalog.json", MAX_PACKED_CATALOG], ["mir2-platform-windows.exe", MAX_ARTIFACT],
+  ["mir2-client.toml", MAX_PACKED_SMALL],
+]);
+
+function packedObjectLimit(path) {
+  if (ALIASES.has(path)) return MAX_PACKED_SMALL;
+  const generation = /^generations\/[0-9a-f]{64}\/([^/]+)$/.exec(path);
+  if (generation) return GENERATION_CONTROLS.get(generation[1]) ?? null;
+  return /^objects\/packs\/[0-9a-f]{64}\.m2p$/.test(path) ? MAX_PACKED_OBJECT : null;
+}
 
 export function validatePointer(value) {
   if (!value || Array.isArray(value) || typeof value !== "object") throw new Error("invalid_pointer");
@@ -34,7 +53,9 @@ export function channelPath(url) {
   if (url.protocol !== "https:" || url.host !== "assets.mir2.obelisk.build" ||
       url.href.includes("?") || url.href.includes("#") || !url.pathname.startsWith("/client-updates/")) return null;
   let raw = url.pathname.slice("/client-updates/".length);
-  const fiveClass = raw.startsWith("five-class/");
+  const packed = raw.startsWith("packed/");
+  if (packed) raw = raw.slice("packed/".length);
+  const fiveClass = !packed && raw.startsWith("five-class/");
   if (fiveClass) raw = raw.slice("five-class/".length);
   // Separators must be literal. Decode exactly once; any residual '%' is invalid.
   if (/%(?:2f|5c)/i.test(raw)) return null;
@@ -44,6 +65,14 @@ export function channelPath(url) {
   if (!path || !safeCharacters.test(path) ||
       path.split("/").some((s) => !s || s === "." || s === ".." || s.startsWith(".") ||
         (fiveClass && (s.endsWith(" ") || s.endsWith("."))))) return null;
+  if (packed) {
+    const objectMaximum = packedObjectLimit(path);
+    if (objectMaximum === null) return null;
+    return {
+      path, publicBase: PACKED_PUBLIC_BASE, objectPrefix: PACKED_OBJECT_PREFIX,
+      pointerKey: PACKED_POINTER_KEY, objectMaximum,
+    };
+  }
   if (!ALIASES.has(path) && !/^(releases|feeds|installers)\/[^/]/.test(path)) return null;
   return {
     path,
@@ -196,6 +225,7 @@ async function serve(request, env, ctx, cache) {
     const pointer = alias ? await loadPointer(env.MIR2_ASSETS, channel) : null;
     const resolved = alias ? feedDirectory(pointer) + path : path;
     const key = channel.objectPrefix + resolved;
+    const objectMaximum = channel.objectMaximum ?? metadataLimit(resolved, channel.metadataMaximum);
     const cacheKey = new Request(channel.publicBase + resolved, { method: "GET" });
     const rangeHeader = request.method === "GET" ? request.headers.get("range") : null;
     if (!alias && !rangeHeader && cache) {
@@ -211,7 +241,7 @@ async function serve(request, env, ctx, cache) {
     }
     const object = await env.MIR2_ASSETS.head(key);
     if (!object) return errorResponse("not_found", 404);
-    validateObject(object, resolved, metadataLimit(resolved, channel.metadataMaximum));
+    validateObject(object, resolved, objectMaximum);
     const expectedHash = pointer && (path === "latest.json" ? pointer.feedSha256 : pointer.signatureSha256);
     if (expectedHash && object.customMetadata?.sha256 && object.customMetadata.sha256 !== expectedHash) throw new Error("invalid_storage_hash");
     let headers = objectHeaders(object, resolved, alias, pointer, null, alias || rangeHeader ? "BYPASS" : "MISS");
@@ -225,7 +255,7 @@ async function serve(request, env, ctx, cache) {
     if (request.method === "HEAD") return new Response(null, { status: 200, headers });
     const data = await env.MIR2_ASSETS.get(key, range ? { range } : undefined);
     if (!data) return errorResponse("not_found", 404);
-    validateObject(data, resolved, metadataLimit(resolved, channel.metadataMaximum));
+    validateObject(data, resolved, objectMaximum);
     if (data.size !== object.size || data.httpEtag !== object.httpEtag ||
         (range && (!data.range || data.range.offset !== range.offset || data.range.length !== range.length))) throw new Error("inconsistent_storage_object");
     const response = new Response(data.body, { status: range ? 206 : 200, headers });

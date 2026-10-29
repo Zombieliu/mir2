@@ -194,6 +194,29 @@ struct NativeCaptureBuild {
     source_revision: Option<String>,
     executable_sha256: Option<String>,
     asset_manifest_sha256: Option<String>,
+    // Authenticated packed generations have their own binding. They never
+    // masquerade as the expanded v4 package manifest expected by capture v1.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    packed_generation: Option<VerifiedPackedProvenance>,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct VerifiedPackedProvenance {
+    pub(crate) generation_manifest_sha256: String,
+    pub(crate) catalog_sha256: String,
+    pub(crate) game_source_revision: String,
+    pub(crate) content_profile: String,
+    pub(crate) executable_sha256: String,
+    pub(crate) pack_sha256: Vec<String>,
+}
+
+/// Called by the CMS-authenticated launch loader, never from an environment
+/// variable or from unsigned files discovered beside the executable.
+pub(crate) fn install_verified_packed_provenance(
+    value: VerifiedPackedProvenance,
+) -> Result<(), String> {
+    provenance::install_verified_packed(value)
 }
 
 #[derive(Debug, Serialize)]
@@ -1321,7 +1344,10 @@ mod tests {
             parse_capture_target_slug("wallet_login"),
             Some(NativeCaptureTarget::WalletLogin)
         );
-        assert_eq!(capture_target_slug(NativeCaptureTarget::WalletLogin), "wallet-login");
+        assert_eq!(
+            capture_target_slug(NativeCaptureTarget::WalletLogin),
+            "wallet-login"
+        );
         assert!(!is_world_scene("wallet-login"));
         assert_eq!(parse_shell_screen_slug("wallet-login"), None);
     }
@@ -1357,7 +1383,12 @@ mod tests {
         });
         app.add_systems(PostUpdate, auto_capture_system);
         let countdown = |app: &App| {
-            app.world().resource::<NativeCaptureRuntime>().auto.as_ref().unwrap().countdown
+            app.world()
+                .resource::<NativeCaptureRuntime>()
+                .auto
+                .as_ref()
+                .unwrap()
+                .countdown
         };
         app.update();
         assert_eq!(countdown(&app), None);
@@ -1380,7 +1411,8 @@ mod tests {
         app.update();
         assert_eq!(countdown(&app), None);
         app.world_mut().resource_mut::<NativeWalletLogin>().stage = NativeWalletLoginStage::Pending;
-        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::CharacterSelect;
+        app.world_mut().resource_mut::<NativeShellModel>().screen =
+            NativeShellScreen::CharacterSelect;
         app.update();
         assert_eq!(countdown(&app), None);
     }
@@ -2001,6 +2033,7 @@ mod tests {
             source_revision: Some("test-source".to_owned()),
             executable_sha256: Some("a".repeat(64)),
             asset_manifest_sha256: Some("b".repeat(64)),
+            packed_generation: None,
         };
         let sidecar: serde_json::Value = serde_json::from_slice(
             &serialize_capture_sidecar(&request, 1024, 768, "c".repeat(64)).expect("sidecar"),

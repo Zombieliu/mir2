@@ -80,6 +80,12 @@ function AssertSourceTracked {
     $sources=@(Get-ChildItem -LiteralPath (Join-Path $crate 'src') -Recurse -Force -File)
     $sources+=Get-Item -LiteralPath (Join-Path $crate 'Cargo.toml'),(Join-Path $crate 'Cargo.lock') -Force
     if(Test-Path -LiteralPath (Join-Path $crate 'build.rs')){$sources+=Get-Item -LiteralPath (Join-Path $crate 'build.rs') -Force}
+    # The shared parser is now a compiled path dependency. Ignored/untracked
+    # parser inputs must not produce a clean-looking updater attestation.
+    $packCrate=Join-Path $project 'apps/game-client/resource-pack'
+    $sources+=Get-ChildItem -LiteralPath (Join-Path $packCrate 'src') -Recurse -Force -File
+    $sources+=Get-Item -LiteralPath (Join-Path $packCrate 'Cargo.toml') -Force
+    if(Test-Path -LiteralPath (Join-Path $packCrate 'build.rs')){$sources+=Get-Item -LiteralPath (Join-Path $packCrate 'build.rs') -Force}
     foreach($source in $sources){
         NoLinks $source.FullName
         $relative=[IO.Path]::GetRelativePath($project,$source.FullName).Replace('\','/')
@@ -115,7 +121,7 @@ if((& git -C $project rev-parse HEAD).Trim()-cne$SourceRevision.ToLowerInvariant
 $now=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $engineHash=Sha $engineExe
 $engine=[ordered]@{
-    schema='mir2.windows.updater-engine.v1';version=1;minBootstrap=1
+    schema='mir2.windows.updater-engine.v1';version=2;minBootstrap=1
     sourceRevision=$SourceRevision.ToLowerInvariant();builtUnix=$now
     exeSize=[long]$engineExe.Length;exeSha256=$engineHash;launcherSha256=Sha $launcher
     cargoLockSha256=FileSha (Join-Path $crate 'Cargo.lock')
@@ -141,7 +147,7 @@ $feed=[ordered]@{
     createdUnix=$now;expiresUnix=$now+(30*86400);minBootstrap=1
     protocol='crystal-mir2-v1';content='mir2.windows.package-manifest.v4'
     game=[ordered]@{directory=$gameDirectory;identity=$version.candidate;metadata=$metadata}
-    engine=[ordered]@{directory=$engineDirectory;identity='1';metadata=@((Entry 'ENGINE.json' $engineBytes),(Entry 'ENGINE.p7s' $engineSig))}
+    engine=[ordered]@{directory=$engineDirectory;identity='2';metadata=@((Entry 'ENGINE.json' $engineBytes),(Entry 'ENGINE.p7s' $engineSig))}
 }
 $feedBytes=JsonBytes $feed;$feedSig=Cms $feedBytes;CheckCms $feedBytes $feedSig
 $bundle=Join-Path $OutputRoot 'bundle'

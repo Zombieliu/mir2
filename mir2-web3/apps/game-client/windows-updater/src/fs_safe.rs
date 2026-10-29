@@ -159,6 +159,197 @@ pub fn open_download(path: &Path) -> Result<File> {
     }
     Ok(file)
 }
+
+/// Retained directory handles prevent ancestor rename/replacement while an
+/// authenticated file is used. Child creation remains permitted.
+pub struct DirectoryLease {
+    _handles: Vec<File>,
+}
+impl DirectoryLease {
+    pub fn acquire(path: &Path) -> Result<Self> {
+        #[cfg(windows)]
+        {
+            use std::os::windows::fs::OpenOptionsExt;
+            use windows_sys::Win32::Storage::FileSystem::{
+                FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_READ,
+                FILE_SHARE_WRITE,
+            };
+            ancestors(path)?;
+            let mut directories: Vec<_> = path.ancestors().collect();
+            directories.reverse();
+            let mut handles = Vec::with_capacity(directories.len());
+            for directory in directories {
+                let file = OpenOptions::new()
+                    .read(true)
+                    .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+                    .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS)
+                    .open(directory)?;
+                validate_read_handle(&file, directory, true)?;
+                handles.push(file);
+            }
+            Ok(Self { _handles: handles })
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = path;
+            anyhow::bail!("Windows directory lifetime lease is unsupported on this platform")
+        }
+    }
+}
+/// Exact signed bytes remain protected through CreateProcess and for the child
+/// lifetime. Reads are shared; write, delete, hard-link aliases and reparse paths
+/// are rejected. Hashing uses this same retained, path-bound actual handle.
+pub struct FileLease {
+    _file: File,
+    _directories: DirectoryLease,
+}
+impl FileLease {
+    pub fn verified(path: &Path, entry: &crate::model::FileEntry) -> Result<Self> {
+        #[cfg(windows)]
+        {
+            use std::os::windows::fs::OpenOptionsExt;
+            use windows_sys::Win32::Storage::FileSystem::{
+                FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_READ,
+            };
+            entry.validate()?;
+            let directories = DirectoryLease::acquire(
+                path.parent()
+                    .ok_or_else(|| anyhow::anyhow!("leased file parent"))?,
+            )?;
+            let mut file = OpenOptions::new()
+                .read(true)
+                .share_mode(FILE_SHARE_READ)
+                .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+                .open(path)?;
+            validate_read_handle(&file, path, false)?;
+            ensure!(
+                file.metadata()?.len() == entry.size,
+                "leased file length differs"
+            );
+            let mut digest = Sha256::new();
+            let mut size = 0u64;
+            let mut buffer = [0u8; 65536];
+            loop {
+                let read = file.read(&mut buffer)?;
+                if read == 0 {
+                    break;
+                }
+                size = size
+                    .checked_add(read as u64)
+                    .ok_or_else(|| anyhow::anyhow!("leased file length overflow"))?;
+                ensure!(size <= entry.size, "leased file grew during hashing");
+                digest.update(&buffer[..read]);
+            }
+            ensure!(
+                size == entry.size
+                    && file.metadata()?.len() == entry.size
+                    && format!("{:X}", digest.finalize()) == entry.sha256,
+                "leased file hash differs"
+            );
+            validate_read_handle(&file, path, false)?;
+            Ok(Self {
+                _file: file,
+                _directories: directories,
+            })
+        }
+        #[cfg(not(windows))]
+        {
+            let _ = (path, entry);
+            anyhow::bail!("Windows verified file lifetime lease is unsupported on this platform")
+        }
+    }
+}
+#[cfg(windows)]
+fn windows_namespace(path: &[u16]) -> Vec<u16> {
+    let extended = [92, 92, 63, 92];
+    if let Some(tail) = path.strip_prefix(&extended) {
+        if tail.len() >= 4
+            && tail[..4]
+                .iter()
+                .zip([85u16, 78, 67, 92])
+                .all(|(a, b)| (*a <= 127 && (*a as u8).to_ascii_uppercase() as u16 == b) || *a == b)
+        {
+            return [vec![92, 92], tail[4..].to_vec()].concat();
+        }
+        return tail.to_vec();
+    }
+    path.to_vec()
+}
+#[cfg(windows)]
+fn validate_read_handle(file: &File, path: &Path, directory: bool) -> Result<()> {
+    use std::os::windows::{ffi::OsStrExt, io::AsRawHandle};
+    use windows_sys::Win32::{
+        Globalization::{CompareStringOrdinal, CSTR_EQUAL},
+        Storage::FileSystem::{
+            GetFileInformationByHandle, GetFinalPathNameByHandleW, BY_HANDLE_FILE_INFORMATION,
+            FILE_NAME_NORMALIZED,
+        },
+    };
+    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { std::mem::zeroed() };
+    ensure!(
+        unsafe { GetFileInformationByHandle(file.as_raw_handle(), &mut info) } != 0,
+        "leased file information: {}",
+        std::io::Error::last_os_error()
+    );
+    ensure!(info.dwFileAttributes & 0x400 == 0, "reparse leased handle");
+    ensure!(
+        if directory {
+            file.metadata()?.is_dir()
+        } else {
+            file.metadata()?.is_file() && info.nNumberOfLinks == 1
+        },
+        "nonregular or linked leased handle"
+    );
+    let mut actual = vec![0u16; 512];
+    let mut length = unsafe {
+        GetFinalPathNameByHandleW(
+            file.as_raw_handle(),
+            actual.as_mut_ptr(),
+            actual.len() as u32,
+            FILE_NAME_NORMALIZED,
+        )
+    } as usize;
+    ensure!(
+        length > 0,
+        "leased handle path: {}",
+        std::io::Error::last_os_error()
+    );
+    if length >= actual.len() && length < 32768 {
+        actual.resize(length + 1, 0);
+        length = unsafe {
+            GetFinalPathNameByHandleW(
+                file.as_raw_handle(),
+                actual.as_mut_ptr(),
+                actual.len() as u32,
+                FILE_NAME_NORMALIZED,
+            )
+        } as usize;
+    }
+    ensure!(
+        length > 0 && length < actual.len(),
+        "leased handle path bound: {}",
+        std::io::Error::last_os_error()
+    );
+    actual.truncate(length);
+    let expected: Vec<u16> = fs::canonicalize(path)?.as_os_str().encode_wide().collect();
+    let actual = windows_namespace(&actual);
+    let expected = windows_namespace(&expected);
+    ensure!(
+        actual.len() <= i32::MAX as usize
+            && expected.len() <= i32::MAX as usize
+            && unsafe {
+                CompareStringOrdinal(
+                    actual.as_ptr(),
+                    actual.len() as i32,
+                    expected.as_ptr(),
+                    expected.len() as i32,
+                    1,
+                )
+            } == CSTR_EQUAL,
+        "leased handle path binding differs"
+    );
+    Ok(())
+}
 pub fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>> {
     ensure!(regular(path)?.len() <= limit, "file too large");
     let mut data = Vec::new();
@@ -272,3 +463,7 @@ pub fn install_root(root: &Path) -> Result<PathBuf> {
     regular(&root.join("game/VERSION.json"))?;
     Ok(root)
 }
+
+#[cfg(test)]
+#[path = "fs_safe_tests.rs"]
+mod tests;

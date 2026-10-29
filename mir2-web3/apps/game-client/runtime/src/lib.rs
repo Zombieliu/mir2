@@ -1872,7 +1872,18 @@ impl RuntimeWindowSpec {
 /// later Android) call this with their own [`RuntimeWindowSpec`]. No DOM, canvas
 /// selector or wasm API is assumed here.
 pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
+    build_runtime_app_with_asset_source(spec, None)
+}
+
+pub fn build_runtime_app_with_asset_source(
+    spec: RuntimeWindowSpec,
+    source: Option<bevy::asset::io::AssetSourceBuilder>,
+) -> App {
     let mut app = App::new();
+    if let Some(source) = source {
+        use bevy::asset::AssetApp;
+        app.register_asset_source(bevy::asset::io::AssetSourceId::Default, source);
+    }
     app.insert_resource(ClearColor(FLOOR_COLOR))
         .insert_resource(RuntimeWorldState::default())
         .insert_resource(RuntimeEntityRenderState::default())

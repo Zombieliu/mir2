@@ -12,7 +12,7 @@
 )]
 
 use bevy::prelude::IntoScheduleConfigs;
-use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
+use mir2_bevy_runtime::{build_runtime_app_with_asset_source, RuntimeWindowSpec};
 
 mod assets;
 mod atlas;
@@ -29,6 +29,7 @@ mod equipment_creature_wire;
 mod frame_sets;
 mod gameplay_bridge;
 mod gateway;
+mod generation_launch;
 mod hero_pointer_settings;
 mod hero_wire;
 mod input;
@@ -43,6 +44,7 @@ mod native_protocol;
 mod native_wallet_visual_tests;
 mod npc_purchase_client;
 mod npc_purchase_projection;
+mod packed_assets;
 mod refine_wire;
 mod session_config;
 mod shell_bridge;
@@ -57,7 +59,7 @@ mod window_sizing;
 /// exists under the native asset root. Used by effects.rs so a missing asset
 /// never produces a sprite or a fake stand-in.
 fn frame_png_exists(web_path: &str) -> bool {
-    assets::asset_path(web_path).is_some_and(|path| path.is_file())
+    assets::exists(web_path)
 }
 
 #[derive(bevy::prelude::Resource, Default)]
@@ -73,6 +75,9 @@ fn report_r2_progress_via_chat(
     mut chat: bevy::prelude::ResMut<mir2_client_bevy::chat::ChatModel>,
     shell: Option<bevy::prelude::Res<mir2_client_bevy::native_shell::NativeShellModel>>,
 ) {
+    if assets::packed_mode() {
+        return;
+    }
     // Bichon town batch: fire-and-forget every tick so the 30-page lattice
     // goes from per-page on-demand (首帧黑) to once批补 (首进城镇一次 30 并发).
     crate::assets::batch_prefetch_bichon_town();
@@ -153,6 +158,10 @@ fn main() -> bevy::app::AppExit {
 
 fn run_native_client() -> bevy::app::AppExit {
     timing::initialize();
+    let packed_launch = generation_launch::load_and_mount().unwrap_or_else(|error| {
+        eprintln!("[platform-windows] generation validation failed: {error}");
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::Assets, 1);
+    });
     let config_started = std::time::Instant::now();
     movement_trace::initialize();
 
@@ -214,13 +223,22 @@ fn run_native_client() -> bevy::app::AppExit {
     );
     timing::report("asset_validation_and_map_decode", assets_started);
     let app_started = std::time::Instant::now();
-    let mut app = build_runtime_app(RuntimeWindowSpec {
-        asset_root: asset_root.to_string_lossy().into_owned(),
-        width: session_config::DEFAULT_WINDOW_WIDTH,
-        height: session_config::DEFAULT_WINDOW_HEIGHT,
-        close_when_requested: false,
-        ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
-    });
+    let mut app = build_runtime_app_with_asset_source(
+        RuntimeWindowSpec {
+            asset_root: asset_root.to_string_lossy().into_owned(),
+            width: session_config::DEFAULT_WINDOW_WIDTH,
+            height: session_config::DEFAULT_WINDOW_HEIGHT,
+            close_when_requested: false,
+            ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
+        },
+        assets::packed_asset_source(),
+    );
+    packed_launch.configure_app(&mut app);
+    if assets::packed_mode() {
+        app.insert_resource(mir2_client_bevy::audio::NativeAudioAssetProvider::new(
+            crate::packed_assets::read_if_present,
+        ));
+    }
     // Keep OS-DPI sizing constraints separate from the chosen physical client
     // area. The display plugin scales the fixed Crystal stage as one unit.
     let world = app.world_mut();

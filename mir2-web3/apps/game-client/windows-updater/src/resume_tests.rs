@@ -120,6 +120,136 @@ fn part(root: &Path, entry: &FileEntry) -> PathBuf {
 }
 
 #[test]
+fn packed_discovery_only_two_json_404s_mean_no_new_channel() {
+    let reply = Reply::many(vec![
+        (
+            "404 Not Found".into(),
+            "Content-Length: 0\r\n".into(),
+            vec![],
+        ),
+        (
+            "404 Not Found".into(),
+            "Content-Length: 0\r\n".into(),
+            vec![],
+        ),
+    ]);
+    let mut wire = 0;
+    assert!(reply
+        .source
+        .packed_discovery_pair(&mut |n| {
+            wire += n;
+            Ok(())
+        })
+        .unwrap()
+        .is_none());
+    let requests = reply.finish();
+    assert_eq!(wire, 0);
+    assert_eq!(requests.len(), 2);
+    assert!(requests
+        .iter()
+        .all(|r| r.starts_with("GET /updates/latest.json ")));
+}
+
+#[test]
+fn packed_discovery_retries_a_whole_pair_without_mixing_alias_bytes() {
+    let reply = Reply::many(vec![
+        (
+            "200 OK".into(),
+            "Content-Length: 1\r\n".into(),
+            b"a".to_vec(),
+        ),
+        (
+            "404 Not Found".into(),
+            "Content-Length: 0\r\n".into(),
+            vec![],
+        ),
+        (
+            "200 OK".into(),
+            "Content-Length: 1\r\n".into(),
+            b"b".to_vec(),
+        ),
+        (
+            "200 OK".into(),
+            "Content-Length: 1\r\n".into(),
+            b"s".to_vec(),
+        ),
+    ]);
+    let mut wire = 0;
+    let pair = reply
+        .source
+        .packed_discovery_pair(&mut |n| {
+            wire += n;
+            Ok(())
+        })
+        .unwrap()
+        .unwrap();
+    assert_eq!(pair, (b"b".to_vec(), b"s".to_vec()));
+    assert_eq!(wire, 3);
+    let requests = reply.finish();
+    assert_eq!(requests.len(), 4);
+    for (index, name) in ["latest.json", "latest.p7s", "latest.json", "latest.p7s"]
+        .iter()
+        .enumerate()
+    {
+        assert!(requests[index].starts_with(&format!("GET /updates/{name} ")));
+    }
+}
+
+#[test]
+fn packed_discovery_unavailable_redirect_or_missing_signature_never_means_absence() {
+    for status in ["500 Server Error", "301 Moved Permanently", "403 Forbidden"] {
+        let reply = Reply::many(vec![
+            (
+                status.into(),
+                "Content-Length: 0\r\nLocation: https://other.invalid/\r\n".into(),
+                vec![],
+            ),
+            (
+                "404 Not Found".into(),
+                "Content-Length: 0\r\n".into(),
+                vec![],
+            ),
+        ]);
+        assert!(
+            reply.source.packed_discovery_pair(&mut |_| Ok(())).is_err(),
+            "{status}"
+        );
+        assert_eq!(reply.finish().len(), 2);
+    }
+    let reply = Reply::many(vec![
+        (
+            "200 OK".into(),
+            "Content-Length: 1\r\n".into(),
+            b"a".to_vec(),
+        ),
+        (
+            "404 Not Found".into(),
+            "Content-Length: 0\r\n".into(),
+            vec![],
+        ),
+        (
+            "404 Not Found".into(),
+            "Content-Length: 0\r\n".into(),
+            vec![],
+        ),
+    ]);
+    assert!(reply.source.packed_discovery_pair(&mut |_| Ok(())).is_err());
+    assert_eq!(reply.finish().len(), 3);
+}
+
+#[test]
+fn packed_discovery_encoding_and_body_bounds_fail_before_other_origin() {
+    for headers in [
+        "Content-Length: 1\r\nContent-Encoding: gzip\r\n",
+        "Content-Length: 32769\r\n",
+    ] {
+        let reply = Reply::new("200 OK", headers, b"x".to_vec());
+        assert!(reply.source.packed_discovery_pair(&mut |_| Ok(())).is_err());
+        assert_eq!(reply.finish().len(), 1);
+    }
+}
+
+#[test]
 fn red_interrupted_http_preserves_prefix_then_reopen_requests_only_remaining_bytes() {
     let root = tempfile::tempdir().unwrap();
     let data: Vec<u8> = (0..262144).map(|i| (i % 251) as u8).collect();

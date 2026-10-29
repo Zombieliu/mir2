@@ -54,6 +54,13 @@ pub struct NativeLightAssets {
 
 impl NativeLightAssets {
     pub fn from_asset_root(asset_root: &Path) -> Self {
+        if crate::assets::packed_mode() {
+            return Self {
+                ranges: std::array::from_fn(|range| {
+                    crate::assets::exists(&format!("original-effects/Lighting/{range}.png"))
+                }),
+            };
+        }
         let lighting_root = asset_root.join("original-effects").join("Lighting");
         Self {
             ranges: std::array::from_fn(|range| {

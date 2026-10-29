@@ -9374,18 +9374,14 @@ static ITEM_FRAME_GEOMETRY: OnceLock<HashMap<u16, ItemFrameGeometry>> = OnceLock
 fn state_item_frame_geometry(index: u16) -> Option<StateItemFrameGeometry> {
     STATE_ITEM_FRAME_GEOMETRY
         .get_or_init(|| {
-            let Some(path) = crate::assets::asset_path("/original-ui/StateItem/meta.json") else {
+            let path = "/original-ui/StateItem/meta.json";
+            let Some(text) = crate::assets::read_text(path) else {
                 eprintln!("[gateway-client] StateItem metadata is unavailable");
                 return HashMap::new();
             };
-            let metadata = std::fs::read_to_string(&path)
-                .ok()
-                .and_then(|text| serde_json::from_str::<StateItemLibraryMetadata>(&text).ok());
+            let metadata = serde_json::from_str::<StateItemLibraryMetadata>(&text).ok();
             let Some(metadata) = metadata else {
-                eprintln!(
-                    "[gateway-client] invalid StateItem metadata at {}",
-                    path.display()
-                );
+                eprintln!("[gateway-client] invalid StateItem metadata at {}", path);
                 return HashMap::new();
             };
             metadata
@@ -9405,18 +9401,14 @@ fn state_item_frame_geometry(index: u16) -> Option<StateItemFrameGeometry> {
 fn item_frame_geometry(index: u16) -> Option<ItemFrameGeometry> {
     ITEM_FRAME_GEOMETRY
         .get_or_init(|| {
-            let Some(path) = crate::assets::asset_path("/original-ui/Items/meta.json") else {
+            let path = "/original-ui/Items/meta.json";
+            let Some(text) = crate::assets::read_text(path) else {
                 eprintln!("[gateway-client] Items metadata is unavailable");
                 return HashMap::new();
             };
-            let metadata = std::fs::read_to_string(&path)
-                .ok()
-                .and_then(|text| serde_json::from_str::<ItemLibraryMetadata>(&text).ok());
+            let metadata = serde_json::from_str::<ItemLibraryMetadata>(&text).ok();
             let Some(metadata) = metadata else {
-                eprintln!(
-                    "[gateway-client] invalid Items metadata at {}",
-                    path.display()
-                );
+                eprintln!("[gateway-client] invalid Items metadata at {}", path);
                 return HashMap::new();
             };
             metadata

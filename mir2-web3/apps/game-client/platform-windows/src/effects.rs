@@ -9,6 +9,7 @@
 //! sprite for a missing asset - a frame whose PNG is absent yields no sprite.
 
 use std::collections::{HashMap, HashSet};
+#[cfg(test)]
 use std::fs;
 use std::sync::{Mutex, OnceLock};
 
@@ -769,25 +770,23 @@ impl EffectCatalog {
     /// native client never panics on a missing asset bundle.
     pub(crate) fn load() -> Option<EffectCatalog> {
         #[cfg(not(test))]
-        let asset_path = assets::asset_path;
+        let read_asset = assets::read_bytes;
         #[cfg(test)]
         let frame_asset_root = exported_effect_test_root();
         #[cfg(test)]
-        let asset_path = |web_path: &str| exported_effect_test_path(&frame_asset_root, web_path);
-        let manifest_path = asset_path("original-effects/effects.generated.json")?;
-        let bytes = fs::read(&manifest_path).ok()?;
+        let read_asset =
+            |web_path: &str| fs::read(exported_effect_test_path(&frame_asset_root, web_path)?).ok();
+        let bytes = read_asset("original-effects/effects.generated.json")?;
         let manifest: EffectsManifest = serde_json::from_slice(&bytes).ok()?;
 
         let mut libraries = HashMap::new();
         for library in &manifest.available {
             let dir = library_dir(library);
-            let Some(meta_path) = asset_path(&format!("original-effects/{dir}/meta.json")) else {
+            let Some(bytes) = read_asset(&format!("original-effects/{dir}/meta.json")) else {
                 continue;
             };
-            if let Ok(bytes) = fs::read(&meta_path) {
-                if let Ok(meta) = serde_json::from_slice::<LibraryMeta>(&bytes) {
-                    libraries.insert(library.clone(), meta);
-                }
+            if let Ok(meta) = serde_json::from_slice::<LibraryMeta>(&bytes) {
+                libraries.insert(library.clone(), meta);
             }
         }
 

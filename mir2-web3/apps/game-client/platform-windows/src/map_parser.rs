@@ -772,10 +772,18 @@ fn find_map_file(map_file_name: &str) -> Option<PathBuf> {
 
 /// Locate the map-atlas manifest built by `assets:map-atlas:build`.
 fn find_map_atlas_manifest() -> Option<PathBuf> {
+    if assets::packed_mode() {
+        return assets::exists("generated/map-atlas/manifest.json")
+            .then(|| PathBuf::from("generated/map-atlas/manifest.json"));
+    }
     assets::asset_path("generated/map-atlas/manifest.json").filter(|path| path.is_file())
 }
 
 fn find_native_keyed_manifest() -> Option<PathBuf> {
+    if assets::packed_mode() {
+        return assets::exists("generated/native-map-keyed/manifest.json")
+            .then(|| PathBuf::from("generated/native-map-keyed/manifest.json"));
+    }
     assets::asset_path("generated/native-map-keyed/manifest.json").filter(|path| path.is_file())
 }
 
@@ -957,7 +965,7 @@ fn load_atlas_index() -> Option<Arc<AtlasIndex>> {
             }
         }
     }
-    let text = fs::read_to_string(&path).ok()?;
+    let text = assets::read_text("generated/map-atlas/manifest.json")?;
     let manifest: Value = serde_json::from_str(&text).ok()?;
 
     let mut pages = HashMap::new();
@@ -1097,7 +1105,7 @@ fn load_native_keyed_index() -> Option<Arc<StandaloneIndex>> {
             }
         }
     }
-    let text = fs::read_to_string(&path).ok()?;
+    let text = assets::read_text("generated/native-map-keyed/manifest.json")?;
     let manifest: Value = serde_json::from_str(&text).ok()?;
     let mut entries = HashMap::new();
     for entry in manifest
@@ -1564,8 +1572,28 @@ pub fn load_map(map_file_name: &str) -> Option<Arc<ParsedMap>> {
         }
     }
     let _diagnostic = crate::timing::DiagnosticSpan::new("mapCacheMissReadDecompressParse");
-    let path = find_map_file(map_file_name)?;
-    let compressed = fs::read(&path).ok()?;
+    let compressed = if assets::packed_mode() {
+        let name = Path::new(map_file_name).file_name()?.to_str()?;
+        if name != map_file_name || name.contains("..") || name.contains(['\\', ':']) {
+            return None;
+        }
+        let stem = name
+            .strip_suffix(".map.gz")
+            .or_else(|| name.strip_suffix(".map"))
+            .unwrap_or(name);
+        if stem.is_empty() {
+            return None;
+        }
+        let key = [
+            format!("crystal-map-pack/{stem}.map.gz"),
+            format!("generated/crystal-map-pack/{stem}.map.gz"),
+        ]
+        .into_iter()
+        .find(|p| assets::exists(p))?;
+        assets::read_bytes(&key)?
+    } else {
+        fs::read(find_map_file(map_file_name)?).ok()?
+    };
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
     let mut bytes = Vec::new();
     decoder.read_to_end(&mut bytes).ok()?;
@@ -1619,9 +1647,17 @@ fn map_cache_key(map_file_name: &str) -> Option<String> {
 
 /// Whether a local map pack + atlas are available for real map rendering.
 pub fn has_local_map_atlas() -> bool {
-    find_map_file("0").is_some()
-        && find_map_atlas_manifest().is_some()
-        && find_native_keyed_manifest().is_some()
+    let has_map = if assets::packed_mode() {
+        [
+            "crystal-map-pack/0.map.gz",
+            "generated/crystal-map-pack/0.map.gz",
+        ]
+        .iter()
+        .any(|key| assets::exists(key))
+    } else {
+        find_map_file("0").is_some()
+    };
+    has_map && find_map_atlas_manifest().is_some() && find_native_keyed_manifest().is_some()
 }
 
 #[cfg(test)]

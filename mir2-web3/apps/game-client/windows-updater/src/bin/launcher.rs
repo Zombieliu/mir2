@@ -1,6 +1,8 @@
 #![cfg_attr(windows, windows_subsystem = "windows")]
 use anyhow::{ensure, Context, Result};
-use mir2_windows_updater::{fs_safe as safe, model::FileEntry, ui, update};
+use mir2_windows_updater::{
+    fs_safe as safe, generation, generation_runtime::GameLease, model::FileEntry, ui, update,
+};
 use std::{fs, process::Command};
 fn run() -> Result<()> {
     let exe = std::env::current_exe()?;
@@ -12,6 +14,15 @@ fn run() -> Result<()> {
     );
     if args == ["--verify-only"] {
         let (engine, _) = update::active_engine(&root)?;
+        if generation::active_record(&root)?.is_some() {
+            let selected = generation::verify_current_selection(&root)?;
+            update::log(
+                &root,
+                "verification",
+                serde_json::json!({"selection":selected.active,"health":selected.health,"engine":engine.version,"passed":true}),
+            );
+            return Ok(());
+        }
         let candidate = update::verify_launch(&root)?;
         update::log(
             &root,
@@ -26,6 +37,9 @@ fn run() -> Result<()> {
         )?,
         "game is already running; save and close before updating"
     );
+    // The actual file lease also detects a packed child whose parent launcher
+    // died. A process-list result for the retained legacy EXE cannot do that.
+    GameLease::ensure_idle(&root)?;
     let lock =
         mir2_windows_updater::platform::InstallLock::acquire(&root).map_err(anyhow::Error::msg)?;
     let (engine, source) = update::active_engine(&root)?;

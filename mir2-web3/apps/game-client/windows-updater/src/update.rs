@@ -7,6 +7,8 @@ use crate::{
 pub mod delivery;
 #[path = "download.rs"]
 mod download;
+#[path = "engine_maintenance.rs"]
+pub mod engine_maintenance;
 use anyhow::{ensure, Context, Result};
 pub use download::DownloadProgress;
 use std::{
@@ -93,6 +95,73 @@ pub struct HttpsSource {
     agent: ureq::Agent,
 }
 impl HttpsSource {
+    /// A separate compiled channel. Old v4 clients never receive a pack feed.
+    pub fn new_packed() -> Result<Self> {
+        Ok(Self {
+            base: Self::pinned_base(
+                "https://assets.mir2.obelisk.build/client-updates/packed/latest.json",
+            )?,
+            legacy_base: Self::pinned_base(
+                "https://165.154.65.136.sslip.io/client-updates/packed/latest.json",
+            )?,
+            agent: ureq::AgentBuilder::new()
+                .redirects(0)
+                .timeout_connect(Duration::from_secs(8))
+                .timeout_read(Duration::from_secs(30))
+                .timeout_write(Duration::from_secs(30))
+                .build(),
+        })
+    }
+    /// Absence is ONLY two genuine JSON 404s. Missing signatures, connection
+    /// failures, redirects and malformed responses cannot enable v4 fallback.
+    pub fn packed_discovery_pair(
+        &self,
+        progress: &mut dyn FnMut(u64) -> Result<()>,
+    ) -> Result<Option<(Vec<u8>, Vec<u8>)>> {
+        let mut missing = 0;
+        let mut previous_error = None;
+        for base in [&self.base, &self.legacy_base] {
+            let json = match self.open_at(base, "latest.json") {
+                Ok(value) => value,
+                Err(failure) => {
+                    if matches!(
+                        failure.error.downcast_ref::<ureq::Error>(),
+                        Some(ureq::Error::Status(404, _))
+                    ) {
+                        missing += 1;
+                    } else if !failure.unavailable {
+                        return Err(failure.error);
+                    } else {
+                        previous_error = Some(failure.error);
+                    }
+                    continue;
+                }
+            };
+            let bytes = discovery_object(
+                |callback| Self::response_bytes(json, 32768, callback),
+                progress,
+            )?;
+            let signature = match self.open_at(base, "latest.p7s") {
+                Ok(value) => value,
+                Err(failure) if failure.unavailable => {
+                    previous_error = Some(failure.error);
+                    continue;
+                }
+                Err(failure) => return Err(failure.error),
+            };
+            let signature = discovery_object(
+                |callback| Self::response_bytes(signature, 32768, callback),
+                progress,
+            )?;
+            return Ok(Some((bytes, signature)));
+        }
+        if missing == 2 && previous_error.is_none() {
+            Ok(None)
+        } else {
+            Err(previous_error
+                .unwrap_or_else(|| anyhow::anyhow!("incomplete packed discovery pair")))
+        }
+    }
     pub fn new() -> Result<Self> {
         let base = Self::pinned_base(crate::CDN_FEED_URL)?;
         let legacy_base = Self::pinned_base(crate::FEED_URL)?;
@@ -555,6 +624,12 @@ pub fn verify_launch(root: &Path) -> Result<String> {
         .context("missing candidate")?
         .to_owned())
 }
+/// Return the executable entry from authenticated release metadata. Callers
+/// must hold FileLease::verified on this entry across process creation/use.
+pub fn launch_executable_entry(root: &Path) -> Result<FileEntry> {
+    let (manifest, _) = local_game(root)?;
+    Ok((*manifest.map()["mir2-platform-windows.exe"]).clone())
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum ReceiptSource {
     Highest,
@@ -647,6 +722,9 @@ fn read_previous(root: &Path) -> Result<Option<(Feed, Vec<u8>)>> {
     }
     let version = safe::read_bounded(&root.join("game/VERSION.json"), MAX_META)?;
     select_previous(receipts, &version)
+}
+pub(crate) fn legacy_sequence_floor(root: &Path) -> Result<u64> {
+    Ok(read_previous(root)?.map_or(0, |(feed, _)| feed.sequence))
 }
 fn remember_highest(root: &Path, bytes: &[u8], sig: &[u8]) -> Result<()> {
     let digest = hash(bytes);

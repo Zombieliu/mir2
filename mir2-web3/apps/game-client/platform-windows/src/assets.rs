@@ -5,6 +5,50 @@ use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
+pub fn install_packed_store(
+    store: std::sync::Arc<mir2_resource_pack::PackStore>,
+) -> Result<(), String> {
+    crate::packed_assets::install(store)
+}
+pub fn packed_mode() -> bool {
+    crate::packed_assets::store().is_some()
+}
+pub fn packed_error() -> Option<String> {
+    crate::packed_assets::failure()
+}
+pub fn packed_login_ready(world: &bevy::prelude::World) -> bool {
+    packed_mode() && packed_error().is_none() && crate::packed_assets::login_ready(world)
+}
+pub fn packed_asset_source() -> Option<bevy::asset::io::AssetSourceBuilder> {
+    crate::packed_assets::source()
+}
+pub fn read_bytes(web_path: &str) -> Option<Vec<u8>> {
+    if packed_mode() {
+        return crate::packed_assets::read(web_path)
+            .map_err(|e| eprintln!("[assets] {e}"))
+            .ok();
+    }
+    std::fs::read(asset_path(web_path)?).ok()
+}
+pub fn read_text(web_path: &str) -> Option<String> {
+    String::from_utf8(read_bytes(web_path)?).ok()
+}
+pub fn exists(web_path: &str) -> bool {
+    if let Some(store) = crate::packed_assets::store() {
+        return crate::packed_assets::logical_path(web_path).is_ok_and(|p| store.exists(p));
+    }
+    asset_path(web_path).is_some_and(|p| p.is_file())
+}
+pub fn is_directory(web_path: &str) -> bool {
+    if let Some(store) = crate::packed_assets::store() {
+        return crate::packed_assets::logical_path(web_path).is_ok_and(|p| store.is_directory(p));
+    }
+    let Ok(key) = crate::packed_assets::logical_path(web_path) else {
+        return false;
+    };
+    asset_root().is_some_and(|root| root.join(key).is_dir())
+}
+
 static R2_HITS: AtomicUsize = AtomicUsize::new(0);
 static LOCAL_HITS: AtomicUsize = AtomicUsize::new(0);
 
@@ -16,6 +60,9 @@ pub fn asset_hit_stats() -> (usize, usize) {
 }
 
 pub fn has_local_full() -> bool {
+    if packed_mode() {
+        return exists("generated/crystal-packs/full/index.json");
+    }
     asset_root()
         .map(|root| {
             root.join("generated/crystal-packs/full/index.json")
@@ -32,6 +79,10 @@ pub const ASSET_ROOT_ENV_ALIAS: &str = "MIR2_ASSET_ROOT";
 /// `installed/mir2-assets/../lib` otherwise refers to the installation directory
 /// on Windows, not to the checkout that the asset link targets.
 pub fn crystal_map_path(asset_root: &Path, map_file_name: &str) -> Option<PathBuf> {
+    // Packed maps are byte reads, not extracted filesystem paths.
+    if packed_mode() {
+        return None;
+    }
     let file_name = Path::new(map_file_name).file_name()?.to_str()?;
     if file_name != map_file_name || file_name.contains("..") || file_name.contains(['\\', ':']) {
         return None;
@@ -64,6 +115,9 @@ pub fn crystal_map_path(asset_root: &Path, map_file_name: &str) -> Option<PathBu
 /// directory). Development builds discover the repository from the process
 /// working directory. No compile-machine path is embedded in the executable.
 pub fn asset_root() -> Option<PathBuf> {
+    if packed_mode() {
+        return Some(PathBuf::from("mir2-assets"));
+    }
     static CACHE: OnceLock<Mutex<AssetRootCache>> = OnceLock::new();
     let context = AssetRootContext::current();
     CACHE
@@ -136,6 +190,15 @@ pub enum AssetRootStatus {
 }
 
 pub fn resolve_asset_root() -> AssetRootStatus {
+    if packed_mode() {
+        let path = PathBuf::from("mir2-assets");
+        let diagnostics = diagnose_asset_root(&path);
+        return if diagnostics.is_complete {
+            AssetRootStatus::Found(path)
+        } else {
+            AssetRootStatus::Incomplete { path, diagnostics }
+        };
+    }
     let mut missing_diagnostics = Vec::new();
 
     if let Some(configured) =
@@ -268,6 +331,55 @@ pub struct AssetRootDiagnostics {
 }
 
 pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
+    if packed_mode() {
+        let has_crystal_map_pack = [
+            "crystal-map-pack/0.map.gz",
+            "generated/crystal-map-pack/0.map.gz",
+        ]
+        .iter()
+        .any(|p| exists(p));
+        let has_entity_manifest = exists("bevy-entity-atlases/manifest.json");
+        let has_map_manifest = exists("generated/map-atlas/manifest.json");
+        let has_native_map_keyed_manifest = exists("generated/native-map-keyed/manifest.json");
+        let has_effect_manifest = exists("original-effects/effects.generated.json");
+        let has_item_icons = ["meta.json", "0.png", "3792.png"]
+            .iter()
+            .all(|p| exists(&format!("original-ui/Items/{p}")));
+        let has_state_items = ["meta.json", "30.png", "5152.png"]
+            .iter()
+            .all(|p| exists(&format!("original-ui/StateItem/{p}")));
+        let has_character_wings = ["meta.json", "1202.png", "1203.png", "1204.png", "1205.png"]
+            .iter()
+            .all(|p| exists(&format!("original-ui/Prguse2/{p}")));
+        let has_crystal_cursors = [
+            "Cursor_Default.png",
+            "Cursor_Normal_Atk.png",
+            "Cursor_Compulsion_Atk.png",
+            "Cursor_Npc.png",
+        ]
+        .iter()
+        .all(|p| exists(&format!("original-ui/Cursors/{p}")));
+        return AssetRootDiagnostics {
+            is_complete: has_crystal_map_pack
+                && has_entity_manifest
+                && has_map_manifest
+                && has_native_map_keyed_manifest
+                && has_effect_manifest
+                && has_item_icons
+                && has_state_items
+                && has_character_wings
+                && has_crystal_cursors,
+            has_crystal_map_pack,
+            has_entity_manifest,
+            has_map_manifest,
+            has_native_map_keyed_manifest,
+            has_effect_manifest,
+            has_item_icons,
+            has_state_items,
+            has_character_wings,
+            has_crystal_cursors,
+        };
+    }
     let has_crystal_map_pack = crystal_map_path(candidate, "0").is_some();
     let has_entity_manifest = candidate
         .join("bevy-entity-atlases/manifest.json")
@@ -417,6 +529,9 @@ fn ensure_r2_cached(web_path: &str) -> Option<PathBuf> {
 }
 
 pub fn batch_prefetch_bichon_town() {
+    if packed_mode() {
+        return;
+    }
     // Fire-and-forget: ensure every Bichon town page in the map-atlas manifest
     // is at least queued for R2. The manifest itself is the first miss.
     let manifest_web = "generated/map-atlas/manifest.json";
@@ -452,6 +567,10 @@ pub fn batch_prefetch_bichon_town() {
 }
 
 pub fn asset_path(web_path: &str) -> Option<PathBuf> {
+    // A packed generation has no loose paths and must never reach R2 fallback.
+    if packed_mode() {
+        return None;
+    }
     let relative = web_path.trim_start_matches('/');
     if relative.is_empty() || relative.contains(['\\', ':']) {
         return None;

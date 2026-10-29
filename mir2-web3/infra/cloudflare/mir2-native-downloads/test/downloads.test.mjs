@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { handle, OBJECT_PREFIX, POINTER_KEY, PUBLIC_BASE, MAX_ARTIFACT, MAX_METADATA, MAX_FIVE_CLASS_METADATA, FIVE_CLASS_OBJECT_PREFIX, FIVE_CLASS_POINTER_KEY, FIVE_CLASS_PUBLIC_BASE, MAX_POINTER, feedDirectory } from "../src/index.mjs";
+import { handle, OBJECT_PREFIX, POINTER_KEY, PUBLIC_BASE, MAX_ARTIFACT, MAX_METADATA, MAX_FIVE_CLASS_METADATA, FIVE_CLASS_OBJECT_PREFIX, FIVE_CLASS_POINTER_KEY, FIVE_CLASS_PUBLIC_BASE, MAX_POINTER, feedDirectory,
+  PACKED_OBJECT_PREFIX, PACKED_POINTER_KEY, PACKED_PUBLIC_BASE, MAX_PACKED_CATALOG, MAX_PACKED_OBJECT, MAX_PACKED_MANIFEST, MAX_PACKED_SMALL } from "../src/index.mjs";
 
 const bytes = (text) => new TextEncoder().encode(text);
 const pointer = (sequence = 1) => ({
@@ -424,4 +425,171 @@ test("five-class space allowance still rejects Windows normalization and encoded
     assert.equal(response.status, 404, path);
     assert.equal(f.bucket.calls.length, 0, path);
   }
+});
+
+const generationDigest = "c".repeat(64);
+const packedGeneration = "generations/" + generationDigest + "/";
+const packPath = "objects/packs/" + "d".repeat(64) + ".m2p";
+function putPacked(f, path, body, extra = {}) { f.bucket.put("packed/" + path, body, extra); }
+function fetchPacked(f, path, headers = {}, method = "GET") {
+  return handle(new Request(PACKED_PUBLIC_BASE + path, { method, headers }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+}
+
+test("packed aliases use only their own atomic pointer and never cache discovery", async () => {
+  const f = setup();
+  const p1 = pointer(3), p2 = pointer(4);
+  putPacked(f, "channels/invited.json", JSON.stringify(p1));
+  f.bucket.put("channels/invited.json", JSON.stringify(pointer(1)));
+  for (const p of [p1, p2]) {
+    putPacked(f, feedDirectory(p) + "latest.json", "packed-feed-" + p.sequence, { customMetadata: { sha256: p.feedSha256 } });
+    putPacked(f, feedDirectory(p) + "latest.p7s", "packed-signature-" + p.sequence, { customMetadata: { sha256: p.signatureSha256 } });
+  }
+  f.bucket.afterSnapshot = (key) => {
+    if (key === PACKED_POINTER_KEY) putPacked(f, "channels/invited.json", JSON.stringify(p2));
+  };
+  const first = await fetchPacked(f, "latest.json");
+  assert.equal(first.status, 200);
+  assert.equal(first.headers.get("cache-control"), "no-store");
+  assert.equal(first.headers.get("x-mir2-sequence"), "3");
+  assert.equal(await first.text(), "packed-feed-3");
+  const signature = await fetchPacked(f, "latest.p7s");
+  assert.equal(signature.status, 200);
+  assert.equal(signature.headers.get("cache-control"), "no-store");
+  assert.equal(signature.headers.get("x-mir2-sequence"), "4");
+  assert.equal(await signature.text(), "packed-signature-4");
+  assert.equal(f.bucket.calls.filter(([op, key]) => op === "get" && key === PACKED_POINTER_KEY).length, 2);
+  assert.ok(!f.bucket.calls.some(([, key]) => key === POINTER_KEY || key === FIVE_CLASS_POINTER_KEY));
+  assert.equal(f.cache.matches.length, 0);
+  assert.equal(f.cache.puts.length, 0);
+});
+
+test("packed absent or invalid discovery cannot fall back to another channel", async () => {
+  const f = setup();
+  f.bucket.put("channels/invited.json", JSON.stringify(pointer(1)));
+  f.bucket.put(feedDirectory(pointer(1)) + "latest.json", "legacy-feed");
+  assert.equal((await fetchPacked(f, "latest.json")).status, 503);
+  putPacked(f, "channels/invited.json", "invalid-pointer");
+  assert.equal((await fetchPacked(f, "latest.p7s")).status, 502);
+  assert.ok(!f.bucket.calls.some(([, key]) => key === POINTER_KEY));
+  putPacked(f, "channels/invited.json", JSON.stringify(pointer(3)));
+  putPacked(f, feedDirectory(pointer(3)) + "latest.json", "wrong hash", { customMetadata: { sha256: "f".repeat(64) } });
+  assert.equal((await fetchPacked(f, "latest.json")).status, 502);
+});
+
+test("packed exact generation controls and content addressed objects are immutable streams", async () => {
+  const paths = ["GENERATION.json", "GENERATION.p7s", "catalog.json", "mir2-platform-windows.exe", "mir2-client.toml"].map((name) => packedGeneration + name);
+  paths.push(packPath);
+  for (const path of paths) {
+    const f = setup(); putPacked(f, path, "same-authenticated-bytes");
+    const response = await fetchPacked(f, path);
+    assert.equal(response.status, 200, path);
+    assert.match(response.headers.get("cache-control"), /31536000, immutable/);
+    assert.equal(response.headers.get("content-encoding"), null);
+    assert.equal(response.headers.get("location"), null);
+    assert.equal(await response.text(), "same-authenticated-bytes");
+    await f.done();
+    const head = await fetchPacked(f, path, {}, "HEAD");
+    assert.equal(head.headers.get("x-mir2-native-cache"), "HIT");
+    assert.equal(await head.text(), "");
+    assert.deepEqual(f.cache.puts, [PACKED_PUBLIC_BASE + path]);
+    assert.ok(f.bucket.calls.every(([, key]) => key.startsWith(PACKED_OBJECT_PREFIX)));
+  }
+});
+
+test("packed HEAD Range ETag and If-Range retain artifact semantics", async () => {
+  const f = setup(); putPacked(f, packPath, "0123456789");
+  const head = await fetchPacked(f, packPath, { Range: "bytes=2-3" }, "HEAD");
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get("content-length"), "10");
+  assert.equal(await head.text(), "");
+  assert.equal(f.bucket.calls.filter(([op]) => op === "get").length, 0);
+  const etag = head.headers.get("etag");
+  const partial = await fetchPacked(f, packPath, { Range: "bytes=2-5", "If-Range": etag });
+  assert.equal(partial.status, 206);
+  assert.equal(partial.headers.get("content-range"), "bytes 2-5/10");
+  assert.equal(await partial.text(), "2345");
+  const suffix = await fetchPacked(f, packPath, { Range: "bytes=-3" });
+  assert.equal(await suffix.text(), "789");
+  const unsatisfiable = await fetchPacked(f, packPath, { Range: "bytes=10-" });
+  assert.equal(unsatisfiable.status, 416);
+  assert.equal(unsatisfiable.headers.get("content-range"), "bytes */10");
+  const stale = await fetchPacked(f, packPath, { Range: "bytes=2-5", "If-Range": '"stale"' });
+  assert.equal(stale.status, 200);
+  assert.equal(await stale.text(), "0123456789");
+  const unchanged = await fetchPacked(f, packPath, { "If-None-Match": etag });
+  assert.equal(unchanged.status, 304);
+  assert.equal(await unchanged.text(), "");
+  assert.equal(f.cache.puts.length, 0);
+});
+
+test("packed object specific bounds do not expand either legacy metadata limit", async () => {
+  for (const [path, maximum] of [
+    [packedGeneration + "catalog.json", MAX_PACKED_CATALOG], [packPath, MAX_PACKED_OBJECT],
+    [packedGeneration + "GENERATION.json", MAX_PACKED_MANIFEST],
+    [packedGeneration + "GENERATION.p7s", MAX_PACKED_SMALL],
+    [packedGeneration + "mir2-client.toml", MAX_PACKED_SMALL],
+    [packedGeneration + "mir2-platform-windows.exe", MAX_ARTIFACT],
+  ]) {
+    const f = setup(); putPacked(f, path, "", { declaredSize: maximum });
+    const accepted = await fetchPacked(f, path, {}, "HEAD");
+    assert.equal(accepted.status, 200, path);
+    assert.equal(accepted.headers.get("content-length"), String(maximum));
+    f.bucket.rows.get(PACKED_OBJECT_PREFIX + path).declaredSize++;
+    assert.equal((await fetchPacked(f, path, {}, "HEAD")).status, 502, path);
+    assert.equal(f.bucket.calls.filter(([op]) => op === "get").length, 0);
+  }
+  const f = setup(), p = pointer(3);
+  putPacked(f, "channels/invited.json", JSON.stringify(p));
+  putPacked(f, feedDirectory(p) + "latest.json", "", { declaredSize: MAX_PACKED_SMALL + 1 });
+  assert.equal((await fetchPacked(f, "latest.json", {}, "HEAD")).status, 502);
+  assert.equal(MAX_METADATA, 32 * 1024 * 1024);
+  assert.equal(MAX_FIVE_CLASS_METADATA, 64 * 1024 * 1024);
+});
+
+test("packed reader refuses extra files private pointers scope escapes and nonlowercase identities before storage", async () => {
+  const denied = [
+    "packed", "packed/", "p%61cked/latest.json", "packed%2flatest.json", "packed/five-class/latest.json",
+    "packed/channels/invited.json", "packed/feeds/s1-a/latest.json", "packed/releases/r1/a.gz", "packed/installers/setup.exe",
+    "packed/generations", "packed/generations/" + generationDigest,
+    "packed/generations/" + "C".repeat(64) + "/catalog.json", "packed/generations/short/catalog.json",
+    ...["PACK-FEED.json", "PACK-FEED.p7s", "BUILD-ATTESTATION.json", "VERSION.json", "PACKAGE-MANIFEST.json", "provenance.json", "catalog.json/child", "catalog.json.", "catalog.json%20", "extra.txt"].map((name) => "packed/" + packedGeneration + name),
+    "packed/objects/packs/" + "D".repeat(64) + ".m2p", "packed/objects/packs/" + "d".repeat(63) + ".m2p",
+    "packed/" + packPath + "/extra", "packed/objects/packs/" + "d".repeat(64) + ".M2P",
+    "packed/objects/packs//" + "d".repeat(64) + ".m2p", "packed/objects/packs/%2e%2e%2fprivate",
+    "packed/" + packPath + "?cache=1", "packed/" + packPath + "?", "packed/" + packPath + "#fragment",
+  ];
+  for (const path of denied) {
+    const f = setup();
+    assert.equal((await f.fetch(path)).status, 404, path);
+    assert.equal(f.bucket.calls.length, 0, path);
+  }
+  const f = setup();
+  for (const method of ["POST", "PUT", "PATCH", "DELETE", "OPTIONS"]) {
+    assert.equal((await fetchPacked(f, packPath, {}, method)).status, 405, method);
+  }
+  assert.equal(f.bucket.calls.length, 0);
+});
+
+test("packed large body is returned before its stream finishes without buffering or redirects", async () => {
+  const f = setup(); const path = packedGeneration + "catalog.json";
+  let controller;
+  f.bucket.head = async (key) => {
+    assert.equal(key, PACKED_OBJECT_PREFIX + path);
+    return { size: 11, httpEtag: '"streaming"', httpMetadata: {} };
+  };
+  f.bucket.get = async (key) => ({
+    ...await f.bucket.head(key),
+    body: new ReadableStream({ start(value) { controller = value; controller.enqueue(bytes("first")); } }),
+  });
+  let timeout;
+  try {
+    const response = await Promise.race([
+      handle(new Request(PACKED_PUBLIC_BASE + path), { MIR2_ASSETS: f.bucket }, f.ctx, null),
+      new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error("reader buffered response")), 1000); }),
+    ]);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("location"), null);
+    controller.enqueue(bytes("second")); controller.close();
+    assert.equal(await response.text(), "firstsecond");
+  } finally { clearTimeout(timeout); }
 });

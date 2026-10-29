@@ -2,6 +2,8 @@
 #[cfg(test)]
 mod five_class_manifest_tests;
 pub mod fs_safe;
+pub mod generation;
+pub mod generation_runtime;
 mod local_io;
 pub mod model;
 #[cfg(test)]
@@ -12,7 +14,7 @@ pub mod ui;
 pub mod update;
 
 pub const BOOTSTRAP_VERSION: u32 = 1;
-pub const ENGINE_VERSION: u32 = 1;
+pub const ENGINE_VERSION: u32 = 2;
 // The original directory remains a signed, old-engine-readable upgrade bridge.
 // This engine reads its separate channel after normal verified activation.
 pub const FEED_URL: &str = "https://165.154.65.136.sslip.io/client-updates/five-class/latest.json";

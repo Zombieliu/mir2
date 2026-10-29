@@ -1,4 +1,5 @@
 fn main() {
+    println!("cargo:rerun-if-env-changed=MIR2_PACKED_RELEASE");
     println!("cargo:rerun-if-changed=resources/numeron.rc");
     println!("cargo:rerun-if-changed=resources/numeron.ico");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
