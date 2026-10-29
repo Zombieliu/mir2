@@ -73,6 +73,9 @@ pub(crate) fn verify_passkey_gateway_token(
     account_id: &str,
     token: &str,
 ) -> Result<VerifiedPasskeyGatewayToken, String> {
+    if crate::web::promotion_game::profile_requested() {
+        return crate::web::promotion_game::verify_login_token(account_id, token);
+    }
     if let Ok(claims) = verify_gateway_identity_token(account_id, token) {
         if claims.account_id == account_id {
             let auth_method = match claims.provider.as_str() {

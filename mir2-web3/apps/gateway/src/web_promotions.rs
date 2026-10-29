@@ -12,6 +12,7 @@ pub(super) fn router() -> Router<WebState> {
     Router::new()
         .route("/v1/promotions/auth/exchange", post(wallet_exchange))
         .route("/v1/promotions/auth/password", post(password_session))
+        .route("/v1/promotions/game-session", post(game_session))
         .route("/v1/promotions/public", get(public_campaign))
         .route("/v1/promotions/invite", get(invite))
         .route("/v1/promotions/click", post(click))
@@ -101,6 +102,25 @@ fn idempotency(headers: &HeaderMap) -> Result<String, String> {
 fn rate(state: &WebState, account: &str, operation: &str) -> Result<(), String> {
     billing::rate_limit(state.session_cache.as_ref(), account, operation)
         .map_err(|_| "promotionTooManyRequests".into())
+}
+
+async fn game_session(
+    State(state): State<WebState>,
+    headers: HeaderMap,
+    Json(_request): Json<super::promotion_game::GameSessionRequest>,
+) -> Response {
+    let identity = match billing::http_identity(&state.identity, &headers).await {
+        Ok(identity) => identity,
+        Err(_) => return failure("promotionAuthenticationRequired"),
+    };
+    match tokio::task::spawn_blocking(move || {
+        rate(&state, &identity.account_id, "promotionGameSession")?;
+        super::promotion_game::issue(&state, &identity)
+    }).await {
+        Ok(Ok(value)) => response(StatusCode::OK, value),
+        Ok(Err(error)) => failure(&error),
+        Err(_) => failure("promotionUnavailable"),
+    }
 }
 #[derive(Clone, Copy)]
 enum Access {

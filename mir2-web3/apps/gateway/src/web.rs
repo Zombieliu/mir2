@@ -92,6 +92,8 @@ mod billing;
 mod monthly_card;
 #[path = "web_promotions.rs"]
 mod promotions;
+#[path = "web_promotion_game.rs"]
+pub(crate) mod promotion_game;
 #[path = "web_packet_batch.rs"]
 mod packet_batch;
 #[path = "web_transport.rs"]
@@ -5194,6 +5196,14 @@ fn spawn_socket_reader(
                 }
             };
             let command = match command {
+                command if promotion_game::profile_requested()
+                    && !promotion_game::browser_command_allowed(&command) => {
+                    if input_tx.send(SocketInbound::Queued(QueuedSocketInput::new(
+                        ParsedSocketInput::ProtocolError("command unavailable in the promotion test realm".into()),
+                        Arc::clone(&reader_pending_count), message_permit,
+                    ))).await.is_err() { return; }
+                    continue;
+                }
                 BrowserCommand::NpcPurchaseOwner { .. } => {
                     // Reparse the original bytes with duplicate/unknown-field
                     // rejection; never dispatch a Value-normalized request.
@@ -5301,7 +5311,7 @@ fn spawn_socket_reader(
                 &movement_ingress,
                 &serial_execution_gate,
                 &movement_drain,
-                authenticated.load(Ordering::Acquire),
+                authenticated.load(Ordering::Acquire) && !promotion_game::profile_requested(),
                 reader_pending_count.load(Ordering::Acquire),
             )
             .await
@@ -5550,6 +5560,11 @@ async fn handle_socket_work(
     let mut authenticated = false;
     let mut authenticated_account_id: Option<String> = None;
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
+    let promotion_game_config = if promotion_game::profile_requested() {
+        session.monthly_card_config().ok().cloned()
+    } else { None };
+    let mut promotion_game_binding: Option<promotion_game::GameBinding> = None;
+    let mut last_promotion_identity_check = Instant::now();
     let mut native_game_shop = NativeGameShopConnectionState::default();
     let mut npc_purchase = crate::npc_purchase_browser::BrowserNpcPurchaseConnection::default();
     let mut server_catalog_gzip_v1 = false;
@@ -5847,6 +5862,17 @@ async fn handle_socket_work(
                         continue;
                     }
                 };
+                if let Some(binding) = promotion_game_binding.as_ref() {
+                    let valid = tokio::task::block_in_place(|| {
+                        promotion_game_config.as_ref().ok_or_else(|| "promotionUnavailable".to_string())
+                            .and_then(|config| promotion_game::validate_binding(
+                                config, &identity, session_cache.as_ref(), binding))
+                    });
+                    if valid.is_err() {
+                        let _ = send_error_message(&sender, "promotion game session is no longer active").await;
+                        return;
+                    }
+                }
                 let first_post_resume_identity_valid = tokio::task::block_in_place(|| {
                     enforce_first_post_resume_action_identity(
                         &mut first_post_resume_identity_check_pending,
@@ -6091,12 +6117,27 @@ async fn handle_socket_work(
                         }
                     }
                 }
+                let mut promotion_login_binding = None;
                 if let SessionAction::PasskeyLogin {
                     account_id,
                     proof_account_id,
                     token,
                 } = &mut action
                 {
+                    if promotion_game::profile_requested() {
+                        let binding = tokio::task::block_in_place(|| {
+                            promotion_game_config.as_ref().ok_or_else(|| "promotionUnavailable".to_string())
+                                .and_then(|config| promotion_game::bind_login(
+                                    config, &identity, session_cache.as_ref(), proof_account_id, token))
+                        });
+                        match binding {
+                            Ok(binding) => promotion_login_binding = Some(binding),
+                            Err(_) => {
+                                let _ = send_error_message(&sender, "promotion game login was rejected").await;
+                                continue;
+                            }
+                        }
+                    }
                     let verified = match verify_passkey_gateway_token(proof_account_id, token) {
                         Ok(verified) => verified,
                         Err(error) => {
@@ -6132,6 +6173,11 @@ async fn handle_socket_work(
                                 continue;
                             }
                         };
+                        if promotion_login_binding.as_ref().is_some_and(|binding|
+                            binding.identity().account_id != resolved_account) {
+                            let _ = send_error_message(&sender, "promotion game account binding changed").await;
+                            continue;
+                        }
                         *account_id = resolved_account.clone();
                         context.account_id = resolved_account.clone();
                         login_account_id = Some(resolved_account);
@@ -6452,6 +6498,20 @@ async fn handle_socket_work(
                         &peer_address,
                         &context.account_id,
                     );
+                    if let Some(binding) = promotion_login_binding.take() {
+                        let valid = tokio::task::block_in_place(|| {
+                            promotion_game_config.as_ref().ok_or_else(|| "promotionUnavailable".to_string())
+                                .and_then(|config| promotion_game::validate_binding(
+                                    config, &identity, session_cache.as_ref(), &binding))
+                        });
+                        if valid.is_err() {
+                            let _ = send_error_message(&sender, "promotion game login was revoked").await;
+                            return;
+                        }
+                        active_identity_session = Some(binding.identity());
+                        promotion_game_binding = Some(binding);
+                        native_resume.disable_and_revoke(reconnect_sessions.as_ref());
+                    } else {
                     let grant = match tokio::task::block_in_place(|| {
                         identity.issue_session(
                             &context.account_id,
@@ -6487,6 +6547,7 @@ async fn handle_socket_work(
                     if send_identity_session_grant(&sender, &grant).await.is_err() {
                         return;
                     }
+                    }
                 }
                 if next_authenticated {
                     if let Some(account_id) = login_account_id {
@@ -6499,11 +6560,13 @@ async fn handle_socket_work(
                     }
                 } else if authenticated {
                     if let Some(verified) = active_identity_session.take() {
+                        if promotion_game_binding.take().is_none() {
                         let _ = tokio::task::block_in_place(|| {
                             let _revocation_fence = reconnect_sessions
                                 .begin_identity_session_revocation(&verified.session_id);
                             identity.revoke_session(&verified, &verified.session_id, "player_logout")
                         });
+                        }
                     }
                     authenticated_account_id = None;
                     _injection_registration = None;
@@ -6769,6 +6832,19 @@ async fn handle_socket_work(
                 }
             } => {
                 let now = Instant::now();
+                if let Some(binding) = promotion_game_binding.as_ref().filter(|_| authenticated
+                    && now.duration_since(last_promotion_identity_check) >= Duration::from_secs(2)) {
+                    last_promotion_identity_check = now;
+                    let valid = tokio::task::block_in_place(|| {
+                        promotion_game_config.as_ref().ok_or_else(|| "promotionUnavailable".to_string())
+                            .and_then(|config| promotion_game::validate_binding(
+                                config, &identity, session_cache.as_ref(), binding))
+                    });
+                    if valid.is_err() {
+                        let _ = send_error_message(&sender, "promotion game session is no longer active").await;
+                        return;
+                    }
+                }
                 if authenticated
                     && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
                 {
@@ -7976,7 +8052,7 @@ fn production_player_command_safety_enabled(tcp_peer_ip: IpAddr) -> bool {
     // Player-command safety is the default in every environment. The sole
     // escape hatch is deliberately limited to an explicitly labelled dev/test
     // process reached from a loopback peer; production and staging always win.
-    if gateway_prod_like_env() {
+    if promotion_game::profile_requested() || gateway_prod_like_env() {
         return true;
     }
     let dev_or_test = ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"]
@@ -10025,6 +10101,7 @@ async fn maybe_issue_native_resume_credential(
     active_identity_session: Option<&VerifiedIdentitySession>,
     force: bool,
 ) -> Result<bool, axum::Error> {
+    if promotion_game::profile_requested() { return Ok(false); }
     let now_ms = gateway_unix_ms();
     if !native_resume.should_rotate(now_ms, force) {
         return Ok(false);
@@ -10072,6 +10149,7 @@ async fn send_identity_session_grant(
     sender: &SharedWebSocketSender,
     grant: &crate::identity::IdentitySessionGrant,
 ) -> Result<(), axum::Error> {
+    if promotion_game::profile_requested() { return Ok(()); }
     sender
         .send(Message::Text(
             json!({
