@@ -98,10 +98,23 @@ jobs:
               MIR2_PROMOTION_WALLET_AUTH_SECRET:wallet,
               MIR2_PROMOTION_SESSION_SECRET:session
             };
-            await api(`/v10/projects/${project}/env?upsert=true`, 'POST', Object.entries(config).map(([key,value]) => ({
+            const environmentResult = await api(`/v10/projects/${project}/env?upsert=true`, 'POST', Object.entries(config).map(([key,value]) => ({
               key,value,type:key.endsWith('_SECRET')?'sensitive':'plain',target:['production'],
               comment:'Isolated test promotion deployment; preserves existing game configuration'
             })));
+            if (!Array.isArray(environmentResult.failed) || environmentResult.failed.length !== 0) {
+              throw Error('Dedicated environment update was incomplete; no deployment created');
+            }
+            const configuredProject = await api(`/v9/projects/${project}`);
+            for (const key of Object.keys(config)) {
+              const entries = (configuredProject.env || []).filter(entry => entry.key === key && entry.target?.includes('production'));
+              if (entries.length !== 1 || (key.endsWith('_SECRET') ?
+                  entries[0].type !== 'sensitive' && entries[0].visibility !== 'secret' :
+                  entries[0].type !== 'plain' && entries[0].visibility !== 'config')) {
+                throw Error(`Dedicated environment metadata mismatch for ${key}`);
+              }
+            }
+            console.log(`Verified ${Object.keys(config).length} dedicated production environment keys and types`);
             const deployment = await api('/v13/deployments', 'POST', {
               name:value.name,project,target:'production',autoAssignCustomDomains:false,
               gitSource:{type:'github',repoId:value.link.repoId,ref:'codex/promotion-vercel-20261029',sha:process.env.GITHUB_SHA},
