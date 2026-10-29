@@ -3,7 +3,8 @@
 use std::io::Read;
 
 use mir2_simulation::promotion::{
-    calculate_commission, CommissionInput, CommissionResult, ALGORITHM_VERSION,
+    calculate_commission, calculate_test_usdc_micro_commission, CommissionInput, CommissionResult,
+    ALGORITHM_VERSION,
 };
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -54,7 +55,11 @@ fn verify() -> Result<(), String> {
     if expected.algorithm_version != ALGORITHM_VERSION {
         return Err("snapshot requires a different algorithm version".into());
     }
-    let actual = calculate_commission(&input)?;
+    let actual = if expected.payable_micro_usd.is_some() {
+        calculate_test_usdc_micro_commission(&input)?
+    } else {
+        calculate_commission(&input)?
+    };
     if actual != expected {
         return Err("recalculated settlement differs from saved result".into());
     }
@@ -62,7 +67,8 @@ fn verify() -> Result<(), String> {
         "{}",
         json!({"verified":true,"algorithmVersion":ALGORITHM_VERSION,"snapshotSha256":sha,
         "memberCount":actual.members.len(),"eligibleRevenueMicroUsd":actual.eligible_revenue_micro_usd.to_string(),
-        "commissionMicroUsd":actual.commission_micro_usd.to_string(),"payableCents":actual.payable_cents.to_string()})
+        "commissionMicroUsd":actual.commission_micro_usd.to_string(),"payableCents":actual.payable_cents.to_string(),
+        "payableMicroUsd":actual.payable_micro_usd.map(|amount|amount.to_string())})
     );
     Ok(())
 }
