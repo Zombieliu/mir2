@@ -318,13 +318,15 @@ fn catalog() -> &'static Catalog {
             include_str!("../../../../packages/game-data/data/native-i18n/periodic.json"),
             include_str!("../../../../packages/game-data/data/native-i18n/conquest.json"),
             include_str!("../../../../packages/game-data/data/native-i18n/wallet.json"),
+            include_str!("../../../../packages/game-data/data/native-i18n/procurement.json"),
         ] {
             let authored: FullLocaleCatalogFile =
                 serde_json::from_str(authored_source).expect("validated authored locale catalog");
             for entry in authored.entries {
+                let keyed_only = entry.key.starts_with("procurement.");
                 assert_eq!(
                     entry.translations.len(),
-                    BASE_LOCALE_COUNT,
+                    BASE_LOCALE_COUNT + usize::from(keyed_only),
                     "periodic entry must contain exactly nine locales"
                 );
                 let values: [String; BASE_LOCALE_COUNT] =
@@ -345,6 +347,10 @@ fn catalog() -> &'static Catalog {
                     result.keys.insert(entry.key, index).is_none(),
                     "periodic key must not replace existing vocabulary"
                 );
+                if keyed_only {
+                    result.values.push(values);
+                    continue;
+                }
                 for source in values.iter().cloned().chain(entry.aliases) {
                     if source.is_empty() {
                         continue;

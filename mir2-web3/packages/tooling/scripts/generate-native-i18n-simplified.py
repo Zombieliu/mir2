@@ -30,7 +30,7 @@ OUTPUT = DATA / "extra/zh-CN.json"
 PROVENANCE = DATA / "extra/zh-CN-provenance.json"
 EDITORIAL = DATA / "extra/zh-CN-editorial-overrides.json"
 CATALOGUES = ["common", "content", "shell", "quest", "game", "help",
-              "npc-menus", "npc-prose", "periodic", "conquest", "wallet"]
+              "npc-menus", "npc-prose", "periodic", "conquest", "wallet", "procurement"]
 OPENCC_VERSION = "1.4.2"
 OPENCC_CONFIG = "tw2sp"
 TOOL_PIN = {
@@ -299,7 +299,11 @@ def generate(opencc_path: Path | None = None):
     override_keys = []
     for entry in rows:
         key = entry["key"]
-        if key in shared:
+        if key.startswith("procurement."):
+            source = entry["zh-TW"]
+            value = entry["zh-CN"]
+            method = "authored-procurement-zh-CN"
+        elif key in shared:
             source = shared[key]
             value = source
             method = "existing-shared-zh-CN"

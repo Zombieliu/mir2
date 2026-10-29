@@ -729,7 +729,7 @@ fn text(
 fn button(
     p: &mut ChildSpawnerCommands,
     a: Action,
-    label: &str,
+    label: impl AsRef<str>,
     x: f32,
     y: f32,
     w: f32,
@@ -749,7 +749,7 @@ fn button(
         }),
         BorderColor::all(Color::srgb(0.55, 0.42, 0.21)),
     ))
-    .with_children(|b| text(b, label, 6., 4., w - 12., 22., 12.));
+    .with_children(|b| text(b, label.as_ref(), 6., 4., w - 12., 22., 12.));
 }
 fn short(value: &str) -> String {
     if value.chars().count() > 18 {
@@ -769,40 +769,141 @@ fn short(value: &str) -> String {
         value.into()
     }
 }
+// Keyed system templates are translated before opaque arguments are inserted.
+fn ui(key: &str) -> String {
+    crate::native_i18n::for_locale(crate::native_i18n::locale(), key, key)
+}
+fn ui_format(key: &str, args: &[(&str, String)]) -> String {
+    let values: Vec<_> = args
+        .iter()
+        .map(|(key, value)| (*key, value.as_str()))
+        .collect();
+    crate::native_i18n::format_for(crate::native_i18n::locale(), key, key, &values)
+}
+fn ui_reason(source: &str) -> String {
+    match source {
+        "交貨裝備、雙方或條件不符" => ui("procurement.text.f4be86b9529201ff"),
+        "取消範圍不符" => ui("procurement.text.3317ed9c1f519569"),
+        "報價操作不符" => ui("procurement.text.ea35f5ccff0c59bb"),
+        "已收到服務端狀態。鏈上成交與遊戲到賬請分別檢視。" => {
+            ui("procurement.text.a99e308089713f53")
+        }
+        "已返回原請求結果；不會重複扣費或發貨。" => {
+            ui("procurement.text.efac037ca2e57fdd")
+        }
+        "找不到自己的訂單" => ui("procurement.text.832b14eb3d1bbb23"),
+        "授權位元組、網路、條件或有效期不符" => {
+            ui("procurement.text.3ba3a42c0bea4307")
+        }
+        "授權金鑰失效" => ui("procurement.text.f5bafe6e59bd4686"),
+        "測試額度報價不符" => ui("procurement.text.26761b4fca7c11a8"),
+        "生產收費未授權" => ui("procurement.text.61914ca410d36bbf"),
+        "短時到期僅供伺服器測試模式；請重新核對有效期。" => {
+            ui("procurement.text.7da94d13177dc888")
+        }
+        "等待服務端確認；請勿重複建立請求。" => {
+            ui("procurement.text.b968ae1c1fcfa5c9")
+        }
+        "系統隨機源不可用，無法建立求購用途授權。" => {
+            ui("procurement.text.8ca75060467ed46e")
+        }
+        "結果暫時未知。金幣和裝備仍可能被託管；超時不會退款。可原請求重試或稍後對賬。" => {
+            ui("procurement.text.b14c2e63437f7c1c")
+        }
+        "缺少可驗證授權" => ui("procurement.text.58713109ce7b6ebe"),
+        "缺少對應操作" => ui("procurement.text.dace5c4712dbec56"),
+        "缺少當前身份和網路狀態" => ui("procurement.text.1fb52d4171c548cb"),
+        "訂單已離開公開列表" => ui("procurement.text.77c4a232c79df6d2"),
+        "請輸入 1–4294967295 的整數金幣價格。" => {
+            ui("procurement.text.76d190cd907642f2")
+        }
+        "請逐項核對報價。只有點選“明確確認”才會簽署本次操作。" => {
+            ui("procurement.text.e01ed6d23c882c74")
+        }
+        "釋出金額、買家或費用不符" => ui("procurement.text.dd419f6c43fe396e"),
+        "響應內容無效，未確認新結果。" => ui("procurement.text.70579e60f3d00fe5"),
+        other => other.to_owned(),
+    }
+}
+fn ui_message(source: &str) -> String {
+    if let Some(value) = source
+        .strip_prefix("結果未確認（")
+        .and_then(|value| value.strip_suffix("）；不釋放資產，保留原請求重試。"))
+    {
+        return ui_format(
+            "procurement.text.1e8d9d5d53e8993e",
+            &[("error", value.to_owned())],
+        );
+    }
+    if let Some(value) = source
+        .strip_prefix("請求未完成：")
+        .and_then(|value| value.strip_suffix(""))
+    {
+        return ui_format(
+            "procurement.text.b1c228c26401e5d5",
+            &[("error", value.to_owned())],
+        );
+    }
+    if let Some(value) = source
+        .strip_prefix("報價校驗失敗：")
+        .and_then(|value| value.strip_suffix("。未簽名、未確認。"))
+    {
+        return ui_format(
+            "procurement.text.1202a37932640c39",
+            &[("reason", ui_reason(value))],
+        );
+    }
+    if let Some(value) = source
+        .strip_prefix("報價已不可確認：")
+        .and_then(|value| value.strip_suffix(""))
+    {
+        return ui_format(
+            "procurement.text.f0b28b621ee70455",
+            &[("reason", ui_reason(value))],
+        );
+    }
+    ui_reason(source)
+}
 fn conditions_label(c: &EquipmentConditions) -> String {
-    format!(
-        "當前耐久≥{}；最大耐久≥{}；附加屬性 {:?}",
-        c.min_current_durability, c.min_max_durability, c.min_added_stats
+    ui_format(
+        "procurement.text.879ac5567a630c7c",
+        &[
+            ("p0", (c.min_current_durability).to_string()),
+            ("p1", (c.min_max_durability).to_string()),
+            ("p2", format!("{:?}", c.min_added_stats)),
+        ],
     )
 }
-fn chain_label(state: &str) -> &str {
+fn chain_label(state: &str) -> String {
     match state {
-        "open" => "公開中",
-        "filled" => "已成交",
-        "cancelled" | "canceled" => "已取消",
-        "expired" => "已到期",
-        "creating" | "created" | "activating" | "pendingPublish" => "釋出待確認",
-        "unknown" | "resultUnknown" => "結果未知",
-        other => other,
+        "open" => ui("procurement.text.e55a690c084bcc4a"),
+        "filled" => ui("procurement.text.2472fb242efb9614"),
+        "cancelled" | "canceled" => ui("procurement.text.a37778f17c5f3ee5"),
+        "expired" => ui("procurement.text.b9d8853e0ce7e6ea"),
+        "creating" | "created" | "activating" | "pendingPublish" => {
+            ui("procurement.text.6b296191b2e91579")
+        }
+        "unknown" | "resultUnknown" => ui("procurement.text.1ff29ee6a4bbb4ab"),
+        other => other.to_owned(),
     }
 }
-fn delivery_label(state: &str) -> &str {
+fn delivery_label(state: &str) -> String {
     match state {
-        "delivered" => "已到帳",
-        "pendingClaim" => "待領取",
-        "escrowed" => "金幣託管中",
-        "refunded" => "已退款",
-        "pending" | "delivering" => "交付處理中",
-        "unknown" | "resultUnknown" => "結果未知",
-        "none" => "尚未交付",
-        other => other,
+        "delivered" => ui("procurement.text.55b2f0b717d9e14e"),
+        "pendingClaim" => ui("procurement.text.4b336806f9b4f5b8"),
+        "escrowed" => ui("procurement.text.230b3773ba28b943"),
+        "refunded" => ui("procurement.text.9696e9a6176b5875"),
+        "pending" | "delivering" => ui("procurement.text.1c724a5c8e8fc144"),
+        "unknown" | "resultUnknown" => ui("procurement.text.1ff29ee6a4bbb4ab"),
+        "none" => ui("procurement.text.313b5283c60e79c4"),
+        other => other.to_owned(),
     }
 }
-fn claim_button_label(delivery: &ProcurementDelivery) -> &'static str {
+fn claim_button_label(delivery: &ProcurementDelivery) -> String {
     if delivery.template_id == 0 && decimal(&delivery.item_uid) == Ok(0) {
-        "領取金幣"
+        ui("procurement.text.3ed015515aa0c8a7")
     } else {
-        "領取原始裝備"
+        ui("procurement.text.0a32c78780dc6c8b")
     }
 }
 fn delivery_candidate(item: &crate::inventory::ItemModel) -> bool {
@@ -825,8 +926,12 @@ fn render(
     model: Res<ProcurementModel>,
     inventory: Option<Res<crate::inventory::InventoryModel>>,
     roots: Query<Entity, With<ProcurementRoot>>,
+    mut seen_locale: Local<u64>,
 ) {
-    if !model.is_changed() && !inventory.as_ref().is_some_and(|i| i.is_changed()) {
+    let locale_changed = *seen_locale != crate::native_i18n::revision();
+    *seen_locale = crate::native_i18n::revision();
+    if !model.is_changed() && !inventory.as_ref().is_some_and(|i| i.is_changed()) && !locale_changed
+    {
         return;
     }
     for e in &roots {
@@ -835,27 +940,135 @@ fn render(
     if !model.open {
         return;
     }
-    commands.spawn((ProcurementRoot,rect(0.,0.,1024.,768.),GlobalZIndex(6200),BackgroundColor(Color::srgba(0.,0.,0.,0.78)),bevy::ui::FocusPolicy::Block))
-        .with_children(|layer|{let mut n=rect(80.,35.,864.,700.);n.border=UiRect::all(Val::Px(2.));
-            layer.spawn((n,BackgroundColor(Color::srgb(0.055,0.04,0.02)),BorderColor::all(Color::srgb(0.65,0.49,0.2))))
-            .with_children(|p|{
-                text(p,"個人智慧求購 · Dubhe / Sui",18.,12.,790.,28.,22.);
-                text(p,"金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。",18.,47.,825.,34.,12.);
-                text(p,"獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。",18.,80.,825.,28.,12.);
-                for (idx,(page,label)) in [(Page::Public,"公開求購"),(Page::Publish,"釋出求購"),(Page::Mine,"我的訂單"),(Page::Service,"服務與明細"),(Page::Claims,"待領取區")].into_iter().enumerate(){button(p,Action::Page(page),label,18.+idx as f32*140.,115.,132.,model.pending.is_none());}
-                button(p,Action::Close,"關閉",750.,115.,95.,true);
-                if let Some(q)=&model.quote {render_quote(p,&model,q);}else{render_page(p,&model,inventory.as_deref());}
-                text(p,&model.message,18.,592.,825.,53.,12.);
-                button(p,Action::Refresh,"重新整理狀態",18.,655.,120.,model.pending.is_none());
-                button(p,Action::Reconcile,"主動對賬",150.,655.,120.,model.pending.is_none());
-                button(p,Action::Retry,"原請求重試",282.,655.,140.,model.pending.as_ref().is_some_and(|p|p.unknown));
-                text(p,"關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。",438.,657.,400.,35.,11.);
-            });});
+    commands
+        .spawn((
+            ProcurementRoot,
+            rect(0., 0., 1024., 768.),
+            GlobalZIndex(6200),
+            BackgroundColor(Color::srgba(0., 0., 0., 0.78)),
+            bevy::ui::FocusPolicy::Block,
+        ))
+        .with_children(|layer| {
+            let mut n = rect(80., 35., 864., 700.);
+            n.border = UiRect::all(Val::Px(2.));
+            layer
+                .spawn((
+                    n,
+                    BackgroundColor(Color::srgb(0.055, 0.04, 0.02)),
+                    BorderColor::all(Color::srgb(0.65, 0.49, 0.2)),
+                ))
+                .with_children(|p| {
+                    text(
+                        p,
+                        ui("procurement.text.22a22e8109c57d7f"),
+                        18.,
+                        12.,
+                        790.,
+                        28.,
+                        22.,
+                    );
+                    text(
+                        p,
+                        ui("procurement.text.7114cac1a52fb80e"),
+                        18.,
+                        47.,
+                        825.,
+                        34.,
+                        12.,
+                    );
+                    text(
+                        p,
+                        ui("procurement.text.ed2435e65bf3d7fd"),
+                        18.,
+                        80.,
+                        825.,
+                        28.,
+                        12.,
+                    );
+                    for (idx, (page, label)) in [
+                        (Page::Public, ui("procurement.text.2c001fc096721088")),
+                        (Page::Publish, ui("procurement.text.d3b1126df2d96c10")),
+                        (Page::Mine, ui("procurement.text.7b97479c560f5540")),
+                        (Page::Service, ui("procurement.text.6d46a05851edfc16")),
+                        (Page::Claims, ui("procurement.text.c07844d32ccb9e1e")),
+                    ]
+                    .into_iter()
+                    .enumerate()
+                    {
+                        button(
+                            p,
+                            Action::Page(page),
+                            label,
+                            18. + idx as f32 * 140.,
+                            115.,
+                            132.,
+                            model.pending.is_none(),
+                        );
+                    }
+                    button(
+                        p,
+                        Action::Close,
+                        ui("procurement.text.c7fdddf79eaa8c4f"),
+                        750.,
+                        115.,
+                        95.,
+                        true,
+                    );
+                    if let Some(q) = &model.quote {
+                        render_quote(p, &model, q);
+                    } else {
+                        render_page(p, &model, inventory.as_deref());
+                    }
+                    text(p, ui_message(&model.message), 18., 592., 825., 53., 12.);
+                    button(
+                        p,
+                        Action::Refresh,
+                        ui("procurement.text.35fec9449eb59567"),
+                        18.,
+                        655.,
+                        120.,
+                        model.pending.is_none(),
+                    );
+                    button(
+                        p,
+                        Action::Reconcile,
+                        ui("procurement.text.a1339d69ed109c1e"),
+                        150.,
+                        655.,
+                        120.,
+                        model.pending.is_none(),
+                    );
+                    button(
+                        p,
+                        Action::Retry,
+                        ui("procurement.text.307a3ca9501ffc18"),
+                        282.,
+                        655.,
+                        140.,
+                        model.pending.as_ref().is_some_and(|p| p.unknown),
+                    );
+                    text(
+                        p,
+                        ui("procurement.text.6746b5d892af3a03"),
+                        438.,
+                        657.,
+                        400.,
+                        35.,
+                        11.,
+                    );
+                });
+        });
 }
 fn render_quote(p: &mut ChildSpawnerCommands, m: &ProcurementModel, q: &ProcurementQuote) {
     text(
         p,
-        format!("二次確認：{} / 報價 {}", q.operation, short(&q.quote_id)),
+        ui_format(
+            "procurement.text.812eed142bb613ce",
+            &[
+                ("p0", (q.operation).to_string()),
+                ("p1", (short(&q.quote_id)).to_string()),
+            ],
+        ),
         18.,
         155.,
         825.,
@@ -865,65 +1078,117 @@ fn render_quote(p: &mut ChildSpawnerCommands, m: &ProcurementModel, q: &Procurem
     let mut rows = Vec::new();
     if let Some(i) = &q.intent {
         rows.extend([
-            format!(
-                "目標：井中月 / DragonSword · 模板 {} · 數量 {} · 金幣 {}",
-                i.template_id, i.quantity, i.price_gold
+            ui_format(
+                "procurement.text.9ee3eaeedee63035",
+                &[
+                    ("p0", (i.template_id).to_string()),
+                    ("p1", (i.quantity).to_string()),
+                    ("p2", (i.price_gold).to_string()),
+                ],
             ),
             conditions_label(&q.conditions),
-            format!("訂單 {}", i.order_id),
-            format!("成交 {}", i.fill_id),
-            format!("買家 {}", i.buyer_ref),
-            format!("賣家 {}", i.seller_ref),
-            format!("網路 {}", i.network_hash),
-            format!("合約 {}", i.package_id),
-            format!("Dapp {}", i.dapp_storage_id),
-            format!(
-                "訂單到期 {} · 授權到期 {} · 規則 {}",
-                i.expires_at_ms, i.valid_until_ms, i.rule_version
+            ui_format(
+                "procurement.text.c9696f7b911a35aa",
+                &[("p0", (i.order_id).to_string())],
+            ),
+            ui_format(
+                "procurement.text.379dbf1af53bda4b",
+                &[("p0", (i.fill_id).to_string())],
+            ),
+            ui_format(
+                "procurement.text.f9879f3438ede175",
+                &[("p0", (i.buyer_ref).to_string())],
+            ),
+            ui_format(
+                "procurement.text.66aa42479a947f82",
+                &[("p0", (i.seller_ref).to_string())],
+            ),
+            ui_format(
+                "procurement.text.1860cdc74fd573d5",
+                &[("p0", (i.network_hash).to_string())],
+            ),
+            ui_format(
+                "procurement.text.46841b4f1bc599ef",
+                &[("p0", (i.package_id).to_string())],
+            ),
+            ui_format(
+                "procurement.text.9b595f1fa2c6555a",
+                &[("p0", (i.dapp_storage_id).to_string())],
+            ),
+            ui_format(
+                "procurement.text.ee6e29a2c6510950",
+                &[
+                    ("p0", (i.expires_at_ms).to_string()),
+                    ("p1", (i.valid_until_ms).to_string()),
+                    ("p2", (i.rule_version).to_string()),
+                ],
             ),
         ]);
     }
     if let Some(uid) = &q.item_uid {
-        rows.push(format!(
-            "交付原始裝備 UID {uid}：{}",
-            q.item_description
-                .as_deref()
-                .unwrap_or("以服務端核驗例項為準")
+        rows.push(ui_format(
+            "procurement.text.6da9510631920d01",
+            &[
+                ("uid", (uid).to_string()),
+                (
+                    "p0",
+                    (q.item_description
+                        .as_ref()
+                        .cloned()
+                        .unwrap_or_else(|| ui("procurement.text.df7f5644f51ce934")))
+                    .to_string(),
+                ),
+            ],
         ));
     }
     if q.operation == "publish"
         && m.expiry_duration_ms == SHORT_TEST_EXPIRY_MS
         && m.status.as_ref().is_some_and(|v| v.test_mode)
     {
-        rows.push("短時測試訂單：120 秒後到期；僅供測試，不是正式有效期選項。".into());
+        rows.push(ui("procurement.text.4a4c9ca5b50cd732").into());
     }
-    rows.push(format!(
-        "服務：{} 次，來源 {}，點券 {}，規則 {}",
-        q.service_fee.quota_units,
-        q.service_fee.quota_source,
-        q.service_fee.credit_cost,
-        q.service_fee.rule_version
+    rows.push(ui_format(
+        "procurement.text.5f91e8476e2db666",
+        &[
+            ("p0", (q.service_fee.quota_units).to_string()),
+            ("p1", (q.service_fee.quota_source).to_string()),
+            ("p2", (q.service_fee.credit_cost).to_string()),
+            ("p3", (q.service_fee.rule_version).to_string()),
+        ],
     ));
-    rows.push(format!(
-        "主動取消退釋出費：{}；到期未成交退釋出費：{}；額度到期：{}",
-        q.service_fee.refund_on_cancel,
-        q.service_fee.refund_on_expiry,
-        q.service_fee
-            .quota_valid_until_ms
-            .as_deref()
-            .unwrap_or("按當前規則")
+    rows.push(ui_format(
+        "procurement.text.6213024b622968de",
+        &[
+            ("p0", (q.service_fee.refund_on_cancel).to_string()),
+            ("p1", (q.service_fee.refund_on_expiry).to_string()),
+            (
+                "p2",
+                (q.service_fee
+                    .quota_valid_until_ms
+                    .as_ref()
+                    .cloned()
+                    .unwrap_or_else(|| ui("procurement.text.b0fa1fd0edd28b0e")))
+                .to_string(),
+            ),
+        ],
     ));
-    rows.push(
-        "釋出費覆蓋後續成交、取消、到期與技術重試；賣家交貨不另收費；本版無金幣成交稅。".into(),
-    );
+    rows.push(ui("procurement.text.1213149a8f37bb3a").into());
     for (idx, row) in rows.iter().enumerate() {
         text(p, row, 18., 190. + idx as f32 * 22., 825., 22., 11.);
     }
-    text(p,"本視窗使用記憶體短期求購用途金鑰。明確確認後只簽署以上操作；登入或繫結錢包不等於任意交易授權。",18.,507.,825.,40.,12.);
+    text(
+        p,
+        ui("procurement.text.5daa3ab2ba601c4c"),
+        18.,
+        507.,
+        825.,
+        40.,
+        12.,
+    );
     button(
         p,
         Action::Confirm,
-        "明確確認",
+        ui("procurement.text.4867be1c7f2f89d5"),
         638.,
         550.,
         190.,
@@ -932,7 +1197,7 @@ fn render_quote(p: &mut ChildSpawnerCommands, m: &ProcurementModel, q: &Procurem
     button(
         p,
         Action::Back,
-        "返回，不簽名",
+        ui("procurement.text.4cd205a8604c7a6a"),
         18.,
         550.,
         170.,
@@ -948,7 +1213,7 @@ fn render_page(
     let Some(v) = &m.status else {
         text(
             p,
-            "先通過當前 NPC 獲取身份、託管、服務規則與訂單狀態。",
+            ui("procurement.text.2c9815aa998dd5c3"),
             18.,
             160.,
             825.,
@@ -959,9 +1224,15 @@ fn render_page(
     };
     text(
         p,
-        format!(
-            "可用金幣 {} / 託管金幣 {} · 測試額度 {} / 付費額度 {} / 預留 {}",
-            v.available_gold, v.escrow_gold, v.test_quota, v.paid_quota, v.reserved_quota
+        ui_format(
+            "procurement.text.e9b464ff654ed1ac",
+            &[
+                ("p0", (v.available_gold).to_string()),
+                ("p1", (v.escrow_gold).to_string()),
+                ("p2", (v.test_quota).to_string()),
+                ("p3", (v.paid_quota).to_string()),
+                ("p4", (v.reserved_quota).to_string()),
+            ],
         ),
         18.,
         155.,
@@ -973,7 +1244,7 @@ fn render_page(
         Page::Publish => {
             text(
                 p,
-                "目標：井中月 / DragonSword（真實模板 245）· 單件裝備、單次完整成交",
+                ui("procurement.text.069199e0f9eded03"),
                 18.,
                 200.,
                 825.,
@@ -982,14 +1253,20 @@ fn render_page(
             );
             text(
                 p,
-                format!(
-                    "求購金幣：{}{}",
-                    m.price,
-                    if m.editing_price {
-                        " | 鍵入數字或退格修改"
-                    } else {
-                        ""
-                    }
+                ui_format(
+                    "procurement.text.22afd39fcba58e9c",
+                    &[
+                        ("p0", (m.price).to_string()),
+                        (
+                            "p1",
+                            (if m.editing_price {
+                                ui("procurement.text.ade0b3f23f9bd9e4")
+                            } else {
+                                String::new()
+                            })
+                            .to_string(),
+                        ),
+                    ],
                 ),
                 18.,
                 245.,
@@ -997,14 +1274,33 @@ fn render_page(
                 30.,
                 16.,
             );
-            button(p, Action::Price, "修改金額", 655., 242., 150., ready);
-            button(p, Action::ClearPrice, "清空", 655., 276., 150., ready);
+            button(
+                p,
+                Action::Price,
+                ui("procurement.text.eb6ed1329186012c"),
+                655.,
+                242.,
+                150.,
+                ready,
+            );
+            button(
+                p,
+                Action::ClearPrice,
+                ui("procurement.text.1ef3de06b32e521b"),
+                655.,
+                276.,
+                150.,
+                ready,
+            );
             text(
                 p,
                 if m.expiry_duration_ms == SHORT_TEST_EXPIRY_MS {
-                    "有效期：120 秒（僅供測試）".into()
+                    ui("procurement.text.672d6344b366a028").into()
                 } else {
-                    format!("有效期：{} 小時", m.expiry_duration_ms / 3_600_000)
+                    ui_format(
+                        "procurement.text.2adcbb35e93f4e6c",
+                        &[("p0", (m.expiry_duration_ms / 3_600_000).to_string())],
+                    )
                 },
                 18.,
                 294.,
@@ -1012,7 +1308,15 @@ fn render_page(
                 30.,
                 14.,
             );
-            button(p, Action::Duration, "切換有效期", 655., 310., 150., ready);
+            button(
+                p,
+                Action::Duration,
+                ui("procurement.text.350200f5710ec37f"),
+                655.,
+                310.,
+                150.,
+                ready,
+            );
             text(
                 p,
                 conditions_label(&m.conditions),
@@ -1022,11 +1326,33 @@ fn render_page(
                 60.,
                 13.,
             );
-            button(p, Action::Conditions, "耐久條件", 655., 350., 150., ready);
-            text(p,format!("服務規則 {}：成功公開後消費 {} 次釋出額度，失敗不消費。當前使用明確標記的測試額度。",v.fee_rule.rule_version,v.fee_rule.quota_units),18.,420.,825.,50.,13.);
+            button(
+                p,
+                Action::Conditions,
+                ui("procurement.text.923e8f037e85279d"),
+                655.,
+                350.,
+                150.,
+                ready,
+            );
             text(
                 p,
-                "下一步僅請求報價；需核對金幣託管、到期、服務費和授權內容後再次明確確認。",
+                ui_format(
+                    "procurement.text.58cb2584dd4bd733",
+                    &[
+                        ("p0", (v.fee_rule.rule_version).to_string()),
+                        ("p1", (v.fee_rule.quota_units).to_string()),
+                    ],
+                ),
+                18.,
+                420.,
+                825.,
+                50.,
+                13.,
+            );
+            text(
+                p,
+                ui("procurement.text.89a5fd848184dbb9"),
                 18.,
                 480.,
                 825.,
@@ -1036,7 +1362,7 @@ fn render_page(
             button(
                 p,
                 Action::PublishQuote,
-                "獲取釋出報價",
+                ui("procurement.text.90091d253bfffc6c"),
                 18.,
                 544.,
                 200.,
@@ -1048,9 +1374,9 @@ fn render_page(
                 p,
                 Action::Filter,
                 if m.filter_target {
-                    "篩選：模板245"
+                    ui("procurement.text.8e2b8263cbeabcb4")
                 } else {
-                    "篩選：全部"
+                    ui("procurement.text.e7fd851aea459b79")
                 },
                 18.,
                 194.,
@@ -1075,12 +1401,16 @@ fn render_page(
             button(
                 p,
                 Action::ChooseItem,
-                &format!(
-                    "切換裝備 UID {}",
-                    selected_item
-                        .and_then(|i| i.unique_id)
-                        .map(|v| v.to_string())
-                        .unwrap_or_else(|| "無".into())
+                &ui_format(
+                    "procurement.text.83eafa0d6f9e36ad",
+                    &[(
+                        "p0",
+                        (selected_item
+                            .and_then(|i| i.unique_id)
+                            .map(|v| v.to_string())
+                            .unwrap_or_else(|| ui("procurement.text.da5930e53d54d33e").into()))
+                        .to_string(),
+                    )],
                 ),
                 214.,
                 194.,
@@ -1096,11 +1426,13 @@ fn render_page(
                 let y = 233. + idx as f32 * 65.;
                 text(
                     p,
-                    format!(
-                        "{} · 井中月245 · {}金幣 · 到期 {}",
-                        short(&o.order_id),
-                        o.price_gold,
-                        o.expires_at_ms
+                    ui_format(
+                        "procurement.text.1954b3c7da179635",
+                        &[
+                            ("p0", (short(&o.order_id)).to_string()),
+                            ("p1", (o.price_gold).to_string()),
+                            ("p2", (o.expires_at_ms).to_string()),
+                        ],
                     ),
                     18.,
                     y,
@@ -1110,11 +1442,13 @@ fn render_page(
                 );
                 text(
                     p,
-                    format!(
-                        "鏈上 {} / 遊戲 {} · {}",
-                        chain_label(&o.chain_state),
-                        delivery_label(&o.delivery_state),
-                        conditions_label(&o.conditions)
+                    ui_format(
+                        "procurement.text.087fd06a7a05d959",
+                        &[
+                            ("p0", (chain_label(&o.chain_state)).to_string()),
+                            ("p1", (delivery_label(&o.delivery_state)).to_string()),
+                            ("p2", (conditions_label(&o.conditions)).to_string()),
+                        ],
                     ),
                     18.,
                     y + 24.,
@@ -1127,7 +1461,10 @@ fn render_page(
                     button(
                         p,
                         Action::DeliverQuote(o.order_id.clone(), uid.clone()),
-                        &format!("交貨 UID {uid}"),
+                        &ui_format(
+                            "procurement.text.6c1742d17a603f42",
+                            &[("uid", (uid).to_string())],
+                        ),
                         638.,
                         y,
                         205.,
@@ -1137,20 +1474,44 @@ fn render_page(
                             && uid != "0",
                     );
                 } else {
-                    text(p, "背包無可選單件未繫結裝備", 638., y, 205., 40., 12.);
+                    text(
+                        p,
+                        ui("procurement.text.73460d25671e87e5"),
+                        638.,
+                        y,
+                        205.,
+                        40.,
+                        12.,
+                    );
                 }
             }
             text(
                 p,
-                "交貨報價將展示原始 UID、強化、耐久和附加屬性；以服務端所有權與鎖定核驗為準。",
+                ui("procurement.text.5f0ec6e7b0e7d9be"),
                 18.,
                 565.,
                 825.,
                 25.,
                 11.,
             );
-            button(p, Action::Previous, "上一頁", 478., 194., 100., ready);
-            button(p, Action::Next, "下一頁", 590., 194., 100., ready);
+            button(
+                p,
+                Action::Previous,
+                ui("procurement.text.13256df2ec815420"),
+                478.,
+                194.,
+                100.,
+                ready,
+            );
+            button(
+                p,
+                Action::Next,
+                ui("procurement.text.ae9d525462f33109"),
+                590.,
+                194.,
+                100.,
+                ready,
+            );
         }
         Page::Mine => {
             for (idx, o) in v
@@ -1163,11 +1524,13 @@ fn render_page(
                 let y = 205. + idx as f32 * 68.;
                 text(
                     p,
-                    format!(
-                        "{} · {}金幣 · 鏈上 {}",
-                        short(&o.order_id),
-                        o.price_gold,
-                        chain_label(&o.chain_state)
+                    ui_format(
+                        "procurement.text.4721ab93bcc479e0",
+                        &[
+                            ("p0", (short(&o.order_id)).to_string()),
+                            ("p1", (o.price_gold).to_string()),
+                            ("p2", (chain_label(&o.chain_state)).to_string()),
+                        ],
                     ),
                     18.,
                     y,
@@ -1177,13 +1540,18 @@ fn render_page(
                 );
                 text(
                     p,
-                    format!(
-                        "遊戲到賬：{} · 成交 {}",
-                        delivery_label(&o.delivery_state),
-                        o.fill_id
-                            .as_deref()
-                            .map(short)
-                            .unwrap_or_else(|| "無".into())
+                    ui_format(
+                        "procurement.text.9751a35cc47d0152",
+                        &[
+                            ("p0", (delivery_label(&o.delivery_state)).to_string()),
+                            (
+                                "p1",
+                                (o.fill_id.as_deref().map(short).unwrap_or_else(|| {
+                                    ui("procurement.text.da5930e53d54d33e").into()
+                                }))
+                                .to_string(),
+                            ),
+                        ],
                     ),
                     18.,
                     y + 26.,
@@ -1194,27 +1562,53 @@ fn render_page(
                 button(
                     p,
                     Action::CancelQuote(o.order_id.clone()),
-                    "申請取消報價",
+                    ui("procurement.text.29a0830f901c5d78"),
                     652.,
                     y,
                     185.,
                     ready && o.chain_state == "open",
                 );
             }
-            button(p, Action::Previous, "上一頁", 478., 550., 100., ready);
-            button(p, Action::Next, "下一頁", 590., 550., 100., ready);
+            button(
+                p,
+                Action::Previous,
+                ui("procurement.text.13256df2ec815420"),
+                478.,
+                550.,
+                100.,
+                ready,
+            );
+            button(
+                p,
+                Action::Next,
+                ui("procurement.text.ae9d525462f33109"),
+                590.,
+                550.,
+                100.,
+                ready,
+            );
         }
         Page::Service => {
-            text(p,"基礎月卡不含無限求購。釋出服務按次；點券是服務收費憑證，官方獨立 Gas 預算承擔鏈上成本。",18.,200.,825.,42.,13.);
             text(
                 p,
-                format!(
-                    "測試模式 {} / 生產收費 {} · 規則 {} · 取消退款 {} / 到期退款 {}",
-                    v.test_mode,
-                    v.production_billing_enabled,
-                    v.fee_rule.rule_version,
-                    v.fee_rule.refund_on_cancel,
-                    v.fee_rule.refund_on_expiry
+                ui("procurement.text.69f74d916e23d67c"),
+                18.,
+                200.,
+                825.,
+                42.,
+                13.,
+            );
+            text(
+                p,
+                ui_format(
+                    "procurement.text.c683e0e8c036a2cc",
+                    &[
+                        ("p0", (v.test_mode).to_string()),
+                        ("p1", (v.production_billing_enabled).to_string()),
+                        ("p2", (v.fee_rule.rule_version).to_string()),
+                        ("p3", (v.fee_rule.refund_on_cancel).to_string()),
+                        ("p4", (v.fee_rule.refund_on_expiry).to_string()),
+                    ],
                 ),
                 18.,
                 245.,
@@ -1226,9 +1620,14 @@ fn render_page(
                 let y = 290. + idx as f32 * 38.;
                 text(
                     p,
-                    format!(
-                        "{}：{} 次 / {} 點券 / 來源 {}",
-                        pack.label, pack.units, pack.credit_cost, pack.source
+                    ui_format(
+                        "procurement.text.37ee30aabb994e7d",
+                        &[
+                            ("p0", (pack.label).to_string()),
+                            ("p1", (pack.units).to_string()),
+                            ("p2", (pack.credit_cost).to_string()),
+                            ("p3", (pack.source).to_string()),
+                        ],
                     ),
                     18.,
                     y,
@@ -1239,7 +1638,7 @@ fn render_page(
                 button(
                     p,
                     Action::BuyQuota(pack.id.clone()),
-                    "獲取套餐確認",
+                    ui("procurement.text.2124f1a287c993c7"),
                     655.,
                     y,
                     170.,
@@ -1250,18 +1649,28 @@ fn render_page(
                         && !v.production_billing_enabled,
                 );
             }
-            text(p,"以下為持久化收費明細（測試/充值/贈送來源分開）；參考美元價格尚未批准，不承諾盈利。",18.,380.,825.,32.,12.);
+            text(
+                p,
+                ui("procurement.text.4baded77e254f618"),
+                18.,
+                380.,
+                825.,
+                32.,
+                12.,
+            );
             for (idx, entry) in v.fee_history.iter().rev().take(5).enumerate() {
                 text(
                     p,
-                    format!(
-                        "{} · {} / {}次 / {}點券 / {} / 規則{}",
-                        short(&entry.order_id),
-                        entry.source,
-                        entry.units,
-                        entry.credit_cost,
-                        entry.state,
-                        entry.rule_version
+                    ui_format(
+                        "procurement.text.518af67765b2c1d1",
+                        &[
+                            ("p0", (short(&entry.order_id)).to_string()),
+                            ("p1", (entry.source).to_string()),
+                            ("p2", (entry.units).to_string()),
+                            ("p3", (entry.credit_cost).to_string()),
+                            ("p4", (entry.state).to_string()),
+                            ("p5", (entry.rule_version).to_string()),
+                        ],
                     ),
                     18.,
                     420. + idx as f32 * 28.,
@@ -1274,7 +1683,7 @@ fn render_page(
         Page::Claims => {
             text(
                 p,
-                "背包滿或離線時保留原始例項。領取只轉移同一 UID，不按模板重新生成裝備。",
+                ui("procurement.text.9adb9e29f638ea65"),
                 18.,
                 200.,
                 825.,
@@ -1291,12 +1700,14 @@ fn render_page(
                 let y = 256. + idx as f32 * 57.;
                 text(
                     p,
-                    format!(
-                        "UID {} · 模板 {} · {} · {}",
-                        d.item_uid,
-                        d.template_id,
-                        d.description,
-                        delivery_label(&d.state)
+                    ui_format(
+                        "procurement.text.842197731be65e0f",
+                        &[
+                            ("p0", (d.item_uid).to_string()),
+                            ("p1", (d.template_id).to_string()),
+                            ("p2", (d.description).to_string()),
+                            ("p3", (delivery_label(&d.state)).to_string()),
+                        ],
                     ),
                     18.,
                     y,
@@ -1314,8 +1725,24 @@ fn render_page(
                     ready && d.state == "pendingClaim",
                 );
             }
-            button(p, Action::Previous, "上一頁", 478., 550., 100., ready);
-            button(p, Action::Next, "下一頁", 590., 550., 100., ready);
+            button(
+                p,
+                Action::Previous,
+                ui("procurement.text.13256df2ec815420"),
+                478.,
+                550.,
+                100.,
+                ready,
+            );
+            button(
+                p,
+                Action::Next,
+                ui("procurement.text.ae9d525462f33109"),
+                590.,
+                550.,
+                100.,
+                ready,
+            );
         }
     }
 }
@@ -1323,6 +1750,55 @@ fn render_page(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn procurement_simplified_system_templates_preserve_opaque_arguments_and_old_locales() {
+        use crate::native_i18n::{self, Locale};
+        let catalog: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../../packages/game-data/data/native-i18n/procurement.json"
+        ))
+        .unwrap();
+        for entry in catalog["entries"].as_array().unwrap() {
+            let key = entry["key"].as_str().unwrap();
+            let original = entry["zh-TW"].as_str().unwrap();
+            for locale in Locale::ALL
+                .into_iter()
+                .filter(|locale| *locale != Locale::SimplifiedChinese)
+            {
+                assert_eq!(native_i18n::for_locale(locale, key, "missing"), original);
+            }
+            assert_eq!(
+                native_i18n::for_locale(Locale::SimplifiedChinese, key, "missing"),
+                entry["zh-CN"].as_str().unwrap()
+            );
+        }
+        native_i18n::with_locale(Locale::SimplifiedChinese, || {
+            assert_eq!(
+                ui("procurement.text.22a22e8109c57d7f"),
+                "个人智能求购 · Dubhe / Sui"
+            );
+            assert_eq!(ui("procurement.text.2c001fc096721088"), "公开求购");
+            assert_eq!(
+                ui_message("報價校驗失敗：授權金鑰失效。未簽名、未確認。"),
+                "报价校验失败：授权密钥失效。未签名、未确认。"
+            );
+            let opaque = "龍城{p0} / 屠龍 / 18446744073709551615";
+            let rendered = ui_format(
+                "procurement.text.6da9510631920d01",
+                &[("uid", "777".into()), ("p0", opaque.into())],
+            );
+            assert_eq!(rendered, format!("交付原始装备 UID 777：{opaque}"));
+            let code = "procurementUnknown:龍城{error}";
+            assert!(ui_message(&format!(
+                "結果未確認（{code}）；不釋放資產，保留原請求重試。"
+            ))
+            .contains(code));
+            assert_eq!(
+                chain_label("unknown-player-state-龍城"),
+                "unknown-player-state-龍城"
+            );
+        });
+    }
+
     #[test]
     #[ignore = "explicit offline Windows GPU evidence of the real procurement renderer; no socket or chain transaction"]
     fn procurement_windows_gpu_five_pages_and_explicit_confirmations() {
@@ -1355,7 +1831,12 @@ mod tests {
             }
         }
         let _restore = RestoreLocale(crate::native_i18n::locale());
-        crate::native_i18n::activate(crate::native_i18n::Locale::TraditionalChinese);
+        let fixture_locale = match std::env::var("MIR2_PROCUREMENT_VISUAL_LOCALE").as_deref() {
+            Ok("zh-CN") => crate::native_i18n::Locale::SimplifiedChinese,
+            Err(std::env::VarError::NotPresent) => crate::native_i18n::Locale::TraditionalChinese,
+            _ => panic!("unsupported procurement fixture locale"),
+        };
+        crate::native_i18n::activate(fixture_locale);
         let short_expiry_only =
             std::env::var_os("MIR2_PROCUREMENT_VISUAL_SHORT_EXPIRY_ONLY").is_some();
         let (mut model, mut quote, _) = publish_quote_fixture();
@@ -1422,7 +1903,13 @@ mod tests {
             description: "井中月 強化+3 耐久28000/34000 附加攻擊+2".into(),
             state: "pendingClaim".into(),
         }];
-        model.message = "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。".into();
+        model.message = if fixture_locale == crate::native_i18n::Locale::SimplifiedChinese {
+            model.status.as_mut().unwrap().deliveries[0].description =
+                "龍城{Gold}：屠龍 +3 耐久28000/34000".into();
+            "离线界面测试；未连接服务器、未产生链上交易。".into()
+        } else {
+            "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。".into()
+        };
         let mut inventory = crate::inventory::InventoryModel::default();
         inventory.items.push(crate::inventory::ItemModel {
             unique_id: Some(777),
@@ -1500,6 +1987,29 @@ mod tests {
                     .as_str()
                     .is_some_and(|t| t.contains("120 秒（僅供測試）"))));
             }
+            if fixture_locale == crate::native_i18n::Locale::SimplifiedChinese {
+                for expected in [
+                    "个人智能求购 · Dubhe / Sui",
+                    "公开求购",
+                    "发布求购",
+                    "我的订单",
+                    "服务与明细",
+                    "待领取区",
+                ] {
+                    assert!(
+                        layouts.iter().any(|row| row["text"] == expected),
+                        "missing Simplified procurement label: {expected}"
+                    );
+                }
+                if page == Page::Claims {
+                    assert!(
+                        layouts.iter().any(|row| row["text"].as_str().is_some_and(
+                            |value| value.contains("龍城{Gold}：屠龍 +3 耐久28000/34000")
+                        )),
+                        "opaque instance description must stay unchanged"
+                    );
+                }
+            }
             layout_checks.push(serde_json::json!({"page":label,"layouts":layouts}));
             assert!(
                 app.world()
@@ -1540,7 +2050,9 @@ mod tests {
             .iter(app.world())
             .map(|t| t.0.clone())
             .collect();
-        assert!(labels.iter().any(|t| t == "明確確認"));
+        assert!(labels
+            .iter()
+            .any(|t| t == &ui("procurement.text.4867be1c7f2f89d5")));
         assert!(labels.iter().any(|t| t.contains("500000")));
         if short_expiry_only {
             assert!(labels
@@ -1600,7 +2112,7 @@ mod tests {
             "rendering never signs or dispatches"
         );
         fs::write(&report,serde_json::to_vec_pretty(&serde_json::json!({"passed":true,"complete":true,
-            "evidenceKind":"offline-native-production-renderer","width":1024,"height":768,"screenshots":screenshots,
+            "evidenceKind":"offline-native-production-renderer","locale":fixture_locale.code(),"width":1024,"height":768,"screenshots":screenshots,
             "usesProductionRenderer":true,"serverConnected":false,"testnetTransactions":0,"humanAccepted":false,
             "scenario":if short_expiry_only {"short-expiry-publish-and-confirmation"}else{"five-pages-and-confirmations"},
             "modelAndSignatureTestsAreSeparate":true,"layoutChecks":layout_checks,
