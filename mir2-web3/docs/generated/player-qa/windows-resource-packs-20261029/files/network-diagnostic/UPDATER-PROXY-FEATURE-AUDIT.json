@@ -1,0 +1,19 @@
+{
+  "projectedReport": {
+    "actualClientNetworkSlaProven": false,
+    "commandExitCode": 0,
+    "currentEnvironmentProxyValuesRecorded": false,
+    "productionBuilderExplicitProxyOverrideFound": false,
+    "proxyFromEnvFeatureEnabled": false,
+    "resolvedUreqFeatures": [],
+    "schema": "mir2.windows.updater-proxy-feature-audit.v1",
+    "sourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe",
+    "ureqAgentDefaultTryProxyFromEnv": false,
+    "ureqVersion": "2.12.1"
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "updater-proxy-audit",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "3D3A7E1BBC9501763973A9ADF8CA79C073C8D79605A936D0F683B879748BDACC",
+  "sourceSize": 2778
+}

@@ -1,0 +1,2 @@
+# Preserve the bytes hashed in INDEX.json on every checkout.
+* -text

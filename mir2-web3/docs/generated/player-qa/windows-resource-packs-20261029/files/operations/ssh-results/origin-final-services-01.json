@@ -1,0 +1,45 @@
+{
+  "projectedReport": {
+    "backendServicesModified": false,
+    "caddySha256": "E1461DF2F01FA33299D29E56152B68F9E2A8693D63E5871B0922047FA8EEFFE4",
+    "databaseWritesExecuted": false,
+    "dockerStarted": false,
+    "feeds": [
+      {
+        "feedSha256": "CFC78A45E30C8079857CFFB2BF6C02C8266A1C9C85FEF4022368B43E8D11317C",
+        "scope": "legacy",
+        "sequence": 23
+      },
+      {
+        "feedSha256": "0C7C9626271C98D478A48CE79DCA92F31436B84AD20B6C2DB4462D65B4DE8A91",
+        "scope": "five-class",
+        "sequence": 24
+      },
+      {
+        "feedSha256": "FFF8F4232FA7531979100BD194FBBF33E5F41B6D185D1CC7423EA8F2CC8A210E",
+        "scope": "packed",
+        "sequence": 31
+      }
+    ],
+    "pidChecks": [
+      {
+        "alive": true,
+        "pid": 788697
+      },
+      {
+        "alive": true,
+        "pid": 788007
+      },
+      {
+        "alive": true,
+        "pid": 3855184
+      }
+    ],
+    "wrapperExitCode": 0
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "backend-final",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "F82206F62163DD6125871189B1644D72AB7754A383A9832FE808A5B0DC889449",
+  "sourceSize": 1073
+}

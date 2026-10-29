@@ -1,0 +1,36 @@
+{
+  "projectedReport": {
+    "aliveAfterFirstReadyMs": 19810,
+    "authenticatedKernelPidMatched": true,
+    "automaticKill": false,
+    "engineSha256": "343C5E52355E012A6E4CDABD81289A52C9D893114F378CD875AE3AF70AC2BBE3",
+    "engineSourceRevision": "ba79cc90b47fa2fe017f977c29ea2c987342bcfe",
+    "fiveMinuteNetworkAcceptance": false,
+    "frontendManualAcceptance": false,
+    "fullLegacyRollbackRunProven": false,
+    "gameLeftRunningForManualInspection": true,
+    "localFilesOnlyInstallation": true,
+    "locale": {
+      "locale": "ru",
+      "sha256": "D42FA0743407B36309568D27BBD5FED9D49927F4B47BC84D8D15E83C87D54658"
+    },
+    "manifestSha256": "1E35573B0C0E5986501F646EF5552A9578DFDE59F67BE7F8687E012E7CB9F861",
+    "nativeExeSha256": "F3B0E756A2DF5747EFB0D2A3613E2FADD4687D982CF8CF280EA99BF0654AA25C",
+    "nativeGameSourceRevision": "29a187a272acb4129e3de2cd37e6bbdf62bf11e3",
+    "networkUpdateAcceptance": false,
+    "passed": true,
+    "phoneWalletSignatureAcceptance": false,
+    "pid": 61864,
+    "readyElapsedMs": 5751,
+    "readySimulated": false,
+    "realReady": true,
+    "schema": "mir2.offline-game-preflight.health.v1",
+    "spawnToAcceptedMs": 25562,
+    "unix": 1793257913
+  },
+  "projectionBoundary": "Explicit fields only; raw log/body/attempt/env/argv/private config excluded.",
+  "role": "real-offline-health",
+  "schema": "mir2.evidence.public-projection.v1",
+  "sourceSha256": "7F902E00F2EBBB305D00BF3EECA21F78110BCC257AC63A30BA1DD78D507A9AD9",
+  "sourceSize": 2052
+}
