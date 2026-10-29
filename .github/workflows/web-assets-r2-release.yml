@@ -22,7 +22,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: promotion-website-release
+  group: promotion-website-${{ inputs.operation == 'backend-build' && 'backend-build' || 'production-release' }}
   cancel-in-progress: false
 
 jobs:
