@@ -1,0 +1,8 @@
+{
+  "old": "F:\\mir2-build\\native-zh-cn-finish-20261029\\checkout",
+  "new": "F:\\m9",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "sourceChanges": 0,
+  "exeSha256": "6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D",
+  "reason": "Reduce physical staging path below Win32 ADS enumeration MAX_PATH, without aliases, links, source changes, or relaxed gates"
+}

@@ -3,7 +3,7 @@
 日期：2026-10-29（Asia/Shanghai）。本记录对应独立开发分支中的实现与下表所列验证；不代表远程测试服已更新、主网开放或真人最终验收。
 
 同日界面后续已拆为“法币充值”“USDC链上充值”“月卡”三个入口，并加入简体中文。
-Windows 导航和重启保存已复验，未新付款；新界面记录见[充值 UI 验收](generated/billing-entry-ui-20261029/README.md)与[简体语言验收](generated/native-zh-cn-20261029/README.md)。下面原测试网付款及历史证据保持其原始版本边界。
+后续完成 9769 键与 873 条 AI/source 校订，以及游戏提交 `24216899a` / 更新器提交 `81942dda7` r10 完整安装器的本机隔离安装、卸载重装和无参数 Launcher→Updater→Game 验收。简体偏好保留及三个页面实际通过，100 点券、10000 金币、三张历史订单不变；本轮未新测充值或购买/使用月卡。详见[最新文案与安装验收](generated/native-zh-cn-finish-20261029/README.md)，旧[充值 UI](generated/billing-entry-ui-20261029/README.md)与[简体语言](generated/native-zh-cn-20261029/README.md)保持历史快照。人审为 0、最终 Accepted 待定，部分旧位图/上游英文保留；远程服未更新，发布者生产 Authenticode 未提供，生产收费关闭。下面原测试网付款及历史证据保持其原始版本边界。
 
 ## 已确定的产品边界
 

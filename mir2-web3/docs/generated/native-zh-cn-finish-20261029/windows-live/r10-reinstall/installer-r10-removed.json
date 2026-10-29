@@ -1,0 +1,16 @@
+{
+  "phase": "r10-removed",
+  "normalRegistrationUnchanged": true,
+  "normalGameUnchanged": true,
+  "personalPreferencesUnchanged": true,
+  "isolationDirectory": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation",
+  "uninstalled": true,
+  "validationRegistrationAbsent": true,
+  "remainingProfileFiles": [
+    "display.json",
+    "locale-seed.json",
+    "locale.json"
+  ],
+  "gameExeRemoved": true,
+  "passed": true
+}

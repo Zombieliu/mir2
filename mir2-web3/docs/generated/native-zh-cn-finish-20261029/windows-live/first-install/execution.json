@@ -1,0 +1,21 @@
+{
+  "phase": "first",
+  "setup": "F:/mir2-build/native-zh-cn-finish-20261029/installer-validation-output/Numeron-Legend-of-Rebirth-20261029-r9-LocalValidation-Setup.exe",
+  "setupSha256": "5FD15CF92CFE4CDACE0408C5F4E99897A67D2AC8E01B44C1DAE71761B7D4DE4C",
+  "arguments": [
+    "/VERYSILENT",
+    "/SUPPRESSMSGBOXES",
+    "/NORESTART",
+    "/SP-",
+    "/CURRENTUSER",
+    "/NOICONS",
+    "/TASKS=\"\"",
+    "/LANG=chinesesimplified",
+    "/DIR=\"F:/mir2-build/native-zh-cn-finish-20261029/installed-validation\"",
+    "/LOG=\"C:/mir2-build/native-zh-cn-finish-20261029/real-install-first.log\""
+  ],
+  "exitCode": 0,
+  "elapsedSeconds": 260.3694329,
+  "installDirectory": "F:/mir2-build/native-zh-cn-finish-20261029/installed-validation",
+  "passed": true
+}

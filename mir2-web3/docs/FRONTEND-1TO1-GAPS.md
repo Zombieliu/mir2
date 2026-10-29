@@ -1,12 +1,19 @@
 # Frontend 1:1 Gaps
 
-## 简体中文与充值入口分离：限定技术验收（2026-10-29）
+## 简体文案与完整 Windows 安装包：限定技术验收（2026-10-29）
 
-Windows 新增简体目录、完整字体及持久化语言选择；“法币充值”“USDC链上充值”“月卡”独立展示。
-十张实机图覆盖语言菜单、切换、重启和三页导航，原余额与历史订单不变；启动时发现的显示设置
-九列索引越界已修复复测。见[单一简体记录](generated/native-zh-cn-20261029/README.md)和[充值 UI 记录](generated/billing-entry-ui-20261029/README.md)。
-这不构成全部文案人工审校、全屏 Crystal 像素一致性或整体 Accepted。安装专项通过，完整自测仍受
-既有 `Title/meta.json` pin 阻断，可信 Inno 7 缺失，完整新安装包和远程部署尚未验证。
+Windows 简体覆盖 9769 键、完整内嵌字体和持久化语言选择，追加 873 条 AI 编辑/源码核对覆盖。
+游戏提交 `24216899a` 的 209 图完整 Candidate、更新器提交 `81942dda7` r10 九文件 bundle、内部 CMS 与两个完整
+Inno 7.1.1 安装器通过。隔离版实际安装、无参数 Launcher→Updater→Game、卸载重装及语言
+保留已验；首次安装全量内容哈希通过，重装只复核路径闭包、关键文件和偏好，不混称再次全量哈希。
+简体设置、十语切换及“法币充值”“USDC链上充值”“月卡”三页有真实 Windows 图证，
+100 点券、10000 金币和三张历史订单保持不变，未新付款或月卡消费。r9 真实启动失败与后续
+五个精确根文件修复分别保留；普通 Setup 仅编译通过，未覆盖安装既有正常版本。
+
+详见[最新文案与安装记录](generated/native-zh-cn-finish-20261029/README.md)，旧[简体 UI](generated/native-zh-cn-20261029/README.md)与[充值 UI](generated/billing-entry-ui-20261029/README.md)不回写。
+人审键数为 0；旧位图 GameSHOP/BUY、Chapter/Exit 及部分专名仍为英文。本轮不构成全部文案
+人工审校、全屏 Crystal 像素一致性或整体 Accepted，不改变全项目比例。发布者生产 Authenticode
+签名未提供，远程测试服未更新，生产收费及人类最终 Accepted 仍开放。
 
 ## 新增 Sui 原生 USDC 充值：自定义功能的限定验收（2026-10-29）
 

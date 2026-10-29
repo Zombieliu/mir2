@@ -1,0 +1,89 @@
+{
+  "schema": "mir2.windows.ui-closure-pin-provenance.v1",
+  "capturedAtUtc": "2026-10-29T07:43:21.777Z",
+  "baseRevision": "758cd76b07bb4a5feace9b9cc01a80c808542b2d",
+  "libraries": [
+    {
+      "library": "Title",
+      "legitimateAddCommit": "dabe442ff1cd98f607190013540738cc97910315",
+      "baselineRawMetadataSha256": "93547fd4ae3315829166d08402da24f06d1e8d825154ccc12f6f4e8b8a467753",
+      "currentRawMetadataSha256": "6513b3f04f3ccc67a201c1722339f76f6083973ba77ebfb940fd9a17773e5a69",
+      "workingEqualsHeadBytes": true,
+      "lineEndingNormalizationUsed": false,
+      "baselineFrames": 349,
+      "currentFrames": 353,
+      "changedPriorFrames": [],
+      "removedPriorFrames": [],
+      "unchangedFields": {
+        "version": true,
+        "count": true,
+        "sourceLibrary": true,
+        "frameSet": true
+      },
+      "addedImages": [
+        {
+          "index": 743,
+          "width": 72,
+          "height": 23,
+          "bytes": 2677,
+          "sha256": "0af770b4e2f2af6a2f9d60e7bd98f5c5fa6081aa8165027cee05418a436efa72",
+          "metadataPngSha256Matches": true
+        },
+        {
+          "index": 744,
+          "width": 72,
+          "height": 23,
+          "bytes": 1280,
+          "sha256": "f23598018c5d592d1c3e654cb6044ffaaeb27d736b3fad92702476953e0f1196",
+          "metadataPngSha256Matches": true
+        },
+        {
+          "index": 745,
+          "width": 72,
+          "height": 23,
+          "bytes": 2673,
+          "sha256": "ab5669753587e3f37396ddb8a4d7307b5447abf39c7dec37a6bbf76bc67ced41",
+          "metadataPngSha256Matches": true
+        },
+        {
+          "index": 746,
+          "width": 72,
+          "height": 23,
+          "bytes": 1311,
+          "sha256": "3cf6104ac32fdbe4d28e4300d9856365fd330b6c61b826bbf037f46ca7588222",
+          "metadataPngSha256Matches": true
+        }
+      ]
+    },
+    {
+      "library": "Prguse2",
+      "legitimateAddCommit": "2a1c54c29b9a12a6e0f381be1c13168ecbc49f8f",
+      "baselineRawMetadataSha256": "db31438e7516e77dc57769d2ab1796ef151f5bbec9d3d29ec313acb53a5027a1",
+      "currentRawMetadataSha256": "52ff33c696a8b04d576bddcc7b8f14d94aa5b3b35cd8e0d31f379295e9a635cd",
+      "workingEqualsHeadBytes": true,
+      "lineEndingNormalizationUsed": false,
+      "baselineFrames": 382,
+      "currentFrames": 383,
+      "changedPriorFrames": [],
+      "removedPriorFrames": [],
+      "unchangedFields": {
+        "version": true,
+        "count": true,
+        "sourceLibrary": true,
+        "frameSet": true
+      },
+      "addedImages": [
+        {
+          "index": 424,
+          "width": 260,
+          "height": 22,
+          "bytes": 1514,
+          "sha256": "8143accb57ff42aae2c8a757e76f32a0e229603240c433d92015d25f50f4253d",
+          "metadataPngSha256Matches": true
+        }
+      ]
+    }
+  ],
+  "sourceAssetsModifiedByRepair": false,
+  "repairScope": "Update two full trusted metadata SHA pins and require five already committed added PNG identities. Original complete metadata, source-Lib, frame-set and old PNG identity gates remain strict."
+}

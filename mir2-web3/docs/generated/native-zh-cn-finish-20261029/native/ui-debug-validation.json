@@ -1,0 +1,252 @@
+{
+  "passed": true,
+  "kind": "final-editorial-native-ui-validation",
+  "observedAtUtc": "2026-10-29T07:36:01.743352+00:00",
+  "sourceHead": "758cd76b07bb4a5feace9b9cc01a80c808542b2d",
+  "sourceLedger": "input-ledger.json",
+  "sourceLedgerSha256": "35ca9060925e27e486398bd3b6b3dd85a033b5b0ff0ec78a0caf0ad3ad7e9fde",
+  "sourceFiles": 534,
+  "frozenInputsUnchangedAfterBuild": true,
+  "overlaySha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f",
+  "editorialOverrides": 873,
+  "catalogKeys": 9769,
+  "focusedTests": [
+    {
+      "suite": "native-i18n-final",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "log": "native-i18n-final.log",
+      "logSha256": "d5d80d47ff9d40f070791d146f663f48a59cee44a5af355e42b9e313f607475a",
+      "logReceipt": {
+        "filename": "native-i18n-final.log",
+        "bytes": 29141,
+        "sha256": "d5d80d47ff9d40f070791d146f663f48a59cee44a5af355e42b9e313f607475a",
+        "included": false
+      },
+      "resultLines": [
+        "test native_i18n::ui::tests::adjacent_capture_boundaries_are_explicit_and_values_remain_opaque ... ok",
+        "test native_i18n::ui::tests::billing_keys_cover_all_locales_and_preserve_placeholders ... ok",
+        "test native_i18n::ui::tests::catalogue_padding_is_normalized_without_removing_display_whitespace ... ok",
+        "test native_i18n::ui::tests::formatting_never_reinterprets_names_or_payloads ... ok",
+        "test native_i18n::ui::tests::indexed_lookup_matches_full_scan_for_counters_npc_markup_and_numeric_formats ... ok",
+        "test native_i18n::ui::tests::language_popup_survives_options_children_rebuilt_each_update ... ok",
+        "test native_i18n::ui::tests::locales_include_simplified_without_changing_existing_indices ... ok",
+        "test native_i18n::ui::tests::monthly_card_exact_system_name_and_tooltip_use_ordinary_item_translation ... ok",
+        "test native_i18n::ui::tests::npc_return_keeps_menu_context_separate_from_quest_heading ... ok",
+        "test native_i18n::ui::tests::numeric_formats_and_npc_colour_markup_preserve_opaque_values ... ok",
+        "test native_i18n::ui::tests::scoped_locales_restore_and_are_thread_local ... ok",
+        "test native_i18n::ui::tests::simplified_catalog_covers_shared_items_quests_and_billing_without_changing_traditional ... ok",
+        "test native_i18n::ui::tests::simplified_npc_and_mail_templates_keep_player_arguments_and_slots_opaque ... ok",
+        "test native_i18n::ui::tests::template_index_preserves_specificity_later_domain_and_unicode_prefixes ... ok",
+        "test native_i18n::ui::tests::unknown_counter_lookup_has_a_bounded_candidate_set ... ok",
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 1597 filtered out; finished in 0.40s"
+      ]
+    },
+    {
+      "suite": "player-text-final",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "log": "player-text-final.log",
+      "logSha256": "c93ea1146109508de51598208a2a4bb8ede4833baa93b5230c1af29d830f996b",
+      "logReceipt": {
+        "filename": "player-text-final.log",
+        "bytes": 28520,
+        "sha256": "c93ea1146109508de51598208a2a4bb8ede4833baa93b5230c1af29d830f996b",
+        "included": false
+      },
+      "resultLines": [
+        "test player_text::tests::all_twenty_six_authored_quests_have_chinese_titles_and_guides ... ok",
+        "test player_text::tests::chapter_and_status_templates_require_known_system_labels ... ok",
+        "test player_text::tests::chapter_titles_goals_rewards_and_class_hints_are_covered ... ok",
+        "test player_text::tests::current_mine_patrol_and_all_copy_keep_distinct_monster_types ... ok",
+        "test player_text::tests::dynamic_kill_labels_preserve_counts_and_only_translate_known_monsters ... ok",
+        "test player_text::tests::native_named_arguments_remain_opaque_and_unknown_text_is_unchanged ... ok",
+        "test player_text::tests::native_original_sections_resolve_whole_paragraph_before_wrapping ... ok",
+        "test player_text::tests::native_quest_locales_cover_all_authored_ids ... ok",
+        "test player_text::tests::native_reward_names_translate_before_quantity_without_changing_reward_identity ... ok",
+        "test player_text::tests::price_templates_preserve_currency_amounts_and_reject_free_text ... ok",
+        "test player_text::tests::system_names_are_exact_and_unknown_player_like_names_remain_intact ... ok",
+        "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1601 filtered out; finished in 0.38s"
+      ]
+    },
+    {
+      "suite": "native-billing-final",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 1,
+      "log": "native-billing-final.log",
+      "logSha256": "dd829e2bab38d6d55da9f22816fc396bd2748e49977d75b3dd839cf8c5c4464a",
+      "logReceipt": {
+        "filename": "native-billing-final.log",
+        "bytes": 29507,
+        "sha256": "dd829e2bab38d6d55da9f22816fc396bd2748e49977d75b3dd839cf8c5c4464a",
+        "included": false
+      },
+      "resultLines": [
+        "test native_billing::ui::tests::billing_windows_gpu_three_routes_and_channel_states ... ignored, explicit offline Windows GPU evidence; no server, wallet signing or chain payment",
+        "test native_billing::ui::tests::checkout_is_bound_to_current_account_character_and_request ... ok",
+        "test native_billing::ui::tests::definitive_purchase_errors_are_specific_and_require_current_correlation ... ok",
+        "test native_billing::ui::tests::hidden_pages_cannot_purchase_or_change_pagination ... ok",
+        "test native_billing::ui::tests::keyboard_page_selection_does_not_execute_old_mouse_purchase ... ok",
+        "test native_billing::ui::tests::monthly_purchase_and_owned_activation_are_independent_of_recharge_channels ... ok",
+        "test native_billing::ui::tests::panel_opening_enter_is_consumed_and_close_fences_world_input ... ok",
+        "test native_billing::ui::tests::pending_navigation_is_blocked_and_retry_returns_to_original_route ... ok",
+        "test native_billing::ui::tests::purchase_reply_refreshes_status_and_disabled_status_cannot_purchase ... ok",
+        "test native_billing::ui::tests::refresh_never_settles_an_unconfirmed_purchase ... ok",
+        "test native_billing::ui::tests::rejected_purchase_allows_an_intentional_new_offer ... ok",
+        "test native_billing::ui::tests::three_routes_remain_visible_without_sales_and_selecting_is_explicit ... ok",
+        "test native_billing::ui::tests::timeout_retry_preserves_order_and_ignores_late_original_url ... ok",
+        "test native_billing::ui::tests::uncertain_server_commit_retries_the_same_order ... ok",
+        "test native_billing::ui::tests::unique_ids_remain_canonical_strings ... ok",
+        "test native_billing::ui::tests::usdc_checkout_requires_local_origin_and_retries_the_same_order ... ok",
+        "test native_billing::ui::tests::usdc_refresh_only_reads_pending_order_status ... ok",
+        "test native_billing::ui::tests::usdc_relogin_reopens_frozen_order_when_new_sales_are_disabled ... ok",
+        "test native_billing::ui::tests::usdc_status_is_optional_for_existing_stripe_servers ... ok",
+        "test native_billing::ui::tests::usdc_wire_requires_canonical_amounts_testnet_and_known_states ... ok",
+        "test result: ok. 19 passed; 0 failed; 1 ignored; 0 measured; 1592 filtered out; finished in 0.32s"
+      ]
+    },
+    {
+      "suite": "native-display-final",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 1,
+      "log": "native-display-final.log",
+      "logSha256": "0adbce3277fbfccfdc03c21874a4c625cd2c8f2370f2e2563ec6b81309c6491b",
+      "logReceipt": {
+        "filename": "native-display-final.log",
+        "bytes": 28368,
+        "sha256": "0adbce3277fbfccfdc03c21874a4c625cd2c8f2370f2e2563ec6b81309c6491b",
+        "included": false
+      },
+      "resultLines": [
+        "test native_display::tests::arabic_dimensions_keep_width_before_height_in_mixed_direction_labels ... ok",
+        "test native_display::tests::automatic_size_matches_notebook_dpi_and_always_fits_work_area ... ok",
+        "test native_display::tests::every_resolution_and_supported_language_labels_are_complete ... ok",
+        "test native_display::tests::login_display_labels_switch_in_all_supported_locales ... ok",
+        "test native_display::tests::login_selector_accepts_supported_choices_and_never_changes_in_game ... ok",
+        "test native_display::tests::nine_locale_login_and_scaled_hud_offscreen ... ignored, offline GPU evidence; run alone with real MIR2_I18N_VISUAL_ASSET_ROOT and a fresh MIR2_DISPLAY_VISUAL_OUTPUT",
+        "test native_display::tests::stage_viewport_is_centered_exact_four_three_and_guards_minimized_targets ... ok",
+        "test native_display::tests::unavailable_resolution_cannot_be_selected_and_monitor_change_recovers_auto ... ok",
+        "test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 1604 filtered out; finished in 0.03s"
+      ]
+    },
+    {
+      "suite": "native-role-captions-final",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "log": "native-role-captions-final.log",
+      "logSha256": "b496576eb84e4b37e61984473cec22640fcab020883819cb2fbb159c91ea4e0c",
+      "logReceipt": {
+        "filename": "native-role-captions-final.log",
+        "bytes": 27567,
+        "sha256": "b496576eb84e4b37e61984473cec22640fcab020883819cb2fbb159c91ea4e0c",
+        "included": false
+      },
+      "resultLines": [
+        "test quest_ui::tests::native_system_role_and_group_captions_keep_names_and_selection_keys_opaque ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1611 filtered out; finished in 0.32s"
+      ]
+    },
+    {
+      "suite": "native-quest-counters-final",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "log": "native-quest-counters-final.log",
+      "logSha256": "b00421d820d3485a088778cffdb753b13f74175430f28b022fb97e0c99a3c960",
+      "logReceipt": {
+        "filename": "native-quest-counters-final.log",
+        "bytes": 27569,
+        "sha256": "b00421d820d3485a088778cffdb753b13f74175430f28b022fb97e0c99a3c960",
+        "included": false
+      },
+      "resultLines": [
+        "test quest_ui::tests::native_quest_counters_render_localized_labels_without_changing_counts_or_ids ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1611 filtered out; finished in 0.34s"
+      ]
+    }
+  ],
+  "focusedPassed": 54,
+  "gpu": [
+    {
+      "report": "../native-mock/gameplay/zh-cn-gameplay-layouts.json",
+      "reportSha256": "0435908958c7b1218a5e96d2eef0fb9fef9204af040d2941ecf75019e05ee370",
+      "captures": 3,
+      "missingGlyphs": 0,
+      "overflowingTextNodes": 0,
+      "outsideViewportNodes": 0,
+      "kind": "offline-native-production-renderer",
+      "liveAcceptance": false
+    },
+    {
+      "report": "../native-mock/billing/billing-entry-native-gpu.json",
+      "reportSha256": "772abcd9f7eb98ad728b00ea96c45afd890d00c1b0baf08f4da421f5b02cde29",
+      "captures": 39,
+      "missingGlyphs": 0,
+      "overflowingTextNodes": 0,
+      "outsideViewportNodes": 0,
+      "kind": "offline-native-production-renderer",
+      "liveAcceptance": false
+    }
+  ],
+  "gpuCaptures": 42,
+  "fontCorpus": {
+    "report": "font-corpus-verification.json",
+    "uniqueNonControlCharacters": 2007,
+    "missingCodepoints": []
+  },
+  "requestedTermsObservedInTheseGpuLayouts": {
+    "点券": true,
+    "传送": false,
+    "雷电术": false,
+    "行会": false
+  },
+  "build": {
+    "profile": "incremental-debug-ui-only",
+    "cleanReleaseAttestation": false,
+    "command": "cargo +1.95.0 build --manifest-path apps/game-client/platform-windows/Cargo.toml --offline --locked --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native",
+    "log": "native-ui-build-final.log",
+    "logSha256": "7d8623e25a893e8a32a915b195e71f254642d5269a958ec9c9e76df2f0445aa4",
+    "executable": {
+      "filename": "mir2-platform-windows.exe",
+      "included": false,
+      "externalDirectoryLabel": "bin-ui"
+    },
+    "bytes": 149412864,
+    "sha256": "70630edc42d528952f334858ef7cbbab541d8ea6d60745c72b3af618f4bf6b22",
+    "logReceipt": {
+      "filename": "native-ui-build-final.log",
+      "bytes": 60147,
+      "sha256": "7d8623e25a893e8a32a915b195e71f254642d5269a958ec9c9e76df2f0445aa4",
+      "included": false
+    }
+  },
+  "coverageLimits": [
+    "These are 3 gameplay scenes plus 13 billing states in en/zh-TW/zh-CN, not a screen-by-screen validation of 9769 strings.",
+    "传送/雷电术/行会 corrections have source/semantic/cmap evidence; the unchanged existing GPU fixtures do not display those exact corrections.",
+    "The independently prepared clean release/installer and real desktop acceptance belong to the coordinator and are not asserted here.",
+    "No Docker, backend/chain tests, new payment, account mutation or production deployment was performed."
+  ],
+  "humanAccepted": false,
+  "repositoryChangesByThisValidation": false,
+  "recordedSourceLedgerSha256Meaning": "SHA256 of files array canonical compact JSON sorted keys; not the ledger JSON file raw bytes.",
+  "sourceLedgerFileRawSha256": "e89c3b647c0f8c29b30fc6ee3263028ebeed0d631b7941fb41afc1c0f79a4d93",
+  "originalSummaryRawSha256": "260ea04bebfc953da34ffa3a6e6a2a339c9cdf15526a0e4081ffb3d11b4a8b27",
+  "sourceHeadMeaning": "Baseline Git HEAD at an incremental debug run; actual effective source files are the explicit 534-input ledger. This is not a clean-source release attestation.",
+  "curationIndependentChecks": {
+    "all534RawInputsMatchedAtCuration": true,
+    "rawExecutableHashMatched": true,
+    "all42PngSignaturesAndRawGpuReportHashesMatched": true,
+    "visualSamplesOpened": 6,
+    "observedAtUtc": "2026-10-29T07:43:19.912907+00:00"
+  },
+  "focusedIgnoredMeaning": "Two tests were ignored within the six focused filters. Billing GPU was separately run; display GPU is not asserted as executed here. A separate gameplay GPU test produced three captures.",
+  "dynamicFixtureLabels": {
+    "note": "Mock offer/card labels are server payload data and include Small/Test package/Monthly Card. These are not claimed to be newly localized system strings or real account state.",
+    "monthlyKnownSystemLabelReview": "Coordinator notified that nonempty card.label is displayed verbatim; any subsequent bounded correction requires its own current-source evidence."
+  }
+}

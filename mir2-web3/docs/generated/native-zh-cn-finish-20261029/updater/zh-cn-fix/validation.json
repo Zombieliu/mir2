@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-10-29T09:11:03.320983+00:00",
+  "topic": "Independent updater Simplified Chinese fix",
+  "status": "passed",
+  "baselineCommit": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "observedHead": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "changedSourceFiles": [
+    "apps/game-client/windows-updater/src/lib.rs",
+    "apps/game-client/windows-updater/src/ui.rs"
+  ],
+  "sourceCount": 20,
+  "sourceLedger": {
+    "path": "input-ledger.json",
+    "sha256": "0b1acefe78940aa3bf7225defa737a94b2440fda69bfab87b68ef31b0cc548aa"
+  },
+  "tests": [
+    {
+      "log": "locale-focused.log",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "bytes": 3374,
+      "sha256": "76c4c11bd94c5788d6c4bcbe404a47876380baaebd296b97fbc0cda1cd5b5179",
+      "resultLines": [
+        "test locale_tests::canonical_game_preferences_accept_ten_locales_and_reject_untrusted_variants ... ok",
+        "test locale_tests::game_roaming_locale_overrules_legacy_local_and_corrupt_preferences_fall_back ... ok",
+        "test locale_tests::operating_system_chinese_scripts_keep_simplified_and_traditional_separate ... ok",
+        "test locale_tests::simplified_game_preference_and_installer_seed_preserve_existing_precedence ... ok",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 86 filtered out; finished in 0.01s"
+      ],
+      "rawLogIncluded": false
+    },
+    {
+      "log": "ui-focused.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "bytes": 600,
+      "sha256": "41baf0a2e8322ef09c3b73bf0e5bbe71363eaefb999abf5255d0113530fa3e37",
+      "resultLines": [
+        "test ui::tests::every_supported_locale_has_every_native_update_stage ... ok",
+        "test ui::tests::simplified_progress_counters_are_translated_and_stay_bounded ... ok",
+        "test ui::tests::unknown_locale_uses_english_and_region_variants_are_normalized ... ok",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.00s"
+      ],
+      "rawLogIncluded": false
+    },
+    {
+      "log": "win32-focused.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "bytes": 693,
+      "sha256": "a0452351203dceaba887d196dad4cf4862f80b217df6f1d0b48a42b888c6d821",
+      "resultLines": [
+        "test ui::windows::native_tests::native_window_updates_and_distinguishes_programmatic_close_from_cancel ... ok",
+        "test ui::windows::native_tests::simplified_native_window_uses_simplified_title_status_and_cancel_control ... ok",
+        "test ui::windows::native_tests::ten_locale_offline_copy_fits_native_status_at_100_150_and_200_percent_layouts ... ok",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.17s"
+      ],
+      "rawLogIncluded": false
+    },
+    {
+      "log": "progress-count-adjacent.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "bytes": 446,
+      "sha256": "b77e20f0b7a193ddbb779a67085ce9404c62778f2b44353eebc5d9ae0c1eed90",
+      "resultLines": [
+        "test five_class_manifest_tests::five_class_update_progress_keeps_large_inventory_counts ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 89 filtered out; finished in 0.00s"
+      ],
+      "rawLogIncluded": false
+    },
+    {
+      "log": "progress-language-adjacent.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "bytes": 449,
+      "sha256": "67ecde5a38c814cd335088126c6813dc0c8fb8bba50e1161663e20bca4117a8f",
+      "resultLines": [
+        "test update::progress_trace_tests::red_native_local_phases_are_translated_for_nine_locales ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 89 filtered out; finished in 0.00s"
+      ],
+      "rawLogIncluded": false
+    }
+  ],
+  "totals": {
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0
+  },
+  "localeCodes": [
+    "en",
+    "zh-TW",
+    "pt-BR",
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar",
+    "zh-CN"
+  ],
+  "stageColumns": [
+    {
+      "stage": "extracting",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在解压并验证文件…"
+    },
+    {
+      "stage": "staging",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在本地暂存已验证的文件…"
+    },
+    {
+      "stage": "preparing",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在准备回滚备份并检查暂存文件…"
+    },
+    {
+      "stage": "installing",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在本地安装已验证的文件…"
+    },
+    {
+      "stage": "checking-installed",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在检查已安装的文件…"
+    },
+    {
+      "stage": "checking",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在检查更新…"
+    },
+    {
+      "stage": "downloading",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在下载有变更的文件…"
+    },
+    {
+      "stage": "verifying",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在验证下载的文件…"
+    },
+    {
+      "stage": "applying",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在安装更新…"
+    },
+    {
+      "stage": "recovering",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在恢复上一版本…"
+    },
+    {
+      "stage": "recovered",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "已恢复上一版本。"
+    },
+    {
+      "stage": "launching",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "正在启动游戏…"
+    },
+    {
+      "stage": "offline",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "无法连接更新服务器，将使用已安装的版本。"
+    },
+    {
+      "stage": "busy",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "请先关闭游戏再更新。"
+    },
+    {
+      "stage": "failed",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "更新失败"
+    },
+    {
+      "stage": "cancel",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "取消"
+    },
+    {
+      "stage": "title",
+      "oldNinePreserved": true,
+      "columns": 10,
+      "simplifiedChinese": "游戏更新"
+    }
+  ],
+  "coverage": [
+    "Strict schema1 canonical saved game preference and installer seed parsing",
+    "APPDATA saved preference then seed precedes legacy LOCALAPPDATA",
+    "OS CN/SG/MY/Hans versus TW/HK/MO/Hant selection and invalid code fallback",
+    "Every existing17 stage string in10 languages",
+    "Actual hidden Win32 Simplified Chinese title/cancel/status controls",
+    "Ten-language offline text measured at96/144/192DPI",
+    "Existing large-file progress counters and nine-language local phase regression"
+  ],
+  "scopeLimits": [
+    "Focused tests only; not the full updater suite",
+    "No production signing, key generation, deployment or update-feed transaction",
+    "No release updater binary or installer generated by this phase",
+    "Native game source and previously attested Candidate242 release unchanged",
+    "Hidden Win32 control tests are automated, not human acceptance"
+  ],
+  "independentReview": {
+    "reviewer": "/root/sui_usdc_billing_audit",
+    "result": "No blocking panic/index/preference precedence issue;17 old nine-language columns preserved; no edits or Cargo by reviewer"
+  },
+  "passed": true,
+  "sourceSummaryReceipt": {
+    "filename": "validation-summary.json",
+    "bytes": 5855,
+    "sha256": "87d002f08d3900a233e67514966b92d576d4283b251fcaf3006529c0515e07cb",
+    "included": false
+  },
+  "committedSourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "sourceCommitPhaseNote": "Tests ran against the explicit 20-file working source snapshot while HEAD was 24216899a; all 20 normalized source blobs were subsequently verified to match committed updater revision 11d8a75ba72e626a287630c3a8a4b6c6278d0647. Native game release remains at 24216899a.",
+  "curatorVerifiedCurrentRawSources": 20,
+  "curatorVerifiedCommittedNormalizedBlobs": 20,
+  "sourceCountsNotAddedToNativeCounts": true
+}

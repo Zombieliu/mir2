@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "phase": "r10-reinstall",
+  "gamePid": 56712,
+  "gameExe": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+  "gameSha256": "6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D",
+  "updaterPid": 66376,
+  "updaterExe": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\.update\\engine-10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC.exe",
+  "updaterSha256": "10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC",
+  "fullLauncherChain": true,
+  "directGameLaunch": false,
+  "assetRootOverride": false,
+  "defaultAssetDiscoveryLine": "[platform-windows] asset_root=F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\game\\mir2-assets has_map_layout=true has_entity_manifest=true has_map_manifest=true has_native_map_keyed_manifest=true has_effect_manifest=true has_character_wings=true has_crystal_cursors=true complete=true",
+  "localePreference": {
+    "schema": 1,
+    "locale": "zh-CN"
+  },
+  "observedAtUtc": "2026-10-29T11:46:42.0011597Z",
+  "paymentsAttempted": false
+}

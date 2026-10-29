@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "kind": "r10-policy-corrected-actual-updater-component-bundle",
+  "sourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "gameCandidate": "WN-CANDIDATE-20261029-invited-09",
+  "sequence": 2026102910,
+  "sourceClean": true,
+  "strictVerifier": "verification.json",
+  "strictVerifierReceipt": {
+    "filename": "updater-release-r10-verification.json",
+    "bytes": 592,
+    "sha256": "1ecb8377ff373d1b7c3bdc11ad707b24eb4144ea203223a31b63cfb1a0437c1d",
+    "included": false
+  },
+  "bundleFiles": [
+    {
+      "path": "Mir2Launcher.exe",
+      "bytes": 392192,
+      "sha256": "76d46b6e52246462d4c57f1fb843bc0b0e557d06e735a4c02abdc24c07b957ac",
+      "binaryIncluded": false
+    },
+    {
+      "path": "updater/active.txt",
+      "bytes": 64,
+      "sha256": "9eb5025aaf72417207ff2a705960162b41147c3dce0ed43ff030cc9c8c404591",
+      "binaryIncluded": false
+    },
+    {
+      "path": "updater/engines/10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC/ENGINE.json",
+      "bytes": 421,
+      "sha256": "7dd4d0b2d4d86688728c182e0f03d7873e93847e902ce9980220d703ca33df15",
+      "binaryIncluded": false
+    },
+    {
+      "path": "updater/engines/10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC/ENGINE.p7s",
+      "bytes": 1614,
+      "sha256": "e6e10946299ebabc655f29b55945717b3b286906ec9eee2eea6ee56a73d1ae8a",
+      "binaryIncluded": false
+    },
+    {
+      "path": "updater/engines/10B94F60286AFEAAE43DB0117A9C73B2DCCECAE1DDD79D562379AC316B40C6BC/Mir2Updater.exe",
+      "bytes": 1955328,
+      "sha256": "10b94f60286afeaae43db0117a9c73b2dccecae1ddd79d562379ac316b40c6bc",
+      "binaryIncluded": false
+    },
+    {
+      "path": "updater/seed-feed.json",
+      "bytes": 1175,
+      "sha256": "04806231baecf5444e609f66f85fe1c4e05c01b2fb588977589ba2640215433a",
+      "binaryIncluded": false
+    },
+    {
+      "path": "updater/seed-feed.p7s",
+      "bytes": 1614,
+      "sha256": "2608b5cb11bab482050fd8b24fa3caa68a233bd350cfa3d2c4f44c235e951900",
+      "binaryIncluded": false
+    },
+    {
+      "path": "UPDATER-BUNDLE.json",
+      "bytes": 1286,
+      "sha256": "a663fbde99867cd0856a6800fdd91ead65c485d74b86243fb4c84e71320458b3",
+      "binaryIncluded": false
+    },
+    {
+      "path": "UPDATER-BUNDLE.p7s",
+      "bytes": 1614,
+      "sha256": "5452d069b90f376afbedbe6cd0be87ad5ab1b9f2dbbf8dd799934b3c6e0027a0",
+      "binaryIncluded": false
+    }
+  ],
+  "curatorRecomputedAllNineFiles": true,
+  "curatorMatchedSevenDeclaredFileHashes": true,
+  "curatorMatchedSeedFeedFourGameMetadataToOriginalUnchangedCandidate": true,
+  "detachedCmsVerifiedByProductionVerifier": true,
+  "signingPublicKeySha256": "6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e",
+  "publicAuthenticode": "NotSigned",
+  "installerIncludeReceipt": {
+    "filename": "installer-updater-files.iss",
+    "bytes": 1761,
+    "sha256": "5f51b051cf4983c440d2050b1401d4e28e22e3615cee828c9ba8b9c92ffe3ad0",
+    "included": false
+  },
+  "installerIncludeLogReceipt": {
+    "filename": "updater-release-r10-installer-input.log",
+    "bytes": 72,
+    "sha256": "42f9065deecbf4a4dce4c0f2417e90214302efd5f917abaf7fa659b4f6df9262",
+    "included": false
+  },
+  "installerIncludeFiles": 9,
+  "r9FailedRuntimeHistoryPreserved": true,
+  "gameOrResourcesRebuilt": false,
+  "r10InstallerAndInstalledRuntimePassedByThisReport": false,
+  "binariesAndRawSignaturesIncluded": false
+}

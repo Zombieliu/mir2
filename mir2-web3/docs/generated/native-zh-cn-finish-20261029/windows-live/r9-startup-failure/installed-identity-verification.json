@@ -1,0 +1,27 @@
+{
+  "phase": "first",
+  "normalRegistrationUnchanged": true,
+  "normalGameUnchanged": true,
+  "personalPreferencesUnchanged": true,
+  "isolationDirectory": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation",
+  "uninstalled": false,
+  "passed": true,
+  "validationRegistration": {
+    "DisplayName": "Numeron - Legend of Rebirth",
+    "DisplayVersion": "2026.10.29.9",
+    "InstallLocation": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\",
+    "UninstallString": "\"F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\uninstall\\unins000.exe\""
+  },
+  "files": 255027,
+  "bytes": 1260971227,
+  "gameExeSha256": "6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "updaterSourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "updaterFilesVerified": 9,
+  "installerSeed": {
+    "schema": 1,
+    "locale": "zh-CN"
+  },
+  "noUnexpectedGameFiles": true,
+  "preservedRuntimeFiles": []
+}

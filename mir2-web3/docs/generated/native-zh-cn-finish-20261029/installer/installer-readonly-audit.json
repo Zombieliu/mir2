@@ -1,0 +1,142 @@
+{
+  "schema": "mir2.windows.installer-readonly-audit.v1",
+  "observedAtUtc": "2026-10-29T11:08:41.1669488Z",
+  "scope": "Read-only inspection of real compiler receipts, actual installer PE files, recipe/includes, final updater files, and launch-helper source. No installer/game launch or process termination performed by this auditor.",
+  "passedForPlannedAcceptance": true,
+  "blockingFindings": [],
+  "installerChecks": [
+    {
+      "kind": "normal",
+      "path": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-normal-output\\Numeron-Legend-of-Rebirth-20261029-r9-Setup.exe",
+      "bytes": 1017970518,
+      "sha256": "b29f0638cefe77f95d1ced256a02e6260aa6e269b212f53548e39736a1272c20",
+      "actualBytesAndHashRecomputed": true,
+      "normalizedPeVersion": "2026.10.29.9",
+      "actualVersionTrimMatched": true,
+      "compilerExitCode": 0,
+      "recipeAndIncludesHashMatched": true,
+      "publicAuthenticode": "NotSigned"
+    },
+    {
+      "kind": "validation",
+      "path": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-validation-output\\Numeron-Legend-of-Rebirth-20261029-r9-LocalValidation-Setup.exe",
+      "bytes": 1017971207,
+      "sha256": "5fd15cf92cfe4cdace0408c5f4e99897a67d2ac8e01b44c1dae71761b7d4de4c",
+      "actualBytesAndHashRecomputed": true,
+      "normalizedPeVersion": "2026.10.29.9",
+      "actualVersionTrimMatched": true,
+      "compilerExitCode": 0,
+      "recipeAndIncludesHashMatched": true,
+      "publicAuthenticode": "NotSigned"
+    }
+  ],
+  "compiler": {
+    "version": "7.1.1",
+    "sha256": "e0f9f1dc32032650c6629f6dee41eb6d20ba140e4e3c07c25d8a24f9ba781644",
+    "publisherSignature": "Valid"
+  },
+  "updater": {
+    "sourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+    "sourceClean": true,
+    "bundleFilesRehashed": 9,
+    "mismatches": [],
+    "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "sequence": 2026102909
+  },
+  "plannedValidationLaunch": {
+    "entry": "Mir2Launcher.exe",
+    "arguments": [],
+    "chain": "verified Launcher -> verified scratch Updater -> verified installed Game",
+    "directGameLaunch": false,
+    "appdata": "installation/validation-profile",
+    "inheritedMir2VariablesRemovedFirst": true,
+    "onlyExistingTestAccountAndLocalGatewayInjected": true,
+    "privateLogsRemainExternal": true,
+    "childEnvironmentInheritedByLauncherAndUpdater": true,
+    "roamingSeedPrecedesLegacyLocalAppData": true,
+    "installedLaunchAndGameplay": "not performed by this read-only audit; coordinator owns actual evidence"
+  },
+  "normalSimplifiedStartup": {
+    "installerLanguage": "chinesesimplified",
+    "freshSeed": "{userappdata}/mir2-web3/locale-seed.json schema1 locale zh-CN",
+    "existingLocaleOrSeed": "preserved without overwrite",
+    "installerEntry": "Launcher with no arguments",
+    "updaterPreferenceOrder": [
+      "APPDATA locale.json",
+      "APPDATA locale-seed.json",
+      "LOCALAPPDATA legacy locale.json",
+      "LOCALAPPDATA legacy locale-seed.json",
+      "OS locale"
+    ],
+    "gamePreferenceOrder": [
+      "APPDATA locale.json",
+      "APPDATA locale-seed.json",
+      "OS locale"
+    ],
+    "freshSimplifiedInstallSourcePathCoherent": true,
+    "existingDInstallationUntouchedByAudit": true,
+    "normalInstallerActuallyInstalled": false
+  },
+  "limitations": [
+    "Validation installer writes its seed under installation/validation-profile, while its generic interactive finish-page Launcher action inherits ordinary APPDATA. Isolated acceptance therefore explicitly requires silent installation plus the reviewed external helper. This is a validation-harness boundary, not a normal-installer production behavior defect.",
+    "Normal installers intentionally preserve an existing saved language. Selecting Simplified Chinese for a new installation seeds zh-CN only when no prior locale preference or seed exists.",
+    "Both actual installers and bundled executables remain without public Authenticode publisher signing; detached CMS verification is a distinct integrity layer.",
+    "This report does not claim installation completion, normal Launcher runtime success, gameplay acceptance, human acceptance, or production deployment."
+  ],
+  "sourceAndEvidencePins": [
+    {
+      "path": "F:/mir2-build/native-zh-cn-finish-20261029/installer-r9/Mir2-Invite.iss",
+      "bytes": 37809,
+      "sha256": "49f087bef9c21ba5be66b72c03221d5b5503b6ac340ac04bf286dde55f747f31",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "F:/u9/mir2-web3/apps/game-client/windows-updater/src/bin/launcher.rs",
+      "bytes": 2567,
+      "sha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "F:/u9/mir2-web3/apps/game-client/windows-updater/src/bin/updater.rs",
+      "bytes": 4587,
+      "sha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "F:/u9/mir2-web3/apps/game-client/windows-updater/src/lib.rs",
+      "bytes": 8739,
+      "sha256": "18d276f8073ac1cb3880df967aafc991681709146b5d5e57b7bcba22dc0780fa",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "F:/m9/mir2-web3/apps/game-client/platform-windows/src/native_locale.rs",
+      "bytes": 13717,
+      "sha256": "3192a50c57a6ab1eba5e793975e90f7aae19dc68e0afe27e82ee68ceef998546",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "C:/mir2-build/native-zh-cn-finish-20261029/launch-installed-native.mjs",
+      "bytes": 2679,
+      "sha256": "7240254af3bcf64d9e72a61b7cc1f1cf6140f0be731d6dc9d1a0e9213fcbbd6c",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "C:/mir2-build/native-zh-cn-finish-20261029/real-installer-normal-compile.json",
+      "bytes": 976,
+      "sha256": "0bcc1a33d10b8fda61725316864f638a3610cceca5832edfb7b1c3e405337d07",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "C:/mir2-build/native-zh-cn-finish-20261029/real-installer-validation-compile.json",
+      "bytes": 1000,
+      "sha256": "7bcf059fdf730db92e7ec0fad15684e3fcaa9ca3274383b409e5c4b2830b8b3b",
+      "normalization": "raw bytes at audit time"
+    },
+    {
+      "path": "C:/mir2-build/native-zh-cn-finish-20261029/updater-release-r9-final.json",
+      "bytes": 4615,
+      "sha256": "6ebb8bfe931c49a16b9904c48793c10d9d9ddce56db9891d3af4cd55fab5d7e6",
+      "normalization": "raw bytes at audit time"
+    }
+  ]
+}

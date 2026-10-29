@@ -1,0 +1,27 @@
+{
+  "kind": "actual-full-inno-compile-output-progress-before-final-postcheck",
+  "artifacts": [
+    {
+      "kind": "normal",
+      "path": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-normal-output\\Numeron-Legend-of-Rebirth-20261029-r9-Setup.exe",
+      "bytes": 1017970518,
+      "sha256": "b29f0638cefe77f95d1ced256a02e6260aa6e269b212f53548e39736a1272c20",
+      "binaryIncluded": false,
+      "coordinatorReportedCompilerExit": 0
+    },
+    {
+      "kind": "validation",
+      "path": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-validation-output\\Numeron-Legend-of-Rebirth-20261029-r9-LocalValidation-Setup.exe",
+      "bytes": 1017971207,
+      "sha256": "5fd15cf92cfe4cdace0408c5f4e99897a67d2ac8e01b44c1dae71761b7d4de4c",
+      "binaryIncluded": false,
+      "coordinatorReportedCompilerExit": 0
+    }
+  ],
+  "curatorRecomputedActualArtifacts": true,
+  "finalPostCompileVerificationPending": true,
+  "initialPostCheckIssue": "The external closing wrapper compared a Windows FileVersion field containing trailing whitespace; coordinator is correcting only the external comparison with Trim and will provide an independent receipt. Compiler success and final postcheck are distinct.",
+  "recompiledByCurator": false,
+  "sourceChangedByCurator": false,
+  "installerOrUiAcceptanceClaimed": false
+}

@@ -1,0 +1,8 @@
+{
+  "phase": "r10-after-first-ui",
+  "uninstaller": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installed-validation\\uninstall\\unins000.exe",
+  "separateAppId": true,
+  "exitCode": 0,
+  "elapsedSeconds": 16.3992197,
+  "passed": true
+}

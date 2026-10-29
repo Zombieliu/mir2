@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "manifestSha256": "ab86b5e083473c003863ead5c2ef09112cadc655684176e7ad757f7c60eb80ed",
+  "candidate": "WN-CANDIDATE-20261029-invited-09",
+  "payloadFilesChecked": 255023,
+  "manifestBytes": 49703926,
+  "allNewExplicitRootFilesPresent": true,
+  "oldPolicyRejectedExactlyTheseNewRoots": [
+    {
+      "path": "BILLING-HAN-SOURCE.json",
+      "size": 3713,
+      "sha256": "5A3A08443BE4F8A3483CB692FEADDAC87B54E1DA84E317C8696C47AF8E62CAC5"
+    },
+    {
+      "path": "OFL-NotoSansCJKsc.txt",
+      "size": 4301,
+      "sha256": "6A73F9541C2DE74158C0E7CF6B0A58EF774F5A780BF191F2D7EC9CC53EFE2BF2"
+    },
+    {
+      "path": "OFL-NotoSansSC-BillingHan.txt",
+      "size": 4388,
+      "sha256": "1C05C68C34F9708415AADA51F17E1B0092D2CEA709BF4A94CD38114F9E73D7D9"
+    },
+    {
+      "path": "README.zh-CN.txt",
+      "size": 3280,
+      "sha256": "0B8368B05343843B2272E9FB19F3200EA2205C3D830FCA09C9032C8CBEE3BDAA"
+    },
+    {
+      "path": "SIMPLIFIED-SOURCE.json",
+      "size": 1544,
+      "sha256": "22264165AA5BB1CBB42075E6D57AAB9BEAEA484528249D82E9A3F1FD28B36AFA"
+    }
+  ],
+  "fixedPolicyFailures": [],
+  "method": "Read every actual payload path through production Python game_path; Rust/Python exact root-policy equivalence is separately tested. No payload mutation or runtime launch."
+}
