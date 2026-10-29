@@ -57,7 +57,7 @@ pub fn relative(value: &str) -> Result<()> {
 }
 pub fn game_path(value: &str) -> Result<()> {
     relative(value)?;
-    const ROOT: [&str; 12] = [
+    const ROOT: [&str; 17] = [
         "mir2-platform-windows.exe",
         "mir2-client.toml",
         "README-START.txt",
@@ -70,6 +70,11 @@ pub fn game_path(value: &str) -> Result<()> {
         "OFL-NotoSansThai.txt",
         "MULTILINGUAL-SOURCES.json",
         "BUILD-ATTESTATION.json",
+        "README.zh-CN.txt",
+        "BILLING-HAN-SOURCE.json",
+        "OFL-NotoSansSC-BillingHan.txt",
+        "SIMPLIFIED-SOURCE.json",
+        "OFL-NotoSansCJKsc.txt",
     ];
     if ROOT.contains(&value) || META.contains(&value) {
         return Ok(());

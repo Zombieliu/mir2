@@ -8,6 +8,80 @@ mod regression {
             sha256: hash(bytes),
         }
     }
+    const SIMPLIFIED_ROOT_FILES: [&str; 5] = [
+        "README.zh-CN.txt",
+        "BILLING-HAN-SOURCE.json",
+        "OFL-NotoSansSC-BillingHan.txt",
+        "SIMPLIFIED-SOURCE.json",
+        "OFL-NotoSansCJKsc.txt",
+    ];
+
+    #[test]
+    fn simplified_release_root_files_are_allowed_exactly() {
+        for path in SIMPLIFIED_ROOT_FILES {
+            game_path(path).unwrap();
+        }
+    }
+
+    #[test]
+    fn simplified_release_root_near_misses_remain_rejected() {
+        for path in SIMPLIFIED_ROOT_FILES {
+            for near_miss in [
+                path.to_ascii_lowercase(),
+                format!("extra-{path}"),
+                format!("{path}.json"),
+                format!("{path}.exe"),
+                format!("nested/{path}"),
+                format!("{path}/data.txt"),
+            ] {
+                assert!(game_path(&near_miss).is_err(), "{near_miss}");
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    #[ignore = "requires an existing CMS-signed Candidate; reads only, never launches"]
+    fn simplified_release_existing_signed_candidate_reads_complete_manifest() {
+        let root = std::path::PathBuf::from(
+            std::env::var_os("MIR2_UPDATER_TEST_CANDIDATE_ROOT")
+                .expect("set MIR2_UPDATER_TEST_CANDIDATE_ROOT to the immutable signed Candidate"),
+        );
+        assert!(root.is_absolute());
+        // Read the immutable package through the same bounded metadata, pinned
+        // CMS, manifest/binding and executable/attestation gates as startup.
+        let metadata: std::collections::BTreeMap<String, Vec<u8>> = META
+            .iter()
+            .map(|name| {
+                (
+                    (*name).to_owned(),
+                    crate::fs_safe::read_bounded(&root.join(name), MAX_META).unwrap(),
+                )
+            })
+            .collect();
+        crate::platform::verify_cms(
+            &metadata["RELEASE-STATEMENT.json"],
+            &metadata["RELEASE-STATEMENT.p7s"],
+            crate::SIGNING_KEY,
+        )
+        .unwrap();
+        let manifest = bind_game(&metadata).unwrap();
+        assert_eq!(manifest.file_count, manifest.files.len());
+        let files = manifest.map();
+        for path in ["mir2-platform-windows.exe", "BUILD-ATTESTATION.json"] {
+            assert!(crate::fs_safe::matches(&root.join(path), files[path]).unwrap());
+        }
+        for path in SIMPLIFIED_ROOT_FILES {
+            assert!(files.contains_key(path), "{path}");
+        }
+        let version: serde_json::Value = serde_json::from_slice(&metadata["VERSION.json"]).unwrap();
+        let identity = version["candidate"].as_str().unwrap();
+        println!(
+            "Verified pinned CMS and complete manifest: {identity}, {} payload files, {} bytes",
+            manifest.file_count, manifest.total_bytes
+        );
+    }
+
     fn feed() -> Feed {
         Feed {
             schema: "mir2.windows.update-feed.v1".into(),

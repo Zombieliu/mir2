@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tarfile
@@ -25,7 +26,7 @@ def dumped(value):
     return json.dumps(value, separators=(",", ":")).encode("ascii")
 
 
-def fixture_candidate(root):
+def fixture_candidate(root, extra_payload=None):
     root.mkdir()
     exe = b"MZ fixture game executable; never executed"
     dirty_hash = archive.sha256(b"clean-worktree-fixture")
@@ -34,6 +35,7 @@ def fixture_candidate(root):
              "worktreeStatusSha256": dirty_hash}
     payload = {"mir2-platform-windows.exe": exe, "BUILD-ATTESTATION.json": dumped(build),
                "README-START.txt": b"fixture instructions\n", "mir2-assets/nested/data.txt": b"exact asset bytes\x00\xff"}
+    payload.update(extra_payload or {})
     for name, data in payload.items():
         file = root / name
         file.parent.mkdir(parents=True, exist_ok=True)
@@ -123,6 +125,37 @@ class ArchiveTests(unittest.TestCase):
                     self.assertEqual(actual[member.name], (Path(self.mapping[prefix]) / member.name[len(prefix) + 1:]).read_bytes())
         self.assertEqual(set(actual), {e["path"] for e in receipt["files"]})
         self.assertEqual(sum(map(len, actual.values())), receipt["uncompressedBytes"])
+
+    def test_simplified_root_policy_matches_runtime_and_rejects_near_misses(self):
+        runtime = SCRIPT.parents[1] / "src" / "model.rs"
+        root_constant = re.search(r"const ROOT: \[&str; (\d+)\] = \[(.*?)\];",
+                                  runtime.read_text(encoding="utf-8"), re.S)
+        self.assertIsNotNone(root_constant)
+        runtime_paths = re.findall(r'"([^"\n]+)"', root_constant.group(2))
+        self.assertEqual(len(runtime_paths), int(root_constant.group(1)))
+        self.assertEqual(set(runtime_paths), archive.GAME_ROOT_FILES)
+        for path in ("README.zh-CN.txt", "BILLING-HAN-SOURCE.json",
+                     "OFL-NotoSansSC-BillingHan.txt", "SIMPLIFIED-SOURCE.json",
+                     "OFL-NotoSansCJKsc.txt"):
+            archive.game_path(path)
+            for near_miss in (path.lower(), "extra-" + path, path + ".json", path + ".exe",
+                              "nested/" + path, path + "/data.txt"):
+                with self.subTest(path=near_miss), self.assertRaises(archive.ValidationError):
+                    archive.game_path(near_miss)
+
+    def test_simplified_root_payload_keeps_complete_archive_binding(self):
+        extra = {path: ("exact " + path).encode("ascii") for path in (
+            "README.zh-CN.txt", "BILLING-HAN-SOURCE.json", "OFL-NotoSansSC-BillingHan.txt",
+            "SIMPLIFIED-SOURCE.json", "OFL-NotoSansCJKsc.txt")}
+        candidate = fixture_candidate(self.root / "simplified-candidate", extra)
+        mapping = {**self.mapping, "releases/game-r6": str(candidate)}
+        receipt = archive.build_archive(mapping, self.output)
+        self.assertEqual(receipt["fileCount"], 16)
+        self.assertFalse(receipt["cmsVerified"])
+        self.assertTrue(receipt["requiresExternalSignatureVerification"])
+        with tarfile.open(self.output, "r:gz") as packaged:
+            for name, data in extra.items():
+                self.assertEqual(packaged.extractfile("releases/game-r6/" + name).read(), data)
 
     def test_deterministic_plain_ustar_gzip(self):
         archive.build_archive(self.mapping, self.output)

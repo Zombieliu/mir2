@@ -39,6 +39,8 @@ GAME_ROOT_FILES = {
     "CONTROLS.txt", "KNOWN-ISSUES.md", "NotoSansTC-OFL.txt", "OFL-NotoSans.txt",
     "OFL-NotoSansArabic.txt", "OFL-NotoSansDevanagari.txt", "OFL-NotoSansThai.txt",
     "MULTILINGUAL-SOURCES.json", "BUILD-ATTESTATION.json",
+    "README.zh-CN.txt", "BILLING-HAN-SOURCE.json", "OFL-NotoSansSC-BillingHan.txt",
+    "SIMPLIFIED-SOURCE.json", "OFL-NotoSansCJKsc.txt",
 }
 EXECUTABLE_TOKENS = {
     "exe", "dll", "com", "scr", "cpl", "msi", "msp", "bat", "cmd", "ps1",
