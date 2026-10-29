@@ -61,7 +61,7 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
     } catch { setError(true); } finally { setBusy(false); }
   }
   return <section className={styles.section}><h2>{labels[0]}</h2><p className={styles.notice}>{copy.testnetBody}</p>
-    <a className={styles.secondary} href="/promotions/play">{labels[8]} ↗</a>
+    <a className={styles.secondary} href={`/promotions/play${bootstrap.campaign?.campaignId ? `?campaignId=${encodeURIComponent(bootstrap.campaign.campaignId)}` : ""}`}>{labels[8]} ↗</a>
     {!bootstrap.characters.length ? <p className={styles.empty}>{copy.noCharacters}</p> : <>
       <label className={styles.field}>{copy.selectCharacter}<select value={character} disabled={busy} onChange={event => setCharacter(Number(event.target.value))}>
         {bootstrap.characters.map(item => <option key={item.index} value={item.index}>{item.name} · {item.level}</option>)}
@@ -71,7 +71,7 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
         <div className={styles.actions}>{status.suiUsdcEnabled ? status.suiUsdcOffers.map(offer => <button key={offer.id} className={styles.primary} disabled={busy} onClick={() => void mutate("checkout", { offerId: offer.id })}>
           {labels[1]} · {formatPromotionUsd(offer.amountMicros, locale)} · {offer.credits} {labels[5]}</button>) : null}</div>
         {checkout ? <p><a className={styles.primary} href={checkout} target="_blank" rel="noopener noreferrer">{labels[4]} ↗</a></p> : null}
-        {status.monthlyCardCreditPrice !== null ? <><label className={styles.checkbox}><input type="checkbox" checked={reviewed} disabled={busy} onChange={event => setReviewed(event.target.checked)} />{labels[6]} ({status.monthlyCardCreditPrice} {labels[5]})</label>
+        {status.monthlyCardCreditPrice !== null ? <><label className={styles.check}><input type="checkbox" checked={reviewed} disabled={busy} onChange={event => setReviewed(event.target.checked)} />{labels[6]} ({status.monthlyCardCreditPrice} {labels[5]})</label>
           <button className={styles.secondary} disabled={busy || !reviewed || status.credit < status.monthlyCardCreditPrice} onClick={() => void mutate("buy")}>{labels[2]}</button></> : null}
         {status.ownedMonthlyCards.map(card => <p key={card.uniqueId}>{card.label} <button className={styles.secondary} disabled={busy} onClick={() => void mutate("activate", { itemUniqueId: card.uniqueId })}>{labels[3]}</button></p>)}
         {status.suiUsdcOrders.map(order => <p key={order.id} className={styles.code}>{order.id} · {order.state}{order.transactionDigest ? ` · ${order.transactionDigest}` : ""}</p>)}
