@@ -6147,9 +6147,9 @@ async fn handle_socket_work(
                     };
                     if let Some(context) = login_identity_context.as_mut() {
                         context.auth_method = verified.auth_method;
-                        context.credential_subject = verified
-                            .credential_subject
-                            .clone()
+                        context.credential_subject = promotion_login_binding.as_ref()
+                            .map(|binding| binding.credential_subject().to_string())
+                            .or_else(|| verified.credential_subject.clone())
                             .unwrap_or_else(|| {
                                 proof_account_id
                                     .strip_prefix("sui:")

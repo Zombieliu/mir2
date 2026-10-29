@@ -69,6 +69,13 @@ pub struct VerifiedIdentitySession {
     pub expires_at_ms: u64,
 }
 
+/// Server-only credential evidence. Unlike the public credential DTO this is
+/// intentionally neither serializable nor Debug-printable.
+pub(crate) struct VerifiedWalletCredential {
+    pub(crate) credential_id: String,
+    pub(crate) credential_subject: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct IdentitySessionTokenPayload {
@@ -400,6 +407,55 @@ impl IdentityService {
                     redact_credential_subject(&credential.credential_subject);
             }
             Ok(credentials)
+        }
+    }
+
+    /// Read the exact current wallet credential under the parent session's
+    /// account/session/expiry binding. Never return this through an HTTP DTO.
+    pub(crate) fn verified_wallet_credential(
+        &self,
+        verified: &VerifiedIdentitySession,
+    ) -> Result<VerifiedWalletCredential, String> {
+        let now_ms = unix_now_ms();
+        let rejected = || "current wallet session is unavailable".to_string();
+        if self.database_url.is_some() {
+            let expires = i64::try_from(verified.expires_at_ms).map_err(|_| rejected())?;
+            self.with_postgres(|client| {
+                client.query_opt(
+                    "SELECT c.credential_id,c.credential_subject FROM identity_sessions s JOIN identity_credentials c ON c.credential_id=s.credential_id AND c.account_id=s.account_id WHERE s.session_id=$1 AND s.account_id=$2 AND s.expires_at_ms=$3 AND s.expires_at_ms>$4 AND s.revoked_at_ms IS NULL AND s.auth_method='sui_wallet' AND c.credential_kind='sui_wallet' AND c.revoked_at_ms IS NULL",
+                    &[&verified.session_id, &verified.account_id, &expires, &(now_ms as i64)],
+                ).map_err(|_| rejected())?.map(|row| VerifiedWalletCredential {
+                    credential_id: row.get(0), credential_subject: row.get(1),
+                }).ok_or_else(rejected)
+            })
+        } else {
+            let memory = self.memory.lock().map_err(|_| rejected())?;
+            let session = memory
+                .sessions
+                .get(&verified.session_id)
+                .filter(|session| {
+                    session.account_id == verified.account_id
+                        && session.expires_at_ms == verified.expires_at_ms
+                        && session.expires_at_ms > now_ms
+                        && session.revoked_at_ms.is_none()
+                        && session.auth_method == "sui_wallet"
+                })
+                .ok_or_else(rejected)?;
+            let credential = memory
+                .credentials
+                .get(&verified.account_id)
+                .and_then(|credentials| {
+                    credentials.iter().find(|credential| {
+                        Some(&credential.credential_id) == session.credential_id.as_ref()
+                            && credential.credential_kind == "sui_wallet"
+                            && credential.revoked_at_ms.is_none()
+                    })
+                })
+                .ok_or_else(rejected)?;
+            Ok(VerifiedWalletCredential {
+                credential_id: credential.credential_id.clone(),
+                credential_subject: credential.credential_subject.clone(),
+            })
         }
     }
 
