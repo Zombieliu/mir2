@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-local-health-evidence-run1/REAL-GAME-EXIT.json",
+    "bytes": 72,
+    "sha256": "b6b800be21fff2540abf019866c6f014288efea743331e9a823c1ce1490069fc"
+  },
+  "sanitizedProducerFields": {
+    "code": 0,
+    "driverKilledHealthyChild": false,
+    "success": true
+  },
+  "attemptNonceRawValuesOmitted": true,
+  "rawGameStdoutStderrNeverCopied": true,
+  "phase": "Actual production-library local apply/real child proof; not a synthetic ready fixture"
+}

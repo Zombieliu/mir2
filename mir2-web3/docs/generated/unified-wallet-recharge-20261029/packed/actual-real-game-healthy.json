@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-local-health-evidence-run1/REAL-GAME-HEALTHY.json",
+    "bytes": 545,
+    "sha256": "8c5b629463da6ff8f5d6ba47f34981b0a6756ed33a02b6e58eda0bd31448ab8d"
+  },
+  "sanitizedProducerFields": {
+    "acceptedViaProductionApi": true,
+    "actualKernelPid": 76824,
+    "actualReadyMessage": true,
+    "aliveAfterReadyAtLeastMs": 10000,
+    "attemptSha256": "0686cd2c123c73be0a66cf13d201a99c3e655f7f1db38debe9055c55c1b72ed3",
+    "frontendManualAcceptance": false,
+    "fullLegacyRollbackExecutionProven": false,
+    "generationManifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+    "mir2EnvironmentCleared": true,
+    "noFakeAcceptedMarker": true,
+    "passed": true,
+    "publicMigrationProven": false,
+    "selectorHealth": "healthy"
+  },
+  "attemptNonceRawValuesOmitted": true,
+  "rawGameStdoutStderrNeverCopied": true,
+  "phase": "Actual production-library local apply/real child proof; not a synthetic ready fixture"
+}

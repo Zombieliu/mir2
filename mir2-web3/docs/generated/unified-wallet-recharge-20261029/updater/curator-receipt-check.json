@@ -1,0 +1,118 @@
+{
+  "passed": true,
+  "checkedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "scope": "Rehash existing small report/log and14 bundle/engine/feed artifact fingerprints; no build/sign/execute/archive rescan",
+  "reportsChecked": [
+    {
+      "file": "unified-updater-staged-preflight.json",
+      "bytes": 1037,
+      "sha256": "ac234edfb7d53b71d0ae7e9a6a5e1a4ccfa20c3d9e2a75b00e7a5883c0e37d2b"
+    },
+    {
+      "file": "unified-updater-build.log",
+      "bytes": 3278,
+      "sha256": "5257600a551f903a604fd1e07ae0b5831b43193d578b18b995ec77161430a636"
+    },
+    {
+      "file": "unified-updater-verification.json",
+      "bytes": 592,
+      "sha256": "3af0bfaf18b871f8bffa2b44fbc0df46fb7e9e6cec6295eb1aeb33da55af429b"
+    },
+    {
+      "file": "unified-updater-verification.log",
+      "bytes": 594,
+      "sha256": "e107e3728acbdf698fedcb75b9f59865d1ed55aa3c3daea9a7e2fce789dd0a46"
+    },
+    {
+      "file": "unified-updater-archive.log",
+      "bytes": 1092,
+      "sha256": "30198197330c7b00286879406840636dcb8236519c295aa138f05466fd83c3ac"
+    },
+    {
+      "file": "unified-updater-pipeline-result.json",
+      "bytes": 705,
+      "sha256": "cdf9e9712453abf24a5c00b017e465b849e1a2b1d4743373f359a5f9391d125c"
+    },
+    {
+      "file": "unified-updater-signed-artifact-fingerprints.json",
+      "bytes": 3867,
+      "sha256": "2f7f0250105d4658c98cb22d01487c471a87d95106003185cbcdc59b18ad767b"
+    }
+  ],
+  "signedArtifactFingerprintsChecked": [
+    {
+      "file": "bundle/Mir2Launcher.exe",
+      "bytes": 512512,
+      "sha256": "e6442339ec5786f4350f694fa058c0e9d4363d0e3d50bdb27f2c3ae65fca6d96"
+    },
+    {
+      "file": "bundle/UPDATER-BUNDLE.json",
+      "bytes": 1286,
+      "sha256": "bf4aeb9f8c9ac947463086f2a6f77fed3279909a373997e7266dfa17c540a7d1"
+    },
+    {
+      "file": "bundle/UPDATER-BUNDLE.p7s",
+      "bytes": 1614,
+      "sha256": "864522368739102a17ce1d2e2b99f53d7dbf75020849e19aab1c9f7ac24c3386"
+    },
+    {
+      "file": "bundle/updater/active.txt",
+      "bytes": 64,
+      "sha256": "2f670777e0918e4d33e94bccb1145d2fb2ccc66568484b9738d58d4436cf55a3"
+    },
+    {
+      "file": "bundle/updater/seed-feed.json",
+      "bytes": 1175,
+      "sha256": "91663f8b4bf8ee013fdbe3f39daeea172c7a6589fdb98182e7e1c09dfb4c82f3"
+    },
+    {
+      "file": "bundle/updater/seed-feed.p7s",
+      "bytes": 1614,
+      "sha256": "b484e2fcb11acade70e041537963babfd65b048f3dd1f20ebbcbc2a7973d0289"
+    },
+    {
+      "file": "bundle/updater/engines/C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB/ENGINE.json",
+      "bytes": 421,
+      "sha256": "c31c8167bfe937c3992bd2dab0d4999a0f6098863eade66d692231a7ade086e3"
+    },
+    {
+      "file": "bundle/updater/engines/C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB/ENGINE.p7s",
+      "bytes": 1614,
+      "sha256": "2eeaac713f21345d343f0137bf1220b232b629530d3cd56b8ea76d33270358c6"
+    },
+    {
+      "file": "bundle/updater/engines/C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB/Mir2Updater.exe",
+      "bytes": 2184192,
+      "sha256": "c7b2a2091222563780c11dbf31544fd889491f5e15dd0c702820bcecbee7cedb"
+    },
+    {
+      "file": "engine-release/ENGINE.json",
+      "bytes": 421,
+      "sha256": "c31c8167bfe937c3992bd2dab0d4999a0f6098863eade66d692231a7ade086e3"
+    },
+    {
+      "file": "engine-release/ENGINE.p7s",
+      "bytes": 1614,
+      "sha256": "2eeaac713f21345d343f0137bf1220b232b629530d3cd56b8ea76d33270358c6"
+    },
+    {
+      "file": "engine-release/Mir2Updater.exe",
+      "bytes": 2184192,
+      "sha256": "c7b2a2091222563780c11dbf31544fd889491f5e15dd0c702820bcecbee7cedb"
+    },
+    {
+      "file": "feed/latest.json",
+      "bytes": 1175,
+      "sha256": "91663f8b4bf8ee013fdbe3f39daeea172c7a6589fdb98182e7e1c09dfb4c82f3"
+    },
+    {
+      "file": "feed/latest.p7s",
+      "bytes": 1614,
+      "sha256": "b484e2fcb11acade70e041537963babfd65b048f3dd1f20ebbcbc2a7973d0289"
+    }
+  ],
+  "archiveRehashedByCurator": false,
+  "archiveHashSource": "Original producer pipeline archive result; full1.057GB archive not copied or rescanned",
+  "cmsCryptographyRerunByCurator": false,
+  "originalIndependentCmsReport": "bundle-verification.json"
+}

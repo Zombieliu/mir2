@@ -1,0 +1,20 @@
+{
+  "name": "installed-sc-login-wallet-entry",
+  "capturedAtUtc": "2026-10-29T17:10:04.015Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 18942406,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-sc-login-wallet-entry-0.jpg",
+      "sha256": "1a61842fa6bbe7234f80593e44d7127030682a39b2cddba6c162a09753df9822",
+      "bytes": 318291,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "phase": "release-source-and-offline-regression-only",
+  "sourceSummary": "../release-implementation-summary.json",
+  "rust": "rust-tests.json",
+  "python": "python-suites.json",
+  "legal": "legal-layout.json",
+  "packageAllowlist": "package-allowlists.json",
+  "innoStatic": "inno-static.json",
+  "developmentHistory": "development-history.json",
+  "pythonTotal": 186,
+  "pythonPassed": 183,
+  "pythonSkipped": 3,
+  "pythonCryptographicBoundary": "Archive/bootstrap/publication/delivery unit fixtures use Mock or placeholder signatures. They do not verify a new signed installer or generation. Real old r10 CMS evidence is separately identified in rust-tests.json.",
+  "oldRoot12CompatibilityBoundary": "Three checks execute the actual pinned Wallet28 archive source parser; no old native binary migration is claimed.",
+  "innoBoundary": "Ten languages,281 trusted messages and15 custom messages per language; no new Setup EXE compiled by this phase.",
+  "newCleanGameOrUpdaterArtifact": false,
+  "actualUnifiedWindowsUi": false,
+  "actualNewHighSequenceMigration": false,
+  "publicFeedModified": false
+}

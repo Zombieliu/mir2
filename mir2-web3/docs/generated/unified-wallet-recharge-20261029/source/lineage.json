@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "historyPreservingMerge": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+  "parents": [
+    "b87f4071a2026ce96c85ca746ed69f207887a322",
+    "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844"
+  ],
+  "finalGameCommit": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "finalGameParent": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+  "finalUpdaterCommit": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "pushed": false,
+  "scope": "Read-only Git lineage; actual Game1875 and Engine77 builds are separately evidenced; public publication not performed"
+}

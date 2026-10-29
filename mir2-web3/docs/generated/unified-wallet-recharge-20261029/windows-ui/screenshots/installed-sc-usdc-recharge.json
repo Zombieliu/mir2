@@ -1,0 +1,20 @@
+{
+  "name": "installed-sc-usdc-recharge",
+  "capturedAtUtc": "2026-10-29T17:12:49.077Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 4788964,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-sc-usdc-recharge-0.jpg",
+      "sha256": "2a1b411fa8aaed287a6b8d096bf920860e2812c8896a781653be87a3c5834b8d",
+      "bytes": 89190,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

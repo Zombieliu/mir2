@@ -1,0 +1,68 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "game-attestation-final.json",
+    "bytes": 1493,
+    "sha256": "8ae470cde3ee893bcfe726f86a0888197820002f6a61945d12f61712f8c27292"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.build-attestation.v2",
+    "exeSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+    "exeSizeBytes": 133843456,
+    "gitRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "worktreeDirty": false,
+    "worktreeStatusScope": "git-status-z+diff+all-untracked-content-v2",
+    "worktreeStatusSha256": "7818A3870FF1F8D6CE856AB2C388E886FD3FB849ECA89BEFEFD3C6EE25D7D295",
+    "worktreeStatusLineCount": 0,
+    "cargoVersion": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)",
+    "rustcVersion": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "buildCommand": {
+      "executable": "cargo",
+      "toolchain": "+1.95.0",
+      "subcommand": "build",
+      "manifestPath": "apps/game-client/platform-windows/Cargo.toml",
+      "bin": "mir2-platform-windows",
+      "release": true,
+      "locked": true,
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "release",
+      "targetDir": "target-attested-windows-candidate",
+      "extraArgs": []
+    },
+    "pathRemapping": {
+      "enabled": true,
+      "environmentVariable": "RUSTFLAGS",
+      "flags": [
+        {
+          "sourceToken": "<REPO_ROOT>",
+          "destination": "."
+        },
+        {
+          "sourceToken": "<CARGO_HOME>",
+          "destination": "cargo-home"
+        }
+      ]
+    },
+    "buildCompletedUtc": "2026-10-29T15:39:07.1209647+00:00",
+    "publisherAuthenticode": {
+      "required": false,
+      "status": "internal-candidate-only",
+      "thumbprint": null,
+      "timestampRequired": false
+    }
+  },
+  "phase": "final clean1875 release; updater and full Candidate remain separate pending gates",
+  "actualFileRehashed": {
+    "bytes": 133843456,
+    "sha256": "85879bfeb1b44d4c759e6a338338bb58a383b7701f886d1090a96b6267f00c6f",
+    "matchedAttestation": true
+  },
+  "releaseLog": {
+    "filename": "game-attested-release-build.log",
+    "bytes": 64093,
+    "sha256": "a265545e8fa61544378e5ec6ef0a32c60c9ef8217be034e88af7b0f7ac4843a9"
+  },
+  "humanAccepted": false
+}

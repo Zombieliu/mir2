@@ -1,0 +1,59 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "windows-live/evidence/ui-economy-conservation.json",
+    "bytes": 1748,
+    "sha256": "428b5091dc7aa71e2de8de0e7ac9283e0d6703ee9e78c6ada1a5a27df95777ba"
+  },
+  "producerReport": {
+    "passed": true,
+    "syntheticUiFixture": true,
+    "observedAtUtc": "2026-10-29T17:22:41.416Z",
+    "beforeBalances": {
+      "gold": 10000,
+      "credit": 100
+    },
+    "afterBalances": {
+      "gold": 10000,
+      "credit": 100
+    },
+    "sections": [
+      {
+        "section": "balances",
+        "unchanged": true,
+        "beforeSha256": "6623ef9b9efeee72edfbf606f1925d58d0b02936eafc3f9d17e76cb7f762ef30",
+        "afterSha256": "6623ef9b9efeee72edfbf606f1925d58d0b02936eafc3f9d17e76cb7f762ef30"
+      },
+      {
+        "section": "inventory",
+        "unchanged": true,
+        "beforeSha256": "fe95254aefee6d0636f20fc2dc9d14a3d73399507a606495fcdf51e45b047a63",
+        "afterSha256": "fe95254aefee6d0636f20fc2dc9d14a3d73399507a606495fcdf51e45b047a63"
+      },
+      {
+        "section": "billing",
+        "unchanged": true,
+        "beforeSha256": "68c86f53f561ec391c1a2739a3066f4d39520346b88be323aa5e35f241e78e45",
+        "afterSha256": "68c86f53f561ec391c1a2739a3066f4d39520346b88be323aa5e35f241e78e45"
+      },
+      {
+        "section": "procurement",
+        "unchanged": true,
+        "beforeSha256": "1a1c2dcfe9d0ebd3bd05b20d2d98293ac49a469bef2fa5d10b7bc5019a446ff1",
+        "afterSha256": "1a1c2dcfe9d0ebd3bd05b20d2d98293ac49a469bef2fa5d10b7bc5019a446ff1"
+      },
+      {
+        "section": "monthly",
+        "unchanged": true,
+        "beforeSha256": "2b4a0839af727f8be2376da90f84c386db6cd39ff2bc527882f92f4377555dbb",
+        "afterSha256": "2b4a0839af727f8be2376da90f84c386db6cd39ff2bc527882f92f4377555dbb"
+      }
+    ],
+    "paymentsAttempted": false,
+    "chainTransactions": 0,
+    "scope": "Balances, original item payloads, billing receipts, procurement assets/quota/requests and monthly-card state; login/actor binding metadata and character position/revision are outside the economy comparison."
+  },
+  "phase": "Independent actual runtime or read-only observation; no source/test/build rerun by curator"
+}

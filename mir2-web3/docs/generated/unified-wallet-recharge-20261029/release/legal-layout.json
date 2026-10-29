@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "producerResult": {
+    "passed": true,
+    "checks": 39,
+    "exactDocuments": 5,
+    "oldRoot17Accepted": true,
+    "newLegalRoot12Accepted": true,
+    "mixedRejected": true
+  },
+  "externalLogReceipt": {
+    "filename": "release-legal-layout-v1.log",
+    "bytes": 156,
+    "sha256": "8c5ec1ffb3f4cc2f1c089de42fcf54726b5c18cc1e9f92bd14ba19f1b9632c4f",
+    "rawLogIncluded": false
+  },
+  "actualNewArtifactVerified": false
+}

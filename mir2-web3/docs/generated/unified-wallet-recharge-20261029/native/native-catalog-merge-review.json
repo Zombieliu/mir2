@@ -1,0 +1,49 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-catalog-merge-review.json",
+    "bytes": 1550,
+    "sha256": "d2d18c1950664344910809e8287398e1776ceb7f4eb9a3e0eb0ff67cfef53cca"
+  },
+  "producerReport": {
+    "recordedAtUtc": "2026-10-29T14:16:53.962374+00:00",
+    "baseSCCommit": "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844",
+    "walletPackedCommit": "b87f4071a2026ce96c85ca746ed69f207887a322",
+    "scope": "read-only catalog union + existing editorial preservation; not human linguistic acceptance",
+    "oldKeys": 9769,
+    "mergedKeys": 9791,
+    "allOldValuesUnchanged": true,
+    "onlyWalletKeysAdded": [
+      "wallet.login.cancel",
+      "wallet.login.countdown",
+      "wallet.login.instructions",
+      "wallet.login.message.cancelling",
+      "wallet.login.message.confirm",
+      "wallet.login.message.connection",
+      "wallet.login.message.creating",
+      "wallet.login.message.credential_expired",
+      "wallet.login.message.expired",
+      "wallet.login.message.qr_failed",
+      "wallet.login.message.rejected",
+      "wallet.login.message.restart",
+      "wallet.login.message.retry",
+      "wallet.login.message.unavailable",
+      "wallet.login.refresh",
+      "wallet.login.stage.approved",
+      "wallet.login.stage.creating",
+      "wallet.login.stage.error",
+      "wallet.login.stage.expired",
+      "wallet.login.stage.pending",
+      "wallet.login.stage.rejected",
+      "wallet.login.title"
+    ],
+    "editorialOverridesUnchanged": true,
+    "overridePath": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+    "overrideRawSha256": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17",
+    "mergedCatalogRawSha256": "4e81d7fa6c190ca4540a7cb466f8178eb2b6aff744a206a9950ddb8b8d8f53bf",
+    "humanAccepted": false
+  },
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

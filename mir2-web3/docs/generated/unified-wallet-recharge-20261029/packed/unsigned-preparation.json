@@ -1,0 +1,46 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-packed-s2026102912/UNIFIED-PACKED-PREPARED.json",
+    "bytes": 1140,
+    "sha256": "4a2aa1d756365bf5cb7de8fa05c64ff291d803361ec00fe24588a18018947ed8"
+  },
+  "producerReport": {
+    "schema": "mir2.unified-packed-unsigned-preparation.v1",
+    "preparedUtc": "2026-10-29T16:57:22.309863+00:00",
+    "passed": true,
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "sequence": 2026102912,
+    "legacySeedSequence": 2026102911,
+    "sourceResourceCount": 255063,
+    "inventorySha256": "41ABCBB85FBAABB0B8977DF21A5D44247BD28ED0400DC9EE09421448D7B09970",
+    "catalogSha256": "1466EE20A770D5E2EEF87D27EAE5EB8B78AC4F8A539248679DC5A9629EEF17F7",
+    "resourceVerification": {
+      "actualFullVerification": true,
+      "catalogSha256": "1466EE20A770D5E2EEF87D27EAE5EB8B78AC4F8A539248679DC5A9629EEF17F7",
+      "logicalBytes": 1086916989,
+      "metadataOnly": false,
+      "packBytes": 1069032581,
+      "packCount": 33,
+      "passed": true,
+      "resourceCount": 255063,
+      "schema": "mir2.native.resource-pack-verification.v1",
+      "uniquePayloadBytes": 1053192997,
+      "uniquePayloads": 247477
+    },
+    "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+    "releaseRoot": "C:\\mir2-build\\unified-20261029\\unified-packed-s2026102912\\release",
+    "previousCatalogUsed": false,
+    "signed": false,
+    "published": false,
+    "installed": false,
+    "gameLaunched": false
+  },
+  "phase": "Unsigned preparation snapshot: signed=false remains true to that earlier stage",
+  "installed": false,
+  "gameLaunched": false,
+  "publicFeedModified": false
+}

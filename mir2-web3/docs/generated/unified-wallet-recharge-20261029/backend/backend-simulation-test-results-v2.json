@@ -1,0 +1,88 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "backend-simulation-test-results-v2.json",
+    "bytes": 2771,
+    "sha256": "b9858e9091327d27fc0f94f94383237712acc14b37bb10ab4dccecea6355c0bf"
+  },
+  "producerReport": [
+    {
+      "name": "migration",
+      "exitCode": 0,
+      "elapsedSeconds": 25.491112,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-migration-v2.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3050 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "name": "simulation-usdc",
+      "exitCode": 0,
+      "elapsedSeconds": 0.7273219,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-simulation-usdc-v2.log",
+      "results": [
+        "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 3030 filtered out; finished in 0.39s"
+      ]
+    },
+    {
+      "name": "simulation-procurement",
+      "exitCode": 0,
+      "elapsedSeconds": 5.8543987,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-simulation-procurement-v2.log",
+      "results": [
+        "test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 2997 filtered out; finished in 5.52s"
+      ]
+    },
+    {
+      "name": "uid-file",
+      "exitCode": 0,
+      "elapsedSeconds": 64.083487,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-uid-file-v2.log",
+      "results": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.87s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.88s",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.89s",
+        "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.95s"
+      ]
+    },
+    {
+      "name": "billing-recharge",
+      "exitCode": 0,
+      "elapsedSeconds": 8.3678894,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-billing-recharge-v2.log",
+      "results": [
+        "test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.48s"
+      ]
+    },
+    {
+      "name": "activities",
+      "exitCode": 0,
+      "elapsedSeconds": 3.6856341,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-activities-v2.log",
+      "results": [
+        "test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s"
+      ]
+    },
+    {
+      "name": "production",
+      "exitCode": 0,
+      "elapsedSeconds": 0.3409666,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-production-v2.log",
+      "results": [
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3051 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "name": "stones",
+      "exitCode": 0,
+      "elapsedSeconds": 0.333469,
+      "log": "C:\\mir2-build\\unified-20261029\\backend-test-stones-v2.log",
+      "results": [
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3051 filtered out; finished in 0.00s"
+      ]
+    }
+  ],
+  "phase": "producer focused test rows; no counts added to aggregate twice"
+}

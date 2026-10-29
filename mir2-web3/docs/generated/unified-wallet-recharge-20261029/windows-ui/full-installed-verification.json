@@ -1,0 +1,72 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "unified-installed-verification.json",
+    "bytes": 2247,
+    "sha256": "be2fd92af187b02bced347bc2dfbe7f9f26ebfb77f2e1398802ab806c0e29c21"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.installed-verification.v1",
+    "passed": true,
+    "installRoot": "F:/mir2-build/unified-20261029/installed-validation",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "fullGameFiles": 255079,
+    "fullGameBytes": 1270575381,
+    "gameReportSha256": "7DF75440E74C55D959C3BBCBAEE1A8D0A6DEC5DF83EDA46F1E51E44DD47537DA",
+    "updaterFiles": [
+      {
+        "path": "Mir2Launcher.exe",
+        "size": 512512,
+        "sha256": "E6442339EC5786F4350F694FA058C0E9D4363D0E3D50BDB27F2C3AE65FCA6D96"
+      },
+      {
+        "path": "UPDATER-BUNDLE.json",
+        "size": 1286,
+        "sha256": "BF4AEB9F8C9AC947463086F2A6F77FED3279909A373997E7266DFA17C540A7D1"
+      },
+      {
+        "path": "UPDATER-BUNDLE.p7s",
+        "size": 1614,
+        "sha256": "864522368739102A17CE1D2E2B99F53D7DBF75020849E19AAB1C9F7AC24C3386"
+      },
+      {
+        "path": "updater\\active.txt",
+        "size": 64,
+        "sha256": "2F670777E0918E4D33E94BCCB1145D2FB2CCC66568484B9738D58D4436CF55A3"
+      },
+      {
+        "path": "updater\\seed-feed.json",
+        "size": 1175,
+        "sha256": "91663F8B4BF8EE013FDBE3F39DAEEA172C7A6589FDB98182E7E1C09DFB4C82F3"
+      },
+      {
+        "path": "updater\\seed-feed.p7s",
+        "size": 1614,
+        "sha256": "B484E2FCB11ACADE70E041537963BABFD65B048F3DD1F20EBBCBC2A7973D0289"
+      },
+      {
+        "path": "updater\\engines\\C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB\\ENGINE.json",
+        "size": 421,
+        "sha256": "C31C8167BFE937C3992BD2DAB0D4999A0F6098863EADE66D692231A7ADE086E3"
+      },
+      {
+        "path": "updater\\engines\\C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB\\ENGINE.p7s",
+        "size": 1614,
+        "sha256": "2EEAAC713F21345D343F0137BF1220B232B629530D3CD56B8EA76D33270358C6"
+      },
+      {
+        "path": "updater\\engines\\C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB\\Mir2Updater.exe",
+        "size": 2184192,
+        "sha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB"
+      }
+    ],
+    "normalInstallationPreserved": true,
+    "globalPreferencesPreserved": true,
+    "fullContentHashes": true,
+    "gameLaunched": false,
+    "completedUtc": "2026-10-29T17:08:39.8236645+00:00"
+  },
+  "phase": "Independent actual runtime or read-only observation; no source/test/build rerun by curator"
+}

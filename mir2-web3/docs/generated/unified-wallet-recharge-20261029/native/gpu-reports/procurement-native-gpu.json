@@ -1,0 +1,3188 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-gpu-procurement/procurement-native-gpu.json",
+    "bytes": 79034,
+    "sha256": "73fbeda6bb39beec09bee1c7b2f90285aa5343ed04b22de091d9ed2194aff0ae"
+  },
+  "producerReport": {
+    "complete": true,
+    "evidenceKind": "offline-native-production-renderer",
+    "height": 768,
+    "humanAccepted": false,
+    "layoutChecks": [
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 56,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              438.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              270.0,
+              610.0,
+              24.0
+            ],
+            "text": "0x44444444…444444 · 井中月245 · 500000金幣 · 到期 1793370316571"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              236.0,
+              88.0,
+              22.0
+            ],
+            "text": "上一頁"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              679.0,
+              236.0,
+              88.0,
+              22.0
+            ],
+            "text": "下一頁"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 10,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              70.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              727.0,
+              275.0,
+              193.0,
+              22.0
+            ],
+            "text": "交貨 UID 777"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 40,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              418.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              602.0,
+              825.0,
+              25.0
+            ],
+            "text": "交貨報價將展示原始 UID、強化、耐久和附加屬性；以服務端所有權與鎖定核驗為準。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 12,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              94.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              303.0,
+              236.0,
+              238.0,
+              22.0
+            ],
+            "text": "切換裝備 UID 777"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金幣 1000000 / 託管金幣 500000 · 測試額度 10 / 付費額度 0 / 預留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 8,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              80.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              236.0,
+              168.0,
+              22.0
+            ],
+            "text": "篩選：模板245"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 41,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              361.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              294.0,
+              610.0,
+              32.0
+            ],
+            "text": "鏈上 公開中 / 遊戲 金幣託管中 · 當前耐久≥0；最大耐久≥0；附加屬性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          }
+        ],
+        "page": "public"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 36,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              468.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              517.0,
+              825.0,
+              40.0
+            ],
+            "text": "下一步僅請求報價；需核對金幣託管、到期、服務費和授權內容後再次明確確認。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              284.0,
+              138.0,
+              22.0
+            ],
+            "text": "修改金額"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              352.0,
+              138.0,
+              22.0
+            ],
+            "text": "切換有效期"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金幣 1000000 / 託管金幣 500000 · 測試額度 10 / 付費額度 0 / 預留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 9,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              103.0,
+              17.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              331.0,
+              600.0,
+              30.0
+            ],
+            "text": "有效期：24 小時"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 43,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              518.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              457.0,
+              825.0,
+              50.0
+            ],
+            "text": "服務規則 1：成功公開後消費 1 次釋出額度，失敗不消費。當前使用明確標記的測試額度。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 11,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              134.0,
+              20.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              282.0,
+              610.0,
+              30.0
+            ],
+            "text": "求購金幣：500000"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              318.0,
+              138.0,
+              22.0
+            ],
+            "text": "清空"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              586.0,
+              188.0,
+              22.0
+            ],
+            "text": "獲取釋出報價"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 21,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              235.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              378.0,
+              620.0,
+              60.0
+            ],
+            "text": "當前耐久≥0；最大耐久≥0；附加屬性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 43,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              500.0,
+              18.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              237.0,
+              825.0,
+              30.0
+            ],
+            "text": "目標：井中月 / DragonSword（真實模板 245）· 單件裝備、單次完整成交"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              392.0,
+              138.0,
+              22.0
+            ],
+            "text": "耐久條件"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          }
+        ],
+        "page": "publish"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 37,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              304.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              242.0,
+              610.0,
+              25.0
+            ],
+            "text": "0x44444444…444444 · 500000金幣 · 鏈上 公開中"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "上一頁"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              679.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "下一頁"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金幣 1000000 / 託管金幣 500000 · 測試額度 10 / 付費額度 0 / 預留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              741.0,
+              247.0,
+              173.0,
+              22.0
+            ],
+            "text": "申請取消報價"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 17,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              177.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              268.0,
+              610.0,
+              25.0
+            ],
+            "text": "遊戲到賬：金幣託管中 · 成交 無"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          }
+        ],
+        "page": "mine"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              336.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              457.0,
+              825.0,
+              27.0
+            ],
+            "text": "0x44444444…444444 · test / 1次 / 0點券 / consumed / 規則1"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 42,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              490.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              417.0,
+              825.0,
+              32.0
+            ],
+            "text": "以下為持久化收費明細（測試/充值/贈送來源分開）；參考美元價格尚未批准，不承諾盈利。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金幣 1000000 / 託管金幣 500000 · 測試額度 10 / 付費額度 0 / 預留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              562.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              237.0,
+              825.0,
+              42.0
+            ],
+            "text": "基礎月卡不含無限求購。釋出服務按次；點券是服務收費憑證，官方獨立 Gas 預算承擔鏈上成本。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 55,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              425.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              282.0,
+              825.0,
+              35.0
+            ],
+            "text": "測試模式 true / 生產收費 false · 規則 1 · 取消退款 false / 到期退款 false"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              244.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              327.0,
+              610.0,
+              30.0
+            ],
+            "text": "測試釋出額度包：10 次 / 0 點券 / 來源 test"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              332.0,
+              158.0,
+              22.0
+            ],
+            "text": "獲取套餐確認"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          }
+        ],
+        "page": "service"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 54,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              416.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              293.0,
+              615.0,
+              43.0
+            ],
+            "text": "UID 777 · 模板 245 · 井中月 強化+3 耐久28000/34000 附加攻擊+2 · 待領取"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "上一頁"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              679.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "下一頁"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金幣 1000000 / 託管金幣 500000 · 測試額度 10 / 付費額度 0 / 預留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 37,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              455.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              237.0,
+              825.0,
+              45.0
+            ],
+            "text": "背包滿或離線時保留原始例項。領取只轉移同一 UID，不按模板重新生成裝備。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              298.0,
+              158.0,
+              22.0
+            ],
+            "text": "領取原始裝備"
+          }
+        ],
+        "page": "claims"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 71,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              433.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              403.0,
+              825.0,
+              22.0
+            ],
+            "text": "Dapp 0x3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 41,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              389.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              469.0,
+              825.0,
+              22.0
+            ],
+            "text": "主動取消退釋出費：false；到期未成交退釋出費：false；額度到期：按當前規則"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 30,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              282.0,
+              20.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              25.0
+            ],
+            "text": "二次確認：publish / 報價 quote-fixture"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              381.0,
+              825.0,
+              22.0
+            ],
+            "text": "合約 0x2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              293.0,
+              825.0,
+              22.0
+            ],
+            "text": "成交 0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              727.0,
+              592.0,
+              178.0,
+              22.0
+            ],
+            "text": "明確確認"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 24,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              191.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              447.0,
+              825.0,
+              22.0
+            ],
+            "text": "服務：1 次，來源 test，點券 0，規則 1"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 47,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              564.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              544.0,
+              825.0,
+              40.0
+            ],
+            "text": "本視窗使用記憶體短期求購用途金鑰。明確確認後只簽署以上操作；登入或繫結錢包不等於任意交易授權。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 21,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              199.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              249.0,
+              825.0,
+              22.0
+            ],
+            "text": "當前耐久≥0；最大耐久≥0；附加屬性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 48,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              328.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              227.0,
+              825.0,
+              22.0
+            ],
+            "text": "目標：井中月 / DragonSword · 模板 245 · 數量 1 · 金幣 500000"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              359.0,
+              825.0,
+              22.0
+            ],
+            "text": "網路 0x1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              271.0,
+              825.0,
+              22.0
+            ],
+            "text": "訂單 0x4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              315.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              425.0,
+              825.0,
+              22.0
+            ],
+            "text": "訂單到期 1793370316571 · 授權到期 1793284516571 · 規則 1"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              315.0,
+              825.0,
+              22.0
+            ],
+            "text": "買家 0x5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              337.0,
+              825.0,
+              22.0
+            ],
+            "text": "賣家 0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              592.0,
+              158.0,
+              22.0
+            ],
+            "text": "返回，不簽名"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 39,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              429.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              491.0,
+              825.0,
+              22.0
+            ],
+            "text": "釋出費覆蓋後續成交、取消、到期與技術重試；賣家交貨不另收費；本版無金幣成交稅。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          }
+        ],
+        "page": "publish-confirm"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 71,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              433.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              403.0,
+              825.0,
+              22.0
+            ],
+            "text": "Dapp 0x3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 41,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              389.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              491.0,
+              825.0,
+              22.0
+            ],
+            "text": "主動取消退釋出費：false；到期未成交退釋出費：false；額度到期：按當前規則"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主動對賬"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 35,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              315.0,
+              20.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              25.0
+            ],
+            "text": "二次確認：deliver / 報價 delivery-q…ixture"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              368.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              447.0,
+              825.0,
+              22.0
+            ],
+            "text": "交付原始裝備 UID 777：強化+3 耐久28000/34000 附加攻擊+2（原始例項）"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "個人智慧求購 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公開求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原請求重試"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              381.0,
+              825.0,
+              22.0
+            ],
+            "text": "合約 0x2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待領取區"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              293.0,
+              825.0,
+              22.0
+            ],
+            "text": "成交 0x0808080808080808080808080808080808080808080808080808080808080808"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的訂單"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              727.0,
+              592.0,
+              178.0,
+              22.0
+            ],
+            "text": "明確確認"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服務與明細"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 24,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              198.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              469.0,
+              825.0,
+              22.0
+            ],
+            "text": "服務：0 次，來源 none，點券 0，規則 1"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 47,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              564.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              544.0,
+              825.0,
+              40.0
+            ],
+            "text": "本視窗使用記憶體短期求購用途金鑰。明確確認後只簽署以上操作；登入或繫結錢包不等於任意交易授權。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "獨立於基礎月卡；無需另買 SUI。生產收費預設關閉，測試額度不代表現金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 21,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              199.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              249.0,
+              825.0,
+              22.0
+            ],
+            "text": "當前耐久≥0；最大耐久≥0；附加屬性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 48,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              328.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              227.0,
+              825.0,
+              22.0
+            ],
+            "text": "目標：井中月 / DragonSword · 模板 245 · 數量 1 · 金幣 500000"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              359.0,
+              825.0,
+              22.0
+            ],
+            "text": "網路 0x1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              271.0,
+              825.0,
+              22.0
+            ],
+            "text": "訂單 0x4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              315.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              425.0,
+              825.0,
+              22.0
+            ],
+            "text": "訂單到期 1793370316571 · 授權到期 1793284516571 · 規則 1"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              315.0,
+              825.0,
+              22.0
+            ],
+            "text": "買家 0x0303030303030303030303030303030303030303030303030303030303030303"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              337.0,
+              825.0,
+              22.0
+            ],
+            "text": "賣家 0x5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              592.0,
+              158.0,
+              22.0
+            ],
+            "text": "返回，不簽名"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "釋出求購"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 39,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              429.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              513.0,
+              825.0,
+              22.0
+            ],
+            "text": "釋出費覆蓋後續成交、取消、到期與技術重試；賣家交貨不另收費；本版無金幣成交稅。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "重新整理狀態"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金幣與原始裝備由遊戲伺服器可信託管、核驗和交付；鏈上不能獨立核驗背包或強迫離線伺服器交貨。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "關閉"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "關閉視窗不會撤銷訂單或解鎖資產。結果未知時不會因超時退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans TC\")",
+            "glyphs": 26,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              312.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "離線原生渲染測試資料；未連線伺服器、未產生鏈上交易。"
+          }
+        ],
+        "page": "delivery-confirm"
+      }
+    ],
+    "missingGlyphs": 0,
+    "modelAndSignatureTestsAreSeparate": true,
+    "outsideViewportNodes": 0,
+    "overflowingTextNodes": 0,
+    "passed": true,
+    "scenario": "five-pages-and-confirmations",
+    "screenshots": [
+      "procurement-public-1024x768.png",
+      "procurement-publish-1024x768.png",
+      "procurement-mine-1024x768.png",
+      "procurement-service-1024x768.png",
+      "procurement-claims-1024x768.png",
+      "procurement-publish-confirm-1024x768.png",
+      "procurement-delivery-confirm-1024x768.png"
+    ],
+    "serverConnected": false,
+    "testnetTransactions": 0,
+    "usesProductionRenderer": true,
+    "width": 1024
+  },
+  "phase": "initial offline fixture report; screenshot paths identify producer BASE, not installed runtime",
+  "humanAccepted": false
+}

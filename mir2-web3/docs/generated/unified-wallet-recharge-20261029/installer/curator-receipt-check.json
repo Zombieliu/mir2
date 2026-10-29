@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "checkedAtUtc": "2026-10-29T17:03:58.610351+00:00",
+  "rehashedSmallEvidence": [
+    {
+      "file": "unified-installer-final-gate-admission.json",
+      "bytes": 986,
+      "sha256": "78390a628bec0c7cba12122b884594df21a1784ff25b0de233d07b08d747a392"
+    },
+    {
+      "file": "unified-final-targeted-receipt.json",
+      "bytes": 5848,
+      "sha256": "6aafdbc14d3d687d63dba0a116af0a11321fedf4a01916c7e71c2cbd41981f7a"
+    },
+    {
+      "file": "unified-package-verification.json",
+      "bytes": 5574,
+      "sha256": "7af3e30aa468d17a9ffcfd8a93d860d9b5c555e1a95630028fc656b2f57c5114"
+    },
+    {
+      "file": "unified-installer-source-copy-verification.json",
+      "bytes": 7418,
+      "sha256": "0e6c19b280f43ded545a57ed0ed3ba90559b9a9a4057bcfd2f74dc3deeac2cb6"
+    },
+    {
+      "file": "unified-installer-prepare-run.log",
+      "bytes": 319,
+      "sha256": "4ba4e1c7a94a33886dd3a8f803208efb82c0717e8866e888cda2b9d61939348e"
+    },
+    {
+      "file": "unified-installer-recipe-verification.json",
+      "bytes": 3728,
+      "sha256": "eda40c1dbdb5329a5c1319cf921a6347b0f189b490fecd28e01e6f59c59c65c4"
+    },
+    {
+      "file": "unified-installer-payload-prepare.log",
+      "bytes": 1167,
+      "sha256": "2fd553e19e2856407983cfb6480565202f6d72136cbec55d24ba90831b9bba6b"
+    },
+    {
+      "file": "unified-installer-updater-prepare.log",
+      "bytes": 72,
+      "sha256": "42f9065deecbf4a4dce4c0f2417e90214302efd5f917abaf7fa659b4f6df9262"
+    },
+    {
+      "file": "unified-installer-normal-compile.json",
+      "bytes": 1053,
+      "sha256": "f8805a13912b2d71395d3845cdbdfb0ee2f5214778266b47c96785af876e7b8c"
+    },
+    {
+      "file": "unified-installer-normal-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "unified-installer-validation-compile.json",
+      "bytes": 1115,
+      "sha256": "7f6c91c14f29000209c462442ed0725b90a028f161dab1ef0f3c0c3d817e0a6a"
+    },
+    {
+      "file": "unified-installer-validation-compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "unified-updater-execution-summary.json",
+      "bytes": 4206,
+      "sha256": "52153c34b96b6fc16dc55a2baf2493502ef5d3dc36a1184b1fc03f365c27c3dd"
+    }
+  ],
+  "installerBinaryRehashedByCurator": false,
+  "installerSha256Source": "Actual compiler helper plus independent final output hash/version checks recorded by producer",
+  "outputMetadataOnly": [
+    {
+      "kind": "normal",
+      "bytesObserved": 1024372943,
+      "bytesExpected": 1024372943,
+      "sizeMatched": true,
+      "sha256": "387fd7140a1457c3977032c4577ad1914de2f70c8402ff4312faf1a0bc4f647f",
+      "versionTrimmed": "2026.10.29.11",
+      "authenticodeStatus": "NotSigned"
+    },
+    {
+      "kind": "validation",
+      "bytesObserved": 1024372706,
+      "bytesExpected": 1024372706,
+      "sizeMatched": true,
+      "sha256": "61526737863975826e721704bad2c03ae6fab5485dd745ef072e74d6922bd1d3",
+      "versionTrimmed": "2026.10.29.11",
+      "authenticodeStatus": "NotSigned"
+    }
+  ],
+  "scope": "No EXE copied/installed/executed by curator; no1GB redundant output rescan"
+}

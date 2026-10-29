@@ -1,0 +1,62 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "packed-local-baseline-preparation.json",
+    "bytes": 1947,
+    "sha256": "32bfc63de206b7e4a233eab6df61793befbdb9a3e6a63509358db2586d86b582"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.packed-local-minimal-baseline.v1",
+    "passed": true,
+    "sourceActualInstalledRoot": "F:/mir2-build/unified-20261029/installed-validation",
+    "sourceInstalledAll255079HashesVerified": true,
+    "root": "C:\\mir2-build\\unified-20261029\\packed-local-baseline",
+    "profile": "C:\\mir2-build\\unified-20261029\\packed-local-profile",
+    "gameFilesCopied": [
+      {
+        "path": "game/mir2-platform-windows.exe",
+        "size": 133843456,
+        "sha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F"
+      },
+      {
+        "path": "game/PACKAGE-MANIFEST.json",
+        "size": 49713416,
+        "sha256": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B"
+      },
+      {
+        "path": "game/VERSION.json",
+        "size": 1221,
+        "sha256": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A"
+      },
+      {
+        "path": "game/RELEASE-STATEMENT.json",
+        "size": 707,
+        "sha256": "44A6B09F26450778F7ECBD66E5B381FCAFBE96A5CBFC7ACF94680047BEABF6C3"
+      },
+      {
+        "path": "game/RELEASE-STATEMENT.p7s",
+        "size": 1614,
+        "sha256": "671BF2A43575EFD97124ED6DFA70D731E7317861CC1CEE1FBC91B0069FE9E29E"
+      },
+      {
+        "path": "game/BUILD-ATTESTATION.json",
+        "size": 1493,
+        "sha256": "8AE470CDE3EE893BCFE726F86A0888197820002F6A61945D12F61712F8C27292"
+      },
+      {
+        "path": "game/mir2-client.toml",
+        "size": 345,
+        "sha256": "33AE7E2CF643C43B3BAB9B8839998F00051447BAF40002ECFB5B19CB3A0A4E13"
+      }
+    ],
+    "updaterFilesCopied": 9,
+    "looseAssetsCopied": false,
+    "registeredInstallerCopy": false,
+    "productionBaselineCmsAndSeedVerificationStillRequired": true,
+    "fullLegacyRollbackExecutionProven": false,
+    "purpose": "Explicit minimal authenticated local-library fixture; no loose resources so actual Game must mount packed resources; not public migration or complete fallback-install test"
+  },
+  "phase": "Minimal authenticated controls/executable copied from actual verified installation; no loose assets or full fallback-install copy"
+}

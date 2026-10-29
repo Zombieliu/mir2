@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "unified-engine-sparse-final-source.json",
+    "bytes": 350641,
+    "sha256": "c1f01f9bd0935090866cd29052ac0a7477b930b2b33928232c06a4d12a110a62"
+  },
+  "producerSummary": {
+    "schema": "mir2.unified-engine-sparse-final-source.v1",
+    "recordedAt": "2026-10-29T16:33:39.478Z",
+    "taskOwned": true,
+    "worktreeRoot": "F:/uu",
+    "projectRoot": "F:/uu/mir2-web3",
+    "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "parentGameRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "detached": true,
+    "gitClean": true,
+    "sourceSnapshot": {
+      "root": "F:\\uu",
+      "revision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+      "clean": true,
+      "statusSha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "sourceFilesChecked": 1343,
+      "sourceInventorySha256": "A084CD178843380471F318FE381C305631CD81CDCCDD5AD25AF936B9CEEBD4F1"
+    },
+    "sourceSnapshotPassed": true,
+    "sourceSnapshotRoot": "F:/uu",
+    "canonicalGitCompilerBytes": true,
+    "compilerInputCount": 1343,
+    "changedTrackedPaths": [
+      "mir2-web3/apps/game-client/windows-updater/src/engine_maintenance.rs"
+    ],
+    "engineSourceSha256": "669e07b9f731ebabfd9caec24d3320fbaff37132097f4794d66bc42feebfacd5",
+    "unifiedVersionSha256": "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+    "configuration": "file:E:/mir2/.git/worktrees/uu/config.worktree\tfalse",
+    "gameRoot": "F:/mu",
+    "gameHeadAfter": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "gameSourceChanged": false,
+    "pngPayloads": 0,
+    "formalBuild": false,
+    "signed": false,
+    "published": false,
+    "commandsLog": {
+      "path": "C:/mir2-build/unified-20261029/unified-engine-sparse-final-source-commands.json",
+      "sha256": "68d1ba1f978b58e9fbbed87c3f952d079a24b5b2161cab03281a09a19d910d13"
+    }
+  },
+  "scope": "Compact1343-input clean Engine77 source proof; per-file lists remain external"
+}

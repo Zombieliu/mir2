@@ -1,0 +1,272 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:39:26.624589+00:00",
+  "producerReceipt": {
+    "filename": "known-language-footer-pointer-fallthrough.json",
+    "bytes": 10235,
+    "sha256": "97f52d95e5f9047d7d45a02946dd245517a9ffbad4cd9f31fb4b4ada5d552c6b"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.known-language-footer-pointer-fallthrough.v1",
+    "recordedAtUtc": "2026-10-29T17:26:03.484534+00:00",
+    "classification": "P2 existing language footer pointer fallthrough",
+    "candidate": "WN-CANDIDATE-20261029-unified-11",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "installedGameSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+    "mergeRegression": false,
+    "inputIsolationPassed": false,
+    "humanAccepted": false,
+    "observation": {
+      "source": "Root reported actual isolated installed Windows GUI observation; this triage agent did not operate GUI",
+      "initialPosition": [
+        27,
+        42
+      ],
+      "firstDropdownOpenPosition": [
+        27,
+        43
+      ],
+      "secondDropdownOpenPosition": [
+        27,
+        44
+      ],
+      "dropdownOpensObserved": 2,
+      "eachDropdownOpenMovedOneOrdinaryWorldTile": true,
+      "languageSelectionsObserved": 2,
+      "languageSelectionItselfMovedActor": false,
+      "languageTransitions": [
+        "zh-CN to en",
+        "en to zh-CN"
+      ],
+      "scopeLimit": "These are the two actual observations, not proof that every locale choice is protected."
+    },
+    "mechanism": {
+      "optionsLogicalRect": {
+        "left": 382.0,
+        "top": 207.0,
+        "width": 259.0,
+        "height": 354.0,
+        "bottom": 561.0
+      },
+      "languageFooterTopRelativeToOptions": 353.0,
+      "languageFooterTopInCrystalLogicalSpace": 560.0,
+      "explanation": "The footer adds padding, title and toggle below the fixed Options rectangle. The native custom world sender runs in PreUpdate and tests the old fixed rectangle; locale toggle/choice interaction runs in Update. Bevy FocusPolicy::Block does not itself stop this custom world sender.",
+      "popupBoundary": "Popup extends upward (bottom33) and many choices lie within the main rectangle, but no dedicated LocaleChoice pointer shield exists. Do not claim all choices are safe.",
+      "currentSourceReferences": [
+        {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 431,
+          "fact": "Fixed Options rectangle"
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 1859,
+          "fact": "Nonmodal Options hit test selects that fixed rectangle"
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 17727,
+          "fact": "Footer top353 relative to Options"
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "line": 17740,
+          "fact": "Footer spawns ordinary language choices"
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+          "line": 997,
+          "fact": "Bevy toggle FocusPolicy::Block"
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+          "line": 1012,
+          "fact": "Popup bottom33 expands upward"
+        },
+        {
+          "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+          "line": 901,
+          "fact": "Locale UI interaction systems run in Update"
+        },
+        {
+          "path": "apps/game-client/platform-windows/src/main.rs",
+          "line": 376,
+          "fact": "Native world producer PreUpdate schedule"
+        },
+        {
+          "path": "apps/game-client/platform-windows/src/main.rs",
+          "line": 384,
+          "fact": "Mouse world interaction registered in that schedule"
+        },
+        {
+          "path": "apps/game-client/platform-windows/src/input.rs",
+          "line": 1448,
+          "fact": "World-owned press origin uses NativePlayerUiState fixed spatial gate"
+        },
+        {
+          "path": "apps/game-client/platform-windows/src/input.rs",
+          "line": 3073,
+          "fact": "Current world pointer uses the same spatial gate"
+        }
+      ]
+    },
+    "functionRegionComparisons": [
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "gitTreePath": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "function": "render_options",
+        "allThreeRegionsEqual": true,
+        "versions": [
+          {
+            "revision": "b87f4071a",
+            "startLine": 17566,
+            "sha256": "b60cc4d9ceb48fd0ad68bc12069bd461325a4c48d43c0e8eec3a15566cb0bc58"
+          },
+          {
+            "revision": "d7a34129b",
+            "startLine": 17501,
+            "sha256": "b60cc4d9ceb48fd0ad68bc12069bd461325a4c48d43c0e8eec3a15566cb0bc58"
+          },
+          {
+            "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+            "startLine": 17677,
+            "sha256": "b60cc4d9ceb48fd0ad68bc12069bd461325a4c48d43c0e8eec3a15566cb0bc58"
+          }
+        ]
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "gitTreePath": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "function": "nonmodal_panel_rect",
+        "allThreeRegionsEqual": true,
+        "versions": [
+          {
+            "revision": "b87f4071a",
+            "startLine": 1842,
+            "sha256": "abc347168a713d1b5b0d2a46c9e2ab6e8d4334f577b7edd9be49aca4da288c41"
+          },
+          {
+            "revision": "d7a34129b",
+            "startLine": 1835,
+            "sha256": "abc347168a713d1b5b0d2a46c9e2ab6e8d4334f577b7edd9be49aca4da288c41"
+          },
+          {
+            "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+            "startLine": 1849,
+            "sha256": "abc347168a713d1b5b0d2a46c9e2ab6e8d4334f577b7edd9be49aca4da288c41"
+          }
+        ]
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+        "gitTreePath": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+        "function": "spawn_language_choices",
+        "allThreeRegionsEqual": true,
+        "versions": [
+          {
+            "revision": "b87f4071a",
+            "startLine": 899,
+            "sha256": "f2763a52c07ec457568c0484d35ac75032704cdacb24c35a29b2490341b02213"
+          },
+          {
+            "revision": "d7a34129b",
+            "startLine": 968,
+            "sha256": "f2763a52c07ec457568c0484d35ac75032704cdacb24c35a29b2490341b02213"
+          },
+          {
+            "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+            "startLine": 975,
+            "sha256": "f2763a52c07ec457568c0484d35ac75032704cdacb24c35a29b2490341b02213"
+          }
+        ]
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+        "gitTreePath": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+        "function": "choose_language",
+        "allThreeRegionsEqual": true,
+        "versions": [
+          {
+            "revision": "b87f4071a",
+            "startLine": 1018,
+            "sha256": "1c5a49a15cf5160951fd42852e9c1ba479e6c440c339e6425ba6c81e26c506ee"
+          },
+          {
+            "revision": "d7a34129b",
+            "startLine": 1087,
+            "sha256": "1c5a49a15cf5160951fd42852e9c1ba479e6c440c339e6425ba6c81e26c506ee"
+          },
+          {
+            "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+            "startLine": 1094,
+            "sha256": "1c5a49a15cf5160951fd42852e9c1ba479e6c440c339e6425ba6c81e26c506ee"
+          }
+        ]
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+        "gitTreePath": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+        "function": "toggle_language_menu",
+        "allThreeRegionsEqual": true,
+        "versions": [
+          {
+            "revision": "b87f4071a",
+            "startLine": 1038,
+            "sha256": "03d39ea6abf9e26f85ff496106929fb25ab2e4b79e5306dcf0548a6a9602ea42"
+          },
+          {
+            "revision": "d7a34129b",
+            "startLine": 1107,
+            "sha256": "03d39ea6abf9e26f85ff496106929fb25ab2e4b79e5306dcf0548a6a9602ea42"
+          },
+          {
+            "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+            "startLine": 1114,
+            "sha256": "03d39ea6abf9e26f85ff496106929fb25ab2e4b79e5306dcf0548a6a9602ea42"
+          }
+        ]
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/input.rs",
+        "gitTreePath": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+        "function": "press_origin_is_world",
+        "allThreeRegionsEqual": true,
+        "versions": [
+          {
+            "revision": "b87f4071a",
+            "startLine": 1419,
+            "sha256": "d0b020a207191b77ab42111db75231ca919d833be0f493519b1b611f993e3d35"
+          },
+          {
+            "revision": "d7a34129b",
+            "startLine": 1419,
+            "sha256": "d0b020a207191b77ab42111db75231ca919d833be0f493519b1b611f993e3d35"
+          },
+          {
+            "revision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+            "startLine": 1419,
+            "sha256": "d0b020a207191b77ab42111db75231ca919d833be0f493519b1b611f993e3d35"
+          }
+        ]
+      }
+    ],
+    "regionHashMethod": "Already executed read-only Git show UTF-8 comparison: splitlines(), region from named function signature through the line before the next same-indentation fn signature, joined with LF and outer strip(), SHA256. This is exact textual region equality, not a Rust AST claim; adjacent trailing comments or attributes can be part of the region.",
+    "wholeInputFileGitBlobComparison": {
+      "gitTreePath": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "b87f4071a": "338ef766ce972dc791b3410a355a4fc1ce0c733b",
+      "d7a34129b": "8904f722a62f5437d942683373a858535b42a5f2",
+      "1875c6c20e1285ffefc45ef6c21eab33e26fc536": "338ef766ce972dc791b3410a355a4fc1ce0c733b",
+      "mergedEqualsB87WholeFile": true,
+      "d7DiffScopeObserved": "Only held-Shift player attack/pursuit and associated test module; no language/footer spatial guard change."
+    },
+    "disposition": "Record as an existing Candidate known issue. Current fixed attested Game artifact is not modified by this triage. Human final Accepted remains open.",
+    "futureBoundedDirection": "If separately authorized, shield actual footer/popup geometry before the world sender and retain nonmodal Options behavior outside real UI bounds.",
+    "evidenceSource": "Only the already completed bounded read-only comparison and Root actual GUI observations; no checks rerun for this receipt.",
+    "noSourceEdits": true,
+    "noBuild": true,
+    "noTestsRerun": true,
+    "noGuiActionsByThisAgent": true
+  },
+  "phase": "Independent actual runtime or read-only observation; no source/test/build rerun by curator"
+}

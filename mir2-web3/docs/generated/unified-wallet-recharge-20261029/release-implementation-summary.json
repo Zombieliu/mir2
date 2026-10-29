@@ -1,0 +1,410 @@
+{
+  "passed": true,
+  "phase": "uncommitted-merge-source-and-offline-tests-only",
+  "parentRevisions": [
+    "b87f4071a2026ce96c85ca746ed69f207887a322",
+    "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844"
+  ],
+  "integratedCleanCommit": null,
+  "sourceFrozen": true,
+  "snapshotSourcePins": [
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 41271,
+      "sha256": "5919ba16cdc8fd65ba9cd8de5cbb0cb8831d50b643e047fb9f248fd30c6d98ca"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 37260,
+      "sha256": "1fdec1dd812fecd8f7d63698243609dc43066ed9e8a342425e771e15b837e9f7"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8065,
+      "sha256": "7a5c286bee3c928d4ad3c6331c45ef71b922bf6b78c375b5175dd3fa13b25dec"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/README.md",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9221,
+      "sha256": "1285b4c593f3ea65adf6857a04237eeae555284c22ff5ca5c31f852d2abfbd0f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6961,
+      "sha256": "23ce2a3def29ba1797b41e7aed82aab623e5f98305cdab31646875e5dfe8eba1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 123107,
+      "sha256": "2fc749d9d866592edfb24e3857cf5f28b0f907a7246f709845b88546a7d0f44e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21520,
+      "sha256": "944a69ad6b1c3210672e9c33cb11e3c7a863664ff67d9cb38c93adc40f849b5c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/simplified-document-layout.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1534,
+      "sha256": "4908bb665546b46692fd3ec81757deb7d57d32ba5ef35118564a467cabfe2a29"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/test-simplified-document-layout.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2759,
+      "sha256": "1685a84c866b25bd11498113bdd59c03dc4cea0f96f7ba57c21a01fc5d770f10"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 174391,
+      "sha256": "256f02dc8ed4ccd5920667dd6b75e371676d8d694c8b925de2190291a5c7f908"
+    },
+    {
+      "path": "apps/game-client/resource-pack/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 364,
+      "sha256": "6876ce6183caf2d4c6eaf1e391dcfef75fd1627f5960b6d91960c516ddb2430a"
+    },
+    {
+      "path": "apps/game-client/resource-pack/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 33290,
+      "sha256": "841334d466a6c961f088f28db0242b35851058797b508116543c7d1d9322b552"
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21945,
+      "sha256": "fe3b02d3fda1d685a5108e0921c5814b16ab46591a09600c866d69e9ab856c5c"
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1198,
+      "sha256": "9d15520739e217f6b8695dfcd6634a529f2d7d5f414852dcb40ba2dec9c80a28"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25480,
+      "sha256": "d5b52e26da628160d57b7266fb1ad7e41dfaaff7840db2be9411cb2792974f29"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/build-bootstrap-installer.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26758,
+      "sha256": "e764eb573714858979eeaf83008b16d02ae6a1343f2afc9a823fc8dcf354310f"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/build-updater-release.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12040,
+      "sha256": "a8577f74e741dd3a2e4697135a6a7a09496c46eef2a4f6119e8f7a8f6cec38ab"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/prepare-bootstrap-installer.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22382,
+      "sha256": "67e6f6471387fefcd0ae06cd6acc1c9722868950edd9940a6cd3a112c1511e24"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/prepare-packed-generation.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30095,
+      "sha256": "276e07f0f621d6050f7f4a79d4401ef1fcecea1da09f895697fb84dbbeb5768d"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21406,
+      "sha256": "619312b0ee364130e6acc66df086e8bae7b03237cf1b7aefc683bb3c9d509989"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-bootstrap-installer.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 46846,
+      "sha256": "d6e84fd8c0654d6173ed10d32bca1d1b756d7fe92e9e290d0b935c703c5a747d"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-unified-release-compatibility.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2484,
+      "sha256": "8284e5ab8a3f77532c36d6255c1dc041ff8e19d2384b99f8ce88c855f310ad07"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/verify-packed-generation.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11882,
+      "sha256": "2144f159d7646b68e826dd9fd533028c330c9589a6c95c0005b42ab3d11ab790"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/launcher.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3202,
+      "sha256": "325a02542f5fbdcefd8a319f8d693972c0c929d2064601e1616dd95295c6c02c"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/updater.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17996,
+      "sha256": "746bfbd4c542ea05b29080d6039a0044679207f964d7a055effd6ddab2d3858b"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 29076,
+      "sha256": "693b1a2d73644acbed38c88aae810b303dd585ce0b1bfade6e39397dcf909b80"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 73917,
+      "sha256": "8bd1a6f4563ffe397494edc76afc5c5c54219d95765098ada8daaadade8357dd"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/download.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9157,
+      "sha256": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/engine_maintenance.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14878,
+      "sha256": "d2dcf1199811137afbdc92172f3cf5ce6118d6eba34ca6e1cbfa3b1c1fe21c5f"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/five_class_manifest_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4369,
+      "sha256": "bf4fe3044addfd29a0fcd927ec9cbb07c895bd63604eb1439515b069f1cb46fc"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/fs_safe.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16370,
+      "sha256": "bc2835ed17333b25e5a0d8acc2311a660495fff5e948b382ff7166c8ad14b116"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/fs_safe_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5030,
+      "sha256": "89081adcf66e0891dbb918865d8b66a372a84474c1d1d5ec224c46bc52ab9b1c"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 41345,
+      "sha256": "a6d15157250e2149050acaa10712cd513297b0be662125f844a04c273fb02d03"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation_runtime.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26732,
+      "sha256": "68dd6ee6327a3cbe37436bff7537f513e733d8f3c6a43999ab938fdc0a48077c"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/generation_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 20748,
+      "sha256": "d32f271a2c0900083654f46ee5713013a8a5ba813e8bfa6f297ad429ee43008e"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8787,
+      "sha256": "66054a9080966fd1e310594d4c441198175f9b8119a9adf76fff3dbaf409f2a1"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/local_io.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7090,
+      "sha256": "bc5dc2abd68cee22e54050432dc276a86bb17e3f4335b485ea6ac6647fa74b34"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16251,
+      "sha256": "5f7bacdfe71fd0a81421da65ea51ee2400e6284424c6c44cc541f7bac0eb4720"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model_regression.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9148,
+      "sha256": "39a222121ca88d4857204704124cae88c4de75dccc7cd7079107795a564ab9ac"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/platform.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 39579,
+      "sha256": "48853f091b2a742098473db39c7dd98821000a37c63767844e1af7be295a4ee7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/progress_trace_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18167,
+      "sha256": "8af6f0342fa159db05a668561cdf1822187141949264891645c814756fc086d3"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/resume_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30491,
+      "sha256": "801daea44fa36fa6aa564c241e9cbb9c5827a77fb09e30546bdf5aaea43e0a75"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/transaction.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31496,
+      "sha256": "0a8bf2f5edc25464220dbb3fbed80b5212888eadf45eb268aa3b7c763b907194"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 38748,
+      "sha256": "94ea97b12d48186b7b2da833283781b73b9d7bc5fd575c34247322ca4eabe4f1"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 48055,
+      "sha256": "03ad130f1cbab03572d7c50576ef4b5c8fd9963948df08e89e7d073dcc8943fe"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update_receipt_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4802,
+      "sha256": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74"
+    },
+    {
+      "path": "apps/game-client/windows-updater/tests/engine_maintenance.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14537,
+      "sha256": "bf055d71357f132395f59474820456f3b3f45330b5c72faa21adad1537e9a7ac"
+    },
+    {
+      "path": "apps/game-client/windows-updater/tests/packed_generations.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14665,
+      "sha256": "4379b18c18c5116feb6be697a91ca76d764e82a829c9d3ab99c4c49eabd00545"
+    },
+    {
+      "path": "apps/game-client/windows-updater/tests/real_packages.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8697,
+      "sha256": "efab9f9498eaa79bcd98843cb9971874d8a7a5378c0367ab241870f40713c840"
+    },
+    {
+      "path": "apps/game-client/windows-updater/UNIFIED-COMPATIBILITY.md",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4140,
+      "sha256": "67a2cb79005dd7f242c2a7b2e49ddb7850a781d37ff6f5cbc6131692fb81f010"
+    }
+  ],
+  "rust": {
+    "libraryPassed": 126,
+    "libraryIgnored": 8,
+    "updaterBinaryPassed": 3,
+    "integrationTestsIgnored": 4,
+    "log": {
+      "path": "release-updater-all-v3.log",
+      "bytes": 17526,
+      "sha256": "1e5192bce5097bceb8b3a99d6a02f0c79b2fc171c173601660153ceb54926875"
+    },
+    "signedR10ReadonlyTests": {
+      "passed": 2,
+      "includedInLibraryDefaultPassed": false,
+      "logs": [
+        {
+          "path": "release-r10-signed-retention-final.log",
+          "bytes": 240,
+          "sha256": "95039f924e716de0bfca02dad67f32007b8468b1976a0b1ce942e365582ae372"
+        },
+        {
+          "path": "release-r10-signed-root17-final.log",
+          "bytes": 231,
+          "sha256": "e4481d24a163d5ae62736c3683ebf4671735726e5c0414515f001dc32f5e2ed3"
+        }
+      ]
+    }
+  },
+  "python": {
+    "suites": 8,
+    "total": 186,
+    "passed": 183,
+    "skipped": 3,
+    "report": {
+      "path": "release-python-suites-v5.json",
+      "bytes": 2582,
+      "sha256": "b8a19179384387677d6b67f0983acd1c0f228fb42f0adf798e7eb033bdbd40e4"
+    }
+  },
+  "powershell": {
+    "exactLayoutChecks": 39,
+    "actualPackageAndVerifierAllowlistChecks": 74,
+    "logs": [
+      {
+        "path": "release-legal-layout-v1.log",
+        "bytes": 156,
+        "sha256": "8c5ec1ffb3f4cc2f1c089de42fcf54726b5c18cc1e9f92bd14ba19f1b9632c4f"
+      },
+      {
+        "path": "release-package-legal-contract-v1.log",
+        "bytes": 243,
+        "sha256": "d50814513e81805918c3afa38c68ecf6760d3959d12a69192262e21ca584791d"
+      }
+    ]
+  },
+  "innoStatic": {
+    "languages": 10,
+    "trustedMessagesPerLanguage": 281,
+    "customMessagesPerLanguage": 15,
+    "report": {
+      "path": "release-inno-recipe-v1.log",
+      "bytes": 3728,
+      "sha256": "eda40c1dbdb5329a5c1319cf921a6347b0f189b490fecd28e01e6f59c59c65c4"
+    },
+    "actualInstallerCompiled": false
+  },
+  "semantics": {
+    "engineVersion": 2,
+    "root17HistoryRetained": true,
+    "canonicalLocales": 10,
+    "strictSignedBelowLegacyFloorOnlyRetention": true,
+    "noFloorReceiptSelectorWritesDuringRetention": true,
+    "badSignatureMalformedEqualAndPackedStateFailClosed": true,
+    "newDocumentLayout": "exact5 mir2-assets/legal/; full old root17 accepted, mixed/partial/duplicate rejected",
+    "installerVersion": "2026.10.29.11",
+    "candidate": "WN-CANDIDATE-20261029-unified-11",
+    "plannedLegacySequence": 2026102911,
+    "plannedPackedSequence": 2026102912,
+    "sequencesNotSignedOrPublished": true
+  },
+  "scope": {
+    "fullGameBuilt": false,
+    "newSignedArtifacts": false,
+    "newInstallerBuiltOrInstalled": false,
+    "publicFeedsModified": false,
+    "dockerStarted": false,
+    "productionKeysUsed": false,
+    "oldEvidenceModified": false,
+    "gitStagedOrCommittedByWorker": false,
+    "actualPackedNewHighSequenceMigrationVerified": false,
+    "fullPackageSelftestsFresh": false
+  },
+  "remaining": [
+    "Coordinator reviews and commits complete merge source",
+    "Clean attested game+updater build",
+    "New signed v4/legal and packed full-closure/real migration fixtures",
+    "Actual normal/validation Inno compiles and isolated installed UI/persistence verification",
+    "Public publication remains separate explicit step"
+  ]
+}

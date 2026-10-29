@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-build-metadata.json",
+    "bytes": 723,
+    "sha256": "a79307a08379f34005cc175a4c76e62464b9ae2f38865d39d5bece072b959e98"
+  },
+  "producerReport": {
+    "recordedAtUtc": "2026-10-29T14:29:30.0339347Z",
+    "path": "C:\\mir2-build\\unified-20261029\\native-bin\\mir2-platform-windows.exe",
+    "bytes": 150394880,
+    "sha256": "800cac61fee9576501b0c6ffff6e757be176d2034ab08f5787e873195e0b08b7",
+    "buildKind": "debug dev optimized, uncommitted unified merge; not clean attested release",
+    "sourceHead": "b87f4071a2026ce96c85ca746ed69f207887a322",
+    "sourceMergeHead": "d7a34129be0ecaa4dad4bf6bbfc28cb9e1b69844",
+    "toolchain": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "target": "F:/mir2-build/unified-20261029/native-target",
+    "manifest": "apps/game-client/platform-windows/Cargo.toml",
+    "cargoLocked": true,
+    "cargoOffline": true,
+    "humanAccepted": false
+  },
+  "phase": "initial integrated snapshot; historical relative to final1875 Game; no stale source pins treated as current"
+}

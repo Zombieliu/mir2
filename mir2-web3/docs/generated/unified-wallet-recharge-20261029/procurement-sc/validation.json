@@ -1,0 +1,193 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "procurement-sc-fix-validation.json",
+    "bytes": 7175,
+    "sha256": "674e6d6e62a5903bc7fa29eba9c54ba75dbc10e0b50bcbcae62c4f35f1fb9201"
+  },
+  "producerReport": {
+    "recordedAtUtc": "2026-10-29T15:32:46.296954+00:00",
+    "phase": "bounded procurement Simplified Chinese fix after e2c gap discovery",
+    "productSourceFrozen": true,
+    "compiledSourceCommitPendingRoot": true,
+    "baseGameCommit": "e2c85519e9435ffbad34e449ba705e33e8c9ad13",
+    "oldSCEntriesUnchanged": 9791,
+    "newSCEntries": 110,
+    "totalSCEntries": 9901,
+    "existingEditorial873Unchanged": true,
+    "oldNineProcurementLocaleValuesUnchanged": true,
+    "globalLegacyAliasesAdded": false,
+    "localizationPolicy": "Explicit procurement keyed-only catalog; translate system template first, then existing format_for substitutes opaque arguments once. Known system messages and validation reasons only; raw error codes/UID/operations/instance/config labels preserved. Locale revision triggers render-only rebuild.",
+    "billingReview": "No billing source edit needed; existing three-page runtime labels use their existing53 localized keys, server/operator labels remain opaque. Prior billing39 images not relabelled as this new run.",
+    "focused": {
+      "procurement": {
+        "passed": 13,
+        "failed": 0,
+        "ignored": 1
+      },
+      "i18nAdjacent": {
+        "passed": 16,
+        "failed": 0,
+        "ignored": 0
+      },
+      "gpu": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "screenshots": 7,
+        "locale": "zh-CN"
+      }
+    },
+    "initialCompileFailure": "v1 used private substitute and one mixed String/&str branch; v2 fixed both using existing public format_for. Failed log retained.",
+    "font": {
+      "wholeCorpusUniqueCharacters": 2015,
+      "missingCodepoints": []
+    },
+    "gpuLayout": {
+      "missingGlyphs": 0,
+      "overflowingTextNodes": 0,
+      "outsideViewportNodes": 0
+    },
+    "visualAIReview": {
+      "sampledPngs": 7,
+      "result": "Reviewed all7 using view_image: system text Simplified Chinese, no observed missing glyph or overlap. Opaque traditional-character item descriptions and operator test-package label are intentionally retained.",
+      "humanAccepted": false
+    },
+    "limits": [
+      "No real order, wallet sign, chain payment or server fixture startup performed.",
+      "NPC Personal procurement entry label remains its existing separate server/quest-caption behavior.",
+      "Protocol operation/fee-source/state codes and caller-supplied instance/offer names are not generic translated.",
+      "Final normal Windows binary must be clean rebuilt by root from its subsequent source commit.",
+      "Original206 logical tests and original64 images remain their earlier source-phase evidence; not repeated or relabelled here."
+    ],
+    "sources": {
+      "apps/game-client/client-bevy/src/native_procurement.rs": {
+        "sha256": "4437b87005fb9e5d930b804936f8f891ffc6666ec7a32fabb3b0e38bd60fef09",
+        "bytes": 94781
+      },
+      "apps/game-client/client-bevy/src/native_i18n.rs": {
+        "sha256": "a615636684eb032d096c9fe0312c2319f082fc3615c1a43dc16b4e2333e17101",
+        "bytes": 109122
+      },
+      "packages/tooling/scripts/generate-native-i18n-simplified.py": {
+        "sha256": "9148e7608b4bde95c99f8d35ca242b970db625293350c302012a97ba7141c1c6",
+        "bytes": 18458
+      },
+      "packages/game-data/data/native-i18n/procurement.json": {
+        "sha256": "4df365308a4a3aee547d8e1016b9bb43500c6f63f2cdab95ecd88d1a592b2023",
+        "bytes": 70214
+      },
+      "packages/game-data/data/native-i18n/extra/zh-CN.json": {
+        "sha256": "258912c2376484cc145965dd1bca550897d7ea6e53e20a5e71a0ecb208fe5f6c",
+        "bytes": 631965
+      },
+      "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json": {
+        "sha256": "1f66f6bb038cf46a0326c51ac1da8dd27190f6ff689d2d20f21443c5540bacfd",
+        "bytes": 12256
+      }
+    },
+    "logs": {
+      "procurement-sc-focused-v1.log": {
+        "sha256": "e72c6626134d22e913d12bc20c91244c62cce814f05f00bf4c1054ab148d87aa",
+        "bytes": 11096,
+        "counts": null
+      },
+      "procurement-sc-focused-v2.log": {
+        "sha256": "7048fa6d6fbb5a01fc5217f82b0cd3a7a823f0812d135c643bef932026baa11a",
+        "bytes": 29306,
+        "counts": {
+          "passed": 13,
+          "failed": 0,
+          "ignored": 1
+        }
+      },
+      "procurement-sc-i18n-regression.log": {
+        "sha256": "49ef9f855f429425f9970e2fb5553fbe8ae058c88a31354f03e9822d2e4e4caf",
+        "bytes": 29082,
+        "counts": {
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0
+        }
+      },
+      "procurement-sc-gpu-v1.log": {
+        "sha256": "48cdb757e8f2aa29d73cc59e684928495ccdd223307bbdd5346ef45e11b2c83c",
+        "bytes": 27571,
+        "counts": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      },
+      "procurement-sc-generate.log": {
+        "sha256": "d2771a45d93e1d9562582c09866ab15a5dbd28295b038517b8134a05fb31d7cc",
+        "bytes": 365,
+        "counts": null
+      },
+      "procurement-sc-generate-check.log": {
+        "sha256": "26ee9b836e8855fd0bdda116079d957efd7a4976153e401fe626aa6225f0c021",
+        "bytes": 301,
+        "counts": null
+      },
+      "procurement-sc-font-corpus.log": {
+        "sha256": "7605a0fe9176e4b5b00c8b00bea189c55d59227cc6d6e4d3d9aeb9ce3576897c",
+        "bytes": 318,
+        "counts": null
+      }
+    },
+    "images": [
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-claims-1024x768.png",
+        "sha256": "56500852727be15b8563c0e3c6f875b83395675867b2dc9e5d425845522ffd6f",
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-delivery-confirm-1024x768.png",
+        "sha256": "6f8e3d63072178242407609455f27b3fd059f60bb7e8da98e00f1ce728ace178",
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-mine-1024x768.png",
+        "sha256": "4f361977306ba82e21c9c0d478386b23d6cdd38dcdc91105496ba2f19d378c86",
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-public-1024x768.png",
+        "sha256": "a653df431a3050e032414eb92136cddef0e8a69868ce379e9cd8a355b6bb5dea",
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-publish-1024x768.png",
+        "sha256": "a628d7e93b0593bb2fa2dcfef518da8a7033c7a70aba6ddcb12acbaecc93ad0d",
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-publish-confirm-1024x768.png",
+        "sha256": "9cef40d2c734ee0f269b0aa3d95d4d3f6b55b1c81a0459a587896c5dd421716c",
+        "width": 1024,
+        "height": 768
+      },
+      {
+        "file": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-service-1024x768.png",
+        "sha256": "e856c3968d86159d103b4cae04f079b7180a222fa57744ce945b45ce40042525",
+        "width": 1024,
+        "height": 768
+      }
+    ],
+    "gpuReport": {
+      "path": "C:\\mir2-build\\unified-20261029\\procurement-sc-gpu\\procurement-native-gpu.json",
+      "sha256": "7cae9d73b224ac364a9e1e8edb51de2af577678fc1d8cd5c5d7d759c8d9c135e"
+    }
+  },
+  "phase": "fresh bounded SC procurement correction after initial integrated stage",
+  "committedFinalGameRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "sourceCommitPendingInProducerIsHistorical": true,
+  "humanAccepted": false
+}

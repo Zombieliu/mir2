@@ -1,0 +1,78 @@
+{
+  "passed": true,
+  "recordedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "sequence": 2026102912,
+  "legacySeedSequence": 2026102911,
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "manifestSha256": "9dfbd083b6b92972539bc01816645ed6131297bb7ca4dedec659438987a74186",
+  "catalogSha256": "1466ee20a770d5e2eef87d27eae5eb8b78ac4f8a539248679dc5a9629eef17f7",
+  "feedSha256": "6d2c2fb0f01155047d56ba42157658d49def40c8c23b33ab9f34725c416a204c",
+  "generationSignatureSha256": "62a34e51582d0c0e857b3b10d213b0e16fed3ea0c04f49316c2a82ecff34459d",
+  "feedSignatureSha256": "914b27a2ad91320f7209f959e8901f555267addc150ea56f4f754ca2f3f19f65",
+  "resourceCount": 255063,
+  "packCount": 33,
+  "packBytes": 1069032581,
+  "logicalBytes": 1086916989,
+  "uniquePayloads": 247477,
+  "uniquePayloadBytes": 1053192997,
+  "metadataOnly": false,
+  "actualFullResourceVerification": true,
+  "cmsVerifiedIndependently": true,
+  "published": false,
+  "installed": false,
+  "gameLaunched": false,
+  "localPackedApplyPassed": false,
+  "rawRunLogReceipts": [
+    {
+      "filename": "unified-packed-unsigned-run.log",
+      "bytes": 1141,
+      "sha256": "902fbb998dcbc5326ae32ff6a59f55f200ad5550aba256364dd748608481fe96"
+    },
+    {
+      "filename": "unified-packed-sign-run.log",
+      "bytes": 1590,
+      "sha256": "a378a5c6555f55cbbf23433463e4a0fb1f42179fba0b1c68eb3b5e714cd6c851"
+    },
+    {
+      "filename": "unified-packed-s2026102912/build-resource-union.log",
+      "bytes": 143,
+      "sha256": "cb982966a6221478a6feced653390e65e04e4d9e6f13d9fdba472a964e46b804"
+    },
+    {
+      "filename": "unified-packed-s2026102912/prepare-generation.log",
+      "bytes": 4173,
+      "sha256": "ea52b06877933b2545a1dfee1f35a5b9578a462547dbbeccb6d62f0efb66ea53"
+    },
+    {
+      "filename": "unified-packed-s2026102912/verify-resource-union.log",
+      "bytes": 346,
+      "sha256": "b7f2bffd86150a386f4a6b7fc94a2f014b1aafe957e395e6846cd244036bf772"
+    },
+    {
+      "filename": "unified-packed-s2026102912/verify-unsigned-draft.log",
+      "bytes": 4173,
+      "sha256": "ea52b06877933b2545a1dfee1f35a5b9578a462547dbbeccb6d62f0efb66ea53"
+    }
+  ],
+  "largeInputsExcluded": [
+    {
+      "file": "unified-packed-s2026102912/resources/catalog.json",
+      "bytes": 68666460,
+      "sha256": "1466ee20a770d5e2eef87d27eae5eb8b78ac4f8a539248679dc5a9629eef17f7",
+      "hashSource": "Actual full production pack verifier"
+    },
+    {
+      "file": "unified-packed-s2026102912/resources/inventory.json",
+      "bytes": 36702747,
+      "sha256": "41abcbb85fbaabb0b8977df21a5d44247bd28ed0400dc9ee09421448d7b09970",
+      "hashSource": "Original resource union preparation"
+    }
+  ],
+  "curatorDidNotRescan255063Resources": true,
+  "limits": [
+    "Public old and Unified feeds unchanged.",
+    "Internal TEST signing is not public publisher Authenticode.",
+    "Prepared/signed/verified does not prove local packed apply, rollback or native startup."
+  ]
+}

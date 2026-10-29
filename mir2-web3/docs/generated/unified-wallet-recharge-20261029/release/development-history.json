@@ -1,0 +1,57 @@
+{
+  "finalPhasePassed": true,
+  "finalPhase": "v5 Python scripts and v3 Rust all-targets",
+  "earlierResultsRetained": [
+    {
+      "phase": "python-discovery-v1",
+      "passed": false,
+      "testsRun": 0,
+      "reason": "unittest discovery did not import hyphenated script names; this is not passing coverage.",
+      "log": {
+        "filename": "release-python-all-v1.log",
+        "bytes": 113,
+        "sha256": "b0281afc5a8f851fedc2bba09c88d720f4dcc47a2a487e40928c779cb967ff8c",
+        "rawLogIncluded": false
+      }
+    },
+    {
+      "phase": "bootstrap-v2",
+      "passed": false,
+      "testsRun": 77,
+      "failures": 2,
+      "reason": "Old nine-font canonical-source copy attempted SafeGetValue on the nested SC additionalTables record; static eleven-font scalar extraction fixed it.",
+      "log": {
+        "filename": "release-test-bootstrap-installer-v2.log",
+        "bytes": 13349,
+        "sha256": "e7517d8490cf194793f5b034492dd58872bbc3236ffba79b8ade6365dc925d78",
+        "rawLogIncluded": false
+      }
+    },
+    {
+      "phase": "bootstrap-v3",
+      "passed": true,
+      "testsRun": 77,
+      "scope": "Intermediate copy fix before later SC-guide/license and negative-test additions; not final 80-test coverage.",
+      "log": {
+        "filename": "release-test-bootstrap-installer-v3.log",
+        "bytes": 10546,
+        "sha256": "b529465d75f91fb6d39b527cc5b334e4492a590ae6a1dad52de2604ba7b12eef",
+        "rawLogIncluded": false
+      }
+    },
+    {
+      "phase": "bootstrap-v4",
+      "passed": false,
+      "testsRun": 80,
+      "errors": 1,
+      "reason": "New regression test omitted its Python re import; repaired in final v5. No production artifact was created.",
+      "log": {
+        "filename": "release-test-bootstrap-installer-v4.log",
+        "bytes": 11838,
+        "sha256": "1b56054320ed3b9348b2900c7989a7026451cf6578957d92f0c9647543736859",
+        "rawLogIncluded": false
+      }
+    }
+  ],
+  "failedOrZeroResultsNotCountedAsFinalCoverage": true
+}

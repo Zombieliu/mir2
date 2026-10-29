@@ -1,0 +1,43 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-packed-s2026102912/release/SIGN-PACKED-GENERATION.json",
+    "bytes": 1451,
+    "sha256": "b15604dce5b2ec159f19fa668380f05f7513d0c13c5218dc8f43245a557745b4"
+  },
+  "producerReport": {
+    "schema": "mir2.windows.packed-generation-signing.v1",
+    "passed": true,
+    "cmsVerified": true,
+    "fullResourceVerified": true,
+    "sourceClean": true,
+    "published": false,
+    "manifestSha256": "9DFBD083B6B92972539BC01816645ED6131297BB7CA4DEDEC659438987A74186",
+    "catalogSha256": "1466EE20A770D5E2EEF87D27EAE5EB8B78AC4F8A539248679DC5A9629EEF17F7",
+    "certificateThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+    "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "resourceSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "resourceManifestSha256": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+    "resourceStrictReportSha256": "7AF3E30AA468D17A9FFCFD8A93D860D9B5C555E1A95630028FC656B2F57C5114",
+    "verificationSha256": "E84CF702C757BD565220C2A9B38A7992579751C233F2B86277CFAD2CC169A2E3",
+    "packVerifierSha256": "AC731A9D407E14AEDEDCC958E4A244750E7F1BFACCDC57D552CF8F1F11031A0D",
+    "signedUnix": 1793293088,
+    "resourceCount": 255063,
+    "uniquePayloads": 247477,
+    "logicalBytes": 1086916989,
+    "uniquePayloadBytes": 1053192997,
+    "packCount": 33,
+    "packBytes": 1069032581,
+    "preparerSha256": "753F64A54BC98F03D900057FB58BB98BF9BBB9EE6A871CF1FBCE94F4340D20B1",
+    "signerSha256": "9A4C7C14284A56EF777956032F0E606B1CC178C9BC87AB955AF59BD2B940682F",
+    "verifierSha256": "7E847AD46AE47C689294784988290FBF0FCEE9F2329B2C2EFEC98414210B996F"
+  },
+  "phase": "Actual signed TEST-CMS high-sequence generation; no public publication",
+  "installed": false,
+  "gameLaunched": false,
+  "publicFeedModified": false
+}

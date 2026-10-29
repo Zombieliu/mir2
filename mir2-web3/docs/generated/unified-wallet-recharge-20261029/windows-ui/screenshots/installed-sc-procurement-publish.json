@@ -1,0 +1,20 @@
+{
+  "name": "installed-sc-procurement-publish",
+  "capturedAtUtc": "2026-10-29T17:16:18.972Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 4788964,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-sc-procurement-publish-0.jpg",
+      "sha256": "fb8ee9c6346769a4c9a6fb2f2075a84bd722aa2e327ed83f1e08bb80d1249887",
+      "bytes": 124043,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

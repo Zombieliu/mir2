@@ -1,0 +1,40 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:42:03.238979+00:00",
+  "producerReceipt": {
+    "filename": "post-ui-preservation.json",
+    "bytes": 1046,
+    "sha256": "e6c96dd7c8f5f79ce577126884d4030625cc05bd437823ee06d167396961f41f"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.post-ui-preservation.v1",
+    "passed": true,
+    "observedAtUtc": "2026-10-29T17:36:38.600253+00:00",
+    "normalInstalledGameExeSha256": "901C47188259B5F2A6B73070B12456D4ECC13AAB02C68B975E1843FFFC507348",
+    "normalGameExeUnchanged": true,
+    "globalPersonalPreferences": [
+      {
+        "file": "locale.json",
+        "exists": true,
+        "sha256": "192A60E8DCDBE02BF6123B549804DBD8A78294F4B0B56185E8009DC29E50504D",
+        "matchedBefore": true
+      },
+      {
+        "file": "locale-seed.json",
+        "exists": true,
+        "sha256": "DC84556B72DACD74DE10C7668CB25AD039C537E0AC407A9D2878F49CD0C2C2DF",
+        "matchedBefore": true
+      },
+      {
+        "file": "display.json",
+        "exists": true,
+        "sha256": "3F0C7040D5EB8A0AB028ED2F417821E35320E20B3F07FDB309C14F5B40B8196D",
+        "matchedBefore": true
+      }
+    ],
+    "scope": "Exact original ordinary Game executable hash and three global preference files; not a whole-installation-tree content audit",
+    "privatePreferenceContentPublished": false
+  },
+  "scope": "Root final bounded preservation/owned process cleanup; no wholeDtree audit or production cleanup inferred"
+}

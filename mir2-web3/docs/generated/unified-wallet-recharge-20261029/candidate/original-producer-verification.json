@@ -1,0 +1,102 @@
+{
+    "schema":  "mir2.windows.package-verification.v4",
+    "candidate":  "WN-CANDIDATE-20261029-unified-11",
+    "packageRoot":  "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-20261029-unified-11.staging-de076792a7ca4016a4e9259a2e25f932",
+    "contentProfile":  "platinum_fiveclass",
+    "contentProfileId":  "platinum_fiveclass",
+    "contentProfileSha256":  "9FC2D6875C78691F7E34650EAE8E8DF868690A1EE6E5960BECC113CAE0E9D4AC",
+    "contentProfileSourceAvailable":  true,
+    "fiveClassClosure":  {
+                             "schema":  "mir2.windows.five-class-closure-evidence.v1",
+                             "profileId":  "platinum_fiveclass",
+                             "profileSha256":  "9FC2D6875C78691F7E34650EAE8E8DF868690A1EE6E5960BECC113CAE0E9D4AC",
+                             "sourceAssetRoot":  "F:\\mu\\mir2-web3\\apps\\web\\public",
+                             "stagedAssetRoot":  "F:\\mu\\mir2-web3\\dist\\mir2-windows-candidate\\.WN-CANDIDATE-20261029-unified-11.staging-de076792a7ca4016a4e9259a2e25f932\\mir2-assets",
+                             "sourceSoundValidated":  true,
+                             "stagedSoundValidated":  true,
+                             "soundIndexExactCopy":  true,
+                             "sourceSpriteAndSkillValidated":  true,
+                             "stagedSpriteAndSkillValidated":  true,
+                             "soundIndexRelativePath":  "original-ui/sound-index.generated.json",
+                             "soundIndexSha256":  "A037A06FAA589EE798AB1CB2C565848A4DCBD00C9CF5FA007C1009C8D50E9B32",
+                             "soundIndexBytes":  112907,
+                             "availableSoundCount":  51,
+                             "absentSoundCount":  6,
+                             "requirements":  [
+                                                  {
+                                                      "kind":  "sprite",
+                                                      "sha256":  "D698E82D271FE041D22F9493BF6679D0E60821632959133640CBDD7E1EDBD7F6"
+                                                  },
+                                                  {
+                                                      "kind":  "skill",
+                                                      "sha256":  "B7AB10218D1992984E978AF7A1CEF951A4CA49E4A35A82B7B200279628272CAB"
+                                                  }
+                                              ]
+                         },
+    "requireCurrentSource":  false,
+    "currentSourceValidated":  true,
+    "currentSourceProof":  {
+                               "revision":  "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+                               "clean":  true,
+                               "statusScope":  "git-status-z+diff+all-untracked-content-v2",
+                               "statusLineCount":  0,
+                               "statusSha256":  "7818A3870FF1F8D6CE856AB2C388E886FD3FB849ECA89BEFEFD3C6EE25D7D295"
+                           },
+    "verifierSha256":  "F012D13B91268E29583A25A81C3F89B08445C22F50AA0D6CF390E20AC14BB516",
+    "nonvisual":  true,
+    "launchRequested":  false,
+    "sourceRepoCheck":  "checked",
+    "currentSourceRevision":  "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "currentSourceRoot":  "F:\\mu\\mir2-web3",
+    "attestationPresent":  true,
+    "attestationSha256":  "8AE470CDE3EE893BCFE726F86A0888197820002F6A61945D12F61712F8C27292",
+    "packageManifestPresent":  true,
+    "packageManifestSha256":  "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+    "packageManifestAggregateSha256":  "4B7F79CAD7F281D69A7BDEFDA5BB633387B5A160F53DBA5F15CF2CEDEF503D16",
+    "trustedSignerThumbprint":  "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+    "detachedSignatureValid":  true,
+    "exeSha256":  "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+    "peValid":  true,
+    "peImports":  [
+                      "KERNEL32.dll",
+                      "SHELL32.dll",
+                      "USER32.dll",
+                      "VCRUNTIME140.dll",
+                      "advapi32.dll",
+                      "api-ms-win-core-synch-l1-2-0.dll",
+                      "api-ms-win-core-winrt-error-l1-1-0.dll",
+                      "api-ms-win-crt-heap-l1-1-0.dll",
+                      "api-ms-win-crt-locale-l1-1-0.dll",
+                      "api-ms-win-crt-math-l1-1-0.dll",
+                      "api-ms-win-crt-runtime-l1-1-0.dll",
+                      "api-ms-win-crt-stdio-l1-1-0.dll",
+                      "api-ms-win-crt-string-l1-1-0.dll",
+                      "bcrypt.dll",
+                      "bcryptprimitives.dll",
+                      "combase.dll",
+                      "crypt32.dll",
+                      "dwmapi.dll",
+                      "dwrite.dll",
+                      "gdi32.dll",
+                      "imm32.dll",
+                      "kernel32.dll",
+                      "ntdll.dll",
+                      "ole32.dll",
+                      "oleaut32.dll",
+                      "setupapi.dll",
+                      "shell32.dll",
+                      "uiautomationcore.dll",
+                      "user32.dll",
+                      "uxtheme.dll",
+                      "ws2_32.dll"
+                  ],
+    "peDelayImports":  [
+
+                       ],
+    "packageFileCount":  255079,
+    "failures":  [
+
+                 ],
+    "passed":  true,
+    "visualAccepted":  false
+}

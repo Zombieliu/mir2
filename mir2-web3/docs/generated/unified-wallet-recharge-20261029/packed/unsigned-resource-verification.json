@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:02:45.245932+00:00",
+  "producerReceipt": {
+    "filename": "unified-packed-s2026102912/resources/ACTUAL-RESOURCE-VERIFICATION.json",
+    "bytes": 391,
+    "sha256": "dadb288254b74d4bc3d30abdc33d365140cba0edf092b41240c697bb62d6b362"
+  },
+  "producerReport": {
+    "actualFullVerification": true,
+    "catalogSha256": "1466EE20A770D5E2EEF87D27EAE5EB8B78AC4F8A539248679DC5A9629EEF17F7",
+    "logicalBytes": 1086916989,
+    "metadataOnly": false,
+    "packBytes": 1069032581,
+    "packCount": 33,
+    "passed": true,
+    "resourceCount": 255063,
+    "schema": "mir2.native.resource-pack-verification.v1",
+    "uniquePayloadBytes": 1053192997,
+    "uniquePayloads": 247477
+  },
+  "phase": "Actual complete resources/packs verification during unsigned preparation",
+  "installed": false,
+  "gameLaunched": false,
+  "publicFeedModified": false
+}
