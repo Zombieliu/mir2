@@ -192,14 +192,15 @@ function Test-PetGuildAssetClosure {
 
 # Sparse original UI libraries: pin the full trusted metadata before consulting
 # selected frame hashes. Indices and paths come from this source, never metadata.
-# September 29 pins include the committed mail/storage UI exports; all 1,381
-# drawable frames were pixel-checked against the same original Crystal Libs.
+# The September 29 baseline's 1,381 drawable frames remain byte-identical.
+# Committed warehouse buttons (dabe442ff) and guild notice input (2a1c54c29)
+# add five frames from the same original Crystal Libs; their PNGs are required.
 # Prguse also retains 81 source-zero-geometry metadata slots (not drawable).
 function Get-SkillBarFrameIdentities {
     @(
-        [pscustomobject]@{ library='Title'; indices=@(156,157,158,287,288,289,516,517,560,561,562,563,564,565); sourceBytes=5617784; sourceSha256='bd3e9485548e9b3cb5d4cb261c9a01a07752fb41fcea7f5d8569e602feaed648'; metaSha256='93547fd4ae3315829166d08402da24f06d1e8d825154ccc12f6f4e8b8a467753' },
+        [pscustomobject]@{ library='Title'; indices=@(156,157,158,287,288,289,516,517,560,561,562,563,564,565,743,744,745,746); sourceBytes=5617784; sourceSha256='bd3e9485548e9b3cb5d4cb261c9a01a07752fb41fcea7f5d8569e602feaed648'; metaSha256='6513b3f04f3ccc67a201c1722339f76f6083973ba77ebfb940fd9a17773e5a69' },
         [pscustomobject]@{ library='Prguse'; indices=@(710,1656,1657,1658,1428,1429,1921,1934,1943,1946,2190,2193,2247,2105) + @(2110..2113) + @(2122..2127) + @(2131..2137) + @(2140..2162); sourceBytes=12414386; sourceSha256='584b67694a420a29c98f51b04cdf681acf1ed071c15c57014fdfd59c762a3c96'; metaSha256='a45c5f42b660981e53ad7819f6bfe279e903c560acc3869725bb18af9fec5f67' },
-        [pscustomobject]@{ library='Prguse2'; indices=@(1260..1282) + @(1290..1324) + @(7,8,9) + @(20..33); sourceBytes=3557648; sourceSha256='510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861'; metaSha256='db31438e7516e77dc57769d2ab1796ef151f5bbec9d3d29ec313acb53a5027a1' }
+        [pscustomobject]@{ library='Prguse2'; indices=@(1260..1282) + @(1290..1324) + @(7,8,9) + @(20..33) + @(424); sourceBytes=3557648; sourceSha256='510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861'; metaSha256='52ff33c696a8b04d576bddcc7b8f14d94aa5b3b35cd8e0d31f379295e9a635cd' }
     )
 }
 function Assert-SkillBarFrames {

@@ -1,14 +1,25 @@
 #define AppName "Numeron - Legend of Rebirth"
-#define AppVersion "2026.10.01.8"
+#define AppVersion "2026.10.29.9"
 #define AppExe "mir2-platform-windows.exe"
 #define LauncherExe "Mir2Launcher.exe"
 
 [Setup]
+#ifdef Mir2ValidationInstall
+  #ifdef Mir2PublicSign
+    #error Mir2ValidationInstall cannot be a public release
+  #endif
+; Isolated acceptance identity: never replace the player's installed game or locale.
+AppId={{57CF8E63-1E57-49E9-882B-EC858C59C0F9}
+DefaultDirName={localappdata}\Programs\Mir2InviteValidation
+OutputBaseFilename=Numeron-Legend-of-Rebirth-20261029-r9-LocalValidation-Setup
+#else
 AppId={{DC4E7701-25AD-4E48-9970-5C1983CBC77F}
+DefaultDirName={localappdata}\Programs\Mir2Invite
+OutputBaseFilename=Numeron-Legend-of-Rebirth-20261029-r9-Setup
+#endif
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher=Numeron - Legend of Rebirth
-DefaultDirName={localappdata}\Programs\Mir2Invite
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 DisableDirPage=no
@@ -18,8 +29,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 OutputDir=..
-OutputBaseFilename=Numeron-Legend-of-Rebirth-20261001-r8-Setup
-VersionInfoVersion=2026.10.1.8
+VersionInfoVersion=2026.10.29.9
 VersionInfoDescription=Numeron - Legend of Rebirth multilingual playtest installer
 UninstallDisplayName={#AppName}
 #ifdef Mir2Bootstrap
@@ -508,7 +518,11 @@ procedure SeedInitialLocale;
 var
   Directory, Preference, Seed, Temporary, Code: String;
 begin
+#ifdef Mir2ValidationInstall
+  Directory := ExpandConstant('{app}\validation-profile\mir2-web3');
+#else
   Directory := ExpandConstant('{userappdata}\mir2-web3');
+#endif
   Preference := AddBackslash(Directory) + 'locale.json';
   Seed := AddBackslash(Directory) + 'locale-seed.json';
   if FileExists(Preference) or FileExists(Seed) then exit;

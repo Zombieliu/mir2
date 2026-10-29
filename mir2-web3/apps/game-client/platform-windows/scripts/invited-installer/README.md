@@ -1,20 +1,20 @@
-# Numeron - Legend of Rebirth: nine-language r8 installer
+# Numeron - Legend of Rebirth: ten-language r9 installer
 
 This recipe consumes an already attested, strictly CMS-verified client-only
 Candidate. It neither builds the game nor changes player saves or servers.
 Earlier artifacts are immutable. Output for this version is
-`Numeron-Legend-of-Rebirth-20261001-r8-Setup.exe`, version `2026.10.01.8`.
-This revision fixes skill readiness, cooldown clocks and ordinary-window input
-capture, and includes the earlier medicine-shop/bag placement correction. It
-retains the verified launcher/updater and login resolution selection. Deploy
-its matching Gateway revision for authoritative action/FlamingSword timing.
+`Numeron-Legend-of-Rebirth-20261029-r9-Setup.exe`, version `2026.10.29.9`.
+This revision adds Simplified Chinese, reviewed game terminology, complete SC
+font coverage and separate Fiat/USDC/monthly-card pages. It retains the verified
+launcher/updater and login resolution selection. A client installer does not
+deploy its matching Gateway or enable any payment provider.
 Per-user display and language preferences survive ordinary updates.
 AppId, per-user installation directory and shortcut identity remain unchanged.
 
 ## Inputs and ordinary internal Candidate build
 
 Use a fresh external directory. Copy this recipe, `prepare-installer-input.py`,
-`languages/`, and the nine `README.*.txt` files from `../player-readme` into it.
+`languages/`, and the ten `README.*.txt` files from `../player-readme` into it.
 Supply `tools/vc_redist.x64.exe` from Microsoft and Inno Setup 7. Verify the
 compiler and runtime publisher signatures. The pinned runtime used here is
 14.51.36247.0, SHA256
@@ -34,10 +34,21 @@ python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-c
 ISCC.exe /Qp Mir2-Invite.iss
 ```
 
-The preparation tool requires `WN-CANDIDATE-20261001-invited-08`, exact clean
+The preparation tool requires `WN-CANDIDATE-20261029-invited-09`, exact clean
 source provenance, recursive file closure and matching hashes. It rejects logs,
 links, extra files and output overwrite. There is no default source revision.
 Its literal input list is supplementary byte evidence, not CMS verification.
+
+For an actual isolated local installation, compile the same verified payload
+with `/DMir2ValidationInstall=1`. This mode uses a separate application ID,
+`Mir2InviteValidation` directory and an `{app}/validation-profile/mir2-web3`
+locale directory. It cannot be combined with `Mir2PublicSign`. The silent
+acceptance run must use `/NOICONS /TASKS=""`, an explicit fresh `/DIR` and
+`/LANG=chinesesimplified`; it never starts the game. Point only the subsequent
+test client process's `APPDATA` at `{app}/validation-profile` to verify the
+installer's actual seed. Existing installed games and user language preferences
+must retain their hashes and registration. This mode does not establish public
+publisher trust or a clean-PC/runtime installation result.
 
 The installer holds the same exclusive per-install file lock as the launcher
 for fresh and existing installations. After all verified files are installed,
@@ -70,10 +81,10 @@ organization's application-control policy admits the program.
 
 ## Languages and font provenance
 
-Installer and initial game locale choices are `en`, `zh-TW`, `pt-BR`, `ru`,
+Installer and initial game locale choices are `en`, `zh-CN`, `zh-TW`, `pt-BR`, `ru`,
 `hi`, `id`, `vi`, `th`, and `ar`. Existing preferences/seed always win. Arabic
 uses Inno's RTL translation. Russian, Thai, Arabic and the original three use
-current compiler language files. The other three derive from the official
+current compiler language files, including Simplified Chinese. The other three derive from the official
 Inno repository's community `Unofficial` translations. Their pinned sources,
 licenses and precise Hindi/Vietnamese corrections are in `languages/`.
 Hindi's older upstream file is preserved; its 67 absent current messages and
@@ -99,4 +110,4 @@ The installer never disables Smart App Control, WDAC, Defender or other policies
 never installs a trusted root, and never retries the game elevated. Client
 uninstallation preserves language preferences and never removes server accounts.
 A successful compiler-only fixture does not establish clean-PC installation,
-application-control acceptance, human nine-language gameplay or capacity.
+application-control acceptance, human ten-language gameplay or capacity.

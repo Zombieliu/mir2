@@ -21,6 +21,7 @@
     "OpenCC-1.4.2-tw2sp": 7407,
     "existing-shared-zh-CN": 2362
   },
+  "methodsScope": "Baseline generation before keyed editorial overrides; final values include the separately counted editorial edits.",
   "converter": {
     "project": "OpenCC",
     "version": "1.4.2",
@@ -84,7 +85,12 @@
     "packages/game-data/data/native-i18n/periodic.json": "a6ade91e8ae348ed47336c851faa0e9ec41900178f779572f22c6ef5a6c76757",
     "packages/game-data/data/native-i18n/conquest.json": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c",
     "native_i18n.rs::BILLING_TRANSLATIONS(key,en,zh-TW)": "ffc04446cd660f1a042e3ded37f5cfae5b494e9d06e180bc79ea14045c408641",
-    "packages/game-data/data/generated/localization_bundle.json": "cca64cebcb5566cb777ac56fa32e3a471020b78a3db64da017a23324c87efec6"
+    "packages/game-data/data/generated/localization_bundle.json": "cca64cebcb5566cb777ac56fa32e3a471020b78a3db64da017a23324c87efec6",
+    "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17",
+    "apps/game-client/client-core/src/item_names.rs": "43e8479124e6ab6adfbaada3b214a088710de7b2f49d8d369a8b2e2eda2ad330",
+    "packages/game-data/data/generated/crystal_item_manifest.json": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+    "packages/game-data/data/generated/crystal_monster_manifest.json": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec",
+    "packages/game-data/data/generated/crystal_magic_manifest.json": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
   },
   "reviewedOverrides": {
     "billing.fiatTab": "法币充值",
@@ -92,8 +98,87 @@
     "billing.usdcTab": "USDC链上充值",
     "ui.languageChinese": "简体中文"
   },
-  "productTerminology": "billing.* uses 点券 for the existing Credits balance; no rates, prices, identity or gameplay data change.",
-  "overlaySha256": "6c64f1791f8743831f13b3d89aea298c629f0ae0b18722fc4b80f274a9506310",
+  "editorialReview": {
+    "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+    "revision": "2026-10-29-editorial-v1",
+    "sha256": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17",
+    "reviewMethod": "AI-assisted editorial review of system-owned catalog text with exact keyed changes and source checks; not human linguistic acceptance.",
+    "reviewCoverage": {
+      "mechanicallyCheckedCatalogKeys": 9769,
+      "detailedReadPrefixes": {
+        "billing": 61,
+        "monthly": 19,
+        "shell": 167,
+        "game": 309,
+        "quest": 404,
+        "help": 124,
+        "npc.menu": 607,
+        "npc.prose": 1479,
+        "periodic": 110,
+        "conquest": 50,
+        "client": 1071,
+        "content.quest": 717
+      },
+      "serverReview": "Economic, permissions and remaining message batches inspected; all 768 keys receive structural/terminology checks. This is AI review, not 9769 human-approved strings.",
+      "contentNamingReview": {
+        "method": "Independent read-only AI/source review, integrated by one writer",
+        "keys": 3545,
+        "uniqueChineseTexts": 3068,
+        "suggestionsIntegrated": 167,
+        "humanCanonicalNameAcceptance": false
+      },
+      "scope": "Only catalog-owned templates. Values substituted for player names, guild names, chat/mail/notice contents or NPC parameters are never converted at runtime.",
+      "additionalSystemTemplates": 22,
+      "humanReviewedKeys": 0,
+      "unresolvedUpstreamCopy": [
+        "Blizzard source English describes defence while its skill-book text describes an attack; no mechanics rewrite made.",
+        "Fury source English says Accuracy while its skill-book text says attack speed; no mechanics rewrite made.",
+        "content.quest.57.description remains a translated upstream Example placeholder, not newly authored quest content.",
+        "Korean romanized proper names lacking an authoritative existing Chinese name are preserved; not invented."
+      ]
+    },
+    "overrideCount": 873,
+    "categories": {
+      "attack-mode-copy": 1,
+      "canonical-content-name": 141,
+      "canonical-quest-npc": 60,
+      "canonical-quest-target": 17,
+      "canonical-skill-copy": 31,
+      "class-copy": 1,
+      "currency-distinction": 13,
+      "game-ui-copy": 11,
+      "guild-permission-copy": 17,
+      "guild-terminology": 88,
+      "help-copy": 4,
+      "hero-terminology": 4,
+      "inventory-copy": 3,
+      "item-type-copy": 2,
+      "missing-translation": 1,
+      "monthly-rules-copy": 4,
+      "npc-copy": 6,
+      "npc-lore-copy": 5,
+      "npc-system-copy": 1,
+      "payment-state-copy": 3,
+      "quest-copy": 9,
+      "rarity-terminology": 2,
+      "shell-copy": 16,
+      "simplified-terminology": 261,
+      "skill-panel-copy": 130,
+      "startup-copy": 3,
+      "stat-copy": 1,
+      "stat-meaning": 8,
+      "system-template-copy": 8,
+      "teleport-meaning": 18,
+      "trade-copy": 1,
+      "trade-safety-copy": 1,
+      "trade-state-copy": 2
+    },
+    "precedence": "Pinned OpenCC/shared baseline, four locale/navigation identity labels, then exact-key versioned editorial values.",
+    "staleBasePolicy": "Every edited key pins the exact pre-editorial value; upstream changes require re-review.",
+    "humanAccepted": false
+  },
+  "productTerminology": "Credits uses 点券; guild buff points remain 点数. 账号/账单/到账, 行会 and system labels use consistent Simplified copy. No rates, prices, identity or gameplay data change.",
+  "overlaySha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f",
   "scope": "All native base, item/monster/quest/NPC/help, periodic/conquest and embedded system-role/group/shop/mail/billing keys. Known system templates only; opaque player arguments, names, chat, notices and mail bodies are never converted at runtime.",
   "acceptance": "Offline coverage and placeholder/number/command preservation; native layout/glyph tests and human linguistic acceptance are separate."
 }

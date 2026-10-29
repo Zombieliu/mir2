@@ -4,6 +4,7 @@ Development-only official OpenCC 1.4.2 (Apache-2.0), configuration tw2sp.
 The generated data is committed; OpenCC is NOT a game/runtime dependency.
 Existing shared zh-CN keys take precedence over offline conversion. Only
 catalog-owned templates are converted, before opaque arguments are inserted.
+Versioned, keyed editorial overrides then take precedence over that baseline.
 
 Use --opencc-path with an explicitly isolated unpacked official wheel, or an
 existing OpenCC environment. --check verifies byte-equivalent generated data.
@@ -27,6 +28,7 @@ NATIVE = ROOT / "apps/game-client/client-bevy/src/native_i18n.rs"
 SHARED = ROOT / "packages/game-data/data/generated/localization_bundle.json"
 OUTPUT = DATA / "extra/zh-CN.json"
 PROVENANCE = DATA / "extra/zh-CN-provenance.json"
+EDITORIAL = DATA / "extra/zh-CN-editorial-overrides.json"
 CATALOGUES = ["common", "content", "shell", "quest", "game", "help",
               "npc-menus", "npc-prose", "periodic", "conquest"]
 OPENCC_VERSION = "1.4.2"
@@ -192,6 +194,85 @@ def tokens(source: str):
     }
 
 
+def editorial_overrides(document: dict, known_keys: set[str]) -> dict[str, dict]:
+    """Reject stale or unsafe copy edits instead of silently changing a template."""
+    if document.get("schema") != 1 or document.get("locale") != "zh-CN":
+        raise ValueError("Unsupported Simplified editorial document")
+    if not isinstance(document.get("revision"), str) or not document["revision"].strip():
+        raise ValueError("Editorial revision is required")
+    if not isinstance(document.get("reviewMethod"), str) or not document["reviewMethod"].strip():
+        raise ValueError("Editorial review method is required")
+    if document.get("humanAccepted") is not False:
+        raise ValueError("Editorial AI review must not claim human acceptance")
+    entries = document.get("entries")
+    if not isinstance(entries, list):
+        raise ValueError("Editorial entries must be an explicit keyed list")
+    output = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise ValueError("Editorial entries must be keyed objects")
+        key = entry.get("key")
+        if key not in known_keys or key in output:
+            raise ValueError(f"Unknown or duplicate editorial key: {key}")
+        for field in ("expectedBase", "value", "category", "reason"):
+            if not isinstance(entry.get(field), str) or not entry[field].strip():
+                raise ValueError(f"Missing editorial {field}: {key}")
+        if entry["expectedBase"] == entry["value"]:
+            raise ValueError(f"Redundant editorial override: {key}")
+        if tokens(entry["expectedBase"]) != tokens(entry["value"]):
+            raise ValueError(f"Editorial changed interpolation/numbers/commands: {key}")
+        output[key] = entry
+    return output
+
+
+def apply_editorial(key: str, baseline: str, reviewed: dict[str, dict]) -> str:
+    entry = reviewed.get(key)
+    if entry is None:
+        return baseline
+    if baseline != entry["expectedBase"]:
+        raise ValueError(f"Editorial baseline is stale; re-review the source: {key}")
+    return entry["value"]
+
+
+def self_test():
+    """Focused negative checks need neither OpenCC nor a changed game asset."""
+    entry = {"key": "test.copy", "expectedBase": "帐单 {order}：500 金币 @open",
+             "value": "账单 {order}：500 金币 @open", "category": "terminology",
+             "reason": "Use the Simplified ledger spelling without changing terms."}
+    document = {"schema": 1, "locale": "zh-CN", "revision": "test-v1",
+                "reviewMethod": "test fixture, no human acceptance",
+                "humanAccepted": False, "entries": [entry]}
+    reviewed = editorial_overrides(document, {"test.copy"})
+    assert apply_editorial("test.copy", entry["expectedBase"], reviewed) == entry["value"]
+    assert apply_editorial("opaque", "龍城{Gold}", reviewed) == "龍城{Gold}"
+    cases = []
+    for name, changed in [
+        ("duplicate", dict(document, entries=[entry, entry])),
+        ("unknown-key", dict(document, entries=[dict(entry, key="unknown")])),
+        ("empty-copy", dict(document, entries=[dict(entry, value=" ")])),
+        ("changed-placeholder", dict(document, entries=[dict(entry, value="账单 {other}：500 金币 @open")])),
+        ("changed-amount", dict(document, entries=[dict(entry, value="账单 {order}：50 金币 @open")])),
+        ("changed-command", dict(document, entries=[dict(entry, value="账单 {order}：500 金币 @close")])),
+        ("human-acceptance-claim", dict(document, humanAccepted=True)),
+        ("missing-review-method", dict(document, reviewMethod="")),
+        ("malformed-entry", dict(document, entries=[None])),
+    ]:
+        try:
+            editorial_overrides(changed, {"test.copy"})
+        except ValueError:
+            cases.append(name)
+        else:
+            raise AssertionError(f"Editorial accepted invalid {name}")
+    try:
+        apply_editorial("test.copy", "上游改动", reviewed)
+    except ValueError:
+        cases.append("stale-baseline")
+    else:
+        raise AssertionError("Editorial silently applied to changed source")
+    print(json.dumps({"passed": True, "positiveCases": 2, "rejectedCases": cases,
+                      "runtimePlayerConversion": False}, indent=2))
+
+
 def generate(opencc_path: Path | None = None):
     if opencc_path is not None:
         sys.path.insert(0, str(opencc_path.resolve()))
@@ -202,6 +283,17 @@ def generate(opencc_path: Path | None = None):
 
     convert = OpenCC(OPENCC_CONFIG).convert
     rows, shared, hashes, counts = inputs()
+    editorial_document = json.loads(EDITORIAL.read_text(encoding="utf-8"))
+    reviewed = editorial_overrides(editorial_document, {row["key"] for row in rows})
+    hashes[EDITORIAL.relative_to(ROOT).as_posix()] = text_sha(EDITORIAL)
+    for relative, expected in editorial_document.get("sourceReviewSha256", {}).items():
+        path = (ROOT / relative).resolve()
+        if not path.is_relative_to(ROOT) or path == ROOT:
+            raise ValueError(f"Editorial source escaped the project: {relative}")
+        actual = text_sha(path)
+        if actual != expected:
+            raise ValueError(f"Reviewed naming source changed; re-review required: {relative}")
+        hashes[relative] = actual
     output = {}
     methods = Counter()
     override_keys = []
@@ -220,6 +312,7 @@ def generate(opencc_path: Path | None = None):
         if key in OVERRIDES:
             value = OVERRIDES[key]
             override_keys.append(key)
+        value = apply_editorial(key, value, reviewed)
         if not value.strip():
             raise ValueError(f"Empty Simplified Chinese value: {key}")
         if tokens(source) != tokens(value):
@@ -239,10 +332,23 @@ def generate(opencc_path: Path | None = None):
         "generatedBy": "packages/tooling/scripts/generate-native-i18n-simplified.py",
         "counts": dict(counts, totalKeys=len(output)),
         "methods": dict(sorted(methods.items())),
+        "methodsScope": "Baseline generation before keyed editorial overrides; final values include the separately counted editorial edits.",
         "converter": dict(TOOL_PIN, configuration=OPENCC_CONFIG, dictionaryAndConfigSha256=dictionaries),
         "sourceTextSha256": hashes,
         "reviewedOverrides": {key: OVERRIDES[key] for key in sorted(override_keys)},
-        "productTerminology": "billing.* uses 点券 for the existing Credits balance; no rates, prices, identity or gameplay data change.",
+        "editorialReview": {
+            "path": EDITORIAL.relative_to(ROOT).as_posix(),
+            "revision": editorial_document["revision"],
+            "sha256": text_sha(EDITORIAL),
+            "reviewMethod": editorial_document["reviewMethod"],
+            "reviewCoverage": editorial_document["reviewCoverage"],
+            "overrideCount": len(reviewed),
+            "categories": dict(sorted(Counter(row["category"] for row in reviewed.values()).items())),
+            "precedence": "Pinned OpenCC/shared baseline, four locale/navigation identity labels, then exact-key versioned editorial values.",
+            "staleBasePolicy": "Every edited key pins the exact pre-editorial value; upstream changes require re-review.",
+            "humanAccepted": False,
+        },
+        "productTerminology": "Credits uses 点券; guild buff points remain 点数. 账号/账单/到账, 行会 and system labels use consistent Simplified copy. No rates, prices, identity or gameplay data change.",
         "overlaySha256": sha(encoded(output)),
         "scope": "All native base, item/monster/quest/NPC/help, periodic/conquest and embedded system-role/group/shop/mail/billing keys. Known system templates only; opaque player arguments, names, chat, notices and mail bodies are never converted at runtime.",
         "acceptance": "Offline coverage and placeholder/number/command preservation; native layout/glyph tests and human linguistic acceptance are separate.",
@@ -254,9 +360,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--opencc-path", type=Path)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--self-test", action="store_true",
+                        help="Run focused editorial validation checks without OpenCC or writes")
     parser.add_argument("--glyph-corpus", type=Path,
                         help="Optional external font-validation corpus; never changes game assets")
     args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return
     overlay, provenance = generate(args.opencc_path)
     for path, value in [(OUTPUT, overlay), (PROVENANCE, provenance)]:
         expected = encoded(value)

@@ -46,6 +46,19 @@ pub struct OwnedMonthlyCard {
     pub label: String,
 }
 
+impl OwnedMonthlyCard {
+    fn display_label(&self) -> String {
+        match self.label.as_str() {
+            // The Gateway currently forwards the first label from the typed
+            // monthly-card listing; the others are exact legacy/item aliases.
+            "" | "30-day account access" | "Monthly Card" | "MonthlyCard30Days" => {
+                crate::native_i18n::key("billing.monthlyCardItemName", "Monthly Card (30 Days)")
+            }
+            _ => self.label.clone(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct BillingOrder {
@@ -1299,15 +1312,7 @@ mod ui {
             let y = 371.0 + i as f32 * 45.0;
             text(
                 p,
-                format!(
-                    "{} #{}",
-                    if card.label.is_empty() {
-                        tr("billing.card")
-                    } else {
-                        card.label.clone()
-                    },
-                    card.unique_id
-                ),
+                format!("{} #{}", card.display_label(), card.unique_id),
                 20.0,
                 y,
                 510.0,
@@ -1741,7 +1746,7 @@ mod ui {
             s.monthly_card_credit_price = Some(100);
             s.owned_monthly_cards = vec![OwnedMonthlyCard {
                 unique_id: "18446744073709551615".into(),
-                label: "Monthly Card".into(),
+                label: "30-day account access".into(),
             }];
             for (i, state) in [
                 SuiUsdcOrderState::Prepared,
@@ -1886,6 +1891,20 @@ mod ui {
                         assert!(!layouts.iter().any(|row| row["text"]
                             == native_i18n::tr("billing.fiatInstructions")
                             || row["text"] == native_i18n::tr("billing.usdcInstructions")));
+                        let card = &s.owned_monthly_cards[0];
+                        let card_name = format!(
+                            "{} #{}",
+                            native_i18n::tr("billing.monthlyCardItemName"),
+                            card.unique_id
+                        );
+                        assert!(layouts.iter().any(|row| row["text"] == card_name));
+                        assert!(app
+                            .world_mut()
+                            .query::<&BillingButton>()
+                            .iter(app.world())
+                            .any(|button| button.enabled
+                                && button.action
+                                    == BillingAction::Activate(card.unique_id.clone())));
                     }
                     screenshots.push(path.file_name().unwrap().to_string_lossy().to_string());
                     checks.push(serde_json::json!({"locale":locale.code(), "page":label, "layouts":layouts}));
@@ -1895,6 +1914,76 @@ mod ui {
                 "evidenceKind":"offline-native-production-renderer", "width":1024,"height":768,
                 "screenshots":screenshots,"checks":checks,"missingGlyphs":0,"overflowingTextNodes":0,"outsideViewportNodes":0})).unwrap()).unwrap();
         }
+        #[test]
+        fn owned_monthly_card_names_localize_exact_aliases_and_keep_identity() {
+            crate::native_i18n::with_locale(crate::native_i18n::Locale::SimplifiedChinese, || {
+                let uid = "18446744073709551615";
+                for label in [
+                    "",
+                    "30-day account access",
+                    "Monthly Card",
+                    "MonthlyCard30Days",
+                ] {
+                    let card = OwnedMonthlyCard {
+                        unique_id: uid.into(),
+                        label: label.into(),
+                    };
+                    assert_eq!(card.display_label(), "30 天月卡");
+                    assert_eq!(card.unique_id, uid);
+                    assert_eq!(card.label, label);
+                }
+                for label in [
+                    "Gold",
+                    "Monthly Card custom",
+                    " Monthly Card ",
+                    "龍城{Gold}",
+                ] {
+                    let card = OwnedMonthlyCard {
+                        unique_id: uid.into(),
+                        label: label.into(),
+                    };
+                    assert_eq!(card.display_label(), label);
+                    assert_eq!(card.unique_id, uid);
+                }
+                let mut panel = BillingPanel::default();
+                panel.open_for("alice", 7, 1);
+                panel.pending = None;
+                panel.page = BillingPage::MonthlyCard;
+                let mut status = status(false);
+                status.monthly_card_credit_price = None;
+                status.owned_monthly_cards = vec![OwnedMonthlyCard {
+                    unique_id: uid.into(),
+                    label: "30-day account access".into(),
+                }];
+                panel.status = Some(status.clone());
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                Commands::new(&mut queue, &world)
+                    .spawn_empty()
+                    .with_children(|parent| {
+                        render_monthly(parent, &panel, &status);
+                    });
+                queue.apply(&mut world);
+                assert!(world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .any(|text| text.0 == format!("30 天月卡 #{uid}")));
+                assert!(world
+                    .query::<&BillingButton>()
+                    .iter(&world)
+                    .any(|button| button.enabled
+                        && button.action == BillingAction::Activate(uid.into())));
+                assert_eq!(panel.status.as_ref(), Some(&status));
+                panel.action(BillingAction::Activate(uid.into()), 2);
+                assert_eq!(
+                    panel.pending.unwrap().purchase,
+                    Some(BillingPurchase::ActivateMonthlyCard {
+                        item_unique_id: uid.into()
+                    })
+                );
+            });
+        }
+
         #[test]
         fn three_routes_remain_visible_without_sales_and_selecting_is_explicit() {
             let mut p = BillingPanel::default();
