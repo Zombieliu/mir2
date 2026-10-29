@@ -56,6 +56,7 @@ pub mod routing;
 mod session;
 pub mod spectator;
 mod stripe_billing;
+pub mod sui_usdc_billing;
 pub mod tcp;
 pub mod topology;
 pub mod web;

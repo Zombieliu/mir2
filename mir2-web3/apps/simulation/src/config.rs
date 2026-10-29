@@ -373,6 +373,8 @@ impl AccountStore {
     }
 
     fn migrate_to_current_schema(mut self) -> Self {
+        let impossible_usdc = self.schema_version < crate::sui_usdc_billing::SCHEMA_VERSION
+            && self.accounts.values().any(|a| a.billing.as_ref().is_some_and(|b| !b.sui_usdc_orders.is_empty()));
         // Never promote authority fields which did not exist in the tagged
         // schema. Version 3 guild records otherwise survive the clock upgrade.
         // Both pre-integration branches used schema 6 for distinct authorities.
@@ -411,6 +413,7 @@ impl AccountStore {
             && !impossible_monthly_cards
             && !impossible_billing
             && !impossible_activities
+            && !impossible_usdc
         {
             self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
         }
@@ -5262,7 +5265,7 @@ impl SimulationConfig {
         if matches!(scope, AccountStoreMutationScope::FullRestore) {
             // A world backup cannot roll back externally committed money.
             for (account_id, original) in &original_store.accounts {
-                if original.billing.as_ref().is_some_and(|v| !v.provenance.is_empty()) {
+                if original.billing.as_ref().is_some_and(|v| !v.provenance.is_empty() || !v.sui_usdc_orders.is_empty()) {
                     let restored=staged_store.accounts.get(account_id).ok_or("billingFinancialRestoreRequiresReconciliation")?;
                     let money_unchanged=serde_json::to_value(&original.billing).ok()==serde_json::to_value(&restored.billing).ok()
                         && serde_json::to_value(&original.monthly_card).ok()==serde_json::to_value(&restored.monthly_card).ok()

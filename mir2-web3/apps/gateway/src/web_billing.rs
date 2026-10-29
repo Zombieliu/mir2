@@ -3,6 +3,8 @@ use super::*;
 use crate::stripe_billing::StripeBilling;
 use mir2_simulation::billing::RechargeOrderState;
 use mir2_simulation::monthly_card::monthly_card_now_ms;
+#[path = "web_sui_usdc.rs"]
+mod sui_usdc;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -36,6 +38,7 @@ pub(super) struct ActivateRequest {
 pub(super) enum Request {
     Status(StatusRequest),
     Checkout(CheckoutRequest),
+    UsdcCheckout(CheckoutRequest),
     Buy(BuyRequest),
     Activate(ActivateRequest),
 }
@@ -44,6 +47,7 @@ impl Request {
         match self {
             Self::Status(r) => r.character_index,
             Self::Checkout(r) => r.character_index,
+            Self::UsdcCheckout(r) => r.character_index,
             Self::Buy(r) => r.character_index,
             Self::Activate(r) => r.character_index,
         }
@@ -52,6 +56,7 @@ impl Request {
         match self {
             Self::Status(r) => r.request_id,
             Self::Checkout(r) => r.request_id,
+            Self::UsdcCheckout(r) => r.request_id,
             Self::Buy(r) => r.request_id,
             Self::Activate(r) => r.request_id,
         }
@@ -60,6 +65,7 @@ impl Request {
         match self {
             Self::Status(_) => "status",
             Self::Checkout(_) => "checkout",
+            Self::UsdcCheckout(_) => "usdcCheckout",
             Self::Buy(_) => "buyMonthlyCard",
             Self::Activate(_) => "activateMonthlyCard",
         }
@@ -198,10 +204,26 @@ fn status_value(
         .take(20)
         .map(|order| json!({"id":order.id,"state":order.state}))
         .collect::<Vec<_>>();
+    let usdc = crate::sui_usdc_billing::UsdcBilling::from_env()?;
+    if let Some(p) = &usdc {
+        p.validate_store(config)?;
+    }
+    let usdc_enabled = usdc.as_ref().is_some_and(|p| p.enabled);
+    let usdc_orders = config
+        .usdc_recharge_orders(account, character)?
+        .iter()
+        .rev()
+        .take(20)
+        .map(crate::sui_usdc_billing::public_order)
+        .collect::<Vec<_>>();
     Ok(
-        json!({"enabled":provider.is_some()||config.billing_monthly_card_credit_price.is_some(),
+        json!({"enabled":provider.is_some()||usdc_enabled||config.billing_monthly_card_credit_price.is_some(),
         "checkoutEnabled":provider.is_some(),"credit":credit,"pendingCredit":pending,
         "offers":provider.map(StripeBilling::public_offers).unwrap_or_default(),
+        "suiUsdcEnabled":usdc_enabled,
+        "suiUsdcCheckoutOrigin":usdc.as_ref().map(|p|p.origin.as_str()),
+        "suiUsdcOffers":usdc.as_ref().filter(|p|p.enabled).map(|p|p.public_offers()).unwrap_or_default(),
+        "suiUsdcOrders":usdc_orders,
         "monthlyCardCreditPrice":config.billing_monthly_card_credit_price,
         "ownedMonthlyCards":cards,"orders":orders,
         "monthlyCard":config.refresh_monthly_card_status(account,monthly_card_now_ms())?}),
@@ -303,6 +325,28 @@ pub(super) async fn socket_action(
     let config = session.monthly_card_config()?.clone();
     let provider = StripeBilling::from_env()?;
     rate_limit(cache.as_ref(), &account, request.operation())?;
+    if let Request::UsdcCheckout(checkout) = &request {
+        let result = tokio::task::block_in_place(|| -> Result<Value, String> {
+            durable(&config)?;
+            let usdc =
+                crate::sui_usdc_billing::UsdcBilling::from_env()?.ok_or("billingUnavailable")?;
+            let (url, _) = usdc.checkout(
+                &config,
+                &account,
+                checkout.character_index,
+                &checkout.order_request_id,
+                &checkout.offer_id,
+            )?;
+            Ok(
+                json!({"checkoutUrl":url,"status":status_value(&config,&account,checkout.character_index,provider.as_ref())?}),
+            )
+        });
+        sender
+            .send(Message::Text(reply(&request, result).to_string().into()))
+            .await
+            .map_err(|_| "billingSendFailed")?;
+        return Ok(());
+    }
     if let Request::Checkout(checkout) = &request {
         let permit = checkout_permit()?;
         let prepared: Result<_, String> = tokio::task::block_in_place(|| {
@@ -440,8 +484,15 @@ pub(super) fn router() -> Router<WebState> {
     Router::new()
         .route("/v1/billing/stripe/webhook", post(webhook))
         .route("/v1/billing/status", get(http_status))
+        .route("/v1/billing/refresh", post(http_refresh))
+        .route("/v1/billing/monthly-card/buy", post(http_buy_monthly_card))
+        .route(
+            "/v1/billing/monthly-card/activate",
+            post(http_activate_monthly_card),
+        )
         .route("/v1/billing/checkout", post(http_checkout))
         .route("/v1/billing/return", get(return_page))
+        .merge(sui_usdc::router())
         .layer(axum::extract::DefaultBodyLimit::max(64 * 1024))
 }
 fn private_response(status: StatusCode, value: Value) -> Response {
@@ -498,6 +549,80 @@ async fn webhook(
         }
     }
 }
+// These HTTP operations are for an inactive character only. The same shared
+// Redis owner lease used by character-select billing fences an online Source.
+// The underlying ordinary purchase/activation code owns all amounts and UIDs.
+async fn http_offline_operation(state: WebState, headers: HeaderMap, request: Request) -> Response {
+    let identity = match http_identity(&state.identity, &headers).await {
+        Ok(v) => v,
+        Err(_) => {
+            return private_response(
+                StatusCode::UNAUTHORIZED,
+                json!({"error":"billingAuthenticationRequired"}),
+            )
+        }
+    };
+    let result = tokio::task::spawn_blocking(move || -> Result<Value,String> {
+        durable(&state.config)?;
+        let account = identity.account_id;
+        let character = request.character();
+        rate_limit(state.session_cache.as_ref(), &account, request.operation())?;
+        let lease = inactive_lease(state.session_cache.as_ref(), &account, character)?;
+        let operation = (|| -> Result<Value,String> {
+            let now = monthly_card_now_ms();
+            let delivery = state.config.consume_inactive_pending_recharge_credits(&account, character, now)?;
+            let receipt = match request {
+                Request::Buy(q) => serde_json::to_value(state.config.buy_monthly_card_for_character(&account, character, &q.order_request_id, now)?).map_err(|_|"billingResultUnconfirmed")?,
+                Request::Activate(q) => {
+                    let uid = q.item_unique_id.parse::<u64>().map_err(|_|"billingItemInvalid")?;
+                    if uid == 0 || uid.to_string() != q.item_unique_id { return Err("billingItemInvalid".into()); }
+                    serde_json::to_value(state.config.activate_monthly_card_for_character(&account, character, uid, now)?).map_err(|_|"billingResultUnconfirmed")?
+                },
+                Request::Status(_) => Value::Null,
+                _ => return Err("billingRequestInvalid".into()),
+            };
+            let provider = StripeBilling::from_env()?;
+            Ok(json!({"receipt":receipt,"delivery":{"granted":delivery.granted,"revision":delivery.revision},"status":status_value(&state.config,&account,character,provider.as_ref())?}))
+        })();
+        release_confirmed_lease(state.session_cache.as_ref(), Some(lease), &operation)?;
+        operation
+    }).await.unwrap_or_else(|_| Err("billingResultUnconfirmed".into()));
+    match result {
+        Ok(v) => private_response(StatusCode::OK, v),
+        Err(e) => private_response(
+            if e == "billingCharacterOnline" {
+                StatusCode::CONFLICT
+            } else if e == "billingTooManyRequests" {
+                StatusCode::TOO_MANY_REQUESTS
+            } else {
+                StatusCode::BAD_REQUEST
+            },
+            json!({"error":public_error(&e)}),
+        ),
+    }
+}
+async fn http_refresh(
+    State(s): State<WebState>,
+    h: HeaderMap,
+    Json(q): Json<StatusRequest>,
+) -> Response {
+    http_offline_operation(s, h, Request::Status(q)).await
+}
+async fn http_buy_monthly_card(
+    State(s): State<WebState>,
+    h: HeaderMap,
+    Json(q): Json<BuyRequest>,
+) -> Response {
+    http_offline_operation(s, h, Request::Buy(q)).await
+}
+async fn http_activate_monthly_card(
+    State(s): State<WebState>,
+    h: HeaderMap,
+    Json(q): Json<ActivateRequest>,
+) -> Response {
+    http_offline_operation(s, h, Request::Activate(q)).await
+}
+
 async fn http_status(
     State(state): State<WebState>,
     headers: HeaderMap,

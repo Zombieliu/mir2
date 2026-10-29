@@ -1,5 +1,6 @@
 pub mod activities;
 pub mod billing;
+pub mod sui_usdc_billing;
 pub mod billing_provenance;
 mod config;
 pub mod conquest;

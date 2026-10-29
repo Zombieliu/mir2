@@ -1263,3 +1263,6 @@ async fn ordinary_websocket_billing_recovers_expired_entry_and_replays_offline_a
     drop(local);
     drop(state);
 }
+
+#[path = "web_billing_http_operations_tests.rs"]
+mod offline_http;

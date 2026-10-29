@@ -128,6 +128,18 @@ pub struct MonthlyRevenuePart {
     pub evidence_ref: String,
     pub funding_status: String,
     pub reason_code: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<SuiRevenueEvidence>,
+}
+
+/// Immutable native-chain payment facts. Testnet value is test accounting only.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SuiRevenueEvidence {
+    pub provider: String,
+    pub network: String,
+    pub module: String,
+    pub receipt: crate::sui_usdc_billing::VerifiedUsdcReceipt,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -170,7 +182,11 @@ impl CreditProvenance {
             && self.monthly_items.is_empty()
     }
 
-    pub fn validate(&self, orders: &BTreeMap<String, RechargeOrder>) -> Result<(), String> {
+    pub fn validate(
+        &self,
+        orders: &BTreeMap<String, RechargeOrder>,
+        sui_orders: &BTreeMap<String, crate::sui_usdc_billing::UsdcRechargeOrder>,
+    ) -> Result<(), String> {
         if self.wallets.len() > MAX_RECORDS
             || self.payments.len() > MAX_RECORDS
             || self.adverse_events.len() > MAX_RECORDS
@@ -192,16 +208,19 @@ impl CreditProvenance {
                     return Err("billingProvenanceInvalid".into());
                 }
                 if lot.kind == CreditFundingKind::Paid {
-                    let order = lot
+                    let id = lot
                         .source_order_id
                         .as_ref()
-                        .and_then(|id| orders.get(id))
                         .ok_or("billingProvenanceOrderMissing")?;
-                    if order.character_index != *character
-                        || order
-                            .applied
-                            .as_ref()
-                            .is_none_or(|r| r.credits != lot.original_credits)
+                    let (index, applied) = if let Some(order) = orders.get(id) {
+                        (order.character_index, order.applied.as_ref())
+                    } else if let Some(order) = sui_orders.get(id) {
+                        (order.character_index, order.applied.as_ref())
+                    } else {
+                        return Err("billingProvenanceOrderMissing".into());
+                    };
+                    if index != *character
+                        || applied.is_none_or(|r| r.credits != lot.original_credits)
                     {
                         return Err("billingProvenanceOrderMismatch".into());
                     }
@@ -702,6 +721,73 @@ fn portion(total: u64, offset: u32, credits: u32, total_credits: u32) -> Result<
 }
 
 /// Only actual owned, redeemed monthly-card units yield source rows. Recharge alone yields none.
+fn sui_monthly_revenue_part(
+    order: &crate::sui_usdc_billing::UsdcRechargeOrder,
+    part: &CreditLotUse,
+    owner: &str,
+    issued_at_ms: u64,
+    livemode: bool,
+) -> Result<MonthlyRevenuePart, String> {
+    use crate::sui_usdc_billing::{account_ref, UsdcOrderState};
+    order.validate()?;
+    let receipt = order
+        .receipt
+        .as_ref()
+        .ok_or("billingProvenanceUsdcReceiptMissing")?;
+    if order.account_ref != account_ref(owner, order.character_index)
+        || receipt.confirmed_at_ms > issued_at_ms
+        || order
+            .applied
+            .as_ref()
+            .is_none_or(|r| r.at_ms > issued_at_ms)
+    {
+        return Err("billingProvenanceMonthlyPaymentTimeInvalid".into());
+    }
+    let eligible = !livemode && order.state == UsdcOrderState::Applied;
+    Ok(MonthlyRevenuePart {
+        source_order_id: order.id.clone(),
+        lot_id: part.lot_id.clone(),
+        credits: part.credits,
+        credits_offset: part.credits_offset,
+        original_currency: "testnet-usdc".into(),
+        original_amount_minor: order.offer.amount_minor,
+        // No cash tax claim is made: this is the explicit Testnet unit convention.
+        indirect_tax_minor: if !livemode { Some(0) } else { None },
+        eligible_micro_usd: if eligible {
+            portion(
+                receipt.amount_micro,
+                part.credits_offset,
+                part.credits,
+                order.offer.credits,
+            )?
+        } else {
+            0
+        },
+        reversed_micro_usd: 0,
+        paid_at_ms: receipt.confirmed_at_ms,
+        fx_snapshot_ref: "testnet-native-usdc6:1testUSDC=1000000testMicroUSD:v1".into(),
+        evidence_ref: format!(
+            "sui:testnet:{}:{}:{}",
+            receipt.chain_identifier, receipt.digest, receipt.event_seq
+        ),
+        funding_status: if eligible { "verified_paid" } else { "pending" }.into(),
+        reason_code: if livemode {
+            "payment_environment_mismatch"
+        } else if !eligible {
+            "payment_review_evidence_pending"
+        } else {
+            "verified_paid_credit_fifo"
+        }
+        .into(),
+        source: Some(SuiRevenueEvidence {
+            provider: "sui_native_usdc".into(),
+            network: "sui:testnet".into(),
+            module: "recharge".into(),
+            receipt: receipt.clone(),
+        }),
+    })
+}
+
 pub fn monthly_revenue_sources(
     account: &AccountRecord,
     owner: &str,
@@ -793,6 +879,23 @@ pub fn monthly_revenue_sources(
                 .source_order_id
                 .as_ref()
                 .ok_or("billingProvenanceOrderMissing")?;
+            if let Some(order) = ledger.sui_usdc_orders.get(order_id) {
+                let output =
+                    sui_monthly_revenue_part(order, part, owner, receipt.issued_at_ms, livemode)?;
+                if output.funding_status != "verified_paid" {
+                    pending = true;
+                }
+                source.source_observed_at_ms = source
+                    .source_observed_at_ms
+                    .max(order.applied.as_ref().map_or(0, |r| r.at_ms));
+                source.paid_at_ms = source.paid_at_ms.max(output.paid_at_ms);
+                source.eligible_micro_usd = source
+                    .eligible_micro_usd
+                    .checked_add(output.eligible_micro_usd)
+                    .ok_or("billingProvenanceOverflow")?;
+                source.parts.push(output);
+                continue;
+            }
             let order = ledger
                 .orders
                 .get(order_id)
@@ -812,6 +915,7 @@ pub fn monthly_revenue_sources(
                 evidence_ref: format!("recharge:{order_id}"),
                 funding_status: "pending".into(),
                 reason_code: "payment_revenue_evidence_missing".into(),
+                source: None,
             };
             if order.livemode != livemode {
                 output.reason_code = "payment_environment_mismatch".into();

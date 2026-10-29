@@ -39,7 +39,7 @@ impl SimulationSession {
             .ok_or("billingAccountMissing")?
             .billing
             .as_ref()
-            .is_some_and(|ledger| !ledger.orders.is_empty());
+            .is_some_and(|ledger| !ledger.orders.is_empty() || !ledger.sui_usdc_orders.is_empty());
         if !has_ledger && config.billing_monthly_card_credit_price.is_none() {
             self.billing_last_recharge_poll = None;
             return Ok(Vec::new());
