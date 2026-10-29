@@ -1,0 +1,82 @@
+{
+  "status": "testnet_e2e_verified",
+  "verifiedAtUtc": "2026-10-29T07:46:27.755Z",
+  "website": "https://mir2.obelisk.build/promotions?campaignId=numeron-chain-acceptance-20261029-fullchain#earnings",
+  "campaignId": "numeron-chain-acceptance-20261029-fullchain",
+  "startsAtMs": 1793258649320,
+  "endsAtMs": 1793259549320,
+  "realClock": true,
+  "backendSource": "4151a63d57c76c6e7f663f91470941db283a6419",
+  "webSource": "78fac20b339d708e8827514cbbd31f7742c55264",
+  "vercelDeployment": "dpl_Hmab1y6vYULtdHJZ4Zy6fsWwMbzm",
+  "invitedQualifiedMembers": 1,
+  "ordinaryGameplaySavedLevel": 2,
+  "recharge": {
+    "amountTestUsdc": "10.000000",
+    "atomic": "10000000",
+    "credits": 1000,
+    "digest": "FQzCWJjhofsBwgBsUSsE3i4mZ76UXqFrvMFy48pqMcjw",
+    "checkpoint": "400452807",
+    "actualSubmissionsTotal": 1,
+    "serverState": "applied"
+  },
+  "membership": {
+    "days": 30,
+    "paidCreditsSpent": 1000,
+    "giftCredits": 0,
+    "unknownCredits": 0,
+    "serviceStartMs": 1793259534085,
+    "serviceEndMs": 1795851534085,
+    "actualSeasonCoveredMs": 15235
+  },
+  "settlement": {
+    "recognizedTestMicroUsd": "58",
+    "rateBps": 1000,
+    "reserveBps": 0,
+    "payableMicroUsd": "5",
+    "snapshotSha256": "5ae45045d01696a1c52e6aea799fac4458ad5021b9478c56bfd9c3eb8a7ad54b",
+    "nativeOfflineRecalculationVerified": true
+  },
+  "payout": {
+    "amountTestUsdc": "0.000005",
+    "atomic": "5",
+    "digest": "eRhD2reuEHyE1cNFLY22598uKWJPYdvCcS7T9cgCU7x",
+    "checkpoint": "400454295",
+    "destination": "0x01929c47553bc2541c1164238199b6226ccaef2bd9308bd81ba0bc0420511042",
+    "status": "confirmed",
+    "actualSubmissionsTotal": 1,
+    "signedAndPgJournaledBeforeBroadcast": true,
+    "actualRecipientDeltaAtomic": "5"
+  },
+  "originalGame": {
+    "accounts": 119,
+    "characters": 35,
+    "saves": 35
+  },
+  "originalGamePidsPreserved": true,
+  "existingSevenDaySeasonPreserved": true,
+  "formalSeasonStillDraft": true,
+  "dockerStarted": false,
+  "windowsReleaseTouched": false,
+  "syntheticBusinessFacts": false,
+  "phoneTransactionSigningClaimed": false,
+  "independentHumanFinanceApprovalClaimed": false,
+  "humanFrontendAccepted": false,
+  "evidenceSha256": {
+    "BUSINESS-FINAL.json": "00f309cfdd0d0d325437e3f51d77d4e3e90a88dec3e423cfda741814d73ff4db",
+    "CHAIN-INDEPENDENT-VERIFICATION.json": "ea940ba69d0851eb6ab971729c1a03d474696592c594260db82d4bd567a6cb38",
+    "REMOTE-FINAL-STATE.json": "0ee83a449941daafda94812d61422cdd3e2e68f6f6b126302e52ce7aa404a746",
+    "MONTHLY-CARD-RECEIPT.json": "32dc1ca0e79bfe88b881b36ed139567cb679b107e6006f24c65e22cea45af1ff",
+    "MEMBER-GAME-SOURCE-FINAL.json": "597a0422d407fc2447f5c32a3f862123c2b3e0f3b075d4a7545141e332dd66eb",
+    "WARMUP-GAME-SOURCE-FINAL.json": "ca6bdc4ce91f3f8ab744d5386b6737a9cc822083f8015495d65a5ebcf8a9e8ee",
+    "SETTLEMENT-FINAL.json": "d96183c82de310db89705136f6f1bc1b71e91054b5e911f16af09d027018d981",
+    "PAYOUT-FINAL.json": "9f27342011f0a0f772e5523e1d30c65fee948b8f552b65b914c537cd71757e0e",
+    "recharge-final.json": "2081e818869956f08689f96304aebfec2ca8a1f79cdf64098d68d0d216484535",
+    "SHORT-SEASON-SETUP.json": "f8ce84ce1a15c03164707e71fac79eb0180ad4a1e698b706d1fd5fd5aece07fa",
+    "PUBLIC-GAME-ENTRY-QA.json": "345f50154996996e643f8d34ae2beb31fe01fefd3ae6bd0e39f4826c5ae78972",
+    "REMOTE-UPGRADE-FINISHED.json": "d72baa713924e62f44fc56ab9746a3ed11934a4901c39e83bd2546b544a23956",
+    "REMOTE-MAP-PACK.json": "6cbfbc27db31537c21ade9f6223cd4dac4c188fa72b3d091bf7ccfcf60b2bbca"
+  },
+  "browserConfirmedAmountAndDigestVerified": true,
+  "finalScreenshotSha256": "c9d040e3726433fcd0cd0bf76cc4cbaf9036dba023f8918a7ee144142d0ac731"
+}
