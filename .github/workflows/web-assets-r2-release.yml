@@ -78,7 +78,8 @@ jobs:
               ...(body === undefined ? {} : {body:JSON.stringify(body)})
             });
             if (!result.ok) throw Error(`Vercel ${method} request failed: HTTP ${result.status}`);
-            return result.status === 204 ? {} : result.json();
+            const responseBody = await result.text();
+            return responseBody.length === 0 ? {} : JSON.parse(responseBody);
           }
           const current = value.targets?.production?.id || value.targets?.production?.deploymentId;
           if (current !== baseline) throw Error('Production changed since inspection; inspect and rebase before continuing');
