@@ -365,6 +365,8 @@ fn install_fixture_fonts(app: &mut App) {
     let mut pinned = FixtureFonts::default();
     for file in [
         "NotoSansTC.ttf",
+        "NotoSansCJKsc-Regular.otf",
+        "MIR2BillingHan-Regular.ttf",
         "NotoSans-Regular.ttf",
         "NotoSans-Bold.ttf",
         "NotoSansDevanagari-Regular.ttf",
@@ -414,16 +416,53 @@ fn configure_fixture_script_fallbacks(mut cx: ResMut<FontCx>) {
             .collection
             .family_id(name)
             .expect("bundled fixture family registered");
+        let families = if tag == *b"Hani" {
+            vec![
+                family,
+                cx.collection
+                    .family_id("MIR2 Billing Han")
+                    .expect("bundled billing Han supplement registered"),
+                cx.collection
+                    .family_id("Noto Sans CJK SC")
+                    .expect("full Simplified Chinese face registered"),
+            ]
+        } else {
+            vec![family]
+        };
         let script = fontique::Script::from_bytes(tag);
-        if cx.collection.fallback_families(script).next() != Some(family) {
-            assert!(cx.collection.set_fallbacks(script, std::iter::once(family)));
+        if !cx
+            .collection
+            .fallback_families(script)
+            .eq(families.iter().copied())
+        {
+            assert!(cx
+                .collection
+                .set_fallbacks(script, families.iter().copied()));
         }
         if tag == *b"Hani" {
-            for locale in ["zh-TW", "zh-HK", "zh-CN", "ja", "ko"] {
-                if cx.collection.fallback_families((script, locale)).next() != Some(family) {
+            for locale in ["zh-TW", "zh-HK", "zh-MO", "zh-Hant", "ja", "ko"] {
+                if !cx
+                    .collection
+                    .fallback_families((script, locale))
+                    .eq(families.iter().copied())
+                {
                     assert!(cx
                         .collection
-                        .set_fallbacks((script, locale), std::iter::once(family)));
+                        .set_fallbacks((script, locale), families.iter().copied()));
+                }
+            }
+            let simplified_families = [families[2], families[0], families[1]];
+            // Match the host: fontique shares zh-CN/Hans with generic Han.
+            // Locale::SimplifiedChinese chooses the SC primary explicitly.
+            for locale in ["zh-SG"] {
+                if !cx
+                    .collection
+                    .fallback_families((script, locale))
+                    .eq(simplified_families)
+                {
+                    assert!(cx
+                        .collection
+                        .set_fallbacks((script, locale), simplified_families.into_iter()));
                 }
             }
         }
@@ -653,11 +692,7 @@ fn font_counts(app: &App) -> Value {
     })
 }
 
-fn capture_nine_language_popups(
-    app: &mut App,
-    target: &Handle<Image>,
-    output: &Path,
-) -> Vec<Value> {
+fn capture_language_popups(app: &mut App, target: &Handle<Image>, output: &Path) -> Vec<Value> {
     let mut cases = Vec::new();
     for locale in [Locale::English, Locale::Arabic] {
         set_screen(app, locale, NativeShellScreen::Login);
@@ -683,7 +718,7 @@ fn capture_nine_language_popups(
         let filename = format!("shell-{}-language-popup.png", locale.code());
         capture_i18n(app, target, &output.join(&filename));
         cases.push(
-            json!({"locale":locale.code(),"image":filename,"visibleAutonyms":9,"texts":layouts}),
+            json!({"locale":locale.code(),"image":filename,"visibleAutonyms":Locale::COUNT,"texts":layouts}),
         );
         native_i18n::set_language_popup_for_tests(app.world_mut(), false);
         warm_i18n_images(app);
@@ -1022,10 +1057,10 @@ fn multilingual_shell_screens_and_font_switches_render_offscreen() {
             }
         }
     }
-    let popups = capture_nine_language_popups(&mut app, &target, &output);
+    let popups = capture_language_popups(&mut app, &target, &output);
     let baseline = font_counts(&app);
     assert!(baseline["atlasBytes"].as_u64().unwrap() > 0);
-    assert_eq!(baseline["pinnedHandles"], 9);
+    assert_eq!(baseline["pinnedHandles"], 11);
     let mut checkpoints = Vec::new();
     // Thirty complete cycles: 270 language selections / 1080 production screen
     // rebuilds. This is a bounded regression, not a long-duration leak claim.
@@ -1458,6 +1493,7 @@ fn guild_name_and_sabuk_npc_pages_render_offscreen() {
         let composition = match locale {
             Locale::English => "Guild",
             Locale::TraditionalChinese => "龍城",
+            Locale::SimplifiedChinese => "龙城",
             Locale::BrazilianPortuguese => "Dragões",
             Locale::Russian => "Драконы",
             Locale::Hindi => "वीर",
@@ -1646,4 +1682,265 @@ fn guild_name_and_sabuk_npc_pages_render_offscreen() {
         failures.is_empty(),
         "Guild/Sabuk production layout failures: {failures:?}"
     );
+}
+
+#[test]
+#[ignore = "explicit Simplified Chinese production NPC, quest and bag GPU evidence; no server or account"]
+fn simplified_chinese_npc_quest_and_inventory_render_offscreen() {
+    use crate::crystal_ui::overlays::NativePlayerUiState;
+    use crate::crystal_ui::{bag_paint, item_tooltip, widget};
+    use crate::inventory::{InventoryModel, ItemModel};
+    use crate::quest_model::{
+        NpcDialogLine, NpcDialogModel, NpcDialogOption, Quest, QuestDetailText, QuestReward,
+        QuestStatus, QuestTracker,
+    };
+    use crate::quest_ui::{Mir2QuestUiPlugin, QuestUiState};
+    use crate::read_model::{PlayerStats, UiReadModel};
+    let assets =
+        PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("real assets"));
+    let output = PathBuf::from(std::env::var_os("MIR2_ZH_CN_VISUAL_OUTPUT").expect("fresh output"));
+    assert!(assets.is_absolute() && output.is_absolute() && !output.starts_with(&assets));
+    fs::create_dir_all(&output).unwrap();
+    let report = output.join("zh-cn-gameplay-layouts.json");
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&report)
+        .unwrap();
+    fs::write(&report, b"{\"passed\":false}").unwrap();
+    struct Restore(Locale);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            native_i18n::activate(self.0);
+        }
+    }
+    let _restore = Restore(native_i18n::locale());
+    native_i18n::activate(Locale::SimplifiedChinese);
+    let (mut app, target, camera) = i18n_offscreen_app_configured(&assets, false, |app| {
+        crate::crystal_ui::item_image::install_original_item_image_layout(app);
+        app.add_plugins(Mir2QuestUiPlugin)
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            });
+    });
+    warm_i18n_images(&mut app);
+    let opaque_name = "龍城{Gold}";
+    let source_greeting = format!("Hello {opaque_name}, Are you a beginner in this game?");
+    let mut npc = NpcDialogModel {
+        is_open: true,
+        npc_object_id: Some(1),
+        npc_name: Some("Administrator".into()),
+        lines: vec![NpcDialogLine {
+            text: source_greeting.clone(),
+        }],
+        options: vec![NpcDialogOption {
+            option_id: "@Exit".into(),
+            label: "Close".into(),
+            enabled: true,
+        }],
+    };
+    app.insert_resource(npc.clone());
+    let player = PlayerStats {
+        name: Some(opaque_name.into()),
+        level: 22,
+        class_name: Some("Warrior".into()),
+        gold: 10_000,
+        ..default()
+    };
+    app.world_mut().resource_mut::<UiReadModel>().player = player.clone();
+    let mut evidence = Vec::new();
+    let mut capture = |app: &mut App, name: &str, expected: &[&str]| {
+        warm_i18n_images(app);
+        let rows = i18n_text_layouts(app);
+        let failures = rows
+            .iter()
+            .filter(|r| {
+                r["missingGlyphs"] != 0
+                    || r["layoutExceedsNode"] == true
+                    || r["nodeOutsideViewport"] == true
+            })
+            .collect::<Vec<_>>();
+        assert!(failures.is_empty(), "{name}: {failures:?}");
+        for expected_text in expected {
+            assert!(
+                rows.iter().any(|r| r["text"]
+                    .as_str()
+                    .is_some_and(|t| t.contains(expected_text))),
+                "{name} missing Simplified text {expected_text}: {rows:?}"
+            );
+        }
+        let filename = format!("zh-CN-{name}-1024x768.png");
+        capture_i18n(app, &target, &output.join(&filename));
+        evidence.push(json!({"case":name,"image":filename,"expected":expected,"layouts":rows}));
+    };
+    capture(&mut app, "npc-opaque-name", &["你好，龍城{Gold}", "管理员"]);
+    assert_eq!(
+        app.world().resource::<NpcDialogModel>().lines[0].text,
+        source_greeting
+    );
+    assert_eq!(
+        app.world().resource::<NpcDialogModel>().options[0].option_id,
+        "@Exit"
+    );
+    assert_eq!(
+        app.world().resource::<NpcDialogModel>().npc_name.as_deref(),
+        Some("Administrator")
+    );
+    npc.close();
+    app.insert_resource(npc);
+
+    let title =
+        native_i18n::format_for(Locale::English, "quest.2110001.title", "Growth reward", &[]);
+    let quest = Quest {
+        quest_index: 2_110_001,
+        accept_npc_index: None,
+        finish_npc_index: None,
+        title: title.clone(),
+        npc_name: None,
+        group: Some("Recommended".into()),
+        min_level_needed: 1,
+        detail: QuestDetailText::default(),
+        status: QuestStatus::InProgress,
+        objectives: vec![],
+        rewards: vec![QuestReward::Gold { amount: 100 }],
+        unknown_text: None,
+    };
+    app.insert_resource(QuestTracker {
+        active_quests: vec![quest],
+    });
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::QuestLog;
+    app.world_mut()
+        .resource_mut::<QuestUiState>()
+        .detail_quest_index = Some(2_110_001);
+    capture(
+        &mut app,
+        "quest-diary-detail",
+        &["首套巡逻装备", "推荐", "列表：1/20"],
+    );
+    assert_eq!(
+        app.world().resource::<QuestTracker>().active_quests[0].title,
+        title
+    );
+    assert_eq!(
+        app.world().resource::<QuestTracker>().active_quests[0]
+            .group
+            .as_deref(),
+        Some("Recommended")
+    );
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::None;
+    app.world_mut()
+        .resource_mut::<QuestUiState>()
+        .detail_quest_index = None;
+    app.insert_resource(QuestTracker::default());
+
+    let template =
+        mir2_game_data::crystal_item_by_index(226).expect("canonical IronSword template");
+    let item = ItemModel {
+        key: "fixture-iron-sword".into(),
+        name: template.name.clone(),
+        icon: template.image,
+        quantity: 1,
+        container: 0,
+        slot: 6,
+        unique_id: Some(42),
+        ..default()
+    };
+    let inventory = InventoryModel {
+        gold: 10_000,
+        items: vec![item.clone()],
+        ..default()
+    };
+    let document = item_tooltip::crystal_item_tooltip_document(&item, &player);
+    let asset_server = app.world().resource::<AssetServer>().clone();
+    let mut queue = bevy::ecs::world::CommandQueue::default();
+    let mut commands = Commands::new(&mut queue, app.world());
+    commands
+        .spawn((
+            UiTargetCamera(camera),
+            Node {
+                width: px(1024.0),
+                height: px(768.0),
+                ..default()
+            },
+        ))
+        .with_children(|root| {
+            root.spawn(Node {
+                position_type: PositionType::Absolute,
+                left: px(520.0),
+                top: px(80.0),
+                width: px(316.0),
+                height: px(236.0),
+                ..default()
+            })
+            .with_children(|bag| {
+                bag_paint::paint_crystal_inventory(
+                    bag,
+                    &asset_server,
+                    &inventory,
+                    &player,
+                    &bag_paint::BagPaintOptions {
+                        page: 0,
+                        delete_mode: false,
+                        weight_ratio: None,
+                        free_slots: Some(39),
+                        font: crate::crystal_ui::typography::crystal_text_font(10.0),
+                        stack_split_hint: default(),
+                    },
+                    |_| (),
+                    |cell| {
+                        bag_paint::BagCellPolicy::new(
+                            cell.item.is_some(),
+                            cell.item.is_some(),
+                            false,
+                        )
+                    },
+                    |_, _| {},
+                )
+            });
+            root.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(120.0),
+                    top: px(120.0),
+                    width: px(310.0),
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                BackgroundColor(Color::srgb(0.02, 0.02, 0.02)),
+            ))
+            .with_children(|tooltip| {
+                widget::spawn_crystal_item_hint_document(
+                    tooltip,
+                    &document,
+                    &crate::crystal_ui::typography::crystal_text_font(
+                        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    ),
+                )
+            });
+        });
+    queue.apply(app.world_mut());
+    capture(&mut app, "bag-item-tooltip", &["铁剑"]);
+    assert!(app
+        .world_mut()
+        .query_filtered::<(&Node, &ImageNode), With<crate::crystal_ui::item_image::OriginalItemImage>>()
+        .iter(app.world())
+        .any(|(node, image)| node.display != Display::None
+            && image.image.path().is_some_and(|path| path.path()
+                == Path::new("original-ui/Items/36.png"))),
+        "the canonical sword icon must be loaded and visible, not only its translated tooltip"
+    );
+    assert_eq!(inventory.items[0].name, template.name);
+    assert_eq!(inventory.items[0].unique_id, Some(42));
+    assert_eq!(
+        app.world().resource::<UiReadModel>().player.name.as_deref(),
+        Some(opaque_name)
+    );
+    fs::write(report, serde_json::to_vec_pretty(&json!({"passed":true,"evidenceKind":"offline-native-production-renderer", "locale":"zh-CN", "systemFonts":false, "width":1024,"height":768,"captures":evidence,"missingGlyphs":0,"overflowingTextNodes":0,"outsideViewportNodes":0,"opaquePlayerName":opaque_name,"liveAcceptance":false})).unwrap()).unwrap();
 }

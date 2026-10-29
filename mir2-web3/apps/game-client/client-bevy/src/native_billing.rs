@@ -284,7 +284,7 @@ pub enum BillingAction {
     Checkout(String),
     UsdcCheckout(String),
     UsdcReopen(String),
-    UsdcPage,
+    SelectPage(BillingPage),
     UsdcOffersPage(bool),
     UsdcOrdersPage(bool),
     BuyMonthlyCard,
@@ -293,6 +293,26 @@ pub enum BillingAction {
     Close,
     OffersPage(bool),
     CardsPage(bool),
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum BillingPage {
+    #[default]
+    Fiat,
+    Usdc,
+    MonthlyCard,
+}
+
+impl BillingPage {
+    const ALL: [Self; 3] = [Self::Fiat, Self::Usdc, Self::MonthlyCard];
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Fiat => "billing.fiatTab",
+            Self::Usdc => "billing.usdcTab",
+            Self::MonthlyCard => "billing.monthlyTab",
+        }
+    }
 }
 
 #[derive(Clone, Default, PartialEq, Eq)]
@@ -304,7 +324,7 @@ pub struct BillingPanel {
     pub focus: usize,
     pub offer_page: usize,
     pub card_page: usize,
-    pub usdc_page: bool,
+    pub page: BillingPage,
     pub usdc_offer_page: usize,
     pub usdc_order_page: usize,
     account: String,
@@ -336,7 +356,7 @@ impl BillingPanel {
 
     pub fn refresh_pending_usdc(&mut self, now: u64) {
         if self.open
-            && self.usdc_page
+            && self.page == BillingPage::Usdc
             && self.pending.is_none()
             && now.saturating_sub(self.last_status_at_ms) >= 5_000
             && self.status.as_ref().is_some_and(|s| {
@@ -580,11 +600,14 @@ impl BillingPanel {
             BillingAction::Refresh => {
                 self.begin(None, now);
             }
-            BillingAction::UsdcPage if self.pending.is_none() => {
-                self.usdc_page = !self.usdc_page;
+            BillingAction::SelectPage(page) if self.pending.is_none() => {
+                self.page = page;
                 self.focus = 0;
+                self.message = self.retry_required.then_some("billing.unconfirmed");
             }
-            BillingAction::UsdcOffersPage(next) => {
+            BillingAction::UsdcOffersPage(next)
+                if self.page == BillingPage::Usdc && self.pending.is_none() =>
+            {
                 self.usdc_offer_page = page(
                     self.usdc_offer_page,
                     next,
@@ -592,7 +615,9 @@ impl BillingPanel {
                 );
                 self.focus = 0;
             }
-            BillingAction::UsdcOrdersPage(next) => {
+            BillingAction::UsdcOrdersPage(next)
+                if self.page == BillingPage::Usdc && self.pending.is_none() =>
+            {
                 self.usdc_order_page = page(
                     self.usdc_order_page,
                     next,
@@ -600,10 +625,17 @@ impl BillingPanel {
                 );
                 self.focus = 0;
             }
-            BillingAction::Retry if self.retry_required => {
+            BillingAction::Retry if self.retry_required && self.pending.is_none() => {
+                self.page = match &self.last_purchase {
+                    Some(BillingPurchase::Checkout { .. }) => BillingPage::Fiat,
+                    Some(BillingPurchase::UsdcCheckout { .. }) => BillingPage::Usdc,
+                    _ => BillingPage::MonthlyCard,
+                };
                 self.begin(self.last_purchase.clone(), now);
             }
-            BillingAction::OffersPage(next) => {
+            BillingAction::OffersPage(next)
+                if self.page == BillingPage::Fiat && self.pending.is_none() =>
+            {
                 self.offer_page = page(
                     self.offer_page,
                     next,
@@ -611,7 +643,9 @@ impl BillingPanel {
                 );
                 self.focus = 0;
             }
-            BillingAction::CardsPage(next) => {
+            BillingAction::CardsPage(next)
+                if self.page == BillingPage::MonthlyCard && self.pending.is_none() =>
+            {
                 self.card_page = page(
                     self.card_page,
                     next,
@@ -622,7 +656,8 @@ impl BillingPanel {
                 self.focus = 0;
             }
             BillingAction::Checkout(id)
-                if self.can_purchase()
+                if self.page == BillingPage::Fiat
+                    && self.can_purchase()
                     && self.status.as_ref().is_some_and(|s| {
                         s.checkout_enabled && s.offers.iter().any(|o| o.id == id)
                     }) =>
@@ -636,7 +671,8 @@ impl BillingPanel {
                 );
             }
             BillingAction::UsdcCheckout(id)
-                if self.can_purchase()
+                if self.page == BillingPage::Usdc
+                    && self.can_purchase()
                     && self.usdc_available()
                     && self
                         .status
@@ -651,7 +687,9 @@ impl BillingPanel {
                     now,
                 );
             }
-            BillingAction::UsdcReopen(id) if self.can_reopen_usdc() => {
+            BillingAction::UsdcReopen(id)
+                if self.page == BillingPage::Usdc && self.can_reopen_usdc() =>
+            {
                 if let Some(order) = self.status.as_ref().and_then(|s| {
                     s.sui_usdc_orders.iter().find(|o| {
                         o.id == id
@@ -673,7 +711,8 @@ impl BillingPanel {
                 }
             }
             BillingAction::BuyMonthlyCard
-                if self.can_purchase()
+                if self.page == BillingPage::MonthlyCard
+                    && self.can_purchase()
                     && self.status.as_ref().is_some_and(|s| {
                         s.monthly_card_credit_price.is_some_and(|p| s.credit >= p)
                     }) =>
@@ -686,7 +725,8 @@ impl BillingPanel {
                 );
             }
             BillingAction::Activate(id)
-                if self.can_purchase()
+                if self.page == BillingPage::MonthlyCard
+                    && self.can_activate_monthly()
                     && self.status.as_ref().is_some_and(|s| {
                         s.owned_monthly_cards.iter().any(|c| c.unique_id == id)
                     }) =>
@@ -705,14 +745,20 @@ impl BillingPanel {
             && !self.retry_required
             && self.status.as_ref().is_some_and(|s| s.enabled)
     }
+    fn can_activate_monthly(&self) -> bool {
+        self.pending.is_none() && !self.retry_required && self.status.is_some()
+    }
     fn actions(&self) -> Vec<BillingAction> {
-        let mut actions = vec![BillingAction::Refresh, BillingAction::Close];
-        actions.push(BillingAction::UsdcPage);
+        let mut actions: Vec<_> = BillingPage::ALL
+            .into_iter()
+            .map(BillingAction::SelectPage)
+            .collect();
+        actions.extend([BillingAction::Refresh, BillingAction::Close]);
         if self.retry_required && self.last_purchase.is_some() {
             actions.push(BillingAction::Retry);
         }
         if let Some(status) = &self.status {
-            if self.usdc_page {
+            if self.page == BillingPage::Usdc {
                 if self.can_purchase() && self.usdc_available() {
                     actions.extend(
                         status
@@ -758,8 +804,8 @@ impl BillingPanel {
                 }
                 return actions;
             }
-            if self.can_purchase() {
-                if status.checkout_enabled {
+            if self.page == BillingPage::Fiat {
+                if self.can_purchase() && status.checkout_enabled {
                     actions.extend(
                         status
                             .offers
@@ -769,32 +815,36 @@ impl BillingPanel {
                             .map(|o| BillingAction::Checkout(o.id.clone())),
                     );
                 }
-                if status
-                    .monthly_card_credit_price
-                    .is_some_and(|p| status.credit >= p)
+                if status.offers.len() > PAGE_SIZE {
+                    actions.extend([
+                        BillingAction::OffersPage(false),
+                        BillingAction::OffersPage(true),
+                    ]);
+                }
+            } else {
+                if self.can_purchase()
+                    && status
+                        .monthly_card_credit_price
+                        .is_some_and(|p| status.credit >= p)
                 {
                     actions.push(BillingAction::BuyMonthlyCard);
                 }
-                actions.extend(
-                    status
-                        .owned_monthly_cards
-                        .iter()
-                        .skip(self.card_page * PAGE_SIZE)
-                        .take(PAGE_SIZE)
-                        .map(|c| BillingAction::Activate(c.unique_id.clone())),
-                );
-            }
-            if status.offers.len() > PAGE_SIZE {
-                actions.extend([
-                    BillingAction::OffersPage(false),
-                    BillingAction::OffersPage(true),
-                ]);
-            }
-            if status.owned_monthly_cards.len() > PAGE_SIZE {
-                actions.extend([
-                    BillingAction::CardsPage(false),
-                    BillingAction::CardsPage(true),
-                ]);
+                if self.can_activate_monthly() {
+                    actions.extend(
+                        status
+                            .owned_monthly_cards
+                            .iter()
+                            .skip(self.card_page * PAGE_SIZE)
+                            .take(PAGE_SIZE)
+                            .map(|c| BillingAction::Activate(c.unique_id.clone())),
+                    );
+                }
+                if status.owned_monthly_cards.len() > PAGE_SIZE {
+                    actions.extend([
+                        BillingAction::CardsPage(false),
+                        BillingAction::CardsPage(true),
+                    ]);
+                }
             }
         }
         if self.pending.is_some() {
@@ -854,6 +904,10 @@ mod ui {
         // The Enter that opens this panel belongs to the monthly-card button.
         if shell.billing.open && input_ready {
             let actions = shell.billing.actions();
+            let keyboard_handled = keys.just_pressed(KeyCode::Escape)
+                || keys.just_pressed(KeyCode::Tab)
+                || keys.just_pressed(KeyCode::Enter)
+                || keys.just_pressed(KeyCode::NumpadEnter);
             if keys.just_pressed(KeyCode::Escape) {
                 shell.billing.action(BillingAction::Close, now_ms());
             } else if keys.just_pressed(KeyCode::Tab) && !actions.is_empty() {
@@ -869,10 +923,15 @@ mod ui {
                     shell.billing.action(action.clone(), now_ms());
                 }
             }
-            for (interaction, button) in &buttons {
-                if *interaction == Interaction::Pressed && button.enabled && shell.billing.open {
-                    shell.billing.action(button.action.clone(), now_ms());
-                    break;
+            // A navigation key and an old rendered button can arrive together.
+            // Consume only one input source before the new page is rendered.
+            if !keyboard_handled {
+                for (interaction, button) in &buttons {
+                    if *interaction == Interaction::Pressed && button.enabled && shell.billing.open
+                    {
+                        shell.billing.action(button.action.clone(), now_ms());
+                        break;
+                    }
                 }
             }
         }
@@ -928,6 +987,7 @@ mod ui {
         let actions = panel.actions();
         let enabled = actions.contains(&action);
         let focused = actions.get(panel.focus % actions.len().max(1)) == Some(&action);
+        let selected = matches!(&action, BillingAction::SelectPage(page) if *page == panel.page);
         let mut bounds = rect(x, y, w, 30.0);
         bounds.border = UiRect::all(Val::Px(1.0));
         parent
@@ -936,12 +996,16 @@ mod ui {
                 Button,
                 FocusPolicy::Block,
                 BillingButton { action, enabled },
-                BackgroundColor(if enabled {
+                BackgroundColor(if selected {
+                    Color::srgb(0.35, 0.27, 0.12)
+                } else if enabled {
                     Color::srgb(0.19, 0.15, 0.09)
                 } else {
                     Color::srgb(0.10, 0.10, 0.10)
                 }),
                 BorderColor::all(if focused {
+                    Color::srgb(1.0, 0.96, 0.82)
+                } else if selected {
                     Color::srgb(1.0, 0.82, 0.25)
                 } else {
                     Color::srgb(0.45, 0.36, 0.20)
@@ -958,6 +1022,308 @@ mod ui {
                     12.0,
                 )
             });
+    }
+
+    fn render_usdc(p: &mut ChildSpawnerCommands, panel: &BillingPanel, s: &BillingStatus) {
+        use crate::native_i18n::tr;
+        text(
+            p,
+            tr(if panel.usdc_available() {
+                "billing.usdcOffers"
+            } else {
+                "billing.usdcUnavailable"
+            }),
+            20.0,
+            230.0,
+            500.0,
+            30.0,
+            14.0,
+        );
+        if s.sui_usdc_offers.len() > PAGE_SIZE {
+            button(
+                p,
+                panel,
+                BillingAction::UsdcOffersPage(false),
+                "billing.previous",
+                524.0,
+                225.0,
+                88.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::UsdcOffersPage(true),
+                "billing.next",
+                622.0,
+                225.0,
+                88.0,
+            );
+        }
+        for (i, offer) in s
+            .sui_usdc_offers
+            .iter()
+            .skip(panel.usdc_offer_page * PAGE_SIZE)
+            .take(PAGE_SIZE)
+            .enumerate()
+        {
+            let y = 264.0 + i as f32 * 46.0;
+            text(
+                p,
+                format!(
+                    "{} · {} · {}",
+                    offer.label,
+                    usdc_amount_label(&offer.amount_micros),
+                    tr("billing.points").replace("{0}", &offer.credits.to_string())
+                ),
+                20.0,
+                y,
+                510.0,
+                42.0,
+                13.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::UsdcCheckout(offer.id.clone()),
+                "billing.usdcPay",
+                550.0,
+                y + 4.0,
+                160.0,
+            );
+        }
+        text(p, tr("billing.usdcOrders"), 20.0, 411.0, 500.0, 30.0, 14.0);
+        if s.sui_usdc_orders.len() > PAGE_SIZE {
+            button(
+                p,
+                panel,
+                BillingAction::UsdcOrdersPage(false),
+                "billing.previous",
+                524.0,
+                406.0,
+                88.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::UsdcOrdersPage(true),
+                "billing.next",
+                622.0,
+                406.0,
+                88.0,
+            );
+        }
+        if s.sui_usdc_orders.is_empty() {
+            text(
+                p,
+                tr("billing.usdcNoOrders"),
+                20.0,
+                449.0,
+                700.0,
+                32.0,
+                13.0,
+            );
+        }
+        for (i, order) in s
+            .sui_usdc_orders
+            .iter()
+            .skip(panel.usdc_order_page * PAGE_SIZE)
+            .take(PAGE_SIZE)
+            .enumerate()
+        {
+            let short_id: String = order.id.chars().take(18).collect();
+            text(
+                p,
+                format!(
+                    "{} · {} · {}\n{}",
+                    short_id,
+                    usdc_amount_label(&order.amount_micros),
+                    tr("billing.points").replace("{0}", &order.credits.to_string()),
+                    tr(order.state.label())
+                ),
+                20.0,
+                449.0 + i as f32 * 42.0,
+                510.0,
+                40.0,
+                13.0,
+            );
+            if !matches!(
+                order.state,
+                SuiUsdcOrderState::Applied | SuiUsdcOrderState::Expired | SuiUsdcOrderState::Review
+            ) {
+                button(
+                    p,
+                    panel,
+                    BillingAction::UsdcReopen(order.id.clone()),
+                    "billing.usdcReopen",
+                    550.0,
+                    453.0 + i as f32 * 42.0,
+                    160.0,
+                );
+            }
+        }
+    }
+
+    fn render_fiat(p: &mut ChildSpawnerCommands, panel: &BillingPanel, s: &BillingStatus) {
+        use crate::native_i18n::tr;
+        text(
+            p,
+            tr(if s.checkout_enabled {
+                "billing.fiatOffers"
+            } else {
+                "billing.fiatUnavailable"
+            }),
+            20.0,
+            230.0,
+            500.0,
+            35.0,
+            14.0,
+        );
+        if s.offers.len() > PAGE_SIZE {
+            button(
+                p,
+                panel,
+                BillingAction::OffersPage(false),
+                "billing.previous",
+                524.0,
+                225.0,
+                88.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::OffersPage(true),
+                "billing.next",
+                622.0,
+                225.0,
+                88.0,
+            );
+        }
+        for (i, offer) in s
+            .offers
+            .iter()
+            .skip(panel.offer_page * PAGE_SIZE)
+            .take(PAGE_SIZE)
+            .enumerate()
+        {
+            let y = 264.0 + i as f32 * 48.0;
+            text(
+                p,
+                format!(
+                    "{} · {} · {}",
+                    offer.label,
+                    offer.amount_label,
+                    tr("billing.points").replace("{0}", &offer.credits.to_string())
+                ),
+                20.0,
+                y,
+                510.0,
+                42.0,
+                13.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::Checkout(offer.id.clone()),
+                "billing.recharge",
+                550.0,
+                y + 4.0,
+                160.0,
+            );
+        }
+    }
+
+    fn render_monthly(p: &mut ChildSpawnerCommands, panel: &BillingPanel, s: &BillingStatus) {
+        use crate::native_i18n::tr;
+        text(p, tr("billing.monthlyTab"), 20.0, 230.0, 700.0, 30.0, 17.0);
+        if let Some(price) = s.monthly_card_credit_price {
+            text(
+                p,
+                tr("billing.monthlyPrice").replace("{0}", &price.to_string()),
+                20.0,
+                264.0,
+                510.0,
+                44.0,
+                14.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::BuyMonthlyCard,
+                "billing.buyMonthly",
+                550.0,
+                268.0,
+                160.0,
+            );
+        } else {
+            text(
+                p,
+                tr("billing.monthlyDisabled"),
+                20.0,
+                264.0,
+                700.0,
+                42.0,
+                14.0,
+            );
+        }
+        text(p, tr("billing.owned"), 20.0, 332.0, 500.0, 30.0, 14.0);
+        if s.owned_monthly_cards.len() > PAGE_SIZE {
+            button(
+                p,
+                panel,
+                BillingAction::CardsPage(false),
+                "billing.previous",
+                524.0,
+                327.0,
+                88.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::CardsPage(true),
+                "billing.next",
+                622.0,
+                327.0,
+                88.0,
+            );
+        }
+        if s.owned_monthly_cards.is_empty() {
+            text(p, tr("billing.noCards"), 20.0, 371.0, 510.0, 30.0, 13.0);
+        }
+        for (i, card) in s
+            .owned_monthly_cards
+            .iter()
+            .skip(panel.card_page * PAGE_SIZE)
+            .take(PAGE_SIZE)
+            .enumerate()
+        {
+            let y = 371.0 + i as f32 * 45.0;
+            text(
+                p,
+                format!(
+                    "{} #{}",
+                    if card.label.is_empty() {
+                        tr("billing.card")
+                    } else {
+                        card.label.clone()
+                    },
+                    card.unique_id
+                ),
+                20.0,
+                y,
+                510.0,
+                40.0,
+                13.0,
+            );
+            button(
+                p,
+                panel,
+                BillingAction::Activate(card.unique_id.clone()),
+                "billing.activate",
+                550.0,
+                y + 4.0,
+                160.0,
+            );
+        }
     }
 
     pub fn render(parent: &mut ChildSpawnerCommands, panel: &BillingPanel) {
@@ -980,33 +1346,24 @@ mod ui {
                         BorderColor::all(Color::srgb(0.65, 0.49, 0.20)),
                     ))
                     .with_children(|p| {
-                        text(p, tr("billing.title"), 20.0, 14.0, 470.0, 30.0, 23.0);
-                        button(
-                            p,
-                            panel,
-                            BillingAction::UsdcPage,
-                            if panel.usdc_page {
-                                "billing.usdcBack"
-                            } else {
-                                "billing.usdcTab"
-                            },
-                            500.0,
-                            14.0,
-                            210.0,
-                        );
-                        text(
-                            p,
-                            tr(if panel.usdc_page {
-                                "billing.usdcInstructions"
-                            } else {
-                                "billing.instructions"
-                            }),
-                            20.0,
-                            48.0,
-                            700.0,
-                            42.0,
-                            13.0,
-                        );
+                        text(p, tr("billing.title"), 20.0, 14.0, 700.0, 30.0, 23.0);
+                        for (i, page) in BillingPage::ALL.into_iter().enumerate() {
+                            button(
+                                p,
+                                panel,
+                                BillingAction::SelectPage(page),
+                                page.label(),
+                                20.0 + i as f32 * 240.0,
+                                52.0,
+                                if i == 2 { 210.0 } else { 220.0 },
+                            );
+                        }
+                        let instructions = match panel.page {
+                            BillingPage::Fiat => "billing.fiatInstructions",
+                            BillingPage::Usdc => "billing.usdcInstructions",
+                            BillingPage::MonthlyCard => "billing.monthlyInstructions",
+                        };
+                        text(p, tr(instructions), 20.0, 94.0, 700.0, 36.0, 13.0);
                         if let Some(s) = &panel.status {
                             text(
                                 p,
@@ -1014,333 +1371,45 @@ mod ui {
                                     .replace("{0}", &s.credit.to_string())
                                     .replace("{1}", &s.pending_credit.to_string()),
                                 20.0,
-                                94.0,
+                                136.0,
                                 700.0,
                                 30.0,
                                 17.0,
                             );
-                            let access = if !s.monthly_card.required {
-                                "billing.optional"
-                            } else if s.monthly_card.active {
-                                "billing.active"
-                            } else {
-                                "billing.expired"
-                            };
-                            let expiry = s
-                                .monthly_card
-                                .expires_at_ms
-                                .and_then(|ms| i64::try_from(ms).ok())
-                                .and_then(chrono::DateTime::<chrono::Utc>::from_timestamp_millis)
-                                .map(|d| {
-                                    format!(
-                                        "\n{} {} UTC",
-                                        tr("billing.expires"),
-                                        d.format("%Y-%m-%d %H:%M")
-                                    )
-                                })
-                                .unwrap_or_default();
-                            text(
-                                p,
-                                if panel.usdc_page {
-                                    tr("billing.usdcGas")
-                                } else {
+                            let context = match panel.page {
+                                BillingPage::Fiat => tr("billing.fiatHelp"),
+                                BillingPage::Usdc => tr("billing.usdcGas"),
+                                BillingPage::MonthlyCard => {
+                                    let access = if !s.monthly_card.required {
+                                        "billing.optional"
+                                    } else if s.monthly_card.active {
+                                        "billing.active"
+                                    } else {
+                                        "billing.expired"
+                                    };
+                                    let expiry = s
+                                        .monthly_card
+                                        .expires_at_ms
+                                        .and_then(|ms| i64::try_from(ms).ok())
+                                        .and_then(
+                                            chrono::DateTime::<chrono::Utc>::from_timestamp_millis,
+                                        )
+                                        .map(|d| {
+                                            format!(
+                                                "\n{} {} UTC",
+                                                tr("billing.expires"),
+                                                d.format("%Y-%m-%d %H:%M")
+                                            )
+                                        })
+                                        .unwrap_or_default();
                                     format!("{}{}", tr(access), expiry)
-                                },
-                                20.0,
-                                132.0,
-                                700.0,
-                                50.0,
-                                13.0,
-                            );
-                            if !s.enabled && !panel.usdc_page {
-                                text(p, tr("billing.unavailable"), 20.0, 190.0, 700.0, 42.0, 15.0);
-                            } else if panel.usdc_page {
-                                text(
-                                    p,
-                                    tr(if panel.usdc_available() {
-                                        "billing.usdcOffers"
-                                    } else {
-                                        "billing.usdcUnavailable"
-                                    }),
-                                    20.0,
-                                    190.0,
-                                    500.0,
-                                    35.0,
-                                    14.0,
-                                );
-                                if s.sui_usdc_offers.len() > PAGE_SIZE {
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::UsdcOffersPage(false),
-                                        "billing.previous",
-                                        524.0,
-                                        185.0,
-                                        88.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::UsdcOffersPage(true),
-                                        "billing.next",
-                                        622.0,
-                                        185.0,
-                                        88.0,
-                                    );
                                 }
-                                for (i, offer) in s
-                                    .sui_usdc_offers
-                                    .iter()
-                                    .skip(panel.usdc_offer_page * PAGE_SIZE)
-                                    .take(PAGE_SIZE)
-                                    .enumerate()
-                                {
-                                    let y = 225.0 + i as f32 * 48.0;
-                                    text(
-                                        p,
-                                        format!(
-                                            "{} · {} · {}",
-                                            offer.label,
-                                            usdc_amount_label(&offer.amount_micros),
-                                            tr("billing.points")
-                                                .replace("{0}", &offer.credits.to_string())
-                                        ),
-                                        20.0,
-                                        y,
-                                        510.0,
-                                        42.0,
-                                        13.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::UsdcCheckout(offer.id.clone()),
-                                        "billing.usdcPay",
-                                        550.0,
-                                        y + 4.0,
-                                        160.0,
-                                    );
-                                }
-                                text(p, tr("billing.usdcOrders"), 20.0, 392.0, 500.0, 30.0, 14.0);
-                                if s.sui_usdc_orders.len() > PAGE_SIZE {
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::UsdcOrdersPage(false),
-                                        "billing.previous",
-                                        524.0,
-                                        387.0,
-                                        88.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::UsdcOrdersPage(true),
-                                        "billing.next",
-                                        622.0,
-                                        387.0,
-                                        88.0,
-                                    );
-                                }
-                                if s.sui_usdc_orders.is_empty() {
-                                    text(
-                                        p,
-                                        tr("billing.usdcNoOrders"),
-                                        20.0,
-                                        430.0,
-                                        700.0,
-                                        32.0,
-                                        13.0,
-                                    );
-                                }
-                                for (i, order) in s
-                                    .sui_usdc_orders
-                                    .iter()
-                                    .skip(panel.usdc_order_page * PAGE_SIZE)
-                                    .take(PAGE_SIZE)
-                                    .enumerate()
-                                {
-                                    let short_id: String = order.id.chars().take(18).collect();
-                                    text(
-                                        p,
-                                        format!(
-                                            "{} · {} · {}\n{}",
-                                            short_id,
-                                            usdc_amount_label(&order.amount_micros),
-                                            tr("billing.points")
-                                                .replace("{0}", &order.credits.to_string()),
-                                            tr(order.state.label())
-                                        ),
-                                        20.0,
-                                        430.0 + i as f32 * 46.0,
-                                        510.0,
-                                        44.0,
-                                        13.0,
-                                    );
-                                    if !matches!(
-                                        order.state,
-                                        SuiUsdcOrderState::Applied
-                                            | SuiUsdcOrderState::Expired
-                                            | SuiUsdcOrderState::Review
-                                    ) {
-                                        button(
-                                            p,
-                                            panel,
-                                            BillingAction::UsdcReopen(order.id.clone()),
-                                            "billing.usdcReopen",
-                                            550.0,
-                                            434.0 + i as f32 * 46.0,
-                                            160.0,
-                                        );
-                                    }
-                                }
-                            } else {
-                                text(
-                                    p,
-                                    tr(if s.checkout_enabled {
-                                        "billing.offers"
-                                    } else {
-                                        "billing.checkoutUnavailable"
-                                    }),
-                                    20.0,
-                                    190.0,
-                                    500.0,
-                                    35.0,
-                                    14.0,
-                                );
-                                if s.offers.len() > PAGE_SIZE {
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::OffersPage(false),
-                                        "billing.previous",
-                                        524.0,
-                                        185.0,
-                                        88.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::OffersPage(true),
-                                        "billing.next",
-                                        622.0,
-                                        185.0,
-                                        88.0,
-                                    );
-                                }
-                                for (i, o) in s
-                                    .offers
-                                    .iter()
-                                    .skip(panel.offer_page * PAGE_SIZE)
-                                    .take(PAGE_SIZE)
-                                    .enumerate()
-                                {
-                                    let y = 225.0 + i as f32 * 48.0;
-                                    text(
-                                        p,
-                                        format!(
-                                            "{} · {} · {}",
-                                            o.label,
-                                            o.amount_label,
-                                            tr("billing.points")
-                                                .replace("{0}", &o.credits.to_string())
-                                        ),
-                                        20.0,
-                                        y,
-                                        510.0,
-                                        42.0,
-                                        13.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::Checkout(o.id.clone()),
-                                        "billing.recharge",
-                                        550.0,
-                                        y + 4.0,
-                                        160.0,
-                                    );
-                                }
-                                if let Some(price) = s.monthly_card_credit_price {
-                                    text(
-                                        p,
-                                        tr("billing.monthlyPrice")
-                                            .replace("{0}", &price.to_string()),
-                                        20.0,
-                                        377.0,
-                                        510.0,
-                                        44.0,
-                                        13.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::BuyMonthlyCard,
-                                        "billing.buyMonthly",
-                                        550.0,
-                                        378.0,
-                                        160.0,
-                                    );
-                                }
-                                text(p, tr("billing.owned"), 20.0, 427.0, 500.0, 28.0, 14.0);
-                                if s.owned_monthly_cards.len() > PAGE_SIZE {
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::CardsPage(false),
-                                        "billing.previous",
-                                        524.0,
-                                        422.0,
-                                        88.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::CardsPage(true),
-                                        "billing.next",
-                                        622.0,
-                                        422.0,
-                                        88.0,
-                                    );
-                                }
-                                if s.owned_monthly_cards.is_empty() {
-                                    text(p, tr("billing.noCards"), 20.0, 459.0, 510.0, 30.0, 13.0);
-                                }
-                                for (i, card) in s
-                                    .owned_monthly_cards
-                                    .iter()
-                                    .skip(panel.card_page * PAGE_SIZE)
-                                    .take(PAGE_SIZE)
-                                    .enumerate()
-                                {
-                                    let y = 459.0 + i as f32 * 37.0;
-                                    text(
-                                        p,
-                                        format!(
-                                            "{} #{}",
-                                            if card.label.is_empty() {
-                                                tr("billing.card")
-                                            } else {
-                                                card.label.clone()
-                                            },
-                                            card.unique_id
-                                        ),
-                                        20.0,
-                                        y,
-                                        510.0,
-                                        32.0,
-                                        13.0,
-                                    );
-                                    button(
-                                        p,
-                                        panel,
-                                        BillingAction::Activate(card.unique_id.clone()),
-                                        "billing.activate",
-                                        550.0,
-                                        y,
-                                        160.0,
-                                    );
-                                }
+                            };
+                            text(p, context, 20.0, 172.0, 700.0, 42.0, 13.0);
+                            match panel.page {
+                                BillingPage::Fiat => render_fiat(p, panel, s),
+                                BillingPage::Usdc => render_usdc(p, panel, s),
+                                BillingPage::MonthlyCard => render_monthly(p, panel, s),
                             }
                         } else {
                             text(
@@ -1351,14 +1420,14 @@ mod ui {
                                     "billing.unavailable"
                                 }),
                                 20.0,
-                                100.0,
+                                172.0,
                                 700.0,
                                 44.0,
                                 15.0,
                             );
                         }
                         if let Some(message) = panel.message {
-                            text(p, tr(message), 20.0, 575.0, 700.0, 48.0, 13.0);
+                            text(p, tr(message), 20.0, 584.0, 700.0, 36.0, 13.0);
                         }
                         button(
                             p,
@@ -1513,7 +1582,7 @@ mod ui {
             panel.open_for("alice", 7, 1);
             panel.pending = None;
             panel.status = Some(usdc_status());
-            panel.usdc_page = true;
+            panel.page = BillingPage::Usdc;
             panel.action(BillingAction::UsdcCheckout("usdc-small".into()), 2);
             assert!(panel.pending.is_none(), "reply origin is not an allowlist");
             panel.set_sui_checkout_origin(Some("http://127.0.0.1:17830".into()));
@@ -1551,7 +1620,7 @@ mod ui {
             panel.open_for("alice", 7, 1);
             panel.pending = None;
             panel.status = Some(usdc_status());
-            panel.usdc_page = true;
+            panel.page = BillingPage::Usdc;
             panel.status.as_mut().unwrap().sui_usdc_orders = vec![SuiUsdcOrder {
                 id: "usdc_order".into(),
                 order_request_id: "native-original-usdc".into(),
@@ -1599,8 +1668,8 @@ mod ui {
                 expires_at_ms: 10000,
                 transaction_digest: None,
             }];
-            panel.status = Some(s);
-            panel.usdc_page = true;
+            panel.status = Some(s.clone());
+            panel.page = BillingPage::Usdc;
             panel.action(BillingAction::UsdcCheckout("removed-offer".into()), 2);
             assert!(panel.pending.is_none());
             panel.action(BillingAction::UsdcReopen("usdc_order".into()), 3);
@@ -1630,7 +1699,7 @@ mod ui {
 
         #[test]
         #[ignore = "explicit offline Windows GPU evidence; no server, wallet signing or chain payment"]
-        fn usdc_windows_gpu_channels_and_payment_states() {
+        fn billing_windows_gpu_three_routes_and_channel_states() {
             use crate::native_i18n::{self, Locale};
             use crate::native_shell_ui::i18n_visual_tests::{
                 capture_i18n, i18n_offscreen_app_configured, i18n_text_layouts, warm_i18n_images,
@@ -1646,7 +1715,7 @@ mod ui {
             );
             assert!(output.is_absolute() && !output.starts_with(&assets));
             fs::create_dir_all(&output).unwrap();
-            let report = output.join("usdc-native-gpu.json");
+            let report = output.join("billing-entry-native-gpu.json");
             fs::OpenOptions::new()
                 .create_new(true)
                 .write(true)
@@ -1669,6 +1738,11 @@ mod ui {
             panel.pending = None;
             panel.set_sui_checkout_origin(Some("http://127.0.0.1:17830".into()));
             let mut s = usdc_status();
+            s.monthly_card_credit_price = Some(100);
+            s.owned_monthly_cards = vec![OwnedMonthlyCard {
+                unique_id: "18446744073709551615".into(),
+                label: "Monthly Card".into(),
+            }];
             for (i, state) in [
                 SuiUsdcOrderState::Prepared,
                 SuiUsdcOrderState::InvoicePending,
@@ -1695,7 +1769,7 @@ mod ui {
                     transaction_digest: None,
                 });
             }
-            panel.status = Some(s);
+            panel.status = Some(s.clone());
             panel.last_status_at_ms = now_ms();
             let (mut app, target, _) = i18n_offscreen_app_configured(&assets, true, |app| {
                 app.insert_resource(NativeShellModel {
@@ -1715,28 +1789,66 @@ mod ui {
             });
             let mut screenshots = Vec::new();
             let mut checks = Vec::new();
-            for locale in [Locale::English, Locale::TraditionalChinese] {
+            for locale in [
+                Locale::English,
+                Locale::TraditionalChinese,
+                Locale::SimplifiedChinese,
+            ] {
                 native_i18n::activate(locale);
-                for (label, usdc, page) in [
-                    ("stripe", false, 0),
-                    ("usdc-preparing", true, 0),
-                    ("usdc-confirmation", true, 1),
-                    ("usdc-expired-review", true, 2),
-                    ("usdc-sales-disabled", true, 0),
+                for (label, page, order_page, fiat_enabled, usdc_enabled) in [
+                    ("fiat", BillingPage::Fiat, 0, true, true),
+                    ("usdc-preparing", BillingPage::Usdc, 0, true, true),
+                    ("usdc-confirmation", BillingPage::Usdc, 1, true, true),
+                    ("usdc-expired-review", BillingPage::Usdc, 2, true, true),
+                    ("monthly", BillingPage::MonthlyCard, 0, true, true),
+                    ("fiat-disabled", BillingPage::Fiat, 0, false, true),
+                    ("usdc-disabled", BillingPage::Usdc, 0, true, false),
+                    ("both-disabled-fiat", BillingPage::Fiat, 0, false, false),
+                    ("both-disabled-usdc", BillingPage::Usdc, 0, false, false),
+                    (
+                        "both-disabled-monthly",
+                        BillingPage::MonthlyCard,
+                        0,
+                        false,
+                        false,
+                    ),
+                    (
+                        "all-sales-disabled-owned-card",
+                        BillingPage::MonthlyCard,
+                        0,
+                        false,
+                        false,
+                    ),
+                    ("loading", BillingPage::Fiat, 0, false, false),
+                    ("unavailable", BillingPage::Usdc, 0, false, false),
                 ] {
                     let mut model = app.world_mut().resource_mut::<NativeShellModel>();
-                    model.billing.usdc_page = usdc;
-                    model.billing.usdc_order_page = page;
+                    // Restore a complete server fixture before changing independent sales gates.
+                    if model.billing.status.is_none() {
+                        model.billing.status = Some(s.clone());
+                    }
+                    model.billing.page = page;
+                    model.billing.usdc_order_page = order_page;
                     let status = model.billing.status.as_mut().unwrap();
-                    status.enabled = label != "usdc-sales-disabled";
-                    status.sui_usdc_enabled = label != "usdc-sales-disabled";
-                    status.sui_usdc_offers = if label == "usdc-sales-disabled" {
+                    status.enabled = label != "all-sales-disabled-owned-card";
+                    status.checkout_enabled = fiat_enabled;
+                    status.sui_usdc_enabled = usdc_enabled;
+                    status.monthly_card_credit_price =
+                        (label != "all-sales-disabled-owned-card").then_some(100);
+                    status.sui_usdc_offers = if !usdc_enabled {
                         vec![]
                     } else {
                         usdc_status().sui_usdc_offers
                     };
                     model.billing.pending = None;
                     model.billing.last_status_at_ms = now_ms();
+                    model.billing.message = None;
+                    if matches!(label, "loading" | "unavailable") {
+                        model.billing.status = None;
+                        if label == "loading" {
+                            model.billing.begin(None, now_ms());
+                        }
+                    }
                     drop(model);
                     warm_i18n_images(&mut app);
                     let path = output.join(format!("{}-{label}-1024x768.png", locale.code()));
@@ -1754,9 +1866,27 @@ mod ui {
                         failures.is_empty(),
                         "{locale:?}/{label} layout failures: {failures:?}"
                     );
+                    for entry in BillingPage::ALL {
+                        assert!(
+                            layouts
+                                .iter()
+                                .any(|row| row["text"] == native_i18n::tr(entry.label())),
+                            "missing persistent navigation: {entry:?}"
+                        );
+                    }
+                    let instructions = match page {
+                        BillingPage::Fiat => "billing.fiatInstructions",
+                        BillingPage::Usdc => "billing.usdcInstructions",
+                        BillingPage::MonthlyCard => "billing.monthlyInstructions",
+                    };
                     assert!(layouts
                         .iter()
-                        .any(|row| row["text"].as_str().is_some_and(|t| t.contains("USDC"))));
+                        .any(|row| row["text"] == native_i18n::tr(instructions)));
+                    if page == BillingPage::MonthlyCard {
+                        assert!(!layouts.iter().any(|row| row["text"]
+                            == native_i18n::tr("billing.fiatInstructions")
+                            || row["text"] == native_i18n::tr("billing.usdcInstructions")));
+                    }
                     screenshots.push(path.file_name().unwrap().to_string_lossy().to_string());
                     checks.push(serde_json::json!({"locale":locale.code(), "page":label, "layouts":layouts}));
                 }
@@ -1765,6 +1895,188 @@ mod ui {
                 "evidenceKind":"offline-native-production-renderer", "width":1024,"height":768,
                 "screenshots":screenshots,"checks":checks,"missingGlyphs":0,"overflowingTextNodes":0,"outsideViewportNodes":0})).unwrap()).unwrap();
         }
+        #[test]
+        fn three_routes_remain_visible_without_sales_and_selecting_is_explicit() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 1);
+            p.pending = None;
+            for server_status in [None, Some(status(false))] {
+                p.status = server_status;
+                for page in BillingPage::ALL {
+                    assert!(p.actions().contains(&BillingAction::SelectPage(page)));
+                    p.focus = 5;
+                    p.action(BillingAction::SelectPage(page), 2);
+                    p.action(BillingAction::SelectPage(page), 3);
+                    assert_eq!(p.page, page);
+                    assert_eq!(p.focus, 0);
+                    assert!(
+                        p.pending.is_none(),
+                        "navigation never sends a payment or refresh"
+                    );
+                }
+            }
+            assert_eq!(
+                crate::native_i18n::translate(
+                    crate::native_i18n::Locale::TraditionalChinese,
+                    "billing.fiatTab"
+                ),
+                "法币充值"
+            );
+            assert_eq!(
+                crate::native_i18n::translate(
+                    crate::native_i18n::Locale::TraditionalChinese,
+                    "billing.usdcTab"
+                ),
+                "USDC链上充值"
+            );
+        }
+
+        #[test]
+        fn hidden_pages_cannot_purchase_or_change_pagination() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 1);
+            p.pending = None;
+            let mut s = usdc_status();
+            s.owned_monthly_cards = vec![OwnedMonthlyCard {
+                unique_id: "42".into(),
+                label: "Card".into(),
+            }];
+            p.status = Some(s);
+            p.set_sui_checkout_origin(Some("http://127.0.0.1:17830".into()));
+            for page in BillingPage::ALL {
+                p.action(BillingAction::SelectPage(page), 2);
+                let hidden = match page {
+                    BillingPage::Fiat => vec![
+                        BillingAction::UsdcCheckout("usdc-small".into()),
+                        BillingAction::BuyMonthlyCard,
+                        BillingAction::Activate("42".into()),
+                        BillingAction::UsdcOffersPage(true),
+                        BillingAction::CardsPage(true),
+                    ],
+                    BillingPage::Usdc => vec![
+                        BillingAction::Checkout("small".into()),
+                        BillingAction::BuyMonthlyCard,
+                        BillingAction::Activate("42".into()),
+                        BillingAction::OffersPage(true),
+                        BillingAction::CardsPage(true),
+                    ],
+                    BillingPage::MonthlyCard => vec![
+                        BillingAction::Checkout("small".into()),
+                        BillingAction::UsdcCheckout("usdc-small".into()),
+                        BillingAction::UsdcReopen("any".into()),
+                        BillingAction::OffersPage(true),
+                        BillingAction::UsdcOffersPage(true),
+                    ],
+                };
+                for action in hidden {
+                    assert!(!p.actions().contains(&action));
+                    let before = p.clone();
+                    p.action(action, 3);
+                    assert_eq!(p, before);
+                }
+            }
+        }
+
+        #[test]
+        fn monthly_purchase_and_owned_activation_are_independent_of_recharge_channels() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 1);
+            p.pending = None;
+            let mut s = status(true);
+            s.checkout_enabled = false;
+            s.sui_usdc_enabled = false;
+            s.owned_monthly_cards = vec![OwnedMonthlyCard {
+                unique_id: "42".into(),
+                label: "Card".into(),
+            }];
+            p.status = Some(s);
+            p.action(BillingAction::SelectPage(BillingPage::MonthlyCard), 2);
+            p.action(BillingAction::BuyMonthlyCard, 3);
+            assert_eq!(
+                p.pending.as_ref().unwrap().operation,
+                BillingOperation::BuyMonthlyCard
+            );
+            p.pending = None;
+            p.last_purchase = None;
+            let s = p.status.as_mut().unwrap();
+            s.enabled = false;
+            s.monthly_card_credit_price = None;
+            assert!(!p.actions().contains(&BillingAction::BuyMonthlyCard));
+            assert!(p.actions().contains(&BillingAction::Activate("42".into())));
+            p.action(BillingAction::Activate("43".into()), 4);
+            assert!(
+                p.pending.is_none(),
+                "only a server-listed owned card can be used"
+            );
+            p.action(BillingAction::Activate("42".into()), 5);
+            assert_eq!(
+                p.pending.unwrap().purchase,
+                Some(BillingPurchase::ActivateMonthlyCard {
+                    item_unique_id: "42".into()
+                })
+            );
+        }
+
+        #[test]
+        fn pending_navigation_is_blocked_and_retry_returns_to_original_route() {
+            let mut p = BillingPanel::default();
+            p.open_for("alice", 7, 1);
+            p.pending = None;
+            p.status = Some(status(true));
+            p.action(BillingAction::Checkout("small".into()), 2);
+            let original = p.pending.clone().unwrap();
+            assert_eq!(p.actions(), vec![BillingAction::Close]);
+            for page in BillingPage::ALL {
+                p.action(BillingAction::SelectPage(page), 3);
+                assert_eq!(p.page, BillingPage::Fiat);
+                assert_eq!(p.pending.as_ref(), Some(&original));
+            }
+            p.expire_request(15_002);
+            p.action(BillingAction::SelectPage(BillingPage::MonthlyCard), 15_003);
+            assert!(p.pending.is_none());
+            p.action(BillingAction::Retry, 15_004);
+            assert_eq!(p.page, BillingPage::Fiat);
+            assert_eq!(p.pending.as_ref().unwrap().purchase, original.purchase);
+            p.open_for("bob", 8, 15_005);
+            assert_eq!(p.page, BillingPage::Fiat);
+            assert!(p.last_purchase.is_none());
+            assert!(!p.retry_required);
+            assert_eq!(p.pending.unwrap().purchase, None);
+        }
+
+        #[test]
+        fn keyboard_page_selection_does_not_execute_old_mouse_purchase() {
+            let mut shell = NativeShellModel::default();
+            shell.screen = NativeShellScreen::CharacterSelect;
+            shell.last_account = Some("alice".into());
+            shell.selected_character_index = Some(7);
+            shell.characters = vec![crate::native_shell::CharacterSummary::new(
+                7, "Hero", 22, "Warrior", "Male",
+            )];
+            shell.billing.open_for("alice", 7, now_ms());
+            shell.billing.pending = None;
+            shell.billing.status = Some(status(true));
+            shell.billing.input_ready = true;
+            shell.billing.focus = 2; // Monthly navigation in the existing render.
+            let mut keys = ButtonInput::<KeyCode>::default();
+            keys.press(KeyCode::Enter);
+            let mut app = App::new();
+            app.insert_resource(shell)
+                .insert_resource(keys)
+                .add_systems(Update, process_input);
+            app.world_mut().spawn((
+                Interaction::Pressed,
+                BillingButton {
+                    action: BillingAction::BuyMonthlyCard,
+                    enabled: true,
+                },
+            ));
+            app.update();
+            let p = &app.world().resource::<NativeShellModel>().billing;
+            assert_eq!(p.page, BillingPage::MonthlyCard);
+            assert!(p.pending.is_none());
+        }
+
         #[test]
         fn checkout_is_bound_to_current_account_character_and_request() {
             let mut p = BillingPanel::default();
@@ -1827,6 +2139,7 @@ mod ui {
             result.status = Some(status(false));
             assert!(p.accept(result, "alice", Some(7), 11));
             p.action(BillingAction::Checkout("small".into()), 12);
+            p.action(BillingAction::SelectPage(BillingPage::MonthlyCard), 12);
             p.action(BillingAction::BuyMonthlyCard, 12);
             assert!(p.pending.is_none());
             p.status = Some(status(true));
@@ -1854,6 +2167,7 @@ mod ui {
             let mut p = BillingPanel::default();
             p.open_for("alice", 7, 1);
             p.pending = None;
+            p.page = BillingPage::MonthlyCard;
             let purchase = BillingPurchase::BuyMonthlyCard {
                 order_request_id: "native-stable-order".into(),
             };
@@ -1884,12 +2198,14 @@ mod ui {
             p.open_for("alice", 7, 1);
             p.pending = None;
             p.status = Some(status(true));
+            p.action(BillingAction::SelectPage(BillingPage::MonthlyCard), 2);
             p.action(BillingAction::BuyMonthlyCard, 2);
             let request = p.pending.clone().unwrap();
             p.mark_sent(request.request_id);
             let mut result = reply(&request);
             result.error = Some("insufficient credits".into());
             assert!(p.accept(result, "alice", Some(7), 3));
+            p.action(BillingAction::SelectPage(BillingPage::Fiat), 4);
             p.action(BillingAction::Checkout("small".into()), 4);
             assert_eq!(p.pending.unwrap().operation, BillingOperation::Checkout);
         }
@@ -1909,6 +2225,7 @@ mod ui {
                 let mut refreshed = reply(&refresh);
                 refreshed.status = Some(status(true));
                 assert!(p.accept(refreshed, "alice", Some(7), 2));
+                p.action(BillingAction::SelectPage(BillingPage::MonthlyCard), 3);
                 p.action(BillingAction::BuyMonthlyCard, 3);
                 let request = p.pending.clone().unwrap();
                 p.mark_sent(request.request_id);

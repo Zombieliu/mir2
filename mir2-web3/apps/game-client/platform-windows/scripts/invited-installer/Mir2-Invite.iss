@@ -53,6 +53,7 @@ LanguageDetectionMethod=uilanguage
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "README.en.txt"
+Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"; InfoBeforeFile: "README.zh-CN.txt"
 Name: "chinesetraditional"; MessagesFile: "compiler:Languages\ChineseTraditional.isl"; InfoBeforeFile: "README.zh-TW.txt"
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"; InfoBeforeFile: "README.pt-BR.txt"
 Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"; InfoBeforeFile: "README.ru.txt"
@@ -77,6 +78,20 @@ english.LaunchFailed=The game could not start (Windows error %1). Installation h
 english.LaunchLog=Launch diagnostics: %1
 english.ReadmeFailed=The guide could not be opened (Windows error %1). Open the installed README manually.
 english.ReadmeFile=README.en.txt
+chinesesimplified.DesktopIcon=创建桌面快捷方式
+chinesesimplified.ShortcutGroup=快捷方式：
+chinesesimplified.ReadmeTitle=安装与试玩说明
+chinesesimplified.UninstallTitle=卸载 Numeron - Legend of Rebirth
+chinesesimplified.LaunchGame=启动 Numeron - Legend of Rebirth
+chinesesimplified.OpenReadme=阅读安装与试玩说明
+chinesesimplified.RuntimePermission=无法开始安装微软运行库。请允许该组件的管理员权限提示后重试。错误：
+chinesesimplified.RuntimeFailed=微软运行库安装失败。请完成安装后重试。退出代码：
+chinesesimplified.RuntimePending=微软运行库尚未就绪。请完成安装；如需重启 Windows，请重启后再次运行安装程序。
+chinesesimplified.LaunchBlocked=Windows 应用保护阻止游戏启动（错误 %1）。安装已完成。请保持保护开启，向开发者索取受信任签名版本，或请组织管理员检查策略。反馈时请附上错误代码和安装日志。
+chinesesimplified.LaunchFailed=游戏无法启动（Windows 错误 %1）。安装已完成，请向支持人员提供错误代码和安装日志。
+chinesesimplified.LaunchLog=启动诊断日志：%1
+chinesesimplified.ReadmeFailed=无法打开说明（Windows 错误 %1）。请手动打开已安装的 README。
+chinesesimplified.ReadmeFile=README.zh-CN.txt
 chinesetraditional.DesktopIcon=建立桌面捷徑
 chinesetraditional.ShortcutGroup=捷徑：
 chinesetraditional.ReadmeTitle=安裝與試玩說明
@@ -191,6 +206,7 @@ arabic.ReadmeFailed=تعذر فتح الدليل (خطأ Windows %1). افتح �
 arabic.ReadmeFile=README.ar.txt
 
 english.GameBusy=Save your character and close the game and updater before installing. The installed game is busy or cannot be replaced.
+chinesesimplified.GameBusy=请先保存角色进度，关闭游戏和更新程序后再安装。目前游戏文件正在使用或无法替换。
 chinesetraditional.GameBusy=請先儲存角色進度，關閉遊戲與更新程式後再安裝。目前遊戲檔案正在使用或無法替換。
 brazilianportuguese.GameBusy=Salve seu personagem e feche o jogo e o atualizador antes de instalar. O jogo está em uso ou não pode ser substituído.
 russian.GameBusy=Сохраните персонажа и закройте игру и программу обновления перед установкой. Файлы игры заняты или недоступны для замены.
@@ -207,6 +223,7 @@ Source: "tools\vc_redist.x64.exe"; Flags: dontcopy
 #include "verified-payload-files.iss"
 #include "verified-updater-files.iss"
 Source: "README.en.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "README.zh-CN.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.zh-TW.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.pt-BR.txt"; DestDir: "{app}"; Flags: ignoreversion
 
@@ -507,6 +524,7 @@ begin
   end;
   if not SafeLocalePath(Directory) then exit;
   Code := 'en';
+  if ActiveLanguage = 'chinesesimplified' then Code := 'zh-CN';
   if ActiveLanguage = 'chinesetraditional' then Code := 'zh-TW';
   if ActiveLanguage = 'brazilianportuguese' then Code := 'pt-BR';
   if ActiveLanguage = 'russian' then Code := 'ru';

@@ -271,7 +271,7 @@ fn multilingual_gpu_labels(app: &mut App, camera: Entity, index: usize) {
     for entity in previous {
         app.world_mut().despawn(entity);
     }
-    let (code, family, sample) = NINE_LANGUAGE_SAMPLES[index];
+    let (code, family, sample) = LANGUAGE_SAMPLES[index];
     for (row, text) in [
         format!("{code} — {family}"),
         sample.to_owned(),
@@ -311,8 +311,8 @@ fn multilingual_gpu_labels(app: &mut App, camera: Entity, index: usize) {
 }
 
 #[test]
-#[ignore = "explicit offline nine-language GPU capture/180-switch proof; run alone with --ignored"]
-fn nine_language_bundled_fonts_gpu_shapes_and_switches_without_os_fonts() {
+#[ignore = "explicit offline ten-language GPU capture/180-switch proof; run alone with --ignored"]
+fn bundled_fonts_gpu_shapes_and_switches_without_os_fonts() {
     let output = PathBuf::from(
         std::env::var_os("MIR2_NATIVE_NINE_FONT_GPU_OUTPUT")
             .expect("explicit fresh evidence directory"),
@@ -333,7 +333,7 @@ fn nine_language_bundled_fonts_gpu_shapes_and_switches_without_os_fonts() {
         .map(|(_, font)| font.data.id())
         .collect();
     let mut evidence = Vec::new();
-    for index in 0..9 {
+    for index in 0..LANGUAGE_SAMPLES.len() {
         multilingual_gpu_labels(&mut app, camera, index);
         for _ in 0..8 {
             multilingual_gpu_step(&mut app);
@@ -367,7 +367,7 @@ fn nine_language_bundled_fonts_gpu_shapes_and_switches_without_os_fonts() {
                 }
             }
         }
-        let filename = format!("font-{}.png", NINE_LANGUAGE_SAMPLES[index].0);
+        let filename = format!("font-{}.png", LANGUAGE_SAMPLES[index].0);
         let path = output.join(&filename);
         assert!(!path.exists(), "preserve prior image");
         app.world_mut()
@@ -403,14 +403,16 @@ fn nine_language_bundled_fonts_gpu_shapes_and_switches_without_os_fonts() {
             "must render real visible text"
         );
         rgba.save(&path).unwrap();
-        evidence.push(serde_json::json!({"locale":NINE_LANGUAGE_SAMPLES[index].0,"image":filename,"runs":runs}));
+        evidence.push(
+            serde_json::json!({"locale":LANGUAGE_SAMPLES[index].0,"image":filename,"runs":runs}),
+        );
     }
     for _ in 0..8 {
         multilingual_gpu_step(&mut app);
     }
     let baseline = counts(&app);
     for switch in 0..180 {
-        multilingual_gpu_labels(&mut app, camera, switch % 9);
+        multilingual_gpu_labels(&mut app, camera, switch % LANGUAGE_SAMPLES.len());
         for _ in 0..3 {
             multilingual_gpu_step(&mut app);
         }

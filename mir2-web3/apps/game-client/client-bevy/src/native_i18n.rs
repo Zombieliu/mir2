@@ -21,11 +21,17 @@ pub enum Locale {
     Vietnamese,
     Thai,
     Arabic,
+    SimplifiedChinese,
 }
 
+// Keep the reviewed nine-language source files and embedded vocabulary stable.
+// Simplified Chinese is an offline-generated keyed overlay appended at load time.
+const BASE_LOCALE_COUNT: usize = 9;
+
 impl Locale {
-    pub const COUNT: usize = 9;
+    pub const COUNT: usize = 10;
     pub const ALL: [Self; Self::COUNT] = [
+        Self::SimplifiedChinese,
         Self::TraditionalChinese,
         Self::English,
         Self::BrazilianPortuguese,
@@ -40,6 +46,7 @@ impl Locale {
         match self {
             Self::English => "en",
             Self::TraditionalChinese => "zh-TW",
+            Self::SimplifiedChinese => "zh-CN",
             Self::BrazilianPortuguese => "pt-BR",
             Self::Russian => "ru",
             Self::Hindi => "hi",
@@ -53,6 +60,7 @@ impl Locale {
         match self {
             Self::English => "English",
             Self::TraditionalChinese => "繁體中文",
+            Self::SimplifiedChinese => "简体中文",
             Self::BrazilianPortuguese => "Português (Brasil)",
             Self::Russian => "Русский",
             Self::Hindi => "हिन्दी",
@@ -66,6 +74,7 @@ impl Locale {
         match code {
             "en" => Some(Self::English),
             "zh-TW" => Some(Self::TraditionalChinese),
+            "zh-CN" => Some(Self::SimplifiedChinese),
             "pt-BR" => Some(Self::BrazilianPortuguese),
             "ru" => Some(Self::Russian),
             "hi" => Some(Self::Hindi),
@@ -87,6 +96,7 @@ impl Locale {
             Self::Vietnamese => 6,
             Self::Thai => 7,
             Self::Arabic => 8,
+            Self::SimplifiedChinese => 9,
         }
     }
 
@@ -98,6 +108,7 @@ impl Locale {
     pub const fn font_family(self) -> &'static str {
         match self {
             Self::TraditionalChinese => "Noto Sans TC",
+            Self::SimplifiedChinese => "Noto Sans CJK SC",
             Self::Hindi => "Noto Sans Devanagari",
             Self::Thai => "Noto Sans Thai",
             Self::Arabic => "Noto Sans Arabic",
@@ -134,6 +145,7 @@ pub fn locale() -> Locale {
             7 => Locale::Vietnamese,
             8 => Locale::Thai,
             9 => Locale::Arabic,
+            10 => Locale::SimplifiedChinese,
             _ => Locale::English,
         })
 }
@@ -199,6 +211,20 @@ struct Catalog {
     npc_templates: TemplateIndex,
 }
 
+fn append_simplified(
+    key: &str,
+    base: [String; BASE_LOCALE_COUNT],
+    simplified: &HashMap<String, String>,
+) -> [String; Locale::COUNT] {
+    let value = simplified
+        .get(key)
+        .filter(|text| !text.trim().is_empty())
+        .unwrap_or_else(|| panic!("validated Simplified Chinese key missing: {key}"));
+    let mut values = Vec::from(base);
+    values.push(value.clone());
+    values.try_into().expect("ten native locale values")
+}
+
 fn catalog() -> &'static Catalog {
     static CATALOG: OnceLock<Catalog> = OnceLock::new();
     CATALOG.get_or_init(|| {
@@ -210,6 +236,10 @@ fn catalog() -> &'static Catalog {
             npc_exact: HashMap::new(),
             npc_templates: TemplateIndex::default(),
         };
+        let simplified: HashMap<String, String> = serde_json::from_str(include_str!(
+            "../../../../packages/game-data/data/native-i18n/extra/zh-CN.json"
+        ))
+        .expect("validated Simplified Chinese overlay");
         // Keyed overlays keep the original three-language source generators
         // unchanged. Missing keys are release validation failures, never an
         // implicit English translation for one of the six added languages.
@@ -243,7 +273,11 @@ fn catalog() -> &'static Catalog {
                         .clone()
                 });
                 let [ru, hi, id, vi, th, ar] = extra;
-                let values = [entry.en, entry.zh_tw, entry.pt_br, ru, hi, id, vi, th, ar];
+                let values = append_simplified(
+                    &entry.key,
+                    [entry.en, entry.zh_tw, entry.pt_br, ru, hi, id, vi, th, ar],
+                    &simplified,
+                );
                 // NPC "Return" means go back; a quest's "Return" describes
                 // the turn-in objective. Never let a script alias overwrite
                 // the ordinary UI vocabulary.
@@ -289,10 +323,10 @@ fn catalog() -> &'static Catalog {
             for entry in authored.entries {
                 assert_eq!(
                     entry.translations.len(),
-                    Locale::COUNT,
+                    BASE_LOCALE_COUNT,
                     "periodic entry must contain exactly nine locales"
                 );
-                let values: [String; Locale::COUNT] =
+                let values: [String; BASE_LOCALE_COUNT] =
                     ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"].map(|code| {
                         entry
                             .translations
@@ -301,6 +335,7 @@ fn catalog() -> &'static Catalog {
                             .expect("periodic locale must be present and nonempty")
                             .clone()
                     });
+                let values = append_simplified(&entry.key, values, &simplified);
                 let index = result.values.len();
                 let npc_caption = entry.key.starts_with("periodic.accept.")
                     || entry.key.starts_with("periodic.complete.")
@@ -338,8 +373,17 @@ fn catalog() -> &'static Catalog {
             assert!(result.keys.insert((*key).into(), index).is_none());
             // Stable billing keys never overwrite an ambiguous legacy alias.
             result.exact.insert((*key).into(), index);
-            result.values.push(translations.map(str::to_owned));
+            result.values.push(append_simplified(
+                key,
+                translations.map(str::to_owned),
+                &simplified,
+            ));
         }
+        assert_eq!(
+            simplified.len(),
+            result.keys.len(),
+            "Simplified Chinese overlay must have exactly the native catalog keys"
+        );
         for (source, key) in [
             (MONTHLY_CARD_ITEM_NAME, "billing.monthlyCardItemName"),
             (MONTHLY_CARD_ITEM_TOOLTIP, "billing.monthlyCardItemTooltip"),
@@ -353,11 +397,13 @@ fn catalog() -> &'static Catalog {
     })
 }
 
-// Authored payment vocabulary, in Locale::index order. Kept separate from
+// Authored system vocabulary, in Locale::index order. Kept separate from
 // generated aliases such as Credits (the character scene's staff credits).
 const MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
 const MONTHLY_CARD_ITEM_TOOLTIP: &str = "Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.";
-const BILLING_TRANSLATIONS: &[(&str, [&str; Locale::COUNT])] = &[
+const BILLING_TRANSLATIONS: &[(&str, [&str; BASE_LOCALE_COUNT])] = &[
+    ("game.npc.role.administrator", ["Administrator", "管理員", "Administrador", "Администратор", "प्रशासक", "Administrator", "Quản trị viên", "ผู้ดูแลระบบ", "المسؤول"]),
+    ("game.quest.group.recommended", ["Recommended", "推薦", "Recomendadas", "Рекомендуемые", "अनुशंसित", "Rekomendasi", "Đề xuất", "แนะนำ", "الموصى بها"]),
     ("game.mail.dateUnknown", ["Not recorded", "未記錄", "Não registrada", "Не указана", "दर्ज नहीं", "Tidak tercatat", "Chưa ghi nhận", "ไม่ได้บันทึก", "غير مسجل"]),
     ("game.mail.shopPurchaseBody", ["{item} x {quantity} was sent from the game shop.", "商城已寄送 {item} x {quantity}。", "{item} x {quantity} foi enviado pela loja do jogo.", "{item} x {quantity} отправлено из игрового магазина.", "गेम की दुकान से {item} x {quantity} भेजा गया।", "{item} x {quantity} dikirim dari toko game.", "{item} x {quantity} đã được gửi từ cửa hàng trò chơi.", "ร้านเกมได้ส่ง {item} x {quantity} แล้ว", "تم إرسال {item} x {quantity} من متجر اللعبة."]),
     ("game.mail.shopGiftBody", ["{sender} sent {item} x {quantity} from the game shop.", "{sender} 從商城贈送了 {item} x {quantity}。", "{sender} enviou {item} x {quantity} pela loja do jogo.", "{sender} отправил {item} x {quantity} из игрового магазина.", "{sender} ने गेम की दुकान से {item} x {quantity} भेजा।", "{sender} mengirim {item} x {quantity} dari toko game.", "{sender} đã gửi {item} x {quantity} từ cửa hàng trò chơi.", "{sender} ส่ง {item} x {quantity} จากร้านเกม", "أرسل {sender} {item} x {quantity} من متجر اللعبة."]),
@@ -386,7 +432,14 @@ const BILLING_TRANSLATIONS: &[(&str, [&str; Locale::COUNT])] = &[
     ("billing.monthlyCardItemName", ["Monthly Card (30 Days)", "30 天月卡", "Cartão mensal (30 dias)", "Месячная карта (30 дней)", "मासिक कार्ड (30 दिन)", "Kartu Bulanan (30 Hari)", "Thẻ tháng (30 ngày)", "บัตรรายเดือน (30 วัน)", "بطاقة شهرية (30 يومًا)"]),
     ("billing.monthlyCardItemTooltip", [MONTHLY_CARD_ITEM_TOOLTIP, "使用後增加 30 天全帳號遊戲使用期限。已有使用權限時，從目前到期時間起延長。離線時間也會計入。僅可使用一次。", "Ao usar, adiciona 30 dias de acesso ao jogo para toda a conta. Se o acesso estiver ativo, o prazo é prorrogado a partir do vencimento atual. O tempo offline conta. Uso único.", "При использовании добавляет 30 дней доступа к игре для всего аккаунта. Активный доступ продлевается от текущей даты окончания. Время вне игры учитывается. Одноразовое использование.", "इस्तेमाल करने पर पूरे खाते के लिए 30 दिन की गेम पहुँच जोड़ता है। सक्रिय पहुँच की अवधि मौजूदा समाप्ति समय से आगे बढ़ती है। ऑफ़लाइन समय भी गिना जाता है। केवल एक बार इस्तेमाल किया जा सकता है।", "Saat digunakan, menambah 30 hari akses game untuk seluruh akun. Akses yang masih aktif diperpanjang dari waktu kedaluwarsa saat ini. Waktu offline tetap dihitung. Sekali pakai.", "Khi sử dụng, thêm 30 ngày truy cập trò chơi cho toàn bộ tài khoản. Quyền truy cập đang còn hạn được gia hạn từ thời điểm hết hạn hiện tại. Thời gian ngoại tuyến vẫn được tính. Chỉ dùng một lần.", "เมื่อใช้จะเพิ่มสิทธิ์เข้าเกม 30 วันสำหรับทั้งบัญชี หากสิทธิ์ยังไม่หมดอายุ จะต่อเวลาจากวันหมดอายุปัจจุบัน เวลาที่ออฟไลน์จะถูกนับด้วย ใช้ได้ครั้งเดียว", "تضيف عند استخدامها 30 يومًا من الوصول إلى اللعبة للحساب بأكمله. يُمدَّد الوصول النشط بدءًا من موعد انتهائه الحالي. يُحتسب الوقت خارج الاتصال. تُستخدم مرة واحدة."]),
     ("billing.updated", ["Account status refreshed.", "已更新帳號狀態。", "Status da conta atualizado.", "Статус аккаунта обновлён.", "खाते की स्थिति अपडेट हो गई।", "Status akun diperbarui.", "Đã cập nhật trạng thái tài khoản.", "อัปเดตสถานะบัญชีแล้ว", "تم تحديث حالة الحساب."]),
-    ("billing.usdcTab", ["Sui USDC", "Sui USDC", "Sui USDC", "Sui USDC", "Sui USDC", "Sui USDC", "Sui USDC", "Sui USDC", "Sui USDC"]),
+    ("billing.fiatTab", ["Fiat recharge", "法币充值", "Recarga em moeda", "Обычное пополнение", "फ़िएट रिचार्ज", "Isi ulang fiat", "Nạp tiền pháp định", "เติมด้วยเงินทั่วไป", "شحن نقدي"]),
+    ("billing.usdcTab", ["USDC on-chain recharge", "USDC链上充值", "Recarga USDC on-chain", "Пополнение USDC", "USDC ऑन-चेन रिचार्ज", "Isi ulang on-chain USDC", "Nạp USDC trên chuỗi", "เติม USDC บนเชน", "شحن USDC على الشبكة"]),
+    ("billing.monthlyTab", ["Monthly card", "月卡", "Cartão mensal", "Месячная карта", "मासिक कार्ड", "Kartu bulanan", "Thẻ tháng", "บัตรรายเดือน", "البطاقة الشهرية"]),
+    ("billing.fiatUnavailable", ["Fiat recharge is unavailable on this server.", "此伺服器目前未開放法幣充值。", "Recarga em moeda indisponível neste servidor.", "Обычное пополнение на этом сервере недоступно.", "इस सर्वर पर फ़िएट रिचार्ज उपलब्ध नहीं है।", "Isi ulang fiat belum tersedia di server ini.", "Máy chủ này chưa hỗ trợ nạp tiền pháp định.", "เซิร์ฟเวอร์นี้ยังไม่เปิดเติมด้วยเงินทั่วไป", "الشحن النقدي غير متاح على هذا الخادم."]),
+    ("billing.fiatOffers", ["Fiat recharge offers", "法幣充值方案", "Recargas em moeda", "Варианты обычного пополнения", "फ़िएट रिचार्ज विकल्प", "Paket isi ulang fiat", "Gói nạp tiền pháp định", "แพ็กเกจเติมเงินทั่วไป", "خيارات الشحن النقدي"]),
+    ("billing.fiatInstructions", ["Complete fiat checkout in your browser, then check the Credits balance here.", "在瀏覽器完成法幣付款後，返回此處檢查點數是否到帳。", "Conclua o pagamento no navegador e consulte os créditos aqui.", "Завершите оплату в браузере и проверьте кредиты здесь.", "ब्राउज़र में भुगतान करें, फिर यहाँ क्रेडिट जाँचें।", "Selesaikan pembayaran di browser, lalu cek kredit di sini.", "Thanh toán trong trình duyệt, rồi kiểm tra điểm tại đây.", "ชำระในเบราว์เซอร์ แล้วกลับมาตรวจสอบเครดิต", "أكمل الدفع في المتصفح ثم تحقق من الرصيد هنا."]),
+    ("billing.fiatHelp", ["Payment must be confirmed by the server before Credits are delivered.", "點數須經伺服器確認付款後才會到帳。", "Os créditos só entram após a confirmação do pagamento pelo servidor.", "Кредиты начисляются после подтверждения сервером.", "सर्वर की पुष्टि के बाद ही क्रेडिट मिलते हैं।", "Kredit masuk setelah server mengonfirmasi pembayaran.", "Điểm chỉ được cộng sau khi máy chủ xác nhận thanh toán.", "เครดิตเข้าหลังเซิร์ฟเวอร์ยืนยันการชำระเงิน", "يُضاف الرصيد بعد تأكيد الخادم للدفع."]),
+    ("billing.monthlyInstructions", ["Use existing Credits to buy a monthly card, then activate an owned card. Each card adds 30 days.", "以現有點數購買月卡，再使用持有的月卡；每張增加 30 天。", "Use créditos para comprar um cartão e depois ative-o. Cada cartão adiciona 30 dias.", "Купите карту за кредиты и затем активируйте её. Каждая карта даёт 30 дней.", "क्रेडिट से मासिक कार्ड खरीदें और सक्रिय करें। हर कार्ड 30 दिन जोड़ता है।", "Beli kartu dengan kredit lalu aktifkan. Tiap kartu menambah 30 hari.", "Dùng điểm mua thẻ rồi kích hoạt thẻ đang có. Mỗi thẻ thêm 30 ngày.", "ใช้เครดิตซื้อบัตรแล้วเปิดใช้ แต่ละใบเพิ่ม 30 วัน", "اشترِ بطاقة بالرصيد ثم فعّلها. تضيف كل بطاقة 30 يومًا."]),
     ("billing.usdcReopen", ["View payment", "查看付款", "Ver pagamento", "Проверить оплату", "भुगतान देखें", "Lihat pembayaran", "Xem thanh toán", "ดูการชำระเงิน", "عرض الدفع"]),
     ("billing.usdcBack", ["Cards / monthly card", "信用卡／月卡", "Cartão / mensal", "Карта / месячная карта", "कार्ड / मासिक कार्ड", "Kartu / bulanan", "Thẻ / thẻ tháng", "บัตร / บัตรรายเดือน", "البطاقة / الشهرية"]),
     ("billing.usdcInstructions", ["Testnet USDC only. Confirm payment in your wallet browser.", "僅支援測試網 USDC；請在瀏覽器錢包確認付款。", "Somente USDC de teste. Confirme na carteira do navegador.", "Только тестовый USDC. Подтвердите в кошельке браузера.", "केवल टेस्टनेट USDC। ब्राउज़र वॉलेट में पुष्टि करें।", "Hanya USDC testnet. Konfirmasi di dompet browser.", "Chỉ USDC testnet. Xác nhận trong ví trình duyệt.", "เฉพาะ USDC ทดสอบ ยืนยันในกระเป๋าเบราว์เซอร์", "USDC تجريبي فقط. أكد الدفع في محفظة المتصفح."]),
@@ -1142,7 +1195,7 @@ mod ui {
         }
 
         #[test]
-        fn billing_keys_cover_nine_locales_and_preserve_placeholders() {
+        fn billing_keys_cover_all_locales_and_preserve_placeholders() {
             let slots = |text: &str| {
                 let mut names: Vec<String> = template_parts(text)
                     .into_iter()
@@ -1157,20 +1210,28 @@ mod ui {
             let mut keys = HashSet::new();
             for (key, values) in BILLING_TRANSLATIONS {
                 assert!(
-                    ["billing.", "game.mail.", "game.shop."]
-                        .iter()
-                        .any(|prefix| key.starts_with(prefix)),
+                    [
+                        "billing.",
+                        "game.mail.",
+                        "game.shop.",
+                        "game.npc.role.",
+                        "game.quest.group."
+                    ]
+                    .iter()
+                    .any(|prefix| key.starts_with(prefix)),
                     "unsupported shop/mail/billing vocabulary key: {key}"
                 );
                 assert!(keys.insert(*key));
                 for language in Locale::ALL {
-                    let value = &values[language.index()];
+                    let value = translate(language, key);
                     assert!(!value.is_empty());
-                    assert_ne!(value, key);
-                    assert_eq!(translate(language, key), *value);
+                    assert_ne!(value.as_str(), *key);
+                    if language.index() < BASE_LOCALE_COUNT {
+                        assert_eq!(value, values[language.index()]);
+                    }
                     assert_eq!(
                         slots(&values[0]),
-                        slots(value),
+                        slots(&value),
                         "{key} {language:?} named slots"
                     );
                     for placeholder in ["{0}", "{1}"] {
@@ -1417,16 +1478,72 @@ mod ui {
         }
 
         #[test]
-        fn locales_are_exactly_the_requested_nine() {
+        fn simplified_catalog_covers_shared_items_quests_and_billing_without_changing_traditional()
+        {
+            let simplified = Locale::SimplifiedChinese;
+            assert_eq!(for_locale(simplified, "client.Warrior", ""), "战士");
+            assert_eq!(
+                for_locale(simplified, "content.item.248.name", ""),
+                "屠龙刀"
+            );
+            assert_eq!(for_locale(simplified, "content.item.226.name", ""), "铁剑");
+            assert_eq!(
+                for_locale(simplified, "quest.2110001.title", ""),
+                "首套巡逻装备"
+            );
+            assert_eq!(translate(simplified, "billing.fiatTab"), "法币充值");
+            assert_eq!(translate(simplified, "billing.usdcTab"), "USDC链上充值");
+            assert_eq!(translate(simplified, "billing.points"), "{0} 点券");
+            assert_eq!(
+                for_locale(Locale::TraditionalChinese, "client.Warrior", ""),
+                "戰士"
+            );
+            assert_eq!(
+                for_locale(Locale::TraditionalChinese, "content.item.248.name", ""),
+                "屠龍刀"
+            );
+            assert_eq!(Locale::SimplifiedChinese.font_family(), "Noto Sans CJK SC");
+        }
+
+        #[test]
+        fn simplified_npc_and_mail_templates_keep_player_arguments_and_slots_opaque() {
+            with_locale(Locale::SimplifiedChinese, || {
+                assert_eq!(
+                    npc_text("Hello 龍城{Gold}, Are you a beginner in this game?"),
+                    "你好，龍城{Gold}，你是这个游戏的新手吗？"
+                );
+                assert_eq!(
+                    format_key(
+                        "game.mail.shopGiftBody",
+                        "",
+                        &[
+                            ("sender", "龍城{quantity}"),
+                            ("item", "屠龍"),
+                            ("quantity", "2")
+                        ]
+                    ),
+                    "龍城{quantity} 从商城赠送了 屠龍 x 2。"
+                );
+                assert_eq!(tr("繁體玩家{quantity}"), "繁體玩家{quantity}");
+                assert_eq!(crate::player_text::list_separator(), "、");
+            });
+        }
+
+        #[test]
+        fn locales_include_simplified_without_changing_existing_indices() {
             assert_eq!(
                 Locale::ALL.map(Locale::code),
-                ["zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"]
+                ["zh-CN", "zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"]
             );
+            assert_eq!(Locale::English.index(), 0);
+            assert_eq!(Locale::TraditionalChinese.index(), 1);
+            assert_eq!(Locale::Arabic.index(), 8);
+            assert_eq!(Locale::SimplifiedChinese.index(), 9);
             for language in Locale::ALL {
                 assert_eq!(Locale::from_code(language.code()), Some(language));
                 assert_eq!(language.is_rtl(), language == Locale::Arabic);
             }
-            for unsupported in ["zh-CN", "es", "pt-PT", "pt", "../../evil", ""] {
+            for unsupported in ["zh", "zh-cn", "es", "pt-PT", "pt", "../../evil", ""] {
                 assert_eq!(Locale::from_code(unsupported), None);
             }
         }

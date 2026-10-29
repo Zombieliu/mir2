@@ -439,7 +439,10 @@ mod tests {
                                 !guide.summary.contains("committed")
                                     && !guide.summary.contains('{')
                             );
-                            if locale != Locale::TraditionalChinese {
+                            if !matches!(
+                                locale,
+                                Locale::TraditionalChinese | Locale::SimplifiedChinese
+                            ) {
                                 assert!(!guide.instructions.iter().any(|line| line
                                     .chars()
                                     .any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c))));
@@ -448,7 +451,10 @@ mod tests {
                         let supplies = supply_instructions(id, class);
                         assert!(!supplies.is_empty());
                         assert!(!supplies.iter().any(|line| line.contains('{')));
-                        if locale != Locale::TraditionalChinese {
+                        if !matches!(
+                            locale,
+                            Locale::TraditionalChinese | Locale::SimplifiedChinese
+                        ) {
                             assert!(!supplies.iter().any(|line| line
                                 .chars()
                                 .any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c))));

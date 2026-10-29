@@ -210,14 +210,14 @@ fn glyph_ids(block: &ComputedTextBlock) -> Vec<u32> {
 }
 
 #[test]
-fn nine_languages_shape_without_system_fonts_or_missing_glyphs() {
+fn supported_languages_shape_without_system_fonts_or_missing_glyphs() {
     let mut fixture = TextFixture::with_bundled_only(true);
     let allowed: BTreeSet<_> = fixture
         .fonts
         .iter()
         .map(|(_, font)| font.data.id())
         .collect();
-    for (locale, family, text) in NINE_LANGUAGE_SAMPLES {
+    for (locale, family, text) in LANGUAGE_SAMPLES {
         let (block, info) = fixture.text(FontSource::Family(family.into()), text, 18.0);
         assert!(info.size.x > 0.0 && info.size.y > 0.0, "{locale}");
         assert!(
@@ -386,17 +386,17 @@ fn bundled_devanagari_and_thai_keep_real_cluster_shaping() {
 }
 
 #[test]
-fn nine_language_switching_keeps_font_identity_and_atlas_memory_bounded() {
+fn supported_language_switching_keeps_font_identity_and_atlas_memory_bounded() {
     let mut fixture = TextFixture::with_bundled_only(true);
     let asset_count = fixture.fonts.len();
-    for (_, family, text) in NINE_LANGUAGE_SAMPLES {
+    for (_, family, text) in LANGUAGE_SAMPLES {
         let (block, _) = fixture.text(FontSource::Family(family.into()), text, 18.0);
         fixture.retained.retain(&block);
     }
     let baseline = fixture.counts();
     let retained = fixture.retained.sources.len();
     for switch in 0..180 {
-        let (_, family, text) = NINE_LANGUAGE_SAMPLES[switch % 9];
+        let (_, family, text) = LANGUAGE_SAMPLES[switch % LANGUAGE_SAMPLES.len()];
         fixture.expire_sources();
         let (block, _) = fixture.text(FontSource::Family(family.into()), text, 18.0);
         fixture.retained.retain(&block);
@@ -405,7 +405,7 @@ fn nine_language_switching_keeps_font_identity_and_atlas_memory_bounded() {
         assert_eq!(fixture.fonts.len(), asset_count);
     }
     eprintln!(
-        "nine-language-font-soak switches=180 system_fonts=false baseline={baseline:?} retained={retained} assets={asset_count}"
+        "ten-language-font-soak switches=180 system_fonts=false baseline={baseline:?} retained={retained} assets={asset_count}"
     );
 }
 

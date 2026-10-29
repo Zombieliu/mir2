@@ -5909,7 +5909,12 @@ fn render_mobile_diary_panel(
             let y = row_start + index as f32 * 48.0;
             let status = quest_diary_status_label(quest, render_text);
             let title = render_text.title(quest.quest_index, &quest.title);
-            let label = format!("{} · {} · {}", group, title, status);
+            let label = format!(
+                "{} · {} · {}",
+                quest_diary_group_caption(group),
+                title,
+                status
+            );
             mobile_button_raw(
                 parent,
                 layout,
@@ -5957,7 +5962,7 @@ fn render_mobile_dialog_panel(
     mobile_chrome(
         parent,
         layout,
-        dialog.npc_name.as_deref().unwrap_or("NPC"),
+        &npc_role_caption(dialog.npc_name.as_deref().unwrap_or("NPC")),
         QuestUiButton::CloseNpcDialog,
         render_text,
     );
@@ -6028,6 +6033,15 @@ fn render_mobile_dialog_panel(
     }
 }
 
+// These are server-owned role captions, not a general name translation pass.
+// Unknown NPC names and every identity/action field remain opaque.
+fn npc_role_caption(source: &str) -> String {
+    match source {
+        "Administrator" => crate::native_i18n::key("game.npc.role.administrator", source),
+        _ => source.to_owned(),
+    }
+}
+
 fn render_dialog_panel(
     parent: &mut ChildSpawnerCommands,
     dialog: &NpcDialogModel,
@@ -6040,7 +6054,7 @@ fn render_dialog_panel(
 ) {
     quest_log_text_at_raw(
         parent,
-        dialog.npc_name.as_deref().unwrap_or("NPC"),
+        &npc_role_caption(dialog.npc_name.as_deref().unwrap_or("NPC")),
         QuestLogRect::new(18.0, 7.0, 390.0, 18.0),
         12.0,
         PANEL_HIGHLIGHT,
@@ -6473,6 +6487,13 @@ fn quest_diary_groups<'a>(
         }
     }
     groups
+}
+
+fn quest_diary_group_caption(source: &str) -> String {
+    match source {
+        "Recommended" => crate::native_i18n::key("game.quest.group.recommended", source),
+        _ => source.to_owned(),
+    }
 }
 
 fn quest_diary_group_name(quest: &Quest, guidance: Option<&QuestGuidance>) -> String {
@@ -6914,10 +6935,20 @@ fn render_quest_diary_panel(
         Justify::Left,
     );
     let count_label = journey.map_or_else(
-        || format!("List: {current_count}/{QUEST_DIARY_MAX_CURRENT}"),
+        || {
+            render_text
+                .chrome("quest.feedback.57", "List: {count}/{max}")
+                .replace("{count}", &current_count.to_string())
+                .replace("{max}", &QUEST_DIARY_MAX_CURRENT.to_string())
+        },
         |journey| match (journey.completed_count, journey.quest_count) {
-            (Some(done), Some(total)) => format!("Ch {done}/{total}"),
-            _ => "Ch --/--".to_owned(),
+            (Some(done), Some(total)) => render_text
+                .chrome("quest.chapter.short", "Ch {done}/{total}")
+                .replace("{done}", &done.to_string())
+                .replace("{total}", &total.to_string()),
+            _ => render_text
+                .chrome("quest.feedback.59", "Ch --/--")
+                .to_owned(),
         },
     );
     quest_log_text_at_raw(
@@ -6976,7 +7007,7 @@ fn render_quest_diary_panel(
         );
         quest_log_text_at_raw(
             parent,
-            &group.name,
+            &quest_diary_group_caption(&group.name),
             QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 18.0, next_y, 250.0, 15.0),
             8.0,
             FEEDBACK_OK,
@@ -8538,7 +8569,9 @@ fn render_npc_quest_list_panel(
     );
     quest_log_text_at_raw(
         parent,
-        &format!("List: {}", quests.len()),
+        &render_text
+            .chrome("quest.feedback.58", "List: {count}")
+            .replace("{count}", &quests.len().to_string()),
         layout.available_count,
         8.0,
         PANEL_TEXT,
@@ -10525,6 +10558,204 @@ fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
 
 #[cfg(all(test, feature = "native-ui"))]
 mod tests {
+    #[test]
+    fn native_quest_counters_render_localized_labels_without_changing_counts_or_ids() {
+        use crate::native_i18n::{self, Locale};
+        for (locale, list, available, chapter, unknown) in [
+            (
+                Locale::SimplifiedChinese,
+                "列表：1/20",
+                "列表：1",
+                "章节 2/7",
+                "章节 --/--",
+            ),
+            (
+                Locale::TraditionalChinese,
+                "列表：1/20",
+                "列表：1",
+                "章節 2/7",
+                "章節 --/--",
+            ),
+            (
+                Locale::English,
+                "List: 1/20",
+                "List: 1",
+                "Ch 2/7",
+                "Ch --/--",
+            ),
+        ] {
+            native_i18n::with_locale(locale, || {
+                let tracker = QuestTracker {
+                    active_quests: vec![quest(9, QuestStatus::InProgress)],
+                };
+                let dialog = NpcDialogModel {
+                    npc_object_id: Some(427),
+                    ..default()
+                };
+                let guidance = QuestGuidance::from_profile_name("crystal");
+                let mut journey = JourneyView {
+                    chapter_id: "opaque-id".into(),
+                    chapter_title: "龍城{Gold}".into(),
+                    level_range: String::new(),
+                    completed_count: Some(2),
+                    quest_count: Some(7),
+                    goal: String::new(),
+                    reward_summary: String::new(),
+                    class_hint: None,
+                    graduated: false,
+                    graduation: None,
+                    next: None,
+                    optional: vec![],
+                };
+                for (journey_view, expected) in [(None, list), (Some(&journey), chapter)] {
+                    let mut world = World::new();
+                    let mut queue = bevy::ecs::world::CommandQueue::default();
+                    Commands::new(&mut queue, &world)
+                        .spawn_empty()
+                        .with_children(|parent| {
+                            render_quest_diary_panel(
+                                parent,
+                                &tracker,
+                                &guidance,
+                                journey_view,
+                                &QuestUiState::default(),
+                                &PendingOperations::default(),
+                                None,
+                                QuestRenderText::default(),
+                            );
+                            render_npc_quest_list_panel(
+                                parent,
+                                &[&tracker.active_quests[0]],
+                                &dialog,
+                                &guidance,
+                                &QuestUiState::default(),
+                                &PendingOperations::default(),
+                                None,
+                                &crate::read_model::PlayerStats::default(),
+                                QuestRenderText::default(),
+                            );
+                        });
+                    queue.apply(&mut world);
+                    let texts = world
+                        .query::<&Text>()
+                        .iter(&world)
+                        .map(|t| t.0.as_str())
+                        .collect::<Vec<_>>();
+                    assert!(
+                        texts.contains(&expected),
+                        "{locale:?} missing {expected}: {texts:?}"
+                    );
+                    assert!(
+                        texts.contains(&available),
+                        "{locale:?} missing {available}: {texts:?}"
+                    );
+                }
+                journey.completed_count = None;
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                Commands::new(&mut queue, &world)
+                    .spawn_empty()
+                    .with_children(|parent| {
+                        render_quest_diary_panel(
+                            parent,
+                            &tracker,
+                            &guidance,
+                            Some(&journey),
+                            &QuestUiState::default(),
+                            &PendingOperations::default(),
+                            None,
+                            QuestRenderText::default(),
+                        );
+                    });
+                queue.apply(&mut world);
+                assert!(world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .any(|text| text.0 == unknown));
+                assert_eq!(tracker.active_quests[0].quest_index, 9);
+                assert_eq!(dialog.npc_object_id, Some(427));
+                assert_eq!(journey.quest_count, Some(7));
+                assert_eq!(journey.chapter_id, "opaque-id");
+                assert_eq!(journey.chapter_title, "龍城{Gold}");
+            });
+        }
+    }
+
+    #[test]
+    fn native_system_role_and_group_captions_keep_names_and_selection_keys_opaque() {
+        use crate::native_i18n::{self, Locale};
+        for (locale, role, group) in [
+            (Locale::SimplifiedChinese, "管理员", "推荐"),
+            (Locale::TraditionalChinese, "管理員", "推薦"),
+        ] {
+            native_i18n::with_locale(locale, || {
+                // Only typed NPC-role and quest-group presentation recognizes
+                // these tokens; a generic name or player field is not rewritten.
+                assert_eq!(native_i18n::tr("Administrator"), "Administrator");
+                assert_eq!(native_i18n::tr("Recommended"), "Recommended");
+                for opaque in ["AdministratorPlayer", "RecommendedPlayer", "龍城{Gold}"] {
+                    assert_eq!(npc_role_caption(opaque), opaque);
+                    assert_eq!(quest_diary_group_caption(opaque), opaque);
+                }
+                let dialog = NpcDialogModel {
+                    npc_object_id: Some(427),
+                    npc_name: Some("Administrator".into()),
+                    ..default()
+                };
+                let mut row = quest(9, QuestStatus::InProgress);
+                row.group = Some("Recommended".into());
+                let tracker = QuestTracker {
+                    active_quests: vec![row],
+                };
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                Commands::new(&mut queue, &world)
+                    .spawn_empty()
+                    .with_children(|parent| {
+                        render_dialog_panel(
+                            parent,
+                            &dialog,
+                            &NpcDialogNav::default(),
+                            &QuestUiState::default(),
+                            &PendingOperations::default(),
+                            false,
+                            None,
+                            QuestRenderText::default(),
+                        );
+                        render_quest_diary_panel(
+                            parent,
+                            &tracker,
+                            &QuestGuidance::from_profile_name("crystal"),
+                            None,
+                            &QuestUiState::default(),
+                            &PendingOperations::default(),
+                            None,
+                            QuestRenderText::default(),
+                        );
+                    });
+                queue.apply(&mut world);
+                assert!(world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .any(|text| text.0 == role));
+                assert!(world
+                    .query::<&Text>()
+                    .iter(&world)
+                    .any(|text| text.0 == group));
+                assert!(world.query::<&QuestUiButton>().iter(&world).any(|button|
+                    matches!(button, QuestUiButton::ToggleQuestGroup { group } if group == "Recommended")
+                ));
+                assert_eq!(dialog.npc_object_id, Some(427));
+                assert_eq!(dialog.npc_name.as_deref(), Some("Administrator"));
+                assert_eq!(tracker.active_quests[0].quest_index, 9);
+                assert_eq!(
+                    tracker.active_quests[0].group.as_deref(),
+                    Some("Recommended")
+                );
+            });
+        }
+    }
+
     #[test]
     fn native_npc_wrapped_opaque_values_never_receive_a_second_translation() {
         for locale in crate::native_i18n::Locale::ALL {

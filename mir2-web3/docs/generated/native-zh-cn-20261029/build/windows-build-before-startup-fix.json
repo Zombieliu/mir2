@@ -1,0 +1,131 @@
+{
+  "evidenceKind": "local-offline-windows-native-build",
+  "passed": true,
+  "startedAtUtc": "2026-10-29T05:33:48.6995032Z",
+  "completedAtUtc": "2026-10-29T05:33:49.3430291Z",
+  "baseHead": "7e444c1d2424f8463cde1fb5bcd9a8d6bbe5be6f",
+  "branch": "codex/sui-usdc-recharge-20261029",
+  "containsUncommittedChanges": true,
+  "command": "cargo +1.95.0 build --manifest-path apps/game-client/platform-windows/Cargo.toml --offline --locked --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "executable": {
+    "bytes": 149408256,
+    "sha256": "5dc223de381b32cecc5b13f7e52e48c9ed12a4b1f6998a52709d691140ba58ce"
+  },
+  "binaryIncluded": false,
+  "independentlyHashed": true,
+  "buildLog": {
+    "filename": "native-build-final-v2.log",
+    "included": false,
+    "bytes": 59647,
+    "sha256": "08f587011af2deeb3d8527234a393549d81cb090413b5ad496dbff5853803026"
+  },
+  "scope": "No server, chain, Docker, production billing or balance mutations. Actual desktop acceptance is recorded separately by root.",
+  "status": "superseded-after-actual-simplified-startup-failure",
+  "compilePassed": true,
+  "runtimeAcceptancePassed": false,
+  "snapshotSourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 90243,
+      "sha256": "52e2d099d0cb57b7ee02e8cd0a536664c5a0b3497dd51ada6fbb25b2b578323f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 104034,
+      "sha256": "40f3f61411f7fc6c7c7bda6c95d4d7b6758fb51296e7c8a25badca12bef0b3bd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 77323,
+      "sha256": "274da61315eda8d0838986839d3b4a075ef63c5c895c02ea75accefedc5c3a6a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40697,
+      "sha256": "0c34c9c9cdc1522c6a763fe1b2ab41ef801c531b0b3821bbcc6310f0c585874c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26356,
+      "sha256": "79d084e604e3ab9aa2bf86f6d1ccd5a52c1e9b6dfc3bcfc4229e0c03ca09157f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 603144,
+      "sha256": "0a1387e6394feff79badf9a390a937d19dd502e7f770f06cc2eb9b9deecd8250"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_locale.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13717,
+      "sha256": "3192a50c57a6ab1eba5e793975e90f7aae19dc68e0afe27e82ee68ceef998546"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24561,
+      "sha256": "f2af7f962d5a7c3e1b654d7e123d6d57d86f4573c64da9da0786f3d34ffe9712"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14894,
+      "sha256": "263aaa462b39a7889ceb989050338c4828d2b9b1373ee87aa013c216da9ec890"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21235,
+      "sha256": "30fd0cdbe48068ee65f80d571d35e98cf4970dde5b664ffdc50217e9dfaeffd2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "normalization": "raw bytes",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+      "normalization": "raw bytes",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1544,
+      "sha256": "22264165aa5bb1cbb42075e6d57aab9beaea484528249d82e9a3f1fd28b36afa"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/verify-simplified-font.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2515,
+      "sha256": "3773d232b420ca1b0ffe6293182aab8821624f5a4cbf9afaa876a6937abe4c39"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1272,
+      "sha256": "d7598658e0d667902ca56ce5f3c2eeaffd23a8db356be60f02f9a391ccd620e5"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 621415,
+      "sha256": "6c64f1791f8743831f13b3d89aea298c629f0ae0b18722fc4b80f274a9506310"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7712,
+      "sha256": "f053d0448d7ab020086975eaa67751f95580b17013609eaebcbf9fd08339a3d8"
+    }
+  ],
+  "failureEvidence": "../native-zh-cn-20261029/windows-live/evidence/first-simplified-startup-failure.json"
+}

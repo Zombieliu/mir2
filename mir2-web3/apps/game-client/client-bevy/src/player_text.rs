@@ -217,7 +217,11 @@ pub fn format_named(key: &str, fallback: &str, args: &[(&str, &str)]) -> String 
 
 pub fn list_separator() -> &'static str {
     if crate::native_i18n::active()
-        && crate::native_i18n::locale() != crate::native_i18n::Locale::TraditionalChinese
+        && !matches!(
+            crate::native_i18n::locale(),
+            crate::native_i18n::Locale::TraditionalChinese
+                | crate::native_i18n::Locale::SimplifiedChinese
+        )
     {
         ", "
     } else {
@@ -734,7 +738,10 @@ mod tests {
                     let description = quest_description(copy.id, "WRONG DESCRIPTION");
                     assert!(!title.contains("WRONG") && !description.contains("WRONG"));
                     assert!(title.len() > 3 && description.len() > 20, "{}", copy.id);
-                    if locale != Locale::TraditionalChinese {
+                    if !matches!(
+                        locale,
+                        Locale::TraditionalChinese | Locale::SimplifiedChinese
+                    ) {
                         assert!(!title
                             .chars()
                             .chain(description.chars())

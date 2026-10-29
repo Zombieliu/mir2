@@ -1,0 +1,136 @@
+{
+  "evidenceKind": "offline installer recipe static closure and attack assertions",
+  "passed": true,
+  "testsPassed": 10,
+  "testsFailed": 0,
+  "checks": [
+    {
+      "name": "baseline ten-language static closure",
+      "passed": true
+    },
+    {
+      "name": "missing tenth language",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "untrusted simplified translation",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "missing installed simplified guide",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "missing custom message",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "wrong placeholder",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "wrong initial locale",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "wrong custom guide",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "duplicate custom message",
+      "passed": true,
+      "rejected": true
+    },
+    {
+      "name": "unexpected custom language",
+      "passed": true,
+      "rejected": true
+    }
+  ],
+  "recipe": {
+    "passed": true,
+    "scope": "static recipe, ten guides, fifteen custom messages and pinned local translation provenance only",
+    "languages": [
+      {
+        "locale": "en",
+        "name": "english",
+        "messagesFile": "compiler:Default.isl",
+        "guideSha256": "c6369151097a238a8c0ea5d36604da8c5aeade3a3e1e21dc795d36c0f6f6bc7b"
+      },
+      {
+        "locale": "zh-CN",
+        "name": "chinesesimplified",
+        "messagesFile": "compiler:Languages\\ChineseSimplified.isl",
+        "guideSha256": "d8f3b2cb9e8c4ba009b86daaeea0f33104c0c51c17f874eb09cc0fffc74a2645"
+      },
+      {
+        "locale": "zh-TW",
+        "name": "chinesetraditional",
+        "messagesFile": "compiler:Languages\\ChineseTraditional.isl",
+        "guideSha256": "50b552c34448151ce0090dea956454e21ef79c706dde769ca0fb8a57fd741176"
+      },
+      {
+        "locale": "pt-BR",
+        "name": "brazilianportuguese",
+        "messagesFile": "compiler:Languages\\BrazilianPortuguese.isl",
+        "guideSha256": "05b67058f04bb91d69b528531a3f55af863367234db96dd8fb46ed06f3fa2dd0"
+      },
+      {
+        "locale": "ru",
+        "name": "russian",
+        "messagesFile": "compiler:Languages\\Russian.isl",
+        "guideSha256": "9339578c8311ae7403b8db9211a8aa15af3351d98c46c3967ec157a42d8668ec"
+      },
+      {
+        "locale": "hi",
+        "name": "hindi",
+        "messagesFile": "languages\\Hindi.isl",
+        "guideSha256": "569422857c87f30dd6afa736dae13dabcd8ec4942fcd3c31f1cf6df71b239e3d"
+      },
+      {
+        "locale": "id",
+        "name": "indonesian",
+        "messagesFile": "languages\\Indonesian.isl",
+        "guideSha256": "9a14690d1d65f0a8ed4736ce445e3bc973e7d2fc96d5356b77fa20b15345b032"
+      },
+      {
+        "locale": "vi",
+        "name": "vietnamese",
+        "messagesFile": "languages\\Vietnamese.isl",
+        "guideSha256": "a5d7873e09c20dbbab18e100e0f0888ee78b1967ff3a9fc8452190a219cffd67"
+      },
+      {
+        "locale": "th",
+        "name": "thai",
+        "messagesFile": "compiler:Languages\\Thai.isl",
+        "guideSha256": "144efb528134c47b21e50c499083e6092b6caa3478646bdcc1eb967eb7b8b6a8"
+      },
+      {
+        "locale": "ar",
+        "name": "arabic",
+        "messagesFile": "compiler:Languages\\Arabic.isl",
+        "guideSha256": "ed84d4360ec11222c89d11a2bac94135fa664e833b5bdb8a6f3b5050d5bd5c4c"
+      }
+    ],
+    "customMessagesPerLocale": 15,
+    "recipeSha256": "62a1e385685a26d19a6c9c3355940db5f65afc8983cee754fefc2178d00000dc",
+    "trustedCompilerTranslationsValidated": false,
+    "installerCompiled": false,
+    "guiOrInstallationTested": false,
+    "signatureVerified": false
+  },
+  "trustedCompilerAvailable": false,
+  "trustedCompilerTranslationsValidated": false,
+  "installerCompiled": false,
+  "installed": false,
+  "signed": false,
+  "rawRecipeSha256": "62a1e385685a26d19a6c9c3355940db5f65afc8983cee754fefc2178d00000dc",
+  "validatorSha256": "c9f81e6473d9a8fc0cd6cdbd255bd8ea5d6b2fe5989fb2d6fb5c6d6b81810b1e"
+}

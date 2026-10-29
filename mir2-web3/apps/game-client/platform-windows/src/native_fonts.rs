@@ -62,6 +62,24 @@ struct NativeTraditionalFont {
 
 const TRADITIONAL_FONT: &[u8] = include_bytes!("../assets/fonts/NotoSansTC.ttf");
 
+const SIMPLIFIED_FONT_FAMILY: &str = "Noto Sans CJK SC";
+const SIMPLIFIED_FONT: &[u8] = include_bytes!("../assets/fonts/NotoSansCJKsc-Regular.otf");
+
+#[derive(Resource)]
+struct NativeSimplifiedFont {
+    _handle: Handle<Font>,
+}
+
+/// Only the simplified characters used by the explicit billing channel labels.
+/// Keep the existing TC face first so all previously supported Han keeps its face.
+const BILLING_HAN_FAMILY: &str = "MIR2 Billing Han";
+const BILLING_HAN_FONT: &[u8] = include_bytes!("../assets/fonts/MIR2BillingHan-Regular.ttf");
+
+#[derive(Resource)]
+struct NativeBillingHanFont {
+    _handle: Handle<Font>,
+}
+
 /// Static regular/bold faces, licensed and pinned in MULTILINGUAL-SOURCES.json.
 /// No font file is discovered or reloaded when the language changes.
 const BUNDLED_FONTS: [(&str, &[u8]); 8] = [
@@ -121,12 +139,20 @@ fn install_bundled_fonts(app: &mut App) {
         return;
     };
     let traditional = fonts.add(Font::from_bytes(TRADITIONAL_FONT.to_vec()));
+    let simplified = fonts.add(Font::from_bytes(SIMPLIFIED_FONT.to_vec()));
+    let billing_han = fonts.add(Font::from_bytes(BILLING_HAN_FONT.to_vec()));
     let handles = BUNDLED_FONTS
         .iter()
         .map(|(_, bytes)| fonts.add(Font::from_bytes(bytes.to_vec())))
         .collect();
     app.insert_resource(NativeTraditionalFont {
         _handle: traditional,
+    });
+    app.insert_resource(NativeSimplifiedFont {
+        _handle: simplified,
+    });
+    app.insert_resource(NativeBillingHanFont {
+        _handle: billing_han,
     });
     app.insert_resource(NativeBundledFonts { handles });
 }
@@ -141,16 +167,47 @@ fn configure_bundled_fallbacks(cx: &mut FontCx) -> bool {
         let Some(family) = cx.collection.family_id(name) else {
             return false; // Assets have not been registered yet.
         };
+        let families = if tag == *b"Hani" {
+            let Some(supplement) = cx.collection.family_id(BILLING_HAN_FAMILY) else {
+                return false;
+            };
+            let Some(simplified) = cx.collection.family_id(SIMPLIFIED_FONT_FAMILY) else {
+                return false;
+            };
+            vec![family, supplement, simplified]
+        } else {
+            vec![family]
+        };
         let script = fontique::Script::from_bytes(tag);
-        if cx.collection.fallback_families(script).next() != Some(family) {
-            cx.collection.set_fallbacks(script, std::iter::once(family));
+        if !cx
+            .collection
+            .fallback_families(script)
+            .eq(families.iter().copied())
+        {
+            cx.collection
+                .set_fallbacks(script, families.iter().copied());
         }
         if tag == *b"Hani" {
             // Fontique keeps locale-specific Han mappings independently.
-            for language in ["zh-TW", "zh-HK", "zh-CN", "ja", "ko"] {
+            for language in ["zh-TW", "zh-HK", "zh-MO", "zh-Hant", "ja", "ko"] {
                 let key = (script, language);
-                if cx.collection.fallback_families(key).next() != Some(family) {
-                    cx.collection.set_fallbacks(key, std::iter::once(family));
+                if !cx
+                    .collection
+                    .fallback_families(key)
+                    .eq(families.iter().copied())
+                {
+                    cx.collection.set_fallbacks(key, families.iter().copied());
+                }
+            }
+            let simplified_families = [families[2], families[0], families[1]];
+            // Fontique aliases zh-CN/zh-Hans to the generic Han slot. Keep
+            // that slot TC-first for existing clients. The selected zh-CN
+            // locale uses the complete SC face explicitly as its primary.
+            for language in ["zh-SG"] {
+                let key = (script, language);
+                if !cx.collection.fallback_families(key).eq(simplified_families) {
+                    cx.collection
+                        .set_fallbacks(key, simplified_families.into_iter());
                 }
             }
         }
@@ -169,13 +226,18 @@ fn restore_bundled_fallbacks(mut cx: ResMut<FontCx>) {
 }
 
 #[cfg(test)]
-const NINE_LANGUAGE_SAMPLES: [(&str, &str, &str); 9] = [
+const LANGUAGE_SAMPLES: [(&str, &str, &str); 10] = [
     (
         "en",
         "Noto Sans",
         "Create character · Quest complete · Gold 123",
     ),
     ("zh-TW", "Noto Sans TC", "建立角色 · 任務完成 · Gold 123"),
+    (
+        "zh-CN",
+        SIMPLIFIED_FONT_FAMILY,
+        "创建角色 · 任务完成 · 装备背包 · 金币 · 简体中文",
+    ),
     (
         "pt-BR",
         "Noto Sans",
@@ -405,7 +467,7 @@ mod tests {
             app.world().resource::<NativeBundledFonts>().handles.len(),
             8
         );
-        assert_eq!(app.world().resource::<Assets<Font>>().len(), 9);
+        assert_eq!(app.world().resource::<Assets<Font>>().len(), 11);
         let temporary = app
             .world_mut()
             .resource_mut::<Assets<Font>>()
@@ -430,6 +492,97 @@ mod tests {
             );
             assert!(family.fonts().len() >= if name == "Noto Sans TC" { 1 } else { 2 });
         }
+        let traditional = cx.collection.family_id("Noto Sans TC").unwrap();
+        let supplement = cx.collection.family_id(BILLING_HAN_FAMILY).unwrap();
+        let simplified = cx.collection.family_id(SIMPLIFIED_FONT_FAMILY).unwrap();
+        let han = fontique::Script::from_bytes(*b"Hani");
+        assert_eq!(
+            cx.collection.fallback_families(han).collect::<Vec<_>>(),
+            vec![traditional, supplement, simplified]
+        );
+        for locale in ["zh-TW", "zh-HK", "zh-MO", "zh-Hant", "ja", "ko"] {
+            assert_eq!(
+                cx.collection
+                    .fallback_families((han, locale))
+                    .collect::<Vec<_>>(),
+                vec![traditional, supplement, simplified]
+            );
+        }
+        for locale in ["zh-SG"] {
+            assert_eq!(
+                cx.collection
+                    .fallback_families((han, locale))
+                    .collect::<Vec<_>>(),
+                vec![simplified, traditional, supplement]
+            );
+        }
+        for locale in ["zh", "zh-CN", "zh-MY", "zh-Hans"] {
+            assert_eq!(
+                cx.collection
+                    .fallback_families((han, locale))
+                    .collect::<Vec<_>>(),
+                vec![traditional, supplement, simplified]
+            );
+        }
+        assert_eq!(
+            cx.collection
+                .family_by_name(SIMPLIFIED_FONT_FAMILY)
+                .unwrap()
+                .fonts()
+                .len(),
+            1
+        );
+    }
+
+    #[test]
+    fn full_simplified_face_matches_immutable_upstream_source_and_license() {
+        use sha2::{Digest, Sha256};
+        let metadata: serde_json::Value =
+            serde_json::from_str(include_str!("../assets/fonts/SIMPLIFIED-SOURCE.json")).unwrap();
+        assert_eq!(metadata["family"], SIMPLIFIED_FONT_FAMILY);
+        assert_eq!(metadata["bytes"], 16_437_364);
+        assert_eq!(metadata["bytes"], SIMPLIFIED_FONT.len());
+        assert_eq!(
+            metadata["sha256"],
+            format!("{:x}", Sha256::digest(SIMPLIFIED_FONT))
+        );
+        assert_eq!(
+            metadata["sourceCommit"],
+            "165c01b46ea533872e002e0785ff17e44f6d97d8"
+        );
+        assert!(metadata["unicodeCodepointCount"].as_u64().unwrap() > 20_000);
+        assert_eq!(&SIMPLIFIED_FONT[..4], b"OTTO");
+        assert!(
+            include_str!("../assets/fonts/OFL-NotoSansCJKsc.txt").contains("SIL OPEN FONT LICENSE")
+        );
+    }
+
+    #[test]
+    fn billing_han_supplement_is_static_licensed_and_matches_the_source_pin() {
+        use sha2::{Digest, Sha256};
+        let metadata: serde_json::Value =
+            serde_json::from_str(include_str!("../assets/fonts/BILLING-HAN-SOURCE.json")).unwrap();
+        assert_eq!(metadata["font"]["family"], BILLING_HAN_FAMILY);
+        assert_eq!(metadata["font"]["weight"], 400);
+        assert_eq!(metadata["font"]["bytes"], BILLING_HAN_FONT.len());
+        assert_eq!(
+            metadata["font"]["sha256"],
+            format!("{:x}", Sha256::digest(BILLING_HAN_FONT))
+        );
+        assert_eq!(
+            metadata["font"]["unicodeMap"],
+            serde_json::json!({"U+0020":"space", "U+5E01":"uni5E01", "U+94FE":"uni94FE"})
+        );
+        let count = u16::from_be_bytes([BILLING_HAN_FONT[4], BILLING_HAN_FONT[5]]) as usize;
+        let tags: Vec<_> = (0..count)
+            .map(|index| &BILLING_HAN_FONT[12 + index * 16..16 + index * 16])
+            .collect();
+        assert!(tags.contains(&b"glyf".as_slice()));
+        assert!(!tags.contains(&b"fvar".as_slice()) && !tags.contains(&b"gvar".as_slice()));
+        assert!(
+            include_str!("../assets/fonts/OFL-NotoSansSC-BillingHan.txt")
+                .contains("SIL OPEN FONT LICENSE")
+        );
     }
 
     #[test]

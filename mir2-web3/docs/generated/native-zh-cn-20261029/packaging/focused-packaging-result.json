@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "scope": "Exact source function extents and original font self-test block; ParseInput retains the original filename/PSCommandPath. No production script implementation altered for this harness.",
+  "allowlists": [
+    {
+      "script": "package-windows-candidate.ps1",
+      "exactDocumentsAccepted": 5,
+      "nearMissesRejected": 30,
+      "sourceSha256": "3532afcce292a456f186206dafdb289b4edf2b80dd32bb4dc29b28b2734aa54a"
+    },
+    {
+      "script": "verify-windows-candidate.ps1",
+      "exactDocumentsAccepted": 5,
+      "nearMissesRejected": 30,
+      "sourceSha256": "66fef5c4bff848106de05ec4e915b22a4f7450d022480338dceae0b6006c0c6b"
+    }
+  ],
+  "fontPins": 11,
+  "originalMultilingualMetadataPins": 8,
+  "dedicatedHanMetadataPins": 2,
+  "wholeFontMasking": false,
+  "exactBinaryTablesOnly": [
+    "gvar",
+    "glyf",
+    "CFF ",
+    "cmap"
+  ],
+  "scCmapMaskReason": "Fixed official numeric binary sequence resembles a UNC path; not a relaxation of arbitrary path detection",
+  "certificatesCreated": false,
+  "packagesExported": false,
+  "installerLaunched": false,
+  "wholeVerifySelfTestPassed": false,
+  "wholePackageSelfTestPassed": false,
+  "wholeSelfTestBlocker": "Unrelated existing skillbar Title/meta.json identity mismatch before font test section",
+  "curation": {
+    "excluded": "External temporary fixture directory path; no harnesses, fixtures or raw full logs included.",
+    "originalReportSha256": "09179fce1abd94367717ef8af15984ea62044db1071eaf5ba146ab6d970088ee"
+  }
+}

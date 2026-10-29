@@ -183,7 +183,7 @@ pub fn preserve_original_stage(projection: &mut Projection) {
 }
 
 fn copy(locale: Locale, key: &str) -> &'static str {
-    let values: [&str; 9] = match key {
+    let values: [&str; Locale::COUNT] = match key {
         "display" => [
             "Display settings",
             "顯示設定",
@@ -194,6 +194,7 @@ fn copy(locale: Locale, key: &str) -> &'static str {
             "Cài đặt hiển thị",
             "การตั้งค่าการแสดงผล",
             "إعدادات العرض",
+            "显示设置",
         ],
         "resolution" => [
             "Window size",
@@ -205,6 +206,7 @@ fn copy(locale: Locale, key: &str) -> &'static str {
             "Kích thước cửa sổ",
             "ขนาดหน้าต่าง",
             "حجم النافذة",
+            "窗口分辨率",
         ],
         "auto" => [
             "Automatic (recommended)",
@@ -216,6 +218,7 @@ fn copy(locale: Locale, key: &str) -> &'static str {
             "Tự động (khuyến nghị)",
             "อัตโนมัติ (แนะนำ)",
             "تلقائي (موصى به)",
+            "自动（推荐）",
         ],
         "unavailable" => [
             "Does not fit this display",
@@ -227,8 +230,9 @@ fn copy(locale: Locale, key: &str) -> &'static str {
             "Không vừa màn hình này",
             "ไม่พอดีกับหน้าจอนี้",
             "لا تناسب هذه الشاشة",
+            "此显示器无法容纳",
         ],
-        _ => [""; 9],
+        _ => [""; Locale::COUNT],
     };
     values[locale.index()]
 }
@@ -618,7 +622,7 @@ mod tests {
         assert_eq!(settings.size(), UVec2::new(896, 672));
     }
     #[test]
-    fn every_resolution_and_nine_language_labels_are_complete() {
+    fn every_resolution_and_supported_language_labels_are_complete() {
         for choice in ResolutionChoice::ALL {
             assert_eq!(ResolutionChoice::from_code(choice.code()), Some(choice));
             if let Some(size) = choice.size() {
@@ -633,6 +637,11 @@ mod tests {
                 assert_ne!(copy(locale, "resolution"), "Resolution");
             }
         }
+        assert_eq!(copy(Locale::SimplifiedChinese, "display"), "显示设置");
+        assert_eq!(copy(Locale::SimplifiedChinese, "resolution"), "窗口分辨率");
+        assert_eq!(copy(Locale::SimplifiedChinese, "auto"), "自动（推荐）");
+        assert_eq!(copy(Locale::TraditionalChinese, "display"), "顯示設定");
+        assert_eq!(copy(Locale::Arabic, "display"), "إعدادات العرض");
         assert!(ResolutionChoice::from_code("1920x1080").is_none());
     }
 
@@ -718,7 +727,7 @@ mod tests {
     }
 
     #[test]
-    fn login_display_labels_switch_in_all_nine_locales() {
+    fn login_display_labels_switch_in_all_supported_locales() {
         for locale in Locale::ALL {
             native_i18n::with_locale(locale, || {
                 let mut app = App::new();

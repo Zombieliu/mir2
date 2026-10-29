@@ -35,7 +35,7 @@ fn parse_preference(bytes: &[u8]) -> Option<Locale> {
     if value.schema != 1
         || !matches!(
             value.locale.as_str(),
-            "en" | "zh-TW" | "pt-BR" | "ru" | "hi" | "id" | "vi" | "th" | "ar"
+            "en" | "zh-TW" | "zh-CN" | "pt-BR" | "ru" | "hi" | "id" | "vi" | "th" | "ar"
         )
     {
         return None;
@@ -96,6 +96,12 @@ fn supported_os_locale(name: &str) -> Locale {
         || name.starts_with("zh-hant-")
     {
         Locale::TraditionalChinese
+    } else if matches!(
+        name.as_str(),
+        "zh" | "zh-cn" | "zh-sg" | "zh-my" | "zh-hans"
+    ) || name.starts_with("zh-hans-")
+    {
+        Locale::SimplifiedChinese
     } else {
         // Match a complete BCP-47 language subtag, not an arbitrary prefix
         // ("arbitrary" must never select Arabic). Regional variants share the
@@ -263,7 +269,7 @@ mod tests {
     fn locale_preference_rejects_untrusted_schema_codes_and_oversized_content() {
         for bad in [
             r#"{"schema":2,"locale":"en"}"#,
-            r#"{"schema":1,"locale":"zh-CN"}"#,
+            r#"{"schema":1,"locale":"zh-XX"}"#,
             r#"{"schema":1,"locale":"en","password":"secret"}"#,
             r#"{"schema":1,"locale":"en","locale":"pt-BR"}"#,
             r#"{"schema":1,"locale":"ar-SA"}"#,
@@ -276,10 +282,14 @@ mod tests {
             parse_preference(br#"{"schema":1,"locale":"zh-TW"}"#),
             Some(Locale::TraditionalChinese)
         );
+        assert_eq!(
+            parse_preference(br#"{"schema":1,"locale":"zh-CN"}"#),
+            Some(Locale::SimplifiedChinese)
+        );
     }
 
     #[test]
-    fn all_nine_preferences_round_trip_without_replacing_the_install_seed() {
+    fn all_supported_preferences_round_trip_without_replacing_the_install_seed() {
         let directory = temp_directory();
         fs::create_dir_all(&directory).unwrap();
         let seed = br#"{"schema":1,"locale":"ar"}"#;
@@ -288,7 +298,7 @@ mod tests {
             choose_locale(Some(&directory), Locale::English),
             Locale::Arabic
         );
-        assert_eq!(Locale::ALL.len(), 9);
+        assert_eq!(Locale::ALL.len(), 10);
         for locale in Locale::ALL {
             write_preference(&directory, locale).unwrap();
             assert_eq!(
@@ -332,6 +342,11 @@ mod tests {
             Locale::English
         );
         assert_eq!(fs::read_dir(&directory).unwrap().count(), 2);
+        write_preference(&directory, Locale::SimplifiedChinese).unwrap();
+        assert_eq!(
+            choose_locale(Some(&directory), Locale::TraditionalChinese),
+            Locale::SimplifiedChinese
+        );
         fs::remove_file(directory.join(PREFERENCE_FILE)).unwrap();
         fs::remove_file(directory.join(SEED_FILE)).unwrap();
         fs::remove_dir(directory).unwrap();
@@ -358,7 +373,19 @@ mod tests {
             ("ar-EG", Locale::Arabic),
             ("ar", Locale::Arabic),
             ("arbitrary", Locale::English),
-            ("zh-CN", Locale::English),
+            ("zh-CN", Locale::SimplifiedChinese),
+            ("zh_CN", Locale::SimplifiedChinese),
+            ("zh-SG", Locale::SimplifiedChinese),
+            ("zh-MY", Locale::SimplifiedChinese),
+            ("zh-Hans", Locale::SimplifiedChinese),
+            ("zh-Hans-CN", Locale::SimplifiedChinese),
+            ("zh", Locale::SimplifiedChinese),
+            ("zh-TW", Locale::TraditionalChinese),
+            ("zh-HK", Locale::TraditionalChinese),
+            ("zh-MO", Locale::TraditionalChinese),
+            ("zh-Hant-HK", Locale::TraditionalChinese),
+            ("zh-XX", Locale::English),
+            ("zh-hansfake", Locale::English),
         ] {
             assert_eq!(supported_os_locale(name), expected, "{name}");
         }
