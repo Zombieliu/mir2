@@ -1,0 +1,10 @@
+{
+  "schema": "mir2.unified.local-publisher-config-cleanup.v1",
+  "deletionAttempted": true,
+  "deleted": false,
+  "automaticApprovalReview": "blocked_by_policy_no_detailed_reason",
+  "restrictedCopyRetained": true,
+  "temporaryRemoteWriterAndSecretBindingDeleted": true,
+  "credentialUsable": false,
+  "sourceEvidence": "CLOUDFLARE-CLEANUP-ACTUAL.json"
+}

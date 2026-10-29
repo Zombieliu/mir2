@@ -1,0 +1,28 @@
+{
+  "schema": "mir2.testnet.final-handoff-independent-postcheck.v1",
+  "passed": true,
+  "observedAtUtc": "2026-10-29T18:57:48.8954112Z",
+  "finalReceiptSha256": "ce29272d9a60166a51a7db485be4a83e06dc754f220299eaae16470b64a202c0",
+  "privateBackupManifestSha256": "098ff1b9f693c276ddbe1f495140b83d28631326a937eff88e543e8373059177",
+  "privateBackupFiles": 14,
+  "unexpectedBackupAclAllowRules": 0,
+  "oldGatewayProcessesRemaining": 0,
+  "oldGatewayChildrenRemaining": 0,
+  "p01Pid": 57624,
+  "p01Running": true,
+  "usdcCapStillMist": "100000000",
+  "reservedMist": "100000000",
+  "originalReservationCount": 2,
+  "gasJournalMutation": false,
+  "originalPrivateZipSha256": "fb29c8fa9e33e659b33b72117343fe2dcc5d897f00472a8a560b79a0c459bf6b",
+  "helperPins": [
+    {
+      "path": "local-handoff-state.py",
+      "sha256": "db0cc24947a12c410be9c7b61a05ea0016bb3a4d2d7385315516030dd4122d65"
+    },
+    {
+      "path": "execute-local-handoff.ps1",
+      "sha256": "ff9b7862348682660b4cdf15311aa05f87f7b9a1e50074fb3387b9a9910619ba"
+    }
+  ]
+}

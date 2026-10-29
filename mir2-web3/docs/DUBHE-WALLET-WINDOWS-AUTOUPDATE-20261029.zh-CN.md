@@ -1,5 +1,9 @@
 # Windows Dubhe Wallet 自动更新发布（2026-10-29）
 
+后续统一Game1875/Engine77、测试服e824及packed2026102912/five-class32/legacy33
+发布见[2026-10-30统一发布记录](UNIFIED-PLAYTEST-ROLLOUT-20261030.zh-CN.md)。
+本页保留10月29日23/24渠道的当日来源、服务状态和验收边界。
+
 本记录覆盖 Windows 旧客户端自动更新到 Dubhe Wallet 扫码登录版本。它接续
 [2026-10-28 测试服更新](DUBHE-WALLET-PLAYTEST-ROLLOUT-20261028.zh-CN.md)；
 服务端更新与 Windows 签名下载渠道是两次独立发布。

@@ -1,0 +1,1 @@
+{"passed": true, "network": "testnet", "chainIdentifier": "4c78adac", "runtimePinsMatched": true, "procurement": {"passed": true, "network": "testnet", "exitCategory": "ok"}, "usdc": {"passed": true, "network": "testnet", "publishingEnabled": true, "exitCategory": "ok"}, "journalsUnchanged": true, "signingInvoked": false, "transactionsSubmitted": 0, "secretsDisclosed": false}

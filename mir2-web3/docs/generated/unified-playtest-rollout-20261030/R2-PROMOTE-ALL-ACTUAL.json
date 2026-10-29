@@ -1,0 +1,50 @@
+{
+  "passed": true,
+  "scopes": [
+    {
+      "scope": "packed",
+      "passed": true,
+      "pointerChanged": true,
+      "candidate": {
+        "channel": "invited",
+        "feedSha256": "6d2c2fb0f01155047d56ba42157658d49def40c8c23b33ab9f34725c416a204c",
+        "platform": "windows-x64",
+        "schema": "mir2.windows.r2-channel.v1",
+        "sequence": 2026102912,
+        "signatureSha256": "914b27a2ad91320f7209f959e8901f555267addc150ea56f4f754ca2f3f19f65",
+        "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536"
+      },
+      "receiptSha256": "ae5c31b815ea235ef7cd3f8f8d48a66c2ef8fa6a024be916bbd1814854402368"
+    },
+    {
+      "scope": "five-class",
+      "passed": true,
+      "pointerChanged": true,
+      "candidate": {
+        "channel": "invited",
+        "feedSha256": "7c3468924dac9477a013bdb90e2688e5f88dd1977770cb3607bb8f4f2ec69e07",
+        "platform": "windows-x64",
+        "schema": "mir2.windows.r2-channel.v1",
+        "sequence": 32,
+        "signatureSha256": "761f041a62d88ae8df6dbfb4c58bc4ddbb590378ca563a84823b95a95c043f95",
+        "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf"
+      },
+      "receiptSha256": "5189397f99ab30d8123d2b898a2b9b465d7e59d92b8b827d5188502d40d22c0c"
+    },
+    {
+      "scope": "legacy",
+      "passed": true,
+      "pointerChanged": true,
+      "candidate": {
+        "channel": "invited",
+        "feedSha256": "a0b33137248ff3a509e008b2ae58bc1c62c56e6e2b01f7071d1345f97e052527",
+        "platform": "windows-x64",
+        "schema": "mir2.windows.r2-channel.v1",
+        "sequence": 33,
+        "signatureSha256": "7114ba8034abc94e31bd6386a94269a4ca64ef01a5238d77e5d014993c0ee2f2",
+        "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf"
+      },
+      "receiptSha256": "389c4f12fc2ced5d39cdfa33665a8ae1a94a7a722c436a9f133a946ea0ba5a8c"
+    }
+  ]
+}

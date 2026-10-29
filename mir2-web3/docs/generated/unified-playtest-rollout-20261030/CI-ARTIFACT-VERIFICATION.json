@@ -1,0 +1,285 @@
+{
+  "schema": "mir2.unified.ci-artifact-verification.v1",
+  "passed": true,
+  "repository": "Zombieliu/mir2",
+  "runId": 40936713249,
+  "runUrl": "https://github.com/Zombieliu/mir2/actions/runs/40936713249",
+  "sourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "runStatus": "completed",
+  "runConclusion": "success",
+  "workflowPath": ".github/workflows/gateway-release.yml",
+  "runAttempt": 1,
+  "authority": "Authenticated gh api run/artifact metadata; actual downloaded ZIP bytes hashed against each API digest before safe extraction",
+  "artifacts": [
+    {
+      "id": 12926240801,
+      "name": "mir2-playtest-wallet-build-evidence-e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+      "size_in_bytes": 85602,
+      "digest": "sha256:0abc8bed51c1bb860c056d3a33dd43bab7cd707b75d002f2fca18b12a32a5fe1",
+      "created_at": "2026-10-29T19:13:40Z",
+      "updated_at": "2026-10-29T19:13:40Z",
+      "actualZipPath": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\12926240801.zip",
+      "actualZipSha256": "0abc8bed51c1bb860c056d3a33dd43bab7cd707b75d002f2fca18b12a32a5fe1",
+      "actualZipDigestMatched": true,
+      "extractRoot": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\evidence",
+      "extractedFiles": [
+        {
+          "path": "activities_postgres.log",
+          "bytes": 52999,
+          "sha256": "6321652bd44a35527d5483557d2b6470004968e6c314aa4dca5ef7c014781b92"
+        },
+        {
+          "path": "build.log",
+          "bytes": 266510,
+          "sha256": "ee5ea2a54c14e0af434f9667b26f6e1ab948a6c2f4894d2b4e11049065609035"
+        },
+        {
+          "path": "billing_postgres.log",
+          "bytes": 52987,
+          "sha256": "89373eeb01a72a414418559349d40defab170c22c5b62adc4ff8475ec611e098"
+        },
+        {
+          "path": "gateway-package.log",
+          "bytes": 59527,
+          "sha256": "7ab76a3c06d8427ee177aac391cde5ded755e08337af6c1096a1c25d48fa9472"
+        },
+        {
+          "path": "gateway-postgres-startup.json",
+          "bytes": 780,
+          "sha256": "80f90099699d0ba7fbf4f5d474f4cc9a3d49338d1e16634c550ba6a82170a728"
+        },
+        {
+          "path": "linux-release-security.log",
+          "bytes": 226,
+          "sha256": "3d7084245af21724fc7f09bbd0f0c4b6ea5392eb0c9a98c2f37c59dc9eb1a5cf"
+        },
+        {
+          "path": "gateway-postgres-startup.log",
+          "bytes": 126,
+          "sha256": "acbd674777923b7c9ac90b02e563ea41cadc34c0b13ccedfe86ac6f5e1bf5397"
+        },
+        {
+          "path": "monthly_card_postgres.log",
+          "bytes": 52985,
+          "sha256": "b23aa96e018c748dd5af299777a94c326431937afadb3d7fa2436503592038b2"
+        },
+        {
+          "path": "postgres-init.log",
+          "bytes": 901,
+          "sha256": "d40e2872d0f13a33dfccc14f09bf6d5af21449540f8ddccaaa2b6cc978bf2a80"
+        },
+        {
+          "path": "postgres-isolation.log",
+          "bytes": 202,
+          "sha256": "24e2177cf3f81ff569dc4b2d7253451b2ca007e17c9511695958ac6130bb1aa4"
+        },
+        {
+          "path": "postgres-stop.log",
+          "bytes": 56,
+          "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+        },
+        {
+          "path": "postgres.log",
+          "bytes": 1753,
+          "sha256": "eb6b2353a517506443c956ee880155251acc8d4afc975399191f3458dab6fb19"
+        },
+        {
+          "path": "schema-union.log",
+          "bytes": 44269,
+          "sha256": "e72264cf6958ba66e2708637e8d6e1fa2c0cb6e4846c47dbfb1454070bd9c62b"
+        },
+        {
+          "path": "startup-gateway.log",
+          "bytes": 178,
+          "sha256": "5eaa38c385106eb611be6a7602730ebb1261bff1d9f4b1a4d9d64f071a86ddde"
+        },
+        {
+          "path": "startup-redis.log",
+          "bytes": 1167,
+          "sha256": "36cb197f7aa8fe70d9e65b103c2bec5cdbca1838c00f170035b979b1f652e688"
+        }
+      ]
+    },
+    {
+      "id": 12924703563,
+      "name": "mir2-playtest-wallet-gateway-linux-x64-e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+      "size_in_bytes": 79790464,
+      "digest": "sha256:1f226d8b9cb314ed5a2b93827a50117120aee50e0e1659a8732da000bfb5eed4",
+      "created_at": "2026-10-29T19:13:22Z",
+      "updated_at": "2026-10-29T19:13:22Z",
+      "actualZipPath": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\12924703563.zip",
+      "actualZipSha256": "1f226d8b9cb314ed5a2b93827a50117120aee50e0e1659a8732da000bfb5eed4",
+      "actualZipDigestMatched": true,
+      "extractRoot": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\gateway-maps",
+      "extractedFiles": [
+        {
+          "path": "gateway-releases/latest-mir2-gateway-release.json",
+          "bytes": 1719,
+          "sha256": "ca30eea4a6863d9b209ce712677d6e1af06aa4c76a28ecfe0280fe534cfe5076"
+        },
+        {
+          "path": "gateway-releases/mir2-gateway-linux-x64-unified-playtest-startup-20261030.tar.gz",
+          "bytes": 40799172,
+          "sha256": "06396c6a0f280e677c1502553a5414c462f2316f1316c7cbba553e01bc98b98d"
+        },
+        {
+          "path": "gateway-releases/mir2-gateway-linux-x64-unified-playtest-startup-20261030.tar.gz.sha256",
+          "bytes": 130,
+          "sha256": "b01a0cdff4a95e9aced2a01257068d6ff3a37cba91c98a86afeedee9aca9ac97"
+        },
+        {
+          "path": "playtest-wallet-release/crystal-map-pack-manifest.json",
+          "bytes": 269794,
+          "sha256": "0f89c5028cbad5338090ee4602d33fd80f2b4473b5366deda2e7265bbae38062"
+        },
+        {
+          "path": "playtest-wallet-release/mir2-crystal-map-pack-e824e520b902e5fc616dc8fbb806b3a4363a60ba.tar.gz",
+          "bytes": 39416107,
+          "sha256": "08a109951894da87c89db7bc483917ad41762566f800e50b4f8c49fbe84514fe"
+        },
+        {
+          "path": "playtest-wallet-release/mir2-crystal-map-pack-e824e520b902e5fc616dc8fbb806b3a4363a60ba.tar.gz.sha256",
+          "bytes": 136,
+          "sha256": "778ddeecbd4adfc3a215af5ee801779f757b90c0efa49c86d6c1ac580df472f1"
+        },
+        {
+          "path": "playtest-wallet-release/playtest-release-verification.json",
+          "bytes": 574,
+          "sha256": "2ac894e63c01d4eb6e2c817d4cd173674613ec44ad954e2ad3509d24f2c75fbb"
+        }
+      ]
+    }
+  ],
+  "gatewayArchive": {
+    "path": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\gateway-maps\\gateway-releases\\mir2-gateway-linux-x64-unified-playtest-startup-20261030.tar.gz",
+    "sha256": "06396c6a0f280e677c1502553a5414c462f2316f1316c7cbba553e01bc98b98d",
+    "bytes": 40799172,
+    "exactFourOrdinaryMembers": true
+  },
+  "gatewayPayload": {
+    "mir2-gateway": {
+      "bytes": 95149832,
+      "sha256": "010c6627c9a18663eb56a5618c220f46f6051b88e3c944e621166072d9aef2ea"
+    },
+    "zone_host": {
+      "bytes": 92832440,
+      "sha256": "83b963337a185318ab4a7ccf2254cbe5ccef9def5d147fd5b3135924fd892b01"
+    },
+    "RELEASE.json": {
+      "bytes": 1552,
+      "sha256": "6128f6df5b71dc052c97983fdf862e7ccd7bbb1217d8ea71b17dd63b269c1ce5"
+    },
+    "README.txt": {
+      "bytes": 7476,
+      "sha256": "7cde83e530a922405c2d87b278dd9446537a8abf553b9b8b0a4c2e8425a1f3c2"
+    }
+  },
+  "gatewayBinaryPath": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\gateway-payload\\mir2-gateway",
+  "gatewayBinarySha256": "010c6627c9a18663eb56a5618c220f46f6051b88e3c944e621166072d9aef2ea",
+  "maps": {
+    "archivePath": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\gateway-maps\\playtest-wallet-release\\mir2-crystal-map-pack-e824e520b902e5fc616dc8fbb806b3a4363a60ba.tar.gz",
+    "archiveSha256": "08a109951894da87c89db7bc483917ad41762566f800e50b4f8c49fbe84514fe",
+    "manifestPath": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\gateway-maps\\playtest-wallet-release\\crystal-map-pack-manifest.json",
+    "manifestSha256": "0f89c5028cbad5338090ee4602d33fd80f2b4473b5366deda2e7265bbae38062",
+    "files": 1620,
+    "bytes": 42111309,
+    "exactManifestAndGitBlobClosure": true,
+    "extractedRoot": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\maps-payload\\crystal-map-pack"
+  },
+  "ciReleaseGates": {
+    "sourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+    "releaseTag": "unified-playtest-startup-20261030",
+    "rustToolchain": "1.95.0",
+    "buildEnvironment": "native-linux-non-root",
+    "postgres": "private-temporary-native-cluster-loopback-only",
+    "containersStarted": false,
+    "productionPublish": false,
+    "passed": [
+      "schema_union",
+      "monthly_card_postgres",
+      "billing_postgres",
+      "activities_postgres",
+      "linux-release-security",
+      "gateway-package",
+      "gateway-postgres-startup"
+    ],
+    "mapManifest": "crystal-map-pack-manifest.json"
+  },
+  "actualPostgresStartup": {
+    "path": "C:\\mir2-build\\unified-rollout-20261030\\ci-startup-fixed\\evidence\\gateway-postgres-startup.json",
+    "sha256": "80f90099699d0ba7fbf4f5d474f4cc9a3d49338d1e16634c550ba6a82170a728",
+    "receipt": {
+      "schema": "mir2.playtest.postgres-async-startup.v1",
+      "passed": true,
+      "sourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+      "binarySha256": "010c6627c9a18663eb56a5618c220f46f6051b88e3c944e621166072d9aef2ea",
+      "actualReleaseSubprocess": true,
+      "procurementNewSalesEnabled": false,
+      "usdcNewSalesEnabled": false,
+      "chainDriversConfigured": false,
+      "identityBackend": "postgres",
+      "channelIdentity": {
+        "backend": "postgres",
+        "durable": true,
+        "accountCount": 0,
+        "identityCount": 0
+      },
+      "sessionCacheBackend": "redis",
+      "sessionCacheHealthy": true,
+      "gatewayExitCode": 0,
+      "redisExitCode": 0,
+      "playerAccountsCreated": 0,
+      "elapsedMs": 410,
+      "containersStarted": false,
+      "publicServiceContacted": false,
+      "credentialsRecorded": false
+    },
+    "packagedBinaryDigestMatched": true,
+    "actualGatewayAndRedisLogsChecked": true,
+    "fullHealthAssertionsEnforcedByExactSource": true,
+    "rawFullHealthSnapshotPersisted": false,
+    "healthEvidenceLimit": "Receipt persists selected health fields; exact committed smoke enforces ok/http/ws/revision, PG durability, configured+healthy Redis and gate15=null before writing receipt",
+    "smokeSourceRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+    "smokeSourceSha256": "a985f974feb362532613101664dd61dfc63431b162b6ce8bec0476b09826bb08"
+  },
+  "actualEvidenceLogChecks": {
+    "schema-union.log": {
+      "passed": 4,
+      "sha256": "e72264cf6958ba66e2708637e8d6e1fa2c0cb6e4846c47dbfb1454070bd9c62b"
+    },
+    "monthly_card_postgres.log": {
+      "passed": 1,
+      "sha256": "b23aa96e018c748dd5af299777a94c326431937afadb3d7fa2436503592038b2"
+    },
+    "billing_postgres.log": {
+      "passed": 1,
+      "sha256": "89373eeb01a72a414418559349d40defab170c22c5b62adc4ff8475ec611e098"
+    },
+    "activities_postgres.log": {
+      "passed": 1,
+      "sha256": "6321652bd44a35527d5483557d2b6470004968e6c314aa4dca5ef7c014781b92"
+    },
+    "linux-release-security.log": {
+      "passed": true,
+      "sha256": "3d7084245af21724fc7f09bbd0f0c4b6ea5392eb0c9a98c2f37c59dc9eb1a5cf"
+    },
+    "gateway-postgres-startup.log": {
+      "passed": true,
+      "bytes": 126,
+      "sha256": "acbd674777923b7c9ac90b02e563ea41cadc34c0b13ccedfe86ac6f5e1bf5397"
+    },
+    "startup-gateway.log": {
+      "passed": true,
+      "bytes": 178,
+      "sha256": "5eaa38c385106eb611be6a7602730ebb1261bff1d9f4b1a4d9d64f071a86ddde"
+    },
+    "startup-redis.log": {
+      "passed": true,
+      "bytes": 1167,
+      "sha256": "36cb197f7aa8fe70d9e65b103c2bec5cdbca1838c00f170035b979b1f652e688"
+    }
+  },
+  "remoteMutation": false,
+  "serverBuild": false,
+  "secretsIncluded": false
+}

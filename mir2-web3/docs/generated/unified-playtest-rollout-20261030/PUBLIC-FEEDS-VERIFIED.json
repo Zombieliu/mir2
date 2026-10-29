@@ -1,0 +1,129 @@
+{
+  "publicHttpResponses": 12,
+  "checks": [
+    {
+      "sequence": 2026102912,
+      "cmsValid": true,
+      "signerKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "responses": [
+        {
+          "cacheControl": "no-store",
+          "file": "latest.json",
+          "sha256": "6D2C2FB0F01155047D56BA42157658D49DEF40C8C23B33AB9F34725C416A204C"
+        },
+        {
+          "cacheControl": "no-store",
+          "file": "latest.p7s",
+          "sha256": "914B27A2AD91320F7209F959E8901F555267ADDC150EA56F4F754CA2F3F19F65"
+        }
+      ],
+      "host": "origin",
+      "scope": "packed",
+      "url": "https://165.154.65.136.sslip.io/client-updates/packed/latest.json"
+    },
+    {
+      "sequence": 32,
+      "cmsValid": true,
+      "signerKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "responses": [
+        {
+          "cacheControl": "no-store",
+          "file": "latest.json",
+          "sha256": "7C3468924DAC9477A013BDB90E2688E5F88DD1977770CB3607BB8F4F2EC69E07"
+        },
+        {
+          "cacheControl": "no-store",
+          "file": "latest.p7s",
+          "sha256": "761F041A62D88AE8DF6DBFB4C58BC4DDBB590378CA563A84823B95A95C043F95"
+        }
+      ],
+      "host": "origin",
+      "scope": "five-class",
+      "url": "https://165.154.65.136.sslip.io/client-updates/five-class/latest.json"
+    },
+    {
+      "sequence": 33,
+      "cmsValid": true,
+      "signerKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "responses": [
+        {
+          "cacheControl": "no-store",
+          "file": "latest.json",
+          "sha256": "A0B33137248FF3A509E008B2AE58BC1C62C56E6E2B01F7071D1345F97E052527"
+        },
+        {
+          "cacheControl": "no-store",
+          "file": "latest.p7s",
+          "sha256": "7114BA8034ABC94E31BD6386A94269A4CA64EF01A5238D77E5D014993C0EE2F2"
+        }
+      ],
+      "host": "origin",
+      "scope": "legacy",
+      "url": "https://165.154.65.136.sslip.io/client-updates/latest.json"
+    },
+    {
+      "sequence": 2026102912,
+      "cmsValid": true,
+      "signerKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "responses": [
+        {
+          "cacheControl": "no-store",
+          "file": "latest.json",
+          "sha256": "6D2C2FB0F01155047D56BA42157658D49DEF40C8C23B33AB9F34725C416A204C"
+        },
+        {
+          "cacheControl": "no-store",
+          "file": "latest.p7s",
+          "sha256": "914B27A2AD91320F7209F959E8901F555267ADDC150EA56F4F754CA2F3F19F65"
+        }
+      ],
+      "host": "cdn",
+      "scope": "packed",
+      "url": "https://assets.mir2.obelisk.build/client-updates/packed/latest.json"
+    },
+    {
+      "sequence": 32,
+      "cmsValid": true,
+      "signerKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "responses": [
+        {
+          "cacheControl": "no-store",
+          "file": "latest.json",
+          "sha256": "7C3468924DAC9477A013BDB90E2688E5F88DD1977770CB3607BB8F4F2EC69E07"
+        },
+        {
+          "cacheControl": "no-store",
+          "file": "latest.p7s",
+          "sha256": "761F041A62D88AE8DF6DBFB4C58BC4DDBB590378CA563A84823B95A95C043F95"
+        }
+      ],
+      "host": "cdn",
+      "scope": "five-class",
+      "url": "https://assets.mir2.obelisk.build/client-updates/five-class/latest.json"
+    },
+    {
+      "sequence": 33,
+      "cmsValid": true,
+      "signerKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+      "responses": [
+        {
+          "cacheControl": "no-store",
+          "file": "latest.json",
+          "sha256": "A0B33137248FF3A509E008B2AE58BC1C62C56E6E2B01F7071D1345F97E052527"
+        },
+        {
+          "cacheControl": "no-store",
+          "file": "latest.p7s",
+          "sha256": "7114BA8034ABC94E31BD6386A94269A4CA64EF01A5238D77E5D014993C0EE2F2"
+        }
+      ],
+      "host": "cdn",
+      "scope": "legacy",
+      "url": "https://assets.mir2.obelisk.build/client-updates/latest.json"
+    }
+  ],
+  "schema": "mir2.unified.public-feed-readback.v1",
+  "observedAtUtc": "2026-10-29T19:50:59.8742236+00:00",
+  "passed": true,
+  "cmsSignaturesVerified": 6
+}

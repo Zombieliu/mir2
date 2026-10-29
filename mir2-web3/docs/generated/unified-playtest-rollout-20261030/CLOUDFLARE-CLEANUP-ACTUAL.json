@@ -1,0 +1,12 @@
+{
+  "schema": "mir2.unified.temporary-publisher-cleanup.v1",
+  "passed": true,
+  "observedAtUtc": "2026-10-29T19:51:25.025Z",
+  "temporaryRouteAbsent": true,
+  "temporaryBicRuleAbsent": true,
+  "temporaryWorkerDeletionAcknowledged": true,
+  "temporarySecretBindingRemovedWithWorker": true,
+  "permanentReaderRoutePreserved": true,
+  "permanentPublicDownloadRulePreserved": true,
+  "r2ObjectsDeleted": false
+}

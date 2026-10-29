@@ -1,0 +1,5 @@
+# Preserve original receipt/CMS bytes so EVIDENCE-INDEX hashes survive checkout.
+*.json -text whitespace=blank-at-eol,space-before-tab,cr-at-eol
+*.jsonl -text whitespace=blank-at-eol,space-before-tab,cr-at-eol
+*.p7s binary
+*.jpg binary
