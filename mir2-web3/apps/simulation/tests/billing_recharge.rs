@@ -1270,7 +1270,18 @@ fn recharge_schema_seven_cannot_promote_real_monthly_card_item_receipts() {
         .buy_monthly_card_for_character("demo", index, "schema-seven-card", NOW)
         .unwrap();
     let store = config.account_store.lock().unwrap();
-    assert!(store.accounts["demo"].billing.is_none());
+    // Current purchases preserve historical/unknown funding without inventing
+    // a recharge or payment receipt. The legacy schema fences below still apply.
+    let ledger = store.accounts["demo"].billing.as_ref().unwrap();
+    assert!(ledger.orders.is_empty());
+    assert!(ledger.provenance.payments.is_empty());
+    assert_eq!(ledger.provenance.monthly_items.len(), 1);
+    let allocation = ledger.provenance.monthly_items.values().next().unwrap();
+    assert!(!allocation.parts.is_empty());
+    assert!(allocation.parts.iter().all(|part| {
+        part.kind == mir2_simulation::billing_provenance::CreditFundingKind::Unknown
+            && part.source_order_id.is_none()
+    }));
     assert_eq!(
         store.accounts["demo"]
             .monthly_card

@@ -95,6 +95,8 @@ pub struct VerifiedRechargePayment {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BillingLedger {
     pub orders: BTreeMap<String, RechargeOrder>,
+    #[serde(default, skip_serializing_if = "crate::billing_provenance::CreditProvenance::is_empty")]
+    pub provenance: crate::billing_provenance::CreditProvenance,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -148,6 +150,7 @@ fn new_order_id() -> Result<String, String> {
 
 impl BillingLedger {
     pub fn validate(&self) -> Result<(), String> {
+        self.provenance.validate(&self.orders)?;
         if self.orders.len() > MAX_ORDERS_PER_ACCOUNT {
             return Err("billingLedgerFull".into());
         }
@@ -433,12 +436,13 @@ pub(crate) fn apply_pending_to_save(
         .revision
         .checked_add(1)
         .ok_or("billingCharacterRevisionExhausted")?;
-    let ledger = account
-        .billing
-        .as_mut()
-        .expect("pending entries require a ledger");
     let mut before = save.credit;
     for id in &applicable {
+        let credits = account.billing.as_ref().expect("pending ledger").orders[id].offer.credits;
+        crate::billing_provenance::apply_paid_credit_lot(
+            account, save.character.index, before, id, credits, now_ms,
+        )?;
+        let ledger = account.billing.as_mut().expect("pending entries require a ledger");
         let order = ledger.orders.get_mut(id).expect("pending entry exists");
         let after = before
             .checked_add(order.offer.credits)

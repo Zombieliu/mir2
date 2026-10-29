@@ -830,20 +830,21 @@ impl IdentityService {
         auth_method: &str,
         address: &str,
     ) -> Result<String, String> {
-        let current = self
-            .session_by_id(&verified.session_id)?
-            .ok_or_else(|| "identity session not found".to_string())?;
-        if unix_now_ms().saturating_sub(current.issued_at_ms) > 10 * 60 * 1_000 {
-            return Err("recent authentication is required to bind a credential".to_string());
-        }
         if !matches!(
             canonical_auth_method(auth_method)?,
             "sui_passkey" | "sui_wallet"
         ) {
             return Err("only Sui passkey or wallet credentials can be bound".to_string());
         }
-        let credential_id =
-            self.upsert_credential(&verified.account_id, auth_method, address, unix_now_ms())?;
+        // Recheck under the same database row lock (or memory lock) as the
+        // binding, so an already revoked/expired proof cannot bind a wallet.
+        let credential_id = self.upsert_credential_for_session(
+            &verified.account_id,
+            auth_method,
+            address,
+            unix_now_ms(),
+            Some(verified),
+        )?;
         self.audit(
             Some(&verified.account_id),
             "credential_bound",
@@ -906,6 +907,17 @@ impl IdentityService {
         subject: &str,
         now_ms: u64,
     ) -> Result<String, String> {
+        self.upsert_credential_for_session(account_id, auth_method, subject, now_ms, None)
+    }
+
+    fn upsert_credential_for_session(
+        &self,
+        account_id: &str,
+        auth_method: &str,
+        subject: &str,
+        now_ms: u64,
+        binding_session: Option<&VerifiedIdentitySession>,
+    ) -> Result<String, String> {
         let kind = credential_kind(auth_method)?;
         let subject = sanitize_summary(subject, 512);
         if subject.is_empty() {
@@ -913,6 +925,15 @@ impl IdentityService {
         }
         if self.database_url.is_some() {
             self.with_postgres(|client| {
+                let mut transaction = client.transaction().map_err(|error| format!("credential transaction failed: {error}"))?;
+                let client = &mut transaction;
+                if let Some(verified) = binding_session {
+                    let row = client.query_opt("SELECT account_id, issued_at_ms, expires_at_ms, revoked_at_ms FROM identity_sessions WHERE session_id=$1 FOR UPDATE", &[&verified.session_id]).map_err(|error| format!("binding session lookup failed: {error}"))?.ok_or_else(|| "identity session not found".to_string())?;
+                    validate_binding_session(
+                        verified, row.get::<_, &str>(0), i64_to_u64(row.get(1)),
+                        i64_to_u64(row.get(2)), row.get::<_, Option<i64>>(3).is_some(), now_ms,
+                    )?;
+                }
                 if let Some(row) = client.query_opt("SELECT credential_id, account_id FROM identity_credentials WHERE credential_kind=$1 AND credential_subject=$2 AND revoked_at_ms IS NULL", &[&kind, &subject]).map_err(|error| format!("credential lookup failed: {error}"))? {
                     let credential_id: String = row.get(0);
                     let owner_account_id: String = row.get(1);
@@ -920,10 +941,12 @@ impl IdentityService {
                         return Err("credential is already bound to another account".to_string());
                     }
                     client.execute("UPDATE identity_credentials SET last_used_at_ms=$1, updated_at=now() WHERE credential_id=$2", &[&(now_ms as i64), &credential_id]).map_err(|error| format!("credential touch failed: {error}"))?;
+                    transaction.commit().map_err(|error| format!("credential commit failed: {error}"))?;
                     return Ok(credential_id);
                 }
                 let credential_id = random_identifier(18);
                 client.execute("INSERT INTO identity_credentials (credential_id, account_id, credential_kind, credential_subject, display_name, created_at_ms, last_used_at_ms) VALUES ($1,$2,$3,$4,$5,$6,$6)", &[&credential_id, &account_id, &kind, &subject, &default_credential_name(kind), &(now_ms as i64)]).map_err(|error| format!("credential insert failed: {error}"))?;
+                transaction.commit().map_err(|error| format!("credential commit failed: {error}"))?;
                 Ok(credential_id)
             })
         } else {
@@ -931,6 +954,20 @@ impl IdentityService {
                 .memory
                 .lock()
                 .map_err(|_| "identity memory store lock poisoned".to_string())?;
+            if let Some(verified) = binding_session {
+                let session = memory
+                    .sessions
+                    .get(&verified.session_id)
+                    .ok_or_else(|| "identity session not found".to_string())?;
+                validate_binding_session(
+                    verified,
+                    &session.account_id,
+                    session.issued_at_ms,
+                    session.expires_at_ms,
+                    session.revoked_at_ms.is_some(),
+                    now_ms,
+                )?;
+            }
             if memory.credentials.iter().any(|(owner, credentials)| {
                 owner != account_id
                     && credentials.iter().any(|item| {
@@ -1147,6 +1184,26 @@ fn env_flag(name: &str) -> bool {
         })
         .unwrap_or(false)
 }
+fn validate_binding_session(
+    verified: &VerifiedIdentitySession,
+    stored_account: &str,
+    issued_at_ms: u64,
+    expires_at_ms: u64,
+    revoked: bool,
+    now_ms: u64,
+) -> Result<(), String> {
+    if revoked
+        || stored_account != verified.account_id
+        || expires_at_ms != verified.expires_at_ms
+        || expires_at_ms <= now_ms
+        || issued_at_ms > now_ms.saturating_add(30_000)
+        || now_ms.saturating_sub(issued_at_ms) > 10 * 60 * 1_000
+    {
+        return Err("recent active authentication is required to bind a credential".to_string());
+    }
+    Ok(())
+}
+
 fn session_ttl_ms() -> u64 {
     env::var("MIR2_IDENTITY_SESSION_TTL_SECONDS")
         .ok()
@@ -1331,5 +1388,61 @@ mod tests {
             .bind_sui_credential(&bob, "sui_wallet", "0x1234")
             .expect_err("the same wallet cannot bind to two accounts");
         assert!(error.contains("another account"));
+    }
+
+    #[test]
+    fn wallet_binding_rechecks_revoked_expired_and_mismatched_sessions() {
+        let service = IdentityService::local_for_tests();
+        let grant = service
+            .issue_session("alice", "password", "alice", "127.0.0.1", "test")
+            .unwrap();
+        let verified = service.verify_session_token(&grant.token).unwrap();
+
+        let mut forged = verified.clone();
+        forged.account_id = "bob".to_string();
+        assert!(service
+            .bind_sui_credential(&forged, "sui_wallet", "0x1234")
+            .is_err());
+
+        let now = super::unix_now_ms();
+        {
+            let mut memory = service.memory.lock().unwrap();
+            let session = memory.sessions.get_mut(&verified.session_id).unwrap();
+            session.expires_at_ms = now.saturating_sub(1);
+        }
+        assert!(service
+            .bind_sui_credential(&verified, "sui_wallet", "0x1234")
+            .is_err());
+        {
+            let mut memory = service.memory.lock().unwrap();
+            let session = memory.sessions.get_mut(&verified.session_id).unwrap();
+            session.expires_at_ms = verified.expires_at_ms;
+            session.issued_at_ms = now.saturating_sub(600_001);
+        }
+        assert!(service
+            .bind_sui_credential(&verified, "sui_wallet", "0x1234")
+            .is_err());
+        {
+            let mut memory = service.memory.lock().unwrap();
+            memory
+                .sessions
+                .get_mut(&verified.session_id)
+                .unwrap()
+                .issued_at_ms = now;
+        }
+        service
+            .revoke_session(
+                &verified,
+                &verified.session_id,
+                "logout during wallet approval",
+            )
+            .unwrap();
+        assert!(service
+            .bind_sui_credential(&verified, "sui_wallet", "0x1234")
+            .is_err());
+        assert_eq!(
+            service.resolve_sui_account("sui_wallet", "0x1234").unwrap(),
+            None
+        );
     }
 }

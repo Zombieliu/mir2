@@ -181,6 +181,17 @@ pub(super) fn apply_experience_gain(world: &mut World, amount: i64) -> Vec<Serve
         // `apply_level_change` repoints `max_experience` at the new level's curve
         // threshold, recomputes the stat pools, and restores HP/MP to full.
         apply_level_change(world, level);
+        let occurred_at_ms = super::shared_guild_experience::promotion_level_event_time(
+            world,
+            super::quests::quest_recurrence::server_now_millis(),
+        );
+        super::shared_guild_experience::record_promotion_game_fact(
+            world,
+            crate::promotion::game_events::CapturedGameplayFact::level_reached(
+                occurred_at_ms,
+                level,
+            ),
+        );
         // Crystal queues one deferred callback per LevelUp. As in the source,
         // all callbacks observe the final state when the queue is drained.
         if super::resources::is_in_world(world) {

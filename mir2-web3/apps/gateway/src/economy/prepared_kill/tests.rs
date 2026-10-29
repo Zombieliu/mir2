@@ -410,12 +410,24 @@ fn prepared_kill_postgres_source_of_truth_runtime_and_ledger_retry_relogin() {
 
 fn actual_runtime_source(source_of_truth: bool) {
     let db = Database::new();
-    let mut config = crate::GatewayConfig::default();
-    if source_of_truth {
-        config.account_store_database_mode =
-            mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth;
-    }
-    let config = config.with_account_store_database_url(&db.scoped);
+    let config = if source_of_truth {
+        // with_account_store_database_url intentionally selects Mirror. Use
+        // the production SourceOfTruth constructor so the private runtime and
+        // durable source writer both exercise authoritative PG transactions.
+        crate::GatewayConfig::default()
+            .with_postgres_account_store(&db.scoped)
+            .unwrap()
+    } else {
+        crate::GatewayConfig::default().with_account_store_database_url(&db.scoped)
+    };
+    assert_eq!(
+        config.account_store_database_mode,
+        if source_of_truth {
+            mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth
+        } else {
+            mir2_simulation::AccountStoreDatabaseMode::Mirror
+        }
+    );
     let mut runtime = crate::economy::tests::start_test_runtime_with_config(
         config,
         "actual-source",
@@ -425,6 +437,9 @@ fn actual_runtime_source(source_of_truth: bool) {
     let envelope = runtime_award(&runtime);
     let context = runtime_context();
     let before = runtime.world_snapshot().player_experience;
+    let promotion_capture_enabled =
+        source_of_truth && std::env::var("MIR2_PROMOTION_ENVIRONMENT").as_deref() == Ok("test");
+    let promotion_before = db.scalar("SELECT count(*) FROM promotion_game_source_events");
     let service = PostgresEconomyAccountInventoryService::new(&db.scoped);
     db.connect().batch_execute("CREATE FUNCTION reject_actual_source() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'source failure'; END $$; CREATE TRIGGER reject_actual_source BEFORE UPDATE ON accounts FOR EACH ROW EXECUTE FUNCTION reject_actual_source()").unwrap();
     assert!(
@@ -437,6 +452,18 @@ fn actual_runtime_source(source_of_truth: bool) {
         db.scalar("SELECT count(*) FROM game_economy_transactions"),
         0
     );
+    if promotion_capture_enabled {
+        assert_eq!(
+            db.scalar("SELECT count(*) FROM promotion_game_source_events"),
+            promotion_before
+        );
+        assert!(runtime
+            .active_character_checkpoint()
+            .unwrap()
+            .guild_experience_journal
+            .promotion_game_facts
+            .is_empty());
+    }
     db.connect()
         .batch_execute("DROP TRIGGER reject_actual_source ON accounts")
         .unwrap();
@@ -456,6 +483,42 @@ fn actual_runtime_source(source_of_truth: bool) {
         .guild_experience_journal
         .applied_kill_receipts
         .contains_key(&key));
+    if promotion_capture_enabled {
+        let source = db
+            .connect()
+            .query_one(
+                "SELECT fact_json FROM promotion_game_source_events WHERE source='combat_commit'",
+                &[],
+            )
+            .unwrap();
+        let fact: mir2_simulation::promotion::TrustedGameFact =
+            serde_json::from_value(source.get(0)).unwrap();
+        assert_eq!(fact.account_id, identity.account_id);
+        assert_eq!(fact.character_index, identity.character_index);
+        assert_eq!(
+            fact.occurred_at_ms, 1,
+            "the actual award timestamp must survive delayed commit"
+        );
+        assert_eq!(
+            db.scalar("SELECT count(*) FROM promotion_game_source_events"),
+            promotion_before + 1
+        );
+        let now: u64 = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis()
+            .try_into()
+            .unwrap();
+        let delivered = mir2_simulation::promotion::game_events::drain_committed_game_events(
+            &db.scoped, "test", 100, now,
+        )
+        .unwrap();
+        assert_eq!(delivered["failures"], serde_json::json!([]));
+        assert_eq!(
+            db.scalar("SELECT count(*) FROM promotion_game_facts WHERE source='combat_commit'"),
+            1
+        );
+    }
     assert_eq!(
         db.scalar("SELECT amount FROM game_economy_balances WHERE asset_kind='experience'"),
         after
@@ -482,6 +545,16 @@ fn actual_runtime_source(source_of_truth: bool) {
         db.scalar("SELECT count(*) FROM game_economy_transactions"),
         1
     );
+    if promotion_capture_enabled {
+        assert_eq!(
+            db.scalar("SELECT count(*) FROM promotion_game_source_events"),
+            promotion_before + 1
+        );
+        assert_eq!(
+            db.scalar("SELECT count(*) FROM promotion_game_facts WHERE source='combat_commit'"),
+            1
+        );
+    }
     let mut changed = envelope;
     if let SharedAccountInventoryCommand::MonsterKillAward(award) = &mut changed.command {
         award.experience += 1;

@@ -1434,7 +1434,10 @@ const WALLET_ACCOUNT_PREFIX: &str = "sui:";
 /// hardening), no candidate — including a literal copy of the sentinel string —
 /// can authenticate. Wallet accounts have no password; they authenticate via the
 /// passkey token.
-pub(super) const LOCKED_ACCOUNT_PASSWORD: &str = "\u{0}wallet-locked";
+// PostgreSQL text cannot contain NUL. Keep the historical file-store sentinel
+// rejected too, while all newly provisioned/healed accounts use a durable value.
+pub(super) const LOCKED_ACCOUNT_PASSWORD: &str = "!mir2:wallet-locked:v1!";
+const LEGACY_LOCKED_ACCOUNT_PASSWORD: &str = "\u{0}wallet-locked";
 
 /// Whether `account_id` belongs to the reserved wallet/passkey namespace and must
 /// therefore bypass every classic password operation. Panic-safe and
@@ -1501,7 +1504,7 @@ enum PasswordVerification {
 /// Verify the current Argon2id PHC format and the two historical formats.
 /// Historical successful logins are immediately rewritten through Argon2id.
 fn verify_account_password(stored: &str, candidate: &str) -> PasswordVerification {
-    if stored == LOCKED_ACCOUNT_PASSWORD {
+    if stored == LOCKED_ACCOUNT_PASSWORD || stored == LEGACY_LOCKED_ACCOUNT_PASSWORD {
         return PasswordVerification::Invalid;
     }
     if stored.starts_with(ARGON2ID_PASSWORD_HASH_PREFIX) {
@@ -1797,7 +1800,9 @@ pub(super) fn login_passkey_account(
         let Some(account) = store.accounts.get(account_id) else {
             return AccountLoginResult::InvalidCredentials;
         };
-        if account.password == LOCKED_ACCOUNT_PASSWORD {
+        if account.password == LOCKED_ACCOUNT_PASSWORD
+            || preserves_bound_password(account_id, &account.password)
+        {
             return AccountLoginResult::Success(account.characters.clone());
         }
     }
@@ -1812,6 +1817,9 @@ pub(super) fn login_passkey_account(
         if let Some(ban) = account.active_ban(unix_now_ms()) {
             return Ok(Err(ban));
         }
+        if preserves_bound_password(&account_id_owned, &account.password) {
+            return Ok(Ok(account.characters.clone()));
+        }
         account.password = LOCKED_ACCOUNT_PASSWORD.to_string();
         Ok(Ok(account.characters.clone()))
     });
@@ -1823,6 +1831,13 @@ pub(super) fn login_passkey_account(
             AccountLoginResult::InvalidCredentials
         }
     }
+}
+
+fn preserves_bound_password(account_id: &str, stored: &str) -> bool {
+    // Trusted gateway identity resolution can map a verified wallet to an
+    // existing password account. Keep that independently verified credential;
+    // only wallet namespaces and legacy/default records need durable healing.
+    !is_wallet_namespaced_account(account_id) && stored.starts_with(ARGON2ID_PASSWORD_HASH_PREFIX)
 }
 
 pub(super) fn provision_passkey_account(

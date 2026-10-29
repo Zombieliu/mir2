@@ -85,6 +85,7 @@ fn paid_ledger() -> BillingLedger {
     };
     BillingLedger {
         orders: BTreeMap::from([(id, order)]),
+        ..Default::default()
     }
 }
 

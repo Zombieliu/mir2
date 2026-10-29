@@ -19,7 +19,7 @@ pub(super) enum QuestCadence {
     Repeatable,
 }
 
-pub(super) fn server_now_millis() -> u64 {
+pub(in crate::runtime) fn server_now_millis() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
@@ -112,7 +112,15 @@ pub(super) fn record_quest_completion(world: &mut World, quest_id: i32) {
     record_quest_completion_at(world, quest_id, server_now_millis());
 }
 
-pub(super) fn record_quest_completion_at(world: &mut World, quest_id: i32, now_ms: u64) {
+pub(in crate::runtime) fn record_quest_completion_at(
+    world: &mut World,
+    quest_id: i32,
+    now_ms: u64,
+) {
+    super::super::shared_guild_experience::record_promotion_game_fact(
+        world,
+        crate::promotion::game_events::CapturedGameplayFact::quest_completed(now_ms, quest_id),
+    );
     let Some(cadence) = cadence_for_quest(world, quest_id) else {
         return;
     };

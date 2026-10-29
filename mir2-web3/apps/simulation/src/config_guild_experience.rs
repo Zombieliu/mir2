@@ -20,6 +20,11 @@ impl SimulationConfig {
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GuildExperienceJournal {
+    /// Private authority-issued promotion evidence. First qualifying event per
+    /// source/UTC day and first attainment per level retain actual event time.
+    /// The complete character checkpoint commits or rolls back these records.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub promotion_game_facts: BTreeMap<String, crate::promotion::game_events::CapturedGameplayFact>,
     /// Monotonic sequence saved with the source checkpoint; never separately
     /// reserved or reset on logout. Pending events are cleared only at commit.
     #[serde(default)]
@@ -37,6 +42,7 @@ pub struct GuildExperienceJournal {
 impl GuildExperienceJournal {
     pub fn is_empty(&self) -> bool {
         self.next_sequence == 0
+            && self.promotion_game_facts.is_empty()
             && self.pending.is_empty()
             && self.event_payloads.is_empty()
             && self.applied_kill_receipts.is_empty()

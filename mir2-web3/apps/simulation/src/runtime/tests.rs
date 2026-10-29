@@ -2882,6 +2882,34 @@ fn classic_login_still_works_for_non_wallet_accounts() {
 }
 
 #[test]
+fn bound_wallet_login_preserves_existing_argon2_password() {
+    let config = SimulationConfig::default();
+    let mut password_session = SimulationSession::new(config.clone());
+    let created = password_session.handle_packet(ClientPacket::NewAccount {
+        account_id: "bound-player".into(),
+        password: "Tracepass1".into(),
+        birth_date_binary: 630_822_816_000_000_000,
+        user_name: "Bound".into(),
+        secret_question: "q".into(),
+        secret_answer: "a".into(),
+        email_address: "bound@example.test".into(),
+    });
+    assert!(matches!(created[0], ServerPacket::NewAccount { result: 8 }));
+    let original_hash = config.account_store.lock().unwrap().accounts["bound-player"]
+        .password.clone();
+    assert!(original_hash.starts_with("$argon2id$"));
+    let mut wallet_session = SimulationSession::new(config.clone());
+    assert!(matches!(wallet_session.passkey_login("bound-player")[0],
+        ServerPacket::LoginSuccess { .. }));
+    assert_eq!(config.account_store.lock().unwrap().accounts["bound-player"].password,
+        original_hash);
+    assert!(matches!(password_session.handle_packet(ClientPacket::Login {
+        account_id: "bound-player".into(),
+        password: "Tracepass1".into(),
+    })[0], ServerPacket::LoginSuccess { .. }));
+}
+
+#[test]
 fn wallet_namespace_detection_and_locked_password_sentinel() {
     use crate::runtime::save::{
         account_password_matches, is_wallet_namespaced_account, LOCKED_ACCOUNT_PASSWORD,
@@ -2904,6 +2932,9 @@ fn wallet_namespace_detection_and_locked_password_sentinel() {
     ));
     assert!(!account_password_matches(LOCKED_ACCOUNT_PASSWORD, "demo"));
     assert!(!account_password_matches(LOCKED_ACCOUNT_PASSWORD, ""));
+    assert!(!LOCKED_ACCOUNT_PASSWORD.contains('\0'));
+    assert!(!account_password_matches("\u{0}wallet-locked", "\u{0}wallet-locked"));
+    assert!(!account_password_matches("\u{0}wallet-locked", "demo"));
 }
 
 #[test]
