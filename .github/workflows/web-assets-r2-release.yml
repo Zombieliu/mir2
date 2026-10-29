@@ -169,7 +169,7 @@ jobs:
           mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
           cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/
           cp config/promotion-playtest-20261029.test.json ../promotion-backend-release/
-          cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json ../promotion-backend-release/usdc-recharge/
+          cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json onchain/usdc-recharge/.npmrc ../promotion-backend-release/usdc-recharge/
           cp onchain/usdc-recharge/service/cli.mjs onchain/usdc-recharge/service/driver.mjs onchain/usdc-recharge/service/model.mjs ../promotion-backend-release/usdc-recharge/service/
           cp "$(command -v node)" ../promotion-backend-release/runtime/node
           node -p 'JSON.stringify({node:process.version,platform:process.platform,arch:process.arch})' > ../promotion-backend-release/runtime/RUNTIME.json
@@ -186,3 +186,4 @@ jobs:
           path: promotion-backend-release/
           retention-days: 7
           if-no-files-found: error
+          include-hidden-files: true
