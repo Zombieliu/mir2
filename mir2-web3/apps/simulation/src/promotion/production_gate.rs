@@ -7,6 +7,69 @@ use postgres::GenericClient;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+pub(super) fn test_micro_enabled(env: &str, rules: &Value) -> Result<bool, String> {
+    for key in ["testUsdcMicroPayouts", "testFirstPayoutAddressNoCooldown"] {
+        if rules.get(key).is_some_and(|v| !v.is_boolean()) {
+            return Err("promotionRulesInvalid".into());
+        }
+    }
+    let micro = rules
+        .get("testUsdcMicroPayouts")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let first = rules
+        .get("testFirstPayoutAddressNoCooldown")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    if (micro || first) && (env != "test" || !micro) {
+        return Err("promotionEnvironmentMismatch".into());
+    }
+    Ok(micro)
+}
+
+pub(super) fn test_micro_manifest(
+    env: &str,
+    rules: &Value,
+    manifest: &Value,
+) -> Result<bool, String> {
+    let micro = test_micro_enabled(env, rules)?;
+    if micro
+        && (manifest.get("network").and_then(Value::as_str) != Some("sui:testnet")
+            || manifest.get("chainIdentifier").and_then(Value::as_str)
+                != Some(super::TESTNET_CHAIN_IDENTIFIER)
+            || manifest.get("coinType").and_then(Value::as_str)
+                != Some(super::TESTNET_USDC_COIN_TYPE)
+            || manifest.get("coinDecimals").and_then(Value::as_u64) != Some(6))
+    {
+        return Err("promotionPayoutManifestMismatch".into());
+    }
+    Ok(micro)
+}
+
+pub(super) fn first_address_exempt<T: GenericClient>(
+    tx: &mut T,
+    env: &str,
+    campaign: &str,
+    version: i64,
+) -> Result<bool, String> {
+    if env != "test" || version != 1 {
+        return Ok(false);
+    }
+    let r=db(tx.query_opt("SELECT c.rules_json,a.manifest_json FROM promotion_campaigns c JOIN promotion_production_approvals a USING(environment,campaign_id) WHERE c.environment=$1 AND c.campaign_id=$2 AND a.approved_by IS NOT NULL",&[&env,&campaign]))?;
+    let Some(r) = r else {
+        return Ok(false);
+    };
+    let rules: Value = r.get(0);
+    if !rules
+        .get("testFirstPayoutAddressNoCooldown")
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+    {
+        return Ok(false);
+    }
+    Ok(test_micro_manifest(env, &rules, &r.get::<_, Value>(1))? && approved(tx, env, campaign)?)
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PromotionLaunchManifest {
@@ -90,6 +153,7 @@ pub(super) fn configuration<T: GenericClient>(
     campaign: &str,
 ) -> Result<Value, String> {
     let r=db(tx.query_opt("SELECT terms_version,starts_at_ms,ends_at_ms,rules_json,budget_micro_usd,member_limit,leader_limit,per_leader_member_limit,per_member_revenue_cap_micro_usd,rules_approved,funding_mode FROM promotion_campaigns WHERE environment=$1 AND campaign_id=$2",&[&env,&campaign]))?.ok_or("promotionCampaignMissing")?;
+    test_micro_enabled(env, &r.get::<_, Value>(3))?;
     if !r.get::<_, bool>(9)
         || (r.get::<_, String>(10) == "budget_capped" && (4..=8).any(|i| r.get::<_, i64>(i) <= 0))
     {
@@ -156,6 +220,12 @@ impl PromotionStore {
             actor(&mut tx, &self.environment, account, "operations")?;
             // Serialize proposals and financial gate changes with the campaign row.
             db(tx.query_one("SELECT campaign_id FROM promotion_campaigns WHERE environment=$1 AND campaign_id=$2 FOR UPDATE",&[&self.environment,&campaign]))?;
+            let rules:Value=db(tx.query_one("SELECT rules_json FROM promotion_campaigns WHERE environment=$1 AND campaign_id=$2",&[&self.environment,&campaign]))?.get(0);
+            test_micro_manifest(
+                &self.environment,
+                &rules,
+                &serde_json::to_value(manifest).map_err(|_| "promotionInputInvalid")?,
+            )?;
             if hash(&configuration(&mut tx, &self.environment, campaign)?)?
                 != manifest.configuration_sha256
             {

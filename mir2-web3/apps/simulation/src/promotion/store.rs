@@ -316,6 +316,55 @@ fn campaign<T: GenericClient>(
 fn rules(row: &postgres::Row) -> Result<PromotionRules, String> {
     serde_json::from_value(row.get(4)).map_err(|_| "promotionRulesInvalid".into())
 }
+fn configured_commission<T: GenericClient>(
+    client: &mut T,
+    input: &CommissionInput,
+) -> Result<CommissionResult, String> {
+    let row = campaign(client, &input.environment, &input.campaign_id, false)?;
+    if super::production_gate::test_micro_enabled(&input.environment, &row.get::<_, Value>(4))? {
+        super::calculate_test_usdc_micro_commission(input)
+    } else {
+        calculate_commission(input)
+    }
+}
+
+/// Frozen snapshot decides the amount precision; a live rule cannot reinterpret
+/// an existing cent settlement or add a minimum grant to a fractional result.
+pub(super) fn settlement_payable_micro_usd<T: GenericClient>(
+    client: &mut T,
+    env: &str,
+    campaign_id: &str,
+    snapshot: &Value,
+    total: i64,
+    reserve: i64,
+    cents: i64,
+) -> Result<i64, String> {
+    let row = campaign(client, env, campaign_id, false)?;
+    let micro = super::production_gate::test_micro_enabled(env, &row.get::<_, Value>(4))?;
+    let frozen = snapshot
+        .get("result")
+        .and_then(|v| v.get("payableMicroUsd"));
+    if micro {
+        let expected = total
+            .checked_sub(reserve)
+            .filter(|v| *v >= 0)
+            .ok_or("promotionSnapshotInvalid")?;
+        if frozen.and_then(Value::as_u64) != u64::try_from(expected).ok()
+            || snapshot["result"]["commissionMicroUsd"].as_u64() != u64::try_from(total).ok()
+            || snapshot["result"]["reserveMicroUsd"].as_u64() != u64::try_from(reserve).ok()
+        {
+            return Err("promotionSnapshotInvalid".into());
+        }
+        Ok(expected)
+    } else {
+        if frozen.is_some() {
+            return Err("promotionSnapshotInvalid".into());
+        }
+        cents
+            .checked_mul(10_000)
+            .ok_or_else(|| "promotionAmountOverflow".into())
+    }
+}
 fn terms(row: &postgres::Row, version: &str) -> Result<(), String> {
     if row.get::<_, String>(0) != version {
         return Err("promotionTermsChanged".into());
@@ -632,7 +681,7 @@ impl PromotionStore {
             if registered<positive(row.get(2))||registered>=positive(row.get(3)) { return Err("promotionExistingAccountExcluded".into()); }
             if now_ms<registered||now_ms>registered.saturating_add(rules.confirmation_window_ms) { return Err("promotionConfirmationExpired".into()); }
             let saved:AccountRecord=serde_json::from_value(acc.get(0)).map_err(|_|"promotionAccountUnavailable")?;
-            if saved.billing.as_ref().is_some_and(|l|l.orders.values().any(|o|o.paid_at_ms.is_some())) { return Err("promotionAlreadyPaid".into()); }
+            if saved.billing.as_ref().is_some_and(|l|l.orders.values().any(|o|o.paid_at_ms.is_some())||l.sui_usdc_orders.values().any(|o|o.receipt.is_some())) { return Err("promotionAlreadyPaid".into()); }
             let cand=db(tx.query_opt("SELECT leader_id,first_clicked_at_ms,expires_at_ms,source FROM promotion_candidates WHERE environment=$1 AND campaign_id=$2 AND candidate_id=$3 AND account_id=$4",&[&self.environment,&campaign_id,&candidate_id,&account_id]))?.ok_or("promotionCandidateMissing")?;
             if now_ms>=positive(cand.get(2)) { return Err("promotionCandidateExpired".into()); }
             let clicked=positive(cand.get(1));
@@ -1364,7 +1413,7 @@ impl PromotionStore {
             let evidence=parsed.evidence().to_string();
             let mut result=match parsed {
                 AdminCommand::ConfigureDraft{draft,..}=>{
-                    draft.rules.validate()?;
+                    draft.rules.validate_environment(&self.environment)?;
                     if draft.rules.test_wallet_enrollment&&self.environment!="test" {return Err("promotionEnvironmentMismatch".into());}
                     if !["budget_capped","revenue_share"].contains(&draft.funding_mode.as_str()) || (draft.funding_mode=="revenue_share"&&draft.budget_micro_usd!=0) {return Err("promotionFundingModeInvalid".into());}
                     if draft.campaign_id!=campaign_id||!valid_id(campaign_id)||!valid_id(&draft.terms_version)||draft.starts_at_ms==0||draft.ends_at_ms<=draft.starts_at_ms {return Err("promotionCampaignInvalid".into());}
@@ -1430,7 +1479,7 @@ impl PromotionStore {
                     for member in &members {refresh_account_qualifications(tx,&self.environment,&member.get::<_,String>(0),now_ms)?;}
                     let leaders=db(tx.query("SELECT leader_id FROM promotion_leaders WHERE environment=$1 AND campaign_id=$2",&[&self.environment,&campaign_id]))?;
                     for leader in &leaders {
-                        let id:String=leader.get(0); let input=build_input(tx,&self.environment,campaign_id,&id)?; let input_hash=hash(&input)?; let result=calculate_commission(&input)?;
+                        let id:String=leader.get(0); let input=build_input(tx,&self.environment,campaign_id,&id)?; let input_hash=hash(&input)?; let result=configured_commission(tx,&input)?;
                         db(tx.execute("INSERT INTO promotion_commission_runs(environment,campaign_id,leader_id,input_sha256,input_json,result_json,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING",&[&self.environment,&campaign_id,&id,&input_hash,&serde_json::to_value(&input).map_err(|_|"promotionSnapshotInvalid")?,&serde_json::to_value(&result).map_err(|_|"promotionSnapshotInvalid")?,&signed(now_ms)?]))?;
                     }
                     json!({"status":"reconciled","memberCount":members.len(),"leaderCount":leaders.len(),"sourceGaps":super::production_gate::gaps(tx,&self.environment,campaign_id)?})
@@ -1447,12 +1496,12 @@ impl PromotionStore {
                     let pending:bool=db(tx.query_one("SELECT EXISTS(SELECT 1 FROM promotion_pending_reversals WHERE environment=$1 AND status='pending')",&[&self.environment]))?.get(0);
                     if pending{return Err("promotionReconciliationIncomplete".into());}
                     ensure_no_source_holds(tx,&self.environment,campaign_id,&leader_id)?;
-                    let input=build_input(tx,&self.environment,campaign_id,&leader_id)?; let result=calculate_commission(&input)?;
+                    let input=build_input(tx,&self.environment,campaign_id,&leader_id)?; let result=configured_commission(tx,&input)?;
                     let snapshot=json!({"input":input,"result":result,"inputWatermarkMs":row.get::<_,Option<i64>>(13),"evidenceRef":evidence});
                     let snapshot_hash=hash(&snapshot)?; let id=token("settle_")?;
                     db(tx.execute("INSERT INTO promotion_settlements(environment,campaign_id,settlement_id,leader_id,algorithm_version,snapshot_json,snapshot_sha256,total_micro_usd,payable_cents,reserve_micro_usd,created_by,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",&[&self.environment,&campaign_id,&id,&leader_id,&ALGORITHM_VERSION,&snapshot,&snapshot_hash,&signed(result.commission_micro_usd)?,&signed(result.payable_cents)?,&signed(result.reserve_micro_usd)?,&actor_account,&signed(now_ms)?]))?;
                     db(tx.execute("UPDATE promotion_campaigns SET recruitment_enabled=FALSE,status='locked' WHERE environment=$1 AND campaign_id=$2",&[&self.environment,&campaign_id]))?;
-                    json!({"settlementId":id,"status":"review","snapshotSha256":snapshot_hash,"totalMicroUsd":result.commission_micro_usd.to_string(),"payableCents":result.payable_cents,"payoutEnabled":campaign_payout_enabled(tx,&self.environment,campaign_id)?})
+                    json!({"settlementId":id,"status":"review","snapshotSha256":snapshot_hash,"totalMicroUsd":result.commission_micro_usd.to_string(),"payableCents":result.payable_cents,"payableMicroUsd":result.payable_micro_usd.unwrap_or(result.payable_cents*10_000).to_string(),"payoutPrecision":if result.payable_micro_usd.is_some(){6}else{2},"payoutEnabled":campaign_payout_enabled(tx,&self.environment,campaign_id)?})
                 }
                 AdminCommand::ApproveSettlement{settlement_id,snapshot_sha256,..}=>{
                     let row=db(tx.query_opt("SELECT created_by,status,snapshot_sha256,leader_id FROM promotion_settlements WHERE environment=$1 AND campaign_id=$2 AND settlement_id=$3 FOR UPDATE",&[&self.environment,&campaign_id,&settlement_id]))?.ok_or("promotionSettlementMissing")?;
@@ -1467,12 +1516,19 @@ impl PromotionStore {
                     if (self.environment=="production"&&(!super::production_gate::approved(tx,&self.environment,campaign_id)?||network!="sui:mainnet"))||(self.environment!="production"&&network!="sui:testnet")||coin_type.trim().is_empty()||coin_type.len()>256 {return Err("promotionPayoutApprovalRequired".into());}
                     let payee:String=db(tx.query_opt("SELECT l.account_id FROM promotion_settlements s JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE s.environment=$1 AND s.campaign_id=$2 AND s.settlement_id=$3",&[&self.environment,&campaign_id,&settlement_id]))?.ok_or("promotionSettlementMissing")?.get(0);
                     lock_payee(tx,&self.environment,&payee)?;
-                    let row=db(tx.query_opt("SELECT s.status,s.payable_cents,l.account_id FROM promotion_settlements s JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE s.environment=$1 AND s.campaign_id=$2 AND s.settlement_id=$3 FOR UPDATE OF s",&[&self.environment,&campaign_id,&settlement_id]))?.ok_or("promotionSettlementMissing")?;
-                    if row.get::<_,String>(0)!="approved"||row.get::<_,i64>(1)<=0 {return Err("promotionSettlementStateInvalid".into());}
+                    let row=db(tx.query_opt("SELECT s.status,s.payable_cents,l.account_id,s.snapshot_json,s.total_micro_usd,s.reserve_micro_usd FROM promotion_settlements s JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE s.environment=$1 AND s.campaign_id=$2 AND s.settlement_id=$3 FOR UPDATE OF s",&[&self.environment,&campaign_id,&settlement_id]))?.ok_or("promotionSettlementMissing")?;
+                    if row.get::<_,String>(0)!="approved" {return Err("promotionSettlementStateInvalid".into());}
+                    let base=settlement_payable_micro_usd(tx,&self.environment,campaign_id,&row.get::<_,Value>(3),row.get(4),row.get(5),row.get(1))?;
+                    let campaign_row=campaign(tx,&self.environment,campaign_id,false)?;
+                    if super::production_gate::test_micro_enabled(&self.environment,&campaign_row.get::<_,Value>(4))? {
+                        if network!="sui:testnet"||coin_type!=super::TESTNET_USDC_COIN_TYPE||!super::production_gate::approved(tx,&self.environment,campaign_id)? {return Err("promotionPayoutManifestMismatch".into());}
+                        let manifest:Value=db(tx.query_one("SELECT manifest_json FROM promotion_production_approvals WHERE environment=$1 AND campaign_id=$2 AND approved_by IS NOT NULL",&[&self.environment,&campaign_id]))?.get(0);
+                        super::production_gate::test_micro_manifest(&self.environment,&campaign_row.get::<_,Value>(4),&manifest)?;
+                    }
                     let address=db(tx.query_opt("SELECT version,network,wallet_address,cooldown_until_ms,verified_credential_id FROM promotion_payout_addresses WHERE environment=$1 AND account_id=$2 ORDER BY version DESC LIMIT 1",&[&self.environment,&row.get::<_,String>(2)]))?.ok_or("promotionWalletProofRequired")?;
-                    if address.get::<_,String>(1)!=network||now_ms<positive(address.get(3)) {return Err("promotionWalletCooldown".into());}
+                    if address.get::<_,String>(1)!=network||(now_ms<positive(address.get(3))&&!super::production_gate::first_address_exempt(tx,&self.environment,campaign_id,address.get(0))?) {return Err("promotionWalletCooldown".into());}
                     let reversals:i64=db(tx.query_one("SELECT COALESCE(-sum(amount_micro_usd),0)::bigint FROM promotion_commission_entries WHERE environment=$1 AND settlement_id=$2",&[&self.environment,&settlement_id]))?.get(0);
-                    let amount=row.get::<_,i64>(1).checked_mul(10_000).and_then(|v|v.checked_sub(reversals)).ok_or("promotionAmountOverflow")?;
+                    let amount=base.checked_sub(reversals).ok_or("promotionAmountOverflow")?;
                     if amount<=0 {return Err("promotionNoPayableBalance".into());}
                     let id=token("payout_")?;
                     db(tx.execute("INSERT INTO promotion_payouts(environment,payout_id,settlement_id,network,coin_type,destination,address_version,amount_micro_usd,created_by,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",&[&self.environment,&id,&settlement_id,&network,&coin_type,&address.get::<_,String>(2),&address.get::<_,i64>(0),&amount,&actor_account,&signed(now_ms)?]))?;
@@ -1795,7 +1851,7 @@ fn reconcile_projection(
             )
         } else {
             let mut input = build_input(tx, env, campaign_id, &id)?;
-            let result = calculate_commission(&input)?;
+            let result = configured_commission(tx, &input)?;
             for member in &mut input.members {
                 if member.excluded {
                     continue;
@@ -1834,7 +1890,7 @@ fn reconcile_projection(
                     )?;
                 }
             }
-            let result = calculate_commission(&input)?;
+            let result = configured_commission(tx, &input)?;
             (input, result)
         };
         let input_hash = hash(&input)?;
@@ -1907,8 +1963,15 @@ fn list_settlements<T: GenericClient>(
     account: &str,
 ) -> Result<Vec<Value>, String> {
     let enabled = campaign_payout_enabled(client, env, campaign)?;
-    let rows=db(client.query("SELECT s.settlement_id,s.status,s.snapshot_sha256,s.total_micro_usd,s.payable_cents,s.reserve_micro_usd,s.created_at_ms,p.payout_id,p.status,COALESCE((SELECT -sum(e.amount_micro_usd) FROM promotion_commission_entries e WHERE e.environment=s.environment AND e.settlement_id=s.settlement_id),0)::bigint FROM promotion_settlements s JOIN promotion_leaders l USING(environment,campaign_id,leader_id) LEFT JOIN promotion_payouts p USING(environment,settlement_id) WHERE s.environment=$1 AND s.campaign_id=$2 AND l.account_id=$3 ORDER BY s.created_at_ms DESC LIMIT 100",&[&env,&campaign,&account]))?;
-    Ok(rows.iter().map(|r|json!({"id":r.get::<_,String>(0),"status":r.get::<_,String>(1),"snapshotSha256":r.get::<_,String>(2),"totalMicroUsd":r.get::<_,i64>(3).to_string(),"payableCents":r.get::<_,i64>(4),"reserveMicroUsd":r.get::<_,i64>(5).to_string(),"createdAtMs":positive(r.get(6)),"payoutId":r.get::<_,Option<String>>(7),"payoutStatus":r.get::<_,Option<String>>(8),"reversalMicroUsd":r.get::<_,i64>(9).to_string(),"payoutEnabled":enabled})).collect())
+    let rows=db(client.query("SELECT s.settlement_id,s.status,s.snapshot_sha256,s.total_micro_usd,s.payable_cents,s.reserve_micro_usd,s.created_at_ms,p.payout_id,p.status,COALESCE((SELECT -sum(e.amount_micro_usd) FROM promotion_commission_entries e WHERE e.environment=s.environment AND e.settlement_id=s.settlement_id),0)::bigint,s.snapshot_json,p.amount_micro_usd,p.tx_digest,(SELECT o.result_json->>'checkpoint' FROM promotion_payout_chain_observations o WHERE o.environment=p.environment AND o.payout_id=p.payout_id AND o.result_json->>'status'='confirmed' ORDER BY o.observed_at_ms DESC LIMIT 1) FROM promotion_settlements s JOIN promotion_leaders l USING(environment,campaign_id,leader_id) LEFT JOIN promotion_payouts p USING(environment,settlement_id) WHERE s.environment=$1 AND s.campaign_id=$2 AND l.account_id=$3 ORDER BY s.created_at_ms DESC LIMIT 100",&[&env,&campaign,&account]))?;
+    rows.iter().map(|r| {
+        let snapshot:Value=r.get(10);
+        let gross=settlement_payable_micro_usd(client,env,campaign,&snapshot,r.get(3),r.get(5),r.get(4))?;
+        let payable=gross.checked_sub(r.get::<_,i64>(9)).ok_or("promotionAmountOverflow")?.max(0);
+        let amount=r.get::<_,Option<i64>>(11);
+        let status=r.get::<_,Option<String>>(8);
+        Ok(json!({"id":r.get::<_,String>(0),"status":r.get::<_,String>(1),"snapshotSha256":r.get::<_,String>(2),"totalMicroUsd":r.get::<_,i64>(3).to_string(),"payableCents":r.get::<_,i64>(4),"payableMicroUsd":payable.to_string(),"grossPayableMicroUsd":gross.to_string(),"payoutPrecision":if snapshot["result"].get("payableMicroUsd").is_some(){6}else{2},"reserveMicroUsd":r.get::<_,i64>(5).to_string(),"createdAtMs":positive(r.get(6)),"payoutId":r.get::<_,Option<String>>(7),"payoutStatus":status,"payoutAmountMicroUsd":amount.map(|v|v.to_string()),"paidMicroUsd":if status.as_deref()==Some("confirmed"){amount.unwrap_or(0).to_string()}else{"0".into()},"txDigest":r.get::<_,Option<String>>(12),"checkpoint":r.get::<_,Option<String>>(13),"reversalMicroUsd":r.get::<_,i64>(9).to_string(),"payoutEnabled":enabled}))
+    }).collect()
 }
 
 fn qualification_times<T: GenericClient>(
@@ -1982,7 +2045,8 @@ fn calculation<T: GenericClient>(
     if let Some(row)=db(client.query_opt("SELECT snapshot_json FROM promotion_settlements WHERE environment=$1 AND campaign_id=$2 AND leader_id=$3",&[&env,&campaign_id,&leader]))? {
         let snapshot:Value=row.get(0);return serde_json::from_value(snapshot["result"].clone()).map_err(|_|"promotionSnapshotInvalid".into());
     }
-    calculate_commission(&build_input(client, env, campaign_id, leader)?)
+    let input = build_input(client, env, campaign_id, leader)?;
+    configured_commission(client, &input)
 }
 
 fn dashboard<T: GenericClient>(
@@ -2021,7 +2085,7 @@ pub(super) fn refresh_account_qualifications(
             continue;
         }
         let input = build_input(tx, env, &campaign_id, &leader)?;
-        let result = calculate_commission(&input)?;
+        let result = configured_commission(tx, &input)?;
         let qualified = result.members.iter().find(|m| m.account_id == account_id);
         let status = if qualified.is_some() {
             "qualified"

@@ -6,6 +6,9 @@ use super::ALGORITHM_VERSION;
 
 pub const MICRO_USD_PER_CENT: u64 = 10_000;
 pub const BASIS_POINTS: u64 = 10_000;
+pub const TESTNET_USDC_COIN_TYPE: &str =
+    "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC";
+pub const TESTNET_CHAIN_IDENTIFIER: &str = "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD";
 
 fn wallet_enrollment_disabled(value: &bool) -> bool {
     !*value
@@ -18,6 +21,12 @@ pub struct PromotionRules {
     /// This never supplies gameplay qualification or payment evidence.
     #[serde(default, skip_serializing_if = "wallet_enrollment_disabled")]
     pub test_wallet_enrollment: bool,
+    /// Explicit short Testnet acceptance only; unchanged legacy cent rounding by default.
+    #[serde(default, skip_serializing_if = "wallet_enrollment_disabled")]
+    pub test_usdc_micro_payouts: bool,
+    /// Campaign-scoped first-address exception; never changes the global address record.
+    #[serde(default, skip_serializing_if = "wallet_enrollment_disabled")]
+    pub test_first_payout_address_no_cooldown: bool,
     pub minimum_level: u16,
     pub active_utc_days: u16,
     pub candidate_ttl_ms: u64,
@@ -32,6 +41,8 @@ impl Default for PromotionRules {
     fn default() -> Self {
         Self {
             test_wallet_enrollment: false,
+            test_usdc_micro_payouts: false,
+            test_first_payout_address_no_cooldown: false,
             minimum_level: 30,
             active_utc_days: 3,
             candidate_ttl_ms: 7 * 86_400_000,
@@ -53,8 +64,18 @@ impl PromotionRules {
             || self.maximum_coverage_ms == 0
             || self.reserve_bps > 10_000
             || self.wallet_cooldown_ms < 72 * 3_600_000
+            || (self.test_first_payout_address_no_cooldown && !self.test_usdc_micro_payouts)
         {
             return Err("promotionRulesInvalid".into());
+        }
+        Ok(())
+    }
+    pub fn validate_environment(&self, environment: &str) -> Result<(), String> {
+        self.validate()?;
+        if environment != "test"
+            && (self.test_usdc_micro_payouts || self.test_first_payout_address_no_cooldown)
+        {
+            return Err("promotionEnvironmentMismatch".into());
         }
         Ok(())
     }
@@ -142,6 +163,9 @@ pub struct CommissionResult {
     pub total_cents: u64,
     pub reserve_micro_usd: u64,
     pub payable_cents: u64,
+    /// Present only for the explicitly approved Testnet micro payout policy.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub payable_micro_usd: Option<u64>,
 }
 
 fn u64_from(value: u128) -> Result<u64, String> {
@@ -177,6 +201,24 @@ fn uncovered_ranges(start: u64, end: u64, occupied: &[(u64, u64)]) -> Vec<(u64, 
 /// never treats a recharge as a subscription. Inputs must already be backed by
 /// authenticated paid-lot/beneficiary evidence in the repository.
 pub fn calculate_commission(input: &CommissionInput) -> Result<CommissionResult, String> {
+    calculate_commission_precision(input, false)
+}
+
+/// Preserve genuine service-period proration, qualification and rates. Only the
+/// final Testnet payout precision changes; this never creates minimum rewards.
+pub fn calculate_test_usdc_micro_commission(
+    input: &CommissionInput,
+) -> Result<CommissionResult, String> {
+    if input.environment != "test" {
+        return Err("promotionEnvironmentMismatch".into());
+    }
+    calculate_commission_precision(input, true)
+}
+
+fn calculate_commission_precision(
+    input: &CommissionInput,
+    micro: bool,
+) -> Result<CommissionResult, String> {
     if input.starts_at_ms == 0
         || input.ends_at_ms <= input.starts_at_ms
         || input.maximum_coverage_ms == 0
@@ -351,6 +393,19 @@ pub fn calculate_commission(input: &CommissionInput) -> Result<CommissionResult,
     // Round gross once. Conservatively reserve complete cents and subtract them
     // from that same rounded gross, so reserve + payable cannot create money.
     let reserve_cents = u64_from(reserve_numerator.div_ceil(cent_denominator))?.min(total_cents);
+    let reserve_micro_usd = if micro {
+        u64_from(
+            card_numerator
+                .checked_mul(u128::from(input.reserve_bps))
+                .ok_or("promotionAmountOverflow")?
+                .div_ceil(cent_denominator),
+        )?
+        .min(commission_micro)
+    } else {
+        reserve_cents
+            .checked_mul(MICRO_USD_PER_CENT)
+            .ok_or("promotionAmountOverflow")?
+    };
     Ok(CommissionResult {
         algorithm_version: ALGORITHM_VERSION.into(),
         members,
@@ -358,10 +413,9 @@ pub fn calculate_commission(input: &CommissionInput) -> Result<CommissionResult,
         commission_micro_usd: commission_micro,
         commission_numerator: numerator.to_string(),
         total_cents,
-        reserve_micro_usd: reserve_cents
-            .checked_mul(MICRO_USD_PER_CENT)
-            .ok_or("promotionAmountOverflow")?,
+        reserve_micro_usd,
         payable_cents: total_cents - reserve_cents,
+        payable_micro_usd: micro.then_some(commission_micro - reserve_micro_usd),
     })
 }
 

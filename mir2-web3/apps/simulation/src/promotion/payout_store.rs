@@ -274,8 +274,9 @@ fn readiness<T: GenericClient>(
     env: &str,
     payout: &str,
     intent: Option<&PromotionPayoutIntent>,
+    now: u64,
 ) -> Result<(), String> {
-    let row=err(tx.query_opt("SELECT c.payout_enabled,l.status,a.is_banned,EXISTS(SELECT 1 FROM promotion_revenue_source_holds h WHERE h.environment=p.environment AND h.campaign_id=s.campaign_id AND h.active AND (h.account_id=l.account_id OR EXISTS(SELECT 1 FROM promotion_attributions x WHERE x.environment=h.environment AND x.campaign_id=h.campaign_id AND x.account_id=h.account_id AND x.leader_id=l.leader_id))) FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_campaigns c USING(environment,campaign_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) JOIN accounts a ON a.account_id=l.account_id WHERE p.environment=$1 AND p.payout_id=$2",&[&env,&payout]))?.ok_or("promotionPayoutMissing")?;
+    let row=err(tx.query_opt("SELECT c.payout_enabled,l.status,a.is_banned,EXISTS(SELECT 1 FROM promotion_revenue_source_holds h WHERE h.environment=p.environment AND h.campaign_id=s.campaign_id AND h.active AND (h.account_id=l.account_id OR EXISTS(SELECT 1 FROM promotion_attributions x WHERE x.environment=h.environment AND x.campaign_id=h.campaign_id AND x.account_id=h.account_id AND x.leader_id=l.leader_id))),c.rules_json FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_campaigns c USING(environment,campaign_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) JOIN accounts a ON a.account_id=l.account_id WHERE p.environment=$1 AND p.payout_id=$2",&[&env,&payout]))?.ok_or("promotionPayoutMissing")?;
     if !row.get::<_, bool>(0) {
         return Err("promotionPayoutExecutionDisabled".into());
     }
@@ -294,6 +295,11 @@ fn readiness<T: GenericClient>(
             return Err("promotionProductionApprovalRequired".into());
         }
         let manifest:Value=err(tx.query_opt("SELECT manifest_json FROM promotion_production_approvals WHERE environment=$1 AND campaign_id=$2 AND approved_by IS NOT NULL",&[&env,&intent.campaign_id]))?.ok_or("promotionProductionApprovalRequired")?.get(0);
+        let micro =
+            super::production_gate::test_micro_manifest(env, &row.get::<_, Value>(4), &manifest)?;
+        if micro && (intent.quote_numerator != "1" || intent.quote_denominator != "1") {
+            return Err("promotionPayoutQuoteMismatch".into());
+        }
         if manifest.get("network").and_then(Value::as_str) != Some(intent.network.as_str())
             || manifest.get("chainIdentifier").and_then(Value::as_str)
                 != Some(intent.chain_identifier.as_str())
@@ -334,9 +340,32 @@ fn readiness<T: GenericClient>(
     if member_banned {
         return Err("promotionRiskReviewRequired".into());
     }
-    let credential=err(tx.query_opt("SELECT i.credential_id FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) JOIN promotion_payout_addresses pa ON pa.environment=p.environment AND pa.account_id=l.account_id AND pa.version=p.address_version AND pa.wallet_address=p.destination AND pa.network=p.network JOIN identity_credentials i ON i.credential_id=pa.verified_credential_id AND i.account_id=l.account_id AND i.credential_subject=pa.wallet_address WHERE p.environment=$1 AND p.payout_id=$2 AND i.credential_kind='sui_wallet' AND i.revoked_at_ms IS NULL FOR SHARE OF i",&[&env,&payout]))?;
-    if credential.is_none() {
-        return Err("promotionWalletProofRequired".into());
+    let credential=err(tx.query_opt("SELECT i.credential_id,pa.version,pa.cooldown_until_ms,s.campaign_id FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) JOIN promotion_payout_addresses pa ON pa.environment=p.environment AND pa.account_id=l.account_id AND pa.version=p.address_version AND pa.wallet_address=p.destination AND pa.network=p.network JOIN identity_credentials i ON i.credential_id=pa.verified_credential_id AND i.account_id=l.account_id AND i.credential_subject=pa.wallet_address WHERE p.environment=$1 AND p.payout_id=$2 AND i.credential_kind='sui_wallet' AND i.revoked_at_ms IS NULL FOR SHARE OF i",&[&env,&payout]))?.ok_or("promotionWalletProofRequired")?;
+    if super::production_gate::test_micro_enabled(env, &row.get::<_, Value>(4))?
+        && signed(now)? < credential.get::<_, i64>(2)
+        && !super::production_gate::first_address_exempt(
+            tx,
+            env,
+            &credential.get::<_, String>(3),
+            credential.get(1),
+        )?
+    {
+        return Err("promotionWalletCooldown".into());
+    }
+    let basis=err(tx.query_one("SELECT s.campaign_id,s.snapshot_json,s.total_micro_usd,s.reserve_micro_usd,s.payable_cents,p.amount_micro_usd,COALESCE((SELECT -sum(e.amount_micro_usd) FROM promotion_commission_entries e WHERE e.environment=s.environment AND e.settlement_id=s.settlement_id),0)::bigint FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) WHERE p.environment=$1 AND p.payout_id=$2",&[&env,&payout]))?;
+    let available = super::store::settlement_payable_micro_usd(
+        tx,
+        env,
+        &basis.get::<_, String>(0),
+        &basis.get::<_, Value>(1),
+        basis.get(2),
+        basis.get(3),
+        basis.get(4),
+    )?
+    .checked_sub(basis.get::<_, i64>(6))
+    .ok_or("promotionAmountOverflow")?;
+    if available <= 0 || available != basis.get::<_, i64>(5) {
+        return Err("promotionPayoutBalanceChanged".into());
     }
     Ok(())
 }
@@ -392,7 +421,13 @@ impl PromotionPayoutJournal {
             {
                 return Err("promotionPayoutIntentChanged".into());
             }
-            readiness(&mut tx, &self.environment, &intent.payout_id, Some(intent))?;
+            readiness(
+                &mut tx,
+                &self.environment,
+                &intent.payout_id,
+                Some(intent),
+                now,
+            )?;
             if let Some(existing)=err(tx.query_opt("SELECT intent_sha256 FROM promotion_payout_intents WHERE environment=$1 AND payout_id=$2",&[&self.environment,&intent.payout_id]))? {
                 if existing.get::<_,String>(0)!=sha{return Err("promotionPayoutIntentChanged".into());}return Ok(json!({"payoutId":intent.payout_id,"intentSha256":sha,"status":"draft"}));
             }
@@ -434,7 +469,7 @@ impl PromotionPayoutJournal {
             if row.get::<_, String>(2) != sha {
                 return Err("promotionPayoutIntentChanged".into());
             }
-            readiness(&mut tx, &self.environment, payout, None)?;
+            readiness(&mut tx, &self.environment, payout, None, now)?;
             if row.get::<_, Option<String>>(4).as_deref() == Some(account)
                 && row.get::<_, String>(0) == "awaiting_approval"
             {
@@ -489,7 +524,7 @@ impl PromotionPayoutJournal {
             actor(&mut tx, &self.environment, account, "payoutSubmit")?;
             lock_payee_for_payout(&mut tx, &self.environment, &intent.payout_id)?;
             // Lock parent first consistently with approval/address/refund paths.
-            let p=err(tx.query_opt("SELECT p.status,p.tx_digest,p.created_by,p.reviewed_by,i.intent_sha256,i.reviewed_by,s.snapshot_sha256,s.status,p.amount_micro_usd,s.payable_cents,s.settlement_id,p.destination,p.address_version,l.account_id FROM promotion_payouts p JOIN promotion_payout_intents i USING(environment,payout_id) JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE p.environment=$1 AND p.payout_id=$2 FOR UPDATE OF p,s,i",&[&self.environment,&intent.payout_id]))?.ok_or("promotionPayoutIntentMissing")?;
+            let p=err(tx.query_opt("SELECT p.status,p.tx_digest,p.created_by,p.reviewed_by,i.intent_sha256,i.reviewed_by,s.snapshot_sha256,s.status,p.amount_micro_usd,s.payable_cents,s.settlement_id,p.destination,p.address_version,l.account_id,s.snapshot_json,s.total_micro_usd,s.reserve_micro_usd FROM promotion_payouts p JOIN promotion_payout_intents i USING(environment,payout_id) JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE p.environment=$1 AND p.payout_id=$2 FOR UPDATE OF p,s,i",&[&self.environment,&intent.payout_id]))?.ok_or("promotionPayoutIntentMissing")?;
             if p.get::<_, String>(4) != sha
                 || p.get::<_, Option<String>>(5).is_none()
                 || p.get::<_, Option<String>>(3).is_none()
@@ -505,17 +540,29 @@ impl PromotionPayoutJournal {
             if p.get::<_, String>(0) != "awaiting_approval" {
                 return Err("promotionPayoutStateInvalid".into());
             }
-            readiness(&mut tx, &self.environment, &intent.payout_id, Some(intent))?;
+            readiness(
+                &mut tx,
+                &self.environment,
+                &intent.payout_id,
+                Some(intent),
+                now,
+            )?;
             let risk_clear:bool=err(tx.query_one("SELECT EXISTS(SELECT 1 FROM promotion_leaders l JOIN accounts a ON a.account_id=l.account_id WHERE l.environment=$1 AND l.campaign_id=$2 AND l.account_id=$3 AND l.status='approved' AND NOT a.is_banned) AND NOT EXISTS(SELECT 1 FROM promotion_pending_reversals WHERE environment=$1 AND status='pending')",&[&self.environment,&intent.campaign_id,&p.get::<_,String>(13)]))?.get(0);
             if !risk_clear {
                 return Err("promotionPayoutRiskReviewRequired".into());
             }
             let reversals:i64=err(tx.query_one("SELECT COALESCE(-sum(amount_micro_usd),0)::bigint FROM promotion_commission_entries WHERE environment=$1 AND settlement_id=$2",&[&self.environment,&intent.settlement_id]))?.get(0);
-            let available = p
-                .get::<_, i64>(9)
-                .checked_mul(10_000)
-                .and_then(|v| v.checked_sub(reversals))
-                .ok_or("promotionAmountOverflow")?;
+            let available = super::store::settlement_payable_micro_usd(
+                &mut tx,
+                &self.environment,
+                &intent.campaign_id,
+                &p.get::<_, Value>(14),
+                p.get(15),
+                p.get(16),
+                p.get(9),
+            )?
+            .checked_sub(reversals)
+            .ok_or("promotionAmountOverflow")?;
             if available != p.get::<_, i64>(8) || available.to_string() != intent.amount_micro_usd {
                 return Err("promotionPayoutBalanceChanged".into());
             }
@@ -556,14 +603,20 @@ impl PromotionPayoutJournal {
             lock_payee_for_payout(&mut tx, &self.environment, payout)?;
             // A refund may have completed while the worker was checking gas.
             // Revalidate the frozen payable basis at the last durable send gate.
-            let basis=err(tx.query_opt("SELECT p.amount_micro_usd,p.destination,p.address_version,s.payable_cents,i.intent_json,l.account_id FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_payout_intents i USING(environment,payout_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE p.environment=$1 AND p.payout_id=$2 FOR UPDATE OF p,s,i",&[&self.environment,&payout]))?.ok_or("promotionPayoutIntentMissing")?;
+            let basis=err(tx.query_opt("SELECT p.amount_micro_usd,p.destination,p.address_version,s.payable_cents,i.intent_json,l.account_id,s.snapshot_json,s.total_micro_usd,s.reserve_micro_usd,s.campaign_id FROM promotion_payouts p JOIN promotion_settlements s USING(environment,settlement_id) JOIN promotion_payout_intents i USING(environment,payout_id) JOIN promotion_leaders l USING(environment,campaign_id,leader_id) WHERE p.environment=$1 AND p.payout_id=$2 FOR UPDATE OF p,s,i",&[&self.environment,&payout]))?.ok_or("promotionPayoutIntentMissing")?;
             let intent: Value = basis.get(4);
             let reversals:i64=err(tx.query_one("SELECT COALESCE(-sum(amount_micro_usd),0)::bigint FROM promotion_commission_entries WHERE environment=$1 AND settlement_id=(SELECT settlement_id FROM promotion_payouts WHERE environment=$1 AND payout_id=$2)",&[&self.environment,&payout]))?.get(0);
-            let available = basis
-                .get::<_, i64>(3)
-                .checked_mul(10_000)
-                .and_then(|v| v.checked_sub(reversals))
-                .ok_or("promotionAmountOverflow")?;
+            let available = super::store::settlement_payable_micro_usd(
+                &mut tx,
+                &self.environment,
+                &basis.get::<_, String>(9),
+                &basis.get::<_, Value>(6),
+                basis.get(7),
+                basis.get(8),
+                basis.get(3),
+            )?
+            .checked_sub(reversals)
+            .ok_or("promotionAmountOverflow")?;
             if available <= 0
                 || available != basis.get::<_, i64>(0)
                 || intent.get("amountMicroUsd").and_then(Value::as_str)
@@ -583,7 +636,7 @@ impl PromotionPayoutJournal {
             {
                 return Err("promotionPayoutAddressChanged".into());
             }
-            readiness(&mut tx, &self.environment, payout, None)?;
+            readiness(&mut tx, &self.environment, payout, None, now)?;
             let changed=err(tx.execute("UPDATE promotion_payout_attempts SET status='submitted',submitted_at_ms=$5,updated_at_ms=$5 WHERE environment=$1 AND payout_id=$2 AND tx_digest=$3 AND created_by=$4 AND status='reserved'",&[&self.environment,&payout,&digest,&account,&signed(now)?]))?;
             if changed != 1 {
                 return Err("promotionPayoutStateInvalid".into());
