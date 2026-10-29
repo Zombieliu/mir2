@@ -4,11 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: Inspect the original website project without changing deployments
+        description: Inspect, stage without aliases, or promote an accepted website deployment
         required: true
         default: context
         type: choice
-        options: [context]
+        options: [context, stage, promote, backend-build]
+      deployment_id:
+        description: Exact accepted production candidate; required only for promote
+        required: false
+        type: string
+      backend_source_sha:
+        description: Reviewed immutable backend source commit; required only for backend-build
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -18,21 +26,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  context:
+  website:
+    if: inputs.operation != 'backend-build'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Verify existing deployment credentials and project settings
+      - name: Verify original project and perform the requested bounded operation
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          MIR2_PROMOTION_WALLET_AUTH_SECRET: ${{ secrets.MIR2_PROMOTION_WALLET_AUTH_SECRET }}
+          MIR2_PROMOTION_SESSION_SECRET: ${{ secrets.MIR2_PROMOTION_SESSION_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           const team = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
           const project = 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz';
+          const baseline = 'dpl_3fnCbybhxwi7AXawCLjLkRTZkLDo';
+          if (process.env.GITHUB_REF !== 'refs/heads/codex/promotion-vercel-20261029') throw Error('Unexpected release branch');
           if (!process.env.VERCEL_TOKEN) throw Error('Missing existing Vercel CI credential');
           if (process.env.VERCEL_ORG_ID !== team || process.env.VERCEL_PROJECT_ID !== project) {
             throw Error('Existing CI credentials do not identify the original website project');
@@ -55,4 +70,95 @@ jobs:
             git: value.link ? {type:value.link.type, repo:value.link.repo, productionBranch:value.link.productionBranch}:null,
             environmentKeys: (value.env || []).map(entry => entry.key).sort()
           }, null, 2));
+          const operation = process.env.RELEASE_OPERATION;
+          if (operation === 'context') process.exit(0);
+          async function api(path, method = 'GET', body) {
+            const result = await fetch(`https://api.vercel.com${path}${path.includes('?')?'&':'?'}teamId=${team}`, {
+              method, headers:{Authorization:`Bearer ${process.env.VERCEL_TOKEN}`, 'Content-Type':'application/json'},
+              ...(body === undefined ? {} : {body:JSON.stringify(body)})
+            });
+            if (!result.ok) throw Error(`Vercel ${method} request failed: HTTP ${result.status}`);
+            return result.status === 204 ? {} : result.json();
+          }
+          const current = value.targets?.production?.id || value.targets?.production?.deploymentId;
+          if (current !== baseline) throw Error('Production changed since inspection; inspect and rebase before continuing');
+          if (operation === 'stage') {
+            const wallet = process.env.MIR2_PROMOTION_WALLET_AUTH_SECRET?.trim();
+            const session = process.env.MIR2_PROMOTION_SESSION_SECRET?.trim();
+            if (!wallet || !session || wallet.length < 32 || session.length < 32 || wallet === session) throw Error('Dedicated promotion secrets missing');
+            const config = {
+              MIR2_PROMOTION_GATEWAY_HTTP_URL:'https://promotion-playtest.165.154.65.136.sslip.io',
+              MIR2_PROMOTION_GATEWAY_ALLOWED_ORIGINS:'https://promotion-playtest.165.154.65.136.sslip.io',
+              MIR2_PROMOTION_PUBLIC_ORIGIN:'https://mir2.obelisk.build',
+              MIR2_PROMOTION_ALLOWED_ORIGINS:'https://mir2.obelisk.build',
+              MIR2_PROMOTION_DUBHE_CONNECT_NETWORK:'testnet',
+              MIR2_PROMOTION_DUBHE_CONNECT_RELAY_URL:'https://dubhe-connect-relay.zombiesliu.workers.dev',
+              MIR2_PROMOTION_DUBHE_WALLET_ORIGIN:'https://wallet.dubhe.obelisk.build',
+              MIR2_PROMOTION_CAMPAIGN_ID:'numeron-playtest-20261029',
+              MIR2_PROMOTION_WALLET_AUTH_SECRET:wallet,
+              MIR2_PROMOTION_SESSION_SECRET:session
+            };
+            await api(`/v10/projects/${project}/env?upsert=true`, 'POST', Object.entries(config).map(([key,value]) => ({
+              key,value,type:key.endsWith('_SECRET')?'sensitive':'plain',target:['production'],
+              comment:'Isolated test promotion deployment; preserves existing game configuration'
+            })));
+            const deployment = await api('/v13/deployments', 'POST', {
+              name:value.name,project,target:'production',autoAssignCustomDomains:false,
+              gitSource:{type:'github',repoId:value.link.repoId,ref:'codex/promotion-vercel-20261029',sha:process.env.GITHUB_SHA},
+              meta:{promotionRelease:'20261029',promotionBaseline:baseline,promotionSourceSha:process.env.GITHUB_SHA}
+            });
+            console.log(JSON.stringify({operation,id:deployment.id,url:deployment.url,readyState:deployment.readyState,
+              target:deployment.target,alias:deployment.alias,autoAssignCustomDomains:false,sourceSha:process.env.GITHUB_SHA},null,2));
+          } else if (operation === 'promote') {
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
+            const deployment = await api(`/v13/deployments/${id}`);
+            if (deployment.projectId !== project || deployment.target !== 'production' || deployment.readyState !== 'READY' ||
+                deployment.meta?.promotionSourceSha !== process.env.GITHUB_SHA || deployment.meta?.promotionBaseline !== baseline) {
+              throw Error('Deployment does not match the reviewed, ready production candidate');
+            }
+            await api(`/v10/projects/${project}/promote/${id}`, 'POST', {});
+            console.log(JSON.stringify({operation,id,url:deployment.url,sourceSha:process.env.GITHUB_SHA},null,2));
+          } else throw Error('Unsupported release operation');
           NODE
+  backend:
+    if: inputs.operation == 'backend-build'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Validate immutable backend input
+        env:
+          BACKEND_SOURCE_SHA: ${{ inputs.backend_source_sha }}
+        run: |
+          [[ "$BACKEND_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.backend_source_sha }}
+          persist-credentials: false
+      - name: Build only the isolated native promotion backend
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_RELEASE_STRIP: symbols
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.95.0 --profile minimal
+          cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway
+          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest
+          mkdir -p ../promotion-backend-release
+          cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest ../promotion-backend-release/
+          cp config/promotion-playtest-20261029.test.json ../promotion-backend-release/
+          git rev-parse HEAD > ../promotion-backend-release/SOURCE-SHA.txt
+          cd ../promotion-backend-release
+          sha256sum mir2-gateway promotion_worker promotion_playtest promotion-playtest-20261029.test.json > SHA256SUMS
+          ldd mir2-gateway
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-backend-${{ inputs.backend_source_sha }}
+          path: promotion-backend-release/
+          retention-days: 7
+          if-no-files-found: error

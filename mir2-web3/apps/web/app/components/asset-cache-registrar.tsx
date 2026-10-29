@@ -247,6 +247,8 @@ export function AssetCacheRegistrar() {
   const [snapshot, setSnapshot] = useState<CacheMetricsSnapshot | null>(null);
 
   useEffect(() => {
+    // Marketing pages use ordinary HTTP data and must not prewarm game packs.
+    if (window.location.pathname.startsWith("/promotions")) return;
     setMounted(true);
     const params = new URLSearchParams(window.location.search);
     const debug = params.get("cacheDebug") === "1";
