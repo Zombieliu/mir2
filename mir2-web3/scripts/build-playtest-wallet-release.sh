@@ -91,7 +91,7 @@ task_pg_started=1
 export PGHOST=127.0.0.1 PGPORT="$task_pg_port" PGUSER=mir2_ci_admin PGDATABASE=postgres
 unset PGOPTIONS PGSERVICE PGSERVICEFILE PGPASSWORD PGPASSFILE
 task_stamp="$(date -u +%Y%m%d%H%M%S)_$$"
-for task_domain in monthly billing activities; do
+for task_domain in monthly billing activities startup; do
   task_role="${task_domain}_qa"
   task_database="mir2_${task_domain}_qa_${task_stamp}"
   "$task_pg_bin/createuser" --no-superuser --no-createdb --no-createrole --no-replication "$task_role"
@@ -103,6 +103,7 @@ for task_domain in monthly billing activities; do
     monthly) export MIR2_MONTHLY_CARD_TEST_DATABASE_URL="$task_uri" MIR2_MONTHLY_CARD_TEST_ISOLATED=1 ;;
     billing) export MIR2_BILLING_TEST_DATABASE_URL="$task_uri" MIR2_BILLING_TEST_ISOLATED=1 ;;
     activities) export MIR2_ACTIVITY_TEST_DATABASE_URL="$task_uri" MIR2_ACTIVITY_TEST_ISOLATED=1 ;;
+    startup) export MIR2_STARTUP_TEST_DATABASE_URL="$task_uri" ;;
   esac
 done
 unset task_uri
@@ -129,6 +130,21 @@ grep -q '^PASS:' "$task_evidence/linux-release-security.log" || fail 'Linux secu
   MIR2_RELEASE_TAG="$task_release_tag" \
   bash scripts/package-gateway-release.sh
 ) 2>&1 | tee "$task_evidence/gateway-package.log"
+
+# The library tests do not execute async_main. Exercise the packaged release
+# with real isolated PostgreSQL and Redis while both recovery features are off.
+# GitHub's ephemeral Ubuntu image may omit the native Redis executable.
+if ! command -v redis-server >/dev/null 2>&1; then
+  sudo -n apt-get update -qq
+  sudo -n apt-get install --no-install-recommends -y redis-server
+fi
+python3 scripts/verify-playtest-postgres-startup.py \
+  --binary "$task_root/target/release/mir2-gateway" \
+  --maps "$task_root/apps/web/lib/generated/crystal-map-pack" \
+  --psql "$task_pg_bin/psql" \
+  --redis-binary "$(command -v redis-server)" \
+  --revision "$task_revision" \
+  --evidence "$task_evidence" 2>&1 | tee "$task_evidence/gateway-postgres-startup.log"
 
 # Archive exactly the authenticated Git tree, rather than an untracked local
 # map directory. No archive member is extracted or executed here.
@@ -180,7 +196,7 @@ verification = {
     'postgres': 'private-temporary-native-cluster-loopback-only',
     'containersStarted': False,
     'productionPublish': False,
-    'passed': ['schema_union', 'monthly_card_postgres', 'billing_postgres', 'activities_postgres', 'linux-release-security', 'gateway-package'],
+    'passed': ['schema_union', 'monthly_card_postgres', 'billing_postgres', 'activities_postgres', 'linux-release-security', 'gateway-package', 'gateway-postgres-startup'],
     'mapManifest': 'crystal-map-pack-manifest.json',
 }
 (output / 'playtest-release-verification.json').write_text(json.dumps(verification, indent=2) + '\n', encoding='utf-8')

@@ -99,10 +99,24 @@ async fn async_main() -> std::io::Result<()> {
     // back to disabled defaults while old custody still requires recovery.
     config.procurement_config = mir2_simulation::procurement::ProcurementConfig::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let _procurement_worker = mir2_gateway::procurement_worker::ProcurementWorker::start(config.clone())
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let _usdc_worker = mir2_gateway::sui_usdc_billing::SuiUsdcWorker::start(config.clone())
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    // Recovery preflight reads PostgreSQL even when new sales are disabled.
+    // Keep synchronous postgres connect/query/drop outside the async runtime;
+    // the returned worker guards contain only their stop signals.
+    let recovery_config = config.clone();
+    let (_procurement_worker, _usdc_worker) = tokio::task::spawn_blocking(move || {
+        let procurement =
+            mir2_gateway::procurement_worker::ProcurementWorker::start(recovery_config.clone())?;
+        let usdc = mir2_gateway::sui_usdc_billing::SuiUsdcWorker::start(recovery_config)?;
+        Ok::<_, String>((procurement, usdc))
+    })
+    .await
+    .map_err(|error| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("recovery worker startup task failed: {error}"),
+        )
+    })?
+    .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let topology = mir2_gateway::ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
