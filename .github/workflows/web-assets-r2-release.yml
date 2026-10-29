@@ -46,7 +46,7 @@ jobs:
           node --input-type=module <<'NODE'
           const team = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
           const project = 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz';
-          const baseline = 'dpl_3fnCbybhxwi7AXawCLjLkRTZkLDo';
+          const baseline = 'dpl_48nA9MP31zPZXMHxgmfciatquZyd';
           if (process.env.GITHUB_REF !== 'refs/heads/codex/promotion-vercel-20261029') throw Error('Unexpected release branch');
           if (!process.env.VERCEL_TOKEN) throw Error('Missing existing Vercel CI credential');
           if (process.env.VERCEL_ORG_ID !== team || process.env.VERCEL_PROJECT_ID !== project) {
@@ -149,6 +149,9 @@ jobs:
         with:
           ref: ${{ inputs.backend_source_sha }}
           persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
       - name: Build only the isolated native promotion backend
         working-directory: mir2-web3
         env:
@@ -162,14 +165,21 @@ jobs:
           set -euo pipefail
           rustup toolchain install 1.95.0 --profile minimal
           cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway
-          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest
-          mkdir -p ../promotion-backend-release
-          cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest ../promotion-backend-release/
+          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_recalculate --example promotion_chain_acceptance
+          mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
+          cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/
           cp config/promotion-playtest-20261029.test.json ../promotion-backend-release/
+          cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json ../promotion-backend-release/usdc-recharge/
+          cp onchain/usdc-recharge/service/cli.mjs onchain/usdc-recharge/service/driver.mjs onchain/usdc-recharge/service/model.mjs ../promotion-backend-release/usdc-recharge/service/
+          cp "$(command -v node)" ../promotion-backend-release/runtime/node
+          node -p 'JSON.stringify({node:process.version,platform:process.platform,arch:process.arch})' > ../promotion-backend-release/runtime/RUNTIME.json
+          (cd ../promotion-backend-release/usdc-recharge && npm ci --omit=dev --ignore-scripts)
+          ../promotion-backend-release/runtime/node --check ../promotion-backend-release/usdc-recharge/service/cli.mjs
           git rev-parse HEAD > ../promotion-backend-release/SOURCE-SHA.txt
           cd ../promotion-backend-release
-          sha256sum mir2-gateway promotion_worker promotion_playtest promotion-playtest-20261029.test.json > SHA256SUMS
+          find . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
           ldd mir2-gateway
+          ldd runtime/node
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: promotion-backend-${{ inputs.backend_source_sha }}

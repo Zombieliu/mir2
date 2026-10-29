@@ -20,7 +20,7 @@ export type PromotionDashboard = {
   estimatedCommissionMicroUsd: string; commissionEnabled: boolean; status?: string;
 };
 export type PromotionMember = { memberRef: string; status: string; reasonCode?: string; estimatedCommissionMicroUsd?: string; qualifiedAtMs?: number | null; rank?: number | null; rateBps?: number | null };
-export type PromotionSettlement = { id: string; status: string; totalMicroUsd: string; payableCents: number; reserveMicroUsd: string; reversalMicroUsd: string; payoutId?: string | null; payoutStatus?: string | null; createdAtMs?: number; snapshotSha256: string };
+export type PromotionSettlement = { id: string; status: string; totalMicroUsd: string; payableCents: number; payableMicroUsd?: string; paidMicroUsd?: string; reserveMicroUsd: string; reversalMicroUsd: string; payoutId?: string | null; payoutStatus?: string | null; txDigest?: string | null; checkpoint?: string | null; createdAtMs?: number; snapshotSha256: string };
 export type PromotionPayoutSettings = { status: string; address?: string; network?: string; version?: number; cooldownUntilMs?: number | null; payoutEnabled: boolean };
 export type PromotionAppeal = { id: string; status: string; category?: string; message?: string; createdAtMs?: number };
 export type PromotionMe = {
@@ -65,15 +65,39 @@ export class PromotionApiError extends Error {
   constructor(public readonly status: number, public readonly code: string) { super(code); }
 }
 
+const CAMPAIGN_READS = new Set(["bootstrap", "public", "invite", "me", "members", "settlements", "export", "admin"]);
+const CAMPAIGN_WRITES = new Set(["click", "apply", "candidate", "confirm", "appeals", "admin"]);
+
+/** Keep a selected season in invitation links and every related request. Identity stays in the cookie. */
+export function promotionSeasonRequest(path: string, body?: Record<string, unknown>, search = typeof window === "undefined" ? "" : window.location.search) {
+  const values = new URL(search || "/", "https://promotion.invalid").searchParams.getAll("campaignId");
+  if (!values.length) return { path, body };
+  if (values.length !== 1 || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(values[0])) throw new PromotionApiError(400, "invalid_promotion_campaign");
+  const selected = values[0];
+  const [route] = path.split("?");
+  if (body !== undefined && CAMPAIGN_WRITES.has(route)) {
+    if (body.campaignId !== undefined && body.campaignId !== selected) throw new PromotionApiError(400, "promotion_campaign_mismatch");
+    return { path, body: { ...body, campaignId: selected } };
+  }
+  if (body === undefined && CAMPAIGN_READS.has(route)) {
+    const url = new URL(`/api/promotions/${path}`, "https://promotion.invalid");
+    if (url.searchParams.has("campaignId") && url.searchParams.get("campaignId") !== selected) throw new PromotionApiError(400, "promotion_campaign_mismatch");
+    url.searchParams.set("campaignId", selected);
+    return { path: `${route}?${url.searchParams}`, body };
+  }
+  return { path, body };
+}
+
 export async function promotionRequest<T>(path: string, options: { body?: Record<string, unknown>; csrfToken?: string; signal?: AbortSignal; idempotencyKey?: string } = {}): Promise<T> {
-  const writing = options.body !== undefined;
-  const response = await fetch(`/api/promotions/${path}`, {
+  const selected = promotionSeasonRequest(path, options.body);
+  const writing = selected.body !== undefined;
+  const response = await fetch(`/api/promotions/${selected.path}`, {
     method: writing ? "POST" : "GET", credentials: "same-origin", cache: "no-store",
     headers: writing ? {
       "content-type": "application/json", "x-promotion-csrf": options.csrfToken || "",
       "Idempotency-Key": options.idempotencyKey || crypto.randomUUID(),
     } : undefined,
-    body: writing ? JSON.stringify(options.body) : undefined,
+    body: writing ? JSON.stringify(selected.body) : undefined,
     signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(15_000)]) : AbortSignal.timeout(15_000),
   });
   let body: unknown;
@@ -89,7 +113,8 @@ export async function promotionRequest<T>(path: string, options: { body?: Record
 
 /** Do not parse/re-serialize canonical settlement input: doing so could change integers or hashes. */
 export async function readPromotionSettlementExport(settlementId: string): Promise<Blob> {
-  const response = await fetch(`/api/promotions/export?settlementId=${encodeURIComponent(settlementId)}`, {
+  const selected = promotionSeasonRequest(`export?settlementId=${encodeURIComponent(settlementId)}`);
+  const response = await fetch(`/api/promotions/${selected.path}`, {
     credentials: "same-origin", cache: "no-store", signal: AbortSignal.timeout(30_000),
   });
   if (!response.ok || !response.headers.get("content-type")?.toLowerCase().includes("application/json")) {

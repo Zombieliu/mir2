@@ -7,12 +7,14 @@ import { canEnrollTestWallet, hasTestWalletEnrollment, testWalletApplication, fo
   type InvitationPreview, type PromotionBootstrap, type PromotionCampaign, type PromotionLeader, type PromotionMember, type PromotionSettlement } from "./promotion-model";
 import { PromotionWalletLogin } from "./promotion-wallet-login";
 import { PromotionAdmin } from "./promotion-admin";
+import { PromotionBilling, PROMOTION_BILLING_LABELS } from "./promotion-billing";
 import styles from "./promotion.module.css";
 
-type View = "overview" | "characters" | "members" | "earnings" | "payout" | "rules" | "support" | "admin";
+type View = "overview" | "characters" | "members" | "earnings" | "payout" | "rules" | "support" | "admin" | "billing";
 const NAVIGATION: readonly { view: View; icon: string }[] = [
   { view: "overview", icon: "◈" }, { view: "characters", icon: "♙" }, { view: "members", icon: "♧" },
   { view: "earnings", icon: "▤" }, { view: "payout", icon: "◇" }, { view: "rules", icon: "≡" },
+  { view: "billing", icon: "◉" },
   { view: "support", icon: "?" }, { view: "admin", icon: "⚙" },
 ];
 const STATUS_KEYS: Record<string, PromotionTextKey> = {
@@ -180,7 +182,9 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
       setBootstrap(next); setError(null);
       setCharacterIndex(current => next.characters.some(character => character.index === current) ? current : next.characters[0]?.index ?? null);
       if (next.leader?.inviteCode) {
-        setInvitationLink(new URL(`/promotions/invite/${encodeURIComponent(next.leader.inviteCode)}`, window.location.origin).href);
+        const invitation = new URL(`/promotions/invite/${encodeURIComponent(next.leader.inviteCode)}`, window.location.origin);
+        if (next.campaign?.campaignId) invitation.searchParams.set("campaignId", next.campaign.campaignId);
+        setInvitationLink(invitation.href);
       } else setInvitationLink(null);
     } catch (cause) {
       if (signal?.aborted || refreshGeneration.current !== generation) return;
@@ -310,8 +314,8 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     </header>
     <div className={styles.layout}>
       <nav className={styles.sidebar} aria-label={copy.program}>
-        {NAVIGATION.filter(item => item.view !== "admin" || canAdmin).map(item => <button key={item.view} className={`${styles.navButton} ${view === item.view ? styles.active : ""}`}
-          aria-current={view === item.view ? "page" : undefined} onClick={() => changeView(item.view)}><span className={styles.navIcon} aria-hidden="true">{item.icon}</span>{item.view === "characters" && testWalletEnrollment ? copy.testEnrollmentTitle : copy[item.view]}</button>)}
+        {NAVIGATION.filter(item => (item.view !== "admin" || canAdmin) && (item.view !== "billing" || campaign?.environment === "test")).map(item => <button key={item.view} className={`${styles.navButton} ${view === item.view ? styles.active : ""}`}
+          aria-current={view === item.view ? "page" : undefined} onClick={() => changeView(item.view)}><span className={styles.navIcon} aria-hidden="true">{item.icon}</span>{item.view === "billing" ? PROMOTION_BILLING_LABELS[locale][0] : item.view === "characters" && testWalletEnrollment ? copy.testEnrollmentTitle : copy[item.view]}</button>)}
         <p className={styles.sidebarNote}>{copy.programIdentity}</p>
       </nav>
       <main className={styles.main}>
@@ -424,7 +428,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
             {dashboard ? <div className={styles.card}><p className={styles.cardTitle}>{copy.estimatedCommission}</p><p className={styles.metric}>{formatPromotionUsd(dashboard.estimatedCommissionMicroUsd, locale)}</p></div> : <p className={styles.empty}>{copy.totalsNoData}</p>}
             <div className={styles.sectionHeading} style={{ marginTop: 30 }}><h3>{copy.settlements}</h3></div>
             {listLoading ? <p role="status" className={styles.empty}>{copy.loading}</p> : settlements?.length ? <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>{copy.settlementId}</th><th>{copy.amount}</th><th>{accountCopy.reserve}</th><th>{accountCopy.reversal}</th><th>{accountCopy.payable}</th><th>{copy.status}</th></tr></thead><tbody>
-              {settlements.map(row => <tr key={row.id}><td className={styles.code}>{row.id}</td><td>{formatPromotionUsd(row.totalMicroUsd, locale)}</td><td>{formatPromotionUsd(row.reserveMicroUsd, locale)}</td><td>{formatPromotionUsd(row.reversalMicroUsd, locale)}</td><td>{formatPromotionCents(row.payableCents, locale)}</td><td><PromotionStatus value={row.payoutStatus || row.status} copy={copy} />{["unknown", "result_unknown"].includes(row.payoutStatus || "") ? <p className={styles.muted}>{copy.unknownPayment}</p> : null}</td></tr>)}
+              {settlements.map(row => <tr key={row.id}><td className={styles.code}>{row.id}</td><td>{formatPromotionUsd(row.totalMicroUsd, locale)}</td><td>{formatPromotionUsd(row.reserveMicroUsd, locale)}</td><td>{formatPromotionUsd(row.reversalMicroUsd, locale)}</td><td>{row.payableMicroUsd !== undefined ? formatPromotionUsd(row.payableMicroUsd, locale) : formatPromotionCents(row.payableCents, locale)}{row.paidMicroUsd && row.paidMicroUsd !== "0" ? <p>{copy.confirmed}: {formatPromotionUsd(row.paidMicroUsd, locale)}</p> : null}</td><td><PromotionStatus value={row.payoutStatus || row.status} copy={copy} />{row.txDigest ? <p className={styles.code} dir="ltr">{row.txDigest}{row.checkpoint ? ` · ${row.checkpoint}` : ""}</p> : null}{["unknown", "result_unknown"].includes(row.payoutStatus || "") ? <p className={styles.muted}>{copy.unknownPayment}</p> : null}</td></tr>)}
             </tbody></table></div> : settlements ? <p className={styles.empty}>{copy.noSettlements}</p> : null}
           </>}
         </section> : null}
@@ -437,6 +441,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
             })()} />}
         </section> : null}
 
+        {view === "billing" && campaign?.environment === "test" ? authenticated && bootstrap ? <PromotionBilling key={bootstrap.csrfToken} bootstrap={bootstrap} copy={copy} locale={locale} /> : <p className={styles.empty}>{copy.notAuthenticated}</p> : null}
         {view === "rules" ? <><PromotionDisclosure copy={copy} gaps={bootstrap?.sourceGaps || []} environment={campaign?.environment === "test" || bootstrap?.public?.environment === "test" ? "test" : campaign?.environment} /><RulePanel copy={copy} campaign={campaign} /></> : null}
 
         {view === "support" ? <section className={styles.section}><div className={styles.sectionHeading}><div><h2>{copy.support}</h2><p>{copy.supportBody}</p></div></div>

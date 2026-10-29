@@ -138,6 +138,9 @@ const GATEWAY_PATHS = new Set([
   "/v1/promotions/auth/exchange", "/v1/promotions/auth/password", "/v1/identity/me", "/v1/identity/sessions/revoke",
   ...["public", "invite", "click", "me", "apply", "candidate", "confirm", "members", "settlements", "export", "payout-address", "appeals", "admin"]
     .map((path) => `/v1/promotions/${path}`),
+  "/v1/billing/status", "/v1/billing/refresh", "/v1/billing/sui-usdc/checkout",
+  "/v1/billing/monthly-card/buy", "/v1/billing/monthly-card/activate",
+  "/v1/promotions/game-session",
 ]);
 export async function promotionGateway(path: string, options: { method?: "GET" | "POST"; token?: string; body?: unknown; idempotencyKey?: string; query?: string } = {}) {
   if (!GATEWAY_PATHS.has(path)) promotionFail(404, "promotion_endpoint_not_found");
@@ -145,6 +148,8 @@ export async function promotionGateway(path: string, options: { method?: "GET" |
   if (options.token) headers.set("authorization", `Bearer ${options.token}`);
   if (options.body !== undefined) headers.set("content-type", "application/json");
   if (options.idempotencyKey) headers.set("idempotency-key", options.idempotencyKey);
+  // This is the fixed server-to-server checkout origin, never browser input.
+  if (path.startsWith("/v1/billing/")) headers.set("origin", new URL(gateway()).origin);
   let response: Response;
   try {
     response = await fetch(`${gateway()}${path}${options.query ?? ""}`, {

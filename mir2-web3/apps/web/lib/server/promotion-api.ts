@@ -71,7 +71,11 @@ export async function promotionBootstrap(request: Request): Promise<Response> {
   try {
     promotionBrowserRequest(request);
     const session = await promotionSession(request, false);
-    const campaignSelection = campaignId();
+    const selection = new URL(request.url).searchParams;
+    if ([...selection.keys()].some(key => key !== "campaignId") || selection.getAll("campaignId").length > 1) {
+      promotionFail(400, "invalid_promotion_query");
+    }
+    const campaignSelection = campaignId(selection.get("campaignId") ?? undefined);
     if (!campaignSelection) return promotionJson({
       authenticated: !!session, csrfToken: session?.csrfToken ?? null, campaign: null, campaignStatus: "unconfigured",
       characters: [], leader: null, dashboard: null, sourceGaps: ["promotion_campaign_not_configured"], permissions: [], binding: binding(session),
