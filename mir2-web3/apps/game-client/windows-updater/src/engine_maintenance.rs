@@ -11,6 +11,25 @@ const HIGHEST: &str = "state/engine-maintenance-highest.txt";
 pub enum Scope {
     Root,
     FiveClass,
+    Unified,
+}
+impl Scope {
+    fn feed_urls(self) -> (&'static str, &'static str) {
+        match self {
+            Self::Root => (
+                "https://assets.mir2.obelisk.build/client-updates/latest.json",
+                "https://165.154.65.136.sslip.io/client-updates/latest.json",
+            ),
+            Self::FiveClass => (
+                "https://assets.mir2.obelisk.build/client-updates/five-class/latest.json",
+                "https://165.154.65.136.sslip.io/client-updates/five-class/latest.json",
+            ),
+            Self::Unified => (
+                "https://assets.mir2.obelisk.build/client-updates/unified/latest.json",
+                "https://165.154.65.136.sslip.io/client-updates/unified/latest.json",
+            ),
+        }
+    }
 }
 fn scope_for_version(digest: &str) -> Option<Scope> {
     match digest {
@@ -18,34 +37,20 @@ fn scope_for_version(digest: &str) -> Option<Scope> {
         "C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F" => {
             Some(Scope::FiveClass)
         }
+        "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A" => Some(Scope::Unified),
         _ => None,
     }
 }
-/// Only the two published, authenticated baseline byte identities select a
-/// production channel. An unknown signed baseline never enables network I/O.
-pub fn network_source(root: &Path) -> Result<Option<HttpsSource>> {
-    let (_, meta) = local_game(root)?;
-    let digest = hash(&meta["VERSION.json"]);
-    let Some(scope) = scope_for_version(&digest) else {
-        log(
-            root,
-            "engine-maintenance-unsupported-scope",
-            serde_json::json!({"baselineVersionSha256":digest}),
-        );
+// Construct a source only after an exact authenticated baseline match. This
+// boundary performs no requests and cannot create a source for an unknown hash.
+fn source_for_version(digest: &str) -> Result<Option<HttpsSource>> {
+    let Some(scope) = scope_for_version(digest) else {
         return Ok(None);
     };
-    let suffix = if scope == Scope::Root {
-        ""
-    } else {
-        "five-class/"
-    };
+    let (primary, fallback) = scope.feed_urls();
     Ok(Some(HttpsSource {
-        base: HttpsSource::pinned_base(&format!(
-            "https://assets.mir2.obelisk.build/client-updates/{suffix}latest.json"
-        ))?,
-        legacy_base: HttpsSource::pinned_base(&format!(
-            "https://165.154.65.136.sslip.io/client-updates/{suffix}latest.json"
-        ))?,
+        base: HttpsSource::pinned_base(primary)?,
+        legacy_base: HttpsSource::pinned_base(fallback)?,
         agent: ureq::AgentBuilder::new()
             .redirects(0)
             .timeout_connect(Duration::from_secs(8))
@@ -53,6 +58,21 @@ pub fn network_source(root: &Path) -> Result<Option<HttpsSource>> {
             .timeout_write(Duration::from_secs(30))
             .build(),
     }))
+}
+/// Only exact authenticated baseline byte identities select a compiled
+/// production channel. An unknown signed baseline never enables network I/O.
+pub fn network_source(root: &Path) -> Result<Option<HttpsSource>> {
+    let (_, meta) = local_game(root)?;
+    let digest = hash(&meta["VERSION.json"]);
+    let source = source_for_version(&digest)?;
+    if source.is_none() {
+        log(
+            root,
+            "engine-maintenance-unsupported-scope",
+            serde_json::json!({"baselineVersionSha256":digest}),
+        );
+    }
+    Ok(source)
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "camelCase")]
@@ -365,7 +385,7 @@ pub fn failed_spawn(root: &Path, handoff: &Handoff) -> Result<()> {
 mod tests {
     use super::*;
     #[test]
-    fn production_scope_only_uses_two_authenticated_baseline_hashes() {
+    fn production_scope_only_uses_three_authenticated_baseline_hashes() {
         assert_eq!(
             scope_for_version("481DA3F3EE5AFAB88A9B20F2DEB5A70E359B859C53671D9099B6213E5748FBAB"),
             Some(Scope::Root)
@@ -374,6 +394,93 @@ mod tests {
             scope_for_version("C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F"),
             Some(Scope::FiveClass)
         );
+        assert_eq!(
+            scope_for_version("51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A"),
+            Some(Scope::Unified)
+        );
         assert_eq!(scope_for_version(&"A".repeat(64)), None);
+    }
+
+    #[test]
+    fn unknown_version_cannot_construct_a_network_source() {
+        for digest in [
+            String::new(),
+            "A".repeat(64),
+            "481da3f3ee5afab88a9b20f2deb5a70e359b859c53671d9099b6213e5748fbab".into(),
+            "C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F/".into(),
+            "51afe182412b0cd7dabeb23228f3cce354d82db9694062fa40fab1166397308a".into(),
+            "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308B".into(),
+        ] {
+            // No Source exists on this branch, so no discovery/request method
+            // can be called, including for a near match of an admitted hash.
+            assert!(source_for_version(&digest).unwrap().is_none());
+        }
+    }
+
+    #[test]
+    fn authenticated_baselines_construct_only_their_matching_engine_source() {
+        for (digest, expected_scope) in [
+            (
+                "481DA3F3EE5AFAB88A9B20F2DEB5A70E359B859C53671D9099B6213E5748FBAB",
+                Scope::Root,
+            ),
+            (
+                "C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F",
+                Scope::FiveClass,
+            ),
+            (
+                "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A",
+                Scope::Unified,
+            ),
+        ] {
+            let source = source_for_version(digest).unwrap().unwrap();
+            let (primary, fallback) = expected_scope.feed_urls();
+            assert_eq!(source.base, HttpsSource::pinned_base(primary).unwrap());
+            assert_eq!(
+                source.legacy_base,
+                HttpsSource::pinned_base(fallback).unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn compiled_engine_channels_are_disjoint_and_keep_both_pinned_hosts() {
+        let mut primary_paths = std::collections::BTreeSet::new();
+        let mut fallback_paths = std::collections::BTreeSet::new();
+        for (scope, expected_path) in [
+            (Scope::Root, "/client-updates/latest.json"),
+            (Scope::FiveClass, "/client-updates/five-class/latest.json"),
+            (Scope::Unified, "/client-updates/unified/latest.json"),
+        ] {
+            let (primary, fallback) = scope.feed_urls();
+            for (raw, host) in [
+                (primary, "assets.mir2.obelisk.build"),
+                (fallback, "165.154.65.136.sslip.io"),
+            ] {
+                let parsed = url::Url::parse(raw).unwrap();
+                assert_eq!(parsed.scheme(), "https");
+                assert_eq!(parsed.host_str(), Some(host));
+                assert_eq!(parsed.path(), expected_path);
+                assert!(parsed.username().is_empty());
+                assert!(parsed.password().is_none());
+                assert!(parsed.query().is_none());
+                assert!(parsed.fragment().is_none());
+            }
+            assert!(primary_paths.insert(primary));
+            assert!(fallback_paths.insert(fallback));
+        }
+    }
+
+    #[test]
+    fn legacy_scope_receipt_encodings_remain_stable_with_unified_scope() {
+        for (scope, encoded) in [
+            (Scope::Root, "\"root\""),
+            (Scope::FiveClass, "\"fiveClass\""),
+            (Scope::Unified, "\"unified\""),
+        ] {
+            assert_eq!(serde_json::to_string(&scope).unwrap(), encoded);
+            assert_eq!(serde_json::from_str::<Scope>(encoded).unwrap(), scope);
+        }
+        assert!(serde_json::from_str::<Scope>("\"UNIFIED\"").is_err());
     }
 }
