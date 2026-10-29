@@ -1,0 +1,142 @@
+{
+  "schema": "mir2.windows.installer-start-menu-audit.v1",
+  "recordedAtUtc": "2026-10-29T11:19:55.4993054Z",
+  "readOnly": true,
+  "shortcutOrRegistryMutationsPerformed": false,
+  "preinstallShortcutSnapshotExisted": false,
+  "firstInstallLog": {
+    "path": "real-install-first.log",
+    "groupCreatedAtLocal": "2026-10-29 19:11:06 +08:00",
+    "createdGroup": "Numeron - Legend of Rebirth",
+    "parametersIncluded": [
+      "/NOICONS",
+      "/TASKS=\"\""
+    ],
+    "entriesCreated": 3
+  },
+  "firstObservedTestShortcuts": [
+    {
+      "name": "Numeron - Legend of Rebirth.lnk",
+      "target": "F:/mir2-build/native-zh-cn-finish-20261029/installed-validation/Mir2Launcher.exe",
+      "sha256": "18d0f4620c019f365e94937925708c120573413334b80a1e54dfa6143c3c83b3"
+    },
+    {
+      "name": "安装与试玩说明.lnk",
+      "target": "F:/mir2-build/native-zh-cn-finish-20261029/installed-validation/README.zh-CN.txt",
+      "sha256": "12171d41b4ab62bbf09e827f948180f315755373b6aae201273f71d2bb97c259"
+    },
+    {
+      "name": "卸载 Numeron - Legend of Rebirth.lnk",
+      "target": "F:/mir2-build/native-zh-cn-finish-20261029/installed-validation/uninstall/unins000.exe",
+      "sha256": "3d4d9992a6040f365fad3173af9a21d577de118f37b3c29d9243c47f70da784d"
+    }
+  ],
+  "actualNormalRegistration": {
+    "iconGroup": "Mir2 联网试玩版",
+    "installLocation": "D:/Mir2Invite",
+    "candidateVersion": "2026.10.07.19"
+  },
+  "oldGroupCurrentSnapshot": [
+    {
+      "name": "安装与试玩说明.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\安装与试玩说明.lnk",
+      "target": "F:\\mir2\\Mir2Invite\\安装与试玩说明.txt",
+      "workingDirectory": "F:\\mir2\\Mir2Invite",
+      "argumentsEmpty": true,
+      "sha256": "94ce5f20099d182121d4a8dc78c7c9a7c78994ac2154cce0ca9c011458db560a",
+      "modifiedUtc": "2026-09-29T11:04:23.4806586Z"
+    },
+    {
+      "name": "安裝與試玩說明.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\安裝與試玩說明.lnk",
+      "target": "D:\\Mir2Invite\\README.zh-TW.txt",
+      "workingDirectory": "D:\\Mir2Invite",
+      "argumentsEmpty": true,
+      "sha256": "6ddac0e14de26a012c400e23d181cbb3326bd52cd156024fe9cb811cdbd894a9",
+      "modifiedUtc": "2026-10-07T03:45:23.1003144Z"
+    },
+    {
+      "name": "解除安裝 Numeron - Legend of Rebirth.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\解除安裝 Numeron - Legend of Rebirth.lnk",
+      "target": "D:\\Mir2Invite\\uninstall\\unins000.exe",
+      "workingDirectory": "D:\\Mir2Invite\\uninstall",
+      "argumentsEmpty": true,
+      "sha256": "4a946e8a0be5f20fe90b2cf7c8d750e56d2465f0b38483b00d85d0e674a8da93",
+      "modifiedUtc": "2026-10-07T03:45:23.1163428Z"
+    },
+    {
+      "name": "卸载 Mir2 联网试玩版.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\卸载 Mir2 联网试玩版.lnk",
+      "target": "F:\\mir2\\Mir2Invite\\uninstall\\unins000.exe",
+      "workingDirectory": "F:\\mir2\\Mir2Invite\\uninstall",
+      "argumentsEmpty": true,
+      "sha256": "24152ae4a1247379067d12418bcbc430d2d7dd3abf4925ddc2f2a781a495e53d",
+      "modifiedUtc": "2026-09-29T11:04:23.4926831Z"
+    },
+    {
+      "name": "Installation and playtest guide.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Installation and playtest guide.lnk",
+      "target": "C:\\mir2-playtest-releases\\20261006-local-install-perf-01\\native-seed14-01\\README.en.txt",
+      "workingDirectory": "C:\\mir2-playtest-releases\\20261006-local-install-perf-01\\native-seed14-01",
+      "argumentsEmpty": true,
+      "sha256": "76fceaf0da236113983d2d5c52a221ab46b708c6bbe6cee6f1748748f8a7f165",
+      "modifiedUtc": "2026-10-06T00:15:00.6703689Z"
+    },
+    {
+      "name": "Mir2 联网试玩版.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Mir2 联网试玩版.lnk",
+      "target": "F:\\mir2\\Mir2Invite\\Mir2Launcher.exe",
+      "workingDirectory": "F:\\mir2\\Mir2Invite",
+      "argumentsEmpty": true,
+      "sha256": "cdb4e9036216dbac0d9e2d70da26be33ce95d25135d224a6b4bf915500ddbaea",
+      "modifiedUtc": "2026-10-01T22:23:09.3665860Z"
+    },
+    {
+      "name": "Numeron - Legend of Rebirth.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Numeron - Legend of Rebirth.lnk",
+      "target": "D:\\Mir2Invite\\Mir2Launcher.exe",
+      "workingDirectory": "D:\\Mir2Invite",
+      "argumentsEmpty": true,
+      "sha256": "414142de5491e1c8d90caac6b35a87db76520f570b03058b852d3355dd887fab",
+      "modifiedUtc": "2026-10-07T03:45:23.0881061Z"
+    },
+    {
+      "name": "Uninstall Numeron - Legend of Rebirth.lnk",
+      "path": "C:\\Users\\Administrator\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Mir2 联网试玩版\\Uninstall Numeron - Legend of Rebirth.lnk",
+      "target": "C:\\mir2-playtest-releases\\20261006-local-install-perf-01\\native-seed14-01\\uninstall\\unins000.exe",
+      "workingDirectory": "C:\\mir2-playtest-releases\\20261006-local-install-perf-01\\native-seed14-01\\uninstall",
+      "argumentsEmpty": true,
+      "sha256": "5a71e5df7fd192d9df879265dfe18ee1753f2b6ee06a4fc2773183467a18bc79",
+      "modifiedUtc": "2026-10-06T00:15:00.6875445Z"
+    }
+  ],
+  "currentTestGroupExists": false,
+  "currentTestGroupFiles": [],
+  "conclusions": [
+    "Observed D installation launch, Traditional Chinese guide and uninstall shortcuts remain in the distinct Mir2 联网试玩版 group and target D:/Mir2Invite. No actual path collision with the first validation group was observed.",
+    "Without a preinstall .lnk snapshot, historical shortcut byte preservation cannot be certified. Existing registry/game/preference snapshots do not prove shortcut preservation.",
+    "The first log explicitly created the new Numeron group, and all three observed new links targeted only the validation installation."
+  ],
+  "commandLinePolicy": {
+    "tasksOnlyGateDesktopIcon": true,
+    "explanation": "/GROUP is ignored when DisableProgramGroupPage=yes. /NOICONS initializes the optional no-group checkbox; AllowNoIcons defaults to no. The three unconditional group entries have no Tasks parameter.",
+    "groupOverrideAloneEffective": false,
+    "sourceUrls": [
+      "https://jrsoftware.org/ishelp/topic_setupcmdline.htm",
+      "https://jrsoftware.org/ishelp/topic_setup_allownoicons.htm"
+    ],
+    "recipeAllowNoIcons": "omitted; official default no",
+    "recipeDisableProgramGroupPage": true
+  },
+  "minimalRecoverySuggestion": [
+    "Do not recreate or repoint legacy D shortcuts without evidence of damage; no such repair is currently indicated.",
+    "Before another installation, archive the current exact validation links and snapshot the old group hashes. If cleaning first-attempt shortcuts, remove only the three exact known test links after confirming both target and recorded hash; remove their parent only if empty. Do not recursively delete the group or touch legacy links. No cleanup was executed by this audit.",
+    "A standalone /GROUP unique argument is insufficient with the current hidden group page. Without recipe changes, use and snapshot the known separate validation group and remove exact test entries afterward.",
+    "If the coordinator already rebuilds the installer for the independent updater fix, a validation-only unique DefaultGroupName plus UsePreviousGroup=no gives a stable isolated group; alternatively validation-only DisableProgramGroupPage=no makes an explicit /GROUP override effective. Keep normal installer behavior unchanged."
+  ],
+  "publicClaimsToAvoid": [
+    "All old shortcuts remained byte-identical after first installation.",
+    "/NOICONS or /TASKS=\"\" suppressed every Start Menu shortcut.",
+    "/GROUP alone isolates this current compiled installer."
+  ]
+}

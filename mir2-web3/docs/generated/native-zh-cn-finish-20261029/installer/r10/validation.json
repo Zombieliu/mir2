@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "kind": "r10-two-actual-full-inno-compiles-with-policy-fixed-updater",
+  "updaterSourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "sequence": 2026102910,
+  "actualFullPayload": true,
+  "producerCompileReceiptsPassed": true,
+  "curatorRecomputedBothActualSetupHashes": true,
+  "curatorRecomputedSameRecipeAndBothIncludes": true,
+  "compiledFromSameRecipeAndPayloadUpdaterIncludes": true,
+  "reports": [
+    {
+      "kind": "normal",
+      "report": "real-installer-normal-compile-r10.json",
+      "sourceReceipt": {
+        "filename": "real-installer-normal-compile-r10.json",
+        "bytes": 1120,
+        "sha256": "1954b347c2d2d1bae2a6e2945cc323f7a0a4f513e5bf9b990e4f98d1a663b767",
+        "included": false
+      },
+      "artifact": {
+        "filename": "Numeron-Legend-of-Rebirth-20261029-r10-Setup.exe",
+        "bytes": 1017971015,
+        "sha256": "e7a2438a6c73dcb3d529a75cbb2e7f19f7054c3909466952dcbe4544dc780d7f",
+        "included": false
+      },
+      "reportedFileVersion": "2026.10.29.10       ",
+      "normalizedFileVersion": "2026.10.29.10",
+      "compilerElapsedSeconds": 65.6565672,
+      "logReceipt": {
+        "filename": "real-installer-normal-compile-r10.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "included": false
+      }
+    },
+    {
+      "kind": "validation",
+      "report": "real-installer-validation-compile-r10.json",
+      "sourceReceipt": {
+        "filename": "real-installer-validation-compile-r10.json",
+        "bytes": 1182,
+        "sha256": "4f581e0eec27d19585a2cf6b118cf72bfbc3b52e2d5afd876e31a5259167678b",
+        "included": false
+      },
+      "artifact": {
+        "filename": "Numeron-Legend-of-Rebirth-20261029-r10-LocalValidation-Setup.exe",
+        "bytes": 1017971039,
+        "sha256": "6a196bc8010b95bed6c94ee9472ee56897bc7a23ac5e02e0bc72eb65176b16c8",
+        "included": false
+      },
+      "reportedFileVersion": "2026.10.29.10       ",
+      "normalizedFileVersion": "2026.10.29.10",
+      "compilerElapsedSeconds": 65.1386004,
+      "logReceipt": {
+        "filename": "real-installer-validation-compile-r10.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "included": false
+      }
+    }
+  ],
+  "compilerEngineVersion": "7.1.1",
+  "compilerSha256": "e0f9f1dc32032650c6629f6dee41eb6d20ba140e4e3c07c25d8a24f9ba781644",
+  "recipeSha256": "5a2653d216d637d2a29c91a63e3d26db1d296dc7a0232d27083898c79c17d004",
+  "payloadIncludeSha256": "c4e273fca76d39c15ce7cb203ff260bb49bd6df41855c9f2f3740a09aa97abf8",
+  "updaterIncludeSha256": "5f51b051cf4983c440d2050b1401d4e28e22e3615cee828c9ba8b9c92ffe3ad0",
+  "payloadIncludeFirstLine": "Source: \"F:\\m9\\mir2-web3\\dist\\mir2-windows-candidate\\WN-CANDIDATE-20261029-invited-09\\BILLING-HAN-SOURCE.json\"; DestDir: \"{app}\\game\"; Flags: ignoreversion",
+  "r9FailedStartupHistoryPreserved": true,
+  "publicAuthenticode": "NotSigned",
+  "publicRelease": false,
+  "binariesIncluded": false,
+  "actualInstalledR10StartupVerifiedByThisReport": false
+}

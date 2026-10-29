@@ -1,0 +1,51 @@
+{
+  "evidenceKind": "independent read-only QA payment refusal diagnosis",
+  "observedAtUtc": "2026-10-28T20:32:16.838Z",
+  "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+  "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+  "events": [
+    {
+      "observedAtUtc": "2026-10-28T20:14:46.375Z",
+      "phase": "explicitPaymentRequested",
+      "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "unsignedTransactionSha256": "57d77c0519ee35172a6db45ecbbe7196910ec65ecb45c0859e808bea34f313d7"
+    },
+    {
+      "observedAtUtc": "2026-10-28T20:14:50.509Z",
+      "phase": "bridgeRejectedOrUnknown",
+      "error": "qaWalletPaymentGasOrSenderMismatch"
+    }
+  ],
+  "paymentPreparedFilePresent": false,
+  "paymentBudgetFilePresent": false,
+  "paymentReceiptFilePresent": false,
+  "failure": {
+    "code": "qaWalletPaymentGasOrSenderMismatch",
+    "source": "external qa-wallet.mjs prepareInside after unsigned build and before buyerKey.signTransaction",
+    "rootCause": "Payer SUI is address balance. SDK2.16.2 resolves wallet self-paid gas with empty gasData.payment; external helper incorrectly requires at least one Gas Coin reference.",
+    "productPaymentWasSigned": false,
+    "productPaymentWasBroadcast": false
+  },
+  "latestFullnodeObservation": {
+    "observedAtUtc": "2026-10-28T20:24:41.367Z",
+    "invoiceState": "unpaid",
+    "creationCheckpoint": "400276065",
+    "expiryUtc": "2026-10-28T20:18:20.546Z",
+    "buyerUsdcMicros": "19990000",
+    "merchantUsdcMicros": "0",
+    "buyerSui": {
+      "coinBalance": "0",
+      "addressBalance": "997677468"
+    }
+  },
+  "separateBuyerTransfer": {
+    "digest": "5mrxwBAXXu8ntDmmbSnrmaHKju1wonoLCmJpqyNpgriM",
+    "checkpoint": "400277484",
+    "amountMicros": "10000",
+    "recipient": "0x8ced5edafb1264a31450a240701eab0ad4c449942a4845565e3d1dfa70ef2f02",
+    "successful": true,
+    "callsRechargeContract": false,
+    "mustNotCountAsRecharge": true
+  },
+  "noSigningBroadcastingOrProductEditsByAudit": true
+}

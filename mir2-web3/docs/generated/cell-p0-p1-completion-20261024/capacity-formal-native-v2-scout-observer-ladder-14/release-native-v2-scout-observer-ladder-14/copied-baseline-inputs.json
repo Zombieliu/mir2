@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_SOURCE_ONLY",
+  "formalPolicyDonor": "release-native-v2-account-store-wait-ladder-13",
+  "activeSourceDonor": "release-native-10-v2-scout-observer-feasibility-18",
+  "sourceDerivation": "template-derivation-v1.json",
+  "runtimeOutputsCopied": false,
+  "actualProbe18FactsKnown": false
+}

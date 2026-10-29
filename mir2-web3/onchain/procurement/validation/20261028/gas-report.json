@@ -1,0 +1,190 @@
+{
+  "network": "testnet",
+  "sampleDateUtc": "2026-10-28",
+  "custodyFixtureOnly": true,
+  "realDatabaseDelivery": false,
+  "formula": "computationCost + storageCost - storageRebate; nonRefundableStorageFee is disclosed separately, not added twice",
+  "publicationTransactionCount": 2,
+  "publicationNetMist": "33099970",
+  "scenarios": [
+    {
+      "scenario": "fill",
+      "transactionCount": 3,
+      "transactions": [
+        "HeQb5BGTZ8Em5wXrQzMq4wiXFrsz688FK2gqYcUMRYPq",
+        "D3maMPEUYLs8qnbHbbYqXu6SXsRZYjY8CL5AgcnECAA6",
+        "CvQg7oUNZ2nBCM3GaKCau2sZHtnTgbm6xqTU6fEhWaAy"
+      ],
+      "transactionsGas": [
+        {
+          "digest": "HeQb5BGTZ8Em5wXrQzMq4wiXFrsz688FK2gqYcUMRYPq",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "10070000",
+            "storageRebate": "4627937",
+            "nonRefundableStorageFee": "463"
+          },
+          "netMist": "6442063"
+        },
+        {
+          "digest": "D3maMPEUYLs8qnbHbbYqXu6SXsRZYjY8CL5AgcnECAA6",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "28728000",
+            "storageRebate": "3070093",
+            "nonRefundableStorageFee": "307"
+          },
+          "netMist": "26657907"
+        },
+        {
+          "digest": "CvQg7oUNZ2nBCM3GaKCau2sZHtnTgbm6xqTU6fEhWaAy",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "9614000",
+            "storageRebate": "9613039",
+            "nonRefundableStorageFee": "961"
+          },
+          "netMist": "1000961"
+        }
+      ],
+      "netMist": "34100931"
+    },
+    {
+      "scenario": "cancel",
+      "transactionCount": 3,
+      "transactions": [
+        "Csxh7vT2JUHPN2EQ7xgEmWCRBA26yqsVc4C55wmE5RGR",
+        "EXFfs9epDQEJDoPsvHqTa7iD4HdaLDZG9nG7NJn4pj75",
+        "A93Gi2VrHE1WNaZ2nAuX8pzVkaqjhYK17V74fQdH2k51"
+      ],
+      "transactionsGas": [
+        {
+          "digest": "Csxh7vT2JUHPN2EQ7xgEmWCRBA26yqsVc4C55wmE5RGR",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "10070000",
+            "storageRebate": "4627937",
+            "nonRefundableStorageFee": "463"
+          },
+          "netMist": "6442063"
+        },
+        {
+          "digest": "EXFfs9epDQEJDoPsvHqTa7iD4HdaLDZG9nG7NJn4pj75",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "28728000",
+            "storageRebate": "3070093",
+            "nonRefundableStorageFee": "307"
+          },
+          "netMist": "26657907"
+        },
+        {
+          "digest": "A93Gi2VrHE1WNaZ2nAuX8pzVkaqjhYK17V74fQdH2k51",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "4484000",
+            "storageRebate": "4483552",
+            "nonRefundableStorageFee": "448"
+          },
+          "netMist": "1000448"
+        }
+      ],
+      "netMist": "34100418"
+    },
+    {
+      "scenario": "expire",
+      "transactionCount": 3,
+      "transactions": [
+        "FDbQxhkoQ5wN51WdP8oj8ZwLRWJk69NGs1CSus4EkmLZ",
+        "9xuDmWffqvuoiXsZ9NSqRm9FMo6ZsD92kBLyULy5sagS",
+        "9Q42MQwCSkcUypuqLLTN1qpUbLKaGeRTZiqgpcnnopQ2"
+      ],
+      "transactionsGas": [
+        {
+          "digest": "FDbQxhkoQ5wN51WdP8oj8ZwLRWJk69NGs1CSus4EkmLZ",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "10070000",
+            "storageRebate": "4627937",
+            "nonRefundableStorageFee": "463"
+          },
+          "netMist": "6442063"
+        },
+        {
+          "digest": "9xuDmWffqvuoiXsZ9NSqRm9FMo6ZsD92kBLyULy5sagS",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "28728000",
+            "storageRebate": "3070093",
+            "nonRefundableStorageFee": "307"
+          },
+          "netMist": "26657907"
+        },
+        {
+          "digest": "9Q42MQwCSkcUypuqLLTN1qpUbLKaGeRTZiqgpcnnopQ2",
+          "gasUsed": {
+            "computationCost": "1000000",
+            "storageCost": "4484000",
+            "storageRebate": "4483552",
+            "nonRefundableStorageFee": "448"
+          },
+          "netMist": "1000448"
+        }
+      ],
+      "netMist": "34100418"
+    }
+  ],
+  "oneTimeSetup": [
+    {
+      "operation": "publish",
+      "digest": "7R9poi8JE1tDyNNGBproGm6egZfpSDQkhghaBTxK1k76",
+      "checkpoint": "400174093",
+      "gasUsed": {
+        "computationCost": "1000000",
+        "storageCost": "69600800",
+        "storageRebate": "0",
+        "nonRefundableStorageFee": "0"
+      },
+      "netMist": "70600800"
+    },
+    {
+      "operation": "genesis",
+      "digest": "8fA3zipy2erzhNZgQASunHy5PyZBVumYxoU7NxubhQGy",
+      "checkpoint": "400174320",
+      "gasUsed": {
+        "computationCost": "1000000",
+        "storageCost": "15025200",
+        "storageRebate": "5995800",
+        "nonRefundableStorageFee": "600"
+      },
+      "netMist": "10029400"
+    },
+    {
+      "operation": "enable",
+      "digest": "6jkPhuqRG5BhGGooitQiyheNmQ6UbLUNSJwVa79qhRni",
+      "checkpoint": "400174332",
+      "gasUsed": {
+        "computationCost": "1000000",
+        "storageCost": "3579600",
+        "storageRebate": "3579242",
+        "nonRefundableStorageFee": "358"
+      },
+      "netMist": "1000358"
+    }
+  ],
+  "totalNetMist": "183932325",
+  "runtimeMaximumPerTransactionMist": "50000000",
+  "runtimeDailySharedReservationCapMist": "980000000",
+  "setupMaximumBudgetMist": "1020000000",
+  "totalAuthorizedMaximumBudgetMist": "2000000000",
+  "runtimeReservedAfterScenariosMist": "450000000",
+  "budgetAdjustment": "Same durable gas ledger retained; runtime daily maximum increased from 500000000 to 980000000 after the three scenarios, reserving room for separate Windows/Gateway validation within the 2-test-SUI maximum.",
+  "nonGasCosts": {
+    "gameServerCpuMemory": "not measured",
+    "databaseStorageAndBackups": "not measured",
+    "rpcTrafficAndService": "not measured",
+    "optionalIndexerComputeDatabase": "not measured"
+  },
+  "serviceFeeUsd": "trial suggestion only; production charging disabled",
+  "usdExchangeAndProfitability": "not verified; test SUI has no real value"
+}

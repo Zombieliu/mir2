@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "indexedAt": "2026-10-24T12:46:29.637Z",
+  "scope": "Focused real ordinary-protocol death/revive continuation. Earlier failed attempts remain immutable. Separate runs never rewrite the original full-lifecycle result.",
+  "originalFullLifecycle": "../protocol-full-lifecycle/1792844742353-ccf6fb6e.report.json",
+  "originalFullLifecycleStatus": "14 passed; playerDeath and townRevive not_run; ok=false",
+  "nativeResume": "../protocol-native-resume/1792845120462-edfccab1.report.json",
+  "nativeResumeStatus": "9 fresh protocol checks passed; visual and server-restart acceptance excluded",
+  "reports": [
+    {
+      "file": "1792845433696-23f84151.report.json",
+      "sha256": "d1b3d08b9c6d3b49e7c0d9a377e85ae22679b279f554dc4b4ddd2f99d33b6427",
+      "runId": "1792845433696-23f84151",
+      "startedAt": "2026-10-24T12:37:13.699Z",
+      "finishedAt": "2026-10-24T12:37:57.333Z",
+      "ok": false,
+      "error": "Witnessed ordinary route did not complete",
+      "checks": {
+        "ordinaryTwoLogin": "passed",
+        "armourRemoval": "passed",
+        "ordinaryApproach": "failed",
+        "logout": "passed",
+        "realmDrain": "passed",
+        "sharedDeath": "not_run",
+        "townRevive": "not_run"
+      },
+      "incomingDamage": null,
+      "navigationSegments": 2,
+      "provocations": [],
+      "armourRestoration": {
+        "receipt": 723,
+        "equipped": true
+      },
+      "fullLifecycleAccepted": false,
+      "visualAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "file": "1792845654430-cb5de189.report.json",
+      "sha256": "4ab08e9893a3df48a4e7a738b1bfe0ac395d0af6ff03694f88dd6bae41a50ec7",
+      "runId": "1792845654430-cb5de189",
+      "startedAt": "2026-10-24T12:40:54.431Z",
+      "finishedAt": "2026-10-24T12:41:48.513Z",
+      "ok": false,
+      "error": "Witnessed ordinary route did not complete",
+      "checks": {
+        "ordinaryTwoLogin": "passed",
+        "armourRemoval": "passed",
+        "ordinaryApproach": "failed",
+        "logout": "passed",
+        "realmDrain": "passed",
+        "sharedDeath": "not_run",
+        "townRevive": "not_run"
+      },
+      "incomingDamage": null,
+      "navigationSegments": 22,
+      "provocations": [],
+      "armourRestoration": {
+        "receipt": 861,
+        "equipped": true
+      },
+      "fullLifecycleAccepted": false,
+      "visualAccepted": false,
+      "loadAccepted": false
+    },
+    {
+      "file": "1792845858629-b969ae9c.report.json",
+      "sha256": "c56e2dd6b38cd33a8cc947da4b73b59b8d43527187d042ffad998a5048884747",
+      "runId": "1792845858629-b969ae9c",
+      "startedAt": "2026-10-24T12:44:18.631Z",
+      "finishedAt": "2026-10-24T12:45:28.107Z",
+      "ok": true,
+      "error": null,
+      "checks": {
+        "ordinaryTwoLogin": "passed",
+        "armourRemoval": "passed",
+        "ordinaryApproach": "passed",
+        "sharedDeath": "passed",
+        "townRevive": "passed",
+        "logout": "passed",
+        "realmDrain": "passed"
+      },
+      "incomingDamage": {
+        "positiveReceipts": [
+          {
+            "sequence": 832,
+            "damage": 3
+          },
+          {
+            "sequence": 835,
+            "damage": 1
+          },
+          {
+            "sequence": 863,
+            "damage": 4
+          },
+          {
+            "sequence": 866,
+            "damage": 2
+          },
+          {
+            "sequence": 988,
+            "damage": 3
+          },
+          {
+            "sequence": 1010,
+            "damage": 3
+          },
+          {
+            "sequence": 1039,
+            "damage": 2
+          },
+          {
+            "sequence": 1055,
+            "damage": 3
+          },
+          {
+            "sequence": 1073,
+            "damage": 3
+          },
+          {
+            "sequence": 1087,
+            "damage": 2
+          },
+          {
+            "sequence": 1104,
+            "damage": 3
+          },
+          {
+            "sequence": 1121,
+            "damage": 2
+          }
+        ],
+        "total": 31,
+        "scope": "Actual owner incoming damage; public Death does not identify a unique killing source."
+      },
+      "navigationSegments": 20,
+      "provocations": [
+        {
+          "objectId": 206013,
+          "name": "RakingCat",
+          "target": {
+            "x": 297,
+            "y": 601
+          },
+          "owner": {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 297,
+            "y": 602,
+            "hp": 14,
+            "maxHp": 18,
+            "dead": false
+          },
+          "commandSequence": 843
+        },
+        {
+          "objectId": 206007,
+          "name": "RakingCat",
+          "target": {
+            "x": 299,
+            "y": 591
+          },
+          "owner": {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 298,
+            "y": 591,
+            "hp": 15,
+            "maxHp": 18,
+            "dead": false
+          },
+          "commandSequence": 1027
+        }
+      ],
+      "armourRestoration": {
+        "receipt": 1214,
+        "equipped": true
+      },
+      "fullLifecycleAccepted": false,
+      "visualAccepted": false,
+      "loadAccepted": false
+    }
+  ],
+  "originalIntegrity": [
+    {
+      "file": "protocol-full-lifecycle\\1792844170791-128cb7c2.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "429ebb48b4627954a259cd51747f28a384a82dcfc96ad5b7acc1144385d3d80b"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844209635-8c69f135.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "2ab05b1afd3c2b6af498328437f810fe9eb53c87b7df809c762789d435d9155b"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb-a.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "29a91c2a609fa53485035a1f13b3fd8e2d4ac239e6f3c7ae07a135a98cbf9f3f"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb-b.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "d758d8611d0f4024a3ea7eaac31a0c42a7bdb128cff7bac862f9b69a0e3948b0"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb-guard-newCharacter.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "5a2e1c6a0431e4eb40dbfe1b1089bdc6b0613c9d3961222a7d2bd5ff8ece810e"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb-guard-startGame.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "9868b561f0c5a6d0d01646cb0f9f8278acb2ceeef00a1f693b6198e77f4fcc7f"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb-relogin-0.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "87bf534b5ab1e91bc0d74a5fc6110a4c78cc2b8b340bab2285d333e3aaa5d7f4"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb-relogin-1.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "17e1e60cbc42103cd1decb1cb1c138ef656205b3b37982472d3a5c55e37a7bcb"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844299531-72b3a0bb.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "3b0971504b0a3fe3836a9be7ddb4ae29726cdf40cb34c3aa638a052ec91f2247"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb-a.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "5b2a1032bed0e69422a5d2ad001f1ea37ef443097ac94256aa922673f11b41c6"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb-b.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "cb2435c1a29a49c6a7eb5d7491971d38e8e088bb23c84cdb419fdd053e190a1d"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb-guard-newCharacter.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "8ce53bc6069ef8cbe360cef1338ad905e6b27e3fc5b9c7f48d528325a050681f"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb-guard-startGame.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "f9cc67bcdf8375c9fbd005bb64d9fdaf2b37f42833354a948b1b7d9a151be81f"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb-relogin-0.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "22bd1797b898e0694bb0d706896da9a141239accb382c24a06a35ed51b729fb3"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb-relogin-1.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "d26341672cb005c2897140c464538aa5b59c248e18660bf19a49937dd8fc38c8"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844550249-a3b772bb.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "d475c9f6d182fa8bfe56cbc826d9b53dc638d1e9f0001e78b15944cf12e70707"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e-a.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "7d7c8582fb5863a4673717778d5441efa03dfc3a5d409545b0c49ef560afcfaa"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e-b.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "877bcadb9d097add31185f0c8a8a0eaba856c73c671ab1a4674314b2cf21cb59"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e-guard-newCharacter.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "df9fb8d3a24de043e6d1774215da6b1f58f8ea080ff9e745d7f3617260b09079"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e-guard-startGame.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "61b2dd585ff4625bcb82ff49990c15c3765ea3667d516eca1663c210417c3106"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e-relogin-0.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "f31bb8fbc0c47804b59cff0373801def4f9480c1f29d1a108fa722ccb74de41e"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e-relogin-1.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "4ee3e36b65d1236aa9fbaedbd92bbd202729f8bbfea2229478272cc8356afe51"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e.core-projection.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "134d0c6ade22a4489b3b543f1db8cb5511abccbb60df6427e31768a7691f729d"
+    },
+    {
+      "file": "protocol-full-lifecycle\\1792844742353-ccf6fb6e.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "8a4cc453f6674000eb55847bb22a6b545662e4ee144d695e3ed4634126c02eb0"
+    },
+    {
+      "file": "protocol-native-resume\\1792844890863-cf239893-original.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "71a3e8eda408e5eec05725da30e6e516339212472ceb2afb3a46be9be5fea27c"
+    },
+    {
+      "file": "protocol-native-resume\\1792844890863-cf239893-resumed.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "aebac9e70eddee5357e80b779f98bc9a93a583e3855dc41790233cc4b4a8ebaa"
+    },
+    {
+      "file": "protocol-native-resume\\1792844890863-cf239893.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "23148ff43b9696df77145485cb385ca4ace2a4fe0d06d44f9c645cf8a523da43"
+    },
+    {
+      "file": "protocol-native-resume\\1792845120462-edfccab1-original.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "8f38b73e081409bf6aa00a542d52160df8b75fbcd07bb216548499877d698a44"
+    },
+    {
+      "file": "protocol-native-resume\\1792845120462-edfccab1-replay.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "a57d4bc55132c3322513d705fe27e89340aad9a4317fabcfcf51a5748f41ac8f"
+    },
+    {
+      "file": "protocol-native-resume\\1792845120462-edfccab1-resumed.trace.jsonl",
+      "matchesPriorAudit": true,
+      "sha256": "13ac656ed1d246d7273acc6807a15e4f4b18ef55abd818115a6a2127d9fb05d2"
+    },
+    {
+      "file": "protocol-native-resume\\1792845120462-edfccab1.report.json",
+      "matchesPriorAudit": true,
+      "sha256": "855e2ea5aa070bcc1af3032d04ec3ca81efbdd35281dfa6c5a7a448d8302ea64"
+    }
+  ],
+  "fullLifecycleAccepted": false,
+  "visualAccepted": false,
+  "loadAccepted": false
+}

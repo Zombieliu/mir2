@@ -1,0 +1,986 @@
+{
+  "schemaVersion": 1,
+  "sourcePlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-bank-plan-pending-v1.json",
+    "bytes": 32017,
+    "sha256": "34292226864e80fe828b1afdb96fe5cfa5a3f51dcb80341af5d2ed72a397508a"
+  },
+  "sourceFiles": 11,
+  "totalBytes": 1279249,
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\accounts.json",
+        "bytes": 1254887,
+        "sha256": "563e8f823ad52ff4285b398bd6632adcaa9ccfdf3ef894895dba8e0c692af8f0",
+        "relative": "accounts.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\accounts.json",
+        "bytes": 1254887,
+        "sha256": "563e8f823ad52ff4285b398bd6632adcaa9ccfdf3ef894895dba8e0c692af8f0"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\capacity-pool.json",
+        "bytes": 22859,
+        "sha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5",
+        "relative": "capacity-pool.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\capacity-pool.json",
+        "bytes": 22859,
+        "sha256": "924f2a81f70153f070948f98cea8fc6187cb25772ffead1fca4c5fa670bab8a5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+        "bytes": 849,
+        "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c",
+        "relative": "capacity-auth-budget.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\capacity-auth-budget.json",
+        "bytes": 849,
+        "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+        "relative": "recovery-mac-key.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+        "relative": "identity-session-secret.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+        "relative": "identity-recovery-pepper.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+        "relative": "passkey-auth-secret.txt"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "save-recovery/.mir2-directory-durability"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "8ad20f7e41bd3dc9889d6bc30ab323d11531f38b35d5bd95100e9390b749686e",
+        "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "8ad20f7e41bd3dc9889d6bc30ab323d11531f38b35d5bd95100e9390b749686e"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+        "relative": "save-recovery/quarantine/.mir2-directory-durability"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    }
+  ],
+  "sourceUnchangedAfterCopy": true,
+  "sourcePoolAccounts": 100,
+  "sourceReadyCharacters": 100,
+  "sourcePreparedCount": 100,
+  "sourceNewPreparedCount": 42,
+  "sourceHistoricalPreparedCount": 58,
+  "sourcePreparedCharacters": [
+    {
+      "name": "L370e2a00",
+      "characterIndex": 1,
+      "map": "0",
+      "x": 288,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a01",
+      "characterIndex": 2,
+      "map": "0",
+      "x": 289,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a02",
+      "characterIndex": 3,
+      "map": "0",
+      "x": 288,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a03",
+      "characterIndex": 4,
+      "map": "0",
+      "x": 289,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a04",
+      "characterIndex": 5,
+      "map": "0",
+      "x": 287,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a05",
+      "characterIndex": 6,
+      "map": "0",
+      "x": 289,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a06",
+      "characterIndex": 7,
+      "map": "0",
+      "x": 288,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a07",
+      "characterIndex": 8,
+      "map": "0",
+      "x": 286,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a08",
+      "characterIndex": 9,
+      "map": "0",
+      "x": 290,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a09",
+      "characterIndex": 10,
+      "map": "0",
+      "x": 288,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0a",
+      "characterIndex": 11,
+      "map": "0",
+      "x": 287,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0b",
+      "characterIndex": 12,
+      "map": "0",
+      "x": 289,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0c",
+      "characterIndex": 13,
+      "map": "0",
+      "x": 286,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0d",
+      "characterIndex": 14,
+      "map": "0",
+      "x": 290,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0e",
+      "characterIndex": 15,
+      "map": "0",
+      "x": 286,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0f",
+      "characterIndex": 16,
+      "map": "0",
+      "x": 290,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0g",
+      "characterIndex": 17,
+      "map": "0",
+      "x": 287,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0h",
+      "characterIndex": 18,
+      "map": "0",
+      "x": 289,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0i",
+      "characterIndex": 19,
+      "map": "0",
+      "x": 290,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0j",
+      "characterIndex": 20,
+      "map": "0",
+      "x": 286,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0k",
+      "characterIndex": 21,
+      "map": "0",
+      "x": 290,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0l",
+      "characterIndex": 22,
+      "map": "0",
+      "x": 288,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0m",
+      "characterIndex": 23,
+      "map": "0",
+      "x": 285,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0n",
+      "characterIndex": 24,
+      "map": "0",
+      "x": 288,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0o",
+      "characterIndex": 25,
+      "map": "0",
+      "x": 287,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0p",
+      "characterIndex": 26,
+      "map": "0",
+      "x": 289,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0q",
+      "characterIndex": 27,
+      "map": "0",
+      "x": 285,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0r",
+      "characterIndex": 28,
+      "map": "0",
+      "x": 291,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0s",
+      "characterIndex": 29,
+      "map": "0",
+      "x": 285,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0t",
+      "characterIndex": 30,
+      "map": "0",
+      "x": 291,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0u",
+      "characterIndex": 31,
+      "map": "0",
+      "x": 287,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0v",
+      "characterIndex": 32,
+      "map": "0",
+      "x": 289,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0w",
+      "characterIndex": 33,
+      "map": "0",
+      "x": 286,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0x",
+      "characterIndex": 34,
+      "map": "0",
+      "x": 290,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0y",
+      "characterIndex": 35,
+      "map": "0",
+      "x": 291,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a0z",
+      "characterIndex": 36,
+      "map": "0",
+      "x": 285,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a10",
+      "characterIndex": 37,
+      "map": "0",
+      "x": 291,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a11",
+      "characterIndex": 38,
+      "map": "0",
+      "x": 286,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a12",
+      "characterIndex": 39,
+      "map": "0",
+      "x": 290,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a13",
+      "characterIndex": 40,
+      "map": "0",
+      "x": 291,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a14",
+      "characterIndex": 41,
+      "map": "0",
+      "x": 285,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a15",
+      "characterIndex": 42,
+      "map": "0",
+      "x": 288,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a16",
+      "characterIndex": 43,
+      "map": "0",
+      "x": 291,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a17",
+      "characterIndex": 44,
+      "map": "0",
+      "x": 284,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a18",
+      "characterIndex": 45,
+      "map": "0",
+      "x": 292,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a19",
+      "characterIndex": 46,
+      "map": "0",
+      "x": 288,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1a",
+      "characterIndex": 47,
+      "map": "0",
+      "x": 287,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1b",
+      "characterIndex": 48,
+      "map": "0",
+      "x": 289,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1c",
+      "characterIndex": 49,
+      "map": "0",
+      "x": 284,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1d",
+      "characterIndex": 50,
+      "map": "0",
+      "x": 292,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1e",
+      "characterIndex": 51,
+      "map": "0",
+      "x": 287,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1f",
+      "characterIndex": 52,
+      "map": "0",
+      "x": 286,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1g",
+      "characterIndex": 53,
+      "map": "0",
+      "x": 289,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1h",
+      "characterIndex": 54,
+      "map": "0",
+      "x": 290,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1i",
+      "characterIndex": 55,
+      "map": "0",
+      "x": 284,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1j",
+      "characterIndex": 56,
+      "map": "0",
+      "x": 292,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1k",
+      "characterIndex": 57,
+      "map": "0",
+      "x": 284,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1l",
+      "characterIndex": 58,
+      "map": "0",
+      "x": 292,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1m",
+      "characterIndex": 59,
+      "map": "0",
+      "x": 286,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1n",
+      "characterIndex": 60,
+      "map": "0",
+      "x": 290,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1o",
+      "characterIndex": 61,
+      "map": "0",
+      "x": 285,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1p",
+      "characterIndex": 62,
+      "map": "0",
+      "x": 291,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1q",
+      "characterIndex": 63,
+      "map": "0",
+      "x": 284,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1r",
+      "characterIndex": 64,
+      "map": "0",
+      "x": 284,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1s",
+      "characterIndex": 65,
+      "map": "0",
+      "x": 284,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1t",
+      "characterIndex": 66,
+      "map": "0",
+      "x": 292,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1u",
+      "characterIndex": 67,
+      "map": "0",
+      "x": 285,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1v",
+      "characterIndex": 68,
+      "map": "0",
+      "x": 292,
+      "y": 612,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1w",
+      "characterIndex": 69,
+      "map": "0",
+      "x": 284,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1x",
+      "characterIndex": 70,
+      "map": "0",
+      "x": 292,
+      "y": 620,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1y",
+      "characterIndex": 71,
+      "map": "0",
+      "x": 288,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a1z",
+      "characterIndex": 72,
+      "map": "0",
+      "x": 283,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a20",
+      "characterIndex": 73,
+      "map": "0",
+      "x": 293,
+      "y": 616,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a21",
+      "characterIndex": 74,
+      "map": "0",
+      "x": 288,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a22",
+      "characterIndex": 75,
+      "map": "0",
+      "x": 287,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a23",
+      "characterIndex": 76,
+      "map": "0",
+      "x": 289,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a24",
+      "characterIndex": 77,
+      "map": "0",
+      "x": 283,
+      "y": 615,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a25",
+      "characterIndex": 78,
+      "map": "0",
+      "x": 283,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a26",
+      "characterIndex": 79,
+      "map": "0",
+      "x": 293,
+      "y": 617,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a27",
+      "characterIndex": 80,
+      "map": "0",
+      "x": 287,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a28",
+      "characterIndex": 81,
+      "map": "0",
+      "x": 286,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a29",
+      "characterIndex": 82,
+      "map": "0",
+      "x": 289,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2a",
+      "characterIndex": 83,
+      "map": "0",
+      "x": 290,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2b",
+      "characterIndex": 84,
+      "map": "0",
+      "x": 283,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2c",
+      "characterIndex": 85,
+      "map": "0",
+      "x": 283,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2d",
+      "characterIndex": 86,
+      "map": "0",
+      "x": 293,
+      "y": 614,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2e",
+      "characterIndex": 87,
+      "map": "0",
+      "x": 293,
+      "y": 618,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2f",
+      "characterIndex": 88,
+      "map": "0",
+      "x": 286,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2g",
+      "characterIndex": 89,
+      "map": "0",
+      "x": 290,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2h",
+      "characterIndex": 90,
+      "map": "0",
+      "x": 285,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2i",
+      "characterIndex": 91,
+      "map": "0",
+      "x": 291,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2j",
+      "characterIndex": 92,
+      "map": "0",
+      "x": 283,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2k",
+      "characterIndex": 93,
+      "map": "0",
+      "x": 293,
+      "y": 613,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2l",
+      "characterIndex": 94,
+      "map": "0",
+      "x": 283,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2m",
+      "characterIndex": 95,
+      "map": "0",
+      "x": 293,
+      "y": 619,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2n",
+      "characterIndex": 96,
+      "map": "0",
+      "x": 285,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2o",
+      "characterIndex": 97,
+      "map": "0",
+      "x": 291,
+      "y": 621,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2p",
+      "characterIndex": 98,
+      "map": "0",
+      "x": 284,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2q",
+      "characterIndex": 99,
+      "map": "0",
+      "x": 292,
+      "y": 611,
+      "normalLogout": true
+    },
+    {
+      "name": "L370e2a2r",
+      "characterIndex": 100,
+      "map": "0",
+      "x": 283,
+      "y": 612,
+      "normalLogout": true
+    }
+  ],
+  "sourcePreparedEligibilityInherited": false,
+  "sourceEarlierFailuresRetained": true,
+  "sourceLatestReportPassed": true,
+  "sourceAll100Fresh": false,
+  "actualW17CompleteSavedBankSource": true,
+  "trafficLedgerSource": "ordinary-economic-formal-ladder-v1",
+  "gameSnapshotSource": "ordinary-capacity-bank-prepare-v17",
+  "isolatedSnapshotReplay": true,
+  "sourceTrafficOutcomeRetainedFalse": true,
+  "trafficAttemptCountAtSource": 11,
+  "sourceRecoveryPreserved": true,
+  "sourcePriorRecoveryArchiveRetainedInPlace": true,
+  "priorRecoveryArchiveCopiedToActive": false,
+  "activeRecoveryInitiallyEmpty": true,
+  "recoveryJournalPayloads": 0,
+  "authLedgerCopiedUnchanged": true,
+  "loginNotBeforeOverridden": false,
+  "accountStoreRewritePerformed": false,
+  "poolRewritePerformed": false,
+  "stockOrPositionEditPerformed": false,
+  "seederInvoked": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -1,0 +1,12 @@
+import {assertFormal14Configured} from './formal-template-contract.mjs';
+assertFormal14Configured();
+import {assertFinalDriverBinding} from './driver-binding-contract.mjs';
+assertFinalDriverBinding();
+import path from 'node:path';
+import { root, read, writeNew, processIdentity, samePath } from './input-lib.mjs';
+if (process.argv.slice(2).join(' ') !== '--request-normal-drain') throw new Error('Require explicit normal-drain argument');
+const record = await read(path.join(root, 'realm-process.json'));
+const owned = processIdentity(record.pid);
+if (!owned || !samePath(owned.exe, record.exe)) throw new Error('Owned gateway identity no longer matches; no stop request written');
+await writeNew(path.join(root, 'stop-request.json'), { schemaVersion: 1, requestedAt: new Date().toISOString(), gatewayPid: record.pid, reason: 'Operator requested normal driver drain and owned monitor/Gateway shutdown' });
+console.log(JSON.stringify({ normalDrainRequested: true, gatewayPid: record.pid, root, forcedKill: false }));

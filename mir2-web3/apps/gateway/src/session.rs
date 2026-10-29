@@ -10,9 +10,9 @@ use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
 #[cfg(test)]
 use mir2_simulation::CharacterSaveRecord;
 use mir2_simulation::{
-    ActiveSessionIdentity, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError, NpcGoldBuyRequest,
-    SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind, WorldSnapshot,
-    ZoneRuntimeHandle,
+    ActiveSessionIdentity, NativeAttackError, NativeAttackExecution, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingError, NpcGoldBuyRequest, SimulationConfig, WorldCommand,
+    WorldCommandExecution, WorldEntityKind, WorldSnapshot, ZoneRuntimeHandle,
 };
 
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
@@ -221,6 +221,24 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub(crate) fn execute_procurement_owner(
+        &mut self,
+        authenticated: bool,
+        request: &mir2_protocol::procurement::ProcurementRequest,
+        now_ms: u64,
+    ) -> Result<mir2_simulation::procurement::ProcurementExecution, String> {
+        if !authenticated { return Err("procurementAuthenticationRequired".into()); }
+        let lease=self.zone_owner_lease.clone();
+        self.validate_zone_owner_lease(&lease)?;
+        let outcome=catch_gateway_panic("procurement gateway owner", || {
+            self.zone_owner_command_client.execute_procurement_owner(
+                &mut self.runtime,&lease,authenticated,request,now_ms,
+            )
+        }).map_err(|_| "procurementOwnerPublicationOutcomeUnknown")??;
+        self.validate_zone_owner_lease(&lease)
+            .map_err(|_| "procurementOwnerPublicationOutcomeUnknown")?;
+        Ok(outcome)
+    }
     pub(crate) fn has_pending_shared_personal_work(&self) -> bool {
         crate::routing::runtime_has_pending_shared_personal_work(self.runtime.as_ref())
     }
@@ -841,6 +859,58 @@ impl GatewaySession {
             ZoneOwnerCommandRequest::production_player(owner_lease, authenticated, command),
             true,
         )
+    }
+
+    /// Opt-in ordinary melee result. This route cannot degrade to a direct or
+    /// private attack if the selected owner does not support typed admission.
+    pub fn execute_production_attack_requiring_typed_outcome(
+        &mut self,
+        object_id: u32,
+        authenticated: bool,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        if !authenticated {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires authentication".into(),
+            ));
+        }
+        let identity = self.active_identity().ok_or_else(|| {
+            NativeAttackError::BeforeExecution(
+                "typed attack requires an active in-game character".into(),
+            )
+        })?;
+        if identity.account_id.is_empty() || identity.character_index < 0 {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires a canonical active identity".into(),
+            ));
+        }
+        self.validate_zone_owner_lease(&self.zone_owner_lease)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        let mut result = self
+            .zone_owner_command_client
+            .execute_production_attack_requiring_typed_outcome(
+                &mut self.runtime,
+                ZoneOwnerCommandRequest::production_player(
+                    self.zone_owner_lease.clone(),
+                    true,
+                    WorldCommand::Attack { object_id },
+                ),
+            )?;
+        if result.execution.outcome.command_kind != mir2_simulation::WorldCommandKind::Attack
+            || result.execution.outcome.packet_count != result.execution.packets.len()
+            || result.execution.outcome.active_identity.as_ref() != Some(&identity)
+        {
+            return Err(NativeAttackError::Unknown(
+                "typed attack result does not match its command and active actor".into(),
+            ));
+        }
+        self.publish_gameplay_event(&result.execution);
+        self.active_identity_binding = result.execution.outcome.active_identity.clone();
+        self.refresh_global_message_identity(result.execution.outcome.active_identity.as_ref());
+        if let Some(bus) = self.global_message_bus.as_ref() {
+            result.execution.packets.extend(bus.drain(&self.session_id));
+            result.execution.outcome.packet_count = result.execution.packets.len();
+        }
+        Ok(result)
     }
 
     pub fn execute_production_player_command_with_zone_owner_lease(
@@ -1597,6 +1667,80 @@ fn gateway_now_ms() -> u64 {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_attack_result_binding_is_checked_before_session_identity_changes() {
+        use mir2_simulation::{
+            ActiveSessionIdentity, NativeAttackAdmission, NativeAttackError, NativeAttackExecution,
+            WorldCommandOutcome,
+        };
+
+        #[derive(Debug)]
+        struct ReplyClient {
+            kind: WorldCommandKind,
+            count: usize,
+            identity: Option<ActiveSessionIdentity>,
+        }
+        impl ZoneOwnerCommandClient for ReplyClient {
+            fn execute(
+                &self,
+                _: &mut ZoneRuntimeHandle,
+                _: ZoneOwnerCommandRequest,
+            ) -> Result<WorldCommandExecution, String> {
+                panic!("typed request must never use generic execution")
+            }
+            fn execute_production_attack_requiring_typed_outcome(
+                &self,
+                _: &mut ZoneRuntimeHandle,
+                _: ZoneOwnerCommandRequest,
+            ) -> Result<NativeAttackExecution, NativeAttackError> {
+                Ok(NativeAttackExecution {
+                    execution: WorldCommandExecution {
+                        packets: Vec::new(),
+                        outcome: WorldCommandOutcome {
+                            command_kind: self.kind.clone(),
+                            packet_count: self.count,
+                            snapshot_tick: 0,
+                            active_identity: self.identity.clone(),
+                        },
+                        game_shop_purchase_outcome: None,
+                    },
+                    admission: NativeAttackAdmission::Launched,
+                })
+            }
+        }
+        let mut session = GatewaySession::new(GatewayConfig::default());
+        login_demo(&mut session);
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let identity = session.active_identity().unwrap();
+        let binding_before = session.active_identity_binding.clone();
+        let mut other_account = identity.clone();
+        other_account.account_id.push_str("-other");
+        let mut other_character = identity.clone();
+        other_character.character_index += 1;
+        let mut other_name = identity.clone();
+        other_name.character_name.push_str("Other");
+        for (kind, count, result_identity) in [
+            (WorldCommandKind::Tick, 0, Some(identity.clone())),
+            (WorldCommandKind::Attack, 1, Some(identity.clone())),
+            (WorldCommandKind::Attack, 0, None),
+            (WorldCommandKind::Attack, 0, Some(other_account)),
+            (WorldCommandKind::Attack, 0, Some(other_character)),
+            (WorldCommandKind::Attack, 0, Some(other_name)),
+        ] {
+            session.zone_owner_command_client = Arc::new(ReplyClient {
+                kind,
+                count,
+                identity: result_identity,
+            });
+            assert!(matches!(
+                session.execute_production_attack_requiring_typed_outcome(7, true),
+                Err(NativeAttackError::Unknown(_))
+            ));
+            assert_eq!(session.active_identity_binding, binding_before);
+            assert_eq!(session.active_identity(), Some(identity.clone()));
+        }
+    }
+
     #[test]
     fn retained_bootstrap_requires_exact_authenticated_custody() {
         let mut session = super::GatewaySession::new(crate::GatewayConfig::default());

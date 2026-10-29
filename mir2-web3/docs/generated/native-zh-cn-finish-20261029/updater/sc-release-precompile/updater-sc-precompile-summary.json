@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.windows.updater-sc-precompile.v1",
+  "capturedAtUtc": "2026-10-29T10:34:05.6573148+00:00",
+  "passed": true,
+  "sourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "sourceClean": true,
+  "projectRoot": "F:/u9/mir2-web3",
+  "sparseCone": [
+    "mir2-web3/apps/game-client/windows-updater"
+  ],
+  "inputCount": 20,
+  "originalAssertSourceTrackedPassed": true,
+  "inputsReceiptSha256": "3df6b934ef2d28002fd2051f3a433a74f1a1bf2e53269e712d6adcef4c3e90d1",
+  "command": "cargo +1.95.0 build --locked --release --target x86_64-pc-windows-msvc --jobs 2",
+  "rustflags": "--remap-path-prefix=<PROJECT>=mir2-source",
+  "cargoReportedSeconds": 31.09,
+  "outputs": [
+    {
+      "name": "Mir2Launcher.exe",
+      "bytes": 392192,
+      "sha256": "cf4782eb831b3ef417d614b3d06ddb5838e8cf77ce3648ec88102eed9f6eb7e8"
+    },
+    {
+      "name": "Mir2Updater.exe",
+      "bytes": 1955328,
+      "sha256": "91216014357046dce1d4e405969f3cbd36695f4b0ea82abbb73f92a20d253231"
+    }
+  ],
+  "logSha256": "1883341bca745c4c6f46cb7032e3896e18e7a3680eb4d4e7795e8d876ff72636",
+  "candidateSigningExecuted": false,
+  "native242CheckoutTouched": false,
+  "newKeysOrTrustStoreChanges": false
+}

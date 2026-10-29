@@ -1,0 +1,26 @@
+{
+  "complete": true,
+  "evidenceKind": "offline-native-production-renderer",
+  "height": 768,
+  "humanAccepted": false,
+  "modelAndSignatureTestsAreSeparate": true,
+  "passed": true,
+  "screenshots": [
+    "procurement-public-1024x768.png",
+    "procurement-publish-1024x768.png",
+    "procurement-mine-1024x768.png",
+    "procurement-service-1024x768.png",
+    "procurement-claims-1024x768.png",
+    "procurement-publish-confirm-1024x768.png",
+    "procurement-delivery-confirm-1024x768.png"
+  ],
+  "serverConnected": false,
+  "testnetTransactions": 0,
+  "usesProductionRenderer": true,
+  "width": 1024,
+  "visualReviewPassed": false,
+  "visualReviewFindings": [
+    "Simplified CJK text has missing glyphs in the existing Traditional Chinese font subset.",
+    "Delivery candidate used incorrect unbound sentinel 0; Crystal uses -1. Both repaired before v2."
+  ]
+}

@@ -3360,6 +3360,14 @@ mod tests {
                 "取消 [Esc]",
             ),
             (
+                SimplifiedChinese,
+                "Dubhe Wallet 扫码登录",
+                "等待手机扫码确认",
+                "二维码有效期：42 秒",
+                "请在手机钱包中确认登录。",
+                "取消 [Esc]",
+            ),
+            (
                 BrazilianPortuguese,
                 "Entrar com Dubhe Wallet",
                 "Aguardando confirmação no celular",

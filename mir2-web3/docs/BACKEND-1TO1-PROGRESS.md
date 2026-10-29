@@ -1,5 +1,19 @@
 # Backend 1:1 Progress
 
+## 普通用药 Tick 唤醒（2026-10-27，北京时间）
+
+`ee06c05f3` 将正常 UID/槽位/key 用药接入原短 Tick 唤醒，实际32项 Rust 回归、828项工具检查及新 Release 构建通过。第四次普通准备中，第5人190.544ms内取得扣药1与精确HP12→18，随后正常购药12；回村寻路失败仍使本轮仅prepared4/100、无CCU测量。P0未通过、P2未启动，详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
+
+## Cell 共享快照发布回归（2026-10-27，北京时间）
+
+当前P1工程合同已通过、P0容量未通过、P2未启动。`7b43caa41`通过新鲜116项Rust测试/55输入及Release构建；V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽。该短窗口服务端AOI生成至发送最大204.716ms，不能代替完整容量验收。原场景/门槛保留；普通准备与补给待证明，无新100资格或容量通过，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
+## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
+
+已接入每逻辑 Zone 的 Partition 0、64 格 Cell、版本化效果 owner 引用和派生目录；canonical checkpoint v3/v7 不变，跨执行域同分区歧义查询拒绝。schema 10 的三项新鲜迁移/旧字段拒绝测试通过。原普通双协议完整报告保持 14 passed / 2 not_run、fullLifecyclePassed=false；独立死亡/复活 focused 补测 7/7 passed。native protocol 断线恢复 9/9 passed，早先失败保留。
+
+生产容量 profile、稳定行为 ID、全局持久目录及完整跨界语义仍未交付，UI 与生产环境未验收；P0/P1 均未 completed，也未实现动态 Cell 或多机调度。分组验证和失败只在[本轮主题证据](generated/cell-preproduction-p0-p1-20261024/README.md)维护；本条不提高整体进度或人类接受状态。
+
 ## 钱包与完整分支集成（2026-10-28）
 
 本轮同时保全生产/石头与远端各账本权限，存档 schema 10 对旧 5–9 做领域验证；完成相关文件存储、模拟器/网关和共享地图回归，详细结果及未运行 PostgreSQL 的限制集中在[合并记录](BRANCH-INTEGRATION-20261028.zh-CN.md)。此记录不代表生产部署或全项目 Accepted。

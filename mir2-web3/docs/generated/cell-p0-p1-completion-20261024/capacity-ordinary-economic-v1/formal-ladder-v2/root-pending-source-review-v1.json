@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-27T12:19:02.107Z",
+  "scope": "Root independent formal-v2 pending source review, exact16 literal derivations/7 raw tools, immutable11 private source pins with latest actual traffic ledger as sole changed source, pure actual100 saved-bank validation. No accounts, realm, bank copying, tests, full16 or capacity run invoked by this review.",
+  "preparation": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-economic-formal-ladder-v2/preparation-v2.json",
+    "bytes": 11839,
+    "sha256": "2c7270fcaa91890bd6167c0958072d60a0fdc4fb50802733147035258bfd72b8"
+  },
+  "configuration": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\prepare-config-pending-v1.json",
+    "bytes": 11044,
+    "sha256": "dac5da987cba2f8c215346fe8f7feb0ce0d65bfb5a0513f489a0fda3d423d3e3"
+  },
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-bank-plan-pending-v1.json",
+    "bytes": 32017,
+    "sha256": "34292226864e80fe828b1afdb96fe5cfa5a3f51dcb80341af5d2ed72a397508a"
+  },
+  "pinsChecked": 85,
+  "runnerAndToolsForwardInverseExact": true,
+  "literalRules": 16,
+  "rawTools": 7,
+  "savedCount": 100,
+  "freshAtFormalStart": false,
+  "currentQualificationStillPending": true,
+  "negative": {
+    "badPinRejected": true,
+    "badEndpointRejected": true
+  },
+  "rootPendingReviewPassed": true,
+  "bankCopied": false,
+  "authPerformed": false,
+  "freezePerformed": false,
+  "ownedExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

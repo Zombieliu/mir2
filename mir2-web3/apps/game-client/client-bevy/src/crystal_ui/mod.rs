@@ -19,6 +19,10 @@ pub mod chat;
 #[cfg(feature = "native-ui")]
 pub mod guild_storage;
 #[cfg(feature = "native-ui")]
+mod guild_pixel_text;
+#[cfg(feature = "native-ui")]
+pub(crate) mod guild_pixel_text_view;
+#[cfg(feature = "native-ui")]
 pub mod hud;
 #[cfg(not(feature = "native-ui"))]
 #[path = "hud_portable.rs"]

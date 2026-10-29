@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T22:50:08.012Z",
+  "scope": "Root actual terminal and sequential ended consumer observations. Failed formal14 verdict preserved; diagnostics are separate.",
+  "runId": "1792967155359-90bac462",
+  "commands": [
+    {
+      "mode": "seal-first-failed",
+      "actualRootExitCode": 1,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stderr-v1.log",
+        "bytes": 1686,
+        "sha256": "d0e3759f74880ae535ba2770c4883c630117cac7d891571e1f110369b08a5b2e"
+      }
+    },
+    {
+      "mode": "seal-final",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stdout-v2.log",
+        "bytes": 337,
+        "sha256": "30ced851675e0e9e66300fbef8808e5d5ed5da576024442d044c24990cf0ef14"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-seal-stderr-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "readonly-sourceguard",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-readonly-guard-stdout-v1.log",
+        "bytes": 315,
+        "sha256": "8ed7c4db5bbd5f49d17e2c862fddfe0581c5e56c4fdf5e2b32f532fe39a8f0b4"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-readonly-guard-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "prepare",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-prepare-stdout-v1.log",
+        "bytes": 631,
+        "sha256": "8885f8af15b1959ed50e28bfc4fa5be5c1443f1bebf8e23cf44c70a994f67ec8"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-prepare-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "run",
+      "actualRootExitCode": 1,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-run-stdout-v1.log",
+        "bytes": 2871,
+        "sha256": "c1a61004881217769b9659e0d643fddcc2608e4359e25255238a994b6c14eacd"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "base-collection-current219-v2",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-collection-stdout-v1.log",
+        "bytes": 132868,
+        "sha256": "d85389beee17b348c6810e263c3cd03ce2747959e94c4c89fe355c0a373d0469"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "base-verification",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-verification-stdout-v1.log",
+        "bytes": 5013,
+        "sha256": "aad3397cdbf68b30da5f74f608ae51812be940166ff498b257e30a2e147e0b5d"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "store-collection",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-collection-stdout-v1.log",
+        "bytes": 389,
+        "sha256": "bc705fab63cc2394451a8867b23248127123b56757cd66528ed11aa5a9d29f64"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "store-verification",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-verification-stdout-v1.log",
+        "bytes": 1244,
+        "sha256": "247459c8fdda4ebd1893b5c8c834e13e40b0a5f29d1a9673696c994be75043e0"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "runSessionId": 66369,
+  "runTerminalExitCode": 1,
+  "prepareSessionId": 3516,
+  "prepareTerminalExitCode": 0,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\reports\\1792967155359-90bac462.report.json",
+    "bytes": 425962,
+    "sha256": "256f070c235cf7d188f0b0dc3700fbba8140e07781c3222b84eec53357989195"
+  },
+  "inputs": {
+    "realm-process.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\realm-process.json",
+      "bytes": 4338,
+      "sha256": "c467f3371b18a94fbffcfc417ad778af00bd3a1f1b4303cd76e154df9a9acc6a"
+    },
+    "realm-cleanup.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\realm-cleanup.json",
+      "bytes": 6539,
+      "sha256": "3b7d7495af8ac4cc188609e280c438a7c62380da8a64ee94d0d05e064837feaa"
+    },
+    "launcher-source-frozen-v1.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\launcher-source-frozen-v1.json",
+      "bytes": 50321,
+      "sha256": "346c201ef7cf205a23b3521aed6d781386b7e1ae94327d590ed2f69bb4ea7480"
+    },
+    "source-guard-readonly-verification.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\source-guard-readonly-verification.json",
+      "bytes": 2350,
+      "sha256": "5a6cf222c5cbe892be7e79c2a961d1db2a842f48223868a6f22ba00c99606f61"
+    },
+    "source-pins.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\source-pins.json",
+      "bytes": 166540,
+      "sha256": "58080f1b64e4c01a7cb8fe2ed7054ba93ce5f2e40d977eee1c86cd5b389c3144"
+    },
+    "provisioning.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    },
+    "collect-public-current219-v2.mjs": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public-current219-v2.mjs",
+      "bytes": 43255,
+      "sha256": "9a159c251035593be4293ea2e3f3c6bf58c118db075f8572cba5f6104a071713"
+    },
+    "postcollector-current219-derivation-v1.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\postcollector-current219-derivation-v1.json",
+      "bytes": 46971,
+      "sha256": "60677cc7aa85198f0d14c61a7c848d662d8a2b1e03518ce3dd8bd45c2e0490fb"
+    }
+  },
+  "rootIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-root-independent-cleanup-v1.json",
+    "bytes": 339,
+    "sha256": "21e161977cd6620075b6352815bc298b8bb9d3531cf82e2df180e45223332cc5"
+  },
+  "actualEndedState": {
+    "driverReportOk": false,
+    "playableCapacityAccepted": false,
+    "cleanupChecks": {
+      "sixCountersZero": true,
+      "monitorTerminalPreserved": true,
+      "monitorStoppedBeforeGateway": true,
+      "monitorExitZero": true,
+      "normalOwnedShutdown": true,
+      "processAbsent": true,
+      "portsFree": true
+    },
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "gatewayPid": 66160,
+    "monitorPid": 57860,
+    "noBackendBuildOrNewRelease": true,
+    "failedStage": 25,
+    "stages50And100Executed": false,
+    "twoHourSoakExecuted": false
+  },
+  "initialSealFailure": {
+    "error": "Location-sensitive geometry proof aggregate differed; equal spatial leaves and identical proof bytes at different paths",
+    "retained": true,
+    "accountsOrRealmStartedBeforeThatFailure": false,
+    "correction": "Only metadata canonical proof reference; all comparison operators and JS unchanged"
+  },
+  "postCollector": {
+    "originalFrozenCollectorExecuted": false,
+    "reason": "Static historical6759 reader mismatched its strict current219 guards",
+    "derivedCollectorExecuted": true,
+    "scope": "Only basename and self/proof explicit allowlist added; 123 frozen sources unchanged"
+  },
+  "failureDiagnosticsPending": true,
+  "formalStarted": true,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false
+}

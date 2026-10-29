@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+## 普通用药 Tick 唤醒（2026-10-27，北京时间）
+
+正常用药沿原鉴权触发短 Tick 唤醒；32项 Rust 回归、828项工具检查与新 Release 构建通过，真实准备验证扣药1及精确HP12→18。回村寻路仍失败，本轮prepared4/100且无CCU测量，不提高整体Candidate/Accepted；详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
+
+## Cell 共享快照发布回归（2026-10-27，北京时间）
+
+当前P1工程合同已通过、P0容量未通过、P2未启动。同值快照复用`7b43caa41`保留原准入、完整结算及owner清理，通过新鲜116项Rust测试与Release构建。V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽；普通准备与补给待证明。原场景/门槛保留，不宣告100、容量或人类接受，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
+## Cell 上线前整合：P0 / P1 partial（2026-10-24，北京时间）
+
+单分区兼容路径已接入 Partition 0、64 格 Cell、版本化效果 owner 引用及派生目录，保留 canonical checkpoint v3/v7；跨执行域相同逻辑分区查询遇歧义则拒绝。schema 10 三项迁移边界测试通过。原真实双协议完整报告仍为 14 passed / 2 not_run、fullLifecyclePassed=false；独立死亡/复活 focused 补测 7/7 passed。native protocol 断线恢复 9/9 passed，旧失败仍保留。
+
+P0 容量规格未冻结，P1 稳定行为 ID、全局持久目录和完整跨界语义未交付；P0/P1 仍 partial。动态拆合、多机、UI、生产环境及人类玩法接受未验收，不据此提升整体百分比。实际分组、输入及失败见[本轮主题证据](generated/cell-preproduction-p0-p1-20261024/README.md)，原版死亡新登录规则保持。
+
 ## 完整分支合并回归（2026-10-28）
 
 合并保留本地石头/生产及远端征服、月卡、计费、活动权限；统一 schema 10 并保留旧版本引入门槛。共享 Zone 权威及死亡确认门槛保持，修复 tick 重复 finalize 和静默拒绝消费任务刷新通知。依据与各组测试结果见[合并记录](BRANCH-INTEGRATION-20261028.zh-CN.md)，隔离 PostgreSQL 与人工验收边界单列，不改全局百分比。

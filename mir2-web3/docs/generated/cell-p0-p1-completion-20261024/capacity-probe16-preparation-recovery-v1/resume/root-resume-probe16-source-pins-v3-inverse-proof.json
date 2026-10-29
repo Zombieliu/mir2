@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v2.mjs",
+    "bytes": 18298,
+    "sha256": "9256c6881e9da04087e481320e8563c6f7ca35debb36d115b2447d3e8057d104"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v3.mjs",
+    "bytes": 18943,
+    "sha256": "587e954260768c9f6f54340ca741ae8d96fe7889c22d0bceabe49ec4ecfa82bd"
+  },
+  "rules": [
+    {
+      "from": "// Read-only reconstruction of the exact ACL summary originally returned by\n// initialize-private.ps1. No Set-Acl, icacls, account-store or credential read.\nconst aclEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>key.toLowerCase()!=='psmodulepath'));\nconst acl={};\nfor(const name of ['private','recordings']){\n const target=path.join(ROOT,name),literal=target.replaceAll(\"'\",\"''\");\n const command=\"$ErrorActionPreference='Stop';$taskOwner=[Security.Principal.WindowsIdentity]::GetCurrent().User;$taskSystem=[Security.Principal.SecurityIdentifier]::new('S-1-5-18');$taskApplied=Get-Acl -LiteralPath '\"+literal+\"';$taskAllowed=@($taskOwner.Value,$taskSystem.Value);$taskRules=@($taskApplied.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]));if(-not $taskApplied.AreAccessRulesProtected -or $taskRules.Count -ne 2 -or @($taskRules|Where-Object {$_.IsInherited -or $_.IdentityReference.Value -notin $taskAllowed -or $_.AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow}).Count){throw 'Existing private ACL verification failed'};@{ownerOnlyVerified=$true;allowedPrincipalCount=$taskRules.Count}|ConvertTo-Json -Compress\";\n acl[name]=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',command],{encoding:'utf8',windowsHide:true,env:aclEnv,timeout:30000}));\n assert.equal(acl[name].ownerOnlyVerified,true);assert.equal(acl[name].allowedPrincipalCount,2);\n}\n",
+      "to": "// Read-only ACL reconstruction after the original seeder: private has exactly\n// current-owner SID1, while recordings retains initializer owner+SYSTEM SID2.\n// Container/Object inheritance flags are normal; IsInherited must remain false.\n// No Set-Acl, icacls, account-store or credential read occurs here.\nconst aclEnv=Object.fromEntries(Object.entries(process.env).filter(([key])=>key.toLowerCase()!=='psmodulepath'));\nconst acl={};\nfor(const name of ['private','recordings']){\n const target=path.join(ROOT,name),literal=target.replaceAll(\"'\",\"''\"),expectedCount=name==='private'?1:2;\n const expectedSids=name==='private'?'@($taskOwner.Value)':'@($taskOwner.Value,$taskSystem.Value)';\n const command=\"$ErrorActionPreference='Stop';$taskOwner=[Security.Principal.WindowsIdentity]::GetCurrent().User;$taskSystem=[Security.Principal.SecurityIdentifier]::new('S-1-5-18');$taskApplied=Get-Acl -LiteralPath '\"+literal+\"';$taskAllowed=\"+expectedSids+\";$taskRules=@($taskApplied.GetAccessRules($true,$true,[Security.Principal.SecurityIdentifier]));$taskActualSids=@($taskRules|ForEach-Object {$_.IdentityReference.Value}|Sort-Object -Unique);if(-not $taskApplied.AreAccessRulesProtected -or $taskApplied.GetOwner([Security.Principal.SecurityIdentifier]).Value -ne $taskOwner.Value -or $taskRules.Count -ne \"+expectedCount+\" -or $taskActualSids.Count -ne \"+expectedCount+\" -or @($taskRules|Where-Object {$_.IsInherited -or $_.IdentityReference.Value -notin $taskAllowed -or $_.AccessControlType -ne [Security.AccessControl.AccessControlType]::Allow -or $_.FileSystemRights -ne [Security.AccessControl.FileSystemRights]::FullControl}).Count){throw 'Existing private/recordings exact-SID FullControl ACL verification failed'};@{ownerOnlyVerified=$true;allowedPrincipalCount=$taskRules.Count}|ConvertTo-Json -Compress\";\n acl[name]=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',command],{encoding:'utf8',windowsHide:true,env:aclEnv,timeout:30000}));\n assert.equal(acl[name].ownerOnlyVerified,true);assert.equal(acl[name].allowedPrincipalCount,expectedCount);\n}\n",
+      "occurrences": 1
+    }
+  ],
+  "inverseRawBytesExact": true,
+  "originalTailBytes": 3500,
+  "originalTailRawExact": true,
+  "remainingRelativeDynamicImportCount": 0,
+  "change": "Only read-only ACL validation matches actual seeder owner-only private1 and initializer recordings owner+SYSTEM2; exact distinct SID set, FullControl Allow, protected and noninherited rules. No ACL mutation.",
+  "evidence": {
+    "seederSource": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\bin\\seed_capacity_accounts.rs",
+    "seederAclLine": 162
+  },
+  "observedOutputsAbsentBeforeV3Creation": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\source-pins.json",
+      "absent": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\execution.lock",
+      "absent": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-partial-state-v1.json",
+      "absent": true
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-execution-v1.json",
+      "absent": true
+    }
+  ],
+  "noteAndReceiptNamesUnchanged": true,
+  "originalRuntimeSourceModified": false,
+  "resumeExecuted": false
+}

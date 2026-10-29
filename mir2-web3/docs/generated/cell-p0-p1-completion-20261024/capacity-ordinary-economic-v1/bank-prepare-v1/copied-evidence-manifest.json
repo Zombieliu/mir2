@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual 5024c812 fresh 100-account ordinary preparation-only run. Three characters completed ordinary hunting, sale, HP658 purchase and normal save; the fourth failed live-Deer eligibility. Original failure is preserved. No CCU measurement or cohort activation. Public tool/config/qualification/report metadata only; private account Store, pool, auth ledger, secret contents, recovery tree, Gateway raw logs and full recordings are not copied.",
+  "driverSourceCommit": "5024c81236ed6cfccfd44126632d92ce6e0133c2",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "freshCapacityToolTestsPassed": 365,
+  "freshOrdinaryDependencyTestsPassed": 301,
+  "preparedCount": 3,
+  "targetPrepared": 100,
+  "originalRunPassed": false,
+  "originalError": "ordinary supplies: only live Deer may be hunted",
+  "normalCleanupComplete": true,
+  "coldBankEligible": false,
+  "formalOrdinaryRelogin100Verified": false,
+  "measurementPerformed": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\source-lib-v1.mjs",
+      "file": "source-lib-v1.mjs",
+      "bytes": 13861,
+      "sha256": "e029c5ce9b8e292de5c1a20e07a928f912bb93247c9b23251052b8c2863da4ef"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\freeze-prepare-v1.mjs",
+      "file": "freeze-prepare-v1.mjs",
+      "bytes": 7090,
+      "sha256": "a0b35e3c089b0ae1267f1f5c7bc8b565ad6e2ebdc98efc3e5071fe4a8ea050b1"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\run-owned-prepare-v1.mjs",
+      "file": "run-owned-prepare-v1.mjs",
+      "bytes": 21456,
+      "sha256": "147c6413512791e17e222ea40b268f7464c635c09ada33d1afcc9bf0fa92bb44"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\owned-child-v1.mjs",
+      "file": "owned-child-v1.mjs",
+      "bytes": 2201,
+      "sha256": "7845fc2e212bb15b0e036e33753c9e155a9d2152c15098f9ab001dd1f9b74375"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\prepare-config-pending-v3.json",
+      "file": "prepare-config-pending-v3.json",
+      "bytes": 4075,
+      "sha256": "25061da26604e7e98e4ad453870abf4c5e9a013f150922c9d28f028d4f650cd0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\resource-profile-v1.json",
+      "file": "resource-profile-v1.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+      "file": "scenario-preparation-v2.json",
+      "bytes": 22813,
+      "sha256": "116fd663f0b49403975d9c48368f59b39daa2c74a66c4567e8ba2edccc2021fc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\static-staging-proof-v2.json",
+      "file": "static-staging-proof-v2.json",
+      "bytes": 25000,
+      "sha256": "9fe1834dd3d7adac7cf1246e95952221b19b88c37de21ae8e5f7fbbf06bc3232"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\authoring-syntax-v5.json",
+      "file": "authoring-syntax-v5.json",
+      "bytes": 3394,
+      "sha256": "3b40aad4a362632b1d5cba09f77fb78b035e0c299858fe508b262d5e58971a04"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\frozen-source-v1.json",
+      "file": "frozen-source-v1.json",
+      "bytes": 81500,
+      "sha256": "aad77d0aaa7e3d23100b7b9e96e354b8c3f0a92431357c72a9096769932448c9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\root-independent-cleanup-v1.json",
+      "file": "root-independent-cleanup-v1.json",
+      "bytes": 285,
+      "sha256": "cf44e2324d80f0422ff91d7eb3663f0c1a00ba5e0275484ee8908f84e2194de2"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\fresh-account-only-origin-v1.json",
+      "file": "fresh-account-only-origin-v1.json",
+      "bytes": 1109,
+      "sha256": "6498b62013a715b2bc1dd4c779565d891a442b51e69e17549889e8b77f4835a6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\preparation-episode-receipt-v1.json",
+      "file": "preparation-episode-receipt-v1.json",
+      "bytes": 2774,
+      "sha256": "b1028084574060d5fcf28ef8645db0dcf1199cdfd31541c72e3a20016cb9276e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\prepared-index-v1.json",
+      "file": "prepared-index-v1.json",
+      "bytes": 1340,
+      "sha256": "197cc93778832b87b13a1c9de57d62152908f4c365439b9717e54d212a6baa7d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\cleanup-v1.json",
+      "file": "cleanup-v1.json",
+      "bytes": 1036,
+      "sha256": "7699c7e1b9fb994126f73b8ec5d7884f70a38731c3acd5717fd637d9cc6ca8c9"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\owned-process-v1.json",
+      "file": "owned-process-v1.json",
+      "bytes": 681,
+      "sha256": "4b2e03d2e5e3e0968c40bd19c8c116ce8545c336280d654e664c01de08193734"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\health-before-v1.json",
+      "file": "health-before-v1.json",
+      "bytes": 1402,
+      "sha256": "c0a6492371f56aa0213e23f267db11d0b17b537e9882664a268d743a1f3ff01f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\health-after-v1.json",
+      "file": "health-after-v1.json",
+      "bytes": 476,
+      "sha256": "fd9b54402982b64ebbacc2185f3f4fb5bf8ad02c1a1e64fd978606ba77bddb43"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\run-intent-v1.json",
+      "file": "run-intent-v1.json",
+      "bytes": 1803,
+      "sha256": "26a81cbcb4b70ac72f88bac6319eb659c5af03c22b1a238f6ff0401cdcbb8199"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\reports\\1793046276153-143c0f31.preparation-report.json",
+      "file": "1793046276153-143c0f31.preparation-report.json",
+      "bytes": 10646,
+      "sha256": "956331eba322ac63e998170323b4a5d2b2972929097a17b0eb5e6ce88f56d3d4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\episode\\reports\\1793046276153-143c0f31.preparation.jsonl",
+      "file": "1793046276153-143c0f31.preparation.jsonl",
+      "bytes": 2521088,
+      "sha256": "f4b1004265a6de4600331cd0e44d74d5044c026f58024ce8cc3d9cb672dc6263"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v1\\root-focused-receipt-v1.json",
+      "file": "root-focused-receipt-v1.json",
+      "bytes": 14522,
+      "sha256": "f66326cea00e7e6dea5904de77db6777fdbf96411eaac6a5c25d256a6a442cc0"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v1\\complete-capacity-driver.stdout.log",
+      "file": "complete-capacity-driver.stdout.log",
+      "bytes": 91583,
+      "sha256": "6b03e5764c4d9df5cb6dfc5cab830932be38470335c3d4451259a1c9d6a4a5e4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v1\\complete-capacity-driver.stderr.log",
+      "file": "complete-capacity-driver.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v1\\ordinary-economy-and-navigation-dependencies.stdout.log",
+      "file": "ordinary-economy-and-navigation-dependencies.stdout.log",
+      "bytes": 69480,
+      "sha256": "202b736ff7e5ab14ca4b6c804fa4deb494371515d29a997fe397bcb5a132ecee"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v1\\ordinary-economy-and-navigation-dependencies.stderr.log",
+      "file": "ordinary-economy-and-navigation-dependencies.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-runner-v3.mjs",
+      "file": "root-validation-runner.mjs",
+      "bytes": 5322,
+      "sha256": "a6387df4ff9b9542c724b1a9773eff79550429d2b329374194e3277ff094c5e3"
+    }
+  ]
+}

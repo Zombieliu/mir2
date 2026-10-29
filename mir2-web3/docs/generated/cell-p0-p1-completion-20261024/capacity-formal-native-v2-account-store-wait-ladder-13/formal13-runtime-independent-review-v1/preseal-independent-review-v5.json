@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T20:17:42.744Z",
+  "prepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\runtime-prepared-v5.json",
+    "bytes": 42479,
+    "sha256": "5fa6efbe226d6f320489fd9beb73a775eb1e2be28c919f5cccce4fa235ac109e"
+  },
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs",
+    "bytes": 16198,
+    "sha256": "7e9cdcf6e49cfa6da418690f85d77ef4d975e9cdc1e6d33fa744660961ad48a5"
+  },
+  "scope": "Final read-only current-metadata/source delta review for Root seal and readonly guard. No target import, actual freshgate, seal, guard, account/ACL operation, raw/monitor replay, binary hash, product tests or service execution by this reviewer.",
+  "evidence": {
+    "preparedOnlyReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-runtime-independent-review-v1\\prepared-review-v2.json",
+      "bytes": 1984,
+      "sha256": "a7d207ee3ddccae97edf4c8992ccb9ec7f3915953b2db9e35508917f3d4261e0"
+    },
+    "priorB1Review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-runtime-independent-review-v1\\preseal-blocker-v3.json",
+      "bytes": 1883,
+      "sha256": "936d4975143fb0b9a9881efb53ff95388703d05e62bf955cfa9073cc8915d275"
+    },
+    "actualFresh17Derivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\actual-fresh17-binding-proof-v1.json",
+      "bytes": 11998,
+      "sha256": "df7ef27bcdaf36a9cd61c1b1415e5790bb885e02d5f02846a277afc2342bcd9b"
+    },
+    "controllerInitialDerivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-controller-derivation-v1.json",
+      "bytes": 6603,
+      "sha256": "fbd6e67578a7fcda847b5bc667a8e9e93486237e465b05b29441a3273b97e1f2"
+    },
+    "controllerReleasePinFix": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-controller-release-pin-delta-v2.json",
+      "bytes": 2047,
+      "sha256": "e949aa0a43c8b142105bf4545cb1018027a0104e8144a273ec62f048e623c86b"
+    },
+    "controllerPreparation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-controller-preparation-v1.json",
+      "bytes": 1631,
+      "sha256": "af15b0b8a1f65698a69783b486b462db229fe4b4f95f6e39cc7cea8b9cda8d34"
+    },
+    "actualFresh17Binding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\bound-formal13-binding-v1.json",
+      "bytes": 19457,
+      "sha256": "e208e8f2825f4217cc336df6dc2f74ae81617188d24fb9d42c8278058e7196a0"
+    },
+    "actualFresh17Final": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\final-verification.json",
+      "bytes": 451627,
+      "sha256": "4203ff7d2384e0dfbe4a8cb7c2548168603aee67828d389d191e621ece93b519"
+    },
+    "actualFresh17FactsAddendum": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-actual-terminal-independent-facts-addendum-v1.json",
+      "bytes": 6153,
+      "sha256": "3c6d052e2b535a060b0bbad470503b4e0b58bded48b28e67e8689185f600f65e"
+    }
+  },
+  "currentClosure": {
+    "localFiles": 57,
+    "externalStableInputs": 34,
+    "localSourceSha256": "af9b1a20588d0317c55174a5f53753351726aa25de83b116343ad20fad5c1093",
+    "externalSourceSha256": "18f5deb029a1ba9c1ce0a2700859b332b90d992a037d9d3fbf69aa4aaee2175e",
+    "syntaxEntries": 34,
+    "syntaxScope": "Original32 Node and2 PowerShell parse results; after the single controller change only its Node--check was newly executed, with other33 source results preserved/reused."
+  },
+  "closedFindings": [
+    {
+      "id": "F13-B1",
+      "resolution": "Only the duplicate out-of-BASE build-log entry was removed from preseal external source metadata. V4 inverse is exact; candidate.buildLog and strict50 validation still bind and read the actual56033-byte build log. Source containment guard stays unchanged."
+    },
+    {
+      "id": "F13-B2",
+      "identifiedBy": "partition_contracts during final integration; independently confirmed here",
+      "resolution": "Pre-seal temporary binding now includes releasePin:await pin(input.releaseFile), exactly matching actual17 gateway build.releaseRecord. Single40-byte source addition reverses exactly to the preserved16158-byte controller; no manifestPin or gameplay changes."
+    }
+  ],
+  "checks": {
+    "all57Local34ExternalCurrentPinsAndAggregatesMatch": true,
+    "noRemainingExternalSourceOutsideControllerBase": true,
+    "controllerPreparationSelfAndFull16SupportPinMatch": true,
+    "reviewRefsUseNodeNormalizedAbsoluteFileStrings": true,
+    "actualFresh17RunAndTenSourceSealExecutionFinalFullyBound": true,
+    "backendC74350Dae1AndHistoricalNodeD240210NamespacesSeparated": true,
+    "originalFormalPolicyJsonAndResourceScenario146HelperPreserved": true,
+    "actualFresh17Policy5_5_6CleanupMonitorHpWirePrerequisitePreserved": true,
+    "storeExactSourceAndMetadataBindingsDoNotAddGameGate": true,
+    "controllerUsesProjectForFull16AndCanonicalReleasePinForFreshGate": true,
+    "controllerChecksAllPrerequisitesBeforeWx": true,
+    "threeRequiredPreparationMetadataOutputsIncludedInFinalFreeze": true,
+    "readonlyGuardRechecksGeneratedInputsAndFresh17Gate": true,
+    "twelvePreRunOutputStatesAbsentAtReview": true
+  },
+  "retainedFormalScope": {
+    "stages": [
+      2,
+      10,
+      25,
+      50,
+      100
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "wallSeconds": 18000,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "postResumeSeconds": 60,
+    "completeMinuteWindows": 146,
+    "logicalCpuStop": 24,
+    "privateGiBStop": 32,
+    "workingSetGiBStop": 40
+  },
+  "limitations": [
+    "This review permits Root source sealing only; actual seal, readonly guard, preparation and formal run remain Root operations.",
+    "Fresh17 passed only its2/10 probe; it is a prerequisite rather than formal100/two-hour capacity acceptance.",
+    "Actual ended17 independently replayed action/window/continuous counters and HP rows; per-request typed900ms dual-positive packet matching remains the frozen original Node/report contract, explicitly not an added independent replay.",
+    "HPzero does not claim a real dose or survival. Store is completed-only diagnostic metadata, not evidence of the original5s holder/root cause or absence of an unfinished stall."
+  ],
+  "verdict": {
+    "preparedContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "formalCapacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

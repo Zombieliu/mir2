@@ -1,8 +1,8 @@
 # Rust 服务端 Cell 分区与调度：上线前改造方案
 
-日期：2026-10-24（Asia/Shanghai）。状态：**设计方案，尚未实现或验收**。
+日期：2026-10-24（Asia/Shanghai）。初稿为设计方案；最新实施为 **P1 工程合同通过、P0 容量基线进行中**，P2 尚未启动，见第 13 节。
 
-本方案针对当前 mir2-web3 Rust 服务端，覆盖 Cell 分区、多核与多机调度、开源代码复用、实施顺序及上线验收。保留现有玩法、认证、客户端协议和经济持久化职责，渐进改造共享世界运行时。文中的接口名称、阈值和阶段均是拟定设计，不代表已有功能或实测承载。
+本方案针对当前 mir2-web3 Rust 服务端，覆盖 Cell 分区、多核与多机调度、开源代码复用、实施顺序及上线验收。保留现有玩法、认证、客户端协议和经济持久化职责，渐进改造共享世界运行时。除第 13 节明确记录的实施范围外，接口、阈值和阶段交付仍是目标设计，不代表已有功能或实测承载。
 
 ## 1. 推荐决策与生产门槛
 
@@ -198,6 +198,19 @@ MMOKIT 的[固定 README](https://github.com/mmokit/mmokit/blob/5ef5523897477850
 
 Nex 样本的[源码许可头](https://github.com/KBEngineLab/KBEngine-Nex/blob/7439c7a5db34d74698398cfae3982f7e78dd8974/kbe/src/server/cellappmgr/cellappmgr.cpp)标明 LGPL-3.0-or-later，不能套用到其他仓库/版本。此处不以文档的 Cell/Ghost 术语证明动态空间拆合已生产成熟。
 
+### 500 CCU 路线的基础设施复用边界
+
+2026-10-27补查以下官方资料，仅用于接入边界判断；没有新增依赖、执行外部代码或据此宣称500 CCU容量。版本与许可证仍须在实际采用时固定。
+
+| 组件 | 许可证与官方依据 | 可复用职责及限制 |
+| --- | --- | --- |
+| Tokio | [MIT](https://github.com/tokio-rs/tokio/blob/master/LICENSE)；[runtime](https://docs.rs/tokio/latest/tokio/runtime/index.html)、[spawn_blocking](https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html) | 保留网络、定时器和异步调度；增加worker不会自动拆开串行Zone，CPU任务仍需限并发 |
+| Rayon | [MIT或Apache-2.0](https://github.com/rayon-rs/rayon#license)；[ThreadPoolBuilder](https://docs.rs/rayon/latest/rayon/struct.ThreadPoolBuilder.html) | 若现有task pool不足，可评估固定线程池处理独立或只读快照计算；单写权威及有序提交仍由本项目保证 |
+| Agones | [Apache-2.0](https://github.com/agones-dev/agones/blob/main/LICENSE)；[overview](https://agones.dev/site/docs/overview/) | 按需复用Kubernetes游戏服务器进程的分配、健康和扩缩容；不负责Cell边界战斗、AOI或玩家交接 |
+| OpenRaft | [MIT或Apache-2.0元数据](https://github.com/databendlabs/openraft/blob/main/Cargo.toml)；[官方接口](https://docs.rs/openraft/latest/openraft/) | 多机故障接管阶段评估Cell节点归属、epoch等控制元数据；应用仍需提供网络、存储、状态机，不将逐次攻击直接变为共识事务 |
+
+优先继续现有Rust/Bevy调度基础，先以串行参考验证固定Cell的单写权威，再开并行；进程编排与控制面共识按多机验收需求接入。上述组件均不能替代第5/6节的epoch/fencing、幂等、裁决顺序、在途效果、边界AOI与恢复合同。分散Cell人数相加只能证明对应部署的总容量；同一热点承载及跨机交接另行实测。
+
 ### SectorSync PoC 的晋级与退出条件
 
 对比原生实现与适配器，至少检查：实体 ID 双向映射、逻辑地图隔离、整数格坐标精度、逻辑时间与顺序、Ghost 只读、完整组件及在途效果交接、部分提交恢复、有界背压、CPU/内存/编码额外成本。
@@ -206,7 +219,7 @@ Nex 样本的[源码许可头](https://github.com/KBEngineLab/KBEngine-Nex/blob/
 
 ## 9. 实施顺序与阶段交付
 
-全部阶段当前为 **not_run**。阶段之间以证据门槛推进；并行任务必须有不重叠写集，runtime.rs、routing.rs 等高冲突模块每轮只有一个写入者。
+初稿交付时全部阶段为 **not_run**，这是方案历史起点。2026-10-24 最新实施为 **P1 工程合同通过、P0 容量基线进行中**，P2—P8 仍为 not_run；第 13 节及主题证据记录实际范围，下面的交付和晋级门槛仍完整保留。阶段之间以证据门槛推进；并行任务必须有不重叠写集，runtime.rs、routing.rs 等高冲突模块每轮只有一个写入者。
 
 | 阶段 | 改造与交付 | 进入下一阶段的门槛 |
 | --- | --- | --- |
@@ -242,7 +255,13 @@ P0/P1 完成前不启动全面搬迁战斗代码。P2 与 OSS 资料核查可并
 
 P0 为每个验收 profile 登记：commit/build/data hash、OS/架构、物理核/vCPU、内存限制、磁盘与数据库、持续网络/PPS 配额、主机间 RTT、TLS、是否同一故障域、调度预算 B、活跃人数 N、热点可见实体数、技能/怪物/宠物组合、操作频率、持续时间及生产 admission 上限。
 
-初轮阶梯建议 2 / 10 / 25 / 50 / 100 普通活跃账号，100 仅是待验证工程目标。若产品计划超过该规模或需要更高同屏密度，必须扩展相应 profile；总在线、同地图、同屏以及实际战斗人数分开报告。空连接、线路总人数、短时峰值和修改后的测试门槛均不能代替稳定战斗容量。
+2026-10-27 用户将最高目标明确为 **500 CCU**。原 P0 的 2 / 10 / 25 / 50 / 100 普通活跃账号基线仍需完成；固定 Cell、多核和多机阶段继续按 **250 / 500** 扩展，500 不是启动 P2 前必须先由旧串行架构达到的条件。每档先完成原 300 秒窗口，最终目标档至少 7200 秒长稳、断线恢复与保存验收；已有失败不追认。默认旧 profile 及其 100 人上限保留，新 500 目标必须显式选择。
+
+用户随后明确最终目标为 **500 人在线，500 人全部持续战斗**；此前“500 在线、50 人战斗”的工程假设撤销。总在线、同地图、同屏可见人数及持续战斗人数分别记录；新 500 profile 必须按 100% 战斗者冻结怪物/玩家目标供给、持续补给、热点布局、技能组合及资源上限。原 100 人 P0 profile 保持原样，作为原有对照门禁，其结果不能证明 500 人全部战斗。分散负载与同屏热点各自验收，扩大地图区域不能替代热点测试。空连接、短时峰值和修改后的测试门槛均不能代替稳定战斗容量。
+
+具体负载、逐人分钟门槛、恢复/保存边界、供给、现有工具缺口及实施阶梯见[500人全部持续战斗验收合同](CELL-500-COMBAT-ACCEPTANCE.zh-CN.md)。纯policy仍保留旧500/50配置及历史报告解析，实际runCapacity已在任何资源/认证操作前阻断显式500执行，等待全战斗合同完整实现；原100路径保持。不得只放宽人数参数便声称已支持500全战斗。
+
+容量准备采用可追溯的独立阶段：普通角色通过狩猎、拾取、售卖和购买取得补给，再按明确 cohort 屏障进入原测量；不得注入金币/物品或自动复活。准备时间、命令、生命、库存及金币变化独立留证，不计作完成了测量窗口。旧 held-only 场景与新的 ordinary-economic-v1 准备场景分开记录，保留原动作预算和验收门槛；单次备药数量不能直接证明两小时可持续。实现与实际结果集中在[补给及 500 目标主题](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
 
 ### 11.2 正确性硬门槛
 
@@ -294,8 +313,102 @@ P0 为每个验收 profile 登记：commit/build/data hash、OS/架构、物理�
 
 ## 13. 证据与后续工作记录
 
-本轮交付仅为方案和源码/开源边界审查。**未改运行时代码、未安装依赖、未部署、未运行 Cell、容量或游戏验收。** 所有 P 阶段与新门槛仍为 not_run。
+初稿交付时仅完成方案和源码/开源边界审查，运行时、依赖、部署及游戏/容量验证均未执行；该 not_run 记录只适用于初稿时点。后续同日实施如下，不能继续将初稿声明作为当前状态。
+
+### 2026-10-24 实施更新：P0 / P1 partial
+
+已整合远端基线与本地 checkpoint。账户 schema 统一为 10，原石 SQL 顺延 0017；新鲜三项边界测试覆盖干净 schema 9 迁移后保留充值、活动和月卡、旧版本夹带合法非空原石拒绝，以及无新增字段的旧存档迁移。
+
+P0 原普通双协议完整生命周期报告保持 **14 passed / 2 not_run、fullLifecyclePassed=false**；随后独立死亡/复活 focused 补测 **7/7 passed**，不回写原完整报告为通过。非正常断线恢复的 native protocol 检查为 **9/9 passed**，前序失败保留。这些是本机协议验证，不能替代原生 GUI、人类接受或两台物理机验证。
+
+P1 已接入每逻辑 Zone 唯一 Partition 0、64 格 Cell 几何、TopologyRevision、版本化 MapEffectOwnerRef 与派生目录。分区绑定复用既有执行域和经过验证的 owner fence；无域查询遇跨执行域相同逻辑分区时拒绝。manager v3 / runtime v7 canonical checkpoint 不变，没有新增持久全局目录，也没有同地图多写入者、动态 Cell 拆合或多机调度。
+
+P0 生产容量规格、完整普通生命周期尚未冻结或通过；P1 稳定行为 ID、全局持久目录及完整跨界语义尚未交付，原生 UI 与生产环境未验收。**P0 / P1 均不得标为 completed**，不得据局部结果提高整体百分比或标记 Accepted。实际输入、分组结果、失败及后续状态统一见[本轮主题证据](generated/cell-preproduction-p0-p1-20261024/README.md)。
 
 实施时在一个主题证据记录中保存：输入 manifest、版本/硬件/配置、命令、退出码、原始指标、封包/状态摘要、故障时点、截图和失败样本；状态文档只写短结论与链接。不得删除旧失败、降低原规则来获得通过，或把有限场景覆盖写成整体百分比。
 
-建议首个实施包限定为 **P0 + P1**：建立新鲜多人战斗/保存基线、冻结容量 profile、完成状态 owner 清单及版本化内部合同，并证明单分区兼容路径不回归。该包通过后进入固定 Cell 和跨界语义，避免同时大改战斗、网络与经济系统。
+首个实施包仍限定为 **P0 + P1**：补齐新鲜多人战斗/保存基线、冻结容量 profile、完成状态 owner 清单及版本化内部合同，并证明单分区兼容路径不回归。该包通过后进入固定 Cell 和跨界语义，避免同时大改战斗、网络与经济系统。
+
+### 2026-10-24 补齐更新：P1 合同通过，P0 容量基线进行中
+
+新 Release 的一次普通双客户端完整生命周期为 **16/16 passed、fullLifecyclePassed=true**，包含共同击杀、唯一拾取、真实死亡复活、跨图和退出重登；原 14/2 报告及独立补测原样保留。P1 已增加逻辑世界/稳定行为身份、持久逻辑目录、完整字段 owner 清单和版本化随机流，配对写入版本为 factory v3 / manager v4 / runtime v8。兼容、拒绝边界和相邻回归见[补齐主题证据](generated/cell-p0-p1-completion-20261024/README.md)，本处不重复运行日志。
+
+用户已选择本机隔离环境 **2/10/25/50/100 人阶梯**。正式容量跑之前仍需确认普通角色能在每个滚动窗口持续产生真实战斗负载；此前供给、路径和巡逻探针的失败保留，不能用连接成功或聚合命中数代替窗口通过。P0 尚未完成，P2 继续冻结。生产多人容量、多机故障恢复、原生 GUI 和人类 Accepted 均不在本轮局部通过结论内。
+
+2026-10-26 补充：驱动边界修复通过同次 210 项 Node 回归，按连接服务端耗时诊断通过 8 项 Rust 聚焦检查。提交 `d2407fb8` 的独立 44 输入 Release `1980…` 已通过新鲜完整闭环 16/16，第十六轮 2/10 人各五分钟加六分钟探测通过。此前正式 11 完成 2/10/25 人阶段后在 31 人扩容期间失败；新正式 12 在首个 2 人阶段因移动 owner 等待超过五秒提前失败，同一时段观察到 6.5 秒 cadence 与 spectator 等待，实际持锁者或 IO 根因仍未证明。原失败、真实执行和有界取证统一归入[补齐主题证据](generated/cell-p0-p1-completion-20261024/README.md)。50/100 人及两小时持续测试未完成，P0 尚未通过，P2 尚未启动；本机协议结果不能直接推导云规格、100 人同时激战或物理机资源上限。
+
+后续诊断与正式 13：提交 `c743122a` 的七文件计时通过 22 项不同 Rust 检查及七文件格式检查，新 50 输入 Release 与普通完整生命周期 16/16 通过，第十七轮 2/10 人各五分钟加六分钟探测通过。正式 13 完成 2/10 人阶段，在 25 人阶段因两个完整分钟窗口的战斗供给不足失败；该阶段 218 次攻击均成功、零超时，原门槛和失败保留。独立 Store 诊断无法据此归因，原五秒等待的实际持有者仍未证明。侦察路点改动已通过同次 219 项工具回归，实际负载改善仍待新绑定后复测；后端 Rust 50 输入保持，复用原构建并严格区分 backend/client/execution 来源。50/100 人及两小时长稳仍未执行，P0 未通过、P2 未启动；详见[本轮完整证据](generated/cell-p0-p1-completion-20261024/README.md)。本机协议负载与网关共用 i9-13900KF / 64GB，四个 Tokio worker 不等于四核云主机硬配额；100 人在线、10 人持续战斗是待验收目标，不能推导为上线规格或物理资源上限。
+
+### 2026-10-26 复测更新：短测通过，正式容量继续未通过
+
+当前 `3a6d8c86` 容量客户端与执行来源已经独立绑定；Rust 50 输入保持原 `c743122a / dae1…`，没有新编译或改写历史 Release。新普通生命周期 16/16、第十八轮 2/10 人各五分钟加六分钟短测及其独立结束重演通过。正式 14 仍在 25 人阶段因第四个完整窗口的 launch 速率不足失败；四项结束后采集/校验和七项正常清理通过，失败结论保留。侦察线索已在实际运行触发，但不能据此认定解决 25 人问题或找到原五秒等待根因。后续规划修复仍需原门槛复测，P0 未通过、P2 不晋级；50/100 人及两小时长稳未执行。全部新鲜结果、计数范围与来源限制集中在[本轮证据](generated/cell-p0-p1-completion-20261024/README.md)。
+
+后续侦察规划仅增加对其他有效 scout 声明路点的非独占顺序偏好，原门槛与回退预算保持；同次完整 Node 回归 226/226、独立审查通过，真实容量改善尚待新来源绑定后复测。七项新增聚焦包含于 226，不另行叠加；P0/P2 状态保持。
+
+最新实际结果：`b5374083 / Node9 / 232` 的新普通闭环及第二十轮短测通过；正式 16 完成 2/10 人阶段后，在 25 人第五个完整窗口因一名角色 60 秒仅发起 15 次攻击、低于原 18 次要求失败。独立重演、四项结束后校验及正常清理保留原裁决。50/100 人及两小时长稳未执行，P0 未通过、P2 未启动。新提示导航至合法攻击邻格的受限实验已通过 Root 同次完整 237 项工具回归，实际容量改善仍需新来源绑定后按原门槛复测，不能宣称已解决供给或原等待根因；本机规格、软资源保护线、100 人目标范围和全部结果集中在[主题证据](generated/cell-p0-p1-completion-20261024/README.md)。
+
+最新状态补充（2026-10-26，AOI 复测与纯解析缓存候选）：`9d720e7c / Node9 / 237` 的普通完整生命周期实际 16/16、354 条普通 sent，Probe21 通过，正式 17 仍在 25 人第四、第五个完整窗口失败；正式 50/100 人及两小时 soak 未到达。AOI 接收状态修复 `657b7528` 已推送，同次完整 Node **242/242** 通过，但新 V4 诊断虽全员 50 人入场，仍在 settle 的 AOI 准备期 fatal，未形成测量窗：所核 pair 的 owner ACK 出距至 18 后约 1.964 秒 observer 才收到 Remove，连续计时达到 1004ms，期间未见回到范围内的条件，不能再将这一例解释为旧的采样间条件中断。bootstrap（含入场与 settle）CPU 峰约 2.371 逻辑核等价、网关 private 峰约 0.768GiB、主机空闲内存最低约 37.21GiB；这些采样不排除单核饱和、共享锁或采样间瞬态。原 100 人诊断的 server-active79/78 ready 与 StartGame 超时保留，不能称为容量上限。
+
+新候选仅在 `shared_experience_profile.rs` 增加有界、精确 JSON 的纯解析缓存，业务刷新、Store/frozen/authority 校验及原验收门槛不变。Root 实跑 **26 项 Rust 检查及格式检查通过**；另两项旧 guild-kill fixture 在候选与全部 50 输入逐字节相同的 `c743122a` 控制基线中均失败，失败签名相同，原收据仍为 `allSelectedTestsPassed=false`。26 项 Rust、242 项 Node 与新增聚焦项分开记录，不累加。该缓存随后在 56211fdc 构建为 immutable Release；V5 全员 50 人后仅测量 14.303 秒即触发原客户端时钟停止，V6 全员入场后在准备期因角色健康/死亡 guard 停止。新稀疏 A* 工作区通过 19 项导航、fresh 242 项工具回归与 3,005 组旧路径对照，仍待 50/100 实测，见[最新导航及诊断证据](generated/cell-p0-p1-completion-20261024/capacity-navigation-workspace-v1/README.md)。这些不构成 P0/容量通过或根因修复；P1 合同通过、P0 未完成、P2 未启动。证据见[AOI 与负载历史](generated/cell-p0-p1-completion-20261024/capacity-aoi-received-state-reconciliation-v1/README.md)及[解析缓存验证与基线控制](generated/cell-p0-p1-completion-20261024/capacity-shared-experience-parse-cache-v1/README.md)。
+
+后续 V7 全员50入场仍在准备期触发AOI：ACK出距后约1.017秒才收到Remove，100不具后续资格。保留原gate的32条/2ms有界分批发送候选及合法proof fixture修复已实跑50项Rust与格式检查通过，真实51输入稳定；新Release/负载待执行，不作为容量通过。见[最新候选与原失败](generated/cell-p0-p1-completion-20261024/capacity-zone-outbound-batch-v1/README.md)。
+
+V8全员50入场后仍在准备期因AOI停止，ACK出距至观察者Remove约2.095秒，无测量阶段/新100。默认关闭的发送链路计时候选通过新鲜55项Rust与局部格式检查，真实52输入稳定；新Release/trace负载待执行，P0仍未通过、P2未启动。见[最新诊断候选](generated/cell-p0-p1-completion-20261024/capacity-zone-delivery-trace-v1/README.md)。
+
+V9全员50入场后AOI停止，无测量/新100。已关联Remove在sender取包前等待1.495秒、发送17µs，尚不能断言唯一阻塞点。默认关闭的慢路径计时候选通过新鲜57项Rust及局部格式，52输入稳定；新Release/复测待执行，P0仍未通过、P2未启动。详见同一[诊断主题](generated/cell-p0-p1-completion-20261024/capacity-zone-delivery-trace-v1/README.md)。
+
+`7b43caa41`精确同值快照复用通过新鲜116项Rust测试/55输入及Release构建。V13全50准备阶段343.454秒完成，计量55.861秒因死亡/presence保护停止，最终HP0/18、gold0、HP药耗尽；短窗口内服务端AOI生成至发送最大204.716ms，不能代替客户端完整300秒验收。普通准备与补给待证明；原场景、准入/结算及门槛保留。原失败不追认，无新100资格，P0未过/P2未启，见[最新证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
+### 2026-10-27：当前V6功能门禁补测
+
+当前ee06 V6后端在d9ec9d执行来源上通过新普通双客户端16/16完整生命周期和原始轨迹独审，详见[当前V6功能证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/v6-full-lifecycle-v1/README.md)。238b的准备寻路修正已通过677项选定Node检查，完整14依赖相等后复用该功能门禁。W10真实准备越过原返村阻塞，完成7/100，第8人以2/3鹿肉、2次狩猎及8次尝试失败，尚未计量人数；正常清理及独立PID/端口检查完成，详见[W10记录](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v10/README.md)。P1合同通过，P0容量基线未完成、P2未启动，500仍为后续最高目标。
+
+a45e的真实资本目标修正通过702项新鲜选定Node检查；W11第8～11人普通售卖/购药/库存12及保存通过，完成11/100。第12人取得一肉270后在接近目标期间反复移动，原600秒超时退出，未进入人数计量；详见[W11证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v11/README.md)。原失败及P0未完成、P2未启动状态保持。
+
+ad803的普通筹款目标失效复核通过719项新鲜选定Node检查。W12推进到21/100；第21人真实206521目标失效在约1.568秒退出该次接近后完成补给保存，第22人则因7次危险选择拒绝、1次狩猎耗完原8次上限失败，未计量容量。原始数据、正常清理与独立PID/端口检查见[W12证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v12/README.md)。
+
+767c的候选优选通过724项新鲜选定Node检查；W13推进到29/100普通准备，第30人搜索期间在原222格导航预算处失败，零战斗测量。完整快照seq836后出现无精确HP的新Deer，原搜索条件不能据此认定live目标；原失败、清理与独立OS检查见[W13证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v13/README.md)。用户已进一步明确500在线/500全部持续战斗，原500/50工程假设撤销，原100人P0对照保持；P0未完成、P2未启动。
+
+ca426的有界候选刷新和500执行入口保护通过1080项新鲜选定Node检查；W14完成41/100普通准备，第31人真实触发cue刷新后完成同ID狩猎、售卖、购药和保存。第42人7次已知危险选择及1次真实追击耗尽原8次尝试，4次攻击、零已完成狩猎；其精确追击终止类别未留存，不能反推。全部原判定与清理见[W14证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v14/README.md)。下一步仅普通显式资格模式在全不合格时继续原有界搜索，已选尝试不退款、默认行为与原预算保持；原P0及500全战斗均未通过。
+
+46274的严格资格模式通过780项新鲜选定Node检查；W15第42人普通售肉471、购11药440、库存12及保存通过，累计准备42/100。第43人仅有257/440资本，8次实际选择含1次完成、1次移动后危险、4次离开AOI及2次NoPath，原失败保留，见[W15证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v15/README.md)。后续准备工具增加AOI16局部可达候选及历史禁区检查，并采用独立continuation-only合同补剩余角色；历史成功不得冒充本轮fresh，原正式阶梯仍须全100逐个普通重登和当前就绪。P0未完成、P2未启动，500全战斗仍待实施与实测。
+
+05dad的AOI内可达候选与显式续跑通过1158项新鲜选定Node检查。[W16实跑](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v16/README.md)仅补原43～100号，新增16人正常保存，与历史42人合计58条保存记录；第59人完成售肉521金币后前往药商失败，未买药、未授准备资格。后续仅为该售后导航补原闭合历史自然到期后的有界重算；不清缓存、改变安全距离或预算。剩余42人仍须正常准备，全100后续普通重登与正式容量阶梯均未完成。
+
+11fc9的售后药商导航修复通过864项新鲜选定Node检查。[W17实跑](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/bank-prepare-v17/README.md)补齐原59～100号42人，正常保存与组合100条索引、完整身份和不同保存点校验通过；coldContinuationBankEligible=true，全100本轮fresh、正式重登、容量与两小时稳定性资格仍false。下一步复用完整冷角色库及原账本，按原2/10/25/50/100逐cohort普通重登和当前就绪门禁测量，不预登录100、不暂停已有active cohort、不沿用旧Probe21容量资格。P0未完成，固定Cell尚未启动。
+
+### 2026-10-27：正式阶梯 v1 在第11角色准备时触发压测端保护
+
+当前cc1f4的1179项Node检查通过，随后[正式v1](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v1/README.md)实测2人300.226秒、10人300.311秒及各5个完整滚动窗口通过。原10人档仅1名战斗角色，168次攻击/168次命中；不代表500人全战斗。进入25人准备后，第11角色尚未激活，连续3次客户端事件循环延迟332.661/319.291/316.670ms触发原250ms保护；原报告ok=false，未产生25人测量或两小时结果。已正常卸载，Root独立确认PID76860退出、17500/17510释放。占据精确准备目标的活鹿与同步全图寻路是当前优先排查线索，尚非CPU归因证明；继续等价优化和回归，不降低原验收门槛。P0未完成，P2尚未启动。
+
+### 2026-10-27：25人完成测量，持续攻击覆盖仍不合格
+
+34036修复不可进入精确目标的全图寻路及正式准备遗漏335候选的接线；Root新鲜1212项Node检查、45输入前后不变，[本轮实际full16-v2](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v2/README.md)用2普通新注册、352条普通命令通过全部16项。V6/55/Rust32仅作严格后端复用，未重建。随后正式v2的2人300.288秒、10人300.285秒通过，越过旧第11角色问题，25人完整300.201秒后按原门槛失败。
+
+25人档前3滚动窗通过，第4窗两fighter分别15/17次攻击，第5窗一名14次，低于原18次/分钟；这些失败行的命中、native完成率及全阶段移动/聊天/fanout均达标，207次攻击全成功。整轮资源未触上限，stage25 driver lag最大35.6844ms；存在公开慢stage/Store项，不能据覆盖不足断言服务器过载，也不能据总体活动通过抹掉滚动失败。正常清理、Root OS核PID78788消失和17500/17510释放。下一步用原始公开状态重演目标、6格实际见证和追击，补可持续真实目标供给/分配证据，原18/12及其他门槛不降低。尚无25通过、50/100/500或两小时结论；P0未完成，P2未启动。
+
+### 2026-10-27：新一轮先暴露近距聊天调度问题
+
+b06b6c183补入只读取原实际决策中间值的有界目标诊断，Root当前75项定向测试通过、45份源绑定一致，实际full16-v2经14依赖逐字节相等后复用。另一次完整v20检查被中断且无最终收据，不计为1221项通过。[正式v3原件](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v3/README.md)记录2人完整300.145秒后失败，未进入10/25；唯一失败是第4个60.065秒窗有4次成功selfChat而0次peerChat，移动、AOI、延迟和其他4窗均通过。Root确认PID73576退出及17500/17510释放。
+
+原成功移动ACK重建显示4次聊天发送时两人均相距10格，超过原chat取样8格；同窗其他156个实际移动/转向发送点中108个最近ACK距离不超过8格。当前到期即发并推进30秒周期的策略错过了自然近距机会；下一次按原门槛验证保留到期聊天、近距再发送的调度修复，再继续25人持续战斗诊断。旧v2的10人混合通过仍是历史结果，不能覆盖本次2人失败，也不能证明500人全战斗。
+
+### 2026-10-27：聊天修复后2/10通过，25人持续战斗仍失败
+
+71eea39ba的Root当前78项定向回归通过，45份源绑定；V6/55/Rust32与actual full16-v2按原14依赖严格复用，没有新Rust构建。[正式v4公开原件](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/formal-ladder-v4/README.md)记录2人300.258秒、10人300.256秒通过，25人完整300.217秒后原false保留：第4窗两fighter仅13/9次攻击，第5窗actor05为17次，未达原18次/分钟；235次攻击全成功，movement/chat/fanout通过。实际client目标诊断在失败窗采样到已死目标或存活目标缺原6格witness，不证明全图缺怪或服务器过载；下一步需独立校准持续目标与见证覆盖，不能原样重跑或降低门槛。11项清理检查全true，Root独立确认PID80356消失、17500/17510释放。50/100/500及两小时未测，P0未完成、P2未启动。
+
+### 2026-10-28：独立全员PvP压力场景准备
+
+[两客户端正常协议功能原件](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-functional-v1/README.md)已通过：总16.235秒、功能操作5.817秒，真实伤害、单剂消费回血及普通退出重登保存均有证据；30秒只是最大预算，并非持续战斗时长。19项定向测试通过。下一步独立预置合法角色/装备/药品的server-only全员PvP压力profile，用于测量服务器战斗处理能力；原ordinary场景与失败原件继续保留，预置资源不计普通成长/经济/补给通过，亦不自动获得P0、500最终验收或固定Cell开工资格。当前没有50/100/500及两小时容量结果。
+
+### 2026-10-28：独立PvP首轮结果与采样限制
+
+[独立预置PvP v1](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-stress-v1/README.md)完成2名fighter×300.096秒通过、10名fighter×300.102秒未通过：唯一失败为actor5第3分钟的复合正伤害见证P95=1683ms，ACK P95=422ms；10人实际2216次launched/1404次positive，不能据此断言硬件只支持2人。该profile使用合法预置L40/普通装备和药品、loopback/File及仅本地development显式600登录预算，生产默认限流30/900s未变。新配置7项及相邻auth12项测试、新release构建通过。
+
+[续测v2-v4](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-stress-continuation-v2-v4/README.md)保留原失败；v4确有25名入场但没有有效测量窗。[v5-v6原件](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-stress-v5-v6/README.md)显示旧治疗采样失败及修正后admission-25的2秒攻击确认超时，仍没有完整25人测量。工具已恢复native的ACK且消费或精确HP增长、移除1.5秒全量轮询，并按实际收件时间完成截止读取；Root32项聚焦回归通过，历史false不改写。V6服务端记录到marker同步942ms持有共享Store锁、同期985ms等锁与超过2秒的完整输入处理，但不能精确归因actor9的超时。[PostgreSQL SourceOfTruth隔离对照](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/server-only-pvp-postgres-v7-v8/README.md)已完成：500账号完整导入回读及3项拒绝检查通过；V7无负载启动失败保留，V8用65.776秒进场25人，战斗约2分钟后actor6的新request123在2秒截止前未收到确认，匿名收件摘要只到122。首分钟全25频次合格但两人positive-proof P95=1481/1012ms未过；没有完整300秒25人结果。全局串行和复制成本仍存在，PG替换不构成性能修复或容量通过。50人以上及两小时仍无数据，P0与最终500验收未完成，P2未启动。
+
+[整库事务复制/编码优化及V9复测](generated/cell-p0-p1-completion-20261024/capacity-store-transaction-snapshot-work-v1/README.md)：原像改借用、纯PG source跳过丢弃整库预编码，File/Mirror顺序和保存保护不变。Root44项Rust真实检查、新Release及普通双客户端full16/16通过；V9用61.556秒进场25人，战斗约3分钟后request144在原2秒期限内未收到确认，仍无完整300秒25人阶段。该小改动未解决容量问题；全局Store校验、会话/出站串行仍待有据优化，不能继续原样重测或声明500通过。所有失败、回归、清理和公开原件均已归档。P0未完成、P2未启动。
+
+### 2026-10-28：用户限定一小时的观战与攻击确认改动
+
+[本轮源与原始证据](generated/cell-p0-p1-completion-20261024/capacity-hour-20261028-spectator-ack-v1/README.md)：观战直接投影公开字段，保留隐私脱敏、采样和录制；18项Rust与新普通full16/16通过。随后仅AttackV2在原必要保存/authority校验后先发关联确认再发显示snapshot，其它调用与route原best-effort保持；39项定向检查及该新Release的普通full16/16通过。去除额外opt-in trace/slow日志的V10仍在25人触发2秒确认超时；ACK改动后的V11在65.756秒进场25人，整轮含进场共4434 launched/2821 positive、0确认超时，08:35UTC按预算主动卸载。三个完整分钟仍有战斗见证延迟失败，未完成300秒阶段；短测不能证明根因已修或25/500容量通过。25人普通退出、网关与隔离PG退出均通过。50/100/250/500与2小时未测，P0未完成、P2未启动。

@@ -1,0 +1,4725 @@
+{
+  "formatVersion": 2,
+  "topic": "Simplified Chinese editorial finishing and complete Windows installer verification",
+  "evidenceStatus": "technical-topic-complete-r10-installed-chain-and-reinstall-locale-persistence-passed",
+  "complete": true,
+  "artifactHashing": "raw bytes; topic-scoped * -text -whitespace",
+  "sourceHashing": "UTF-8 CRLF to LF for Rust/JSON/text; raw bytes for font/source artifacts explicitly marked -text",
+  "artifactCount": 233,
+  "artifactBytes": 19732680,
+  "artifacts": [
+    {
+      "path": ".gitattributes",
+      "bytes": 21,
+      "sha256": "ffe82f3c5b968ed009c2577fa38f32c83be167799ee565d40a18e3440c57b342"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 88,
+      "sha256": "03355d37f9392a1c3e281e8da7b27ebe544c52f09f39e3c270ca4442bb8890cb"
+    },
+    {
+      "path": "README.md",
+      "bytes": 28120,
+      "sha256": "d8a82f4f3947a29c5d1a0d1d25fdf9104bca964aed3f8768c1e221cb299abbec"
+    },
+    {
+      "path": "candidate/BUILD-ATTESTATION.json",
+      "bytes": 1493,
+      "sha256": "3209853348a4bfb05b4353cdc33703c099ed5e56e743b5191f6adcf0d0714125"
+    },
+    {
+      "path": "candidate/RELEASE-STATEMENT.json",
+      "bytes": 707,
+      "sha256": "6ab2f5b745a3e98a41a63a0e5077f7bfefe1b9c71d52eef0b9b1bb16d7b41849"
+    },
+    {
+      "path": "candidate/VERSION.json",
+      "bytes": 1221,
+      "sha256": "efe4507024f936fa0a8865ecb52f9717b6689adb4db4e530e9388ef5e468074c"
+    },
+    {
+      "path": "candidate/explicit-current-source-copy/validation.json",
+      "bytes": 2221,
+      "sha256": "49ccea6c85f8802c09d3035403b6b372e2ff7f4cf61bbae8ec17e05af34a80a2"
+    },
+    {
+      "path": "candidate/explicit-current-source-copy/verification.json",
+      "bytes": 2620,
+      "sha256": "edeb559aa6d98a25dc31bb69da3381a886084e0405e95921d845b0423a39ba41"
+    },
+    {
+      "path": "candidate/real-candidate-completed.json",
+      "bytes": 474,
+      "sha256": "0c9d2bdc37e409994ba222c1e3027871b620dd02ae1b593532fa492eaef3efd4"
+    },
+    {
+      "path": "candidate/real-original-candidate-summary.json",
+      "bytes": 801,
+      "sha256": "0db912832bc1cbea097d9b4a1632ff7dabb46d3188e5a4434d8f2d3a28e64902"
+    },
+    {
+      "path": "candidate/real-original-candidate-verification.json",
+      "bytes": 3553,
+      "sha256": "913f5c7d2dae2c210ea7d340976e6c60ab81eb0e1c338de05cb06aedd6b639f1"
+    },
+    {
+      "path": "candidate/validation.json",
+      "bytes": 5344,
+      "sha256": "040d39bb910dc226a4907ff399464fde59f2d15d38b6bd5d6057f6781df10ae1"
+    },
+    {
+      "path": "editorial/changed-key-index.json",
+      "bytes": 31247,
+      "sha256": "f71316ede364af7597054de6bcffcdb7fa1e7673e0ce2fdc0936bbd8f204b3dc"
+    },
+    {
+      "path": "editorial/content-name-integration.json",
+      "bytes": 3828,
+      "sha256": "f0e92854b03bbc451d5f77e7a86f84d743ac72e7e3472127757657e3768df545"
+    },
+    {
+      "path": "editorial/content-review-coverage.json",
+      "bytes": 1474,
+      "sha256": "e45cc01af9dff2b7e6ab41d888408e3f4bd0469dd4e495411116d9f2f2272486"
+    },
+    {
+      "path": "editorial/generator-checks.json",
+      "bytes": 2120,
+      "sha256": "cea7164523dea4d04a948232c8e846ca05b991b7fa3fbf8ebfcbd20f02f0bbe5"
+    },
+    {
+      "path": "editorial/upstream-mechanics-caveats.json",
+      "bytes": 2438,
+      "sha256": "07686119ab6520f3be97484b562c44c1ba553f74f09bb3d2da1dc3de4ce1d796"
+    },
+    {
+      "path": "editorial/validation.json",
+      "bytes": 2699,
+      "sha256": "26b99955c870a6eabacdbd2478c21cd0293c3d27b9a036cfc5131477e29c0407"
+    },
+    {
+      "path": "evidence-index.json",
+      "bytes": 82005,
+      "sha256": "d4a678d4a70ecd85ef1bc75023a0e130821c225d75cd627a67d1b1a6e007ca2b"
+    },
+    {
+      "path": "fonts/corpus-verification.json",
+      "bytes": 828,
+      "sha256": "b0a93fbed937a473a2c5bf3714b63b811a55fa51b03fb2e20af549eca417e371"
+    },
+    {
+      "path": "generate-manifest.mjs",
+      "bytes": 7315,
+      "sha256": "e5504c4c77637c18c7ab9636fc95639b3786e15cb6dc8e6652dd0d43fd244a66"
+    },
+    {
+      "path": "installer/compile-progress.json",
+      "bytes": 1354,
+      "sha256": "af60b21eb576d6f9a7e1360f84c57cc00fa4dbb3f6482229cd90f1bfd2f2d6a8"
+    },
+    {
+      "path": "installer/current-helper-readonly-validation.json",
+      "bytes": 624,
+      "sha256": "e1ea611e237b6464149840215f2670a34e9e9cdc9cb745a72ab6521ef956cf5a"
+    },
+    {
+      "path": "installer/full-compile-validation.json",
+      "bytes": 6062,
+      "sha256": "d41fa300cd79ba538edbf1b93122d5a3eafcb329b0922863c0a832356422f1d0"
+    },
+    {
+      "path": "installer/installer-readonly-audit-final-helper.json",
+      "bytes": 2636,
+      "sha256": "c222dfdec8e2a3ef2c250cb4060c387dab8fa983f6b8a4eb7a09cb5f7319a463"
+    },
+    {
+      "path": "installer/installer-readonly-audit.json",
+      "bytes": 6678,
+      "sha256": "72c02e5a39b0743d37c0f02cdbb0fadb3c832632ad209976405959126eaa5b22"
+    },
+    {
+      "path": "installer/installer-start-menu-audit.json",
+      "bytes": 8368,
+      "sha256": "57b159cf47b6ef7196e33942598e23c15959864592afd98272a2f150ad3893f2"
+    },
+    {
+      "path": "installer/r10/real-installer-normal-compile-r10.json",
+      "bytes": 1120,
+      "sha256": "1954b347c2d2d1bae2a6e2945cc323f7a0a4f513e5bf9b990e4f98d1a663b767"
+    },
+    {
+      "path": "installer/r10/real-installer-validation-compile-r10.json",
+      "bytes": 1182,
+      "sha256": "4f581e0eec27d19585a2cf6b118cf72bfbc3b52e2d5afd876e31a5259167678b"
+    },
+    {
+      "path": "installer/r10/validation.json",
+      "bytes": 3280,
+      "sha256": "aa9b141ab3e1b6ef5f78c4a2dadc9a0381295982462faa72045dfbbc04fce58f"
+    },
+    {
+      "path": "installer/real-installer-normal-compile.json",
+      "bytes": 976,
+      "sha256": "0bcc1a33d10b8fda61725316864f638a3610cceca5832edfb7b1c3e405337d07"
+    },
+    {
+      "path": "installer/real-installer-validation-compile.json",
+      "bytes": 1000,
+      "sha256": "7bcf059fdf730db92e7ec0fad15684e3fcaa9ca3274383b409e5c4b2830b8b3b"
+    },
+    {
+      "path": "manifest-tool-validation.json",
+      "bytes": 1977,
+      "sha256": "a189188554690c2851cd2da4f9669f221bdc87c208a39acee3382abdc5876598"
+    },
+    {
+      "path": "native-mock/billing/billing-entry-native-gpu.json",
+      "bytes": 524487,
+      "sha256": "772abcd9f7eb98ad728b00ea96c45afd890d00c1b0baf08f4da421f5b02cde29"
+    },
+    {
+      "path": "native-mock/billing/en-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 193598,
+      "sha256": "a17ad6f16e84f06a774f7fe00cd003973219370142716021189c773be8876ad4"
+    },
+    {
+      "path": "native-mock/billing/en-both-disabled-fiat-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d"
+    },
+    {
+      "path": "native-mock/billing/en-both-disabled-monthly-1024x768.png",
+      "bytes": 193222,
+      "sha256": "3d79cdc8ae3dcdd7eea796f58da044f3e8f5d4d2b283de2ad59fc6d763596fb7"
+    },
+    {
+      "path": "native-mock/billing/en-both-disabled-usdc-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e"
+    },
+    {
+      "path": "native-mock/billing/en-fiat-1024x768.png",
+      "bytes": 183853,
+      "sha256": "647d765ac88634825e9b164ae93149ad88f541150eb8181a74970ebef0f72de5"
+    },
+    {
+      "path": "native-mock/billing/en-fiat-disabled-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d"
+    },
+    {
+      "path": "native-mock/billing/en-loading-1024x768.png",
+      "bytes": 166365,
+      "sha256": "7bbb9bb7f7449fcea36377fa5b82e08c656a69f985f130cdc950a546bde111dc"
+    },
+    {
+      "path": "native-mock/billing/en-monthly-1024x768.png",
+      "bytes": 193222,
+      "sha256": "3d79cdc8ae3dcdd7eea796f58da044f3e8f5d4d2b283de2ad59fc6d763596fb7"
+    },
+    {
+      "path": "native-mock/billing/en-unavailable-1024x768.png",
+      "bytes": 166486,
+      "sha256": "ee5f0a31f67e9e512cf6f726cc6104579c254dfe2b0d87c1fb0ddd186ef3c632"
+    },
+    {
+      "path": "native-mock/billing/en-usdc-confirmation-1024x768.png",
+      "bytes": 226728,
+      "sha256": "c8c01bc7a9c3fb9721765a042e405e11c59ef70ebf233dd465a5ee2578417693"
+    },
+    {
+      "path": "native-mock/billing/en-usdc-disabled-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e"
+    },
+    {
+      "path": "native-mock/billing/en-usdc-expired-review-1024x768.png",
+      "bytes": 216139,
+      "sha256": "b584eedee80634a8c75b18fb4bab2ec51df7b24550190d69c78a63a98e95d31e"
+    },
+    {
+      "path": "native-mock/billing/en-usdc-preparing-1024x768.png",
+      "bytes": 224609,
+      "sha256": "31648c8353539f0ec6996ffaefee906341fa0e17b6f93a74248b488b9656e6ae"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 180887,
+      "sha256": "b2469ed19207177077450ceb3b74c284454e6389013c44fcc6e64b00f6cae7f7"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-both-disabled-fiat-1024x768.png",
+      "bytes": 179254,
+      "sha256": "0a307c7bac59c0ac40137bb0d83c59ce30afa327fbe1ab42dbef68d2fd425dc2"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-both-disabled-monthly-1024x768.png",
+      "bytes": 180248,
+      "sha256": "8a3264bcd1f0caa49135a4226bf56e3d83ca0be030a6380891acbd363fb5d9e0"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-both-disabled-usdc-1024x768.png",
+      "bytes": 216625,
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-fiat-1024x768.png",
+      "bytes": 176659,
+      "sha256": "8253b987ae8117fe908a8604a2b2a045a6051a42b4cdc7254331e7514048a0a9"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-fiat-disabled-1024x768.png",
+      "bytes": 179254,
+      "sha256": "0a307c7bac59c0ac40137bb0d83c59ce30afa327fbe1ab42dbef68d2fd425dc2"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-loading-1024x768.png",
+      "bytes": 161486,
+      "sha256": "de0a97eefad9c3668df3517c69410246fdaa02c8c6addd77739bffee89037466"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-monthly-1024x768.png",
+      "bytes": 180248,
+      "sha256": "8a3264bcd1f0caa49135a4226bf56e3d83ca0be030a6380891acbd363fb5d9e0"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-unavailable-1024x768.png",
+      "bytes": 164120,
+      "sha256": "718a642c5ec438710e50eed71ef311fb990762ede78acb5ed0ea0b9c008eff1e"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-usdc-confirmation-1024x768.png",
+      "bytes": 222776,
+      "sha256": "6117abb3d66e34054f2b7ce37870a93d537dcaa4464a51d46c32aa9bc4075466"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-usdc-disabled-1024x768.png",
+      "bytes": 216625,
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-usdc-expired-review-1024x768.png",
+      "bytes": 212902,
+      "sha256": "7f38486cfbc11ba7ff950e17861ec142a9489f3f497f26f807f0c47c6632f938"
+    },
+    {
+      "path": "native-mock/billing/zh-CN-usdc-preparing-1024x768.png",
+      "bytes": 222285,
+      "sha256": "7a47753f4c3d77bf76707b38160dd24b286f8f2a001036949123639e62a8cb7b"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 186923,
+      "sha256": "1c7e8a3d8944da0d5a40ea2b50d37ed8d2dce35b11de61146b5396346e1ea94e"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-both-disabled-fiat-1024x768.png",
+      "bytes": 186477,
+      "sha256": "4d8e20a26822ba9c0cb7907e2e43f82dfac8ef8724c75606640053e5b2e5ffcd"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-both-disabled-monthly-1024x768.png",
+      "bytes": 185993,
+      "sha256": "7809fd56894eaca14e648a29f1cfacb51415e748b3f5e59efbb0700184545337"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-both-disabled-usdc-1024x768.png",
+      "bytes": 226575,
+      "sha256": "f20819f27ee85dcd94f5651cc7157725fa14324bede2388c72614faa3f9d82a4"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-fiat-1024x768.png",
+      "bytes": 183143,
+      "sha256": "b404c45000ee571166b516ffc409e390334819717626d35647c372d1999020ae"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-fiat-disabled-1024x768.png",
+      "bytes": 186477,
+      "sha256": "4d8e20a26822ba9c0cb7907e2e43f82dfac8ef8724c75606640053e5b2e5ffcd"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-loading-1024x768.png",
+      "bytes": 165315,
+      "sha256": "35fffbd7d5e3880cfa202d597abafc5b9c013d801695505ab732227cd02e9483"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-monthly-1024x768.png",
+      "bytes": 185993,
+      "sha256": "7809fd56894eaca14e648a29f1cfacb51415e748b3f5e59efbb0700184545337"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-unavailable-1024x768.png",
+      "bytes": 167967,
+      "sha256": "0f832ea800e4e8f278089849936e9ae88af54f66391e1609e691753b01614298"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-usdc-confirmation-1024x768.png",
+      "bytes": 233903,
+      "sha256": "f907341eb17255ee1528afce94c057268371933129e2caaf4b74c1e37b90ed57"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-usdc-disabled-1024x768.png",
+      "bytes": 226575,
+      "sha256": "f20819f27ee85dcd94f5651cc7157725fa14324bede2388c72614faa3f9d82a4"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-usdc-expired-review-1024x768.png",
+      "bytes": 223452,
+      "sha256": "1fe91f9d37e53eac5b013784a34d04fbce1cd38f4abeaa485d7c249e5069dda7"
+    },
+    {
+      "path": "native-mock/billing/zh-TW-usdc-preparing-1024x768.png",
+      "bytes": 233145,
+      "sha256": "c4d016d1a3533f9003664e77c52fae1c80cec9566ab4cf426f64a387ff712314"
+    },
+    {
+      "path": "native-mock/gameplay/zh-CN-bag-item-tooltip-1024x768.png",
+      "bytes": 82019,
+      "sha256": "7c2594d4c1c1f42f6d0062e2e8fd0f5184bad52f65256a716da96f9525c265e3"
+    },
+    {
+      "path": "native-mock/gameplay/zh-CN-npc-opaque-name-1024x768.png",
+      "bytes": 81306,
+      "sha256": "11f120304ade1ab440961399a4c06fa72171a3e8f79b458fa0f0e86cdc27f685"
+    },
+    {
+      "path": "native-mock/gameplay/zh-CN-quest-diary-detail-1024x768.png",
+      "bytes": 683828,
+      "sha256": "6b21a45e06c5c32486aee0dc72172ac24b7102923e65d4eb5d8760809a2eb432"
+    },
+    {
+      "path": "native-mock/gameplay/zh-cn-gameplay-layouts.json",
+      "bytes": 14981,
+      "sha256": "0435908958c7b1218a5e96d2eef0fb9fef9204af040d2941ecf75019e05ee370"
+    },
+    {
+      "path": "native/input-ledger.json",
+      "bytes": 107470,
+      "sha256": "e89c3b647c0f8c29b30fc6ee3263028ebeed0d631b7941fb41afc1c0f79a4d93"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/billing-entry-native-gpu.json",
+      "bytes": 524517,
+      "sha256": "73772c067a19608282d3ee4720416f9646541fd28f170caedd82cc274923161a"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 195162,
+      "sha256": "e89bde603c8379fda6e50b844f8ca38cea057a6f0c593e3c705d19bf1a0fc2d9"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-both-disabled-fiat-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-both-disabled-monthly-1024x768.png",
+      "bytes": 194785,
+      "sha256": "2ce54fd3dc674865b1f4475902788709e14c54a478bbc72515197e6c12470492"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-both-disabled-usdc-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-fiat-1024x768.png",
+      "bytes": 183853,
+      "sha256": "647d765ac88634825e9b164ae93149ad88f541150eb8181a74970ebef0f72de5"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-fiat-disabled-1024x768.png",
+      "bytes": 186516,
+      "sha256": "1514029c7e307e1e95326429390e14109f82220b2983d93cd964fb878d0cba8d"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-loading-1024x768.png",
+      "bytes": 166365,
+      "sha256": "7bbb9bb7f7449fcea36377fa5b82e08c656a69f985f130cdc950a546bde111dc"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-monthly-1024x768.png",
+      "bytes": 194785,
+      "sha256": "2ce54fd3dc674865b1f4475902788709e14c54a478bbc72515197e6c12470492"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-unavailable-1024x768.png",
+      "bytes": 166486,
+      "sha256": "ee5f0a31f67e9e512cf6f726cc6104579c254dfe2b0d87c1fb0ddd186ef3c632"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-usdc-confirmation-1024x768.png",
+      "bytes": 226728,
+      "sha256": "c8c01bc7a9c3fb9721765a042e405e11c59ef70ebf233dd465a5ee2578417693"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-usdc-disabled-1024x768.png",
+      "bytes": 219348,
+      "sha256": "754ce31c34aa9d3d9cb1ce583b94eeff38e9978aa3b4ac974cd10eab49503c3e"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-usdc-expired-review-1024x768.png",
+      "bytes": 216139,
+      "sha256": "b584eedee80634a8c75b18fb4bab2ec51df7b24550190d69c78a63a98e95d31e"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/en-usdc-preparing-1024x768.png",
+      "bytes": 224609,
+      "sha256": "31648c8353539f0ec6996ffaefee906341fa0e17b6f93a74248b488b9656e6ae"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 180657,
+      "sha256": "1ecc40192318faff29f6c512c2540172b14b0601c1274a96c3eb789f69c68297"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-both-disabled-fiat-1024x768.png",
+      "bytes": 179254,
+      "sha256": "0a307c7bac59c0ac40137bb0d83c59ce30afa327fbe1ab42dbef68d2fd425dc2"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-both-disabled-monthly-1024x768.png",
+      "bytes": 180018,
+      "sha256": "a8f9480ad63d129a55f092b515cec8082d3245b86b0cf510b635a2f0023043a9"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-both-disabled-usdc-1024x768.png",
+      "bytes": 216625,
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-fiat-1024x768.png",
+      "bytes": 176659,
+      "sha256": "8253b987ae8117fe908a8604a2b2a045a6051a42b4cdc7254331e7514048a0a9"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-fiat-disabled-1024x768.png",
+      "bytes": 179254,
+      "sha256": "0a307c7bac59c0ac40137bb0d83c59ce30afa327fbe1ab42dbef68d2fd425dc2"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-loading-1024x768.png",
+      "bytes": 161486,
+      "sha256": "de0a97eefad9c3668df3517c69410246fdaa02c8c6addd77739bffee89037466"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-monthly-1024x768.png",
+      "bytes": 180018,
+      "sha256": "a8f9480ad63d129a55f092b515cec8082d3245b86b0cf510b635a2f0023043a9"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-unavailable-1024x768.png",
+      "bytes": 164120,
+      "sha256": "718a642c5ec438710e50eed71ef311fb990762ede78acb5ed0ea0b9c008eff1e"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-usdc-confirmation-1024x768.png",
+      "bytes": 222776,
+      "sha256": "6117abb3d66e34054f2b7ce37870a93d537dcaa4464a51d46c32aa9bc4075466"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-usdc-disabled-1024x768.png",
+      "bytes": 216625,
+      "sha256": "8d4f3163ca1ea2da4004eda895a18d9c2b1959f8850d33bb3ced93b89c79ac31"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-usdc-expired-review-1024x768.png",
+      "bytes": 212902,
+      "sha256": "7f38486cfbc11ba7ff950e17861ec142a9489f3f497f26f807f0c47c6632f938"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-CN-usdc-preparing-1024x768.png",
+      "bytes": 222285,
+      "sha256": "7a47753f4c3d77bf76707b38160dd24b286f8f2a001036949123639e62a8cb7b"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-all-sales-disabled-owned-card-1024x768.png",
+      "bytes": 186403,
+      "sha256": "bf1ef915e46f33b98fbad1363a6e164229cc907a49279f362ec4f75dcc098067"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-both-disabled-fiat-1024x768.png",
+      "bytes": 186477,
+      "sha256": "4d8e20a26822ba9c0cb7907e2e43f82dfac8ef8724c75606640053e5b2e5ffcd"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-both-disabled-monthly-1024x768.png",
+      "bytes": 185473,
+      "sha256": "1865f1446019231326797b4895c776f73d66b0c4bc2069dd710d58754981eb0e"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-both-disabled-usdc-1024x768.png",
+      "bytes": 226575,
+      "sha256": "f20819f27ee85dcd94f5651cc7157725fa14324bede2388c72614faa3f9d82a4"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-fiat-1024x768.png",
+      "bytes": 183143,
+      "sha256": "b404c45000ee571166b516ffc409e390334819717626d35647c372d1999020ae"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-fiat-disabled-1024x768.png",
+      "bytes": 186477,
+      "sha256": "4d8e20a26822ba9c0cb7907e2e43f82dfac8ef8724c75606640053e5b2e5ffcd"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-loading-1024x768.png",
+      "bytes": 165315,
+      "sha256": "35fffbd7d5e3880cfa202d597abafc5b9c013d801695505ab732227cd02e9483"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-monthly-1024x768.png",
+      "bytes": 185473,
+      "sha256": "1865f1446019231326797b4895c776f73d66b0c4bc2069dd710d58754981eb0e"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-unavailable-1024x768.png",
+      "bytes": 167967,
+      "sha256": "0f832ea800e4e8f278089849936e9ae88af54f66391e1609e691753b01614298"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-usdc-confirmation-1024x768.png",
+      "bytes": 233903,
+      "sha256": "f907341eb17255ee1528afce94c057268371933129e2caaf4b74c1e37b90ed57"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-usdc-disabled-1024x768.png",
+      "bytes": 226575,
+      "sha256": "f20819f27ee85dcd94f5651cc7157725fa14324bede2388c72614faa3f9d82a4"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-usdc-expired-review-1024x768.png",
+      "bytes": 223452,
+      "sha256": "1fe91f9d37e53eac5b013784a34d04fbce1cd38f4abeaa485d7c249e5069dda7"
+    },
+    {
+      "path": "native/mock-monthly-card-label-fix/zh-TW-usdc-preparing-1024x768.png",
+      "bytes": 233145,
+      "sha256": "c4d016d1a3533f9003664e77c52fae1c80cec9566ab4cf426f64a387ff712314"
+    },
+    {
+      "path": "native/monthly-card-label-fix/input-ledger.json",
+      "bytes": 107470,
+      "sha256": "64ff0ef384d32d974c59cea3335fa93c52e0f4b691f8016fb45cd488be0db033"
+    },
+    {
+      "path": "native/monthly-card-label-fix/validation.json",
+      "bytes": 6788,
+      "sha256": "fb801039d92f670b84ad5a32e40b8ffe6a9abe70322f8c7af08ad57b9a4bf4ab"
+    },
+    {
+      "path": "native/quest-practice-validation.json",
+      "bytes": 3528,
+      "sha256": "a3c28fd39c20f224d262774c8333a0ff66ce3d1b93925e6aface8371820d09e2"
+    },
+    {
+      "path": "native/ui-debug-validation.json",
+      "bytes": 14629,
+      "sha256": "a1801de5952e9e2d7394ab1684d6eea2360e48a6459578d45609b512e5d54fdc"
+    },
+    {
+      "path": "packaging/actual-package-attempts-before-success.json",
+      "bytes": 5198,
+      "sha256": "0ebc8f8b2eaab2c28195831e4b5a18cfbd36e33c5db403793bfe01368b937d39"
+    },
+    {
+      "path": "packaging/asset-metadata-pin-provenance.json",
+      "bytes": 3065,
+      "sha256": "516ecbf424f0b47260f48892124deef506e09b2113b6d5c75cfb4c59e208a53b"
+    },
+    {
+      "path": "packaging/assets/fresh-base-map-atlas-output.json",
+      "bytes": 1426,
+      "sha256": "088ba48b7324cf570514e87baa62ec716d748fdcc39ac220e152ed0f150715d1"
+    },
+    {
+      "path": "packaging/assets/fresh-seed-validation.json",
+      "bytes": 1399,
+      "sha256": "c7ea0bd1df8ca9d48756c7744dec51ae649c391ddfaf08d1cf0b8199a647298b"
+    },
+    {
+      "path": "packaging/assets/map-atlas-input-provenance.json",
+      "bytes": 1288,
+      "sha256": "d3226dee665df30ea57bada4639cb6282f6c7032530d3494b5e2f523e230e5b3"
+    },
+    {
+      "path": "packaging/assets/recovery/actor-input-bootstrap.json",
+      "bytes": 797,
+      "sha256": "c9ea49c1c8f8255c3f74c2b25651c0b1ec5e117ba65b5c071fd0c329e20f70b6"
+    },
+    {
+      "path": "packaging/assets/recovery/actor-source-trust.json",
+      "bytes": 860,
+      "sha256": "77a4081d8e83fb599d594288d8c4625801e4e907ae6a1dd40bbae4f34cb240d8"
+    },
+    {
+      "path": "packaging/assets/recovery/asset-input-closure-final.json",
+      "bytes": 4625,
+      "sha256": "65d4111c331469c9fc032353679a8e183fefeb51d4a6629cb679803755354430"
+    },
+    {
+      "path": "packaging/assets/recovery/asset-input-gap-after-recovery.json",
+      "bytes": 558,
+      "sha256": "c3bb1c1f86f5e963dc72ee37be278a8bb7c17db5604bc52707adb54739bd109b"
+    },
+    {
+      "path": "packaging/assets/recovery/asset-input-recovery-summary.json",
+      "bytes": 43885,
+      "sha256": "4589c969471818a33a162f7aa2fd55acbd28c6e557f0e504d3403024f2b3fe08"
+    },
+    {
+      "path": "packaging/assets/recovery/production-asset-closure-after.json",
+      "bytes": 1884,
+      "sha256": "a9c1d2006e3e04f0524b49cdb898c976478694221b36c420e6e645fb2d9b2304"
+    },
+    {
+      "path": "packaging/assets/recovery/production-asset-closure-before.json",
+      "bytes": 1918,
+      "sha256": "725cb3b41db49ceac072865ec6b9a6f230c1d99f0db077f020576cb0936b848f"
+    },
+    {
+      "path": "packaging/assets/recovery/validation.json",
+      "bytes": 3305,
+      "sha256": "62b9b78ee7b813038b55b8852999f34d2704747d3a351a9665f35968a0c2d625"
+    },
+    {
+      "path": "packaging/compiler/inno-compiler-provenance.json",
+      "bytes": 381,
+      "sha256": "b3c642f7027815daa7732e65d88472d21584cdb6bea1d72d05d71c3ddccc4698"
+    },
+    {
+      "path": "packaging/compiler/inno-download-authenticode.json",
+      "bytes": 360,
+      "sha256": "bb4894147898faa4bc02dd4e27a37c1683cd815416be2afd5156dedbb7e1bc94"
+    },
+    {
+      "path": "packaging/compiler/readiness.json",
+      "bytes": 5033,
+      "sha256": "1fdf5705eb1c6893ed99886328126baaf19fc879bf2eab8c9cc8dd00630893b6"
+    },
+    {
+      "path": "packaging/compiler/recipe-trusted-compiler-final.json",
+      "bytes": 3728,
+      "sha256": "636b23728f44d3dd994fde8aa96e057690ea2ca92e0b2b6031c6e91309ee614d"
+    },
+    {
+      "path": "packaging/gates-source-summary.json",
+      "bytes": 13312,
+      "sha256": "bc21113aad0432a6bd41b667551f82e8e12f5a636eb3007844709b69eb624559"
+    },
+    {
+      "path": "packaging/pre-release-full-selftests.json",
+      "bytes": 7974,
+      "sha256": "8627c7ee50024464c4234354a4faa7625d6f8d2245a805479e83b4fa4faf8b04"
+    },
+    {
+      "path": "packaging/short-path-correction/short-build-worktree-move.json",
+      "bytes": 405,
+      "sha256": "d3fab5a17abfb0c9ecf1054de9fde4c0cca3769641f088477deaa521d0f0f4f2"
+    },
+    {
+      "path": "packaging/short-path-correction/short-path-ads-pwsh.json",
+      "bytes": 248,
+      "sha256": "c726edff3616c24a2aa460d7fb09ac0f145d22ba75b11fb4eb6cd7f7e0fec45c"
+    },
+    {
+      "path": "packaging/short-path-correction/short-path-ads-windows-powershell.json",
+      "bytes": 278,
+      "sha256": "6212e320864ada9f370a2dd8bf72cbadb070cd1276989234902af9785d1416a6"
+    },
+    {
+      "path": "packaging/short-path-correction/validation.json",
+      "bytes": 1578,
+      "sha256": "7d7dd76d96be31093622193a22c62f149c921c1a185dd6492a210d7f3abae545"
+    },
+    {
+      "path": "packaging/tools/robocopy-help-readonly-observation.json",
+      "bytes": 1056,
+      "sha256": "eb63ee22a515965701efab7e1bd6b7149ae9897161749486f68cf408ad802b36"
+    },
+    {
+      "path": "packaging/updater-precompile-24216899a.json",
+      "bytes": 1191,
+      "sha256": "2d9c4de9c2a0b419554c0d0180fb5d54cd2fe15f2693e0a2493755a23874c8f4"
+    },
+    {
+      "path": "packaging/vc-runtime-cache-validation.json",
+      "bytes": 981,
+      "sha256": "a4fef8e091f80872af75007e825e248b8ae1d2adc68dce8b37a1c92f40ce7ed6"
+    },
+    {
+      "path": "release/game-and-updater-result.json",
+      "bytes": 784,
+      "sha256": "6feaaf993b138b9c20d62afe7f272302e7976f2e286fa762ba9d6fbd7adaa3ac"
+    },
+    {
+      "path": "release/native-attested-release.json",
+      "bytes": 1508,
+      "sha256": "6c7988038ee1f106b5b1767cde0a8847a557f3a2307601021b021c5046d60fed"
+    },
+    {
+      "path": "release/native-build-attestation.json",
+      "bytes": 1493,
+      "sha256": "3209853348a4bfb05b4353cdc33703c099ed5e56e743b5191f6adcf0d0714125"
+    },
+    {
+      "path": "release/r10-game-and-updater-result.json",
+      "bytes": 973,
+      "sha256": "d6295eae4880de4ea144c90a8f9f6460ac526aff080c527dad898f9be3cc4567"
+    },
+    {
+      "path": "updater/final-r10/BUILD-UPDATER.json",
+      "bytes": 625,
+      "sha256": "32b1dff41b6087b0fbe6c9321fbd7951c5a3ab876cb5f79c367090d28f3fbfb2"
+    },
+    {
+      "path": "updater/final-r10/ENGINE.json",
+      "bytes": 421,
+      "sha256": "7dd4d0b2d4d86688728c182e0f03d7873e93847e902ce9980220d703ca33df15"
+    },
+    {
+      "path": "updater/final-r10/UPDATER-BUNDLE.json",
+      "bytes": 1286,
+      "sha256": "a663fbde99867cd0856a6800fdd91ead65c485d74b86243fb4c84e71320458b3"
+    },
+    {
+      "path": "updater/final-r10/seed-feed.json",
+      "bytes": 1175,
+      "sha256": "04806231baecf5444e609f66f85fe1c4e05c01b2fb588977589ba2640215433a"
+    },
+    {
+      "path": "updater/final-r10/validation.json",
+      "bytes": 3576,
+      "sha256": "c546d8f01495be0fadc50fdc7eabba09cf76257dfb4bf70ef114fbb98a6125b2"
+    },
+    {
+      "path": "updater/final-r10/verification.json",
+      "bytes": 592,
+      "sha256": "1ecb8377ff373d1b7c3bdc11ad707b24eb4144ea203223a31b63cfb1a0437c1d"
+    },
+    {
+      "path": "updater/final-r9/BUILD-UPDATER.json",
+      "bytes": 625,
+      "sha256": "9638f841d665a26283025dcc01e016fd7144ccbb3d9201bf5febe38a7d4b4c93"
+    },
+    {
+      "path": "updater/final-r9/ENGINE.json",
+      "bytes": 421,
+      "sha256": "d1f6f1b7992021f9f0ed4426c8ce316bb60782830cd21f6ce3e16af1c4ebcd88"
+    },
+    {
+      "path": "updater/final-r9/UPDATER-BUNDLE.json",
+      "bytes": 1286,
+      "sha256": "2661d0e9b0a0f45298a724cc890f0de4e8c836eb4d3f6d3284c9278bcab6f584"
+    },
+    {
+      "path": "updater/final-r9/producer-final.json",
+      "bytes": 4615,
+      "sha256": "6ebb8bfe931c49a16b9904c48793c10d9d9ddce56db9891d3af4cd55fab5d7e6"
+    },
+    {
+      "path": "updater/final-r9/seed-feed.json",
+      "bytes": 1175,
+      "sha256": "8b3f10786c99a441f48ccfc42245b5bac79af3ccc86070c48e299b6239858d24"
+    },
+    {
+      "path": "updater/final-r9/source-map.json",
+      "bytes": 265,
+      "sha256": "d5d1ec6331861287919d002088113d7b0f88ffda42f786f9ab07c7e61be0f221"
+    },
+    {
+      "path": "updater/final-r9/validation.json",
+      "bytes": 2751,
+      "sha256": "c2da358fff1f477e5e14360944ecc839888d5d33bfe7fc76dbb36bdf65233e3d"
+    },
+    {
+      "path": "updater/final-r9/verification.json",
+      "bytes": 592,
+      "sha256": "8a672aaca58c6e9fd7777fbed9298dd5a11c829e51f52bc514f24c3691c91ad1"
+    },
+    {
+      "path": "updater/root-policy-fix/independent-review.json",
+      "bytes": 4589,
+      "sha256": "e9b72601a7e1bc7e9b417cff2d3b248af3b51c0e2440b8f38340ded60663a391"
+    },
+    {
+      "path": "updater/root-policy-fix/producer-summary.json",
+      "bytes": 5794,
+      "sha256": "3069cd84502d374c0e73c4ee22e7627dcd48f24bc658834bb1b6800eb08b4743"
+    },
+    {
+      "path": "updater/root-policy-fix/source-diff.json",
+      "bytes": 9791,
+      "sha256": "7c2bfc8f3790d1a8b952e651235d82dad2f646a10a200f43b4b2f60a8e5dec6a"
+    },
+    {
+      "path": "updater/root-policy-fix/updater-root-policy-live-inventory.json",
+      "bytes": 1346,
+      "sha256": "3bef8a0cebb477d9c07a5b56eb98b1a91a3d69b99b2103a51e2001ff92f673c8"
+    },
+    {
+      "path": "updater/root-policy-fix/validation.json",
+      "bytes": 5109,
+      "sha256": "6d1dc74d8942267710bc651b3922ee5d421a2e13c52a68a8f0b5de34c7508331"
+    },
+    {
+      "path": "updater/sc-release-precompile/updater-sc-precompile-summary.json",
+      "bytes": 1226,
+      "sha256": "8273bd46c940f2ecf6aa9454a9487558861d572cb46f8591b1c75a05142cb03c"
+    },
+    {
+      "path": "updater/sc-release-precompile/updater-sparse-source-inputs.json",
+      "bytes": 4221,
+      "sha256": "3df6b934ef2d28002fd2051f3a433a74f1a1bf2e53269e712d6adcef4c3e90d1"
+    },
+    {
+      "path": "updater/sc-release-precompile/validation.json",
+      "bytes": 1985,
+      "sha256": "0a5a233c26705e8f28a6572117f4fbe6f9bdf83e0b19e1dcb93e40b08ee3db50"
+    },
+    {
+      "path": "updater/zh-cn-fix/input-ledger.json",
+      "bytes": 8508,
+      "sha256": "0b1acefe78940aa3bf7225defa737a94b2440fda69bfab87b68ef31b0cc548aa"
+    },
+    {
+      "path": "updater/zh-cn-fix/validation.json",
+      "bytes": 8708,
+      "sha256": "c229d8b1c713db75ec00caff650ce84fc433af4ab1824d5fa54d4ab184b6ace0"
+    },
+    {
+      "path": "windows-live/before-finish-install.json",
+      "bytes": 1340,
+      "sha256": "e80a98e9705d1cabc34f4dbac7a4c0e1eb58aed36a094f86fa690a63f41017d0"
+    },
+    {
+      "path": "windows-live/final-ui-validation.json",
+      "bytes": 1171,
+      "sha256": "f0a87d65e97d89b3db2d8c5ec9aac58f63cd1acf0d375ada60f29cd61e7f6658"
+    },
+    {
+      "path": "windows-live/first-install/before-installed-ui.json",
+      "bytes": 1338,
+      "sha256": "6e86ebb2e3904803bc963c5bc7b3889d58914bf2df08aa35d45c255c6dfa1c97"
+    },
+    {
+      "path": "windows-live/first-install/execution.json",
+      "bytes": 778,
+      "sha256": "c664f751d80c76ef9b6a6b011eeb1d25527f48016372b9414ff16967ece56bb5"
+    },
+    {
+      "path": "windows-live/first-install/no-auto-launch.json",
+      "bytes": 132,
+      "sha256": "948649ae3f15c1677039c59175e8e15263089b73dd44963df47c63aad8e15b08"
+    },
+    {
+      "path": "windows-live/first-install/validation.json",
+      "bytes": 896,
+      "sha256": "1a5fa391275c3888aa9a9e2baeb0e152382992f8dea4e1f2d83f31965295cc73"
+    },
+    {
+      "path": "windows-live/pre-install-preservation.json",
+      "bytes": 990,
+      "sha256": "a20e7089afabd0f248dfc3e6fa0ebc21fe2a80316b7c7c8a3f8cdb3349680e02"
+    },
+    {
+      "path": "windows-live/r10-first-install/execution.json",
+      "bytes": 791,
+      "sha256": "fea90adc17479e5d23ea5ebfe9adc0e22c8335b25c5638b66fb4949a9f3748f0"
+    },
+    {
+      "path": "windows-live/r10-first-install/validation.json",
+      "bytes": 690,
+      "sha256": "01ae1168526bdca4c083af4cff7346a4f270a7bc0f839386800d06f882c1b1f0"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/economy-after-ui.json",
+      "bytes": 1337,
+      "sha256": "1d58459e30486670122c1beea13927e23711929f0e3c7c4da53814a57fbff341"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/installed-identity-verification.json",
+      "bytes": 1066,
+      "sha256": "0875b1f717026f3f9b02c04610f0d28dbffd2b5068705385bc93d94f7f1fda0d"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/launcher-updater-game-chain.json",
+      "bytes": 772,
+      "sha256": "3de32121b4ff872934667c9526c504729a20bd9e4da15261f45cf177141d6383"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/profile-before-uninstall.json",
+      "bytes": 558,
+      "sha256": "81f75913c099ea5cb7a4bb56579625ca93283b25515a2d0996916392f19db474"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-fiat-zh-cn.png",
+      "bytes": 85092,
+      "sha256": "fc05aa82d3dbee207a64df913e7e9edbb277e16e11ecc864aa8e3cd8ee44af63"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-fiat-zh-cn.png.json",
+      "bytes": 607,
+      "sha256": "56bc25bef8da4334d2ee4bfee56d6b4f2a61f413e20de70593235473971177cc"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-monthly-zh-cn.png",
+      "bytes": 86225,
+      "sha256": "e8e01fb7e4cdde2e26476c722973361d2cfd2c7fc4b2aee2937b4c5163fcf4c6"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-monthly-zh-cn.png.json",
+      "bytes": 615,
+      "sha256": "b8e12d7a040956a798dc151c6bcb648b9a8427744095426cd60d222cc7ad8d69"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-options-english.png",
+      "bytes": 213748,
+      "sha256": "d3fa2d44b52b3cff01c9cb1489abec66cc98c4482dc74e620ec4bffea00645b4"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-options-english.png.json",
+      "bytes": 606,
+      "sha256": "1a45407aca03ec4b2690f214bcd7057b4537a23993d82576cc6ba41e374671a2"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-options-restored-zh-cn.png",
+      "bytes": 207547,
+      "sha256": "b0b46712c1d577f734bf10ed2fa1090fb6e67a4e05047ce7dcf2db2d22279a74"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-options-restored-zh-cn.png.json",
+      "bytes": 583,
+      "sha256": "3a3f5702e19cb7361e31f63ccea07a371aac1187a7983b7c3876b79a7aeac314"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-options-zh-cn.png",
+      "bytes": 215455,
+      "sha256": "d129c91fd0747370dd763cf8979120aaff029de32263fd657cbf146ed6c05012"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-options-zh-cn.png.json",
+      "bytes": 559,
+      "sha256": "4d38e4cc960f049e95ae74369e6b2de2bf414c4649608060b44ee37380805a05"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-startup.png",
+      "bytes": 209286,
+      "sha256": "47737b91a9522cdd6882535a18ce46f9a43f3eba7325429daafa8903c7cadd7b"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-startup.png.json",
+      "bytes": 606,
+      "sha256": "7ee758028a29b64f1ade352a0b7db3b17a69663f361d38d9b55bb1498dc03b87"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-ten-language-menu.png",
+      "bytes": 214097,
+      "sha256": "e2db2b382d7740a96c96c9adfe67afd32091d5d365ea140b14d99682e549f37e"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-ten-language-menu.png.json",
+      "bytes": 573,
+      "sha256": "763a23701b0ac158f0d02f7eddadf6cdff6231d5f24b7370634269ea55a3dc3f"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-usdc-zh-cn.png",
+      "bytes": 98019,
+      "sha256": "759263d167b9dafcc801048e13275d365a7b85ea9a51a6471f78e1f59930476f"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/r10-first-usdc-zh-cn.png.json",
+      "bytes": 614,
+      "sha256": "5a2268acfbddfff0e166cb37c5f16300b07902d208bc9b269217fc41f8e30474"
+    },
+    {
+      "path": "windows-live/r10-first-runtime/validation.json",
+      "bytes": 7556,
+      "sha256": "e78e01f1a7aa2fc5034aed8eebb48ee5ddabc1f8ed7a200ecefc4c079ae5b4c5"
+    },
+    {
+      "path": "windows-live/r10-reinstall/after-r10-reinstall-ui.json",
+      "bytes": 1341,
+      "sha256": "edfb047997068266a2a53b26d74aa022cee1eba31e7784125bd0919bca04c92f"
+    },
+    {
+      "path": "windows-live/r10-reinstall/external-harness-source-review.json",
+      "bytes": 1001,
+      "sha256": "81688d6ad1282e449e0d95439fd133ceb195f260d1c9fdc5a9a8fa7bc9e831b2"
+    },
+    {
+      "path": "windows-live/r10-reinstall/installed-native-process-r10-reinstall.json",
+      "bytes": 830,
+      "sha256": "58457958c3b15fa0c7a49c5f757ef1f374c32b9203889dc406b7f003144aa05e"
+    },
+    {
+      "path": "windows-live/r10-reinstall/installer-r10-reinstall-execution.json",
+      "bytes": 799,
+      "sha256": "c85092e9887c289088903729b640c61ee5694206b5674ccdd3e8d8aedb9d9e94"
+    },
+    {
+      "path": "windows-live/r10-reinstall/installer-r10-reinstall.json",
+      "bytes": 1290,
+      "sha256": "bdaa7f95f0856d6961361beb732d94f5b2cc29ad7cead2e99169eac79a304d9c"
+    },
+    {
+      "path": "windows-live/r10-reinstall/installer-r10-removed.json",
+      "bytes": 452,
+      "sha256": "8f6507de777b58cdad34c880b1461df90af80487f257a474ed5b7dffdc717b4a"
+    },
+    {
+      "path": "windows-live/r10-reinstall/installer-r10-uninstall-execution.json",
+      "bytes": 248,
+      "sha256": "9331a378d517aa8ac25c18047f43360e181172175140b37da24c8d80e68f6b77"
+    },
+    {
+      "path": "windows-live/r10-reinstall/launch-chain-r10-reinstall.json",
+      "bytes": 1149,
+      "sha256": "d94cfc7c13cc5be5afb80c6a89ebdcc72a0449050f29b9219c44036251ff8cad"
+    },
+    {
+      "path": "windows-live/r10-reinstall/profile-after-r10-uninstall.json",
+      "bytes": 595,
+      "sha256": "c668fdf30b3edf3249908e415b37e71c77a6bd0067580713256593b907a966e5"
+    },
+    {
+      "path": "windows-live/r10-reinstall/profile-before-r10-reinstall.json",
+      "bytes": 529,
+      "sha256": "eda2baabe10ea3a258b977302b9e0bac9c41d6481cbf6d0c270ffc3d78b8c3de"
+    },
+    {
+      "path": "windows-live/r10-reinstall/profile-before-r10-uninstall.json",
+      "bytes": 558,
+      "sha256": "81f75913c099ea5cb7a4bb56579625ca93283b25515a2d0996916392f19db474"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-fiat-zh-cn.png",
+      "bytes": 85179,
+      "sha256": "33877131f4e0e3c860c8a79965870517181587f0df68681377f1d0731dc79b42"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-fiat-zh-cn.png.json",
+      "bytes": 589,
+      "sha256": "a927992ba5ab57bea90960422611db05cb5b6c5f7889a19e3245b0a45fd96a3a"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-monthly-zh-cn.png",
+      "bytes": 86262,
+      "sha256": "1e358c68ead9f28fb48f8ee9fe949b9a4d39599cfe7dd0791bae76a0f575c3a7"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-monthly-zh-cn.png.json",
+      "bytes": 590,
+      "sha256": "eb10ee00931bdc4ba6b68db798857504e5931d74627a9d204e4f6f80c81d50e7"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-startup.png",
+      "bytes": 201637,
+      "sha256": "fceb2c494404946b45412b85363d33768f04c547421ecac3691ad07424bdddc7"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-startup.png.json",
+      "bytes": 622,
+      "sha256": "20c9536421e6a236a24ed841a25e8f59eb3accecc9b16c477f00ccbd39027806"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-usdc-zh-cn.png",
+      "bytes": 98019,
+      "sha256": "759263d167b9dafcc801048e13275d365a7b85ea9a51a6471f78e1f59930476f"
+    },
+    {
+      "path": "windows-live/r10-reinstall/r10-reinstall-usdc-zh-cn.png.json",
+      "bytes": 604,
+      "sha256": "86a42a7999aac543bd318fea1355725289670358b876c264f187a69f10ff5964"
+    },
+    {
+      "path": "windows-live/r10-reinstall/validation.json",
+      "bytes": 7484,
+      "sha256": "9818b2e3def15738557c677967df94c568178d2235be8da6508e18451d1f4cd6"
+    },
+    {
+      "path": "windows-live/r9-removal/execution.json",
+      "bytes": 410,
+      "sha256": "4276f369435be9cfe90590c2d865d3ffb52a5ef6a79c87437a2eb0e00d71affa"
+    },
+    {
+      "path": "windows-live/r9-removal/validation.json",
+      "bytes": 665,
+      "sha256": "07cf626adea1e848171fcd351a2396beadc1e7e594bbe7bffd1a87d0fa4d32db"
+    },
+    {
+      "path": "windows-live/r9-startup-failure/first-updater-rejected-payload.png",
+      "bytes": 9669,
+      "sha256": "38f62307bbc7b7b63ce27612c5ee7fd72b3bcc5f79fb257e9edbfa75cea6ad5a"
+    },
+    {
+      "path": "windows-live/r9-startup-failure/first-updater-rejected-payload.png.json",
+      "bytes": 615,
+      "sha256": "7e17c3eec2f08348f003ea1b7d1b5bf2e5317de3ac1cb92aa9899c40cafd9907"
+    },
+    {
+      "path": "windows-live/r9-startup-failure/installed-identity-verification.json",
+      "bytes": 1061,
+      "sha256": "eddbc6a664cffec9d04dee6b04d9032f8ebdc0dac524f2b587e5e1a3c3d5039b"
+    },
+    {
+      "path": "windows-live/r9-startup-failure/last-run-raw-receipt.json",
+      "bytes": 905,
+      "sha256": "cff926349b9b42ce687a1ff2f13977f6f31b570f87425db50c20ac4b6447542e"
+    },
+    {
+      "path": "windows-live/r9-startup-failure/validation.json",
+      "bytes": 1906,
+      "sha256": "aed3414468e00f98e09f3b39cbf489e3b5cb5f4f2d08f17d686cf72b65c15e1b"
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": ".cargo/config.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30,
+      "sha256": "17d6d9fdca4859d571020695c0af7fefd2589200d6277be62762605c0d78bdab"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 127952,
+      "sha256": "d2054e187c8af34028a88c4650b4da646451931a15a01e83ea405b3204ed88a8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1725,
+      "sha256": "377510326b9fa3ca356f1c1cb57f44b061179cdda6807934bad5ec645cd3596c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/audio.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 72085,
+      "sha256": "28d679cc491a228a94e27fbc707817013764df33e0be133e8fd9a463a52ff14c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/bag_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13198,
+      "sha256": "c9b79aa02c0fd943955e58fcd8cb0558fd47fd129f30619dcf516ec77ca29ee0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map_geometry.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4157,
+      "sha256": "e34f4900608a157441ff9ba3760c689fa617a42e8e10007c0e37876598afe2dc"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/big_map.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 49629,
+      "sha256": "cbeb7885b150a287e55e7b13f483bb83b6505863cb860883af5d416cffe98a20"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/character.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3525,
+      "sha256": "a88338e21f6f26c59f5f91c5501eda3a7740d646159f221745b9ab74d241fb50"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat_settings_effects.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10554,
+      "sha256": "04357156a342fef53328b49e72e18c860c64f400f8ba498fabc77d5ad6f4ad8b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/chat.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9148,
+      "sha256": "42cad272298ee37a5605c0d582bc299317762e76ce9d6e40c98f39029d58dc7f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28587,
+      "sha256": "dd215f108653287a7293f285989b5eb9c8dbbf2abba6ef4957b4ebed1059de25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/combat_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 38414,
+      "sha256": "5a4bf89f4e5ae86af2b6b311d33e9c3ab7b993de1864c1cbabdb00cc65339742"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4167,
+      "sha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/assets.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5081,
+      "sha256": "dce72c5010735d60c531250bb3f20534b26651ea2a4698d94187b7105fcf8b64"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/bag_paint.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27522,
+      "sha256": "cf58947f87f977eaab18c29268fb78f315fd829c9ed366dba89e1079795ef6b3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12593,
+      "sha256": "1b71977b7c33c5b3ba5e969f21413cd3cc929e4c9608872db33d60b03e8b9eaf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5565,
+      "sha256": "a3e951f895b500d876ce15a1b75bde026f0454837faeb7835ec532e28add50b6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/big_map_npc_navigation_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13859,
+      "sha256": "9ac429fa5f8444105e59fd7e5e4b2c57ea8557cc63c84cc900e250f84ff43458"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7425,
+      "sha256": "c8f223ed07ad7a58f01116ff696282f802650934370031a1182808c56c3c434f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_materials.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3399,
+      "sha256": "67f377a018cf795c5e9051d7ffd155d3d3b5a1e2d03700cf39c47b861b7a3f91"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3723,
+      "sha256": "70fa9085774fdd40dc1fca51021680f208f57200d471fa3292d30373a99ed5f0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_page.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10327,
+      "sha256": "295eeb5b95da2a4c2f39a577072097d5c238a4ac5e0de2e933b47ee6d004aaf2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats_portable.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10337,
+      "sha256": "61d320eb6f47abf321577488bd7cccc45bc36c332a5aa6b6c1747d04a003d469"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/character_stats.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8611,
+      "sha256": "8563b962df0f9f8d6b2f4c4a44e68d7bfe8b6f9204d722b24f6f6e80fdb59ddf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 103269,
+      "sha256": "023b1d19a04914dde6ebbf9d32b1fd15d338aea23914de93b859bac403ec479e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/combat_mode_keys.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4945,
+      "sha256": "aa767df49c6f7cfc38e6e5557f9a3ef8d5e1efeecf1d079437a713fcf3e2fd93"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26565,
+      "sha256": "295a5cf8f7c7d4a476afc5f5f570777762808383b15cc9a8f9a7c9aa0c9868eb"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6764,
+      "sha256": "27583b21b786a7ee8f85ee1a3161bb894e4f109456c1d2d82a898771029cec38"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/creature_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17156,
+      "sha256": "e5ebfda4f3e01fd414f1736bf19225f1ab4b994678150f418adbd8e6e37a7e86"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_frames.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 42219,
+      "sha256": "85f11ac54f47fd5a2fb9d036d5abfa3696b028335e70a214fe54907ebf1d6087"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25057,
+      "sha256": "94a905bb9bfd24f08d97c1bd56a0a36313f83deffdcc01c4054176f42b3feed1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/equipment_storage_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12537,
+      "sha256": "a760e200a0a6024764c07ec8a13dadd95cd90aa67494a2779de86c5a5f628e77"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26968,
+      "sha256": "344502384864da33c8e29b022f1f7e0a59cfe0e022b660a2306a3f5541b5c05e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18011,
+      "sha256": "2733c461c37776fad8e802e41b351a8caa504a109283b05ddc0fc72c62b1266b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5785,
+      "sha256": "079c90665f29881c932261d569f23daef7e96654473a818178fa2843fb34d015"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13089,
+      "sha256": "77c0432500a103547d0d2034efd90b096cd0a160a10ca7725f6c86ced4e6f0e8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4710,
+      "sha256": "c8d037635dab159243428f95b1f6a5e7fc5b3d50e5d8443cc751ef80f0101c0d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/friend_text_editor.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10750,
+      "sha256": "d883fb09df661f9ab197f6c444821d6ed5df88bd5be4e1530a4a69685dbfb28d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 108493,
+      "sha256": "346c4fdd9c5d2c56699cba2de4491ca98fc7e234a34f89bd00e9f27e610f1037"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/group_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 20025,
+      "sha256": "b1f4e80020ff83ae59a24e658d3feda21ae8f52047a0f92f3f04251946f0e09f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5742,
+      "sha256": "94198f0805ef0d67155ec489fc7aa7488987cfb9f730226b29fcfa2350d77e98"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7599,
+      "sha256": "99525afbafb8affd057dc9752763386f7238895a0839de4f3ae6ed3bf8911a65"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 47440,
+      "sha256": "21fa08d54452bdb2fbce25811e6c39c99adfbb8f9e3f9b0abc1d9ffa1acff7ca"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text_view.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11512,
+      "sha256": "0d5d809f5e426660f4a74aaed5594682e3404e4d30d644a7137a9625452d076f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_pixel_text.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 321,
+      "sha256": "dd29832e9918e6ce9ba26f4e04443c134b54aa6bef009addee6509c9f3f1ab3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12496,
+      "sha256": "ddf3caec9e508ab80baa39f677d97a7ac6a1970dc667023728252fae3e5d7e2e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 41551,
+      "sha256": "b76c722fa58f4bedf0cd57cb46bd09a1d6665686e8790bb5210617c6c8e4edce"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12243,
+      "sha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_assign_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9046,
+      "sha256": "b4935dc36d12f48b563457149db579c668fde070e84e262c204b05556ea401d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3994,
+      "sha256": "501b39d47e14d8bad22f9442889a94e0b4ccb30f16930573b3af42683b367a66"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9944,
+      "sha256": "1bc4ad1314ccfecc06cce93142391d05d1449713020bcb37ec4e071b54361606"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8158,
+      "sha256": "2b0634dcd27a4a428fc250138a12c1d69b94a7a03a26638dfc76dc8a42339117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_cross_inventory.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10687,
+      "sha256": "097c70a23a681f732ebd2ee21e9e697729b493d3c08f514b61e45524577e959f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_geometry.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9172,
+      "sha256": "0d16e2066edc2edaf633cfd10c9d7f46f50986125b1f31bb1419e5066fb3b0d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27238,
+      "sha256": "ec972c2f53f6b4d4f690a3e39de954a91fdfdab8ea7fada95f3d9e8ce10ca9e0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 49289,
+      "sha256": "c4c2a3d683553b2bd024bbf03ff0c58755808fed20f28be9609eb2666b8bfa3a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17476,
+      "sha256": "181713ba533c4eb92bb3be983a67b550e03236073f665143db18fcd64f72026b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4446,
+      "sha256": "466ed3dfa5176a5cda58dfa3fc7fad9f7da5a5f4ca2444eb311f9a9f82c92117"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_item_use.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7082,
+      "sha256": "d42d750b7e7955cd0d3878cfad2824ae7cd3821753b6ce008760d3e0f096b31f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hero_pointer_settings.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 340,
+      "sha256": "c1ff409f274b58ab5c80b93a5772f2f14fbd47cc83ef4770be9cb9d77193b3db"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_bar.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1288,
+      "sha256": "18850cad9b755d21a8805f3bde1c19938031053c1329795f6229cad6ba36a3c3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6725,
+      "sha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_orb.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8631,
+      "sha256": "a1a05bede2bbffc408be649bd8b6ab7ab90cca3864b0cadca12c927142078703"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud_portable.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7839,
+      "sha256": "a2ba43a9c1a2a42a2967acff346049e742802bb7472824ed90faac4f6270cb46"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 80687,
+      "sha256": "50492c2521f4ad63fe983e6228cc6e070e9b9932e2a64678145e8d09ee7727a3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13228,
+      "sha256": "862fe97112959676346d06bfea9ae3f67e0ab451b619f81a5cd344490c630512"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21620,
+      "sha256": "fbf1b5efab583c84e40f42d1f8ccef324dd80ba5a8a45945d9adce930cb7f6e1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17332,
+      "sha256": "ebfd4f283523f658d33793f604e697a5c4e4b0430fc5d63586ec8597bf31d208"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31669,
+      "sha256": "46f85f80a5303b50ed48fcf89aaa0cd5526cbe178aece1c262b56d9e92823bc9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10199,
+      "sha256": "454325de28cc47301c8e4fbd2e247d5e6ea7a354a699f1b1cebeac2f0e2cef05"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7609,
+      "sha256": "b2eba78cc674f4a039606bc1551d22ba20d895b73cd8a2aa571ffbf25edf3ebf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14280,
+      "sha256": "b1dc4b27efa32781eb47f0436691cac2824959038e01ee5923195cad9909c153"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6479,
+      "sha256": "7e1d2d74ed1e53dc4636f125cff77ea908a7a76f28957feb2b5fe1d2ae41cead"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/leave_game_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2722,
+      "sha256": "d43815d47d9c73bd678852e80f3be0ff828834648ac8c6fefcbf9d72761d1339"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/local_keyboard_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1936,
+      "sha256": "f235a96e71ee6a873703e33879bd51c7cb7b35280f29d0ea9a132ed53da9e07e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/localized_help.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17246,
+      "sha256": "1ddb8b3d1d4824631ac1b6caf2758e5e77baf407899469930b24f6d757adcc52"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10806,
+      "sha256": "aae7f2052cf6b1102b10f8a28d40ec27335ef8d0ba7f164dad37d9eb68b26235"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_drag.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10036,
+      "sha256": "d290c785f44667f361b60381e3d9c69bd94f298d42ad7448fb27392b343fe050"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4357,
+      "sha256": "28a0295ff81adca550b2d5524df02e3deb94e79e9efcba70568138ccd9e8c6de"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_shared.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 50473,
+      "sha256": "bf64bc8984f5b40f06861db6e769a733af5ca7ce8f8324add0189366c8d3154d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_compose_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31105,
+      "sha256": "9382c8f1f37aec6ad3253f11b383d3a4b1630f8c0237e6e81ad190c2d15154f1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_delete_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14547,
+      "sha256": "c257aba303f38700235fe4d07dd0aea94b2b3f37ba17e2e5d170d8d538f78a2d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 80723,
+      "sha256": "cfefe8e2d882982ceaea0326c6235ca8febf81d7ef3901d11ce3f8f632e5f64f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40659,
+      "sha256": "ad1052374004e28b344241c70610d3e087e442dca29cb2b325aaf4f70200381d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_feedback_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 32759,
+      "sha256": "c134b544b27abde4b7d4d154b2931fd9d169ec55bf5fd97c91110cf77ab1d586"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_list.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2647,
+      "sha256": "8698469c3c7007438af3554e21defc9a6d3737790b2ffaf75aba8716048018f8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_page_shared.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 35779,
+      "sha256": "f5654e67fd7a5da1d722ea8078789b5a604402d7fa7a222aca5c45386ddd7922"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 43267,
+      "sha256": "988b9672faa5d8609c8e1eee0faf57dd66a3c527c7eaa8c41b0dcbd0e558b667"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24267,
+      "sha256": "8c67c2b337d7b0d2dde8f895fe554c2dc63943a0ee9cf6da8c9044b5ce7ed7f2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_drag.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10205,
+      "sha256": "97461fd55a379060f339acba8564e4075650623626a90612e74d0dead663ad3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_reader_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19153,
+      "sha256": "2793ce741de49f276294516ade0e06aca3a4678adfdbf5d2bf6f88811157fae6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3048,
+      "sha256": "082000adf8d7d7ab762d1d3b8a85aa57cdee6371f79dc4420defcfdd64e5ff43"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mail_text_adapter.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2564,
+      "sha256": "fb497377a303ae874e64680ae1823b6077188992aec430dcdc4b1e09c2e97c85"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12932,
+      "sha256": "257bed6875d9767837e344923a7d21faa956823dfbbe6b4a9ce08f13d01f9fe7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/minimap.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18097,
+      "sha256": "ac54aee1debc3370d47498c6eb0748c4924a2f444e06a9662251f0c28561da14"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2739,
+      "sha256": "3531c39cabbcb9d08d9f32a094f854934105e322e07d107171504842f0cf53a4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16498,
+      "sha256": "1147479afb553a8becd7f7f234e99e501cecb8ab23478abe80ed588fdaf9e6ef"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 20511,
+      "sha256": "28cec2945eaf0c166398f94ad74fb7235112af9898d64b9478c2f2374e91ad06"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/mount_fishing_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8152,
+      "sha256": "57689fef43667dd00e2eb04a11309cde539a87d7182845dfb4fb57f316800016"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28717,
+      "sha256": "dc66fd18496f52bcbc413ec514826aee310160fe5c406bbd3a51f77743512170"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/nonmodal_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3585,
+      "sha256": "7c287db57d50f8c0237bfe14192c6eebca809474de842314305d09acf19d64b1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26053,
+      "sha256": "63aa5f1398ffd1044197a346e8b21be471956d3ff7f2744353a9a444cc01e30c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_quote.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10567,
+      "sha256": "2db26253870a7ccf9a68a1faaf1e2276a8ceae3be4e10d658137372e03ad3c58"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 32970,
+      "sha256": "6e509446d6065678fe52bf4b67e54ce991f6316d9e855ddcf7da44a0f825153d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11766,
+      "sha256": "3137061bf4ef23d5a9c4e5a10a78ae790ce21da7d5bb3ba9a39625764e9de09b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/npc_shop_scroll.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5470,
+      "sha256": "b82866388894296627445cf881eff169c423ba9fde7f85b18140c8b7748a7fe5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14497,
+      "sha256": "b9f62345e1b945d31c457bb71e6cb7f1272fd0afee937244a6f302ab09b9eec7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/options_volume.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7166,
+      "sha256": "f094a7d5dc436b5340b4a635e819799f5c2d72da3a110f185713d8d862fbc2b8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays_portable.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2079,
+      "sha256": "d1ba70ba2b6ad8a4c7ff13f43ae516d2dea271c35aa6f03f89c1aa2066b75ca4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 941812,
+      "sha256": "a729be318799ded8ae4c08e222a77b350a15ed444ae1d46ebf36fea9a1064e25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/panel_navigation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2772,
+      "sha256": "6e003eba04b7f2b24639b20f1e2731f8d7b6658f25071235b7d1df1f9a7e7a2a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15329,
+      "sha256": "c2c56972872c9d1b9ec1dc1daec2c01138c2a3d02fce7c2565cf25b5b8e1f068"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13051,
+      "sha256": "12a98e580bfbd8cf6ad47f083ad7c5977f857a6d71e0d82e238780c833560a05"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17405,
+      "sha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/quest_targets.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10456,
+      "sha256": "d88f3537ac65f3326f8d0dc139ce792f61196cb2f8b88e79e86d254c1192286a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8271,
+      "sha256": "a42c830afd707be17129704d822c75efeb5c30d1b8ac414b0db12e3ee4a97f52"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25421,
+      "sha256": "5ed3faf76346d436fc3c19332cf85e26cc90d8a4885be20167d190b912c067c2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18385,
+      "sha256": "e77b5fcb1f896db363547ae13d06ca0dbd67ba898a4eee64acbc5a4ae9e6279c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9047,
+      "sha256": "f04807acc2f8561c3018afd699a3523d4ca58883a546c88b5ceeeed119a174f8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 20187,
+      "sha256": "8494d04b0649ccf6b5783a64c8ba33a808a7200ecda66a542c704d76ebea2a7b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/refine_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25704,
+      "sha256": "e8957cb457eaa81f6298e4af1bdb9291ecb04467d7b66b7d37a5e71e2de93701"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31119,
+      "sha256": "04de010a5c45c3979b7f8a2c6933bab1517ae19d92abb2d28da4fd5d2b8cee58"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shared_hud.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16596,
+      "sha256": "3e6fcdc241efdec0f8c1bdae402957b036e2651a30415fe496ccdd605217dee5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 20132,
+      "sha256": "f7fa79ca12c24e60caf46d75f07b5dcc9a3c084ca7dfa2c373021d11ae4f059c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/shop_paint.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19984,
+      "sha256": "b7279b5d15b7c27960afeddf8ece13b37cb58c795817f74edeec3170b63c85d6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12882,
+      "sha256": "45fd18a4889b65aa3c23981857e06310fb28a632c489d7b85ec1b4e41dc8cff6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11928,
+      "sha256": "d912d6f010be68dcc94cc88186199b03610db3125d20d341323168989753c242"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12301,
+      "sha256": "fd7f640af6bbdf24b1d803998de73fcbd7b8a1b625ab788457450de76de569c8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3894,
+      "sha256": "d4557b8a4f360a891251fcd32f0cbe6bafd2951494345abfd0781213edab086d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page_shared.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13960,
+      "sha256": "eb12640795fdd126ab5a2f86ae9fdf4bc1dbf2ab435cf3b1d7314fdf95502c71"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5794,
+      "sha256": "83ccd86855a2295db400773516b9cc18568bf64794178b5c1206b8f0f82987b5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14671,
+      "sha256": "bf8bd1a8d9074c9fb480b81227762d257dfaf73cc271526b9a1b42bb7caed23b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12560,
+      "sha256": "4d05faf4fd648cf266a8acd4d07e931f5816f3e5600b22f1c2330f0972ee48ec"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15049,
+      "sha256": "90bc64734e7c75dcce9b6a59962b80a7938cf188a604d5bf1932d8bcf8fedff0"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27025,
+      "sha256": "bd558f66051fca453081e37f1e806f9f5a910e0cf658b63854bfd9f22e533e15"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/spec.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17307,
+      "sha256": "f82abfcc3f4b222224027c4004b0441273caf771f150ea8002e57f8bfc336b55"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30967,
+      "sha256": "474897b243e24fe81762af9cb208fa131f4f2a1f4741028f7c7063c2a7fbb0c3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8556,
+      "sha256": "98c4ddd5528254bdbb78f396b0614b68090382812cf108548d345d1e7536b148"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/status_hud.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27576,
+      "sha256": "f2821907c77c95818a89d854a40bcf373b64bbb4a5a1333f079a7fb24e5ca712"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_drag_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21739,
+      "sha256": "0f23cc4588fd8f25a60055cb5e27edc8670b4d463ee76bfc7531abae2852e695"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13844,
+      "sha256": "b8d0241d2767f6b249da8304d06dc948c82b2c8d4860e4a07ec0d03996ded788"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_paint.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19305,
+      "sha256": "7dd88df1cc9ac8a3b62dbbee34a1eff5540378e1015d0353137f5a1528819b72"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13096,
+      "sha256": "8ee77fe06ff6035d54fe86a914588291a520daa814b7a19a282ebbc27063a516"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_password.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5393,
+      "sha256": "e0988f17e76dd152696f95a6b37802d61ae3225dd4e192fba4de2cebc2a1e6ac"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/storage_rental_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9425,
+      "sha256": "1ea8bd836c3a45a67a009022bc6b616fa2a01d43f3694a754e975b96c6957855"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14224,
+      "sha256": "0d41b9e146db66d37a4147348873a2833b763f4d396f1f4805e0e5de91712335"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/text_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15925,
+      "sha256": "121465dc0fba7e27fe75bfa5dc1abb54b356c910774d9d1190116cf6bf950393"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 33158,
+      "sha256": "57088e60edf1c18a24b44b6c4b683f11302f30e5eb70ddb253653b909e0de5f7"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26798,
+      "sha256": "d2e9fab18f2c07d848b6fba0cd2ea2b7216f7e3734d2ddc512af9452feec2a3d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17157,
+      "sha256": "d3022d83e31e199decccabc24db4601cf4560c8276663dc92a54a1e3a3326d98"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/trade_item_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28376,
+      "sha256": "093ec8546f3d4a7a531811648725ac3ab2d8cba696964fb69f3d5515220b35a1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1705,
+      "sha256": "012f631ab075ba0889cfec059076025c797935882fd1332a83cfaa5f8cc6aa1d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 81120,
+      "sha256": "89ec9c6f5f622ee5586e1c2084e85c3e6d3d41f5e5c111ef751f8f369deca8aa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/entities.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9192,
+      "sha256": "da2c85d305d97ad03dadef22f7eb4211ec69ec4948abe4a43d91a079e694cd2c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/game_shop.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28797,
+      "sha256": "83eec3c71d0cb53de483deacb42af69ba00e352f53cf8ae901055ca0dc94a03a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/graduation_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3493,
+      "sha256": "90ed22b17ffef2a68099cda3b0985e369984a31c4dd69701547c486f046d7a5c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_action_basis.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 42327,
+      "sha256": "01e7d466de1c6cb32467cfe8405254e9df6a71371ee5222191a1db7592b2481b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_ingress.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 94874,
+      "sha256": "64a6c051e8643af6122804138dcf91c2b588ecd1b4fdafcfbda2638ac0bdf45e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_model.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 63462,
+      "sha256": "6548c6363a33cc56e9b4bd49f852ec016fcc4ae98a0b71b0e640fee8ba725b1b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hero_source_witness.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26034,
+      "sha256": "b049b2532fad43150fc6d96804247700ff6102dc45d008ef7ced9eb2aae9cae8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/hud.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6225,
+      "sha256": "b23c5f5b19b4b02b5aec27cb8f4b1440d8a9822748a69e91500933cab41704a9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/inventory.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 32305,
+      "sha256": "80becbf9826855c02c6f39a0b289b87ba37c3112a498b3908d750ae8a065e62a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5495,
+      "sha256": "d140d25426d427feb20b9221ea40b5242f2fecd5003f218fcb1082c76733977d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail_service.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24889,
+      "sha256": "175df3b99471b7925709c1bfe9bca1120ecce029998478e31a11b840efd06e2d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/mail.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 39789,
+      "sha256": "92a1fc76d42d57b961a670482d58d7495b41f7fba7129b1efd409f0523c047e9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/map.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10934,
+      "sha256": "7613359832b2cb3985d58528ac97599112ed6891e51435f13defda8678a0eb51"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_billing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 94334,
+      "sha256": "ba31b81b092cf01e6c57b50231e268b6b3490d14933aa9db2945d5f3561cf4b9"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_display.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 42665,
+      "sha256": "46631d5454a6e90a7a974c7a7fe94823a50f39af7245b84d00554b2312573641"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 77371,
+      "sha256": "0997239a945b8b2c67011320f5d3f0d1418667a9ccbe99e8bd1bce94e4f19b32"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 104034,
+      "sha256": "40f3f61411f7fc6c7c7bda6c95d4d7b6758fb51296e7c8a25badca12bef0b3bd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_monthly_card.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7961,
+      "sha256": "801752573883f21348b6a4ac4585d3a8413a07989ee154b2d5a4b1191a4097b2"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_procurement.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 77918,
+      "sha256": "da7f74d62ba2076f4de4dd89d8ec6246972ea664b65b90a6d4b713af7456e63c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22855,
+      "sha256": "bdc2b4b6ad85ab55bd09a351f15bc7919995d549acc3a98d059d883ca36782fa"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 140967,
+      "sha256": "40408db14a24f58179fea420ec8805a388e29c7f9a30e0d72ed8a4d4f3d46126"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 91185,
+      "sha256": "29e53b8bca747e9af53a146d5ef040ea59b13ec1edd2940e892ce50f5ef09ae8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/newcomer_v2_guidance_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5508,
+      "sha256": "d770d6ef22ef0af72df9c8a6dc093c991f1be3e69926a177c753d9befacfe1ea"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_gold_buy_attempt.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25208,
+      "sha256": "5c569f253d105855abbcfd0a3090731cd61619bfd185280144387293be812505"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 33552,
+      "sha256": "a2caee299b79e563c804eedc4f383d62cb3fa9232ce6420b707fa9404bb231e4"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_buy.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21052,
+      "sha256": "d5a2282bda80cb464d9e2581429578c7f32154b2909a868cd8e7b7f4899b1605"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22767,
+      "sha256": "cc59fcd3a0c8ea4a19ba17ad6c80350bc02931398dfe21162a8d8a8365d0746e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/npc_shop_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21896,
+      "sha256": "e1f6d14f632699a45a0a12a8e6105843ea159b37f0103ed91e260b416d3b0bd5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/options_effects.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28290,
+      "sha256": "d086e5faa0c6e20a659da1fe5b35636a374021135d97ea84300b9279a8901a7a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/pending_operations.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 128759,
+      "sha256": "b5c387017ba34ec2a1c291c9306d9f4eeb6836f3c171a96b7bc03cc3e721bfbb"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/periodic_quest_ui_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 50289,
+      "sha256": "18d5ef6b60c464c7f571fe5f13abadedc4aa437706ce743c666ca55927458b85"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40697,
+      "sha256": "0c34c9c9cdc1522c6a763fe1b2ab41ef801c531b0b3821bbcc6310f0c585874c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_bag_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 160675,
+      "sha256": "2a1ebdc268ec1f74d3ef0ab0d5fc66e64782dd62dc3e2320e9a6cb2f4591675a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6521,
+      "sha256": "e02a7386e939a1196224848dc69cde6bbbdf50532a3346867f1f702639c607fe"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_character_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19402,
+      "sha256": "ff1dff6df4cb8d624b0c82817f89fabac9965bdac2f54a6616cce8181af6b62f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_experience_bar_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18563,
+      "sha256": "6e835c5d6bcb62db12204888014dfcdfa55db2687825f28e23386fe06ebe6796"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hero_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 69892,
+      "sha256": "75ed32984741c914d4ad62f81fbfe2663346846803719471f0332e3dae3423b3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hp_orb_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 60674,
+      "sha256": "322e9c46e31108cd588f525a218ec2251a7cae347a6faebc85409cbe1c1f9c04"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_hud_bar_draw_plan.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12781,
+      "sha256": "8f7ef2a307289e479a3696e79e25c05ce6022e44be4da075fff54f6d7d893d2a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_mail_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 44407,
+      "sha256": "1b86007446fe9268b1e38050af39572cba864c0ce7a443e877a4c40fd3266b28"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40594,
+      "sha256": "15e83bc402a5a359116f283c48d1d4f7220ed6f916cd7b6249215f264356b09b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_npc_shop_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 49522,
+      "sha256": "6112790ba0b9a57fb529fbbf85d25dd20c3d8b98a63884a9098267badb42c5a1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_quest_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 52202,
+      "sha256": "7de7b68db57bc9863c62ef65ab6e1b31bb931fe2cbb5a8df15169845c023eee3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8110,
+      "sha256": "f470b9a430d1ad1e25c960bf6ad958c0cad09ccd56705111138b74983501af0b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_spells_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15429,
+      "sha256": "c858933be07fe1f994d2248ed3a5cf642ea421bae167efa67c51e484d172673a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_storage_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 82948,
+      "sha256": "534d968d44541499d3abbe706d36b6bdfe9b54a6027817d6795ad0dd8d6d29bd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/portable_weight_bar_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17598,
+      "sha256": "700a492ee2e8de661aa2026f66a71fe19a8d1973db396b75e79f10c7f7444c02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_destination.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5337,
+      "sha256": "4022b78804cbcb65793879e423049fb26634df00008811b3e96019fd4443d08d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_guidance.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5675,
+      "sha256": "202a7faa12f0d2e635512570fb05616ee29900275f0d0f9341e758745b787c2c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_hunt_regions.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12090,
+      "sha256": "8858e395268dd5cdf70655984ae44c164ac16a637d9b9e87efc9bff2d962e161"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_intents.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7511,
+      "sha256": "ed0efd24c4202aa12d34a7ba9d7a75fe354e3c69311398ef859cc58a3741d57f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_journey.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 37931,
+      "sha256": "d02a13f5e0d9d1e452dabb71fa24d77a0f7a26193648d29c0fb729ba5b917d6f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_model.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 32330,
+      "sha256": "3d99a0b1d67615d08c0281e5eca180eee9e16462fc368d77a0996e44511b0798"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 71260,
+      "sha256": "e821795297de0ed6cce3eeae9c4e15bf162c8e0942253552582bd60912550c97"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_multilingual_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26828,
+      "sha256": "5b0e4dad5b079f72b3f153e33b1c17405f5aa856c933d0cba81304433d2aee0b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_nonmodal_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10293,
+      "sha256": "d2ad9c40d84983faddee466363b1670255d0a7d2f84634e3df2c2860db345f25"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26356,
+      "sha256": "79d084e604e3ab9aa2bf86f6d1ccd5a52c1e9b6dfc3bcfc4229e0c03ca09157f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_presentation_text.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4753,
+      "sha256": "a4173aceda4c23a25284480e90901ad48f48d832aed01f6e63bc52a28c1e1f49"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route_search.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 292,
+      "sha256": "879b0634c0a76d4f88a0dff03da3103f81e556b49b8a06c28ff8a9e9a58dca45"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_route.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6565,
+      "sha256": "b4876ec4b953d9e899ad45626585d37f2e3cb6242ef939c8fa9ccf484f30fb39"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies_fiveclass_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17282,
+      "sha256": "60d55027337424f1ca81ce3ca27cfad7a032cbf108df393e1623f51dfa856aa3"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supplies.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 36692,
+      "sha256": "38281dc11669fedef7904d08c6057a64b7f2bfce429e6e1a9f27652b32ecabaf"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_supply_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19286,
+      "sha256": "345fde2e267f781f8a16f063150d38544711783e43a252a038fa221d7fb2a659"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_turn_in.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22953,
+      "sha256": "bcccb7f6b4e1148cb7199d12cdc18eccd44f64d9ac3a31f892e29046cdb45f02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/quest_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 609490,
+      "sha256": "dfd90e23e60e0d99a69e981e5497fa56464026cf1f7fd5a39c2ce13c7d66933a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/read_model.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11721,
+      "sha256": "f570ee71ed883051062e385a745eb6b00dfc6973136878cc50c2b519af7a1373"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/shop.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 23584,
+      "sha256": "4766ee8c2b7afc4abe18cd80c7b5b0928c90559179984c1e57db331b180731e8"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16414,
+      "sha256": "ee7edd097d1f2208a6a746a1d1c84bcaa096d02a5008411734dd3122bba27357"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_binding_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21495,
+      "sha256": "5d73ec6765b3df04ad357686d6abe2d10910e0e3cad628d5dd7ce4156322bbd5"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_model.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 33184,
+      "sha256": "5fa5f240863db2cc5664ffd0907f652c82eebf0d9277319c6f93f16cf0439c02"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10024,
+      "sha256": "68b5ec253f88d5d4deac53c7c3e43a94a60f661bff1267921a8af6f3b0991548"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/skill_page_state.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15771,
+      "sha256": "e3b8de1d31507bb34e6bf37d3765d8a778f33980956e2dcd7bd59f3f0e142b3a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7237,
+      "sha256": "72ebf67e41020b1f9a8800fe4e36a036f939762d3835ddbf46d32c77c4f8bbdd"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_trade_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10477,
+      "sha256": "5ad3148fda7f25ea47b1754ebcbfdad9c8fb5b54ba7106bd550ecf2fc6b832c6"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 85598,
+      "sha256": "f2770f4e3fe99fe64ca3d2dc98b8372dbc6ae51f5c88844b4d6f220d2d25566a"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/stone_workshop_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11240,
+      "sha256": "2efbfb76ff0eab1feabbc75cf29ecc5d040c6ba1f9af2dd68b8a4eeaef9c498d"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage_interaction.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22116,
+      "sha256": "7980643295198bfa1ff356a42b8a999ceaa2faadf0b8823c367a1390ed2cfc8e"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/storage.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22005,
+      "sha256": "927c0771967aab045b87242e02af13c6683feeff5582c397f413c0b227effc9b"
+    },
+    {
+      "path": "apps/game-client/client-bevy/test-fixtures/original-item-true-sizes.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24107,
+      "sha256": "a36ff048c8cd50628f40c9f7613ea63c3a65b59a58c6eec894ba7d0925df70e2"
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 160,
+      "sha256": "a216ff6c6ef92ac18738544aa1c3e8cf76545838cbe0a8018caaba1aedd3da2a"
+    },
+    {
+      "path": "apps/game-client/client-core/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 390,
+      "sha256": "ecc48174c912f769b5974fe27e428de84e730d489129c2f5fdc27ea38800eb4a"
+    },
+    {
+      "path": "apps/game-client/client-core/src/auth_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16086,
+      "sha256": "9d7f29434331114d65327b3e363a7fa6722a35a4f9842c860dfee59b68946d69"
+    },
+    {
+      "path": "apps/game-client/client-core/src/cash_preview.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6740,
+      "sha256": "5e5d07ccf650f92413379d68536670280cda32e1ed04b6f141ec05ef6bd6e8fd"
+    },
+    {
+      "path": "apps/game-client/client-core/src/chat_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13191,
+      "sha256": "5fc58219341418a8c663497a4a1a0441163a130214f06fd3792b9bf1b6307168"
+    },
+    {
+      "path": "apps/game-client/client-core/src/clock.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1543,
+      "sha256": "5a972dba7de1aab6092cedb654939c54f5a5a7493e99809057ad93995c1eabd5"
+    },
+    {
+      "path": "apps/game-client/client-core/src/entity_animation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 81097,
+      "sha256": "997036024ff06ab5ff4510a94952c54cf7218657ec13053bd4ada386a6f4328f"
+    },
+    {
+      "path": "apps/game-client/client-core/src/equipment_pending.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13569,
+      "sha256": "b7bbaeb24d61a1b74973f77b91f5240e38555291cdc5aee717272355cfff2b3a"
+    },
+    {
+      "path": "apps/game-client/client-core/src/fishing_click.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17227,
+      "sha256": "479c34270b538e773b31ebacf71d81d950211435ab3fd779c63daa0a4c08ccd7"
+    },
+    {
+      "path": "apps/game-client/client-core/src/intent.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8213,
+      "sha256": "b2d24c18624cf6359eac00387805d99fd75d75ea45ba759ff2f07b2b95fcfdd2"
+    },
+    {
+      "path": "apps/game-client/client-core/src/interpolation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3723,
+      "sha256": "919b78ff7663066713c74c53af5be2483a8c06660c1fe8d45ab4fd9500ac7753"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_names.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11191,
+      "sha256": "43e8479124e6ab6adfbaada3b214a088710de7b2f49d8d369a8b2e2eda2ad330"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip_types.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5441,
+      "sha256": "046a7d721dda11ed62c0ac579a9772ad37732e510c3131cb333e5581833b1963"
+    },
+    {
+      "path": "apps/game-client/client-core/src/item_tooltip.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 81121,
+      "sha256": "0496131e32d2536b7330bf487dd4f68f7a4af10b8f1107161e27356dc81a9a04"
+    },
+    {
+      "path": "apps/game-client/client-core/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 871,
+      "sha256": "10202f0bd4db1008ff07cc86c06e2c1cc96d07acc4b86fea5c54d778c31ebdd3"
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_compose.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12287,
+      "sha256": "ca4cd917da422f623132d261384cca07a48ab046ec3c321021d339a1fce9cc31"
+    },
+    {
+      "path": "apps/game-client/client-core/src/mail_parcel.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 23865,
+      "sha256": "5e40c7c2ed652c5dbf8d5bee79cd3fa10ceefe2282187d6a7eb76d0f7f1c4d25"
+    },
+    {
+      "path": "apps/game-client/client-core/src/map_route.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7444,
+      "sha256": "96654530f2d8e76ad654ff582cc96d9ee915a5399e26a6312c5a33cda8f3a6b6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/motion.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2181,
+      "sha256": "ad5d6bef1ef144ea6173f36ef5d89ea54c51954c00629fec46e7e1450d7c9d66"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18978,
+      "sha256": "906ebdbc2aca2520a5524f4207c679ef6a0f8343a9315e587222b78cff7db173"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_gold_buy_attempt.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15443,
+      "sha256": "6edd4bd07153a940f68bdb465eb0ee923e5216908506437b22ccf4df64d74025"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_pearl_buy.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9165,
+      "sha256": "26df6d94035049ded08ddac24b224938da614f23457fb961cb404a7ea88c92a7"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30993,
+      "sha256": "18fe6cc5266ab9ed0c5b1a6820dd045209b2db7ca4a4ff991ae4966d16a3f4dc"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_purchase_receipt.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 44207,
+      "sha256": "90a81047017581290ca23d0c6bd42264b59461954052f133f394d86a22c59dee"
+    },
+    {
+      "path": "apps/game-client/client-core/src/npc_repair_quote.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8805,
+      "sha256": "18bc85d3ffece369c8bb1a84ff9b76234b5246806108b390bf9d8487d0715f10"
+    },
+    {
+      "path": "apps/game-client/client-core/src/ordered_map.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11975,
+      "sha256": "a8d80e3a02cc43748565749fbf604baf8b3475780b2aa96ad745151534786732"
+    },
+    {
+      "path": "apps/game-client/client-core/src/quest.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11249,
+      "sha256": "99d9edff9b59c644e83d822945d7c3c577786397e738172a50246f10baca42c6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/ranking_inspect.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5242,
+      "sha256": "21d25b988e34ddb4cf2e5d4dba405cc8474dcc2a0ce0471609667e8758c77cd6"
+    },
+    {
+      "path": "apps/game-client/client-core/src/reconciliation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3579,
+      "sha256": "f91301ab67276f825d684a95d51a7031799b597a2e1a2a71c455104e6bb37867"
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2679,
+      "sha256": "b377e7d5f6fb809945a21c13ef34641e6ce69d53052952afca90dccd85bd631c"
+    },
+    {
+      "path": "apps/game-client/client-wire/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 364,
+      "sha256": "38a3ac4cc26de4d18c51c36026e84383c1c4ccc88dd31b725385cebd5651588e"
+    },
+    {
+      "path": "apps/game-client/client-wire/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 129819,
+      "sha256": "a15864a99067b15e0d3cdf507120e22ac9153da8e20adbf88506a67d8a38a19c"
+    },
+    {
+      "path": "apps/game-client/crystal-gdi-text/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 222,
+      "sha256": "930a5f79d2775411ca615959bd19a078c1ea4cd615c1004e21f578ad13c4a4f1"
+    },
+    {
+      "path": "apps/game-client/crystal-gdi-text/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19976,
+      "sha256": "2a81b5043c88caf991fcda131a2906ee325441a26059973ae1ee350addb18710"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/.gitattributes",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 266,
+      "sha256": "68bd593f87c1ac138dd77aea5bfe57e86c6b7bc8a922792528ad54c007eb62f8"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/BILLING-HAN-SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3713,
+      "sha256": "5a3a08443be4f8a3483cb692feaddac87b54e1da84e317c8696c47af8e62cac5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/METADATA.pb",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1296,
+      "sha256": "c6c4bdb785793b2de1da177caeeffcd0c90d7680bdab2de8f88ab45007bc59bc"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/billing-han-source/NotoSansSC-Text400.eot",
+      "normalization": "raw bytes",
+      "bytes": 2660,
+      "sha256": "0ca2976cbf7b560ca3a5f565b40b9f17fa648b0966cece2b08a1e39cad4b9917"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/generate-billing-han.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4464,
+      "sha256": "fb3801d4748d15d81826b4db87287deb9d16a408fbe76c0f296785e12221edce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MIR2BillingHan-Regular.ttf",
+      "normalization": "raw bytes",
+      "bytes": 2532,
+      "sha256": "7cc4d33730ae409a198cae325f57db54730f94b193f5d604375701890bb762ce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/MULTILINGUAL-SOURCES.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8618,
+      "sha256": "1528b614dedb07860e22ac2e1cf62528b0ed126230657dc008fb88d2f01f6d11"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Bold.ttf",
+      "normalization": "raw bytes",
+      "bytes": 631484,
+      "sha256": "1df075a380fc7cb898acf64c1f7b3b4dd780de3caa860178bf929de35817a913"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSans-Regular.ttf",
+      "normalization": "raw bytes",
+      "bytes": 621572,
+      "sha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Bold.ttf",
+      "normalization": "raw bytes",
+      "bytes": 261460,
+      "sha256": "4e5462d2e8be880317b9f49b5b2da109ddb6a3563d91cc604b67f3535832a555"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Regular.ttf",
+      "normalization": "raw bytes",
+      "bytes": 234892,
+      "sha256": "bdff3e5659d67e67def05b33f749683b9376ae819d65d3dd62ac4640b3aaef48"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansCJKsc-Regular.otf",
+      "normalization": "raw bytes",
+      "bytes": 16437364,
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Bold.ttf",
+      "normalization": "raw bytes",
+      "bytes": 250176,
+      "sha256": "6a09c8d797cfc803d32cdc731e809424d74cbaff59f503de34ade421a08e5bc2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Regular.ttf",
+      "normalization": "raw bytes",
+      "bytes": 243520,
+      "sha256": "4e3c66638958c3e2ab5d37f47a8deb89fffeb7be9985c665a519bbc7ba762313"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "normalization": "raw bytes",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Bold.ttf",
+      "normalization": "raw bytes",
+      "bytes": 37824,
+      "sha256": "2ac6c6e8a478e23b15f76e4894af1fa2210f8f350e4e6e54aad530bec03efbfb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/NotoSansThai-Regular.ttf",
+      "normalization": "raw bytes",
+      "bytes": 37780,
+      "sha256": "61cf814eec46b294d6ea4401ac295d0cecd5207bd2331dcc5a15e7301d30ee44"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSans.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4396,
+      "sha256": "cee9892f9f0cc8fe882c9e9537ee6a89621d86ee7ceaf70b02e2b2b1c25c061a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansArabic.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4382,
+      "sha256": "a7a5a25eb188bf1cd96982030d53e23c33485c69b1044a562254226857ee13af"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansCJKsc.txt",
+      "normalization": "raw bytes",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansDevanagari.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4386,
+      "sha256": "a216f6f8d85c7228093e0ee5e258d9d377e6671f68acb4db1930b29583d0f331"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansSC-BillingHan.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4388,
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL-NotoSansThai.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4380,
+      "sha256": "dad6e6abc2bf3fc37cc698af7607c3f4d4235039695713b222e5a034fb5b9b1c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/OFL.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4388,
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SIMPLIFIED-SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1544,
+      "sha256": "22264165aa5bb1cbb42075e6d57aab9beaea484528249d82e9a3f1fd28b36afa"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1272,
+      "sha256": "d7598658e0d667902ca56ce5f3c2eeaffd23a8db356be60f02f9a391ccd620e5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/assets/fonts/verify-simplified-font.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2515,
+      "sha256": "3773d232b420ca1b0ffe6293182aab8821624f5a4cbf9afaa876a6937abe4c39"
+    },
+    {
+      "path": "apps/game-client/platform-windows/build.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 400,
+      "sha256": "9063303d223f5bc7476f63f39e14d22e242ee6073ca6fb5ee90d2fc3027b4c6a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 151310,
+      "sha256": "a7c7b2b2029be2242073cc24193cd7fc47bc480700a868710901a94a379166dd"
+    },
+    {
+      "path": "apps/game-client/platform-windows/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2207,
+      "sha256": "4348223e5a3ec60d9ac921433e8ada3bb4ba7a1a211022c9f4e98bb93fee4a36"
+    },
+    {
+      "path": "apps/game-client/platform-windows/resources/numeron.png",
+      "normalization": "raw bytes",
+      "bytes": 7853,
+      "sha256": "e463f7b3326c1147ec707ddaa40e5f225b0b33ed75f90bedef4f24ac55f1222b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11806,
+      "sha256": "7f9599641b6b5a5fc59ce0774580a5727c8acfc02164035db9745833dbe54706"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 35730,
+      "sha256": "711bb1b6274b657e827417cbfab04d1ed2d0b04038b4bda04dca16f2a3bdaf34"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/entity-atlas-closure.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5098,
+      "sha256": "7949ac14cae0767c7fd3ded084ff16bd848cd1ce28dcdaa0157a4ee1e067a865"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/five-class-asset-closure.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1288,
+      "sha256": "95491d643e2b3a1846499ce421a6061b7e2d942906390d0af3d7e35dda3aa04e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/.gitattributes",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 237,
+      "sha256": "fcf1a16ca1173382ee689b17203ec89eb69996474e5b2f22210c29ccf00486f6"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/HINDI-UPDATE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2816,
+      "sha256": "6093882810e631363ab51a4a90989748abd6247c11031259a5474f4915d4a59d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Hindi.isl",
+      "normalization": "raw bytes",
+      "bytes": 39981,
+      "sha256": "d61d0938acb6d5191b26a01e3cab63a16115e8adda17ff0ffe19d4a95f7d7ab2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Hindi.islu",
+      "normalization": "raw bytes",
+      "bytes": 34753,
+      "sha256": "fbb1045f3b25842bb926bdd5400d07875f4c8572b04ffab14bb7add9882cc19b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Indonesian.isl",
+      "normalization": "raw bytes",
+      "bytes": 19404,
+      "sha256": "06232efff765902ddf7be78e39f1c5471b7e35f4c7c537deeb76692f3b5e208d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Inno-Setup-LICENSE.txt",
+      "normalization": "raw bytes",
+      "bytes": 1521,
+      "sha256": "2e5346868c2a18434489824e11d65c3031620f792fefc415d05f19cd441abf5c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/SOURCES.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1454,
+      "sha256": "d983b2d8681414ea126f55100033f6ead80e5245425a2f6a0c304cd13f0548f5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/VIETNAMESE-UPDATE.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 211,
+      "sha256": "e4d61ef27e530df7952dfa10e1453d4b16e33fe1554088ac5050554de81f40f3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Vietnamese.isl",
+      "normalization": "raw bytes",
+      "bytes": 27006,
+      "sha256": "aae1faddee261f5ed57ce9a3eb5deb5a042f3fca6dfb7a1e8fa83502380fe741"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/languages/Vietnamese.upstream.isl",
+      "normalization": "raw bytes",
+      "bytes": 26442,
+      "sha256": "1ed7f5580df3a302a6955c72ddbfa8e3c3e24d5ed22ea85f55bad548859b3a19"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 37244,
+      "sha256": "9633a4336921e2b050707a31e58ec8b959b21b62265bc33d0d903ce0773c9d73"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8055,
+      "sha256": "a1375673a8cc4d8167b1d6c3fcc4a9999b6be4ec47fef6c3b85a771ef3577127"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/README.md",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8818,
+      "sha256": "7405a90ff20cb26286ac47ca5af77fbe1ee9d13a1703baccd2765a6419e13124"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6961,
+      "sha256": "23ce2a3def29ba1797b41e7aed82aab623e5f98305cdab31646875e5dfe8eba1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 122405,
+      "sha256": "d28da79b7e94cab6b447a033e47f4d12238018666baa953fe753310a88943020"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/pet-guild-asset-closure.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21520,
+      "sha256": "944a69ad6b1c3210672e9c33cb11e3c7a863664ff67d9cb38c93adc40f849b5c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ar.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5564,
+      "sha256": "7c3776d9b2ee08298a01ace3c9afb261bf24eb65bfc77f2421754015358031a3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.en.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3694,
+      "sha256": "0e402ec2e4ecc2b0bdd4e4b553ca44597ca2a9adb1f71b6303e201d8a4ca143c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.hi.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8634,
+      "sha256": "2f730e01b78f75a594563f740323ebfd891183d55e81b4f652b751b45d37e1bb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.id.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3802,
+      "sha256": "8bebe5988998017aa7e3dd2dcc627f44ad00fc8fafb2038a13cc1c298b04036c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.pt-BR.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4090,
+      "sha256": "f18fa8a623baf88dab0fea3feee09689bf3396f7a98d9675e06762a0caf2800e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.ru.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6557,
+      "sha256": "46d7df84047cc171c7107b536c0e3197bd40785af94edca0ad2e8448af9658b0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.th.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8731,
+      "sha256": "4f6e19d540ae8c21dc96c3a7d3b5aa6849e1afd6b00d393be709e9a81f6143a0"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.vi.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4835,
+      "sha256": "216d6c4e7331d4f32e8155518399c4632c59e3f4f351d1ba2a309214d0d399ef"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-CN.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3256,
+      "sha256": "d8f3b2cb9e8c4ba009b86daaeea0f33104c0c51c17f874eb09cc0fffc74a2645"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-readme/README.zh-TW.txt",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3244,
+      "sha256": "05349b71035f2ab9cd4dd4d577829343f2f719498d34a055ff576482ef5f95e6"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/player-sprite-closure.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5091,
+      "sha256": "b3c50be80b7f63b4cb9a9f0a027aad8770c62d47774e39c4a230eee3af6725da"
+    },
+    {
+      "path": "apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 174175,
+      "sha256": "a599a46c099052da0512603bc3d9872e35cf6d1d4dc269b520acf430a47c08e2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/assets.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 35827,
+      "sha256": "e77018ae0451159388e99ee46ef83480a4b69b7a2026809c8350780f0b297478"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/atlas.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 150599,
+      "sha256": "7678b6f23c8e6dac5b4d775119fcb4dd6811c87601c71c4e2a9c0e8c5e165bcf"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18024,
+      "sha256": "1b9ebe9488207e04955d692e2b1c631bdfb29625c4ee05281b40923dce14cf02"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10397,
+      "sha256": "d741ad38a7508903e633df56eb15dbf96636d9e47f3edf96c2fe6df35c0a53f5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/big_map_npc_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9654,
+      "sha256": "dea62cb2caafb1fa6025b3104e94f306301fe7c1ae9954960c1e91e3cfbef872"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/billing_browser.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8502,
+      "sha256": "4020e4ebae1c8c447f8d782c885752c406485577bbeb8dbeb1462101beaf18fb"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/branding.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2012,
+      "sha256": "999dcde18d74c5161e9c02453a3034ed00ce5f42e63d7df73976399c321edea1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/buried_monster_replay_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11185,
+      "sha256": "9871cc97f4d7af02d07d6c67f3c39558f40fc59ad59d616fa063251f2549f5da"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 69513,
+      "sha256": "877b3a96c1e484abfc688499c0939e1a1f1a0ea0b20f4a570f23f2b7c1dc4ca3"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/capture/provenance.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6284,
+      "sha256": "a4396ffecdbaf1d17b50fc41e5b161c68f6a36937bdd53d0ca1c56243c86c8f5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/clipboard.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30256,
+      "sha256": "0d705572ac08ad1cdc49473faf4d569b209ce715d238ab27bae644db994e5b4c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/cursor.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7177,
+      "sha256": "188d6e258e791248db851a5f19835f7a7568884a70691c2240ec0870d1639cba"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/effects.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 555487,
+      "sha256": "5a1e69a7c58f0ffc37953a6ee6d0f5f088e5852d0bce93e22da632849152d465"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_health.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16819,
+      "sha256": "4e7569c699271c694ac6727ab27bcf92b6fee6cfae698596c42b9e1a395bf2ce"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_overlays.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 92027,
+      "sha256": "4ee7ac78f5b7ac845561bbbe17f7d04fd2e33ea4507e44029166fd55b2e82e6c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/entity_presentation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 228168,
+      "sha256": "15cc2bd3ae30fc7e5c4f756a6e61c214baf34a6440712ac59cef54fea7e96353"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/equipment_creature_wire.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9696,
+      "sha256": "537602df77c31189ffee93dbbbe775b35905abb54f58d668fdf16d18e3c22d97"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/five_class_bridge_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15877,
+      "sha256": "7c4421c613985c820ee0c61456c430cbd8d953e9e5ba5861a2e1dcae8a52771a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/frame_sets.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19090,
+      "sha256": "553d216ee3d93f00433b2691aa01124cf86f3ac9b05e1dca4078589bdee35206"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 416802,
+      "sha256": "e82808b5fd6ef2a582ff5bef483ffe7baba704d5106680c8aaa2084ba3711d7d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_account_feedback.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3916,
+      "sha256": "2dc06913529f8df491890b25df4723326a6f98ac41d519e602ca790bb7e418d9"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_catalog_transport.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12055,
+      "sha256": "2391e1a68b6c282a940f5211a3efa4641ea7f719a832b59b23584fb65ab5455e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_handshake_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6652,
+      "sha256": "00adc0100280164dac2c980bb5957443d340ad95d86a66120c1e883906ae8123"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_map_identity_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11990,
+      "sha256": "da5f19a2a47b745444c3fa12bed6af64d9baee1fd2039f3795c10c7b3e7bc258"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_movement_barrier_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10382,
+      "sha256": "5628b7c4d45c8e6c29a9026646e5234da6a260353d795e8da4c4b4adca834689"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_quest_tooltip_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4739,
+      "sha256": "9ac2640dd4f2a6ec240510186fe5fbea4984c74f5d42661ba52f4dab1f671be5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway_target_lifecycle_network_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22825,
+      "sha256": "1495fd09a95321277ef1b4e703d3ec141c5132c6a06410ab6ade62fd55b50020"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 792084,
+      "sha256": "c45c8eef9ef53bf99ef739e0b53b2bfe0b60b06df1c7e262ab39ded67c11bb0a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_creation_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9831,
+      "sha256": "eaabf7f34670d489c55c97a40fad71ea46be5195f88be04f1dc9e6ef80743057"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7400,
+      "sha256": "b102b69c9eae26d1c294f3dd74c1ab42645721319c31a90ff95f8a3bd378beca"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_authority_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15568,
+      "sha256": "611e1412eb3c235c85b77b48fa65cbfacdf0bfc637c3f5e42210bd7243324f9e"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/health_zero_display_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3900,
+      "sha256": "06b1e3f42a033e4ad2783c757436537fc73baa04dad9e7ff4addb271615e6098"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_pointer_settings.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 599,
+      "sha256": "811e218f65588532fe23e9d4f81596f48ff8b6fae62ce02ea418061a0b217e1b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hero_wire.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3584,
+      "sha256": "2c42694b507d0787d3aa8adf7d99c264703cfe5670e59cbd41781596738365b5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/hotkey_intent_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 22145,
+      "sha256": "3460c8ee8266bb8cd308b6201b1914fdefe17cbb6dc6b0a62745bfeefb2a8e28"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 475743,
+      "sha256": "19756b5937253352a2b4ee81eefb84208ac5e396a168d4e552a623f38ae50f62"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9674,
+      "sha256": "d65a9d0a6dcdbeed767548db0b27ab4a763c6a754925b08ee80f21b14d72ce85"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lifecycle.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3028,
+      "sha256": "3b9d9fbb2ceb251fb06f1a3edae0b7983a2e0f7d08680267d228032a4f28e4df"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/lighting.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 46034,
+      "sha256": "39f104cedc654a9d9eca8522082af8baa5a3b4873237a588bccea26d093f2a8c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21519,
+      "sha256": "c2a5bce5ea53762cfa8cbaafec903d1a3bc303fbbc7099366fbd83da8838af4b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_parser.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 105644,
+      "sha256": "927b908a2dc1c9cfbc1c339e1136f42b665873dedceec9d942bb489bc7b64503"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/map_player_movement_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4208,
+      "sha256": "89620d464fc6a51a925096bb5bbb47792fe9302214c91ffc334ded5ca86f0585"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11412,
+      "sha256": "ec852356b9d68af66afb7d4838eb80c58d7cce58853da1c760d27813ca0f5fd4"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/minimap_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2415,
+      "sha256": "ad14be32a64588c726918b4df80d6ac82a8105a57b785ccf4ead70dc7ceb6878"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8914,
+      "sha256": "7b5c5f756537718825aa0f51360728ea52ac8705537f1d12d734b1dbb0e24edf"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_input.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 20347,
+      "sha256": "37657759f1cd1420b6796c4eb786a99c04ff77a869705dcfce82e6e6700e9dec"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/mining_visual_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19252,
+      "sha256": "df2d6d29a87ac103e342f44ffcf06b1a9ab9d0310f5b8cd41d22d83e0456be38"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/movement_trace.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6217,
+      "sha256": "3791e450cdfe0d60dfb5ca8aea9b9195af2a9952e31e06f96b71b50abd321b77"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_display.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13714,
+      "sha256": "62111f80c89b07532510c8d30219906a16a7ed3b9e3c9fbc2d9acb62069a1354"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14894,
+      "sha256": "263aaa462b39a7889ceb989050338c4828d2b9b1373ee87aa013c216da9ec890"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21235,
+      "sha256": "30fd0cdbe48068ee65f80d571d35e98cf4970dde5b664ffdc50217e9dfaeffd2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_fonts.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24561,
+      "sha256": "f2af7f962d5a7c3e1b654d7e123d6d57d86f4573c64da9da0786f3d34ffe9712"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_locale.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13717,
+      "sha256": "3192a50c57a6ab1eba5e793975e90f7aae19dc68e0afe27e82ee68ceef998546"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/native_protocol.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 95388,
+      "sha256": "ecdd99bc05e535729f6f052cb379382df9528fe33a905578a7aa5d59ac36e4d2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/nonmodal_panel_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17926,
+      "sha256": "ec31cf2177e8a5b40b12be8a70e8ce74dc2130d59351860334377888d3e7a493"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_gold_buy_transport_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 59905,
+      "sha256": "945fb122c587e4e75ea3623c755cf4b6ff6bebdfb988db0265a70fe2a8aea53c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_client.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 49189,
+      "sha256": "506af56f83eca9fb9c2a0019bc06a2411db5fc12c2cb25ee9b4a0822658e0510"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_gateway.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 97676,
+      "sha256": "3d3f7d619c8ce8c505bd570d3463a959b38f0cb2108fbb9d77dedf417b0feaf1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/npc_purchase_projection.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15673,
+      "sha256": "2ccec0932f2b619cf14f2c6e2b18c53d6b8676408095e6531e140eb3790d804c"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/pet_effects.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9972,
+      "sha256": "77e5a8f705d65269250062df46a592ea0c11b287cbd4fd0f7c50e75846086a55"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 58574,
+      "sha256": "fdee3201fc39b3e8179fd4fb899d72285f91b8af4dacefc073ce4c2f35dbdd5b"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/refine_wire.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9412,
+      "sha256": "bef444696b4b64f8c4dee81dac0ffeefd1724ad8fdd96a9a54a165ea7b8440c1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/self_occlusion_redraw_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4349,
+      "sha256": "180e96e5a5066a459cc06a3ad3f4d06bdde575d5d580a2ee92282fdfb684dc04"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/session_config.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27087,
+      "sha256": "be1a774f8d42061db808a7b53b89f6bb6ca9ab051f4cf98267c209784c2b253d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/shell_bridge.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40085,
+      "sha256": "c00d2c00d7a1f0e78deb612f2d4fa07e6dab03c7c1fe984eeca51f23ee54b3b5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/social_bond_wire.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4944,
+      "sha256": "2ee8fc75579283fc7a3c7091027fa512548202b21d4c20a9431efd19032416b1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/spell_targeting.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6636,
+      "sha256": "e809a9d431fb6b2d7e7d95397ed9d8f5ef2c04ffbeb4f0ab2b1bf034663c5c5a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/startup_diagnostics.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18183,
+      "sha256": "b0b9841e35abae01befef03a25a207b59c563e47bf7a46782b27c84d8063abd6"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/struck_run_guard.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21528,
+      "sha256": "6d8f7e161b59c9cfe6b8ebd1f5cd56496994f7afe4b74b7c8898809db2928313"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/timing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3565,
+      "sha256": "52e73b0f86f3dd8a485592509dd7acda4c3c65042bb5561673b6f50d59f4a968"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/trade_projection.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12404,
+      "sha256": "24ee8e1b34c06dcf1d29a9d4105a6109e11f7e585376952f7a9d55251245183d"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/window_sizing.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 40446,
+      "sha256": "70ac5f3bc983596b4840babecdde600346b29fe99f248cdee40c70634ed03649"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis01-bichon-actors-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18685,
+      "sha256": "3af36b70fea734ecc8fffd6e596b09d46dddb27dc717067b143d1d2622927024"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-fire-bounce-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3174,
+      "sha256": "3773ec43949b58b3064acc51ed06c9eeda9efaa300a33162313dd6b3fe2b8b87"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-fireball-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2394,
+      "sha256": "276bbd2da6a36c5b8368012f879563b4b6951914264043a5042ee1b27262bea1"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-firewall-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3571,
+      "sha256": "e7fd25706055bfe6caced3e0471f851c609a724a1160cbec1174c357afa7862a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-flaming-sword-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3757,
+      "sha256": "ab59cab7f399fdf2878a4250c70dda76874fe3e7dd24fac802ffcf284cc57164"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-great-fireball-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2471,
+      "sha256": "08c811636ec5f8026941a8f067f32ea63254f549190a9af73f44e1f1caca01de"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-hallucination-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2056,
+      "sha256": "3e59ec9c02c333a67a0b3674347730a98acceee5f6d4a843c3ece0e37dfa87c2"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-healing-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2627,
+      "sha256": "16f3869d7bc8cb2558c50dfd077af0f9d77e041dc206ec18e0eb84dba5cba603"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-lightning-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2714,
+      "sha256": "693d3379a55e05130373effbc0f7b2e07dc0db66f393abaa8bb0b26f1bba6ed5"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis02-bichon-soul-fireball-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2451,
+      "sha256": "62724598397ab854133603010401bf1ad36be6a249b2b2933ad600e442ec7827"
+    },
+    {
+      "path": "apps/game-client/platform-windows/tests/fixtures/vis03-buried-zombie2-wizard-20261001.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17248,
+      "sha256": "a7296ab7179edb6d42d77caea1e9aa0bef17fe01c410768ffd6c9e73d89a4fbe"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 125951,
+      "sha256": "e92a1a1f64aff9031e840a03bd1a81ad677d2079c9e60fbe92b00ae17d2e69dd"
+    },
+    {
+      "path": "apps/game-client/runtime/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1447,
+      "sha256": "a4ca9a1ae0890ede3214ee5196dad415414f815dc47d0c6abcef2a3b25436c26"
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material_gpu_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12441,
+      "sha256": "79ccebe5d0dd38a515795dcf13e9eec1b4393c8d9584b1853b58841045d13af9"
+    },
+    {
+      "path": "apps/game-client/runtime/src/additive_material.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13668,
+      "sha256": "478ebde3f15e1d1cfda49f32a18e1cbda6a6da87de183c0e085057939708e464"
+    },
+    {
+      "path": "apps/game-client/runtime/src/bag_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 56320,
+      "sha256": "667c174ca2a06ffe9b43473a94f68ae277c2f3af8c9090e1bc3f84a6d62baf8e"
+    },
+    {
+      "path": "apps/game-client/runtime/src/capture_context.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7956,
+      "sha256": "00754168779eda8591989226d9985c0fc2ce5b02a687dbd19b7aeccba7604ab5"
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3682,
+      "sha256": "07011de04cdb4e1ae0b93f66b8d6d02729f39e2d62b8ba4c9204633ddc82221b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/character_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18887,
+      "sha256": "35c8c2294de5301e68be961cc0a9fad747005df56cf3688c46e9b0db866e8070"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8917,
+      "sha256": "47b4602797376f16832dff7a6b4164ec76bc7c3095a38515f968d3bfea694c91"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_input_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6992,
+      "sha256": "25d97dad44a9c9d90681f87caf96adbe6f4c0e441d61cdac3ae397d6aa76a14c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/combat_modes_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27361,
+      "sha256": "0456b7121187ac17145cc10173726ba46f0921bdea2bc7b1697bc934e72aeaa3"
+    },
+    {
+      "path": "apps/game-client/runtime/src/crystal_additive_material.wgsl",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1090,
+      "sha256": "dd8c223ac85f416917182938986e8ccbf594d7a241e34df9a509044e78d84204"
+    },
+    {
+      "path": "apps/game-client/runtime/src/crystal_multiply_material.wgsl",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1590,
+      "sha256": "6fde9a1d77ddaafe316cc6bca1e5eb91dc28e1d77abf70e5994b72020c10a021"
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation_bridge.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 236,
+      "sha256": "74b7fc12e7354bfdfef49f0ce7bd100e01de259e57d2e39af208e25cd3b106e0"
+    },
+    {
+      "path": "apps/game-client/runtime/src/entity_animation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 203,
+      "sha256": "380d310bf2d761159915dd820142a671cfd460f45bed4ee5e33f305c68ffb9e4"
+    },
+    {
+      "path": "apps/game-client/runtime/src/fallback_hierarchy_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4326,
+      "sha256": "754e5fd395941d82f98402483f05092dd7e87b0d3a657ebfa850b3352ad99316"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hero_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 119216,
+      "sha256": "3fe28472573370422519a694754f562ac60ae1344e90cbab7cb000495046e366"
+    },
+    {
+      "path": "apps/game-client/runtime/src/hud_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21166,
+      "sha256": "ac1f343f7d34f0bc66a8e953339f0dc337451d0ab71c72a132b6e9acaa315177"
+    },
+    {
+      "path": "apps/game-client/runtime/src/interpolation.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8462,
+      "sha256": "d31c211204e35750913bb2c252f60af30edb6227fac4d9e59e6f2b9ced41abb6"
+    },
+    {
+      "path": "apps/game-client/runtime/src/item_tooltip_query.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 73414,
+      "sha256": "87c64581ef533d6977a4aee25782ae8e61e66afeede0a5b63990dfc1aefe939c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 439846,
+      "sha256": "8b7454626080d3545a958a7e25c5df40ba94e2452466ff827081b6cc761a93df"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lighting.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21670,
+      "sha256": "537a9316c5f63e82b623cff8fbc0bd6c67df24e07cc614c0b52ac2ffcbf1fc33"
+    },
+    {
+      "path": "apps/game-client/runtime/src/local_motion.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 67768,
+      "sha256": "1a65024ad71611068dd574e767b592eb6dd499ccfa0324926294565c23fc8b32"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_service_runtime_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18663,
+      "sha256": "952787c9cdd94645fd2bdab4a23d3246e47871e156adbe8cf6d6dc1ab360aeb3"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 69957,
+      "sha256": "bcf7add8d6fb2cad05d9fdb9e74f34d72efce1e7e18af369d5e49f4eedd999b5"
+    },
+    {
+      "path": "apps/game-client/runtime/src/mail_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 68168,
+      "sha256": "0a012d978b69e22e9d590a76bcb3fd0fa3f228c4e88fc49873bcc9cdf347fc22"
+    },
+    {
+      "path": "apps/game-client/runtime/src/motion.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 42774,
+      "sha256": "dbd6051812a14738e356eac9a151cdb5dfab760da0bb4dd12da7857032948e52"
+    },
+    {
+      "path": "apps/game-client/runtime/src/movement_shadow.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 53217,
+      "sha256": "ca24171396c5566ce0a4ce510763590a3fbf680d3811bc512e8f8e961521a369"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5687,
+      "sha256": "8a7ad5b18e45c1130309922177e340b972418e3a9537cc07921d92ff26c71375"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest_wasm.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2403,
+      "sha256": "1c051d3073474730c28d5cbea6bba04253ef4ab7b09b4269a037809b7068711b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_ingest.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 152619,
+      "sha256": "948153a29b4bdd83400605d412c79f4f80a703f44b5a76cba9e14edcc9618694"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_purchase_economy.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 151273,
+      "sha256": "7acca0c567537ca7ae2a071fc332f2d8432b28d84e3ac971ae938e59fed88426"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31728,
+      "sha256": "820214c3e6301d3adc943a8d575ac1b9aabf28cc2760fd6af39e14a539941f68"
+    },
+    {
+      "path": "apps/game-client/runtime/src/npc_shop_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 38136,
+      "sha256": "e60f90e6d2d92d15b66b7ae6ef04872508a9bf4c01d37eae09141c41df48fb6a"
+    },
+    {
+      "path": "apps/game-client/runtime/src/presentation_pose.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26877,
+      "sha256": "9d28250412fabd3890626d58cc2492982a21fdbc4fa988222e27198786ac984b"
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_route_plan.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17896,
+      "sha256": "abc72b163154a3f49150ac1e1558ee74a5053ce81441a789103a10df0610220c"
+    },
+    {
+      "path": "apps/game-client/runtime/src/quest_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 133903,
+      "sha256": "54306beb7a62057df4b864ecfd8e67a823112dfb190c109c4de0c0d69cea9f41"
+    },
+    {
+      "path": "apps/game-client/runtime/src/remote_motion.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 29251,
+      "sha256": "7c29f8b13ee55dd5d0ee4c90b23c955e388a335ef5552792813ae692196b9458"
+    },
+    {
+      "path": "apps/game-client/runtime/src/render_diagnostics.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 27863,
+      "sha256": "645245e4474dc4ad4cb171cb7840008476cdc5a32ffe8e6671581f43185d48e4"
+    },
+    {
+      "path": "apps/game-client/runtime/src/runtime_ui_capabilities.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13088,
+      "sha256": "4c0e0db030507ebd8103792a6aade175b450842ed4d2cacf1d41c7080389c4e2"
+    },
+    {
+      "path": "apps/game-client/runtime/src/skill_bar_query.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 13470,
+      "sha256": "b5fed74cb7781006f50d6aef2ae5875b8808554bb013bbb9a1bd07640fc13506"
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3410,
+      "sha256": "48c3dd5c785c5e0e1e4c3849713fba63b85b2138091f5b73d4d36d817e4789cc"
+    },
+    {
+      "path": "apps/game-client/runtime/src/spells_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24563,
+      "sha256": "953618b188eea3bade8fc387d3a30eb7b95e7ee8f5a51cede2a703263b190c9d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17897,
+      "sha256": "9591091d6e0a2076eaae2e7b47ed1b0f0f00ce233d40343dc06f3da3d718935d"
+    },
+    {
+      "path": "apps/game-client/runtime/src/storage_ui_host.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 29475,
+      "sha256": "77f8c82f28f21a6df29ccb9d03e3ca908f7cf062e2dc158c76fc86823d585e56"
+    },
+    {
+      "path": "apps/game-client/runtime/src/webgl2_shared_ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 12978,
+      "sha256": "c7f19a68d7a4c5253daead98d853ebc1803e45ea2f58db96a73875c5b8eea1a7"
+    },
+    {
+      "path": "apps/game-client/ui-core/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 421,
+      "sha256": "781a69888a9a50d5d2b1a8a490871c53076cb1269fcf57265f47992574a08a30"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/action.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6755,
+      "sha256": "6f50588618eedc8d4e029886774a32495095f4ad70ff2adfb3b0156e5432d698"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/effect.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7524,
+      "sha256": "10398598e768a6d21d79e11c3ab6c9db4e8394bedf8af3803dbfdfd503f34944"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/game_shop.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 16578,
+      "sha256": "90bd7b60a361c4183aac0bbc6dcaf3e63ceec333ff6e7ad8fd608529358ec8b6"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 443,
+      "sha256": "fa2548bb42f386f8b01084f143d8865d2ad61a09696cb965a7345106f326093b"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/reducer.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 73182,
+      "sha256": "25773a6de0912db3305785b23ae9f5651539d2ddaec14cec2d49d31a21b00d6b"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/registry.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 88557,
+      "sha256": "ba3d290ba5897b20b4e10c249fb5ddb9843df5283c517a62a2a88937dcfaeae8"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/state.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25240,
+      "sha256": "6e1d670f34a9c6f4a7840a8bbe66057a729441b85bd846578a7017db57217096"
+    },
+    {
+      "path": "apps/game-client/ui-core/src/storage.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4363,
+      "sha256": "8b080cde6b3321d77b2d0f0865c6b196d0241ee4a546ca50e6f6a7edb9fafce0"
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 21776,
+      "sha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a"
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1074,
+      "sha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24706,
+      "sha256": "b1481187c079044b9fbf001534a08e1082f9d0764a79a2496fc842d2655b053a"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/build-updater-release.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11512,
+      "sha256": "8f05816fff77e6d1919316cec35531e558bd211596dca0e066738bc0edbf9c57"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/prepare-updater-input.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2361,
+      "sha256": "d79236ce6bd20a9ddfe7c820d81437dc01d50249a333571e19cfd041b78d6a49"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 19483,
+      "sha256": "4937c7c0c191be84b4f749281e85ef6f2d8ddeb35f1c0f39e5c0eb56092132c5"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/verify-updater-bundle.ps1",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5560,
+      "sha256": "6d4c94a3253614d71dd005e525de365a871ed9c4b4bd1b039ba4a56602909675"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/launcher.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2567,
+      "sha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/updater.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4587,
+      "sha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 55848,
+      "sha256": "01cf15ecc9e5931c6b528b46bc4dd59af874f04cf98187cb0bbbffe596ad44da"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26136,
+      "sha256": "37ffcc8878686ca15bc9d5fae7d34ef61a0a78456c55b5adbce76662944abaf5"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/download.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9157,
+      "sha256": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/five_class_manifest_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4369,
+      "sha256": "bf4fe3044addfd29a0fcd927ec9cbb07c895bd63604eb1439515b069f1cb46fc"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/fs_safe.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9421,
+      "sha256": "ecfe5ca1f6747c5b555d7c53382dcb3d83017a76891d3cb293b4811c7911d610"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8739,
+      "sha256": "18d276f8073ac1cb3880df967aafc991681709146b5d5e57b7bcba22dc0780fa"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/local_io.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7090,
+      "sha256": "bc5dc2abd68cee22e54050432dc276a86bb17e3f4335b485ea6ac6647fa74b34"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model_regression.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6875,
+      "sha256": "bfdaf0478880e3371f96c61bcb40ec9ce1276895dfbbc18a9c97f668dd7f59f7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 15191,
+      "sha256": "24a87f5455f3812628fcd73ab7e0a1b1120f0dcb72e62785b494fa87e154cb72"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/platform.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 38568,
+      "sha256": "db9901523f87c7aecc3d305f7e4adace723faf1a75f6f23a09a2870a5f831e60"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/progress_trace_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 18241,
+      "sha256": "11038cf935b05888f01dd40c528663619926b35dd5d7516c799c73622bcebadd"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/resume_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 26944,
+      "sha256": "6a5be7d0c2682545b077d6d77b9f6baaf2066b32d5e7d2d4976a00e8058d7ae9"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/transaction.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31496,
+      "sha256": "0a8bf2f5edc25464220dbb3fbed80b5212888eadf45eb268aa3b7c763b907194"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/ui.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 38748,
+      "sha256": "94ea97b12d48186b7b2da833283781b73b9d7bc5fd575c34247322ca4eabe4f1"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update_receipt_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4802,
+      "sha256": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 44806,
+      "sha256": "11b1fd0635156c8d6b0c50472ca62ebd60af002444d99a994f030a53730ad9c9"
+    },
+    {
+      "path": "apps/web/lib/generated/crystal-map-pack/0.map.gz",
+      "normalization": "raw bytes",
+      "bytes": 512762,
+      "sha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5"
+    },
+    {
+      "path": "apps/web/public/original-ui/frame-sets.generated.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1375659,
+      "sha256": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9"
+    },
+    {
+      "path": "apps/web/public/original-ui/Items/meta.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 459663,
+      "sha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+    },
+    {
+      "path": "apps/web/public/original-ui/MagIcon/meta.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 102939,
+      "sha256": "40c8a1d8d1674b031538754ff0b63abdf9f3d16dbe8bff34aec50e0749a66952"
+    },
+    {
+      "path": "apps/web/public/original-ui/MMap/meta.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 64066,
+      "sha256": "13229d5a9f2864b777d4fef754c75d6037e420620b95a6fd8770c859e6e7d2e2"
+    },
+    {
+      "path": "apps/web/public/original-ui/Prguse2/meta.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 177013,
+      "sha256": "52ff33c696a8b04d576bddcc7b8f14d94aa5b3b35cd8e0d31f379295e9a635cd"
+    },
+    {
+      "path": "Cargo.lock",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 240688,
+      "sha256": "c9a29ce120c99e6b865c4be3c0c13491284f72849a16a7050283372453085d9e"
+    },
+    {
+      "path": "Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 365,
+      "sha256": "6de1c26df325285aa51515e99abe32677775b3396aa6e8a83a0983deee3500ac"
+    },
+    {
+      "path": "config/quest-guidance/daily-weekly-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9945,
+      "sha256": "39bf59c5e0a4a2d014a74ab8c70c18af26055b6e446c100710afe12831e8c01e"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 41856,
+      "sha256": "6952068b9827aa90f44a0b58296637cf83b298d57483912ca274fdfba3c0822e"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2-ui.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5436,
+      "sha256": "e52630f84ee09e3e2d3abd821db00dde01b62e7d803d18972c8fd906db38c747"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 35329,
+      "sha256": "fd35732d9356fcf5aeb4c06d639261a816626a54ccaf33f8cc6d461e98c93182"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-supplies.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1152,
+      "sha256": "313de1d7e0faf0cc70ab62e8a5079ea8d211fd75d06479d290621fd0aa5fa1f2"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 28662,
+      "sha256": "49c1ba49d4c3af4fadf3a53ea2618ba5d998ec829fd72f45349498e246e941b3"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v2-graduation.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2664,
+      "sha256": "4e3b37f8ac9969219e1e03b566c391f59860f083e1156b7cf88d5f433ccb5655"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-v2.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4624,
+      "sha256": "381be9f89f92f81bfae2fe34f310aa48410875129581049204bd5c34c4821819"
+    },
+    {
+      "path": "onchain/procurement/fixtures/intent-v1.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3418,
+      "sha256": "9b76eab5853a715b745cb3facfefb1849774f3c20c10969ebbc0fc2c2682ace9"
+    },
+    {
+      "path": "packages/game-data/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 327,
+      "sha256": "e69823755b2f5f4818f76754a47db6e6911180463d0e20ba26dc2ccacc7b1091"
+    },
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_176.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 47571,
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
+    },
+    {
+      "path": "packages/game-data/data/content_profiles/platinum_fiveclass.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 66727,
+      "sha256": "9fc2d6875c78691f7e34650eae8e8df868690a1ee6e5960becc113cae0e9d4ac"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_base_stats_packet_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3449,
+      "sha256": "6edbf2e942e8742914c79d7aa05e4adb840c61dc83e3591714a4db32fd0293c4"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_buff_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 10919,
+      "sha256": "3d59abc5c4cccb2323d66113fd9550e770a3257ea5ce4d7e7a8889757674162b"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_creature_settings.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 166,
+      "sha256": "cf098d6df97e50217f212fc13873964a096c156611835f2d5654668db8da7297"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_drop_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 24076631,
+      "sha256": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_game_shop_packet_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 96259,
+      "sha256": "ff5bce2f32b0013f3ccd2705fdf7e4a93de89e1c8a6ea1ee58050e52f4124571"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_guild_buff_packet_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1492,
+      "sha256": "21a00a9feabb53542cee7f05fe65f93463eede949c56cf6e4feffea8464dd94b"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_guild_settings.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1015,
+      "sha256": "e1a16a6b08ba033fb8cfdf91a1e175e15b6d4ae8223baca06e7b90a112e2c1d4"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_hero_settings.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 23460,
+      "sha256": "1cd6aea695708bca17dd66e535477854fb332a744155ea472919dffc1e964754"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_item_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_magic_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 51696,
+      "sha256": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_map_event_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 50155,
+      "sha256": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_mining_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5976,
+      "sha256": "e0b316ed8172ac1f0d3f1577fc06df126682563ff019612e7cd4663eccff3c28"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_ai_summary.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 134815,
+      "sha256": "12e82908bdf696b49e7193cfb1288ccf63663e8269c4e3a59b57c31648530e79"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_command_summary.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 59118,
+      "sha256": "49ebaa25650a2e2088693d4200ebac0f7ed9a9b81a6cd6246cdd75375ea73414"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_info_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 313945,
+      "sha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_npc_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5244108,
+      "sha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_quest_packet_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 189239,
+      "sha256": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_random_item_stats_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 25753,
+      "sha256": "74ecdd5c5d3df8f04c34f9f4df3d3a9171ef85002ba395535b4fbe948dcaa449"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_recipe_packet_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 64271,
+      "sha256": "53699a4fc96fd9df015e4e5a4d72fcea644a59ccb8643d32604726ea678019e5"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_starter_map_collision.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 57421,
+      "sha256": "38ac56c53ce6c9ba0e1849e7750fd48636754f4e33113c63b19b6a61d8f3f690"
+    },
+    {
+      "path": "packages/game-data/data/generated/localization_bundle.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 916875,
+      "sha256": "cca64cebcb5566cb777ac56fa32e3a471020b78a3db64da017a23324c87efec6"
+    },
+    {
+      "path": "packages/game-data/data/generated/platinum_176_bundle.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3614,
+      "sha256": "69d8ee8d6b3875da92f4e2787c4d0fa50184639c6de2d312fdaa0db18d936ea6"
+    },
+    {
+      "path": "packages/game-data/data/generated/platinum_fiveclass_bundle.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3888,
+      "sha256": "3c12e13860161be681fd70f672c1a40b54d85f721cf50c5b1d1c68c15bf5e6a2"
+    },
+    {
+      "path": "packages/game-data/data/generated/quest_presentation_text.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2212,
+      "sha256": "9105cfb8e464aed1572f85b24bfc37e55b3ac33379c548827b25279b62428ac2"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/common.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 822142,
+      "sha256": "9bcf22b9f4ea1b6f7f514a7b0176cb6ab896d98c9e6ce75aba0d4d3c93d2d19d"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/conquest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 31304,
+      "sha256": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/content-coverage.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 9935,
+      "sha256": "97bce38a6c089cd4aebcc6f41aa4164f72f67eff905ee6cec72f26da9805076a"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/content.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1052918,
+      "sha256": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ar.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 774552,
+      "sha256": "4dc325cbc3698791dd33e0d5c6a25a5dd2cc07caa41706f5c23ce6b0c775bd39"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/hi.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1066908,
+      "sha256": "37f44d1746942c3fcae28810b7b6291d5de17d02767850acd0fb37b4baa7360f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/id.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 652403,
+      "sha256": "af8e138801c84cde116627d6e6f57eb52c510e5f36e4657478ca323765c96aa4"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/provenance.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 71369,
+      "sha256": "a54f72bd81e65573e23ceaf6072305d8c2f59632d1342ba0210f4bd0a0c43169"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/ru.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 895476,
+      "sha256": "c88e7b28d8690aa4e6fa789cfebfed3ea4fe48aa698e7df39da81e3514bfdb44"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/th.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1041281,
+      "sha256": "60ca5db30a16fce9cf6b4a65ba5d2789ba8d474ae348ad80254e3f5165102b0c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/vi.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 729021,
+      "sha256": "b53bc32c4cd78f56ed470d47ecff8fb5c32dd49fdf3650324b6279f02115e43c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 372613,
+      "sha256": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11924,
+      "sha256": "ae04a32c4315e5625e081f322e397925bdb47544bef24e6841accb58ac78090e"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 621287,
+      "sha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/game.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 43682,
+      "sha256": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/help.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 72192,
+      "sha256": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-menu-coverage.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 336,
+      "sha256": "5d611484cab36b02b4ec9ddd307dc9a4cc8c114e99a01dab8ffcde00f0be77f3"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-menus.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 125054,
+      "sha256": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/npc-prose.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 457753,
+      "sha256": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/periodic.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 250662,
+      "sha256": "a6ade91e8ae348ed47336c851faa0e9ec41900178f779572f22c6ef5a6c76757"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/quest.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 137085,
+      "sha256": "47a5beaa6feb4277b33a8617b55966a56eec2856b80000d34083ee6e23f9a5d1"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/shell.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 43041,
+      "sha256": "52ace631cb335840532fcfec6a37b144b829950e25bd5e909e69b1ec5af6d3b1"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/validation-report.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 973835,
+      "sha256": "3e7dbf83cc7453326cb89fb4bba9cfddac42147fccb77ad52eae1fd67e7fe794"
+    },
+    {
+      "path": "packages/game-data/data/starter_scene.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2893,
+      "sha256": "f06c92e72843f7c8bfd8f78aeb1714098107a184f4012a3f86649620ab5451f7"
+    },
+    {
+      "path": "packages/game-data/data/starter_server_data.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8207,
+      "sha256": "d4349ff4e2d2753d0be95de27341a8a9bb59ea04d3062868b03c7e1d80f72e4d"
+    },
+    {
+      "path": "packages/game-data/src/crystal_creature_settings.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2162,
+      "sha256": "6ead34f9056a38921d6397048f85ed1f3ffdc31f7b8ab5e9e28b8ee466928c95"
+    },
+    {
+      "path": "packages/game-data/src/crystal_guild_settings.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 4046,
+      "sha256": "19bbf36fb8812162a7853b66f4efb2dbe747394eac39aa5df4c8dd019585cd38"
+    },
+    {
+      "path": "packages/game-data/src/crystal_hero_settings.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 8195,
+      "sha256": "011c406f296ddbb53b0e777bfaa34122a3686583cf7180b70e0a2c784eb244a2"
+    },
+    {
+      "path": "packages/game-data/src/crystal_item_image.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 2932,
+      "sha256": "b57acb109955d4157ec352fa8b0ec4f5de083e9021828a67e1e54501cc23993e"
+    },
+    {
+      "path": "packages/game-data/src/crystal_map_events.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 6669,
+      "sha256": "6a627807f49eafda4e44a3b53541e48131bec13046ae60a0079ae353ba1754b8"
+    },
+    {
+      "path": "packages/game-data/src/crystal_mining.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 7387,
+      "sha256": "25dd31d764a38332d0748f881dadc85f44f5160e68a27108cd0bd6ce5d9f8057"
+    },
+    {
+      "path": "packages/game-data/src/crystal_npc_goods.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5808,
+      "sha256": "c123145dc0c0558045876c079f0ea76a66492080a51e07e6967b1222504c67d9"
+    },
+    {
+      "path": "packages/game-data/src/fiveclass_tests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11802,
+      "sha256": "316f81295c60ba30b543a0060e398b76549e59f7f722dd38a46c9e7bebdbe854"
+    },
+    {
+      "path": "packages/game-data/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 176397,
+      "sha256": "d720b7b86396a109ca77f358c54a6e9517b25cbd0c8ab1ce6458d9179eb2aa99"
+    },
+    {
+      "path": "packages/game-data/src/periodic_quests.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 14155,
+      "sha256": "fe4715f86ec6a18fa11b70c72a6067740b9b90ad3c65b97cca411b06162aa50f"
+    },
+    {
+      "path": "packages/game-data/src/stone_items.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1411,
+      "sha256": "bc1df14c421be8305651733529da726f7a497f18695cc8b39018abbca8c26ecf"
+    },
+    {
+      "path": "packages/protocol/Cargo.toml",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 378,
+      "sha256": "245b0e2cb7c34270f9f5dc2aa96572d19699d5ff208f3f796add42b0a953aab3"
+    },
+    {
+      "path": "packages/protocol/src/catalog_transport.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11788,
+      "sha256": "cd6f73582d2774805e66ca9898a8f2b96e829d8bce648e6ddf983d13f485689d"
+    },
+    {
+      "path": "packages/protocol/src/error.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 3373,
+      "sha256": "a7e13c9abbdf35f98e830a62355f9dd082e6c95a66a887f4e7c4d3d90bf9a6ba"
+    },
+    {
+      "path": "packages/protocol/src/frame.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1275,
+      "sha256": "ba0ac651251624b4595711dc3d0fbc70ab57428b21d0997bd418a0fc1d49c7ad"
+    },
+    {
+      "path": "packages/protocol/src/ids.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 30620,
+      "sha256": "930259a2f29d2dd7c09f77d861ab5db1477629d75b31b2ca59d2479dd8efb126"
+    },
+    {
+      "path": "packages/protocol/src/io.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 5117,
+      "sha256": "e80ef0c9a01c5c185469cab988ef7e257a5de6638fe5326360d36fe1ca766046"
+    },
+    {
+      "path": "packages/protocol/src/item_image.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1218,
+      "sha256": "09fc26d058b62409a1ca99acdbd717b59a8ab21f956244fa60e82a7fa51b7a72"
+    },
+    {
+      "path": "packages/protocol/src/lib.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1990,
+      "sha256": "4aff98f8f201cf6117d7e46d6b192b8da898958a389d955905e3c37673b3ef0d"
+    },
+    {
+      "path": "packages/protocol/src/packets.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 307016,
+      "sha256": "6397a43b3a4c2376cfcf8b6a7d0811d2ff9dd6e3da9ca84dc07d8854675beec7"
+    },
+    {
+      "path": "packages/protocol/src/procurement.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11040,
+      "sha256": "685cd01dae73439069cf54e0ebd7df7059ceb97a9106872b001a8ce727ce1e08"
+    },
+    {
+      "path": "packages/protocol/src/trace.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 29621,
+      "sha256": "1d2fcb0f5eaff134e5693e9497461587de8dfd9e0aa893184f5ca156541f3c89"
+    },
+    {
+      "path": "packages/protocol/src/types.rs",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 120092,
+      "sha256": "cf18d6c3c7066acb9d82edc35ad49548adb858d925c489410c614efc0882d0fb"
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/npc-menu-source.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 756430,
+      "sha256": "eeb79ae5addccdd552b0d9893a4aebd4b5df5d5a90a1bb8fd6ba8515049e93f2"
+    },
+    {
+      "path": "packages/tooling/data/native-i18n/npc-prose-source.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 1138897,
+      "sha256": "445c682383aabce7d8965aa8aa0dd9e6ca5551d80e926bffc31dc16c18fb2ae2"
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17874,
+      "sha256": "58ce20cf96c64c33f85f48da1b85d85ed38f5c7127f47c0c19a4c90dccb7085c"
+    }
+  ]
+}

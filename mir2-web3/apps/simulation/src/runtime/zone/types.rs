@@ -556,7 +556,7 @@ pub struct ZoneMonsterKillAward {
 
 /// Trusted personal-session projection of equipment and cosmetic state only.
 /// Position, life, poison, visibility and transformation remain Zone-owned.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct ZonePlayerAppearance {
     pub hair: u8,
     pub light: u8,
@@ -569,7 +569,7 @@ pub struct ZonePlayerAppearance {
     pub fishing: bool,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum ZoneCommand {
     Join(ZoneJoin),
     Leave {
@@ -653,11 +653,13 @@ pub enum ZoneCommand {
     BroadcastPackets {
         session_id: SessionId,
         owner_local_object_id: u32,
+        #[serde(serialize_with = "serialize_command_packets")]
         packets: Vec<ServerPacket>,
         now_ms: u64,
     },
     SyncSharedObjects {
         session_id: SessionId,
+        #[serde(serialize_with = "serialize_command_packets")]
         packets: Vec<ServerPacket>,
         include_owner: bool,
         now_ms: u64,
@@ -665,6 +667,7 @@ pub enum ZoneCommand {
     BroadcastSharedObjectPackets {
         session_id: SessionId,
         local_self_object_id: Option<u32>,
+        #[serde(serialize_with = "serialize_command_packets")]
         packets: Vec<ServerPacket>,
         now_ms: u64,
     },
@@ -836,7 +839,65 @@ pub enum ZoneCommand {
     },
 }
 
+fn serialize_command_packets<S: serde::Serializer>(
+    packets: &[ServerPacket],
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    let frames = packets
+        .iter()
+        .map(mir2_protocol::encode_server_packet)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(serde::ser::Error::custom)?;
+    frames.serialize(serializer)
+}
+
 impl ZoneCommand {
+    /// Internal routing identity only. Serialization never makes this a client
+    /// command schema, and no Deserialize implementation is provided.
+    pub(crate) fn session_id(&self) -> Option<&SessionId> {
+        match self {
+            Self::Join(join) => Some(&join.session_id),
+            Self::Tick { .. } => None,
+            Self::Leave { session_id }
+            | Self::Walk { session_id, .. }
+            | Self::Run { session_id, .. }
+            | Self::Turn { session_id, .. }
+            | Self::TeleportToNpc { session_id, .. }
+            | Self::UpdateChatProfile { session_id, .. }
+            | Self::UpdatePlayerCombatStats { session_id, .. }
+            | Self::UpdateMentorBank { session_id, .. }
+            | Self::SyncPlayerCombatState { session_id, .. }
+            | Self::SyncPlayerTransform { session_id, .. }
+            | Self::SyncPlayerVitals { session_id, .. }
+            | Self::SyncPlayerAppearance { session_id, .. }
+            | Self::SyncPlayerVitalsAndLife { session_id, .. }
+            | Self::Chat { session_id, .. }
+            | Self::BroadcastPackets { session_id, .. }
+            | Self::SyncSharedObjects { session_id, .. }
+            | Self::BroadcastSharedObjectPackets { session_id, .. }
+            | Self::SyncGroundDrops { session_id, .. }
+            | Self::SpawnMonster { session_id, .. }
+            | Self::SyncNativeMonsters { session_id, .. }
+            | Self::PlayerAttackObject { session_id, .. }
+            | Self::PlayerAttackMaterializedObject { session_id, .. }
+            | Self::PlayerRangeAttackObject { session_id, .. }
+            | Self::PlayerRangeAttackMaterializedObject { session_id, .. }
+            | Self::PreparePlayerFlamingSword { session_id, .. }
+            | Self::PlayerCastMagic { session_id, .. }
+            | Self::PlayerCastMagicWithItem { session_id, .. }
+            | Self::ResolveReincarnation { session_id, .. }
+            | Self::ClaimGroundDrop { session_id, .. }
+            | Self::ClaimNearestGroundDrop { session_id, .. }
+            | Self::CommitGroundDropClaim { session_id, .. }
+            | Self::CommitGroundDropClaimWithTicket { session_id, .. }
+            | Self::CancelGroundDropClaim { session_id, .. }
+            | Self::CancelGroundDropClaimWithTicket { session_id, .. }
+            | Self::CancelPendingMovement { session_id }
+            | Self::TickPlayerMovement { session_id, .. }
+            | Self::OpenDoor { session_id, .. }
+            | Self::ConfigureHazards { session_id, .. } => Some(session_id),
+        }
+    }
     /// Construct a trusted server-to-zone combat admission update without
     /// exposing the internal state as a client protocol shape.
     pub fn sync_player_combat_state(

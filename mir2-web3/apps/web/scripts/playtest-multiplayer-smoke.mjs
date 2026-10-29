@@ -10,13 +10,15 @@ import { applyProtocolObservation, hasAuthoritativePlayerDeath } from './quest-a
 import { loadProtocolCollisionMap, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 import { createNavigator, equipStarterGear } from './quest-agent/protocol-play.mjs';
 import { decodePlaytestFrame } from './playtest-catalog-transport.mjs';
+import { FULL_LIFECYCLE_CHECKS, runLifecycleChecks, validateLifecycleCommand, isLifecycleLootTarget } from './playtest-lifecycle.mjs';
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '../../../..');
 // Same pinned Next bundled transport used by the existing capture scripts.
 // Node's global WebSocket cannot portably set the required browser Origin.
 const WebSocketTransport = createRequire(import.meta.url)('next/dist/compiled/ws');
 const COMMANDS = new Set(['clientVersion', 'newAccount', 'login', 'newCharacter', 'startGame',
-  'keepAlive', 'walk', 'run', 'turn', 'chat', 'attack', 'equipItem', 'useItem', 'logOut']);
+  'keepAlive', 'walk', 'run', 'turn', 'chat', 'attack', 'equipItem', 'useItem', 'logOut', 'pickUp', 'townRevive', 'removeItem',
+  'harvest', 'interact', 'selectNpcDialog', 'sellItem', 'buyItem']);
 const PRIVATE_KEY = /password|secret|token|authorization|cookie|assertion|private.?key/i;
 const REQUIRED_CHECKS = ['authGuards', 'twoAccounts', 'mutualVisibility', 'movement', 'turn', 'chat',
   'chatLatency', 'sharedCombat', 'mapRoundTrip', 'logout', 'reloginPersistence'];
@@ -140,7 +142,13 @@ export function sharedHitEvidence(clients, cursors, targetId, attackerId) {
 }
 
 export function finishReport(report) {
-  report.ok = !report.error && !report.cleanupErrors?.length && REQUIRED_CHECKS.every(key => report.checks?.[key]?.status === 'passed');
+  const profile = report.profile ?? 'core';
+  const required = profile === 'full-lifecycle' ? [...REQUIRED_CHECKS, ...FULL_LIFECYCLE_CHECKS] : REQUIRED_CHECKS;
+  report.requiredChecks = [...required];
+  report.ok = ['core', 'full-lifecycle'].includes(profile) && !report.error && !report.cleanupErrors?.length &&
+    required.every(key => report.checks?.[key]?.status === 'passed');
+  report.fullLifecyclePassed = report.ok && profile === 'full-lifecycle' &&
+    FULL_LIFECYCLE_CHECKS.every(key => report.checks?.[key]?.status === 'passed');
   report.status = report.ok ? 'passed' : 'incomplete';
   report.finishedAt = new Date().toISOString();
   report.visualAccepted = false;
@@ -208,7 +216,8 @@ export class PlaytestClient {
     }, 2000);
   }
   send(command) {
-    if (!COMMANDS.has(command.type)) throw new Error(`Not an allowed ordinary playtest command: ${command.type}`);
+    if (!COMMANDS.has(command?.type)) throw new Error(`Not an allowed ordinary playtest command: ${command?.type}`);
+    if (['pickUp', 'townRevive', 'removeItem'].includes(command.type)) validateLifecycleCommand(command);
     this.record('sent', command);
     this.ws.send(JSON.stringify(command));
   }
@@ -374,18 +383,22 @@ async function socialChecks(clients, report, loadMap, deadline) {
   report.checks.chatLatency = chatLatencyCheck(report.checks.chat.observerLatencyMs);
 }
 
-async function sharedCombat(clients, loadMap, deadline) {
+async function sharedCombat(clients, loadMap, deadline, options = {}) {
   const names = new Set(['Scarecrow', 'Hen', 'Deer', 'HookingCat', 'RakingCat']);
   const [a, b] = clients;
   for (const client of clients) await equipStarterGear(client);
   const navigation = clients.map(client => createNavigator(client, { loadCollisionMap: loadMap, movementResponseTimeoutMs: 5000 }));
   const candidates = a.snapshot.entities.filter(entity => entity.kind === 'monster' && names.has(entity.name) &&
-    !entity.dead && Number(entity.hp ?? 1) > 0 && distance(self(a), entity) <= 18)
+    !entity.dead && Number(entity.hp ?? 1) > 0 && distance(self(a), entity) <= 18 &&
+    (options.profile !== 'full-lifecycle' || isLifecycleLootTarget(entity)))
     .sort((left, right) => distance(self(a), left) - distance(self(a), right));
   const attempts = [];
   for (const candidate of candidates.slice(0, 4)) {
     if (Date.now() >= deadline) break;
     const targetId = Number(candidate.objectId);
+    const lifecycleStart = { cursors: clients.map(client => client.sequence),
+      baselineDropIds: [...new Set(clients.flatMap(client => (client.snapshot.groundDrops ?? []).map(drop => drop.objectId)))],
+      mapFileName: String(a.snapshot.mapFileName) };
     const evidence = [];
     try {
       for (let index = 0; index < 2; index++) {
@@ -408,7 +421,7 @@ async function sharedCombat(clients, loadMap, deadline) {
         try {
           const hit = await client.wait(() => sharedHitEvidence(clients, cursors, targetId, attackerIds), 'shared positive hit', 2500);
           evidence.push({ ...hit, attackerName });
-          if (new Set(evidence.map(item => item.attackerName)).size === 2) return { targetId, target: candidate.name, hits: evidence };
+          if (new Set(evidence.map(item => item.attackerName)).size === 2) return { targetId, target: candidate.name, hits: evidence, lifecycleStart };
         } catch (error) { attempts.push({ targetId, attackerName, error: error.message }); }
       }
     } catch (error) { attempts.push({ targetId, error: error.message }); }
@@ -523,6 +536,8 @@ export async function resumeCredentials(reportPath, endpoint) {
 export async function runPlaytest(options) {
   const endpoint = validateEndpoint(options.endpoint);
   if (options.realm !== 'isolated') throw new Error('--realm isolated is required; never target the existing public realm');
+  const profile = options.profile ?? 'core';
+  if (!['core', 'full-lifecycle'].includes(profile)) throw new Error('--profile must be core or full-lifecycle');
   if (!options.output || (!options.privateDir && !options.resumeReport)) throw new Error('--output and --private-dir (or --resume-report) are required');
   const durationSeconds = Number(options.durationSeconds ?? 600);
   if (!Number.isInteger(durationSeconds) || durationSeconds < 60 || durationSeconds > 1800) throw new Error('Duration must be 60–1800 seconds');
@@ -533,7 +548,7 @@ export async function runPlaytest(options) {
     : await privateCredentials(options.privateDir, runId);
   const secrets = credentials.map(entry => entry.password);
   const makeClient = label => new PlaytestClient(endpoint, label, path.join(output, `${runId}-${label}.trace.jsonl`), secrets);
-  const report = { schemaVersion: 1, runId, endpoint, startedAt: new Date().toISOString(),
+  const report = { schemaVersion: 1, runId, endpoint, profile, startedAt: new Date().toISOString(),
     scope: 'ordinary-public-protocol-two-independent-sockets', privateCredentialsPath: credentialPath,
     checks: {}, accounts: credentials.map(({ accountId, name }) => ({ accountId, name })) };
   report.registrationMode = resumedFrom ? 'recorded-prior-run-accounts' : 'two-fresh-ordinary-registrations';
@@ -565,7 +580,20 @@ export async function runPlaytest(options) {
     report.checks.twoAccounts = { status: 'passed', evidence: actors };
     await socialChecks(clients, report, loadMap, deadline);
     await checkpoint();
-    await step('sharedCombat', () => sharedCombat(clients, loadMap, Math.min(deadline, Date.now() + 90000)));
+    await step('sharedCombat', () => sharedCombat(clients, loadMap, Math.min(deadline, Date.now() + 90000), { profile }));
+    if (profile === 'full-lifecycle') await runLifecycleChecks({ clients,
+      combat: report.checks.sharedCombat?.status === 'passed' ? report.checks.sharedCombat.evidence : null,
+      loadMap, deadline,
+      nextCombat: () => sharedCombat(clients, loadMap, Math.min(deadline, Date.now() + 60000), { profile }),
+      onAttempt: async attempt => {
+        (report.lifecycleDropAttempts ??= []).push(attempt);
+        await checkpoint();
+      },
+      onCheck: async (key, result) => {
+        report.checks[key] = result;
+        await checkpoint();
+        options.onProgress?.({ check: key, status: result.status });
+      } });
     await step('mapRoundTrip', () => mapRoundTrip(clients, loadMap, deadline));
     await step('logout', async () => {
       const receipts = [];
@@ -606,6 +634,9 @@ export async function runPlaytest(options) {
     for (const key of REQUIRED_CHECKS) {
       report.checks[key] ??= { status: 'skipped', reason: 'An earlier prerequisite did not complete' };
     }
+    if (profile === 'full-lifecycle') for (const key of FULL_LIFECYCLE_CHECKS) {
+      report.checks[key] ??= { status: 'not_run', reason: 'An earlier prerequisite did not complete' };
+    }
     finishReport(report);
     if (report.cleanupErrors?.length) { report.ok = false; report.status = 'incomplete'; }
     await checkpoint();
@@ -616,10 +647,10 @@ export async function runPlaytest(options) {
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const options = {};
   const keys = { '--endpoint': 'endpoint', '--output': 'output', '--private-dir': 'privateDir',
-    '--realm': 'realm', '--duration-seconds': 'durationSeconds', '--map-root': 'mapRoot', '--resume-report': 'resumeReport' };
+    '--realm': 'realm', '--profile': 'profile', '--duration-seconds': 'durationSeconds', '--map-root': 'mapRoot', '--resume-report': 'resumeReport' };
   try {
     if (process.argv.includes('--help')) {
-      console.log('node playtest-multiplayer-smoke.mjs --endpoint wss://TEST-REALM/ws --realm isolated --output REPORT_DIR --private-dir PRIVATE_DIR [--duration-seconds 600] [--map-root MAP_DIR] [--resume-report PRIOR_REPORT]');
+      console.log('node playtest-multiplayer-smoke.mjs --endpoint wss://TEST-REALM/ws --realm isolated --output REPORT_DIR --private-dir PRIVATE_DIR [--duration-seconds 600] [--map-root MAP_DIR] [--resume-report PRIOR_REPORT] [--profile core|full-lifecycle] (full-lifecycle additionally contests a real drop and exposes one owned actor to an ordinary monster after ordinary armour removal before town revival; no QA fallback)');
     } else {
       for (let index = 2; index < process.argv.length; index += 2) {
         const key = keys[process.argv[index]];

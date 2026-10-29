@@ -56,15 +56,16 @@ pub use npc_gold_buy_outcome::{
 };
 mod npc_purchase_outcome;
 mod npc_purchase_snapshot;
+mod npc_purchase_transaction;
 mod production;
-mod stone_npc;
+pub(crate) mod procurement;
 mod stones;
+mod stone_npc;
+pub use stone_npc::StoneWorkshopError;
 pub use production::{
     PersonalProductionConfig, PersonalProductionFacility, PersonalProductionState,
     ProductionDurableError, ProductionDurableExecution,
 };
-pub use stone_npc::StoneWorkshopError;
-mod npc_purchase_transaction;
 pub use npc_purchase_outcome::{
     NpcPurchaseBeforeExecution, NpcPurchaseCurrency, NpcPurchaseProcessingError,
     NpcPurchaseProcessingExecution, NpcPurchaseProcessingOutcome, NpcPurchaseRejection,
@@ -173,8 +174,10 @@ pub use session::{
 };
 pub use stage5::{GameShopPurchaseExecution, GameShopPurchaseFailure, GameShopPurchaseOutcome};
 pub use zone::{
-    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, CreatureOperation,
-    CreatureOwner, CreaturePickupIntent, GroundDropClaimTicket, PlayerId, SessionId,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, CellCoord, CellSize,
+    CreatureOperation, CreatureOwner, CreaturePickupIntent, GroundDropClaimTicket,
+    MapEffectOwnerRef, PartitionId, PartitionKey, PartitionLocation, PlayerId, SessionId,
+    TopologyRevision, ZonePartitionDescriptor,
     ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
     ZoneExperiencePartner, ZoneExperienceProfile, ZoneExperienceRateBuff, ZoneExperienceRateSource,
     ZoneExperienceRateStat, ZoneExperienceSelection, ZoneFiveClassPracticeReceipt,

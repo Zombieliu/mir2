@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T17:41:39.028Z",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\preparation-v1.json",
+    "bytes": 5476,
+    "sha256": "671b6d52b33f601958361e37c1069babf64621a230b32bc516cd144d1dc5e0f9"
+  },
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": []
+  },
+  "scope": "Static source eligibility only. Root sealing and actual invocation must wait until session50905 CLOSED, owned cleanup, original collection/public verification success and actual Root OS cleanup proof. No probe verdict is read or inferred.",
+  "runId": "1792949214664-bea1433d",
+  "sourceChecks": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-v1.mjs",
+      "bytes": 30334,
+      "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "f31dbde547f7e725d9ea209cc3e160f36c442891729dccba675db0b59eee927d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\run-ended-probe16-v1.mjs",
+      "bytes": 2257,
+      "sha256": "944ef34333131c729d3accf43451dbe22962dbab040ec7b66f9b7a1fb3b0f546"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\derivation-pending-v1.json",
+      "bytes": 27038,
+      "sha256": "216733c4309471f5b316d6a330352f63dc146f224ba1b5804b11318d310a05bb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-draft-v1.mjs",
+      "bytes": 30338,
+      "sha256": "67b407e48f40f467de0bd4ec8919021b6b833c09854d5c0c11c6e9d20d11fdc8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\preparation-pending-v1.json",
+      "bytes": 3653,
+      "sha256": "34a38898ce839f1e09855abf8f970e0611f453610ef2115a71e9bfadbd6548c3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-run-id-binding-v1.json",
+      "bytes": 1444,
+      "sha256": "2cc419aba47362f2b9a1eed40744f0ceacd6c08c4019599a296f08ff6e9de75b"
+    }
+  ],
+  "sourceCount": 10,
+  "expectedSealedSourceCount": 12,
+  "sourceAggregate": "61bcbc84c646eb3ce94eb0a638ba9bd8c5c6b58baf3fc04b71c068c9b1241ac1",
+  "finalRunLiteralExactlyOneReplacement": true,
+  "draftAndPendingPreparationPreserved": true,
+  "inverseProofs": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\verify-ended-probe15-v1.mjs",
+        "bytes": 28031,
+        "sha256": "eedc2a98058cfca8ffaf1120d8e8f5b8518ff595e1ef250309845475f0063704"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-draft-v1.mjs",
+        "bytes": 30338,
+        "sha256": "67b407e48f40f467de0bd4ec8919021b6b833c09854d5c0c11c6e9d20d11fdc8"
+      },
+      "hunks": 8,
+      "forwardAndInverseRawExact": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "9a1843d910cbe4503859bd00d7c9fec77217d2229db9e31d0c9fe5ef005f278b"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\probe-contract-v1.mjs",
+        "bytes": 5820,
+        "sha256": "f31dbde547f7e725d9ea209cc3e160f36c442891729dccba675db0b59eee927d"
+      },
+      "hunks": 2,
+      "forwardAndInverseRawExact": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\run-ended-probe15-v1.mjs",
+        "bytes": 2257,
+        "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\run-ended-probe16-v1.mjs",
+        "bytes": 2257,
+        "sha256": "944ef34333131c729d3accf43451dbe22962dbab040ec7b66f9b7a1fb3b0f546"
+      },
+      "hunks": 1,
+      "forwardAndInverseRawExact": true
+    }
+  ],
+  "semantics": {
+    "actualMeasuredSecondsPreserved": true,
+    "completeSuccessfulWindowsRequired": [
+      5,
+      5,
+      6
+    ],
+    "failureAndPartialPreserved": true,
+    "originalGatesUnchanged": true,
+    "currentDriverFreezeAnd210ShapeChecked": true,
+    "historicalSixDeclarationBasisSeparated": true,
+    "currentCoreCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+    "wireAndOriginalStaticCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "zeroHpEventsAreNotDoseEvidence": true,
+    "wireDiagnosticsDoNotGrantGameCredit": true,
+    "capacityAcceptedAlwaysFalse": true
+  },
+  "limitations": [
+    "Source preparation is not an actual probe result; success remains unknown in this review.",
+    "readline aggregates an entire line before the 64MiB line check. This tool handles trusted frozen-producer and SHA/byte-bound archives; it does not claim a strict malicious-long-line memory bound.",
+    "No actual raw, monitor, recording, private payload or executable was read.",
+    "No target import, selfcheck, product tests, seal, guard or actual verifier invocation was executed."
+  ],
+  "activeRawRead": false,
+  "targetImported": false,
+  "testsExecuted": false,
+  "actualVerificationExecuted": false,
+  "runtimeSourcesModified": false,
+  "capacityAccepted": false
+}

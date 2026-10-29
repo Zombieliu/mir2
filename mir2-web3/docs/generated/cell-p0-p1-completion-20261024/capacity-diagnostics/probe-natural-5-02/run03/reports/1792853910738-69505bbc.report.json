@@ -1,0 +1,1225 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792853910738-69505bbc",
+  "endpoint": "ws://127.0.0.1:17510/ws",
+  "policy": {
+    "profile": "probe",
+    "activityMode": "native",
+    "movementIntervalMs": 750,
+    "stages": [
+      5
+    ],
+    "stageSeconds": 30,
+    "soakSeconds": 360,
+    "wallSeconds": 1200,
+    "layout": "dispersed",
+    "combatActors": 1,
+    "resumeSamples": 0,
+    "saveSamples": 0,
+    "commandsPerSecond": 3,
+    "intentionIntervalMs": 750,
+    "variableActionCadence": true,
+    "maximumSendLatenessMs": 250,
+    "movementP95Ms": 750,
+    "chatP95Ms": 1000,
+    "actionTimeoutMs": 2000,
+    "timeoutExclusive": 0.01,
+    "maximumMissedPlanRatio": 0.05,
+    "maximumCorrectionRatio": 0.05,
+    "minimumMovesPerMinute": 30,
+    "minimumCombatHitsPerMinute": 12,
+    "minimumCombatAttacksPerMinute": 18,
+    "aoiRange": 16,
+    "aoiGraceMs": 1000,
+    "nativeChatIntervalMs": 30000,
+    "nativeTurnIntervalMs": 60000,
+    "minimumNativeRunRatio": 0.5,
+    "minimumNativeCellsPerMinute": 80,
+    "maximumEvidenceInFlight": 4,
+    "maximumMemorySlopeMiBPerHour": 32,
+    "memoryWarmupSeconds": 300,
+    "maximumDriverLagP99Ms": 250,
+    "fullAcceptanceEligible": false
+  },
+  "startedAt": "2026-10-24T14:58:30.739Z",
+  "stages": [
+    {
+      "name": "stage-5",
+      "controlledActors": 5,
+      "completed": true,
+      "passed": false,
+      "seconds": 30,
+      "activity": [
+        {
+          "actor": "L8d384900",
+          "role": "movement",
+          "plans": 40,
+          "gaps": 0,
+          "moves": 39,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792854019753,
+          "runs": 38,
+          "cells": 77,
+          "nativeOpportunities": 40,
+          "nativeCompleted": 40,
+          "offeredDurationMs": 30000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9743589743589743,
+            "cellsPerMinute": 154,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 30000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L8d384901",
+          "role": "movement",
+          "plans": 40,
+          "gaps": 0,
+          "moves": 38,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792854019503,
+          "runs": 34,
+          "cells": 72,
+          "nativeOpportunities": 40,
+          "nativeCompleted": 40,
+          "offeredDurationMs": 30000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.8947368421052632,
+            "cellsPerMinute": 144,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 30000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L8d384902",
+          "role": "combat",
+          "plans": 40,
+          "gaps": 0,
+          "moves": 39,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792854019193,
+          "runs": 0,
+          "cells": 39,
+          "nativeOpportunities": 40,
+          "nativeCompleted": 40,
+          "offeredDurationMs": 30000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0,
+            "cellsPerMinute": 78,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 30000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": false
+        },
+        {
+          "actor": "L8d384903",
+          "role": "movement",
+          "plans": 40,
+          "gaps": 0,
+          "moves": 39,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792854019722,
+          "runs": 36,
+          "cells": 75,
+          "nativeOpportunities": 40,
+          "nativeCompleted": 40,
+          "offeredDurationMs": 30000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": true,
+            "completionRatio": 1,
+            "runRatio": 0.9230769230769231,
+            "cellsPerMinute": 150,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 30000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": true
+        },
+        {
+          "actor": "L8d384904",
+          "role": "movement",
+          "plans": 40,
+          "gaps": 39,
+          "moves": 0,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 0,
+          "runs": 0,
+          "cells": 0,
+          "nativeOpportunities": 40,
+          "nativeCompleted": 1,
+          "offeredDurationMs": 30000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0,
+          "nativeActivity": {
+            "passed": false,
+            "completionRatio": 0.025,
+            "runRatio": 0,
+            "cellsPerMinute": 0,
+            "positiveHitsPerMinute": 0,
+            "evidenceWaits": 0,
+            "ownerAckWaits": 0,
+            "offeredDurationMs": 30000,
+            "unknownPacing": 0,
+            "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+          },
+          "passed": false
+        }
+      ],
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementPassed": true,
+      "chatPassed": true,
+      "combatCoverage": "scenario-insufficient",
+      "metrics": {
+        "walk": {
+          "count": 86,
+          "status": {
+            "success": 47,
+            "navigation-blocked": 39
+          },
+          "fromSend": {
+            "count": 47,
+            "p50Ms": 18,
+            "p95Ms": 48,
+            "p99Ms": 57,
+            "maxMs": 56.032299999991665
+          },
+          "fromPlan": {
+            "count": 47,
+            "p50Ms": 47,
+            "p95Ms": 96,
+            "p99Ms": 122,
+            "maxMs": 121.9141999999847
+          }
+        },
+        "chat": {
+          "count": 5,
+          "status": {
+            "success": 5
+          },
+          "fromSend": {
+            "count": 5,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4,
+            "maxMs": 3.0635999999940395
+          },
+          "fromPlan": {
+            "count": 5,
+            "p50Ms": 24,
+            "p95Ms": 30,
+            "p99Ms": 30,
+            "maxMs": 29.423999999984517
+          }
+        },
+        "selfChat": {
+          "count": 3,
+          "status": {
+            "success": 3
+          },
+          "fromSend": {
+            "count": 3,
+            "p50Ms": 3,
+            "p95Ms": 3,
+            "p99Ms": 3,
+            "maxMs": 2.9311999999918044
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "run": {
+          "count": 108,
+          "status": {
+            "success": 108
+          },
+          "fromSend": {
+            "count": 108,
+            "p50Ms": 2,
+            "p95Ms": 5,
+            "p99Ms": 19,
+            "maxMs": 21.63509999999951
+          },
+          "fromPlan": {
+            "count": 108,
+            "p50Ms": 22,
+            "p95Ms": 33,
+            "p99Ms": 34,
+            "maxMs": 37.6137000000017
+          }
+        },
+        "fanout-run": {
+          "count": 49,
+          "status": {
+            "success": 49
+          },
+          "fromSend": {
+            "count": 49,
+            "p50Ms": 3,
+            "p95Ms": 5,
+            "p99Ms": 11,
+            "maxMs": 10.707099999999627
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "rtt": {
+          "count": 15,
+          "status": {
+            "success": 15
+          },
+          "fromSend": {
+            "count": 15,
+            "p50Ms": 1,
+            "p95Ms": 7,
+            "p99Ms": 7,
+            "maxMs": 6.317199999990407
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "refresh": {
+          "count": 2,
+          "status": {
+            "success": 2
+          },
+          "fromSend": {
+            "count": 2,
+            "p50Ms": 21,
+            "p95Ms": 22,
+            "p99Ms": 22,
+            "maxMs": 21.9774000000034
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "turn": {
+          "count": 1,
+          "status": {
+            "success": 1
+          },
+          "fromSend": {
+            "count": 1,
+            "p50Ms": 2,
+            "p95Ms": 2,
+            "p99Ms": 2,
+            "maxMs": 1.8874000000068918
+          },
+          "fromPlan": {
+            "count": 1,
+            "p50Ms": 24,
+            "p95Ms": 24,
+            "p99Ms": 24,
+            "maxMs": 23.78420000000915
+          }
+        },
+        "peerChat": {
+          "count": 2,
+          "status": {
+            "success": 2
+          },
+          "fromSend": {
+            "count": 2,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4,
+            "maxMs": 3.0635999999940395
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "fanout-chat": {
+          "count": 2,
+          "status": {
+            "success": 2
+          },
+          "fromSend": {
+            "count": 2,
+            "p50Ms": 3,
+            "p95Ms": 4,
+            "p99Ms": 4,
+            "maxMs": 3.0635999999940395
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        },
+        "fanout-walk": {
+          "count": 2,
+          "status": {
+            "success": 2
+          },
+          "fromSend": {
+            "count": 2,
+            "p50Ms": 2,
+            "p95Ms": 3,
+            "p99Ms": 3,
+            "maxMs": 2.242499999993015
+          },
+          "fromPlan": {
+            "count": 0,
+            "p50Ms": null,
+            "p95Ms": null,
+            "p99Ms": null,
+            "maxMs": 0
+          }
+        }
+      },
+      "aoi": {
+        "samples": 29,
+        "expectedPairs": 216,
+        "observedPairs": 216,
+        "persistentMissing": 0,
+        "ghosts": 0,
+        "duplicates": 0,
+        "minimumCoverage": 1,
+        "maximumExpectedPerObserver": 3
+      },
+      "fanoutPassed": true,
+      "rollingWindows": []
+    }
+  ],
+  "nativeResume": [],
+  "savedVerification": [],
+  "ordinaryAccountsOnly": true,
+  "visualAccepted": false,
+  "capacityUpperBound": null,
+  "acceptanceScope": "One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup",
+  "provisioning": [
+    "admin-provisioned-file-account-only"
+  ],
+  "registrationLoadTested": false,
+  "simultaneousLoginBurstTested": false,
+  "mixedClassCombatTested": false,
+  "baselineActiveSessions": 0,
+  "initialLoginNotBefore": "2026-10-24T14:58:30.785Z",
+  "scenario": {
+    "layout": "dispersed",
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "combatActors": 1,
+    "patrolSpan": 2,
+    "explicitNativeHomes": {
+      "visitedCells": 16689,
+      "mapCells": 490000,
+      "footprintCells": 45
+    },
+    "combatClusters": [
+      {
+        "combatActorIndices": [
+          2
+        ],
+        "movementActorIndices": [
+          0,
+          1,
+          3,
+          4
+        ],
+        "observerFootprintCoverageRadius": 14
+      }
+    ],
+    "mapFileName": "0",
+    "anchors": [
+      {
+        "x": 252,
+        "y": 625
+      },
+      {
+        "x": 258,
+        "y": 631
+      },
+      {
+        "x": 265,
+        "y": 636
+      },
+      {
+        "x": 289,
+        "y": 625
+      },
+      {
+        "x": 261,
+        "y": 643
+      }
+    ],
+    "knownStationaryNpcCount": 46
+  },
+  "peakControlledActors": 5,
+  "highestMeasuredStage": 5,
+  "error": "Stage 5 did not satisfy the fixed activity, latency or coverage gates",
+  "finishedAt": "2026-10-24T15:00:26.660Z",
+  "safetyStopped": true,
+  "safetyReason": "Continuous activity window failed, regardless of the measured stage",
+  "cleanupErrors": [],
+  "metrics": {
+    "login": {
+      "count": 5,
+      "status": {
+        "success": 5
+      },
+      "fromSend": {
+        "count": 5,
+        "p50Ms": 851,
+        "p95Ms": 1025,
+        "p99Ms": 1025,
+        "maxMs": 1024.9059999999954
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "startGame": {
+      "count": 5,
+      "status": {
+        "success": 5
+      },
+      "fromSend": {
+        "count": 5,
+        "p50Ms": 9020,
+        "p95Ms": 11800,
+        "p99Ms": 11800,
+        "maxMs": 11719.123699999996
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "bootstrap": {
+      "count": 5,
+      "status": {
+        "success": 5
+      },
+      "fromSend": {
+        "count": 5,
+        "p50Ms": 12400,
+        "p95Ms": 16000,
+        "p99Ms": 16000,
+        "maxMs": 15934.029999999992
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "walk": {
+      "count": 160,
+      "status": {
+        "success": 121,
+        "navigation-blocked": 39
+      },
+      "fromSend": {
+        "count": 121,
+        "p50Ms": 17,
+        "p95Ms": 248,
+        "p99Ms": 585,
+        "maxMs": 677.9680000000008
+      },
+      "fromPlan": {
+        "count": 121,
+        "p50Ms": 46,
+        "p95Ms": 280,
+        "p99Ms": 606,
+        "maxMs": 701.6831999999995
+      }
+    },
+    "run": {
+      "count": 284,
+      "status": {
+        "success": 284
+      },
+      "fromSend": {
+        "count": 284,
+        "p50Ms": 2,
+        "p95Ms": 19,
+        "p99Ms": 406,
+        "maxMs": 679.1138999999966
+      },
+      "fromPlan": {
+        "count": 284,
+        "p50Ms": 22,
+        "p95Ms": 45,
+        "p99Ms": 422,
+        "maxMs": 681.3726999999999
+      }
+    },
+    "rtt": {
+      "count": 34,
+      "status": {
+        "success": 34
+      },
+      "fromSend": {
+        "count": 34,
+        "p50Ms": 1,
+        "p95Ms": 6,
+        "p99Ms": 7,
+        "maxMs": 6.317199999990407
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "chat": {
+      "count": 13,
+      "status": {
+        "success": 13
+      },
+      "fromSend": {
+        "count": 13,
+        "p50Ms": 3,
+        "p95Ms": 220,
+        "p99Ms": 220,
+        "maxMs": 219.80509999999776
+      },
+      "fromPlan": {
+        "count": 13,
+        "p50Ms": 24,
+        "p95Ms": 240,
+        "p99Ms": 240,
+        "maxMs": 239.72269999999844
+      }
+    },
+    "selfChat": {
+      "count": 6,
+      "status": {
+        "success": 6
+      },
+      "fromSend": {
+        "count": 6,
+        "p50Ms": 3,
+        "p95Ms": 29,
+        "p99Ms": 29,
+        "maxMs": 28.610100000001694
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "fanout-run": {
+      "count": 121,
+      "status": {
+        "success": 121
+      },
+      "fromSend": {
+        "count": 121,
+        "p50Ms": 2,
+        "p95Ms": 12,
+        "p99Ms": 362,
+        "maxMs": 685.9430999999968
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "peerChat": {
+      "count": 7,
+      "status": {
+        "success": 7
+      },
+      "fromSend": {
+        "count": 7,
+        "p50Ms": 3,
+        "p95Ms": 220,
+        "p99Ms": 220,
+        "maxMs": 219.80509999999776
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "fanout-chat": {
+      "count": 7,
+      "status": {
+        "success": 7
+      },
+      "fromSend": {
+        "count": 7,
+        "p50Ms": 3,
+        "p95Ms": 220,
+        "p99Ms": 220,
+        "maxMs": 219.80509999999776
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "fanout-walk": {
+      "count": 10,
+      "status": {
+        "success": 10
+      },
+      "fromSend": {
+        "count": 10,
+        "p50Ms": 3,
+        "p95Ms": 501,
+        "p99Ms": 501,
+        "maxMs": 500.1967000000004
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "refresh": {
+      "count": 3,
+      "status": {
+        "success": 3
+      },
+      "fromSend": {
+        "count": 3,
+        "p50Ms": 21,
+        "p95Ms": 22,
+        "p99Ms": 22,
+        "maxMs": 21.9774000000034
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "turn": {
+      "count": 2,
+      "status": {
+        "success": 2
+      },
+      "fromSend": {
+        "count": 2,
+        "p50Ms": 2,
+        "p95Ms": 3,
+        "p99Ms": 3,
+        "maxMs": 2.3718000000080792
+      },
+      "fromPlan": {
+        "count": 2,
+        "p50Ms": 9,
+        "p95Ms": 24,
+        "p99Ms": 24,
+        "maxMs": 23.78420000000915
+      }
+    },
+    "fanout-turn": {
+      "count": 1,
+      "status": {
+        "success": 1
+      },
+      "fromSend": {
+        "count": 1,
+        "p50Ms": 3,
+        "p95Ms": 3,
+        "p99Ms": 3,
+        "maxMs": 2.47970000001078
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    },
+    "logOut": {
+      "count": 5,
+      "status": {
+        "success": 5
+      },
+      "fromSend": {
+        "count": 5,
+        "p50Ms": 3300,
+        "p95Ms": 3330,
+        "p99Ms": 3330,
+        "maxMs": 3320.498999999996
+      },
+      "fromPlan": {
+        "count": 0,
+        "p50Ms": null,
+        "p95Ms": null,
+        "p99Ms": null,
+        "maxMs": 0
+      }
+    }
+  },
+  "samples": 668,
+  "continuousAcceptance": {
+    "passed": false,
+    "failureCount": 1,
+    "firstFailure": {
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "L8d384904",
+        "role": "movement",
+        "phases": [
+          "ramp",
+          "settle",
+          "stage-5"
+        ],
+        "seconds": 35.7357843,
+        "final": true,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 47,
+          "gaps": 39,
+          "moves": 7,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792853989311,
+          "runs": 5,
+          "cells": 12,
+          "nativeOpportunities": 47,
+          "nativeCompleted": 8,
+          "offeredDurationMs": 35250,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": false,
+          "completionRatio": 0.1702127659574468,
+          "runRatio": 0.7142857142857143,
+          "cellsPerMinute": 20.14787177904474,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 35250,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": false,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "metrics": {
+          "walk": {
+            "count": 41,
+            "status": {
+              "success": 2,
+              "navigation-blocked": 39
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 2,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.4149999999935972
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 16,
+              "p95Ms": 18,
+              "p99Ms": 18,
+              "maxMs": 17.733299999992596
+            }
+          },
+          "run": {
+            "count": 5,
+            "status": {
+              "success": 5
+            },
+            "fromSend": {
+              "count": 5,
+              "p50Ms": 2,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.064799999992829
+            },
+            "fromPlan": {
+              "count": 5,
+              "p50Ms": 26,
+              "p95Ms": 28,
+              "p99Ms": 28,
+              "maxMs": 27.705999999991036
+            }
+          },
+          "chat": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 3,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.722300000008545
+            },
+            "fromPlan": {
+              "count": 1,
+              "p50Ms": 24,
+              "p95Ms": 24,
+              "p99Ms": 24,
+              "maxMs": 23.21259999999893
+            }
+          },
+          "selfChat": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 3,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.722300000008545
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      }
+    },
+    "assessedWindows": 8,
+    "shortSegments": 1,
+    "shortSegmentRule": "Under 20 active seconds: protocol/latency/error gates still apply; no activity-rate claim",
+    "actors": [
+      {
+        "name": "L8d384900",
+        "role": "movement",
+        "activeSeconds": 98.12428739999999,
+        "plannedPauseSeconds": 6.824624300000011,
+        "assessedWindows": 2
+      },
+      {
+        "name": "L8d384901",
+        "role": "movement",
+        "activeSeconds": 84.1815654,
+        "plannedPauseSeconds": 6.824624300000011,
+        "assessedWindows": 2
+      },
+      {
+        "name": "L8d384902",
+        "role": "combat",
+        "activeSeconds": 71.06485729999999,
+        "plannedPauseSeconds": 6.824624300000011,
+        "assessedWindows": 2
+      },
+      {
+        "name": "L8d384903",
+        "role": "movement",
+        "activeSeconds": 56.263326199999995,
+        "plannedPauseSeconds": 6.824624300000011,
+        "assessedWindows": 1
+      },
+      {
+        "name": "L8d384904",
+        "role": "movement",
+        "activeSeconds": 35.7357843,
+        "plannedPauseSeconds": 6.824624300000011,
+        "assessedWindows": 1
+      }
+    ]
+  },
+  "peakServerActive": 5,
+  "bytes": {
+    "sent": 17309,
+    "received": 2507269
+  },
+  "bytesDefinition": "Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing",
+  "activityMode": "native",
+  "actorActivity": [
+    {
+      "actor": "L8d384900",
+      "plans": 131,
+      "gaps": 0,
+      "moves": 126,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792854019753,
+      "runs": 113,
+      "cells": 239,
+      "nativeOpportunities": 131,
+      "nativeCompleted": 131,
+      "offeredDurationMs": 98250,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L8d384901",
+      "plans": 112,
+      "gaps": 0,
+      "moves": 108,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792854019503,
+      "runs": 98,
+      "cells": 206,
+      "nativeOpportunities": 112,
+      "nativeCompleted": 112,
+      "offeredDurationMs": 84000,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L8d384902",
+      "plans": 94,
+      "gaps": 0,
+      "moves": 91,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792854019193,
+      "runs": 8,
+      "cells": 99,
+      "nativeOpportunities": 94,
+      "nativeCompleted": 94,
+      "offeredDurationMs": 70500,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L8d384903",
+      "plans": 75,
+      "gaps": 0,
+      "moves": 73,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792854019722,
+      "runs": 58,
+      "cells": 131,
+      "nativeOpportunities": 75,
+      "nativeCompleted": 75,
+      "offeredDurationMs": 56250,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    {
+      "actor": "L8d384904",
+      "plans": 47,
+      "gaps": 39,
+      "moves": 7,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792853989311,
+      "runs": 5,
+      "cells": 12,
+      "nativeOpportunities": 47,
+      "nativeCompleted": 8,
+      "offeredDurationMs": 35250,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    }
+  ],
+  "nativeLoadScope": {
+    "movementIntervalMs": 750,
+    "movementMinimumMs": 600,
+    "singleUnacknowledgedMovement": true,
+    "attackFormula": "max(max(550,1400-60*AttackSpeed-min(14*level,370)),600)+50ms",
+    "nativeVsZoneFloorDifference": "Native 550ms floor and Zone 600ms floor remain unchanged; this driver respects both",
+    "chatIntervalMs": 30000,
+    "maximumObserverEvidenceInFlight": 4,
+    "actionFanoutProbeRange": 6,
+    "chatFanoutProbeRange": 8,
+    "fullAoiMembershipRange": 16,
+    "evidenceWaitMeaning": "Instrumentation wait stays in offered-load denominator; insufficient coverage does not establish server overload",
+    "ambiguousAttackRule": "Unverified attacks permanently quarantine that actor/target pair for this run; more than 64 such targets stops the test",
+    "continuousRunningRule": "The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits",
+    "limitations": [
+      "Warrior starter melee only",
+      "No caster AOE, summons or cross-map raid proof",
+      "No native GPU/render acceptance",
+      "No simultaneous auth burst or automatic revival"
+    ]
+  },
+  "combatScenario": {
+    "rule": "First reach the declared home by ordinary Walk/Run, then hunt; initial transit stays in continuous activity and stage measurement starts only after arrival",
+    "searchRadiusFromCurrentPosition": 16,
+    "monsterNames": [
+      "Deer",
+      "Scarecrow"
+    ],
+    "huntingRangeMeaning": "Actual attack positions; chasing may leave the initial home. Authored spawns do not prove live target supply",
+    "actors": [
+      {
+        "actor": "L8d384902",
+        "declaredHome": {
+          "x": 265,
+          "y": 636
+        },
+        "arrival": {
+          "at": 1792853952502,
+          "phase": "ramp",
+          "mapFileName": "0",
+          "declaredHome": {
+            "x": 265,
+            "y": 636
+          },
+          "actual": {
+            "x": 265,
+            "y": 636
+          },
+          "authoritativeSequence": 609,
+          "activeElapsedMs": 3733.766300000003
+        },
+        "hunting": null
+      }
+    ]
+  },
+  "boundedStorage": {
+    "retainedMonitorSamples": 38,
+    "maximumMonitorSamples": 1201,
+    "monitorTimeBucketMs": 3000,
+    "rawMonitorSamples": 52,
+    "maximumEventsPerConnection": 2048,
+    "writerMaximumBufferedBytes": 12213,
+    "writerLimitBytes": 4194304,
+    "movementCorrection": {
+      "maximumRejectedWalkCells": 16,
+      "rejectedWalkCellTtlMs": 3000,
+      "maximumNearbyOccupants": 32,
+      "rows": 0,
+      "rule": "First correction per uninterrupted movement streak; unchanged-owner Walk temporarily avoids its single refused cell without changing failure accounting"
+    },
+    "navigationBlocked": {
+      "maximumAttempts": 40,
+      "maximumNearbyOccupants": 32,
+      "rows": 1,
+      "rule": "First blocked action opportunity until a successful movement acknowledgement; ordinary blocked opportunities remain counted"
+    },
+    "selfTransform": {
+      "rows": 405,
+      "rule": "Only public packets changing owner coordinates; fixed position/direction fields streamed through the existing writer, no retained aggregate"
+    },
+    "playerLifecycle": {
+      "maximumIdentitiesPerConnection": 256,
+      "maximumProjectionPlayers": 256,
+      "rows": 154,
+      "identityEvictions": 0,
+      "unchangedSnapshotsOmitted": 25,
+      "movementRule": "Ordinary movement is not copied; retain only the first known-player movement while its projection is absent, until reappearance"
+    }
+  },
+  "diagnosticCompleted": false,
+  "ok": false,
+  "movementCapacityAccepted": false,
+  "combatCapacityAccepted": false,
+  "playableCapacityAccepted": false,
+  "acceptedControlledActors": null,
+  "reportPath": "C:\\mir2-build\\p01-completion-20261024\\probe-natural-5-02\\run03\\reports\\1792853910738-69505bbc.report.json"
+}

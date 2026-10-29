@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "kind": "normal",
+  "actualFullPayload": true,
+  "exe": "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-normal-output-r10\\Numeron-Legend-of-Rebirth-20261029-r10-Setup.exe",
+  "bytes": 1017971015,
+  "sha256": "E7A2438A6C73DCB3D529A75CBB2E7F19F7054C3909466952DCBE4544DC780D7F",
+  "fileVersion": "2026.10.29.10       ",
+  "elapsedSeconds": 65.6565672,
+  "compilerEngineVersion": "7.1.1",
+  "compilerSha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+  "recipeSha256": "5A2653D216D637D2A29C91A63E3D26DB1D296DC7A0232D27083898C79C17D004",
+  "payloadIncludeSha256": "C4E273FCA76D39C15CE7CB203FF260BB49BD6DF41855C9F2F3740A09AA97ABF8",
+  "updaterIncludeSha256": "5F51B051CF4983C440D2050B1401D4E28E22E3615CEE828C9BA8B9C92FFE3AD0",
+  "arguments": [
+    "/Qp",
+    "/OF:/mir2-build/native-zh-cn-finish-20261029/installer-normal-output-r10",
+    "F:\\mir2-build\\native-zh-cn-finish-20261029\\installer-r10\\Mir2-Invite.iss"
+  ],
+  "authenticodeStatus": "NotSigned",
+  "publicRelease": false,
+  "installation": "pending separate actual installation"
+}

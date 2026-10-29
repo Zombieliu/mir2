@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "before": "  const findPlan = (homeIndex, hinted = false) => {",
+      "after": "  const findPlan = (homeIndex, hinted = false, hintGoal = null) => {"
+    },
+    {
+      "before": "    const goals = STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))\n      .filter(goal => distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&\n        !occupied.some(entity => entity.x === goal.x && entity.y === goal.y))\n      .sort((a, b) => distance(a, owner) - distance(b, owner));\n    if (client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));",
+      "after": "    const usableGoal = goal => lifecyclePoint(goal) && Number.isInteger(goal.x) && Number.isInteger(goal.y) &&\n      distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&\n      !occupied.some(entity => entity.x === goal.x && entity.y === goal.y);\n    const retainedTarget = !hinted && client.combatScout?.targetWaypoint === true && usableGoal(client.combatScout.goal) ? client.combatScout.goal : null;\n    const goals = hinted ? [hintGoal].filter(usableGoal) : STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))\n      .filter(usableGoal).sort((a, b) => distance(a, owner) - distance(b, owner));\n    if (!hinted && client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));\n    // Keep a validated hint waypoint across ACK ticks; failed or invalid goals\n    // fall through to the existing home goals within the same search budget.\n    if (retainedTarget && !goals.some(goal => distance(goal, retainedTarget) === 0)) goals.unshift(retainedTarget);"
+    },
+    {
+      "before": "      return { plan, homeIndex, goal };",
+      "after": "      return { plan, homeIndex, goal, targetWaypoint: hinted || Boolean(retainedTarget && distance(goal, retainedTarget) === 0) };"
+    },
+    {
+      "before": "        const preferred = findPlan(candidate.homeIndex, true);",
+      "after": "        const preferred = findPlan(candidate.homeIndex, true, candidate.attackTile);"
+    },
+    {
+      "before": "    const { plan, homeIndex, goal } = selected;\n    if (!client.combatScout) {\n      client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,\n        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map() };\n    } else client.combatScout.goal = goal;",
+      "after": "    const { plan, homeIndex, goal, targetWaypoint } = selected;\n    if (!client.combatScout) {\n      client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,\n        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map(),\n        ...(targetWaypoint ? { targetWaypoint: true } : {}) };\n    } else {\n      client.combatScout.goal = goal;\n      if (!targetWaypoint) delete client.combatScout.targetWaypoint;\n    }"
+    },
+    {
+      "before": "      selectedHomeIndex: homeIndex, pathSearches: searches, hintPathSearches: searches - fallbackSearches,",
+      "after": "      selectedHomeIndex: homeIndex, selectedWaypoint: { x: goal.x, y: goal.y },\n      selectedWaypointSource: targetWaypoint ? 'hint-attack-tile' : 'declared-home',\n      pathSearches: searches, hintPathSearches: searches - fallbackSearches,"
+    }
+  ],
+  "before": {
+    "bytes": 156391,
+    "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+  },
+  "after": {
+    "bytes": 157409,
+    "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+  },
+  "inverseRawExact": true
+}

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T16:46:26.285Z",
+  "source": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-personal-projection-feasibility-15/verify-full16-gate.mjs",
+    "bytes": 4679,
+    "sha256": "cc9bed869452261362b93941da11afd1e7e22702616ff9823cda9122669cf31f"
+  },
+  "target": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-attack-deadline-feasibility-16/verify-full16-gate.mjs",
+    "bytes": 5142,
+    "sha256": "1ecd3b23d54451ccb5eb35e9116a46ede0e039488edebac9672b52024164d4e7"
+  },
+  "rules": [
+    {
+      "purpose": "Fresh new-diagnostic full16 public namespace only",
+      "from": "full-lifecycle-personal-monster-projection-v1/public",
+      "to": "full-lifecycle-attack-deadline-diagnostics-v1/public"
+    },
+    {
+      "purpose": "Keep future binary dynamic but reject every historical backend and mismatched source before checking artifact pins",
+      "from": "export async function verifyFull16Gate(binding,release,manifest){",
+      "to": "export async function verifyFull16Gate(binding,release,manifest){\n  if(release?.sourceCommit!=='d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16'||binding.backendSourceCommit!==release.sourceCommit||['d8791cceeed00fdb7019d1201aad19f06005790162df1b459a8cacac96f68756','a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d','855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f'].includes(release.binary?.sha256))throw Error('Fresh diagnostic full16 requires the committed new backend and its actual new Release');"
+    }
+  ],
+  "exactRawInverse": true,
+  "allOriginalFunctionalSafetyAndRawChecksUnchanged": true,
+  "originalRequiredChecks": 16,
+  "backendInputCount": 44,
+  "driverInputCount": 6,
+  "publicDir": "full-lifecycle-attack-deadline-diagnostics-v1/public",
+  "futureBinaryFromActualRelease": true,
+  "historicalBinaryRejected": true,
+  "futureFull16WithoutActualPassingArtifactsFailsClosed": true,
+  "nodeSyntaxExitCode": 0,
+  "gateExecuted": false,
+  "runtimeStarted": false
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "args": [
+    "--test",
+    "--test-name-pattern=^native witnessed approach",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "node": "v22.18.0",
+  "startedAtMs": 1792899948556,
+  "elapsedMs": 240,
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "sourceSha256": "cb1cb0ee94cb6f077a96433dbb9e3e6a65dc7c5bc6e6ed681eebc922822e25f7",
+  "sourceSha256After": "cb1cb0ee94cb6f077a96433dbb9e3e6a65dc7c5bc6e6ed681eebc922822e25f7",
+  "sourcePinsUnchangedAfterRun": true,
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 223789,
+      "sha256": "e0630422b9a97233988697f0fdb6b8e0243d08d291f7982342fe91d95e29b7b0"
+    }
+  ],
+  "exactSourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1-source-pins.json",
+    "bytes": 1796,
+    "sha256": "d8a4c7a1acd7ac0d3f2df149d20527e857471fdc009d5f294b0c06e959870769"
+  },
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-witness-approach-planning-v1\\focused-v1.log",
+    "bytes": 3217,
+    "sha256": "80ec7b3981dfd9f8b4a59b50469beb6972e027af29a04013ade151bda8c33c16"
+  },
+  "counts": {
+    "tests": 12,
+    "pass": 12,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  }
+}

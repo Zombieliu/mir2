@@ -91,6 +91,18 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0016_shared_conquest_authority",
         include_str!("../../../infra/postgres/migrations/0016_shared_conquest_authority.sql"),
     ),
+    (
+        "0017_sealed_stone_authority",
+        include_str!("../../../infra/postgres/migrations/0017_sealed_stone_authority.sql"),
+    ),
+    (
+        "0018_procurement_authority_guard",
+        include_str!("../../../infra/postgres/migrations/0018_procurement_authority_guard.sql"),
+    ),
+    (
+        "0019_sui_usdc_billing_authority",
+        include_str!("../../../infra/postgres/migrations/0019_sui_usdc_billing_authority.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.
@@ -730,6 +742,28 @@ mod tests {
     use super::*;
     use crate::config::CharacterRecord;
     use mir2_protocol::{MirClass, MirGender};
+
+    #[test]
+    fn migration_union_preserves_both_historical_stone_ids_and_new_authority_guards() {
+        let versions: Vec<_> = MIGRATIONS.iter().map(|(version, _)| *version).collect();
+        assert_eq!(
+            versions.iter().copied().collect::<std::collections::BTreeSet<_>>().len(),
+            versions.len(),
+            "full migration IDs, including historical aliases, must remain unique"
+        );
+        let position = |version| versions.iter().position(|v| *v == version).unwrap();
+        let legacy = position("0015_sealed_stone_authority");
+        let conquest = position("0016_shared_conquest_authority");
+        let current = position("0017_sealed_stone_authority");
+        assert!(legacy < conquest && conquest < current);
+        assert_eq!(
+            MIGRATIONS[legacy].1.replace("\r\n", "\n"),
+            MIGRATIONS[current].1.replace("\r\n", "\n"),
+            "historical aliases must have identical SQL after Windows line-ending normalization"
+        );
+        assert!(current < position("0018_procurement_authority_guard"));
+        assert!(position("0018_procurement_authority_guard") < position("0019_sui_usdc_billing_authority"));
+    }
 
     fn sample_save() -> CharacterSaveRecord {
         let mut save = CharacterSaveRecord::new(CharacterRecord {

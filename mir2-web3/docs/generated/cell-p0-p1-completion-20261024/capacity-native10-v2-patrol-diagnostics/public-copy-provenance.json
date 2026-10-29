@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T22:11:48.809Z",
+  "hashMode": "raw-bytes",
+  "scope": "Exact explicit public allowlist only. Full capacity raw, monitor raw and recording payload remain external. No private/store/credentials/EXE payload copied.",
+  "files": [
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/gateway-build-pin.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/gateway-build-pin.json",
+      "bytes": 1312,
+      "sha256": "f0645a4c1f8b2a64c8e7b84425ddcf4b13b493cc9ae800545491f0784b264dd6"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/source-pins.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/source-pins.json",
+      "bytes": 20063,
+      "sha256": "f6baaa02b647e7f17681e684e31602bd987224d2f1cbf4be869df203611b780e"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/source-pins-admitted-v2.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/source-pins-admitted-v2.json",
+      "bytes": 20497,
+      "sha256": "6729291c221413a3a43d758513b12cfa7786ff017ef5004bd9ae1fafe4a0a737"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/realm-process.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/realm-process.json",
+      "bytes": 1345,
+      "sha256": "9f30bf34d574d2c885db584fc12192c42a11bcfd299c71270ef07018ab9bc4c1"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/realm-cleanup.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/realm-cleanup.json",
+      "bytes": 2976,
+      "sha256": "7f758896d970b4e527182489232185d0b103a3fcaa7f076bf13ca23c506185f4"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-public.jsonl",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-public.jsonl",
+      "bytes": 11008,
+      "sha256": "edc4f485d7c892ab404d1a7b49edd718fcd1c00733e42e8279ec95c3b867437c"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-public-status.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-public-status.json",
+      "bytes": 846,
+      "sha256": "eed34b02f677d8ef4ebaa7022d2da1f0d6d6884332ee39144eeebbc54a9b6f18"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-diagnostics-config.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-diagnostics-config.json",
+      "bytes": 3432,
+      "sha256": "10e42d0ce88795466afc8b8713bdbb2896db922117572aef28fc6ea3629014cd"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-public.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-public.mjs",
+      "bytes": 7767,
+      "sha256": "2c2f72385d9c9db25237e4c98aa56375639f6a0b8f82bd2602ce04684a0b607c"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-public.test.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-public.test.mjs",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-public-test.log",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-public-test.log",
+      "bytes": 3196,
+      "sha256": "e27260963c3a8b1c83a6ce52c6acf5b9ae6b6e628f213064fa5f4f3348534bf3"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/slow-stage-public-test-v2.log",
+      "source": "release-native-10-v2-patrol-feasibility-07/slow-stage-public-test-v2.log",
+      "bytes": 3462,
+      "sha256": "c9be6ee159c6caaf5a7922adef4e36e0c8ac6b492cef5027dad3770228bc7494"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/resource-profile.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/resource-profile.json",
+      "bytes": 1194,
+      "sha256": "a5e9012823bd816dedc3c40b13988618f3a18e69b3dd19edc4534a199a778ac3"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/run-options.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/run-options.json",
+      "bytes": 2867,
+      "sha256": "ae373147fbe4dac52c2aaebe9cb97dea806006d316619c118502c38544123a1d"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/run-options-admitted-v2.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/run-options-admitted-v2.json",
+      "bytes": 3477,
+      "sha256": "5e141e5513f5dd6e39f5951b81112560e4e6e8dcc9bcd03892b26b18daa4867f"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/scenario.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/scenario.json",
+      "bytes": 1362,
+      "sha256": "701a2a3e30c1b963653af1a767f5af290e15fef207a7359cc90492cf5e496921"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/provisioning.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/provisioning.json",
+      "bytes": 330,
+      "sha256": "8e6998c671da917a36c0b8ce511ab62da153b4f79c087543822c4db2a1c171b4"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/spectator-health-before.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/spectator-health-before.json",
+      "bytes": 657,
+      "sha256": "a8e9f7ee7e82654635dc81aee7eeab1e12e7d1d16a7c8755995ed51cffea1430"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/monitor-options.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/monitor-options.json",
+      "bytes": 708,
+      "sha256": "a29ea3d17830edeba8aa16e1cbd7abfba1ae038470079cc2f35e6f9e28d4f27e"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/monitor-process.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/monitor-process.json",
+      "bytes": 223,
+      "sha256": "f09adb96ddad09a54c09778206ea0764eebd3d032ae8641b01dc69dfe9486f73"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/launcher-source-frozen-v1.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/launcher-source-frozen-v1.json",
+      "bytes": 7273,
+      "sha256": "f65e4ad9bc09701a0890a4e7505997c4d0d48485c9505684cf58e73dd4c95dc1"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/launcher-source-prepared-v1.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/launcher-source-prepared-v1.json",
+      "bytes": 7706,
+      "sha256": "00e3be5b682e695d68cb7d996cb1e0ebd59150e0e4dbf0364f47b2cf4cf585f8"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/driver-report-contract.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/driver-report-contract.mjs",
+      "bytes": 4413,
+      "sha256": "0c955ec48bb39fd9e92d0d4ed3490b9b4736f4da8f3a1a6d26c7c10aad847071"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/preparation-plan.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/preparation-plan.json",
+      "bytes": 3801,
+      "sha256": "f49bd904747b4a7db37ec8c72dcf38d19373ab728e8e86dd6fce41e6baf4beff"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/report-provenance.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/report-provenance.json",
+      "bytes": 2023,
+      "sha256": "a28810857a0e76b6f570a62037a5ede61b13ade6e5356d3e411bda8199d7cd11"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/static-preparation-verification.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/static-preparation-verification.json",
+      "bytes": 7809,
+      "sha256": "8125fc37bdd1cf40ff29cb11d5e9dd38e7e62720f6f9f060de16f2fd15b749e9"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/source-guard-readonly-verification.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/source-guard-readonly-verification.json",
+      "bytes": 12973,
+      "sha256": "471eea052dd880e7c389e61be1fce716aee35bbcb2434a1cad19d4e80483a3b1"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/initialize-private.ps1",
+      "source": "release-native-10-v2-patrol-feasibility-07/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/input-lib.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/input-lib.mjs",
+      "bytes": 14465,
+      "sha256": "6caea866b106bb319fa072ee3b3df81089592894924f156fc5b4bfec9731ee92"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/prepare-inputs.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/prepare-inputs.mjs",
+      "bytes": 10581,
+      "sha256": "a0c3cfe1d6c2d197fc2a0522af29aabb846ec5a0be8262f02e7659eaf0a21211"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/run-owned.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/run-owned.mjs",
+      "bytes": 17227,
+      "sha256": "565de2cc2f415ccefeadb31de57e708859f95eaa2b4b8bc53adaff9eaceda584"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/monitor-owned.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/request-stop.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/recover-drained-owned.ps1",
+      "source": "release-native-10-v2-patrol-feasibility-07/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/reports/1792878747018-da931241.report.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/reports/1792878747018-da931241.report.json",
+      "bytes": 326916,
+      "sha256": "f1e003be92a13a195d5f958e45adb005c56823a2f7c4733842b6ae2b3e8edd02"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/launcher-syntax-check.log",
+      "source": "release-native-10-v2-patrol-feasibility-07/launcher-syntax-check.log",
+      "bytes": 560,
+      "sha256": "72824177d6101ebdd046b78ca29e6bdfd15b24b90feca3eb7f51a1a9b88894e9"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/run-command.log",
+      "source": "release-native-10-v2-patrol-feasibility-07/run-command.log",
+      "bytes": 1865,
+      "sha256": "cb4a31dfe80958dcec1b00d6c8d516c71e735bc3621b72a5c028f73233b88e93"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/spectator-health-after.json",
+      "source": "release-native-10-v2-patrol-feasibility-07/spectator-health-after.json",
+      "bytes": 665,
+      "sha256": "3f092cf62ad896bdc8fa0a2ef5b12308baf08c4cc8ffde4faca70351b242a125"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-attack-v2.json",
+      "source": "release-native-attack-v2.json",
+      "bytes": 1139,
+      "sha256": "d27ff7ef91c979d7884aa99047c27a820d845850d63786ea30fd88d786eb197f"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/backend-source-native-attack-v2.json",
+      "source": "backend-source-native-attack-v2.json",
+      "bytes": 11716,
+      "sha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/capacity-patrol-run-preference-driver-frozen-v1.json",
+      "source": "capacity-patrol-run-preference-driver-frozen-v1.json",
+      "bytes": 6826,
+      "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/collect-release-native-10-v2-patrol-feasibility-07-recordings-metadata.json",
+      "source": "collect-release-native-10-v2-patrol-feasibility-07-recordings-metadata.json",
+      "bytes": 1655,
+      "sha256": "2bee299e7f7771a51c94d41cd865e0c6f726d998c0c1a9866cb582919ca6efd4"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/collect-release-native-10-v2-patrol-feasibility-07-monitor-endpoints.json",
+      "source": "collect-release-native-10-v2-patrol-feasibility-07-monitor-endpoints.json",
+      "bytes": 4705,
+      "sha256": "f11d8496a04b807d08b2590817b3e4ae2681479eb81fb640cf28af1dc6729062"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/collect-public.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/collect-public.mjs",
+      "bytes": 37189,
+      "sha256": "0e74e18401c4c27a2ad42b3dc81180e53f123e7255b40c0e7f005b714d6b41e2"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/release-native-10-v2-patrol-feasibility-07/verify-public.mjs",
+      "source": "release-native-10-v2-patrol-feasibility-07/verify-public.mjs",
+      "bytes": 16159,
+      "sha256": "44379c1b7917dba9049bfe34fce066b5fa9e59d3f77f6d539f8252a3f6796f11"
+    },
+    {
+      "path": "capacity-native10-v2-patrol-diagnostics/collect-release-native-10-v2-patrol-feasibility-07-public-artifact-catalog.json",
+      "source": "collect-release-native-10-v2-patrol-feasibility-07-public-artifact-catalog.json",
+      "bytes": 19817,
+      "sha256": "36e96336f288848f6eb359e2a0999063f3ef20c08f20e0406dadaa38ab541212"
+    }
+  ],
+  "allOriginalCopiesByteEqual": true,
+  "structurallyUnredactedSensitiveJsonFields": 0,
+  "privateSecretValuesReadOrClaimedChecked": false
+}

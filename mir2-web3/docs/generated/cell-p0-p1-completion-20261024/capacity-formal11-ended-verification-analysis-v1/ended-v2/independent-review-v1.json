@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T16:01:50.3032469Z",
+  "scope": "Narrow read-only ended Formal11 verifier revision2 review. The only main changes are actual collected catalog identity and a separate v2 output directory; no formal-game or acceptance rule changes.",
+  "verdict": {
+    "toolSourceContractPassed": true,
+    "eligibleForRootSealing": true,
+    "blockingFindingIds": [],
+    "actualVerifierExecutedByReviewer": false,
+    "formalRunPassedAdjudicated": false,
+    "capacityAcceptedByReview": false,
+    "P0Accepted": false,
+    "P2Authorized": false
+  },
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\preparation-v1.json",
+    "bytes": 7760,
+    "sha256": "d6211e8f3bd521b1df94a97a81baea0506c9b9657a589efa972b03e9a6edabbd"
+  },
+  "sourceClosure": {
+    "inputs": 7,
+    "bytes": 51691,
+    "sourceSha256": "37bf026a11d7dd3bf16ab15a2ff101b4eb23c0246d803557c28ef4ac9deb7dbf",
+    "allRawPinsMatched": true,
+    "futureRootSealedInputs": 9
+  },
+  "delta": {
+    "proof": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\derivation-proof-v1.json",
+      "bytes": 5566,
+      "sha256": "5deeeb599e483cf135c7618877b1b827b4c9a0b5e1462e578d6319231d0a5a3c"
+    },
+    "main": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\verify-ended-formal11-v1.mjs",
+      "bytes": 29070,
+      "sha256": "cb7b98b25e01d61708b79f7c0df1197e161e78ee27a33109f73c4087f5cf0010"
+    },
+    "twoRulesForwardAndInverseExact": true,
+    "originalMain": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\verify-ended-formal11-v1.mjs",
+      "bytes": 29032,
+      "sha256": "6d4dbe1fb92027ea514c70b5d59055fbd89b73e345ebb774105ef69297aae69e"
+    },
+    "unchangedCopies": 5,
+    "v1AcceptanceLogicAndFailurePartialPathUnchanged": true,
+    "newOutputDirectory": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v2",
+    "noRenameAliasOrFallbackAdded": true
+  },
+  "actualCatalogIdentity": {
+    "literal": "collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json",
+    "file": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-personal-projection-ladder-11\\collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json",
+      "bytes": 62973,
+      "sha256": "819a199e5cfc060463b65893bfdc78896891ffc9a6ddf2c2ffa5e819421d9d78"
+    },
+    "frozenCollector": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-personal-projection-ladder-11\\collect-public.mjs",
+      "bytes": 43493,
+      "sha256": "23613532bfd35f04ddaa74b1742190e6d88ba4496d44e0df5f998f11159595d0"
+    },
+    "collectorLiteralAndActualFileExactlyMatched": true,
+    "v1ReviewLimitation": "The v1 static review did not cross-check the generated catalog basename against the collector independent literal. This revision explicitly checks both the frozen collector source and the actual produced catalog."
+  },
+  "v1FailurePreservation": {
+    "seal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 1955,
+      "sha256": "798799c298c188d98cf7d8bd2f9399591ead9f6fae7e1bd521edc1b2ec36aade"
+    },
+    "execution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 672,
+      "sha256": "4ecaa21fc07466f1d3b32e689bd409ccd8f862308fa1b7af72cfae8e9c5455b4"
+    },
+    "failureLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v1\\actual-verification.log",
+      "bytes": 1435,
+      "sha256": "3c86c7718d4889eade40d0bb70c5a0d19104bc9a93ae3bbcd2f28bcf86c76ee5"
+    },
+    "actualExitCode": 1,
+    "sourceBeforeAfterIdentical": true,
+    "finalReceiptAbsent": true,
+    "v1SourcesAndEvidenceUnchanged": true,
+    "refusalWasBeforeRawReplay": true
+  },
+  "rootControl": {
+    "sealer": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    "runner": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-independent-verification-v2\\run-ended-formal11-v1.mjs",
+      "bytes": 2259,
+      "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+    },
+    "bothRawExactV1": true,
+    "relativeImportsAndImportMetaKeepOutputsInV2": true,
+    "allV2SealLogExecutionAndFinalPathsAbsentAtReview": true,
+    "wxSemanticsPreserved": true,
+    "requiresExactPreparationReviewAndSourceSealSha": true
+  },
+  "preservedContract": {
+    "priorReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal11-ended-tool-independent-review-v1.json",
+      "bytes": 8879,
+      "sha256": "8fbd70193f4b7924e3e5cd41d8bec7472e60ed802b40a766107a46f91179476a"
+    },
+    "originalPolicyHpContractActualElapsedAnd146RulesUnchanged": true,
+    "actualRunId": "1792942371568-1e322224",
+    "failureDuringRampWithoutFutureStagesAcceptedAsFailureOnly": true,
+    "complete146SuccessShapeIsReportOkOnly": true,
+    "gatewayPid": 58172,
+    "monitorPid": 69080,
+    "noFullpassOrCapacityClaimMade": true,
+    "originalReadlineTrustAndMemoryCutoffLimitationsRetained": true
+  },
+  "reviewMethod": {
+    "moduleImports": false,
+    "syntaxOrBehaviorTestsRun": false,
+    "rawMonitorOrRecordingScan": false,
+    "privateDataRead": false,
+    "root11OrProductSourcesChanged": false,
+    "newReviewOnly": true
+  }
+}

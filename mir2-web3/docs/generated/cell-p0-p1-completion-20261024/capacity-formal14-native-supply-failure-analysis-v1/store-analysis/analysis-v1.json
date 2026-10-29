@@ -1,0 +1,719 @@
+{
+  "schemaVersion": 1,
+  "analyzedAt": "2026-10-25T22:49:11.345Z",
+  "runId": "1792967155359-90bac462",
+  "scope": "Closed report plus only the two small public completed slow-stage datasets. No gameplay raw, monitor stream, packet traces, recordings, binary, private data, OS query, test, build or service read/execution.",
+  "pins": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\reports\\1792967155359-90bac462.report.json",
+      "bytes": 425962,
+      "sha256": "256f070c235cf7d188f0b0dc3700fbba8140e07781c3222b84eec53357989195"
+    },
+    "storeRows": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\store-stage-public.jsonl",
+      "bytes": 23441,
+      "sha256": "44569e52854e5f0355d512d690db27ae44222ef859c892582bb1ef5a8e5cf60d"
+    },
+    "storeStatus": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\store-stage-public-status.json",
+      "bytes": 2585,
+      "sha256": "8edb01566d3fccd4f883ae6cc032d187dabc3f61acfb9f6fc4f20d14dbde09c4"
+    },
+    "baseRows": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public.jsonl",
+      "bytes": 108391,
+      "sha256": "163cfe26e62e3f1ece72f27f187d102b7c0fb35569b7bc2cba923dcac1da7a3d"
+    },
+    "baseStatus": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-public-status.json",
+      "bytes": 1017,
+      "sha256": "f2126c15f5c0fd162298a496bc77c6a14f4dd201e557e04e3ade64706df25590"
+    },
+    "realmProcess": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\realm-process.json",
+      "bytes": 4338,
+      "sha256": "c467f3371b18a94fbffcfc417ad778af00bd3a1f1b4303cd76e154df9a9acc6a"
+    },
+    "originalCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\realm-cleanup.json",
+      "bytes": 6539,
+      "sha256": "3b7d7495af8ac4cc188609e280c438a7c62380da8a64ee94d0d05e064837feaa"
+    },
+    "storeHelper": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+    },
+    "baseRowContract": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    "backend50Manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    "diagnosticSourceCandidate": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-account-store-diagnostics-v1\\source-candidate-v1.json",
+      "bytes": 6682,
+      "sha256": "fe037243485836fae250965c710b8096dcf10e7d254d75c4533b0241569912e7"
+    },
+    "analysisScript": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal14-store-wait-analysis-v1\\analyze-v1.mjs",
+      "bytes": 11547,
+      "sha256": "92548fdfc5cbef0aa99ec37ad1491e599b6fac850d28816e9be6bf9341ef1b40"
+    }
+  },
+  "identities": {
+    "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendInputs": 50,
+    "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+    "executionCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "driverCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "diagnosticSourcePins": [
+      {
+        "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+        "bytes": 10863,
+        "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+      },
+      {
+        "path": "apps/simulation/src/lib.rs",
+        "bytes": 7191,
+        "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+      },
+      {
+        "path": "apps/simulation/src/config.rs",
+        "bytes": 347044,
+        "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+      },
+      {
+        "path": "apps/simulation/src/config_file_authority.rs",
+        "bytes": 24828,
+        "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+      },
+      {
+        "path": "apps/simulation/src/config_shared_guilds.rs",
+        "bytes": 53319,
+        "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+      },
+      {
+        "path": "apps/simulation/src/config_guild_clock_driver.rs",
+        "bytes": 22968,
+        "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+      },
+      {
+        "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+        "bytes": 76309,
+        "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+      }
+    ]
+  },
+  "originalVerdict": {
+    "reportOk": false,
+    "capacityAccepted": false,
+    "stages": [
+      {
+        "name": "stage-2",
+        "measuredSeconds": 300.227,
+        "passed": true,
+        "completeWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "measuredSeconds": 300.327,
+        "passed": true,
+        "completeWindows": 5
+      },
+      {
+        "name": "stage-25",
+        "measuredSeconds": 300.281,
+        "passed": false,
+        "completeWindows": 5
+      }
+    ],
+    "unexecuted": [
+      "stage-50",
+      "stage-100",
+      "7200s-soak",
+      "resume5",
+      "save5",
+      "post60"
+    ],
+    "continuousPassed": true,
+    "continuousFailureCount": 0,
+    "continuousAssessedWindows": 230,
+    "cleanupSevenTrue": true
+  },
+  "reportedFailure": {
+    "phase": "stage-25",
+    "window": 4,
+    "startedAtMs": 1792968101694,
+    "endedAtMs": 1792968161769,
+    "seconds": 60.075,
+    "originalPassed": false,
+    "combat": [
+      {
+        "actor": "Leca0c805",
+        "role": "combat",
+        "launched": 16,
+        "positiveHits": 16,
+        "launchedPerActualMinute": 15.980024968789014,
+        "positiveHitsPerActualMinute": 15.980024968789014,
+        "minimumLaunchesForActualWindow": 19,
+        "launchRatePassed": false,
+        "positiveRatePassed": true,
+        "moves": 48,
+        "plans": 67,
+        "gaps": 0,
+        "nativeOpportunities": 67,
+        "nativeCompleted": 67,
+        "offeredDurationMs": 60330,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "nativePassed": true,
+        "originalActivityPassed": false
+      },
+      {
+        "actor": "Leca0c80f",
+        "role": "combat",
+        "launched": 18,
+        "positiveHits": 18,
+        "launchedPerActualMinute": 17.977528089887638,
+        "positiveHitsPerActualMinute": 17.977528089887638,
+        "minimumLaunchesForActualWindow": 19,
+        "launchRatePassed": false,
+        "positiveRatePassed": true,
+        "moves": 44,
+        "plans": 66,
+        "gaps": 0,
+        "nativeOpportunities": 66,
+        "nativeCompleted": 66,
+        "offeredDurationMs": 61344,
+        "evidenceWaits": 0,
+        "ownerAckWaits": 0,
+        "nativePassed": true,
+        "originalActivityPassed": false
+      }
+    ],
+    "timeoutRatio": 0,
+    "correctionRatio": 0,
+    "attackRejectionRatio": 0,
+    "attackMetrics": {
+      "count": 34,
+      "status": {
+        "success": 34
+      },
+      "fromSend": {
+        "count": 34,
+        "p50Ms": 93,
+        "p95Ms": 132,
+        "p99Ms": 140,
+        "maxMs": 139.45270000002347
+      },
+      "fromPlan": {
+        "count": 34,
+        "p50Ms": 105,
+        "p95Ms": 141,
+        "p99Ms": 169,
+        "maxMs": 168.33419999992475
+      },
+      "attackV2Requests": 34,
+      "attackV2NotLaunched": 0
+    },
+    "meaning": "Only the launched-attack rate is below18/min for these two combat actors in this60.075s window. Positive-hit12/min and reported native completion pass;18 actual launches over60.075s is17.9775/min, not18/min. The cause of reduced attack availability is not established by this report."
+  },
+  "stage25Windows": [
+    {
+      "index": 1,
+      "seconds": 60.01,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "launched": 31,
+          "hits": 31,
+          "moves": 18,
+          "nativeOpportunities": 52,
+          "nativeCompleted": 52,
+          "passed": true
+        },
+        {
+          "actor": "Leca0c80f",
+          "launched": 31,
+          "hits": 31,
+          "moves": 14,
+          "nativeOpportunities": 53,
+          "nativeCompleted": 53,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "seconds": 60.083,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "launched": 20,
+          "hits": 20,
+          "moves": 38,
+          "nativeOpportunities": 64,
+          "nativeCompleted": 64,
+          "passed": true
+        },
+        {
+          "actor": "Leca0c80f",
+          "launched": 24,
+          "hits": 24,
+          "moves": 29,
+          "nativeOpportunities": 58,
+          "nativeCompleted": 58,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "seconds": 60.027,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "launched": 28,
+          "hits": 28,
+          "moves": 22,
+          "nativeOpportunities": 56,
+          "nativeCompleted": 56,
+          "passed": true
+        },
+        {
+          "actor": "Leca0c80f",
+          "launched": 26,
+          "hits": 26,
+          "moves": 27,
+          "nativeOpportunities": 57,
+          "nativeCompleted": 57,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "seconds": 60.075,
+      "passed": false,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "launched": 16,
+          "hits": 16,
+          "moves": 48,
+          "nativeOpportunities": 67,
+          "nativeCompleted": 67,
+          "passed": false
+        },
+        {
+          "actor": "Leca0c80f",
+          "launched": 18,
+          "hits": 18,
+          "moves": 44,
+          "nativeOpportunities": 66,
+          "nativeCompleted": 66,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "seconds": 60.086,
+      "passed": true,
+      "combat": [
+        {
+          "actor": "Leca0c805",
+          "launched": 28,
+          "hits": 28,
+          "moves": 24,
+          "nativeOpportunities": 57,
+          "nativeCompleted": 57,
+          "passed": true
+        },
+        {
+          "actor": "Leca0c80f",
+          "launched": 21,
+          "hits": 21,
+          "moves": 36,
+          "nativeOpportunities": 60,
+          "nativeCompleted": 60,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "stage25AttackMetrics": {
+    "count": 243,
+    "status": {
+      "success": 243
+    },
+    "fromSend": {
+      "count": 243,
+      "p50Ms": 82,
+      "p95Ms": 140,
+      "p99Ms": 175,
+      "maxMs": 311.79489999986254
+    },
+    "fromPlan": {
+      "count": 243,
+      "p50Ms": 101,
+      "p95Ms": 159,
+      "p99Ms": 202,
+      "maxMs": 343.1398999998346
+    },
+    "attackV2Requests": 243,
+    "attackV2NotLaunched": 0
+  },
+  "datasets": {
+    "store": {
+      "rows": 107,
+      "bytes": 23441,
+      "captureComplete": true,
+      "formatRowsChecked": true,
+      "fixedStageCount": 14,
+      "fixedOperationCount": 5,
+      "fixedPublicKeys": 10,
+      "thresholdMs": 50,
+      "byStage": {
+        "account_store.store_held": {
+          "rows": 12,
+          "maximumCompletedMs": 390
+        },
+        "account_store.marker_begin_sync": {
+          "rows": 10,
+          "maximumCompletedMs": 384
+        },
+        "account_store.driver_held": {
+          "rows": 3,
+          "maximumCompletedMs": 137
+        },
+        "account_store.store_wait": {
+          "rows": 69,
+          "maximumCompletedMs": 368
+        },
+        "account_store.marker_settle_sync": {
+          "rows": 1,
+          "maximumCompletedMs": 352
+        },
+        "account_store.writable_wait": {
+          "rows": 9,
+          "maximumCompletedMs": 309
+        },
+        "account_store.persist_wait": {
+          "rows": 2,
+          "maximumCompletedMs": 184
+        },
+        "account_store.temp_write_sync": {
+          "rows": 1,
+          "maximumCompletedMs": 75
+        }
+      },
+      "maximumCompletedRow": {
+        "observedAtMs": 1792967887275,
+        "stage": "account_store.store_held",
+        "durationMs": 390,
+        "operation": "transaction",
+        "traceId": 49738,
+        "startedUnixMs": 1792967886884,
+        "maxStartUs": 0,
+        "maxEndUs": 390925,
+        "samples": 1,
+        "totalUs": 390924,
+        "line": 44
+      },
+      "maximumHeld": {
+        "observedAtMs": 1792967887275,
+        "stage": "account_store.store_held",
+        "durationMs": 390,
+        "operation": "transaction",
+        "traceId": 49738,
+        "startedUnixMs": 1792967886884,
+        "maxStartUs": 0,
+        "maxEndUs": 390925,
+        "samples": 1,
+        "totalUs": 390924,
+        "line": 44
+      },
+      "maximumHeldApproxSpan": {
+        "approxStartedUnixMs": 1792967886884,
+        "approxEndedUnixMs": 1792967887274.925
+      },
+      "sameTraceAsMaximumHeld": [
+        {
+          "observedAtMs": 1792967887275,
+          "stage": "account_store.store_held",
+          "durationMs": 390,
+          "operation": "transaction",
+          "traceId": 49738,
+          "startedUnixMs": 1792967886884,
+          "maxStartUs": 0,
+          "maxEndUs": 390925,
+          "samples": 1,
+          "totalUs": 390924,
+          "line": 44
+        },
+        {
+          "observedAtMs": 1792967887275,
+          "stage": "account_store.marker_begin_sync",
+          "durationMs": 384,
+          "operation": "transaction",
+          "traceId": 49738,
+          "startedUnixMs": 1792967886884,
+          "maxStartUs": 1026,
+          "maxEndUs": 385976,
+          "samples": 1,
+          "totalUs": 384949,
+          "line": 45
+        }
+      ],
+      "maximumCompletedStoreWait": {
+        "observedAtMs": 1792967887277,
+        "stage": "account_store.store_wait",
+        "durationMs": 368,
+        "operation": "experience_admission",
+        "traceId": 49739,
+        "startedUnixMs": 1792967886907,
+        "maxStartUs": 0,
+        "maxEndUs": 368246,
+        "samples": 1,
+        "totalUs": 368245,
+        "line": 46
+      }
+    },
+    "base": {
+      "rows": 1145,
+      "bytes": 108391,
+      "captureComplete": true,
+      "formatRowsChecked": true,
+      "maximumCompletedRow": {
+        "observedAtMs": 1792967851126,
+        "stage": "socket_turn.input",
+        "durationMs": 987,
+        "connection": 13,
+        "line": 98
+      }
+    }
+  },
+  "phaseTiming": [
+    {
+      "name": "bootstrap-2",
+      "startedAtMs": 1792967155397,
+      "endedAtMs": 1792967186559,
+      "storeRowsObserved": 0,
+      "maximumStoreRow": null,
+      "baseRowsObserved": 11,
+      "maximumBaseRow": {
+        "observedAtMs": 1792967157665,
+        "stage": "socket_turn.input",
+        "durationMs": 939,
+        "connection": 1,
+        "line": 6
+      }
+    },
+    {
+      "name": "stage-2",
+      "startedAtMs": 1792967186559,
+      "endedAtMs": 1792967486786,
+      "storeRowsObserved": 0,
+      "maximumStoreRow": null,
+      "baseRowsObserved": 0,
+      "maximumBaseRow": null
+    },
+    {
+      "name": "bootstrap-10",
+      "startedAtMs": 1792967486787,
+      "endedAtMs": 1792967541015,
+      "storeRowsObserved": 0,
+      "maximumStoreRow": null,
+      "baseRowsObserved": 46,
+      "maximumBaseRow": {
+        "observedAtMs": 1792967493196,
+        "stage": "socket_turn.input",
+        "durationMs": 898,
+        "connection": 4,
+        "line": 22
+      }
+    },
+    {
+      "name": "stage-10",
+      "startedAtMs": 1792967541016,
+      "endedAtMs": 1792967841343,
+      "storeRowsObserved": 13,
+      "maximumStoreRow": {
+        "observedAtMs": 1792967587004,
+        "stage": "account_store.store_wait",
+        "durationMs": 141,
+        "operation": "guild_lookup",
+        "traceId": 16894,
+        "startedUnixMs": 1792967586863,
+        "maxStartUs": 0,
+        "maxEndUs": 141688,
+        "samples": 1,
+        "totalUs": 141688,
+        "line": 8
+      },
+      "baseRowsObserved": 23,
+      "maximumBaseRow": {
+        "observedAtMs": 1792967587007,
+        "stage": "socket_turn.spectator",
+        "durationMs": 144,
+        "connection": 5,
+        "line": 73
+      }
+    },
+    {
+      "name": "bootstrap-25",
+      "startedAtMs": 1792967841344,
+      "endedAtMs": 1792967921574,
+      "storeRowsObserved": 43,
+      "maximumStoreRow": {
+        "observedAtMs": 1792967887275,
+        "stage": "account_store.store_held",
+        "durationMs": 390,
+        "operation": "transaction",
+        "traceId": 49738,
+        "startedUnixMs": 1792967886884,
+        "maxStartUs": 0,
+        "maxEndUs": 390925,
+        "samples": 1,
+        "totalUs": 390924,
+        "line": 44
+      },
+      "baseRowsObserved": 265,
+      "maximumBaseRow": {
+        "observedAtMs": 1792967851126,
+        "stage": "socket_turn.input",
+        "durationMs": 987,
+        "connection": 13,
+        "line": 98
+      }
+    },
+    {
+      "name": "stage-25",
+      "startedAtMs": 1792967921574,
+      "endedAtMs": 1792968221855,
+      "storeRowsObserved": 50,
+      "maximumStoreRow": {
+        "observedAtMs": 1792968220134,
+        "stage": "account_store.store_held",
+        "durationMs": 233,
+        "operation": "transaction",
+        "traceId": 131538,
+        "startedUnixMs": 1792968219900,
+        "maxStartUs": 1,
+        "maxEndUs": 233834,
+        "samples": 1,
+        "totalUs": 233833,
+        "line": 86
+      },
+      "baseRowsObserved": 690,
+      "maximumBaseRow": {
+        "observedAtMs": 1792968220146,
+        "stage": "socket_turn.input",
+        "durationMs": 311,
+        "connection": 6,
+        "line": 855
+      }
+    }
+  ],
+  "failureCorrelation": {
+    "storeRowsReceivedWithinFailureWindow": 0,
+    "maximumCompletedStoreOccurrenceSpansOverlappingFailureWindow": 0,
+    "nearestStoreRowReceivedBeforeFailureWindow": {
+      "observedAtMs": 1792968020278,
+      "stage": "account_store.store_held",
+      "durationMs": 51,
+      "operation": "transaction",
+      "traceId": 82724,
+      "startedUnixMs": 1792968020226,
+      "maxStartUs": 0,
+      "maxEndUs": 51449,
+      "samples": 1,
+      "totalUs": 51448,
+      "line": 79
+    },
+    "nearestStoreRowReceivedAfterFailureWindow": {
+      "observedAtMs": 1792968173674,
+      "stage": "account_store.store_held",
+      "durationMs": 80,
+      "operation": "transaction",
+      "traceId": 120110,
+      "startedUnixMs": 1792968173593,
+      "maxStartUs": 0,
+      "maxEndUs": 80634,
+      "samples": 1,
+      "totalUs": 80633,
+      "line": 80
+    },
+    "baseRowsReceivedWithinFailureWindow": 92,
+    "maximumBaseRowWithinFailureWindow": {
+      "observedAtMs": 1792968158201,
+      "stage": "socket_turn.input",
+      "durationMs": 120,
+      "connection": 6,
+      "line": 726
+    },
+    "baseByStageWithinFailureWindow": {
+      "socket_turn.input": {
+        "rows": 30,
+        "maximumCompletedMs": 120
+      },
+      "serial_gate.zone_outbound_wait": {
+        "rows": 15,
+        "maximumCompletedMs": 120
+      },
+      "zone_owner.in_process.execute_request": {
+        "rows": 12,
+        "maximumCompletedMs": 71
+      },
+      "runtime_tick.execute": {
+        "rows": 11,
+        "maximumCompletedMs": 71
+      },
+      "runtime_tick.total": {
+        "rows": 12,
+        "maximumCompletedMs": 79
+      },
+      "shared_session.predrain": {
+        "rows": 2,
+        "maximumCompletedMs": 63
+      },
+      "session_action.execute": {
+        "rows": 8,
+        "maximumCompletedMs": 75
+      },
+      "socket_input.queue_residence": {
+        "rows": 1,
+        "maximumCompletedMs": 79
+      },
+      "session_action.flush": {
+        "rows": 1,
+        "maximumCompletedMs": 51
+      }
+    },
+    "maximumStoreHeldOccurredDuring": "bootstrap-25",
+    "conclusion": "The largest completed Store hold is a bootstrap25 transaction, not contemporaneous with the failed W4. W4 has no thresholded completed Store row by receive time or recorded maximum occurrence span. This does not exclude uncompleted, subthreshold, uninstrumented or differently delayed operations and does not prove a Store root cause or its absence."
+  },
+  "limitations": [
+    "Only completed records emit after their business guards release; an ongoing holder can be absent.",
+    "The50ms slow logger is left-censored: durations below50ms are not represented; exactly50ms can be represented. Missing rows do not prove no wait.",
+    "durationMs is the floored maximum single completed occurrence for that stage; samples/totalUs aggregate multiple occurrences. Nested stages and same-trace spans overlap and must not be summed.",
+    "Approximate Store occurrence wall times combine startedUnixMs and microsecond offsets. Launcher observedAtMs is a later receive clock, not span start/end or a request identifier; endpoint truncation and clock skew apply.",
+    "traceId and connection are process-local diagnostic counters. They do not identify a player, target, action or packet without separate evidence.",
+    "No exact attack gap or target supply mechanism is reconstructed here. Another author owns the single gameplay-raw forensic scan.",
+    "No5s completed Store/base record was observed in these thresholded datasets; this is not proof that no5s stall or uncompleted operation occurred.",
+    "No game threshold, policy, original report, frozen source, previous failure, P0 or P2 state is changed."
+  ],
+  "gameplayRawRead": false,
+  "sourceChanged": false,
+  "verdictChanged": false,
+  "rootCauseEstablished": false
+}

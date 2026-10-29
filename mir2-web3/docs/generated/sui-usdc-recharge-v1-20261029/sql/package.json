@@ -1,0 +1,12 @@
+{
+  "name": "mir2-sui-usdc-migration-evidence",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test-migration.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.13"
+  }
+}

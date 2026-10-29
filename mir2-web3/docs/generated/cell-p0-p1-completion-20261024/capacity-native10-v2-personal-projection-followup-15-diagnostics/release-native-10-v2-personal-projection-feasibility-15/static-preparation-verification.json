@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "currentBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\actual-binding-proof-v1.json",
+    "bytes": 42659,
+    "sha256": "32b40ff986b011892dae5d3abb32128dbea723f1fdbc729c517ae3d7531a0a79"
+  },
+  "nodeSyntaxCheckCount": 26,
+  "nodeSyntaxExitCodesAllZero": true,
+  "nodeSyntaxLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\launcher-syntax-check.log",
+    "bytes": 3258,
+    "sha256": "a941e3992e40980bd4a646775a6007b8435a786738b6fc2ec43a3d98618e1d03"
+  },
+  "powerShellAstPassed": 2,
+  "powerShellSourceReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\template-syntax-v1.json",
+    "bytes": 359,
+    "sha256": "a2fa5342d1524981441b8f8ab05bef83fa62af3648796ee4a85aa984370e131e"
+  },
+  "originalScenarioResourceAndPolicyExact": true,
+  "originalCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "backendInputs": 44,
+  "backendSourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+  "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "rootSealExecuted": false,
+  "readonlyGuardExecuted": false,
+  "targetModuleImported": false,
+  "testsOrRealmExecuted": false
+}

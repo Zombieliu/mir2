@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T02:19:10.006Z",
+  "runId": "1792979329578-cf62e25d",
+  "priorTerminalFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-actual-independent-facts-v1.json",
+    "bytes": 15626,
+    "sha256": "4228cc8daa663319040ab6c315d5a8cd52bb4f51f312b321fd81db88c3e0e491"
+  },
+  "priorPendingPrerequisite": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-full-prerequisite-v1\\actual-prerequisite-v1.json",
+    "bytes": 14835,
+    "sha256": "a2236ff4d264f55052f19b1e606a7741ce64b1f2a0be57d270e8d3bf6908883d"
+  },
+  "actualEnded": {
+    "sourceSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2290,
+      "sha256": "6f8f20969d6c5915edb60672b83556bd36a356e06c7249ddcb247890aec65a19"
+    },
+    "executionReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "1337e647fc24034d55670eae39d2946385cfefe8263ee48773c39484d070f68d"
+    },
+    "verificationLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\actual-verification.log",
+      "bytes": 878,
+      "sha256": "470d4519772fabad4c60e830caceedfbb6e86f0f28ddf02eda06e07e8afa055a"
+    },
+    "finalVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe20-independent-verification-v1\\final-verification.json",
+      "bytes": 442311,
+      "sha256": "bd4897fb45dc67d1d65e2fe488021081bcf599e745febb9d66b83659cd4b5df0"
+    }
+  },
+  "checks": {
+    "actualExitCode": 0,
+    "actualSignal": null,
+    "sourceSealInputs": 11,
+    "executionCheckedInputs": 11,
+    "sourceBeforeAfterIdentical": true,
+    "reviewedSourceClosureMatchesSeal": true,
+    "schemaVersion": 1,
+    "verifierRevision": 2,
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "phaseChecks": [
+      {
+        "name": "stage-2",
+        "measuredSeconds": 300.134,
+        "completeWindowCount": 5,
+        "requiredCompleteWindows": 5,
+        "strictGatesPassed": true
+      },
+      {
+        "name": "stage-10",
+        "measuredSeconds": 300.299,
+        "completeWindowCount": 5,
+        "requiredCompleteWindows": 5,
+        "strictGatesPassed": true
+      },
+      {
+        "name": "soak",
+        "measuredSeconds": 360.197,
+        "completeWindowCount": 6,
+        "requiredCompleteWindows": 6,
+        "strictGatesPassed": true
+      }
+    ],
+    "rawContinuousAssessments": 132,
+    "rawContinuousFailureCount": 0,
+    "scoutRows": 3,
+    "scoutReasonCounts": {
+      "no-active-other-waypoints": 3
+    },
+    "scoutFieldContractObserved": true,
+    "scoutDoesNotContributeToGameAcceptance": true,
+    "hpVerifiedEventsChecked": 0,
+    "hpSuccessProofChecked": false,
+    "hpNoVerifiedDoseObserved": true
+  },
+  "scope": "Small actual-execution/result-metadata closure check only; no repeated raw/monitor stream, source execution, test or mode. The earlier pending facts/prerequisite remain accurate historical originals. Actual endedPASS permits fresh formal prerequisite binding only.132 includes original assessment scopes, not a claim of132 complete minute windows. Three diagnostic rows exercise only no-active-other-waypoints, not shared-waypoint reorder behavior or causal improvement. No independent per-request900ms replay or HP dose proof is added.",
+  "verdict": {
+    "actualEndedExecutionAndMetadataConsistent": true,
+    "eligibleForFreshFormalPrerequisiteBinding": true,
+    "blockingFindingIds": []
+  },
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "productionAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false
+}

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792844170791-128cb7c2",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "profile": "full-lifecycle",
+  "startedAt": "2026-10-24T12:16:10.837Z",
+  "scope": "ordinary-public-protocol-two-independent-sockets",
+  "privateCredentialsPath": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\realm-private\\credentials\\1792844170791-128cb7c2\\accounts.json",
+  "checks": {
+    "authGuards": {
+      "status": "failed",
+      "error": "WebSocket connection failed"
+    },
+    "twoAccounts": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "mutualVisibility": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "movement": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "turn": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "chat": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "chatLatency": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "sharedCombat": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "mapRoundTrip": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "logout": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "reloginPersistence": {
+      "status": "skipped",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "sharedKill": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "sharedDrop": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "uniquePickup": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "playerDeath": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "townRevive": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    }
+  },
+  "accounts": [
+    {
+      "accountId": "pta01e3d9bc",
+      "name": "A01e3d9bc"
+    },
+    {
+      "accountId": "ptb01e3d9bc",
+      "name": "B01e3d9bc"
+    }
+  ],
+  "registrationMode": "two-fresh-ordinary-registrations",
+  "error": "Authentication guard failed; account creation stopped",
+  "requiredChecks": [
+    "authGuards",
+    "twoAccounts",
+    "mutualVisibility",
+    "movement",
+    "turn",
+    "chat",
+    "chatLatency",
+    "sharedCombat",
+    "mapRoundTrip",
+    "logout",
+    "reloginPersistence",
+    "sharedKill",
+    "sharedDrop",
+    "uniquePickup",
+    "playerDeath",
+    "townRevive"
+  ],
+  "ok": false,
+  "fullLifecyclePassed": false,
+  "status": "incomplete",
+  "finishedAt": "2026-10-24T12:16:10.881Z",
+  "visualAccepted": false,
+  "twoPhysicalComputersTested": false,
+  "loadAccepted": false
+}

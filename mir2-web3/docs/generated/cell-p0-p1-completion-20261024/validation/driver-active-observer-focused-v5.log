@@ -1,0 +1,166 @@
+TAP version 13
+# Subtest: active observer coverage binds only declared living movement clients and never borrows a future home
+ok 1 - active observer coverage binds only declared living movement clients and never borrows a future home
+  ---
+  duration_ms: 10.1147
+  type: 'test'
+  ...
+# Subtest: scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+ok 2 - scout keeps its declared index and finite ACK/online budgets through observer pause and transport restore
+  ---
+  duration_ms: 1.526
+  type: 'test'
+  ...
+# Subtest: temporary observer coverage loss and restore do not wash a live pursuit movement budget
+ok 3 - temporary observer coverage loss and restore do not wash a live pursuit movement budget
+  ---
+  duration_ms: 1.3579
+  type: 'test'
+  ...
+# Subtest: pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+ok 4 - pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+  ---
+  duration_ms: 1.7253
+  type: 'test'
+  ...
+# Subtest: pending attack packet subscriptions are removed after synchronous send failure and transport close
+ok 5 - pending attack packet subscriptions are removed after synchronous send failure and transport close
+  ---
+  duration_ms: 2.1033
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 6 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 0.4532
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 7 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 9.1295
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 8 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.3774
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 9 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.7366
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 10 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.5272
+  type: 'test'
+  ...
+# Subtest: native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+ok 11 - native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+  ---
+  duration_ms: 0.2676
+  type: 'test'
+  ...
+# Subtest: native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+ok 12 - native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+  ---
+  duration_ms: 0.2122
+  type: 'test'
+  ...
+# Subtest: native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+ok 13 - native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+  ---
+  duration_ms: 1.6022
+  type: 'test'
+  ...
+# Subtest: native hunt does not credit a newly planned route when the target moves during each authoritative step
+ok 14 - native hunt does not credit a newly planned route when the target moves during each authoritative step
+  ---
+  duration_ms: 0.3968
+  type: 'test'
+  ...
+# Subtest: native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+ok 15 - native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+  ---
+  duration_ms: 4.1222
+  type: 'test'
+  ...
+# Subtest: native hunt defers an authoritative position loop even when replanned routes claim progress
+ok 16 - native hunt defers an authoritative position loop even when replanned routes claim progress
+  ---
+  duration_ms: 0.5071
+  type: 'test'
+  ...
+# Subtest: native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+ok 17 - native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+  ---
+  duration_ms: 97.3173
+  type: 'test'
+  ...
+# Subtest: native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+ok 18 - native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+  ---
+  duration_ms: 0.469
+  type: 'test'
+  ...
+# Subtest: native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+ok 19 - native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+  ---
+  duration_ms: 0.2801
+  type: 'test'
+  ...
+# Subtest: native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+ok 20 - native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+  ---
+  duration_ms: 0.4634
+  type: 'test'
+  ...
+# Subtest: native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+ok 21 - native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+  ---
+  duration_ms: 1.4936
+  type: 'test'
+  ...
+# Subtest: native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+ok 22 - native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+  ---
+  duration_ms: 0.7755
+  type: 'test'
+  ...
+# Subtest: native hunt movement hook keeps all corrected and successful actions in the original denominator
+ok 23 - native hunt movement hook keeps all corrected and successful actions in the original denominator
+  ---
+  duration_ms: 2.0249
+  type: 'test'
+  ...
+# Subtest: native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+ok 24 - native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+  ---
+  duration_ms: 27.9319
+  type: 'test'
+  ...
+# Subtest: native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+ok 25 - native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+  ---
+  duration_ms: 1.3571
+  type: 'test'
+  ...
+# Subtest: native combat clusters cover the exact cohort and contain hunting inside declared observer footprints
+ok 26 - native combat clusters cover the exact cohort and contain hunting inside declared observer footprints
+  ---
+  duration_ms: 0.8459
+  type: 'test'
+  ...
+1..26
+# tests 26
+# suites 0
+# pass 26
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 267.7689

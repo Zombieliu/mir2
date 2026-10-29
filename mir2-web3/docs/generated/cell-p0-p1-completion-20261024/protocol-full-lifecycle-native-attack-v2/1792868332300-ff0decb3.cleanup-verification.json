@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-24T19:11:07.0377363+00:00",
+  "ownedPid": 45792,
+  "processAbsent": true,
+  "remainingListeners": [],
+  "portsFree": true,
+  "scope": "Post-normal-exit owned Release functional realm and known task ports only; no global world-presence or ghost census claim."
+}

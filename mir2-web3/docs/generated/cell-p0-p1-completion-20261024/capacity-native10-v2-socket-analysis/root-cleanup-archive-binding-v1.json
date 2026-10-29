@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T00:17:28.390Z",
+  "scope": "External read-only binding of the explicit root cleanup proof to the completed failed08 public archive. The proof remains external for root topic integration; no frozen collector or public allowlist was amended.",
+  "runId": "1792885245847-0368d2eb",
+  "destination": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-socket-diagnostics",
+  "publicFileCount": 64,
+  "publicBytes": 1285377,
+  "rootIndependentCleanup": {
+    "original": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe08-root-independent-cleanup-v1.json",
+      "bytes": 124,
+      "sha256": "ba51408a95a7833b91890b739ada3dbefc4decb9fe474ce72d62a0c342d0e2d1"
+    },
+    "whitelisted": {
+      "pid": 64860,
+      "processAbsent": true,
+      "portsFree": true,
+      "checkedAtUtc": "2026-10-24T23:59:20.0206336Z",
+      "capacityAccepted": false
+    },
+    "processStateWasNotReprobedByThisScript": true
+  },
+  "originalRuntimeFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\launcher-source-frozen-v1.json",
+    "bytes": 12087,
+    "sha256": "d8d5cc9fe8edef50b24eea94793414099c481261dee39c1b71b18fae5c9daee1"
+  },
+  "originalRuntimePinsUnchanged": 29,
+  "formal05ExpectedRejection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal05-expected08-rejection-v1.json",
+    "bytes": 1020,
+    "sha256": "4cbcaeff3e76bb5f0fb0c58940dcfc3d3704b87630fb513777004f90611666e4"
+  },
+  "archivePins": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-socket-diagnostics\\public-verification.json",
+      "bytes": 1080,
+      "sha256": "9a7dd46687f41d2d6072ab0aa37d3466c72eaa5dd925b2cc7eb48a7410067d53"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-socket-diagnostics\\collection-verification.json",
+      "bytes": 316464,
+      "sha256": "2ad8e4bde70142e6334c935f686e118f570c43322989237bd889f8d85c8c5661"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-socket-diagnostics\\public-copy-provenance.json",
+      "bytes": 19539,
+      "sha256": "69d061aa52d8cc0adadbaf89dfc7fa70157f36a718eff29af877d1d9f9cf3ccf"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-socket-diagnostics\\raw-artifact-manifest.json",
+      "bytes": 651,
+      "sha256": "1d768eb9a285b79d4d5b35f84741d4301aaf67e044886faccecd8566657efe2d"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-socket-diagnostics\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.report.json",
+      "bytes": 192768,
+      "sha256": "04ad88bdd4fd34a29b6b8326f68960619e0b137b6aee2eba7252a9d2866e547a"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-socket-diagnostics\\release-native-10-v2-socket-feasibility-08\\reports\\1792885245847-0368d2eb.raw-projection.json",
+      "bytes": 342689,
+      "sha256": "374779df2b888780593b1460c4bb9157376b29dfefc16f63fa6837569e9442fe"
+    }
+  ],
+  "raw": {
+    "bytes": 17808660,
+    "sha256": "a42c137132dd966434a46e735dafdd9fd53dd63d6f97983c06ea7f265b4286dc",
+    "rows": 28609,
+    "monitorCount": 530,
+    "validMonitorCount": 530,
+    "invalidMonitorCount": 0,
+    "stoppedMonitorCount": 0,
+    "maxGapMs": 7553
+  },
+  "monitor": {
+    "bytes": 4773507,
+    "sha256": "97e9d96589331e77c2f4df6c3e32750e76fd4b0c51de2a4614aae83103f6e872",
+    "rows": 533,
+    "monitorRows": 531,
+    "normalTerminalRows": 1
+  },
+  "spectator": {
+    "files": 1,
+    "frames": 3990,
+    "bytes": 177479226,
+    "errors": 0,
+    "persistedCounterMatchesFiles": true
+  },
+  "slowStage": {
+    "rows": 98,
+    "bytes": 8753,
+    "sha256": "9049e3ab2928fbe19860d7f9ebb85841771bf71cfaf8fbcf28c0811b6cf58f29",
+    "complete": true
+  },
+  "originalVerdictPreserved": true,
+  "reportOk": false,
+  "capacityAccepted": false,
+  "normalOwnedCleanup": true,
+  "diagnosticsComplete": true,
+  "rootIndexUpdated": false,
+  "existingTopicsModified": false
+}

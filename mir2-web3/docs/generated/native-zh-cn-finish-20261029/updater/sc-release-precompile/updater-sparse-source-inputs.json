@@ -1,0 +1,114 @@
+{
+  "schema": "mir2.windows.updater-sparse-source-inputs.v1",
+  "capturedAtUtc": "2026-10-29T10:32:23.9121428+00:00",
+  "sourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "sourceClean": true,
+  "sparseCone": [
+    "mir2-web3/apps/game-client/windows-updater"
+  ],
+  "originalAssertSourceTrackedPassed": true,
+  "inputs": [
+    {
+      "path": "apps/game-client/windows-updater/Cargo.lock",
+      "bytes": 22615,
+      "sha256": "9cdd49937b3f39cdc00cb84483f944ffa6c53a9d398472de0e15641009e7b21d"
+    },
+    {
+      "path": "apps/game-client/windows-updater/Cargo.toml",
+      "bytes": 1074,
+      "sha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/launcher.rs",
+      "bytes": 2567,
+      "sha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/bin/updater.rs",
+      "bytes": 4587,
+      "sha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery_tests.rs",
+      "bytes": 55848,
+      "sha256": "01cf15ecc9e5931c6b528b46bc4dd59af874f04cf98187cb0bbbffe596ad44da"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/delivery.rs",
+      "bytes": 26136,
+      "sha256": "37ffcc8878686ca15bc9d5fae7d34ef61a0a78456c55b5adbce76662944abaf5"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/download.rs",
+      "bytes": 9157,
+      "sha256": "5539e85f0c141904ee3df2b379379db307099190ab4fba89bd744cd11433e8c7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/five_class_manifest_tests.rs",
+      "bytes": 4369,
+      "sha256": "bf4fe3044addfd29a0fcd927ec9cbb07c895bd63604eb1439515b069f1cb46fc"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/fs_safe.rs",
+      "bytes": 9421,
+      "sha256": "ecfe5ca1f6747c5b555d7c53382dcb3d83017a76891d3cb293b4811c7911d610"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/lib.rs",
+      "bytes": 8739,
+      "sha256": "18d276f8073ac1cb3880df967aafc991681709146b5d5e57b7bcba22dc0780fa"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/local_io.rs",
+      "bytes": 7090,
+      "sha256": "bc5dc2abd68cee22e54050432dc276a86bb17e3f4335b485ea6ac6647fa74b34"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model_regression.rs",
+      "bytes": 4039,
+      "sha256": "73948ef628469709c2871637f53e53752606fc0a327277057393e13341e516cb"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model.rs",
+      "bytes": 15020,
+      "sha256": "de00b292ed422c5aac6cc9563c3dd75445f92f5018045eb4a0400eca94151389"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/platform.rs",
+      "bytes": 38568,
+      "sha256": "db9901523f87c7aecc3d305f7e4adace723faf1a75f6f23a09a2870a5f831e60"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/progress_trace_tests.rs",
+      "bytes": 18241,
+      "sha256": "11038cf935b05888f01dd40c528663619926b35dd5d7516c799c73622bcebadd"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/resume_tests.rs",
+      "bytes": 26944,
+      "sha256": "6a5be7d0c2682545b077d6d77b9f6baaf2066b32d5e7d2d4976a00e8058d7ae9"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/transaction.rs",
+      "bytes": 31496,
+      "sha256": "0a8bf2f5edc25464220dbb3fbed80b5212888eadf45eb268aa3b7c763b907194"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/ui.rs",
+      "bytes": 38748,
+      "sha256": "94ea97b12d48186b7b2da833283781b73b9d7bc5fd575c34247322ca4eabe4f1"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update_receipt_tests.rs",
+      "bytes": 4802,
+      "sha256": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/update.rs",
+      "bytes": 44806,
+      "sha256": "11b1fd0635156c8d6b0c50472ca62ebd60af002444d99a994f030a53730ad9c9"
+    }
+  ],
+  "inputCount": 20,
+  "nativeCheckoutTouched": false
+}

@@ -1,0 +1,144 @@
+{
+  "schema": "cold-economy-whitelist-projection-v1",
+  "createdAt": "2026-10-27T00:19:19.508330+00:00",
+  "sourceStore": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v10/episode/private/accounts.json",
+    "bytes": 162309,
+    "sha256": "2021501f77b568c20892db3b94400e92430b45ff091878f263ea8357955f02bb"
+  },
+  "sourceCopyReceipt": {
+    "file": "C:/mir2-build/p01-completion-20261024/ordinary-capacity-bank-prepare-v10/episode/source-bank-copy-receipt-v1.json",
+    "bytes": 8702,
+    "sha256": "0430b635eeb00b4f191f7d102da39363b21e9de320b1b60f9897ad3c1782f7d4"
+  },
+  "character": {
+    "name": "L370e2a07",
+    "index": 8,
+    "characterJsonPointer": "/accounts/lt370e2a07/characters/0",
+    "saveJsonPointer": "/accounts/lt370e2a07/saves/8",
+    "hp": 18,
+    "maxHp": 18,
+    "gold": 0,
+    "map": "0",
+    "position": {
+      "x": 287,
+      "y": 604
+    },
+    "hpStock": 1,
+    "heldHp": [
+      {
+        "uniqueId": 2,
+        "itemTemplate": 658,
+        "quantity": 1
+      }
+    ],
+    "venison": [
+      {
+        "jsonPointer": "/accounts/lt370e2a07/saves/8/inventory_items_json/1",
+        "storedElementEncoding": "JSON string",
+        "uniqueId": 4,
+        "itemTemplate": 853,
+        "quantity": 1,
+        "durabilityCurrent": 9088,
+        "durabilityMax": 8000,
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "addedStats": [],
+        "storedSellValue": null,
+        "derivedUnitSellValue": 258
+      },
+      {
+        "jsonPointer": "/accounts/lt370e2a07/saves/8/inventory_items_json/2",
+        "storedElementEncoding": "JSON string",
+        "uniqueId": 5,
+        "itemTemplate": 853,
+        "quantity": 1,
+        "durabilityCurrent": 9674,
+        "durabilityMax": 8000,
+        "addedAttack": 0,
+        "addedDefence": 0,
+        "addedStats": [],
+        "storedSellValue": null,
+        "derivedUnitSellValue": 263
+      }
+    ]
+  },
+  "formulaSources": [
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/items.rs",
+      "bytes": 166922,
+      "sha256": "4b81b12312fa0d388e3b5f605cc9b2ced829d619082a77396dd4df8f8d4f62a5",
+      "relevantLineRanges": [
+        [
+          535,
+          552
+        ]
+      ],
+      "meaning": "WorldItemSnapshot unit quantity1 sellValue"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/npc.rs",
+      "bytes": 55897,
+      "sha256": "0bdcbbf9155477d31aff15259b62076097a7ef7666244e23f243b0cd8b81eca3",
+      "relevantLineRanges": [
+        [
+          1667,
+          1680
+        ]
+      ],
+      "meaning": "known-template current price integer-divided by2"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/equipment.rs",
+      "bytes": 109643,
+      "sha256": "092f84f7c44a2a856f2c8074bd3d53cdc8810053e15fc1d6aba56ff34cfa4a91",
+      "relevantLineRanges": [
+        [
+          2365,
+          2420
+        ],
+        [
+          2964,
+          2970
+        ]
+      ],
+      "meaning": "added stat weight, float32 durability price, added stat factor"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/packages/game-data/data/generated/crystal_item_manifest.json",
+      "bytes": 1589543,
+      "sha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+      "relevantLineRanges": [
+        [
+          40767,
+          40815
+        ]
+      ],
+      "meaning": "Venison853 price500 durability8000 stack1"
+    }
+  ],
+  "derivation": {
+    "arithmetic": "Rust f32 intermediates, floor/trunc per source, no added stats; known-template sale currentPrice / 2",
+    "templatePrice": 500,
+    "templateDurability": 8000,
+    "unitSellValues": [
+      258,
+      263
+    ],
+    "totalDerivedVenisonSaleValue": 521,
+    "initialLiveRubenUnitPrice": 40,
+    "missingHpStock": 11,
+    "planningCost": 440,
+    "derivedCapitalSufficientForInitialPrice": true
+  },
+  "limitations": {
+    "coldDerivedNotFreshLiveQuote": true,
+    "freshOwnerQuoteAtFailureAvailable": false,
+    "originalFailedAfter": null,
+    "prepared": false,
+    "capacityAccepted": false,
+    "originalFailurePreserved": "safe Deer funding holds 2/3 Venison after 2 hunts and 8 attempts",
+    "storeModified": false,
+    "credentialsIncluded": false
+  }
+}

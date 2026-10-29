@@ -3123,6 +3123,7 @@ fn release_unsent_guild_rank_rename(
 
 pub fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
+    mut procurement: Option<ResMut<mir2_client_bevy::native_procurement::ProcurementModel>>,
     mut intents: ResMut<QuestUiIntentQueue>,
     mut player_ui_intents: Option<ResMut<NativePlayerUiIntentQueue>>,
     commands: Res<GatewayCommands>,
@@ -3311,6 +3312,18 @@ pub fn forward_quest_ui_intents(
                 }
             }
             QuestUiIntent::SelectNpcDialog { target } => {
+                if target == mir2_client_bevy::native_procurement::NPC_ENTRY {
+                    if let (Some(model), Some(dialog), Some(account), Some(character)) = (
+                        procurement.as_deref_mut(), dialog.as_deref(), shell.last_account.as_deref(), shell.billing_character_index()) {
+                        if !dead && dialog.is_open && dialog.options.iter().any(|option|
+                            option.enabled && option.option_id == target) {
+                            if let Some(npc) = dialog.npc_object_id.filter(|id|*id>0) {
+                                model.open_for(account, character, npc, mir2_client_bevy::native_procurement::now_ms());
+                            }
+                        }
+                    }
+                    continue;
+                }
                 NativeOutboundCommand::SelectNpcDialog { target }
             }
             QuestUiIntent::AcceptQuest {
@@ -5480,6 +5493,32 @@ mod guild_creation_tests;
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn procurement_npc_entry_requires_current_enabled_dialog_and_authenticated_character() {
+        use bevy::prelude::{App,Update};
+        use mir2_client_bevy::native_procurement::{ProcurementModel,NPC_ENTRY};
+        for case in 0..7 {
+            let (sender,receiver)=mpsc::channel();
+            let mut shell=NativeShellModel{screen:NativeShellScreen::InGame,last_account:Some("alice".into()),
+                active_character:Some(mir2_client_bevy::native_shell::CharacterSummary::new(0,"Buyer",22,"Warrior","Male")),..Default::default()};
+            let mut dialog=NpcDialogModel{is_open:true,npc_object_id:Some(12),options:vec![NpcDialogOption{
+                option_id:NPC_ENTRY.into(),label:"Personal procurement".into(),enabled:true}],..Default::default()};
+            let mut read=UiReadModel::default();
+            match case {1=>dialog.is_open=false,2=>dialog.options[0].enabled=false,3=>dialog.options[0].option_id="@other".into(),
+                4=>dialog.npc_object_id=Some(0),5=>shell.active_character=None,6=>{read.player.max_hp=1;read.player.hp=0;},_=>{}}
+            let mut app=App::new();app.insert_resource(shell).insert_resource(dialog).insert_resource(read)
+                .insert_resource(NativePlayerUiState::default()).insert_resource(QuestTracker::default())
+                .init_resource::<QuestUiIntentQueue>().init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<PendingOperations>().init_resource::<ProcurementModel>()
+                .insert_resource(GatewayCommands::new(sender)).add_systems(Update,forward_quest_ui_intents);
+            for _ in 0..2 {app.world_mut().resource_mut::<QuestUiIntentQueue>().push_intent(QuestUiIntent::SelectNpcDialog{target:NPC_ENTRY.into()});}
+            app.update();
+            let model=app.world().resource::<ProcurementModel>();
+            assert_eq!(model.open,case==0,"case {case}");
+            assert!(receiver.try_recv().is_err(),"NPC entry is not a forged generic target mutation");
+            if case==0 {assert!(matches!(model.unsent_request().unwrap().action,mir2_protocol::procurement::ProcurementAction::Status{npc_object_id:12}));}
+        }
+    }
     #[test]
     fn native_mail_send_actual_bridge_prebind_and_every_preentry_mapping_rejection_are_exact() {
         use bevy::ecs::system::RunSystemOnce;

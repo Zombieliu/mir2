@@ -1,0 +1,591 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-28T08:19:48.149Z",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\run-intent-v1.json",
+        "bytes": 926,
+        "sha256": "21e9c30ff15c35d52f3adc1b4e94c02c5507dc5650d2b75c2ff819c5d8d328fd"
+      },
+      "destination": "ordinary-full16/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "73b9284dafed2c64c27860175a94b7a7a0a6d0ba6392ead13a8a101cad73d5fa"
+      },
+      "destination": "ordinary-full16/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\resource-profile-v1.json",
+        "bytes": 2042,
+        "sha256": "4f6c93020553034724c3c9a1dfef71795309e05be13e0dcee883dd8b83a78ad7"
+      },
+      "destination": "ordinary-full16/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\health-before-v1.json",
+        "bytes": 13399,
+        "sha256": "1d3c2e92cc0cf47ce439df143e2e95f1f8b25edd212fe78402bd0eed3fbd3fab"
+      },
+      "destination": "ordinary-full16/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\health-after-v1.json",
+        "bytes": 13522,
+        "sha256": "7bf08b7dfc081de1a230d0ede50633f3186a1bd6041b47c80c4988170750e13b"
+      },
+      "destination": "ordinary-full16/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\monitor-current.json",
+        "bytes": 9128,
+        "sha256": "409b6033bc81a0a28472fc5fbae21a0ede074c2f2c837f07c528122b42cf668b"
+      },
+      "destination": "ordinary-full16/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\monitor-history.jsonl",
+        "bytes": 401660,
+        "sha256": "a71f1093ce8dfc16bbf2b66bb22234e7d6923a8fcf5a7c6b0ac0cde01b64ac60"
+      },
+      "destination": "ordinary-full16/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "807803041fa84408677c289683de2f411fef7b1d0993e8956768e3eacfded659"
+      },
+      "destination": "ordinary-full16/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168-a.trace.jsonl",
+        "bytes": 974079,
+        "sha256": "9f0fd8b22e65d7ff440d5580244cc02a5208a2c610bcb709d0ca05f4acaf59ca"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168-a.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168-b.trace.jsonl",
+        "bytes": 901388,
+        "sha256": "e33c45ddc4726840876beaba204e6920196df07a4fbeacfe240e541dc1cdf269"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168-b.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168-guard-newCharacter.trace.jsonl",
+        "bytes": 3478,
+        "sha256": "97bf32db8ae471c25792a804af12e5644a11b187e8a0de81e9b03433bccf3063"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168-guard-newCharacter.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168-guard-startGame.trace.jsonl",
+        "bytes": 3431,
+        "sha256": "02eb47618e08df19b80f6261fcefe9f5a060bdc1ed29e667e30ca29375edf877"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168-guard-startGame.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168-relogin-0.trace.jsonl",
+        "bytes": 683363,
+        "sha256": "6410a0de796d996cf50f4d08b38442fa2ce4b94adc71877e331ae6143922588e"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168-relogin-0.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168-relogin-1.trace.jsonl",
+        "bytes": 680191,
+        "sha256": "44cd5ff0aa7985eeea43cba21d1cfc4499932c56cc00a5e2625bf9b746d5f7ab"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168-relogin-1.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168.report.json",
+        "bytes": 109396,
+        "sha256": "5350d1dd9933a4937221fdf721704a1fbe904a43b71688332d03e88f19c69ddd"
+      },
+      "destination": "ordinary-full16/reports/1793175003874-3ffb8168.report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\run-intent-v1.json",
+        "bytes": 2050,
+        "sha256": "02dd21e87aefd027881148e858981278fe3b33d20b2fefe4ae4eb4f109460e12"
+      },
+      "destination": "pvp-v10/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\cleanup-v1.json",
+        "bytes": 382,
+        "sha256": "26d00ef7cb06e7d46602fb763f1c8ba8029f9c14765c46b1d721c67dec945b4d"
+      },
+      "destination": "pvp-v10/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\resource-profile-v1.json",
+        "bytes": 2170,
+        "sha256": "9a6675aacdd74f3967f460d099e6211be028c81a0aab18d74ca0dbd64af44401"
+      },
+      "destination": "pvp-v10/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\health-before-v1.json",
+        "bytes": 13510,
+        "sha256": "989102ddc586614704934bae45b1fcd0635e45433686ac44d1777e8aba4aba52"
+      },
+      "destination": "pvp-v10/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\health-after-v1.json",
+        "bytes": 13665,
+        "sha256": "2badc04ad9effdfbf6b5052ac06732cc95c3c852b6c97ddd8dfa03baf754d28a"
+      },
+      "destination": "pvp-v10/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\monitor-current.json",
+        "bytes": 9151,
+        "sha256": "7f7f316cbd59d37ff49f545ad714af51a3d903556411b0c95e555fb7130d1a8f"
+      },
+      "destination": "pvp-v10/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\monitor-history.jsonl",
+        "bytes": 959911,
+        "sha256": "b8b5a1e2305cb6f17e473e00627d151fce8a5ff58c421aa40bc2b67763d91075"
+      },
+      "destination": "pvp-v10/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "c70bb0b36c42fb271d5f1c0342554007667e8ada52c905dac6b791963c9c15aa"
+      },
+      "destination": "pvp-v10/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\reports\\1793175158270-86aa8e88.pvp-stress-report.json",
+        "bytes": 49555,
+        "sha256": "4b7778389049de881828ac7f87605348816cfcba50c5de0ac793e1c3b41cb68c"
+      },
+      "destination": "pvp-v10/reports/1793175158270-86aa8e88.pvp-stress-report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v10\\reports\\1793175158270-86aa8e88.pvp-stress-samples.jsonl",
+        "bytes": 1029482,
+        "sha256": "9374bbeb5d09dd8df78b2d4873ab45eda1c3a150334ce97e7ca70853ccb5b54d"
+      },
+      "destination": "pvp-v10/reports/1793175158270-86aa8e88.pvp-stress-samples.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\validation-v1.json",
+        "bytes": 2973,
+        "sha256": "7d9efe7e26a41d7572d64f3f4b8de4365fc329948c8c87d48c1a4eb9418abe1b"
+      },
+      "destination": "backend-v4/validation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\integration-v1.json",
+        "bytes": 663,
+        "sha256": "e4fa6e9605d2e0b4e70a20ba942b7787e04e7ce48474f9514ef26b08bccdcf29"
+      },
+      "destination": "backend-v4/integration-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\spectator-tests.stdout.log",
+        "bytes": 1495,
+        "sha256": "1139ca19ab230113cd490a8990b7e7040dd9ea8359349b5b6575698ead530a3e"
+      },
+      "destination": "backend-v4/spectator-tests.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\spectator-tests.stderr.log",
+        "bytes": 55123,
+        "sha256": "12e86ac435aa6288c52d3964f3b15487823ef64220621849da9d83b7741f1236"
+      },
+      "destination": "backend-v4/spectator-tests.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\web-snapshot-tests.stdout.log",
+        "bytes": 386,
+        "sha256": "f81962d56432db6b1ccd6a8d58a83dee36bccf4c61d41f47f2841910c7929a23"
+      },
+      "destination": "backend-v4/web-snapshot-tests.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\web-snapshot-tests.stderr.log",
+        "bytes": 54737,
+        "sha256": "4fa3101461d7654e0fc7b5cc1d657fb24a4c2c02fa12284675e3997273dafc0b"
+      },
+      "destination": "backend-v4/web-snapshot-tests.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\gateway-release.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "backend-v4/gateway-release.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v4\\gateway-release.stderr.log",
+        "bytes": 57273,
+        "sha256": "a23315d41e668667e8e80da766696c567b15c5b0bcd537720aab6e86138c8812"
+      },
+      "destination": "backend-v4/gateway-release.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-postgres-v3\\import-validation-v1.json",
+        "bytes": 806,
+        "sha256": "e5b6277c2507438e62aa7ae6603ece3a855787965ab9f805d60039afa395ce46"
+      },
+      "destination": "postgres-import-v3.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\run-intent-v1.json",
+        "bytes": 926,
+        "sha256": "9e3cbc04e10d26fc684bc8fa2853957b3ab0fb84a5b04eb4db00b09024b14c1c"
+      },
+      "destination": "ordinary-full16-ack/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "58052c114457f15b06bdbb0457833bf85c84793d8dc13176f17cabc3c953fa9e"
+      },
+      "destination": "ordinary-full16-ack/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\resource-profile-v1.json",
+        "bytes": 2042,
+        "sha256": "4f6c93020553034724c3c9a1dfef71795309e05be13e0dcee883dd8b83a78ad7"
+      },
+      "destination": "ordinary-full16-ack/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\health-before-v1.json",
+        "bytes": 13389,
+        "sha256": "4fff4e3c5b20dc9d75691903096c18788f487d495365beafbc5323037b514060"
+      },
+      "destination": "ordinary-full16-ack/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\health-after-v1.json",
+        "bytes": 13510,
+        "sha256": "040bf1e05b9875bc3753f8374da727a287d276d264fdded474f2a7dbeb8a88a0"
+      },
+      "destination": "ordinary-full16-ack/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\monitor-current.json",
+        "bytes": 9128,
+        "sha256": "0ef4205111dd540c057bf4c2629b832994829e9ecbac47663c6d2d991badffe4"
+      },
+      "destination": "ordinary-full16-ack/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\monitor-history.jsonl",
+        "bytes": 392223,
+        "sha256": "55bde2fdcd9ffa8a788821e6a281331e2a864eb4084b9eec6346654204e6736c"
+      },
+      "destination": "ordinary-full16-ack/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "8a3bef268f5a71c8a2eaf205cd54c20fec6c7f652549c6a0f3ff097efa515c85"
+      },
+      "destination": "ordinary-full16-ack/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7-a.trace.jsonl",
+        "bytes": 970906,
+        "sha256": "615999adaf9e1deaea55b7f73641b9923f8101cd69cac414572d64bb274f6e8f"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7-a.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7-b.trace.jsonl",
+        "bytes": 897285,
+        "sha256": "87981a058babfe16c5c7f9da3f3443cc4fbca99f40772db3d890dfc66f614686"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7-b.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7-guard-newCharacter.trace.jsonl",
+        "bytes": 3470,
+        "sha256": "606dae74d410dbab050c400e0f5bd76fb7143664f92605cb6a1d24bd540a8ffe"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7-guard-newCharacter.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7-guard-startGame.trace.jsonl",
+        "bytes": 3433,
+        "sha256": "30ceba1e34a4d30f93196b4efc868c39da49112017d49382100f10cf6807e54e"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7-guard-startGame.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7-relogin-0.trace.jsonl",
+        "bytes": 683401,
+        "sha256": "63569127d172113eb224f2173b0a451a7f91b607dae9e8424ec3c4ff7111cb32"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7-relogin-0.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7-relogin-1.trace.jsonl",
+        "bytes": 680174,
+        "sha256": "95e22e5d8a27fff9853cb5cc7695f8c84aedf277d8b1dd9338eaa33881dde183"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7-relogin-1.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7.report.json",
+        "bytes": 104717,
+        "sha256": "7cbd7ceecd2b0187df393e4299f9d93daf818d5646f56a8b119e468d266d78a1"
+      },
+      "destination": "ordinary-full16-ack/reports/1793176072026-624a5ae7.report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\run-intent-v1.json",
+        "bytes": 2051,
+        "sha256": "3464bff66ccc937662742f2023e94e7a84001a62b6ffb871295b26e21e9df302"
+      },
+      "destination": "pvp-v11/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\cleanup-v1.json",
+        "bytes": 382,
+        "sha256": "2ac0db9fa73a8d777a63cf7749f4d9fd51f87b0d80c6f83a489e322e6424b3da"
+      },
+      "destination": "pvp-v11/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\resource-profile-v1.json",
+        "bytes": 2170,
+        "sha256": "9a6675aacdd74f3967f460d099e6211be028c81a0aab18d74ca0dbd64af44401"
+      },
+      "destination": "pvp-v11/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\health-before-v1.json",
+        "bytes": 13510,
+        "sha256": "ebe422105da930b57cadaa9e96ea57e3ecec9ebe03e30d3d3bf1de5fc12d304b"
+      },
+      "destination": "pvp-v11/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\health-after-v1.json",
+        "bytes": 13671,
+        "sha256": "33dd75c5a6f05ed9fe16b72750f198c62bd82f092a72f4666205e9be80fb7c19"
+      },
+      "destination": "pvp-v11/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\monitor-current.json",
+        "bytes": 9166,
+        "sha256": "a63f1e05f0074529d576cd251cb99f27b600e386c55f1464c7fbbbfa6e8e8165"
+      },
+      "destination": "pvp-v11/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\monitor-history.jsonl",
+        "bytes": 1125444,
+        "sha256": "ec35372f38dbd4632c3004c663bfeb4cf654e0890eac4b02be5c2633631e2ff7"
+      },
+      "destination": "pvp-v11/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "b8d17f8625abf2791c4f4a79fa626c1c2d009e252fcf82cef793d2fe662da86a"
+      },
+      "destination": "pvp-v11/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\reports\\1793176229483-570d3dce.pvp-stress-report.json",
+        "bytes": 49457,
+        "sha256": "2c35ce3d4d60d4c5b408e5dd73757090c293a64a638925413dd65856526f6d67"
+      },
+      "destination": "pvp-v11/reports/1793176229483-570d3dce.pvp-stress-report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\reports\\1793176229483-570d3dce.pvp-stress-samples.jsonl",
+        "bytes": 1240279,
+        "sha256": "269c0e80c564ac8dc7c7861166a9ceb91fe9bd753b40e65e15efaf9ed85547a5"
+      },
+      "destination": "pvp-v11/reports/1793176229483-570d3dce.pvp-stress-samples.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v11\\time-budget-cutoff-v1.json",
+        "bytes": 104,
+        "sha256": "b1e410e19c3a439942e0171b51c8209b570e98bf45ced503007b321a950e25cf"
+      },
+      "destination": "pvp-v11/time-budget-cutoff-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-postgres-v4\\import-validation-v1.json",
+        "bytes": 713,
+        "sha256": "a722f8a4d1449b4f5aca053e4ca7d001ece7c86aedeba5b4e3a43b7a7db0dbfb"
+      },
+      "destination": "postgres-import-v4.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\validation-v1.json",
+        "bytes": 3143,
+        "sha256": "43af470fa35bac9dbea67937f4c4b16b21c7900df54591d53ac83b55f024f578"
+      },
+      "destination": "backend-v5/validation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\integration-v1.json",
+        "bytes": 643,
+        "sha256": "df0b9aace778113118c28d976c04dcfd349b57155484d4108ba42e887031ead6"
+      },
+      "destination": "backend-v5/integration-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\gateway-release.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "backend-v5/gateway-release.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\gateway-release.stderr.log",
+        "bytes": 57273,
+        "sha256": "dd15e11e871f217af5202a9429e338aff65358abf797676842ce8db82fefc870"
+      },
+      "destination": "backend-v5/gateway-release.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-0-final.stdout.log",
+        "bytes": 298,
+        "sha256": "180f635cdec8819b0b95da45b5b262d179d543fe274bcf56802f58c59d3912b2"
+      },
+      "destination": "backend-v5/test-0-final.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-0-final.stderr.log",
+        "bytes": 54737,
+        "sha256": "98930e4d700b1b6227b2a7f3ee0ccefc5f60f0c2bb862705b9b7e31d4d07fe58"
+      },
+      "destination": "backend-v5/test-0-final.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-1.stdout.log",
+        "bytes": 3298,
+        "sha256": "066ec7969cdf2c41de760e32917d77dcf25700e0eb1507e2c2d6971cdb69960a"
+      },
+      "destination": "backend-v5/test-1.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-1.stderr.log",
+        "bytes": 55445,
+        "sha256": "ad7edf282b87b82818bd672af23dc4e38aa85e42e2189c0b884c7c1d5a125ac5"
+      },
+      "destination": "backend-v5/test-1.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-2.stdout.log",
+        "bytes": 744,
+        "sha256": "074954aaaa0f0bca1e09bb57a863b3cfe94bca3b402b14f8144e87b49962aa21"
+      },
+      "destination": "backend-v5/test-2.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-2.stderr.log",
+        "bytes": 55780,
+        "sha256": "625da6918993ac09d8b1ee254818890f3f2996f838750d0581b18298e1507bc1"
+      },
+      "destination": "backend-v5/test-2.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-3.stdout.log",
+        "bytes": 271,
+        "sha256": "e991e182bb7151fc6968bce4e3e2f69cc59d41cbb864c8591fe192ed4b43e816"
+      },
+      "destination": "backend-v5/test-3.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v5\\test-3.stderr.log",
+        "bytes": 54737,
+        "sha256": "4fa3101461d7654e0fc7b5cc1d657fb24a4c2c02fa12284675e3997273dafc0b"
+      },
+      "destination": "backend-v5/test-3.stderr.log"
+    }
+  ],
+  "updatedAt": "2026-10-28T08:36:24.896Z"
+}

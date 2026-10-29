@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-v6-full-lifecycle-v2",
+  "state": "PENDING_AUTHORING_ONLY",
+  "executionSourceCommit": null,
+  "newRootReceipt": null,
+  "toolPins": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\source-lib-v1.mjs",
+      "bytes": 13053,
+      "sha256": "9758402317d730431fd698a1f121fb3668c455489a4708d29f69a0dc26c8c80a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-source-lib-v1.mjs",
+      "bytes": 9374,
+      "sha256": "f75b6eeddbe1246f4941ff1f293786e68b5d17617a15f0938e0c194597ce04ed"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\verify-inputs.mjs",
+      "bytes": 1397,
+      "sha256": "c6e6a9a4c0b1365ea627acce6a14a3cfe975fa86b4a83cef60fc62ab86e3f3a0"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\finalize-inputs-v1.mjs",
+      "bytes": 2989,
+      "sha256": "05c3942b45bcf69cdd8f598784806eba57b48e20425c1e44479d857eb9d3903d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\freeze-inputs-v1.mjs",
+      "bytes": 1893,
+      "sha256": "6f4c896f30297448a396b03ce4f3abd06ef5247f2cf6c4e4903110b6cd97d56c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\run-owned-full.mjs",
+      "bytes": 14907,
+      "sha256": "5db1fb4d8b94996aef8e8d1de26f9a3ffa56b83b42fa24b1c1ff03d2402465fe"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\audit-owned-full.mjs",
+      "bytes": 9736,
+      "sha256": "0e8cdd9f7471778beea2f19bca7d7a5c63d57a647da56bee7fd2dd74e041b696"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\author-pending-v1.mjs",
+      "bytes": 16759,
+      "sha256": "44edfc1ba8dc6088b1e4923ed050daefe118dbb4877122aa46e1aa65fce49497"
+    }
+  ],
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\config-pending-v1.json",
+    "bytes": 3609,
+    "sha256": "fb6fd100e466ef7ded1af58f7872738b7cb78269e7f48d21edcebbbdf7c2190f"
+  },
+  "pendingBackendBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\backend-release-binding-pending-v1.json",
+    "bytes": 1160,
+    "sha256": "157de87027f3579b3167586581c40bddbfec0b648f7919b7227943368c3e4610"
+  },
+  "candidateDriver": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\candidate-driver-preview-v1.json",
+    "bytes": 10188,
+    "sha256": "3d241d5ea2e9028b02e6691f753dc22da77d15c1cc233b85098260e9a7738250"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\derivation-v1.json",
+    "bytes": 10990,
+    "sha256": "d035fb0d0ca553a28cf64adafe6e9612f1372c450a05884e98c488656e63993e"
+  },
+  "versionDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\version-derivation-v2.json",
+    "bytes": 9088,
+    "sha256": "28ce15ed8285cff69cef9466adff48bcdf9feaa32c9ed55d9cdea4a93df43206"
+  },
+  "syntax": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\syntax-checks-v1.json",
+    "bytes": 7141,
+    "sha256": "0a214d22b6b03187a949fcc9fb9eb37c255b93784a213196ab223d9f7455e7bc"
+  },
+  "readme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\README-PENDING.md",
+    "bytes": 2648,
+    "sha256": "6a83e32e5d429e2fc493c44697b750926c11392230c5e9e528a402e5c1a552fd"
+  },
+  "backendSourceCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "backendInputs": 55,
+  "historicalExecutedRustTests": 32,
+  "newRustTestsExecuted": 0,
+  "syntaxMjsChecks": 9,
+  "ordinaryRegistrationsPerformed": 0,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "freezePerformed": false,
+  "currentRootQualificationPerformed": false,
+  "actualFull16Passed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

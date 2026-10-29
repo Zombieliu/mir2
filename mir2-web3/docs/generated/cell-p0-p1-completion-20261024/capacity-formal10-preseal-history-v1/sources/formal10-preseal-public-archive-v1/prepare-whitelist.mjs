@@ -1,0 +1,26 @@
+import fs from 'node:fs/promises';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+const base='C:/mir2-build/p01-completion-20261024',tool=path.join(base,'formal10-preseal-public-archive-v1'),topic='C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024';
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),pin=async file=>{const stat=await fs.lstat(file);assert.ok(stat.isFile()&&!stat.isSymbolicLink()&&stat.size<=1024*1024);assert.equal((await fs.realpath(file)).toLowerCase(),path.resolve(file).toLowerCase());const raw=await fs.readFile(file);return{bytes:raw.length,sha256:sha(raw)}};
+const names=[
+ 'compact-wire-formal10-execution-prerequisites-v5.json','compact-wire-formal10-executor-normalization-v6.json',
+ 'compact-wire-formal10-hp-schema-synthetic-v3.json','compact-wire-formal10-hp-schema-synthetic-v3.log','compact-wire-formal10-hp-schema-synthetic-v4.json','compact-wire-formal10-hp-schema-synthetic-v4.log','compact-wire-formal10-hp-status-schema.test.mjs',
+ 'compact-wire-formal10-preseal-helper-v1.mjs.txt','compact-wire-formal10-preseal-helper-v2.mjs.txt','compact-wire-formal10-preseal-helper-v3.mjs.txt',
+ ...[1,2,3,4,5,6].map(v=>`compact-wire-formal10-preseal-input-check-v${v}.json`),
+ ...[2,3,4].map(v=>`compact-wire-formal10-schema-normalization-v${v}.json`),
+ 'compact-wire-formal10-v4-collect-public.mjs.txt','compact-wire-formal10-v4-verify-feasibility-gate.mjs.txt','compact-wire-formal10-v4-verify-public.mjs.txt',
+ 'compact-wire-formal10-window-contract.test.mjs','compact-wire-formal10-window-normalization-v5.json','compact-wire-formal10-window-synthetic-v5.json','compact-wire-formal10-window-synthetic-v5.log',
+ ...[1,2,3,4,5,6].map(v=>`check-compact-wire-formal10-preseal-v${v}.mjs`),
+ ...[2,3,4].map(v=>`normalize-compact-wire-formal10-schema-v${v}.mjs`),'normalize-compact-wire-formal10-windows-v5.mjs',
+ 'run-compact-wire-formal10-hp-schema-synthetic-v3.mjs','run-compact-wire-formal10-hp-schema-synthetic-v4.mjs','run-compact-wire-formal10-window-synthetic-v5.mjs','create-compact-wire-formal10-preseal-checker-v3.mjs','prepare-compact-wire-formal10-preseal-v5.mjs','finalize-compact-wire-formal10-executor-v6.mjs','seal-compact-wire-formal10-v5.mjs','seal-compact-wire-formal10-v6.mjs',
+ 'compact-formal10-independent-review-v1/preseal-independent-review-v2.json','compact-formal10-independent-review-v1/preseal-independent-review-v6.json','compact-formal10-independent-review-v1/preseal-review-checklist-v1.json',
+ 'formal10-preseal-public-archive-v1/README-prepared.md','formal10-preseal-public-archive-v1/prepare-whitelist.mjs','formal10-preseal-public-archive-v1/copy-public.mjs',
+];assert.equal(new Set(names).size,names.length);const files=[];for(const source of names)files.push({source,target:source.endsWith('/README-prepared.md')?'README.md':'sources/'+source,...await pin(path.join(base,...source.split('/')))});
+const links=[
+ 'capacity-native10-v2-compact-wire-followup-13-diagnostics/public-verification.json','capacity-native10-v2-compact-wire-followup-13-diagnostics/raw-artifact-manifest.json',
+ 'capacity-native10-v2-compact-wire-followup-13-analysis/probe13-independent-verification-v1/final-verification.json',
+ 'capacity-native10-v2-compact-wire-followup-13-analysis/posthoc13-collection-v2/posthoc-source-frozen-v2.json',
+ 'capacity-native10-v2-compact-wire-followup-13-analysis/probe13-root-independent-cleanup-v1.json',
+];const existingPublicEvidence=[];for(const relative of links)existingPublicEvidence.push({path:relative,...await pin(path.join(topic,...relative.split('/'))),copyAgain:false});
+const runtime='formal-native-v2-compact-wire-ladder-10',plannedRuntimeCollectionReferences=[];for(const name of['launcher-source-frozen-v1.json','source-guard-readonly-verification.json'])plannedRuntimeCollectionReferences.push({externalFile:path.join(base,runtime,name),...await pin(path.join(base,runtime,name)),plannedPublicPath:'capacity-formal-native-v2-compact-wire-ladder-10/'+runtime+'/'+name,publicCopyAlreadyExists:false,copyInThisPackage:false});
+const manifest={schemaVersion:1,preparedAt:new Date().toISOString(),sourceScope:'formal10-preseal-history-only',publicChild:'capacity-formal10-preseal-history-v1',files,fileCount:files.length,totalBytes:files.reduce((n,p)=>n+p.bytes,0),filesSha256:sha(JSON.stringify(files)),existingPublicEvidence,plannedRuntimeCollectionReferences,currentFrozenRuntimeSourceCount:51,currentRuntimeFilesCopiedByThisPackage:0,containsOriginalHistoryVersions:[1,2,3,4,5,6],oldBlockedReviewPreserved:true,currentReviewVersion:6,actualFormalCapacityAccepted:false,archiveCopyExecuted:false,formalGateOrRealmExecuted:false,privateDataRead:false,rawOrRecordingPayloadRead:false};
+const output=path.join(tool,'archive-whitelist-v1.json');await fs.writeFile(output,JSON.stringify(manifest,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({manifest:{file:output,...await pin(output)},files:manifest.fileCount,totalBytes:manifest.totalBytes,aggregate:manifest.filesSha256,existingPublicLinks:links.length,plannedRuntimeReferences:plannedRuntimeCollectionReferences.length,archiveCopyExecuted:false}));

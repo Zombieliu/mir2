@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v1.mjs",
+    "bytes": 10118,
+    "sha256": "bfc5e6d29bafdf5fe3537fc0f1446c45213faf9d5230c0284b8a96dfaccd916d"
+  },
+  "output": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v2.mjs",
+    "bytes": 10118,
+    "sha256": "4b086dbbb4759dcf4084fc055765852928e2b4c2f9c3abce0b761cdf6502c117"
+  },
+  "from": "2ecf0c1b01920809daa4004db7fe926092005a974c322e78bbd2a156a6326889",
+  "to": "e3eaf0604f0e99fde70fbbe90585f171e3a5068b6e89e1fffbaab13dafe92adf",
+  "occurrences": 1,
+  "inverseRawExact": true,
+  "sourceOfActualSceneAggregate": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\final-verification.json",
+    "bytes": 449267,
+    "sha256": "b1d786f3ae059dba0c626a6f43f74381d4a113d15e36195295d32d668dc89fa7"
+  },
+  "scope": "Actual Probe16 scene-source hash includes current compatibility/source closure; geometry100/10 bytes and historical static execution remain unchanged. This replaces a historical hardcoded source aggregate in the mechanically cloned binder before any binder invocation.",
+  "binderV1Executed": false,
+  "actualGateExecuted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-formal-ladder-v2",
+  "scope": "Numeric audit schema and rejected report binding only; original v1 and actual evidence unchanged",
+  "preservedPreimages": [
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\formal-contract-v1.mjs",
+        "bytes": 12278,
+        "sha256": "0bd1cd4c0aa3fa824ba7e38eade031af91b618728045b1da94ba98403914be00"
+      },
+      "preserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\formal-contract-v1.mjs",
+        "bytes": 12278,
+        "sha256": "0bd1cd4c0aa3fa824ba7e38eade031af91b618728045b1da94ba98403914be00"
+      }
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\derivation-v1.json",
+        "bytes": 31423,
+        "sha256": "87d982a4961b73fe3393da26b9107f37fa50085a7cf4769733fb9eae5a1e2a48"
+      },
+      "preserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\derivation-v1.json",
+        "bytes": 31423,
+        "sha256": "87d982a4961b73fe3393da26b9107f37fa50085a7cf4769733fb9eae5a1e2a48"
+      }
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preparation-v1.json",
+        "bytes": 8988,
+        "sha256": "3699b3e234d64089efcbe49ef155d91a10e1d2ae15ac2b77b790a47f5a62e12b"
+      },
+      "preserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\preparation-v1.json",
+        "bytes": 8988,
+        "sha256": "3699b3e234d64089efcbe49ef155d91a10e1d2ae15ac2b77b790a47f5a62e12b"
+      }
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\README-pending-v1.md",
+        "bytes": 5296,
+        "sha256": "eda01b894d289b8fe9a91532d4103582dd70671e9ceec7e4bfcc769a91d1cc8e"
+      },
+      "preserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\README-pending-v1.md",
+        "bytes": 5296,
+        "sha256": "eda01b894d289b8fe9a91532d4103582dd70671e9ceec7e4bfcc769a91d1cc8e"
+      }
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\syntax-checks-v1.json",
+        "bytes": 6649,
+        "sha256": "0d8c93833d24983a0900d0076bb3f29e128fcd2706987754ff27ce99a0daf3f4"
+      },
+      "preserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\syntax-checks-v1.json",
+        "bytes": 6649,
+        "sha256": "0d8c93833d24983a0900d0076bb3f29e128fcd2706987754ff27ce99a0daf3f4"
+      }
+    },
+    {
+      "original": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\run-owned-formal-v1.mjs",
+        "bytes": 23074,
+        "sha256": "013f1d59dcdd4f7443be61f897380406bced7bd3761e3fc6dd9b16cd9609fc9d"
+      },
+      "preserved": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\run-owned-formal-v1.mjs",
+        "bytes": 23074,
+        "sha256": "013f1d59dcdd4f7443be61f897380406bced7bd3761e3fc6dd9b16cd9609fc9d"
+      }
+    }
+  ],
+  "runtimeChanges": [
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\formal-contract-v1.mjs",
+        "bytes": 12278,
+        "sha256": "0bd1cd4c0aa3fa824ba7e38eade031af91b618728045b1da94ba98403914be00"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\formal-contract-v1.mjs",
+        "bytes": 12276,
+        "sha256": "a07b009bfd9a5c77ad9e14ec7e60ce4bd8fa2d9824dc8b8edcb04b29a1c529b5"
+      },
+      "rule": {
+        "before": "audit.frozenDriverRawPinsMatched===true",
+        "after": "audit.frozenDriverRawPinsMatched===14"
+      },
+      "forwardInverseExact": true
+    },
+    {
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\preimages-before-audit-count-fix-v1\\run-owned-formal-v1.mjs",
+        "bytes": 23074,
+        "sha256": "013f1d59dcdd4f7443be61f897380406bced7bd3761e3fc6dd9b16cd9609fc9d"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\run-owned-formal-v1.mjs",
+        "bytes": 23115,
+        "sha256": "6e1b580dfd6c25b197bb465021fc2510bf2f5af860db92b7266834d23bba69e8"
+      },
+      "rule": {
+        "before": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');report=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof report.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(report.runId)&&path.basename(reportFile)===report.runId+'.report.json'&&same(report.reportPath,reportFile)&&driver.message.runId===report.runId,'Canonical report runId/path differs from the owned child result');}",
+        "after": " if(driver.message?.reportPath){const reportsRoot=path.join(root,'reports'),reportFile=path.resolve(driver.message.reportPath),st=await fs.lstat(reportFile);assert(same(path.dirname(reportFile),reportsRoot)&&st.isFile()&&!st.isSymbolicLink()&&same(await fs.realpath(reportFile),reportFile),'Canonical report must be a regular direct child of owned reports');const candidate=JSON.parse(await fs.readFile(reportFile,'utf8'));assert(typeof candidate.runId==='string'&&/^[0-9]{13}-[a-f0-9]{8}$/.test(candidate.runId)&&path.basename(reportFile)===candidate.runId+'.report.json'&&same(candidate.reportPath,reportFile)&&driver.message.runId===candidate.runId,'Canonical report runId/path differs from the owned child result');report=candidate;}"
+      },
+      "forwardInverseExact": true
+    }
+  ],
+  "actualAudit": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v2\\public\\1793102972033-ab025037.independent-audit.json",
+    "bytes": 1866,
+    "sha256": "a539d282b802ec8ef9e511cd5bcaf2a641709552fb4ec1d7e4e84cae7886009c"
+  },
+  "observedAuditValue": {
+    "frozenDriverRawPinsMatched": 14,
+    "type": "number"
+  },
+  "syntax": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\syntax-checks-v2.json",
+    "bytes": 7025,
+    "sha256": "61f74fc7792fbc99a91d0f2e7ec0ff795729747ab0be19e198ea1d2f5f381565"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\derivation-v2.json",
+    "bytes": 35549,
+    "sha256": "eb6dbc27b730189b2456b491d35e546e8f7c6402894afb4c6baefbca337ad099"
+  },
+  "originalFormalV1Modified": false,
+  "actualAuditModified": false,
+  "productionModified": false,
+  "currentBindingsRemainNull": true,
+  "finalized": false,
+  "freezePerformed": false,
+  "bankCopied": false,
+  "servicesStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

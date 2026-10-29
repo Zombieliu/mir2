@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "state": "External helper and pure synthetic source frozen; runtime integration not performed.",
+  "files": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/account-store-public-validator.mjs",
+      "bytes": 5407,
+      "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/account-store-slow-stage-public.test.mjs",
+      "bytes": 14477,
+      "sha256": "4e14bf9a45a514edee54b8478c791c1baf9259c3fc8b2216cbcbe341c071f245"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/consumer-integration-plan-v1.md",
+      "bytes": 2425,
+      "sha256": "3f94488a9a378d9d7b555fdc9e858d8287d4e579093aafc4c222b403d0f8e4fa"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/derivation-proof-v1.json",
+      "bytes": 9782,
+      "sha256": "9f62edce19e59965bd571c2479da0f9acf8f4e71c1bc35a1dd32835452931f91"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/protocol-contract-v1.json",
+      "bytes": 5971,
+      "sha256": "02852a5ab77ec2c8f5944bdbd2d907fdb39be3b5fb22722db0d47cf1f9cfc800"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/README.md",
+      "bytes": 2743,
+      "sha256": "10cd76d2e1997c4afdccd70b9511174b199360b5323cf316acba05596fc631a1"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/slow-stage-public-before-store-only-v1.mjs.txt",
+      "bytes": 15012,
+      "sha256": "8d902c32c20c8d72fa3dab4d095a23cb4fba839ded9236163d01fbf8f3a82187"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/store-only-derivation-proof-v2.json",
+      "bytes": 3134,
+      "sha256": "9b22e53e8b5eee8a6d103a3e9a50ea2806d666522aaed99b853da60630013e3e"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/store-only-validator.test.mjs",
+      "bytes": 6493,
+      "sha256": "52d728f1b6a9c2a7b6f5807c06c77f191429833d3c4d06101fe2cfaa9abcb02a"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/syntax-v1.log",
+      "bytes": 351,
+      "sha256": "a164f291b2fe951d2b2a5a75769fcf9a575911b433f81ed76f6c9e527cde708d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/syntax-v2.log",
+      "bytes": 595,
+      "sha256": "e45eaa2e9e6800b4924929fdb35b36ff4e2589feebaf1682a13d12bc18a610a2"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-execution-v1.json",
+      "bytes": 2927,
+      "sha256": "81e12d0c520c735ccb758080d4f8dddf601809084af09c478542f4304b10feb7"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-execution-v2.json",
+      "bytes": 4453,
+      "sha256": "16246e4ae2b4a8b33a0c3019eb84550eb24b77e2e01be19d5b65dc375e45a674"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-tests-v1.log",
+      "bytes": 11230,
+      "sha256": "cdb000e6fc5e3b2b7d2fe9977b33149bf8aff1cf6a080a6cc49fd151ad99fc29"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/account-store-slow-stage-diagnostics-v1/synthetic-tests-v2.log",
+      "bytes": 12763,
+      "sha256": "2db1b159a75358f0e54909c0fe9b4ef08a4247fa1847350527b03f915d260a09"
+    }
+  ],
+  "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+  "actualTests": {
+    "passed": 51,
+    "failed": 0,
+    "durationMs": 147.5975,
+    "legacyTestsRawExact": true,
+    "legacyTestCount": 30,
+    "newTestCount": 21,
+    "sourceBeforeAndAfterExact": true
+  },
+  "noProductionOrOldConsumerModification": true,
+  "noNewBackendReleaseOrRealm": true,
+  "gameOrCapacityPromotion": false
+}

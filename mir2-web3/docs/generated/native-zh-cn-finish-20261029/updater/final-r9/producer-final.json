@@ -1,0 +1,117 @@
+{
+  "schema": "mir2.windows.updater-release-evidence.v1",
+  "recordedUtc": "2026-10-29T11:00:12.8252666Z",
+  "passed": true,
+  "pipelineExitCode": 0,
+  "updaterSourceRevision": "11d8a75ba72e626a287630c3a8a4b6c6278d0647",
+  "gameSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "gameCandidate": "WN-CANDIDATE-20261029-invited-09",
+  "sequence": 2026102909,
+  "sourceCleanAfter": true,
+  "gameCandidateRoot": "F:/m9/mir2-web3/dist/mir2-windows-candidate/WN-CANDIDATE-20261029-invited-09",
+  "bundleRoot": "C:/mir2-build/native-zh-cn-finish-20261029/updater-release-r9/bundle",
+  "installerInclude": "C:/mir2-build/native-zh-cn-finish-20261029/updater-release-r9/installer-updater-files.iss",
+  "bundleFiles": [
+    {
+      "path": "Mir2Launcher.exe",
+      "bytes": 392192,
+      "sha256": "838c9bb6c2fd0e8478a704907fd98248b9bcdfa5a3c09b3ff07c8100f585d8ae"
+    },
+    {
+      "path": "UPDATER-BUNDLE.json",
+      "bytes": 1286,
+      "sha256": "2661d0e9b0a0f45298a724cc890f0de4e8c836eb4d3f6d3284c9278bcab6f584"
+    },
+    {
+      "path": "UPDATER-BUNDLE.p7s",
+      "bytes": 1614,
+      "sha256": "97862b2eaeedc73c70d6f0d7b50e330dc054715dae3256198d4898edf5bf4ae2"
+    },
+    {
+      "path": "updater/active.txt",
+      "bytes": 64,
+      "sha256": "ba617d9844bfb8cec28f1db642f8b81f6cdfa951e448d5850d6c67d76406b2d3"
+    },
+    {
+      "path": "updater/engines/0D23AADE70ACAA6BB2C00941BE5379971E6BD764AE585DB8427C2E03DCEED363/ENGINE.json",
+      "bytes": 421,
+      "sha256": "d1f6f1b7992021f9f0ed4426c8ce316bb60782830cd21f6ce3e16af1c4ebcd88"
+    },
+    {
+      "path": "updater/engines/0D23AADE70ACAA6BB2C00941BE5379971E6BD764AE585DB8427C2E03DCEED363/ENGINE.p7s",
+      "bytes": 1614,
+      "sha256": "db6ddb24d4a91db652d3fc6c5c0c29708f4999307b3acda151a051364df3a792"
+    },
+    {
+      "path": "updater/engines/0D23AADE70ACAA6BB2C00941BE5379971E6BD764AE585DB8427C2E03DCEED363/Mir2Updater.exe",
+      "bytes": 1955328,
+      "sha256": "0d23aade70acaa6bb2c00941be5379971e6bd764ae585db8427c2e03dceed363"
+    },
+    {
+      "path": "updater/seed-feed.json",
+      "bytes": 1175,
+      "sha256": "8b3f10786c99a441f48ccfc42245b5bac79af3ccc86070c48e299b6239858d24"
+    },
+    {
+      "path": "updater/seed-feed.p7s",
+      "bytes": 1614,
+      "sha256": "6fd0dd7405cba09f8bb4ecc230d6b49cda4d35a84c1cc0ae6c248a85911dbc8b"
+    }
+  ],
+  "evidenceArtifacts": [
+    {
+      "path": "updater-release-r9/BUILD-UPDATER.json",
+      "bytes": 625,
+      "sha256": "9638f841d665a26283025dcc01e016fd7144ccbb3d9201bf5febe38a7d4b4c93"
+    },
+    {
+      "path": "updater-release-r9/source-map.json",
+      "bytes": 265,
+      "sha256": "d5d1ec6331861287919d002088113d7b0f88ffda42f786f9ab07c7e61be0f221"
+    },
+    {
+      "path": "updater-release-r9/installer-updater-files.iss",
+      "bytes": 1752,
+      "sha256": "dba84b24b7973ec419bf3ef4ad0a7438ef4e84a36169996b871be9bae70d09f8"
+    },
+    {
+      "path": "updater-release-r9-verification.json",
+      "bytes": 592,
+      "sha256": "8a672aaca58c6e9fd7777fbed9298dd5a11c829e51f52bc514f24c3691c91ad1"
+    },
+    {
+      "path": "updater-release-r9-build.log",
+      "bytes": 2731,
+      "sha256": "c5643dca86a97fc6ddf5f2dba5ec1dbd73230e39041adfd23c07ce84404502a2"
+    },
+    {
+      "path": "updater-release-r9-verification.log",
+      "bytes": 594,
+      "sha256": "a195bb90b2450052b94d7a90cd6d113ee09d6247912be01d01eba18bc551c6ac"
+    },
+    {
+      "path": "updater-release-r9-installer-input.log",
+      "bytes": 72,
+      "sha256": "42f9065deecbf4a4dce4c0f2417e90214302efd5f917abaf7fa659b4f6df9262"
+    },
+    {
+      "path": "updater-release-r9-pipeline.log",
+      "bytes": 406,
+      "sha256": "f8d0c282d9bdb5bb67826e5522b483b4b8f4b3e9fe6cb380a8ed2fc7e6fc7a59"
+    }
+  ],
+  "detachedCmsVerified": true,
+  "signingPublicKeySha256": "6c70c777b27d50949370d494b4b25798200fbdd5c171baeeaa94d7e289900f3e",
+  "publicAuthenticode": "NotSigned",
+  "installerCompiled": false,
+  "installedFlowVerified": false,
+  "newKeys": false,
+  "trustStoreChanged": false,
+  "remoteDeployment": false,
+  "notes": [
+    "Updater wrapper build, strict 9-file bundle verification, and installer include generation passed.",
+    "Updater source 11d8 and attested Game source 242 are independently bound by signed metadata.",
+    "Precompile hashes are historical; the signed bundle above contains the actual wrapper-built binaries.",
+    "Installer compilation, installation, and normal Launcher to Updater to Game acceptance remain coordinator-owned pending steps."
+  ]
+}

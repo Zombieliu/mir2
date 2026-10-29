@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "compiler": "C:/mir2-build/native-zh-cn-finish-20261029/tools/InnoSetup7/ISCC.exe",
+  "version": "0.0.0.0",
+  "sha256": "E0F9F1DC32032650C6629F6DEE41EB6D20BA140E4E3C07C25D8A24F9BA781644",
+  "signature": "Valid",
+  "publisher": "CN=Pyrsys B.V., O=Pyrsys B.V., S=Noord-Holland, C=NL",
+  "installedForCurrentUser": true,
+  "trustStoreChanged": false
+}

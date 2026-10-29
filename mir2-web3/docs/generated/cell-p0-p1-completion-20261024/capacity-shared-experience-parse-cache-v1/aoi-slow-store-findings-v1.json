@@ -1,0 +1,842 @@
+{
+  "schemaVersion": 1,
+  "runId": "1793003885881-6d2fa527",
+  "scope": "Completed slow/Store-stage timing correlation for one previously analyzed AOI pair, without rereading gameplay raw. No game or source change.",
+  "pair": {
+    "observer": "L63fdbd1c",
+    "owner": "L63fdbd15"
+  },
+  "anchorTimes": {
+    "ownerSelfAckAtMs": 1793004126525,
+    "fatalAtMs": 1793004127820,
+    "observerRemoveAtMs": 1793004128489,
+    "ackToRemoveMs": 1964,
+    "neighborhoodStartMs": 1793004123525,
+    "neighborhoodEndMs": 1793004131489,
+    "neighborhoodMeaning": "ACK minus 3 seconds through Remove plus 3 seconds"
+  },
+  "sources": {
+    "base": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\slow-stage-public.jsonl",
+      "bytes": 4695677,
+      "sha256": "98ff9fbe5f042ccea4eb509f6896ec3f530062b326097a5e8bf47cffc683a277",
+      "rows": 51172,
+      "actualReadPasses": 1,
+      "statStable": true
+    },
+    "store": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\store-stage-public.jsonl",
+      "bytes": 626155,
+      "sha256": "507144ca2ff7fd4a54271e75b9eeaf2f7d595e5a5c66bec7ae1e46ae4a58ae1e",
+      "rows": 2836,
+      "actualReadPasses": 1,
+      "statStable": true
+    }
+  },
+  "statusEvidence": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\slow-stage-public-status.json",
+      "bytes": 1030,
+      "sha256": "9232079ec9d13915ffde9633b0c75509f19644010fac1da270fdffce68b99bc9"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\store-stage-public-status.json",
+      "bytes": 2597,
+      "sha256": "e4ad8ab4748b77b69fb187cc41cc447b7c88e895d150bb7d96038707bab24483"
+    }
+  ],
+  "cleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v4\\episode-50\\realm-cleanup.json",
+    "bytes": 6552,
+    "sha256": "7d44df5b32ea4b6bb21b0d89ac926cb2dbc242aceaeb71046a4084053d6b01c8"
+  },
+  "selector": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-aoi-v4-50-pair-analysis-v1\\analyze-slow-store-v1.py",
+    "bytes": 2995,
+    "sha256": "49b43cd6f03c439ec14811def40ea83e9a58f54aa1727576e52120026e66b64d"
+  },
+  "firstSelection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-aoi-v4-50-pair-analysis-v1\\slow-store-selected-v1.json",
+    "bytes": 767531,
+    "sha256": "81fa425bb7f5f3842e0db22449ce5fc659dc9c706111280d81c65879d2e58b7e"
+  },
+  "labelCorrection": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-aoi-v4-50-pair-analysis-v1\\slow-base-label-correction-v2.json",
+    "bytes": 324671,
+    "sha256": "82805dc92aed76059cea54fa2ec2ab60ac07b880ac0aa01141a5a02fcfa0c9a3"
+  },
+  "originalPairFindings": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\steady-aoi-v4-50-pair-analysis-v1\\findings-v1.json",
+    "bytes": 18443,
+    "sha256": "aecc0084faa73bbd8c0a4307f6ee35f65365659d517b87c3d306fd1af50183c2"
+  },
+  "actualReadPasses": {
+    "gameplayRawDuringThisTask": 0,
+    "baseSlowStream": 2,
+    "storeStream": 1,
+    "baseHashPasses": 1,
+    "storeHashPasses": 1
+  },
+  "readCorrectionHistory": {
+    "firstPassIssue": "Requested shorthand labels serial.zone_outbound_wait/shared_session.inner did not match actual labels serial_gate.zone_outbound_wait/shared_session.inner_execute. Global counts were saved, local rows omitted. Other three requested base stages and all Store rows were selected normally.",
+    "resolution": "Root explicitly permitted a second narrow base-only filter for the two actual labels; first-pass SHA was reused without rehash, Store and gameplay raw were not reread. First selection preserved unchanged.",
+    "secondFilterCountsMatchFirstPass": true,
+    "secondFilterStatStable": true
+  },
+  "captureVerification": {
+    "bothComplete": true,
+    "rowCountsEqualCleanupAndStatus": true,
+    "byteCountsEqualCleanupAndStatus": true,
+    "statStableOnEachRead": true,
+    "expectedPreexistingStreamHashInCleanup": false,
+    "hashesMeaning": "New SHA256 computed during the first and only hash pass for each ended stream; not falsely described as a preexisting cleanup hash comparison.",
+    "baseRows": 51172,
+    "storeRows": 2836,
+    "thresholdMs": 50
+  },
+  "stageStatistics": {
+    "serial_gate.zone_outbound_wait": {
+      "neighborhoodReceived": {
+        "rows": 694,
+        "maximumCompletedDurationMs": 2239,
+        "distinctOpaqueConnections": 50,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 186,
+        "maximumCompletedDurationMs": 2239,
+        "distinctOpaqueConnections": 50,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 221,
+        "maximumCompletedDurationMs": 2239,
+        "distinctOpaqueConnections": 50,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 44,
+        "maximumCompletedDurationMs": 2239,
+        "distinctOpaqueConnections": 44,
+        "operations": {}
+      },
+      "intervalMeaning": "receive-ending proxy, not measured server interval",
+      "largestNeighborhoodRow": {
+        "dataset": "base",
+        "line": 47312,
+        "row": {
+          "observedAtMs": 1793004128440,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 2239,
+          "connection": 49
+        },
+        "intervalMs": [
+          1793004126201,
+          1793004128440
+        ],
+        "intervalMeaning": "receive-ending proxy only, not a measured server span"
+      }
+    },
+    "runtime_tick.execute": {
+      "neighborhoodReceived": {
+        "rows": 577,
+        "maximumCompletedDurationMs": 2268,
+        "distinctOpaqueConnections": 49,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 126,
+        "maximumCompletedDurationMs": 2268,
+        "distinctOpaqueConnections": 49,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 157,
+        "maximumCompletedDurationMs": 2268,
+        "distinctOpaqueConnections": 49,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 42,
+        "maximumCompletedDurationMs": 2268,
+        "distinctOpaqueConnections": 42,
+        "operations": {}
+      },
+      "intervalMeaning": "receive-ending proxy, not measured server interval",
+      "largestNeighborhoodRow": {
+        "dataset": "base",
+        "line": 47310,
+        "row": {
+          "observedAtMs": 1793004128440,
+          "stage": "runtime_tick.execute",
+          "durationMs": 2268,
+          "connection": 49
+        },
+        "intervalMs": [
+          1793004126172,
+          1793004128440
+        ],
+        "intervalMeaning": "receive-ending proxy only, not a measured server span"
+      }
+    },
+    "shared_session.predrain": {
+      "neighborhoodReceived": {
+        "rows": 579,
+        "maximumCompletedDurationMs": 504,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 126,
+        "maximumCompletedDurationMs": 468,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 148,
+        "maximumCompletedDurationMs": 468,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 35,
+        "maximumCompletedDurationMs": 468,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "receive-ending proxy, not measured server interval",
+      "largestNeighborhoodRow": {
+        "dataset": "base",
+        "line": 48349,
+        "row": {
+          "observedAtMs": 1793004131203,
+          "stage": "shared_session.predrain",
+          "durationMs": 504
+        },
+        "intervalMs": [
+          1793004130699,
+          1793004131203
+        ],
+        "intervalMeaning": "receive-ending proxy only, not a measured server span"
+      }
+    },
+    "shared_session.inner_execute": {
+      "neighborhoodReceived": {
+        "rows": 155,
+        "maximumCompletedDurationMs": 368,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 58,
+        "maximumCompletedDurationMs": 368,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 58,
+        "maximumCompletedDurationMs": 368,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 4,
+        "maximumCompletedDurationMs": 368,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "receive-ending proxy, not measured server interval",
+      "largestNeighborhoodRow": {
+        "dataset": "base",
+        "line": 46952,
+        "row": {
+          "observedAtMs": 1793004128051,
+          "stage": "shared_session.inner_execute",
+          "durationMs": 368
+        },
+        "intervalMs": [
+          1793004127683,
+          1793004128051
+        ],
+        "intervalMeaning": "receive-ending proxy only, not a measured server span"
+      }
+    },
+    "shared_session.reconcile": {
+      "neighborhoodReceived": {
+        "rows": 200,
+        "maximumCompletedDurationMs": 419,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 38,
+        "maximumCompletedDurationMs": 315,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 44,
+        "maximumCompletedDurationMs": 315,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 2,
+        "maximumCompletedDurationMs": 315,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "receive-ending proxy, not measured server interval",
+      "largestNeighborhoodRow": {
+        "dataset": "base",
+        "line": 47936,
+        "row": {
+          "observedAtMs": 1793004129796,
+          "stage": "shared_session.reconcile",
+          "durationMs": 419
+        },
+        "intervalMs": [
+          1793004129377,
+          1793004129796
+        ],
+        "intervalMeaning": "receive-ending proxy only, not a measured server span"
+      }
+    },
+    "account_store.writable_wait": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.persist_wait": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.store_wait": {
+      "neighborhoodReceived": {
+        "rows": 447,
+        "maximumCompletedDurationMs": 236,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "experience_admission": 246,
+          "guild_lookup": 200,
+          "guild_clock": 1
+        }
+      },
+      "ackToRemoveReceived": {
+        "rows": 166,
+        "maximumCompletedDurationMs": 236,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "experience_admission": 91,
+          "guild_lookup": 74,
+          "guild_clock": 1
+        }
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 170,
+        "maximumCompletedDurationMs": 236,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "experience_admission": 94,
+          "guild_lookup": 75,
+          "guild_clock": 1
+        }
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 17,
+        "maximumCompletedDurationMs": 236,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "experience_admission": 16,
+          "guild_lookup": 1
+        }
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": {
+        "dataset": "store",
+        "line": 2701,
+        "row": {
+          "observedAtMs": 1793004127957,
+          "stage": "account_store.store_wait",
+          "durationMs": 236,
+          "operation": "experience_admission",
+          "traceId": 65205,
+          "startedUnixMs": 1793004127712,
+          "maxStartUs": 0,
+          "maxEndUs": 236916,
+          "samples": 1,
+          "totalUs": 236916
+        },
+        "intervalMs": [
+          1793004127712.0,
+          1793004127948.916
+        ],
+        "intervalMeaning": "server wall-anchored maximum completed occurrence; endpoint truncation applies"
+      }
+    },
+    "account_store.store_held": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.file_writer_wait": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.serialize": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.temp_write_sync": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.atomic_replace": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.marker_wait": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.marker_state_wait": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.marker_begin_sync": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.marker_settle_sync": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.driver_wait": {
+      "neighborhoodReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveReceived": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": null
+    },
+    "account_store.driver_held": {
+      "neighborhoodReceived": {
+        "rows": 1,
+        "maximumCompletedDurationMs": 92,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "guild_clock": 1
+        }
+      },
+      "ackToRemoveReceived": {
+        "rows": 1,
+        "maximumCompletedDurationMs": 92,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "guild_clock": 1
+        }
+      },
+      "ackToRemoveIntervalIntersection": {
+        "rows": 1,
+        "maximumCompletedDurationMs": 92,
+        "distinctOpaqueConnections": 0,
+        "operations": {
+          "guild_clock": 1
+        }
+      },
+      "fatalPointIntervalIntersection": {
+        "rows": 0,
+        "maximumCompletedDurationMs": null,
+        "distinctOpaqueConnections": 0,
+        "operations": {}
+      },
+      "intervalMeaning": "wall-anchored largest completed occurrence only; other same-stage occurrences not located",
+      "largestNeighborhoodRow": {
+        "dataset": "store",
+        "line": 2571,
+        "row": {
+          "observedAtMs": 1793004126792,
+          "stage": "account_store.driver_held",
+          "durationMs": 92,
+          "operation": "guild_clock",
+          "traceId": 64988,
+          "startedUnixMs": 1793004126701,
+          "maxStartUs": 0,
+          "maxEndUs": 92069,
+          "samples": 1,
+          "totalUs": 92069
+        },
+        "intervalMs": [
+          1793004126701.0,
+          1793004126793.069
+        ],
+        "intervalMeaning": "server wall-anchored maximum completed occurrence; endpoint truncation applies"
+      }
+    }
+  },
+  "strongestCoincidence": {
+    "serialWait": {
+      "dataset": "base",
+      "line": 47312,
+      "row": {
+        "observedAtMs": 1793004128440,
+        "stage": "serial_gate.zone_outbound_wait",
+        "durationMs": 2239,
+        "connection": 49
+      },
+      "intervalMs": [
+        1793004126201,
+        1793004128440
+      ],
+      "intervalMeaning": "receive-ending proxy only, not a measured server span"
+    },
+    "runtimeExecute": {
+      "dataset": "base",
+      "line": 47310,
+      "row": {
+        "observedAtMs": 1793004128440,
+        "stage": "runtime_tick.execute",
+        "durationMs": 2268,
+        "connection": 49
+      },
+      "intervalMs": [
+        1793004126172,
+        1793004128440
+      ],
+      "intervalMeaning": "receive-ending proxy only, not a measured server span"
+    },
+    "sharedReceiveAtMs": 1793004128440,
+    "receiveToObserverRemoveMs": 49,
+    "interpretation": "A 2239ms serial zone-outbound wait and a 2268ms runtime tick were logged for opaque connection49 and received together, 49ms before the observer Remove. Their receive-ending proxies include the owner ACK and the fatal poll. This is affirmative temporal evidence of a long serial wait during this neighborhood, but it does not identify which client/request/ObjectRemove was waiting.",
+    "connectionIdentityWarning": "The base slow connection counter49 and gameplay client connection49 must not be equated solely by numeric equality. No explicit shared mapping or request ID is present."
+  },
+  "storeInterpretation": {
+    "targetStoreWaitReceivedRows": 166,
+    "targetMaximumCompletedStoreWaitMs": 236,
+    "recordedMaxSpanIntersections": 170,
+    "fatalPointMaxSpanIntersections": 17,
+    "guildClockHeldRow": {
+      "dataset": "store",
+      "line": 2571,
+      "row": {
+        "observedAtMs": 1793004126792,
+        "stage": "account_store.driver_held",
+        "durationMs": 92,
+        "operation": "guild_clock",
+        "traceId": 64988,
+        "startedUnixMs": 1793004126701,
+        "maxStartUs": 0,
+        "maxEndUs": 92069,
+        "samples": 1,
+        "totalUs": 92069
+      },
+      "intervalMs": [
+        1793004126701.0,
+        1793004126793.069
+      ],
+      "intervalMeaning": "server wall-anchored maximum completed occurrence; endpoint truncation applies"
+    },
+    "noCompletedStoreHeldOverThresholdInNeighborhood": true,
+    "limits": "store_wait completed records do not reveal the identity of the holder. No >=50ms completed store_held row in this neighborhood does not exclude shorter repeated holds or an unfinished hold. The guild_clock driver_held92ms is not itself proof of Store lock ownership. Store spans overlap/nest and must not be summed."
+  },
+  "conclusion": {
+    "hasTemporalSerialWaitingEvidence": true,
+    "identifiesPairConnection": false,
+    "provesSpecificObjectRemoveBlocked": false,
+    "uniqueRootCauseProven": false,
+    "originalAoiFatalPreserved": true,
+    "capacityAccepted": false,
+    "gameThresholdChanged": false,
+    "plainLanguage": "The new pair receive skew overlaps substantial recorded serial waiting. The largest logged serial wait is 2239ms, whereas the largest completed Store wait in the ACK-to-Remove received window is236ms. This narrows the next inspection to the serial outbound/runtime wait path and its queue-holder chain, without claiming Store, CPU, transport or a particular connection as the cause."
+  },
+  "limitations": [
+    "Base observedAtMs is launcher stderr receive time. observedAtMs-durationMs is only a proxy; buffering, scheduling and nested reporting delay are unknown, so it is not an exact server span or an overlap proof by itself.",
+    "Store startedUnixMs plus maxStartUs/maxEndUs provides a server wall-anchored maximum-completed-occurrence interval; millisecond/microsecond truncation and cross-clock sampling apply. samples and totalUs do not locate every occurrence.",
+    "Counts are row counts, not independent requests or actors. Nested runtime, predrain, inner, reconcile and serial waits must not be added.",
+    "Existing50ms threshold censors short stalls. Only completed Store records emit; missing held rows cannot prove absence of an active holder.",
+    "The neighborhood includes some post-fatal drain records. The target-window and fatal-point columns are separately labeled, and base interval counts remain proxy correlations.",
+    "No gameplay raw, monitor stream, private inputs or server process was read or rerun in this task. No network/test/load/source operation occurred."
+  ]
+}

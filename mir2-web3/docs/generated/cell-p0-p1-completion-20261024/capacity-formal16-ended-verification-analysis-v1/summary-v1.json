@@ -1,0 +1,415 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-26T03:32:45.100Z",
+  "runId": "1792981760951-0079fde7",
+  "scope": "Closed final/report and bounded-analysis metadata only; no raw/monitor/trace scan or verifier rerun.",
+  "actualIndependentFinal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\final-verification.json",
+    "bytes": 572241,
+    "sha256": "070a748fc8791dec6d35dd31475c0e7f79a77bf8ec49537bad5ddecaa8d9aea6"
+  },
+  "actualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 814,
+    "sha256": "281a9adf934598641240678c0d4c3d7d6eaf5e1d2d763c754e1e05a2e73a4851"
+  },
+  "actualToolSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 2296,
+    "sha256": "4dee47066ba1bbb4ceb0024a6bf242dce721f0ad8d5665a8830223052cb4276d"
+  },
+  "actualIndependentFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-actual-independent-facts-v1.json",
+    "bytes": 10036,
+    "sha256": "ee42961cd87701cf7a0c79e9f84d483d74c8828508fd9235230499fa6894f240"
+  },
+  "actualIndependentCompletion": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-actual-independent-completion-v1.json",
+    "bytes": 3838,
+    "sha256": "c4dc1cb6ad3421fde52e2bdba91cbd0b25129a0f376f0f7ac864091f528efc08"
+  },
+  "independentVerificationPassed": true,
+  "formalRunPassed": false,
+  "capacityAccepted": false,
+  "rawVerifierAccepted": false,
+  "productionAccepted": false,
+  "phaseChecks": [
+    {
+      "name": "stage-2",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.22,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-10",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.223,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": true
+    },
+    {
+      "name": "stage-25",
+      "configuredSeconds": 300,
+      "measuredSeconds": 300.27,
+      "completed": true,
+      "completeWindowCount": 5,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": true,
+      "activityCounterReplayEqual": true,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-50",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "stage-100",
+      "configuredSeconds": 300,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 5,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "soak",
+      "configuredSeconds": 7200,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 120,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    },
+    {
+      "name": "post-resume-observation",
+      "configuredSeconds": 60,
+      "measuredSeconds": null,
+      "completed": false,
+      "completeWindowCount": 0,
+      "requiredCompleteWindows": 1,
+      "rawReportWindowsEqual": null,
+      "activityCounterReplayEqual": false,
+      "strictGatesPassed": false
+    }
+  ],
+  "failureWindow": {
+    "stage": "stage-25",
+    "index": 5,
+    "seconds": 60,
+    "startedAtMs": 1792982768898,
+    "endedAtMs": 1792982828898,
+    "movementPassed": true,
+    "chatPassed": true,
+    "timeoutRatio": 0,
+    "correctionRatio": 0,
+    "actors": [
+      {
+        "actor": "Le984da05",
+        "passed": false,
+        "attacks": 15,
+        "hits": 15,
+        "plans": 67,
+        "gaps": 0,
+        "nativePassed": true,
+        "cellsPerMinute": 85
+      },
+      {
+        "actor": "Le984da0f",
+        "passed": true,
+        "attacks": 23,
+        "hits": 23,
+        "plans": 60,
+        "gaps": 0,
+        "nativePassed": true,
+        "cellsPerMinute": 57
+      }
+    ]
+  },
+  "continuous": {
+    "assessed": 230,
+    "completeAtLeast60Seconds": 205,
+    "finalPartial": 25,
+    "failed": 0
+  },
+  "attackMetadata": {
+    "whole": 487,
+    "measuredPhaseCounts": [
+      0,
+      164,
+      249
+    ],
+    "measuredTotal": 413,
+    "outsideMeasured": 74,
+    "outsideClassification": "Unclassified; no ramp/settle attribution.",
+    "notLaunched": 0,
+    "source": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-independent-verification-v1\\root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 11336,
+      "sha256": "5eaea7bd0468160452944bb9293904fcdcef36de139f42960c7338f7f9d6f48d"
+    },
+    "noNewPacketLevel900Replay": true
+  },
+  "scoutSelectionDiagnostics": {
+    "rows": 9,
+    "detailedRows": 9,
+    "truncationSentinels": 0,
+    "missingFieldRows": 0,
+    "invalidTypeRows": 0,
+    "unknownReasonRows": 0,
+    "reasonCounts": {
+      "no-active-other-waypoints": 7,
+      "reordered": 1,
+      "all-hints-unshared": 1
+    },
+    "fieldPresence": {
+      "hintCount": 9,
+      "activeOtherWaypointCount": 9,
+      "sharedHintCount": 9,
+      "unsharedHintCount": 9,
+      "hintPreferenceReason": 9
+    },
+    "selected": [
+      {
+        "line": 16354,
+        "actor": "Le984da05",
+        "phase": "stage-10",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 44272,
+        "actor": "Le984da05",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 50149,
+        "actor": "Le984da05",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 50317,
+        "actor": "Le984da0f",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 1,
+        "sharedHintCount": 1,
+        "unsharedHintCount": 3,
+        "hintPreferenceReason": "reordered"
+      },
+      {
+        "line": 58326,
+        "actor": "Le984da05",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 65302,
+        "actor": "Le984da05",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 3,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 3,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 72962,
+        "actor": "Le984da05",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 80647,
+        "actor": "Le984da0f",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 0,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "no-active-other-waypoints"
+      },
+      {
+        "line": 80834,
+        "actor": "Le984da05",
+        "phase": "stage-25",
+        "truncated": false,
+        "hintCount": 4,
+        "activeOtherWaypointCount": 1,
+        "sharedHintCount": 0,
+        "unsharedHintCount": 4,
+        "hintPreferenceReason": "all-hints-unshared"
+      }
+    ],
+    "selectedTruncated": false,
+    "observed": true,
+    "contributesToGameAcceptance": false,
+    "fieldContractObserved": true,
+    "observationScope": "Only bounded scalar selection diagnostics were observed; no planning success, ACK, hit, throughput or causal-improvement credit.",
+    "notIndependentlyReplayedTyped900msPackets": true
+  },
+  "stage25DiagnosticSummary": {
+    "rows": 8,
+    "sentinels": 0,
+    "fieldContracts": {
+      "valid": 8
+    },
+    "preferenceReasons": {
+      "no-active-other-waypoints": 6,
+      "reordered": 1,
+      "all-hints-unshared": 1
+    },
+    "hintCounts": {
+      "3": 1,
+      "4": 7
+    },
+    "activeOtherWaypointCounts": {
+      "0": 6,
+      "1": 2
+    },
+    "sharedUnsharedTuples": {
+      "0/4": 6,
+      "1/3": 1,
+      "0/3": 1
+    },
+    "stablePartitionApplied": 1
+  },
+  "failedWindowDiagnosticSummary": {
+    "rows": 3,
+    "sentinels": 0,
+    "fieldContracts": {
+      "valid": 3
+    },
+    "preferenceReasons": {
+      "no-active-other-waypoints": 2,
+      "all-hints-unshared": 1
+    },
+    "hintCounts": {
+      "4": 3
+    },
+    "activeOtherWaypointCounts": {
+      "0": 2,
+      "1": 1
+    },
+    "sharedUnsharedTuples": {
+      "0/4": 3
+    },
+    "stablePartitionApplied": 0
+  },
+  "diagnosticInterpretation": "Declared waypoint overlap and bounded hint counts are planning observations, not independent target supply, arrived occupancy, exclusive claims or a unique cause of the failed attack rate.",
+  "boundedFailureAnalysis": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-supply-failure-analysis-v1\\analyze-v1.py",
+      "bytes": 22819,
+      "sha256": "f7db79d40b0f97e6cdc142f5390de75681a2abcf4afe404ada0b365a2894d48a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-supply-failure-analysis-v1\\analysis-v1.json",
+      "bytes": 184733,
+      "sha256": "5e07036f54628ab8025e94da48c3644857445cfd0a4031ffc3aa0e5caa052810"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-supply-failure-analysis-v1\\selected-evidence-v1.json",
+      "bytes": 245251,
+      "sha256": "b2a860f7c6cc35a811ff75d76d7d988d91754a4fbebbb84b8fb574edf1c79c31"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal16-supply-failure-analysis-v1\\summary-v1.json",
+      "bytes": 33011,
+      "sha256": "6758088b1e75dbc8bbf0a05d00999c58a2068f76ff13e92295deeca50a0649a5"
+    }
+  ],
+  "storeDiagnostics": {
+    "rows": 107,
+    "bytes": 23371,
+    "sha256": "f4312abf01cd24d69e45063d4d30bed7f57d7beb7d604019b96ea50da71f6fb4",
+    "complete": true,
+    "contributesToGameAcceptance": false,
+    "completedOnlyCannotProveMissingHolder": true
+  },
+  "hp": {
+    "observedStatuses": {},
+    "statusValidationChecked": true,
+    "totalRows": 0,
+    "verifiedEventsChecked": 0,
+    "successProofChecked": false,
+    "noVerifiedDoseObserved": true,
+    "pendingSentWithoutTerminal": 0,
+    "notContinuousHpCoverage": true,
+    "claim": "Only actual verified rows with matching sent/acknowledgement and effect proof are checked. Zero verified events claim neither a real dose nor survival.",
+    "proofLimitations": [
+      "The raw producer does not persist send monotonic time, receipt cursor or quantityBefore. This verifier cannot independently reconstruct the original freshness deadline or the numeric inventory decrease.",
+      "Consumed and increased HP remain distinct observations. A consumption proof alone does not claim healing.",
+      "No HP event or diagnostic proof contributes to native opportunity, launched attack, dual hit, ACK or original gameplay acceptance."
+    ]
+  },
+  "originalCleanupCapacityAccepted": null,
+  "originalCleanupCapacityAcceptanceAdjudicated": false,
+  "originalPendingFactsPreserved": true,
+  "pendingHistoricalNotRewritten": true,
+  "notExecuted": [
+    "stage-50",
+    "stage-100",
+    "7200-second-soak",
+    "native-resume5",
+    "save5",
+    "post-resume-observation60"
+  ],
+  "unproven": [
+    "No unique supply root cause or CPU/server capacity limit is established.",
+    "No independent per-request typed-result/dual-positive900ms replay.",
+    "No2h memory/survival or100-player production guarantee.",
+    "P0 remains false; P2 has not started."
+  ],
+  "privateDataRead": false,
+  "rawOrLargePayloadCopied": false,
+  "copyExecuted": false
+}

@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "kind": "public-archive-descriptive-metadata-correction",
+  "scope": "The original W6 copied-evidence-manifest descriptive block accidentally retained V5 values during authoring. This append-only correction supersedes only those descriptions; all33 actual raw copied originals, original manifest bytes and game failure remain unchanged.",
+  "originalArchiveManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v6\\copied-evidence-manifest.json",
+    "bytes": 12734,
+    "sha256": "664eb017480c612f8790103b90175d613957030b23de35e8bd75bbda2bb0c735"
+  },
+  "actualPublicInputs": {
+    "report": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v6\\1793054581472-f2428092.preparation-report.json",
+      "bytes": 17362,
+      "sha256": "0063adec5a16e3cffdcc642e4edf6b130a21945eb0f0b22a89c3915c2b2f1b00"
+    },
+    "nodeReceipt": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v6\\node-v6\\root-focused-receipt-v1.json",
+      "bytes": 15783,
+      "sha256": "620a35b75a94ca4e5105cf737e0bb56d853dd1dbb543e49639e0462104ccceb7"
+    },
+    "sourceBankPlan": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v6\\source-bank-plan-pending-v1.json",
+      "bytes": 11045,
+      "sha256": "b718121546daf4d791a4a50d59ff1602cbdfccf17a69328556b7601c53f97839"
+    },
+    "sourceBankCopyReceipt": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\bank-prepare-v6\\source-bank-copy-receipt-v1.json",
+      "bytes": 8690,
+      "sha256": "1ef35cc9cb217e8b84485ba3bbfc2a2c811e2a82e0d503245012f3eb61f3d3df"
+    }
+  },
+  "corrections": [
+    {
+      "field": "scope/source bank",
+      "original": "V4 bank/latest V4 ledger and guarded-navigation narrative copied from V5",
+      "correct": "Actual W6 continues complete cold V5 bank/latest V5 ledger and fails dynamic staging selection before movement"
+    },
+    {
+      "field": "freshPreparationAndProtectedNavigationTestsPassed",
+      "original": 200,
+      "correct": 237
+    },
+    {
+      "field": "freshOrdinaryDependencyTestsPassed",
+      "original": 301,
+      "correct": 325
+    },
+    {
+      "field": "actualRootFreshSelectedJsTestsPassed",
+      "original": 501,
+      "correct": 562
+    },
+    {
+      "field": "fifthActor.freshBefore",
+      "original": {
+        "hp": 18,
+        "maximumHp": 18,
+        "hpStock": 12,
+        "gold": 15,
+        "x": 304,
+        "y": 613,
+        "sequence": 633
+      },
+      "correct": {
+        "sequence": 667,
+        "monotonicMs": 16238.0661,
+        "ownerId": 1000,
+        "ownerName": "L370e2a04",
+        "map": "0",
+        "x": 331,
+        "y": 590,
+        "hp": 18,
+        "maxHp": 18,
+        "hpStock": 12,
+        "gold": 15,
+        "venison": 0,
+        "inSafeZone": false,
+        "nearbyHostileCount": 3,
+        "playerPoison": null,
+        "ownerPoison": null,
+        "dazed": false
+      }
+    },
+    {
+      "field": "fifthActor.commands",
+      "original": 24,
+      "correct": 1
+    },
+    {
+      "field": "fifthActor.movementCommands",
+      "original": 23,
+      "correct": 0
+    }
+  ],
+  "actualCounts": {
+    "freshPreparationTests": 237,
+    "freshOrdinaryTests": 325,
+    "freshSelectedTotal": 562,
+    "namedSourceInputs": 32,
+    "sourceBeforeAfterUnchanged": true
+  },
+  "actualFifth": {
+    "name": "L370e2a04",
+    "characterIndex": 5,
+    "commands": 1,
+    "movementCommands": 0,
+    "elapsedMs": 30.96229999999923,
+    "error": "No fresh visible unoccupied distinct declared staging candidate",
+    "purchased": 0,
+    "soldVenison": 0,
+    "funding": null,
+    "after": null,
+    "freshReadiness": null
+  },
+  "unchangedResults": {
+    "preparedCount": 4,
+    "originalRunPassed": false,
+    "measurementPerformed": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "normalCleanupComplete": true,
+    "reusedBackend": "Original actual ee06 immutable backend Release V6/55 sources/Rust32 remains reused, not fresh or rebuilt"
+  },
+  "original33RawCopiesVerifiedUnchanged": true,
+  "archiveCorrectionOnly": true,
+  "codeChanged": false,
+  "testsRun": false,
+  "loadRun": false
+}

@@ -120,6 +120,7 @@ use super::bag_paint::{
     format_crystal_gold, inventory_second_tab_index, inventory_weight_bar_asset,
     inventory_weight_bar_width, BagPaintGridViewport as OverlayInventoryGridViewport,
 };
+use super::guild_pixel_text_view::{spawn_guild_label, GuildTextAlign};
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
 #[cfg(test)]
@@ -789,6 +790,8 @@ pub struct NativePlayerUiState {
     pub game_shop_dialog: game_shop_dialog::GameShopDialogUi,
     pub billing_open: bool,
     pub billing_input_consumed: bool,
+    pub procurement_open: bool,
+    pub procurement_input_consumed: bool,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
@@ -1421,6 +1424,8 @@ impl Default for NativePlayerUiState {
             game_shop_dialog: Default::default(),
             billing_open: false,
             billing_input_consumed: false,
+            procurement_open: false,
+            procurement_input_consumed: false,
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
@@ -1782,7 +1787,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.billing_open
+        self.procurement_open
+            || self.procurement_input_consumed
+            || self.billing_open
             || self.billing_input_consumed
             || self.refine.open
             || self.refine.pending()
@@ -1950,7 +1957,9 @@ impl NativePlayerUiState {
         panel_blocks: bool,
         hover_blocks: bool,
     ) -> bool {
-        self.billing_open
+        self.procurement_open
+            || self.procurement_input_consumed
+            || self.billing_open
             || self.billing_input_consumed
             || self.refine.open
             || self.refine.pending()
@@ -2100,7 +2109,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.non_friend_amount_modal_open_except_hero()
     }
     fn non_friend_amount_modal_open_except_hero(&self) -> bool {
-        self.billing_open
+        self.procurement_open
+            || self.procurement_input_consumed
+            || self.billing_open
             || self.billing_input_consumed
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
@@ -4650,14 +4661,18 @@ pub fn native_mail_parcel_quote_state(world: &World) -> Option<NativeMailParcelQ
 
 impl Plugin for Mir2CrystalOverlayPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Mir2NativeMailParcelServicePlugin)
-            .configure_sets(
-                Update,
-                NativeMailParcelServiceSet
-                    .after(sync_mail_letter_editor)
-                    .before(consume_hud_buttons)
-                    .before(process_overlay_keyboard),
-            );
+        app.add_plugins((
+            Mir2NativeMailParcelServicePlugin,
+            super::guild_pixel_text_view::GuildPixelTextPlugin,
+            crate::native_procurement::NativeProcurementPlugin,
+        ))
+        .configure_sets(
+            Update,
+            NativeMailParcelServiceSet
+                .after(sync_mail_letter_editor)
+                .before(consume_hud_buttons)
+                .before(process_overlay_keyboard),
+        );
         register_crystal_additive_ui(app);
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<localized_help::HelpScrollState>()
@@ -6306,6 +6321,10 @@ fn process_inventory_drag(
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
     if !state.inventory_open()
+        || state.procurement_open
+        || state.procurement_input_consumed
+        || state.billing_open
+        || state.billing_input_consumed
         || state.mail_feedback_prompt.is_some()
         || state.mail_feedback_input_consumed
         || state.mail_recipient_prompt_active
@@ -7796,6 +7815,8 @@ fn sync_npc_dialog_inventory_location(
     big_map: Option<Res<BigMapModel>>,
     intents: Option<Res<NativePlayerUiIntentQueue>>,
     mut was_open: Local<bool>,
+    mut previous_npc: Local<Option<u32>>,
+    mut previous_map_epoch: Local<Option<u64>>,
     presentation: Option<Res<crate::quest_ui::QuestUiPresentation>>,
     geometry: crate::stone_workshop_ui::StoneWorkshopGeometry,
     mut previous_sidebar: Local<
@@ -7804,8 +7825,6 @@ fn sync_npc_dialog_inventory_location(
             crate::quest_ui::QuestUiPresentation,
         )>,
     >,
-    mut previous_npc: Local<Option<u32>>,
-    mut previous_map_epoch: Local<Option<u64>>,
 ) {
     if let Some(intents) = intents {
         state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());
@@ -8064,7 +8083,11 @@ pub(crate) fn process_overlay_keyboard(
         typed.clear();
         return;
     }
-    if shell.billing.open || state.billing_input_consumed {
+    if shell.billing.open
+        || state.billing_input_consumed
+        || state.procurement_open
+        || state.procurement_input_consumed
+    {
         typed.clear();
         return;
     }
@@ -9254,7 +9277,11 @@ fn process_overlay_buttons(
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
-    if shell.billing.open || state.billing_input_consumed {
+    if shell.billing.open
+        || state.billing_input_consumed
+        || state.procurement_open
+        || state.procurement_input_consumed
+    {
         return;
     }
     state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());
@@ -15328,7 +15355,89 @@ fn group_member_position(index: usize) -> (f32, f32) {
     }
 }
 
-fn render_guild_panel(
+fn guild_uses_original_art() -> bool {
+    !crate::native_i18n::active()
+        || crate::native_i18n::locale() == crate::native_i18n::Locale::English
+}
+
+fn spawn_guild_source_sprite(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    path: String,
+    rect: CrystalRect,
+) {
+    if !guild_uses_original_art() {
+        spawn_static_overlay_sprite(parent, assets, path, rect);
+        return;
+    }
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        ImageNode {
+            image: assets.load(path),
+            ..default()
+        },
+    ));
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_guild_source_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    library: &'static str,
+    normal: u16,
+    hover: u16,
+    pressed: u16,
+    rect: CrystalRect,
+    image_size: (f32, f32),
+    action: OverlayButton,
+    enabled: bool,
+) {
+    let spec = CrystalButtonSpec::new(
+        library,
+        normal,
+        hover,
+        pressed,
+        rect,
+        image_size.0,
+        image_size.1,
+    );
+    let frames = CrystalButtonAssetSet::from_spec(spec);
+    if guild_uses_original_art() {
+        super::widget::spawn_original_crystal_image_button(
+            parent, assets, spec, frames, action, false, enabled,
+        );
+    } else {
+        spawn_crystal_image_button(parent, assets, spec, frames, action, false, enabled);
+    }
+}
+
+fn guild_label_at(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    rect: CrystalRect,
+    point_size: f32,
+    color: Color,
+) {
+    spawn_guild_label(
+        parent,
+        text,
+        rect,
+        point_size,
+        color,
+        GuildTextAlign::Left,
+        true,
+        false,
+    );
+}
+
+pub(crate) fn render_guild_panel(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
     social: &crate::social::SocialModel,
@@ -15340,19 +15449,19 @@ fn render_guild_panel(
     let Some(asset_server) = asset_server else {
         return;
     };
-    spawn_static_overlay_sprite(
+    spawn_guild_source_sprite(
         parent,
         asset_server,
         "original-ui/Prguse/180.png".to_owned(),
         rect,
     );
-    spawn_static_overlay_sprite(
+    spawn_guild_source_sprite(
         parent,
         asset_server,
         "original-ui/Title/25.png".to_owned(),
         CrystalRect::new(rect.left + 18.0, rect.top + 9.0, 49.0, 15.0),
     );
-    spawn_overlay_crystal_button(
+    spawn_guild_source_button(
         parent,
         asset_server,
         "Prguse2",
@@ -15360,7 +15469,9 @@ fn render_guild_panel(
         361,
         362,
         CrystalRect::new(rect.left + 565.0, rect.top + 4.0, 24.0, 21.0),
+        (24.0, 21.0),
         OverlayButton::CloseSocial,
+        true,
     );
     spawn_guild_tab(
         parent,
@@ -15455,7 +15566,7 @@ fn spawn_guild_tab(
     action: OverlayButton,
 ) {
     let normal = if selected { active } else { idle };
-    spawn_overlay_crystal_button(
+    spawn_guild_source_button(
         parent,
         asset_server,
         "Title",
@@ -15463,7 +15574,9 @@ fn spawn_guild_tab(
         normal,                                    // Guild tabs have no HoverIndex in Crystal.
         if idle == 101 { normal } else { active }, // Rank has no PressedIndex.
         CrystalRect::new(left, top, 72.0, 24.0),
+        (72.0, 24.0),
         action,
+        true,
     );
 }
 
@@ -16012,7 +16125,7 @@ fn render_guild_status(
         "original-ui/Prguse/1850.png".to_owned(),
         CrystalRect::new(rect.left + 365.0, rect.top + 62.0, 208.0, 316.0),
     );
-    if crate::native_i18n::active() {
+    if !guild_uses_original_art() {
         localized_art_label(
             parent,
             "Guild Statistics",
@@ -16021,11 +16134,11 @@ fn render_guild_status(
         );
     }
     if social_has_permission(guild, "recruit") {
-        overlay_text_at(
+        guild_label_at(
             parent,
             &crate::native_i18n::tr("Recruit Member"),
             CrystalRect::new(rect.left + 391., rect.top + 343., 150., 15.),
-            10.6667,
+            8.0,
             Color::WHITE,
         );
         friend_dialog::view::render_editor_styled(
@@ -16035,49 +16148,51 @@ fn render_guild_status(
             false,
             Color::srgb_u8(35, 35, 35),
         );
-        spawn_overlay_crystal_button_enabled(
+        spawn_guild_source_button(
             parent,
             asset_server,
             "Title",
             356,
             357,
             358,
-            CrystalRect::new(rect.left + 525., rect.top + 358., 40., 25.),
+            CrystalRect::new(rect.left + 525., rect.top + 358., 24., 21.),
+            (24., 24.),
             OverlayButton::GuildRecruitNameSubmit,
             true,
         );
     }
-    for (label, value, top) in [
-        ("Guild", guild.name.as_deref().unwrap_or(""), 107.0),
-        ("Level", if guild.name.is_some() { "" } else { "" }, 133.0),
-        ("Members", "", 159.0),
-    ] {
-        overlay_text_at(
-            parent,
-            &crate::native_i18n::tr(label),
-            CrystalRect::new(rect.left + 362.0, rect.top + top, 75.0, 14.0),
-            9.0,
-            Color::srgb(0.55, 0.55, 0.55),
-        );
-        if !value.is_empty() {
-            overlay_text_at(
-                parent,
-                value,
-                CrystalRect::new(rect.left + 437.0, rect.top + top, 120.0, 14.0),
-                9.0,
-                TEXT,
-            );
-        }
-    }
+    // Original StatusHeaders is ONE right-aligned MirLabel, including the
+    // blank lines. Keeping its full control size preserves GDI's line advance
+    // and overhang padding; a left-aligned 14px row shifts all three captions.
+    let headers = ["Guild Name", "Level", "Members"]
+        .map(crate::native_i18n::tr)
+        .join("\n\n");
+    spawn_guild_label(
+        parent,
+        &headers,
+        CrystalRect::new(rect.left + 362., rect.top + 107., 75., 300.),
+        8.,
+        Color::srgb_u8(128, 128, 128),
+        GuildTextAlign::Right,
+        false,
+        false,
+    );
     if guild.name.is_some() {
-        overlay_text_at(
+        guild_label_at(
+            parent,
+            guild.name.as_deref().unwrap_or(""),
+            CrystalRect::new(rect.left + 437., rect.top + 107., 120., 200.),
+            8.,
+            Color::WHITE,
+        );
+        guild_label_at(
             parent,
             &guild.level.to_string(),
-            CrystalRect::new(rect.left + 437.0, rect.top + 133.0, 120.0, 14.0),
-            9.0,
-            TEXT,
+            CrystalRect::new(rect.left + 437.0, rect.top + 133.0, 120.0, 200.0),
+            8.0,
+            Color::WHITE,
         );
-        overlay_text_at(
+        guild_label_at(
             parent,
             &crate::native_i18n::tr(&format!(
                 "{}{}",
@@ -16088,9 +16203,9 @@ fn render_guild_status(
                     format!("/{}", guild.max_members)
                 }
             )),
-            CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 14.0),
-            9.0,
-            TEXT,
+            CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 200.0),
+            8.0,
+            Color::WHITE,
         );
     }
     if guild.max_experience > 0 {
@@ -16123,20 +16238,16 @@ fn render_guild_status(
         }
         let value = format!("{:.2}", ratio * 100.);
         let label = format!("{}%", value.trim_end_matches('0').trim_end_matches('.'));
-        parent.spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(rect.left + 322.),
-                top: Val::Px(rect.top + 405.),
-                width: Val::Px(260.),
-                height: Val::Px(15.),
-                ..default()
-            },
-            Text::new(label),
-            crate::crystal_ui::typography::crystal_text_font(32. / 3.),
-            TextColor(Color::WHITE),
-            TextLayout::justify(Justify::Center),
-        ));
+        spawn_guild_label(
+            parent,
+            &label,
+            CrystalRect::new(rect.left + 322., rect.top + 405., 260., 15.),
+            8.,
+            Color::WHITE,
+            GuildTextAlign::Center,
+            false,
+            true,
+        );
     }
 }
 

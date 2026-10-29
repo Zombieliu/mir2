@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "small-public-derivation-cross-reference",
+  "createdAt": "2026-10-25T10:38:42.8639397Z",
+  "sourceReview": {
+    "file": "source-review-v1.json",
+    "bytes": 9331,
+    "sha256": "01a71b922194bd872511813161c556cb1de22b48a5fc0af44e56102a2f49a160"
+  },
+  "derivationRead": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe14-independent-verification-v1/final-verification.json",
+    "bytes": 160745,
+    "sha256": "51767fdb36d7d8f146b7bb366f7bd58fdcbff3c92e19b318f72673fa613139a7",
+    "runId": "1792923531277-bc2bda2e",
+    "rawReplayedByThisReviewer": false
+  },
+  "correctedActions": [
+    {
+      "line": 1642,
+      "at": 1792923657353,
+      "actor": "L8baceb00",
+      "phase": "stage-2",
+      "kind": "run",
+      "plannedTarget": {
+        "x": 243,
+        "y": 598
+      },
+      "actual": {
+        "x": 243,
+        "y": 596
+      },
+      "latencyMs": 0.48170000000391155
+    },
+    {
+      "line": 3473,
+      "at": 1792923779619,
+      "actor": "L8baceb00",
+      "phase": "stage-2",
+      "kind": "run",
+      "plannedTarget": {
+        "x": 243,
+        "y": 599
+      },
+      "actual": {
+        "x": 241,
+        "y": 599
+      },
+      "latencyMs": 0.4841000000014901
+    },
+    {
+      "line": 3482,
+      "at": 1792923780359,
+      "actor": "L8baceb00",
+      "phase": "stage-2",
+      "kind": "walk",
+      "plannedTarget": {
+        "x": 242,
+        "y": 599
+      },
+      "actual": {
+        "x": 241,
+        "y": 599
+      },
+      "latencyMs": 0.5094000000099186
+    },
+    {
+      "line": 3887,
+      "at": 1792923807366,
+      "actor": "L8baceb00",
+      "phase": "stage-2",
+      "kind": "run",
+      "plannedTarget": {
+        "x": 243,
+        "y": 597
+      },
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "latencyMs": 2.7785999999614432
+    },
+    {
+      "line": 3897,
+      "at": 1792923808110,
+      "actor": "L8baceb00",
+      "phase": "stage-2",
+      "kind": "walk",
+      "plannedTarget": {
+        "x": 242,
+        "y": 597
+      },
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "latencyMs": 0.4787000000360422
+    }
+  ],
+  "pairs": [
+    {
+      "runRawLine": 3473,
+      "walkRawLine": 3482,
+      "timeBetweenActionRowsMs": 740,
+      "runPlannedEnd": {
+        "x": 243,
+        "y": 599
+      },
+      "runAcknowledgedPosition": {
+        "x": 241,
+        "y": 599
+      },
+      "walkPlannedEnd": {
+        "x": 242,
+        "y": 599
+      },
+      "walkAcknowledgedPosition": {
+        "x": 241,
+        "y": 599
+      }
+    },
+    {
+      "runRawLine": 3887,
+      "walkRawLine": 3897,
+      "timeBetweenActionRowsMs": 744,
+      "runPlannedEnd": {
+        "x": 243,
+        "y": 597
+      },
+      "runAcknowledgedPosition": {
+        "x": 241,
+        "y": 597
+      },
+      "walkPlannedEnd": {
+        "x": 242,
+        "y": 597
+      },
+      "walkAcknowledgedPosition": {
+        "x": 241,
+        "y": 597
+      }
+    }
+  ],
+  "sourceCompatibility": "The two Run/Walk pairs are compatible with the current design: a corrected Run adds no guessed blocker; an unchanged-owner Walk can subsequently avoid its single refused cell for3s. This describes planning behavior, not an authoritative refusal cause.",
+  "limits": [
+    "The compact correctedActions projection has no captured origin/first/sent direction, pre-send monster population, refusal reason or unique movement request ID. An ACK actual coordinate is not, alone, proof of the captured send origin.",
+    "The5 total corrected rows include an earlier Run; this receipt does not independently assign the4 rows to the failed continuous window or recompute its denominator.",
+    "No full raw, monitor, private input, binary or recording was read. Original per-connection diagnostic wire ordering remains the required next evidence."
+  ],
+  "verdict": {
+    "newProductDefectConfirmed": false,
+    "serverCollisionProven": false,
+    "latePriorAckProven": false,
+    "correctionReclassificationProposed": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "eligibleForP2": false
+  }
+}

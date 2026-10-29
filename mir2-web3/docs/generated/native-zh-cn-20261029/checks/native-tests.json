@@ -1,0 +1,252 @@
+{
+  "passed": true,
+  "suites": [
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 15,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "final 9769-key catalog",
+      "sourceLog": {
+        "filename": "client-native_i18n-final.log",
+        "included": false,
+        "bytes": 29594,
+        "sha256": "9c24d608985469aa8b7831d1a2c85ed6a717f096f1a100bcf1dd21384962543d"
+      },
+      "testLines": [
+        "test native_i18n::ui::tests::adjacent_capture_boundaries_are_explicit_and_values_remain_opaque ... ok",
+        "test native_i18n::ui::tests::billing_keys_cover_all_locales_and_preserve_placeholders ... ok",
+        "test native_i18n::ui::tests::catalogue_padding_is_normalized_without_removing_display_whitespace ... ok",
+        "test native_i18n::ui::tests::formatting_never_reinterprets_names_or_payloads ... ok",
+        "test native_i18n::ui::tests::indexed_lookup_matches_full_scan_for_counters_npc_markup_and_numeric_formats ... ok",
+        "test native_i18n::ui::tests::language_popup_survives_options_children_rebuilt_each_update ... ok",
+        "test native_i18n::ui::tests::locales_include_simplified_without_changing_existing_indices ... ok",
+        "test native_i18n::ui::tests::monthly_card_exact_system_name_and_tooltip_use_ordinary_item_translation ... ok",
+        "test native_i18n::ui::tests::npc_return_keeps_menu_context_separate_from_quest_heading ... ok",
+        "test native_i18n::ui::tests::numeric_formats_and_npc_colour_markup_preserve_opaque_values ... ok",
+        "test native_i18n::ui::tests::scoped_locales_restore_and_are_thread_local ... ok",
+        "test native_i18n::ui::tests::simplified_catalog_covers_shared_items_quests_and_billing_without_changing_traditional ... ok",
+        "test native_i18n::ui::tests::simplified_npc_and_mail_templates_keep_player_arguments_and_slots_opaque ... ok",
+        "test native_i18n::ui::tests::template_index_preserves_specificity_later_domain_and_unicode_prefixes ... ok",
+        "test native_i18n::ui::tests::unknown_counter_lookup_has_a_bounded_candidate_set ... ok",
+        "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 1596 filtered out; finished in 0.39s"
+      ],
+      "suite": "client native_i18n"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "full simplified overlay before two scoped caption additions",
+      "sourceLog": {
+        "filename": "client-player_text-v3.log",
+        "included": false,
+        "bytes": 28973,
+        "sha256": "1e4f296e4491773b16bd9fda54d4511f8c4c850ebd3493a28b15e324265a6cef"
+      },
+      "testLines": [
+        "test player_text::tests::all_twenty_six_authored_quests_have_chinese_titles_and_guides ... ok",
+        "test player_text::tests::chapter_and_status_templates_require_known_system_labels ... ok",
+        "test player_text::tests::chapter_titles_goals_rewards_and_class_hints_are_covered ... ok",
+        "test player_text::tests::current_mine_patrol_and_all_copy_keep_distinct_monster_types ... ok",
+        "test player_text::tests::dynamic_kill_labels_preserve_counts_and_only_translate_known_monsters ... ok",
+        "test player_text::tests::native_named_arguments_remain_opaque_and_unknown_text_is_unchanged ... ok",
+        "test player_text::tests::native_original_sections_resolve_whole_paragraph_before_wrapping ... ok",
+        "test player_text::tests::native_quest_locales_cover_all_authored_ids ... ok",
+        "test player_text::tests::native_reward_names_translate_before_quantity_without_changing_reward_identity ... ok",
+        "test player_text::tests::price_templates_preserve_currency_amounts_and_reject_free_text ... ok",
+        "test player_text::tests::system_names_are_exact_and_unknown_player_like_names_remain_intact ... ok",
+        "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1599 filtered out; finished in 0.39s"
+      ],
+      "suite": "client player_text"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "full simplified overlay before two scoped caption additions",
+      "sourceLog": {
+        "filename": "client-quest_practice-v3.log",
+        "included": false,
+        "bytes": 28627,
+        "sha256": "b3c81e8e43f12c6c0423f50f3b3d4761b1c319d29fdf2df68e86a717fe615f09"
+      },
+      "testLines": [
+        "test quest_practice::tests::added_classes_receive_every_authored_practice_node ... ok",
+        "test quest_practice::tests::assassin_and_archer_practice_names_are_specific_in_all_nine_locales ... ok",
+        "test quest_practice::tests::every_authored_class_requirement_has_player_instructions ... ok",
+        "test quest_practice::tests::graduation_requires_both_warrior_skills_without_other_classes ... ok",
+        "test quest_practice::tests::native_lightning_practice_uses_its_own_spell_name_and_keeps_legacy_copy ... ok",
+        "test quest_practice::tests::native_practice_and_supplies_cover_every_class_without_mutating_requirements ... ok",
+        "test quest_practice::tests::poisoning_guidance_explains_carried_supplies_and_keeps_amulets_equipped ... ok",
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1603 filtered out; finished in 1.14s"
+      ],
+      "suite": "client quest_practice"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 19,
+      "failed": 0,
+      "ignored": 1,
+      "sourcePhase": "full simplified overlay before two scoped caption additions",
+      "sourceLog": {
+        "filename": "client-native_billing-v3.log",
+        "included": false,
+        "bytes": 29960,
+        "sha256": "573574962914f4e94dc624b7867a8c7515e7d3a000df0c01b23f614bc428f8bf"
+      },
+      "testLines": [
+        "test native_billing::ui::tests::billing_windows_gpu_three_routes_and_channel_states ... ignored, explicit offline Windows GPU evidence; no server, wallet signing or chain payment",
+        "test native_billing::ui::tests::checkout_is_bound_to_current_account_character_and_request ... ok",
+        "test native_billing::ui::tests::definitive_purchase_errors_are_specific_and_require_current_correlation ... ok",
+        "test native_billing::ui::tests::hidden_pages_cannot_purchase_or_change_pagination ... ok",
+        "test native_billing::ui::tests::keyboard_page_selection_does_not_execute_old_mouse_purchase ... ok",
+        "test native_billing::ui::tests::monthly_purchase_and_owned_activation_are_independent_of_recharge_channels ... ok",
+        "test native_billing::ui::tests::panel_opening_enter_is_consumed_and_close_fences_world_input ... ok",
+        "test native_billing::ui::tests::pending_navigation_is_blocked_and_retry_returns_to_original_route ... ok",
+        "test native_billing::ui::tests::purchase_reply_refreshes_status_and_disabled_status_cannot_purchase ... ok",
+        "test native_billing::ui::tests::refresh_never_settles_an_unconfirmed_purchase ... ok",
+        "test native_billing::ui::tests::rejected_purchase_allows_an_intentional_new_offer ... ok",
+        "test native_billing::ui::tests::three_routes_remain_visible_without_sales_and_selecting_is_explicit ... ok",
+        "test native_billing::ui::tests::timeout_retry_preserves_order_and_ignores_late_original_url ... ok",
+        "test native_billing::ui::tests::uncertain_server_commit_retries_the_same_order ... ok",
+        "test native_billing::ui::tests::unique_ids_remain_canonical_strings ... ok",
+        "test native_billing::ui::tests::usdc_checkout_requires_local_origin_and_retries_the_same_order ... ok",
+        "test native_billing::ui::tests::usdc_refresh_only_reads_pending_order_status ... ok",
+        "test native_billing::ui::tests::usdc_relogin_reopens_frozen_order_when_new_sales_are_disabled ... ok",
+        "test native_billing::ui::tests::usdc_status_is_optional_for_existing_stripe_servers ... ok",
+        "test native_billing::ui::tests::usdc_wire_requires_canonical_amounts_testnet_and_known_states ... ok",
+        "test result: ok. 19 passed; 0 failed; 1 ignored; 0 measured; 1590 filtered out; finished in 0.33s"
+      ],
+      "suite": "client native_billing"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "final 9769-key catalog; raw IDs/player names preserved",
+      "sourceLog": {
+        "filename": "client-system-captions-final.log",
+        "included": false,
+        "bytes": 28020,
+        "sha256": "bee060d0fd8ef84a83c2ebca35790b0d3b28e2edb012d540343c373d704dba2c"
+      },
+      "testLines": [
+        "test quest_ui::tests::native_system_role_and_group_captions_keep_names_and_selection_keys_opaque ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1610 filtered out; finished in 0.32s"
+      ],
+      "suite": "client typed system captions"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 1,
+      "sourcePhase": "final ten-column display labels and actual selector systems; replaces unsafe nine-column table",
+      "sourceLog": {
+        "filename": "client-native_display-final.log",
+        "included": false,
+        "bytes": 28533,
+        "sha256": "7a746c2fe8e4f25e22c0491516e1e72ec0db9c6941bf4750b2b6f4aaeae5dc18"
+      },
+      "testLines": [
+        "test native_display::tests::arabic_dimensions_keep_width_before_height_in_mixed_direction_labels ... ok",
+        "test native_display::tests::automatic_size_matches_notebook_dpi_and_always_fits_work_area ... ok",
+        "test native_display::tests::every_resolution_and_supported_language_labels_are_complete ... ok",
+        "test native_display::tests::login_display_labels_switch_in_all_supported_locales ... ok",
+        "test native_display::tests::login_selector_accepts_supported_choices_and_never_changes_in_game ... ok",
+        "test native_display::tests::nine_locale_login_and_scaled_hud_offscreen ... ignored, offline GPU evidence; run alone with real MIR2_I18N_VISUAL_ASSET_ROOT and a fresh MIR2_DISPLAY_VISUAL_OUTPUT",
+        "test native_display::tests::stage_viewport_is_centered_exact_four_three_and_guards_minimized_targets ... ok",
+        "test native_display::tests::unavailable_resolution_cannot_be_selected_and_monitor_change_recovers_auto ... ok",
+        "test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 1604 filtered out; finished in 0.04s"
+      ],
+      "suite": "client native_display"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "actual SC/TC/EN diary/NPC list rendering; list, chapter and unknown-count states",
+      "sourceLog": {
+        "filename": "client-quest-counters-final.log",
+        "included": false,
+        "bytes": 27569,
+        "sha256": "58b12370fc32e54f5ca56f775020fa46c8dd05c7a752471fbbc556c8d52b8462"
+      },
+      "testLines": [
+        "test quest_ui::tests::native_quest_counters_render_localized_labels_without_changing_counts_or_ids ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1611 filtered out; finished in 0.36s"
+      ],
+      "suite": "client localized quest counts"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "final production host locale/font code",
+      "sourceLog": {
+        "filename": "host-native_locale-v1.log",
+        "included": false,
+        "bytes": 54179,
+        "sha256": "904d439e536cb24ffdb9dd972a00d9a446047191f2ce9754e9299c6adadd1df8"
+      },
+      "testLines": [
+        "test native_locale::tests::all_supported_preferences_round_trip_without_replacing_the_install_seed ... ok",
+        "test native_locale::tests::locale_os_mapping_has_an_explicit_supported_fallback ... ok",
+        "test native_locale::tests::locale_preference_priority_and_atomic_replacement_leave_no_temporary_files ... ok",
+        "test native_locale::tests::locale_preference_rejects_untrusted_schema_codes_and_oversized_content ... ok",
+        "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1148 filtered out; finished in 0.10s"
+      ],
+      "suite": "host native_locale"
+    },
+    {
+      "evidenceKind": "focused-native-tests",
+      "passed": 16,
+      "failed": 0,
+      "ignored": 3,
+      "sourcePhase": "final production host locale/font code",
+      "sourceLog": {
+        "filename": "host-native_fonts-v2.log",
+        "included": false,
+        "bytes": 55567,
+        "sha256": "8a8731f2d9a6d2ede3563bad4a65e979d8e8f709d1b873e234d86b83cc71ec47"
+      },
+      "testLines": [
+        "test native_fonts::gpu_tests::bundled_fonts_gpu_shapes_and_switches_without_os_fonts ... ignored, explicit offline ten-language GPU capture/180-switch proof; run alone with --ignored",
+        "test native_fonts::gpu_tests::font_gpu_rebuild_negative_control ... ignored, explicit offscreen GPU negative control; run alone with --ignored",
+        "test native_fonts::gpu_tests::font_gpu_rebuild_soak ... ignored, explicit 11-minute offscreen GPU soak; run alone with --ignored",
+        "test native_fonts::soak_tests::bundled_arabic_uses_joining_and_bidirectional_runs_without_reversing_numbers ... ok",
+        "test native_fonts::soak_tests::bundled_devanagari_and_thai_keep_real_cluster_shaping ... ok",
+        "test native_fonts::soak_tests::dense_game_text_stays_bounded_through_per_layout_cache_pruning ... ok",
+        "test native_fonts::soak_tests::game_fallback_fonts_remain_bounded_across_hidden_and_rebuilt_text ... ok",
+        "test native_fonts::soak_tests::installed_collector_runs_after_layout_and_survives_entity_teardown ... ok",
+        "test native_fonts::soak_tests::retained_fallback_sources_preserve_raster_pixels_and_glyph_positions ... ok",
+        "test native_fonts::soak_tests::source_sharing_and_strong_retention_are_both_required ... ok",
+        "test native_fonts::soak_tests::supported_language_switching_keeps_font_identity_and_atlas_memory_bounded ... ok",
+        "test native_fonts::soak_tests::supported_languages_shape_without_system_fonts_or_missing_glyphs ... ok",
+        "test native_fonts::tests::billing_han_supplement_is_static_licensed_and_matches_the_source_pin ... ok",
+        "test native_fonts::tests::bundled_multilingual_fonts_are_static_licensed_and_match_pinned_hashes ... ok",
+        "test native_fonts::tests::bundled_script_fallbacks_recover_after_bevy_collection_rebuild_without_system_fonts ... ok",
+        "test native_fonts::tests::bundled_traditional_face_is_registered_and_retained_without_a_language_pack ... ok",
+        "test native_fonts::tests::empty_font_bytes_do_not_create_a_pinned_asset ... ok",
+        "test native_fonts::tests::full_simplified_face_matches_immutable_upstream_source_and_license ... ok",
+        "test native_fonts::tests::installed_faces_register_under_original_names_and_survive_source_pruning ... ok",
+        "test result: ok. 16 passed; 0 failed; 3 ignored; 0 measured; 1133 filtered out; finished in 1.03s"
+      ],
+      "suite": "host native_fonts"
+    }
+  ],
+  "fontBreakdown": {
+    "pinRegistrationTests": 7,
+    "boundedCacheAndShapingTests": 9,
+    "totalPassed": 16,
+    "separatelyIgnored": 3,
+    "elevenMinuteGpuSoakRunInThisRound": false
+  },
+  "note": "Counts are per filter. The ignored GPU tests are executed separately; do not add them to focused counts."
+}

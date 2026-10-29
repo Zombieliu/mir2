@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-economic-formal-ladder-v2",
+  "state": "PENDING_AUTHORING_COMPLETE_NO_PACKAGE_QUALIFICATION_OR_EXECUTION",
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\formal-contract-v1.mjs",
+      "bytes": 12278,
+      "sha256": "0bd1cd4c0aa3fa824ba7e38eade031af91b618728045b1da94ba98403914be00"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\freeze-formal-v1.mjs",
+      "bytes": 3640,
+      "sha256": "4d594a2a96d2e39135d468d836c87aa519508521071efd85d7f11d502dd6bb34"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\run-owned-formal-v1.mjs",
+      "bytes": 23074,
+      "sha256": "013f1d59dcdd4f7443be61f897380406bced7bd3761e3fc6dd9b16cd9609fc9d"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\owned-child-v1.mjs",
+      "bytes": 2722,
+      "sha256": "d1a72ee7ded41adc7285054f2029b1aa0d263186d7096657b9840d7d38d7005f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\copy-source-bank-v1.mjs",
+      "bytes": 20932,
+      "sha256": "e3e4c08736aebadf42724dec70c6618d837bc162adc9e019bb5bded0b48a91bb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\base\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics\\store\\account-store-public-validator.mjs",
+      "bytes": 5407,
+      "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\diagnostics-v1.mjs",
+      "bytes": 2396,
+      "sha256": "d828eefb489f18c01b2b2176df0b7d119dc5faf3495776f64178f06b387def1b"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-bank-plan-pending-v1.json",
+      "bytes": 32017,
+      "sha256": "34292226864e80fe828b1afdb96fe5cfa5a3f51dcb80341af5d2ed72a397508a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\prepare-config-pending-v1.json",
+      "bytes": 11044,
+      "sha256": "dac5da987cba2f8c215346fe8f7feb0ce0d65bfb5a0513f489a0fda3d423d3e3"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\backend-release-binding-pending-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\syntax-checks-v1.json",
+      "bytes": 6649,
+      "sha256": "0d8c93833d24983a0900d0076bb3f29e128fcd2706987754ff27ce99a0daf3f4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\derivation-v1.json",
+      "bytes": 31423,
+      "sha256": "87d982a4961b73fe3393da26b9107f37fa50085a7cf4769733fb9eae5a1e2a48"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\README-pending-v1.md",
+      "bytes": 5296,
+      "sha256": "eda01b894d289b8fe9a91532d4103582dd70671e9ceec7e4bfcc769a91d1cc8e"
+    }
+  ],
+  "configuration": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\prepare-config-pending-v1.json",
+    "bytes": 11044,
+    "sha256": "dac5da987cba2f8c215346fe8f7feb0ce0d65bfb5a0513f489a0fda3d423d3e3"
+  },
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\source-bank-plan-pending-v1.json",
+    "bytes": 32017,
+    "sha256": "34292226864e80fe828b1afdb96fe5cfa5a3f51dcb80341af5d2ed72a397508a"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\derivation-v1.json",
+    "bytes": 31423,
+    "sha256": "87d982a4961b73fe3393da26b9107f37fa50085a7cf4769733fb9eae5a1e2a48"
+  },
+  "readme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v2\\README-pending-v1.md",
+    "bytes": 5296,
+    "sha256": "eda01b894d289b8fe9a91532d4103582dd70671e9ceec7e4bfcc769a91d1cc8e"
+  },
+  "runtimeToolCount": 11,
+  "rawExactToolCount": 7,
+  "changedTools": 4,
+  "literalRuleCount": 14,
+  "allForwardInverseExact": true,
+  "staticSyntaxChecks": 11,
+  "allSyntaxExitZero": true,
+  "privateSourceFiles": 11,
+  "priorControls": 4,
+  "allSourcePinsRawExact": true,
+  "privateGameSource": "W17 immutable complete saved bank",
+  "privateTrafficSource": "Latest actual formal-v1 ended raw ledger",
+  "ledgerAtSourceAttempts": 11,
+  "oldAttemptsPrunedUnderOriginal901sRule": true,
+  "trafficLedgerRawPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v1\\episode\\private\\capacity-auth-budget.json",
+    "bytes": 849,
+    "sha256": "bd803f9723a9f3c8afd80e41d435f9841cb6b7af7e9129924cd8a37f814cc94c"
+  },
+  "originalSourceFormalV1FailureRetained": true,
+  "originalOptionsAndGatewayCapsExact": true,
+  "sourceSavedCount": 100,
+  "sourceFreshAtFormalStart": false,
+  "expectedRuntimeSources": 33,
+  "expectedNamedSources": 45,
+  "reviewedSourceRows": [
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 186926,
+      "sha256": "0a094e3a2a11a38e1a92a8af8be4926006e14f05a7e4153f7810b350c6ddd1f0"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 353658,
+      "sha256": "bfe917ac07e74c925a42a87419668e4d91e7dc5c31b7a7d65e7b3b6a3b7c374a"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+      "bytes": 38075,
+      "sha256": "3b6eb9e0d04513c0b03ca5cc880f016f5a2e72b5de76a3ec370e44fd15cd97e7"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs",
+      "bytes": 3701,
+      "sha256": "d236f3e34b26cf419b1291f4892d61fcc4f23d8f5f4695936f57ab524e389196"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs",
+      "bytes": 4050,
+      "sha256": "08efae775038b1ed2f3aab93349c1b5b43b39185fa73a4ef8a4e20eaf880fb19"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 20548,
+      "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+      "bytes": 21187,
+      "sha256": "2f76989e0381f6de3321e6eaa5fa7e2447752863d1ce3b82abe376b1a3de6f0d"
+    }
+  ],
+  "availableRootQualification": {
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v19\\root-focused-receipt-v1.json",
+      "bytes": 23388,
+      "sha256": "6d0063a116df95f7f7f3b9739bd9d62158da95cec859eec70ac9475e53e23ce1"
+    },
+    "actualTests": 1212,
+    "suiteCounts": [
+      442,
+      393,
+      55,
+      322
+    ],
+    "namedSources": 45,
+    "head": "34036a1ae54c3a21e723cd0df36b7ab40205590b",
+    "appliedAsPackageQualification": false
+  },
+  "currentBinding": {
+    "head": null,
+    "rootReceipt": null,
+    "actualRootCount": null,
+    "currentFull16Proof": null,
+    "currentBackendVerification": null,
+    "actualFreeze": null
+  },
+  "newActualFull16V2ResultKnown": false,
+  "full16CoversStaging": false,
+  "sourceLibraryBackendBodyChanged": false,
+  "readmeLinks": 4,
+  "allLinksExist": true,
+  "largePayloadGeneratorAdded": false,
+  "modulesImported": false,
+  "testSuitesExecuted": false,
+  "bankCopied": false,
+  "finalized": false,
+  "freezePerformed": false,
+  "ownedExecuted": false,
+  "loadStarted": false,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "all100FreshPreparedThisRun": false,
+  "fullDurableRelogin100Verified": false,
+  "sustainableTwoHourSupplyProven": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "final500Online500FightersCertified": false
+}

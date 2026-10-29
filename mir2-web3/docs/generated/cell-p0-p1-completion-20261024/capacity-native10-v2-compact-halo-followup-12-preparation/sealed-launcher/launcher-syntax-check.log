@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-25T06:05:01.383Z",
+  "allScriptsPassed": true,
+  "scripts": [
+    "backend-driver-source-guard.mjs",
+    "collect-public.mjs",
+    "driver-evidence-contract.mjs",
+    "driver-report-contract.mjs",
+    "initialize-private.ps1",
+    "input-lib.mjs",
+    "measured-phase-contract.mjs",
+    "monitor-owned.mjs",
+    "prepare-inputs.mjs",
+    "recover-drained-owned.ps1",
+    "request-stop.mjs",
+    "run-owned.mjs",
+    "scene-contract.mjs",
+    "slow-stage-public.mjs",
+    "slow-stage-public.test.mjs",
+    "slow-stage-row-contract.mjs",
+    "socket-build-source-lib.mjs",
+    "verify-full16-gate.mjs",
+    "verify-public.mjs"
+  ],
+  "productModulesEvaluated": false,
+  "realmStarted": false
+}

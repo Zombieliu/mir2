@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T06:17:23.462Z",
+  "state": "source-and-final-report-review-awaiting-selected-correction-evidence",
+  "scope": "Read-only bounded source semantics plus finalized public report; no raw/recording scan, target import, A*, model, test, source edit or realm.",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\protocol-navigation.mjs",
+      "bytes": 18249,
+      "sha256": "6ce9fa87088ae31bcac1916c4ad46158bdb6802122de6925a219a9a40cb67036"
+    }
+  ],
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-compact-halo-feasibility-12\\reports\\1792908575146-40a66fff.report.json",
+    "bytes": 25325,
+    "sha256": "7325e575a4a0d219ffb7b24729509e90b14aba3b578942336135be6d8be889c8"
+  },
+  "observedFailure": {
+    "runId": "1792908575146-40a66fff",
+    "ok": false,
+    "error": "Continuous activity window failed, regardless of the measured stage",
+    "completedReportStageCount": 0,
+    "actor": "L99367200",
+    "role": "movement",
+    "phases": [
+      "stage-2"
+    ],
+    "seconds": 60.3634656,
+    "plans": 80,
+    "successfulMoves": 73,
+    "runs": 59,
+    "cells": 132,
+    "nativeCompleted": 76,
+    "nativeOpportunities": 80,
+    "completionRatio": 0.95,
+    "runRatio": 0.8082191780821918,
+    "cellsPerMinute": 131.2051904455267,
+    "activityPassed": true,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "timeoutRatio": 0,
+    "correctionRatio": 0.05194805194805195,
+    "correctedMoves": 4,
+    "allMoveAttempts": 77,
+    "allMoveAttemptStatuses": {
+      "walk": {
+        "success": 14,
+        "corrected": 2
+      },
+      "run": {
+        "corrected": 2,
+        "success": 59
+      }
+    },
+    "originalCorrectionThreshold": 0.05,
+    "verdictPreserved": "FAILED:4 corrected of77movement attempts exceeds original0.05, despite passing movement completion/running/cell volume and latency/fanout."
+  },
+  "sourceSemantics": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "lines": [
+        661,
+        677
+      ],
+      "finding": "Navigation uses the complete current AOI nondead entity union, temporary rejected-Walk cells and active same-map controlled peers actual owner position plus their in-flight7-cell hints. Each client ownID1000 is excluded by client identity, not global numeric identity. This is a conservative client view, not authoritative occupancy."
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "lines": [
+        699,
+        725,
+        734,
+        757
+      ],
+      "finding": "Movement patrol targets only its four declared span2 corners. A primed native actor first tries an ordinary clear two-cell straight/diagonal corner; otherwise at most the same four4000-node A*paths are inspected, preferring an already legal Run over the first Walk. No available path returns navigation-blocked. Default movement patrol does not impose combat scout coverage/routeAllowed, so a dynamic detour can leave the3x3body/5x5halo."
+    },
+    {
+      "file": "apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "lines": [
+        183,
+        201,
+        231
+      ],
+      "finding": "8-direction A* deletes only its origin from dynamic occupancy, requires both adjoining cardinal cells for a diagonal, and caps expansions. A fully static clear5x5halo does not guarantee future dynamic monster/peer clearance or all off-halo detours."
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "lines": [
+        1200,
+        1214,
+        1254,
+        1258
+      ],
+      "finding": "Immediately before real send, native movement rechecks all first/target/diagonal-side cells with current obstacle union and claims the hint synchronously; then it waits for fresh post-cursor/post-send UserLocation. Run accepts the planned2-cell destination or1-cell intermediate; Walk accepts its planned destination. Other coordinates are corrected. Each successful move primes nativeRunUntil=sentAt+1200ms."
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "lines": [
+        605,
+        619,
+        632
+      ],
+      "finding": "Unchanged-owner Walk refusal alone adds the refused first cell as a temporary3-second avoidance and advances movement cursor. Run rejection cannot identify which of2cells failed. movementCorrection detail rows are streak-suppressed until a successful move; detail-row count is not the full corrected denominator. Occupant projection is taken after receipt/classification, not an authoritative send-time snapshot; row.direction is the actual ACK direction."
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "lines": [
+        169,
+        174,
+        196,
+        326,
+        341
+      ],
+      "finding": "Only real successful Walk/Run adds moves/cells; only successful Run with displacement>1 adds runs. Native completed excludes corrected/navigationblocked. Continuous correctionRatio is corrected/allWalkRun attempts and failure remains latched, including before full measured phases; this4/77failure cannot be recast as a passed partial phase."
+    }
+  ],
+  "notEstablished": [
+    "No initial monster trap is proved by the firstFailure: there were73successes/59Runs,0gaps and passed activity in this failed window.",
+    "Neither fast ACK latency nor static-clear halo determines whether any correction was occupancy race, cooldown/action-state rejection or unrelated late UserLocation; exact selected movements/packets must be correlated.",
+    "A public post-receipt occupant or global spectator snapshot cannot substitute for the actual send-time per-client AOI."
+  ],
+  "nextEvidenceNeeded": [
+    "The four correction actions and each planned origin/first/target versus actual ACK, sentAt/ACK time and preceding/following successful owner transforms.",
+    "Bounded actual peer ownerUL and any contemporaneous monster position events; preserve source of observation and timing limitations.",
+    "No threshold, denominator, scene or source change without root new authorization."
+  ],
+  "formalAdmission": {
+    "fresh12GateMustReject": true,
+    "prepareAccountsOrRealmPermitted": false,
+    "partialDurationCannotPromote": true,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  }
+}

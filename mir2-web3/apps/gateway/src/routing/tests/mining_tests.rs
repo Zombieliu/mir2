@@ -478,7 +478,7 @@ fn mining_original_d401_strict_checkpoint_restores_stone_clock_and_pending_effec
     tool.durability = tool.durability.saturating_sub(swing.tool_damage());
     let bytes = uninterrupted.checkpoint_bytes().unwrap();
     let before: Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(before["version"], 7);
+    assert_eq!(before["version"], 8);
     assert_eq!(
         before["state_root"],
         uninterrupted.canonical_state_root().unwrap()

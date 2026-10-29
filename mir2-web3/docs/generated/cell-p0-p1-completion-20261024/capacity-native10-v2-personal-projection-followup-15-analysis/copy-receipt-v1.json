@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792937158876-b61ec943",
+  "scope": "Explicit public ended-verifier/Root-proof archive only. Original raw/report/recording payload, existing diagnostics, source files and frozen runtime inputs are unchanged.",
+  "sourceAndDestinationRawExact": true,
+  "files": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\verify-ended-probe15-v1.mjs",
+      "target": "ended-verifier/verify-ended-probe15-v1.mjs",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 28031,
+      "sha256": "eedc2a98058cfca8ffaf1120d8e8f5b8518ff595e1ef250309845475f0063704"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\probe-contract-v1.mjs",
+      "target": "ended-verifier/probe-contract-v1.mjs",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 5820,
+      "sha256": "9a1843d910cbe4503859bd00d7c9fec77217d2229db9e31d0c9fe5ef005f278b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "target": "ended-verifier/hp-proof-contract-v2.mjs",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\expected-probe-policy-v1.json",
+      "target": "ended-verifier/expected-probe-policy-v1.json",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\run-ended-probe15-v1.mjs",
+      "target": "ended-verifier/run-ended-probe15-v1.mjs",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 2257,
+      "sha256": "3c5731662e415db08e7a97add7f2bef7b98dd5ce317a41ce488d3f87a12827b7"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "target": "ended-verifier/seal-tool-source-v1.mjs",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\derivation-proof-v1.json",
+      "target": "ended-verifier/derivation-proof-v1.json",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 7237,
+      "sha256": "3f8235de28d3ecf988a061e98e506d117858a81dd68d29e415fc7a8147d5435c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\preparation-v1.json",
+      "target": "ended-verifier/preparation-v1.json",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 4243,
+      "sha256": "84ea2c9cce40bb392cffc8b60e007c61d4c797ff4d7f59719b7745d0de497a5a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\independent-review-v1.json",
+      "target": "ended-verifier/independent-review-v1.json",
+      "classification": "exact-nine-source-tool-closure",
+      "bytes": 7436,
+      "sha256": "b7f466113755240130abb2fc2cc357fce114882951b66fb689504790de515151"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\tool-source-frozen-v1.json",
+      "target": "ended-verifier/tool-source-frozen-v1.json",
+      "classification": "actual-ended-verification-original",
+      "bytes": 1949,
+      "sha256": "7a90c16b13593dcc6c6e62d2b8abf98e4e4fcaeb312a308074f28968d0aec1aa"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "target": "ended-verifier/actual-verification-execution-receipt-v1.json",
+      "classification": "actual-ended-verification-original",
+      "bytes": 812,
+      "sha256": "1822d860e1d7d2fe7cba56d28ff4137d5530a2b9571f36ab9e912af88623ba96"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\actual-verification.log",
+      "target": "ended-verifier/actual-verification.log",
+      "classification": "actual-ended-verification-original",
+      "bytes": 878,
+      "sha256": "24914cae556e9042f848f3a08ff2fa1264ada6698feaf6c3e58b91203d334505"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-independent-verification-v1\\final-verification.json",
+      "target": "ended-verifier/final-verification.json",
+      "classification": "actual-ended-verification-original",
+      "bytes": 448826,
+      "sha256": "2c9b79b7073eefac5094211fc78effee51f567dd21dbdf57223701860983878b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-independent-cleanup-v1.json",
+      "target": "actual/probe15-root-independent-cleanup-v1.json",
+      "classification": "actual-root-os-or-independent-terminal-facts",
+      "bytes": 324,
+      "sha256": "eaf8ad2feede5ff55855097d9659a4ac9a22f08ce2a224dcfd75ff5c04a5dc00"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-actual-terminal-independent-facts-v1.json",
+      "target": "actual/probe15-actual-terminal-independent-facts-v1.json",
+      "classification": "actual-root-os-or-independent-terminal-facts",
+      "bytes": 6129,
+      "sha256": "b9a36163b9f80f7cac204715d939a7354037e4a215211a4a6c369a1c6de1b2d5"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-seal-source-control-v1.mjs",
+      "target": "source-control/probe15-root-seal-source-control-v1.mjs",
+      "classification": "minimal-root-source-seal-controller-and-review",
+      "bytes": 5140,
+      "sha256": "058462385fe2aab8fc27925e3a8fa9f52bb2db94f8d44757ba38823a4ea50688"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-seal-controller-derivation-v1.json",
+      "target": "source-control/probe15-root-seal-controller-derivation-v1.json",
+      "classification": "minimal-root-source-seal-controller-and-review",
+      "bytes": 3218,
+      "sha256": "a54d8443db7862fb44ef280cba2fe987a5f8597ccc2e23e492b4962c0fda55a3"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe15-preseal-independent-review-v1.json",
+      "target": "source-control/probe15-preseal-independent-review-v1.json",
+      "classification": "minimal-root-source-seal-controller-and-review",
+      "bytes": 7669,
+      "sha256": "16261a8ae92d393deb7fb660c0b353a4712c34d8baac26ef38597e94b09de286"
+    }
+  ],
+  "fileCount": 18,
+  "totalCopiedBytes": 538632,
+  "sourceListSha256": "60037a8ea0e57cc41728e9d7bd2aa61de43a410cd75359f920f72ed15ebb3d7c",
+  "nineToolSourcesChecked": 9,
+  "jsonStructureSafety": {
+    "objectsChecked": 3816,
+    "sensitiveKeyFindings": 0,
+    "privateSourceRead": false
+  },
+  "probePassed": true,
+  "independentVerificationPassed": true,
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false,
+  "existingEvidenceLinks": [
+    "../capacity-native10-v2-personal-projection-followup-15-diagnostics/collection-verification.json",
+    "../capacity-native10-v2-personal-projection-followup-15-diagnostics/release-native-10-v2-personal-projection-feasibility-15/reports/1792937158876-b61ec943.report.json",
+    "../capacity-native10-v2-personal-projection-followup-15-diagnostics/release-native-10-v2-personal-projection-feasibility-15/preseal-inputs-finalized-v1.json"
+  ],
+  "noRawOrRecordingPayloadCopied": true,
+  "notANewRawReplay": true
+}

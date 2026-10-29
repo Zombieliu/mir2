@@ -1,5 +1,47 @@
 # Frontend 1:1 Gaps
 
+## 简体文案与完整 Windows 安装包：限定技术验收（2026-10-29）
+
+Windows 简体覆盖 9769 键、完整内嵌字体和持久化语言选择，追加 873 条 AI 编辑/源码核对覆盖。
+游戏提交 `24216899a` 的 209 图完整 Candidate、更新器提交 `81942dda7` r10 九文件 bundle、内部 CMS 与两个完整
+Inno 7.1.1 安装器通过。隔离版实际安装、无参数 Launcher→Updater→Game、卸载重装及语言
+保留已验；首次安装全量内容哈希通过，重装只复核路径闭包、关键文件和偏好，不混称再次全量哈希。
+简体设置、十语切换及“法币充值”“USDC链上充值”“月卡”三页有真实 Windows 图证，
+100 点券、10000 金币和三张历史订单保持不变，未新付款或月卡消费。r9 真实启动失败与后续
+五个精确根文件修复分别保留；普通 Setup 仅编译通过，未覆盖安装既有正常版本。
+
+详见[最新文案与安装记录](generated/native-zh-cn-finish-20261029/README.md)，旧[简体 UI](generated/native-zh-cn-20261029/README.md)与[充值 UI](generated/billing-entry-ui-20261029/README.md)不回写。
+人审键数为 0；旧位图 GameSHOP/BUY、Chapter/Exit 及部分专名仍为英文。本轮不构成全部文案
+人工审校、全屏 Crystal 像素一致性或整体 Accepted，不改变全项目比例。发布者生产 Authenticode
+签名未提供，远程测试服未更新，生产收费及人类最终 Accepted 仍开放。
+
+## 新增 Sui 原生 USDC 充值：自定义功能的限定验收（2026-10-29）
+
+已实现保留 Stripe 的独立 USDC 套餐、订单状态、同源浏览器钱包交接和原订单重登
+恢复；不新增 SUI 币充值。原生逻辑 14、离线 GPU 1/10 图、host 7 和浏览器 Mock 18
+项通过。新增通道仍限 Testnet/Test 来源，主网与生产收费关闭；测试用 1 USDC/100
+点券不构成正式价格批准。充值使用独立 Sui Move 模块，不能混称 Dubhe 求购验收。
+
+<!-- SUI_USDC_LIVE_STATUS_BEGIN -->
+**真实闭环状态（实测通过）：** 实际 Windows、普通已注册 Chrome 和明确标记的隔离 QA Wallet 已完成真实 Testnet 1 USDC 付款及 100 Test 点券到账。原生截图 06–10 显示已交付、待入账 0、商城点券 100/金币 10,000；最终 Gateway v4 重启、关闭新充值和 Windows 重登后保持一致，两张旧单正确显示已到期。同一 digest 再次重复通知与状态查询均为 200/Applied，原到账回执未变、只有一次入账。成功单两笔交易合计 7,138,270 MIST；浏览器成功截图仅工具内联展示，不能称为已归档 PNG，也不代表第三方钱包扩展或人类 Accepted。前两次未付到期与助手签前拒付保留为历史失败。
+<!-- SUI_USDC_LIVE_STATUS_END -->
+
+本项不改变 Crystal 原版差异项、百分比或整体 Accepted；原生 PostgreSQL、多机与
+生产发布另行验收。[专题规则](SUI-USDC-RECHARGE-V1.zh-CN.md)和
+[独立验收包](generated/sui-usdc-recharge-v1-20261029/README.md)集中保存范围与证据。
+
+## 新增个人智能求购 V1：限定原生实连结果（2026-10-29）
+
+Windows v3 / Gateway v5 已完成 NPC 免费 Test 套餐确认、500,000 金币求购发布至链上 Open、另一账号交付原始 UID `1028024501`、买家离线待领取及双方领取；普通背包和装备提示有实机截图，原始装备 JSON 一致性另有独立核验。取消订单及退款领取也已通过。120 秒测试到期单已进入链上 `Expired`，自动 watch 提交第三笔交易，500,000 金币退款已从 Windows 领取；该订单不是发布失败补偿。成交、取消、到期三张订单各 3 笔，合计 9 笔测试网交易。本次不包含人类 Accepted、生产收费或原生 PostgreSQL 验收。
+
+最终双方 Windows 重登通过（实机截图 25/26）：买家 Bag1 保留原 UID `1028024501`，金币 1,500,000；卖家 Bag1 为空，金币 510,000。总金币 2,011,280，托管及待领均为 0，三单全部领取，Test 额度累计消费 3 单位；未验证多机部署。
+
+此项属于自定义新增功能，不改变 Crystal 原版 1:1 差异清单、百分比或整体验收结论；人类 Accepted 仍开放。电脑控制保存的原生窗口 JPEG 与离线 GPU 夹具分别记录，未用 Web 截图代替 Windows 实测。[统一验收证据](generated/personal-procurement-v1-20261028/README.md)保留截图、链与资产核验及版本边界；[主题文档](PERSONAL-PROCUREMENT-V1.zh-CN.md)列规则和未验证范围。
+
+## 本地动作位置确认回滚（2026-10-26）
+
+仅本人的攻击/远攻/施法改为保留最新移动位置，动画/方向/特效/弹道照常，远端及真实位移处理不变。生产helper与页面接线15项、driver24项、容量工具242项及Web typecheck通过；旧scene结构脚本的既有renderer锚点断言在原代码对照仍失败，未改断言。新网关/50复测及GUI/人类Accepted尚待，不能列为完整前端验收。见[可复核证据](generated/cell-p0-p1-completion-20261024/capacity-owner-action-pose-v1/README.md)。
+
 ## Windows 钱包与九语言集成（2026-10-28）
 
 完整分支集成保留本地装备/攻击交互与远端原生功能；钱包接入原有九语言目录与用户偏好。原生、共享 UI、Web 聚焦测试及九语离屏截图结果集中在[合并记录](BRANCH-INTEGRATION-20261028.zh-CN.md)，不等同手机实签、全游戏翻译或玩家 Accepted。

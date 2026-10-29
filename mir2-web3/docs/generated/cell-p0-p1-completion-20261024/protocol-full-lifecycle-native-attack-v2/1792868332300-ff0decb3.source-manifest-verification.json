@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "backendInputCount": 39,
+  "sourceManifestSha256": "7970dee9448ffc7fb2d4751024a25a4a0cc84fa133c1b915dfe9fff1b03a9495",
+  "sourceManifestFileSha256": "94c7ee1b121fac0634212989638d7c451e8ce89343b3bf23a9d940d7365f289d",
+  "matchedRawInputs": 39,
+  "matchedRawDriverPins": 6,
+  "releaseSha256": "855b4ba3c80ccb99b4128a9ee1170bc56ad51fcbaf022d5269f0b6662986c61f",
+  "scope": "This fresh native-attack-v2 server Release only; historical source/binary proofs remain unchanged"
+}

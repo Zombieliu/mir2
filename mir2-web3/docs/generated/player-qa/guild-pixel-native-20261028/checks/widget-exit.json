@@ -1,0 +1,15 @@
+{
+  "operation": "shared Crystal widget adjacent library regression",
+  "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui --lib crystal_ui::widget --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "workdir": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "startedUtc": "2026-10-28T11:33:12.1276217Z",
+  "endedUtc": "2026-10-28T11:33:12.5493526Z",
+  "elapsedSeconds": 0.4217309,
+  "exitCode": 0,
+  "resultLines": [
+    "test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 1562 filtered out; finished in 0.04s"
+  ],
+  "log": "C:/mir2-build/guild-pixel-parity-20261028/native-widget-tests-v1.log",
+  "targetDirectory": "C:/mir2-build/guild-pixel-parity-20261028/target-native",
+  "gpuTestRun": false
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "state": "controller-prepared-not-executed",
+  "controller": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\root-seal-and-guard-v1.mjs",
+    "bytes": 16503,
+    "sha256": "6bd3ae52fc59e81754a5f955aec1c1bb9579ee54393936c8bc4701eb67ed5630"
+  },
+  "syntax": {
+    "exitCode": 0,
+    "receipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\launcher-syntax-check.log",
+      "bytes": 8506,
+      "sha256": "5da15841904dfd4af86d96088aead02c0aed22170b4d9236a8a884729d78e074"
+    }
+  },
+  "supportInputs": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+      "bytes": 14002,
+      "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+    }
+  ],
+  "moduleImported": false,
+  "modeExecuted": false
+}

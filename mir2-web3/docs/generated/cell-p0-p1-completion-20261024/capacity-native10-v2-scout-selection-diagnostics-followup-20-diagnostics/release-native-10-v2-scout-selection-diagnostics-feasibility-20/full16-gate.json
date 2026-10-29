@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-26T01:48:00.006Z",
+  "passed": true,
+  "runId": "1792977859487-2ff0ea0f",
+  "realmStamp": "1792977848891-7c9f3b5a",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "slowStageThresholdMs": 50,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.audit-source.mjs",
+      "bytes": 9491,
+      "sha256": "278309304f6b929499c19367028ee109432b59a886c2476b81c911b9a9f87422"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.backend-source.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.independent-audit.json",
+      "bytes": 1905,
+      "sha256": "3d961d5c79b20e89cbe0b9998ae1063a2c9a1f36db5c80fb63420a7328c4f246"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.prepared-profile.json",
+      "bytes": 4838,
+      "sha256": "1ca0cb2ef77f73dbc0b6e2743d77796119702d651f9cc740fbd84622995e6477"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.realm-evidence.json",
+      "bytes": 35137,
+      "sha256": "6af7da892450bafe1e72b089f980df4a053aafc2dd087d6b3caab6c39d62fe57"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.release-input.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.runner-source.mjs",
+      "bytes": 14516,
+      "sha256": "07940d612fe14044235d6ee1cba2a763ec4206da2f8eeaa48770eadaa5e013e7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.source-manifest-verification.json",
+      "bytes": 725,
+      "sha256": "62e3e67e9885209e55ff94d6916872be30ab98edabac9b9698b29d315ff293e8"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.zone-metrics.json",
+      "bytes": 23595,
+      "sha256": "d597b890fd12ea29586e00fb05b28bc2769e941e93f67876fca3cbc9786d447a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f-a.trace.jsonl",
+      "bytes": 973023,
+      "sha256": "a4b9e12a1adc62b30f3ed3ac8836df68114a21e7dabe4bace09a77bb77071bf1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f-b.trace.jsonl",
+      "bytes": 899476,
+      "sha256": "46ca430e7daecea625027141a13835ce2c27ed519d17e6613223407d26ce8b7a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f-guard-newCharacter.trace.jsonl",
+      "bytes": 3486,
+      "sha256": "1cb01c950638e4d9f78c85a25969a602ecf5ff70430e37fb1806e377ae87b69e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f-guard-startGame.trace.jsonl",
+      "bytes": 3450,
+      "sha256": "4ab57453ff2fd888e62edc831f929b7f68e4a8b85a1cf648fcb8a75c34202cc4"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f-relogin-0.trace.jsonl",
+      "bytes": 683371,
+      "sha256": "9686f6a59cce8da34b5eae0f1d4534b8ac02cca74c74c23c354306234ce5a774"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f-relogin-1.trace.jsonl",
+      "bytes": 680224,
+      "sha256": "1eba4c2fca833aaef8390af3a16b1c3e22cc65c8bffcf5e2a875ecf57287deee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f.report.json",
+      "bytes": 104579,
+      "sha256": "699eeafa335dc2273b0a2f63ee4753443525d59c6e2035332bbfca6776303f60"
+    }
+  ],
+  "capacityAccepted": false
+}

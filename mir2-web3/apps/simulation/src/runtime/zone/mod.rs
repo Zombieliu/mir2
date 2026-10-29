@@ -1,6 +1,11 @@
 mod aoi;
 mod aoi_grid;
 mod collision;
+mod contract;
+pub use contract::{
+    EffectEnvelope, EffectReplayReceipt, EntityLifeRef, LogicalWorldId, PayloadDigest,
+    StableActionId, WorldMapEffectOwner, WorldPartitionKey,
+};
 mod ecs;
 mod experience;
 pub use experience::{
@@ -16,6 +21,7 @@ pub use owner_health::{ZoneOwnerHealthChange, ZoneOwnerHealthCursor};
 mod five_class_receipts;
 mod movement;
 mod packets;
+mod partition;
 mod replay;
 mod replication;
 mod runtime;
@@ -25,7 +31,11 @@ mod intelligent_creatures;
 pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickupIntent};
 
 pub use collision::{ZoneBounds, ZoneCollision};
-pub use manager::{ZoneManager, ZoneNpcPopulationReadSet};
+pub use manager::{ManagerAdmissionReceipt, ZoneManager, ZoneNpcPopulationReadSet};
+pub use partition::{
+    CellCoord, CellSize, MapEffectOwnerRef, PartitionId, PartitionKey, PartitionLocation,
+    TopologyRevision, ZonePartitionDescriptor,
+};
 pub use replay::{
     gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, ZoneInput, ZoneOutput,
     ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,

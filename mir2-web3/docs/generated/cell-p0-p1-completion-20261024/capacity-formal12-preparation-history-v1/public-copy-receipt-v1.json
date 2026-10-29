@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T18:00:46.663Z",
+  "scope": "Actual Formal12 preparation history only; six completed public review/log originals omitted from the frozen108 collector closure. No active run/raw/report/monitor/private values read.",
+  "sourceCount": 6,
+  "copiedBytes": 14258,
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-runtime-independent-review-v1\\prepared-review-v4.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\review\\prepared-review-v4.json",
+      "relative": "review/prepared-review-v4.json",
+      "bytes": 3798,
+      "sha256": "1471510fc4e777ac832bc81d31e35078ce748df31f6253ba0e3d762084b8c591",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-runtime-independent-review-v1\\preseal-independent-review-v2.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\review\\preseal-independent-review-v2.json",
+      "relative": "review/preseal-independent-review-v2.json",
+      "bytes": 6368,
+      "sha256": "67706397d6287bda86f099b2561f790f187edfc5ca4198548822f66b68767b9a",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-seal-actual-v1.log",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\execution\\formal12-root-seal-actual-v1.log",
+      "relative": "execution/formal12-root-seal-actual-v1.log",
+      "bytes": 346,
+      "sha256": "d1973a1d5938dbf78fd4d2d7083349ebf0f92f9a13fe0f11eabef7e5616c02c1",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-source-guard-actual-v1.log",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\execution\\formal12-root-source-guard-actual-v1.log",
+      "relative": "execution/formal12-root-source-guard-actual-v1.log",
+      "bytes": 412,
+      "sha256": "423a89ae6e1ddafd35ef70e13cd7e9fa826b330098e03253359729191f54507b",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-root-prepare-actual-v1.log",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\execution\\formal12-root-prepare-actual-v1.log",
+      "relative": "execution/formal12-root-prepare-actual-v1.log",
+      "bytes": 566,
+      "sha256": "519ca40147737d5e0152bda442f52faaa743b2041efb60136530332e13203b90",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal12-actual-preparation-independent-review-v1.json",
+      "target": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal12-preparation-history-v1\\review\\formal12-actual-preparation-independent-review-v1.json",
+      "relative": "review/formal12-actual-preparation-independent-review-v1.json",
+      "bytes": 2768,
+      "sha256": "32e35b54d487aa8ac6f9a55238ecf933e6d2e705f2f93254fbb795c87ef849ba",
+      "sourceAfterVerified": true,
+      "destinationVerified": true
+    }
+  ],
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-preparation-history-public-archive-v1\\public-whitelist-v1.json",
+    "bytes": 4482,
+    "sha256": "952b9b7e0f69eee4673973e4a63401235ca771ec24aeaf0cfcda87c314378377"
+  },
+  "archiveHelper": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal12-preparation-history-public-archive-v1\\copy-public.mjs",
+    "bytes": 8055,
+    "sha256": "694ea6152664cb50551b203128f0d26a8821c317f1ca7c9f4a5d84624a3cacca"
+  },
+  "excludedCurrentRuntimeClosure": true,
+  "activeRunLogsOrReportsRead": false,
+  "privateValuesRead": false,
+  "sourceOrRuntimeModified": false,
+  "formalResultKnown": false,
+  "capacityAccepted": false
+}

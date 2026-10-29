@@ -90,6 +90,8 @@ mod activities;
 mod billing;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
+#[path = "web_procurement.rs"]
+mod procurement;
 #[path = "web_packet_batch.rs"]
 mod packet_batch;
 #[path = "web_transport.rs"]
@@ -171,6 +173,7 @@ enum ParsedSocketInput {
         skill_key_request: Option<SkillKeyRequest>,
     },
     ClientCapabilities(Vec<String>),
+    AttackV2(crate::attack_protocol::AttackV2Request),
     NpcPurchaseOwner(mir2_client_wire::ClientRequest),
     ResumeSession(ResumeCredential),
     ResumeRejected,
@@ -179,6 +182,238 @@ enum ParsedSocketInput {
         error: String,
     },
     ProtocolError(String),
+}
+
+const SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER: u64 = 9_007_199_254_740_991;
+const SOCKET_DIAGNOSTIC_PHASE_BITS: u32 = 8;
+const SOCKET_DIAGNOSTIC_MAX_START_US: u64 = u64::MAX >> SOCKET_DIAGNOSTIC_PHASE_BITS;
+static NEXT_SOCKET_DIAGNOSTIC_ID: AtomicU64 = AtomicU64::new(1);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
+enum SocketDiagnosticPhase {
+    SelectWait = 1,
+    Input,
+    InputGate,
+    InputOwnerHeartbeat,
+    Chat,
+    Injection,
+    Spectator,
+    AiLive,
+    RuntimeTick,
+    IdentityCache,
+    IdentityDatabase,
+    ResumeCredential,
+    OwnerHeartbeat,
+    TickGate,
+    Preflight,
+}
+
+impl SocketDiagnosticPhase {
+    fn label(self) -> &'static str {
+        match self {
+            Self::SelectWait => "select_wait",
+            Self::Input => "input",
+            Self::InputGate => "input_gate",
+            Self::InputOwnerHeartbeat => "input_owner_heartbeat",
+            Self::Chat => "chat",
+            Self::Injection => "injection",
+            Self::Spectator => "spectator",
+            Self::AiLive => "ai_live",
+            Self::RuntimeTick => "runtime_tick",
+            Self::IdentityCache => "identity_cache",
+            Self::IdentityDatabase => "identity_database",
+            Self::ResumeCredential => "resume_credential",
+            Self::OwnerHeartbeat => "owner_heartbeat",
+            Self::TickGate => "tick_gate",
+            Self::Preflight => "preflight",
+        }
+    }
+
+    fn unpack(value: u64) -> Option<Self> {
+        match value & 0xff {
+            1 => Some(Self::SelectWait),
+            2 => Some(Self::Input),
+            3 => Some(Self::InputGate),
+            4 => Some(Self::InputOwnerHeartbeat),
+            5 => Some(Self::Chat),
+            6 => Some(Self::Injection),
+            7 => Some(Self::Spectator),
+            8 => Some(Self::AiLive),
+            9 => Some(Self::RuntimeTick),
+            10 => Some(Self::IdentityCache),
+            11 => Some(Self::IdentityDatabase),
+            12 => Some(Self::ResumeCredential),
+            13 => Some(Self::OwnerHeartbeat),
+            14 => Some(Self::TickGate),
+            15 => Some(Self::Preflight),
+            _ => None,
+        }
+    }
+
+    fn pack(self, start_us: u64) -> Option<u64> {
+        (start_us <= SOCKET_DIAGNOSTIC_MAX_START_US)
+            .then(|| (start_us << SOCKET_DIAGNOSTIC_PHASE_BITS) | u64::from(self as u8))
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SocketDiagnosticInputClass {
+    Move,
+    AttackV2,
+    Other,
+}
+
+impl SocketDiagnosticInputClass {
+    fn for_input(input: &ParsedSocketInput) -> Self {
+        match input {
+            ParsedSocketInput::AttackV2(_) => Self::AttackV2,
+            ParsedSocketInput::Action {
+                action:
+                    SessionAction::Packet(
+                        ClientPacket::Walk { .. }
+                        | ClientPacket::Run { .. }
+                        | ClientPacket::Turn { .. },
+                    ),
+                ..
+            } => Self::Move,
+            _ => Self::Other,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Move => "move",
+            Self::AttackV2 => "attack_v2",
+            Self::Other => "other",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SocketQueuedDiagnostic {
+    phase: SocketDiagnosticPhase,
+    phase_elapsed_ms: u64,
+    input_class: SocketDiagnosticInputClass,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SocketSlowContext {
+    connection: u64,
+    queued: Option<SocketQueuedDiagnostic>,
+}
+
+struct SocketDiagnosticState {
+    connection: u64,
+    origin: Instant,
+    // One main-task writer and reader-task snapshots. Phase and start must be
+    // one atomic value; two independent atomics would allow a torn observation.
+    phase_and_start: AtomicU64,
+}
+
+type SocketDiagnostics = Option<Arc<SocketDiagnosticState>>;
+
+fn allocate_socket_diagnostics(enabled: bool, counter: &AtomicU64) -> SocketDiagnostics {
+    if !enabled {
+        return None;
+    }
+    let connection = counter
+        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |next| {
+            (next != 0 && next <= SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER).then(|| next + 1)
+        })
+        .ok()?;
+    Some(Arc::new(SocketDiagnosticState {
+        connection,
+        origin: Instant::now(),
+        phase_and_start: AtomicU64::new(SocketDiagnosticPhase::SelectWait.pack(0)?),
+    }))
+}
+
+impl SocketDiagnosticState {
+    fn now_us(&self) -> Option<u64> {
+        let now = u64::try_from(self.origin.elapsed().as_micros()).ok()?;
+        (now <= SOCKET_DIAGNOSTIC_MAX_START_US).then_some(now)
+    }
+
+    fn context(&self) -> SocketSlowContext {
+        SocketSlowContext {
+            connection: self.connection,
+            queued: None,
+        }
+    }
+
+    fn queued_context(&self, input: &ParsedSocketInput) -> Option<SocketSlowContext> {
+        let packed = self.phase_and_start.load(Ordering::Acquire);
+        // Read the clock after the atomic so a newer phase cannot be paired
+        // with an older observation time. Overflow omits context, never wraps.
+        let now_us = self.now_us()?;
+        self.context_from_snapshot(packed, now_us, SocketDiagnosticInputClass::for_input(input))
+    }
+
+    fn context_from_snapshot(
+        &self,
+        packed: u64,
+        now_us: u64,
+        input_class: SocketDiagnosticInputClass,
+    ) -> Option<SocketSlowContext> {
+        if now_us > SOCKET_DIAGNOSTIC_MAX_START_US {
+            return None;
+        }
+        let phase = SocketDiagnosticPhase::unpack(packed)?;
+        let elapsed_us = now_us.checked_sub(packed >> SOCKET_DIAGNOSTIC_PHASE_BITS)?;
+        Some(SocketSlowContext {
+            connection: self.connection,
+            queued: Some(SocketQueuedDiagnostic {
+                phase,
+                phase_elapsed_ms: elapsed_us / 1_000,
+                input_class,
+            }),
+        })
+    }
+}
+
+struct SocketDiagnosticPhaseGuard {
+    state: Arc<SocketDiagnosticState>,
+    previous: u64,
+    slow_stage: Option<GatewaySlowStage>,
+}
+
+impl SocketDiagnosticPhaseGuard {
+    fn enter(
+        diagnostics: &SocketDiagnostics,
+        phase: SocketDiagnosticPhase,
+        label: Option<&'static str>,
+    ) -> Option<Self> {
+        let state = diagnostics.as_ref()?;
+        let packed = phase.pack(state.now_us()?)?;
+        let previous = state.phase_and_start.swap(packed, Ordering::AcqRel);
+        Some(Self {
+            state: Arc::clone(state),
+            previous,
+            slow_stage: label.map(|label| GatewaySlowStage::for_socket(label, diagnostics)),
+        })
+    }
+}
+
+impl Drop for SocketDiagnosticPhaseGuard {
+    fn drop(&mut self) {
+        // Include any synchronous slow-log write in the observed phase until
+        // it really finishes. Child scopes retain the parent's original start.
+        drop(self.slow_stage.take());
+        let restored = if SocketDiagnosticPhase::unpack(self.previous)
+            == Some(SocketDiagnosticPhase::SelectWait)
+        {
+            self.state
+                .now_us()
+                .and_then(|now| SocketDiagnosticPhase::SelectWait.pack(now))
+                .unwrap_or(0)
+        } else {
+            self.previous
+        };
+        self.state
+            .phase_and_start
+            .store(restored, Ordering::Release);
+    }
 }
 
 struct PendingSerialAction {
@@ -201,6 +436,8 @@ impl Drop for PendingSerialAction {
 struct QueuedSocketInput {
     input: Option<ParsedSocketInput>,
     queued_at: Instant,
+    received_at: Instant,
+    diagnostic_context: Option<SocketSlowContext>,
     _pending: PendingSerialAction,
     _buffered_bytes: OwnedSemaphorePermit,
 }
@@ -210,10 +447,17 @@ impl QueuedSocketInput {
         input: ParsedSocketInput,
         pending_count: Arc<AtomicUsize>,
         buffered_bytes: OwnedSemaphorePermit,
+        received_at: Instant,
+        diagnostics: &SocketDiagnostics,
     ) -> Self {
+        let diagnostic_context = diagnostics
+            .as_ref()
+            .and_then(|state| state.queued_context(&input));
         Self {
             input: Some(input),
             queued_at: Instant::now(),
+            received_at,
+            diagnostic_context,
             _pending: PendingSerialAction::new(pending_count),
             _buffered_bytes: buffered_bytes,
         }
@@ -231,6 +475,7 @@ pub(crate) struct GatewaySlowStage {
     label: &'static str,
     started_at: Instant,
     threshold: Option<Duration>,
+    context: Option<SocketSlowContext>,
 }
 
 impl GatewaySlowStage {
@@ -243,7 +488,40 @@ impl GatewaySlowStage {
             label,
             started_at,
             threshold: gateway_slow_stage_threshold(),
+            context: None,
         }
+    }
+
+    fn for_socket(label: &'static str, diagnostics: &SocketDiagnostics) -> Self {
+        let mut stage = Self::start(label);
+        stage.context = diagnostics.as_ref().map(|state| state.context());
+        stage
+    }
+
+    fn log_line(&self, elapsed: Duration) -> String {
+        let mut line = format!(
+            "[gateway-slow-stage] stage={} duration_ms={}",
+            self.label,
+            elapsed.as_millis()
+        );
+        let context = self.context.filter(|context| {
+            self.label != "socket_input.queue_residence" || context.queued.is_some()
+        });
+        if let Some(context) = context {
+            line.push_str(&format!(" connection={}", context.connection));
+            if let Some(queued) = context
+                .queued
+                .filter(|_| self.label == "socket_input.queue_residence")
+            {
+                line.push_str(&format!(
+                    " queued_phase={} phase_elapsed_ms={} input_class={}",
+                    queued.phase.label(),
+                    queued.phase_elapsed_ms,
+                    queued.input_class.label()
+                ));
+            }
+        }
+        line
     }
 }
 
@@ -254,11 +532,7 @@ impl Drop for GatewaySlowStage {
         };
         let elapsed = self.started_at.elapsed();
         if elapsed >= threshold {
-            eprintln!(
-                "[gateway-slow-stage] stage={} duration_ms={}",
-                self.label,
-                elapsed.as_millis()
-            );
+            eprintln!("{}", self.log_line(elapsed));
         }
     }
 }
@@ -313,6 +587,7 @@ struct WebState {
     capacity: Arc<GatewayCapacityState>,
     gameplay_event_sink: Option<SharedGameplayEventSink>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     /// On-chain command injection registry (M4, WF-5) — routes Relayer commands to live sessions.
     injector: crate::inject::LiveSessionInjector,
     spectator: SpectatorHub,
@@ -1629,8 +1904,10 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    Procurement(mir2_protocol::procurement::ProcurementRequest),
     BillingStatus(billing::StatusRequest),
     BillingCheckout(billing::CheckoutRequest),
+    BillingUsdcCheckout(billing::CheckoutRequest),
     BillingBuyMonthlyCard(billing::BuyRequest),
     BillingActivateMonthlyCard(billing::ActivateRequest),
     MonthlyCardStatus,
@@ -1640,6 +1917,14 @@ enum BrowserCommand {
         request_id: u64,
     },
     ClientVersion,
+    AttackV2 {
+        #[serde(rename = "protocolVersion")]
+        protocol_version: u16,
+        #[serde(rename = "requestId")]
+        request_id: String,
+        #[serde(rename = "objectId")]
+        object_id: u32,
+    },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -2330,6 +2615,7 @@ enum QaControlAction {
 
 #[derive(Debug, Clone)]
 enum SessionAction {
+    Procurement(mir2_protocol::procurement::ProcurementRequest),
     Billing(billing::Request),
     MonthlyCardStatus,
     RedeemMonthlyCard {
@@ -2401,6 +2687,26 @@ enum SessionAction {
     Tick,
 }
 
+fn request_metrics_class(action: &SessionAction) -> crate::zone_metrics::RequestClass {
+    match action {
+        SessionAction::Packet(
+            ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
+        ) => crate::zone_metrics::RequestClass::MovementAdmission,
+        SessionAction::PasskeyLogin { .. }
+        | SessionAction::Packet(
+            ClientPacket::NewAccount { .. }
+            | ClientPacket::ChangePassword { .. }
+            | ClientPacket::Login { .. }
+            | ClientPacket::NewCharacter { .. }
+            | ClientPacket::DeleteCharacter { .. }
+            | ClientPacket::StartGame { .. }
+            | ClientPacket::LogOut
+            | ClientPacket::Disconnect,
+        ) => crate::zone_metrics::RequestClass::Lifecycle,
+        _ => crate::zone_metrics::RequestClass::Immediate,
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum QuestOperationRequest {
     AcceptQuest {
@@ -2470,6 +2776,9 @@ struct HealthResponse {
     ai_live: crate::ai_live::AiLiveMetrics,
     channel_identity: ChannelIdentityRegistryStatus,
     identity_backend: &'static str,
+    zone_metrics: crate::zone_metrics::ZoneMetricsSnapshot,
+    #[serde(rename = "loadTestLogin", skip_serializing_if = "Option::is_none")]
+    load_test_login: Option<LoadTestLoginHealth>,
 }
 
 #[derive(Debug, Serialize)]
@@ -2711,6 +3020,8 @@ pub async fn serve_web_gateway_with_zone_registry(
     chat_hub: ChatBroadcastHub,
     zone_registry: Arc<ZoneRegistry>,
 ) -> io::Result<()> {
+    let auth_rate_limit_policy = AuthRateLimitPolicy::from_environment(listener.local_addr()?)
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.
@@ -2757,6 +3068,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         capacity: Arc::new(GatewayCapacityState::from_env()),
         gameplay_event_sink: default_gameplay_event_sink_from_env(),
         identity: Arc::new(identity),
+        auth_rate_limit_policy,
         injector: crate::inject::LiveSessionInjector::default(),
         spectator,
         ai_live,
@@ -2911,6 +3223,8 @@ async fn health(State(state): State<WebState>) -> Json<HealthResponse> {
         ai_live: state.ai_live.metrics(),
         channel_identity: channel_identity_status,
         identity_backend: state.identity.backend_label(),
+        zone_metrics: crate::zone_metrics::snapshot(),
+        load_test_login: state.auth_rate_limit_policy.test_only_health(),
     })
 }
 
@@ -3585,12 +3899,13 @@ async fn identity_recover_account(
         account_id: request.account_id.clone(),
         action: AuthSecurityAction::Recovery,
     };
-    enforce_auth_rate_limits(
+    enforce_auth_rate_limits_with_policy(
         state.session_cache.as_ref(),
         &state.identity,
         &peer_address,
         &user_agent,
         &context,
+        state.auth_rate_limit_policy,
     )
     .map_err(|_| identity_unauthorized("account recovery could not be completed"))?;
     mir2_simulation::validate_commercial_identity_credentials(
@@ -4697,6 +5012,7 @@ async fn handle_socket(
             Arc::clone(&state.reconnect_sessions),
             Arc::clone(&state.capacity),
             Arc::clone(&state.identity),
+            state.auth_rate_limit_policy,
             &mut active_session_permit,
             &mut save_queue,
             &mut route_refresh,
@@ -4914,6 +5230,7 @@ fn zone_movement_packet_for_action(action: &SessionAction) -> Option<ClientPacke
 
 async fn try_handle_zone_movement_from_reader(
     action: &SessionAction,
+    received_at: Instant,
     sender: &SharedWebSocketSender,
     movement_ingress: &SharedZoneMovementIngressSlot,
     serial_execution_gate: &SharedSerialExecutionGate,
@@ -4941,15 +5258,34 @@ async fn try_handle_zone_movement_from_reader(
     let Some(call) = movement_drain.begin() else {
         return Err("socket movement ingress has ended".to_string());
     };
-    let execution = tokio::task::spawn_blocking(move || {
+    let execution = match tokio::task::spawn_blocking(move || {
         let _call = call;
         ingress.try_execute(packet)
     })
     .await
-    .map_err(|error| format!("zone movement ingress task failed: {error}"))??;
+    {
+        Ok(Ok(execution)) => execution,
+        result => {
+            crate::zone_metrics::record_request(
+                crate::zone_metrics::RequestClass::MovementAdmission,
+                received_at.elapsed(),
+                false,
+            );
+            return Err(match result {
+                Ok(Err(error)) => error,
+                Err(error) => format!("zone movement ingress task failed: {error}"),
+                Ok(Ok(_)) => unreachable!(),
+            });
+        }
+    };
     let Some(execution) = execution else {
         return Ok(false);
     };
+    crate::zone_metrics::record_request(
+        crate::zone_metrics::RequestClass::MovementAdmission,
+        received_at.elapsed(),
+        true,
+    );
     let responses = execution.packets;
     log_move_action(move_log, &responses);
     for packet in responses {
@@ -4960,76 +5296,429 @@ async fn try_handle_zone_movement_from_reader(
     Ok(true)
 }
 
+// Passive outbound block diagnostics: owned helper/sender region starts here.
+const ZONE_OUTBOUND_BLOCK_THRESHOLD: Duration = Duration::from_millis(50);
+
+fn zone_outbound_block_enabled_value(value: Option<&str>) -> bool {
+    value == Some("1")
+}
+
+fn zone_outbound_block_trace_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| {
+        zone_outbound_block_enabled_value(
+            std::env::var("MIR2_GATEWAY_ZONE_DELIVERY_TRACE")
+                .ok()
+                .as_deref(),
+        )
+    })
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockKind {
+    OwnerHealth,
+    UserLocation,
+    ObjectPlayer,
+    ObjectRemove,
+    Other,
+}
+
+impl ZoneOutboundBlockKind {
+    fn for_packet(packet: &ServerPacket) -> Self {
+        match packet {
+            ServerPacket::UserLocation { .. } => Self::UserLocation,
+            ServerPacket::ObjectPlayer { .. } => Self::ObjectPlayer,
+            ServerPacket::ObjectRemove { .. } => Self::ObjectRemove,
+            _ => Self::Other,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::OwnerHealth => "OwnerHealth",
+            Self::UserLocation => "UserLocation",
+            Self::ObjectPlayer => "ObjectPlayer",
+            Self::ObjectRemove => "ObjectRemove",
+            Self::Other => "Other",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockLane {
+    Owner,
+    Normal,
+}
+
+impl ZoneOutboundBlockLane {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Owner => "owner",
+            Self::Normal => "normal",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum ZoneOutboundBlockStage {
+    ReadGate,
+    HealthSchedule,
+    HealthRun,
+    HealthAwait,
+    Send,
+    CompletionToPop,
+}
+
+impl ZoneOutboundBlockStage {
+    fn label(self) -> &'static str {
+        match self {
+            Self::ReadGate => "read_gate",
+            Self::HealthSchedule => "health_schedule",
+            Self::HealthRun => "health_run",
+            Self::HealthAwait => "health_await",
+            Self::Send => "send",
+            Self::CompletionToPop => "completion_to_pop",
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct ZoneOutboundBlockContext {
+    registration: u64,
+    batch_id: u64,
+    batch_index: usize,
+    kind: ZoneOutboundBlockKind,
+    lane: ZoneOutboundBlockLane,
+    normal_depth: usize,
+    owner_depth: usize,
+}
+
+impl ZoneOutboundBlockContext {
+    fn line(
+        self,
+        stage: ZoneOutboundBlockStage,
+        elapsed: Duration,
+        recorded_unix_ms: u128,
+    ) -> Option<String> {
+        if elapsed < ZONE_OUTBOUND_BLOCK_THRESHOLD {
+            return None;
+        }
+        Some(format!(
+            "[gateway-zone-outbound-block] stage={} registration={} batchID={} batchIndex={} kind={} lane={} normalDepth={} ownerDepth={} elapsedUs={} recordedUnixMs={recorded_unix_ms}",
+            stage.label(), self.registration, self.batch_id, self.batch_index,
+            self.kind.label(), self.lane.label(), self.normal_depth, self.owner_depth,
+            elapsed.as_micros(),
+        ))
+    }
+
+    fn emit(self, stage: ZoneOutboundBlockStage, elapsed: Duration) {
+        if elapsed < ZONE_OUTBOUND_BLOCK_THRESHOLD {
+            return;
+        }
+        let recorded_unix_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        if let Some(line) = self.line(stage, elapsed, recorded_unix_ms) {
+            eprintln!("{line}");
+        }
+    }
+}
+
+// Delaying these two completed spans until packet materialization lets the
+// context classify ObjectPlayer/ObjectRemove without inspecting private payloads.
+// Terminal packets that never materialize retain their pre-send classification.
+struct ZoneOutboundBlockPacketTrace<'a> {
+    context: ZoneOutboundBlockContext,
+    gate_wait: Option<Duration>,
+    completion_to_pop: Option<Duration>,
+    completed_at: &'a mut Option<Instant>,
+}
+
+impl Drop for ZoneOutboundBlockPacketTrace<'_> {
+    fn drop(&mut self) {
+        // Include diagnostic I/O in the next completion-to-pop interval.
+        *self.completed_at = Some(Instant::now());
+        if let Some(elapsed) = self.gate_wait {
+            self.context.emit(ZoneOutboundBlockStage::ReadGate, elapsed);
+        }
+        if let Some(elapsed) = self.completion_to_pop {
+            // This includes normal idle receive waits and diagnostic I/O, so
+            // it is not by itself evidence of backlog or network delay.
+            // A writer blocking the next read gate is measured separately.
+            self.context
+                .emit(ZoneOutboundBlockStage::CompletionToPop, elapsed);
+        }
+    }
+}
+
+const ZONE_OUTBOUND_BATCH_MAX: usize = 32;
+const ZONE_OUTBOUND_BATCH_BUDGET: Duration = Duration::from_millis(2);
+
 fn spawn_zone_outbound_sender(
+    receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    sender: SharedWebSocketSender,
+    serial_execution_gate: SharedSerialExecutionGate,
+    active_registration_id: Arc<AtomicU64>,
+    failure_signal: tokio::sync::watch::Sender<u64>,
+    diagnostics: SocketDiagnostics,
+) -> ZoneOutboundSenderTask {
+    spawn_zone_outbound_sender_with_clock(
+        receiver,
+        owner_location_receiver,
+        sender,
+        serial_execution_gate,
+        active_registration_id,
+        failure_signal,
+        diagnostics,
+        Instant::now,
+    )
+}
+
+fn spawn_zone_outbound_sender_with_clock(
     mut receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
     mut owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
     sender: SharedWebSocketSender,
     serial_execution_gate: SharedSerialExecutionGate,
     active_registration_id: Arc<AtomicU64>,
     failure_signal: tokio::sync::watch::Sender<u64>,
+    diagnostics: SocketDiagnostics,
+    now: impl Fn() -> Instant + Send + 'static,
 ) -> ZoneOutboundSenderTask {
+    use crate::routing::ZoneDeliveryTraceStage as TraceStage;
+
+    let block_trace_enabled = zone_outbound_block_trace_enabled();
     let handle = tokio::spawn(async move {
+        let mut previous_completed_at: Option<Instant> = None;
+        let mut batch_id = 0_u64;
         loop {
-            let outbound = tokio::select! {
+            let (outbound, lane) = tokio::select! {
                 biased;
                 outbound = owner_location_receiver.recv() => match outbound {
-                    Some(outbound) => outbound,
+                    Some(outbound) => (outbound, ZoneOutboundBlockLane::Owner),
                     None => match receiver.recv().await {
-                        Some(outbound) => outbound,
+                        Some(outbound) => (outbound, ZoneOutboundBlockLane::Normal),
                         None => return,
                     },
                 },
                 outbound = receiver.recv() => match outbound {
-                    Some(outbound) => outbound,
+                    Some(outbound) => (outbound, ZoneOutboundBlockLane::Normal),
                     None => match owner_location_receiver.recv().await {
-                        Some(outbound) => outbound,
+                        Some(outbound) => (outbound, ZoneOutboundBlockLane::Owner),
                         None => return,
                     },
                 },
             };
-            let registration_id = outbound.registration_id();
+            let first_block_pop = block_trace_enabled.then(|| {
+                let popped_at = Instant::now();
+                batch_id = batch_id.wrapping_add(1);
+                let kind = if outbound.owner_health().is_some() {
+                    ZoneOutboundBlockKind::OwnerHealth
+                } else if outbound.is_owner_location() {
+                    ZoneOutboundBlockKind::UserLocation
+                } else {
+                    ZoneOutboundBlockKind::Other
+                };
+                (
+                    ZoneOutboundBlockContext {
+                        registration: outbound.registration_id(),
+                        batch_id,
+                        batch_index: 0,
+                        kind,
+                        lane,
+                        normal_depth: receiver.len(),
+                        owner_depth: owner_location_receiver.len(),
+                    },
+                    popped_at,
+                )
+            });
+            let first_trace = outbound.delivery_trace();
+            let first_dequeued_at = first_trace.as_ref().map(|trace| {
+                let at = Instant::now();
+                trace.emit(TraceStage::Dequeue, Some(at), None);
+                at
+            });
             // A cadence may enqueue the first new-epoch ACK between registration
             // preparation and activation while bootstrap holds the write gate.
             // Judge the epoch only after bootstrap/activation has completed.
-            let serial_gate_wait = GatewaySlowStage::start("serial_gate.zone_outbound_wait");
+            let serial_gate_wait =
+                GatewaySlowStage::for_socket("serial_gate.zone_outbound_wait", &diagnostics);
+            let block_gate_started_at = block_trace_enabled.then(Instant::now);
             let _serial_execution = serial_execution_gate.read().await;
+            let batch_started_at = now();
+            let first_block_gate_wait = block_gate_started_at.map(|at| at.elapsed());
+            let first_gate_acquired_at = first_trace.as_ref().map(|trace| {
+                let at = Instant::now();
+                trace.emit(TraceStage::Gate, first_dequeued_at, Some(at));
+                at
+            });
             drop(serial_gate_wait);
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                if outbound.is_owner_location() {
-                    eprintln!(
-                        "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
-                        active_registration_id.load(Ordering::Acquire)
-                    );
+            // Bootstrap wait is not batch work. Keep the in-hand first packet
+            // in its original order, even if an owner ACK arrived while waiting.
+            let mut first_outbound = Some((
+                outbound,
+                first_trace,
+                first_dequeued_at,
+                first_gate_acquired_at,
+                first_block_pop
+                    .map(|(context, popped_at)| (context, popped_at, first_block_gate_wait)),
+            ));
+            for batch_index in 0..ZONE_OUTBOUND_BATCH_MAX {
+                if batch_index > 0
+                    && now().duration_since(batch_started_at) >= ZONE_OUTBOUND_BATCH_BUDGET
+                {
+                    break;
                 }
-                continue;
-            }
-            if outbound.is_overloaded() {
-                failure_signal.send_replace(registration_id);
-                return;
-            }
-            // Health may have waited through a death/revival while this read
-            // gate was blocked. Validate its server-only stamp at final send.
-            let packet = if outbound.owner_health().is_some() {
-                match tokio::task::spawn_blocking(move || outbound.claim_for_send()).await {
-                    Ok(Ok(Some(packet))) => packet,
-                    Ok(Ok(None)) => continue,
-                    _ => {
-                        if active_registration_id.load(Ordering::Acquire) != registration_id {
+                let (outbound, trace, dequeued_at, gate_acquired_at, block_pop) =
+                    if let Some(first) = first_outbound.take() {
+                        first
+                    } else {
+                        // Never await another packet while holding the read guard.
+                        // Recheck owner priority at every pop; normal remains FIFO.
+                        match owner_location_receiver
+                            .try_recv()
+                            .map(|outbound| (outbound, ZoneOutboundBlockLane::Owner))
+                            .or_else(|_| {
+                                receiver
+                                    .try_recv()
+                                    .map(|outbound| (outbound, ZoneOutboundBlockLane::Normal))
+                            }) {
+                            Ok((outbound, lane)) => {
+                                let block_pop = block_trace_enabled.then(|| {
+                                    let popped_at = Instant::now();
+                                    let kind = if outbound.owner_health().is_some() {
+                                        ZoneOutboundBlockKind::OwnerHealth
+                                    } else if outbound.is_owner_location() {
+                                        ZoneOutboundBlockKind::UserLocation
+                                    } else {
+                                        ZoneOutboundBlockKind::Other
+                                    };
+                                    (
+                                        ZoneOutboundBlockContext {
+                                            registration: outbound.registration_id(),
+                                            batch_id,
+                                            batch_index,
+                                            kind,
+                                            lane,
+                                            normal_depth: receiver.len(),
+                                            owner_depth: owner_location_receiver.len(),
+                                        },
+                                        popped_at,
+                                        None,
+                                    )
+                                });
+                                let trace = outbound.delivery_trace();
+                                let at = trace.as_ref().map(|trace| {
+                                    let at = Instant::now();
+                                    trace.emit(TraceStage::Dequeue, Some(at), None);
+                                    trace.emit(TraceStage::Gate, Some(at), Some(at));
+                                    at
+                                });
+                                (outbound, trace, at, at, block_pop)
+                            }
+                            Err(_) => break,
+                        }
+                    };
+                let mut block_trace = block_pop.map(|(context, popped_at, gate_wait)| {
+                    let completion_to_pop =
+                        previous_completed_at.map(|at| popped_at.saturating_duration_since(at));
+                    ZoneOutboundBlockPacketTrace {
+                        context,
+                        gate_wait,
+                        completion_to_pop,
+                        completed_at: &mut previous_completed_at,
+                    }
+                });
+                let trace_stage = |stage| {
+                    if let Some(trace) = &trace {
+                        trace.emit(stage, dequeued_at, gate_acquired_at);
+                    }
+                };
+                // Stale and empty-health packets count toward both limits too.
+                let registration_id = outbound.registration_id();
+                if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    trace_stage(TraceStage::Stale);
+                    if outbound.is_owner_location() {
+                        eprintln!(
+                            "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
+                            active_registration_id.load(Ordering::Acquire)
+                        );
+                    }
+                    continue;
+                }
+                if outbound.is_overloaded() {
+                    trace_stage(TraceStage::Overload);
+                    failure_signal.send_replace(registration_id);
+                    return;
+                }
+                // Health may have waited through a death/revival while this read
+                // gate was blocked. Validate its server-only stamp at final send.
+                let packet = if outbound.owner_health().is_some() {
+                    let health_span = block_trace
+                        .as_ref()
+                        .map(|trace| (trace.context, Instant::now()));
+                    let health_result = tokio::task::spawn_blocking(move || {
+                        let health_run = health_span.map(|(context, submitted_at)| {
+                            let started_at = Instant::now();
+                            context.emit(
+                                ZoneOutboundBlockStage::HealthSchedule,
+                                started_at.saturating_duration_since(submitted_at),
+                            );
+                            (context, Instant::now())
+                        });
+                        let result = outbound.claim_for_send();
+                        if let Some((context, started_at)) = health_run {
+                            context.emit(ZoneOutboundBlockStage::HealthRun, started_at.elapsed());
+                        }
+                        result
+                    })
+                    .await;
+                    if let Some((context, submitted_at)) = health_span {
+                        context.emit(ZoneOutboundBlockStage::HealthAwait, submitted_at.elapsed());
+                    }
+                    match health_result {
+                        Ok(Ok(Some(packet))) => packet,
+                        Ok(Ok(None)) => {
+                            trace_stage(TraceStage::HealthEmpty);
                             continue;
                         }
-                        failure_signal.send_replace(registration_id);
-                        return;
+                        _ => {
+                            if active_registration_id.load(Ordering::Acquire) != registration_id {
+                                trace_stage(TraceStage::Stale);
+                                continue;
+                            }
+                            trace_stage(TraceStage::HealthError);
+                            failure_signal.send_replace(registration_id);
+                            return;
+                        }
+                    }
+                } else {
+                    outbound.into_packet()
+                };
+                if let Some(trace) = block_trace.as_mut() {
+                    if !matches!(trace.context.kind, ZoneOutboundBlockKind::OwnerHealth) {
+                        trace.context.kind = ZoneOutboundBlockKind::for_packet(&packet);
                     }
                 }
-            } else {
-                outbound.into_packet()
-            };
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                continue;
-            }
-            if send_server_packet(&sender, &packet).await.is_err() {
-                failure_signal.send_replace(registration_id);
-                return;
+                if active_registration_id.load(Ordering::Acquire) != registration_id {
+                    trace_stage(TraceStage::Stale);
+                    continue;
+                }
+                trace_stage(TraceStage::Send);
+                let send_span = block_trace
+                    .as_ref()
+                    .map(|trace| (trace.context, Instant::now()));
+                let send_result = send_server_packet(&sender, &packet).await;
+                if let Some((context, started_at)) = send_span {
+                    context.emit(ZoneOutboundBlockStage::Send, started_at.elapsed());
+                }
+                if send_result.is_err() {
+                    trace_stage(TraceStage::SendError);
+                    failure_signal.send_replace(registration_id);
+                    return;
+                }
+                trace_stage(TraceStage::Sent);
             }
         }
     });
@@ -5103,20 +5792,18 @@ fn refresh_zone_live_outbound(
 }
 
 fn invalid_browser_command_input(message: &str, error: &serde_json::Error) -> ParsedSocketInput {
-    let recognized_resume = serde_json::from_str::<Value>(message)
+    let recognized_type = serde_json::from_str::<Value>(message)
         .ok()
         .and_then(|value| {
             value
                 .get("type")
                 .and_then(Value::as_str)
                 .map(str::to_string)
-        })
-        .as_deref()
-        == Some("resumeSession");
-    if recognized_resume {
-        ParsedSocketInput::ResumeRejected
-    } else {
-        ParsedSocketInput::ProtocolError(format!("invalid command: {error}"))
+        });
+    match recognized_type.as_deref() {
+        Some("resumeSession") => ParsedSocketInput::ResumeRejected,
+        Some("attackV2") => ParsedSocketInput::ProtocolError("invalid attackV2 request".into()),
+        _ => ParsedSocketInput::ProtocolError(format!("invalid command: {error}")),
     }
 }
 
@@ -5129,6 +5816,7 @@ fn spawn_socket_reader(
     terminal: transport::TransportSignal,
     movement_drain: Arc<transport::MovementDrain>,
     session_id: String,
+    diagnostics: SocketDiagnostics,
 ) -> (
     mpsc::Receiver<SocketInbound>,
     SocketReaderTask,
@@ -5161,6 +5849,7 @@ fn spawn_socket_reader(
                     return;
                 }
             };
+            let received_at = Instant::now();
             if message.len() > WEBSOCKET_MAX_MESSAGE_BYTES {
                 return;
             }
@@ -5180,6 +5869,8 @@ fn spawn_socket_reader(
                             invalid_browser_command_input(&message, &error),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5190,6 +5881,26 @@ fn spawn_socket_reader(
                 }
             };
             let command = match command {
+                BrowserCommand::AttackV2 { .. } => {
+                    let parsed = match crate::attack_protocol::parse_attack_v2(&message) {
+                        Ok(request) => ParsedSocketInput::AttackV2(request),
+                        Err(error) => ParsedSocketInput::ProtocolError(error),
+                    };
+                    if input_tx
+                        .send(SocketInbound::Queued(QueuedSocketInput::new(
+                            parsed,
+                            Arc::clone(&reader_pending_count),
+                            message_permit,
+                            received_at,
+                            &diagnostics,
+                        )))
+                        .await
+                        .is_err()
+                    {
+                        return;
+                    }
+                    continue;
+                }
                 BrowserCommand::NpcPurchaseOwner { .. } => {
                     // Reparse the original bytes with duplicate/unknown-field
                     // rejection; never dispatch a Value-normalized request.
@@ -5204,6 +5915,8 @@ fn spawn_socket_reader(
                             parsed,
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5218,6 +5931,8 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ClientCapabilities(capabilities),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5232,6 +5947,8 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ResumeSession(request.credential),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5251,6 +5968,8 @@ fn spawn_socket_reader(
                                 ParsedSocketInput::ProtocolError(error),
                                 Arc::clone(&reader_pending_count),
                                 message_permit,
+                                received_at,
+                                &diagnostics,
                             )))
                             .await
                             .is_err()
@@ -5273,6 +5992,8 @@ fn spawn_socket_reader(
                             input,
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5293,6 +6014,7 @@ fn spawn_socket_reader(
             }
             match try_handle_zone_movement_from_reader(
                 &action,
+                received_at,
                 &sender,
                 &movement_ingress,
                 &serial_execution_gate,
@@ -5310,6 +6032,8 @@ fn spawn_socket_reader(
                             ParsedSocketInput::ProtocolError(error),
                             Arc::clone(&reader_pending_count),
                             message_permit,
+                            received_at,
+                            &diagnostics,
                         )))
                         .await
                         .is_err()
@@ -5328,6 +6052,8 @@ fn spawn_socket_reader(
                     },
                     Arc::clone(&reader_pending_count),
                     message_permit,
+                    received_at,
+                    &diagnostics,
                 )))
                 .await
                 .is_err()
@@ -5379,6 +6105,7 @@ async fn handle_socket_inner(
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
@@ -5405,6 +6132,7 @@ async fn handle_socket_inner(
         reconnect_sessions,
         capacity,
         identity,
+        auth_rate_limit_policy,
         active_session_permit,
         save_queue,
         route_refresh,
@@ -5497,6 +6225,7 @@ async fn handle_socket_work(
     reconnect_sessions: Arc<ReconnectSessionStore>,
     capacity: Arc<GatewayCapacityState>,
     identity: Arc<IdentityService>,
+    auth_rate_limit_policy: AuthRateLimitPolicy,
     active_session_permit: &mut Option<GatewayCapacityPermit>,
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
@@ -5515,6 +6244,10 @@ async fn handle_socket_work(
     terminal: transport::TransportSignal,
     movement_drain: Arc<transport::MovementDrain>,
 ) {
+    let diagnostics = allocate_socket_diagnostics(
+        gateway_slow_stage_threshold().is_some(),
+        &NEXT_SOCKET_DIAGNOSTIC_ID,
+    );
     let (sender, receiver) = socket.split();
     let sender = Arc::new(transport::SocketSender::new(sender, terminal.clone()));
     if sender
@@ -5548,6 +6281,7 @@ async fn handle_socket_work(
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
     let mut native_game_shop = NativeGameShopConnectionState::default();
     let mut npc_purchase = crate::npc_purchase_browser::BrowserNpcPurchaseConnection::default();
+    let mut native_attack = crate::attack_protocol::AttackV2Connection::default();
     let mut server_catalog_gzip_v1 = false;
     let mut first_post_resume_identity_check_pending = false;
     let mut last_identity_revocation_check = Instant::now();
@@ -5610,6 +6344,7 @@ async fn handle_socket_work(
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
         overload_tx,
+        diagnostics.clone(),
     );
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
@@ -5622,6 +6357,7 @@ async fn handle_socket_work(
         terminal,
         movement_drain,
         session.session_id().to_owned(),
+        diagnostics.clone(),
     );
 
     loop {
@@ -5629,6 +6365,9 @@ async fn handle_socket_work(
             biased;
 
             socket_input = socket_inputs.recv() => {
+                let _input_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Input, Some("socket_turn.input"),
+                );
                 let mut queued_input = match socket_input {
                     Some(SocketInbound::Queued(input)) => input,
                     Some(SocketInbound::Closed) | None => return,
@@ -5637,13 +6376,23 @@ async fn handle_socket_work(
                         return;
                     }
                 };
-                drop(GatewaySlowStage::since(
+                let mut queue_stage = GatewaySlowStage::since(
                     "socket_input.queue_residence",
                     queued_input.queued_at,
-                ));
-                let serial_gate_wait = GatewaySlowStage::start("serial_gate.input_wait");
+                );
+                queue_stage.context = queued_input.diagnostic_context;
+                drop(queue_stage);
+                let input_gate_phase = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::InputGate, None,
+                );
+                let serial_gate_wait = GatewaySlowStage::for_socket("serial_gate.input_wait", &diagnostics);
                 let _serial_execution = serial_execution_gate.write().await;
                 drop(serial_gate_wait);
+                drop(input_gate_phase);
+                let input_owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::InputOwnerHeartbeat,
+                    Some("socket_turn.input_owner_heartbeat"),
+                );
                 if let Err(error) = catch_gateway_panic("web zone owner command heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 })
@@ -5652,10 +6401,14 @@ async fn handle_socket_work(
                     let _ = send_error_message(&sender, &error).await;
                     continue;
                 }
+                drop(input_owner_heartbeat);
                 let parsed_input = queued_input.take_input();
                 let mut npc_purchase_request = None;
+                let mut native_attack_request = None;
                 let (action, quest_operation_request, skill_key_request) = match parsed_input {
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
+                        let attack_capability_requested = capabilities.iter()
+                            .any(|capability| capability == "nativeAttackOutcomeV1");
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
                                 if native_resume.opted_in && !capabilities.native_resume_v1 {
@@ -5673,6 +6426,10 @@ async fn handle_socket_work(
                                 if !native_game_shop.opted_in && !native_game_shop.gift_opted_in {
                                     native_game_shop.pending = None;
                                 }
+                                if attack_capability_requested && sender.send(Message::Text(json!({
+                                    "type":"attackCapabilitiesV2", "protocolVersion":2,
+                                    "capability":"nativeAttackOutcomeV1", "supported":true, "scope":"connection",
+                                }).to_string().into())).await.is_err() { return; }
                             }
                             Err(error) => {
                                 if send_error_message(&sender, &error).await.is_err() {
@@ -5824,6 +6581,11 @@ async fn handle_socket_work(
                         npc_purchase_request = Some(request);
                         (None, None, None)
                     }
+                    ParsedSocketInput::AttackV2(request) => {
+                        let object_id = request.object_id;
+                        native_attack_request = Some(request);
+                        (Some(SessionAction::Attack { object_id }), None, None)
+                    }
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
@@ -5864,6 +6626,28 @@ async fn handle_socket_work(
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
                 }
+                if let Some(request) = native_attack_request.as_ref() {
+                    let prepared = catch_gateway_panic("attackV2 authorization", || {
+                        tokio::task::block_in_place(|| {
+                            let identity_valid = authenticated && active_identity_session.as_ref()
+                                .zip(authenticated_account_id.as_deref())
+                                .is_some_and(|(verified, account_id)| verified.account_id == account_id
+                                    && native_resume_identity_is_active(session_cache.as_ref(), &identity, verified, gateway_unix_ms()));
+                            let actor = if identity_valid { session.active_identity().filter(|actor|
+                                Some(actor.account_id.as_str()) == authenticated_account_id.as_deref()) } else { None };
+                            native_attack.prepare(request, identity_valid, actor.as_ref())
+                        })
+                    });
+                    match prepared {
+                        Ok(crate::attack_protocol::PreparedAttack::Execute) => {}
+                        Ok(crate::attack_protocol::PreparedAttack::Reply(frame)) => {
+                            let unknown = frame["result"] == "unknown";
+                            if sender.send(Message::Text(frame.to_string().into())).await.is_err() || unknown { return; }
+                            continue;
+                        }
+                        Err(_) => return,
+                    }
+                }
                 if let Some(request) = npc_purchase_request {
                     let dispatch = tokio::task::block_in_place(|| {
                         let identity_valid = authenticated && active_identity_session.as_ref()
@@ -5893,6 +6677,13 @@ async fn handle_socket_work(
                 let Some(mut action) = action else { continue; };
                 if matches!(&action, SessionAction::Packet(ClientPacket::Login { .. } | ClientPacket::LogOut | ClientPacket::Disconnect) | SessionAction::PasskeyLogin { .. }) {
                     billing_generation.fetch_add(1, Ordering::AcqRel);
+                }
+                if let SessionAction::Procurement(request) = &action {
+                    if procurement::socket_action(session, &identity,
+                        active_identity_session.as_ref(), authenticated,
+                        authenticated_account_id.as_deref(), request,
+                        &sender, &session_cache).await.is_err() { return; }
+                    continue;
                 }
                 if let SessionAction::Billing(request) = &action {
                     if let Err(error) = billing::socket_action(session, Arc::clone(&identity),
@@ -5994,12 +6785,13 @@ async fn handle_socket_work(
                 let mut login_account_id = login_account_id_for_action(&action).map(str::to_string);
                 let mut login_identity_context = login_identity_context_for_action(&action);
                 if let Some(context) = auth_security_context_for_action(&action) {
-                    if let Err(error) = enforce_auth_rate_limits(
+                    if let Err(error) = enforce_auth_rate_limits_with_policy(
                         session_cache.as_ref(),
                         &identity,
                         &peer_address,
                         &user_agent,
                         &context,
+                        auth_rate_limit_policy,
                     ) {
                         let _ = send_error_message(&sender, &error).await;
                         continue;
@@ -6216,10 +7008,23 @@ async fn handle_socket_work(
                         tokio::task::block_in_place(|| session.supports_magic_key_assignment(*spell, *key, *old_key)),
                     _ => false,
                 };
+                let request_class = request_metrics_class(&action);
+                let mut native_attack_admission = None;
+                let mut native_attack_error = None;
                 let execution_result = match catch_gateway_panic("web session action", || {
-                    let _slow_stage = GatewaySlowStage::start("session_action.execute");
+                    let _slow_stage = GatewaySlowStage::for_socket("session_action.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
-                        if let Some(request) = native_game_shop_request.as_ref() {
+                        if let Some(request) = native_attack_request.as_ref() {
+                            match session.execute_production_attack_requiring_typed_outcome(request.object_id, authenticated) {
+                                Ok(result) => {
+                                    native_attack_admission = Some(result.admission);
+                                    Ok((result.execution.packets, None))
+                                }
+                                Err(error) => {
+                                    let detail = error.to_string(); native_attack_error = Some(error); Err(detail)
+                                }
+                            }
+                        } else if let Some(request) = native_game_shop_request.as_ref() {
                             execute_native_game_shop_handler_seam(session, request).map(|dispatch| {
                                 (dispatch.normal_packets, Some(dispatch.post_execution))
                             })
@@ -6240,13 +7045,23 @@ async fn handle_socket_work(
                         }
                     })
                 }) {
-                    Ok(Ok(execution)) => execution,
+                    Ok(Ok(execution)) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), true);
+                        execution
+                    },
                     Ok(Err(error)) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), false);
                         release_pending_start_game_route_lease(
                             session_cache.as_ref(),
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
+                        if let Some(request) = native_attack_request.as_ref() {
+                            let error = native_attack_error.take().unwrap_or_else(|| mir2_simulation::NativeAttackError::Unknown(error));
+                            let frame = crate::attack_protocol::error_frame(request, &error);
+                            let _ = sender.send(Message::Text(frame.to_string().into())).await;
+                            return;
+                        }
                         if native_game_shop_request.is_some() {
                             eprintln!(
                                 "native GameShop execution failed with unknown commit state; closing socket: {error}"
@@ -6279,11 +7094,18 @@ async fn handle_socket_work(
                         continue;
                     }
                     Err(error) => {
+                        crate::zone_metrics::record_request(request_class, queued_input.received_at.elapsed(), false);
                         release_pending_start_game_route_lease(
                             session_cache.as_ref(),
                             session,
                             pending_start_game_route_lease.as_ref(),
                         );
+                        if let Some(request) = native_attack_request.as_ref() {
+                            let frame = crate::attack_protocol::error_frame(request,
+                                &mir2_simulation::NativeAttackError::Unknown("execution panicked".into()));
+                            let _ = sender.send(Message::Text(frame.to_string().into())).await;
+                            return;
+                        }
                         if native_game_shop_request.is_some() {
                             eprintln!(
                                 "native GameShop execution panicked with unknown commit state; closing socket without receipt: {error}"
@@ -6370,7 +7192,7 @@ async fn handle_socket_work(
                 )
                 .await
                 {
-                    if native_game_shop_request.is_some() {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution identity finalization failed; closing without receipt: {error}"
                         );
@@ -6521,7 +7343,7 @@ async fn handle_socket_work(
                         &mut _zone_live_outbound_registration,
                     )
                 }) {
-                    if native_game_shop_request.is_some() {
+                    if native_game_shop_request.is_some() || native_attack_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
                         );
@@ -6532,8 +7354,9 @@ async fn handle_socket_work(
                 }
 
                 let flush_result = {
-                    let _slow_stage = GatewaySlowStage::start("session_action.flush");
-                    flush_session_updates(
+                    let _slow_stage = GatewaySlowStage::for_socket("session_action.flush", &diagnostics);
+                    if native_attack_request.is_some() {
+                        flush_session_updates_with_deferred_snapshot(
                         &sender,
                         session,
                         session_cache.as_ref(),
@@ -6546,25 +7369,47 @@ async fn handle_socket_work(
                         low_latency_action,
                         should_queue_save_by_action,
                         force_route_refresh,
+                        true,
                     )
                     .await
+                    } else {
+                        flush_session_updates(
+                            &sender,
+                            session,
+                            session_cache.as_ref(),
+                            save_queue,
+                            route_refresh,
+                            responses,
+                            server_catalog_gzip_v1,
+                            quest_operation_ack.as_ref(),
+                            should_send_snapshot_by_action,
+                            low_latency_action,
+                            should_queue_save_by_action,
+                            force_route_refresh,
+                        )
+                        .await
+                        .map(|_| false)
+                    }
                 };
-                if let Err(error) = flush_result {
-                    if native_game_shop_request.is_some() {
-                        eprintln!(
-                            "native GameShop post-execution flush failed; closing without receipt: {error}"
-                        );
+                let pending_attack_snapshot = match flush_result {
+                    Ok(pending_snapshot) => pending_snapshot,
+                    Err(error) => {
+                        if native_game_shop_request.is_some() || native_attack_request.is_some() {
+                            eprintln!(
+                                "native GameShop post-execution flush failed; closing without receipt: {error}"
+                            );
+                            return;
+                        }
+                        eprintln!("web session state flush failed; internal detail: {error}");
+                        let _ = send_fixed_error_event(
+                            &sender,
+                            "stateSyncUnavailable",
+                            "Player state synchronization is temporarily unavailable.",
+                        )
+                        .await;
                         return;
                     }
-                    eprintln!("web session state flush failed; internal detail: {error}");
-                    let _ = send_fixed_error_event(
-                        &sender,
-                        "stateSyncUnavailable",
-                        "Player state synchronization is temporarily unavailable.",
-                    )
-                    .await;
-                    return;
-                }
+                };
                 if send_monthly_status {
                     if let Some(account) = authenticated_account_id.as_deref() {
                         if monthly_card::send_status(&sender, session, account).await.is_err() { return; }
@@ -6613,12 +7458,30 @@ async fn handle_socket_work(
                         session,
                     );
                 }
+                if let Some(request) = native_attack_request.as_ref() {
+                    let Some(admission) = native_attack_admission else { return; };
+                    let frame = tokio::task::block_in_place(|| {
+                        native_attack.complete(request, admission, session.active_identity().as_ref())
+                    });
+                    let Ok(frame) = frame else { return; };
+                    if sender.send(Message::Text(frame.to_string().into())).await.is_err() { return; }
+                    if pending_attack_snapshot
+                        && send_world_snapshot_with_quest_ack(
+                            &sender, session, quest_operation_ack.as_ref(),
+                        ).await.is_err()
+                    {
+                        return;
+                    }
+                }
                 if let Some(duration) = runtime_tick_defer_duration {
                     runtime_tick_deferred_until = Instant::now() + duration;
                     runtime_tick.reset_after(duration);
                 }
             }
             broadcast = recv_optional_chat(&mut chat_presence) => {
+                let _chat_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Chat, Some("socket_turn.chat"),
+                );
                 match broadcast {
                     Ok(packet) => {
                         if send_server_packet(&sender, &packet).await.is_err() {
@@ -6632,6 +7495,9 @@ async fn handle_socket_work(
                 }
             }
             maybe_injection = inject_rx.recv() => {
+                let _injection_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Injection, Some("socket_turn.injection"),
+                );
                 let Some(crate::inject::InjectionMessage { command, reply }) = maybe_injection else {
                     continue;
                 };
@@ -6712,6 +7578,9 @@ async fn handle_socket_work(
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
             }
             _ = spectator_publish_tick.tick(), if spectator.config().enabled => {
+                let _spectator_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Spectator, Some("socket_turn.spectator"),
+                );
                 let result = tokio::task::block_in_place(|| {
                     publish_spectator_frame_if_enabled(&spectator, || {
                         session.active_identity().map(|_| session.world_snapshot())
@@ -6722,6 +7591,9 @@ async fn handle_socket_work(
                 }
             }
             _ = ai_live_tick.tick(), if authenticated => {
+                let _ai_live_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::AiLive, Some("socket_turn.ai_live"),
+                );
                 let status = ai_live.status();
                 let game_overlay_ready = status.distribution.channels.iter().any(|channel| {
                     channel.channel
@@ -6764,6 +7636,9 @@ async fn handle_socket_work(
                     _ = monthly_access_tick.tick(), if monthly_access_enabled && active_session_permit.is_some() => {},
                 }
             } => {
+                let _runtime_tick_turn = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::RuntimeTick, Some("runtime_tick.total"),
+                );
                 let now = Instant::now();
                 if authenticated
                     && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
@@ -6777,7 +7652,14 @@ async fn handle_socket_work(
                         let _ = send_error_message(&sender, "identity session expired").await;
                         return;
                     }
-                    match session_cache.identity_session_is_revoked(&verified.session_id) {
+                    let identity_revocation = {
+                        let _identity_cache = SocketDiagnosticPhaseGuard::enter(
+                            &diagnostics, SocketDiagnosticPhase::IdentityCache,
+                            Some("runtime_tick.identity_cache"),
+                        );
+                        session_cache.identity_session_is_revoked(&verified.session_id)
+                    };
+                    match identity_revocation {
                         Ok(false) => {}
                         Ok(true) => {
                             let _ = send_error_message(&sender, "identity session was revoked").await;
@@ -6796,9 +7678,14 @@ async fn handle_socket_work(
                         >= Duration::from_secs(60)
                     {
                         last_identity_database_check = now;
+                        let identity_database = SocketDiagnosticPhaseGuard::enter(
+                            &diagnostics, SocketDiagnosticPhase::IdentityDatabase,
+                            Some("runtime_tick.identity_database"),
+                        );
                         let database_check = tokio::task::block_in_place(|| {
                             identity.touch_session(verified)
                         });
+                        drop(identity_database);
                         if let Err(error) = database_check {
                             let _ = send_error_message(
                                 &sender,
@@ -6809,6 +7696,10 @@ async fn handle_socket_work(
                         }
                     }
                 }
+                let resume_credential = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::ResumeCredential,
+                    Some("runtime_tick.resume_credential"),
+                );
                 if maybe_issue_native_resume_credential(
                     &sender,
                     reconnect_sessions.as_ref(),
@@ -6825,25 +7716,40 @@ async fn handle_socket_work(
                 {
                     return;
                 }
+                drop(resume_credential);
+                let owner_heartbeat = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::OwnerHeartbeat,
+                    Some("runtime_tick.owner_heartbeat"),
+                );
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
                     let _ = send_error_message(&sender, &error).await;
                     return;
                 }
+                drop(owner_heartbeat);
+                let preflight = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::Preflight, Some("runtime_tick.preflight"),
+                );
                 let monthly_expiry_pending = session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
                 if now < runtime_tick_deferred_until && !monthly_expiry_pending
                     && !session.has_pending_shared_personal_work() {
                     continue;
                 }
+                drop(preflight);
                 // Tick can complete a queued portal movement and rebuild the
                 // viewport. Serialize its bootstrap/re-registration/flush just
                 // like a player action so live ACKs cannot precede the landing.
+                let tick_gate_phase = SocketDiagnosticPhaseGuard::enter(
+                    &diagnostics, SocketDiagnosticPhase::TickGate,
+                    Some("runtime_tick.serial_gate_wait"),
+                );
                 let _serial_execution = serial_execution_gate.write().await;
+                drop(tick_gate_phase);
                 let monthly_expiry_route = monthly_expiry_pending
                     .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
                 let responses = match catch_gateway_panic("web session tick", || {
-                    let _slow_stage = GatewaySlowStage::start("runtime_tick.execute");
+                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.execute", &diagnostics);
                     tokio::task::block_in_place(|| {
                         session
                             .execute_with_outcome(WorldCommand::Tick)
@@ -6896,7 +7802,7 @@ async fn handle_socket_work(
                 }
                 if responses.is_empty() {
                     let checkpoint_result = {
-                        let _slow_stage = GatewaySlowStage::start("runtime_tick.save_checkpoint");
+                        let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.save_checkpoint", &diagnostics);
                         save_queue.checkpoint(now, || {
                             tokio::task::block_in_place(|| {
                                 catch_gateway_panic("web save_active_character", || {
@@ -6913,7 +7819,7 @@ async fn handle_socket_work(
                     continue;
                 }
                 let flush_result = {
-                    let _slow_stage = GatewaySlowStage::start("runtime_tick.flush");
+                    let _slow_stage = GatewaySlowStage::for_socket("runtime_tick.flush", &diagnostics);
                     flush_session_updates(
                         &sender,
                         session,
@@ -7040,6 +7946,40 @@ async fn flush_session_updates(
     should_queue_save_by_action: bool,
     force_route_refresh: bool,
 ) -> Result<(), String> {
+    flush_session_updates_with_deferred_snapshot(
+        sender,
+        session,
+        session_cache,
+        save_queue,
+        route_refresh,
+        responses,
+        server_catalog_gzip_v1,
+        quest_operation_ack,
+        should_send_snapshot_by_action,
+        low_latency_action,
+        should_queue_save_by_action,
+        force_route_refresh,
+        false,
+    )
+    .await
+    .map(|_| ())
+}
+
+async fn flush_session_updates_with_deferred_snapshot(
+    sender: &SharedWebSocketSender,
+    session: &mut GatewaySession,
+    session_cache: &dyn crate::cache::GatewaySessionCache,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
+    responses: Vec<ServerPacket>,
+    server_catalog_gzip_v1: bool,
+    quest_operation_ack: Option<&QuestOperationAck>,
+    should_send_snapshot_by_action: bool,
+    low_latency_action: bool,
+    should_queue_save_by_action: bool,
+    force_route_refresh: bool,
+    defer_snapshot: bool,
+) -> Result<bool, String> {
     let response_requires_snapshot = responses_require_world_snapshot(&responses);
     let low_latency_response_requires_snapshot =
         low_latency_responses_require_world_snapshot(&responses);
@@ -7054,10 +7994,10 @@ async fn flush_session_updates(
         // Calendar/kill progress and committed player progression are folded
         // from the authoritative snapshot by the native client. Keep ordinary
         // movement and world deltas on the packet-only fast path.
-        if low_latency_response_requires_snapshot {
+        if low_latency_response_requires_snapshot && !defer_snapshot {
             send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
         }
-        return Ok(());
+        return Ok(defer_snapshot && low_latency_response_requires_snapshot);
     }
 
     let external_state_changed = {
@@ -7067,7 +8007,7 @@ async fn flush_session_updates(
     let should_send_snapshot =
         should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
 
-    if should_send_snapshot {
+    if should_send_snapshot && !defer_snapshot {
         send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
     }
 
@@ -7104,7 +8044,9 @@ async fn flush_session_updates(
         eprintln!("web session route lease refresh skipped: {error}");
     }
 
-    Ok(())
+    // The caller may publish its correlated receipt only after these original
+    // persistence and route-refresh steps, then send this presentation snapshot.
+    Ok(defer_snapshot && should_send_snapshot)
 }
 
 fn route_lease_ttl_seconds() -> u64 {
@@ -7202,21 +8144,23 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::Packet(ClientPacket::StartGame { .. }) => {
             Some(gateway_runtime_tick_bootstrap_grace())
         }
-        // Active movement and combat must wake the runtime tick loop. Without
-        // this, a cast immediately after StartGame leaves its resolved Zone
-        // damage queued for the full bootstrap grace (or until LogOut), even
-        // though KeepAlive continues to acknowledge. Retain the small input
-        // batching window before draining the ordinary session path.
+        // Active movement, combat and item use must wake the runtime tick loop.
+        // Otherwise an action immediately after StartGame can leave resolved
+        // Zone damage or a consumed potion's personal restoration queued for
+        // the full bootstrap grace, even while KeepAlive acknowledges. Retain
+        // the small input batching window before the ordinary session drain.
         SessionAction::MoveTo { .. }
         | SessionAction::Attack { .. }
         | SessionAction::CastSkill { .. }
+        | SessionAction::UseItem { .. }
         | SessionAction::Packet(
             ClientPacket::Walk { .. }
             | ClientPacket::Run { .. }
             | ClientPacket::Turn { .. }
             | ClientPacket::Attack { .. }
             | ClientPacket::RangeAttack { .. }
-            | ClientPacket::Magic { .. },
+            | ClientPacket::Magic { .. }
+            | ClientPacket::UseItem { .. },
         ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
@@ -7308,12 +8252,126 @@ fn auth_security_context_for_action(action: &SessionAction) -> Option<AuthSecuri
     }
 }
 
+// An explicit, immutable startup policy for isolated loopback load experiments.
+// Normal authentication, all other buckets and successful-login clearing stay unchanged.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+struct AuthRateLimitPolicy {
+    load_test_login_peer_limit: Option<u64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LoadTestLoginHealth {
+    test_only: bool,
+    login_peer_limit: u64,
+    login_device_limit: u64,
+    window_seconds: u64,
+}
+
+impl AuthRateLimitPolicy {
+    fn from_environment(actual_web_addr: SocketAddr) -> Result<Self, String> {
+        let raw = match env::var("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT") {
+            Ok(raw) => raw,
+            Err(env::VarError::NotPresent) => return Ok(Self::default()),
+            Err(env::VarError::NotUnicode(_)) => {
+                return Err(
+                    "MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT must be an integer in 30..=1024"
+                        .into(),
+                );
+            }
+        };
+        Self::from_values(
+            Some(&raw),
+            env::var("MIR2_RUNTIME_ENV").ok().as_deref(),
+            env::var("MIR2_GATEWAY_WEB_ADDR").ok().as_deref(),
+            env::var("MIR2_GATEWAY_TCP_ADDR").ok().as_deref(),
+            actual_web_addr,
+            gateway_prod_like_env(),
+        )
+    }
+
+    fn from_values(
+        raw_limit: Option<&str>,
+        runtime_env: Option<&str>,
+        web_addr: Option<&str>,
+        tcp_addr: Option<&str>,
+        actual_web_addr: SocketAddr,
+        prod_like: bool,
+    ) -> Result<Self, String> {
+        let Some(raw) = raw_limit else {
+            return Ok(Self::default());
+        };
+        let limit = raw
+            .parse::<u64>()
+            .ok()
+            .filter(|limit| {
+                !raw.is_empty()
+                    && raw.bytes().all(|byte| byte.is_ascii_digit())
+                    && (30..=1024).contains(limit)
+            })
+            .ok_or("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT must be an integer in 30..=1024")?;
+        if runtime_env != Some("development") || prod_like {
+            return Err("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires MIR2_RUNTIME_ENV=development without production/staging environment aliases".into());
+        }
+        let parse_loopback = |raw: Option<&str>| {
+            raw.and_then(|value| value.parse::<SocketAddr>().ok())
+                .filter(|addr| addr.ip().is_loopback())
+                .ok_or("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires explicit IP loopback MIR2_GATEWAY_WEB_ADDR and MIR2_GATEWAY_TCP_ADDR")
+        };
+        let configured_web = parse_loopback(web_addr)?;
+        parse_loopback(tcp_addr)?;
+        if !actual_web_addr.ip().is_loopback()
+            || configured_web.ip() != actual_web_addr.ip()
+            || (configured_web.port() != 0 && configured_web.port() != actual_web_addr.port())
+        {
+            return Err("MIR2_GATEWAY_LOAD_TEST_LOGIN_PEER_LIMIT requires the actual Web listener to match its configured loopback address".into());
+        }
+        Ok(Self {
+            load_test_login_peer_limit: Some(limit),
+        })
+    }
+
+    fn login_peer_limit(self) -> u64 {
+        self.load_test_login_peer_limit.unwrap_or(30)
+    }
+
+    fn test_only_health(self) -> Option<LoadTestLoginHealth> {
+        self.load_test_login_peer_limit
+            .map(|limit| LoadTestLoginHealth {
+                test_only: true,
+                login_peer_limit: limit,
+                login_device_limit: limit,
+                window_seconds: 900,
+            })
+    }
+}
+
+// Keep existing default-policy auth tests on their original five-argument API.
+#[cfg(test)]
 fn enforce_auth_rate_limits(
     cache: &dyn crate::cache::GatewaySessionCache,
     identity: &IdentityService,
     peer_address: &str,
     user_agent: &str,
     context: &AuthSecurityContext,
+) -> Result<(), String> {
+    enforce_auth_rate_limits_with_policy(
+        cache,
+        identity,
+        peer_address,
+        user_agent,
+        context,
+        AuthRateLimitPolicy::default(),
+    )
+}
+
+fn enforce_auth_rate_limits_with_policy(
+    cache: &dyn crate::cache::GatewaySessionCache,
+    identity: &IdentityService,
+    peer_address: &str,
+    user_agent: &str,
+    context: &AuthSecurityContext,
+    policy: AuthRateLimitPolicy,
 ) -> Result<(), String> {
     let peer = identity.peer_fingerprint(peer_address)?;
     // User-Agent is caller supplied, not a device identity. Scope this
@@ -7328,8 +8386,16 @@ fn enforce_auth_rate_limits(
     let policies: Vec<(String, u64, u64)> = match context.action {
         AuthSecurityAction::Login => vec![
             (format!("login:pair:{peer}:{account}"), 8, 15 * 60),
-            (format!("login:peer:{peer}"), 30, 15 * 60),
-            (format!("login:device:{device}"), 30, 15 * 60),
+            (
+                format!("login:peer:{peer}"),
+                policy.login_peer_limit(),
+                15 * 60,
+            ),
+            (
+                format!("login:device:{device}"),
+                policy.login_peer_limit(),
+                15 * 60,
+            ),
             (format!("login:account:{account}"), 50, 15 * 60),
         ],
         AuthSecurityAction::Registration => vec![
@@ -7666,7 +8732,8 @@ fn execute_session_action(
         SessionAction::QaControl { token, action } => {
             execute_qa_control_action(session, &token, action)
         }
-        SessionAction::Billing(_)
+        SessionAction::Procurement(_)
+        | SessionAction::Billing(_)
         | SessionAction::MonthlyCardStatus
         | SessionAction::RedeemMonthlyCard { .. } => {
             Err("account purchases require the authenticated socket seam".into())
@@ -7805,7 +8872,8 @@ fn execute_production_session_action(
         SessionAction::QaControl { .. } => {
             return Err("QA control is not allowed on the production player path".to_string());
         }
-        SessionAction::Billing(_)
+        SessionAction::Procurement(_)
+        | SessionAction::Billing(_)
         | SessionAction::MonthlyCardStatus
         | SessionAction::RedeemMonthlyCard { .. } => {
             return Err("account purchases require the authenticated socket seam".into())
@@ -8080,6 +9148,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         })),
         BrowserCommand::ClientCapabilities { .. }
         | BrowserCommand::ResumeSession(_)
+        | BrowserCommand::AttackV2 { .. }
         | BrowserCommand::NpcPurchaseOwner { .. } => Err(
             "native resume control commands must be handled before gameplay dispatch".to_string(),
         ),
@@ -8900,11 +9969,15 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::QaControl { token, action } => {
             Ok(SessionAction::QaControl { token, action })
         }
+        BrowserCommand::Procurement(request) => Ok(SessionAction::Procurement(request)),
         BrowserCommand::BillingStatus(request) => {
             Ok(SessionAction::Billing(billing::Request::Status(request)))
         }
         BrowserCommand::BillingCheckout(request) => {
             Ok(SessionAction::Billing(billing::Request::Checkout(request)))
+        }
+        BrowserCommand::BillingUsdcCheckout(request) => {
+            Ok(SessionAction::Billing(billing::Request::UsdcCheckout(request)))
         }
         BrowserCommand::BillingBuyMonthlyCard(request) => {
             Ok(SessionAction::Billing(billing::Request::Buy(request)))
@@ -13951,6 +15024,41 @@ mod tests {
     }
 
     #[test]
+    fn attack_v2_socket_tag_cannot_fall_back_to_legacy_gameplay_dispatch() {
+        let raw = r#"{"type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7}"#;
+        let command: super::BrowserCommand = serde_json::from_str(raw).unwrap();
+        assert!(super::browser_command_to_action(command).is_err());
+        assert_eq!(
+            crate::attack_protocol::parse_attack_v2(raw)
+                .unwrap()
+                .object_id,
+            7
+        );
+        for raw in [
+            r#"{"type":"attackV2","type":"attack","protocolVersion":2,"requestId":"1","objectId":7}"#,
+            r#"{"type":"attack","type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7}"#,
+        ] {
+            assert!(serde_json::from_str::<super::BrowserCommand>(raw).is_err());
+        }
+        let legacy: super::BrowserCommand =
+            serde_json::from_str(r#"{"type":"attack","objectId":7}"#).unwrap();
+        assert!(matches!(
+            super::browser_command_to_action(legacy).unwrap(),
+            super::SessionAction::Attack { object_id: 7 }
+        ));
+    }
+
+    #[test]
+    fn attack_v2_socket_reparses_original_bytes_and_rejects_unknown_fields() {
+        let raw = r#"{"type":"attackV2","protocolVersion":2,"requestId":"1","objectId":7,"moveTo":{"x":1,"y":2}}"#;
+        assert!(matches!(
+            serde_json::from_str::<super::BrowserCommand>(raw).unwrap(),
+            super::BrowserCommand::AttackV2 { .. }
+        ));
+        assert!(crate::attack_protocol::parse_attack_v2(raw).is_err());
+    }
+
+    #[test]
     fn creature_world_sprite_uses_original_pet_family_for_all_fifteen_images() {
         for pet_type in 0_u16..15 {
             let sprite = super::monster_packet_sprite(10_000 + pet_type);
@@ -14188,6 +15296,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -14250,6 +15359,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: Some(shared_event_sink),
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -14341,6 +15451,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -16461,6 +17572,7 @@ mod tests {
             capacity: Arc::new(super::GatewayCapacityState::unlimited()),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -16797,6 +17909,7 @@ mod tests {
             capacity: Arc::clone(&capacity),
             gameplay_event_sink: None,
             identity: Arc::new(crate::identity::IdentityService::local_for_tests()),
+            auth_rate_limit_policy: super::AuthRateLimitPolicy::default(),
             injector: crate::inject::LiveSessionInjector::default(),
             spectator: crate::spectator::SpectatorHub::from_env(),
             ai_live: crate::ai_live::AiLiveHub::new(
@@ -18730,6 +19843,8 @@ mod tests {
                     .clone()
                     .try_acquire_owned()
                     .expect("test input byte permit should be available"),
+                std::time::Instant::now(),
+                &None,
             );
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);
             assert_eq!(bytes.available_permits(), 0);
@@ -18844,6 +19959,359 @@ mod tests {
             ))
             .is_none()
         );
+    }
+
+    #[test]
+    fn runtime_tick_item_use_wakes_pending_personal_restoration_after_bootstrap() {
+        let bootstrap = SessionAction::Packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(
+            super::runtime_tick_defer_duration_for_action(&bootstrap),
+            Some(super::gateway_runtime_tick_bootstrap_grace())
+        );
+        // Both ordinary browser forms must wake the same loop that advances
+        // queued potion restoration; the item-use ACK does not heal by itself.
+        for value in [
+            json!({ "type": "useItem", "uniqueId": 1024, "grid": "inventory" }),
+            json!({ "type": "useItem", "key": "red-potion" }),
+        ] {
+            let command = serde_json::from_value::<BrowserCommand>(value)
+                .expect("ordinary item use must deserialize");
+            let action = super::browser_command_to_action(command)
+                .expect("ordinary item use must map to its existing session action");
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                Some(super::gateway_runtime_tick_input_wake_grace()),
+                "item use must release the bootstrap wait: {action:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn runtime_tick_refresh_and_keep_alive_preserve_the_idle_bootstrap_wait() {
+        for value in [
+            json!({ "type": "clientVersion" }),
+            json!({ "type": "keepAlive", "time": 12345 }),
+        ] {
+            let command = serde_json::from_value::<BrowserCommand>(value)
+                .expect("ordinary observation command must deserialize");
+            let action = super::browser_command_to_action(command)
+                .expect("ordinary observation command must map");
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                None,
+                "observation alone must not wake the runtime tick: {action:?}"
+            );
+        }
+    }
+
+    mod socket_diagnostics_tests {
+        use super::super::{
+            allocate_socket_diagnostics, GatewaySlowStage, ParsedSocketInput, QueuedSocketInput,
+            SessionAction, SocketDiagnosticInputClass as InputClass,
+            SocketDiagnosticPhase as Phase, SocketDiagnosticPhaseGuard, SocketSlowContext,
+            SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER, SOCKET_DIAGNOSTIC_MAX_START_US,
+        };
+        use mir2_protocol::{ClientPacket, MirDirection};
+        use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+        use std::sync::{Arc, Barrier};
+        use std::time::{Duration, Instant};
+
+        fn stage(context: Option<SocketSlowContext>) -> GatewaySlowStage {
+            GatewaySlowStage {
+                label: "socket_input.queue_residence",
+                started_at: Instant::now(),
+                threshold: None,
+                context,
+            }
+        }
+
+        #[test]
+        fn disabled_and_exhausted_ids_have_no_state_or_counter_wrap() {
+            let disabled = AtomicU64::new(7);
+            assert!(allocate_socket_diagnostics(false, &disabled).is_none());
+            assert_eq!(disabled.load(Ordering::Relaxed), 7);
+            assert!(SocketDiagnosticPhaseGuard::enter(
+                &None,
+                Phase::Input,
+                Some("socket_turn.input")
+            )
+            .is_none());
+
+            let counter = AtomicU64::new(SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+            let last = allocate_socket_diagnostics(true, &counter).unwrap();
+            assert_eq!(last.connection, SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+            assert_eq!(
+                counter.load(Ordering::Relaxed),
+                SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER + 1
+            );
+            for _ in 0..3 {
+                assert!(allocate_socket_diagnostics(true, &counter).is_none());
+                assert_eq!(
+                    counter.load(Ordering::Relaxed),
+                    SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER + 1
+                );
+            }
+            assert!(allocate_socket_diagnostics(true, &AtomicU64::new(0)).is_none());
+        }
+
+        #[test]
+        fn legacy_and_scoped_log_grammar_are_exact_and_safe() {
+            assert_eq!(
+                stage(None).log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=53"
+            );
+            let mut scoped = stage(Some(SocketSlowContext {
+                connection: 17,
+                queued: None,
+            }));
+            scoped.label = "serial_gate.input_wait";
+            assert_eq!(
+                scoped.log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=serial_gate.input_wait duration_ms=53 connection=17"
+            );
+            assert_eq!(
+                stage(Some(SocketSlowContext {
+                    connection: 17,
+                    queued: None
+                }))
+                .log_line(Duration::from_millis(53)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=53"
+            );
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(17)).unwrap();
+            let context = state
+                .context_from_snapshot(
+                    Phase::Spectator.pack(10_000).unwrap(),
+                    65_999,
+                    InputClass::AttackV2,
+                )
+                .unwrap();
+            assert_eq!(stage(Some(context)).log_line(Duration::from_millis(3356)),
+                "[gateway-slow-stage] stage=socket_input.queue_residence duration_ms=3356 connection=17 queued_phase=spectator phase_elapsed_ms=55 input_class=attack_v2");
+            assert!(SOCKET_DIAGNOSTIC_MAX_START_US / 1000 < SOCKET_DIAGNOSTIC_MAX_SAFE_INTEGER);
+        }
+
+        #[test]
+        fn execution_flush_and_tick_stages_distinguish_connections_without_payload() {
+            let counter = AtomicU64::new(17);
+            let first = allocate_socket_diagnostics(true, &counter);
+            let second = allocate_socket_diagnostics(true, &counter);
+            let elapsed = Duration::from_millis(53);
+            for label in [
+                "session_action.execute",
+                "session_action.flush",
+                "runtime_tick.execute",
+                "runtime_tick.save_checkpoint",
+                "runtime_tick.flush",
+            ] {
+                let first_stage = GatewaySlowStage::for_socket(label, &first);
+                let second_stage = GatewaySlowStage::for_socket(label, &second);
+                let disabled = GatewaySlowStage::for_socket(label, &None);
+                assert_eq!(
+                    first_stage.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53 connection=17")
+                );
+                assert_eq!(
+                    second_stage.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53 connection=18")
+                );
+                assert_eq!(
+                    disabled.log_line(elapsed),
+                    format!("[gateway-slow-stage] stage={label} duration_ms=53")
+                );
+                assert_eq!(first_stage.threshold, disabled.threshold);
+                assert_eq!(second_stage.threshold, disabled.threshold);
+                assert!(first_stage.context.as_ref().unwrap().queued.is_none());
+                assert!(second_stage.context.as_ref().unwrap().queued.is_none());
+            }
+        }
+
+        #[test]
+        fn packed_phase_boundaries_omit_invalid_or_overflowed_observations() {
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(1)).unwrap();
+            for phase in [
+                Phase::SelectWait,
+                Phase::Input,
+                Phase::InputGate,
+                Phase::InputOwnerHeartbeat,
+                Phase::Chat,
+                Phase::Injection,
+                Phase::Spectator,
+                Phase::AiLive,
+                Phase::RuntimeTick,
+                Phase::IdentityCache,
+                Phase::IdentityDatabase,
+                Phase::ResumeCredential,
+                Phase::OwnerHeartbeat,
+                Phase::TickGate,
+                Phase::Preflight,
+            ] {
+                let packed = phase.pack(SOCKET_DIAGNOSTIC_MAX_START_US).unwrap();
+                assert_eq!(Phase::unpack(packed), Some(phase));
+                let context = state
+                    .context_from_snapshot(
+                        packed,
+                        SOCKET_DIAGNOSTIC_MAX_START_US,
+                        InputClass::Other,
+                    )
+                    .unwrap();
+                assert_eq!(context.queued.unwrap().phase_elapsed_ms, 0);
+            }
+            assert!(Phase::Input
+                .pack(SOCKET_DIAGNOSTIC_MAX_START_US + 1)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(0, 0, InputClass::Other)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(Phase::Input.pack(10).unwrap(), 9, InputClass::Other)
+                .is_none());
+            assert!(state
+                .context_from_snapshot(
+                    Phase::Input.pack(0).unwrap(),
+                    SOCKET_DIAGNOSTIC_MAX_START_US + 1,
+                    InputClass::Other
+                )
+                .is_none());
+        }
+
+        #[test]
+        fn atomic_snapshots_never_pair_one_phase_with_another_start() {
+            let state = allocate_socket_diagnostics(true, &AtomicU64::new(1)).unwrap();
+            let input = Phase::Input.pack(1000).unwrap();
+            let spectator = Phase::Spectator.pack(2000).unwrap();
+            state.phase_and_start.store(input, Ordering::Release);
+            let barrier = Arc::new(Barrier::new(2));
+            let writer_state = Arc::clone(&state);
+            let writer_barrier = Arc::clone(&barrier);
+            let writer = std::thread::spawn(move || {
+                writer_barrier.wait();
+                for i in 0..10_000 {
+                    writer_state.phase_and_start.store(
+                        if i % 2 == 0 { input } else { spectator },
+                        Ordering::Release,
+                    );
+                }
+            });
+            barrier.wait();
+            for _ in 0..10_000 {
+                let packed = state.phase_and_start.load(Ordering::Acquire);
+                let queued = state
+                    .context_from_snapshot(packed, 4000, InputClass::Other)
+                    .unwrap()
+                    .queued
+                    .unwrap();
+                assert!(matches!(
+                    (queued.phase, queued.phase_elapsed_ms),
+                    (Phase::Input, 3) | (Phase::Spectator, 2)
+                ));
+            }
+            writer.join().unwrap();
+        }
+
+        #[test]
+        fn nested_and_early_exit_phases_restore_parent_then_select_idle() {
+            let diagnostics = allocate_socket_diagnostics(true, &AtomicU64::new(1));
+            let state = diagnostics.as_ref().unwrap();
+            {
+                let _turn =
+                    SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::RuntimeTick, None);
+                let parent = state.phase_and_start.load(Ordering::Acquire);
+                for _ in 0..2 {
+                    let _child =
+                        SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Preflight, None);
+                    assert_eq!(
+                        Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                        Some(Phase::Preflight)
+                    );
+                    continue;
+                }
+                assert_eq!(state.phase_and_start.load(Ordering::Acquire), parent);
+                fn early_return(diagnostics: &super::super::SocketDiagnostics) {
+                    let _child =
+                        SocketDiagnosticPhaseGuard::enter(diagnostics, Phase::IdentityCache, None);
+                }
+                early_return(&diagnostics);
+                assert_eq!(state.phase_and_start.load(Ordering::Acquire), parent);
+            }
+            assert_eq!(
+                Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                Some(Phase::SelectWait)
+            );
+        }
+
+        #[test]
+        fn queued_input_preserves_enqueue_phase_and_serial_lifetime_without_payload() {
+            let diagnostics = allocate_socket_diagnostics(true, &AtomicU64::new(17));
+            let state = diagnostics.as_ref().unwrap();
+            let pending = Arc::new(AtomicUsize::new(0));
+            let bytes = Arc::new(tokio::sync::Semaphore::new(1));
+            let queued;
+            {
+                let _spectator =
+                    SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Spectator, None);
+                queued = QueuedSocketInput::new(
+                    ParsedSocketInput::ProtocolError("must-not-appear-in-diagnostics".to_owned()),
+                    Arc::clone(&pending),
+                    Arc::clone(&bytes).try_acquire_owned().unwrap(),
+                    Instant::now(),
+                    &diagnostics,
+                );
+            }
+            let _input = SocketDiagnosticPhaseGuard::enter(&diagnostics, Phase::Input, None);
+            assert_eq!(
+                Phase::unpack(state.phase_and_start.load(Ordering::Acquire)),
+                Some(Phase::Input)
+            );
+            let context = queued.diagnostic_context.unwrap();
+            assert_eq!(context.queued.unwrap().phase, Phase::Spectator);
+            assert_eq!(context.queued.unwrap().input_class, InputClass::Other);
+            let line = stage(Some(context)).log_line(Duration::from_millis(60));
+            assert!(line.ends_with(" input_class=other"));
+            assert!(!line.contains("must-not-appear"));
+            assert_eq!(pending.load(Ordering::Acquire), 1);
+            assert_eq!(bytes.available_permits(), 0);
+            drop(queued);
+            assert_eq!(pending.load(Ordering::Acquire), 0);
+            assert_eq!(bytes.available_permits(), 1);
+        }
+
+        #[test]
+        fn input_class_uses_only_static_command_variants() {
+            let attack = crate::attack_protocol::parse_attack_v2(
+                r#"{"type":"attackV2","protocolVersion":2,"requestId":"12345","objectId":7654321}"#,
+            )
+            .unwrap();
+            assert_eq!(
+                InputClass::for_input(&ParsedSocketInput::AttackV2(attack)),
+                InputClass::AttackV2
+            );
+            for packet in [
+                ClientPacket::Walk {
+                    direction: MirDirection::Up,
+                },
+                ClientPacket::Run {
+                    direction: MirDirection::Down,
+                },
+                ClientPacket::Turn {
+                    direction: MirDirection::Left,
+                },
+            ] {
+                assert_eq!(
+                    InputClass::for_input(&ParsedSocketInput::Action {
+                        action: SessionAction::Packet(packet),
+                        quest_operation_request: None,
+                        skill_key_request: None,
+                    }),
+                    InputClass::Move
+                );
+            }
+            assert_eq!(
+                InputClass::for_input(&ParsedSocketInput::ClientCapabilities(vec![
+                    "not-logged".into()
+                ])),
+                InputClass::Other
+            );
+        }
     }
 
     #[test]
@@ -21699,5 +23167,298 @@ mod tests {
         ];
 
         assert!(responses_require_world_snapshot(&responses));
+    }
+}
+
+#[cfg(test)]
+mod load_test_login_policy_tests {
+    use super::{AuthRateLimitPolicy, AuthSecurityAction, AuthSecurityContext};
+    use crate::cache::{GatewaySessionCache, InMemoryGatewaySessionCache};
+    use crate::identity::IdentityService;
+    use std::net::SocketAddr;
+
+    fn parse(raw: Option<&str>) -> Result<AuthRateLimitPolicy, String> {
+        AuthRateLimitPolicy::from_values(
+            raw,
+            Some("development"),
+            Some("127.0.0.1:17510"),
+            Some("127.0.0.1:17500"),
+            "127.0.0.1:17510".parse().unwrap(),
+            false,
+        )
+    }
+
+    #[test]
+    fn default_login_policy_preserves_thirty_and_omits_test_health() {
+        let policy = AuthRateLimitPolicy::from_values(
+            None,
+            Some("production"),
+            Some("0.0.0.0:7010"),
+            None,
+            "0.0.0.0:7010".parse().unwrap(),
+            true,
+        )
+        .unwrap();
+        assert_eq!(policy, AuthRateLimitPolicy::default());
+        assert_eq!(policy.login_peer_limit(), 30);
+        assert!(policy.test_only_health().is_none());
+    }
+
+    #[test]
+    fn explicit_login_limit_has_exact_bounds_and_integer_syntax() {
+        for limit in [30, 500, 1024] {
+            assert_eq!(
+                parse(Some(&limit.to_string())).unwrap().login_peer_limit(),
+                limit
+            );
+        }
+        for raw in [
+            "",
+            "0",
+            "29",
+            "1025",
+            "-1",
+            "+500",
+            "500.0",
+            "NaN",
+            " 500",
+            "500 ",
+            "18446744073709551616",
+        ] {
+            assert!(parse(Some(raw)).is_err(), "must reject {raw:?}");
+        }
+        let health =
+            serde_json::to_value(parse(Some("500")).unwrap().test_only_health().unwrap()).unwrap();
+        assert_eq!(
+            health,
+            serde_json::json!({
+                "testOnly": true, "loginPeerLimit": 500, "loginDeviceLimit": 500, "windowSeconds": 900
+            })
+        );
+    }
+
+    #[test]
+    fn explicit_login_limit_rejects_non_development_and_conflicting_aliases() {
+        for runtime in [
+            None,
+            Some("production"),
+            Some("staging"),
+            Some("test"),
+            Some("Development"),
+        ] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                runtime,
+                Some("127.0.0.1:17510"),
+                Some("127.0.0.1:17500"),
+                "127.0.0.1:17510".parse().unwrap(),
+                false,
+            )
+            .is_err());
+        }
+        assert!(AuthRateLimitPolicy::from_values(
+            Some("500"),
+            Some("development"),
+            Some("127.0.0.1:17510"),
+            Some("127.0.0.1:17500"),
+            "127.0.0.1:17510".parse().unwrap(),
+            true,
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn explicit_login_limit_requires_both_literal_loopback_addresses_and_actual_web_match() {
+        for address in [
+            None,
+            Some("0.0.0.0:17510"),
+            Some("[::]:17510"),
+            Some("192.0.2.1:17510"),
+            Some("localhost:17510"),
+            Some("not-an-address"),
+        ] {
+            for (web, tcp) in [
+                (address, Some("127.0.0.1:17500")),
+                (Some("127.0.0.1:17510"), address),
+            ] {
+                assert!(AuthRateLimitPolicy::from_values(
+                    Some("500"),
+                    Some("development"),
+                    web,
+                    tcp,
+                    "127.0.0.1:17510".parse().unwrap(),
+                    false,
+                )
+                .is_err());
+            }
+        }
+        for actual in ["0.0.0.0:17510", "127.0.0.1:17511", "[::1]:17510"] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                Some("development"),
+                Some("127.0.0.1:17510"),
+                Some("127.0.0.1:17500"),
+                actual.parse().unwrap(),
+                false,
+            )
+            .is_err());
+        }
+        for (configured, actual) in [
+            ("[::1]:17510", "[::1]:17510"),
+            ("127.0.0.1:0", "127.0.0.1:17510"),
+        ] {
+            assert!(AuthRateLimitPolicy::from_values(
+                Some("500"),
+                Some("development"),
+                Some(configured),
+                Some("[::1]:17500"),
+                actual.parse::<SocketAddr>().unwrap(),
+                false,
+            )
+            .is_ok());
+        }
+    }
+
+    fn enforce(
+        cache: &InMemoryGatewaySessionCache,
+        identity: &IdentityService,
+        policy: AuthRateLimitPolicy,
+        action: AuthSecurityAction,
+        peer: &str,
+        account: &str,
+    ) -> Result<(), String> {
+        super::enforce_auth_rate_limits_with_policy(
+            cache,
+            identity,
+            peer,
+            "shared-test-agent",
+            &AuthSecurityContext {
+                account_id: account.to_owned(),
+                action,
+            },
+            policy,
+        )
+    }
+
+    #[test]
+    fn real_enforcement_uses_only_the_explicit_login_peer_and_device_limit() {
+        let identity = IdentityService::local_for_tests();
+        for (policy, allowed) in [
+            (AuthRateLimitPolicy::default(), 30),
+            (parse(Some("500")).unwrap(), 500),
+        ] {
+            let cache = InMemoryGatewaySessionCache::default();
+            for index in 0..=allowed {
+                let result = enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    &format!("load-player-{index}"),
+                );
+                assert_eq!(
+                    result.is_ok(),
+                    index < allowed,
+                    "peer attempt {} of {allowed}",
+                    index + 1
+                );
+            }
+        }
+        // Seed only the independent device bucket so the peer bucket cannot
+        // hide an accidental unchanged device limit or an omitted device gate.
+        let peer = identity.peer_fingerprint("127.0.0.1").unwrap();
+        let device = identity
+            .peer_fingerprint(&format!("device:{peer}:shared-test-agent"))
+            .unwrap();
+        for (policy, prior_attempts, expected) in [
+            (AuthRateLimitPolicy::default(), 30, false),
+            (parse(Some("500")).unwrap(), 30, true),
+            (parse(Some("500")).unwrap(), 500, false),
+        ] {
+            let cache = InMemoryGatewaySessionCache::default();
+            for _ in 0..prior_attempts {
+                cache
+                    .record_auth_attempt(&format!("login:device:{device}"), 900)
+                    .unwrap();
+            }
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    "device-only-test"
+                )
+                .is_ok(),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn real_enforcement_retains_login_pair_eight_and_account_fifty() {
+        let identity = IdentityService::local_for_tests();
+        let policy = parse(Some("1024")).unwrap();
+        let cache = InMemoryGatewaySessionCache::default();
+        for index in 0..9 {
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    "127.0.0.1",
+                    "same-account"
+                )
+                .is_ok(),
+                index < 8
+            );
+        }
+        let cache = InMemoryGatewaySessionCache::default();
+        for index in 0..51 {
+            assert_eq!(
+                enforce(
+                    &cache,
+                    &identity,
+                    policy,
+                    AuthSecurityAction::Login,
+                    &format!("127.0.1.{}", index + 1),
+                    "same-account"
+                )
+                .is_ok(),
+                index < 50
+            );
+        }
+    }
+
+    #[test]
+    fn real_enforcement_does_not_relax_registration_recovery_or_password_change() {
+        let identity = IdentityService::local_for_tests();
+        for (action, allowed) in [
+            (AuthSecurityAction::Registration, 5),
+            (AuthSecurityAction::PasswordChange, 10),
+            (AuthSecurityAction::Recovery, 10),
+        ] {
+            for policy in [AuthRateLimitPolicy::default(), parse(Some("1024")).unwrap()] {
+                let cache = InMemoryGatewaySessionCache::default();
+                for index in 0..=allowed {
+                    assert_eq!(
+                        enforce(
+                            &cache,
+                            &identity,
+                            policy,
+                            action,
+                            "127.0.0.1",
+                            &format!("account-{index}")
+                        )
+                        .is_ok(),
+                        index < allowed,
+                        "{action:?}"
+                    );
+                }
+            }
+        }
     }
 }

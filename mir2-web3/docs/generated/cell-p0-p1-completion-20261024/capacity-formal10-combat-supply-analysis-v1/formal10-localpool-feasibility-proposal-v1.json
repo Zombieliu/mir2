@@ -1,0 +1,1690 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:49:07.259Z",
+  "scope": "Bounded existing-data local-pool proposal after formal25 failure. No new scene, route search, runtime, product changes or acceptance.",
+  "sourcePins": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-supply-static-review-v1/review-v1.json",
+      "bytes": 15137,
+      "sha256": "7d87328a509e9c7c0ad5aa587cf32ec8a1a6341da385109065f9cc29665daeca"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/summary-v1.json",
+      "bytes": 31524,
+      "sha256": "ef1fbb2a3e84da1c407ca59dff3bca777d5c1eb228089e8c085940f315438b92"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/lib/generated/crystal_respawn_manifest.json",
+      "bytes": 6799671,
+      "sha256": "907db052030a97036e404429373dd3ad3e0e838e279613080e92c3be28bf3ff2"
+    },
+    {
+      "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    }
+  ],
+  "preserveFirst10Anchors": true,
+  "all100AnchorsUnchanged": true,
+  "rolesUnchanged": true,
+  "comparison": "Counterfactual cluster-only reassignment: each existing block of10 has its original fighter index5+10k and the other9 declared movement observers. Prefixes use only actually admitted indices.",
+  "prefixes": [
+    {
+      "actors": 2,
+      "fighters": 0,
+      "currentGlobalDeduplicatedTargets": 0,
+      "localUnionTargets": 0,
+      "localRawSumTargets": 0,
+      "sharedTargetIdsBetweenLocalGroups": [],
+      "fractionalAllocationConditionalBound": {
+        "1": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": null,
+          "bottleneckFighterIndices": [],
+          "meets12InThisConditionalModel": null,
+          "proves18LaunchedPerMinute": false
+        },
+        "5": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": null,
+          "bottleneckFighterIndices": [],
+          "meets12InThisConditionalModel": null,
+          "proves18LaunchedPerMinute": false
+        },
+        "10": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": null,
+          "bottleneckFighterIndices": [],
+          "meets12InThisConditionalModel": null,
+          "proves18LaunchedPerMinute": false
+        },
+        "15": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": null,
+          "bottleneckFighterIndices": [],
+          "meets12InThisConditionalModel": null,
+          "proves18LaunchedPerMinute": false
+        }
+      },
+      "groups": []
+    },
+    {
+      "actors": 10,
+      "fighters": 1,
+      "currentGlobalDeduplicatedTargets": 28,
+      "localUnionTargets": 28,
+      "localRawSumTargets": 28,
+      "sharedTargetIdsBetweenLocalGroups": [],
+      "fractionalAllocationConditionalBound": {
+        "1": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 57.722063220564486,
+          "bottleneckFighterIndices": [
+            5
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "5": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 44.09352232891327,
+          "bottleneckFighterIndices": [
+            5
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "10": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 35.816186556927306,
+          "bottleneckFighterIndices": [
+            5
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "15": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 30.787654320987638,
+          "bottleneckFighterIndices": [
+            5
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        }
+      },
+      "groups": [
+        {
+          "fighterIndex": 5,
+          "home": {
+            "x": 239,
+            "y": 596
+          },
+          "movementObserverIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9
+          ],
+          "terrainFreeCoverageReachableCells": 2905,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206313,
+            206327,
+            206328,
+            206331,
+            206334,
+            206335,
+            206338,
+            206502,
+            206503,
+            206514,
+            206517,
+            206518,
+            206521,
+            206527,
+            206532,
+            206533,
+            206539,
+            206548,
+            206600,
+            206607,
+            206613,
+            206622,
+            206634,
+            206646,
+            206649,
+            206706,
+            206708,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 21,
+            "Scarecrow": 7
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 28,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 86,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 57.722063220564486,
+            "5": 44.09352232891327,
+            "10": 35.816186556927306,
+            "15": 30.787654320987638
+          }
+        }
+      ]
+    },
+    {
+      "actors": 25,
+      "fighters": 2,
+      "currentGlobalDeduplicatedTargets": 33,
+      "localUnionTargets": 28,
+      "localRawSumTargets": 42,
+      "sharedTargetIdsBetweenLocalGroups": [
+        206327,
+        206331,
+        206334,
+        206335,
+        206502,
+        206514,
+        206527,
+        206532,
+        206533,
+        206539,
+        206607,
+        206622,
+        206634,
+        206710
+      ],
+      "fractionalAllocationConditionalBound": {
+        "1": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 28.861031610282243,
+          "bottleneckFighterIndices": [
+            5,
+            15
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "5": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 22.046761164456633,
+          "bottleneckFighterIndices": [
+            5,
+            15
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "10": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 17.908093278463653,
+          "bottleneckFighterIndices": [
+            5,
+            15
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "15": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 15.393415637860084,
+          "bottleneckFighterIndices": [
+            15
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        }
+      },
+      "groups": [
+        {
+          "fighterIndex": 5,
+          "home": {
+            "x": 239,
+            "y": 596
+          },
+          "movementObserverIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9
+          ],
+          "terrainFreeCoverageReachableCells": 2905,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206313,
+            206327,
+            206328,
+            206331,
+            206334,
+            206335,
+            206338,
+            206502,
+            206503,
+            206514,
+            206517,
+            206518,
+            206521,
+            206527,
+            206532,
+            206533,
+            206539,
+            206548,
+            206600,
+            206607,
+            206613,
+            206622,
+            206634,
+            206646,
+            206649,
+            206706,
+            206708,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 21,
+            "Scarecrow": 7
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 27,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 86,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 57.722063220564486,
+            "5": 44.09352232891327,
+            "10": 35.816186556927306,
+            "15": 30.787654320987638
+          }
+        },
+        {
+          "fighterIndex": 15,
+          "home": {
+            "x": 247,
+            "y": 589
+          },
+          "movementObserverIndices": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            16,
+            17,
+            18,
+            19
+          ],
+          "terrainFreeCoverageReachableCells": 1626,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206327,
+            206331,
+            206334,
+            206335,
+            206502,
+            206514,
+            206527,
+            206532,
+            206533,
+            206539,
+            206607,
+            206622,
+            206634,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 11,
+            "Scarecrow": 3
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 14,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 30,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 28.882664930506557,
+            "5": 22.061230503480164,
+            "10": 17.91952446273434,
+            "15": 15.393415637860084
+          }
+        }
+      ]
+    },
+    {
+      "actors": 50,
+      "fighters": 5,
+      "currentGlobalDeduplicatedTargets": 62,
+      "localUnionTargets": 62,
+      "localRawSumTargets": 99,
+      "sharedTargetIdsBetweenLocalGroups": [
+        206313,
+        206327,
+        206328,
+        206331,
+        206334,
+        206335,
+        206338,
+        206502,
+        206503,
+        206514,
+        206517,
+        206518,
+        206527,
+        206532,
+        206533,
+        206539,
+        206600,
+        206607,
+        206622,
+        206634,
+        206646,
+        206710,
+        206301,
+        206305,
+        206505,
+        206625,
+        206647
+      ],
+      "fractionalAllocationConditionalBound": {
+        "1": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 23.580889035659652,
+          "bottleneckFighterIndices": [
+            5,
+            15,
+            25,
+            35
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "5": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 18.017958390489238,
+          "bottleneckFighterIndices": [
+            5,
+            15,
+            25,
+            35
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "10": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 14.63631687242798,
+          "bottleneckFighterIndices": [
+            5,
+            15,
+            25,
+            35
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "15": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 12.604629629629635,
+          "bottleneckFighterIndices": [
+            5,
+            15,
+            25,
+            35
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        }
+      },
+      "groups": [
+        {
+          "fighterIndex": 5,
+          "home": {
+            "x": 239,
+            "y": 596
+          },
+          "movementObserverIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9
+          ],
+          "terrainFreeCoverageReachableCells": 2905,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206313,
+            206327,
+            206328,
+            206331,
+            206334,
+            206335,
+            206338,
+            206502,
+            206503,
+            206514,
+            206517,
+            206518,
+            206521,
+            206527,
+            206532,
+            206533,
+            206539,
+            206548,
+            206600,
+            206607,
+            206613,
+            206622,
+            206634,
+            206646,
+            206649,
+            206706,
+            206708,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 21,
+            "Scarecrow": 7
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 27,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 86,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 57.722063220564486,
+            "5": 44.09352232891327,
+            "10": 35.816186556927306,
+            "15": 30.787654320987638
+          }
+        },
+        {
+          "fighterIndex": 15,
+          "home": {
+            "x": 247,
+            "y": 589
+          },
+          "movementObserverIndices": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            16,
+            17,
+            18,
+            19
+          ],
+          "terrainFreeCoverageReachableCells": 1626,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206327,
+            206331,
+            206334,
+            206335,
+            206502,
+            206514,
+            206527,
+            206532,
+            206533,
+            206539,
+            206607,
+            206622,
+            206634,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 11,
+            "Scarecrow": 3
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 14,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 30,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 28.882664930506557,
+            "5": 22.061230503480164,
+            "10": 17.91952446273434,
+            "15": 15.393415637860084
+          }
+        },
+        {
+          "fighterIndex": 25,
+          "home": {
+            "x": 243,
+            "y": 559
+          },
+          "movementObserverIndices": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            26,
+            27,
+            28,
+            29
+          ],
+          "terrainFreeCoverageReachableCells": 2848,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206300,
+            206301,
+            206304,
+            206305,
+            206327,
+            206330,
+            206334,
+            206338,
+            206505,
+            206514,
+            206517,
+            206529,
+            206532,
+            206535,
+            206547,
+            206600,
+            206612,
+            206615,
+            206618,
+            206625,
+            206634,
+            206637,
+            206646,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 16,
+            "Scarecrow": 8
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 24,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 83,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 46.799122260671176,
+            "5": 35.75906619925825,
+            "10": 29.0477823502515,
+            "15": 25.016872427983525
+          }
+        },
+        {
+          "fighterIndex": 35,
+          "home": {
+            "x": 220,
+            "y": 589
+          },
+          "movementObserverIndices": [
+            30,
+            31,
+            32,
+            33,
+            34,
+            36,
+            37,
+            38,
+            39
+          ],
+          "terrainFreeCoverageReachableCells": 2323,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206301,
+            206305,
+            206309,
+            206313,
+            206328,
+            206335,
+            206503,
+            206505,
+            206512,
+            206518,
+            206527,
+            206533,
+            206601,
+            206616,
+            206625,
+            206635,
+            206647
+          ],
+          "targetCounts": {
+            "Deer": 12,
+            "Scarecrow": 5
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 17,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 65,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 33.148001377387146,
+            "5": 25.32556012802927,
+            "10": 20.572016460905356,
+            "15": 17.703703703703702
+          }
+        },
+        {
+          "fighterIndex": 45,
+          "home": {
+            "x": 255,
+            "y": 648
+          },
+          "movementObserverIndices": [
+            40,
+            41,
+            42,
+            43,
+            44,
+            46,
+            47,
+            48,
+            49
+          ],
+          "terrainFreeCoverageReachableCells": 2642,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206503,
+            206506,
+            206525,
+            206534,
+            206537,
+            206549,
+            206602,
+            206608,
+            206614,
+            206620,
+            206629,
+            206638,
+            206647,
+            206701,
+            206709,
+            206712
+          ],
+          "targetCounts": {
+            "Deer": 9,
+            "Scarecrow": 7
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 15,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 85,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 31.61084485389723,
+            "5": 24.160280445054106,
+            "10": 19.626886145404665,
+            "15": 16.935802469135805
+          }
+        }
+      ]
+    },
+    {
+      "actors": 100,
+      "fighters": 10,
+      "currentGlobalDeduplicatedTargets": 123,
+      "localUnionTargets": 112,
+      "localRawSumTargets": 160,
+      "sharedTargetIdsBetweenLocalGroups": [
+        206313,
+        206327,
+        206328,
+        206331,
+        206334,
+        206335,
+        206338,
+        206502,
+        206503,
+        206514,
+        206517,
+        206518,
+        206527,
+        206532,
+        206533,
+        206539,
+        206600,
+        206607,
+        206622,
+        206634,
+        206646,
+        206706,
+        206710,
+        206301,
+        206305,
+        206505,
+        206625,
+        206647,
+        206549,
+        206320,
+        206545,
+        206604,
+        206619,
+        206700,
+        206711,
+        206526,
+        206707,
+        206718
+      ],
+      "fractionalAllocationConditionalBound": {
+        "1": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 16.595634008917894,
+          "bottleneckFighterIndices": [
+            65,
+            75
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "5": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 12.677249403038156,
+          "bottleneckFighterIndices": [
+            65,
+            75
+          ],
+          "meets12InThisConditionalModel": true,
+          "proves18LaunchedPerMinute": false
+        },
+        "10": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 10.29743941472337,
+          "bottleneckFighterIndices": [
+            65,
+            75
+          ],
+          "meets12InThisConditionalModel": false,
+          "proves18LaunchedPerMinute": false
+        },
+        "15": {
+          "idealFractionalMaxMinPositiveHitsPerFighterMinute": 8.851440329218107,
+          "bottleneckFighterIndices": [
+            65,
+            75
+          ],
+          "meets12InThisConditionalModel": false,
+          "proves18LaunchedPerMinute": false
+        }
+      },
+      "groups": [
+        {
+          "fighterIndex": 5,
+          "home": {
+            "x": 239,
+            "y": 596
+          },
+          "movementObserverIndices": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            6,
+            7,
+            8,
+            9
+          ],
+          "terrainFreeCoverageReachableCells": 2905,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206313,
+            206327,
+            206328,
+            206331,
+            206334,
+            206335,
+            206338,
+            206502,
+            206503,
+            206514,
+            206517,
+            206518,
+            206521,
+            206527,
+            206532,
+            206533,
+            206539,
+            206548,
+            206600,
+            206607,
+            206613,
+            206622,
+            206634,
+            206646,
+            206649,
+            206706,
+            206708,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 21,
+            "Scarecrow": 7
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 27,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 86,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 57.722063220564486,
+            "5": 44.09352232891327,
+            "10": 35.816186556927306,
+            "15": 30.787654320987638
+          }
+        },
+        {
+          "fighterIndex": 15,
+          "home": {
+            "x": 247,
+            "y": 589
+          },
+          "movementObserverIndices": [
+            10,
+            11,
+            12,
+            13,
+            14,
+            16,
+            17,
+            18,
+            19
+          ],
+          "terrainFreeCoverageReachableCells": 1626,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206327,
+            206331,
+            206334,
+            206335,
+            206502,
+            206514,
+            206527,
+            206532,
+            206533,
+            206539,
+            206607,
+            206622,
+            206634,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 11,
+            "Scarecrow": 3
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 14,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 30,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 28.882664930506557,
+            "5": 22.061230503480164,
+            "10": 17.91952446273434,
+            "15": 15.393415637860084
+          }
+        },
+        {
+          "fighterIndex": 25,
+          "home": {
+            "x": 243,
+            "y": 559
+          },
+          "movementObserverIndices": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            26,
+            27,
+            28,
+            29
+          ],
+          "terrainFreeCoverageReachableCells": 2848,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206300,
+            206301,
+            206304,
+            206305,
+            206327,
+            206330,
+            206334,
+            206338,
+            206505,
+            206514,
+            206517,
+            206529,
+            206532,
+            206535,
+            206547,
+            206600,
+            206612,
+            206615,
+            206618,
+            206625,
+            206634,
+            206637,
+            206646,
+            206710
+          ],
+          "targetCounts": {
+            "Deer": 16,
+            "Scarecrow": 8
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 24,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 83,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 46.799122260671176,
+            "5": 35.75906619925825,
+            "10": 29.0477823502515,
+            "15": 25.016872427983525
+          }
+        },
+        {
+          "fighterIndex": 35,
+          "home": {
+            "x": 220,
+            "y": 589
+          },
+          "movementObserverIndices": [
+            30,
+            31,
+            32,
+            33,
+            34,
+            36,
+            37,
+            38,
+            39
+          ],
+          "terrainFreeCoverageReachableCells": 2323,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206301,
+            206305,
+            206309,
+            206313,
+            206328,
+            206335,
+            206503,
+            206505,
+            206512,
+            206518,
+            206527,
+            206533,
+            206601,
+            206616,
+            206625,
+            206635,
+            206647
+          ],
+          "targetCounts": {
+            "Deer": 12,
+            "Scarecrow": 5
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 17,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 65,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 33.148001377387146,
+            "5": 25.32556012802927,
+            "10": 20.572016460905356,
+            "15": 17.703703703703702
+          }
+        },
+        {
+          "fighterIndex": 45,
+          "home": {
+            "x": 255,
+            "y": 648
+          },
+          "movementObserverIndices": [
+            40,
+            41,
+            42,
+            43,
+            44,
+            46,
+            47,
+            48,
+            49
+          ],
+          "terrainFreeCoverageReachableCells": 2642,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206503,
+            206506,
+            206525,
+            206534,
+            206537,
+            206549,
+            206602,
+            206608,
+            206614,
+            206620,
+            206629,
+            206638,
+            206647,
+            206701,
+            206709,
+            206712
+          ],
+          "targetCounts": {
+            "Deer": 9,
+            "Scarecrow": 7
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 15,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 85,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 31.61084485389723,
+            "5": 24.160280445054106,
+            "10": 19.626886145404665,
+            "15": 16.935802469135805
+          }
+        },
+        {
+          "fighterIndex": 55,
+          "home": {
+            "x": 286,
+            "y": 655
+          },
+          "movementObserverIndices": [
+            50,
+            51,
+            52,
+            53,
+            54,
+            56,
+            57,
+            58,
+            59
+          ],
+          "terrainFreeCoverageReachableCells": 3103,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206501,
+            206504,
+            206507,
+            206513,
+            206528,
+            206540,
+            206543,
+            206549,
+            206605,
+            206611,
+            206617,
+            206624,
+            206627,
+            206639,
+            206642,
+            206645,
+            206648,
+            206704,
+            206715
+          ],
+          "targetCounts": {
+            "Deer": 10,
+            "Scarecrow": 9
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 13,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 109,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 35.876181300777816,
+            "5": 27.42461006960322,
+            "10": 22.27937814357568,
+            "15": 19.246090534979427
+          }
+        },
+        {
+          "fighterIndex": 65,
+          "home": {
+            "x": 271,
+            "y": 605
+          },
+          "movementObserverIndices": [
+            60,
+            61,
+            62,
+            63,
+            64,
+            66,
+            67,
+            68,
+            69
+          ],
+          "terrainFreeCoverageReachableCells": 1527,
+          "observersUnreachableEvenWithoutTerrain": [
+            60,
+            61,
+            62,
+            63
+          ],
+          "conservativeCanonicalTargetIds": [
+            206320,
+            206500,
+            206545,
+            206604,
+            206619,
+            206700,
+            206706,
+            206711
+          ],
+          "targetCounts": {
+            "Deer": 6,
+            "Scarecrow": 2
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 8,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 144,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 18.046257251510518,
+            "5": 13.784651729919219,
+            "10": 11.19684499314129,
+            "15": 9.620987654320986
+          }
+        },
+        {
+          "fighterIndex": 75,
+          "home": {
+            "x": 274,
+            "y": 583
+          },
+          "movementObserverIndices": [
+            70,
+            71,
+            72,
+            73,
+            74,
+            76,
+            77,
+            78,
+            79
+          ],
+          "terrainFreeCoverageReachableCells": 1704,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206316,
+            206320,
+            206511,
+            206526,
+            206545,
+            206604,
+            206619,
+            206631,
+            206643,
+            206700,
+            206707,
+            206711,
+            206718
+          ],
+          "targetCounts": {
+            "Deer": 9,
+            "Scarecrow": 4
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 13,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 39,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 28.1140866687616,
+            "5": 21.47859066199258,
+            "10": 17.446959304983995,
+            "15": 15.009465020576133
+          }
+        },
+        {
+          "fighterIndex": 85,
+          "home": {
+            "x": 291,
+            "y": 571
+          },
+          "movementObserverIndices": [
+            80,
+            81,
+            82,
+            83,
+            84,
+            86,
+            87,
+            88,
+            89
+          ],
+          "terrainFreeCoverageReachableCells": 2470,
+          "observersUnreachableEvenWithoutTerrain": [],
+          "conservativeCanonicalTargetIds": [
+            206203,
+            206319,
+            206323,
+            206326,
+            206329,
+            206333,
+            206526,
+            206541,
+            206544,
+            206609,
+            206707,
+            206718
+          ],
+          "targetCounts": {
+            "Deer": 11,
+            "Scarecrow": 1
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 11,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 74,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 26.793263347514905,
+            "5": 20.458004369252656,
+            "10": 16.616140832190215,
+            "15": 14.237448559670783
+          }
+        },
+        {
+          "fighterIndex": 95,
+          "home": {
+            "x": 283,
+            "y": 608
+          },
+          "movementObserverIndices": [
+            90,
+            91,
+            92,
+            93,
+            94,
+            96,
+            97,
+            98,
+            99
+          ],
+          "terrainFreeCoverageReachableCells": 1668,
+          "observersUnreachableEvenWithoutTerrain": [
+            90,
+            91,
+            92,
+            93,
+            94
+          ],
+          "conservativeCanonicalTargetIds": [
+            206302,
+            206339,
+            206515,
+            206546,
+            206626,
+            206632,
+            206641,
+            206644,
+            206717
+          ],
+          "targetCounts": {
+            "Deer": 5,
+            "Scarecrow": 4
+          },
+          "reusedOriginalExact4000RoutesWhollyInsideLocalCoverage": 9,
+          "newAStarSearches": 0,
+          "localAStarAlternativeRoutesNotExhaustivelySearched": true,
+          "directScoutSecondCircuitUnitStepLowerBound": 243,
+          "conditionalExpectedPositiveHitsPerMinute": {
+            "1": 17.234412349316923,
+            "5": 13.173073210384594,
+            "10": 10.701417466849566,
+            "15": 9.237860082304527
+          }
+        }
+      ]
+    }
+  ],
+  "ordinaryMap0Inventory": [
+    {
+      "rule": 5,
+      "name": "Scarecrow",
+      "count": 10,
+      "hp": 20,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 110,
+        "y": 60
+      },
+      "spread": 70
+    },
+    {
+      "rule": 7,
+      "name": "Scarecrow",
+      "count": 10,
+      "hp": 20,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 220,
+        "y": 60
+      },
+      "spread": 60
+    },
+    {
+      "rule": 13,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 210,
+        "y": 185
+      },
+      "spread": 45
+    },
+    {
+      "rule": 14,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 265,
+        "y": 125
+      },
+      "spread": 45
+    },
+    {
+      "rule": 15,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 310,
+        "y": 95
+      },
+      "spread": 45
+    },
+    {
+      "rule": 26,
+      "name": "Deer",
+      "count": 10,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 420,
+        "y": 380
+      },
+      "spread": 45
+    },
+    {
+      "rule": 27,
+      "name": "Deer",
+      "count": 10,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 470,
+        "y": 330
+      },
+      "spread": 45
+    },
+    {
+      "rule": 31,
+      "name": "Scarecrow",
+      "count": 10,
+      "hp": 20,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 500,
+        "y": 400
+      },
+      "spread": 50
+    },
+    {
+      "rule": 41,
+      "name": "Deer",
+      "count": 10,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 600,
+        "y": 580
+      },
+      "spread": 40
+    },
+    {
+      "rule": 42,
+      "name": "Scarecrow",
+      "count": 20,
+      "hp": 20,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 540,
+        "y": 530
+      },
+      "spread": 70
+    },
+    {
+      "rule": 43,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 550,
+        "y": 550
+      },
+      "spread": 70
+    },
+    {
+      "rule": 44,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 570,
+        "y": 610
+      },
+      "spread": 50
+    },
+    {
+      "rule": 47,
+      "name": "Scarecrow",
+      "count": 20,
+      "hp": 20,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 640,
+        "y": 530
+      },
+      "spread": 50
+    },
+    {
+      "rule": 48,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 205,
+        "y": 325
+      },
+      "spread": 50
+    },
+    {
+      "rule": 49,
+      "name": "Deer",
+      "count": 30,
+      "hp": 25,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 260,
+        "y": 380
+      },
+      "spread": 50
+    },
+    {
+      "rule": 51,
+      "name": "Scarecrow",
+      "count": 20,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 200,
+        "y": 400
+      },
+      "spread": 50
+    },
+    {
+      "rule": 62,
+      "name": "Deer",
+      "count": 30,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 340,
+        "y": 550
+      },
+      "spread": 50
+    },
+    {
+      "rule": 63,
+      "name": "Deer",
+      "count": 40,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 247,
+        "y": 565
+      },
+      "spread": 50
+    },
+    {
+      "rule": 64,
+      "name": "Scarecrow",
+      "count": 50,
+      "hp": 20,
+      "delayMinutes": 6,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 330,
+        "y": 530
+      },
+      "spread": 40
+    },
+    {
+      "rule": 65,
+      "name": "Deer",
+      "count": 50,
+      "hp": 25,
+      "delayMinutes": 4,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 270,
+        "y": 625
+      },
+      "spread": 60
+    },
+    {
+      "rule": 66,
+      "name": "Scarecrow",
+      "count": 50,
+      "hp": 20,
+      "delayMinutes": 5,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 270,
+        "y": 625
+      },
+      "spread": 60
+    },
+    {
+      "rule": 67,
+      "name": "Deer",
+      "count": 20,
+      "hp": 25,
+      "delayMinutes": 3,
+      "randomDelayMinutes": 0,
+      "center": {
+        "x": 295,
+        "y": 625
+      },
+      "spread": 50
+    }
+  ],
+  "currentGlobal100ConditionalBands": [
+    {
+      "level": 1,
+      "minDc": 2,
+      "maxDc": 4,
+      "idealExpectedPositiveHitsPerMinute": 244.02017408015809,
+      "requiredPositiveHitsPerMinute": 120,
+      "requiredLaunchedPerMinute": 180
+    },
+    {
+      "level": 5,
+      "minDc": 3,
+      "maxDc": 5,
+      "idealExpectedPositiveHitsPerMinute": 186.46033125031784,
+      "requiredPositiveHitsPerMinute": 120,
+      "requiredLaunchedPerMinute": 180
+    },
+    {
+      "level": 10,
+      "minDc": 4,
+      "maxDc": 6,
+      "idealExpectedPositiveHitsPerMinute": 151.46616369455873,
+      "requiredPositiveHitsPerMinute": 120,
+      "requiredLaunchedPerMinute": 180
+    },
+    {
+      "level": 15,
+      "minDc": 5,
+      "maxDc": 7,
+      "idealExpectedPositiveHitsPerMinute": 130.4736625514403,
+      "requiredPositiveHitsPerMinute": 120,
+      "requiredLaunchedPerMinute": 180
+    }
+  ],
+  "conclusions": [
+    "Do not adopt ten block-local clusters blindly: some groups lose much of the globallyshared conservative target pool or cannot reach all their ownobserver footprints even in terrain-free coverage. Per-group details quantify this without claiming full local A* proof.",
+    "Local grouping can reduce duplicate pursuit and long global scout tours only if target ownership/claims and actual bounded routes are solved. The present direct-tour figures are lower bounds, not measured or collision-aware tour costs.",
+    "All-nine stable6 geometry is conservative over original observerbody positions. It is not a live target census or an upper bound on targets that may wander in; no conclusion establishes or denies actual localpoolcapacity.",
+    "The fractional max-min calculation allows ideal divisible targetrefresh capacity and ignores travel/killtime/death/respawn overhead; it exposes shared-ID allocation bottlenecks only under the frozen conditional model. It is not a deterministic60second guarantee.",
+    "The same physical spawn must not be credited independently to multiple local pools. Global123 is not123 per fighter. Expected positive hits do not prove18launched/min; actual formal25 almost all launches hit, so unmodeledmisses cannot be assumed to create safe slack.",
+    "Under original ordinary fresh growth, fullglobal100 idealL5=186.46positive/min is only a small conditionalmargin near180launch/min and L10/L15 drop151.47/130.47. Real level/effectiveDC were not fully logged and cannot be inferred solely from formal damage; two-hour demand cannot be frozen atL1.",
+    "First resolve the observed duplicate-chase gap without weakening activity gates. If a later scene proposal is authorized, keep first10 and verify each laterprefix has exclusive or explicitlyshared targetallocation, original4000node local routes, finite scoutcost, realstable6witnesses and adequate conditional bands; this inventory does not certify a feasible100localpoollayout."
+  ],
+  "recommendedNextStep": "Fix and validate actual duplicatechase behavior first. Do not replace the scene or claim100capacity from this static inventory. A redesigned localpoollayout needs a separate bounded authoring scope and fresh live evidence.",
+  "newSceneWritten": false,
+  "newAStarSearches": 0,
+  "rawOrRecordingRead": false,
+  "accepted": false,
+  "capacityAccepted": false
+}

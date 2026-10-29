@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "args": [
+    "--test",
+    "--test-name-pattern=native HP|native post-strike|native attack witness|native initial no-witness|^native combat walks|^native pending evidence",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "startedAtMs": 1792896274420,
+  "elapsedMs": 312,
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "sourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143423,
+      "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 216855,
+      "sha256": "a3a6ce1729800ddd6553ddc475afba20c75cf733080a49bfec31c8acc2275c87"
+    }
+  ],
+  "log": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v4.log",
+    "bytes": 7094,
+    "sha256": "edd5cf36cda1aeb92c33a228f2c8865ad8711c3b44ca527ac5c975a3880c211b"
+  }
+}

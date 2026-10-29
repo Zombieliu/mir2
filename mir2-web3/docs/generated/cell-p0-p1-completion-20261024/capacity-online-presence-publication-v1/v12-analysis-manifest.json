@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline V12 only; original false verdicts unchanged; all output paths outside repository",
+  "originalReadPasses": {
+    "rawSamples": 1,
+    "privateStderr": 1,
+    "authorisedFinalStore": 1
+  },
+  "raw": {
+    "samples": {
+      "sha256": "4aee8f6a839bd9a06a71e0bd128f71563e2d2c0cdd0578edb2fa8b1d6b4ce10d",
+      "bytes": 28566718,
+      "lines": 50599,
+      "oversizeLines": 0,
+      "fullReadPasses": 1
+    },
+    "stderr": {
+      "sha256": "cce17a98a27b20327751c2db29d32343df0a49a69ad65d5cbf9b4a06950031f7",
+      "bytes": 55942556,
+      "lines": 341976,
+      "oversizeLines": 0,
+      "fullReadPasses": 1,
+      "acceptedDeliveryRows": 149298,
+      "acceptedSlowSpanRows": 44706,
+      "ignoredLines": 147972,
+      "rejectedDeliveryRows": 0,
+      "rejectedSlowSpanRows": 0
+    },
+    "report": {
+      "bytes": 77751,
+      "sha256": "824b290e05fe917d3d290a08c2951a9e4aa4ba0f6ac880bf38c33354172c67b4"
+    },
+    "finalStore": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v12\\episode-50\\private\\accounts.json",
+      "bytes": 469387,
+      "sha256": "e0175df377732a3906d904278ce4260ee6b7a09e89a9f8c866ccd57b841e2094",
+      "physicalReadPasses": 1,
+      "sizeBefore": 469387,
+      "sizeAfter": 469387,
+      "lastModifiedBeforeUtc": "2026-10-26T16:35:07.045Z",
+      "lastModifiedAfterUtc": "2026-10-26T16:35:07.045Z",
+      "stableDuringRead": true
+    }
+  },
+  "primary": [
+    {
+      "file": "findings-final-v3.json",
+      "bytes": 23255,
+      "sha256": "00d6e3cb312dbe662e11c1540bb8d39a5d6261b0701cfb9220089b0f30807ac5"
+    },
+    {
+      "file": "selected-causal-chain-v2.jsonl",
+      "bytes": 13186,
+      "sha256": "e60b5c2b437f4884687cc96904f08a28fe6393d262ce5bbd2741ab07d7c40ba3"
+    },
+    {
+      "file": "final-saved-actor-state-v1.json",
+      "bytes": 2474,
+      "sha256": "9d0304e439423a8e9c8c0a257f7fc89786aa669b4215c7e9697b3b5f3f6d486d"
+    }
+  ],
+  "anonymousStreams": {
+    "samples": {
+      "file": "all-strict-anonymous-samples.jsonl",
+      "rows": 50599,
+      "bytes": 23670806,
+      "sha256": "96279834c8e26b65ff3570886833e10da1210791abb8c841ad54434db0c1f532"
+    },
+    "stderr": {
+      "file": "all-strict-anonymous-stderr.jsonl",
+      "rows": 194004,
+      "bytes": 54737938,
+      "sha256": "aa14cca1b096e67f68d4e780c7c39b2e61b84a21f8d9c847d4796352cebf2c6a"
+    },
+    "selected": {
+      "file": "selected-anonymous.jsonl",
+      "rows": 1154,
+      "bytes": 349957,
+      "sha256": "9d4f0b6800311b15ab95f76af41667732755f03d7b8f6a0deb4593bb48452695"
+    }
+  },
+  "tools": [
+    {
+      "file": "analyze-v12.mjs",
+      "bytes": 23828,
+      "sha256": "2b2bfa0291903a126f2b6a293b45924391b00e8c9de2a0b9eb505977293dc12e"
+    },
+    {
+      "file": "summarize-derived-v12.mjs",
+      "bytes": 6733,
+      "sha256": "07a3334d28c9f3a3e266781ebe238827873dce5616d901a5933b0072fd956b42"
+    },
+    {
+      "file": "extract-final-saved-state-v12.mjs",
+      "bytes": 3685,
+      "sha256": "86900f8b47a2c746f93afaa2bb760b4d830eae4542ddd84941764732f993b20a"
+    },
+    {
+      "file": "finalize-manifest-v12.mjs",
+      "bytes": 5539,
+      "sha256": "f53b769a56a8cf3e9c780b054e208881faae0e5ae775ec9d4e94e466772bd956"
+    }
+  ],
+  "verification": {
+    "rawOriginalsNotReRead": true,
+    "allSourceByteHashesComputedDuringSoleRead": true,
+    "repositoryWrites": false,
+    "loadOrTestsOrBuilds": false,
+    "safetyStoppedStillTrue": true,
+    "okStillFalse": true,
+    "playableCapacityAcceptedStillFalse": true,
+    "privateFieldsNotCopied": true
+  },
+  "caveat": "Strict schema projection deliberately omitted non-allowlisted source fields; no raw text/account/auth/password/runtime JSON is retained in outputs."
+}

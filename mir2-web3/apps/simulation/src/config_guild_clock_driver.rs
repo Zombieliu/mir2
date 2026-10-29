@@ -34,20 +34,26 @@ impl SimulationConfig {
         Ok(changed)
     }
     fn tick_shared_guild_clock_at(&self, now_ms: u64) -> Result<Vec<String>, String> {
+        let diagnostics = DiagnosticRecord::new(DiagnosticOperation::GuildClock);
+        let driver_wait = diagnostics.span(DiagnosticStage::DriverWait);
         let mut driver = self
             .guild_clock_driver
             .lock()
             .map_err(|_| "guild clock coordinator poisoned")?;
+        drop(driver_wait);
+        let _driver_held = diagnostics.span(DiagnosticStage::DriverHeld);
         if let Some(error) = &driver.frozen {
             return Err(error.clone());
         }
-        self.ensure_account_store_writable()?;
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
         self.ensure_file_writer_binding()?;
+        let persist_wait = diagnostics.span(DiagnosticStage::PersistWait);
         let _persist = self
             .account_store_persist_lock
             .lock()
             .map_err(|_| "account store persist mutex poisoned")?;
-        self.ensure_account_store_writable()?;
+        drop(persist_wait);
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
         if self.account_store_database_url.is_some()
             && self.account_store_database_mode == AccountStoreDatabaseMode::Mirror
             && self.account_store_path.is_none()
@@ -56,10 +62,13 @@ impl SimulationConfig {
                 "guild clock mirror requires a File authority before any PostgreSQL write".into(),
             );
         }
+        let store_wait = diagnostics.span(DiagnosticStage::StoreWait);
         let mut live = self
             .account_store
             .lock()
             .map_err(|_| "account store mutex poisoned")?;
+        drop(store_wait);
+        let _store_held = diagnostics.span(DiagnosticStage::StoreHeld);
         if driver.observed_guild_versions.is_none() {
             driver.observed_guild_versions = Some(live.source_guild_versions.clone());
         }
@@ -79,7 +88,7 @@ impl SimulationConfig {
             let retained_lease = driver.retained_lease.clone();
             let observe =
                 self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth;
-            let publication = self.begin_file_publication()?;
+            let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
             let receipt = std::thread::spawn(move || {
                 let mut client = pool
                     .connection()
@@ -115,7 +124,7 @@ impl SimulationConfig {
                             return Err(self.freeze_account_store_writes(error.to_string()));
                         }
                     } else if let Some(publication) = publication {
-                        publication.settle()?;
+                        publication.settle_with_diagnostics(Some(&diagnostics))?;
                     }
                     return Err(error.to_string());
                 }
@@ -159,7 +168,7 @@ impl SimulationConfig {
             }
             let Some(receipt) = receipt else {
                 if let Some(publication) = publication {
-                    publication.settle()?;
+                    publication.settle_with_diagnostics(Some(&diagnostics))?;
                 }
                 return Ok(vec![]);
             };
@@ -171,7 +180,9 @@ impl SimulationConfig {
                     driver.frozen = Some(error.clone());
                     return Err(error);
                 };
-                if let Err(error) = self.save_file_account_store(path, &staged) {
+                if let Err(error) =
+                    self.save_file_account_store_with_diagnostics(path, &staged, Some(&diagnostics))
+                {
                     if error.is_commit_outcome_unknown() {
                         let error = self.map_file_commit_error(error);
                         driver.frozen = Some(error.clone());
@@ -196,14 +207,18 @@ impl SimulationConfig {
                         Ok(compensation) => {
                             let mut restored = original;
                             adopt_receipt(&mut restored, &compensation);
-                            if let Err(error) = self.save_file_account_store(path, &restored) {
+                            if let Err(error) = self.save_file_account_store_with_diagnostics(
+                                path,
+                                &restored,
+                                Some(&diagnostics),
+                            ) {
                                 let reason = format!("guild clock compensated PostgreSQL but File publication failed: {error}");
                                 driver.frozen = Some(reason.clone());
                                 return Err(self.freeze_account_store_writes(reason));
                             }
                             *live = restored;
                             if let Some(publication) = publication {
-                                publication.settle()?;
+                                publication.settle_with_diagnostics(Some(&diagnostics))?;
                             }
                             return Err(first_error);
                         }
@@ -218,7 +233,7 @@ impl SimulationConfig {
                 driver.retained_lease = receipt.after.lease();
                 *live = staged;
                 if let Some(publication) = publication {
-                    publication.settle()?;
+                    publication.settle_with_diagnostics(Some(&diagnostics))?;
                 }
                 return Ok(ids);
             }
@@ -275,16 +290,18 @@ impl SimulationConfig {
         }
         staged.guild_clock = Some(next);
         shared_guild_store::validate_complete_guild_state(&staged)?;
-        let publication = self.begin_file_publication()?;
+        let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
         if let Some(path) = &self.account_store_path {
-            if let Err(error) = self.save_file_account_store(path, &staged) {
+            if let Err(error) =
+                self.save_file_account_store_with_diagnostics(path, &staged, Some(&diagnostics))
+            {
                 if error.is_commit_outcome_unknown() {
                     let error = self.map_file_commit_error(error);
                     driver.frozen = Some(error.clone());
                     return Err(error);
                 }
                 if let Some(publication) = publication {
-                    publication.settle()?;
+                    publication.settle_with_diagnostics(Some(&diagnostics))?;
                 }
                 return Err(error.to_string());
             }
@@ -296,7 +313,7 @@ impl SimulationConfig {
         *live = staged;
         driver.file_started = true;
         if let Some(publication) = publication {
-            publication.settle()?;
+            publication.settle_with_diagnostics(Some(&diagnostics))?;
         }
         Ok(ids)
     }

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "finalizedAt": "2026-10-24T21:49:16.610Z",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "driverFrozenManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-patrol-run-preference-driver-frozen-v1.json",
+    "bytes": 6826,
+    "sha256": "48e6b2c2dae7e82d26d2a0e95d408b863557530e363a79e4a07c2e77c21f172d"
+  },
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "results": [
+    {
+      "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07",
+      "scripts": 12,
+      "scriptSourceSha256": "cbe2a35cfcfe82b7941a23fd4cbb0a023e6676ae19bb06946283d4add3fae3f9",
+      "finalFreeze": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\launcher-source-frozen-v1.json",
+        "bytes": 7273,
+        "sha256": "f65e4ad9bc09701a0890a4e7505997c4d0d48485c9505684cf58e73dd4c95dc1"
+      },
+      "finalFreezeEntries": 25,
+      "admissionCaps": [
+        24,
+        10,
+        10,
+        4,
+        1,
+        2
+      ],
+      "sourceGuardsPassed": true,
+      "readonlyGuardReceipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-patrol-feasibility-07\\source-guard-readonly-verification.json",
+        "bytes": 12973,
+        "sha256": "471eea052dd880e7c389e61be1fce716aee35bbcb2434a1cad19d4e80483a3b1"
+      }
+    },
+    {
+      "root": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-04",
+      "scripts": 13,
+      "scriptSourceSha256": "11bf6b61aa90db76362519221577585ed3f3bed8634f8aafe8395cf8b0b5d89f",
+      "finalFreeze": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-04\\launcher-source-frozen-v1.json",
+        "bytes": 7101,
+        "sha256": "12dbc3f7c4f44ce9a9f0310e13cb268be28cd1fcb165d368cec546560a9e5d9d"
+      },
+      "finalFreezeEntries": 26,
+      "admissionCaps": [
+        128,
+        100,
+        100,
+        4,
+        1,
+        2
+      ],
+      "sourceGuardsPassed": true,
+      "readonlyGuardReceipt": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-ladder-04\\source-guard-readonly-verification.json",
+        "bytes": 12960,
+        "sha256": "e6e0e202661cfd4a5c1fb6a539bbb60c682ae5781b3e60a8bc1fb38b4e54f9f8"
+      }
+    }
+  ],
+  "prepareExecuted": false,
+  "seederExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

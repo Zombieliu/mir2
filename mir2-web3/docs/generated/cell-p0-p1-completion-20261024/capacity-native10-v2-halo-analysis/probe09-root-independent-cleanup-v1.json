@@ -1,0 +1,28 @@
+{
+  "checkedAtUtc": "2026-10-25T01:30:39.8604834Z",
+  "ownedPids": [
+    66332,
+    64532
+  ],
+  "ownedProcessesAbsent": true,
+  "portsFree": true,
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "monitorExit": {
+    "code": 0,
+    "signal": null
+  },
+  "sixCountersZero": true,
+  "checks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "capacityAccepted": false
+}

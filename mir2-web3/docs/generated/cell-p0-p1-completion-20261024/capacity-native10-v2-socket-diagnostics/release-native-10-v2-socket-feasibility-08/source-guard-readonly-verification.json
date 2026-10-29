@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T23:35:53.426Z",
+  "passed": true,
+  "backendInputCount": 41,
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "backendSourceAggregate": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "full16RunId": "1792884517374-04264602",
+  "full16Matched": true,
+  "driverImportCount": 21,
+  "driverClosureFiles": 34,
+  "actualAdmissionCaps": [
+    24,
+    10,
+    10,
+    4,
+    1,
+    2
+  ],
+  "launcherFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-socket-feasibility-08\\launcher-source-frozen-v1.json",
+    "bytes": 12087,
+    "sha256": "d8d5cc9fe8edef50b24eea94793414099c481261dee39c1b71b18fae5c9daee1"
+  },
+  "readOnly": true,
+  "gameplayModulesEvaluated": false,
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

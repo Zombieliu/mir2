@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T02:18:52.952Z",
+  "repositoryHead": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "scope": "Bounded implementation review before root full-suite authorization; no new realm, scene, backend, or acceptance",
+  "writerFiles": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 143634,
+      "sha256": "bf09e909102776d3911b9fa581f38f2817bff7214c47e388132f539eb8a91229",
+      "unchanged": false
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 214369,
+      "sha256": "560d44791a8d4e33bd149c06c3ccabe4ea7820768c328593effa1227ad1a11ed",
+      "unchanged": false
+    }
+  ],
+  "unchangedOtherSeven": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc",
+      "unchanged": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7",
+      "unchanged": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d",
+      "unchanged": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f",
+      "unchanged": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8",
+      "unchanged": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964",
+      "unchanged": true
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974",
+      "unchanged": true
+    }
+  ],
+  "existingTestBodies": {
+    "lfOnlyNormalization": true,
+    "inverseTransform": "Remove the newly added hpRecoveryFixture-to-navigationFixture block, remove only offerNativeHpRecovery from the existing import",
+    "exactlyEqualsPreimage": true,
+    "originalNormalizedSha256": "2235d9e7d55f0bfa1b78bce3b6ad493cd6cfba2fbe329e551502d2a53ab367cf"
+  },
+  "checks": {
+    "gitDiffCheck": true
+  },
+  "focused": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v2-receipt.json",
+    "bytes": 897,
+    "sha256": "3fcab1173af72f6c795013c7d6481f03a1c3ded24c8eb2507524c1913aa53126"
+  },
+  "adjacent": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/adjacent-v1-receipt.json",
+    "bytes": 1163,
+    "sha256": "947263293c389e9247fbf89987c62a2f0e249385db953366f86cac8c0299067d"
+  },
+  "firstFailurePreserved": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/focused-v1-receipt.json",
+    "bytes": 897,
+    "sha256": "2c4cc0805d7cc32ef9568a60a195e9f85b3aeb421a86d26e17fec6666c856925"
+  },
+  "fullSuiteRun": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@mir2/usdc-recharge-chain",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "test": "node --test test/*.test.mjs", "cli": "node service/cli.mjs" },
+  "dependencies": { "@mysten/sui": "2.16.2" }
+}

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "mode": "posthoc-artifact-and-command-log-binding",
+  "sourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "backendSourceAggregate": "57ea1cde0ab22a03a50d1e9c7e20fdcd8a2060d1cb7922a2ad2cee91e55f5d96",
+  "sourceManifestFileSha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\socket-diagnostics-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87370240,
+    "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+  },
+  "actualBuild": {
+    "exit": {
+      "code": 0,
+      "signal": null
+    },
+    "durationMs": 119708,
+    "arguments": [
+      "+1.95.0",
+      "build",
+      "--locked",
+      "--offline",
+      "--release",
+      "-p",
+      "mir2-gateway",
+      "--bin",
+      "mir2-gateway"
+    ],
+    "toolchain": {
+      "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "cargo": "cargo 1.95.0 (f2d3ce0bd 2026-03-21)"
+    },
+    "sourceUnchangedBeforeAfter": true,
+    "completeCargoLog": "socket-queue-diagnostics-release-v1/p0-socket-diagnostics-v1-release-build.log",
+    "outerLog": "socket-queue-diagnostics-release-v1/root-socket-release-build-v1.log",
+    "wrapper": "socket-queue-diagnostics-release-v1/root-run-socket-release-v1.ps1",
+    "receipt": "socket-queue-diagnostics-release-v1/socket-diagnostics-v1-build-receipt.json"
+  },
+  "rootReportedExecutionOrder": [
+    "pin-socket-diagnostics-build-v2.mjs",
+    "build-socket-diagnostics-v2.mjs",
+    "capture-socket-diagnostics-release-v2.mjs"
+  ],
+  "pinAndCaptureSeparateStdoutAvailable": false,
+  "pinAndCaptureEvidenceScope": "Root reports the source-pin/build/release-capture calls returned success. Their tool stdout was not separately saved as files. Actual manifest/release/build-receipt products exist and mutually match their raw SHA/bytes; this posthoc binding neither invents stdout nor reruns exclusive-create tools.",
+  "preservedPreparedMetadata": "socket-queue-diagnostics-release-v1/tools/prepared-v2.json",
+  "preparedMetadataScope": "The prepared-only historical document is copied verbatim; its execution flags describe preparation time and are not retroactively rewritten.",
+  "copiedToolBytesMatchPreviouslyArchivedPreparedV2": true,
+  "capacityAccepted": false,
+  "realmStartedByThisArchive": false
+}

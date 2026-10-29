@@ -1,0 +1,40 @@
+{
+  "digest": "7R9poi8JE1tDyNNGBproGm6egZfpSDQkhghaBTxK1k76",
+  "checkpoint": "400174093",
+  "effects": {
+    "status": {
+      "status": "success",
+      "error": null
+    },
+    "gasUsed": {
+      "computationCost": "1000000",
+      "storageCost": "69600800",
+      "storageRebate": "0",
+      "nonRefundableStorageFee": "0"
+    }
+  },
+  "events": [],
+  "objectChanges": [
+    {
+      "type": "created",
+      "objectId": "0x3a6401294afd546661ecf135a18504c48e54a58a8ac3edda13efda9351d8a5df",
+      "objectType": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::AdminCap",
+      "version": "1",
+      "digest": "HwcVz9ioGgxnrE8AVEHUAaEiGD5HWZGUAL7cLDfAxhpB"
+    },
+    {
+      "type": "created",
+      "objectId": "0xeda1ad2fdd1c3831eea04080ce096ad502a1478b50498e28c4de4dbd91b59f47",
+      "objectType": "0x2::package::UpgradeCap",
+      "version": "1",
+      "digest": "GXopudxMzdRddPxuFEwZcoZWTYAaKtV43E9BCEWN52N1"
+    },
+    {
+      "type": "published",
+      "objectId": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880",
+      "objectType": "package",
+      "version": "1",
+      "digest": "436GguBWghJTLGt3xBMgB1wFKka1fg4GqxWdmFStKcK7"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe14-root-seal-source-control-v1.mjs",
+    "bytes": 4719,
+    "sha256": "8d44586be59e251ec0fd99babca15132bad7cd2fb6efe34ccc009d564ebeada8"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe15-root-seal-source-control-v1.mjs",
+    "bytes": 5140,
+    "sha256": "058462385fe2aab8fc27925e3a8fa9f52bb2db94f8d44757ba38823a4ea50688"
+  },
+  "preseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\preseal-inputs-finalized-v1.json",
+    "bytes": 21362,
+    "sha256": "2a3fae294ff10271702d708d6f76015d68886b02ed83018df5413e9bebaf2186"
+  },
+  "rules": [
+    {
+      "from": "release-native-10-v2-chase-preference-feasibility-14",
+      "to": "release-native-10-v2-personal-projection-feasibility-15",
+      "count": 1
+    },
+    {
+      "from": "preseal-inputs-finalized-v3.json",
+      "to": "preseal-inputs-finalized-v1.json",
+      "count": 1
+    },
+    {
+      "from": "565fe291e06beb93f43a3780228070984d8737c8e394890e27c8c9b73d1888ba",
+      "to": "2a3fae294ff10271702d708d6f76015d68886b02ed83018df5413e9bebaf2186",
+      "count": 1
+    },
+    {
+      "from": "COMMIT='b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd'",
+      "to": "COMMIT='5c2e713863d3e9556a92f856b11df2396c73b137'",
+      "count": 1
+    },
+    {
+      "from": "backendSourceCommit:'46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b'",
+      "to": "backendSourceCommit:COMMIT",
+      "count": 1
+    },
+    {
+      "from": "release.manifest.files.length,41",
+      "to": "release.manifest.files.length,44",
+      "count": 1
+    },
+    {
+      "from": "backendInputs:41",
+      "to": "backendInputs:44",
+      "count": 1
+    },
+    {
+      "from": "assert.equal(p.driverSourceSha256,AGG);assert.equal(p.accountPrepared,false);",
+      "to": "assert.equal(p.driverSourceSha256,AGG);assert.equal(p.backendSourceCommit,COMMIT);assert.equal(p.backendInputCount,44);assert.equal(p.actualNodeCodeEvidenceCommit,'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd');assert.ok(same(review.preseal?.file??'',PRESEAL)&&review.preseal?.sha256===PRESEAL_SHA,'Independent review must bind this exact actual preseal');assert.equal(p.accountPrepared,false);",
+      "count": 1
+    },
+    {
+      "from": "driverSourceCommit:COMMIT,driverSourceSha256:AGG,files,",
+      "to": "driverSourceCommit:COMMIT,coreCodeEvidenceCommit:'b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd',backendInputCount:44,driverSourceSha256:AGG,files,",
+      "count": 1
+    },
+    {
+      "from": "driverSourceCommit:driver.driverSourceCommit,driverSourceSha256:AGG,backendInputs:44",
+      "to": "driverSourceCommit:driver.driverSourceCommit,coreCodeEvidenceCommit:driver.frozen.actualCodeCommit,driverSourceSha256:AGG,backendInputs:44",
+      "count": 1
+    }
+  ],
+  "exactRawInverse": true,
+  "rootModes": [
+    "--seal-source-after-final-review",
+    "--verify-sealed-source-no-execution"
+  ],
+  "expectedReviewVerdict": {
+    "presealContractPassed": true,
+    "eligibleForSealNow": true,
+    "blockingFindingIds": []
+  },
+  "reviewMustPinThisPreseal": true,
+  "noSourceSealOrGuardExecuted": true,
+  "noProvisioningOrRuntime": true
+}

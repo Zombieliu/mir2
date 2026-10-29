@@ -2,6 +2,10 @@
 use super::*;
 use crate::runtime::zone::types::ZoneExperienceOwner;
 
+#[cfg(test)]
+#[path = "presence_publication_fixtures.rs"]
+mod presence_publication_fixtures;
+
 const EXPERIENCE_OWNER_DELAY_MS: u64 = 5_000;
 const MASTER_CREDIT_RANGE: i32 = 16;
 
@@ -35,6 +39,84 @@ fn claimant(
 }
 
 impl ZoneRuntime {
+    pub(crate) fn has_online_projection_player(
+        &self,
+        session: &SessionId,
+        owner: &OnlineOwner,
+    ) -> bool {
+        self.players
+            .get(session)
+            .is_some_and(|player| owner.matches_player(player))
+    }
+
+    /// Compare the exact snapshot source, including the old-presence gates of
+    /// pet clocks/brown time. The exhaustive destructure guards new fields.
+    pub(crate) fn online_presence_matches_sources<'a>(
+        &self,
+        mut sources: impl Iterator<Item = &'a ZoneRuntime>,
+        book: &OnlineIdentityBook,
+        source_count: usize,
+    ) -> bool {
+        self.online_presence.len() == source_count
+            && sources.all(|source| {
+                source.players.iter().all(|(session, player)| {
+                    let Some(source_owner) = book
+                        .owner(session)
+                        .filter(|owner| owner.matches_player(player))
+                    else {
+                        return true;
+                    };
+                    let Some(OnlinePresence {
+                        owner,
+                        key,
+                        dead,
+                        owned_pet_clock,
+                        life_generation,
+                        guild_name,
+                        chat_profile,
+                        brown_until_ms,
+                        position,
+                        level,
+                        experience_profile,
+                        name,
+                        group_members,
+                        mentor_bank,
+                    }) = self.online_presence.get(session)
+                    else {
+                        return false;
+                    };
+                    owner == source_owner
+                        && key == &source.key
+                        && *dead == player.dead
+                        && owned_pet_clock.as_ref() == source.player_owned_pet_clock_ref(session)
+                        && *life_generation == player.life_generation
+                        && guild_name == &player.chat_profile.guild_name
+                        && chat_profile.as_ref() == Some(&player.chat_profile)
+                        && *brown_until_ms == source.owned_pet_brown_until(player)
+                        && position == &player.position
+                        && *level == player.level
+                        && experience_profile == &player.experience_profile
+                        && name == &player.name
+                        && group_members == &player.chat_profile.group_members
+                        && mentor_bank == &player.mentor_bank
+                })
+            })
+    }
+
+    /// Certifies the only old-presence dependencies of online_player_snapshot:
+    /// the local pet clock and brown timer both gate on this exact owner.
+    /// Absent book/presence owners compare equal for cold, unadmitted players.
+    pub(crate) fn online_projection_owners_match(&self, book: &OnlineIdentityBook) -> bool {
+        self.players.iter().all(|(session, player)| {
+            self.online_presence
+                .get(session)
+                .map(|presence| &presence.owner)
+                == book
+                    .owner(session)
+                    .filter(|owner| owner.matches_player(player))
+        })
+    }
+
     pub(crate) fn online_player_snapshot(
         &self,
         book: &OnlineIdentityBook,
@@ -81,6 +163,17 @@ impl ZoneRuntime {
     ) {
         self.online_presence = snapshot;
         self.managed_online_identity = managed;
+        self.prune_online_owners();
+    }
+
+    /// The manager has already compared every retained field to the complete
+    /// original snapshot source. Preserve ingest's non-projection effects.
+    pub(crate) fn ingest_unchanged_online_presence(&mut self, managed: bool) {
+        self.managed_online_identity = managed;
+        self.prune_online_owners();
+    }
+
+    fn prune_online_owners(&mut self) {
         for monster in self.native_monsters.values_mut() {
             if monster.experience_owner.as_ref().is_some_and(|owner| {
                 owner.online_owner.as_ref().is_none_or(|proof| {
@@ -659,7 +752,7 @@ mod tests {
             serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
         // The current checkpoint contract includes mining (v7). Reanchoring
         // a v4 file must still retire legacy claim authority and forced hits.
-        assert_eq!(reanchored["version"], 7);
+        assert_eq!(reanchored["version"], 8);
         assert!(reanchored["native_monsters"]["201"]
             .get("experience_owner")
             .is_none());

@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:25:02.553Z",
+  "scope": "Final external trusted-frozen-archive ended-formal10 verifier; entryv3 executesverifierv4. No product/runtime/frozenlauncher changes.",
+  "files": [
+    {
+      "path": "preimages/probe13-corrected-v2.mjs.txt",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "path": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "path": "formal-contract-v1.mjs",
+      "bytes": 5570,
+      "sha256": "300441547632ecba0c132204352b02153edee96d1e0ce5e9e361d3c724a7363b"
+    },
+    {
+      "path": "derive-from-probe13-v2-v1.mjs",
+      "bytes": 10077,
+      "sha256": "9030b07a36e1d2333855c60ad05e22b0d25addea777d5e5ca94fa8420321845f"
+    },
+    {
+      "path": "verify-ended-formal10-v1.mjs",
+      "bytes": 25419,
+      "sha256": "841f4abe47c9616a5aed9b1f37cdf59eb205c8e5c02c1fc7061d39d55cde58f2"
+    },
+    {
+      "path": "inverse-provenance-v1.json",
+      "bytes": 11074,
+      "sha256": "4b1302f2f7d37f8d533a8fecd513d7f46eb6bbdab1b0da8648d992fe241667f6"
+    },
+    {
+      "path": "refine-formal-v2-v1.mjs",
+      "bytes": 6835,
+      "sha256": "4f5c406265f7a2cfbc5451243ac137d96bc7fa078a913dc4df6f45b7521d12dd"
+    },
+    {
+      "path": "verify-ended-formal10-v2.mjs",
+      "bytes": 27524,
+      "sha256": "e98c3fdbc84e8dd8f14d76bdd793ea6ea4eeaaf4c2fc65b083908260fae5bdba"
+    },
+    {
+      "path": "refinement-provenance-v2.json",
+      "bytes": 6847,
+      "sha256": "3b164a2db8d7291fdeeb7eb302c902af02e014fb6c585dec36b8e3eacf7e118c"
+    },
+    {
+      "path": "schema-selfcheck-v1.mjs",
+      "bytes": 5870,
+      "sha256": "0e35b915c2ba983d4a7a01f65aa505d3cd66904e086936c838c5fc05cf4acfc2"
+    },
+    {
+      "path": "run-schema-selfcheck-v1.mjs",
+      "bytes": 1464,
+      "sha256": "00caae12ee460af0efc481869c078edd718521c1c353adef54e6cb030957a041"
+    },
+    {
+      "path": "schema-selfcheck-v1.log",
+      "bytes": 1384,
+      "sha256": "9446490165483626f34e97eb304776b1586594b6f377dcec219eb10846b132bc"
+    },
+    {
+      "path": "schema-selfcheck-v1-receipt.json",
+      "bytes": 4059,
+      "sha256": "c3203de43d7a09c623b4163486ed421eed6ee7ed6e9f25cc632e6b8bc39381e0"
+    },
+    {
+      "path": "run-ended-formal10-v1.mjs",
+      "bytes": 2410,
+      "sha256": "9e0f8ded0bc80ce1b582d1dae51deb9cb2e9067c4543c097475bf84ce81bae1a"
+    },
+    {
+      "path": "seal-preparation-v1.mjs",
+      "bytes": 4942,
+      "sha256": "63fde842260caa2f76e927c18480dd83a65df3dadee152197584f7c46d338a53"
+    },
+    {
+      "path": "tool-source-frozen-v1.json",
+      "bytes": 4193,
+      "sha256": "686cd3f35e33b637db4a9f31fdc24e24c331bde35fe1decb06b7631ce6fad832"
+    },
+    {
+      "path": "preparation-v1.json",
+      "bytes": 6453,
+      "sha256": "b781aee660516587580ed16f93849aa18fb91fd5d6190075a2c146624109eb27"
+    },
+    {
+      "path": "refine-formal-v3-v1.mjs",
+      "bytes": 3805,
+      "sha256": "3fedc8f7f6b6a8fc857d9f268e3cb43f5116d221a971cb5c3a159ef0e1da4812"
+    },
+    {
+      "path": "verify-ended-formal10-v3.mjs",
+      "bytes": 27968,
+      "sha256": "3c689714ec1c9849b87e9730eb99ac192847f94250b7d805af890305373da6fc"
+    },
+    {
+      "path": "refinement-provenance-v3.json",
+      "bytes": 1675,
+      "sha256": "7eea68360bae824b87a1dcfcd766845d1c410146ecd725cba6f7c2d349bf0d04"
+    },
+    {
+      "path": "schema-selfcheck-v2.mjs",
+      "bytes": 6495,
+      "sha256": "11b65a9c6a4eeeb90207863f6df27cb636d8b58f1437e8097305fb2e6f244cb2"
+    },
+    {
+      "path": "run-schema-selfcheck-v2.mjs",
+      "bytes": 1464,
+      "sha256": "57ce6540dacc352fbd33e850b6d0c88c63ae915f599538f360df8a16a36c79f9"
+    },
+    {
+      "path": "schema-selfcheck-v2.log",
+      "bytes": 1475,
+      "sha256": "2d56074d2902b21c2ff28aa304076059cb87b7c928ebc7a8d53a385378aedf32"
+    },
+    {
+      "path": "schema-selfcheck-v2-receipt.json",
+      "bytes": 4184,
+      "sha256": "fe6509ddd44c5c596d26dbbce0f8d71e21bd9b2a1ecce04755a7554d37b4bf44"
+    },
+    {
+      "path": "run-ended-formal10-v2.mjs",
+      "bytes": 2410,
+      "sha256": "24c49ce935e9fb9c46a49773cd90834ed025c26c5f3f0155547f0740eddefa33"
+    },
+    {
+      "path": "refine-formal-v4-v1.mjs",
+      "bytes": 4512,
+      "sha256": "d07ae6e35730639395374a50536ed23bc9ed8f9c83509d53328a41345186f1e2"
+    },
+    {
+      "path": "verify-ended-formal10-v4.mjs",
+      "bytes": 28111,
+      "sha256": "f5cc63dc6587e50673ac984c541390f0a415f4fb19e7371d957c43dbac0747c7"
+    },
+    {
+      "path": "formal-contract-v2.mjs",
+      "bytes": 6103,
+      "sha256": "5aa9f0057bacf899270b14619d0168148c07323f97065aff8c56bf14cf227b4c"
+    },
+    {
+      "path": "refinement-provenance-v4.json",
+      "bytes": 2249,
+      "sha256": "59ebac0b06a7d8253fbc32345eb5b708404b514e44b1c02cd0706ec1e5fe252a"
+    },
+    {
+      "path": "schema-selfcheck-v3.mjs",
+      "bytes": 7151,
+      "sha256": "1f2c35770e335f22cfa256731486ba91bc83c00bea56d09b7a5b1bf05162e048"
+    },
+    {
+      "path": "run-schema-selfcheck-v3.mjs",
+      "bytes": 1464,
+      "sha256": "0dd4ae648e3d624c00c98a294ccffd5c8c1c2d4e0ff9d40f0e0c8a9a420db1d4"
+    },
+    {
+      "path": "schema-selfcheck-v3.log",
+      "bytes": 1559,
+      "sha256": "b37e269f8b922c41827cfc45625843cfd3b77d2e4e6250422ceb1f32083a3c23"
+    },
+    {
+      "path": "schema-selfcheck-v3-receipt.json",
+      "bytes": 4302,
+      "sha256": "317ed78cfe37bf5ee5695bb4e6de5b0fef87fb5d041c9927d928a6f39eafb273"
+    },
+    {
+      "path": "run-ended-formal10-v3.mjs",
+      "bytes": 2410,
+      "sha256": "f4051f68adefddb18f60346874e9d353d83a3b2d5d7a31dcd91b41d32a9acba2"
+    },
+    {
+      "path": "seal-preparation-v2.mjs",
+      "bytes": 4280,
+      "sha256": "c6b25dbab21a2791408fa7026d8fd4f09012db8a32d0bd53b4f7b899fe4b86b5"
+    }
+  ],
+  "sourceSha256": "d3c021d49f10b6aadc4a727507479db1d8dd2336c30a5c25779750d087db570e",
+  "referencePins": [
+    {
+      "path": "probe13-independent-verification-v1/verify-ended-probe13-v2.mjs",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "path": "probe13-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "path": "probe13-independent-verification-v1/hp-proof-v2-selfcheck-receipt.json",
+      "bytes": 3595,
+      "sha256": "10c80885160b9d5b1d46e21fa038dc2bd9acd0b9197e7ba61985a190baa73b78"
+    },
+    {
+      "path": "compact-wire-formal10-preseal-input-check-v6.json",
+      "bytes": 26339,
+      "sha256": "de146199a73f1be24c5c1a7ce241fead3b92126455d7096c0f5fcd6c02376163"
+    },
+    {
+      "path": "formal-native-v2-compact-wire-ladder-10/launcher-source-frozen-v1.json",
+      "bytes": 23133,
+      "sha256": "c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724"
+    },
+    {
+      "path": "formal-native-v2-compact-wire-ladder-10/phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    }
+  ],
+  "actualRunRead": false,
+  "actualGameVerifierExecuted": false,
+  "capacityAccepted": false,
+  "trustBoundary": "Frozen producer archives with original SHA/bytes bindings; readline checks64MiB after whole-line allocation and is not an adversarial-input absolute memory bound."
+}

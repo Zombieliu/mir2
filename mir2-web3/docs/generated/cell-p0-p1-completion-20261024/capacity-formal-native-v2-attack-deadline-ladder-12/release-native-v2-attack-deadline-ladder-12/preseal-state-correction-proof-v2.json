@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "previousPreseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\preseal-inputs-finalized-v1.json",
+    "bytes": 27669,
+    "sha256": "60fcc220a8c208b2ebf44d1e6928862cead6709939d3f7895f2d7eba536c3912"
+  },
+  "producer": {
+    "before": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v3.mjs",
+      "bytes": 10118,
+      "sha256": "2bf0bc6d93a49450288348a69ed676eb2402558dd7b97bbac9f1635dfd67a993"
+    },
+    "after": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bind-actual-ended16-v4.mjs",
+      "bytes": 10118,
+      "sha256": "98b63456d0e39f5cd6c071c3d460e52ce6092604a8542edf31d094e23da46655"
+    },
+    "from": "state:'formal12-actual-fresh15-bound-not-sealed'",
+    "to": "state:'formal12-actual-fresh16-bound-not-sealed'",
+    "occurrences": 1,
+    "inverseRawExact": true,
+    "correctedProducerExecuted": false
+  },
+  "controller": {
+    "before": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-v1.mjs",
+      "bytes": 13747,
+      "sha256": "47ea96e1cb5b2eabe85ce86c5565adaeda4ae56701d5f326fe410c0ef69dc3fc"
+    },
+    "after": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\root-seal-and-guard-v2.mjs",
+      "bytes": 13747,
+      "sha256": "01bfc8c6953ee7247217380ea4daaa3f350ff1362bf689dd8c4903ab092ea0cf"
+    },
+    "from": "preseal-inputs-finalized-v1.json",
+    "to": "preseal-inputs-finalized-v2.json",
+    "occurrences": 1,
+    "inverseRawExact": true
+  },
+  "scope": "Correct one stale preseal state label to the actual Probe16 identity. New immutable output filename and executor pin preserve v1. No accepted evidence, threshold, source or game verdict changes.",
+  "originalPresealPreserved": true,
+  "actualSealGuardPrepareRunExecuted": false,
+  "capacityAccepted": false
+}

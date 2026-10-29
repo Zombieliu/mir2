@@ -253,10 +253,16 @@ export function applyProtocolObservation(snapshot, message) {
     case 'ObjectPushed':
     case 'ObjectDash':
     case 'ObjectDashFail':
+      updateEntity(snapshot, payload.objectId, payload);
+      break;
     case 'ObjectAttack':
     case 'ObjectRangeAttack':
     case 'ObjectMagic':
-      updateEntity(snapshot, payload.objectId, payload);
+      // Owner action locations are pose anchors and can predate a movement ACK.
+      // These actions update facing; separate movement packets supply the owner tile.
+      updateEntity(snapshot, payload.objectId,
+        objectIdOf(payload.objectId) === objectIdOf(snapshot.playerObjectId)
+          ? { direction: payload.direction } : payload);
       break;
     case 'ObjectStruck':
       // Crystal GameScene.ObjectStruck ignores the local user: a delayed hit

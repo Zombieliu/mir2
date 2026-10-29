@@ -1,0 +1,321 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T06:37:25.707Z",
+  "runId": "1792908575146-40a66fff",
+  "scope": "Exact failed-probe12 independent replay, bounded public forensic projections, immutable whitelist files, and permanently unsealed formal09 historical template/rejection. No server blocker attribution is inferred from merged spectator frames.",
+  "copies": [
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\probe12-independent-verification-v1\\public-whitelist-v1.json",
+      "target": "probe12-independent-verification-v1/public-whitelist-v1.json",
+      "bytes": 1240,
+      "sha256": "bba8156a4e2daecb7f3192755e9e3c0119da08ba3e4f584a7bb14552248a64d4"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/verify-ended-probe12.mjs",
+      "target": "probe12-independent-verification-v1/verify-ended-probe12.mjs",
+      "bytes": 20511,
+      "sha256": "38a912c8712f244c3ee215f1413e1e7a40d152f57cfbd4cb372a60c46d70ed3a"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/final-verification.json",
+      "target": "probe12-independent-verification-v1/final-verification.json",
+      "bytes": 124145,
+      "sha256": "acbc8d169409420fece19f5376037ea6b61405a249f5e63434803dcae364755e"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/selected-movement-events-v1.json",
+      "target": "probe12-independent-verification-v1/selected-movement-events-v1.json",
+      "bytes": 103223,
+      "sha256": "96883d2b942c8be8360709e332bc7165e0d5043ff582f2054a4115696f76c463"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/movement-failure-summary-v1.json",
+      "target": "probe12-independent-verification-v1/movement-failure-summary-v1.json",
+      "bytes": 14983,
+      "sha256": "9c4b044db057b5911395cfa5f309b053442eac6234c953edbc72b72ecfab9458"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\public-whitelist-v1.json",
+      "target": "compact12-movement-review-v1/public-whitelist-v1.json",
+      "bytes": 3174,
+      "sha256": "c04d8257c84c184545fbbf07831452fb525f49b307b803458b4b4cbae99fa5f6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\source-review-v1.json",
+      "target": "compact12-movement-review-v1/source-review-v1.json",
+      "bytes": 7082,
+      "sha256": "e588f69a82474d6d406af09a9e8343f9a734d6a4f4c4f004018a5d7ef87ad792"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\selected-corrections-crosscheck-v1.json",
+      "target": "compact12-movement-review-v1/selected-corrections-crosscheck-v1.json",
+      "bytes": 8485,
+      "sha256": "4623c6a5b0ad815c2310bf7cd19aa210c0a72f0316e9c4f78146dd759402b958"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\project-three-public-frames-v1.mjs",
+      "target": "compact12-movement-review-v1/project-three-public-frames-v1.mjs",
+      "bytes": 5612,
+      "sha256": "4e78109163c588517e6467fef1a21dab02b9a9ae3cad2c54ebc1ec76eaac1891"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\three-public-local-frames-v1.json",
+      "target": "compact12-movement-review-v1/three-public-local-frames-v1.json",
+      "bytes": 5886,
+      "sha256": "9049cc437d6f72ab6f67674b2703da69c26cd10d59a82b13ad95a6b9996c2275"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\authoritative-occupancy-visibility-review-v1.json",
+      "target": "compact12-movement-review-v1/authoritative-occupancy-visibility-review-v1.json",
+      "bytes": 13438,
+      "sha256": "b251190881d8ba44e97eaf623c7b4fd7082c1343346be33b095b04f1e17a1498"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\completion-addendum-v1.json",
+      "target": "compact12-movement-review-v1/completion-addendum-v1.json",
+      "bytes": 3530,
+      "sha256": "0fb372c689ca9b0b08c6f2fad5c856c71f53f36382236a4c79493aeb868ef8eb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-independent-review-v1\\review-checklist-v1.json",
+      "target": "compact-formal09-independent-review-v1/review-checklist-v1.json",
+      "bytes": 8167,
+      "sha256": "f63300398656874f344f0385a7dee16d05f5f9cb9e8225bf3e1c5d84e0d42247"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-independent-review-v1\\check-preseal-raw.mjs",
+      "target": "compact-formal09-independent-review-v1/check-preseal-raw.mjs",
+      "bytes": 4585,
+      "sha256": "5805588e5cf914024783cc0893a4d01dbae4a3440e60d7dc2371a839d7f0a66e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-independent-review-v1\\preseal-raw-check-v1.json",
+      "target": "compact-formal09-independent-review-v1/preseal-raw-check-v1.json",
+      "bytes": 890,
+      "sha256": "beb8909735cbf0ef0528c0e7527127227551f14bb4e645b672d072a5e625e8a4"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-independent-review-v1\\historical-preseal-independent-review-v1.json",
+      "target": "compact-formal09-independent-review-v1/historical-preseal-independent-review-v1.json",
+      "bytes": 6655,
+      "sha256": "2d72a85d39b4c4561824d9a58016de15adcf293a76b0b4c443361f4d7447d31f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-preseal-input-check-v1.json",
+      "target": "compact-formal09-preseal-input-check-v1.json",
+      "bytes": 14613,
+      "sha256": "fe5a93d33cda10cbeb3a739ba085f64abb4e9676bd0f1470a7de9802aa2b79bc"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\HISTORICAL-NOT-RUNNABLE.md",
+      "target": "formal-native-v2-compact-halo-ladder-09/HISTORICAL-NOT-RUNNABLE.md",
+      "bytes": 687,
+      "sha256": "9a52a0d17034c329b91036f7a17c4fe856eba1bc26ea17931ca4159cfbc79f6f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\backend-driver-source-guard.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\candidate-release-binding.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/candidate-release-binding.json",
+      "bytes": 6386,
+      "sha256": "442246921e74e6614bbd6280150765bcda16ddc4eb9aec57cf7f3c3df8e67835"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\collect-public.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/collect-public.mjs",
+      "bytes": 39473,
+      "sha256": "b138b71c76be0d90a6b3ceec51aa62191a60a9bcc8a928e73a97e90ba2f9c59a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\driver-evidence-contract.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\driver-report-contract.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/driver-report-contract.mjs",
+      "bytes": 9234,
+      "sha256": "a038e9c186893015ed386b4140cef3927a0ad8024d85e4f6ad01d2a798eba581"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\initialize-private.ps1",
+      "target": "formal-native-v2-compact-halo-ladder-09/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\input-lib.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/input-lib.mjs",
+      "bytes": 14875,
+      "sha256": "597d48f7cadbaf1e44612dc98cd3c6513d4e68dcd5df1938ce9de0e03b599b73"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\legacy14-original.mjs.txt",
+      "target": "formal-native-v2-compact-halo-ladder-09/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\measured-phase-contract.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\monitor-owned.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\preparation-plan.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/preparation-plan.json",
+      "bytes": 3402,
+      "sha256": "80efc21c57cca9af061d089cc6ecd151afa72057128febb30bd6d3ef730dc1fe"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\prepare-inputs.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/prepare-inputs.mjs",
+      "bytes": 10969,
+      "sha256": "4a49987ce2f0c3e4f7274b9a9f6f868ff631468d331f95d8c7f04ca98eae119d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\recover-drained-owned.ps1",
+      "target": "formal-native-v2-compact-halo-ladder-09/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\request-stop.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\resource-profile.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\run-options.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/run-options.json",
+      "bytes": 3035,
+      "sha256": "b4886cf4f288ae133bbe0f872438d08beb1230058e2b921c6a73827e572ee88c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\run-owned.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/run-owned.mjs",
+      "bytes": 18128,
+      "sha256": "8de45d468d508a018ba831481fb717a05ed340ae699636c7ce6df3a3831f1f84"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\scenario-prefix-readiness.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\scenario.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\scene-binding.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/scene-binding.json",
+      "bytes": 6417,
+      "sha256": "b11055102404d50a8c14d43faaaf331bdde1b73cf1fb9f2ff5f5e6adcf1a7bcb"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\scene-contract.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/scene-contract.mjs",
+      "bytes": 10033,
+      "sha256": "2baa5ee428dfb3b95acb664993988977a570ac7c93c8bf28d8b0f70d859909ad"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\slow-stage-diagnostics-config.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\slow-stage-helper-freeze-v1.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\slow-stage-public.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\slow-stage-public.test.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\slow-stage-row-contract.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\slow-stage-schema-contract.json",
+      "target": "formal-native-v2-compact-halo-ladder-09/slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\socket-build-source-lib.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\synthetic-tests-v1.log",
+      "target": "formal-native-v2-compact-halo-ladder-09/synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-feasibility-gate.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/verify-feasibility-gate.mjs",
+      "bytes": 18868,
+      "sha256": "0ab03879f5aee813fcacdea6b649563a0fedfd6f605cdce29910ccaef252f095"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-full16-gate.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-probe12-collected-evidence.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/verify-probe12-collected-evidence.mjs",
+      "bytes": 9501,
+      "sha256": "39bb17239df585f65579822bdc1e0114461aef0ff2a727658b4a6fb3e82185da"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09\\verify-public.mjs",
+      "target": "formal-native-v2-compact-halo-ladder-09/verify-public.mjs",
+      "bytes": 17142,
+      "sha256": "27ad1c6c994de3335fc22cd37461a055986085a9e10c9e7d1ddec293c2209f3a"
+    },
+    {
+      "source": "C:\\mir2-build\\p01-completion-20261024\\compact-formal09-expected12-rejection-v1.json",
+      "target": "compact-formal09-expected12-rejection-v1.json",
+      "bytes": 4790,
+      "sha256": "d7e27d665471d06bc41a58bb92f865b017aa9a63506b69ad98853b8330dc46b1"
+    }
+  ],
+  "capacityAccepted": false
+}

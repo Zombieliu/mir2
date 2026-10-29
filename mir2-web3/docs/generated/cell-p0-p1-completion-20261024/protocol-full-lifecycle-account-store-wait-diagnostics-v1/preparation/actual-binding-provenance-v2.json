@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_RELEASE_BOUND_NOT_FINALIZED_NOT_EXECUTED",
+  "createdAt": "2026-10-25T19:03:43.361Z",
+  "rootActualFacts": {
+    "release": {
+      "path": "C:/mir2-build/p01-completion-20261024/release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc"
+    },
+    "buildReceipt": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-v1-build-receipt.json",
+      "bytes": 2453,
+      "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936"
+    },
+    "buildLog": {
+      "path": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-account-store-wait-diagnostics-v1-release-build.log",
+      "bytes": 56033,
+      "sha256": "64e6c04e66681b8486cd29bd401faaec7d7cdd7fad61f3395b2defa7b9f0e864"
+    },
+    "binaryPinFromActualRelease": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+      "bytes": 87396864,
+      "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+    },
+    "reviewerRepeatedLargeBinaryHash": false
+  },
+  "preservedPending": [
+    {
+      "current": "full-lifecycle-profile.json",
+      "preserved": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/full-lifecycle-profile.json.before-actual-v2.txt",
+        "bytes": 4372,
+        "sha256": "c35157bb216a15a7385b3ad432141333da71f9833bf34236ca2b19d54fea974b"
+      }
+    },
+    {
+      "current": "candidate-release-binding-v1.json",
+      "preserved": {
+        "path": "C:/mir2-build/p01-completion-20261024/full-lifecycle-account-store-wait-diagnostics-v1/candidate-release-binding-v1.json.before-actual-v2.txt",
+        "bytes": 977,
+        "sha256": "a87fb54fdd3440305f4500035b99d2de582b773573809ffb9c32ec0c520d26c3"
+      }
+    }
+  ],
+  "unchangedExecutionSources": [
+    {
+      "file": "run-owned-full.mjs",
+      "bytes": 14401,
+      "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+    },
+    {
+      "file": "audit-owned-full.mjs",
+      "bytes": 9078,
+      "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+    },
+    {
+      "file": "verify-inputs.mjs",
+      "bytes": 9407,
+      "sha256": "5960387fcf51d6d4b3be202839861727fcc44209a7eda9e8460804f080d9f8bd"
+    },
+    {
+      "file": "finalize-launcher-inputs.mjs",
+      "bytes": 2038,
+      "sha256": "12e7392145acca4098f8586fb6e820ae99932b4514ed335975088945b76d1c06"
+    },
+    {
+      "file": "projection-build-source-lib.mjs",
+      "bytes": 242,
+      "sha256": "16e2848ce480761686481efcfc2d723471dbea466b3dfa6f3c6a350bce3d35fe"
+    },
+    {
+      "file": "frozen-audit-support.mjs",
+      "bytes": 46572,
+      "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+    },
+    {
+      "file": "initialize-fresh-private.ps1",
+      "bytes": 1643,
+      "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+    }
+  ],
+  "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "historicalNodeCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "newActualSent": null,
+  "finalizationExecuted": false,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "fullLifecyclePassed": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,115 @@
+{
+  "passed": true,
+  "kind": "exact-five-root-policy-fix-and-focused-security-regression",
+  "producerSummary": "producer-summary.json",
+  "sourceSummaryReceipt": {
+    "filename": "updater-root-policy-fix-summary.json",
+    "bytes": 5794,
+    "sha256": "3069cd84502d374c0e73c4ee22e7627dcd48f24bc658834bb1b6800eb08b4743",
+    "included": false
+  },
+  "committedUpdaterSourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "sourcePhaseNote": "Producer retains its focused-patch phase wording and worker did not commit. Coordinator integration commit81942 is independently bound here by all4 normalized source blobs; no claim that an uncommitted worker performed release actions.",
+  "curatorMatchedFourCurrentAndCommittedNormalizedSources": true,
+  "exactAddedRoots": [
+    "README.zh-CN.txt",
+    "BILLING-HAN-SOURCE.json",
+    "OFL-NotoSansSC-BillingHan.txt",
+    "SIMPLIFIED-SOURCE.json",
+    "OFL-NotoSansCJKsc.txt"
+  ],
+  "otherPathCaseExecutableBoundsCmsAndBindingChecksUnchanged": true,
+  "rustFocusedPassed": 5,
+  "rustFocusedIgnored": 1,
+  "rustIgnoredRealSignedCandidateExecutedSeparatelyPassed": 1,
+  "rustAdjacentSecurityPassed": 2,
+  "pythonArchiveTotal": 33,
+  "pythonArchivePassed": 30,
+  "pythonArchiveSkipped": 3,
+  "pythonFixtureCmsIsMock": true,
+  "separateRealRustWindowsCmsIsPinnedAndVerified": true,
+  "actualManifestPathsCheckedByPython": 255023,
+  "actualManifestPolicyFailures": 0,
+  "logs": [
+    {
+      "sourceReceipt": {
+        "filename": "updater-root-policy-rust-focused-final.log",
+        "bytes": 1014,
+        "sha256": "9383dde6d88e42fe4abd3c1129e9b6c16bd4244c1482350440b0a3b2bab83745",
+        "included": false
+      },
+      "resultLines": [
+        "test model_regression::regression::simplified_release_existing_signed_candidate_reads_complete_manifest ... ignored, requires an existing CMS-signed Candidate; reads only, never launches",
+        "test model_regression::regression::simplified_release_root_files_are_allowed_exactly ... ok",
+        "test model_regression::regression::simplified_release_root_near_misses_remain_rejected ... ok",
+        "test model_regression::regression::signed_sequence_may_advance_but_not_rollback_or_reuse ... ok",
+        "test model_regression::regression::manifest_rejects_case_insensitive_file_directory_collision ... ok",
+        "test model_regression::regression::freshness_compatibility_and_metadata_sets_are_required ... ok",
+        "test result: ok. 5 passed; 0 failed; 1 ignored; 0 measured; 87 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "sourceReceipt": {
+        "filename": "updater-root-policy-signed-candidate.log",
+        "bytes": 741,
+        "sha256": "282c48813b8c8544d79cb588d1aee48f39449c8a62d46ab344e116d3ee36e1a7",
+        "included": false
+      },
+      "resultLines": [
+        "test model_regression::regression::simplified_release_existing_signed_candidate_reads_complete_manifest ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 92 filtered out; finished in 5.62s"
+      ]
+    },
+    {
+      "sourceReceipt": {
+        "filename": "updater-root-policy-path-security.log",
+        "bytes": 478,
+        "sha256": "9ef8c13f22e6490ac9029c07bb4f88e00bb89a308381265acaf730201578ddba",
+        "included": false
+      },
+      "resultLines": [
+        "test model::tests::bad_hashes_and_sizes_rejected ... ok",
+        "test model::tests::windows_paths_reject_escape_alias_stream_and_devices ... ok",
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 91 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "sourceReceipt": {
+        "filename": "updater-root-policy-python.log",
+        "bytes": 4059,
+        "sha256": "4f3ecb73cf8560905364fff64ebe58ec1a492b2349b80926c8a7c92eca9c2b1a",
+        "included": false
+      },
+      "resultLines": [
+        "Ran 33 tests in 1.482s",
+        "OK (skipped=3)"
+      ]
+    }
+  ],
+  "historicalMissingInstalledPathAttempt": {
+    "sourceReceipt": {
+      "filename": "updater-root-policy-signed-installation.log",
+      "bytes": 976,
+      "sha256": "c897e2782aefa86c67c2167fc77e32d85b8b06122e0c1c19de07097a797e5b0e",
+      "included": false
+    },
+    "status": "failed before validation because first isolated installation had been removed during coordinator workflow",
+    "correctedTestUsesImmutableOriginalCandidate": true
+  },
+  "gameCandidate": {
+    "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+    "modified": false,
+    "identity": "WN-CANDIDATE-20261029-invited-09",
+    "manifestSha256": "ab86b5e083473c003863ead5c2ef09112cadc655684176e7ad757f7c60eb80ed"
+  },
+  "gameOrResourcesRebuiltByThisFix": false,
+  "actualInstalledR10LauncherPathSuccessClaimed": false,
+  "r9FailurePreserved": true,
+  "independentReview": {
+    "path": "independent-review.json",
+    "bytes": 4589,
+    "sha256": "e9b72601a7e1bc7e9b417cff2d3b248af3b51c0e2440b8f38340ded60663a391",
+    "noMaterialBlockers": true,
+    "testsOrGuiRerunByReviewer": false
+  }
+}

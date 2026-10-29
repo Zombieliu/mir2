@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "mode": "reused-ordinary-earned-bank-relogin-functional-pilot",
+  "sourceBankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+    "bytes": 7710,
+    "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+  },
+  "bankCopyReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\bank-copy-receipt-v1.json",
+    "bytes": 8095,
+    "sha256": "a2d0d1ca6e1b3816b4565f2782581533ee144297a342c12f9d6ca1de729c26dc"
+  },
+  "ordinaryReloginReadbackPassed": true,
+  "bankPersistedInventoryReusePassed": true,
+  "reusedOrdinaryEarnedBank": true,
+  "freshZeroCharacterPool": false,
+  "sourceBankPreparationReadyCount": 1,
+  "sourceBankPreparationFailedCount": 1,
+  "manifestPin": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\frozen-source-v1.json",
+    "bytes": 79506,
+    "sha256": "259afb207fbdd7bea946b172cb2db9d773e683f28ec1ee570e1f1d855814b410"
+  },
+  "driverSourceCommit": "e73d04d251902a876620a111fc845adb4b2025ef",
+  "backendSourceCommit": "7b43caa41ee12f2e6b41d0a5df7e9ab45a32580d",
+  "backendExecutable": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\online-presence-reuse-release-v5\\bin\\mir2-gateway.exe",
+    "bytes": 87455744,
+    "sha256": "4fb233a2e47ed19aadfce75a209d0e32a559a2dd402f26e109f1a7678e1fec04"
+  },
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "rawOriginalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports\\1793043370759-685834a8.report.json",
+    "bytes": 35864,
+    "sha256": "64d85dc393d6b94ecf763afee8872811a6a5520c984e6fd337deba743b5d7a3b"
+  },
+  "rawOriginalVerdict": {
+    "ok": false,
+    "error": "Soak failed fixed rolling activity or delivery gates",
+    "safetyStopped": false,
+    "highestPassedStage": 2
+  },
+  "ordinaryPreparationEvidence": {
+    "originalSamples": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\reports\\1793043370759-685834a8.samples.jsonl",
+      "bytes": 717854,
+      "sha256": "d7223762224cc98d30b79425da6c7a104f59c33a799c80a851fc3efa87324bac"
+    },
+    "preparationRows": 2,
+    "preparedActors": 2,
+    "failedPreparationCount": 0,
+    "closedLoops": 0,
+    "cohortActivations": [
+      {
+        "newActors": 2,
+        "controlledActors": 2,
+        "at": 1793043390727
+      }
+    ],
+    "reloginReadback": [
+      {
+        "actor": "L23d06a00",
+        "characterIndex": 1,
+        "status": "ready",
+        "before": {
+          "sequence": 702,
+          "monotonicMs": 2339.7809,
+          "ownerId": 1000,
+          "ownerName": "L23d06a00",
+          "map": "0",
+          "x": 285,
+          "y": 602,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": false,
+          "nearbyHostileCount": 0,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 65,
+          "hpStock": 12,
+          "venison": 1,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false
+        },
+        "after": {
+          "ownerId": 1000,
+          "ownerName": "L23d06a00",
+          "map": "0",
+          "x": 286,
+          "y": 616,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": true,
+          "nearbyHostileCount": 3,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 65,
+          "hpStock": 12,
+          "venison": 1,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false,
+          "currentNearbyHostileCount": 3,
+          "sequence": 743,
+          "monotonicMs": 8362.3126,
+          "actualStagingReached": true,
+          "stagingProtection": "authoritative-safe-zone-normal-monsters"
+        },
+        "targetHp": 12,
+        "actualStagingReached": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null,
+        "fundingFieldPresent": true
+      },
+      {
+        "actor": "L23d06a01",
+        "characterIndex": 2,
+        "status": "ready",
+        "before": {
+          "sequence": 651,
+          "monotonicMs": 12439.0097,
+          "ownerId": 1000,
+          "ownerName": "L23d06a01",
+          "map": "0",
+          "x": 288,
+          "y": 602,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": false,
+          "nearbyHostileCount": 0,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 232,
+          "hpStock": 12,
+          "venison": 0,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false
+        },
+        "after": {
+          "ownerId": 1000,
+          "ownerName": "L23d06a01",
+          "map": "0",
+          "x": 289,
+          "y": 616,
+          "hp": 24,
+          "maxHp": 24,
+          "inSafeZone": true,
+          "nearbyHostileCount": 3,
+          "playerPoison": null,
+          "ownerPoison": null,
+          "dazed": false,
+          "gold": 232,
+          "hpStock": 12,
+          "venison": 0,
+          "saleRemaining": null,
+          "npcId": null,
+          "buyLink": false,
+          "sellLink": false,
+          "currentNearbyHostileCount": 3,
+          "sequence": 701,
+          "monotonicMs": 18434.5393,
+          "actualStagingReached": true,
+          "stagingProtection": "authoritative-safe-zone-normal-monsters"
+        },
+        "targetHp": 12,
+        "actualStagingReached": true,
+        "purchased": 0,
+        "soldVenison": 0,
+        "funding": null,
+        "fundingFieldPresent": true
+      }
+    ]
+  },
+  "executionError": null,
+  "cleanupComplete": true,
+  "cleanupRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\cleanup-v1.json",
+    "bytes": 1033,
+    "sha256": "47e4f5fafff2be6145ec0ec1b5d4882fd9510756a23c36fedb199ba4b50ecd90"
+  },
+  "functionalPilotDurationOnly": true,
+  "sustainableTwoHourSupplyProven": false,
+  "formalFiveMinuteStagePerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false
+}

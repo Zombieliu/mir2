@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T06:26:58.629Z",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Read-only authoritative movement/current-vs-retained occupancy, AOI/snapshot and global spectator source review. No Rust/Node edits or tests; no further raw/recording scan beyond previously authorized three-frame projection.",
+  "sources": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime.rs",
+      "bytes": 748912,
+      "sha256": "4f4eaa4519e745c0bd376f33ef76b86c88ad1c1015fd42bb53ef3a159ce320a8"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\passive_ai.rs",
+      "bytes": 7779,
+      "sha256": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\zone\\runtime\\visibility_ai.rs",
+      "bytes": 12443,
+      "sha256": "92dd817ffe8798ea2998bf5417ba037c8478b222d7c318950ec5a1b58c4bf7ea"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\routing.rs",
+      "bytes": 1388304,
+      "sha256": "a0e3a19ad1184efd87a632118a98a65c975ca12d2adfda95b2f9e4a6138eff49"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+      "bytes": 855687,
+      "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\spectator.rs",
+      "bytes": 58692,
+      "sha256": "3aa1ea329da20cb827440a67329d5af77251b666fff9e135125d9742ae9f0a6f"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\config.rs",
+      "bytes": 342825,
+      "sha256": "9f1315fb16d48e4b19cdfd1d9c1e8c2acab9fb9458eb0ce96e5fa5674261dde5"
+    }
+  ],
+  "priorEvidence": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\source-review-v1.json",
+      "bytes": 7082,
+      "sha256": "e588f69a82474d6d406af09a9e8343f9a734d6a4f4c4f004018a5d7ef87ad792"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\selected-corrections-crosscheck-v1.json",
+      "bytes": 8485,
+      "sha256": "4623c6a5b0ad815c2310bf7cd19aa210c0a72f0316e9c4f78146dd759402b958"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\compact12-movement-review-v1\\three-public-local-frames-v1.json",
+      "bytes": 5886,
+      "sha256": "9049cc437d6f72ab6f67674b2703da69c26cd10d59a82b13ad95a6b9996c2275"
+    }
+  ],
+  "authoritativeBoundary": [
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "line": 10300,
+      "scope": "execute_shared_zone_movement",
+      "fact": "Shared state and per-session state are locked synchronously. Real Walk/Run translates to sequenced ZoneCommand with current shared clock; Zone handles command and TickPlayerMovement, then dispatches outbounds while still holding shared-state ownership. No network await or future tile reservation occurs within this transaction."
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 3308,
+      "scope": "queue_movement_action",
+      "fact": "Pending intent queue readiness/replacement/last-seen sequence are handled separately from tile ownership. Queuing a Walk/Run does not reserve its future path or destination."
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 3423,
+      "scope": "consume_step_action",
+      "fact": "At consumption CanMove checks alive, ready deadline, fishing and movement-blocking status; failure returns unchanged owner correction. Run grace selects effective1/2 steps (or existing trusted mount/buff3step semantics). The actual path is computed from current authoritative owner position, not client proposed coordinates."
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 3467,
+      "scope": "blocked path",
+      "fact": "Each actual step is checked using can_player_movement_occupy. Rejection leaves position unchanged and returns UserLocation, setting requested direction only for Run. Accepted movement changes current occupancy/position/grid immediately and establishes real movement/run-grace clocks before generating visibility/outbound packets. No rejection reason or consumed sequence is present in the ordinary UserLocation."
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 16225,
+      "scope": "can_player_movement_occupy",
+      "fact": "Blocking sources are current gate/static player collision; retained object at that exact point with ordinary visible/live blocking packet; current visible live native monster at that exact point; or another current player occupancy. Nearby-adjacent objects and future AI intentions do not block this predicate."
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "line": 190,
+      "scope": "ordinary AI2 movement",
+      "fact": "Legal destination is checked, then native_monster.position changes immediately. ObjectWalk is applied to retained object/grid synchronously, followed by visibility diff and outbound recipients. next_ai_ready_at_ms is a next-time readiness, not a future-position reservation. The general native path in runtime.rs13543 follows the same current-position then retained-packet sequence."
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 15184,
+      "scope": "retained mirror",
+      "fact": "apply_zone_object_packets mutates retained object and object_grid synchronously. can_player_movement_occupy checks retained and native current maps independently, so a real mismatch could matter, but no mismatch is measured for206613 in existing evidence."
+    }
+  ],
+  "visibilityAndSnapshotBoundary": [
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "line": 15476,
+      "fact": "AOI diff unions grid neighbors with already-visible retained IDs; entering emits full object visibility packet and updates owner visible_object_ids; leaving emits recipient-local ObjectRemove. Monster movement updates current/retained state first, diffs visibility, then broadcasts ObjectWalk to visible/in-range recipients."
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "line": 7001,
+      "fact": "Recipient-local ObjectRemove is excluded from the whole-map tombstone/index whenever the authoritative Zone retains that object. A recipient may correctly have a local removal while the globally actionable object persists."
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "line": 18550,
+      "fact": "Full shared world_snapshot acquires the shared lock and first re-centres self from authoritative presence. It overlays whole-map shared entities filtered by current Crystal data range and native visibility, then rechecks range. It is not a copy of exactly the last delivered per-recipient visible-ID set."
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "line": 3400,
+      "fact": "overlay_visible_snapshot discards personal nonplayer entity rows, then clones current visible shared map entities; global map state can rehydrate an object omitted from a personal/runtime view. The final client_view strips private drop/ledger fields, not ordinary monster rows (config.rs8615)."
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "line": 4931,
+      "fact": "Queued realtime retry prioritizes latest owner UserLocation before nonplayer observer motion packets. Network transmission and delivery occur after authoritative state mutation. An owner cache may therefore temporarily lag the current server position; this is possible semantics, not evidence of this run backpressure/reordering."
+    }
+  ],
+  "spectatorBoundary": [
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 425,
+      "fact": "Each incoming personal sanitized snapshot refreshes presence timestamps for IDs it contains, then merges into per-map previous world before capture throttling. Capture time is not an authoritative per-entity observation time."
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 760,
+      "fact": "merge_worlds/merge_object_array unions previous and next arrays by objectId; latest present publisher wins. Omission in one publisher does not remove global ID; there is no per-connection membership or direct owner ObjectRemove consumption."
+    },
+    {
+      "file": "apps/gateway/src/spectator.rs",
+      "line": 829,
+      "fact": "Default entity_stale_ms is15000. A global ID is pruned only after no present snapshot refreshes it within TTL. A stale peer snapshot that still contains an ID may refresh its global presence; no per-entity authoritative freshness is checked."
+    }
+  ],
+  "evidenceInterpretation": {
+    "publicGlobal206613OnIntendedFirstCell": true,
+    "ownerFourPostAckDiagnosticsExclude206613": true,
+    "globalFrameCannotProveOwnerMembership": true,
+    "globalFrameCannotProveConsumeTimeCollision": true,
+    "noFutureReservationFoundInRelevantPaths": true,
+    "actualCurrentRetainedMismatchNotMeasured": true,
+    "driverFixOrBackendFixProven": false,
+    "whyNoDirectFix": "The available ordinary UserLocation exposes outcome transform without rejection cause or consumed seq. Existing movement logs omit per-packet nonplayer membership transitions and pre-send snapshot membership. Changing navigation, collision, retirement or AOI now would assume an unproved cause."
+  },
+  "minimalNextDiagnosticProposal": {
+    "priority": "Driver-side ordinary owner-packet and snapshot membership transition evidence first, preserving protocol/source/backend and all gates if root separately authorizes.",
+    "boundedFields": [
+      "Existing connection lifecycle ordinal, received event.sequence and monotonicMs, packet category; no account/session secret or arbitrary payload.",
+      "Per-pending movement: original cursor/sent time, kind, origin/first/destination, actual UserLocation and arrival sequence; preserve all classifications and denominator.",
+      "Before/after membership of only bounded movement-cell/nearby ordinary public object IDs: ObjectMonster adds, ObjectRemove removes, movement for missing IDs, and full worldSnapshot replacement source with previous/next presence.",
+      "Public object ID/kind/position/dead/hidden needed to connect a206613 disappearance to an ordinary packet or snapshot replacement. Do not log player names, private inventory, credentials or full snapshots.",
+      "Fixed per-pending packet cap and fixed small membership projection; explicit truncated/incomplete flags rather than a false claim of no transition."
+    ],
+    "optionalServerFieldsOnlyIfStillNecessary": [
+      "Static decision class accepted/notReady/dead/fishing/status/gate/terrain/retainedObject/nativeMonster/player, actual path index/effectiveStepCount and relative ready lag.",
+      "Anonymous opaque diagnostic connection/movement ordinal from a separate bounded diagnostic counter for correlation; no gameplay ActionId, account identity or RNG.",
+      "For an exact blocker only: whether native/retained current positions agree and owner visible-ID membership Boolean. Do not infer reason from an adjacent object or add a future reservation."
+    ],
+    "notImplemented": true
+  },
+  "meaningfulFixtureGapsToProveIfAuthorized": [
+    "An ordinary ObjectRemove or full worldSnapshot replacement removes a nearby monster from the client cache; later ObjectWalk for an unknown ID cannot silently manufacture a valid full monster or authoritative visibility. Diagnostic must expose which source caused disappearance.",
+    "Two session snapshots: first contains a monster, second omits it; global spectator retains it until TTL without pretending it is present to second owner. Latest present publisher can overwrite its position.",
+    "Serialized monster movement immediately updates native and retained positions; old source cell becomes available and new destination blocks a player without reserving another future step.",
+    "Player blocked first/second step preserves exact old transform and established Run/Walk direction behavior; diagnostic reason must be derived at consumption and change neither clocks nor queues.",
+    "Owner correction and delayed nonplayer update under bounded transport leave cache temporarily stale; evidence must distinguish timing from a persistent missing membership."
+  ],
+  "formalAdmission": {
+    "failed12MustReject": true,
+    "gateMayBeSealedButCannotAdmit": true,
+    "accountsOrRealmPermitted": false,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Authorized": false
+  },
+  "notPerformed": {
+    "sourceEdits": true,
+    "fixtureOrBuild": true,
+    "astarSceneSearch": true,
+    "moreThanThreeSpectatorFrames": true,
+    "liveService": true
+  }
+}

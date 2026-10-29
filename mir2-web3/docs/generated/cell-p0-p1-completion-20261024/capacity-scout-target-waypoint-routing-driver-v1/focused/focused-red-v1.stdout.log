@@ -1,0 +1,130 @@
+TAP version 13
+# (node:70776) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+not ok 1 - scout target waypoint follows the validated attack tile across real movement ACK ticks without visibility or credit
+  ---
+  duration_ms: 5.2623
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3590:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   x: 19,
+    +   y: 6
+    -   x: 25,
+    -   y: 9
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    x: 25
+    y: 9
+  actual:
+    x: 19
+    y: 6
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3597:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: scout target waypoint invalidation safely falls back without rebuilding the finite scout
+not ok 2 - scout target waypoint invalidation safely falls back without rebuilding the finite scout
+  ---
+  duration_ms: 0.7788
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3617:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   x: 19,
+    +   y: 6
+    -   x: 25,
+    -   y: 9
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    x: 25
+    y: 9
+  actual:
+    x: 19
+    y: 6
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3621:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+ok 3 - scout target waypoint unreachable new hint retains the exact original cyclic fallback within four searches
+  ---
+  duration_ms: 6.6713
+  type: 'test'
+  ...
+# Subtest: scout target waypoint does not redirect an ordinary established scout or reset its saved state
+ok 4 - scout target waypoint does not redirect an ordinary established scout or reset its saved state
+  ---
+  duration_ms: 0.561
+  type: 'test'
+  ...
+# Subtest: scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+not ok 5 - scout target waypoint keeps corrected ACK exclusion and the existing time move and visit limits
+  ---
+  duration_ms: 0.6077
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:3664:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      {
+    +   x: 19,
+    +   y: 6
+    -   x: 25,
+    -   y: 9
+      }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    x: 25
+    y: 9
+  actual:
+    x: 19
+    y: 6
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:3668:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 2
+# fail 3
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 98.0767

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createNavigator, NavigationStalled, NavigationStepGuarded, reviveInTown } from './protocol-play.mjs';
+import { createNavigator, NavigationStalled, NavigationStepGuarded, isTerminalNavigationNoPath, reviveInTown } from './protocol-play.mjs';
 import { applyProtocolObservation } from './protocol-observation.mjs';
 import { startEmergencyHpRecovery } from './protocol-loadout.mjs';
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
@@ -68,6 +68,60 @@ const dependencies = {
   delay: async () => {},
   now: () => 10_000,
 };
+
+test('terminal NoPath diagnostics are bounded immutable exact-cache scalars and never reread planning getters',async()=>{
+  const client=navigationClient(),map=openMap();map.blocked[1*8+6]=1;
+  client.snapshot.entities.push(...Array.from({length:140},(_,i)=>({objectId:100+i,kind:'monster',name:'Unknown'+i,
+    x:20+i,y:20,hp:10,dead:false,disposition:'hostile',privateDetail:'must-not-retain'})));
+  let allowedReads=0,forbiddenReads=0,caught;
+  const options={maxNoPathRefreshes:0,hostileAvoidanceRadius:8,
+    get allowedHostileObjectIds(){allowedReads++;return [100,101];},
+    get forbiddenPoints(){forbiddenReads++;return [{x:2,y:2}];}};
+  const navigate=createNavigator(client,{...dependencies,loadCollisionMap:async()=>map});
+  await assert.rejects(navigate({x:6,y:1},0,()=>false,options),error=>{caught=error;return error.message==='No walk path on test from 1,1 to 6,1'&&error.successfulSteps===0&&error.attempts===1;});
+  const d=caught.navigationDiagnostics;
+  assert.equal(isTerminalNavigationNoPath(caught),true);
+  assert.equal(isTerminalNavigationNoPath(new Error(caught.message)),false);
+  assert.equal(isTerminalNavigationNoPath({...caught}),false);
+  assert.equal(isTerminalNavigationNoPath(null),false);
+  assert.equal(isTerminalNavigationNoPath('No walk path'),false);
+  assert.equal(d.source,'shared-navigator-exact-cache');assert.equal(d.hostileMemoryTotal,140);assert.equal(d.mapHostileMemoryTotal,140);
+  assert.equal(d.hostileMemory.length,128);assert.equal(d.hostileMemoryTruncated,true);
+  assert.equal(d.hostileMemory[0].objectId,100);assert.equal(d.hostileMemory[0].allowed,true);assert.equal(d.hostileMemory[0].currentlyVisible,true);
+  assert.equal(d.hostileMemory[0].remainingMs,20000);assert.equal(d.explicitForbiddenTotal,1);assert.equal(d.occupancyTotal,140);
+  assert.deepEqual(d.allowedIds,[100,101]);assert.equal(allowedReads,1);assert.equal(forbiddenReads,1);
+  for(const value of [d,d.from,d.target,d.allowedIds,d.hostileMemory,d.hostileMemory[0],d.explicitForbidden,d.occupancy])assert.equal(Object.isFrozen(value),true);
+  assert.throws(()=>{d.hostileMemory[0].x=0;},TypeError);assert.equal(client.snapshot.entities[1].x,20);
+  assert.equal(JSON.stringify(d).includes('must-not-retain'),false);assert.equal(client.sent.length,0);
+});
+
+test('terminal NoPath exact memory records an unknown monster after real ObjectRemove without inventing a current observation',async()=>{
+  const client=navigationClient();client.snapshot.entities.push({objectId:71,kind:'monster',name:'Unknown',x:6,y:1,hp:10,dead:false});
+  client.wait=acknowledgeUnitMovement(client);
+  const navigate=createNavigator(client,dependencies);
+  await navigate({x:1,y:2},0,()=>false,{hostileAvoidanceRadius:8});
+  client.snapshot=applyProtocolObservation(client.snapshot,{type:'packet',packet:'ObjectRemove',payload:{objectId:71}});
+  const sentBefore=client.sent.length;
+  await assert.rejects(navigate({x:6,y:1},0,()=>false,{hostileAvoidanceRadius:8,maxNoPathRefreshes:0}),error=>{
+    const row=error.navigationDiagnostics.hostileMemory.find(e=>e.objectId===71);
+    return /No walk path/.test(error.message)&&row?.currentlyVisible===false&&row.allowed===false&&row.x===6&&row.y===1&&row.remainingMs===20000;
+  });
+  assert.equal(client.sent.length,sentBefore);
+});
+
+test('a diagnostic attachment failure leaves the original NoPath and original zero-command budget result intact',async()=>{
+  const client=navigationClient(),map=openMap();map.blocked[1*8+6]=1;
+  const prior=Object.getOwnPropertyDescriptor(Error.prototype,'navigationDiagnostics');
+  Object.defineProperty(Error.prototype,'navigationDiagnostics',{configurable:true,set(){throw new Error('fixture diagnostic sink rejected');}});
+  try {
+    const navigate=createNavigator(client,{...dependencies,loadCollisionMap:async()=>map});
+    await assert.rejects(navigate({x:6,y:1},0,()=>false,{maxNoPathRefreshes:0}),error=>
+      error.message==='No walk path on test from 1,1 to 6,1'&&error.successfulSteps===0&&error.attempts===1);
+    assert.equal(client.sent.length,0);
+  } finally {
+    if(prior)Object.defineProperty(Error.prototype,'navigationDiagnostics',prior);else delete Error.prototype.navigationDiagnostics;
+  }
+});
 
 test('town revive waits for authoritative death, then a self Revived and healthy snapshot', async () => {
   const client = navigationClient();
@@ -1121,7 +1175,7 @@ test('transfer dispatch no-path retains completed movement count on its original
 
   await assert.rejects(
     navigateNear({ x: 6, y: 1 }, 0, () => false, { maxNoPathRefreshes: 0 }),
-    error => /No walk path on test from 1,1 to 6,1/.test(error?.message ?? '') && error.successfulSteps === 0,
+    error => /No walk path on test from 1,1 to 6,1/.test(error?.message ?? '') && error.successfulSteps === 0 && isTerminalNavigationNoPath(error),
   );
   assert.deepEqual(client.sent, []);
 });

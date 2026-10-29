@@ -147,6 +147,7 @@ mod mining_websocket_tests {
         let state = super::super::WebState {
             config: config.clone(),
             deploy_revision: None,
+            auth_rate_limit_policy: crate::web::AuthRateLimitPolicy::default(),
             zone_registry: registry,
             chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),

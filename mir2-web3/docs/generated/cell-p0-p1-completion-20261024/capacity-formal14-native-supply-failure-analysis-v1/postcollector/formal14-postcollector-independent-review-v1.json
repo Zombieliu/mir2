@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T22:46:39.783Z",
+  "state": "POST_TERMINAL_COLLECTOR_SOURCE_REVIEW_PASSED",
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public-current219-v2.mjs",
+    "bytes": 43255,
+    "sha256": "9a159c251035593be4293ea2e3f3c6bf58c118db075f8572cba5f6104a071713"
+  },
+  "proof": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\postcollector-current219-derivation-v1.json",
+    "bytes": 46971,
+    "sha256": "60677cc7aa85198f0d14c61a7c848d662d8a2b1e03518ce3dd8bd45c2e0490fb"
+  },
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\collect-public.mjs",
+    "bytes": 43126,
+    "sha256": "c4c1ede0b5e96c7191ff4fdd2e7cd5ab0478c89d2e601e60e5c4e2baef43c619"
+  },
+  "checks": {
+    "onlyTwoExactRules": true,
+    "forwardRawExact": true,
+    "inverseRawExact": true,
+    "original123SealedSourceUnchanged": true,
+    "readerNowMatchesActualH219Freeze9465": true,
+    "explicitDerivedSelfAndProofPublicAllowlist": true,
+    "gamePolicyThresholds146AndFailedReportVerdictUnchanged": true,
+    "authorNodeSyntaxExitZero": true
+  },
+  "scope": "Static source and raw inverse checks only. No target import, collector execution, raw/monitor/recording/private/binary read, service or test.",
+  "verdict": {
+    "postCollectorSourceContractPassed": true,
+    "eligibleForRootExecution": true,
+    "blockingFindingIds": [],
+    "capacityAccepted": false
+  }
+}

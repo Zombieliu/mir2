@@ -1,0 +1,7 @@
+
+running 2 tests
+test web::tests::attack_v2_socket_reparses_original_bytes_and_rejects_unknown_fields ... ok
+test web::tests::attack_v2_socket_tag_cannot_fall_back_to_legacy_gameplay_dispatch ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1278 filtered out; finished in 0.00s
+

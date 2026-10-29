@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-25T22:08:04.2172566Z",
+  "runId": "1792965008290-fc5e2eed",
+  "ownedPids": [
+    70676,
+    45472
+  ],
+  "remainingOwnedProcesses": [],
+  "remainingOwnedPortListeners": [],
+  "scope": "Fresh Root post-terminal OS observation; original ready log supplies gateway/monitor identities; no backdated observation"
+}

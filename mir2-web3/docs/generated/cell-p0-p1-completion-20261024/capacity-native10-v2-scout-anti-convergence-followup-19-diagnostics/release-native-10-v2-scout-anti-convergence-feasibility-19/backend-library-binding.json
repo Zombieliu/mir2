@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "library": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 43452,
+    "sha256": "c8188c54c2bec952fb3877da5218d1ad91ef3efc4d40c53008939e8e8d987bca"
+  },
+  "adapter": "projection-build-source-lib.mjs",
+  "expectedBackendInputCount": 50,
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "currentExecutionHead": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "runtimeBinding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1402,
+    "sha256": "2a6cc9ae89a467ddeb19636b3f50b6126af968c1b5a29e6d303ca7f85bb7adea"
+  },
+  "runtimeBindingDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\root-final-binding-derivation-v1.json",
+    "bytes": 1900,
+    "sha256": "6d9fbf94488a5db4ac3ed30dbb5f55f4046807a1194f2eb2394795b732b6ecca"
+  },
+  "oldPreparedPendingBindingNotUsed": true,
+  "runtimeSourceReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-independent-review-v1\\final-binding-review-v1.json",
+    "bytes": 3197,
+    "sha256": "77e797fee794698a5a22d42febdbc7b50cd02e3c8483a58ddc3e0b3677b88034"
+  },
+  "runtimeGuardExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-readonly-guard-execution-v1.json",
+    "bytes": 2814,
+    "sha256": "1f76dc58190543287e6506ca5dbd7a9931d5c440b1600fcc483e7ef7303d3623"
+  },
+  "runtimeGuardStdout": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-readonly-guard-stdout-v1.log",
+    "bytes": 513,
+    "sha256": "d8de777412955cb68dac020e84c8156bd792acc0fcb7bfe77cd74d884008a141"
+  }
+}

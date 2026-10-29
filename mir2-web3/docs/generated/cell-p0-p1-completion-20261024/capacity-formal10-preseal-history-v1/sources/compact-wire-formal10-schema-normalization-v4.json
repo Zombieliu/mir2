@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:46:56.522Z",
+  "scope": "Unsealed formal10 binds the actually prepared corrected independent verifier revision2. Original game acceptance and extra-diagnostic limitations remain unchanged.",
+  "oldPreseal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-input-check-v3.json",
+    "bytes": 24252,
+    "sha256": "f4731f2f93b3eaec9a41d858896f64f70a7cae4179dce974e2e6273c117bd1f7"
+  },
+  "originalSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 12808,
+    "sha256": "724036a7f52f6c223519e5af7e4695df6586db846bc3097a2d0d41042e55c8ae"
+  },
+  "preservedPreimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-formal10-preseal-helper-v3.mjs.txt",
+    "bytes": 12808,
+    "sha256": "724036a7f52f6c223519e5af7e4695df6586db846bc3097a2d0d41042e55c8ae"
+  },
+  "newSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\verify-probe13-collected-evidence.mjs",
+    "bytes": 13659,
+    "sha256": "be17670e9203446fe40be75282bef05d43895dabba36fc2c19b7cfd8558f9c2a"
+  },
+  "currentIndependentVerifierSources": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\verify-ended-probe13-v2.mjs",
+      "bytes": 22979,
+      "sha256": "803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    }
+  ],
+  "requiredIndependentReceiptRevision": 2,
+  "exactInverseRestoresOriginalBytes": true,
+  "sourceChanges": [
+    {
+      "kind": "bind-corrected-independent-source-raw-pins",
+      "before": "const realm='release-native-10-v2-compact-wire-feasibility-13';",
+      "after": "const realm='release-native-10-v2-compact-wire-feasibility-13';\nconst INDEPENDENT_VERIFIER_SOURCES=Object.freeze([{\"path\":\"probe13-independent-verification-v1/verify-ended-probe13-v2.mjs\",\"bytes\":22979,\"sha256\":\"803ecb952cc18854dda6c39726a5aa0401f956e878d878fc50b5c5bb207c3575\"},{\"path\":\"probe13-independent-verification-v1/hp-proof-contract-v2.mjs\",\"bytes\":4644,\"sha256\":\"cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285\"}]);"
+    },
+    {
+      "kind": "verify-only-canonical-pinned-independent-source-files",
+      "before": " const receiptFile=await under(base,'probe13-independent-verification-v1/final-verification.json'),receipt=await json(receiptFile);",
+      "after": " const independentVerifierPins=[];for(const expected of INDEPENDENT_VERIFIER_SOURCES){const file=await under(base,expected.path),actual=await pin(file);if(actual.bytes!==expected.bytes||actual.sha256!==expected.sha256)throw Error('Corrected probe13 independent verifier source raw pin differs');independentVerifierPins.push(actual);}\n const receiptFile=await under(base,'probe13-independent-verification-v1/final-verification.json'),receipt=await json(receiptFile);"
+    },
+    {
+      "kind": "require-receipt-revision2",
+      "before": "if(receipt.schemaVersion!==1||receipt.runId!==report.runId",
+      "after": "if(receipt.schemaVersion!==1||receipt.verifierRevision!==2||receipt.runId!==report.runId"
+    },
+    {
+      "kind": "return-actual-independent-source-evidence",
+      "before": "independentVerificationPassed:true,probePassed:true",
+      "after": "independentVerificationPassed:true,independentVerifierRevision:2,independentVerifierSources:independentVerifierPins,probePassed:true"
+    },
+    {
+      "kind": "include-source-pins-in-admitted-evidence-files",
+      "before": "monitorPin,rootCleanupPin,...wireSource.files]",
+      "after": "monitorPin,rootCleanupPin,...wireSource.files,...independentVerifierPins]"
+    }
+  ],
+  "otherPreviousLocalInputsUnchanged": 45,
+  "hpDictionaryAndZeroDoseSemanticsUnchanged": true,
+  "originalGameplayThresholdsUnchanged": true,
+  "doesNotReplayMissingSendCursorOrDeadline": true,
+  "diagnosticCompletenessNotGameplayGate": true,
+  "gateInvoked": false,
+  "sourceGuardExecuted": false,
+  "liveProbeRawRead": false,
+  "sealed": false,
+  "realmStarted": false
+}

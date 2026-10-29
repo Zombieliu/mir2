@@ -1,0 +1,244 @@
+TAP version 13
+# Subtest: worldSnapshot replaces rather than merges the observed cache
+ok 1 - worldSnapshot replaces rather than merges the observed cache
+  ---
+  duration_ms: 1.1873
+  type: 'test'
+  ...
+# Subtest: real movement packet fields update self and remote entities
+ok 2 - real movement packet fields update self and remote entities
+  ---
+  duration_ms: 0.2208
+  type: 'test'
+  ...
+# Subtest: late self ObjectStruck cannot roll back a newer acknowledged owner transform
+ok 3 - late self ObjectStruck cannot roll back a newer acknowledged owner transform
+  ---
+  duration_ms: 0.4377
+  type: 'test'
+  ...
+# Subtest: remote ObjectStruck retains its public action position and direction
+ok 4 - remote ObjectStruck retains its public action position and direction
+  ---
+  duration_ms: 0.167
+  type: 'test'
+  ...
+# Subtest: ObjectMonster and NewMonsterInfo use their location payload to upsert monsters
+ok 5 - ObjectMonster and NewMonsterInfo use their location payload to upsert monsters
+  ---
+  duration_ms: 0.2339
+  type: 'test'
+  ...
+# Subtest: incremental packets retain Crystal neutral disposition for passive and guard AI families
+ok 6 - incremental packets retain Crystal neutral disposition for passive and guard AI families
+  ---
+  duration_ms: 0.2693
+  type: 'test'
+  ...
+# Subtest: ObjectHealth keeps percent separate from absolute hp
+ok 7 - ObjectHealth keeps percent separate from absolute hp
+  ---
+  duration_ms: 0.1703
+  type: 'test'
+  ...
+# Subtest: fresh self percentages drive control without altering exact HP evidence
+ok 8 - fresh self percentages drive control without altering exact HP evidence
+  ---
+  duration_ms: 0.1817
+  type: 'test'
+  ...
+# Subtest: percentage HP estimates stay conservative and do not revive a dead self
+ok 9 - percentage HP estimates stay conservative and do not revive a dead self
+  ---
+  duration_ms: 0.6842
+  type: 'test'
+  ...
+# Subtest: rounded self percent zero remains low-health control rather than an authoritative death
+ok 10 - rounded self percent zero remains low-health control rather than an authoritative death
+  ---
+  duration_ms: 0.3181
+  type: 'test'
+  ...
+# Subtest: poison packets keep the current self movement-control mask observable
+ok 11 - poison packets keep the current self movement-control mask observable
+  ---
+  duration_ms: 0.123
+  type: 'test'
+  ...
+# Subtest: an omitted snapshot poison field does not clear current paralysis
+ok 12 - an omitted snapshot poison field does not clear current paralysis
+  ---
+  duration_ms: 0.1339
+  type: 'test'
+  ...
+# Subtest: death retains a harvestable corpse and revive restores its lifecycle flag
+ok 13 - death retains a harvestable corpse and revive restores its lifecycle flag
+  ---
+  duration_ms: 0.1334
+  type: 'test'
+  ...
+# Subtest: remove and teleport-out retire entities from the visible observation
+ok 14 - remove and teleport-out retire entities from the visible observation
+  ---
+  duration_ms: 0.0949
+  type: 'test'
+  ...
+# Subtest: MapChanged clears old-map observations while retaining the relocated self
+ok 15 - MapChanged clears old-map observations while retaining the relocated self
+  ---
+  duration_ms: 0.1178
+  type: 'test'
+  ...
+# Subtest: actual MapInformation clears stale AOI and waits for subsequent UserLocation landing
+ok 16 - actual MapInformation clears stale AOI and waits for subsequent UserLocation landing
+  ---
+  duration_ms: 0.3479
+  type: 'test'
+  ...
+# Subtest: visibility and self death packets update observed lifecycle without inventing hp
+ok 17 - visibility and self death packets update observed lifecycle without inventing hp
+  ---
+  duration_ms: 0.0862
+  type: 'test'
+  ...
+# Subtest: HealthChanged restores exact self vitals after Revived
+ok 18 - HealthChanged restores exact self vitals after Revived
+  ---
+  duration_ms: 0.0764
+  type: 'test'
+  ...
+# Subtest: UserInformation restores exact self and maximum vitals from its public fields
+ok 19 - UserInformation restores exact self and maximum vitals from its public fields
+  ---
+  duration_ms: 0.0959
+  type: 'test'
+  ...
+# Subtest: late own ObjectAttack preserves the acknowledged tile while updating direction
+ok 20 - late own ObjectAttack preserves the acknowledged tile while updating direction
+  ---
+  duration_ms: 0.1371
+  type: 'test'
+  ...
+# Subtest: late own ObjectRangeAttack preserves the acknowledged tile while updating direction
+ok 21 - late own ObjectRangeAttack preserves the acknowledged tile while updating direction
+  ---
+  duration_ms: 0.0641
+  type: 'test'
+  ...
+# Subtest: late own ObjectMagic preserves the acknowledged tile while updating direction
+ok 22 - late own ObjectMagic preserves the acknowledged tile while updating direction
+  ---
+  duration_ms: 0.057
+  type: 'test'
+  ...
+# Subtest: remote attack range-attack and magic keep their public position and direction
+ok 23 - remote attack range-attack and magic keep their public position and direction
+  ---
+  duration_ms: 0.2064
+  type: 'test'
+  ...
+# Subtest: real own movement and push packets still relocate after an action pose
+ok 24 - real own movement and push packets still relocate after an action pose
+  ---
+  duration_ms: 0.1245
+  type: 'test'
+  ...
+# Subtest: ObjectAttack preserves the owner's newer UserLocation and updates direction
+ok 25 - ObjectAttack preserves the owner's newer UserLocation and updates direction
+  ---
+  duration_ms: 1.5152
+  type: 'test'
+  ...
+# Subtest: ObjectAttack continues applying remote action anchors
+ok 26 - ObjectAttack continues applying remote action anchors
+  ---
+  duration_ms: 0.0984
+  type: 'test'
+  ...
+# Subtest: ObjectAttack without owner identity retains legacy pose behavior
+ok 27 - ObjectAttack without owner identity retains legacy pose behavior
+  ---
+  duration_ms: 0.0622
+  type: 'test'
+  ...
+# Subtest: ObjectRangeAttack preserves the owner's newer UserLocation and updates direction
+ok 28 - ObjectRangeAttack preserves the owner's newer UserLocation and updates direction
+  ---
+  duration_ms: 0.0893
+  type: 'test'
+  ...
+# Subtest: ObjectRangeAttack continues applying remote action anchors
+ok 29 - ObjectRangeAttack continues applying remote action anchors
+  ---
+  duration_ms: 0.0769
+  type: 'test'
+  ...
+# Subtest: ObjectRangeAttack without owner identity retains legacy pose behavior
+ok 30 - ObjectRangeAttack without owner identity retains legacy pose behavior
+  ---
+  duration_ms: 0.0396
+  type: 'test'
+  ...
+# Subtest: ObjectMagic preserves the owner's newer UserLocation and updates direction
+ok 31 - ObjectMagic preserves the owner's newer UserLocation and updates direction
+  ---
+  duration_ms: 0.0719
+  type: 'test'
+  ...
+# Subtest: ObjectMagic continues applying remote action anchors
+ok 32 - ObjectMagic continues applying remote action anchors
+  ---
+  duration_ms: 0.0407
+  type: 'test'
+  ...
+# Subtest: ObjectMagic without owner identity retains legacy pose behavior
+ok 33 - ObjectMagic without owner identity retains legacy pose behavior
+  ---
+  duration_ms: 0.1979
+  type: 'test'
+  ...
+# Subtest: consecutive late action snapshots never roll back or mutate the owner
+ok 34 - consecutive late action snapshots never roll back or mutate the owner
+  ---
+  duration_ms: 0.2653
+  type: 'test'
+  ...
+# Subtest: owner attack reducer preserves position and still updates animation, timing and FlamingSword
+ok 35 - owner attack reducer preserves position and still updates animation, timing and FlamingSword
+  ---
+  duration_ms: 0.3353
+  type: 'test'
+  ...
+# Subtest: remote attack reducer applies anchor and animation while owner stays unchanged
+ok 36 - remote attack reducer applies anchor and animation while owner stays unchanged
+  ---
+  duration_ms: 0.0825
+  type: 'test'
+  ...
+# Subtest: attack reducer's optional owner argument preserves older callers
+ok 37 - attack reducer's optional owner argument preserves older callers
+  ---
+  duration_ms: 0.0526
+  type: 'test'
+  ...
+# Subtest: page routes only the three action poses through owner protection
+ok 38 - page routes only the three action poses through owner protection
+  ---
+  duration_ms: 1.8713
+  type: 'test'
+  ...
+# Subtest: real movement, map and teleport packet paths retain position updates
+ok 39 - real movement, map and teleport packet paths retain position updates
+  ---
+  duration_ms: 1.9202
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 39
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 339.5041

@@ -1,0 +1,26 @@
+
+running 21 tests
+test runtime::zone::manager::admission::tests::batch_exhaustion_does_not_allocate_partial_timer_ids ... ok
+test runtime::zone::manager::admission::tests::exhausted_manager_rejects_commands_and_all_timer_paths_before_any_change ... ok
+test runtime::zone::manager::admission::tests::live_bulk_leave_is_atomic_on_exhaustion_and_cold_cleanup_keeps_the_watermark ... ok
+test runtime::zone::manager::admission::tests::live_bulk_leave_rejects_a_partial_remaining_budget ... ok
+test runtime::zone::manager::admission::tests::specialized_commits_reject_exhaustion_before_vitals_or_spawn_mutation ... ok
+test runtime::zone::manager::npc_population::tests::a_real_map_change_invalidates_the_old_actor_read_and_keeps_the_departed_map_zero ... ok
+test runtime::zone::manager::npc_population::tests::actor_binding_rejects_wrong_node_map_life_and_a_new_login_epoch ... ok
+test runtime::zone::manager::npc_population::tests::an_inconsistent_counted_node_is_unavailable_instead_of_disappearing ... ok
+test runtime::zone::manager::npc_population::tests::another_manager_namespace_and_cold_bytes_do_not_authorize_an_old_read ... ok
+test runtime::zone::manager::npc_population::tests::orphan_owner_and_route_are_unavailable_instead_of_known_zero ... ok
+test runtime::zone::manager::npc_population::tests::population_keeps_dead_and_out_of_aoi_players_until_actual_leave ... ok
+test runtime::zone::manager::npc_population::tests::returning_to_a_retained_map_does_not_refresh_an_old_read ... ok
+test runtime::zone::manager::npc_population::tests::reverse_session_route_and_missing_life_cannot_be_replaced_by_zero ... ok
+test runtime::zone::manager::parallel_tick_tests::leave_all_sessions_preserves_zones_but_removes_players ... ok
+test runtime::zone::manager::parallel_tick_tests::parallel_tick_all_matches_sequential_across_many_zones ... ok
+test runtime::zone::manager::parallel_tick_tests::single_zone_takes_sequential_path_and_still_works ... ok
+test runtime::zone::manager::presence_publication_tests::absent_unadmitted_owners_and_last_zone_move_keep_original_projection ... ok
+test runtime::zone::manager::presence_publication_tests::combined_keeps_pending_vampire_burst_and_pet_death_flushes ... ok
+test runtime::zone::manager::presence_publication_tests::combined_matches_separate_same_and_changed_chat_all_pet_modes ... ok
+test runtime::zone::manager::presence_publication_tests::invalid_profile_and_exhausted_chat_admission_keep_separate_call_results ... ok
+test runtime::zone::manager::presence_publication_tests::stale_owner_certificate_falls_back_when_pet_clock_projection_needs_two_refreshes ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 2930 filtered out; finished in 0.86s
+

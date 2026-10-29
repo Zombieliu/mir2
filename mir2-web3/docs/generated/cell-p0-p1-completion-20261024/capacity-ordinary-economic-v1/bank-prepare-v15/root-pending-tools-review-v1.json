@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "packageId": "ordinary-capacity-bank-prepare-v15",
+  "pendingToolsReviewed": true,
+  "approved": true,
+  "tools": [
+    {
+      "file": "source-lib-v1.mjs",
+      "hunks": 0,
+      "forwardAndReverseExact": true
+    },
+    {
+      "file": "copy-source-bank-v1.mjs",
+      "hunks": 3,
+      "forwardAndReverseExact": true
+    },
+    {
+      "file": "freeze-prepare-v1.mjs",
+      "hunks": 2,
+      "forwardAndReverseExact": true
+    },
+    {
+      "file": "run-owned-prepare-v1.mjs",
+      "hunks": 4,
+      "forwardAndReverseExact": true
+    },
+    {
+      "file": "owned-child-v1.mjs",
+      "hunks": 0,
+      "forwardAndReverseExact": true
+    }
+  ],
+  "source": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\accounts.json",
+      "bytes": 560509,
+      "sha256": "d53228e809a24d68a751c34a514c8c38ea746d3cd092cfc7c33d9139224f628f",
+      "relative": "accounts.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\capacity-pool.json",
+      "bytes": 21524,
+      "sha256": "5cfbfc3926252db5d2715e343ede9f5c6b390fd067041f8c56b00bc024d7ccf6",
+      "relative": "capacity-pool.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\capacity-auth-budget.json",
+      "bytes": 717,
+      "sha256": "80d67450159272ea19811000392e53affb2669d73ba009c796e987ac2b3c7521",
+      "relative": "capacity-auth-budget.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\recovery-mac-key.txt",
+      "bytes": 64,
+      "sha256": "cefb29ae1ddf2091dfe55c66694fac08b657a859eb15a14cba0bc37dc3a5765a",
+      "relative": "recovery-mac-key.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\identity-session-secret.txt",
+      "bytes": 64,
+      "sha256": "db2809fd0970391e8bbc9b6ca80e8c4dd5d77aabad307400d0952dcdffdfc024",
+      "relative": "identity-session-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\identity-recovery-pepper.txt",
+      "bytes": 64,
+      "sha256": "d7137790909ad7c7f62178f74484466941b416a0561e5211515c7081e06a077e",
+      "relative": "identity-recovery-pepper.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\passkey-auth-secret.txt",
+      "bytes": 64,
+      "sha256": "37a4307699fde5753874c037b303776d3820c25feb68b24ccd116f2b0df9ed72",
+      "relative": "passkey-auth-secret.txt"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\save-recovery\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/.mir2-directory-durability"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "relative": "save-recovery/.mir2-recovery-exclusive.lock"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+      "bytes": 340,
+      "sha256": "a50e45f6a52e2e83ba30afdfa6df0c01808084f8f974d4f74d59f2940901baa2",
+      "relative": "save-recovery/.mir2-recovery-owner-v1.json"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v14\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+      "bytes": 29,
+      "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3",
+      "relative": "save-recovery/quarantine/.mir2-directory-durability"
+    }
+  ],
+  "sourceTotalBytes": 583404,
+  "sourceReadyCharacters": 42,
+  "sourcePreparedCount": 41,
+  "sourceQualificationInherited": false,
+  "sourcePublicEvidencePinsExact": true,
+  "priorControlsExact": true,
+  "ledgerUnchanged": true,
+  "currentQualificationPending": true,
+  "noModeExecuted": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

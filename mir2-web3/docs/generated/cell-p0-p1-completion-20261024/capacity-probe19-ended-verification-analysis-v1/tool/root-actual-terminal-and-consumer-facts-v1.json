@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-26T00:07:25.416Z",
+  "runId": "1792971941351-af013515",
+  "actualExecutionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "sourceConfigSha256": "1225f83d8b2d5546c04dff9b152ba1c64acd71e35dffebb4b8642a5485d2d267",
+  "realOrdinaryAccounts": 100,
+  "charactersCreatedDuringPreparation": 0,
+  "runTerminal": {
+    "sessionId": 9166,
+    "exitCode": 0,
+    "signal": null
+  },
+  "prepareTerminal": {
+    "sessionId": 33236,
+    "exitCode": 0,
+    "signal": null
+  },
+  "fourConsumerTerminal": {
+    "sessionId": 60163,
+    "exitCode": 0,
+    "signal": null
+  },
+  "commands": [
+    {
+      "label": "seal",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-seal-stdout-v1.log",
+        "bytes": 353,
+        "sha256": "f100d173191fcf10d899bacc9131ad781d2e82870cc074463813eab83f39b22e"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-seal-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "guard",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-guard-stdout-v1.log",
+        "bytes": 331,
+        "sha256": "81c42ccb6bd6b40ee7b11e113617486570103d4793c0df5b38c37b55cadb0661"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-guard-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "prepare",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-prepare-stdout-v1.log",
+        "bytes": 603,
+        "sha256": "ac4294bf894f489f78272dc91f4e7a3767571352b01013d092e9c1e71e8a5a38"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-prepare-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "run",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-run-stdout-v1.log",
+        "bytes": 1969,
+        "sha256": "eaa3580b91e155f289eba4e513a7d8a562d2816e58542d4d9efd6d86af025f6c"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "base-collection",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-base-collection-stdout-v1.log",
+        "bytes": 110685,
+        "sha256": "5c8a7e588c486049f44f43d75e89aee5770335319fcb42f9cba63f8ff1ddba51"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "base-verification",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-base-verification-stdout-v1.log",
+        "bytes": 5028,
+        "sha256": "f602c7c5f37c01d9ca031a49b7ccb3f1406b8b171943c9b1f5283067bb7e712b"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "store-collection",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-store-collection-stdout-v1.log",
+        "bytes": 392,
+        "sha256": "354b8857993ac7ca6e813994592e87625d287ff0f3e7ad361e55ed68b65724ce"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "store-verification",
+      "exitCode": 0,
+      "signal": null,
+      "basis": "Observed Root tool terminal completion; no reconstructed execution wrapper",
+      "stdout": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-store-verification-stdout-v1.log",
+        "bytes": 1241,
+        "sha256": "f72375905a1f04d9a05bd949377dbcc3edc12b49b9a80845c0dcc412504fbb46"
+      },
+      "stderr": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe19-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "report": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-anti-convergence-feasibility-19/reports/1792971941351-af013515.report.json",
+    "bytes": 325156,
+    "sha256": "9d7b8dafb07d0d2b9b79616453ccf3d3cd361e2ccd7753960e7724e108e667fc"
+  },
+  "cleanup": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-anti-convergence-feasibility-19/realm-cleanup.json",
+    "bytes": 6516,
+    "sha256": "1b45c037fb3c7177b542c7ba90a8168371e04bf5f95e1b812b00836e34ccbc71"
+  },
+  "runtimeSeal": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-scout-anti-convergence-feasibility-19/launcher-source-frozen-v1.json",
+    "bytes": 66317,
+    "sha256": "a2b9fa102a584cf7994ae5fc900f9232f86fe8174c19fc0a57bfd8c24dbde212"
+  },
+  "rootFreshOs": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe19-root-independent-cleanup-v1.json",
+    "bytes": 327,
+    "sha256": "fffd285c3a20d7596fd0cc365bc0aef55b9d145812387a539e4e9727144f913f"
+  },
+  "reportSelfAdjudication": {
+    "ok": true,
+    "stages": [
+      {
+        "name": "stage-2",
+        "passed": true,
+        "measuredSeconds": 300.294,
+        "fullWindows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "name": "stage-10",
+        "passed": true,
+        "measuredSeconds": 300.22,
+        "fullWindows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "name": "soak",
+        "passed": true,
+        "measuredSeconds": 360.319,
+        "fullWindows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "continuousAssessed": 132,
+    "continuousFailures": 0
+  },
+  "cleanupChecks": {
+    "sixCountersZero": true,
+    "monitorTerminalPreserved": true,
+    "monitorStoppedBeforeGateway": true,
+    "monitorExitZero": true,
+    "normalOwnedShutdown": true,
+    "processAbsent": true,
+    "portsFree": true
+  },
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "independentWindowAdjudicationPending": true,
+  "capacityAccepted": false,
+  "formalCapacityAccepted": false,
+  "fixedCellStarted": false,
+  "limitations": [
+    "This is a closed producer/consumer facts record before independent ended replay.",
+    "132 assessed activity windows are not claimed to be 132 complete minutes.",
+    "Ordinary full16, short probe and formal capacity are distinct scopes."
+  ]
+}

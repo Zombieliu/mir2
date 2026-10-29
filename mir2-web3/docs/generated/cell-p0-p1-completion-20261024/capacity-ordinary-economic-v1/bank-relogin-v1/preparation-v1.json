@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_NEW_CURRENT_SOURCE_BOUND_VALIDATION_AND_ROOT_FREEZE",
+  "packageId": "ordinary-bank-relogin-pilot-v1",
+  "files": [
+    {
+      "name": "bank-plan-pending-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+      "bytes": 7710,
+      "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+    },
+    {
+      "name": "copy-bank-v1.mjs",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\copy-bank-v1.mjs",
+      "bytes": 7743,
+      "sha256": "5b383d46230ab834cfcadf8dd9c3e843d97a4a50893b4106920ee14a380de63f"
+    },
+    {
+      "name": "source-lib-v1.mjs",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\source-lib-v1.mjs",
+      "bytes": 13730,
+      "sha256": "9a306f9c85447769842496e3f63f33ba806d4a47e3de46276f48dc752702462b"
+    },
+    {
+      "name": "owned-child-v1.mjs",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\owned-child-v1.mjs",
+      "bytes": 1555,
+      "sha256": "b9eb53a2420ea3e6305983ee9cb23b066fbc28d2cc5be813bce133a9252bce1f"
+    },
+    {
+      "name": "run-bank-pilot-v1.mjs",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\run-bank-pilot-v1.mjs",
+      "bytes": 20588,
+      "sha256": "bd6695da3243c0168061d6bbd4dda8f5ff46af86ccbfc88866323b1f0b8c0a41"
+    },
+    {
+      "name": "pilot-config-pending-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\pilot-config-pending-v1.json",
+      "bytes": 3252,
+      "sha256": "70822854103b9c1e59bd9b619e61d0c8c26d4cf4671538d1627d437af5fe6828"
+    },
+    {
+      "name": "derivation-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\derivation-v1.json",
+      "bytes": 10927,
+      "sha256": "e30363cb3a6e20011a5b7a699c5380d46c91c5ce5ba8031b338d6570b6c10327"
+    },
+    {
+      "name": "README-draft-v1.md",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\README-draft-v1.md",
+      "bytes": 3302,
+      "sha256": "293af884b4875a0580d272c88757994190157de4322a86fe89d83d31a5f6bc6a"
+    },
+    {
+      "name": "syntax-check-v1.json",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\syntax-check-v1.json",
+      "bytes": 2729,
+      "sha256": "b3d31a0aa4706b927b81ccfd90afa99558d3cc97ef519c2e7071de747d90a3ea"
+    },
+    {
+      "name": "syntax-check-v1.log",
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\syntax-check-v1.log",
+      "bytes": 560,
+      "sha256": "3461c15d462c989e7a0eff8e62137bf99469c27304944c3d82abc1672bf9f38b"
+    }
+  ],
+  "filesSha256": "4ab2b3b071d80c96c4986f82c92f7379b0a88b5ccd48a26405800b7e7603fb56",
+  "sourceBank": {
+    "plan": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+      "bytes": 7710,
+      "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+    },
+    "sourcePilotCleanupComplete": true,
+    "sourceOrdinaryReadyCharacters": 2,
+    "sourcePreparationReady": 1,
+    "sourcePreparationFailed": 1,
+    "privateFiles": 11,
+    "privateBytes": 35098,
+    "currentDurableHpStockVerified": false
+  },
+  "runtime": {
+    "candidateCommitNotBound": true,
+    "actualCommittedHead": null,
+    "focusedValidationReceipt": null,
+    "expectedFutureRootReceipt": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-economic-validation-v4\\root-focused-receipt-v1.json",
+    "frozenManifest": null,
+    "freezeProduced": false,
+    "bankCopied": false,
+    "loadRun": false,
+    "ordinaryReloginReadbackPassed": null,
+    "bankPersistedInventoryReusePassed": null,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "static": {
+    "actualNodeSyntaxChecks": 4,
+    "allNodeSyntaxPassed": true,
+    "runnerPositionRules": 9,
+    "runnerRawInverseExact": true,
+    "normalOwnedCleanupBodyRawExact": true,
+    "oldRecoveryControlOnlyBeforeCopyRequired": true,
+    "originalAuthLedgerPreserved": true
+  },
+  "nextRootAction": "Read-only review. After genuine successful current source-bound tests, Root may build the next source manifest and review it before any copy or process execution. This draft does not authorize those actions."
+}

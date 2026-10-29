@@ -507,6 +507,7 @@ impl SharedInProcessZoneState {
                             validator: validator.clone(),
                             highest_sent_sequence: record.owner_health_sent_sequence.clone(),
                         }),
+                        delivery_trace: None,
                     };
                     match record.sender.try_send(outbound) {
                         Ok(()) => {}

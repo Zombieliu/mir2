@@ -21,6 +21,13 @@ pub const MAX_TRANSACTION_FILES: usize = MAX_MANIFEST_FILES * 2 + 10;
 pub const MAX_RECOVERY_BYTES: u64 = MAX_META * 4 + 65_536;
 pub const MAX_FILE: u64 = 512 * 1024 * 1024;
 pub const MAX_TOTAL: u64 = 4 * 1024 * 1024 * 1024;
+pub const SIMPLIFIED_DOCUMENTS: [&str; 5] = [
+    "README.zh-CN.txt",
+    "BILLING-HAN-SOURCE.json",
+    "OFL-NotoSansSC-BillingHan.txt",
+    "SIMPLIFIED-SOURCE.json",
+    "OFL-NotoSansCJKsc.txt",
+];
 pub fn hash(bytes: &[u8]) -> String {
     format!("{:X}", Sha256::digest(bytes))
 }
@@ -57,7 +64,7 @@ pub fn relative(value: &str) -> Result<()> {
 }
 pub fn game_path(value: &str) -> Result<()> {
     relative(value)?;
-    const ROOT: [&str; 12] = [
+    const ROOT: [&str; 17] = [
         "mir2-platform-windows.exe",
         "mir2-client.toml",
         "README-START.txt",
@@ -70,9 +77,20 @@ pub fn game_path(value: &str) -> Result<()> {
         "OFL-NotoSansThai.txt",
         "MULTILINGUAL-SOURCES.json",
         "BUILD-ATTESTATION.json",
+        "README.zh-CN.txt",
+        "BILLING-HAN-SOURCE.json",
+        "OFL-NotoSansSC-BillingHan.txt",
+        "SIMPLIFIED-SOURCE.json",
+        "OFL-NotoSansCJKsc.txt",
     ];
     if ROOT.contains(&value) || META.contains(&value) {
         return Ok(());
+    }
+    if let Some(name) = value.strip_prefix("mir2-assets/legal/") {
+        ensure!(
+            SIMPLIFIED_DOCUMENTS.contains(&name),
+            "unknown simplified legal document"
+        );
     }
     ensure!(value.starts_with("mir2-assets/"), "non-client payload");
     let lower = value.to_ascii_lowercase();
@@ -187,6 +205,20 @@ impl Manifest {
             "manifest aggregate mismatch"
         );
         let files = result.map();
+        let root_documents = SIMPLIFIED_DOCUMENTS
+            .iter()
+            .filter(|name| files.contains_key(**name))
+            .count();
+        let legal_documents = SIMPLIFIED_DOCUMENTS
+            .iter()
+            .filter(|name| files.contains_key(format!("mir2-assets/legal/{name}").as_str()))
+            .count();
+        ensure!(
+            (root_documents == 0 && legal_documents == 0)
+                || (root_documents == SIMPLIFIED_DOCUMENTS.len() && legal_documents == 0)
+                || (root_documents == 0 && legal_documents == SIMPLIFIED_DOCUMENTS.len()),
+            "mixed or incomplete simplified document layout"
+        );
         for file in result.files.iter() {
             let mut parent = file.path.as_str();
             while let Some((p, _)) = parent.rsplit_once('/') {

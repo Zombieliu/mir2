@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-26T20:56:29.2063314Z",
+  "ownedPid": 61120,
+  "ownedProcessAbsent": true,
+  "expectedPorts": [
+    17500,
+    17510
+  ],
+  "remainingListeners": [],
+  "portsFree": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

@@ -46,8 +46,8 @@ fn file(path: &str, bytes: &[u8]) -> FileEntry {
 }
 
 #[test]
-fn red_native_local_phases_are_translated_for_nine_locales() {
-    for locale in ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] {
+fn red_native_local_phases_are_translated_for_ten_locales() {
+    for locale in crate::SUPPORTED_LOCALES {
         for phase in ["extracting", "staging", "preparing", "installing"] {
             let label = crate::ui::stage(locale, phase);
             assert_ne!(
@@ -479,8 +479,8 @@ fn interrupted_commit_observation_retains_recovery_schema_and_exact_old_files() 
 }
 
 #[test]
-fn completed_counts_render_in_all_nine_locales_without_download_label() {
-    for locale in ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] {
+fn completed_counts_render_in_all_ten_locales_without_download_label() {
+    for locale in crate::SUPPORTED_LOCALES {
         for phase in [
             "extracting",
             "staging",

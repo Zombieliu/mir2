@@ -6,16 +6,16 @@ use std::sync::{
 };
 
 fn locale_index(locale: &str) -> usize {
-    let locale = locale.replace('_', "-").to_ascii_lowercase();
-    match locale.split('-').next().unwrap_or("en") {
-        "zh" => 1,
-        "pt" => 2,
+    match crate::canonical_os_locale(locale) {
+        "zh-TW" => 1,
+        "pt-BR" => 2,
         "ru" => 3,
         "hi" => 4,
         "id" => 5,
         "vi" => 6,
         "th" => 7,
         "ar" => 8,
+        "zh-CN" => 9,
         _ => 0,
     }
 }
@@ -42,7 +42,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             }
         }
     }
-    let strings: [&str; 9] = match key {
+    let strings: [&str; crate::SUPPORTED_LOCALES.len()] = match key {
         "extracting" => [
             "Unpacking and verifying files…",
             "正在解壓並驗證檔案…",
@@ -53,6 +53,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang giải nén và xác minh tệp…",
             "กำลังแตกไฟล์และตรวจสอบไฟล์…",
             "جارٍ فك الملفات والتحقق منها…",
+            "正在解压并验证文件…",
         ],
         "staging" => [
             "Preparing verified files locally…",
@@ -64,6 +65,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang chuẩn bị tệp đã xác minh trên máy…",
             "กำลังเตรียมไฟล์ที่ตรวจสอบแล้วในเครื่อง…",
             "جارٍ تجهيز الملفات المتحقق منها على الجهاز…",
+            "正在本地暂存已验证的文件…",
         ],
         "preparing" => [
             "Preparing rollback and checking staged files…",
@@ -75,6 +77,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang chuẩn bị khôi phục và kiểm tra tệp cục bộ…",
             "กำลังเตรียมการย้อนกลับและตรวจสอบไฟล์ในเครื่อง…",
             "جارٍ تجهيز الاستعادة وفحص الملفات المحلية…",
+            "正在准备回滚备份并检查暂存文件…",
         ],
         "installing" => [
             "Installing verified files locally…",
@@ -86,6 +89,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang cài đặt tệp đã xác minh trên máy…",
             "กำลังติดตั้งไฟล์ที่ตรวจสอบแล้วในเครื่อง…",
             "جارٍ تثبيت الملفات المتحقق منها على الجهاز…",
+            "正在本地安装已验证的文件…",
         ],
         "checking-installed" => [
             "Checking installed files…",
@@ -97,6 +101,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang kiểm tra các tệp đã cài đặt…",
             "กำลังตรวจสอบไฟล์ที่ติดตั้งแล้ว…",
             "جارٍ فحص الملفات المثبتة…",
+            "正在检查已安装的文件…",
         ],
         "checking" => [
             "Checking for updates…",
@@ -108,6 +113,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang kiểm tra cập nhật…",
             "กำลังตรวจสอบการอัปเดต…",
             "جارٍ التحقق من التحديثات…",
+            "正在检查更新…",
         ],
         "downloading" => [
             "Downloading changed files…",
@@ -119,6 +125,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang tải các tệp đã thay đổi…",
             "กำลังดาวน์โหลดไฟล์ที่เปลี่ยนแปลง…",
             "جارٍ تنزيل الملفات المعدّلة…",
+            "正在下载有变更的文件…",
         ],
         "verifying" => [
             "Verifying downloaded files…",
@@ -130,6 +137,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang xác minh các tệp đã tải…",
             "กำลังตรวจสอบไฟล์ที่ดาวน์โหลด…",
             "جارٍ التحقق من الملفات المنزّلة…",
+            "正在验证下载的文件…",
         ],
         "applying" => [
             "Installing the update…",
@@ -141,6 +149,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang cài đặt bản cập nhật…",
             "กำลังติดตั้งการอัปเดต…",
             "جارٍ تثبيت التحديث…",
+            "正在安装更新…",
         ],
         "recovering" => [
             "Recovering the previous version…",
@@ -152,6 +161,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang khôi phục phiên bản trước…",
             "กำลังกู้คืนเวอร์ชันก่อนหน้า…",
             "جارٍ استعادة الإصدار السابق…",
+            "正在恢复上一版本…",
         ],
         "recovered" => [
             "The previous version has been restored.",
@@ -163,6 +173,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đã khôi phục phiên bản trước.",
             "กู้คืนเวอร์ชันก่อนหน้าแล้ว",
             "تمت استعادة الإصدار السابق.",
+            "已恢复上一版本。",
         ],
         "launching" => [
             "Starting the game…",
@@ -174,6 +185,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Đang khởi động trò chơi…",
             "กำลังเริ่มเกม…",
             "جارٍ تشغيل اللعبة…",
+            "正在启动游戏…",
         ],
         "offline" => [
             "The update server is unavailable. Using the installed version.",
@@ -185,6 +197,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Máy chủ cập nhật không khả dụng. Sử dụng phiên bản đã cài đặt.",
             "เซิร์ฟเวอร์อัปเดตไม่พร้อมใช้งาน จะใช้เวอร์ชันที่ติดตั้งไว้",
             "خادم التحديث غير متاح. سيُستخدم الإصدار المثبّت.",
+            "无法连接更新服务器，将使用已安装的版本。",
         ],
         "busy" => [
             "Please close the game before updating.",
@@ -196,6 +209,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Vui lòng đóng trò chơi trước khi cập nhật.",
             "กรุณาปิดเกมก่อนอัปเดต",
             "يرجى إغلاق اللعبة قبل التحديث.",
+            "请先关闭游戏再更新。",
         ],
         "failed" => [
             "Update failed",
@@ -207,6 +221,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Cập nhật thất bại",
             "อัปเดตไม่สำเร็จ",
             "فشل التحديث",
+            "更新失败",
         ],
         "cancel" => [
             "Cancel",
@@ -218,6 +233,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Hủy",
             "ยกเลิก",
             "إلغاء",
+            "取消",
         ],
         "title" => [
             "Game update",
@@ -229,6 +245,7 @@ pub fn stage(locale: &str, key: &str) -> String {
             "Cập nhật trò chơi",
             "อัปเดตเกม",
             "تحديث اللعبة",
+            "游戏更新",
         ],
         _ => return key.to_string(),
     };
@@ -814,8 +831,8 @@ mod windows {
         }
 
         #[test]
-        fn nine_locale_offline_copy_fits_native_status_at_100_150_and_200_percent_layouts() {
-            for locale in ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] {
+        fn ten_locale_offline_copy_fits_native_status_at_100_150_and_200_percent_layouts() {
+            for locale in crate::SUPPORTED_LOCALES {
                 let window = ProgressWindow::spawn_impl(locale, false);
                 assert_ne!(window.hwnd, 0);
                 let text = stage(locale, "offline");
@@ -871,6 +888,30 @@ mod windows {
                 flush(&window, STATUS_MESSAGE, 0, 0);
             }
         }
+
+        #[test]
+        fn simplified_native_window_uses_simplified_title_status_and_cancel_control() {
+            use windows_sys::Win32::UI::WindowsAndMessaging::GetWindowTextW;
+            fn text(hwnd: HWND) -> String {
+                let mut buffer = [0_u16; 256];
+                let length =
+                    unsafe { GetWindowTextW(hwnd, buffer.as_mut_ptr(), buffer.len() as i32) };
+                assert!(length > 0);
+                String::from_utf16_lossy(&buffer[..length as usize])
+            }
+            let window = ProgressWindow::spawn_impl("zh-CN", false);
+            assert_ne!(window.hwnd, 0);
+            let root = window.hwnd as HWND;
+            assert!(text(root).ends_with("游戏更新"));
+            let cancel = unsafe { GetDlgItem(root, CANCEL_ID as i32) };
+            assert_eq!(text(cancel), "取消");
+            window.update(&stage("zh-CN", "extracting:3/7"), 30);
+            flush(&window, STATUS_MESSAGE, 0, 0);
+            let status = unsafe { GetDlgItem(root, STATUS_ID as i32) };
+            assert_eq!(text(status), "正在解压并验证文件…  (3 / 7)");
+            window.close();
+            flush(&window, STATUS_MESSAGE, 0, 0);
+        }
     }
 }
 
@@ -902,8 +943,14 @@ mod tests {
     use super::*;
     #[test]
     fn every_supported_locale_has_every_native_update_stage() {
-        for locale in ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] {
+        for (index, locale) in crate::SUPPORTED_LOCALES.into_iter().enumerate() {
+            assert_eq!(locale_index(locale), index);
             for key in [
+                "extracting",
+                "staging",
+                "preparing",
+                "installing",
+                "checking-installed",
                 "checking",
                 "downloading",
                 "verifying",
@@ -929,5 +976,36 @@ mod tests {
         assert_eq!(stage("xx-ZZ", "checking"), stage("en", "checking"));
         assert_eq!(stage("pt_BR", "checking"), stage("pt-BR", "checking"));
         assert_eq!(stage("ru-RU", "checking"), stage("ru", "checking"));
+        assert_eq!(stage("zh-CN", "checking"), "正在检查更新…");
+        assert_eq!(stage("zh-SG", "title"), "游戏更新");
+        for locale in ["zh-TW", "zh-HK", "zh-MO", "zh-Hant"] {
+            assert_eq!(stage(locale, "checking"), "正在檢查更新…");
+        }
+        assert_eq!(stage("zh-XX", "checking"), stage("en", "checking"));
+        assert_eq!(stage("zh-Hansfake", "checking"), stage("en", "checking"));
+    }
+
+    #[test]
+    fn simplified_progress_counters_are_translated_and_stay_bounded() {
+        for phase in [
+            "extracting",
+            "staging",
+            "preparing",
+            "installing",
+            "checking-installed",
+            "recovering",
+        ] {
+            assert!(stage("zh-CN", &format!("{phase}:3/7")).ends_with("(3 / 7)"));
+        }
+        for key in [
+            "extracting:8/7",
+            "extracting:-1/7",
+            "extracting:3/no",
+            "arbitrary:3/7",
+        ] {
+            assert_eq!(stage("zh-CN", key), key);
+        }
+        let key = format!("installing:1/{}", crate::model::MAX_TRANSACTION_FILES + 1);
+        assert_eq!(stage("zh-CN", &key), key);
     }
 }

@@ -2,8 +2,10 @@
 //! Use normal authentication/StartGame, with isolated account-store fixtures;
 //! no QA command or private ECS access can bypass the public settlement path.
 
-use mir2_protocol::{ClientPacket, ServerPacket, UserItem};
-use mir2_simulation::{CharacterSaveRecord, SimulationConfig, SimulationSession};
+use mir2_protocol::{ClientPacket, Point, ServerPacket, UserItem};
+use mir2_simulation::{
+    CharacterBindPoint, CharacterSaveRecord, SimulationConfig, SimulationSession, WorldEntityKind,
+};
 use serde_json::{json, Value};
 
 const RED_POISON: &str = "crystal-red-poison";
@@ -179,18 +181,45 @@ fn personal_gm_immunity_is_projected_but_cannot_revoke_a_zone_settlement() {
 fn settled_hp_is_saved_and_loaded_through_the_normal_character_path() {
     let config = config_with_red_poison();
     let mut session = login(&config);
+    let position = Point { x: 337, y: 270 };
+    let bind = Point { x: 334, y: 259 };
+    let mut checkpoint = session.active_character_checkpoint().unwrap();
+    checkpoint.position = position.clone();
+    checkpoint.bind_point = Some(CharacterBindPoint {
+        map_file_name: "0".into(),
+        position: bind.clone(),
+    });
+    session.restore_active_character_checkpoint(&checkpoint).unwrap();
     let expected = hp(&session) - 12;
     assert!(!session.apply_zone_player_damage(12));
     session.save_active_character().unwrap();
 
     let mut loaded = login(&config);
     assert_eq!(hp(&loaded), expected);
+    assert_eq!(loaded.active_character_checkpoint().unwrap().position, position);
     assert!(loaded.apply_zone_player_damage(expected));
+    assert_eq!(hp(&loaded), 0);
     loaded.save_active_character().unwrap();
+    let persisted = config.account_store.lock().unwrap().accounts["demo"].saves[&0].clone();
+    assert_eq!(persisted.hp, 0, "death must persist the actual settled HP");
+    assert_eq!(persisted.position, position);
+    assert!(!loaded.apply_zone_player_damage(1), "the same online corpse cannot die twice");
 
-    let mut dead_loaded = login(&config);
-    assert_eq!(hp(&dead_loaded), 0);
-    assert!(!dead_loaded.apply_zone_player_damage(1));
+    // Crystal/Server/MirObjects/PlayerObject.cs:240-248 (gitlink 92b4ce4ab488):
+    // Load refreshes stats, then restores HP0 to full HP/MP at the bind point.
+    // The new PlayerObject starts alive; this is distinct from online damage.
+    let mut relogged = login(&config);
+    let snapshot = relogged.world_snapshot();
+    assert_eq!(snapshot.player_hp, snapshot.player_max_hp);
+    assert_eq!(snapshot.player_mp, snapshot.player_max_mp);
+    let player = snapshot.entities.iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer).unwrap();
+    assert_eq!((player.x, player.y), (bind.x, bind.y));
+    assert!(!player.dead);
+    let before = hp(&relogged);
+    assert!(before > 1);
+    assert!(!relogged.apply_zone_player_damage(1));
+    assert_eq!(hp(&relogged), before - 1, "the fresh login owns a new live damage target");
 }
 
 const RENTAL_OWNER_INDEX: i32 = 78;

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "state": "TEMPLATE_SOURCE_REVIEW_ONLY_NOT_SOURCEGUARD",
+  "policyPreserved": true,
+  "scenarioPreserved": true,
+  "resourcePreserved": true,
+  "actualSourceAndReleaseReferencesBound": true,
+  "full16ActualPassed": true,
+  "gameOrSourceGuardExecuted": false,
+  "capacityAccepted": false
+}

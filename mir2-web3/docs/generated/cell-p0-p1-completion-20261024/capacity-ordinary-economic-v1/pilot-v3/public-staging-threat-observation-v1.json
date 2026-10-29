@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "ANONYMIZED_PUBLIC_STAGING_THREAT_OBSERVATION",
+  "packageId": "ordinary-economic-preparation-pilot-v3",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\recordings\\0-498067.jsonl",
+    "bytes": 19763410,
+    "sha256": null,
+    "sha256Status": "Not computed; retained facts from prior single streaming read, no recording reread for this extract."
+  },
+  "frame": {
+    "sequence": 1075,
+    "capturedAt": 1793041320489
+  },
+  "monster": {
+    "objectId": 206604,
+    "kind": "monster",
+    "name": "Scarecrow",
+    "x": 280,
+    "y": 602,
+    "disposition": "hostile",
+    "hp": 20,
+    "dead": false
+  },
+  "actors": [
+    {
+      "actor": "anonymous-A",
+      "stagingPoint": {
+        "x": 285,
+        "y": 602
+      },
+      "monsterChebyshevDistance": 5
+    },
+    {
+      "actor": "anonymous-B",
+      "stagingPoint": {
+        "x": 288,
+        "y": 602
+      },
+      "monsterChebyshevDistance": 8
+    }
+  ],
+  "failedPreparation": {
+    "at": 1793041320517,
+    "afterFrameMs": 28,
+    "actor": "anonymous-B",
+    "failure": "ordinary supplies: hostile near staging"
+  },
+  "guard": {
+    "metric": "Chebyshev",
+    "inclusiveDistance": 8
+  },
+  "scope": "Actual public frame fields only. No raw player identities, private account data, credentials or full recording copied. This does not certify live staging safety."
+}

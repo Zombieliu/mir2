@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "stoppedAtUtc": "2026-10-24T16:26:08.6686064+00:00",
+  "pid": 49440,
+  "ownedExe": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-01/bin/mir2-gateway.exe",
+  "sha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+  "stopReason": "No gameplay ever started; native10 command rejected by frozen probe actor limit5 before any Login; preserve preflight and re-freeze narrowly authorized cap10 tooling",
+  "preStopCapacity": {
+    "maxWsConnections": 24,
+    "maxActiveSessions": 10,
+    "maxReconnectLeases": 10,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "capacityAccepted": false,
+  "formalStarted": false,
+  "monitor": "Stopped external CtrlC after preflight rejection; history preserved"
+}

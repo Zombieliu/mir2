@@ -15,6 +15,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ContentProfile = $ContentProfile.ToLowerInvariant()
+. (Join-Path $PSScriptRoot 'simplified-document-layout.ps1')
 $PetSoundNames = @('pet_pig.wav','pet_chick.wav','pet_kitty.wav','pet_skeleton.wav','pet_pigman.wav','pet_weman.wav','pet_blackdragon.wav','pet_olympicmascot.wav','pet_frog.wav','pet_monkey.wav','pet_pickup.wav')
 $PlayerCombatSoundNames = @('70.wav','71.wav','72.wav','73.wav','80.wav','81.wav','82.wav','83.wav','138.wav','139.wav','144.wav','145.wav','tiger_struck_1.wav','tiger_struck_2.wav','wolf_struck1.wav')
 $MonsterCombatSoundNames = @('005-1.wav','005-2.wav','005-3.wav','60.wav','61.wav','62.wav','63.wav','64.wav','65.wav')
@@ -243,7 +244,8 @@ function Test-PackageRelativeFileAllowed {
     if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if($RelativePath -ceq $ExeName){return $true}
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
-    $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','OFL-NotoSans.txt','OFL-NotoSansArabic.txt','OFL-NotoSansDevanagari.txt','OFL-NotoSansThai.txt','MULTILINGUAL-SOURCES.json','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
+    if (Test-SimplifiedLegalFile -RelativePath $RelativePath) { return $true }
+    $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','OFL-NotoSans.txt','OFL-NotoSansArabic.txt','OFL-NotoSansDevanagari.txt','OFL-NotoSansThai.txt','MULTILINGUAL-SOURCES.json','README.zh-CN.txt','BILLING-HAN-SOURCE.json','OFL-NotoSansSC-BillingHan.txt','SIMPLIFIED-SOURCE.json','OFL-NotoSansCJKsc.txt','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
     if ($null -ne $FiveClassPackageSoundPolicy -and
         ($RelativePath -ceq $FiveClassPackageSoundPolicy.soundIndexPackagePath -or
@@ -265,6 +267,7 @@ function Test-PackageRelativeFileAllowed {
 
 function Test-PackageRelativeDirectoryAllowed {
     param([string]$RelativePath)
+    if ($RelativePath -ceq 'mir2-assets/legal') { return $true }
     if (Test-CandidateActorDirectoryAllowed -RelativePath $RelativePath) { return $true }
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
     if(@('logs','mir2-assets','mir2-assets/generated','mir2-assets/original-ui','mir2-assets/original-ui/Cursors','mir2-assets/original-ui/Items','mir2-assets/original-ui/Monster','mir2-assets/original-ui/NPC','mir2-assets/original-ui/Sound') -ccontains $RelativePath){return $true}
@@ -495,7 +498,8 @@ function Test-AsciiDriveUtf8WordPredecessor {
 }
 
 function Get-PinnedFontScanDefinitions {
-    # Whole-file identities from SOURCE.json and MULTILINGUAL-SOURCES.json are
+    # Whole-file identities from SOURCE.json, MULTILINGUAL-SOURCES.json and
+    # the two dedicated Han provenance documents are
     # pinned independently here. Neither mutable metadata nor an SFNT header
     # can add a scan exemption. Only the listed binary table is ever masked.
     return @(
@@ -507,8 +511,16 @@ function Get-PinnedFontScanDefinitions {
         [pscustomobject]@{ file = 'NotoSansThai-Regular.ttf'; length = 37780; sha256 = '61CF814EEC46B294D6EA4401AC295D0CECD5207BD2331DCC5A15E7301D30EE44'; table = 'glyf'; offset = 4500; count = 25366 },
         [pscustomobject]@{ file = 'NotoSansThai-Bold.ttf'; length = 37824; sha256 = '2AC6C6E8A478E23B15F76E4894AF1FA2210F8F350E4E6E54AAD530BEC03EFBFB'; table = 'glyf'; offset = 4512; count = 25424 },
         [pscustomobject]@{ file = 'NotoSansArabic-Regular.ttf'; length = 234892; sha256 = 'BDFF3E5659D67E67DEF05B33F749683B9376AE819D65D3DD62AC4640B3AAEF48'; table = 'glyf'; offset = 22608; count = 180002 },
-        [pscustomobject]@{ file = 'NotoSansArabic-Bold.ttf'; length = 261460; sha256 = '4E5462D2E8BE880317B9F49B5B2DA109DDB6A3563D91CC604B67F3535832A555'; table = 'glyf'; offset = 22828; count = 206374 }
+        [pscustomobject]@{ file = 'NotoSansArabic-Bold.ttf'; length = 261460; sha256 = '4E5462D2E8BE880317B9F49B5B2DA109DDB6A3563D91CC604B67F3535832A555'; table = 'glyf'; offset = 22828; count = 206374 },
+        [pscustomobject]@{ file = 'MIR2BillingHan-Regular.ttf'; length = 2532; sha256 = '7CC4D33730AE409A198CAE325F57DB54730F94B193F5D604375701890BB762CE'; table = 'glyf'; offset = 624; count = 654 },
+        [pscustomobject]@{ file = 'NotoSansCJKsc-Regular.otf'; length = 16437364; sha256 = '2C76254F6FC379FDDFCE0A7E84FB5385BB135D3E399294F6EEB6680D0365B74B'; table = 'CFF '; offset = 239496; count = 15458582; additionalTables = @([pscustomobject]@{ table = 'cmap'; offset = 2628; count = 236833 }) }
     )
+}
+
+function Get-PinnedFontBinaryTables {
+    param([object]$Pin)
+    [pscustomobject]@{ table = $Pin.table; offset = $Pin.offset; count = $Pin.count }
+    if ($null -ne $Pin.PSObject.Properties['additionalTables']) { $Pin.additionalTables }
 }
 
 function Assert-PinnedFontScanSource {
@@ -516,13 +528,18 @@ function Assert-PinnedFontScanSource {
     if ($Font.Length -ne $Pin.length -or (Get-ByteSha256 -Bytes $Font) -cne $Pin.sha256) {
         throw "native font changed: the reviewed path-scan pin must be revalidated ($($Pin.file))"
     }
-    if ($Font[0] -ne 0 -or $Font[1] -ne 1 -or $Font[2] -ne 0 -or $Font[3] -ne 0) {
+    $sfnt = [BitConverter]::ToString($Font, 0, 4)
+    $expectedSfnt = if ($Pin.table -ceq 'CFF ') { '4F-54-54-4F' } else { '00-01-00-00' }
+    if ($sfnt -cne $expectedSfnt) {
         throw "pinned native font has an unexpected SFNT version ($($Pin.file))"
     }
     $tableCount = ([int]$Font[4] -shl 8) -bor [int]$Font[5]
     $directoryEnd = 12 + 16 * $tableCount
     if ($tableCount -eq 0 -or $directoryEnd -gt $Font.Length) { throw 'native font SFNT directory exceeds file bounds' }
     $tags = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $expectedTables = @(Get-PinnedFontBinaryTables -Pin $Pin)
+    $expectedTags = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($expected in $expectedTables) { if (-not $expectedTags.Add($expected.table)) { throw 'duplicate reviewed binary-table pin' } }
     $binaryTables = 0
     for ($table = 0; $table -lt $tableCount; $table++) {
         $record = 12 + 16 * $table
@@ -536,19 +553,22 @@ function Assert-PinnedFontScanSource {
         if ($offset -lt $directoryEnd -or [uint64]$offset + [uint64]$count -gt [uint64]$Font.Length) {
             throw 'native font SFNT table exceeds file bounds'
         }
-        if ($tag -cne $Pin.table) { continue }
+        $expected = @($expectedTables | Where-Object { $_.table -ceq $tag })
+        if ($expected.Count -eq 0) { continue }
         $binaryTables++
-        if ($offset -ne $Pin.offset -or $count -ne $Pin.count) { throw 'native font binary-table bounds changed' }
+        if ($expected.Count -ne 1 -or $offset -ne $expected[0].offset -or $count -ne $expected[0].count) { throw 'native font binary-table bounds changed' }
     }
-    if ($binaryTables -ne 1) { throw 'native font binary table is missing or ambiguous' }
+    if ($binaryTables -ne $expectedTables.Count) { throw 'native font binary table is missing or ambiguous' }
 }
 
 function Clear-PinnedFontBinaryScanBytes {
     param([byte[]]$Bytes, [object[]]$Ranges)
     # Glyph outlines and variation deltas contain numeric binary data that can
     # coincide with path syntax. Require an exact complete pinned font before
-    # masking its reviewed glyf/gvar table; name/post/meta stay fully scanned.
-    if ($Bytes.Length -lt 37780) { return }
+    # masking its reviewed glyf/gvar/CFF tables. The fixed SC cmap numeric
+    # sequence also resembles UNC paths; only its exact reviewed bounds are
+    # masked. Name/post/meta and all other bytes stay fully scanned.
+    if ($Bytes.Length -lt 2532) { return }
     $fontRoot = Join-Path (Split-Path -Parent $PSCommandPath) '..\assets\fonts'
     $encoding = [Text.Encoding]::GetEncoding(28591)
     $fonts = New-Object System.Collections.Generic.List[object]
@@ -561,7 +581,7 @@ function Clear-PinnedFontBinaryScanBytes {
         [void]$fonts.Add([pscustomobject]@{ pin = $pin; needle = $encoding.GetString($font) })
     }
     foreach ($range in $Ranges) {
-        if ($range.count -lt 37780) { continue }
+        if ($range.count -lt 2532) { continue }
         $view = $encoding.GetString($Bytes, $range.offset, $range.count)
         foreach ($font in $fonts) {
             if ($range.count -lt $font.pin.length) { continue }
@@ -569,7 +589,9 @@ function Clear-PinnedFontBinaryScanBytes {
             while (($found = $view.IndexOf($font.needle, $start, [StringComparison]::Ordinal)) -ge 0) {
                 # The full font must lie inside this one scan range. Modify
                 # only the private scan copy, never EXE/package/source bytes.
-                [Array]::Clear($Bytes, $range.offset + $found + $font.pin.offset, $font.pin.count)
+                foreach ($table in Get-PinnedFontBinaryTables -Pin $font.pin) {
+                    [Array]::Clear($Bytes, $range.offset + $found + $table.offset, $table.count)
+                }
                 $start = $found + $font.pin.length
             }
         }
@@ -651,7 +673,7 @@ function Invoke-CandidateProcess {
 function Fail([string]$Message) { [void]$script:Failures.Add($Message); Write-Host "FAIL: $Message" }
 
 function Get-RequiredCandidateFiles {
-    param([string]$ExeName)
+    param([string]$ExeName, [string]$PackageRoot = '')
     $required = @($ExeName, 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s', 'mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'mir2-assets\bevy-entity-atlases\manifest.json', 'mir2-assets\generated\map-atlas\manifest.json', 'mir2-assets\generated\native-map-keyed\manifest.json', 'mir2-assets\original-effects\effects.generated.json', 'mir2-assets\crystal-map-pack\0.map.gz', 'mir2-assets\original-ui\frame-sets.generated.json', 'mir2-assets\original-ui\Items\meta.json', 'mir2-assets\original-ui\Items\0.png', 'mir2-assets\original-ui\Items\3792.png', 'mir2-assets\original-ui\StateItem\meta.json', 'mir2-assets\original-ui\StateItem\30.png', 'mir2-assets\original-ui\StateItem\5152.png', 'mir2-assets\original-ui\Prguse\20.png', 'mir2-assets\original-ui\Sound\Login2.wav', 'mir2-assets\original-ui\Sound\Select2.wav', 'mir2-assets\original-ui\Sound\103.wav', 'mir2-assets\original-ui\Sound\M8-1.wav', 'mir2-assets\original-ui\Sound\M31-0.wav', 'mir2-assets\original-ui\Sound\M31-1.wav', 'mir2-assets\original-ui\Sound\M31-2.wav', 'mir2-assets\original-ui\Sound\M34-0.wav', 'mir2-assets\original-ui\Sound\M34-1.wav', 'mir2-assets\original-ui\Sound\M34-2.wav', 'mir2-assets\original-ui\Sound\M39-0.wav', 'mir2-assets\original-ui\Sound\M39-1.wav', 'mir2-assets\original-ui\Sound\M40-0.wav', 'mir2-assets\original-ui\Sound\M61-0.wav', 'mir2-assets\original-ui\Sound\M61-1.wav', 'mir2-assets\original-ui\Sound\M64-0.wav', 'mir2-assets\original-ui\Sound\M64-1.wav', 'mir2-assets\original-ui\Sound\M64-2.wav', 'mir2-assets\original-ui\Sound\M79-1.wav')
     $required += @('mir2-assets\original-ui\Sound\91.wav', 'mir2-assets\original-ui\Sound\100.wav', 'mir2-assets\original-ui\Sound\104.wav', 'mir2-assets\original-ui\Sound\105.wav')
     foreach($index in @(24,238,360)){ $required += "mir2-assets\original-ui\Prguse\$index.png" }
@@ -687,6 +709,7 @@ function Get-RequiredCandidateFiles {
     foreach ($library in @((Get-CandidateActorLibraryNames)) + @('MapLinkIcon')) { $required += ('mir2-assets/original-ui/' + $library + '/meta.json').Replace('/', '\') }
     foreach ($mapName in Get-CandidateRequiredMapNames) { $required += "mir2-assets\crystal-map-pack\$mapName.map.gz" }
     $required += 'mir2-assets\generated\native-map-keyed\coverage-audit.json'
+    $required += @(Get-RequiredSimplifiedDocumentPaths -PackageRoot $PackageRoot)
     if ($null -ne $FiveClassPackageSoundPolicy) {
         foreach ($relative in @($FiveClassPackageSoundPolicy.soundIndexPackagePath) + @($FiveClassPackageSoundPolicy.packagePaths)) {
             $required += $relative.Replace('/', '\')
@@ -697,7 +720,7 @@ function Get-RequiredCandidateFiles {
 
 function Get-MissingRequiredCandidateFiles {
     param([string]$PackageRoot, [string]$ExeName)
-    return @(Get-RequiredCandidateFiles -ExeName $ExeName | Where-Object { -not (Test-Path -LiteralPath (Join-Path $PackageRoot $_) -PathType Leaf) })
+    return @(Get-RequiredCandidateFiles -ExeName $ExeName -PackageRoot $PackageRoot | Where-Object { -not (Test-Path -LiteralPath (Join-Path $PackageRoot $_) -PathType Leaf) })
 }
 
 function Test-FileIdentity {
@@ -927,12 +950,19 @@ if ($SelfTest) {
         }
         $fontPins = @(Get-PinnedFontScanDefinitions)
         $fontSourceRoot = Split-Path -Parent $fontScanSource
+        $tcMetadata = ConvertFrom-JsonPreservingDateStrings -Text ([IO.File]::ReadAllText((Join-Path $fontSourceRoot 'SOURCE.json'), [Text.Encoding]::UTF8))
+        $tcPin = @($fontPins | Where-Object { $_.file -ceq 'NotoSansTC.ttf' })
+        if ($tcPin.Count -ne 1 -or $tcMetadata.file -cne $tcPin[0].file -or $tcMetadata.bytes -ne $tcPin[0].length -or ([string]$tcMetadata.sha256).ToUpperInvariant() -cne $tcPin[0].sha256) { throw 'TC font provenance differs from its fixed pin' }
         $staticFontMetadata = ConvertFrom-JsonPreservingDateStrings -Text ([IO.File]::ReadAllText((Join-Path $fontSourceRoot 'MULTILINGUAL-SOURCES.json'), [Text.Encoding]::UTF8))
-        $staticFontPins = @($fontPins | Where-Object { $_.file -cne 'NotoSansTC.ttf' })
-        if ($fontPins.Count -ne 9 -or $staticFontPins.Count -ne 8 -or @($staticFontMetadata.fonts).Count -ne 8) { throw 'pinned font self-test must cover exactly nine reviewed fonts' }
-        foreach ($pin in $staticFontPins) {
-            $metadata = @($staticFontMetadata.fonts | Where-Object { $_.file -ceq $pin.file })
-            if ($metadata.Count -ne 1 -or $metadata[0].bytes -ne $pin.length -or ([string]$metadata[0].sha256).ToUpperInvariant() -cne $pin.sha256) {
+        $staticFontPins = @($fontPins | Where-Object { $_.file -cnotin @('NotoSansTC.ttf', 'MIR2BillingHan-Regular.ttf', 'NotoSansCJKsc-Regular.otf') })
+        if ($fontPins.Count -ne 11 -or $staticFontPins.Count -ne 8 -or @($staticFontMetadata.fonts).Count -ne 8) { throw 'pinned font self-test must cover exactly eleven reviewed fonts and eight multilingual metadata entries' }
+        $billingHanMetadata = ConvertFrom-JsonPreservingDateStrings -Text ([IO.File]::ReadAllText((Join-Path $fontSourceRoot 'BILLING-HAN-SOURCE.json'), [Text.Encoding]::UTF8))
+        $simplifiedMetadata = ConvertFrom-JsonPreservingDateStrings -Text ([IO.File]::ReadAllText((Join-Path $fontSourceRoot 'SIMPLIFIED-SOURCE.json'), [Text.Encoding]::UTF8))
+        foreach ($pin in @($fontPins | Where-Object { $_.file -cne 'NotoSansTC.ttf' })) {
+            $metadata = if ($pin.file -ceq 'MIR2BillingHan-Regular.ttf') { @($billingHanMetadata.font) }
+                elseif ($pin.file -ceq 'NotoSansCJKsc-Regular.otf') { @($simplifiedMetadata) }
+                else { @($staticFontMetadata.fonts | Where-Object { $_.file -ceq $pin.file }) }
+            if ($metadata.Count -ne 1 -or $metadata[0].file -cne $pin.file -or $metadata[0].bytes -ne $pin.length -or ([string]$metadata[0].sha256).ToUpperInvariant() -cne $pin.sha256) {
                 throw "font scan pin differs from reviewed source provenance: $($pin.file)"
             }
             $sourcePath = Join-Path $fontSourceRoot $pin.file
@@ -948,21 +978,26 @@ if ($SelfTest) {
             Clear-PinnedFontBinaryScanBytes -Bytes $maskProbe -Ranges @([pscustomobject]@{ offset = 0; count = $maskProbe.Length })
             $fontView = [Text.Encoding]::GetEncoding(28591).GetString($sourceFont)
             $maskedView = [Text.Encoding]::GetEncoding(28591).GetString($maskProbe)
-            $tableEnd = $pin.offset + $pin.count
-            if ($maskedView.Substring(0, $pin.offset) -cne $fontView.Substring(0, $pin.offset) -or
-                $maskedView.Substring($tableEnd) -cne $fontView.Substring($tableEnd) -or
-                $maskedView.Substring($pin.offset, $pin.count).Trim([char]0).Length -ne 0) {
-                throw "font mask escaped its reviewed binary table: $($pin.file)"
+            $reviewedTables = @(Get-PinnedFontBinaryTables -Pin $pin | Sort-Object offset)
+            $cursor = 0
+            foreach ($table in $reviewedTables) {
+                if ($maskedView.Substring($cursor, $table.offset - $cursor) -cne $fontView.Substring($cursor, $table.offset - $cursor) -or
+                    $maskedView.Substring($table.offset, $table.count).Trim([char]0).Length -ne 0) { throw "font mask escaped its reviewed binary tables: $($pin.file)" }
+                $cursor = $table.offset + $table.count
             }
+            if ($maskedView.Substring($cursor) -cne $fontView.Substring($cursor)) { throw 'font mask changed trailing metadata' }
+            $tableEnd = $pin.offset + $pin.count
             # Even exact bytes must fit in a single scanned PE range. A font
             # crossing a section boundary must not grant a partial exemption.
-            $splitProbe = [byte[]]$sourceFont.Clone()
-            $splitAt = $pin.offset + [int][Math]::Floor($pin.count / 2)
-            Clear-PinnedFontBinaryScanBytes -Bytes $splitProbe -Ranges @(
-                [pscustomobject]@{ offset = 0; count = $splitAt },
-                [pscustomobject]@{ offset = $splitAt; count = $splitProbe.Length - $splitAt }
-            )
-            if ((Get-ByteSha256 -Bytes $splitProbe) -cne $pin.sha256) { throw 'font mask crossed a scanned range boundary' }
+            foreach ($table in $reviewedTables) {
+                $splitProbe = [byte[]]$sourceFont.Clone()
+                $splitAt = $table.offset + [int][Math]::Floor($table.count / 2)
+                Clear-PinnedFontBinaryScanBytes -Bytes $splitProbe -Ranges @(
+                    [pscustomobject]@{ offset = 0; count = $splitAt },
+                    [pscustomobject]@{ offset = $splitAt; count = $splitProbe.Length - $splitAt }
+                )
+                if ((Get-ByteSha256 -Bytes $splitProbe) -cne $pin.sha256) { throw 'font mask crossed a scanned range boundary' }
+            }
             $truncatedFont = New-Object byte[] ($sourceFont.Length - 1)
             [Array]::Copy($sourceFont, 0, $truncatedFont, 0, $truncatedFont.Length)
             $truncatedHash = Get-ByteSha256 -Bytes $truncatedFont
@@ -995,10 +1030,9 @@ if ($SelfTest) {
             # Inject a real path into both the normally masked binary table
             # and the unmasked metadata area. A preserved SFNT header/table
             # directory is insufficient: neither changed blob may be exempted.
-            foreach ($injection in @(
-                [pscustomobject]@{ offset = $pin.offset + 32; encoding = [Text.Encoding]::UTF8 },
-                [pscustomobject]@{ offset = $tableEnd + 64; encoding = [Text.Encoding]::Unicode }
-            )) {
+            $injections = @([pscustomobject]@{ offset = $tableEnd + 64; encoding = [Text.Encoding]::Unicode })
+            foreach ($table in $reviewedTables) { $injections += [pscustomobject]@{ offset = $table.offset + 32; encoding = [Text.Encoding]::UTF8 } }
+            foreach ($injection in $injections) {
                 $changedFont = [byte[]]$sourceFont.Clone()
                 $injectedLeak = $injection.encoding.GetBytes('C:\buildfarm\changed-font.pdb' + [char]0)
                 [Array]::Copy($injectedLeak, 0, $changedFont, $injection.offset, $injectedLeak.Length)
@@ -1007,13 +1041,13 @@ if ($SelfTest) {
                 if (-not $rejected) { throw "changed font hid an injected real path: $($pin.file)" }
             }
         }
-        Write-Host 'MULTILINGUAL_FONT_PATH_SCAN=passed (8 additional full-font pins; glyf only; source mutation, truncated fonts, injected/adjacent paths and SFNT range boundaries checked)'
+        Write-Host 'MULTILINGUAL_FONT_PATH_SCAN=passed (8 static multilingual pins plus 2 dedicated Han pins; exact glyf/CFF/SC cmap only; source mutation, truncated fonts, injected/adjacent paths and SFNT range boundaries checked)'
         $releaseProbe = Join-Path $selfRepo 'target-attested-windows-candidate\x86_64-pc-windows-msvc\release\mir2-platform-windows.exe'
         if (Test-Path -LiteralPath $releaseProbe -PathType Leaf) {
             Assert-NoBuildPathStrings -ExePath $releaseProbe -PeInfo (Read-PeInfo -Path $releaseProbe)
             Write-Host 'EXISTING_RELEASE_PATH_SCAN=passed'
         }
-        Write-Host 'PINNED_FONT_PATH_SCAN=passed (9 full-font pins; TC gvar/static glyf only; adjacent leaks and altered fonts rejected)'
+        Write-Host 'PINNED_FONT_PATH_SCAN=passed (11 full-font pins; TC gvar/static glyf/SC CFF+cmap only; adjacent leaks and altered fonts rejected)'
         $blockedPaths = @(
             'D:\buildfarm\obj\client.pdb','C:\release\mir2.exe','C:/release/mir2.exe',
             '\\server\share\build\mir2.pdb','//host/share/build/mir2.pdb',
@@ -1182,7 +1216,7 @@ $fiveClassClosureEvidence = $null
 try { Assert-NoReparseTree -Path $PackageRoot; Assert-NoAlternateDataStreams -Path $PackageRoot } catch { Fail $_.Exception.Message; Write-Host 'verify-windows-candidate FAILED during pre-manifest filesystem inspection'; exit 1 }
 $allFiles = @(Get-OrdinalPackageFiles -Root $PackageRoot)
 try { Assert-PackageAllowlist -Root $PackageRoot -ExeName $ExeName } catch { Fail $_.Exception.Message }
-$required = @(Get-RequiredCandidateFiles -ExeName $ExeName)
+$required = @(Get-RequiredCandidateFiles -ExeName $ExeName -PackageRoot $PackageRoot)
 foreach ($relative in @(Get-MissingRequiredCandidateFiles -PackageRoot $PackageRoot -ExeName $ExeName)) { Fail "missing required file: $relative" }
 $candidateSoundIdentities = @(
     [pscustomobject]@{ name='91.wav'; size=[int64]164642; sha256='EBCB5E32521CDF7256C334BE1951064EDD21E080264823B327BC6803ACDD38F1' },

@@ -1,0 +1,340 @@
+TAP version 13
+# Subtest: catalog framing preserves Unicode, fields and original envelope order
+ok 1 - catalog framing preserves Unicode, fields and original envelope order
+  ---
+  duration_ms: 2.3126
+  type: 'test'
+  ...
+# Subtest: Rust flate2 reference fixture decodes with the identical Unicode and order in Node
+ok 2 - Rust flate2 reference fixture decodes with the identical Unicode and order in Node
+  ---
+  duration_ms: 0.2255
+  type: 'test'
+  ...
+# Subtest: legacy text stays text and binary requires explicit transport capability
+ok 3 - legacy text stays text and binary requires explicit transport capability
+  ---
+  duration_ms: 0.5979
+  type: 'test'
+  ...
+# Subtest: entire batch must be catalog envelopes before any entry can be applied
+ok 4 - entire batch must be catalog envelopes before any entry can be applied
+  ---
+  duration_ms: 1.1565
+  type: 'test'
+  ...
+# Subtest: gzip CRC, length, truncation, appended bytes and additional members fail closed
+ok 5 - gzip CRC, length, truncation, appended bytes and additional members fail closed
+  ---
+  duration_ms: 0.4621
+  type: 'test'
+  ...
+# Subtest: decoded, wire and count limits prevent oversized or explosive allocation
+ok 6 - decoded, wire and count limits prevent oversized or explosive allocation
+  ---
+  duration_ms: 1.1516
+  type: 'test'
+  ...
+# Subtest: text length, UTF8, empty entries and unused decoded bytes are rejected
+ok 7 - text length, UTF8, empty entries and unused decoded bytes are rejected
+  ---
+  duration_ms: 0.4975
+  type: 'test'
+  ...
+# Subtest: a high-bit gzip flag cannot bypass header validation
+ok 8 - a high-bit gzip flag cannot bypass header validation
+  ---
+  duration_ms: 0.1277
+  type: 'test'
+  ...
+# Subtest: real WebSocket applies negotiated catalog batch in order between legacy Text messages
+ok 9 - real WebSocket applies negotiated catalog batch in order between legacy Text messages
+  ---
+  duration_ms: 191.7499
+  type: 'test'
+  ...
+# Subtest: real WebSocket rejects an unnegotiated batch without observing any catalog entry
+ok 10 - real WebSocket rejects an unnegotiated batch without observing any catalog entry
+  ---
+  duration_ms: 93.0925
+  type: 'test'
+  ...
+# Subtest: real WebSocket rejects a malformed second envelope without partially applying the first
+ok 11 - real WebSocket rejects a malformed second envelope without partially applying the first
+  ---
+  duration_ms: 92.6615
+  type: 'test'
+  ...
+# Subtest: actual CapacityClient negotiation permits compressed catalogs and counts physical wire bytes once
+ok 12 - actual CapacityClient negotiation permits compressed catalogs and counts physical wire bytes once
+  ---
+  duration_ms: 126.2155
+  type: 'test'
+  ...
+# Subtest: malformed Text errors never quote remote payload into operator reports
+ok 13 - malformed Text errors never quote remote payload into operator reports
+  ---
+  duration_ms: 0.2257
+  type: 'test'
+  ...
+# Subtest: lifecycle wire shape accepts only ordinary pickup u32 and empty town revival
+ok 14 - lifecycle wire shape accepts only ordinary pickup u32 and empty town revival
+  ---
+  duration_ms: 1.3153
+  type: 'test'
+  ...
+# Subtest: exposure selects only current live wild cats and never historical IDs, guards or owned pets
+ok 15 - exposure selects only current live wild cats and never historical IDs, guards or owned pets
+  ---
+  duration_ms: 0.6839
+  type: 'test'
+  ...
+# Subtest: ordinary approach plans around current occupancy, refuses transfer tiles and only guides map zero
+ok 16 - ordinary approach plans around current occupancy, refuses transfer tiles and only guides map zero
+  ---
+  duration_ms: 7.2531
+  type: 'test'
+  ...
+# Subtest: observer stays in AOI outside both acquisition rectangles, including every planned retreat step
+ok 17 - observer stays in AOI outside both acquisition rectangles, including every planned retreat step
+  ---
+  duration_ms: 1.6354
+  type: 'test'
+  ...
+# Subtest: approach recovery uses an already-held exact small HP UID with a fresh receipt and inventory consumption
+ok 18 - approach recovery uses an already-held exact small HP UID with a fresh receipt and inventory consumption
+  ---
+  duration_ms: 0.8599
+  type: 'test'
+  ...
+# Subtest: ordinary exposure unequips the exact live armour into a real empty slot and requires receipt plus fresh state
+ok 19 - ordinary exposure unequips the exact live armour into a real empty slot and requires receipt plus fresh state
+  ---
+  duration_ms: 0.5808
+  type: 'test'
+  ...
+# Subtest: post-revival armour recovery restores the original held UID only with fresh exact receipt and state
+ok 20 - post-revival armour recovery restores the original held UID only with fresh exact receipt and state
+  ---
+  duration_ms: 0.5977
+  type: 'test'
+  ...
+# Subtest: pickup lifecycle targets ordinary non-harvest monsters without treating animal corpses or guards as loot
+ok 21 - pickup lifecycle targets ordinary non-harvest monsters without treating animal corpses or guards as loot
+  ---
+  duration_ms: 0.1388
+  type: 'test'
+  ...
+# Subtest: shared kill requires both attackers and fresh matching same-life death receipts
+ok 22 - shared kill requires both attackers and fresh matching same-life death receipts
+  ---
+  duration_ms: 0.9832
+  type: 'test'
+  ...
+# Subtest: a shared drop needs fresh matching public spawns and both current source-name snapshots
+ok 23 - a shared drop needs fresh matching public spawns and both current source-name snapshots
+  ---
+  duration_ms: 1.1379
+  type: 'test'
+  ...
+# Subtest: contested gold pickup requires one award, both removals and exact two-player conservation
+ok 24 - contested gold pickup requires one award, both removals and exact two-player conservation
+  ---
+  duration_ms: 0.9612
+  type: 'test'
+  ...
+# Subtest: item pickup preserves one safe exact UID and rejects merges, invented identity and unrelated inventory changes
+ok 25 - item pickup preserves one safe exact UID and rejects merges, invented identity and unrelated inventory changes
+  ---
+  duration_ms: 6.7084
+  type: 'test'
+  ...
+# Subtest: pickup replay cannot pass without fresh snapshots or after any repeated gain
+ok 26 - pickup replay cannot pass without fresh snapshots or after any repeated gain
+  ---
+  duration_ms: 0.291
+  type: 'test'
+  ...
+# Subtest: player death needs exact owner death and the same observer actor, not rounded zero health
+ok 27 - player death needs exact owner death and the same observer actor, not rounded zero health
+  ---
+  duration_ms: 0.3749
+  type: 'test'
+  ...
+# Subtest: town revival needs a new alive snapshot plus source-map observer revival or departure
+ok 28 - town revival needs a new alive snapshot plus source-map observer revival or departure
+  ---
+  duration_ms: 0.2688
+  type: 'test'
+  ...
+# Subtest: runner records real-shaped lifecycle receipts and never sends revival without witnessed death
+ok 29 - runner records real-shaped lifecycle receipts and never sends revival without witnessed death
+  ---
+  duration_ms: 516.8492
+  type: 'test'
+  ...
+# Subtest: runner full packet fixture joins pickup, owner death and normal town revival without privileged actions
+ok 30 - runner full packet fixture joins pickup, owner death and normal town revival without privileged actions
+  ---
+  duration_ms: 3150.0591
+  type: 'test'
+  ...
+# Subtest: missing combat prerequisites produce explicit not_run and no action or pass
+ok 31 - missing combat prerequisites produce explicit not_run and no action or pass
+  ---
+  duration_ms: 0.1727
+  type: 'test'
+  ...
+# Subtest: bounded ordinary loot recovery retains the failed attempt and a failed next-target search
+ok 32 - bounded ordinary loot recovery retains the failed attempt and a failed next-target search
+  ---
+  duration_ms: 0.4373
+  type: 'test'
+  ...
+# Subtest: external endpoints require TLS and cannot leak credentials in trace URLs
+ok 33 - external endpoints require TLS and cannot leak credentials in trace URLs
+  ---
+  duration_ms: 0.7618
+  type: 'test'
+  ...
+# Subtest: Origin uses the endpoint scheme and authority without copying its WebSocket path
+ok 34 - Origin uses the endpoint scheme and authority without copying its WebSocket path
+  ---
+  duration_ms: 0.0991
+  type: 'test'
+  ...
+# Subtest: the actual WebSocket handshake sends the derived Origin without weakening the server guard
+ok 35 - the actual WebSocket handshake sends the derived Origin without weakening the server guard
+  ---
+  duration_ms: 108.3961
+  type: 'test'
+  ...
+# Subtest: the runner refuses unspecified realms before writing credentials or making connections
+ok 36 - the runner refuses unspecified realms before writing credentials or making connections
+  ---
+  duration_ms: 0.5633
+  type: 'test'
+  ...
+# Subtest: credentials cannot be created in the project or its enclosing Git checkout
+ok 37 - credentials cannot be created in the project or its enclosing Git checkout
+  ---
+  duration_ms: 0.2567
+  type: 'test'
+  ...
+# Subtest: each run requires two distinct strong private account identities
+ok 38 - each run requires two distinct strong private account identities
+  ---
+  duration_ms: 0.4458
+  type: 'test'
+  ...
+# Subtest: resuming a bounded QA run cannot reuse credentials from a different realm or account pair
+ok 39 - resuming a bounded QA run cannot reuse credentials from a different realm or account pair
+  ---
+  duration_ms: 5.3337
+  type: 'test'
+  ...
+# Subtest: recursive credential fields and echoed secret values never survive report redaction
+ok 40 - recursive credential fields and echoed secret values never survive report redaction
+  ---
+  duration_ms: 0.4969
+  type: 'test'
+  ...
+# Subtest: failed login or absent character is not proof of an authentication guard
+ok 41 - failed login or absent character is not proof of an authentication guard
+  ---
+  duration_ms: 0.3282
+  type: 'test'
+  ...
+# Subtest: a delayed public login shell cannot be confused with an owned character bootstrap
+ok 42 - a delayed public login shell cannot be confused with an owned character bootstrap
+  ---
+  duration_ms: 0.2745
+  type: 'test'
+  ...
+# Subtest: ObjectChat uses the real wire text field and checks the sender identity
+ok 43 - ObjectChat uses the real wire text field and checks the sender identity
+  ---
+  duration_ms: 0.1091
+  type: 'test'
+  ...
+# Subtest: delivered chat still fails acceptance if a stationary observer waits over one second
+ok 44 - delivered chat still fails acceptance if a stationary observer waits over one second
+  ---
+  duration_ms: 0.093
+  type: 'test'
+  ...
+# Subtest: save comparison detects lost stacks, gold, character inventory or equipment identities
+ok 45 - save comparison detects lost stacks, gold, character inventory or equipment identities
+  ---
+  duration_ms: 6.6417
+  type: 'test'
+  ...
+# Subtest: a combat pass requires fresh attacker-attributed strike, positive damage and matching observer health
+ok 46 - a combat pass requires fresh attacker-attributed strike, positive damage and matching observer health
+  ---
+  duration_ms: 0.4079
+  type: 'test'
+  ...
+# Subtest: shared player evidence respects normalized owner versus observer object IDs
+ok 47 - shared player evidence respects normalized owner versus observer object IDs
+  ---
+  duration_ms: 0.1993
+  type: 'test'
+  ...
+# Subtest: both observers receiving the same attributed death is accepted without a rounded health packet
+ok 48 - both observers receiving the same attributed death is accepted without a rounded health packet
+  ---
+  duration_ms: 0.0868
+  type: 'test'
+  ...
+# Subtest: skipped or failed map/combat/persistence checks can never create an overall pass
+ok 49 - skipped or failed map/combat/persistence checks can never create an overall pass
+  ---
+  duration_ms: 0.3611
+  type: 'test'
+  ...
+# Subtest: full lifecycle is explicit and requires every new real-event check as well as the existing core
+ok 50 - full lifecycle is explicit and requires every new real-event check as well as the existing core
+  ---
+  duration_ms: 1.1612
+  type: 'test'
+  ...
+# Subtest: added lifecycle commands reach the wire only with their exact ordinary parameter shape
+ok 51 - added lifecycle commands reach the wire only with their exact ordinary parameter shape
+  ---
+  duration_ms: 2.8179
+  type: 'test'
+  ...
+# Subtest: wire allowlist blocks teleport, grants, passkey impersonation and raw world mutation
+ok 52 - wire allowlist blocks teleport, grants, passkey impersonation and raw world mutation
+  ---
+  duration_ms: 1.63
+  type: 'test'
+  ...
+# Subtest: command rejection terminates the wait immediately, and late receipts from prior requests cannot satisfy it
+ok 53 - command rejection terminates the wait immediately, and late receipts from prior requests cannot satisfy it
+  ---
+  duration_ms: 1.1463
+  type: 'test'
+  ...
+# Subtest: a rejected StartGame is reported directly and does not attempt an in-game logout
+ok 54 - a rejected StartGame is reported directly and does not attempt an in-game logout
+  ---
+  duration_ms: 2.3876
+  type: 'test'
+  ...
+# Subtest: cleanup failure cannot replace the initial command failure
+ok 55 - cleanup failure cannot replace the initial command failure
+  ---
+  duration_ms: 0.1824
+  type: 'test'
+  ...
+1..55
+# tests 55
+# suites 0
+# pass 55
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3753.6626

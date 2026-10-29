@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:28:06.101Z",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\template-prepared-v2.json",
+    "bytes": 6774,
+    "sha256": "1d91d04d6910a07bba1df58970d1e2c8b814683cfeacf523e6a6d9423dddac59"
+  },
+  "scope": "Read-only v2 narrow review; no import, finalization, runtime guard, source capture, test, binary read or realm execution.",
+  "sources": {
+    "validator": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+      "bytes": 14002,
+      "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+    },
+    "profile": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\full-lifecycle-profile.json",
+      "bytes": 4571,
+      "sha256": "8736f7c2f3c002a8a57b972cb9d5ba6be09d83a224ffcd444b277dd49f9ade98"
+    },
+    "derivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\derivation-proof-v2.json",
+      "bytes": 21974,
+      "sha256": "f9aae1e6d2b19d027bd748159ad1d955072021b1db8aa885984e80dc59b065c2"
+    },
+    "syntax": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\syntax-check-v2.json",
+      "bytes": 2181,
+      "sha256": "7c83827fd66bfbd47f5d7c4e41ae7c6904e54fa53a54b6c0e67ac75bf027b9f7"
+    },
+    "sourcePreimage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.before-review-path-fix-v1.mjs.txt",
+      "bytes": 14000,
+      "sha256": "86ffb40d7cdb79986aa74f70027d5f7951a45779643c939d7842a6b0988aaa1e"
+    },
+    "profilePreimage": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\full-lifecycle-profile.before-review-path-fix-v1.json",
+      "bytes": 4571,
+      "sha256": "3e7b6da86faa8670a228c2f0d081f5f00a0595550b8da87c08c34fbc65e835e2"
+    },
+    "priorReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-independent-review-v1\\prepared-review-v1.json",
+      "bytes": 3494,
+      "sha256": "e43637e0ea2a60bd7c147d7432c5c521e8feec255c331f7b88adde1808537664"
+    }
+  },
+  "checks": {
+    "allTwelveCurrentPinsAndAggregateExact": true,
+    "onlyTwoValidatorLiteralsChanged": true,
+    "validatorInverseRawExactToV1": true,
+    "privateComponentsUseNativePathSep": true,
+    "readerRequiresPreparedV2SoOldReviewCannotAuthorize": true,
+    "profileOnlyValidatorToolPinChanged": true,
+    "sixOrdinaryDriversUnchanged": true,
+    "fiveCompleteDerivedToolsInverseExactToOriginal": true,
+    "twoNeutralCopiesRawExact": true,
+    "authorOneNewNodeCheckAndFiveUnchangedNodePlusPsEvidenceReused": true,
+    "original16AndCleanupAnd900BudgetUnchanged": true,
+    "backendC743DriverExecutionHSeparated": true
+  },
+  "history": "The initial v1 review is preserved as historical static QA. It was withdrawn before finalization after author found the Windows separator check gap; this v2 replaces it for actual Root consumption.",
+  "verdict": {
+    "preparedSourceContractPassed": true,
+    "eligibleForRootFinalization": true,
+    "blockingFindingIds": [],
+    "actualFull16Passed": null,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

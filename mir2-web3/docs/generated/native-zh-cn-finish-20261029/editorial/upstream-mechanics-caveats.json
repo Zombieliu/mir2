@@ -1,0 +1,27 @@
+{
+  "evidenceKind": "pre-edit source mechanics-copy discrepancy observations",
+  "sourcePhase": "Read-only review of the prior 6c64f179… overlay. Stylistic wording may subsequently be polished; effects below were deliberately not rewritten.",
+  "sourceReportSha256": "cef0ad021b55eb2684a7b47dba831829edc5d7af81830f48cd87ce1aab66f657",
+  "items": [
+    {
+      "key": "content.magic.Blizzard.description",
+      "issue": "upstream English semantic contract differs from the corresponding skill book text; not a Simplified Chinese conversion error",
+      "currentChinese": "天霜冰环\n\n引导施法\n法力消耗 {2}\n\n集中内力并扩散至全身各处，\n增强对敌人的防护。防御力和持续时间\n取决于技能等级。技能使用后需等待一段时间才能再次施展。\n\n当前技能等级 {0}\n下一级 {1}",
+      "upstreamEnglish": "Blizzard\n\nChannelling Casting\nMana Cost {2}\n\nConcentrate inner force and spreads it to all\nthe parts of your body.This will enhance the\nprotection from enemies. Defence power and duration\ntime will depend on the skill level. Once the skill\nhas been used, you will have to wait to use it again.\n\nCurrent Skill Level {0}\nNext Level {1}",
+      "relatedBookKey": "content.item.1009.description",
+      "relatedBookChinese": "召唤冰暴，向目标周围 5x5 格降下冰片。",
+      "recommendation": "Keep mechanics unchanged in this language-only pass; verify authoritative gameplay behavior before rewriting skill effects."
+    },
+    {
+      "key": "content.magic.Fury.description",
+      "issue": "upstream English semantic contract differs from the corresponding skill book text; not a Simplified Chinese conversion error",
+      "currentChinese": "嗜血\n\n增益技能\n法力消耗 {2}\n\n在一定时间内提升战士的命中率。\n\n当前技能等级 {0}\n下一等级 {1}",
+      "upstreamEnglish": "Fury\n\nBuff Skill\nMana Cost {2}\n\nIncreases the warriors Accuracy for a set period of time.\n\nCurrent Skill Level {0}\nNext Level {1}",
+      "relatedBookKey": "content.item.988.description",
+      "relatedBookChinese": "在一段时间内提升战士的攻击速度。",
+      "recommendation": "Keep mechanics unchanged in this language-only pass; verify authoritative gameplay behavior before rewriting skill effects."
+    }
+  ],
+  "mechanicsVerified": false,
+  "mechanicsChangedByLanguagePass": false
+}

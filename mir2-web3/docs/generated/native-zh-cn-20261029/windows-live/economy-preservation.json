@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "evidenceKind": "public isolated file-authority economy projections compared independently",
+  "snapshots": [
+    "evidence/before-native-ui.json",
+    "evidence/after-three-pages.json",
+    "evidence/after-native-restart.json"
+  ],
+  "comparedFields": [
+    "credit",
+    "gold",
+    "stripeOrderCount",
+    "each existing USDC order id/state/invoiceId/paymentDigest/applied receipt"
+  ],
+  "credit": 100,
+  "gold": 10000,
+  "stripeOrderCount": 0,
+  "usdcOrderCount": 3,
+  "stableEconomyHash": "62075679239d8dd5370fc02c307c81f74d379548844ef2f061c66f10789b8a27",
+  "allComparedValuesEqual": true,
+  "saveRevisionCanChange": true,
+  "newPaymentAttempted": false,
+  "monthlyCardPurchasedOrUsed": false,
+  "limitations": "Monthly purchase/activation was not requested; this is UI navigation and the listed public economic fields, not a fresh payment or complete database audit."
+}

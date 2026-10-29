@@ -91,8 +91,10 @@ Continue independent authorized work when a missing input blocks only one part.
 ## Historical record
 
 The complete previous orchestration file is preserved byte-for-byte in
-[orchestration history](AGENT-ORCHESTRATION-HISTORY-20261023.md). Read a relevant
-section with an explicit path only when investigating that recorded round.
+[orchestration history](AGENT-ORCHESTRATION-HISTORY-20261023.md). The upstream
+version integrated on 2026-10-24 is also preserved byte-for-byte in
+[upstream orchestration history](AGENT-ORCHESTRATION-UPSTREAM-HISTORY-20261024.md).
+Read a relevant section with an explicit path only when investigating that recorded round.
 The detailed [Shared Zone MVP rules](SHARED-ZONE-MVP-RULES.md) are required for
 Zone/session/gateway movement and lifecycle work, not unrelated edits.
 

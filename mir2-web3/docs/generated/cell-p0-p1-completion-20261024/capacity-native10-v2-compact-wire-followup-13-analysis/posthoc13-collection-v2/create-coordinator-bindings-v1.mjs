@@ -1,0 +1,9 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const base='C:/mir2-build/p01-completion-20261024',root=path.join(base,'posthoc13-collection-v2');
+const specifications=[['probe13-collection-first-refusal-coordinator-record-v1.json',1759,'0bc75124640e0fe2ec28740892a6fb826fde8e0db32bdf14e2fd1f05c17fc0ff'],['probe13-independent-verification-v1/raw-window-contract-audit-v1.json',8549,'a32477d9b72843fdcc04847cc0148bb56d1f035bf7e29bd3438ae8e4cecddac1'],['posthoc13-collection-v2/posthoc-source-frozen-v2.json',3980,'2efbafd38a518da087384a5680ca269ed7213df664fd586da81ab06b496de3f4'],['posthoc13-collection-v2/source-mutation-proof-v2.json',22301,'0f27ffabcf386fe896d10c84a7b6670a91a84106e098e6a27db9cd53c826e1b7']];
+const files=[];for(const[relative,bytes,sha256]of specifications){const file=path.join(base,relative),raw=await fs.readFile(file);assert.equal(raw.length,bytes);assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),sha256);files.push({file,bytes,sha256});}
+const receipt={schemaVersion:1,recordedAt:new Date().toISOString(),runId:'1792912711217-e7ea81f2',scope:'Posthoc independent binding of the coordinator-authored first refusal record, actual raw-window audit and unchanged prepared derived-source provenance. This supplemental receipt is not a runtime input or original stderr log.',files,originalStderrFileCaptured:false,coordinatorRecordIsObservedToolExcerpt:true,sourceFreezeChanged:false,original46InputsChanged:false,collectorExecuted:false,capacityAccepted:false};
+const output=path.join(root,'coordinator-bindings-v1.json');await fs.writeFile(output,JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});const raw=await fs.readFile(output);console.log(JSON.stringify({file:output,bytes:raw.length,sha256:crypto.createHash('sha256').update(raw).digest('hex')}));

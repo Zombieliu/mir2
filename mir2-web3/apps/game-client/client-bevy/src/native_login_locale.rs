@@ -139,7 +139,7 @@ impl NativeUiLocale {
 mod tests {
     use super::*;
     #[test]
-    fn wallet_catalog_covers_the_canonical_nine_locales() {
+    fn wallet_catalog_covers_all_supported_locales() {
         for language in Locale::ALL {
             let locale = NativeUiLocale(language);
             assert!(!locale.wallet_title().is_empty());
@@ -167,5 +167,20 @@ mod tests {
                 assert_eq!(NativeUiLocale::default().0, language)
             });
         }
+    }
+
+    #[test]
+    fn simplified_wallet_copy_uses_the_canonical_catalog_and_keeps_countdown() {
+        let locale = NativeUiLocale(Locale::SimplifiedChinese);
+        assert_eq!(locale.wallet_entry(), "Dubhe Wallet 扫码登录  [F8]");
+        assert_eq!(
+            locale.wallet_stage(NativeWalletLoginStage::Pending),
+            "等待手机扫码确认"
+        );
+        assert_eq!(locale.wallet_countdown(42), "二维码有效期：42 秒");
+        assert_eq!(
+            locale.message(NativeWalletLoginMessage::ConfirmOnPhone),
+            "请在手机钱包中确认登录。"
+        );
     }
 }

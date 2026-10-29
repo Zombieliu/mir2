@@ -1,3 +1,4 @@
+use super::combat_random::AuthoritativeCombatRandom;
 use super::entity_combat::ZoneEntityCombatState;
 use super::intelligent_creature_host::CreatureHost;
 use super::{PetSpecialWorld, TreeQueenWorld};
@@ -35,15 +36,17 @@ const LEGACY_V4_CANONICAL_ZONE_STATE_VERSION: u32 = 4;
 const LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
 const LEGACY_V5_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
 const LEGACY_V6_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v6\0";
-const CANONICAL_ZONE_STATE_VERSION: u32 = 7;
-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v7\0";
+const LEGACY_V7_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v7\0";
+const CANONICAL_ZONE_STATE_VERSION: u32 = 8;
+const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v8\0";
 const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
 const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
 const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
 const LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
 const LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
 const LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 6;
-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 7;
+const LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 7;
+const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 8;
 
 fn legacy_v2_ground_drop_claim_idempotency_key(
     key: &ZoneKey,
@@ -155,6 +158,8 @@ struct CanonicalZoneStateV4<'a> {
     issued_native_monster_awards: Option<&'a BTreeMap<String, OnlineOwner>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     mining: Option<&'a super::mining::ZoneMiningState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    combat_random: Option<&'a AuthoritativeCombatRandom>,
 }
 
 #[derive(Serialize)]
@@ -198,6 +203,10 @@ struct LegacyZoneGroundDropClaim<'a> {
 struct ZoneRuntimeCheckpoint {
     version: u32,
     state_root: String,
+    // Legacy schemas did not authenticate this field. Keep it opaque until the
+    // version is known so even malformed forward data cannot grant RNG state.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    combat_random: Option<serde_json::Value>,
     key: ZoneKey,
     players: BTreeMap<SessionId, ZonePlayer>,
     objects: BTreeMap<u32, ZoneObjectCheckpoint>,
@@ -324,6 +333,7 @@ impl ZoneRuntime {
             (self.ground_drops.clone(), self.claimed_ground_drops.clone())
         };
         let state = CanonicalZoneStateV4 {
+            combat_random: (version >= 8).then_some(&self.combat_random),
             mining: (version >= 7).then_some(&self.mining),
             online_presence: (version >= 6).then_some(&self.online_presence),
             detached_ground_drop_custody: (version >= 6)
@@ -395,6 +405,14 @@ impl ZoneRuntime {
         self.canonical_state_root_for_schema(
             6,
             LEGACY_V6_CANONICAL_ZONE_STATE_DOMAIN,
+            &self.native_monsters,
+            &self.pending_native_hits,
+        )
+    }
+    fn legacy_v7_canonical_state_root(&self) -> Result<String, String> {
+        self.canonical_state_root_for_schema(
+            7,
+            LEGACY_V7_CANONICAL_ZONE_STATE_DOMAIN,
             &self.native_monsters,
             &self.pending_native_hits,
         )
@@ -742,6 +760,10 @@ impl ZoneRuntime {
 
     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
         let checkpoint = ZoneRuntimeCheckpoint {
+            combat_random: Some(
+                serde_json::to_value(&self.combat_random)
+                    .map_err(|error| format!("failed to encode combat random state: {error}"))?,
+            ),
             mining: Some(self.mining.clone()),
             online_presence: Some(self.online_presence.clone()),
             detached_ground_drop_custody: Some(self.detached_ground_drop_custody.clone()),
@@ -817,10 +839,11 @@ impl ZoneRuntime {
             && checkpoint.version != LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION
+            && checkpoint.version != LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
         {
             return Err(format!(
-                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, {}, or {}",
+                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, {}, {}, or {}",
                 checkpoint.version,
                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
@@ -828,6 +851,7 @@ impl ZoneRuntime {
                 LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 ZONE_RUNTIME_CHECKPOINT_VERSION
             ));
         }
@@ -851,7 +875,21 @@ impl ZoneRuntime {
             }
         }
 
-        let mut runtime = Self::new(checkpoint.key);
+        let combat_random = if checkpoint_version >= ZONE_RUNTIME_CHECKPOINT_VERSION {
+            serde_json::from_value(checkpoint.combat_random.ok_or_else(|| {
+                "zone runtime v8 checkpoint is missing combat random state".to_string()
+            })?)
+            .map_err(|error| format!("invalid combat random state: {error}"))?
+        } else {
+            AuthoritativeCombatRandom::legacy_verification_placeholder()
+        };
+        let collision = ZoneCollision::for_map(&checkpoint.key.map_file_name);
+        let mut runtime = Self::new_with_collision_config_and_random(
+            checkpoint.key,
+            collision,
+            crate::runtime::big_map::authoritative_zone_npc_teleport_config(),
+            combat_random,
+        );
         // Legacy roots never committed mining fields. Discard any injected
         // forward data before authenticating their old schema commitment.
         if checkpoint_version >= 7 {
@@ -975,6 +1013,9 @@ impl ZoneRuntime {
             LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.legacy_v6_canonical_state_root()?
             }
+            LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.legacy_v7_canonical_state_root()?
+            }
             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
             _ => unreachable!("checkpoint version was validated above"),
         };
@@ -983,6 +1024,12 @@ impl ZoneRuntime {
                 "zone runtime checkpoint state root mismatch: expected {}, got {restored_root}",
                 expected_state_root
             ));
+        }
+        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
+            // No pre-v8 checkpoint carried a replayable business-random stream.
+            // Authenticate its original schema first; never adopt forward data
+            // which that schema's root did not bind.
+            runtime.combat_random = AuthoritativeCombatRandom::fresh();
         }
         // Only now has the ORIGINAL legacy canonical shape been verified.
         // New-looking metadata on v1-v5 bytes was never committed by that root.
@@ -1011,7 +1058,9 @@ impl ZoneRuntime {
             | LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
-            LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION | ZONE_RUNTIME_CHECKPOINT_VERSION => {
+            LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION
+            | LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION
+            | ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
             _ => unreachable!("checkpoint version was validated above"),
@@ -1033,6 +1082,10 @@ fn hex_lower(bytes: &[u8]) -> String {
     }
     output
 }
+
+#[cfg(test)]
+#[path = "combat_random_checkpoint_tests.rs"]
+mod combat_random_checkpoint_tests;
 
 #[cfg(test)]
 mod tests {

@@ -1,0 +1,8 @@
+file:///C:/mir2-build/p01-completion-20261024/release-native-10-v2-socket-feasibility-08/collect-public.mjs:135
+try { await fs.access(dest); throw Error('Refusing an existing public collection'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+                                   ^
+
+Error: Refusing an existing public collection
+    at file:///C:/mir2-build/p01-completion-20261024/release-native-10-v2-socket-feasibility-08/collect-public.mjs:135:36
+
+Node.js v22.18.0

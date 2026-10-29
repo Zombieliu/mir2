@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_BOUND_UNSEALED_NOT_EXECUTED",
+  "executionSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "driverSourceCommit": "4fb58ade4aa95b677bb795625d01da542a84a3f7",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceSha256": "3b0a0a8300744d6e0d34315f7bbab934252e1e70b124353ae7cf7a2398952df8",
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "document": "static-preparation-verification.json",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "actualInputsBound": true,
+  "sourceFreezeNotSealed": true,
+  "rootExecutionRequired": true,
+  "full16": {
+    "audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-anti-convergence-v1\\public\\1792971063764-c4c81284.independent-audit.json",
+      "bytes": 1904,
+      "sha256": "7ec58c2c91858dc9136018857cab96e6c024c00ea5341f45e0ed4bd52499c496"
+    },
+    "prerequisite": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-public-archive-v1\\full16-actual-prerequisite-v1.json",
+      "bytes": 9348,
+      "sha256": "9e21969af766c6a11983354af92b0c71722ae991719f15c80724f0aae8694b26"
+    },
+    "independentFacts": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-full16-actual-independent-facts-v1.json",
+      "bytes": 6348,
+      "sha256": "04f4cf042228d098e8d3fc910c3a1b9830dec4d052f03d0b2b89320372cbfdf9"
+    }
+  },
+  "accountsCreated": 0
+}

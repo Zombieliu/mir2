@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "originalCodeCommit": "9d720e7ca2409253b93c5f0659327eb6ad50c05c",
+  "priorSourceSha256": "30863fa8e8b0af6f5588cddafb43ec7355e83bd2c3f9a792fb8c4ebc6f3f1750",
+  "sourceSha256": "cb8c542abdda05a3d6bc2fac7309a14bcb359517cfdb2eae5554e2f708bb03e1",
+  "currentSourcePins": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak-core.mjs",
+      "bytes": 39617,
+      "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 157490,
+      "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 292873,
+      "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "changedInputs": [
+    "apps/web/scripts/playtest-capacity-soak-core.mjs",
+    "apps/web/scripts/playtest-capacity-soak.mjs",
+    "apps/web/scripts/playtest-capacity-soak.test.mjs"
+  ],
+  "otherSixInputsUnchanged": [
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.mjs",
+      "bytes": 4447,
+      "sha256": "19edb25f68fdd18567391e52a247964bd689346b58535871ce17051f53af9af7"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-observability.test.mjs",
+      "bytes": 5228,
+      "sha256": "00ff902194f805eb3433b192b2838b6eea6cd80860052860b825ab34f58a626d"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.mjs",
+      "bytes": 21246,
+      "sha256": "e585081835d9232b58d91bb0f717a796b483a818ed5c6fd943abf93350d74e7f"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-monitor.test.mjs",
+      "bytes": 10882,
+      "sha256": "0e60e4636ea5e384e6455fe9d474d56a760881505e765ccfc82eec490d8d92f8"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.mjs",
+      "bytes": 6548,
+      "sha256": "d3b74c3b8e0401530e787f6b35bd9a578de4f455b3f7817b6230df41c5871964"
+    },
+    {
+      "file": "apps/web/scripts/playtest-capacity-telemetry.test.mjs",
+      "bytes": 6277,
+      "sha256": "f5efe4aa510f67eb10ebba26a5de9cb5402f061de07900998a77a191a749f974"
+    }
+  ],
+  "rawPreimages": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\preimages\\playtest-capacity-soak-core.mjs.txt",
+      "bytes": 37930,
+      "sha256": "40ccd36ee84265a29bd509ca9a7bb360691f2be002411c8cab5f64a3e254cacc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\preimages\\playtest-capacity-soak.mjs.txt",
+      "bytes": 157409,
+      "sha256": "8acb34b5c1815bab0ab82ec26fff1b770cbbf159779f7c55103dacb51c127d56"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\preimages\\playtest-capacity-soak.test.mjs.txt",
+      "bytes": 286361,
+      "sha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656"
+    }
+  ],
+  "preimageManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\preimages-v1.json",
+    "bytes": 1949,
+    "sha256": "f63fbb740def9b9812b8dd472d03a872c294235c46a3a78452d5c8b392517f5f"
+  },
+  "productionMutation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\production-mutation-v1.json",
+    "bytes": 3604,
+    "sha256": "55a396ab99a14c130e1e8bf8a4229d6861f6589d11d811276a89451124a43122"
+  },
+  "sourceDiff": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\source-diff-v1.patch",
+    "bytes": 10655,
+    "sha256": "91b68b98645ef5a1c9e2743dc565c1cdd7ea466b7564035ac239ea91d52186f0"
+  },
+  "red": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\red-execution-v1.json",
+    "bytes": 2854,
+    "sha256": "18489a05c60c82b7286fe093af5d66a17804d88a976f53e43e97987be4bac378"
+  },
+  "green": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\green-execution-v1.json",
+    "bytes": 2860,
+    "sha256": "632ab6c1b87c2f57a55404c554bafd9d7387073ced0cda385ec65cecf09684dd"
+  },
+  "adjacent": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\adjacent-execution-v1.json",
+    "bytes": 2909,
+    "sha256": "cac2d7332051316883fb4b6e1a6c761d98e06519aaad82287888943e8e9c2145"
+  },
+  "syntax": [
+    {
+      "args": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak-core.mjs",
+        "bytes": 39617,
+        "sha256": "c59977540640efe0a2a5f9b05e81d3ce6c526ecc3c498fbb077f886e35605ebf"
+      }
+    },
+    {
+      "args": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+        "bytes": 157490,
+        "sha256": "fe5c255f45b1010e63f98d6670307b365cc60c9cfb948e1ae6b676604500ddb6"
+      }
+    },
+    {
+      "args": [
+        "C:/Program Files/nodejs/node.exe",
+        "--check",
+        "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "source": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+        "bytes": 292873,
+        "sha256": "6365f8cb988d0b36a3a6b4964b4bb66603bf1e28b13d731b2d842f22d041b1cf"
+      }
+    }
+  ],
+  "diffCheck": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs', CRLF will be replaced by LF the next time Git touches it\n"
+  },
+  "preservation": {
+    "productionTwoHunksInverseRawExact": true,
+    "originalTestPrefixRawExact": true,
+    "originalTestPrefixBytes": 286361,
+    "originalTestPrefixSha256": "efa0779b746d138894f63300c1e484bee72ae405d41d9e3d0271b25ad0069656",
+    "newTestCount": 5,
+    "finalAppend": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\aoi-received-state-reconciliation-v1\\appended-tests-final-v1.txt",
+      "bytes": 6512,
+      "sha256": "1b908c2f7288b10966d728f47a0516f6e9de00437b7bf79fe9408cab943c78d7"
+    },
+    "newTestOnlyAssertionCorrection": "After RED, one newly appended cumulative observedPairs assertion was changed to compare full stats before/after reconciliation; no original assertion changed.",
+    "aoiSampleBodyRawExact": true,
+    "originalSixDeclarationsRawExact": [
+      {
+        "name": "measurementClock",
+        "bytes": 742,
+        "sha256": "f2eda2c20d5a7c4bef388b41dfd1e55ab4733d7ca69b10f9c3eab211b60cc99f",
+        "rawExact": true
+      },
+      {
+        "name": "navigationCoordination",
+        "bytes": 548,
+        "sha256": "72d016c9f4836113bc358570bc6f310500092da14345dd59cb94deabacd24423",
+        "rawExact": true
+      },
+      {
+        "name": "nativePatrolPlanning",
+        "bytes": 583,
+        "sha256": "6e1fd09fde3d17f1d331d6ca9b85314aa33698b12d3d8890cd8f8617c36895d9",
+        "rawExact": true
+      },
+      {
+        "name": "nativeHpMaintenance",
+        "bytes": 639,
+        "sha256": "0eb7baf64b02f24588e49c2e439d52ad5b64ddfb9b252258b72715827cf56054",
+        "rawExact": true
+      },
+      {
+        "name": "nativeChasePreference",
+        "bytes": 902,
+        "sha256": "4d1658ef243a1b06dcd9ea2e187be112b95c1d5f551274199f40ce765b762a01",
+        "rawExact": true
+      },
+      {
+        "name": "nativeAttackWitness",
+        "bytes": 896,
+        "sha256": "acfad94aa6dd482a8631c766a2d02c7ae9e32d4b18b705504b7a29bf18d7012a",
+        "rawExact": true
+      }
+    ],
+    "range16AndStrictGreater1000Unchanged": true,
+    "noNewTimersOrStatsOrVisibleCredit": true
+  },
+  "limits": {
+    "emptyTimersReturnBeforeCohortScan": true,
+    "onlyChangedActorExistingClocksConsidered": true,
+    "receiverProjectionCountsCachedPerHook": true,
+    "fullN2EntityScansNotAdded": true
+  },
+  "verificationScope": "Focused5 and adjacent20 share the five new cases; total20 distinct tests here. Full four-entry regression is reserved for Root. No live capacity result or historical verdict is changed.",
+  "capacityAccepted": false,
+  "realCapacityRunPerformed": false,
+  "rootCauseProven": false
+}

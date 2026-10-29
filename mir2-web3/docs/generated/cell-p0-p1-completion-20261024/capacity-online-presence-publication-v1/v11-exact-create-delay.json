@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "capacityAccepted": false,
+  "fatal": {
+    "unixMs": 1793029007019,
+    "observer": "actor-46",
+    "owner": "actor-41",
+    "reason": "missing",
+    "phase": "settle"
+  },
+  "notice": {
+    "traceID": 20279,
+    "registration": 46,
+    "recipientZoneID": 50045,
+    "targetObjectID": 50040,
+    "producerUnixMs": 1793029005944,
+    "position": {
+      "x": 232,
+      "y": 618
+    },
+    "observerLastAcknowledgedPosition": {
+      "x": 244,
+      "y": 633
+    },
+    "distanceChebyshev": 15,
+    "dequeueAgeUs": 1786041,
+    "sendDurationUs": 46,
+    "estimatedSentUnixMs": 1793029007730.097
+  },
+  "qualification": [
+    "Rows below come from the existing strict anonymous derived stream; original private stderr and samples were not reread.",
+    "sent means server socket flush returned, not client receipt.",
+    "Batch read_gate span emit time cannot establish exact interval start. Public connection counters are a different namespace."
+  ],
+  "rows": [
+    {
+      "type": "gateway-zone-delivery-trace",
+      "sourceLine": 237782,
+      "stage": "enqueue",
+      "serverTraceID": 20279,
+      "registration": 46,
+      "recipientZoneID": 50045,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50040,
+      "hasPosition": 1,
+      "x": 232,
+      "y": 618,
+      "producerUnixMs": 1793029005944,
+      "elapsedUs": 0,
+      "queueAgeUs": 0,
+      "gateWaitUs": 0
+    },
+    {
+      "type": "gateway-zone-delivery-trace",
+      "sourceLine": 240371,
+      "stage": "dequeue",
+      "serverTraceID": 20279,
+      "registration": 46,
+      "recipientZoneID": 50045,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50040,
+      "hasPosition": 1,
+      "x": 232,
+      "y": 618,
+      "producerUnixMs": 1793029005944,
+      "elapsedUs": 1786041,
+      "queueAgeUs": 1786041,
+      "gateWaitUs": 0
+    },
+    {
+      "type": "gateway-zone-delivery-trace",
+      "sourceLine": 240372,
+      "stage": "gate",
+      "serverTraceID": 20279,
+      "registration": 46,
+      "recipientZoneID": 50045,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50040,
+      "hasPosition": 1,
+      "x": 232,
+      "y": 618,
+      "producerUnixMs": 1793029005944,
+      "elapsedUs": 1786047,
+      "queueAgeUs": 1786041,
+      "gateWaitUs": 0
+    },
+    {
+      "type": "gateway-zone-delivery-trace",
+      "sourceLine": 240373,
+      "stage": "send",
+      "serverTraceID": 20279,
+      "registration": 46,
+      "recipientZoneID": 50045,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50040,
+      "hasPosition": 1,
+      "x": 232,
+      "y": 618,
+      "producerUnixMs": 1793029005944,
+      "elapsedUs": 1786051,
+      "queueAgeUs": 1786041,
+      "gateWaitUs": 0
+    },
+    {
+      "type": "gateway-zone-delivery-trace",
+      "sourceLine": 240376,
+      "stage": "sent",
+      "serverTraceID": 20279,
+      "registration": 46,
+      "recipientZoneID": 50045,
+      "kind": "ObjectPlayer",
+      "targetObjectID": 50040,
+      "hasPosition": 1,
+      "x": 232,
+      "y": 618,
+      "producerUnixMs": 1793029005944,
+      "elapsedUs": 1786097,
+      "queueAgeUs": 1786041,
+      "gateWaitUs": 0
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+TAP version 13
+# Subtest: send calls the original once with identical this/arguments and preserves its return
+ok 1 - send calls the original once with identical this/arguments and preserves its return
+  ---
+  duration_ms: 2.0306
+  type: 'test'
+  ...
+# Subtest: observe projects true before/after snapshots and records only after the one original fold
+ok 2 - observe projects true before/after snapshots and records only after the one original fold
+  ---
+  duration_ms: 0.6044
+  type: 'test'
+  ...
+# Subtest: original send throw object is preserved after exactly one call, with no invented pending success
+ok 3 - original send throw object is preserved after exactly one call, with no invented pending success
+  ---
+  duration_ms: 0.5755
+  type: 'test'
+  ...
+# Subtest: original observe throw object is preserved after exactly one call
+ok 4 - original observe throw object is preserved after exactly one call
+  ---
+  duration_ms: 0.3242
+  type: 'test'
+  ...
+# Subtest: observer wrapper makes no additional client/message/hint mutation compared with the original
+ok 5 - observer wrapper makes no additional client/message/hint mutation compared with the original
+  ---
+  duration_ms: 1.0089
+  type: 'test'
+  ...
+# Subtest: send wrapper makes no additional client/command/hint mutation compared with original
+ok 6 - send wrapper makes no additional client/command/hint mutation compared with original
+  ---
+  duration_ms: 0.3666
+  type: 'test'
+  ...
+# Subtest: unknown motion retains numeric id/cause and before/after absence without synthesizing an entity
+ok 7 - unknown motion retains numeric id/cause and before/after absence without synthesizing an entity
+  ---
+  duration_ms: 0.2505
+  type: 'test'
+  ...
+# Subtest: a remembered regional monster Remove is recorded after it moved outside the region
+ok 8 - a remembered regional monster Remove is recorded after it moved outside the region
+  ---
+  duration_ms: 0.3007
+  type: 'test'
+  ...
+# Subtest: snapshot replacement deletion is distinguished from explicit ObjectRemove
+ok 9 - snapshot replacement deletion is distinguished from explicit ObjectRemove
+  ---
+  duration_ms: 0.4284
+  type: 'test'
+  ...
+# Subtest: map and geometric boundaries are fixed inclusive bounds; other-map samples are excluded
+ok 10 - map and geometric boundaries are fixed inclusive bounds; other-map samples are excluded
+  ---
+  duration_ms: 0.3908
+  type: 'test'
+  ...
+# Subtest: known player lifecycle is not emitted or kept as remembered monster after id reuse
+ok 11 - known player lifecycle is not emitted or kept as remembered monster after id reuse
+  ---
+  duration_ms: 0.2502
+  type: 'test'
+  ...
+# Subtest: navigation association copies the existing hint/cursor and observes release without classifying ACK success
+ok 12 - navigation association copies the existing hint/cursor and observes release without classifying ACK success
+  ---
+  duration_ms: 0.2542
+  type: 'test'
+  ...
+# Subtest: only actual connections one and two are captured; other clients still call originals once
+ok 13 - only actual connections one and two are captured; other clients still call originals once
+  ---
+  duration_ms: 0.2554
+  type: 'test'
+  ...
+# Subtest: entity projections together cap32 per row with true totalCount/truncated
+ok 14 - entity projections together cap32 per row with true totalCount/truncated
+  ---
+  duration_ms: 0.2881
+  type: 'test'
+  ...
+# Subtest: remembered lifecycle cache never exceeds64 and explicitly reports eviction
+ok 15 - remembered lifecycle cache never exceeds64 and explicitly reports eviction
+  ---
+  duration_ms: 3.3013
+  type: 'test'
+  ...
+# Subtest: each observational pending window logs at most64 events including explicit truncation marker
+ok 16 - each observational pending window logs at most64 events including explicit truncation marker
+  ---
+  duration_ms: 0.9454
+  type: 'test'
+  ...
+# Subtest: a new existing hint keeps at most one pending window and explicitly marks the prior trace superseded
+ok 17 - a new existing hint keeps at most one pending window and explicitly marks the prior trace superseded
+  ---
+  duration_ms: 0.2338
+  type: 'test'
+  ...
+# Subtest: row cap is fixed12000 per connection including terminal marker and never skips an original fold
+ok 18 - row cap is fixed12000 per connection including terminal marker and never skips an original fold
+  ---
+  duration_ms: 30.0393
+  type: 'test'
+  ...
+# Subtest: strict projection never copies names, credentials, accounts, payloads or arbitrary source/direction strings
+ok 19 - strict projection never copies names, credentials, accounts, payloads or arbitrary source/direction strings
+  ---
+  duration_ms: 0.4156
+  type: 'test'
+  ...
+# Subtest: sink exception propagates after original once and marks incomplete, without changing original error precedence
+ok 20 - sink exception propagates after original once and marks incomplete, without changing original error precedence
+  ---
+  duration_ms: 0.2458
+  type: 'test'
+  ...
+# Subtest: projection exception cannot prevent original call; original error retains priority
+ok 21 - projection exception cannot prevent original call; original error retains priority
+  ---
+  duration_ms: 0.1951
+  type: 'test'
+  ...
+# Subtest: uninstall restores exact descriptors and duplicate installation cannot stack wrappers
+ok 22 - uninstall restores exact descriptors and duplicate installation cannot stack wrappers
+  ---
+  duration_ms: 0.1432
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 95.4248

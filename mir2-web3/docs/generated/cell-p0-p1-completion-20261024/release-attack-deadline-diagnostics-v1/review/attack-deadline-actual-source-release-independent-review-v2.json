@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T16:45:48.488Z",
+  "scope": "Combined independent source-binding and closed new Release/build facts; fresh full16 and capacity still unadjudicated.",
+  "sourceReview": {
+    "file": "C:/mir2-build/p01-completion-20261024/attack-deadline-actual-source-binding-independent-review-v1.json",
+    "bytes": 6360,
+    "sha256": "b2ee13b28948671c07d0020e501ee7a2e0816dcef836bd9457cd64b87f249090"
+  },
+  "release": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "buildReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-v1-build-receipt.json",
+    "bytes": 2373,
+    "sha256": "c1c3259e50ac7eba1fe5cadbe77830a77549f700f98a8bc9deb15304f2c5b3f7"
+  },
+  "closedBuildLog": {
+    "file": "C:\\mir2-build\\cell-preproduction-p0-p1-20261024\\p0-attack-deadline-diagnostics-v1-release-build.log",
+    "bytes": 55560,
+    "sha256": "e11129d2b8e266549a504fb3ee11994aec834518c7808a6665319c2a45c6ee29"
+  },
+  "binary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87371264,
+    "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+    "independentlyStreamHashed": true,
+    "stableBeforeAfter": true
+  },
+  "checks": {
+    "sourceD240": true,
+    "backendInputs44": true,
+    "baseline5c2OnlyWebDelta": true,
+    "other43RawGitUnchanged": "checked by sourceReview",
+    "nodeNine5baAnd210": "checked by sourceReview",
+    "exactLockedOfflineReleaseJobs4": true,
+    "pinnedRust195AndVSx64": true,
+    "closedBuildExit0": true,
+    "sourceUnchangedBeforeAfterBuild": true,
+    "freshImmutableNotAnyOldBinary": true,
+    "releaseManifestReceiptLogAndBinaryConsistent": true
+  },
+  "backendSourceAggregate": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "buildDurationMs": 118147,
+  "full16": {
+    "state": "RUNNING_UNADJUDICATED",
+    "realm": "1792946591077-812d0b0d",
+    "pid": 68528,
+    "actualRunOrGrowingLogsRead": false,
+    "passed": null
+  },
+  "capacityAccepted": false,
+  "fixedCellStarted": false,
+  "testsOrBuildExecutedByThisReview": false,
+  "runtimeOrPrivateDataRead": false,
+  "repoOrPreviousEvidenceWritten": false
+}

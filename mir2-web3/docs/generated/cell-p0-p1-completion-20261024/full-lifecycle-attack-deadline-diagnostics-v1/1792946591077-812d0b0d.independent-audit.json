@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-25T16:45:58.994Z",
+  "runId": "1792946599345-0034c2b9",
+  "realmStamp": "1792946591077-812d0b0d",
+  "all16Passed": true,
+  "pairedDeathReceiptsMatchRawTrace": true,
+  "pairedReviveAndKillDropPickupReceiptsMatchRawTrace": true,
+  "onlyOrdinarySentCommands": true,
+  "sentCommandCount": 357,
+  "backendInputCount": 44,
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendSourceAggregate": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+  "frozenDriverRawPinsMatched": 6,
+  "checkedPublicFileCount": 13,
+  "checkedPrivateValueCount": 6,
+  "credentialValuesAbsent": true,
+  "rawZoneMetricsVersion": 2,
+  "rawZoneMetricsComplete": true,
+  "nonzeroClassDeltas": {
+    "movementAdmissions": {
+      "count": 108,
+      "successCount": 108,
+      "failureCount": 0,
+      "sumUs": 715227,
+      "overBudgetCount": 2
+    },
+    "immediateRequests": {
+      "count": 148,
+      "successCount": 148,
+      "failureCount": 0,
+      "sumUs": 691926,
+      "overBudgetCount": 2
+    },
+    "lifecycleRequests": {
+      "count": 18,
+      "successCount": 16,
+      "failureCount": 2,
+      "sumUs": 6672391,
+      "overBudgetCount": 9
+    }
+  },
+  "binarySha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "sixCountersZeroBeforeAndAfter": true,
+  "normalExitCode": 0,
+  "firstNoLootAttemptPreserved": true,
+  "scope": "P0 attack-deadline-diagnostics server Release normal public protocol lifecycle; neutral receipt checks from pinned verifier snapshot only. Independent dynamically counted candidate-source proof; historical builds remain separate. No frontend/native UI, two-computer, capacity, Cell or global ghost census acceptance"
+}

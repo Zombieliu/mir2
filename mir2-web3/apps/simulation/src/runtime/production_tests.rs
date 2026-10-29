@@ -592,6 +592,7 @@ fn production_double_session_cas_and_original_request_recovery() {
         .configure_personal_production(f.cfg.clone())
         .unwrap();
     let receipt = f.execute(f.start.clone(), 1000).unwrap().receipt;
+    let committed = fs::read(&f.path).unwrap();
     assert!(
         stale
             .run_personal_production(f.start.clone(), 1001, |_| Ok(()))
@@ -604,6 +605,7 @@ fn production_double_session_cas_and_original_request_recovery() {
         matches!(stale.run_personal_production(different, 1002, |_| Ok(())), Err(ProductionDurableError::BeforeExecution(detail)) if detail.contains("stale"))
     );
     assert!(stale.save_active_character().is_err());
+    assert_eq!(fs::read(&f.path).unwrap(), committed);
     assert_eq!(
         f.session.query_personal_production(&f.start).unwrap(),
         Some(receipt)

@@ -1,3 +1,7 @@
 # Bundled font data and upstream license bytes are immutable source artifacts.
 *.ttf binary
 OFL-NotoSans*.txt -text -whitespace
+generate-billing-han.py -text -whitespace
+billing-han-source/* -text -whitespace
+*.otf binary
+verify-simplified-font.py -text -whitespace

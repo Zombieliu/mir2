@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-25T08:15:03.083Z",
+  "endedAt": "2026-10-25T08:15:03.136Z",
+  "exitCode": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "file": "verify-ended-formal10-v2.mjs",
+      "bytes": 27524,
+      "sha256": "e98c3fdbc84e8dd8f14d76bdd793ea6ea4eeaaf4c2fc65b083908260fae5bdba"
+    },
+    {
+      "file": "formal-contract-v1.mjs",
+      "bytes": 5570,
+      "sha256": "300441547632ecba0c132204352b02153edee96d1e0ce5e9e361d3c724a7363b"
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "file": "schema-selfcheck-v1.mjs",
+      "bytes": 5870,
+      "sha256": "0e35b915c2ba983d4a7a01f65aa505d3cd66904e086936c838c5fc05cf4acfc2"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "verify-ended-formal10-v2.mjs",
+      "bytes": 27524,
+      "sha256": "e98c3fdbc84e8dd8f14d76bdd793ea6ea4eeaaf4c2fc65b083908260fae5bdba"
+    },
+    {
+      "file": "formal-contract-v1.mjs",
+      "bytes": 5570,
+      "sha256": "300441547632ecba0c132204352b02153edee96d1e0ce5e9e361d3c724a7363b"
+    },
+    {
+      "file": "hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+    },
+    {
+      "file": "expected-formal-policy-v1.json",
+      "bytes": 1038,
+      "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+    },
+    {
+      "file": "schema-selfcheck-v1.mjs",
+      "bytes": 5870,
+      "sha256": "0e35b915c2ba983d4a7a01f65aa505d3cd66904e086936c838c5fc05cf4acfc2"
+    }
+  ],
+  "inputsUnchanged": true,
+  "passed": true,
+  "result": {
+    "schemaVersion": 1,
+    "passed": true,
+    "cases": 16,
+    "checks": [
+      {
+        "name": "formal exact146 >=60 windows and actual nominal fields",
+        "passed": true
+      },
+      {
+        "name": "one59.999second window rejected",
+        "passed": true
+      },
+      {
+        "name": "missing final soak window rejected",
+        "passed": true
+      },
+      {
+        "name": "post resume stage60 cannot be omitted",
+        "passed": true
+      },
+      {
+        "name": "noncontiguous actual clock rejected",
+        "passed": true
+      },
+      {
+        "name": "configured policy cannot lower attack rate",
+        "passed": true
+      },
+      {
+        "name": "all5 native resume and5saved states mandatory",
+        "passed": true
+      },
+      {
+        "name": "memory original1800 duration and32 slope boundary",
+        "passed": true
+      },
+      {
+        "name": "explicit ended identity required before verifier IO",
+        "passed": true
+      },
+      {
+        "name": "retained memory arithmetic uses actual timestamps",
+        "passed": true
+      },
+      {
+        "name": "histogram differences derive profile quantiles not lifetime maxima",
+        "passed": true
+      },
+      {
+        "name": "zero overflow and discarded histogram quantiles unknown",
+        "passed": true
+      },
+      {
+        "name": "histogram counter rollback rejected",
+        "passed": true
+      },
+      {
+        "name": "phase telemetry inside edges explicit and never server hardgate",
+        "passed": true
+      },
+      {
+        "name": "corrected movement remains failure at4of77 and V2 notLaunched not credit",
+        "passed": true
+      },
+      {
+        "name": "whole phase rate replay code uses measuredSeconds with no nominal fallback override",
+        "passed": true
+      }
+    ],
+    "actualRunRead": false,
+    "productTestsExecuted": false,
+    "actualGameVerifierExecuted": false,
+    "capacityAccepted": false
+  },
+  "actualRunRead": false,
+  "actualGameVerifierExecuted": false,
+  "log": {
+    "file": "schema-selfcheck-v1.log",
+    "bytes": 1384,
+    "sha256": "9446490165483626f34e97eb304776b1586594b6f377dcec219eb10846b132bc"
+  }
+}

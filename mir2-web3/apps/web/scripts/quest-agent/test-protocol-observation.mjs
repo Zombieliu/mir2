@@ -388,3 +388,57 @@ test('UserInformation restores exact self and maximum vitals from its public fie
     { hp: 180, maxHp: 240, dead: false, x: 288 },
   );
 });
+
+
+for (const action of ['ObjectAttack', 'ObjectRangeAttack', 'ObjectMagic']) {
+  test(`late own ${action} preserves the acknowledged tile while updating direction`, () => {
+    const state = observedWorld();
+    for (const anchor of [{ location: { x: 236, y: 601 } }, { x: 236, y: 601 }]) {
+      applyProtocolObservation(state, packet('UserLocation', { x: 235, y: 602, direction: 'Down' }));
+      const expected = structuredClone(state);
+      expected.entities[0].direction = 'Right';
+      const message = packet(action, { objectId: '1001', ...anchor, direction: 'Right', effect: 7 });
+      const original = structuredClone(message);
+      assert.equal(applyProtocolObservation(state, message), state, 'the action continues through observation processing');
+      assert.deepEqual(state, expected, 'a delayed pose changes only owner facing');
+      assert.deepEqual(message, original, 'the full action/effect evidence remains available to other consumers');
+    }
+  });
+}
+
+test('remote attack range-attack and magic keep their public position and direction', () => {
+  const state = observedWorld();
+  state.entities.push({ objectId: 50001, kind: 'player', name: 'Peer', x: 10, y: 10 });
+  for (const action of ['ObjectAttack', 'ObjectRangeAttack', 'ObjectMagic']) {
+    for (const objectId of [2001, 50001]) {
+      const entity = state.entities.find(value => value.objectId === objectId);
+      for (const anchor of [{ location: { x: 236, y: 601 } }, { x: 237, y: 603 }]) {
+        applyProtocolObservation(state, packet(action, { objectId, ...anchor, direction: 'UpRight' }));
+        assert.deepEqual(
+          { x: entity.x, y: entity.y, direction: entity.direction },
+          { ...(anchor.location ?? anchor), direction: 'UpRight' },
+          `${action} retains remote ${objectId} action positions`,
+        );
+      }
+    }
+  }
+});
+
+test('real own movement and push packets still relocate after an action pose', () => {
+  const state = observedWorld(), owner = state.entities[0];
+  for (const [movement, fields, expected] of [
+    ['ObjectWalk', { objectId: 1001, x: 234, y: 602 }, { x: 234, y: 602 }],
+    ['ObjectPushed', { objectId: 1001, location: { x: 233, y: 602 } }, { x: 233, y: 602 }],
+    ['Pushed', { x: 232, y: 602 }, { x: 232, y: 602 }],
+    ['UserDash', { location: { x: 230, y: 602 } }, { x: 230, y: 602 }],
+  ]) {
+    applyProtocolObservation(state, packet('UserLocation', { x: 235, y: 602, direction: 'Down' }));
+    applyProtocolObservation(state, packet('ObjectAttack', { objectId: 1001, location: { x: 236, y: 601 }, direction: 'Right' }));
+    applyProtocolObservation(state, packet(movement, { ...fields, direction: 'Left' }));
+    assert.deepEqual(
+      { x: owner.x, y: owner.y, direction: owner.direction },
+      { ...expected, direction: 'Left' },
+      `${movement} remains authoritative for the owner tile`,
+    );
+  }
+});

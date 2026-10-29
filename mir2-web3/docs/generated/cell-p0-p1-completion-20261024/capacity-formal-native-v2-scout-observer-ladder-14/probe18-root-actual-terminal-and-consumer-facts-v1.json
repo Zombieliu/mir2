@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T22:10:29.286Z",
+  "scope": "Root actual terminal and sequential consumer observations plus immutable ended-file pins; complete-window independent adjudication remains a separate next step.",
+  "runId": "1792965008290-fc5e2eed",
+  "commands": [
+    {
+      "mode": "seal-first-failed",
+      "actualRootExitCode": 1,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-seal-stdout-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-seal-stderr-v1.log",
+        "bytes": 1019,
+        "sha256": "8718f0345424500ff4a560cc687679a019760d2d718b2e86b9430263b340a4bf"
+      }
+    },
+    {
+      "mode": "seal-final",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-seal-stdout-v2.log",
+        "bytes": 345,
+        "sha256": "7803beb9bc38b5a88e6b67b37fe3c89185a54946e161a89216e485ca795e68f4"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-seal-stderr-v2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "readonly-sourceguard",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-readonly-guard-stdout-v1.log",
+        "bytes": 323,
+        "sha256": "72795c188858b244d5fe377fd3067e7b068b48b79faec79b4565562db9fc2139"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-readonly-guard-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "prepare",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-prepare-stdout-v1.log",
+        "bytes": 595,
+        "sha256": "9f9bb2f956b36c44ccd3b798c201fd09cc5fa7947e9dbdf68d9d0ea49c808787"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-prepare-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "run",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-run-stdout-v1.log",
+        "bytes": 1945,
+        "sha256": "dd78513312d8beab9dc1b51821a80a63c4da0b78dd52a7fabf632565e28f5ff5"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-run-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "base-collection",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-collection-stdout-v1.log",
+        "bytes": 105061,
+        "sha256": "fe6ebfd50ea27610518c35626d3937cb9b9e3d4cf599778f461bd4d6a8d0928c"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "base-verification",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-verification-stdout-v1.log",
+        "bytes": 5020,
+        "sha256": "43ca1fa8aae653a6b1571bd2612107a9a54b2d64e315f01ff520d30aa5c47312"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-base-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "store-collection",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-collection-stdout-v1.log",
+        "bytes": 384,
+        "sha256": "e4211fe86f731d9260cd868432162639e650928dd733ea188018d8e23ef75e07"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-collection-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "mode": "store-verification",
+      "actualRootExitCode": 0,
+      "stdout": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-verification-stdout-v1.log",
+        "bytes": 1241,
+        "sha256": "4c791f45fff15ae4a429371098337b214970d5240729e9f63f70e36efe946c74"
+      },
+      "stderr": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-store-verification-stderr-v1.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "runSessionId": 36793,
+  "runTerminalExitCode": 0,
+  "prepareSessionId": 28049,
+  "prepareTerminalExitCode": 0,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\reports\\1792965008290-fc5e2eed.report.json",
+    "bytes": 324303,
+    "sha256": "c9fe969068b30727250c94f67149b8d938abb493b93200041d0e94ee8abca4c7"
+  },
+  "inputs": {
+    "realm-process.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\realm-process.json",
+      "bytes": 4359,
+      "sha256": "17384e7214981375698147bfee7706104b89aa5aefa315f865aaf470a1864ff4"
+    },
+    "realm-cleanup.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\realm-cleanup.json",
+      "bytes": 6484,
+      "sha256": "08b62b4792fccc121d54c7888e801406d80fadd5fb7fca547e08c2d415c26a60"
+    },
+    "launcher-source-frozen-v1.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\launcher-source-frozen-v1.json",
+      "bytes": 66405,
+      "sha256": "75f02c495ce8f328b2a4bd141e88a6d48d4a3213c6a3ba0e1d3106d1426d4ca6"
+    },
+    "source-guard-readonly-verification.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\source-guard-readonly-verification.json",
+      "bytes": 2441,
+      "sha256": "e8e31a5a3d0457e39e655c7c5859f3cf9a9f4cfd533006b11e071e8400cb26a9"
+    },
+    "source-pins.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\source-pins.json",
+      "bytes": 53781,
+      "sha256": "264781007d455c92183fc8e58cbe915a3b6b81b919681ad09b5998ddda0de5c8"
+    },
+    "provisioning.json": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    }
+  },
+  "rootIndependentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe18-root-independent-cleanup-v1.json",
+    "bytes": 371,
+    "sha256": "1ad90c3a6ab3f6e802e90135bf6838f4befd6e7841e6d9f582aa3d9ab8e7e1af"
+  },
+  "actualEndedState": {
+    "driverReportOk": true,
+    "playableCapacityAccepted": false,
+    "cleanupChecks": {
+      "sixCountersZero": true,
+      "monitorTerminalPreserved": true,
+      "monitorStoppedBeforeGateway": true,
+      "monitorExitZero": true,
+      "normalOwnedShutdown": true,
+      "processAbsent": true,
+      "portsFree": true
+    },
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "executionSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "driverSourceCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+    "gatewayPid": 70676,
+    "monitorPid": 45472,
+    "allNineSourceInputsUnchanged": true,
+    "noBackendBuildOrNewRelease": true
+  },
+  "initialSealFailure": {
+    "error": "ESM cycle read imported base before initialization",
+    "retained": true,
+    "accountsOrRealmStartedBeforeThatFailure": false,
+    "correctedBy": "lazy refs only; actual final seal and readonly guard both exit0"
+  },
+  "independentWindowAdjudicationPending": true,
+  "formalStarted": false,
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false
+}

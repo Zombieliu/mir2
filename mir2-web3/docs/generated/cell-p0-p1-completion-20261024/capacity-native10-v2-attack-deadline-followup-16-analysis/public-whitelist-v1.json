@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "scope": "Closed ended16 tool/source-history, actual execution, independent verification, Root OS proof and terminal facts only. No raw/monitor/spectator/executable/private payload copied.",
+  "base": "C:\\mir2-build\\p01-completion-20261024",
+  "destination": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-native10-v2-attack-deadline-followup-16-analysis",
+  "sourceCount": 18,
+  "totalBytes": 583518,
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-v1.mjs",
+      "bytes": 30334,
+      "sha256": "9c25c810fcb979c649ed108f53e7a1ea2ec6f463dc68a627712766ee017ce8a4",
+      "target": "tool/verify-ended-probe16-v1.mjs",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\probe-contract-v1.mjs",
+      "bytes": 5820,
+      "sha256": "f31dbde547f7e725d9ea209cc3e160f36c442891729dccba675db0b59eee927d",
+      "target": "tool/probe-contract-v1.mjs",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285",
+      "target": "tool/hp-proof-contract-v2.mjs",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242",
+      "target": "tool/expected-probe-policy-v1.json",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\run-ended-probe16-v1.mjs",
+      "bytes": 2257,
+      "sha256": "944ef34333131c729d3accf43451dbe22962dbab040ec7b66f9b7a1fb3b0f546",
+      "target": "tool/run-ended-probe16-v1.mjs",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499",
+      "target": "tool/seal-tool-source-v1.mjs",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\derivation-pending-v1.json",
+      "bytes": 27038,
+      "sha256": "216733c4309471f5b316d6a330352f63dc146f224ba1b5804b11318d310a05bb",
+      "target": "tool/derivation-pending-v1.json",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\verify-ended-probe16-draft-v1.mjs",
+      "bytes": 30338,
+      "sha256": "67b407e48f40f467de0bd4ec8919021b6b833c09854d5c0c11c6e9d20d11fdc8",
+      "target": "tool/verify-ended-probe16-draft-v1.mjs",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\preparation-pending-v1.json",
+      "bytes": 3653,
+      "sha256": "34a38898ce839f1e09855abf8f970e0611f453610ef2115a71e9bfadbd6548c3",
+      "target": "tool/preparation-pending-v1.json",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-run-id-binding-v1.json",
+      "bytes": 1444,
+      "sha256": "2cc419aba47362f2b9a1eed40744f0ceacd6c08c4019599a296f08ff6e9de75b",
+      "target": "tool/actual-run-id-binding-v1.json",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\preparation-v1.json",
+      "bytes": 5476,
+      "sha256": "671b6d52b33f601958361e37c1069babf64621a230b32bc516cd144d1dc5e0f9",
+      "target": "tool/preparation-v1.json",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\independent-review-v1.json",
+      "bytes": 6460,
+      "sha256": "343a62632612ad8c9f09efb99c1aa410a0ed98f678257887a5be7bc058da86a5",
+      "target": "tool/independent-review-v1.json",
+      "category": "sealed-tool-source-history"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2457,
+      "sha256": "bc2ce35c20f8ff491443da7bbbc2d7e3fffc3dc63d809b467efbc2899410f9c2",
+      "target": "tool/tool-source-frozen-v1.json",
+      "category": "actual-source-seal"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-verification.log",
+      "bytes": 878,
+      "sha256": "e3bb08944d420f1a2016ee109780796d75f424480e23d47f29d9e0aefcdb7fce",
+      "target": "actual/actual-verification.log",
+      "category": "actual-ended-execution"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "dee8e31af98139fc471fb72d9a5931bd66331bc046ea0d263fbba2d783cf069d",
+      "target": "actual/actual-verification-execution-receipt-v1.json",
+      "category": "actual-ended-execution"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-independent-verification-v1\\final-verification.json",
+      "bytes": 449267,
+      "sha256": "b1d786f3ae059dba0c626a6f43f74381d4a113d15e36195295d32d668dc89fa7",
+      "target": "actual/final-verification.json",
+      "category": "actual-ended-execution"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-root-independent-cleanup-v1.json",
+      "bytes": 324,
+      "sha256": "d76863ee7e0b5f0c367ea2633bba27bd91bbd66b757d757d1efaedb7d6b4539a",
+      "target": "cleanup/probe16-root-independent-cleanup-v1.json",
+      "category": "root-os-proof"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-actual-terminal-independent-facts-v1.json",
+      "bytes": 8296,
+      "sha256": "ad8f4f4567238d87e317e7578e27ac20e08986c68f2e273b4ae9ba0a69846c82",
+      "target": "facts/probe16-actual-terminal-independent-facts-v1.json",
+      "category": "independent-ended-facts"
+    }
+  ],
+  "duplicateReviewReference": {
+    "external": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe16-ended-tool-independent-review-v1\\review-v1.json",
+      "bytes": 6460,
+      "sha256": "343a62632612ad8c9f09efb99c1aa410a0ed98f678257887a5be7bc058da86a5"
+    },
+    "publicCopy": "tool/independent-review-v1.json",
+    "sameRawBytesVerified": true,
+    "recopied": false
+  },
+  "expectedRunId": "1792949214664-bea1433d",
+  "probePassed": true,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "toolSourceSealInputs": 12,
+  "preparationBaseInputs": 10,
+  "collectorCopiesNotDuplicated": 184,
+  "rootActualVerifierExitCode": 0,
+  "scopeLimitations": [
+    "No raw/monitor/executable scan repeated during archival.",
+    "Original prepared/pending/not-executed metadata is historical; actual execution and final verifier are separate files.",
+    "A2/10probe is a prerequisite only; it does not replace Formal12/100actors/2h/P0 acceptance."
+  ]
+}

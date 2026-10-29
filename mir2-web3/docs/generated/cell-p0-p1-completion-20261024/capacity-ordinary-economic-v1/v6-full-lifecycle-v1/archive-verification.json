@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "archiveScope": "public-only raw archival and offline receipt validation",
+  "copiedManifest": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\copied-evidence-manifest.json",
+    "bytes": 29334,
+    "sha256": "1ec712ca61d46b8871d4fcb019e87a257c4ea9e84e8972e44456178dfa7c6ff5"
+  },
+  "copiedFileCount": 51,
+  "copiedBytes": 3865212,
+  "allExclusiveRawCopiesMatched": true,
+  "allSourcesUnchangedBeforeAfter": true,
+  "exactOriginalPublicFileSet": true,
+  "neutralFull16AndAllSixPublicTracesRechecked": true,
+  "ordinaryCommandsRecounted": 351,
+  "firstNoLootAttemptPreserved": true,
+  "root647RawLogTotalsRechecked": true,
+  "root647LogsCrossLinkedNotCopied": true,
+  "rootIndependentOsReceiptMatched": true,
+  "originalV6BinaryHashMatchedAcrossPublicMetadata": true,
+  "generatedPins": [
+    {
+      "relativePath": "archive-public-v1.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\archive-public-v1.mjs",
+      "bytes": 16902,
+      "sha256": "a75d4524c4fd47d5710d4f07bee48016782dfa42bdf7161f6f9ec8f283a357d0"
+    },
+    {
+      "relativePath": "README.md",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\README.md",
+      "bytes": 2590,
+      "sha256": "27da4d7cd980a4018f1361148b7d909490aadfda26b9d6ed09a4ba00cbbb077e"
+    },
+    {
+      "relativePath": "public-copy-allowlist.json",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\public-copy-allowlist.json",
+      "bytes": 12928,
+      "sha256": "f4f555c2e42dd42fc75993b17057e28168c906bca920bb380da130c195759254"
+    },
+    {
+      "relativePath": "actual-summary.json",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\actual-summary.json",
+      "bytes": 1821,
+      "sha256": "1c8f2883af4a61dc1ba54df528ef2b34132cf2578bd77046016f337bfa67b044"
+    },
+    {
+      "relativePath": "external-provenance-references.json",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\external-provenance-references.json",
+      "bytes": 8214,
+      "sha256": "32cdac4d56bb7dad6a195b28e91a7dc882f2447cd1ca68a69891c4fa664ed4c4"
+    },
+    {
+      "relativePath": "copied-evidence-manifest.json",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-ordinary-economic-v1\\v6-full-lifecycle-v1\\copied-evidence-manifest.json",
+      "bytes": 29334,
+      "sha256": "1ec712ca61d46b8871d4fcb019e87a257c4ea9e84e8972e44456178dfa7c6ff5"
+    }
+  ],
+  "privateFilesOpened": false,
+  "newTestProcessStarted": false,
+  "newBuildPerformed": false,
+  "newRealmStarted": false,
+  "gitCommandsExecuted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

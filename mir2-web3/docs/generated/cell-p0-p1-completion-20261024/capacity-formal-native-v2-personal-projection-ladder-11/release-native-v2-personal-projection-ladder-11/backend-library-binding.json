@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "library": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\personal-monster-projection-release-v1\\source-lib-v3.mjs",
+    "bytes": 15618,
+    "sha256": "ffd87a222e5f04d1f61c29ee71bc69144cc90f696decf5c5aacc821817ba80fb"
+  },
+  "adapter": "projection-build-source-lib.mjs",
+  "expectedBackendInputCount": 44
+}

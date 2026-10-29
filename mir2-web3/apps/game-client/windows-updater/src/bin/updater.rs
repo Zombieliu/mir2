@@ -203,6 +203,7 @@ fn run() -> Result<()> {
         window: ui::ProgressWindow::spawn(&mir2_windows_updater::locale()),
     };
     let packed_before = generation::active_record(&root)?;
+    let mut retained_legacy = false;
     let legacy_pending = transaction::pending_activation(&root)?;
     ensure!(
         !(packed_before.is_some() && legacy_pending),
@@ -263,6 +264,17 @@ fn run() -> Result<()> {
                             .window
                             .update(&ui::stage(&status.locale, "offline"), 100);
                         true
+                    } else if generation::retain_verified_legacy_after_rejected_feed(&root, &error)?
+                    {
+                        // A newer signed installer may legitimately see the old
+                        // pack release line. Keep precisely its verified game;
+                        // never feed that decision into v4 network discovery.
+                        retained_legacy = true;
+                        update::log(&root, "packed-below-legacy-floor-retained", "verified installed legacy; no discovery retry or selector/floor writes");
+                        status
+                            .window
+                            .update(&ui::stage(&status.locale, "offline"), 100);
+                        false
                     } else {
                         return Err(error);
                     }
@@ -282,24 +294,26 @@ fn run() -> Result<()> {
         }
         drop(activation_lease);
     }
-    let source = update::HttpsSource::new()?;
     let mut activated = transaction::pending_activation(&root)?;
-    match update::check_update(&root, &source, &status) {
-        Ok(outcome) => {
-            activated = outcome.activated;
-            update::log(&root, "update", outcome);
-        }
-        Err(error) => {
-            update::log(&root, "update-error", format!("{error:#}"));
-            transaction::recover(&root).context("recovery failed; launch prevented")?;
-            if status.window.cancelled() {
-                status.window.close();
-                return Ok(());
+    if !retained_legacy {
+        let source = update::HttpsSource::new()?;
+        match update::check_update(&root, &source, &status) {
+            Ok(outcome) => {
+                activated = outcome.activated;
+                update::log(&root, "update", outcome);
             }
-            update::verify_launch(&root).context("installed fallback is not valid")?;
-            status
-                .window
-                .update(&ui::stage(&status.locale, "offline"), 100);
+            Err(error) => {
+                update::log(&root, "update-error", format!("{error:#}"));
+                transaction::recover(&root).context("recovery failed; launch prevented")?;
+                if status.window.cancelled() {
+                    status.window.close();
+                    return Ok(());
+                }
+                update::verify_launch(&root).context("installed fallback is not valid")?;
+                status
+                    .window
+                    .update(&ui::stage(&status.locale, "offline"), 100);
+            }
         }
     }
     if args == ["--check-only"] {

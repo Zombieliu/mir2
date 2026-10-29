@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "syntaxOnly": true,
+  "executionPerformed": false,
+  "loadPerformed": false,
+  "changeScope": "Only realm.sourcePins[path] SHA256-string schema comparison; v1 preserved",
+  "startedAt": "2026-10-27T00:00:38.5936348Z",
+  "finishedAt": "2026-10-27T00:00:38.6348817Z",
+  "command": [
+    "node",
+    "--check",
+    "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v2.mjs"
+  ],
+  "exitCode": 0,
+  "output": "",
+  "tool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\verify-full16-reuse-v2.mjs",
+    "bytes": 14895,
+    "sha256": "de9644d39dc1f3ca53ca392f4d5f6629d146c00ead2a3bdafdbece5663db93ae"
+  }
+}

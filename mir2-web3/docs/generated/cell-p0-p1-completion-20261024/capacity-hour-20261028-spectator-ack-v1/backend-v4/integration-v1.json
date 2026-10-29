@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-28T08:12:34.864Z",
+  "freshFullLifecyclePassed": true,
+  "actualCheckCount": 16,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\reports\\1793175003874-3ffb8168.report.json",
+    "bytes": 109396,
+    "sha256": "5350d1dd9933a4937221fdf721704a1fbe904a43b71688332d03e88f19c69ddd"
+  },
+  "cleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-spectator-projection-v1\\cleanup-v1.json",
+    "bytes": 341,
+    "sha256": "73b9284dafed2c64c27860175a94b7a7a0a6d0ba6392ead13a8a101cad73d5fa"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

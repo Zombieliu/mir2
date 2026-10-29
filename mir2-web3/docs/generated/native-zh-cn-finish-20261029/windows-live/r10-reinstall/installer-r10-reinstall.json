@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "phase": "r10-reinstall",
+  "sameSetupAsFullFirstPhase": true,
+  "installedGameClosureFiles": 255027,
+  "selectedGamePayloadHashesVerified": 7,
+  "gameMetadataHashesVerified": 4,
+  "updaterFilesVerified": 9,
+  "preservedProfileFiles": [
+    {
+      "name": "locale.json",
+      "size": 29,
+      "sha256": "108D3D7D3F4DE720733D8B60E1B103A2117A1BA8E9478FA09485B05D5F19ACB8"
+    },
+    {
+      "name": "locale-seed.json",
+      "size": 29,
+      "sha256": "108D3D7D3F4DE720733D8B60E1B103A2117A1BA8E9478FA09485B05D5F19ACB8"
+    },
+    {
+      "name": "display.json",
+      "size": 32,
+      "sha256": "3F0C7040D5EB8A0AB028ED2F417821E35320E20B3F07FDB309C14F5B40B8196D"
+    }
+  ],
+  "locale": {
+    "schema": 1,
+    "locale": "zh-CN"
+  },
+  "normalRegistrationUnchanged": true,
+  "normalGameUnchanged": true,
+  "globalPreferencesUnchanged": true,
+  "fullPayloadHashVerifiedThisPhase": false,
+  "fullPayloadHashEvidence": "installer-r10-first.json",
+  "scope": "Same immutable installer reinstalled after actual uninstall. Check complete file-path closure, selected executable/attestation/SC document identities, all signed metadata/updater files and three exact profile hashes; do not repeat the prior full 255027-file content hashing."
+}

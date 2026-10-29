@@ -1,0 +1,588 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792967155359-90bac462",
+  "scope": "Original report facts first,not a new verdict or per-request packet replay.",
+  "source": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-observer-ladder-14\\reports\\1792967155359-90bac462.report.json",
+    "bytes": 425962,
+    "sha256": "256f070c235cf7d188f0b0dc3700fbba8140e07781c3222b84eec53357989195"
+  },
+  "originalReportOk": false,
+  "error": "Stage 25 did not satisfy the fixed activity, latency or coverage gates",
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false,
+  "thresholds": {
+    "minimumCombatAttacksPerMinute": 18,
+    "minimumCombatHitsPerMinute": 12,
+    "nativeCompletion": 0.95,
+    "nativeMovementCellsPerMinute": 80,
+    "typedDualDeadlineMs": 900,
+    "maximumCorrectionRatio": 0.05,
+    "timeoutExclusive": 0.01
+  },
+  "phases": [
+    {
+      "name": "stage-2",
+      "actualSeconds": 300.227,
+      "completed": true,
+      "passed": true,
+      "windows": [
+        {
+          "index": 1,
+          "seconds": 60.023,
+          "passed": true
+        },
+        {
+          "index": 2,
+          "seconds": 60.08,
+          "passed": true
+        },
+        {
+          "index": 3,
+          "seconds": 60.036,
+          "passed": true
+        },
+        {
+          "index": 4,
+          "seconds": 60.011,
+          "passed": true
+        },
+        {
+          "index": 5,
+          "seconds": 60.077,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "stage-10",
+      "actualSeconds": 300.327,
+      "completed": true,
+      "passed": true,
+      "windows": [
+        {
+          "index": 1,
+          "seconds": 60.082,
+          "passed": true
+        },
+        {
+          "index": 2,
+          "seconds": 60.047,
+          "passed": true
+        },
+        {
+          "index": 3,
+          "seconds": 60.047,
+          "passed": true
+        },
+        {
+          "index": 4,
+          "seconds": 60.047,
+          "passed": true
+        },
+        {
+          "index": 5,
+          "seconds": 60.104,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "stage-25",
+      "actualSeconds": 300.281,
+      "completed": true,
+      "passed": false,
+      "windows": [
+        {
+          "index": 1,
+          "seconds": 60.01,
+          "passed": true
+        },
+        {
+          "index": 2,
+          "seconds": 60.083,
+          "passed": true
+        },
+        {
+          "index": 3,
+          "seconds": 60.027,
+          "passed": true
+        },
+        {
+          "index": 4,
+          "seconds": 60.075,
+          "passed": false
+        },
+        {
+          "index": 5,
+          "seconds": 60.086,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "stage25": {
+    "measuredSeconds": 300.281,
+    "wholePhaseActorsAllPassed": true,
+    "movementPassed": true,
+    "chatPassed": true,
+    "fanoutPassed": true,
+    "timeoutRatio": 0,
+    "correctionRatio": 0.00010905125408942203,
+    "combatActors": [
+      {
+        "actor": "Leca0c805",
+        "role": "combat",
+        "passed": true,
+        "plans": 296,
+        "gaps": 0,
+        "moves": 150,
+        "runs": 83,
+        "cells": 233,
+        "attacks": 123,
+        "hits": 123,
+        "damage": 436,
+        "nativeOpportunities": 296,
+        "nativeCompleted": 296,
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 1,
+          "runRatio": 0.5533333333333333,
+          "cellsPerMinute": 46.556392179325364,
+          "positiveHitsPerMinute": 24.57697956247648,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 299924,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "attacksPerMinute": 24.57697956247648,
+        "hitsPerMinute": 24.57697956247648,
+        "failedCombatThresholds": []
+      },
+      {
+        "actor": "Leca0c80f",
+        "role": "combat",
+        "passed": true,
+        "plans": 294,
+        "gaps": 0,
+        "moves": 150,
+        "runs": 88,
+        "cells": 238,
+        "attacks": 120,
+        "hits": 120,
+        "damage": 354,
+        "nativeOpportunities": 294,
+        "nativeCompleted": 294,
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 1,
+          "runRatio": 0.5866666666666667,
+          "cellsPerMinute": 47.55545638918213,
+          "positiveHitsPerMinute": 23.97754103656242,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 300244,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "attacksPerMinute": 23.97754103656242,
+        "hitsPerMinute": 23.97754103656242,
+        "failedCombatThresholds": []
+      }
+    ],
+    "windows": [
+      {
+        "index": 1,
+        "startedAtMs": 1792967921574,
+        "endedAtMs": 1792967981584,
+        "seconds": 60.01,
+        "passed": true,
+        "combatCoverage": "shared-positive-damage",
+        "actors": [
+          {
+            "actor": "Leca0c805",
+            "role": "combat",
+            "passed": true,
+            "plans": 52,
+            "gaps": 0,
+            "moves": 18,
+            "runs": 8,
+            "cells": 26,
+            "attacks": 31,
+            "hits": 31,
+            "damage": 84,
+            "nativeOpportunities": 52,
+            "nativeCompleted": 52,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.4444444444444444,
+              "cellsPerMinute": 25.99566738876854,
+              "positiveHitsPerMinute": 30.99483419430095,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 58964,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 30.99483419430095,
+            "hitsPerMinute": 30.99483419430095,
+            "failedCombatThresholds": []
+          },
+          {
+            "actor": "Leca0c80f",
+            "role": "combat",
+            "passed": true,
+            "plans": 53,
+            "gaps": 0,
+            "moves": 14,
+            "runs": 5,
+            "cells": 19,
+            "attacks": 31,
+            "hits": 31,
+            "damage": 85,
+            "nativeOpportunities": 53,
+            "nativeCompleted": 53,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.35714285714285715,
+              "cellsPerMinute": 18.996833861023163,
+              "positiveHitsPerMinute": 30.99483419430095,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 60666,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 30.99483419430095,
+            "hitsPerMinute": 30.99483419430095,
+            "failedCombatThresholds": []
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "startedAtMs": 1792967981584,
+        "endedAtMs": 1792968041667,
+        "seconds": 60.083,
+        "passed": true,
+        "combatCoverage": "shared-positive-damage",
+        "actors": [
+          {
+            "actor": "Leca0c805",
+            "role": "combat",
+            "passed": true,
+            "plans": 64,
+            "gaps": 0,
+            "moves": 38,
+            "runs": 14,
+            "cells": 52,
+            "attacks": 20,
+            "hits": 20,
+            "damage": 79,
+            "nativeOpportunities": 64,
+            "nativeCompleted": 64,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.3684210526315789,
+              "cellsPerMinute": 51.92816603698218,
+              "positiveHitsPerMinute": 19.972371552685452,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 60600,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 19.972371552685452,
+            "hitsPerMinute": 19.972371552685452,
+            "failedCombatThresholds": []
+          },
+          {
+            "actor": "Leca0c80f",
+            "role": "combat",
+            "passed": true,
+            "plans": 58,
+            "gaps": 0,
+            "moves": 29,
+            "runs": 19,
+            "cells": 48,
+            "attacks": 24,
+            "hits": 24,
+            "damage": 71,
+            "nativeOpportunities": 58,
+            "nativeCompleted": 58,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.6551724137931034,
+              "cellsPerMinute": 47.93369172644508,
+              "positiveHitsPerMinute": 23.96684586322254,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 59558,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 23.96684586322254,
+            "hitsPerMinute": 23.96684586322254,
+            "failedCombatThresholds": []
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "startedAtMs": 1792968041667,
+        "endedAtMs": 1792968101694,
+        "seconds": 60.027,
+        "passed": true,
+        "combatCoverage": "shared-positive-damage",
+        "actors": [
+          {
+            "actor": "Leca0c805",
+            "role": "combat",
+            "passed": true,
+            "plans": 56,
+            "gaps": 0,
+            "moves": 22,
+            "runs": 15,
+            "cells": 37,
+            "attacks": 28,
+            "hits": 28,
+            "damage": 100,
+            "nativeOpportunities": 56,
+            "nativeCompleted": 56,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.6818181818181818,
+              "cellsPerMinute": 36.983357489129894,
+              "positiveHitsPerMinute": 27.987405667449647,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 59640,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 27.987405667449647,
+            "hitsPerMinute": 27.987405667449647,
+            "failedCombatThresholds": []
+          },
+          {
+            "actor": "Leca0c80f",
+            "role": "combat",
+            "passed": true,
+            "plans": 57,
+            "gaps": 0,
+            "moves": 27,
+            "runs": 14,
+            "cells": 41,
+            "attacks": 26,
+            "hits": 26,
+            "damage": 80,
+            "nativeOpportunities": 57,
+            "nativeCompleted": 57,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.5185185185185185,
+              "cellsPerMinute": 40.981558298765556,
+              "positiveHitsPerMinute": 25.988305262631815,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 59858,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 25.988305262631815,
+            "hitsPerMinute": 25.988305262631815,
+            "failedCombatThresholds": []
+          }
+        ]
+      },
+      {
+        "index": 4,
+        "startedAtMs": 1792968101694,
+        "endedAtMs": 1792968161769,
+        "seconds": 60.075,
+        "passed": false,
+        "combatCoverage": "scenario-insufficient",
+        "actors": [
+          {
+            "actor": "Leca0c805",
+            "role": "combat",
+            "passed": false,
+            "plans": 67,
+            "gaps": 0,
+            "moves": 48,
+            "runs": 30,
+            "cells": 78,
+            "attacks": 16,
+            "hits": 16,
+            "damage": 61,
+            "nativeOpportunities": 67,
+            "nativeCompleted": 67,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.625,
+              "cellsPerMinute": 77.90262172284643,
+              "positiveHitsPerMinute": 15.980024968789014,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 60330,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 15.980024968789014,
+            "hitsPerMinute": 15.980024968789014,
+            "failedCombatThresholds": [
+              "minimumCombatAttacksPerMinute"
+            ]
+          },
+          {
+            "actor": "Leca0c80f",
+            "role": "combat",
+            "passed": false,
+            "plans": 66,
+            "gaps": 0,
+            "moves": 44,
+            "runs": 28,
+            "cells": 72,
+            "attacks": 18,
+            "hits": 18,
+            "damage": 53,
+            "nativeOpportunities": 66,
+            "nativeCompleted": 66,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.6363636363636364,
+              "cellsPerMinute": 71.91011235955055,
+              "positiveHitsPerMinute": 17.977528089887638,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 61344,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 17.977528089887638,
+            "hitsPerMinute": 17.977528089887638,
+            "failedCombatThresholds": [
+              "minimumCombatAttacksPerMinute"
+            ]
+          }
+        ]
+      },
+      {
+        "index": 5,
+        "startedAtMs": 1792968161769,
+        "endedAtMs": 1792968221855,
+        "seconds": 60.086,
+        "passed": true,
+        "combatCoverage": "shared-positive-damage",
+        "actors": [
+          {
+            "actor": "Leca0c805",
+            "role": "combat",
+            "passed": true,
+            "plans": 57,
+            "gaps": 0,
+            "moves": 24,
+            "runs": 16,
+            "cells": 40,
+            "attacks": 28,
+            "hits": 28,
+            "damage": 112,
+            "nativeOpportunities": 57,
+            "nativeCompleted": 57,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.6666666666666666,
+              "cellsPerMinute": 39.94274872682489,
+              "positiveHitsPerMinute": 27.959924108777418,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 60390,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 27.959924108777418,
+            "hitsPerMinute": 27.959924108777418,
+            "failedCombatThresholds": []
+          },
+          {
+            "actor": "Leca0c80f",
+            "role": "combat",
+            "passed": true,
+            "plans": 60,
+            "gaps": 0,
+            "moves": 36,
+            "runs": 22,
+            "cells": 58,
+            "attacks": 21,
+            "hits": 21,
+            "damage": 65,
+            "nativeOpportunities": 60,
+            "nativeCompleted": 60,
+            "nativeActivity": {
+              "passed": true,
+              "completionRatio": 1,
+              "runRatio": 0.6111111111111112,
+              "cellsPerMinute": 57.916985653896084,
+              "positiveHitsPerMinute": 20.969943081583065,
+              "evidenceWaits": 0,
+              "ownerAckWaits": 0,
+              "offeredDurationMs": 58818,
+              "unknownPacing": 0,
+              "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+            },
+            "attacksPerMinute": 20.969943081583065,
+            "hitsPerMinute": 20.969943081583065,
+            "failedCombatThresholds": []
+          }
+        ]
+      }
+    ]
+  },
+  "continuous": {
+    "passed": true,
+    "failureCount": 0,
+    "assessedWindows": 230
+  },
+  "wholeRunAttack": {
+    "count": 477,
+    "status": {
+      "success": 477
+    },
+    "fromSend": {
+      "count": 477,
+      "p50Ms": 77,
+      "p95Ms": 131,
+      "p99Ms": 175,
+      "maxMs": 516.3924000000115
+    },
+    "fromPlan": {
+      "count": 477,
+      "p50Ms": 93,
+      "p95Ms": 151,
+      "p99Ms": 202,
+      "maxMs": 530.2296999999089
+    },
+    "attackV2Requests": 477,
+    "attackV2NotLaunched": 0
+  },
+  "peakControlledActors": 25,
+  "highestPassedStage": 10,
+  "unexecuted": [
+    "stage-50",
+    "stage-100",
+    "7200second-soak",
+    "resume/save/post-resume"
+  ],
+  "firstConclusion": "Stage25 W4 launch rate only:16 and18 attacks over60.075s are both below18/min; both positive hit rates exceed12/min,all native opportunities complete,other reported gates pass. Eighteen attempts is insufficient for a window longer than60s; the original actual-duration threshold is preserved."
+}

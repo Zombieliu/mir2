@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-27T12:01:47.473Z",
+  "scope": "Root integration review after independent read-only review of exact-goal guard and explicit335 ordinary staging integration. Production patch only affects client tooling, no Rust build or capacity verdict.",
+  "sourceBeforeCommit": [
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-navigation.mjs",
+      "bytes": 20548,
+      "sha256": "f4296f07112265e39b3b6072d089a1e27574820ba5b22adad1f075f5c7513645"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-navigation.mjs",
+      "bytes": 21187,
+      "sha256": "2f76989e0381f6de3321e6eaa5fa7e2447752863d1ce3b82abe376b1a3de6f0d"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 186926,
+      "sha256": "0a094e3a2a11a38e1a92a8af8be4926006e14f05a7e4153f7810b350c6ddd1f0"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "bytes": 353658,
+      "sha256": "bfe917ac07e74c925a42a87419668e4d91e7dc5c31b7a7d65e7b3b6a3b7c374a"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-prepare.mjs",
+      "bytes": 38075,
+      "sha256": "3b6eb9e0d04513c0b03ca5cc880f016f5a2e72b5de76a3ec370e44fd15cd97e7"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/capacity-ordinary-staging.mjs",
+      "bytes": 3701,
+      "sha256": "d236f3e34b26cf419b1291f4892d61fcc4f23d8f5f4695936f57ab524e389196"
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs",
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey/mir2-web3/apps/web/scripts/capacity-ordinary-staging.test.mjs",
+      "bytes": 4050,
+      "sha256": "08efae775038b1ed2f3aab93349c1b5b43b39185fa73a4ef8a4e20eaf880fb19"
+    }
+  ],
+  "independentReadOnlyReviewNoBlockers": true,
+  "writerFocusedChecks": {
+    "navigation": 22,
+    "affectedMain": 22,
+    "stagingAndPreparer": 57
+  },
+  "rootOfflineReplay": {
+    "file": "C:/mir2-build/p01-completion-20261024/root-formal-exact-goal-replay-v1.stdout.json",
+    "bytes": 1271,
+    "sha256": "852c3b0dfcac6cca4b57ef83334e41d34167e7194c309e050a998bfb4b98378b",
+    "differentialComparisons": 603,
+    "routeAndNullExact": true,
+    "necessaryOccupiedGoalFixtureOnly": true,
+    "completeRawCacheReplay": false
+  },
+  "rootCompleteCurrentHeadQualificationPending": true,
+  "freshFull16Pending": true,
+  "formalLadderRerunPending": true,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

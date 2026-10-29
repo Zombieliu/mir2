@@ -85,6 +85,7 @@ fn paid_ledger() -> BillingLedger {
     };
     BillingLedger {
         orders: BTreeMap::from([(id, order)]),
+        ..Default::default()
     }
 }
 
@@ -116,8 +117,8 @@ fn assert_file_round_trip(store: AccountStore, character: CharacterRecord) {
     fs::write(&file.0, serde_json::to_vec(&expected).unwrap()).unwrap();
     let repository = FileAccountStoreRepository::new(&file.0);
     let loaded = repository.load(character.clone()).unwrap();
-    assert_eq!(loaded.schema_version, 10);
-    expected["schemaVersion"] = 10.into();
+    assert_eq!(loaded.schema_version, crate::billing::BILLING_SCHEMA_VERSION);
+    expected["schemaVersion"] = crate::billing::BILLING_SCHEMA_VERSION.into();
     assert_eq!(serde_json::to_value(&loaded).unwrap(), expected);
     repository.save(&loaded).unwrap();
     let reopened = repository.load(character).unwrap();

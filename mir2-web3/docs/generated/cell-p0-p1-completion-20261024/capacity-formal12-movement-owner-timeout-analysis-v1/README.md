@@ -1,0 +1,13 @@
+# Formal12 movement owner-timeout evidence
+
+This archive preserves selected public evidence for run1792951023370-34757a8d. The original formal failure is unchanged. The [summary](analysis/summary-v1.json), [selected packet/action evidence](analysis/selected-public-evidence-v1.json) and [slow/monitor correlation](analysis/slow-monitor-correlation-v1.json) are bounded projections bound to original row numbers and raw SHA; no whole raw or monitor is duplicated.
+
+Both owner clients received the explicit shared-zone movement-owner timeout after5000ms. Nearby public diagnostics recorded zone_cadence.total6500ms and spectator branches4899ms. These are measured timing correlations; they do not identify the actual Store/writable-state/IO lock holder, prove a deadlock or establish a CPU capacity ceiling. The error is an owner-wait timeout and supplies no authoritative collision rejection diagnosis.
+
+The [wording clarification](analysis/wording-clarification-v2.json) preserves an exact distinction: five movement timeouts span both actors, and both actors had Run and Walk timeouts; only actor01 additionally had the RTT timeout at raw line1847. The original summary sentence, rows, census and verdict remain intact. A5000ms wait cannot have begun with the final Walk sent only about1510ms before its error; ordinary movement lacks request IDs, so the error and final prior UserLocation cannot be uniquely assigned to that movement request.
+
+The stable [source review v1](source-review/source-review-v1.json) and [expanded source review v2](source-review/source-review-v2.json) describe Store/write_state/PublicationGuard.settle and File IO boundaries. They are source facts and candidate waiting paths, not proof of the runtime holder. The intermediate addendum is already incorporated in v2 and is not copied again.
+
+The original [v2 five-file whitelist](analysis/public-whitelist-v2.json) includes four unchanged diagnostics plus the wording clarification. Its historical v1 whitelist remains SHA-referenced. This archive's [copy whitelist](public-whitelist-v1.json) adds only the two stable source reviews, for eight originals totaling153207 bytes. The original raw1888rows/2054564B/SHA6e9a23aab7d71faee1b2e109aba076da722efcf3785f71a079137b0bbf9b1619 stays external. No raw/monitor/spectator/87MB executable/private data or active runtime was read by the copier.
+
+The [ended verification](../capacity-formal12-ended-verification-analysis-v1/README.md) preserves formalFailed=true and accepted=false. P0 remains unaccepted and P2 frozen. This analysis does not alter thresholds or grant gameplay credit, and it makes no final root-cause determination.

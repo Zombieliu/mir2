@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-10-24T23:07:03.860Z",
+  "state": "source-frozen-synthetic-only",
+  "sourceSha256": "23a072c2438ef5151778167d5d61c7084df2e037a3c89cea95ff3147feb9caeb",
+  "sources": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\freeze-helper-v1.mjs",
+      "bytes": 7357,
+      "sha256": "2206e5f0bf86264e18660e757cab2d314c09833d4ddc32d7fd9c41c181210ed7"
+    }
+  ],
+  "files": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\freeze-helper-v1.mjs",
+      "bytes": 7357,
+      "sha256": "2206e5f0bf86264e18660e757cab2d314c09833d4ddc32d7fd9c41c181210ed7"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    }
+  ],
+  "producerSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\gateway\\src\\web.rs",
+    "bytes": 855687,
+    "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+  },
+  "producerSourceCommit": null,
+  "newBackendInputCount": 41,
+  "newBackendReleaseBindingPending": true,
+  "synthetic": {
+    "tests": 25,
+    "passed": 25,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "durationMs": 154.3198,
+    "legacyScenariosPassed": 14,
+    "newContextScenariosPassed": 11,
+    "log": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    }
+  },
+  "normalizedKeys": {
+    "legacy": [
+      "observedAtMs",
+      "stage",
+      "durationMs"
+    ],
+    "scoped": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "connection"
+    ],
+    "queue": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "connection",
+      "queuedPhase",
+      "phaseElapsedMs",
+      "inputClass"
+    ]
+  },
+  "stageCounts": {
+    "legacy": 27,
+    "newContext": 13,
+    "totalLegacy": 40,
+    "nonQueueScoped": 15,
+    "queuedPhases": 15,
+    "inputClasses": 3
+  },
+  "limits": {
+    "lineBytes": 8192,
+    "totalPublicBytes": 33554432,
+    "prewriteQueueBytes": 1048576,
+    "writerHighWaterMarkBytes": 1048576,
+    "finishWaitMs": 15000
+  },
+  "scope": "New external helper/test/schema sources only. No old03/07 source, production file, launcher, threshold or prior evidence was modified. Synthetic validation only, no game build/service/capacity acceptance.",
+  "oldFrozenFilesModified": false,
+  "productFilesModified": false,
+  "helperImportedForSyntheticTestsOnly": true,
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

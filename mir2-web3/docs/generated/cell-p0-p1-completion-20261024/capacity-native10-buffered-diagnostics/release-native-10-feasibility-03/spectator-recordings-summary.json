@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:15:55.422Z",
+  "scope": "Post-stop streaming metadata/count/hash from this fresh explicitly owned spectator directory only; no replay/entity payload copied",
+  "directory": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-03/recordings",
+  "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+  "fileCount": 1,
+  "totalFrames": 397,
+  "totalBytes": 22583696,
+  "healthPersistedFramesTotal": 397,
+  "persistedCounterMatchesFiles": true,
+  "recordingErrorsTotal": 0,
+  "files": [
+    {
+      "file": "0-498017.jsonl",
+      "bytes": 22583696,
+      "sha256": "6eaba7e6ab9620dd8b59fb5c34f6bf0029e9480f7d6f35d3be6440a27a59fd79",
+      "frames": 397,
+      "minCapturedAtMs": 1792861677464,
+      "maxCapturedAtMs": 1792861782328,
+      "firstSequence": 1,
+      "lastSequence": 397,
+      "mapFileNames": [
+        "0"
+      ],
+      "schemas": [
+        "obelisk.mir2.spectator.v1"
+      ]
+    }
+  ],
+  "capacityAccepted": false
+}

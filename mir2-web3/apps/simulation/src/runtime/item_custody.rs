@@ -93,6 +93,9 @@ pub(super) fn reserved_ids(systems: &Stage5SystemsState) -> Result<BTreeSet<u64>
 }
 pub(super) fn refresh(world: &mut World) -> Result<(), String> {
     let mut ids = reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems)?;
+    for id in super::procurement::reserved_ids(world)? {
+        if !ids.insert(id) { return Err("procurement UID collides with existing custody".into()); }
+    }
     let hero_ids = super::hero_inventory::validate_hero_custody(
         world.resource::<super::resources::HeroInventoryResource>(),
     )?;

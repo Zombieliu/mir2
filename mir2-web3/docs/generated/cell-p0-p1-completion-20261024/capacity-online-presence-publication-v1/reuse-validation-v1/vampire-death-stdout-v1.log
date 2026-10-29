@@ -1,0 +1,11 @@
+
+running 6 tests
+test runtime::zone::runtime::vampire_ai::death_tests::captured_explosion_does_not_damage_a_revived_zombie_incarnation ... ok
+test runtime::zone::runtime::vampire_ai::death_tests::fresh_authoritative_spawn_reuses_removed_id_but_rejects_old_burst_target_life ... ok
+test runtime::zone::runtime::vampire_ai::death_tests::lethal_released_explosion_preserves_only_a_preexisting_exp_owner_once ... ok
+test runtime::zone::runtime::vampire_ai::death_tests::ordinary_fatal_damage_releases_master_and_cannot_hit_uncontrolled_wild ... ok
+test runtime::zone::runtime::vampire_ai::death_tests::released_burst_can_hit_former_safe_master_without_human_pk_or_vampirism ... ok
+test runtime::zone::runtime::vampire_ai::death_tests::released_burst_rejects_cold_revoked_or_reborn_human_and_untyped_legacy_queue ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 2950 filtered out; finished in 0.38s
+

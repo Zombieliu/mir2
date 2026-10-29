@@ -1,0 +1,73 @@
+{
+  "purpose": "Supplement only U+5E01 and U+94FE missing from the existing Noto Sans TC face; preserve TC as first Han fallback.",
+  "font": {
+    "file": "MIR2BillingHan-Regular.ttf",
+    "sha256": "7cc4d33730ae409a198cae325f57db54730f94b193f5d604375701890bb762ce",
+    "bytes": 2532,
+    "family": "MIR2 Billing Han",
+    "postScriptName": "MIR2BillingHan-Regular",
+    "weight": 400,
+    "static": true,
+    "format": "TrueType",
+    "unicodeMap": {
+      "U+0020": "space",
+      "U+5E01": "uni5E01",
+      "U+94FE": "uni94FE"
+    },
+    "glyphOrder": [
+      ".notdef",
+      "space",
+      "uni5E01",
+      "uni94FE"
+    ],
+    "copyright": "(c) 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.",
+    "fontToolsVersion": "4.68.0"
+  },
+  "officialSource": {
+    "provider": "Google Fonts official text API",
+    "apiUrl": "https://fonts.googleapis.com/css?family=Noto+Sans+SC:400&text=%E5%B8%81%E9%93%BE",
+    "requestUserAgent": "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)",
+    "downloadUrl": "https://fonts.gstatic.com/l/font?kit=k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnY1VbhFrfZnaTg&skey=cf0bb10b5602fdc3&v=v41",
+    "file": "billing-han-source/NotoSansSC-Text400.eot",
+    "sha256": "0ca2976cbf7b560ca3a5f565b40b9f17fa648b0966cece2b08a1e39cad4b9917",
+    "bytes": 2660,
+    "format": "Uncompressed EOT v2.0002",
+    "embeddedSfntSha256": "3da569a39e0173d80d6e56b5931e0b9c71b78da4a6195ed3da6cb36e1148161f",
+    "embeddedSfntBytes": 2356,
+    "embeddedVersion": "Version 2.004-H2;hotconv 1.0.118;makeotfexe 2.5.65603",
+    "note": "Delivered static text subset is pinned by its exact EOT and embedded TrueType hashes; it is not claimed byte-identical to the full upstream variable font."
+  },
+  "familyAndLicenseReference": {
+    "repository": "https://github.com/google/fonts",
+    "commit": "a85815a42757630ce188fdad368c2dfc444d4773",
+    "metadataPath": "ofl/notosanssc/METADATA.pb",
+    "localMetadata": "billing-han-source/METADATA.pb",
+    "metadataSha256": "c6c4bdb785793b2de1da177caeeffcd0c90d7680bdab2de8f88ab45007bc59bc",
+    "metadataUpstreamRepository": "https://github.com/notofonts/noto-cjk",
+    "metadataUpstreamCommit": "523d033d6cb47f4a80c58a35753646f5c3608a78"
+  },
+  "license": {
+    "name": "SIL Open Font License 1.1",
+    "file": "OFL-NotoSansSC-BillingHan.txt",
+    "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9",
+    "copyright": "(c) 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.",
+    "reservedFontName": "Source",
+    "modification": "Retained exact space and two Han glyphs, renamed all primary family/subfamily/PostScript names to MIR2 Billing Han Regular, retained original copyright and OFL."
+  },
+  "generator": {
+    "file": "generate-billing-han.py",
+    "sha256": "fb3801d4748d15d81826b4db87287deb9d16a408fbe76c0f296785e12221edce",
+    "command": "python generate-billing-han.py",
+    "requires": "fontTools 4.68.0 from an existing environment or an explicitly temporary PYTHONPATH; no project dependency",
+    "tool": {
+      "project": "fonttools",
+      "version": "4.68.0",
+      "wheel": "fonttools-4.68.0-py3-none-any.whl",
+      "sha256": "d76f8fdcb6936f5e1045a0c9dd721a4bf11112e60d1e243bfa1d39f06a8b3104",
+      "url": "https://files.pythonhosted.org/packages/35/74/4ea331ecc65ba05a58b1e4e8ccd604c8a15565f876dfbf93fc2a2ea2e22b/fonttools-4.68.0-py3-none-any.whl",
+      "metadataUrl": "https://pypi.org/pypi/fonttools/4.68.0/json",
+      "license": "MIT"
+    }
+  },
+  "embedding": "Static TrueType subset embedded in Windows executable and loaded from the same bundled file by system-font-disabled GPU fixtures. Han fallback order: Noto Sans TC, MIR2 Billing Han."
+}

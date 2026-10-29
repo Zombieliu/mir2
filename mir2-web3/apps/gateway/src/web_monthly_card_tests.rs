@@ -164,6 +164,7 @@ mod monthly_card_tests {
         let state = super::super::WebState {
             config: Arc::clone(&config),
             deploy_revision: None,
+            auth_rate_limit_policy: crate::web::AuthRateLimitPolicy::default(),
             zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
             chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
             session_cache: Arc::new(crate::InMemoryGatewaySessionCache::default()),

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T02:33:11.878Z",
+  "reason": "Preserve passed21+51 version before root-authorized initial no-witness liveness correction",
+  "files": [
+    {
+      "source": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "preimage": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/pre-liveness-playtest-capacity-soak.mjs.txt",
+      "bytes": 143634,
+      "sha256": "bf09e909102776d3911b9fa581f38f2817bff7214c47e388132f539eb8a91229"
+    },
+    {
+      "source": "apps/web/scripts/playtest-capacity-soak.test.mjs",
+      "preimage": "C:/mir2-build/p01-completion-20261024/native-hp-pursuit-maintenance-v1/pre-liveness-playtest-capacity-soak.test.mjs.txt",
+      "bytes": 214369,
+      "sha256": "560d44791a8d4e33bd149c06c3ccabe4ea7820768c328593effa1227ad1a11ed"
+    }
+  ]
+}

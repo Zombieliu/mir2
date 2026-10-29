@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARATION_CONTRACT_NOT_ACTUAL_VALIDATION",
+  "parameters": {
+    "allowed": ["--repository", "--expected-head"],
+    "repository": "Actual checkout root, resolved through Git toplevel",
+    "expectedHead": "Actual new lowercase40hex committed HEAD; 5c2e/468/b84d historical values rejected"
+  },
+  "finalBinding": {
+    "schemaVersion": 1,
+    "state": "FINAL_COMMITTED_BACKEND_SOURCE",
+    "sourceCommit": "<new actual HEAD>",
+    "sourcePins": [{"path": "mir2-web3/apps/gateway/src/web.rs", "bytes": "positive integer", "sha256": "actual64hex"}],
+    "rootFunctionalValidation": {"path": "absolute external actual JSON receipt", "bytes": "positive integer", "sha256": "actual64hex"},
+    "driverFrozenManifest": {"path": "absolute external actual new Node9 freeze", "bytes": "positive integer", "sha256": "actual64hex"}
+  },
+  "rootFunctionalValidation": {
+    "schemaVersion": 1,
+    "sourcePins": "Exactly the same single web raw pin as finalBinding",
+    "driverSourceSha256": "Exact new driverFrozenManifest.sourceSha256",
+    "driverSourcePins": "Exact driverFrozenManifest.files9 array",
+    "checks": {"rustFocusedPassed": true, "rustfmtPassed": true, "nodeRegressionPassed": true},
+    "actualChecks": [
+      {"kind": "rustFocused", "exitCode": 0, "passed": 8, "failed": 0, "log": "exact external pin", "receipt": "exact actual JSON receipt pin"},
+      {"kind": "rustfmt", "exitCode": 0, "passed": 1, "failed": 0, "log": "exact external pin (zero bytes is valid)", "receipt": "exact actual JSON receipt pin"},
+      {"kind": "nodeRegression", "exitCode": 0, "passed": 210, "failed": 0, "log": "exact external pin", "receipt": "exact actual JSON receipt pin"}
+    ],
+    "scope": "The8Rust filter includes the old7; it is not15 independent Rust passes. Node210 must be the actual full run, not arithmetic combining preliminary185+25. This root-owned summary and its raw references must be produced after actual checks."
+  },
+  "driverFreeze": {
+    "schemaVersion": 1,
+    "actualCodeCommit": "same new expected HEAD",
+    "driverSourceCommit": "same new expected HEAD",
+    "files": "Exact original9 Node input names, each {file,bytes,sha256}; current raw and Git-filtered code must match",
+    "sourceSha256": "sha256(JSON.stringify(files)), distinct from backend44 aggregate"
+  },
+  "baseline": {
+    "sourceCommit": "5c2e713863d3e9556a92f856b11df2396c73b137",
+    "manifest": "backend-source-personal-monster-projection-v1.json",
+    "bytes": 32926,
+    "sha256": "151869b76d13202e3c6557f908b5adc5643d1b0579cd7d4961cf0458c71cec52",
+    "sourceSha256": "6276d11a740e956cf8e3d316362a49900f1c761d9ffcdfd462cb7394056f7828",
+    "inputCount": 44,
+    "rustCount": 39,
+    "cargoCount": 5,
+    "allowedDelta": "web.rs only",
+    "other43RawAndGitLfExact": true,
+    "originalGitBase": "68f810b442321ae66360a2be18e31dc309efdaf7",
+    "ignoredInclusiveUntrackedBackendInputsAllowed": 0
+  },
+  "captureBuildRunExecuted": false,
+  "capacityAccepted": false
+}

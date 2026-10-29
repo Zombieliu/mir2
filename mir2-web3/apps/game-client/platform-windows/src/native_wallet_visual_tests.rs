@@ -14,7 +14,7 @@ use bevy::{
         view::screenshot::{Screenshot, ScreenshotCaptured},
         RenderApp, RenderPlugin,
     },
-    text::TextLayoutInfo,
+    text::{ComputedTextBlock, TextLayoutInfo},
     window::{ExitCondition, WindowPlugin},
     winit::WinitPlugin,
 };
@@ -201,19 +201,43 @@ fn readback(app: &mut App, target: &Handle<Image>) -> Image {
 
 fn verify_text(app: &mut App, expected: &str) {
     let world = app.world_mut();
-    let (_, computed, layout) = world
-        .query::<(&Text, &ComputedNode, &TextLayoutInfo)>()
+    let (_, computed, layout, block, transform) = world
+        .query::<(
+            &Text,
+            &ComputedNode,
+            &TextLayoutInfo,
+            &ComputedTextBlock,
+            &UiGlobalTransform,
+        )>()
         .iter(world)
-        .find(|(text, _, _)| text.0 == expected)
+        .find(|(text, _, _, _, _)| text.0 == expected)
         .unwrap_or_else(|| panic!("native text absent: {expected}"));
     assert!(
         !layout.glyphs.is_empty(),
         "native text must rasterize: {expected}"
     );
     assert!(computed.size.x > 0.0 && computed.size.y > 0.0);
+    let mut missing_glyphs = 0;
+    for line in block.buffer().lines() {
+        for run in line.runs() {
+            for cluster in run.clusters() {
+                missing_glyphs += cluster.glyphs().filter(|glyph| glyph.id == 0).count();
+            }
+        }
+    }
+    assert_eq!(missing_glyphs, 0, "missing native glyph: {expected}");
     assert!(
         layout.size.x <= computed.size.x + 1.0 && layout.size.y <= computed.size.y + 1.0,
         "native text overflow: {expected}"
+    );
+    let top_left = transform.translation - computed.size / 2.0;
+    let bottom_right = top_left + computed.size;
+    assert!(
+        top_left.x >= -1.0
+            && top_left.y >= -1.0
+            && bottom_right.x <= WIDTH as f32 + 1.0
+            && bottom_right.y <= HEIGHT as f32 + 1.0,
+        "native text outside viewport: {expected}"
     );
 }
 
@@ -446,7 +470,7 @@ fn native_wallet_login_offscreen_fixture() {
             .bytes()
             .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-'));
         let filename = format!(
-            "{:02}-wallet-pending-{code}-nine-language-offscreen-fixture.png",
+            "{:02}-wallet-pending-{code}-all-locales-offscreen-fixture.png",
             index + 5
         );
         if let Some(output) = &output {
@@ -460,16 +484,17 @@ fn native_wallet_login_offscreen_fixture() {
             "walletAuthenticated": false,
         }));
     }
-    assert_eq!(smoke_frames.len(), 9);
+    assert_eq!(smoke_frames.len(), Locale::COUNT);
     if let Some(output) = &output {
         std::fs::write(output.join("wallet-offscreen-fixture.json"), serde_json::to_vec_pretty(&serde_json::json!({
             "kind": "offscreen native UI fixture", "liveAcceptance": false,
             "walletAuthenticated": false, "windowCount": 0, "width": WIDTH, "height": HEIGHT,
             "qrPayload": FIXTURE_QR_PAYLOAD,
             "languages": ["en", "zh-TW"],
-            "nineLanguageSmoke": smoke_frames,
+            "languageCount": Locale::COUNT,
+            "supportedLanguageSmoke": smoke_frames,
             "qrRect": { "min": chinese_qr_rect.min.to_array(), "max": chinese_qr_rect.max.to_array() },
-            "verified": ["native entry button in English and Chinese", "pending modal in English and Chinese", "countdown", "cancel label", "locale switch preserves pending state and QR handle", "English/Traditional Chinese locale switch preserves QR bounds and pixels", "nine-language pending text glyphs and layout", "nine-language GPU readback"]
+            "verified": ["native entry button in English and Chinese", "pending modal in English and Chinese", "countdown", "cancel label", "locale switch preserves pending state and QR handle", "English/Traditional Chinese locale switch preserves QR bounds and pixels", "all-supported-language pending text glyphs and layout", "all-supported-language GPU readback"]
         })).unwrap()).unwrap();
         eprintln!("offscreen native UI fixture saved to {}", output.display());
     }

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v1.mjs",
+    "bytes": 18269,
+    "sha256": "2fe4b3d258b62afcd977815d5e53854b89f51cf29ff2655500aec378c55b2b30"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-resume-probe16-source-pins-v2.mjs",
+    "bytes": 18298,
+    "sha256": "9256c6881e9da04087e481320e8563c6f7ca35debb36d115b2447d3e8057d104"
+  },
+  "rules": [
+    {
+      "from": "const { verifyDriverReportContract, EXPECTED_NATIVE_PATROL_PLANNING, EXPECTED_NAVIGATION_COORDINATION, EXPECTED_MEASUREMENT_CLOCK, EXPECTED_NATIVE_HP_MAINTENANCE, EXPECTED_NATIVE_ATTACK_WITNESS, EXPECTED_NATIVE_CHASE_PREFERENCE } = await import('./driver-report-contract.mjs');",
+      "to": "const { verifyDriverReportContract, EXPECTED_NATIVE_PATROL_PLANNING, EXPECTED_NAVIGATION_COORDINATION, EXPECTED_MEASUREMENT_CLOCK, EXPECTED_NATIVE_HP_MAINTENANCE, EXPECTED_NATIVE_ATTACK_WITNESS, EXPECTED_NATIVE_CHASE_PREFERENCE } = await import(pathToFileURL(path.join(ROOT,'driver-report-contract.mjs')));",
+      "occurrences": 1
+    }
+  ],
+  "inverseRawBytesExact": true,
+  "originalTailBytes": 3500,
+  "originalTailRawExact": true,
+  "remainingRelativeDynamicImportCount": 0,
+  "reason": "Source relocated to BASE; only this original relative import must resolve against actual ROOT16 instead. This is source-pin preparation recovery, not re-provisioning.",
+  "noteAndReceiptNamesUnchanged": true,
+  "originalRuntimeSourceModified": false,
+  "resumeExecuted": false
+}

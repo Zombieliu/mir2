@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T21:13:05.728Z",
+  "scope": "Static prepared-only read-only QA. No target-module import, runtime/source guard, Git capture, test, build, binary read or service execution by this reviewer.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\preparation-v1.json",
+    "bytes": 2693,
+    "sha256": "0ff2a7821420ea191f0f1c0ba70aeed9be3b19e544c2a7dd8271154eea328844"
+  },
+  "sources": {
+    "runtimeLibrary": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-lib-v1.mjs",
+      "bytes": 33531,
+      "sha256": "9b12d67e7e31eb0ada4550c9aceb8dd9c0e64e74892007b4ffc8d0fa710b366f"
+    },
+    "readonlyEntry": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\readonly-source-guard-v1.mjs",
+      "bytes": 724,
+      "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+    },
+    "pendingBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\current-execution-binding-v1.json",
+      "bytes": 1271,
+      "sha256": "2faf380631c621e142086cae45e2d46cc83241f02e2848d6c3211e7c741ab696"
+    },
+    "derivation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\source-derivation-proof-v1.json",
+      "bytes": 20845,
+      "sha256": "48c45d5dda1f94c3366ca47cfe63affb4702e9191d7fd4f7b2aebc2fe3dbecbf"
+    },
+    "originalLibrary": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\source-lib-v1.mjs",
+      "bytes": 23031,
+      "sha256": "831a38ce052b11258d48a5946d95173cb299304ec7d7e210e7eb9bec050b57ef"
+    },
+    "syntaxReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-runtime-v1\\node-syntax-check-v1.json",
+      "bytes": 595,
+      "sha256": "9e755402c45af10439bdae13ceadc9bc7874c6ef712f6fddea057b5bf9e4ab25"
+    },
+    "current219ActualReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-root-full-driver-receipt-v1.json",
+      "bytes": 5378,
+      "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1"
+    }
+  },
+  "checks": {
+    "allSixPreparedRawPinsMatched": true,
+    "preparedAggregateRecomputed": true,
+    "twelveRulesForwardAndReverseRawExact": true,
+    "pendingHeadAndFreezeRefNull": true,
+    "pendingRefusalBeforeGitCapture": true,
+    "actual219ReceiptArrayAndPassedFailedSchemaMatched": true,
+    "authorTwoNodeChecksPassed": true,
+    "authorChecksDidNotImportOrExecuteGuard": true,
+    "readOnlyEntryHasNoBuildMode": true
+  },
+  "sourceReview": [
+    "The new adapter validates immutable original c743/50/09081/f919 Release and build evidence without calling the old current-HEAD requireFrozen. Old d240/6759/210 is explicitly historical build basis.",
+    "Current H must be an actual clean descendant of c743. Complete68f-to-H backend closure remains exactly50, ignored-inclusive untracked backend inputs are rejected, all50 current raw and H GitLF are compared with both c743 blobs and its original manifest, retaining fixedCargo and four-None proofs.",
+    "Current nine Node files must match a separately pinned H freeze and Git-filtered H objects; only main/test may differ from historical nine inputs. The actual four-file219 receipt is consumed with sourceBefore/After arrays and counts.passed/failed, matching the real5378-byte producer schema.",
+    "The returned manifest and manifestBytes remain the original immutable c743 certificate. Explicit current fields separate backendc743, driverH and executionH and state rebuildPerformed:false; original Release.driver d240 remains unchanged.",
+    "The readonly CLI accepts only readonly-sourceguard plus repository/expected-head. PENDING active binding refuses before backend capture or executable hashing. No new Release, manifest, build writer or account/service operation exists."
+  ],
+  "pendingFinalizationRequirements": [
+    "Actual committed clean H and its first immutable current-nine freeze must still be supplied. Current fullRegression passed/failed/cancelled/skipped and receipt/log reference shapes must match the consumer when that actual freeze exists.",
+    "The new freeze should explicitly identify backendBuildCommit/backendSourceCommit as c743 when those fields exist; new H labels belong to driver/execution. A later binding review must reject namespace ambiguity.",
+    "A separately derived fresh full16 must retain its six ordinary lifecycle source pins, separate from the nine capacity inputs. This adapter does not turn219 into lifecycle execution or a live capacity result."
+  ],
+  "limitations": [
+    "All conclusions are prepared source eligibility only. This reviewer did not execute the guard or inspect a future current H freeze.",
+    "Author-run two syntax checks are reviewed as existing evidence, not repeated by this reviewer. Actual219 was already independently reviewed under the separate full-regression addendum."
+  ],
+  "verdict": {
+    "preparedRuntimeContractPassed": true,
+    "eligibleForRootActualBinding": true,
+    "eligibleForExecutionNow": false,
+    "blockingFindingIds": [],
+    "rustRebuildRequired": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

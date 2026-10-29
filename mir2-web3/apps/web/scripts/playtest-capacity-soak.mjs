@@ -9,12 +9,17 @@ import { pathToFileURL } from 'node:url';
 import { PlaytestClient, outsideRepository, validateEndpoint, observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { NativeResumeClient, validateResumeControl, assertResumeEvidence, assertReplayRejected, resumeFingerprint } from './playtest-native-resume-smoke.mjs';
 import { CATALOG_GZIP_CAPABILITY } from './playtest-catalog-transport.mjs';
+import { PublicDensity, SustainObservations, beginCapacityPhase, finishCapacityPhase } from './playtest-capacity-observability.mjs';
 import { CommandBudget, SafetyStop } from './playtest-load-smoke.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
-import { hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.mjs';
+import { hasAuthoritativePlayerDeath, observedPlayerHp } from './quest-agent/protocol-observation.mjs';
 import { selfActionBlockMask } from './quest-agent/protocol-status.mjs';
-import { equipStarterGear } from './quest-agent/protocol-play.mjs';
-import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
+import { createNavigator, equipStarterGear } from './quest-agent/protocol-play.mjs';
+import { startEmergencyHpRecovery } from './quest-agent/protocol-loadout.mjs';
+import { createOrdinarySupplies } from './capacity-ordinary-supplies.mjs';
+import { loadOrdinaryProtection } from './capacity-ordinary-protection.mjs';
+import { preparationStagingCatalogue, selectPreparationStagingPoint } from './capacity-ordinary-staging.mjs';
+import { capacityPolicy, capacityActorLimit, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
   AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
 const STEPS = [[0, -1, 'Up'], [1, -1, 'UpRight'], [1, 0, 'Right'], [1, 1, 'DownRight'],
@@ -32,12 +37,113 @@ const REJECTED_WALK_CELL_LIMIT = 16;
 const REJECTED_WALK_CELL_TTL_MS = 3000;
 const COMBAT_CHASE_DEFERRAL_LIMIT = 16;
 const COMBAT_CHASE_DEFERRAL_MS = 30000;
+const COMBAT_CHASE_MAX_MOVES = 40;
+const COMBAT_CHASE_MAX_MS = 30000;
+const RECENT_CHASE_PREFERENCE_MS = 3000;
+const COMBAT_SCOUT_HINT_OBSERVER_LIMIT = 100;
+const COMBAT_SCOUT_HINT_ENTITY_LIMIT = 2048;
+const COMBAT_SCOUT_HINT_LIMIT = 4;
+const COMBAT_SCOUT_SELECTION_ROW_LIMIT = 32;
+export const PENDING_ATTACK_PACKET_LIMIT = 64;
+export const ATTACK_OUTCOME_CAPABILITY = 'nativeAttackOutcomeV1';
+const MAX_ATTACK_REQUEST_ID = 18446744073709551615n;
+const ATTACK_RESULT_CODES = { unavailable: new Set(['unsupported', 'executionUnavailable', 'authenticationRequired', 'requestIdNotFresh']),
+  unknown: new Set(['outcomeUnknown', 'previousOutcomeUnknown']) };
+const ATTACK_TRACE_PACKETS = new Set(['ObjectAttack', 'ObjectWalk', 'ObjectRun', 'ObjectTurn', 'ObjectStruck',
+  'DamageIndicator', 'ObjectHealth', 'ObjectDied', 'ObjectRevive', 'ObjectRemove', 'ObjectTeleportOut']);
 
 // Deliberately select public identity/position fields. Never copy a packet or
 // snapshot wholesale into the persistent diagnostic stream.
 function lifecyclePoint(value) {
   if (!value || !Number.isFinite(value.x) || !Number.isFinite(value.y)) return null;
   return { x: value.x, y: value.y };
+}
+
+function attackTraceLife(entity) {
+  if (!entity) return null;
+  return { ...(Number.isInteger(entity.objectId) ? { objectId: entity.objectId } : {}),
+    ...(lifecyclePoint(entity) ?? {}),
+    ...(typeof entity.dead === 'boolean' ? { dead: entity.dead } : {}),
+    ...Object.fromEntries(['hp', 'maxHp'].filter(key => Number.isFinite(entity[key])).map(key => [key, entity[key]])) };
+}
+
+export function attackResultsMode(value = 'legacy') {
+  if (!['legacy', 'v2'].includes(value)) throw new Error('Attack results must be legacy or v2');
+  return value;
+}
+
+function validAttackRequestId(value) {
+  return typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value) && BigInt(value) <= MAX_ATTACK_REQUEST_ID;
+}
+
+export function matchAttackResultV2(events, request) {
+  const matches = events.filter(event => event.type === 'attackResultV2' && event.protocolVersion === 2 &&
+    event.requestId === request.requestId && event.objectId === request.objectId &&
+    validAttackRequestId(event.requestId) && ['launched', 'notLaunched', 'unavailable', 'unknown'].includes(event.result) &&
+    (['launched', 'notLaunched'].includes(event.result) ? event.code === undefined : ATTACK_RESULT_CODES[event.result].has(event.code)));
+  // Identical cache replays are harmless. Conflicting results are never used
+  // to choose the more favourable outcome or to credit damage.
+  if (new Set(matches.map(event => `${event.result}:${event.code ?? ''}`)).size > 1) throw new Error('Conflicting correlated attackV2 outcomes');
+  return matches[0] ?? null;
+}
+
+export function beginPendingAttackEvidence(client, observer, owner, target, sentAtMs, cursor, observerCursor) {
+  if (client.pendingAttackEvidence) throw new Error('Only one pending attack evidence window per actor');
+  const trace = { actor: client.label, phase: client.context.phase, connection: client.lifecycleConnection,
+    sentAtMs, sentAtWallMs: Date.now(), sendCursor: cursor, owner: attackTraceLife(owner), target: attackTraceLife(target),
+    receivers: [{ client, cursor, role: 'owner', attackerId: owner.objectId }], packets: [], packetCount: 0, active: true };
+  if (observer && observer !== client) trace.receivers.push({ client: observer, cursor: observerCursor,
+    role: 'observer', attackerId: observedPlayerId(observer, client.label) });
+  for (const receiver of trace.receivers) (receiver.client.pendingAttackPacketTraces ??= new Set()).add(trace);
+  client.pendingAttackEvidence = trace;
+  return trace;
+}
+
+// These receipts are diagnostic only: neither a same-coordinate UserLocation
+// nor target movement proves that this particular attack was rejected.
+export function recordPendingAttackPacket(client, event) {
+  if (event.direction !== 'received' || !['packet', 'attackResultV2'].includes(event.type)) return;
+  for (const trace of client.pendingAttackPacketTraces ?? []) {
+    const receiver = trace.receivers.find(entry => entry.client === client), payload = event.payload ?? {};
+    if (!trace.active || !receiver || event.sequence <= receiver.cursor || event.monotonicMs < trace.sentAtMs) continue;
+    if (event.type === 'attackResultV2') {
+      if (receiver.role !== 'owner' || event.objectId !== trace.target?.objectId || !validAttackRequestId(event.requestId) ||
+          event.protocolVersion !== 2 || !['launched', 'notLaunched', 'unavailable', 'unknown'].includes(event.result)) continue;
+      trace.packetCount++;
+      if (trace.packets.length < PENDING_ATTACK_PACKET_LIMIT) trace.packets.push({ receiver: 'owner', sequence: event.sequence,
+        monotonicMs: event.monotonicMs, atMs: Date.now(), type: 'attackResultV2', protocolVersion: 2,
+        requestId: event.requestId, objectId: event.objectId, result: event.result,
+        ...(ATTACK_RESULT_CODES[event.result]?.has(event.code) ? { code: event.code } : {}) });
+      continue;
+    }
+    const ownerLocation = receiver.role === 'owner' && event.packet === 'UserLocation';
+    if (!ownerLocation && (!ATTACK_TRACE_PACKETS.has(event.packet) ||
+        ![receiver.attackerId, trace.target?.objectId].filter(Number.isInteger).includes(payload.objectId))) continue;
+    trace.packetCount++;
+    if (trace.packets.length >= PENDING_ATTACK_PACKET_LIMIT) continue;
+    const projected = { ...Object.fromEntries(['objectId', 'attackerId', 'damage', 'percent', 'hp', 'maxHp']
+      .filter(key => Number.isFinite(payload[key])).map(key => [key, payload[key]])),
+      ...(lifecyclePoint(payload) ?? {}), ...(lifecyclePoint(payload.location) ? { location: lifecyclePoint(payload.location) } : {}),
+      ...(typeof payload.dead === 'boolean' ? { dead: payload.dead } : {}),
+      ...(STEPS.some(([, , direction]) => direction === payload.direction) ? { direction: payload.direction } : {}) };
+    trace.packets.push({ receiver: receiver.role, sequence: event.sequence, monotonicMs: event.monotonicMs,
+      atMs: Date.now(), packet: event.packet, payload: projected });
+  }
+}
+
+export function finishPendingAttackEvidence(client, context, outcome) {
+  const trace = client.pendingAttackEvidence;
+  if (!trace) return;
+  trace.active = false;
+  for (const receiver of trace.receivers) receiver.client.pendingAttackPacketTraces.delete(trace);
+  client.pendingAttackEvidence = null;
+  const endAtMs = performance.now(), endedAtWallMs = Date.now();
+  context.writer?.add({ type: 'pendingAttackEvidence', actor: trace.actor, phase: trace.phase, connection: trace.connection,
+    at: endedAtWallMs, sentAtMs: trace.sentAtMs, sentAtWallMs: trace.sentAtWallMs, sendCursor: trace.sendCursor,
+    endedAtMs: endAtMs, endedAtWallMs, owner: trace.owner, target: trace.target, outcome,
+    ...(trace.requestId ? { protocolVersion: 2, requestId: trace.requestId } : {}),
+    maximumPackets: PENDING_ATTACK_PACKET_LIMIT, packetCount: trace.packetCount, truncated: trace.packetCount > trace.packets.length,
+    packets: trace.packets, rule: 'Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting.' });
 }
 function lifecyclePlayer(entity, names) {
   if (!entity || !names.has(entity.name) || !Number.isInteger(entity.objectId)) return null;
@@ -109,18 +215,34 @@ export class CapacityClient extends NativeResumeClient {
     context.accountBudgets ??= new Map();
     if (!context.accountBudgets.has(account.accountId)) context.accountBudgets.set(account.accountId, new CommandBudget());
     this.budget = context.accountBudgets.get(account.accountId);
+    if (context.policy?.activityMode === 'native') {
+      context.accountRestorativeUses ??= new Map();
+      if (!context.accountRestorativeUses.has(account.accountId)) context.accountRestorativeUses.set(account.accountId, Object.create(null));
+      this.journeyRestorativeUseAt = context.accountRestorativeUses.get(account.accountId);
+    }
     this.bytes = { sent: 0, received: 0 }; this.recentSecrets = []; this.movementCount = 0; this.targetCursor = 0; this.failedTargets = new Map();
     this.combatPursuit = null; this.chaseDeferrals = new Map();
+    this.combatScout = null; this.combatScoutCursor = 0;
     this.evidencePending = new Set(); this.nativeRunPrimedUntil = 0;
     this.lifecycleConnection = context.nextLifecycleConnection = (context.nextLifecycleConnection ?? 0) + 1;
-    this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, 100).map(item => item.name)].filter(name => typeof name === 'string'));
+    this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, capacityActorLimit(context.policy)).map(item => item.name)].filter(name => typeof name === 'string'));
     this.lifecycleIdentities = new Map(); this.lifecycleMissing = new Set(); this.lifecycleOrphans = new Set();
     this.lifecycleRows = 0; this.lifecycleIdentityEvictions = 0; this.lifecycleUnchangedSnapshots = 0;
     this.navigationBlocked = false; this.navigationBlockedRows = 0;
     this.rejectedWalkCells = new Map(); this.movementCorrectionStreak = false; this.movementCorrectionRows = 0;
     this.selfTransformRows = 0;
+    this.navigationHint = null; this.navigationClosing = false;
+    this.pendingAttackPacketTraces = new Set(); this.pendingAttackEvidence = null;
+    this.attackResults = attackResultsMode(context.attackResults);
+    this.attackV2Supported = false; this.attackV2Sequence = 0n; this.lastSentAttackV2 = 0n;
   }
   record(direction, value) {
+    const preparationBudget = this.preparationCommandBudget;
+    if (direction === 'sent' && preparationBudget) {
+      if (!Number.isSafeInteger(preparationBudget.sent) || preparationBudget.sent < 0 || preparationBudget.maximum !== 2048 ||
+          preparationBudget.sent >= preparationBudget.maximum) throw new Error('Preparation shared2048 command budget exhausted');
+      preparationBudget.sent++;
+    }
     // Never retain worldSnapshot arrays in event history, nor an ever-growing
     // list of rotated tickets. The latest native ticket remains memory-only.
     const compact = value.type === 'worldSnapshot' ? { type: value.type, payload: { mapFileName: this.snapshot?.mapFileName,
@@ -130,6 +252,7 @@ export class CapacityClient extends NativeResumeClient {
     if (event.type === 'worldSnapshot') event.payload = { mapFileName: this.snapshot?.mapFileName,
       playerObjectId: this.snapshot?.playerObjectId, entities: self(this) ? [{ ...self(this) }] : [] };
     this.events.push(event); if (this.events.length > 2048) this.events.splice(0, 256);
+    recordPendingAttackPacket(this, event);
     if (event.type === 'error') this.context.writer.add({ type: 'serverError', actor: this.label, event });
     return event;
   }
@@ -146,8 +269,20 @@ export class CapacityClient extends NativeResumeClient {
     const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
     const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    this.ordinarySupplies?.observe(message, this.events.at(-1));
+    this.context.sustain?.observe(this, message, this.events.at(-1), Date.now());
+    this.context.aoi?.reconcileReceived(this.context.clients ?? [], this.label);
+    recordNativeHpRecoveryEvidence(this, message, this.events.at(-1));
+    recordPreparationHpRecovery(this, message, this.events.at(-1));
+    const navigationHint = this.navigationHint, navigationReceipt = this.events.at(-1);
+    if (navigationHint && ((message.packet === 'UserLocation' && navigationReceipt.sequence > navigationHint.sendCursor &&
+        navigationReceipt.monotonicMs >= navigationHint.sentAtMs) || ['MapInformation', 'MapChanged'].includes(message.packet) ||
+        this.snapshot?.mapFileName !== navigationHint.mapFileName || !lifecyclePoint(self(this)) || hasAuthoritativePlayerDeath(this.snapshot))) {
+      releaseNavigationHint(this, navigationHint);
+    }
     if (['MapInformation', 'MapChanged'].includes(message.packet)) {
       this.combatPursuit = null; this.chaseDeferrals.clear();
+      this.combatScout = null; this.combatScoutCursor = 0;
     }
     if (lifecycle) this.recordPlayerLifecycle(message, before, orphanMotion);
     if (ownerTransform) {
@@ -208,15 +343,37 @@ export class CapacityClient extends NativeResumeClient {
     this.lifecycleRows++;
   }
   send(command) {
+    if (command?.type === 'attack' && this.attackResults === 'v2') throw new Error('Legacy attack is forbidden in attack-results v2 mode');
+    if (command?.type === 'attackV2') {
+      if (this.attackResults !== 'v2' || !this.attackV2Supported || command.protocolVersion !== 2 ||
+          Object.keys(command).sort().join(',') !== 'objectId,protocolVersion,requestId,type' || !validAttackRequestId(command.requestId) ||
+          BigInt(command.requestId) <= this.lastSentAttackV2 || !Number.isInteger(command.objectId) || command.objectId <= 0 || command.objectId > 4294967295) {
+        throw new Error('Invalid or unsupported attackV2 request; no legacy fallback');
+      }
+      if (!this.draining) this.context.guard.assert();
+      this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
+      this.lastSentAttackV2 = BigInt(command.requestId); this.record('sent', command); this.ws.send(JSON.stringify(command));
+      return;
+    }
     if (!this.draining) this.context.guard.assert();
     this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
     PlaytestClient.prototype.send.call(this, command);
   }
   control(command) {
-    validateResumeControl(command);
+    const v2Capabilities = this.attackResults === 'v2' && command?.type === 'clientCapabilities' &&
+      Object.keys(command).sort().join(',') === 'capabilities,type' &&
+      JSON.stringify(command.capabilities) === JSON.stringify(['nativeResumeV1', CATALOG_GZIP_CAPABILITY, ATTACK_OUTCOME_CAPABILITY]);
+    if (!v2Capabilities) validateResumeControl(command);
     if (!this.draining) this.context.guard.assert();
     this.budget.reserve(); this.bytes.sent += Buffer.byteLength(JSON.stringify(command));
-    NativeResumeClient.prototype.control.call(this, command);
+    if (v2Capabilities) {
+      this.record('sent', command); this.ws.send(JSON.stringify(command)); this.catalogGzipOptedIn = true;
+    } else NativeResumeClient.prototype.control.call(this, command);
+  }
+  nextAttackV2(objectId) {
+    if (!this.attackV2Supported) throw new Error('attackV2 capability not confirmed; no legacy fallback');
+    if (++this.attackV2Sequence > MAX_ATTACK_REQUEST_ID) throw new Error('attackV2 request id exhausted; no retry');
+    return { type: 'attackV2', protocolVersion: 2, requestId: this.attackV2Sequence.toString(), objectId };
   }
   async pace() {
     while (this.budget.remainingWait()) {
@@ -224,7 +381,7 @@ export class CapacityClient extends NativeResumeClient {
       await sleep(Math.min(50, this.budget.remainingWait()));
     }
   }
-  async wait(predicate, label, timeoutMs = 15000) {
+  async wait(predicate, label, timeoutMs = 15000, deadlinePredicate = null) {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       if (!this.draining) this.context.guard.assert();
@@ -233,7 +390,18 @@ export class CapacityClient extends NativeResumeClient {
       if (this.closed) throw new Error(`${this.label} transport closed during ${label}`);
       await sleep(20);
     }
-    throw new Error(`${this.label} timed out waiting for ${label}`);
+    // V2 attacks provide a timestamp-bounded predicate. Read evidence already
+    // recorded by the deadline even if this polling timer resumes just after
+    // it; do not wait again or change ordinary request timeout semantics.
+    if (deadlinePredicate) {
+      if (!this.draining) this.context.guard.assert();
+      if (this.failure) throw this.failure;
+      if (this.closed) throw new Error(`${this.label} transport closed during ${label}`);
+      const result = deadlinePredicate(); if (result) return result;
+    }
+    throw Object.assign(new Error(`${this.label} timed out waiting for ${label}`), {
+      code: 'CAPACITY_WAIT_TIMEOUT', waitLabel: label,
+    });
   }
   async request(command, name, timeoutMs = 15000) {
     await this.pace(); const started = performance.now();
@@ -250,11 +418,26 @@ export class CapacityClient extends NativeResumeClient {
   }
   async connect() {
     const promise = super.connect();
+    this.ws.addEventListener('close', () => releaseNavigationHint(this, this.navigationHint));
     this.ws.addEventListener('message', event => { this.bytes.received += Buffer.byteLength(event.data); });
     try { await promise; } finally { clearInterval(this.timer); }
-    await this.pace(); this.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1', CATALOG_GZIP_CAPABILITY] });
+    const cursor = this.sequence;
+    await this.pace(); this.control({ type: 'clientCapabilities', capabilities: ['nativeResumeV1', CATALOG_GZIP_CAPABILITY,
+      ...(this.attackResults === 'v2' ? [ATTACK_OUTCOME_CAPABILITY] : [])] });
+    if (this.attackResults === 'v2') {
+      await this.wait(() => this.events.find(event => event.direction === 'received' && event.sequence > cursor &&
+        event.type === 'attackCapabilitiesV2' && event.protocolVersion === 2 && event.capability === ATTACK_OUTCOME_CAPABILITY &&
+        event.supported === true && event.scope === 'connection'), 'confirmed attackV2 capability; no legacy fallback', 15000);
+      this.attackV2Supported = true;
+    }
   }
   async refresh() { await this.pace(); return PlaytestClient.prototype.refresh.call(this); }
+  async close() {
+    this.navigationClosing = true;
+    const hint = this.navigationHint; releaseNavigationHint(this, hint);
+    try { return await super.close(); }
+    finally { releaseNavigationHint(this, hint); }
+  }
   async logout() {
     if (!this.inGame) return null;
     const ack = await this.request({ type: 'logOut' }, 'LogOutSuccess', 5000); this.inGame = false; return ack;
@@ -310,11 +493,11 @@ export function chooseHomes(map, origin, count, layout, transfers = [], explicit
   });
 }
 
-export function validateNativeExplicitHomes(map, origin, count, anchors, patrolSpan = 2, transfers = [], stationaryObstacles = []) {
+export function validateNativeExplicitHomes(map, origin, count, anchors, patrolSpan = 2, transfers = [], stationaryObstacles = [], policy = {}) {
   const cells = map?.width * map?.height;
   if (!Number.isInteger(map?.width) || !Number.isInteger(map?.height) || map.width < 1 || map.height < 1 ||
       !Number.isInteger(cells) || cells < 1 || cells > 4_000_000 || map.blocked?.length !== cells ||
-      !Number.isInteger(count) || count < 1 || count > 100 || !Array.isArray(anchors) || anchors.length !== count || ![2, 4].includes(patrolSpan)) {
+      !Number.isInteger(count) || count < 1 || count > capacityActorLimit(policy) || !Array.isArray(anchors) || anchors.length !== count || ![2, 4].includes(patrolSpan)) {
     throw new Error('Native explicit scenario requires complete bounded anchors and patrolSpan 2 or 4');
   }
   const inMap = point => Number.isInteger(point?.x) && Number.isInteger(point?.y) && point.x >= 0 && point.y >= 0 && point.x < map.width && point.y < map.height;
@@ -367,7 +550,8 @@ export function validateNativeCombatClusters(definitions, homes, combatIndices, 
       used.add(index); if (combat) fighters.add(index);
     }
     const cluster = { combatActorIndices: [...combatActorIndices], movementActorIndices: [...movementActorIndices], patrolSpan,
-      observerHomes: movementActorIndices.map(index => homes[index]), observerNames: new Set() };
+      observerHomes: movementActorIndices.map(index => homes[index]), observerNames: new Set(),
+      observerBindings: movementActorIndices.map((actorIndex, homeIndex) => ({ actorIndex, homeIndex, home: homes[actorIndex] })) };
     if (combatActorIndices.some(index => !insideCombatCoverage(cluster, homes[index]))) throw new Error('Combat home lacks declared observer coverage');
     return cluster;
   });
@@ -380,8 +564,30 @@ export function insideCombatCoverage(cluster, point) {
     Math.abs(point.y - home.y), Math.abs(point.y - home.y - cluster.patrolSpan)) <= 14);
 }
 
-export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = []) {
-  if (!Number.isInteger(count) || count < 1 || count > 100 || ![origin, center].every(point => Number.isInteger(point.x) && Number.isInteger(point.y))) throw new Error('Scenario requires integer coordinates and 1–100 actors');
+// Declared homes are immutable geometry. Only an actually active, living
+// movement observer can make its own declared home available to this cohort.
+// In particular, an explicit cluster with no active observer is closed, not
+// the unrestricted null-cluster case. No range-to-fighter filter belongs here.
+function activeGameplayOwner(client, mapFileName) {
+  if (typeof mapFileName !== 'string' || client.ready !== true || client.inGame !== true || client.closed || client.paused ||
+      client.draining || client.navigationClosing || client.snapshot?.mapFileName !== mapFileName) return null;
+  const owner = self(client);
+  return lifecyclePoint(owner) && !hasAuthoritativePlayerDeath(client.snapshot) ? owner : null;
+}
+export function activeCombatCoverage(client, context) {
+  const cluster = client.combatCluster;
+  if (!cluster) return null;
+  const entries = (cluster.observerBindings ?? []).flatMap(binding => {
+    if (typeof binding.name !== 'string' || typeof client.snapshot.mapFileName !== 'string') return [];
+    const observer = context.clients.find(other => other !== client && other.label === binding.name &&
+      cluster.observerNames.has(other.label) && other.role === 'movement' && activeGameplayOwner(other, client.snapshot.mapFileName));
+    return observer ? [{ ...binding, observer }] : [];
+  });
+  return { patrolSpan: cluster.patrolSpan, observerHomes: entries.map(entry => entry.home), entries };
+}
+
+export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = [], policy = {}) {
+  if (!Number.isInteger(count) || count < 1 || count > capacityActorLimit(policy) || ![origin, center].every(point => Number.isInteger(point.x) && Number.isInteger(point.y))) throw new Error(`Scenario requires integer coordinates and 1–${capacityActorLimit(policy)} actors`);
   const width = Math.ceil(Math.sqrt(count));
   const requested = Array.from({ length: count }, (_, i) => ({ x: center.x + (i % width - (width - 1) / 2) * 4,
     y: center.y + (Math.floor(i / width) - (width - 1) / 2) * 4 }));
@@ -406,7 +612,7 @@ export async function generateCapacityScenario(options) {
   if (!metadata) throw new Error('Unknown authored scenario map');
   const transfers = metadata.movements.map(move => ({ bounds: { minX: move.source.x, maxX: move.source.x, minY: move.source.y, maxY: move.source.y } }));
   const stationaryObstacles = await loadStationaryNpcObstacles(options.scenarioMap);
-  const scenario = spacingFourScenario(map, origin, center, Number(options.scenarioCount ?? 50), String(options.scenarioMap), transfers, stationaryObstacles);
+  const scenario = spacingFourScenario(map, origin, center, Number(options.scenarioCount ?? 50), String(options.scenarioMap), transfers, stationaryObstacles, options);
   const file = outsideRepository(options.generateScenario); await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, JSON.stringify(scenario, null, 2) + '\n', { flag: 'wx' });
   return { file, ...scenario.generated };
@@ -463,9 +669,65 @@ function recordMovementCorrection(client, context, owner, plan, actual, phase, r
   }
   return avoidance;
 }
-function movement(client, target, map) {
-  const owner = self(client), occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead)
-    .concat(rejectedWalkObstacles(client));
+export const NAVIGATION_HINT_MAX_CELLS = 7;
+export function movementHintCells(origin, plan) {
+  const first = lifecyclePoint(plan?.first), target = lifecyclePoint(plan?.target), start = lifecyclePoint(origin), kind = plan?.command?.type;
+  if (!start || !first || !target || !['walk', 'run'].includes(kind)) return null;
+  const dx = first.x - start.x, dy = first.y - start.y, steps = kind === 'run' ? 2 : 1;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) !== 1 || target.x !== start.x + steps * dx || target.y !== start.y + steps * dy ||
+      plan.command.direction !== directionOf(start, first)) return null;
+  const cells = new Map([[`${start.x},${start.y}`, start]]);
+  const add = point => cells.set(`${point.x},${point.y}`, point);
+  for (let step = 1; step <= steps; step++) {
+    const before = { x: start.x + (step - 1) * dx, y: start.y + (step - 1) * dy };
+    add({ x: start.x + step * dx, y: start.y + step * dy });
+    if (dx && dy) { add({ x: before.x + dx, y: before.y }); add({ x: before.x, y: before.y + dy }); }
+  }
+  return [...cells.values()];
+}
+// These are conservative tool-local navigation hints, never authoritative
+// occupancy or AOI. Keep every original AOI obstacle, including stale peer cells.
+export function navigationObstacles(client) {
+  const owner = self(client), context = client.context, mapFileName = client.snapshot?.mapFileName;
+  const occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client));
+  if (context?.policy?.activityMode !== 'native') return occupied;
+  const clients = context?.clients ?? [];
+  if (clients.length > capacityActorLimit(context.policy)) throw new Error(capacityActorLimit(context.policy) === 100
+    ? 'Controlled navigation cohort exceeds the original100 actor ceiling' : 'Controlled navigation cohort exceeds the declared actor ceiling (500)');
+  for (const other of clients) {
+    if (other === client) continue; // Every receiver may independently own ID1000.
+    const actual = activeGameplayOwner(other, mapFileName);
+    if (!actual) continue;
+    occupied.push(lifecyclePoint(actual));
+    const hint = other.navigationHint;
+    if (hint?.mapFileName === mapFileName && hint.connection === other.lifecycleConnection) occupied.push(...hint.cells);
+  }
+  return occupied;
+}
+export function navigationPlanIsClear(client, plan, map = client.context.map) {
+  if (client.context?.policy?.activityMode !== 'native') return true;
+  if (typeof client.snapshot?.mapFileName !== 'string' || (client.context.mapName != null && client.snapshot.mapFileName !== client.context.mapName)) return false;
+  const origin = lifecyclePoint(self(client)), cells = movementHintCells(origin, plan);
+  if (!cells) return false;
+  const occupied = new Set(navigationObstacles(client).map(point => `${point.x},${point.y}`));
+  // An ordinary spawn can be shared; as in A*, allow leaving its origin.
+  return cells.every(point => (point.x === origin.x && point.y === origin.y) ||
+    (protocolMapCellIsWalkable(map, point) && !occupied.has(`${point.x},${point.y}`)));
+}
+export function claimNavigationHint(client, plan, sentAtMs = performance.now()) {
+  if (client.context?.policy?.activityMode !== 'native' || client.navigationHint || !activeGameplayOwner(client, client.snapshot?.mapFileName)) return null;
+  const origin = lifecyclePoint(self(client)), cells = movementHintCells(origin, plan);
+  if (!cells || cells.length > NAVIGATION_HINT_MAX_CELLS) return null;
+  const hint = Object.freeze({ connection: client.lifecycleConnection, mapFileName: client.snapshot.mapFileName, kind: plan.command.type,
+    origin: Object.freeze(origin), first: Object.freeze(lifecyclePoint(plan.first)), target: Object.freeze(lifecyclePoint(plan.target)), cells: Object.freeze(cells.map(Object.freeze)),
+    sendCursor: client.sequence, sentAtMs });
+  client.navigationHint = hint; return hint;
+}
+export function releaseNavigationHint(client, hint) {
+  if (hint && client.navigationHint === hint) client.navigationHint = null;
+}
+function movement(client, target, map, routeAllowed, planningObstacles) {
+  const owner = self(client), occupied = planningObstacles ?? navigationObstacles(client);
   const blocked = (reason, nextStep) => {
     if (client.navigationAttempts) {
       client.navigationAttemptCount++;
@@ -477,18 +739,20 @@ function movement(client, target, map) {
   };
   const route = findProtocolWalkPath({ map, start: owner, target, dynamicObstacles: occupied, maxExpanded: 4000 });
   if (!route) return blocked('no-path-or-expansion-limit');
+  if (routeAllowed && !route.every(routeAllowed)) return blocked('route-outside-scout-coverage-or-transfer');
   if (route.length < 2) return blocked('already-at-target');
   const first = route[1];
   if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return blocked('next-step-transfer', first);
   const direction = directionOf(owner, first); if (!direction) return blocked('invalid-unit-step', first);
+  const navigation = { goal: lifecyclePoint(target), remainingSteps: route.length - 1 };
   const wantsRun = client.context?.policy.activityMode === 'native' ? performance.now() < client.nativeRunPrimedUntil : client.movementCount % 10 === 9;
   if (wantsRun && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&
       !(client.snapshot.mapTransfers ?? []).some(transfer => inside(route[2], transfer.bounds))) {
-    return { command: { type: 'run', direction }, target: route[2], first };
+    return { command: { type: 'run', direction }, target: route[2], first, navigation };
   }
-  return { command: { type: 'walk', direction }, target: first, first };
+  return { command: { type: 'walk', direction }, target: first, first, navigation };
 }
-function patrol(client, context, home = client.home) {
+export function patrol(client, context, home = client.home, routeAllowed) {
   const owner = self(client), map = context.map;
   // A live obstacle can push a native actor outside its 3x3 patrol. Returning
   // only to home then traps it if that one corner is occupied; try the same
@@ -502,8 +766,7 @@ function patrol(client, context, home = client.home) {
     // Prefer an ordinary clear two-cell corner over a one-two-one detour to a
     // blocked edge. Check the exact same two steps and diagonal side cells as
     // A*, without allocating another full-map search for each of four corners.
-    const occupied = new Set(client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client))
-      .map(entity => `${entity.x},${entity.y}`));
+    const occupied = new Set(navigationObstacles(client).map(entity => `${entity.x},${entity.y}`));
     const clear = point => protocolMapCellIsWalkable(map, point) && !occupied.has(`${point.x},${point.y}`);
     const doorway = point => (client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
     for (let offset = 0; offset < points.length; offset++) {
@@ -513,13 +776,16 @@ function patrol(client, context, home = client.home) {
       if (length < 2 || (deltaX && deltaY && Math.abs(deltaX) !== Math.abs(deltaY))) continue;
       const x = Math.sign(deltaX), y = Math.sign(deltaY), target = { x: owner.x + 2 * x, y: owner.y + 2 * y };
       const first = { x: owner.x + x, y: owner.y + y };
-      if (!clear(first) || !clear(target) || doorway(first) || doorway(target)) continue;
+      if (!clear(first) || !clear(target) || doorway(first) || doorway(target) ||
+          (routeAllowed && (!routeAllowed(owner) || !routeAllowed(first) || !routeAllowed(target)))) continue;
       if (x && y && [{ x: owner.x + x, y: owner.y }, { x: owner.x, y: owner.y + y },
         { x: first.x + x, y: first.y }, { x: first.x, y: first.y + y }].some(point => !clear(point))) continue;
       client.targetCursor = index;
       return { command: { type: 'run', direction: directionOf(owner, first) }, first, target };
     }
   }
+  const preferRun = native && performance.now() < client.nativeRunPrimedUntil;
+  let firstWalk;
   for (let offset = 0; offset < points.length; offset++) {
     // Native patrol advances exactly one corner. Mutating the starting cursor
     // inside this loop used to skip a corner and endlessly cut across NPCs.
@@ -527,9 +793,16 @@ function patrol(client, context, home = client.home) {
     const index = ((context.policy?.activityMode === 'native' ? initialCursor : client.targetCursor) + offset) % points.length, [dx, dy] = points[index];
     const target = { x: home.x + dx, y: home.y + dy };
     if (distance(owner, target) === 0) { client.targetCursor = (index + 1) % points.length; continue; }
-    const plan = movement(client, target, map);
-    if (plan) { client.targetCursor = index; return plan; }
+    const plan = movement(client, target, map, routeAllowed);
+    if (!plan) continue;
+    // A detour can leave the actor one step from this corner while another
+    // original corner already has two legal straight steps. Inspect only the
+    // same four native targets; movement() retains its4000-node path and all
+    // collision/transfer/route checks. Never turn a Walk into a forced Run.
+    if (!preferRun || plan.command.type === 'run') { client.targetCursor = index; return plan; }
+    firstWalk ??= { plan, index };
   }
+  if (firstWalk) { client.targetCursor = firstWalk.index; return firstWalk.plan; }
   return null;
 }
 
@@ -537,7 +810,7 @@ function recordNavigationBlocked(client, context, phase) {
   if (client.navigationBlocked) return;
   client.navigationBlocked = true;
   const owner = self(client), names = client.lifecycleNames ?? new Set([client.label,
-    ...(context.pool?.accounts ?? []).slice(0, 100).map(account => account.name)]);
+    ...(context.pool?.accounts ?? []).slice(0, capacityActorLimit(context.policy)).map(account => account.name)]);
   const occupants = []; let count = 0;
   for (const entity of client.snapshot.entities) {
     if (entity.objectId === owner.objectId || entity.dead || !lifecyclePoint(entity) ||
@@ -564,61 +837,239 @@ function nearbyObservers(client, context, margin = 16) {
   return context.clients.filter(other => other !== client && other.inGame && !other.closed && !other.paused &&
     other.snapshot?.mapFileName === client.snapshot.mapFileName && self(other) && distance(self(other), self(client)) <= margin);
 }
-function combatObservers(client, context) {
-  return nearbyObservers(client, context).filter(other => !client.combatCluster || client.combatCluster.observerNames.has(other.label));
+
+const TARGET_SUPPLY_COUNTERS = new Set(['decisions', 'visible', 'legalWeak', 'notMonster', 'dead', 'nonpositiveHp', 'friendly', 'owned', 'notWeak', 'notScenario', 'outOfRange', 'failedTarget', 'chaseDeferred', 'claimed', 'outsideCoverage', 'approachNoWitness', 'witnessCalls', 'witnessInactive', 'witnessAttackerMissing', 'witnessTargetMissing', 'witnessRange', 'witnessAvailable', 'pathSearch', 'pathNull', 'pathOutside', 'scoutPathSearch', 'scoutPathNull', 'scoutBindingMissing', 'scoutRetainedElsewhere', 'scoutSearchLimit', 'scoutUnavailable', 'scoutNoPath', 'scoutHintUnused', 'attack', 'turn', 'chase', 'scout', 'return', 'blocked', 'initialTransit', 'strategyException']);
+const TARGET_SUPPLY_SLOT_MS = 10000, TARGET_SUPPLY_ROWS_PER_SLOT = 2, TARGET_SUPPLY_ACTOR_LIMIT = 500;
+function supplyIncrement(counts, key, amount = 1) {
+  counts[key] = Math.min(Number.MAX_SAFE_INTEGER, (counts[key] ?? 0) + amount);
 }
-function ordinaryCombatMonster(entity, context) {
-  return entity?.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
+function supplyCount(diagnostic, key, amount = 1) {
+  if (!diagnostic || !TARGET_SUPPLY_COUNTERS.has(key)) return;
+  supplyIncrement(diagnostic.counts, key, amount); supplyIncrement(diagnostic.state.counters, key, amount);
+}
+function supplyCapture(diagnostic, capture) {
+  if (!diagnostic) return;
+  try { capture(); } catch { supplyIncrement(diagnostic.state, 'collectorErrors'); }
+}
+function supplyTarget(target) {
+  return { id: target.objectId, name: target.name, x: target.x, y: target.y };
+}
+function beginTargetSupply(client, context, owner, monotonicMs) {
+  let state;
+  try {
+    if (context.targetSupplyDiagnostics !== true || !Number.isFinite(monotonicMs) || monotonicMs < 0) return null;
+    const store = context.targetSupplyDiagnosticState ??= { actors: new Map(), actorLimitDrops: 0 };
+    state = store.actors.get(client.label);
+    if (!state) {
+      if (store.actors.size >= TARGET_SUPPLY_ACTOR_LIMIT) { supplyIncrement(store, 'actorLimitDrops'); return null; }
+      state = { counters: {}, lastMono: monotonicMs, slot: -1, slotRows: 0, signature: null, emitted: 0, sampledOut: 0, writerLost: 0, collectorErrors: 0, clockRegressions: 0, lastHint: null };
+      store.actors.set(client.label, state);
+    }
+    if (!context.writer) return null;
+    if (monotonicMs < state.lastMono) supplyIncrement(state, 'clockRegressions');
+    state.lastMono = Math.max(state.lastMono, monotonicMs);
+    const diagnostic = { state, counts: {}, actor: client.label, phase: context.phase, monotonicMs,
+      sequence: client.sequence, mapFileName: String(client.snapshot.mapFileName),
+      owner: { id: owner.objectId, name: owner.name, x: owner.x, y: owner.y },
+      reason: 'strategyException', selected: null, first4: [], approachRejected: [], witnessRejected: [], witness: null, pursuit: null, pursuitEvaluated: false, scout: null };
+    supplyCount(diagnostic, 'decisions'); return diagnostic;
+  } catch { if (state) supplyIncrement(state, 'collectorErrors'); return null; }
+}
+function completeTargetSupply(diagnostic, reason, plan, selected = null, observer = null) {
+  try { if (diagnostic) {
+    diagnostic.reason = reason; supplyCount(diagnostic, reason);
+    diagnostic.selected = selected ? supplyTarget(selected) : null;
+    diagnostic.witness = observer ? observer.label : null;
+    diagnostic.plan = plan ? { kind: plan.command.type, x: plan.target?.x ?? null, y: plan.target?.y ?? null,
+      chaseTargetId: plan.chaseTargetId ?? null, scoutHomeIndex: plan.scoutHomeIndex ?? null } : null;
+  }
+  } catch { supplyIncrement(diagnostic.state, 'collectorErrors'); }
+  return plan;
+}
+function emitTargetSupply(context, diagnostic) {
+  if (!diagnostic) return;
+  const state = diagnostic.state;
+  try {
+    if (diagnostic.reason === 'strategyException') supplyCount(diagnostic, 'strategyException');
+    const slot = Math.floor(state.lastMono / TARGET_SUPPLY_SLOT_MS);
+    if (slot > state.slot) { state.slot = slot; state.slotRows = 0; state.signature = null; }
+    const signature = diagnostic.reason + ':' + (diagnostic.selected?.id ?? diagnostic.plan?.chaseTargetId ?? diagnostic.scout?.hintScan?.selectedTargetId ?? diagnostic.plan?.scoutHomeIndex ?? 'none');
+    if (state.slotRows >= TARGET_SUPPLY_ROWS_PER_SLOT || (state.slotRows && state.signature === signature)) { supplyIncrement(state, 'sampledOut'); return; }
+    state.slotRows++; state.signature = signature;
+    const hintAge = state.lastHint && diagnostic.monotonicMs >= state.lastHint.monotonicMs ? diagnostic.monotonicMs - state.lastHint.monotonicMs : null;
+    const hint = state.lastHint ? { ...state.lastHint, ageAtDecisionMs: hintAge,
+      sameMap: state.lastHint.mapFileName === diagnostic.mapFileName, currentAuthority: false } : null;
+    const comparableHint = hint?.sameMap && hintAge !== null && hintAge <= 20000;
+    const row = { type: 'combatTargetSupply', at: Date.now(), actor: diagnostic.actor, phase: diagnostic.phase,
+      monotonicMs: diagnostic.monotonicMs, sequence: diagnostic.sequence, mapFileName: diagnostic.mapFileName,
+      owner: diagnostic.owner, reason: diagnostic.reason, selected: diagnostic.selected, witness: diagnostic.witness,
+      plan: diagnostic.plan ?? null, counts: { ...diagnostic.counts }, cumulative: { ...state.counters },
+      first4: diagnostic.first4, approachRejected: diagnostic.approachRejected,
+      approachRejectedTruncated: (diagnostic.counts.approachNoWitness ?? 0) > diagnostic.approachRejected.length,
+      witnessRejected: diagnostic.witnessRejected,
+      witnessRejectedExamplesTruncated: ['witnessInactive', 'witnessAttackerMissing', 'witnessTargetMissing', 'witnessRange'].reduce((sum, key) => sum + (diagnostic.counts[key] ?? 0), 0) > diagnostic.witnessRejected.length,
+      pursuitEvaluated: diagnostic.pursuitEvaluated, pursuit: diagnostic.pursuit, scout: diagnostic.scout, lastHint: hint,
+      hintDiffersFromActualTarget: comparableHint && diagnostic.selected ? hint.id !== diagnostic.selected.id : null,
+      fixedMonotonicMinute: Math.floor(state.lastMono / 60000), slot, slotRow: state.slotRows,
+      writerLost: state.writerLost, collectorErrors: state.collectorErrors, clockRegressions: state.clockRegressions };
+    if (context.writer.failure) { supplyIncrement(state, 'writerLost'); return; }
+    try {
+      context.writer.add(row);
+      if (context.writer.failure) supplyIncrement(state, 'writerLost'); else supplyIncrement(state, 'emitted');
+    } catch { supplyIncrement(state, 'writerLost'); }
+  } catch { supplyIncrement(state, 'collectorErrors'); }
+}
+export function targetSupplyDiagnosticSummary(context) {
+  const store = context.targetSupplyDiagnosticState;
+  return { enabled: context.targetSupplyDiagnostics === true, diagnosticOnly: true,
+    maximumRowsPerFixedMonotonicMinute: 12, slotMs: TARGET_SUPPLY_SLOT_MS, maximumRowsPerSlot: TARGET_SUPPLY_ROWS_PER_SLOT,
+    windowRule: 'Fixed floor(monotonicMs / 60000) minutes, not arbitrary rolling sixty seconds; clock regression never replenishes the quota.',
+    scope: 'Existing client decision intermediates only, not a spectator snapshot, replay certificate, live target guarantee or game gate.',
+    counterRule: 'Fixed reason keys saturate at Number.MAX_SAFE_INTEGER; counts are original predicate/path/witness evaluations, not unique monsters or a replay of rejected opportunities.',
+    candidateRule: 'legalWeak is before distance/deferral/claim/coverage filters; first4 is the original post-approach/priority window; evaluated=false means the earlier selected candidate returned before this candidate was tried.',
+    receiptRule: 'sequence/owner/map are from this client at the synchronous decision; monotonicMs is its original decision clock. Hints are historical routing suggestions, never live target or witness authority. hintDiffersFromActualTarget compares only same-map suggestions aged at most20000ms; older/cross-map/regressed-clock comparisons are null.',
+    maximumActors: TARGET_SUPPLY_ACTOR_LIMIT, actorLimitDrops: store?.actorLimitDrops ?? 0,
+    actors: [...(store?.actors ?? [])].map(([actor, state]) => ({ actor, counters: { ...state.counters }, emitted: state.emitted,
+      sampledOut: state.sampledOut, writerLost: state.writerLost, collectorErrors: state.collectorErrors, clockRegressions: state.clockRegressions })) };
+}
+
+function combatObservers(client, context) {
+  const coverage = activeCombatCoverage(client, context);
+  return nearbyObservers(client, context).filter(other => !coverage || coverage.entries.some(entry => entry.observer === other));
+}
+function ordinaryCombatMonster(entity, context, diagnostic) {
+  if (!diagnostic) return entity?.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
     String(entity.disposition ?? '').trim().toLowerCase() !== 'friendly' && !String(entity.ownerName ?? '').trim() &&
     WEAK_MONSTERS.includes(entity.name) && context.monsterNames.includes(entity.name);
+  const reject = reason => { supplyCount(diagnostic, reason); return false; };
+  if (entity?.kind !== 'monster') return reject('notMonster');
+  if (entity.dead) return reject('dead');
+  if (!(Number(entity.hp ?? 1) > 0)) return reject('nonpositiveHp');
+  if (String(entity.disposition ?? '').trim().toLowerCase() === 'friendly') return reject('friendly');
+  if (String(entity.ownerName ?? '').trim()) return reject('owned');
+  if (!WEAK_MONSTERS.includes(entity.name)) return reject('notWeak');
+  if (!context.monsterNames.includes(entity.name)) return reject('notScenario');
+  supplyCount(diagnostic, 'legalWeak'); return true;
 }
-export function combatCandidates(client, context, now = Date.now()) {
-  const owner = self(client);
-  const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
-  return client.snapshot.entities.filter(entity => ordinaryCombatMonster(entity, context) && distance(entity, owner) <= 16 &&
-    insideCombatCoverage(client.combatCluster, entity) &&
+function availableCombatTarget(client, context, entity, now, diagnostic) {
+  if (!diagnostic) return ordinaryCombatMonster(entity, context) && distance(entity, self(client)) <= 16 &&
     (client.failedTargets.get(entity.objectId)?.until ?? 0) <= now &&
     (context.policy?.activityMode !== 'native' || client.chaseDeferrals?.get(entity.objectId)?.mapFileName !== String(client.snapshot.mapFileName) ||
       client.chaseDeferrals.get(entity.objectId).until <= now) &&
-    (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label))
+    (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label);
+  if (!ordinaryCombatMonster(entity, context, diagnostic)) return false;
+  if (!(distance(entity, self(client)) <= 16)) { supplyCount(diagnostic, 'outOfRange'); return false; }
+  if (!((client.failedTargets.get(entity.objectId)?.until ?? 0) <= now)) { supplyCount(diagnostic, 'failedTarget'); return false; }
+  if (!(context.policy?.activityMode !== 'native' || client.chaseDeferrals?.get(entity.objectId)?.mapFileName !== String(client.snapshot.mapFileName) ||
+      client.chaseDeferrals.get(entity.objectId).until <= now)) { supplyCount(diagnostic, 'chaseDeferred'); return false; }
+  if (!(!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label)) { supplyCount(diagnostic, 'claimed'); return false; }
+  return true;
+}
+function livePursuitTarget(client, context, pursuit = client.combatPursuit, now = Date.now()) {
+  return pursuit?.mapFileName === String(client.snapshot.mapFileName) ? client.snapshot.entities.find(entity =>
+    entity.objectId === pursuit.objectId && entity.name === pursuit.name && availableCombatTarget(client, context, entity, now)) : null;
+}
+export function combatCandidates(client, context, now = Date.now(), diagnostic) {
+  const owner = self(client);
+  const coverage = activeCombatCoverage(client, context);
+  const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
+  return client.snapshot.entities.filter(entity => {
+    supplyCount(diagnostic, 'visible');
+    if (!availableCombatTarget(client, context, entity, now, diagnostic)) return false;
+    const covered = insideCombatCoverage(coverage, entity); if (!covered) supplyCount(diagnostic, 'outsideCoverage'); return covered;
+  })
     .sort((a, b) => (observed ? Number(observed.has(b.objectId)) - Number(observed.has(a.objectId)) : 0) || distance(a, owner) - distance(b, owner));
 }
 
+function newCombatPursuit(client, target, now, origin = self(client), cursor = client.sequence) {
+  return { objectId: target.objectId, name: target.name, mapFileName: String(client.snapshot.mapFileName),
+    bestDistance: distance(origin, target), lastProgressAt: now, nonImprovingMoves: 0,
+    lastReceiptSequence: cursor, attackSent: false, targetPoint: lifecyclePoint(target),
+    startedAt: now, activeElapsedMs: 0, confirmedMoves: 0, visited: new Map(),
+    coordinationFirstReceiptMonoMs: null, coordinationLastReceiptMonoMs: null };
+}
 function rememberCombatTarget(client, target, now = Date.now()) {
   const mapFileName = String(client.snapshot.mapFileName);
   if (client.combatPursuit?.objectId !== target.objectId || client.combatPursuit.mapFileName !== mapFileName) {
-    client.combatPursuit = { objectId: target.objectId, name: target.name, mapFileName,
-      bestDistance: distance(self(client), target), lastProgressAt: now, nonImprovingMoves: 0,
-      lastReceiptSequence: client.sequence, attackSent: false };
+    client.combatPursuit = newCombatPursuit(client, target, now);
   }
+}
+function postStrikeChaseSegment(client, context, plan, origin, cursor, now = Date.now()) {
+  const previous = client.combatPursuit;
+  if (context.policy?.activityMode !== 'native' || !previous?.attackSent ||
+      !['walk', 'run'].includes(plan.command.type) || previous.objectId !== plan.chaseTargetId ||
+      previous.mapFileName !== String(client.snapshot.mapFileName) || !lifecyclePoint(plan.target) ||
+      distance(origin, plan.target) === 0) return null;
+  const target = livePursuitTarget(client, context, previous, now);
+  return target ? { previous, next: newCombatPursuit(client, target, now, origin, cursor) } : null;
 }
 
 // Progress is measured only at a successful, nonzero authoritative movement
 // receipt. Selecting a plan, waiting, turning, or a corrected step proves none.
 export function recordCombatPursuitMovement(client, context, plan, origin, receipt, status, now = Date.now()) {
+  recordCombatScoutMovement(client, context, plan, origin, receipt, status, now);
   const pursuit = client.combatPursuit, actual = receipt?.payload, kind = plan.command.type;
   if (context.policy?.activityMode !== 'native' || !pursuit || pursuit.attackSent || status !== 'success' ||
       !['walk', 'run'].includes(kind) || pursuit.objectId !== plan.chaseTargetId ||
       pursuit.mapFileName !== String(client.snapshot.mapFileName) || receipt.packet !== 'UserLocation' ||
       receipt.sequence <= pursuit.lastReceiptSequence || !lifecyclePoint(actual) || distance(origin, actual) === 0 ||
       !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;
-  const target = combatCandidates(client, context, now).find(entity => entity.objectId === pursuit.objectId);
+  const target = livePursuitTarget(client, context, pursuit, now);
   if (!target) { client.combatPursuit = null; return; }
   pursuit.lastReceiptSequence = receipt.sequence;
-  const currentDistance = distance(actual, target);
-  if (currentDistance < pursuit.bestDistance) {
-    pursuit.bestDistance = currentDistance; pursuit.lastProgressAt = now; pursuit.nonImprovingMoves = 0; return;
+  pursuit.confirmedMoves++;
+  pursuit.lastMovementAt = now;
+  // Only the authoritative receipt's own clock can establish this optional
+  // planning preference. Processing an old ACK does not refresh its age.
+  const receiptMonoMs = receipt.monotonicMs, previousMonoMs = pursuit.coordinationLastReceiptMonoMs;
+  if (Number.isFinite(receiptMonoMs) && receiptMonoMs >= 0 &&
+      (!Number.isFinite(previousMonoMs) || receiptMonoMs >= previousMonoMs)) {
+    if (!Number.isFinite(previousMonoMs) || receiptMonoMs - previousMonoMs > RECENT_CHASE_PREFERENCE_MS ||
+        !Number.isFinite(pursuit.coordinationFirstReceiptMonoMs) || pursuit.coordinationFirstReceiptMonoMs < 0 ||
+        pursuit.coordinationFirstReceiptMonoMs > previousMonoMs) pursuit.coordinationFirstReceiptMonoMs = receiptMonoMs;
+    pursuit.coordinationLastReceiptMonoMs = receiptMonoMs;
+  } else {
+    pursuit.coordinationFirstReceiptMonoMs = null; pursuit.coordinationLastReceiptMonoMs = null;
   }
-  pursuit.nonImprovingMoves++;
+  const visitKey = `${actual.x},${actual.y}`, visits = (pursuit.visited.get(visitKey) ?? 0) + 1;
+  pursuit.visited.set(visitKey, visits);
+  const targetStable = distance(target, plan.chaseTargetPoint ?? {}) === 0 && distance(target, pursuit.targetPoint) === 0;
+  const navigation = plan.navigation;
+  let routeImproved = false;
+  if (targetStable && lifecyclePoint(navigation?.goal) && Number.isInteger(navigation.remainingSteps) && navigation.remainingSteps > 0) {
+    const consumed = kind === 'run' && distance(actual, plan.first) !== 0 ? 2 : 1;
+    const remaining = navigation.remainingSteps - consumed, key = `${target.x},${target.y}:${navigation.goal.x},${navigation.goal.y}`;
+    const prior = pursuit.routeProgress;
+    if (!prior || prior.key !== key) {
+      // Only the first path can use its pre-move length as a baseline. A new
+      // goal after replanning cannot manufacture progress on every ACK.
+      routeImproved = !prior && !pursuit.routeInitialized && remaining >= 0 && remaining < navigation.remainingSteps;
+      pursuit.routeProgress = { key, bestRemaining: remaining };
+    } else if (remaining >= 0 && remaining < prior.bestRemaining) {
+      routeImproved = true; prior.bestRemaining = remaining;
+    }
+    pursuit.routeInitialized = true;
+  } else pursuit.routeProgress = null;
+  pursuit.targetPoint = lifecyclePoint(target);
+  const currentDistance = distance(actual, target);
+  const improved = currentDistance < pursuit.bestDistance || routeImproved;
+  pursuit.bestDistance = Math.min(pursuit.bestDistance, currentDistance);
+  if (improved) { pursuit.lastProgressAt = now; pursuit.nonImprovingMoves = 0; }
+  else pursuit.nonImprovingMoves++;
   const elapsedMs = now - pursuit.lastProgressAt;
-  if (pursuit.nonImprovingMoves < 2 || (pursuit.nonImprovingMoves < 4 && elapsedMs < 6000)) return;
+  const pursuitMs = pursuit.activeElapsedMs + Math.max(0, now - pursuit.startedAt);
+  const reason = visits >= 3 ? 'route-loop' : pursuit.confirmedMoves >= COMBAT_CHASE_MAX_MOVES ? 'movement-budget' :
+    pursuitMs >= COMBAT_CHASE_MAX_MS ? 'time-budget' :
+    pursuit.nonImprovingMoves >= 2 && (pursuit.nonImprovingMoves >= 4 || elapsedMs >= 6000) ? 'no-progress' : null;
+  if (!reason) return;
   const deferred = client.chaseDeferrals ??= new Map();
   for (const [id, entry] of deferred) if (entry.until <= now || entry.mapFileName !== pursuit.mapFileName) deferred.delete(id);
   if (deferred.size >= COMBAT_CHASE_DEFERRAL_LIMIT) deferred.delete(deferred.keys().next().value);
   deferred.set(pursuit.objectId, { mapFileName: pursuit.mapFileName, until: now + COMBAT_CHASE_DEFERRAL_MS });
   context.writer?.add({ type: 'combatChaseDeferred', actor: client.label, phase: context.phase, at: now,
     targetId: pursuit.objectId, mapFileName: pursuit.mapFileName, nonImprovingMoves: pursuit.nonImprovingMoves,
-    elapsedMs, ttlMs: COMBAT_CHASE_DEFERRAL_MS, actual: lifecyclePoint(actual), target: lifecyclePoint(target), attacksSent: 0 });
+    elapsedMs, pursuitMs, confirmedMoves: pursuit.confirmedMoves, reason,
+    ttlMs: COMBAT_CHASE_DEFERRAL_MS, actual: lifecyclePoint(actual), target: lifecyclePoint(target), attacksSent: 0 });
   client.combatPursuit = null;
 }
 
@@ -627,23 +1078,246 @@ export function restoreCombatPursuit(original, restored, context, now = Date.now
   restored.chaseDeferrals = new Map([...(original.chaseDeferrals ?? [])].filter(([, entry]) =>
     entry.until > now && entry.mapFileName === String(restored.snapshot.mapFileName)).slice(-COMBAT_CHASE_DEFERRAL_LIMIT));
   const pursuit = original.combatPursuit;
-  const target = pursuit && pursuit.mapFileName === String(restored.snapshot.mapFileName)
-    ? combatCandidates(restored, context, now).find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name) : null;
+  const target = livePursuitTarget(restored, context, pursuit, now);
   // Resume retains the choice and attack-written state, but offline time and a
   // previous socket's receipt sequence cannot count as new chase evidence.
+  const pausedAt = Math.min(now, Math.max(original.combatPursuitPausedAt ?? now, pursuit?.lastMovementAt ?? 0,
+    original.combatScout?.lastMovementAt ?? 0));
   restored.combatPursuit = target ? { ...pursuit, bestDistance: distance(self(restored), target),
-    lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence } : null;
+    lastProgressAt: now, nonImprovingMoves: 0, lastReceiptSequence: restored.sequence,
+    activeElapsedMs: pursuit.activeElapsedMs + Math.max(0, pausedAt - pursuit.startedAt),
+    startedAt: now, lastMovementAt: now, targetPoint: lifecyclePoint(target), routeProgress: null,
+    coordinationFirstReceiptMonoMs: null, coordinationLastReceiptMonoMs: null,
+    visited: new Map(pursuit.visited) } : null;
+  const scout = original.combatScout;
+  restored.combatScoutCursor = original.combatScoutCursor;
+  restored.combatScout = scout?.mapFileName === String(restored.snapshot.mapFileName) ? { ...scout,
+    activeElapsedMs: (scout.activeElapsedMs ?? 0) + Math.max(0, pausedAt - scout.startedAt),
+    startedAt: now, lastMovementAt: now, lastReceiptSequence: restored.sequence, visited: new Map(scout.visited) } : null;
 }
 
-function returnToCombatCoverage(client, context) {
+function returnToCombatCoverage(client, context, coverage = activeCombatCoverage(client, context)) {
   const owner = self(client), cluster = client.combatCluster;
   if (!cluster) return patrol(client, context);
-  const recovering = !insideCombatCoverage(cluster, owner);
-  for (const home of [client.home, ...cluster.observerHomes].sort((a, b) => distance(a, owner) - distance(b, owner))) {
-    const plan = patrol(client, context, home);
-    if (plan && (recovering || (insideCombatCoverage(cluster, plan.first) && insideCombatCoverage(cluster, plan.target)))) return plan;
+  if (!coverage.entries.length) return null;
+  const recovering = !insideCombatCoverage(coverage, owner);
+  const homes = [client.home, ...coverage.observerHomes].filter(home => insideCombatCoverage(coverage, home));
+  const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
+  for (const home of homes.sort((a, b) => distance(a, owner) - distance(b, owner))) {
+    const plan = patrol(client, context, home, recovering ? undefined : allowed);
+    if (plan && (recovering || (insideCombatCoverage(coverage, plan.first) && insideCombatCoverage(coverage, plan.target)))) return plan;
   }
   return null;
+}
+
+function advanceCombatScout(client, context, reason, now) {
+  const scout = client.combatScout;
+  if (!scout) return;
+  client.combatScoutCursor = (scout.homeIndex + 1) % client.combatCluster.observerHomes.length;
+  context.writer?.add({ type: 'combatScoutAdvanced', actor: client.label, phase: context.phase, at: now,
+    reason, homeIndex: scout.homeIndex, confirmedMoves: scout.confirmedMoves,
+    elapsedMs: (scout.activeElapsedMs ?? 0) + now - scout.startedAt });
+  client.combatScout = null;
+}
+
+export function recordCombatScoutMovement(client, context, plan, origin, receipt, status, now = Date.now()) {
+  const scout = client.combatScout, actual = receipt?.payload, kind = plan.command.type;
+  if (context.policy?.activityMode !== 'native' || !scout || !plan.scouting || scout.homeIndex !== plan.scoutHomeIndex ||
+      scout.mapFileName !== String(client.snapshot.mapFileName) || status !== 'success' || !['walk', 'run'].includes(kind) ||
+      receipt?.packet !== 'UserLocation' || receipt.sequence <= scout.lastReceiptSequence || !lifecyclePoint(actual) ||
+      distance(origin, actual) === 0 || !(distance(actual, plan.target) === 0 || (kind === 'run' && distance(actual, plan.first) === 0))) return;
+  scout.lastReceiptSequence = receipt.sequence; scout.confirmedMoves++; scout.lastMovementAt = now;
+  const key = `${actual.x},${actual.y}`, visits = (scout.visited.get(key) ?? 0) + 1; scout.visited.set(key, visits);
+  const reason = visits >= 3 ? 'route-loop' : scout.confirmedMoves >= 24 ? 'movement-budget' :
+    (scout.activeElapsedMs ?? 0) + now - scout.startedAt >= 20000 ? 'time-budget' :
+    distance(actual, scout.goal) === 0 ? 'waypoint-reached' : null;
+  if (reason) advanceCombatScout(client, context, reason, now);
+}
+
+function preferUnsharedScoutWaypoints(client, context, hints, now, diagnostic) {
+  Object.assign(diagnostic, { hintCount: hints.length, activeOtherWaypointCount: null,
+    sharedHintCount: null, unsharedHintCount: null, hintPreferenceReason: 'insufficient-hints' });
+  if (hints.length < 2) return hints;
+  const mapName = client.snapshot.mapFileName, otherWaypoints = new Set();
+  for (let index = 0; index < Math.min(context.clients.length, capacityActorLimit(context.policy)); index++) {
+    const other = context.clients[index], scout = other.combatScout;
+    if (other === client || other.role !== 'combat' || !activeGameplayOwner(other, mapName) || !scout ||
+        scout.mapFileName !== mapName || !Number.isFinite(scout.startedAt) || scout.startedAt > now ||
+        !Number.isFinite(scout.activeElapsedMs ?? 0) || (scout.activeElapsedMs ?? 0) < 0 ||
+        !Number.isInteger(scout.confirmedMoves) || scout.confirmedMoves < 0 || scout.confirmedMoves >= 24 ||
+        (scout.activeElapsedMs ?? 0) + now - scout.startedAt >= 20000 || !Number.isInteger(scout.homeIndex)) continue;
+    const home = other.combatCluster?.observerHomes?.[scout.homeIndex];
+    if (home && Number.isInteger(home.x) && Number.isInteger(home.y)) otherWaypoints.add(home.x + ',' + home.y);
+  }
+  diagnostic.activeOtherWaypointCount = otherWaypoints.size;
+  if (!otherWaypoints.size) {
+    diagnostic.sharedHintCount = 0; diagnostic.unsharedHintCount = hints.length;
+    diagnostic.hintPreferenceReason = 'no-active-other-waypoints';
+    return hints;
+  }
+  const unshared = [], shared = [];
+  for (const hint of hints) {
+    const home = client.combatCluster.observerHomes[hint.homeIndex];
+    (otherWaypoints.has(home.x + ',' + home.y) ? shared : unshared).push(hint);
+  }
+  diagnostic.sharedHintCount = shared.length; diagnostic.unsharedHintCount = unshared.length;
+  diagnostic.hintPreferenceReason = unshared.length && shared.length ? 'reordered' :
+    shared.length ? 'all-hints-shared' : 'all-hints-unshared';
+  // A local home index is not a cross-cluster identity. These are same-map
+  // declared waypoint coordinates, only a planning preference, never a claim.
+  // Preserve original order when no usable distinction exists.
+  return unshared.length && shared.length ? [...unshared, ...shared] : hints;
+}
+
+function combatScoutHints(client, context, coverage, initialCursor, fallbackHomeIndex, now, allowed, occupied) {
+  const hints = [], cluster = client.combatCluster, range = stableFanoutRange('attack', context.policy);
+  let truncated = cluster.observerHomes.length > COMBAT_SCOUT_HINT_OBSERVER_LIMIT;
+  for (let offset = 0; offset < Math.min(cluster.observerHomes.length, COMBAT_SCOUT_HINT_OBSERVER_LIMIT); offset++) {
+    const homeIndex = (initialCursor + offset) % cluster.observerHomes.length;
+    if (homeIndex === fallbackHomeIndex) continue;
+    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
+    if (!binding) continue;
+    const observer = activeGameplayOwner(binding.observer, client.snapshot.mapFileName);
+    if (!observer) continue;
+    const entities = binding.observer.snapshot.entities;
+    truncated ||= entities.length > COMBAT_SCOUT_HINT_ENTITY_LIMIT;
+    for (let index = 0; index < Math.min(entities.length, COMBAT_SCOUT_HINT_ENTITY_LIMIT); index++) {
+      const target = entities[index], point = lifecyclePoint(target), id = target?.objectId;
+      if (!Number.isInteger(id) || id <= 0 || id > 0xffffffff || !point || !Number.isInteger(point.x) || !Number.isInteger(point.y) ||
+          !ordinaryCombatMonster(target, context) || !allowed(point) || distance(observer, point) > range ||
+          (client.failedTargets.get(id)?.until ?? 0) > now ||
+          (client.chaseDeferrals?.get(id)?.mapFileName === String(client.snapshot.mapFileName) && client.chaseDeferrals.get(id).until > now) ||
+          (context.targetClaims.has(id) && context.targetClaims.get(id) !== client.label)) continue;
+      const attackTile = STEPS.map(([dx, dy]) => ({ x: point.x + dx, y: point.y + dy })).find(tile =>
+        allowed(tile) && protocolMapCellIsWalkable(context.map, tile) && distance(observer, tile) <= range &&
+        !occupied.some(entity => entity.x === tile.x && entity.y === tile.y));
+      if (!attackTile) continue;
+      // Peer-only knowledge can suggest a waypoint, never add an owner AOI
+      // entity or bypass the real two-snapshot witness at attack selection/send.
+      hints.push({ homeIndex, objectId: id, target: point, observer: lifecyclePoint(observer), attackTile });
+      break;
+    }
+    if (hints.length === COMBAT_SCOUT_HINT_LIMIT) { truncated = true; break; }
+  }
+  return { hints, truncated };
+}
+
+function recordCombatScoutSelection(client, context, selection, now) {
+  if (!context.writer) return;
+  let diagnostic = client.combatScoutSelectionDiagnostic;
+  if (!diagnostic || diagnostic.phase !== context.phase) diagnostic = client.combatScoutSelectionDiagnostic = { phase: context.phase, rows: 0 };
+  if (diagnostic.rows >= COMBAT_SCOUT_SELECTION_ROW_LIMIT) return;
+  diagnostic.rows++;
+  context.writer.add({ type: 'combatScoutSelection', actor: client.label, phase: context.phase, at: now,
+    ...(diagnostic.rows === COMBAT_SCOUT_SELECTION_ROW_LIMIT ? { truncated: true, rowLimit: COMBAT_SCOUT_SELECTION_ROW_LIMIT } :
+      { ...selection, truncated: false }) });
+}
+
+function scoutCombatCoverage(client, context, now = Date.now(), coverage = activeCombatCoverage(client, context), diagnostic) {
+  const cluster = client.combatCluster, owner = self(client);
+  const unavailable = reason => { if (diagnostic) diagnostic.scout = { blockedReason: reason }; supplyCount(diagnostic, 'scoutUnavailable'); return null; };
+  if (!cluster?.observerHomes?.length) return unavailable('no-declared-observers');
+  if (!coverage.entries.length) return unavailable('no-active-observers');
+  if (client.pending) return unavailable('owner-pending');
+  if (!insideCombatCoverage(coverage, owner)) return unavailable('owner-outside-coverage');
+  if (client.combatScout?.mapFileName !== String(client.snapshot.mapFileName)) client.combatScout = null;
+  if (client.combatScout && (client.combatScout.activeElapsedMs ?? 0) + now - client.combatScout.startedAt >= 20000) advanceCombatScout(client, context, 'time-budget', now);
+  const occupied = navigationObstacles(client);
+  const allowed = point => insideCombatCoverage(coverage, point) && !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
+  const initialCursor = client.combatScout?.homeIndex ?? client.combatScoutCursor ?? 0;
+  if (diagnostic) diagnostic.scout = {};
+  supplyCapture(diagnostic, () => {
+    const current = client.combatScout;
+    diagnostic.scout = { existing: Boolean(current), homeIndex: current?.homeIndex ?? null,
+      goal: current ? { x: current.goal.x, y: current.goal.y } : null,
+      startedAt: current?.startedAt ?? null, activeElapsedMs: current?.activeElapsedMs ?? null,
+      confirmedMoves: current?.confirmedMoves ?? null, targetWaypoint: current?.targetWaypoint === true,
+      hintScan: null, selectedHomeIndex: null };
+  });
+  let searches = 0;
+  const findPlan = (homeIndex, hinted = false, hintGoal = null) => {
+    const binding = coverage.entries.find(entry => entry.homeIndex === homeIndex);
+    if (!binding) { supplyCount(diagnostic, 'scoutBindingMissing'); return null; }
+    const home = binding.home;
+    // A temporarily inactive declared waypoint must not reset a different
+    // waypoint's existing finite clock, ACK count or position-loop budget.
+    if (client.combatScout && client.combatScout.homeIndex !== homeIndex) { supplyCount(diagnostic, 'scoutRetainedElsewhere'); return null; }
+    const usableGoal = goal => lifecyclePoint(goal) && Number.isInteger(goal.x) && Number.isInteger(goal.y) &&
+      distance(goal, owner) > 0 && protocolMapCellIsWalkable(context.map, goal) && allowed(goal) &&
+      !occupied.some(entity => entity.x === goal.x && entity.y === goal.y);
+    const retainedTarget = !hinted && client.combatScout?.targetWaypoint === true && usableGoal(client.combatScout.goal) ? client.combatScout.goal : null;
+    const goals = hinted ? [hintGoal].filter(usableGoal) : STEPS.map(([dx, dy]) => ({ x: home.x + dx, y: home.y + dy }))
+      .filter(usableGoal).sort((a, b) => distance(a, owner) - distance(b, owner));
+    if (!hinted && client.combatScout?.homeIndex === homeIndex) goals.sort((a, b) => Number(distance(b, client.combatScout.goal) === 0) - Number(distance(a, client.combatScout.goal) === 0));
+    // Keep a validated hint waypoint across ACK ticks; failed or invalid goals
+    // fall through to the existing home goals within the same search budget.
+    if (retainedTarget && !goals.some(goal => distance(goal, retainedTarget) === 0)) goals.unshift(retainedTarget);
+    for (const goal of goals) {
+      if (searches >= 4) { supplyCount(diagnostic, 'scoutSearchLimit'); return null; }
+      searches++; supplyCount(diagnostic, 'scoutPathSearch');
+      const plan = hinted ? movement(client, goal, context.map, allowed, occupied) : movement(client, goal, context.map, allowed);
+      if (!plan) { supplyCount(diagnostic, 'scoutPathNull'); continue; }
+      return { plan, homeIndex, goal, targetWaypoint: hinted || Boolean(retainedTarget && distance(goal, retainedTarget) === 0) };
+    }
+    return null;
+  };
+  let fallback = null;
+  for (let offset = 0; offset < cluster.observerHomes.length && searches < 4; offset++) {
+    fallback = findPlan((initialCursor + offset) % cluster.observerHomes.length);
+    if (fallback) break;
+  }
+  if (fallback) {
+    let selected = fallback, hint = null, hintScan = null;
+    const fallbackSearches = searches;
+    if (!client.combatScout && searches < 4) {
+      hintScan = combatScoutHints(client, context, coverage, initialCursor, fallback.homeIndex, now, allowed, occupied);
+      const preferredHints = preferUnsharedScoutWaypoints(client, context, hintScan.hints, now, hintScan);
+      hintScan.hintOrderChangedByActiveScoutPreference = preferredHints !== hintScan.hints;
+      for (const candidate of preferredHints) {
+        const preferred = findPlan(candidate.homeIndex, true, candidate.attackTile);
+        if (preferred) { selected = preferred; hint = candidate; break; }
+        if (searches >= 4) break;
+      }
+    }
+    const { plan, homeIndex, goal, targetWaypoint } = selected;
+    supplyCapture(diagnostic, () => {
+      diagnostic.scout.selectedHomeIndex = homeIndex;
+      diagnostic.scout.selectedGoal = { x: goal.x, y: goal.y };
+      diagnostic.scout.pathSearches = searches;
+      diagnostic.scout.hintScan = hintScan ? { count: hintScan.hintCount, truncated: hintScan.truncated,
+        preference: hintScan.hintPreferenceReason, selectedTargetId: hint?.objectId ?? null,
+        selectedTargetPoint: hint ? { x: hint.target.x, y: hint.target.y } : null } : null;
+      if (hintScan?.hints.length && !hint) supplyCount(diagnostic, 'scoutHintUnused');
+      if (hint) diagnostic.state.lastHint = { id: hint.objectId, x: hint.target.x, y: hint.target.y,
+        sequence: diagnostic.sequence, monotonicMs: diagnostic.monotonicMs, mapFileName: diagnostic.mapFileName, phase: diagnostic.phase, homeIndex };
+    });
+    if (!client.combatScout) {
+      client.combatScout = { mapFileName: String(client.snapshot.mapFileName), homeIndex, goal, startedAt: now,
+        activeElapsedMs: 0, confirmedMoves: 0, lastReceiptSequence: client.sequence, visited: new Map(),
+        ...(targetWaypoint ? { targetWaypoint: true } : {}) };
+    } else {
+      client.combatScout.goal = goal;
+      if (!targetWaypoint) delete client.combatScout.targetWaypoint;
+    }
+    client.combatScoutCursor = homeIndex;
+    if (hintScan?.hints.length) recordCombatScoutSelection(client, context, {
+      reason: hint ? 'observer-target-waypoint' : 'cyclic-fallback', fallbackHomeIndex: fallback.homeIndex,
+      selectedHomeIndex: homeIndex, selectedWaypoint: { x: goal.x, y: goal.y },
+      selectedWaypointSource: targetWaypoint ? 'hint-attack-tile' : 'declared-home',
+      pathSearches: searches, hintPathSearches: searches - fallbackSearches,
+      hintScanTruncated: hintScan.truncated, hintOrderChangedByActiveScoutPreference: hintScan.hintOrderChangedByActiveScoutPreference,
+      hintCount: hintScan.hintCount, activeOtherWaypointCount: hintScan.activeOtherWaypointCount,
+      sharedHintCount: hintScan.sharedHintCount, unsharedHintCount: hintScan.unsharedHintCount, hintPreferenceReason: hintScan.hintPreferenceReason,
+      ...(hint ? { hintTargetId: hint.objectId, hintTarget: hint.target, actualObserver: hint.observer,
+        potentialAttackTile: hint.attackTile } : {}) }, now);
+    return { ...plan, scouting: true, scoutHomeIndex: homeIndex };
+  }
+  // Failed paths never become movement evidence. The next legal opportunity
+  // can consider another finite observer waypoint while normal fallback keeps
+  // its original blocked/latency/offered-load accounting.
+  client.combatScoutCursor = (initialCursor + 1) % cluster.observerHomes.length;
+  if (diagnostic) diagnostic.scout.blockedReason = searches >= 4 ? 'search-budget-no-plan' : 'no-usable-goal-or-path';
+  supplyCount(diagnostic, 'scoutNoPath'); return null;
 }
 
 export function stableFanoutRange(kind, policy) {
@@ -656,53 +1330,146 @@ export function stableFanoutRange(kind, policy) {
   if (policy?.activityMode === 'native') return kind === 'chat' ? 8 : 6;
   return kind === 'chat' ? 14 : 12;
 }
-function combatPlan(client, context) {
+function nativeAttackWitness(client, context, target, owner = self(client), diagnostic) {
+  const range = stableFanoutRange('attack', context.policy);
+  supplyCount(diagnostic, 'witnessCalls');
+  return combatObservers(client, context).map(observer => {
+    const peer = activeGameplayOwner(observer, client.snapshot.mapFileName);
+    const attackerId = observedPlayerId(observer, client.label);
+    const attacker = observer.snapshot.entities.find(entity => entity.objectId === attackerId && entity.name === client.label && entity.dead !== true);
+    const observedTarget = observer.snapshot.entities.find(entity => entity.objectId === target.objectId &&
+      entity.name === target.name && ordinaryCombatMonster(entity, context));
+    const separation = peer ? Math.max(distance(peer, owner), distance(peer, target)) : Infinity;
+    const usable = peer && attacker && observedTarget && Number.isInteger(attackerId) && separation <= range;
+    if (diagnostic) {
+      const reason = !peer ? 'witnessInactive' : !attacker || !Number.isInteger(attackerId) ?
+        'witnessAttackerMissing' : !observedTarget ? 'witnessTargetMissing' : separation > range ? 'witnessRange' : 'witnessAvailable';
+      supplyCount(diagnostic, reason);
+      if (!usable && diagnostic.witnessRejected.length < 4) supplyCapture(diagnostic, () => {
+        diagnostic.witnessRejected.push({ targetId: target.objectId, observer: observer.label,
+          testedOwnerPoint: { x: owner.x, y: owner.y }, peerPoint: peer ? { x: peer.x, y: peer.y } : null,
+          attackerPresent: Boolean(attacker), targetPresent: Boolean(observedTarget), separation: Number.isFinite(separation) ? separation : null, reason });
+      });
+    }
+    return usable ? { observer, separation } : null;
+  }).filter(Boolean).sort((a, b) => a.separation - b.separation)[0]?.observer ?? null;
+}
+function recentNativePursuitLeaders(context, mapFileName, nowMonoMs) {
+  const leaders = new Map();
+  if (!Number.isFinite(nowMonoMs) || nowMonoMs < 0) return leaders;
+  for (const hunter of context.clients) {
+    if (hunter.role !== 'combat' || typeof hunter.label !== 'string' || !activeGameplayOwner(hunter, mapFileName)) continue;
+    const pursuit = hunter.combatPursuit;
+    if (!pursuit || pursuit.attackSent || pursuit.mapFileName !== mapFileName) continue;
+    const first = pursuit.coordinationFirstReceiptMonoMs, last = pursuit.coordinationLastReceiptMonoMs;
+    if (!Number.isFinite(first) || !Number.isFinite(last) || first < 0 || first > last ||
+        last > nowMonoMs || nowMonoMs - last > RECENT_CHASE_PREFERENCE_MS) continue;
+    const target = hunter.snapshot.entities.find(entity => entity.objectId === pursuit.objectId && entity.name === pursuit.name);
+    if (!target || !availableCombatTarget(hunter, context, target, Date.now())) continue;
+    const prior = leaders.get(pursuit.objectId);
+    if (!prior || first < prior.firstReceiptMonoMs || (first === prior.firstReceiptMonoMs && hunter.label < prior.label)) {
+      leaders.set(pursuit.objectId, { label: hunter.label, firstReceiptMonoMs: first });
+    }
+  }
+  return leaders;
+}
+
+function combatPlan(client, context, nowMonoMs = performance.now()) {
   const owner = self(client), native = context.policy?.activityMode === 'native';
+  const diagnostic = native ? beginTargetSupply(client, context, owner, nowMonoMs) : null;
+  try {
   if (context.policy?.activityMode === 'native' && !client.combatArrival) {
     if (distance(owner, client.home) !== 0) {
       const plan = movement(client, client.home, context.map);
-      return plan ? { ...plan, initialCombatTransit: true } : null;
+      return completeTargetSupply(diagnostic, 'initialTransit', plan ? { ...plan, initialCombatTransit: true } : null);
     }
     recordCombatArrival(client, context);
   }
-  if (!insideCombatCoverage(client.combatCluster, owner)) return returnToCombatCoverage(client, context);
+  const coverage = activeCombatCoverage(client, context);
+  if (!insideCombatCoverage(coverage, owner)) return completeTargetSupply(diagnostic, 'return', returnToCombatCoverage(client, context, coverage));
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
-  let candidates = combatCandidates(client, context);
+  let candidates = combatCandidates(client, context, undefined, diagnostic);
   const observers = combatObservers(client, context);
-  const witness = target => observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId &&
-    (!native || (ordinaryCombatMonster(entity, context) && entity.name === target.name))) &&
-    (!native || Number.isInteger(observedPlayerId(other, client.label))));
+  const witness = target => native ? nativeAttackWitness(client, context, target, undefined, diagnostic) :
+    observers.find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
+  const approaches = native ? new Map() : null;
   if (native) {
+    // An approach must lead to a genuinely witnessed strike, rather than
+    // orbiting an adjacent monster that no current observer can witness.
+    // These eight cheap geometry/membership checks do not expand path budgets.
+    candidates = candidates.filter(target => {
+      const destinations = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
+        .filter(destination => insideCombatCoverage(coverage, destination) && nativeAttackWitness(client, context, target, destination, diagnostic));
+      approaches.set(target.objectId, destinations);
+      if (!destinations.length) {
+        supplyCount(diagnostic, 'approachNoWitness');
+        if (diagnostic && diagnostic.approachRejected.length < 4) supplyCapture(diagnostic, () => diagnostic.approachRejected.push(supplyTarget(target)));
+      }
+      return destinations.length > 0;
+    });
     const pursuit = client.combatPursuit;
+    supplyCapture(diagnostic, () => { diagnostic.pursuitEvaluated = true;
+      if (pursuit) diagnostic.pursuit = { id: pursuit.objectId, name: pursuit.name, mapFileName: pursuit.mapFileName,
+        confirmedMoves: pursuit.confirmedMoves, attackSent: pursuit.attackSent, startedAt: pursuit.startedAt, activeElapsedMs: pursuit.activeElapsedMs }; });
     const selected = pursuit?.mapFileName === String(client.snapshot.mapFileName)
       ? candidates.find(target => target.objectId === pursuit.objectId && target.name === pursuit.name) : null;
-    if (!selected) client.combatPursuit = null;
+    if (!selected) {
+      const live = livePursuitTarget(client, context, pursuit);
+      supplyCapture(diagnostic, () => { if (diagnostic.pursuit) Object.assign(diagnostic.pursuit,
+        { selectedInApproach: false, liveCheckPerformed: true, liveCheckPassed: Boolean(live), cleared: !live }); });
+      if (!live) client.combatPursuit = null;
+    } else supplyCapture(diagnostic, () => { if (diagnostic.pursuit) Object.assign(diagnostic.pursuit,
+      { selectedInApproach: true, liveCheckPerformed: false, liveCheckPassed: null, cleared: false }); });
     const adjacent = candidates.filter(target => distance(owner, target) === 1 && witness(target));
     candidates = [...new Set([...(selected && adjacent.includes(selected) ? [selected] : []), ...adjacent,
       ...(selected ? [selected] : []), ...candidates])];
+    // Reorder only the original four-candidate window. A claimed target with
+    // the only usable path remains a fallback within the same search budget.
+    // This is a group planning preference, never an exclusive combat claim.
+    const leaders = recentNativePursuitLeaders(context, client.snapshot.mapFileName, nowMonoMs);
+    const immediate = new Set(adjacent.map(target => target.objectId));
+    const priority = target => immediate.has(target.objectId) ? 0 :
+      leaders.has(target.objectId) && leaders.get(target.objectId).label !== client.label ? 2 : 1;
+    candidates = candidates.slice(0, 4).sort((a, b) => priority(a) - priority(b));
   }
-  for (const target of candidates.slice(0, 4)) {
+  const first4 = candidates.slice(0, 4);
+  supplyCapture(diagnostic, () => { diagnostic.first4 = first4.map(target => ({ ...supplyTarget(target), approachGoals: approaches?.get(target.objectId)?.length ?? null,
+    evaluated: false, witness: null, pathSearches: 0, pathNull: 0 })); });
+  let diagnosticIndex = 0;
+  for (const target of first4) {
+    const candidateDiagnostic = diagnostic?.first4[diagnosticIndex++];
     const observer = witness(target);
+    if (candidateDiagnostic) supplyCapture(diagnostic, () => { candidateDiagnostic.evaluated = true; candidateDiagnostic.witness = observer?.label ?? null; });
     if (distance(owner, target) === 1 && observer) {
       if (native && !client.pending) rememberCombatTarget(client, target);
       const facing = directionOf(owner, target);
-      if (owner.direction !== facing) return { command: { type: 'turn', direction: facing }, hunting: target.name };
-      return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
-        peerAttackerId: observedPlayerId(observer, client.label) };
+      if (owner.direction !== facing) return completeTargetSupply(diagnostic, 'turn', { command: { type: 'turn', direction: facing }, hunting: target.name }, target, observer);
+      return completeTargetSupply(diagnostic, 'attack', { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
+        peerAttackerId: observedPlayerId(observer, client.label) }, target, observer);
     }
-    const adjacent = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
+    const adjacent = (native ? approaches.get(target.objectId) : STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy })))
       .sort((a, b) => distance(a, owner) - distance(b, owner));
     for (const destination of adjacent) {
-      if (!insideCombatCoverage(client.combatCluster, destination)) continue;
-      const plan = movement(client, destination, context.map);
-      if (plan && insideCombatCoverage(client.combatCluster, plan.first) && insideCombatCoverage(client.combatCluster, plan.target)) {
+      if (!insideCombatCoverage(coverage, destination)) continue;
+      supplyCount(diagnostic, 'pathSearch'); if (candidateDiagnostic) candidateDiagnostic.pathSearches++;
+      const plan = movement(client, destination, context.map, point => insideCombatCoverage(coverage, point) &&
+        !(client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds)));
+      if (!plan) { supplyCount(diagnostic, 'pathNull'); if (candidateDiagnostic) candidateDiagnostic.pathNull++; }
+      if (plan && insideCombatCoverage(coverage, plan.first) && insideCombatCoverage(coverage, plan.target)) {
         if (native && !client.pending) rememberCombatTarget(client, target);
-        return { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId } : {}) };
+        return completeTargetSupply(diagnostic, 'chase', { ...plan, hunting: target.name, ...(native ? { chaseTargetId: target.objectId, chaseTargetPoint: lifecyclePoint(target) } : {}) }, target, observer);
       }
+      if (plan) supplyCount(diagnostic, 'pathOutside');
     }
-    if (native && !client.pending && client.combatPursuit?.objectId === target.objectId) client.combatPursuit = null;
+    // A temporarily unavailable path must not erase real chase ACKs. Otherwise
+    // chase / fallback-patrol / chase can revisit one cell forever while each
+    // replan resets the loop and finite pursuit budgets.
+    if (native && !client.pending && client.combatPursuit?.objectId === target.objectId &&
+        client.combatPursuit.confirmedMoves === 0) client.combatPursuit = null;
   }
-  return returnToCombatCoverage(client, context);
+  const fallback = (native ? scoutCombatCoverage(client, context, Date.now(), coverage, diagnostic) : null) ?? returnToCombatCoverage(client, context, coverage);
+  return completeTargetSupply(diagnostic, fallback?.scouting ? 'scout' : fallback ? 'return' : 'blocked', fallback);
+  } finally { emitTargetSupply(context, diagnostic); }
 }
 
 function recordCombatArrival(client, context) {
@@ -750,12 +1517,19 @@ function checkOwner(client, context) {
 }
 export function selectNativeAction(client, context, now = performance.now()) {
   client.navigationAttempts = context.policy?.activityMode === 'native' ? [] : null; client.navigationAttemptCount = 0;
-  if (now >= client.nextNativeChatAt) return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
+  if (now >= client.nextNativeChatAt) {
+    const peers = nearbyObservers(client, context, Infinity);
+    // A self echo must not consume a multiplayer peer-chat opportunity.
+    // Keep the due time while ordinary movement naturally brings a peer near.
+    if (!peers.length || peers.some(peer => distance(self(peer), self(client)) <= stableFanoutRange('chat', context.policy))) {
+      return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
+    }
+  }
   if (now >= client.nextNativeTurnAt && client.role !== 'combat') return { command: { type: 'turn', direction: self(client).direction === 'Up' ? 'Right' : 'Up' } };
-  return client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
+  return client.role === 'combat' ? combatPlan(client, context, now) : patrol(client, context);
 }
 
-async function action(client, context, planned, preparedPlan) {
+export async function action(client, context, planned, preparedPlan) {
   const phase = context.phase, owner = { ...self(client) }, plannedAt = planned.due;
   const native = context.policy.activityMode === 'native';
   const nativeMeta = native ? { nativeOpportunity: true, plannedIntervalMs: planned.intervalMs, pacingKnown: planned.cadence.pacingKnown,
@@ -774,6 +1548,17 @@ async function action(client, context, planned, preparedPlan) {
   }
   const command = plan.command, kind = command.type;
   if (client.budget.remainingWait()) { context.add({ actor: client.label, phase, kind, status: 'budget-gap', plannedGameplay: true, ...nativeMeta }); return; }
+  if (native && kind === 'attack') {
+    const target = client.snapshot.entities.find(entity => entity.objectId === command.objectId && ordinaryCombatMonster(entity, context));
+    const observer = target && nativeAttackWitness(client, context, target);
+    if (!observer) {
+      context.add({ actor: client.label, phase, kind, status: 'evidence-wait', plannedGameplay: true,
+        attackWitnessUnavailable: true, ...nativeMeta }); return;
+    }
+    // Re-resolve both the receiver's actor namespace and its cursor immediately
+    // before this send. A prepared observer may have moved since selection.
+    plan = { ...plan, targetEntity: target, observer, peerAttackerId: observedPlayerId(observer, client.label) };
+  }
   const observers = nearbyObservers(client, context, stableFanoutRange(kind, context.policy)).map(peer => ({ peer, cursor: peer.sequence,
     objectId: observedPlayerId(peer, client.label) }));
   const observerCursor = plan.observer?.sequence, cursor = client.sequence, sentAt = performance.now();
@@ -782,14 +1567,33 @@ async function action(client, context, planned, preparedPlan) {
   }
   if (kind === 'attack') context.targetClaims.set(command.objectId, client.label);
   const row = { actor: client.label, phase, kind, plannedGameplay: true, scheduledAtMs: plannedAt, sentAtMs: sentAt,
-    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, chaseTargetId: plan.chaseTargetId, ...nativeMeta,
+    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, chaseTargetId: plan.chaseTargetId,
+    ...(plan.scouting ? { scouting: true, scoutHomeIndex: plan.scoutHomeIndex } : {}), ...nativeMeta,
     ...(native && client.role === 'combat' ? { declaredHome: client.home, initialCombatTransit: Boolean(plan.initialCombatTransit),
       targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
+  const v2Attack = kind === 'attack' && client.attackResults === 'v2';
+  if (v2Attack) row.attackResults = 'v2';
+  let attackOutcome = 'unresolved', navigationHint;
   try {
+    if (native && ['walk', 'run'].includes(kind)) {
+      if (!navigationPlanIsClear(client, plan, context.map) || !(navigationHint = claimNavigationHint(client, plan, sentAt))) {
+        context.add({ ...row, status: 'navigation-blocked', navigationCoordinationConflict: true }); return;
+      }
+    }
     client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
-    client.send(command);
+    if (kind === 'attack') beginPendingAttackEvidence(client, plan.observer, owner,
+      plan.targetEntity ?? client.snapshot.entities.find(entity => entity.objectId === command.objectId), sentAt, cursor, observerCursor);
+    const wireCommand = v2Attack ? client.nextAttackV2(command.objectId) : command;
+    if (v2Attack) { row.requestId = wireCommand.requestId; client.pendingAttackEvidence.requestId = wireCommand.requestId; }
+    // A launched strike ends its previous chase. Only a new, actually sent
+    // movement can begin another segment; selecting or rejecting a plan cannot.
+    const postStrike = postStrikeChaseSegment(client, context, plan, owner, cursor);
+    client.send(wireCommand);
+    if (postStrike && client.combatPursuit === postStrike.previous) client.combatPursuit = postStrike.next;
+    if (v2Attack) row.attackRequestSent = true;
     if (native && kind === 'attack') {
-      rememberCombatTarget(client, plan.targetEntity); client.combatPursuit.attackSent = true;
+      rememberCombatTarget(client, plan.targetEntity);
+      if (!v2Attack) client.combatPursuit.attackSent = true;
     }
     if (native && kind === 'attack') recordHuntAttempt(client, owner, row.targetPosition);
     if (native) {
@@ -797,18 +1601,35 @@ async function action(client, context, planned, preparedPlan) {
       if (kind === 'chat') client.nextNativeChatAt = sentAt + context.policy.nativeChatIntervalMs;
       if (kind === 'turn') client.nextNativeTurnAt = sentAt + context.policy.nativeTurnIntervalMs;
     }
-    const receipt = await client.wait(() => {
-      const own = fresh(client, cursor, sentAt), rejection = own.find(event => event.type === 'error');
+    const acknowledgement = () => {
+      const own = fresh(client, cursor, sentAt).filter(event => !v2Attack || event.monotonicMs <= sentAt + 900);
+      const rejection = own.find(event => event.type === 'error');
       if (rejection) { const error = new Error('Public gameplay command rejected'); error.code = 'PUBLIC_COMMAND_REJECTED'; throw error; }
-      if (kind === 'attack') return verifiedCombatHit(own, fresh(plan.observer, observerCursor, sentAt), command.objectId, owner.objectId, plan.peerAttackerId);
+      if (kind === 'attack') {
+        if (v2Attack) {
+          const result = matchAttackResultV2(own, wireCommand);
+          if (!result) return null;
+          row.attackResult = result.result;
+          if (['unavailable', 'unknown'].includes(result.result)) {
+            const error = new Error(`attackV2 ${result.result}: ${result.code}; no retry`);
+            error.terminalAttackResult = true; throw error;
+          }
+          if (result.result === 'notLaunched') return { ...result, notLaunched: true };
+          if (native && client.combatPursuit?.objectId === command.objectId) client.combatPursuit.attackSent = true;
+        }
+        return verifiedCombatHit(own, fresh(plan.observer, observerCursor, sentAt)
+          .filter(event => !v2Attack || event.monotonicMs <= sentAt + 900), command.objectId, owner.objectId, plan.peerAttackerId);
+      }
       if (kind === 'chat') {
         const peer = observers[0]?.peer ?? client, after = observers[0]?.cursor ?? cursor;
         return fresh(peer, after, sentAt).find(event => ['ObjectChat', 'Chat'].includes(event.packet) &&
           String(event.payload?.text ?? event.payload?.message ?? '').includes(command.message));
       }
       return own.find(event => event.packet === 'UserLocation');
-    }, `${kind} authoritative acknowledgement`, kind === 'attack' ? 900 : context.policy.actionTimeoutMs);
-    let status = 'success';
+    };
+    const receipt = await client.wait(acknowledgement, `${kind} authoritative acknowledgement`,
+      kind === 'attack' ? 900 : context.policy.actionTimeoutMs, v2Attack ? acknowledgement : null);
+    let status = receipt.notLaunched ? 'not-launched' : 'success';
     if (['walk', 'run'].includes(kind)) {
       const actual = receipt.payload;
       if (!(actual.x === plan.target.x && actual.y === plan.target.y) &&
@@ -823,8 +1644,11 @@ async function action(client, context, planned, preparedPlan) {
     context.add({ ...row, status, latencyMs: receipt.monotonicMs - sentAt, plannedLatencyMs: receipt.monotonicMs - plannedAt,
       damage: receipt.damage, sharedHealthVerified: receipt.sharedHealthVerified, healthPercent: receipt.healthPercent });
     if (kind === 'attack') {
-      client.failedTargets.delete(command.objectId);
-      if (native) { client.combatHunting.positiveHits++; client.combatHunting.totalDamage += receipt.damage; }
+      attackOutcome = status;
+      if (status === 'success') {
+        client.failedTargets.delete(command.objectId);
+        if (native) { client.combatHunting.positiveHits++; client.combatHunting.totalDamage += receipt.damage; }
+      }
     }
     if (kind === 'chat') context.add({ actor: client.label, phase, kind: observers.length ? 'peerChat' : 'selfChat', status: 'success', latencyMs: receipt.monotonicMs - sentAt });
     if (status === 'success' && ['walk', 'run', 'turn', 'chat'].includes(kind)) {
@@ -852,7 +1676,8 @@ async function action(client, context, planned, preparedPlan) {
       } else await verifyObservers();
     }
   } catch (error) {
-    const swung = kind === 'attack' && fresh(client, cursor, sentAt).some(event => event.packet === 'ObjectAttack' && event.payload?.objectId === owner.objectId);
+    const swung = kind === 'attack' && (v2Attack ? row.attackResult === 'launched' :
+      fresh(client, cursor, sentAt).some(event => event.packet === 'ObjectAttack' && event.payload?.objectId === owner.objectId));
     if (kind === 'attack' && !(error instanceof SafetyStop)) {
       const prior = client.failedTargets.get(command.objectId);
       // The protocol has no strike request ID. Even an observed swing followed
@@ -865,15 +1690,24 @@ async function action(client, context, planned, preparedPlan) {
         else client.failedTargets.delete(client.failedTargets.keys().next().value);
       }
     }
-    context.add({ ...row, status: actionFailureStatus(error, swung, client.closed),
+    attackOutcome = actionFailureStatus(error, swung, client.closed);
+    context.add({ ...row, status: attackOutcome,
       latencyMs: performance.now() - sentAt, plannedLatencyMs: performance.now() - plannedAt, error: sanitize(error.message, client.secrets),
       targetStillAdjacent: kind === 'attack' ? client.snapshot.entities.some(entity => entity.objectId === command.objectId && !entity.dead && distance(entity, self(client)) === 1) : undefined,
       ambiguousTargetQuarantined: kind === 'attack' && native && !(error instanceof SafetyStop) });
-    if (error instanceof SafetyStop || client.closed) throw error;
-  } finally { client.waitReason = null; if (kind === 'attack' && context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }
+    if (error instanceof SafetyStop || client.closed || error.terminalAttackResult) throw error;
+  } finally {
+    releaseNavigationHint(client, navigationHint);
+    client.waitReason = null;
+    if (kind === 'attack') {
+      try { finishPendingAttackEvidence(client, context, attackOutcome); }
+      finally { if (context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }
+    }
+  }
 }
 
 async function auxiliary(client, context) {
+  if (client.hpRecoveryPending || client.hpRecoveryEvidence) return;
   const phase = context.phase, refresh = Date.now() >= client.nextRefresh;
   if (client.budget.remainingWait()) return;
   const kind = refresh ? 'refresh' : 'rtt', cursor = client.sequence, at = performance.now(), time = Date.now();
@@ -895,6 +1729,285 @@ async function auxiliary(client, context) {
   }
 }
 
+// Temporary preparation-only observer: retain one latest raw scalar, never a
+// complete snapshot or packet history. Native maintenance keeps its own rules.
+function preparationItemTemplate(item) {
+  const source = item?.tooltipSource;
+  const ids = [item?.itemIndex, item?.item_index, source?.info?.itemIndex, source?.info?.item_index,
+    source?.realInfo?.itemIndex, source?.realInfo?.item_index, source?.real_info?.itemIndex, source?.real_info?.item_index].filter(value => value !== undefined);
+  if (!ids.length || ids.some(value => !Number.isSafeInteger(value) || value <= 0)) throw new Error('Preparation HP recovery inventory template is unknown');
+  // GetRealItem may legitimately select a different class/level row (e.g.
+  // SpiritBlade info1 -> realInfo3). Resolve it like the ordinary helper.
+  const resolved = source?.realInfo ?? source?.real_info ?? source?.info;
+  const effective = item?.itemIndex ?? item?.item_index ?? resolved?.item_index ?? resolved?.itemIndex;
+  if (!Number.isSafeInteger(effective) || effective <= 0 ||
+      (item.name === '(HP)DrugSmall' && ids.some(value => value !== 658))) throw new Error('Preparation HP recovery inventory template is unknown or HP658 identity conflicts');
+  return effective;
+}
+function preparationHpScalar(raw, expected, receipt, selected) {
+  if (!raw || raw.playerObjectId !== expected.ownerObjectId || raw.mapFileName !== expected.mapFileName) throw new Error('Preparation HP recovery owner or map changed');
+  const owner = raw.entities?.find(e => e.objectId === raw.playerObjectId);
+  if (!owner || owner.name !== expected.ownerName) throw new Error('Preparation HP recovery owner changed');
+  if (owner.dead !== false || raw.playerHp === 0) throw new Error('Preparation HP recovery owner is dead or life state is unknown');
+  if (!Number.isSafeInteger(raw.playerHp) || raw.playerHp <= 0 || !Number.isSafeInteger(raw.playerMaxHp) || raw.playerMaxHp <= 0 || raw.playerHp > raw.playerMaxHp ||
+      !Array.isArray(raw.inventoryItems) || !Array.isArray(raw.beltItems)) throw new Error('Preparation HP recovery needs exact raw HP and complete inventory plus belt');
+  const candidates = [], matching = [], ids = new Set(), slots = new Set();
+  for (const [grid, items] of [['belt', raw.beltItems], ['inventory', raw.inventoryItems]]) for (const item of items) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) throw new Error('Preparation HP recovery inventory record is malformed');
+    const uidValue = item.uniqueId;
+    const uid = typeof uidValue === 'number' ? uidValue : typeof uidValue === 'string' && /^(0|[1-9]\d*)$/.test(uidValue) ? Number(uidValue) : NaN;
+    const quantity = item.quantity, template = preparationItemTemplate(item);
+    if (!Number.isSafeInteger(uid) || uid < 0 || ids.has(uid) || !Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 0xffff_ffff ||
+        typeof item.name !== 'string' || !item.name.length || !Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot > 255 ||
+        !(grid === 'belt' ? item.container === 'belt' : ['bag1', 'bag2', 'quest'].includes(item.container))) throw new Error('Preparation HP recovery inventory UID quantity or container is malformed');
+    const slotKey = item.container + ':' + item.slot;
+    if (slots.has(slotKey)) throw new Error('Preparation HP recovery duplicate inventory slot');
+    ids.add(uid); slots.add(slotKey);
+    if (selected && uid === selected.uniqueId) matching.push({ ...item, template });
+    if (!/^\(hp\)drug/i.test(item.name)) continue;
+    if (item.container === 'quest') throw new Error('Preparation HP recovery HP item is not ordinarily usable');
+    candidates.push({ uniqueId: uid, quantity, grid, exact658: template === 658 && item.name === '(HP)DrugSmall' });
+  }
+  let selectedQuantity = null;
+  if (selected) {
+    const item = matching[0];
+    if (item && (item.template !== 658 || item.name !== '(HP)DrugSmall')) throw new Error('Preparation HP recovery held UID changed');
+    selectedQuantity = item ? item.quantity : 0;
+  }
+  return { ownerObjectId: raw.playerObjectId, ownerName: owner.name, map: raw.mapFileName,
+    hp: raw.playerHp, maximumHp: raw.playerMaxHp, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs,
+    hpCandidateCount: candidates.length, candidate: candidates.length === 1 ? candidates[0] : null, selectedQuantity };
+}
+function recordPreparationHpRecovery(client, message, receipt) {
+  const pending = client.preparationHpRecoveryObservation;
+  if (!pending || receipt?.direction !== 'received' || receipt.sequence <= pending.cursor || receipt.monotonicMs < pending.startedAtMs) return;
+  if (receipt.monotonicMs > (pending.sentAtMs === null ? pending.beforeDeadlineMs : pending.deadlineMs)) return;
+  try {
+    const owner = self(client);
+    if (client.closed || !owner || owner.objectId !== pending.ownerObjectId || owner.name !== pending.ownerName ||
+        client.snapshot.mapFileName !== pending.mapFileName) throw new Error('Preparation HP recovery owner or transport changed');
+    if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Preparation HP recovery owner is dead');
+    if (message.type === 'error') throw new Error('Preparation HP recovery public error');
+    if (message.type === 'worldSnapshot') {
+      const scalar = preparationHpScalar(message.payload, pending, receipt, pending.selected);
+      if (pending.sentAtMs === null) pending.before = scalar;
+      else { pending.after = scalar; pending.afterInvalidated = false; }
+    }
+    if (pending.sentAtMs !== null && message.packet === 'UseItem' && Number(message.payload?.uniqueId) === pending.selected.uniqueId &&
+        String(message.payload?.grid).toLowerCase() === pending.selected.grid) {
+      if (message.payload.success !== true) throw new Error('Preparation HP recovery UseItem rejected');
+      pending.acknowledgement ??= { sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
+    }
+    // Ordinary potions emit self ObjectHealth percentages, not exact personal
+    // HealthChanged. Either is only a cue for one raw refresh, never HP proof.
+    if (pending.sentAtMs !== null && (message.packet === 'HealthChanged' ||
+        (message.packet === 'ObjectHealth' && message.payload?.objectId === pending.ownerObjectId))) {
+      pending.afterInvalidated = true;
+      pending.healthCue = { source: message.packet, sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
+    }
+  } catch (error) { pending.failure ??= error; }
+}
+export async function recoverPreparationHeldHp(client, context, { actorDeadlineMs = performance.now() + 600000 } = {}) {
+  const began = performance.now(), row = { type: 'preparationHpRecovery', actor: client.label, phase: context.phase,
+    preparationOnly: true, measurementCredit: false, hpThreshold: .7, maximumDoses: 1, evidenceWindowMs: 2000 };
+  let pending = null;
+  const check = () => {
+    context.guard.assert();
+    if (context.phase !== 'preparation' || client.ready !== false || !client.inGame || client.closed || client.paused || client.draining) throw new Error('Preparation HP recovery requires an inactive ordinary owner');
+    if (!Number.isFinite(actorDeadlineMs) || performance.now() >= actorDeadlineMs || performance.now() - began >= 600000) throw new Error('Preparation actor600s budget exhausted');
+    if (pending?.failure) throw pending.failure;
+  };
+  const waitFor = async (predicate, label, deadline) => {
+    const read = () => { check(); return predicate(); };
+    const remaining = deadline - performance.now();
+    if (!(remaining > 0)) throw new Error('Preparation HP recovery2s evidence deadline exhausted');
+    return client.wait(read, label, remaining, read);
+  };
+  try {
+    check();
+    if (client.pending || client.auxPending || client.hpRecoveryPending || client.hpRecoveryEvidence || client.preparationHpRecoveryObservation) throw new Error('Preparation HP recovery cannot overlap another action');
+    const owner = self(client);
+    if (!owner || owner.name !== client.label || client.snapshot?.mapFileName !== '0' || hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Preparation HP recovery requires a live same-owner map0 snapshot');
+    pending = { ownerObjectId: owner.objectId, ownerName: owner.name, mapFileName: '0', cursor: client.sequence,
+      startedAtMs: performance.now(), sentAtMs: null, deadlineMs: null, before: null, after: null, selected: null, failure: null };
+    client.preparationHpRecoveryObservation = pending;
+    await client.pace(); check(); pending.before = null; pending.cursor = client.sequence; pending.startedAtMs = performance.now();
+    pending.beforeDeadlineMs = Math.min(actorDeadlineMs, pending.startedAtMs + 2000);
+    client.send({ type: 'clientVersion' });
+    await waitFor(() => pending.before, 'fresh raw preparation HP snapshot', pending.beforeDeadlineMs);
+    const before = pending.before; row.before = { ...before };
+    if (before.hp / before.maximumHp >= .7) {
+      const result = { ...row, at: Date.now(), status: 'not-needed', doses: 0, elapsedMs: performance.now() - began };
+      client.preparationHpRecoveryResult = result; context.writer?.add(result); return result;
+    }
+    if (before.hpCandidateCount !== 1 || !before.candidate?.exact658) throw new Error('Preparation HP recovery requires one unambiguous held HP658 DrugSmall UID');
+    await client.pace(); check();
+    const live = self(client), item = before.candidate;
+    if (!live || live.objectId !== pending.ownerObjectId || live.name !== pending.ownerName || client.snapshot.mapFileName !== '0' || hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Preparation HP recovery owner changed before dose');
+    // Re-evaluate the same raw observation after pacing; newer complete raw
+    // inventory must still identify the exact item selected before sending.
+    const current = pending.before;
+    if (performance.now() - current.monotonicMs <= 2000 && current.hp / current.maximumHp >= .7 && current.maximumHp === before.maximumHp) {
+      const result = { ...row, before: { ...current }, at: Date.now(), status: 'not-needed', doses: 0, naturalRecoveryObserved: true, elapsedMs: performance.now() - began };
+      client.preparationHpRecoveryResult = result; context.writer?.add(result); return result;
+    }
+    if (performance.now() - current.monotonicMs > 2000 || current.hpCandidateCount !== 1 || !current.candidate?.exact658 || current.candidate.uniqueId !== item.uniqueId || current.candidate.grid !== item.grid ||
+        current.candidate.quantity !== item.quantity || current.hp !== before.hp || current.maximumHp !== before.maximumHp) throw new Error('Preparation HP recovery state changed before dose');
+    // The generic emergency selector reads the cache. Check its full current
+    // input before sending, while keeping raw receipts as the only proof.
+    const cached = preparationHpScalar(client.snapshot, pending, { sequence: client.sequence, monotonicMs: performance.now() }, null);
+    if (cached.hpCandidateCount !== 1 || !cached.candidate?.exact658 || cached.candidate.uniqueId !== item.uniqueId || cached.candidate.grid !== item.grid ||
+        cached.candidate.quantity !== item.quantity || cached.hp !== before.hp || cached.maximumHp !== before.maximumHp) throw new Error('Preparation HP recovery selector input changed before dose');
+    pending.selected = item; pending.cursor = client.sequence; pending.sentAtMs = performance.now();
+    pending.deadlineMs = Math.min(actorDeadlineMs, pending.sentAtMs + 2000); row.sentAtMs = pending.sentAtMs;
+    const dose = startEmergencyHpRecovery(client, { hpThreshold: .7, restorativeReuseDelayMs: 6000, now: pending.sentAtMs })[0];
+    if (!dose || Number(dose.uniqueId) !== item.uniqueId || dose.command.grid !== item.grid) throw new Error('Preparation HP recovery held-item selector declined or changed');
+    row.uniqueId = item.uniqueId; row.grid = item.grid; row.quantityBefore = item.quantity;
+    const complete = () => {
+      const after = pending.after;
+      return pending.acknowledgement && after && !pending.afterInvalidated && after.sequence > pending.cursor && after.monotonicMs >= pending.sentAtMs && after.monotonicMs <= pending.deadlineMs &&
+        after.maximumHp === before.maximumHp && after.hp > before.hp && after.hp / after.maximumHp >= .7 && after.selectedQuantity === item.quantity - 1;
+    };
+    await waitFor(() => complete() || (pending.acknowledgement && pending.healthCue), 'preparation HP acknowledgement and health refresh cue', pending.deadlineMs);
+    if (!complete()) {
+      await client.pace(); check();
+      if (performance.now() >= pending.deadlineMs) throw new Error('Preparation HP recovery2s evidence deadline exhausted');
+      row.rawRefreshCue = { ...pending.healthCue };
+      client.send({ type: 'clientVersion' }); // At most one post-dose snapshot; the proof clock is never restarted.
+      await waitFor(complete, 'preparation raw HP increase and exact held consumption', pending.deadlineMs);
+    }
+    const result = { ...row, at: Date.now(), status: 'verified', doses: 1, acknowledgement: pending.acknowledgement,
+      after: { ...pending.after }, consumedQuantity: 1, observedExactHpIncrease: pending.after.hp - before.hp,
+      proofMeaning: 'Both actual consumption and exact HP increase observed; no causal healing or measurement credit claimed.', elapsedMs: performance.now() - began };
+    client.preparationHpRecoveryResult = result; context.writer?.add(result); return result;
+  } catch (error) {
+    const result = { ...row, at: Date.now(), status: 'failed', failure: sanitize(error.message, client.secrets ?? []),
+      acknowledgement: pending?.acknowledgement ?? null, after: pending?.after ?? null, elapsedMs: performance.now() - began };
+    client.preparationHpRecoveryResult = result; context.writer?.add(result); context.guard.stop(result.failure); throw error;
+  } finally { if (client.preparationHpRecoveryObservation === pending) client.preparationHpRecoveryObservation = null; }
+}
+
+const NATIVE_HP_REUSE_MS = 6000, NATIVE_HP_EVIDENCE_MS = 2000;
+function exactNativeHp(snapshot) {
+  const value = snapshot?.playerHp ?? snapshot?.entities?.find(entity => entity.objectId === snapshot.playerObjectId)?.hp;
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+function heldNativeHpItem(snapshot) {
+  for (const item of [...(snapshot?.beltItems ?? []), ...(snapshot?.inventoryItems ?? [])]) {
+    const uniqueId = Number(item.uniqueId), quantity = Number(item.quantity ?? 1);
+    if (/^\(hp\)drug/i.test(String(item.name)) && Number.isSafeInteger(uniqueId) && uniqueId >= 0 &&
+        Number.isSafeInteger(quantity) && quantity > 0) return { uniqueId, quantity,
+      grid: String(item.container).toLowerCase() === 'belt' ? 'belt' : 'inventory' };
+  }
+  return null;
+}
+function nativeHpNotice(client, context, reason) {
+  const notices = client.nativeHpRecoveryNotices ??= new Set();
+  if (notices.has(reason)) return;
+  notices.add(reason);
+  context.writer?.add({ type: 'nativeHpRecovery', actor: client.label, phase: context.phase, at: Date.now(), status: 'not-sent', reason });
+}
+function recordNativeHpRecoveryEvidence(client, message, receipt) {
+  const pending = client.hpRecoveryEvidence;
+  if (!pending || receipt?.direction !== 'received' || receipt.sequence <= pending.cursor ||
+      receipt.monotonicMs < pending.sentAtMs || receipt.monotonicMs > pending.deadlineMs) return;
+  const owner = self(client), snapshot = client.snapshot;
+  if (!owner || owner.objectId !== pending.ownerObjectId || owner.name !== pending.ownerName ||
+      snapshot.mapFileName !== pending.mapFileName) { pending.failure = 'owner-changed'; return; }
+  if (hasAuthoritativePlayerDeath(snapshot)) { pending.failure = 'owner-dead'; return; }
+  if (message.type === 'error') { pending.failure = 'public-error'; return; }
+  const proof = { sequence: receipt.sequence, monotonicMs: receipt.monotonicMs };
+  if (message.packet === 'UseItem' && Number(message.payload?.uniqueId) === pending.uniqueId &&
+      String(message.payload?.grid).toLowerCase() === pending.grid) {
+    if (message.payload.success !== true) pending.failure = 'rejected';
+    else {
+      if (!pending.ack) client.context.sustain?.recordHpRecovery(client, 'ack');
+      pending.ack = proof;
+    }
+  }
+  if (message.type === 'worldSnapshot' || message.packet === 'HealthChanged') {
+    const hp = exactNativeHp(snapshot);
+    if (hp != null && hp > pending.hpBefore) {
+      const exactHp = message.type === 'worldSnapshot' ? message.payload?.playerHp : message.payload?.hp;
+      if (!pending.sustainHpIncreaseObserved && Number.isFinite(exactHp) && exactHp > pending.hpBefore) {
+        pending.sustainHpIncreaseObserved = true; client.context.sustain?.recordHpRecovery(client, 'hp-increase');
+      }
+      pending.hpIncrease = { ...proof, hp, exactHp: Number.isFinite(exactHp) ? exactHp : null };
+    }
+  }
+  // Only a complete, freshly received inventory can prove removal. Missing
+  // arrays and later snapshots outside the original deadline prove nothing.
+  if (message.type === 'worldSnapshot' && Array.isArray(snapshot.beltItems) && Array.isArray(snapshot.inventoryItems)) {
+    const item = [...snapshot.beltItems, ...snapshot.inventoryItems].find(item => Number(item.uniqueId) === pending.uniqueId);
+    const quantity = item ? Number(item.quantity ?? 1) : 0;
+    if (Number.isSafeInteger(quantity) && quantity >= 0 && quantity < pending.quantityBefore) {
+      const raw = message.payload, complete = Array.isArray(raw?.beltItems) && Array.isArray(raw?.inventoryItems);
+      const freshItems = complete ? [...raw.beltItems, ...raw.inventoryItems].filter(item => Number(item?.uniqueId) === pending.uniqueId) : [];
+      const freshQuantity = complete && freshItems.length <= 1 ? (freshItems.length ? freshItems[0].quantity : 0) : null;
+      const afterQuantity = Number.isSafeInteger(freshQuantity) && freshQuantity >= 0 ? freshQuantity : null;
+      const provenDelta = afterQuantity !== null && afterQuantity < pending.quantityBefore ? pending.quantityBefore - afterQuantity : null;
+      const previousDelta = pending.sustainProvenConsumptionDelta ?? 0;
+      if (provenDelta > previousDelta) {
+        pending.sustainProvenConsumptionDelta = provenDelta;
+        client.context.sustain?.recordHpRecovery(client, 'consumption', provenDelta - previousDelta, previousDelta === 0);
+      }
+      pending.consumption = { ...proof, quantity, quantityBefore: pending.quantityBefore, afterQuantity, provenDelta };
+    }
+  }
+}
+
+// This auxiliary operation neither pauses nor completes a native opportunity.
+// Its ordinary send still reserves the account's original three-command budget.
+export function offerNativeHpRecovery(client, context) {
+  if (context.policy?.activityMode !== 'native' || client.pending || client.auxPending || client.hpRecoveryPending || client.hpRecoveryEvidence) return null;
+  const owner = activeGameplayOwner(client, context.mapName);
+  if (!owner) return null;
+  const hp = exactNativeHp(client.snapshot), maximum = client.snapshot.playerMaxHp;
+  if (!(hp > 0) || !Number.isFinite(maximum) || !(maximum > 0)) { nativeHpNotice(client, context, 'unknown-exact-health'); return null; }
+  if (observedPlayerHp(client.snapshot) / maximum > .6) return null;
+  const item = heldNativeHpItem(client.snapshot);
+  if (!item) { nativeHpNotice(client, context, 'no-held-hp-item'); return null; }
+  const now = performance.now(), lastUse = Number(client.journeyRestorativeUseAt?.hp);
+  if (Number.isFinite(lastUse) && now - lastUse < NATIVE_HP_REUSE_MS) return null;
+  if (client.budget.remainingWait()) { nativeHpNotice(client, context, 'command-budget'); return null; }
+  const sentAtMs = performance.now(), pending = { ...item, quantityBefore: item.quantity, hpBefore: hp,
+    ownerObjectId: owner.objectId, ownerName: owner.name, mapFileName: client.snapshot.mapFileName,
+    cursor: client.sequence, sentAtMs, deadlineMs: sentAtMs + NATIVE_HP_EVIDENCE_MS };
+  client.hpRecoveryEvidence = pending;
+  const row = { type: 'nativeHpRecovery', actor: client.label, phase: context.phase, at: Date.now(),
+    uniqueId: item.uniqueId, grid: item.grid, quantityBefore: item.quantity, hpBefore: hp, maximumHp: maximum };
+  try {
+    const dose = startEmergencyHpRecovery(client, { hpThreshold: .6, restorativeReuseDelayMs: NATIVE_HP_REUSE_MS, now })[0];
+    if (!dose) { client.hpRecoveryEvidence = null; nativeHpNotice(client, context, 'helper-declined'); return null; }
+    if (Number(dose.uniqueId) !== item.uniqueId || dose.command.grid !== item.grid) throw new Error('HP helper item did not match the held-item proof');
+    context.writer?.add({ ...row, status: 'sent' });
+  } catch {
+    client.hpRecoveryEvidence = null;
+    context.writer?.add({ ...row, status: 'send-failed' });
+    context.guard.stop('Ordinary HP recovery send failed'); return null;
+  }
+  const operation = client.wait(() => {
+    if (pending.failure) { const error = new Error('Ordinary HP recovery failed'); error.hpRecoveryFailure = pending.failure; throw error; }
+    return pending.ack && (pending.consumption || pending.hpIncrease) ? pending : null;
+  }, 'ordinary HP acknowledgement and effect', NATIVE_HP_EVIDENCE_MS).then(proof => {
+    context.writer?.add({ ...row, at: Date.now(), status: 'verified', acknowledgement: proof.ack,
+      consumed: Boolean(proof.consumption), consumption: proof.consumption ?? null,
+      afterQuantity: proof.consumption?.afterQuantity ?? null, provenConsumedQuantity: proof.consumption?.provenDelta ?? null,
+      hpIncreaseObserved: Boolean(proof.hpIncrease), hpIncrease: proof.hpIncrease ?? null });
+  }).catch(error => {
+    const status = error instanceof SafetyStop ? 'cancelled' : error.hpRecoveryFailure ?? 'timeout';
+    context.writer?.add({ ...row, at: Date.now(), status, acknowledgement: pending.ack ?? null,
+      consumption: pending.consumption ?? null, afterQuantity: pending.consumption?.afterQuantity ?? null,
+      provenConsumedQuantity: pending.consumption?.provenDelta ?? null, hpIncrease: pending.hpIncrease ?? null });
+    if (!(error instanceof SafetyStop)) context.guard.stop(`Ordinary HP recovery ${status}`);
+  }).finally(() => {
+    if (client.hpRecoveryEvidence === pending) client.hpRecoveryEvidence = null;
+    if (client.hpRecoveryPending === operation) client.hpRecoveryPending = null;
+  });
+  client.hpRecoveryPending = operation;
+  return operation;
+}
+
 function initializePlan(client, context, startAt) {
   client.plan = context.policy.activityMode === 'native' ? new NativePlan(startAt) : new FixedPlan(startAt);
   client.nextNativeChatAt = startAt + 5000; client.nextNativeTurnAt = startAt + context.policy.nativeTurnIntervalMs;
@@ -910,6 +2023,11 @@ export function offerNativeAction(client, context, now = performance.now()) {
     plannedIntervalMs: cadence.intervalMs, pacingKnown: cadence.pacingKnown, cadence };
   for (let n = 0; n < Math.min(planned.missed, 60); n++) context.add({ ...row, status: 'plan-gap' });
   if (planned.missed > 60) { context.guard.stop('Native driver stalled over 60 legal action opportunities'); return; }
+  if (client.hpRecoveryPending || client.hpRecoveryEvidence) {
+    // Take the opportunity first: maintenance must not hide offered gameplay
+    // or missed plans while its ordinary useItem evidence is unresolved.
+    context.add({ ...row, status: 'evidence-wait', maintenanceReason: 'hp-recovery' }); return;
+  }
   if (client.pending || client.evidencePending.size >= context.policy.maximumEvidenceInFlight) {
     // Damage has no request id. Keep a single unresolved attack so one late
     // strike cannot be credited to two requests. This observer/instrumentation
@@ -921,14 +2039,35 @@ export function offerNativeAction(client, context, now = performance.now()) {
   }).finally(() => { client.pending = null; });
 }
 
+export function offerNativeClientWork(client, context, now = performance.now()) {
+  offerNativeHpRecovery(client, context);
+  offerNativeAction(client, context, now);
+  if (!client.pending && !client.auxPending && !client.hpRecoveryPending && !client.hpRecoveryEvidence &&
+      (Date.now() >= client.nextRtt || Date.now() >= client.nextRefresh)) {
+    client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Auxiliary transport failed: ${error.message}`))
+      .finally(() => { client.auxPending = null; });
+  }
+}
+
+export function offerPreparationKeepAlive(client, context) {
+  if (context.policy.preparationProfile !== 'ordinary-economic-v1' || client.ready || !client.inGame ||
+      !client.ordinarySupplies || client.paused || client.draining || client.closed) return;
+  checkOwner(client, context);
+  if (client.ordinarySupplies.status().status !== 'ready' || client.auxPending ||
+      client.hpRecoveryPending || client.hpRecoveryEvidence || client.budget.remainingWait() || Date.now() < client.nextRtt) return;
+  client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Preparation transport failed: ${error.message}`))
+    .finally(() => { client.auxPending = null; });
+}
+
 function startEngine(context) {
   context.engine = setInterval(() => {
     try {
       context.guard.assert();
       for (const client of context.clients) {
-        if (!client.ready || client.paused || client.draining) continue;
+        if (!client.ready) { offerPreparationKeepAlive(client, context); continue; }
+        if (client.paused || client.draining) continue;
         checkOwner(client, context);
-        if (context.policy.activityMode === 'native') offerNativeAction(client, context);
+        if (context.policy.activityMode === 'native') { offerNativeClientWork(client, context); continue; }
         else {
           const planned = client.plan.take(performance.now());
           if (planned) {
@@ -949,7 +2088,7 @@ function startEngine(context) {
   }, 25);
 }
 
-async function ordinaryLogin(client, context, purpose = 'admission') {
+export async function ordinaryLogin(client, context, purpose = 'admission') {
   let lastNotice = 0;
   while (context.loginBudget.delay(purpose)) {
     context.guard.assert();
@@ -988,36 +2127,54 @@ async function settleClients(context) {
   throw new Error('Ordinary paths did not reach the declared scenario within 180 seconds');
 }
 
-async function measure(context, name, seconds) {
+export async function measure(context, name, seconds, { now = Date.now, sleep: wait = sleep } = {}) {
   context.phase = name; context.current = new Measurements(); context.window = new Measurements(); context.aoi.reset();
-  const started = Date.now(), deadline = started + seconds * 1000, windows = [];
-  let nextWindow = started + 60000, windowStart = started;
-  while (Date.now() < deadline) {
-    context.guard.assert(); await sleep(100);
-    if (Date.now() >= nextWindow) {
+  let lastAt;
+  const readClock = () => {
+    const at = now();
+    if (!Number.isSafeInteger(at) || at < 0 || lastAt !== undefined && at < lastAt) {
+      const reason = 'Measurement phase clock is invalid or moved backward';
+      context.guard.stop(reason); context.guard.assert(); throw new SafetyStop(reason);
+    }
+    lastAt = at; return at;
+  };
+  const started = readClock();
+  const phase = beginCapacityPhase(context, name, 'measurement', context.clients.filter(client => client.ready).length, started);
+  try {
+  const windows = [], minimumCompleteWindows = Math.floor(seconds / 60);
+  let ended = started, windowStart = started;
+  while (ended - started < seconds * 1000 || windows.length < minimumCompleteWindows) {
+    context.guard.assert(); await wait(100); ended = readClock(); context.guard.assert();
+    if (ended - windowStart >= 60000) {
+      const closedAt = ended;
       const assessment = assessMeasurements(context.window, context.clients.filter(client => client.ready).map(client => ({ name: client.label, role: client.role })),
-        (Date.now() - windowStart) / 1000, context.policy, { requireChat: context.clients.length > 1 });
-      windows.push({ elapsedSeconds: (Date.now() - started) / 1000, ...assessment });
-      context.writer.add({ type: 'window', phase: name, assessment });
-      context.window = new Measurements(); windowStart = Date.now(); nextWindow += 60000;
+        (closedAt - windowStart) / 1000, context.policy, { requireChat: context.clients.length > 1 });
+      windows.push({ elapsedSeconds: (closedAt - started) / 1000, startedAtMs: windowStart, endedAtMs: closedAt, ...assessment });
+      context.writer.add({ type: 'window', phase: name, startedAtMs: windowStart, endedAtMs: closedAt, assessment });
+      context.window = new Measurements(); windowStart = closedAt;
     }
   }
   const actors = context.clients.filter(client => client.ready).map(client => ({ name: client.label, role: client.role }));
-  const assessment = assessMeasurements(context.current, actors, seconds, context.policy, {
+  const measuredSeconds = (ended - started) / 1000;
+  const assessment = assessMeasurements(context.current, actors, measuredSeconds, context.policy, {
     requireChat: actors.length > 1 && (context.policy.activityMode !== 'native' || seconds * 1000 > context.policy.nativeChatIntervalMs), aoi: { ...context.aoi.stats } });
   const fanout = Object.entries(assessment.metrics).filter(([kind]) => kind.startsWith('fanout-'));
   const fanoutPassed = fanout.every(([, value]) => (value.status.timeout ?? 0) / Math.max(1, value.count) < .01 && value.fromSend.p95Ms <= 1000);
+  // seconds retains the configured profile contract; rates use actual elapsed time.
   const output = { name, controlledActors: actors.length, completed: true, ...assessment, fanoutPassed,
-    rollingWindows: windows, passed: assessment.passed && fanoutPassed && windows.every(window => window.passed) };
+    seconds, measuredSeconds, rollingWindows: windows, startedAtMs: started, endedAtMs: ended,
+    passed: assessment.passed && fanoutPassed && windows.every(window => window.passed) };
+  finishCapacityPhase(context, phase, true, output.endedAtMs);
   context.writer.add({ type: 'stageComplete', stage: output });
   context.current = null; context.window = null; context.phase = 'ramp';
   return output;
+  } finally { finishCapacityPhase(context, phase, false, lastAt); }
 }
 
 export async function awaitPendingActions(clients) {
   // Capture once. New actions may continue for unpaused actors, but any old
   // observer obligation must finish before its planned transport is removed.
-  const pending = clients.flatMap(client => [client.pending, client.auxPending, ...(client.evidencePending ?? [])]).filter(Boolean);
+  const pending = clients.flatMap(client => [client.pending, client.auxPending, client.hpRecoveryPending, ...(client.evidencePending ?? [])]).filter(Boolean);
   await Promise.allSettled(pending);
   // A captured owner action can create its independent fanout waiter just
   // before resolving. Include that waiter before transport teardown as well.
@@ -1025,7 +2182,7 @@ export async function awaitPendingActions(clients) {
 }
 
 async function resumeActor(original, context) {
-  original.paused = true; context.continuous.pause(original.label);
+  original.paused = true; original.combatPursuitPausedAt = Date.now(); context.continuous.pause(original.label);
   await awaitPendingActions(context.clients);
   await original.refresh();
   const before = resumeFingerprint(original.snapshot, original.label);
@@ -1061,6 +2218,7 @@ async function resumeActor(original, context) {
     restored.activityStartedAtMs = original.activityStartedAtMs;
     initializePlan(restored, context, performance.now() + 1000); restored.nextRtt = Date.now() + 5000; restored.nextRefresh = Date.now() + 60000;
     context.clients[context.clients.indexOf(original)] = restored; original.ready = false;
+    context.sustain?.bindResumedConnection(restored);
     return { actor: original.label, status: 'passed', elapsedMs: performance.now() - started, characterIndex: original.account.characterIndex,
       before, restoredState, resumedOwnerTurnReceipt: liveAck.sequence, generation: restored.nativeTicket.generation, replayRejected: true, loginFallback: false };
   } catch (error) {
@@ -1071,26 +2229,134 @@ async function resumeActor(original, context) {
   }
 }
 
-async function drain(client, context) {
+export async function drain(client, context) {
   client.paused = true; context.continuous?.pause(client.label);
-  await Promise.allSettled([client.pending, client.auxPending].filter(Boolean));
+  await Promise.allSettled([client.pending, client.auxPending, client.hpRecoveryPending].filter(Boolean));
   client.draining = true;
   let state;
   try { if (client.inGame && !client.closed) { await client.refresh(); state = fingerprint(client); } }
   catch (error) { context.cleanupErrors.push({ actor: client.label, step: 'finalSnapshot', error: sanitize(error.message, client.secrets) }); }
+  context.sustain?.drain(client, context.phase);
   try { await client.close(); }
   catch (error) { context.cleanupErrors.push({ actor: client.label, step: 'normalLogout', error: sanitize(error.message, client.secrets) }); }
   client.ready = false; return state ? { account: client.account, state } : null;
 }
 
+export function ordinaryPreparationConfiguration(policy, scenario) {
+  if ((policy.preparationProfile ?? 'held-only') === 'held-only') return null;
+  const preparation = scenario.preparation;
+  const points = preparation?.stagingPoints ?? [preparation?.stagingPoint];
+  if (!Array.isArray(points) || points.length !== (policy.stages?.at(-1) ?? 1) || points.some(staging =>
+      !Number.isSafeInteger(staging?.x) || !Number.isSafeInteger(staging?.y) || staging.x < 0 || staging.y < 0 || staging.x > 65535 || staging.y > 65535 ||
+      (staging.mapFileName != null && String(staging.mapFileName) !== '0')) ||
+      new Set(points.map(staging => `${staging.x},${staging.y}`)).size !== points.length ||
+      !Array.isArray(preparation?.route?.quests) || !preparation.route.quests.length ||
+      (scenario.mapFileName != null && String(scenario.mapFileName) !== '0')) {
+    throw new Error('ordinary-economic-v1 requires scenario.preparation with distinct explicit map-0 stagingPoints for every actor and an authoritative Deer route');
+  }
+  const candidates = preparationStagingCatalogue(preparation, points);
+  return { stagingPoints: points.map(({ x, y }) => ({ x, y })), route: preparation.route,
+    ...(candidates ? { candidatePolicy: preparation.candidatePolicy, stagingCandidates: candidates } : {}) };
+}
+
+export async function prepareCapacityActor(client, context, configuration, { createSupplies = createOrdinarySupplies } = {}) {
+  const setupStartedAtMs = performance.now();
+  if (client.ready || client.paused || client.draining || context.phase !== 'preparation') throw new Error('Ordinary preparation requires an inactive new actor');
+  if (String(client.snapshot?.mapFileName) !== '0' || !protocolMapCellIsWalkable(context.map, configuration.stagingPoint) ||
+      (client.snapshot.mapTransfers ?? []).some(transfer => inside(configuration.stagingPoint, transfer.bounds))) {
+    throw new Error('Ordinary preparation requires a walkable staging point on the current map without a transfer');
+  }
+  if (String(context.mapName) !== String(client.snapshot.mapFileName)) throw new Error('Ordinary preparation protection requires the current same map');
+  const candidates = preparationStagingCatalogue(configuration, [configuration.stagingPoint], context.map, client.snapshot.mapTransfers ?? []);
+  const assignments = candidates ? (context.preparationStagingAssignments ??= new Set()) : null;
+  const ordinaryProtection = await loadOrdinaryProtection(configuration.route, context.mapName);
+  context.guard.assert();
+  if (client.ready || client.paused || client.draining || context.phase !== 'preparation' ||
+      client.snapshot?.mapFileName !== ordinaryProtection.mapFileName || String(context.mapName) !== ordinaryProtection.mapFileName ||
+      configuration.route?.source?.runtimeProfileId !== ordinaryProtection.runtimeProfileId) throw new Error('Ordinary preparation protection map or profile changed while loading');
+  const remainingTimeoutMs = configuration.timeoutMs === undefined ? undefined : Math.floor(configuration.timeoutMs - (performance.now() - setupStartedAtMs));
+  if (remainingTimeoutMs !== undefined && (!Number.isSafeInteger(configuration.timeoutMs) || !(remainingTimeoutMs > 0))) throw new Error('Ordinary preparation actor600s budget exhausted during protection setup');
+  // A scenario cannot inject a replacement safety spec through configuration.
+  const navigators = new WeakMap();
+  client.ordinarySupplies = createSupplies(client, {
+    preparationProfile: 'ordinary-economic-v1', targetHp: context.policy.preparationHpTarget,
+    ...configuration, ...(remainingTimeoutMs === undefined ? {} : { timeoutMs: remainingTimeoutMs }), ordinaryProtection, fundingNavigationMap:context.map, isPreparation: () => context.phase === 'preparation' && !client.ready && !client.draining,
+    ...(candidates ? { resolveStagingPoint: input => selectPreparationStagingPoint({ ...input, candidates, savedPoints: assignments }) } : {}),
+    navigate: (facade, target, range, stop, options) => {
+      if (!navigators.has(facade)) navigators.set(facade, createNavigator(facade, {
+        loadCollisionMap: async map => {
+          if (String(map) !== String(context.mapName)) throw new Error('Ordinary preparation cannot change maps');
+          return context.map;
+        }, movementResponseTimeoutMs: context.policy.actionTimeoutMs,
+      }));
+      return navigators.get(facade)(target, range, stop, options);
+    },
+  });
+  let result;
+  try {
+    result = await client.ordinarySupplies.prepare();
+    if (result.status !== 'ready') throw new Error('Ordinary preparation did not become ready');
+    if (candidates) {
+      const readiness = client.ordinarySupplies.assertReady({ afterSequence: result.after?.sequence - 1 });
+      const point = result.resolvedStagingPoint;
+      if (!point || result.actualStagingReached !== true || result.after?.ownerName !== client.label ||
+          readiness.ownerName !== client.label || readiness.map !== '0' || readiness.inSafeZone !== true ||
+          !candidates.some(candidate => candidate.x === point.x && candidate.y === point.y) ||
+          point.x !== readiness.x || point.y !== readiness.y || result.after.x !== point.x || result.after.y !== point.y ||
+          assignments.has(`${point.x},${point.y}`)) throw new Error('Ordinary resolved staging assignment did not pass fresh readiness');
+    }
+  } catch (error) {
+    try {
+      context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), status: 'failed',
+        result: sanitize(client.ordinarySupplies.status(), client.secrets.concat(client.recentSecrets)) });
+    } finally { throw error; } // Diagnostics cannot replace the original preparation failure.
+  }
+  context.writer.add({ type: 'ordinaryPreparation', actor: client.label, at: Date.now(), result });
+  if (candidates) assignments.add(`${result.resolvedStagingPoint.x},${result.resolvedStagingPoint.y}`);
+  return result;
+}
+
+export async function activatePreparedCohort(cohort, context) {
+  // Earlier actors may have waited while later actors earned supplies. Recheck
+  // every current live snapshot before opening the new cohort's offered load.
+  const cursors = new Map();
+  for (let offset = 0; offset < cohort.length; offset += 16) {
+    await Promise.all(cohort.slice(offset, offset + 16).map(async client => {
+      await client.auxPending;
+      client.auxPending = (async () => {
+        context.guard.assert(); await client.pace(); cursors.set(client, client.sequence); await client.refresh();
+      })();
+      try { await client.auxPending; } finally { client.auxPending = null; }
+    }));
+  }
+  for (const client of cohort) client.ordinarySupplies.assertReady({ afterSequence: cursors.get(client) });
+  const startedAt = performance.now();
+  for (const [index, client] of cohort.entries()) {
+    client.ready = true;
+    initializePlan(client, context, startedAt + 500 + (index % 10) * 40);
+    client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
+    client.activityStartedAtMs = startedAt; context.continuous.join(client.label, client.role, startedAt);
+    context.sustain?.activate(client, context.phase, startedAt);
+  }
+  context.writer.add({ type: 'cohortActivated', profile: 'ordinary-economic-v1', at: Date.now(),
+    newActors: cohort.length, controlledActors: context.clients.length, activityStartedAtMs: startedAt,
+    existingActorsContinue: true });
+}
+
 export async function runCapacity(options) {
+  const declaredTarget = options.targetActors;
+  if (declaredTarget !== undefined && capacityActorLimit({ targetActors: declaredTarget }) === 500) {
+    throw new Error('The 500 online / 500 continuously fighting contract is not implemented; targetActors=500 execution is blocked, including the historical 50-fighter workload.');
+  }
   if (options.realm !== 'isolated') throw new Error('--realm isolated is required');
-  const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(options);
+  const endpoint = validateEndpoint(options.endpoint), policy = capacityPolicy(Object.create(options,
+    { targetActors: { value: declaredTarget } })), attackResults = attackResultsMode(options.attackResults);
   if (!options.accountsFile || !options.monitor || !options.output) throw new Error('--accounts-file, --monitor and --output are required');
   const output = outsideRepository(options.output); await fs.mkdir(output, { recursive: true });
   const runId = `${Date.now()}-${crypto.randomBytes(4).toString('hex')}`, writer = new BoundedEvidence(path.join(output, `${runId}.samples.jsonl`));
   const guard = new CapacityMonitor(options.monitor, writer), aggregate = new Measurements();
-  const context = { endpoint, policy, runId, writer, guard, aggregate, clients: [], allClients: [], targetClaims: new Map(),
+  const context = { endpoint, policy, attackResults, runId, writer, guard, aggregate, clients: [], allClients: [], targetClaims: new Map(),
+    targetSupplyDiagnostics: policy.activityMode === 'native',
     aoi: new AoiCoverage(), phase: 'preflight', cleanupErrors: [], monsterNames: WEAK_MONSTERS,
     add(sample) {
       const row = { at: Date.now(), phase: this.phase, ...sample };
@@ -1106,8 +2372,49 @@ export async function runCapacity(options) {
     },
     onFailure: reason => { if (policy.profile !== 'movement') guard.stop(reason); },
   });
-  const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [],
+  const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [], phaseWindows: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
+  report.preparation = { profile: policy.preparationProfile ?? 'held-only', targetHpStock: policy.preparationHpTarget ?? 0,
+    activationRule: policy.preparationProfile === 'ordinary-economic-v1' ? 'New cohort remains inactive until every actor completes bounded ordinary preparation and passes a fresh staging/health/stock recheck; existing active actors continue unchanged.' :
+      'Original canonical per-actor activation after login and equipment; already-held supplies only.',
+    stageResupply: false, sustainableDurationProven: false };
+  Object.defineProperty(report, 'measurementClock', { enumerable: true,
+    value: Object.freeze({ scope: 'All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.',
+      minimumCompleteWindowMs: 60000,
+      completeWindowCountRule: 'At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.',
+      durationRule: 'Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.',
+      partialWindowRule: 'The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'navigationCoordination', { enumerable: true,
+    value: Object.freeze({ scope: 'Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.',
+      maximumHintCellsPerConnection: NAVIGATION_HINT_MAX_CELLS, blockedOpportunityRule: 'A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativePatrolPlanning', { enumerable: true,
+    value: Object.freeze({ scope: 'Native primed patrol fallback only; original fast path and at most four existing corner targets remain.',
+      maximumFallbackCornerTargets: 4, pathExpansionLimit: 4000,
+      selectionRule: 'Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.',
+      primingRule: 'Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeHpMaintenance', { enumerable: true,
+    value: Object.freeze({ scope: 'Stage maintenance uses already-held ordinary HP potions only; no MP, purchase, grants or revival.',
+      hpThreshold: .6, reuseDelayMs: NATIVE_HP_REUSE_MS, evidenceDeadlineMs: NATIVE_HP_EVIDENCE_MS,
+      commandBudgetPerSecond: 3, rule: 'Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.',
+      activityRule: 'HP recovery is offered before gameplay and auxiliary work. Pending HP evidence records original offered native opportunities as evidence-wait with maintenanceReason; it never credits movement, attack or completion.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeChasePreference', { enumerable: true,
+    value: Object.freeze({ freshReceiptMs: RECENT_CHASE_PREFERENCE_MS,
+      scope: 'Client-side preference within the original first4 candidates, not an exclusive claim or a capacity result.',
+      evidenceRule: 'Only fresh matching nonzero chase UserLocation receipts establish monotonic first/last ACK priority; active living same-map fighters and live targets only.',
+      selectionRule: 'Keep adjacent witnessed attacks first, then prefer targets without an earlier recent pursuer; retain every original first4 candidate and path fallback.',
+      budgetRule: 'Original4-target/8-goal/4000-node searches, cadence, offered/completed accounting and finite chase budgets are unchanged.',
+      restoreRule: 'Resume clears receipt preference only; original chase elapsed time, ACK count and visited positions remain.' }) });
+  if (policy.activityMode === 'native') Object.defineProperty(report, 'nativeAttackWitness', { enumerable: true,
+    value: Object.freeze({ scope: 'New native attack witness selection; the original full AOI membership range remains16.',
+      maximumOwnerAndTargetDistance: stableFanoutRange('attack', policy),
+      rule: 'Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.',
+      approachRule: 'Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.',
+      damageRule: 'Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged.' }) });
+  if (attackResults === 'v2') Object.defineProperty(report, 'attackResults', { enumerable: true,
+    value: Object.freeze({ mode: 'v2', capability: ATTACK_OUTCOME_CAPABILITY,
+      rule: 'No legacy fallback. Activity attacks count correlated launched outcomes only; hits still require the original dual-end damage/health evidence. Hunting attempts are offered requests, not launched attacks.' }) });
+  context.phaseWindows = report.phaseWindows; context.density = new PublicDensity(policy);
+  context.sustain = new SustainObservations(policy, row => writer.add(row));
   const lag = monitorEventLoopDelay({ resolution: 20 }); lag.enable();
   let timer, sampler, draining = false, driverLagFailures = 0, initialMemoryAt, finalStage, lockFile, lock;
   const onSignal = () => guard.stop('Operator requested normal load drain');
@@ -1118,7 +2425,7 @@ export async function runCapacity(options) {
     lockFile = path.join(path.dirname(context.accountFile), 'capacity-run.lock');
     lock = await fs.open(lockFile, 'wx', 0o600);
     await lock.writeFile(JSON.stringify({ runId, pid: process.pid, endpoint, startedAt: Date.now() }));
-    context.pool = validateCapacityPool(JSON.parse(await fs.readFile(context.accountFile, 'utf8')), endpoint);
+    context.pool = validateCapacityPool(JSON.parse(await fs.readFile(context.accountFile, 'utf8')), endpoint, policy);
     if (context.pool.accounts.length < policy.stages.at(-1)) throw new Error('Not enough separately provisioned ordinary accounts for declared stages');
     report.provisioning = [...new Set(context.pool.accounts.map(account => account.provisioning))];
     report.registrationLoadTested = false; report.simultaneousLoginBurstTested = false; report.mixedClassCombatTested = false;
@@ -1135,6 +2442,7 @@ export async function runCapacity(options) {
     report.initialLoginNotBefore = new Date(Math.max(Date.now(), notBefore)).toISOString();
     let scenario = {};
     if (options.scenarioFile) scenario = JSON.parse(await fs.readFile(options.scenarioFile, 'utf8'));
+    const preparationConfiguration = ordinaryPreparationConfiguration(policy, scenario);
     if ((scenario.patrolSpan != null || scenario.combatClusters != null) &&
         (policy.activityMode !== 'native' || !Array.isArray(scenario.anchors) || scenario.anchors.length !== policy.stages.at(-1))) {
       throw new Error('Patrol span and combat clusters require a complete explicit native scenario');
@@ -1158,14 +2466,19 @@ export async function runCapacity(options) {
           active: client.ready && !client.paused && !client.closed && client.inGame && Boolean(self(client)) })));
         const aoi = context.aoi.sample(context.clients);
         context.continuous.observeAoi(aoi, context.phase);
-        writer.add({ type: 'coverage', phase: context.phase, at: Date.now(), aoi, driver }); lag.reset();
+        context.sustain.tick(context.phase);
+        writer.add({ type: 'coverage', phase: context.phase, at: Date.now(), aoi, driver, density: context.density.sample(context.clients) }); lag.reset();
         report.peakControlledActors = Math.max(report.peakControlledActors ?? 0, aoi.activeOwners);
       } catch (error) { if (!(error instanceof SafetyStop)) guard.stop(error.message); }
     }, 1000);
     startEngine(context);
     const combatIndices = new Set(Array.from({ length: policy.combatActors }, (_, i) => Math.floor((i + .5) * policy.stages.at(-1) / policy.combatActors)));
     for (const count of policy.stages) {
-      context.phase = 'ramp';
+      context.phase = preparationConfiguration ? 'preparation' : 'ramp';
+      const bootstrap = beginCapacityPhase(context, `bootstrap-${count}`, 'bootstrap', count);
+      const preparation = preparationConfiguration ? beginCapacityPhase(context, `preparation-${count}`, 'bootstrap', count) : null;
+      const newCohort = [];
+      try {
       while (context.clients.length < count) {
         guard.assert(); const index = context.clients.length;
         const client = new CapacityClient(endpoint, context.pool.accounts[index], context); context.allClients.push(client);
@@ -1179,12 +2492,15 @@ export async function runCapacity(options) {
             ...client.snapshot.entities.filter(entity => String(entity.kind).toLowerCase() === 'npc' && !entity.dead),
           ] : [];
           if (policy.activityMode === 'native' && scenario.anchors?.length) {
-            const proof = validateNativeExplicitHomes(context.map, self(client), policy.stages.at(-1), scenario.anchors, context.patrolSpan, client.snapshot.mapTransfers ?? [], stationaryObstacles);
+            const proof = validateNativeExplicitHomes(context.map, self(client), policy.stages.at(-1), scenario.anchors, context.patrolSpan, client.snapshot.mapTransfers ?? [], stationaryObstacles, policy);
             context.homes = proof.homes;
             report.scenario.explicitNativeHomes = { visitedCells: proof.visitedCells, mapCells: proof.mapCells, footprintCells: proof.footprintCells };
           } else context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? [], policy.activityMode === 'native' ? 3 : 1, stationaryObstacles);
           context.combatClusters = validateNativeCombatClusters(scenario.combatClusters, context.homes, combatIndices, context.patrolSpan);
-          for (const cluster of context.combatClusters) cluster.observerNames = new Set(cluster.movementActorIndices.map(index => context.pool.accounts[index].name));
+          for (const cluster of context.combatClusters) {
+            cluster.observerNames = new Set(cluster.movementActorIndices.map(index => context.pool.accounts[index].name));
+            for (const binding of cluster.observerBindings) binding.name = context.pool.accounts[binding.actorIndex].name;
+          }
           if (context.combatClusters.length) report.scenario.combatClusters = context.combatClusters.map(cluster => ({ combatActorIndices: cluster.combatActorIndices,
             movementActorIndices: cluster.movementActorIndices, observerFootprintCoverageRadius: 14 }));
           report.scenario.mapFileName = context.mapName; report.scenario.anchors = context.homes;
@@ -1192,17 +2508,33 @@ export async function runCapacity(options) {
         }
         checkOwner(client, context);
         await equipStarterGear(client);
-        client.role = combatIndices.has(index) ? 'combat' : 'movement'; client.home = context.homes[index]; client.ready = true;
+        client.role = combatIndices.has(index) ? 'combat' : 'movement'; client.home = context.homes[index]; client.ready = !preparationConfiguration;
         client.combatCluster = context.combatClusters.find(cluster => cluster.combatActorIndices.includes(index));
-        initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
-        client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
         context.clients.push(client);
-        client.activityStartedAtMs = performance.now(); context.continuous.join(client.label, client.role, client.activityStartedAtMs);
+        if (preparationConfiguration) {
+          newCohort.push(client);
+          client.nextRtt = Date.now() + 10000; client.nextRefresh = Infinity;
+          await prepareCapacityActor(client, context, { route: preparationConfiguration.route,
+            stagingPoint: preparationConfiguration.stagingPoints[index],
+            ...(preparationConfiguration.stagingCandidates ? { candidatePolicy: preparationConfiguration.candidatePolicy,
+              stagingCandidates: preparationConfiguration.stagingCandidates } : {}) });
+        } else {
+          initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
+          client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
+          client.activityStartedAtMs = performance.now(); context.continuous.join(client.label, client.role, client.activityStartedAtMs);
+          context.sustain.activate(client, context.phase, client.activityStartedAtMs);
+        }
         writer.add({ type: 'admitted', actor: client.label, role: client.role, characterIndex: client.account.characterIndex, at: Date.now(), controlledActors: context.clients.length });
         options.onProgress?.({ stage: 'admitted', controlledActors: context.clients.length, target: count });
         await guard.afterAdmission(Date.now());
       }
+      if (preparationConfiguration) {
+        await activatePreparedCohort(newCohort, context);
+        finishCapacityPhase(context, preparation, true);
+      }
       await settleClients(context);
+      finishCapacityPhase(context, bootstrap, true);
+      } finally { if (preparation) finishCapacityPhase(context, preparation, false); finishCapacityPhase(context, bootstrap, false); }
       const stage = await measure(context, `stage-${count}`, policy.stageSeconds); report.stages.push(stage);
       options.onProgress?.({ stage: stage.name, passed: stage.passed });
       report.highestMeasuredStage = count;
@@ -1231,8 +2563,10 @@ export async function runCapacity(options) {
     // await their real outstanding receipts, but must not accrue idle time
     // while earlier batches save and close their sessions.
     const stoppedAt = performance.now();
+    context.sustain.stop(stoppedAt);
     for (const client of context.clients) { client.paused = true; context.continuous.pause(client.label, stoppedAt); }
     await awaitPendingActions(context.clients);
+    for (const client of context.allClients) client.ordinarySupplies?.dispose();
     const saved = [];
     // Bounded drain concurrency avoids turning safety shutdown into a save storm.
     const live = context.allClients.filter(client => client.ws && !client.closed);
@@ -1240,6 +2574,7 @@ export async function runCapacity(options) {
       const results = await Promise.all(live.slice(offset, offset + 4).map(client => drain(client, context)));
       saved.push(...results.filter(Boolean));
     }
+    for (const client of context.clients) context.sustain.drain(client, context.phase);
     context.continuous.finish();
     if (!report.error && !guard.stopped && !context.cleanupErrors.length) {
       context.phase = 'save-verification';
@@ -1262,6 +2597,8 @@ export async function runCapacity(options) {
     report.finishedAt = new Date().toISOString(); report.safetyStopped = guard.stopped; report.safetyReason = guard.reason;
     report.cleanupErrors = context.cleanupErrors; report.metrics = aggregate.summary(); report.samples = aggregate.samples;
     report.continuousAcceptance = context.continuous.summary();
+    if (policy.activityMode === 'native') report.targetSupplyDiagnostics = targetSupplyDiagnosticSummary(context);
+    report.density = context.density.summary();
     report.peakServerActive = guard.peakServerActive; report.bytes = context.allClients.reduce((sum, client) => ({ sent: sum.sent + client.bytes.sent, received: sum.received + client.bytes.received }), { sent: 0, received: 0 });
     report.bytesDefinition = 'Physical WebSocket payload bytes, including catalog batch/gzip headers and excluding WebSocket/TLS framing';
     report.activityMode = policy.activityMode;
@@ -1274,7 +2611,9 @@ export async function runCapacity(options) {
       actionFanoutProbeRange: 6, chatFanoutProbeRange: 8, fullAoiMembershipRange: 16,
       evidenceWaitMeaning: 'Instrumentation wait stays in offered-load denominator; insufficient coverage does not establish server overload',
       ambiguousAttackRule: 'Unverified attacks permanently quarantine that actor/target pair for this run; more than 64 such targets stops the test',
-      continuousRunningRule: 'The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits',
+      continuousRunningRule: policy.preparationProfile === 'ordinary-economic-v1' ?
+        'The Run ratio and cell-rate gates begin at new-cohort activation and include anchor travel; existing active actors retain those gates throughout later-cohort preparation and login-window waits' :
+        'The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits',
       limitations: ['Warrior starter melee only', 'No caster AOE, summons or cross-map raid proof', 'No native GPU/render acceptance', 'No simultaneous auth burst or automatic revival'] };
     if (policy.activityMode === 'native') report.combatScenario = {
       rule: 'First reach the declared home by ordinary Walk/Run, then hunt; initial transit stays in continuous activity and stage measurement starts only after arrival',
@@ -1319,7 +2658,9 @@ export async function runCapacity(options) {
 export function parseArguments(args) {
   const result = {}, allowed = new Set(['realm', 'endpoint', 'accountsFile', 'monitor', 'output', 'profile', 'stages', 'stageSeconds', 'soakSeconds',
     'wallSeconds', 'layout', 'combatActors', 'resumeSamples', 'saveSamples', 'mapRoot', 'loginNotBefore', 'scenarioFile',
-    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount']);
+    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount', 'attackResults',
+    'targetActors', 'preparationProfile', 'preparationHpTarget']);
+  args = args.flatMap(value => value.startsWith('--attack-results=') ? ['--attack-results', value.slice('--attack-results='.length)] : [value]);
   for (let i = 0; i < args.length; i += 2) {
     if (!args[i].startsWith('--') || args[i + 1] == null) throw new Error('Arguments must use --name value');
     const key = args[i].slice(2).replace(/-([a-z])/g, (_, char) => char.toUpperCase());

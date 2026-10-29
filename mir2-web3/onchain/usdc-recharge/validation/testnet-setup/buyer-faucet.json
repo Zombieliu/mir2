@@ -1,0 +1,15 @@
+{
+  "role": "buyer",
+  "recipient": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+  "observedAt": "2026-10-28T19:07:41.176Z",
+  "network": "testnet",
+  "officialPoW": true,
+  "maximumMist": "1000000000",
+  "result": {
+    "status": "success",
+    "digest": "8w1Lf4ca6cfijzyTto8WPEuJTMLhLqxR8ddm5XkY2Xii",
+    "recipient": "0x960b3560bd7fca54874692cf2706d248af9ec69963743faa261fb1497ed97a33",
+    "amountMist": "1000000000",
+    "difficulty": "3000"
+  }
+}

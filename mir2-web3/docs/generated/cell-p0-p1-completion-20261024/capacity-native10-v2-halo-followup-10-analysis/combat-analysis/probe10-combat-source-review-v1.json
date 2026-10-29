@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T03:39:47.449Z",
+  "runId": "1792898022018-efb7a76a",
+  "scope": "Independent read-only source and bounded public raw/selected-evidence diagnosis of probe10 combat activity failure. No code, fixtures, scene, thresholds, tests or realm changes.",
+  "source": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+    "bytes": 143423,
+    "sha256": "01db0e25728208d17468f708819cd4d1f134a81c97884614da06d06525929f6d"
+  },
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-10\\reports\\1792898022018-efb7a76a.report.json",
+    "bytes": 189046,
+    "sha256": "cf8b864372f5c402aea8544c8a3987ffbcdca876b7ad978d47ab8d91ee56a48c"
+  },
+  "selectedGap": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe10-combat-analysis-v1\\gap82-to83-moves-v1.json",
+    "bytes": 68203,
+    "sha256": "bf2ca3edb798b94991c16771b949cc91f4c306f3d1bbcbeb079ac54d1a00eb0d"
+  },
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "driverSourceCommit": "6e05932000740abc88997db9496c57b301e0a4a9",
+  "originalBudgetComparison": {
+    "baselineCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+    "recordCombatPursuitMovementBodyLfIdentical": true,
+    "bodyLfSha256": "423b310be952265e0dfbc7c40a2802ae3cf78f1c431a6f89fa62d8713ce14cb7",
+    "maximumMoves": 40,
+    "maximumMs": 30000,
+    "thirdCellVisitDefers": true,
+    "temporaryDeferralMs": 30000,
+    "nonImprovingMoves": 4,
+    "earlyNonImprovingMoves": 2,
+    "earlyNoProgressMs": 6000
+  },
+  "observedResult": {
+    "highestPassedStage": 2,
+    "stage10Completed": true,
+    "stage10Passed": false,
+    "stage10MeasuredSeconds": 300.342,
+    "fighter": {
+      "plans": 320,
+      "moves": 217,
+      "attacks": 88,
+      "hits": 88,
+      "nativeCompleted": 320,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0
+    },
+    "minuteWindows": [
+      {
+        "seconds": 60.032,
+        "passed": true,
+        "attacks": 24,
+        "hits": 24,
+        "moves": 30
+      },
+      {
+        "seconds": 60.088,
+        "passed": false,
+        "attacks": 14,
+        "hits": 14,
+        "moves": 50
+      },
+      {
+        "seconds": 60.096,
+        "passed": true,
+        "attacks": 28,
+        "hits": 28,
+        "moves": 22
+      },
+      {
+        "seconds": 60.093,
+        "passed": false,
+        "attacks": 7,
+        "hits": 7,
+        "moves": 65
+      },
+      {
+        "seconds": 60.033,
+        "passed": false,
+        "attacks": 15,
+        "hits": 15,
+        "moves": 50
+      }
+    ]
+  },
+  "gap82to83": {
+    "sentGapMs": 49427.721699999995,
+    "moves": 62,
+    "fromTarget": {
+      "objectId": 206624,
+      "x": 254,
+      "y": 671,
+      "dead": false,
+      "hp": 6,
+      "maxHp": 20
+    },
+    "toTarget": {
+      "objectId": 206645,
+      "x": 270,
+      "y": 671,
+      "dead": false
+    },
+    "fromTargetDeathBothEnds": true,
+    "movementGroups": [
+      {
+        "key": "scout",
+        "moves": 15,
+        "firstSentAtMs": 598231.0683,
+        "lastSentAtMs": 610223.5408,
+        "spanMs": 11992.472499999916,
+        "maximumCellVisits": 1,
+        "repeatedCells": []
+      },
+      {
+        "key": "206534",
+        "moves": 1,
+        "firstSentAtMs": 601217.0728,
+        "lastSentAtMs": 601217.0728,
+        "spanMs": 0,
+        "maximumCellVisits": 1,
+        "repeatedCells": []
+      },
+      {
+        "key": "206528",
+        "moves": 8,
+        "firstSentAtMs": 610973.5054,
+        "lastSentAtMs": 616200.3966,
+        "spanMs": 5226.891199999955,
+        "maximumCellVisits": 1,
+        "repeatedCells": []
+      },
+      {
+        "key": "206513",
+        "moves": 8,
+        "firstSentAtMs": 616975.7906,
+        "lastSentAtMs": 622214.9634,
+        "spanMs": 5239.1728000000585,
+        "maximumCellVisits": 3,
+        "repeatedCells": [
+          [
+            "274,661",
+            3
+          ],
+          [
+            "275,661",
+            2
+          ]
+        ]
+      },
+      {
+        "key": "206704",
+        "moves": 11,
+        "firstSentAtMs": 622962.1753,
+        "lastSentAtMs": 630469.2275,
+        "spanMs": 7507.052200000035,
+        "maximumCellVisits": 3,
+        "repeatedCells": [
+          [
+            "281,663",
+            2
+          ],
+          [
+            "282,663",
+            3
+          ],
+          [
+            "283,663",
+            2
+          ]
+        ]
+      },
+      {
+        "key": "206507",
+        "moves": 6,
+        "firstSentAtMs": 631215.0394,
+        "lastSentAtMs": 634958.9867,
+        "spanMs": 3743.9473,
+        "maximumCellVisits": 3,
+        "repeatedCells": [
+          [
+            "283,665",
+            3
+          ],
+          [
+            "284,665",
+            2
+          ]
+        ]
+      },
+      {
+        "key": "206715",
+        "moves": 5,
+        "firstSentAtMs": 635705.856,
+        "lastSentAtMs": 638702.5934,
+        "spanMs": 2996.7373999999836,
+        "maximumCellVisits": 2,
+        "repeatedCells": [
+          [
+            "285,665",
+            2
+          ]
+        ]
+      },
+      {
+        "key": "206645",
+        "moves": 8,
+        "firstSentAtMs": 639450.9202,
+        "lastSentAtMs": 645470.903,
+        "spanMs": 6019.982799999998,
+        "maximumCellVisits": 1,
+        "repeatedCells": []
+      }
+    ],
+    "deferrals": [
+      {
+        "line": 15313,
+        "type": "combatScoutAdvanced",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898607889,
+        "reason": "time-budget",
+        "homeIndex": 1,
+        "confirmedMoves": 4,
+        "elapsedMs": 20350
+      },
+      {
+        "line": 15449,
+        "type": "combatScoutAdvanced",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898610172,
+        "reason": "waypoint-reached",
+        "homeIndex": 2,
+        "confirmedMoves": 4,
+        "elapsedMs": 2283
+      },
+      {
+        "line": 15567,
+        "type": "combatScoutAdvanced",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898612409,
+        "reason": "waypoint-reached",
+        "homeIndex": 3,
+        "confirmedMoves": 2,
+        "elapsedMs": 783
+      },
+      {
+        "line": 15832,
+        "type": "combatScoutAdvanced",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898616918,
+        "reason": "waypoint-reached",
+        "homeIndex": 4,
+        "confirmedMoves": 6,
+        "elapsedMs": 3769
+      },
+      {
+        "line": 16677,
+        "type": "combatChaseDeferred",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898631905,
+        "targetId": 206513,
+        "mapFileName": "0",
+        "nonImprovingMoves": 4,
+        "elapsedMs": 2989,
+        "pursuitMs": 5269,
+        "confirmedMoves": 8,
+        "reason": "route-loop",
+        "ttlMs": 30000,
+        "actual": {
+          "x": 274,
+          "y": 661
+        },
+        "target": {
+          "x": 274,
+          "y": 662
+        },
+        "attacksSent": 0
+      },
+      {
+        "line": 17103,
+        "type": "combatChaseDeferred",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898640153,
+        "targetId": 206704,
+        "mapFileName": "0",
+        "nonImprovingMoves": 4,
+        "elapsedMs": 2989,
+        "pursuitMs": 7530,
+        "confirmedMoves": 11,
+        "reason": "route-loop",
+        "ttlMs": 30000,
+        "actual": {
+          "x": 282,
+          "y": 663
+        },
+        "target": {
+          "x": 282,
+          "y": 662
+        },
+        "attacksSent": 0
+      },
+      {
+        "line": 17346,
+        "type": "combatChaseDeferred",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898644648,
+        "targetId": 206507,
+        "mapFileName": "0",
+        "nonImprovingMoves": 4,
+        "elapsedMs": 2995,
+        "pursuitMs": 3772,
+        "confirmedMoves": 6,
+        "reason": "route-loop",
+        "ttlMs": 30000,
+        "actual": {
+          "x": 283,
+          "y": 665
+        },
+        "target": {
+          "x": 283,
+          "y": 666
+        },
+        "attacksSent": 0
+      },
+      {
+        "line": 17534,
+        "type": "combatChaseDeferred",
+        "actor": "L25081f05",
+        "phase": "stage-10",
+        "at": 1792898648392,
+        "targetId": 206715,
+        "mapFileName": "0",
+        "nonImprovingMoves": 4,
+        "elapsedMs": 2997,
+        "pursuitMs": 3026,
+        "confirmedMoves": 5,
+        "reason": "no-progress",
+        "ttlMs": 30000,
+        "actual": {
+          "x": 285,
+          "y": 665
+        },
+        "target": {
+          "x": 284,
+          "y": 665
+        },
+        "attacksSent": 0
+      }
+    ]
+  },
+  "sourceFindings": [
+    {
+      "status": "proven-from-source-and-raw",
+      "finding": "Third-visit route-loop fires independently of40-move/30-second limits, and before the no-progress classification. The actual8/11/6-move segments revisit274661/282663/283665 three times; the guard is enforcing its original semantics.",
+      "anchors": [
+        "recordCombatPursuitMovement:862-915",
+        "original baseline exact same function body"
+      ]
+    },
+    {
+      "status": "proven-source-behavior",
+      "finding": "Attack selection requires an actual stable6 dual-visible witness; approach selection does not. An adjacent target with no such witness falls through into nearest-to-owner adjacent-tile movement. Repeated planning can therefore move between equally adjacent tiles without making a witness possible.",
+      "anchors": [
+        "combatCandidates:830-835",
+        "nativeAttackWitness:1026-1040",
+        "combatPlan:1052-1084"
+      ]
+    },
+    {
+      "status": "observed-and-source-supported-not-complete-runtime-attribution",
+      "finding": "The49.4277217s gap contains15 distinct-cell scouting moves, then approaches and short repeated-cell chases of multiple Deer, followed by8 moves returning to a different Scarecrow for request83. Request82 actually killed its target on both ordinary protocol streams, so this gap is a new-target/exploration interval rather than an unbounded post-strike chase of target82.",
+      "anchors": [
+        "selectedGap.from82 owner and observer ObjectDied",
+        "selectedGap.gapMoves",
+        "postStrikeChaseSegment:850-859"
+      ]
+    },
+    {
+      "status": "ruled-out-for-this-single-fighter-run",
+      "finding": "targetClaims only spans one pending attack from send preflight to finally; own-label claims remain eligible and this report has one combat actor. It does not reserve a target for the whole chase or explain a49s inter-attack gap.",
+      "anchors": [
+        "availableCombatTarget:819-825",
+        "action:1181",
+        "action finally:1313-1316"
+      ]
+    },
+    {
+      "status": "proven-source-boundary",
+      "finding": "Post-strike budget reset commits once only after real movement send, while actual ACK tracking retains all old loop, movement, time and non-progress thresholds. Bounded scout retains24-ACK/20s/third-visit limits and does not manufacture chase progress or clear ambiguous-attack quarantine.",
+      "anchors": [
+        "postStrikeChaseSegment:850-859",
+        "action:1203-1205",
+        "recordCombatScoutMovement:963-975",
+        "scoutCombatCoverage:977-1016"
+      ]
+    }
+  ],
+  "minimalCorrectionProposal": {
+    "implemented": false,
+    "rule": "Before the existing adjacent-destination A* call, require at least one currently active living same-map observer with real snapshot membership for both attacker and target, and target plus that candidate attack tile both within6 of the observer actual owner position. Prefer/reuse only such feasible approach tiles; if absent, continue existing other candidates/scout/return rather than orbiting the unwitnessable target.",
+    "preserved": [
+      "Actual attack still reselects a current real witness immediately before send.",
+      "Original AOI16 and complete coverage geometry are unchanged.",
+      "Original4000 path bound, coverage/transfer checks, navigation coordination and real movement ACK are unchanged.",
+      "Third visit,40moves/30s, no-progress and deferral/quarantine thresholds remain exact.",
+      "All opportunities remain in the original denominator; only real ACK or dual-end positive damage can complete the corresponding action.",
+      "Original18attacks/12hits,900ms evidence and95percent completion gates remain."
+    ],
+    "neededFocusedEvidence": [
+      "Near adjacent Deer visible only to an edge observer must not orbit solely to obtain impossible witness geometry; a valid witnessed alternate or ordinary bounded scout remains available.",
+      "A target with a feasible witness at the future attack tile may still be approached even while the current owner is farther than6; actual double visibility is required.",
+      "If observer/target moves or loses membership after planning, actual send revalidation remains fail-closed; no invented attack receipt or opportunity credit.",
+      "Existing counter/loop/time/resume tests continue to prove unchanged thresholds."
+    ],
+    "remainingAttributionBoundary": "Exact per-decision observer snapshots and target positions were not retained for every ordinary movement; actual peer-UL/frame projections are being independently assessed by capacity worker. Static declared footprints or a post-action world frame must not be substituted for actual witness eligibility."
+  },
+  "sourceModified": false,
+  "fixturesModified": false,
+  "thresholdsModified": false,
+  "testsExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

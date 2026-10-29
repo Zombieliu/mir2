@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "scope": "Producer-only raw reuse under actual V6 complete55 source equality. No old formal17/C50/L237/Probe21 qualification inherited; no compact-wire certificate.",
+  "baseRows": "original exact3/4/7",
+  "storeRows": "original exact10; storeOnly true",
+  "thresholdMs": 50,
+  "leftCensored": true,
+  "nestedSpansNotAdditive": true,
+  "connectionIsOpaque": true,
+  "storeDiagnosticsContributeToGameAcceptance": false,
+  "sourceCopies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "target": "diagnostics/base/slow-stage-public.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "target": "diagnostics/base/slow-stage-row-contract.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\slow-stage-public.mjs",
+        "bytes": 15386,
+        "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7"
+      },
+      "target": "diagnostics/store/slow-stage-public.mjs"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\account-store-public-validator.mjs",
+        "bytes": 5407,
+        "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262"
+      },
+      "target": "diagnostics/store/account-store-public-validator.mjs"
+    }
+  ],
+  "protocol": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\protocol-contract-v1.json",
+    "bytes": 5971,
+    "sha256": "02852a5ab77ec2c8f5944bdbd2d907fdb39be3b5fb22722db0d47cf1f9cfc800"
+  },
+  "actualV6BackendRows": [
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "bytes": 874138,
+      "sha256": "b248a8efcc0630edac2d4ed7f5726570c3b17dd55f9bb47862492ef8c249c92d"
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    }
+  ],
+  "oldWirePatch": {
+    "applied": false,
+    "createdAdditionalConnections": false,
+    "previousDescriptionCorrected": "Legacy adapter monkeypatches existing1/2 only, not extra network connections; its historical identities are not current evidence."
+  }
+}

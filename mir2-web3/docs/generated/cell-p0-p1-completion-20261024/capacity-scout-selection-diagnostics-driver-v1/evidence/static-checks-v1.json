@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "actualChecks": [
+    {
+      "command": [
+        "node",
+        "--check",
+        "apps/web/scripts/playtest-capacity-soak.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "node",
+        "--check",
+        "apps/web/scripts/playtest-capacity-soak.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "apps/web/scripts/playtest-capacity-soak.mjs",
+        "apps/web/scripts/playtest-capacity-soak.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs', CRLF will be replaced by LF the next time Git touches it\n"
+    }
+  ],
+  "noProductImportOrExtraTests": true
+}

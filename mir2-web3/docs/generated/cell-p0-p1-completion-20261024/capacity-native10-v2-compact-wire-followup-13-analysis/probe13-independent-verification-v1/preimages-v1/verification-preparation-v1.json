@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T07:22:22.633Z",
+  "state": "prepared-only-not-executed-against-run",
+  "runId": "1792912711217-e7ea81f2",
+  "script": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe13-independent-verification-v1/verify-ended-probe13.mjs",
+    "bytes": 23135,
+    "sha256": "daa1cc795bff12d850294f7507128b924e4d3ac5821e84f7753575e5e4f25f18"
+  },
+  "priorReplayScript": {
+    "file": "C:/mir2-build/p01-completion-20261024/probe12-independent-verification-v1/verify-ended-probe12.mjs",
+    "bytes": 20511,
+    "sha256": "38a912c8712f244c3ee215f1413e1e7a40d152f57cfbd4cb372a60c46d70ed3a"
+  },
+  "execution": "node verify-ended-probe13.mjs --verify-ended-probe13 (only after root confirms owned cleanup and public collection)",
+  "inheritance": "Original actor/status/continuous counter replay, actual elapsed5/5/6 phase completeness, monitor/projection verification and exact publiccopy byte closure retained.",
+  "identities": {
+    "currentHead": "4cab00893b861395b63906b1b8183a021d397cdb",
+    "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "core9": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendInputs": 41,
+    "launcherInputs": 46,
+    "wrapperSourceInputs": 11,
+    "preparedSourceConfig": "f80a5894c1d47ad02016ab8116bfb2404ba99398f5b4f667b3981a8066486cbb"
+  },
+  "wireDiagnosticsSchema": {
+    "present": "boolean",
+    "sourceValid": "boolean",
+    "countsMatch": "boolean",
+    "uninstallSucceeded": "boolean",
+    "complete": "boolean; independent of originalgame verdict",
+    "reasons": "fixed reason array",
+    "sequenceContinuity": "perconn1/2 rows/first/last/gapCount/bounded16gaps",
+    "rawCounts": "sealedcontract counts of raw actuallypersisted rows",
+    "terminal": "publicraw pin ornull",
+    "sourceIdentity": "exactly {manifest,review,sourceSha256}",
+    "fullSourceIdentity": "full existing sealedwireidentity"
+  },
+  "newChecks": [
+    "Reviewv2 frozenwrapper manifest+independent review+9wrapper source files checked afterrun.",
+    "Each persisted diagnostic row schema/strict sequence/count/truncation checked, separately from gameplay.",
+    "Producer terminal outsideclosedraw hash/source/runID/before-afteruninstall compared to actualraw counts.",
+    "Collector/catalog wirecapture compared to recomputation. Emitreturn count is never treated as durable proof."
+  ],
+  "outputPlan": {
+    "publicFiles": [
+      "final-verification.json",
+      "verify-ended-probe13.mjs",
+      "verification-preparation-v1.json",
+      "public-whitelist-v1.json"
+    ],
+    "externalOnlyRaw": [
+      "originalcapacitysamplesJSONL",
+      "originalmonitorhistoryJSONL"
+    ],
+    "recordings": "Originalcollected metadata hashes only; no recordingpayload read planned.",
+    "excluded": [
+      "private",
+      "accountpool",
+      "accountstore",
+      "ledger",
+      "EXE",
+      "recordingpayload"
+    ]
+  },
+  "gameVerdictRule": "ProbePass remains originalreport plusoriginalstrict phase/continuous gates; wirecomplete never addsACK, resets counters or changes the report. capacityAccepted/rawVerifierAccepted remainfalse.",
+  "scopeLimitation": "Truncated/partial wire records cannot prove noobject/noevent.",
+  "setupHistory": "Initial in-memory generator required a unique CLI token but the12source has two CLI/usage occurrences; it stopped before writing anyscript, then syntaxcheck found nofile. Clonegenerator was corrected to exactlytwo expected identity mentions. No live run was read or changed.",
+  "rawScanned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

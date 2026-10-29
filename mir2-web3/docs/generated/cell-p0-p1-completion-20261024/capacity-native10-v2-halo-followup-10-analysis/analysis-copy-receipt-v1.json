@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T03:57:55.506Z",
+  "runId": "1792898022018-efb7a76a",
+  "scope": "Root-authorized explicit six-file public derivative whitelist plus its original whitelist and separately authorized source review. No original raw JSONL, complete recording payload or private store copied.",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe10-combat-analysis-v1\\public-whitelist-v1.json",
+    "bytes": 1555,
+    "sha256": "d6bd9b274b56de5bc5140d22d7eec157adeb2c2938c9f393549ed3251f15d25d"
+  },
+  "sourceReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe10-combat-source-review-v1.json",
+    "bytes": 13785,
+    "sha256": "aa7d380eee44e82a6072c41af9c85a932d3c7ddbc1cab04f0aaefba9fa5c8487"
+  },
+  "files": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/raw-selected-v1.json",
+        "bytes": 1212291,
+        "sha256": "6f9a54abc74fc732867ebd4bb80f4045755d84c27f077dcd86b7c36a6bc01bfb"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\raw-selected-v1.json",
+        "bytes": 1212291,
+        "sha256": "6f9a54abc74fc732867ebd4bb80f4045755d84c27f077dcd86b7c36a6bc01bfb"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap82-to83-moves-v1.json",
+        "bytes": 68203,
+        "sha256": "bf2ca3edb798b94991c16771b949cc91f4c306f3d1bbcbeb079ac54d1a00eb0d"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\gap82-to83-moves-v1.json",
+        "bytes": 68203,
+        "sha256": "bf2ca3edb798b94991c16771b949cc91f4c306f3d1bbcbeb079ac54d1a00eb0d"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-deferral-observer-geometry-v1.json",
+        "bytes": 18586,
+        "sha256": "2d251b1da5cc4626bc87541cf2ca277d86520181eab09c704ed5f2223941bbf5"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\gap-deferral-observer-geometry-v1.json",
+        "bytes": 18586,
+        "sha256": "2d251b1da5cc4626bc87541cf2ca277d86520181eab09c704ed5f2223941bbf5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/stage10-window-actor-matrix-v1.json",
+        "bytes": 73037,
+        "sha256": "10e3fe1e0e8e7d8710d0118ed77b21d4f4e8ce2086edd80be4b8c91631ffb06c"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\stage10-window-actor-matrix-v1.json",
+        "bytes": 73037,
+        "sha256": "10e3fe1e0e8e7d8710d0118ed77b21d4f4e8ce2086edd80be4b8c91631ffb06c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/gap-movement-origin-projection-v1.json",
+        "bytes": 44057,
+        "sha256": "2a581d7082682a8c193cc292d000066608e6859819c35bb4c4109e8415393931"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\gap-movement-origin-projection-v1.json",
+        "bytes": 44057,
+        "sha256": "2a581d7082682a8c193cc292d000066608e6859819c35bb4c4109e8415393931"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/probe10-combat-analysis-v1/summary-v1.json",
+        "bytes": 21261,
+        "sha256": "249f0fc07ae343adc92d6549d73507038afe6443913ff306c1294d78bfbc4ac4"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\summary-v1.json",
+        "bytes": 21261,
+        "sha256": "249f0fc07ae343adc92d6549d73507038afe6443913ff306c1294d78bfbc4ac4"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe10-combat-analysis-v1\\public-whitelist-v1.json",
+        "bytes": 1555,
+        "sha256": "d6bd9b274b56de5bc5140d22d7eec157adeb2c2938c9f393549ed3251f15d25d"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\public-whitelist-v1.json",
+        "bytes": 1555,
+        "sha256": "d6bd9b274b56de5bc5140d22d7eec157adeb2c2938c9f393549ed3251f15d25d"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\probe10-combat-source-review-v1.json",
+        "bytes": 13785,
+        "sha256": "aa7d380eee44e82a6072c41af9c85a932d3c7ddbc1cab04f0aaefba9fa5c8487"
+      },
+      "target": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\combat-analysis\\probe10-combat-source-review-v1.json",
+        "bytes": 13785,
+        "sha256": "aa7d380eee44e82a6072c41af9c85a932d3c7ddbc1cab04f0aaefba9fa5c8487"
+      }
+    }
+  ],
+  "originalCopies": 8,
+  "totalOriginalBytes": 1452775,
+  "sourceTargetRawEqual": true,
+  "jsonStructuralSensitiveFieldScanPassed": true,
+  "originalCopyReceiptUnchanged": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\public-copy-receipt.json",
+    "bytes": 8644,
+    "sha256": "9d13762d1820333a45b7a7c0a5bb0f2b4442339efa05e8fd7ef1af3601ccd949"
+  },
+  "readmeAppend": {
+    "before": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\README.md",
+      "bytes": 888,
+      "sha256": "30e6d4acb2c73414772b6f921fd75252cba1b4c07fe3fff5fcf055978c5d0aff"
+    },
+    "after": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-native10-v2-halo-followup-10-analysis\\README.md",
+      "bytes": 1591,
+      "sha256": "169d4932c361852efaa3b0c1c807d869c88be051bd54fb20776af8b278892632"
+    }
+  },
+  "oldDiagnosticSubtreeModified": false,
+  "productSourcesModified": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

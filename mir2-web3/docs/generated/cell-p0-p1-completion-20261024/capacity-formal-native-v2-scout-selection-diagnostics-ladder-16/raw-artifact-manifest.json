@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "kind": "capacity-samples-jsonl",
+      "runId": "1792981760951-0079fde7",
+      "report": "capacity-formal-native-v2-scout-selection-diagnostics-ladder-16/release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.report.json",
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.samples.jsonl",
+      "bytes": 51469886,
+      "sha256": "420ef1cd80999570bf08b63f7b9c69f1e739b8ad2e322ee773180fac637fc7f1",
+      "projection": "capacity-formal-native-v2-scout-selection-diagnostics-ladder-16/release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.raw-projection.json"
+    }
+  ]
+}

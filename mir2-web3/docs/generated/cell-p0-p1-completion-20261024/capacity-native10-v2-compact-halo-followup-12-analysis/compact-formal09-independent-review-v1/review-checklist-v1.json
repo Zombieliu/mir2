@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T06:12:10.335Z",
+  "state": "review-checklist-only-awaiting-formal09-preseal",
+  "reviewer": "/root/fixed_cell_gate_audit",
+  "scope": "Future bounded read-only review of formal09 sources and exact preseal metadata. No live probe12 raw/report is read, and no template or product module is executed.",
+  "targetDirectory": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-halo-ladder-09",
+  "immutableIdentities": {
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+    "backendInputCount": 41,
+    "release": {
+      "bytes": 87370240,
+      "sha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d"
+    },
+    "driverSourceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+    "driverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "probeScene": {
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    "formalScene": {
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "sceneSourceSha256": "4854eb58f6468ad4f8092dd375dc5363f42071470f92be4219a14df1321b163f"
+  },
+  "baseline": {
+    "runOptions": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\run-options.json",
+      "bytes": 2968,
+      "sha256": "ff21cced2ca1562fb834dd45e7a3ce7be2dc6fb7f971d665085850cd221e1ea5"
+    },
+    "resourceProfile": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-halo-ladder-08\\resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    "policy": {
+      "profile": "standard",
+      "activityMode": "native",
+      "movementIntervalMs": 750,
+      "stages": [
+        2,
+        10,
+        25,
+        50,
+        100
+      ],
+      "stageSeconds": 300,
+      "soakSeconds": 7200,
+      "wallSeconds": 18000,
+      "layout": "dispersed",
+      "combatActors": 10,
+      "resumeSamples": 5,
+      "saveSamples": 5,
+      "commandsPerSecond": 3,
+      "intentionIntervalMs": 750,
+      "variableActionCadence": true,
+      "maximumSendLatenessMs": 250,
+      "movementP95Ms": 750,
+      "chatP95Ms": 1000,
+      "actionTimeoutMs": 2000,
+      "timeoutExclusive": 0.01,
+      "maximumMissedPlanRatio": 0.05,
+      "maximumCorrectionRatio": 0.05,
+      "minimumMovesPerMinute": 30,
+      "minimumCombatHitsPerMinute": 12,
+      "minimumCombatAttacksPerMinute": 18,
+      "aoiRange": 16,
+      "aoiGraceMs": 1000,
+      "nativeChatIntervalMs": 30000,
+      "nativeTurnIntervalMs": 60000,
+      "minimumNativeRunRatio": 0.5,
+      "minimumNativeCellsPerMinute": 80,
+      "maximumEvidenceInFlight": 4,
+      "maximumMemorySlopeMiBPerHour": 32,
+      "memoryWarmupSeconds": 300,
+      "maximumDriverLagP99Ms": 250,
+      "fullAcceptanceEligible": true
+    }
+  },
+  "formalConfiguration": {
+    "caps": [
+      128,
+      100,
+      100,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "resourceLimits": {
+      "maxCpuCores": 24,
+      "maxPrivateBytes": 34359738368,
+      "maxWorkingSetBytes": 42949672960,
+      "minHostFreeBytes": 8589934592,
+      "maxIoOperationsPerSecond": 100000,
+      "sustainedSamples": 3
+    },
+    "requiredPhases": [
+      [
+        "stage-2",
+        2,
+        300,
+        5
+      ],
+      [
+        "stage-10",
+        10,
+        300,
+        5
+      ],
+      [
+        "stage-25",
+        25,
+        300,
+        5
+      ],
+      [
+        "stage-50",
+        50,
+        300,
+        5
+      ],
+      [
+        "stage-100",
+        100,
+        300,
+        5
+      ],
+      [
+        "soak",
+        100,
+        7200,
+        120
+      ],
+      [
+        "post-resume-observation",
+        100,
+        60,
+        1
+      ]
+    ],
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "wallSeconds": 18000,
+    "allOriginalPolicyValuesRequired": true
+  },
+  "reviewChecklist": [
+    {
+      "id": "identity-and-closure",
+      "checks": [
+        "Every local preseal reviewed file has its exact raw size/SHA and the declared aggregate.",
+        "Backend41/build/full16, frozen9+124-closure and dual source commits remain exact; no target imports or repeat guards in this review.",
+        "Scene binding shared identity exact, local100 raw f87 and first10 a42, span2/body3/halo5."
+      ]
+    },
+    {
+      "id": "fresh12-admission-before-provisioning",
+      "checks": [
+        "Only new compact12 is eligible; report and provenance exact run/report bytes must agree.",
+        "Fresh ordinary2/10 stages have true300 seconds and five passing >=60-second windows each; soak has true360 seconds and six passing >=60-second windows.",
+        "Same immutable backend41/Release and all9 driver inputs, same scene/static closure and HP/witness/measurement metadata.",
+        "Authentic raw phase/monitor continuity, complete bounded slow-stage diagnostics and no continuous/safety failure.",
+        "Owned process terminal normal cleanup, six current counters zero, owned listeners free and inputs unchanged.",
+        "Public collection and independent public-verification/catalog/provenance are complete and bound to this same new12 run/report rawSHA/source+scene, without promoting probe to capacity acceptance.",
+        "prepare-inputs awaits the gate before any preparation lock, accounts, secrets, bin copy or other provisioning; run revalidates the gate/source before spawn."
+      ]
+    },
+    {
+      "id": "formal-scope",
+      "checks": [
+        "Policy JSON exact original formal08; only explicit new scenario/path/scope identity changes.",
+        "Five original300-second cohorts in2/10/25/50/100 order,7200-second100-actor soak,5resumes,60-second100-actor post observation and5saves remain mandatory.",
+        "measuredSeconds and actual clocks/rates plus complete >=60-second windows remain enforced; no nominal-only or old short-window promotion.",
+        "Original750ms cadence/3commands-per-second,18launched+12dualpositive/fighter-minute,Run50%,80receipt-backedcells/min,95%opportunity/correction,900msattack and other policy gates stay exact.",
+        "Formal caps128/100/100/4/1/2,Tokio4,Slow50; actual24logical/32GiBprivate/40GiBWS soft envelope unchanged."
+      ]
+    },
+    {
+      "id": "public-evidence-and-failure",
+      "checks": [
+        "All target child/catalog/scope names point only new formal09; old compact12 artifacts not rewritten.",
+        "Explicit safe public whitelist, dual-separator path checks/realpath containment/private denial, raw-byte wx copies and external large archives.",
+        "Partial and failed original reports remain collectable without threshold or verdict rewrite.",
+        "Raw verifier accepted, normal process cleanup and diagnostic completeness remain independent; formal capacity accepted requires all.",
+        "No secret/store/credential/private stderr/recording payload/EXE included."
+      ]
+    },
+    {
+      "id": "risk-and-authority-boundary",
+      "checks": [
+        "Probe feasibility never certifies capacity; formal09 preparation still requires root authorization.",
+        "Original25-actor socket/stall root cause remains unresolved; current ordinary full16 does not certify it.",
+        "100-actor180launched/min AND120positivehit/min are separate; conditional positive-hit model cannot certify180launches.",
+        "886static steps and53-65step legs may meet24ACK/20s scout budgets before arrival; static route validation is not runtime tour completion.",
+        "Fresh two-hour supply, ordinary leveling/durability/finite healing and dynamic occupancy remain unknown until actual run.",
+        "P0 remains pending and no P2 code is authorized."
+      ]
+    }
+  ],
+  "notPerformed": {
+    "productOrTemplateImports": true,
+    "sourceGuard": true,
+    "astarOrModels": true,
+    "liveRawOrRecordings": true,
+    "testsOrBuild": true,
+    "prepareOrAccounts": true,
+    "realmOrLoad": true,
+    "trackedFileEdits": true
+  },
+  "formalReady": false,
+  "authorizesRun": false
+}

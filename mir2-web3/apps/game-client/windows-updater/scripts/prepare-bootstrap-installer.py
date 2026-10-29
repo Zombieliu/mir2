@@ -27,13 +27,16 @@ sys.modules[SPEC.name] = archive
 SPEC.loader.exec_module(archive)
 require = archive.require
 
-LANGUAGES = ("en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar")
+LANGUAGES = ("en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar", "zh-CN")
 LICENSES = ("NotoSansTC-OFL.txt", "OFL-NotoSans.txt", "OFL-NotoSansArabic.txt",
             "OFL-NotoSansDevanagari.txt", "OFL-NotoSansThai.txt",
             "MULTILINGUAL-SOURCES.json")
+SIMPLIFIED_LICENSES = ("BILLING-HAN-SOURCE.json", "OFL-NotoSansSC-BillingHan.txt",
+                       "SIMPLIFIED-SOURCE.json", "OFL-NotoSansCJKsc.txt")
 PIN = "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E"
 EXISTING_MESSAGES = {
     "english": "The online installer needs an empty folder. Existing players should open Mir2Launcher.exe in their installed folder to update. Keep the existing installation and its recovery files, or use the full offline installer to repair it.",
+    "chinesesimplified": "在线安装程序需要空文件夹。已安装游戏的玩家请打开原安装文件夹中的 Mir2Launcher.exe 更新。请保留现有安装和恢复文件；需要修复时，请使用完整离线安装包。",
     "chinesetraditional": "線上安裝程式需要空白資料夾。已有遊戲的玩家請開啟安裝資料夾中的 Mir2Launcher.exe 更新。請保留現有安裝與復原檔案；如需修復，請使用完整離線安裝程式。",
     "brazilianportuguese": "O instalador online precisa de uma pasta vazia. Quem já instalou o jogo deve abrir Mir2Launcher.exe na pasta instalada para atualizar. Preserve a instalação e seus arquivos de recuperação ou use o instalador offline completo para reparar.",
     "russian": "Для онлайн-установки нужна пустая папка. Если игра уже установлена, откройте Mir2Launcher.exe в её папке для обновления. Сохраните установку и файлы восстановления; для ремонта используйте полный автономный установщик.",
@@ -291,6 +294,14 @@ def prepare(candidate_root: Path, bundle_root: Path, recipe_root: Path, guide_ro
     bundle, engine, feed = verify_bundle(bundle_files, candidate_files, expected_revision,
                                          expected_candidate)
     documentation = {n: candidate_files[n] for n in LICENSES}
+    # Old candidates have no SC font payload. New complete root17/legal12
+    # candidates already passed archive layout admission; preserve their exact
+    # license/provenance bytes under the installer's existing licenses root.
+    for name in SIMPLIFIED_LICENSES:
+        for relative in (name, "mir2-assets/legal/" + name):
+            if relative in candidate_files:
+                require(name not in documentation, "duplicate simplified license")
+                documentation[name] = candidate_files[relative]
     guide_files = scan_tree(guide_root, "guides")
     guides = {"README." + code + ".txt": guide_files["README." + code + ".txt"]
               for code in LANGUAGES}

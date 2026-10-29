@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "kind": "clean-native-release-build-only",
+  "gitRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "attestation": "native-build-attestation.json",
+  "attestationReceipt": {
+    "filename": "BUILD-ATTESTATION.json",
+    "bytes": 1493,
+    "sha256": "3209853348a4bfb05b4353cdc33703c099ed5e56e743b5191f6adcf0d0714125",
+    "included": false
+  },
+  "executable": {
+    "filename": "mir2-platform-windows.exe",
+    "bytes": 132739584,
+    "sha256": "6b657f869afc2baa8a086baf9bd39ce77b5011247d8b12a8f92eaeebe3cf2e9d",
+    "binaryIncluded": false
+  },
+  "curatorVerifiedBinaryIdentity": true,
+  "logReceipt": {
+    "filename": "attested-release-build.log",
+    "bytes": 64358,
+    "sha256": "d28e405e19fbe17db171db7704cded801616df0e448381f3bdc6dea544547d6a",
+    "included": false
+  },
+  "resultLines": [
+    "    Finished `release` profile [optimized] target(s) in 5m 59s",
+    "gitRevision=24216899acd4301d8c3b1eff08b825f4896cc410",
+    "exeSha256=6B657F869AFC2BAA8A086BAF9BD39CE77B5011247D8B12A8F92EAEEBE3CF2E9D"
+  ],
+  "buildSecondsFromCargo": 359,
+  "publisherSignature": "internal-candidate-only; publisher signing not required by this build attestation",
+  "scope": "Native game binary at the recorded clean source revision. Updater delta, actual Candidate, updater bundle, installer compilation/installation and live GUI remain separately recorded stages.",
+  "candidateOrInstallerPassedByThisReport": false,
+  "productionDeployment": false
+}

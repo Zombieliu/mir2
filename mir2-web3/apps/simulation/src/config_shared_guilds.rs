@@ -1299,11 +1299,15 @@ impl SimulationConfig {
         &self,
         identity: &Stage5FriendIdentity,
     ) -> Result<Option<SharedGuildRecord>, String> {
-        self.ensure_account_store_writable()?;
+        let diagnostics = DiagnosticRecord::new(DiagnosticOperation::GuildLookup);
+        self.ensure_account_store_writable_with_diagnostics(Some(&diagnostics))?;
+        let store_wait = diagnostics.span(DiagnosticStage::StoreWait);
         let store = self
             .account_store
             .lock()
             .map_err(|_| "guild authority mutex poisoned")?;
+        drop(store_wait);
+        let _store_held = diagnostics.span(DiagnosticStage::StoreHeld);
         // Clone only the owner's record, never every guild bank on a render snapshot.
         // Structural/identity validation happens at strict load and mutation boundaries.
         Ok(store

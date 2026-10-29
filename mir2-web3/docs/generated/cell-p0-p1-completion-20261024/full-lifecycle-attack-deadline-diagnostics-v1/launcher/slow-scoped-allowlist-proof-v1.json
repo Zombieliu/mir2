@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_NEW_HELPER_NOT_EXECUTED",
+  "source": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-public.mjs",
+    "bytes": 10186,
+    "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+  },
+  "destination": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-v1\\slow-stage-public.mjs",
+    "bytes": 10318,
+    "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+  },
+  "mutations": [
+    {
+      "from": "  'serial_gate.input_wait', 'serial_gate.zone_outbound_wait', ...CONTEXT_STAGES,",
+      "to": "  'serial_gate.input_wait', 'serial_gate.zone_outbound_wait',\n  'session_action.execute', 'session_action.flush', 'runtime_tick.execute',\n  'runtime_tick.save_checkpoint', 'runtime_tick.flush', ...CONTEXT_STAGES,",
+      "count": 1
+    }
+  ],
+  "inverseRestoresOriginalExactly": true,
+  "onlyFiveExistingLabelsAddedToScopedAllowlist": [
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush"
+  ],
+  "rowContract": {
+    "source": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    "destination": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-attack-deadline-diagnostics-v1\\slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    "rawIdentical": true
+  },
+  "unchanged": [
+    "all allowed stage names",
+    "queue phase/input class enums",
+    "canonical numeric parsing",
+    "8KiB line/32MiB public/1MiB write/15s finish caps",
+    "unknown fields/stages rejected",
+    "partial/truncation/cleanup semantics"
+  ],
+  "executionScope": "Full16 runner retains original raw stdout/stderr persistence. This strict public helper is prepared separately for the next diagnostic capacity launcher and is not credited as a gameplay or ACK source.",
+  "unitTestsExecuted": false
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T10:02:46.414Z",
+  "actualCodeCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "driverSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "historicalStaticCodeCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "historicalMain": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-before-v1.mjs.txt",
+    "bytes": 144416,
+    "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+  },
+  "currentMain": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.mjs",
+    "bytes": 148409,
+    "sha256": "1cf9da1746db1b23d00b13cf9dd65c14ac72c155bd558621bf7767d4e6376f3f"
+  },
+  "mutationProof": {
+    "file": "C:/mir2-build/p01-completion-20261024/native-chase-preference-main-mutation-v1.json",
+    "bytes": 6417,
+    "sha256": "6c0d95fbcdb5f9a035da54bff5920cc47f8834daa8bb3eb0e8a8bafc05942291"
+  },
+  "wholeMainReverseRawExact": true,
+  "reverseRules": 8,
+  "geometryFunctions": {
+    "validateNativeExplicitHomes": {
+      "bytes": 3186,
+      "sha256": "644a4305de903c0451ff0faec2e2df4942f40739d06df9f03e727e03346d3f05",
+      "oldAndNewExact": true
+    },
+    "validateNativeCombatClusters": {
+      "bytes": 1815,
+      "sha256": "b9e09ba7aa3d58bf3c9aec9da776076599b41baefb68568c04b9d268dbc39443",
+      "oldAndNewExact": true
+    },
+    "insideCombatCoverage": {
+      "bytes": 287,
+      "sha256": "9f5b5a85a555e8c8bd2ef0473422ec656ccd4dca66d03e9ef9759a30a65784e1",
+      "oldAndNewExact": true
+    }
+  },
+  "originalAStarReexecuted": false,
+  "oldSceneValidationChanged": false,
+  "scope": "Only8first4-chase-preference hunks differ; exact inverse restores originalmain and3geometry function bodies are identical. Old static map/data/routes remain historical evidence, not new200 coverage."
+}

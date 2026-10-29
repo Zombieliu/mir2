@@ -1,0 +1,582 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792923531277-bc2bda2e",
+  "actor": "L8baceb00",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\reports\\1792923531277-bc2bda2e.samples.jsonl",
+    "bytes": 5219958,
+    "rows": 4314,
+    "sha256": "0ebbc11aab62b1db86436117268037002f9687031e32d3e26527e6011feca1c1"
+  },
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-chase-preference-feasibility-14\\reports\\1792923531277-bc2bda2e.report.json",
+    "bytes": 25653,
+    "sha256": "61aae831530f2eab59e2937a937adb3721710ce9802f36a1fc9b57ebfa0a6309"
+  },
+  "originalReportOk": false,
+  "originalCapacityAccepted": false,
+  "firstFailure": {
+    "actor": "L8baceb00",
+    "role": "movement",
+    "phases": [
+      "stage-2"
+    ],
+    "seconds": 60.18221310000002,
+    "final": false,
+    "activityDurationSufficient": true,
+    "activity": {
+      "plans": 80,
+      "gaps": 0,
+      "moves": 73,
+      "attacks": 0,
+      "hits": 0,
+      "damage": 0,
+      "lastSuccessAt": 1792923834383,
+      "runs": 52,
+      "cells": 125,
+      "nativeOpportunities": 80,
+      "nativeCompleted": 76,
+      "offeredDurationMs": 60000,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "unknownPacing": 0
+    },
+    "nativeActivity": {
+      "passed": true,
+      "completionRatio": 0.95,
+      "runRatio": 0.7123287671232876,
+      "cellsPerMinute": 124.62153871838916,
+      "positiveHitsPerMinute": 0,
+      "evidenceWaits": 0,
+      "ownerAckWaits": 0,
+      "offeredDurationMs": 60000,
+      "unknownPacing": 0,
+      "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+    },
+    "activityPassed": true,
+    "latencyPassed": true,
+    "fanoutPassed": true,
+    "timeoutRatio": 0,
+    "correctionRatio": 0.05194805194805195,
+    "metrics": {
+      "run": {
+        "count": 54,
+        "status": {
+          "success": 52,
+          "corrected": 2
+        },
+        "fromSend": {
+          "count": 54,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 5,
+          "maxMs": 4.329900000011548
+        },
+        "fromPlan": {
+          "count": 54,
+          "p50Ms": 21,
+          "p95Ms": 33,
+          "p99Ms": 36,
+          "maxMs": 35.56589999998687
+        }
+      },
+      "fanout-run": {
+        "count": 5,
+        "status": {
+          "success": 5
+        },
+        "fromSend": {
+          "count": 5,
+          "p50Ms": 2,
+          "p95Ms": 2,
+          "p99Ms": 2,
+          "maxMs": 1.7263000000384636
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "turn": {
+        "count": 1,
+        "status": {
+          "success": 1
+        },
+        "fromSend": {
+          "count": 1,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.42639999999664724
+        },
+        "fromPlan": {
+          "count": 1,
+          "p50Ms": 3,
+          "p95Ms": 3,
+          "p99Ms": 3,
+          "maxMs": 2.6920000000100117
+        }
+      },
+      "walk": {
+        "count": 23,
+        "status": {
+          "success": 21,
+          "corrected": 2
+        },
+        "fromSend": {
+          "count": 23,
+          "p50Ms": 1,
+          "p95Ms": 2,
+          "p99Ms": 5,
+          "maxMs": 4.219700000016019
+        },
+        "fromPlan": {
+          "count": 23,
+          "p50Ms": 17,
+          "p95Ms": 35,
+          "p99Ms": 42,
+          "maxMs": 41.96649999998044
+        }
+      },
+      "chat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.7439000000013039
+        },
+        "fromPlan": {
+          "count": 2,
+          "p50Ms": 11,
+          "p95Ms": 28,
+          "p99Ms": 28,
+          "maxMs": 27.482299999974202
+        }
+      },
+      "peerChat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.7439000000013039
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "fanout-chat": {
+        "count": 2,
+        "status": {
+          "success": 2
+        },
+        "fromSend": {
+          "count": 2,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.7439000000013039
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      },
+      "fanout-walk": {
+        "count": 1,
+        "status": {
+          "success": 1
+        },
+        "fromSend": {
+          "count": 1,
+          "p50Ms": 1,
+          "p95Ms": 1,
+          "p99Ms": 1,
+          "maxMs": 0.9170999999623746
+        },
+        "fromPlan": {
+          "count": 0,
+          "p50Ms": null,
+          "p95Ms": null,
+          "p99Ms": null,
+          "maxMs": 0
+        }
+      }
+    },
+    "passed": false
+  },
+  "stage2MovementCounts": {
+    "run/success": 293,
+    "walk/success": 53,
+    "run/corrected": 3,
+    "walk/corrected": 2
+  },
+  "cases": [
+    {
+      "number": 1,
+      "insideFinalFailingWindow": false,
+      "actionLine": 1642,
+      "at": 1792923657353,
+      "kind": "run",
+      "sentAtMs": 138555.2749,
+      "origin": {
+        "x": 243,
+        "y": 596
+      },
+      "first": {
+        "x": 243,
+        "y": 597
+      },
+      "target": {
+        "x": 243,
+        "y": 598
+      },
+      "actual": {
+        "x": 243,
+        "y": 596
+      },
+      "sourceCorrectionLine": 1641,
+      "sendLine": 1639,
+      "receiptLine": 1640,
+      "packetSequence": 2516,
+      "actualOwnerAfterPacket": {
+        "objectId": 1000,
+        "dead": false,
+        "x": 243,
+        "y": 596
+      },
+      "atSendLocalFirstOccupants": [],
+      "atSendLocalTargetOccupants": [],
+      "nearbyAfterReceipt": [
+        {
+          "objectId": 206607,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 242,
+          "y": 597
+        },
+        {
+          "objectId": 206622,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 241,
+          "y": 597
+        },
+        {
+          "objectId": 206331,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 244,
+          "y": 593
+        },
+        {
+          "objectId": 206539,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 248,
+          "y": 599
+        },
+        {
+          "objectId": 206533,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 237,
+          "y": 602
+        }
+      ],
+      "localWireViewTruncated": false,
+      "diagnosticWindow": 130,
+      "evidenceScope": "The exact client send/observe folds and public correction projection; not a simultaneous authoritative occupancy census."
+    },
+    {
+      "number": 2,
+      "insideFinalFailingWindow": true,
+      "actionLine": 3473,
+      "at": 1792923779619,
+      "kind": "run",
+      "sentAtMs": 260801.6379,
+      "origin": {
+        "x": 241,
+        "y": 599
+      },
+      "first": {
+        "x": 242,
+        "y": 599
+      },
+      "target": {
+        "x": 243,
+        "y": 599
+      },
+      "actual": {
+        "x": 241,
+        "y": 599
+      },
+      "sourceCorrectionLine": 3472,
+      "sendLine": 3470,
+      "receiptLine": 3471,
+      "packetSequence": 4607,
+      "actualOwnerAfterPacket": {
+        "objectId": 1000,
+        "dead": false,
+        "x": 241,
+        "y": 599
+      },
+      "atSendLocalFirstOccupants": [],
+      "atSendLocalTargetOccupants": [],
+      "nearbyAfterReceipt": [
+        {
+          "objectId": 206622,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 242,
+          "y": 598
+        },
+        {
+          "objectId": 206607,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 243,
+          "y": 597
+        },
+        {
+          "objectId": 206533,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 237,
+          "y": 602
+        },
+        {
+          "objectId": 206331,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 244,
+          "y": 593
+        },
+        {
+          "objectId": 206527,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 242,
+          "y": 605
+        }
+      ],
+      "localWireViewTruncated": false,
+      "diagnosticWindow": 277,
+      "evidenceScope": "The exact client send/observe folds and public correction projection; not a simultaneous authoritative occupancy census."
+    },
+    {
+      "number": 3,
+      "insideFinalFailingWindow": true,
+      "actionLine": 3482,
+      "at": 1792923780359,
+      "kind": "walk",
+      "sentAtMs": 261540.8143,
+      "origin": {
+        "x": 241,
+        "y": 599
+      },
+      "first": {
+        "x": 242,
+        "y": 599
+      },
+      "target": {
+        "x": 242,
+        "y": 599
+      },
+      "actual": {
+        "x": 241,
+        "y": 599
+      },
+      "sourceCorrectionLine": null,
+      "sendLine": 3480,
+      "receiptLine": 3481,
+      "packetSequence": 4611,
+      "actualOwnerAfterPacket": {
+        "objectId": 1000,
+        "dead": false,
+        "x": 241,
+        "y": 599
+      },
+      "atSendLocalFirstOccupants": [],
+      "atSendLocalTargetOccupants": [],
+      "nearbyAfterReceipt": [],
+      "localWireViewTruncated": false,
+      "diagnosticWindow": 278,
+      "evidenceScope": "The exact client send/observe folds and public correction projection; not a simultaneous authoritative occupancy census."
+    },
+    {
+      "number": 4,
+      "insideFinalFailingWindow": true,
+      "actionLine": 3887,
+      "at": 1792923807366,
+      "kind": "run",
+      "sentAtMs": 288548.5027,
+      "origin": {
+        "x": 241,
+        "y": 597
+      },
+      "first": {
+        "x": 242,
+        "y": 597
+      },
+      "target": {
+        "x": 243,
+        "y": 597
+      },
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "sourceCorrectionLine": 3886,
+      "sendLine": 3884,
+      "receiptLine": 3885,
+      "packetSequence": 5005,
+      "actualOwnerAfterPacket": {
+        "objectId": 1000,
+        "dead": false,
+        "x": 241,
+        "y": 597
+      },
+      "atSendLocalFirstOccupants": [],
+      "atSendLocalTargetOccupants": [],
+      "nearbyAfterReceipt": [
+        {
+          "objectId": 206622,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 242,
+          "y": 598
+        },
+        {
+          "objectId": 206607,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 243,
+          "y": 598
+        },
+        {
+          "objectId": 206331,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 244,
+          "y": 593
+        },
+        {
+          "objectId": 206533,
+          "kind": "monster",
+          "dead": false,
+          "hidden": false,
+          "x": 237,
+          "y": 602
+        }
+      ],
+      "localWireViewTruncated": false,
+      "diagnosticWindow": 312,
+      "evidenceScope": "The exact client send/observe folds and public correction projection; not a simultaneous authoritative occupancy census."
+    },
+    {
+      "number": 5,
+      "insideFinalFailingWindow": true,
+      "actionLine": 3897,
+      "at": 1792923808110,
+      "kind": "walk",
+      "sentAtMs": 289292.7349,
+      "origin": {
+        "x": 241,
+        "y": 597
+      },
+      "first": {
+        "x": 242,
+        "y": 597
+      },
+      "target": {
+        "x": 242,
+        "y": 597
+      },
+      "actual": {
+        "x": 241,
+        "y": 597
+      },
+      "sourceCorrectionLine": null,
+      "sendLine": 3895,
+      "receiptLine": 3896,
+      "packetSequence": 5009,
+      "actualOwnerAfterPacket": {
+        "objectId": 1000,
+        "dead": false,
+        "x": 241,
+        "y": 597
+      },
+      "atSendLocalFirstOccupants": [],
+      "atSendLocalTargetOccupants": [],
+      "nearbyAfterReceipt": [],
+      "localWireViewTruncated": false,
+      "diagnosticWindow": 313,
+      "evidenceScope": "The exact client send/observe folds and public correction projection; not a simultaneous authoritative occupancy census."
+    }
+  ],
+  "limitations": [
+    "No server-authoritative simultaneous occupancy or rejection reason is present in these ordinary wire traces.",
+    "No spectator recording or private file was read.",
+    "Only the fixed241..244×594..599 diagnostic region and previously remembered non-player IDs are covered.",
+    "A same-position UserLocation can be observed by the wrapper even though the core selfTransform stream intentionally omits unchanged transforms.",
+    "Client snapshot membership is neither a global live-monster census nor proof of authority ordering."
+  ],
+  "rawSingleStreamingPass": false,
+  "analysisRawFullReads": 2,
+  "firstReadStoppedAtWrongFourTotalCasesAssertion": true,
+  "perExecutionRawPasses": 1,
+  "typeCounts": {
+    "monitor": 162,
+    "phaseStarted": 2,
+    "action": 889,
+    "coverage": 301,
+    "playerLifecycle": 9,
+    "admitted": 2,
+    "selfTransform": 763,
+    "fanoutDistribution": 138,
+    "compactNavigationWire": 2025,
+    "phaseEnded": 2,
+    "continuousWindow": 11,
+    "window": 4,
+    "movementCorrection": 3,
+    "continuousFailure": 1,
+    "safetyStop": 1,
+    "finished": 1
+  },
+  "sourceChanged": false,
+  "thresholdsChanged": false,
+  "capacityAccepted": false
+}

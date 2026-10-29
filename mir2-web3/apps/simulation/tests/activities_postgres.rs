@@ -457,7 +457,7 @@ fn activities_postgres_four_writers_restart_and_online_source_preserve_reservati
     let restarted = open(&scoped, &policy);
     assert_eq!(
         restarted.account_store.lock().unwrap().schema_version,
-        mir2_simulation::billing::BILLING_SCHEMA_VERSION
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION,
     );
     let status = checked(
         restarted.activity_status(ACCOUNT, &policy, monthly_card_now_ms()),

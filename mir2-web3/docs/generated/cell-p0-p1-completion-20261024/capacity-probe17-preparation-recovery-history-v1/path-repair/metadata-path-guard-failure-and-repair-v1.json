@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T19:23:39.693Z",
+  "kind": "Metadata-only repair after Root first actual readonly guard refusal",
+  "history": {
+    "origin": "Root coordinator messages reporting actual tool observations; no raw stdout/stderr log file was captured for this guard failure.",
+    "originalStdoutOrStderrFileCaptured": false,
+    "sealExitCode": 0,
+    "readonlyGuardExitCode": 1,
+    "observedRefusal": "backend-driver-source-guard.mjs compared ref.path with Node path.resolve output using strict string equality; C:/ metadata spelling differed from C:\\ spelling.",
+    "failedSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\launcher-source-frozen-v1.json",
+      "bytes": 33193,
+      "sha256": "d6a54fba126d58c258462fe39bffc68a78b33cb7959b78591ef75e3ead5d72ad"
+    },
+    "accountProvisioningOccurred": false,
+    "realmStarted": false
+  },
+  "repair": {
+    "metadataBefore": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json",
+      "bytes": 342,
+      "sha256": "91f2f045e5b5610ad352683090eef6b54dbf24702b411b84f15093f8c8d7f86d"
+    },
+    "metadataBeforeRawCopy": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json.before-node-path-v1.txt",
+      "bytes": 342,
+      "sha256": "91f2f045e5b5610ad352683090eef6b54dbf24702b411b84f15093f8c8d7f86d"
+    },
+    "metadataAfter": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json",
+      "bytes": 346,
+      "sha256": "55a7e8475c2ce8b178c4ecd89274a0e29718c08deef44e00ee73729447808883"
+    },
+    "onlyChangedField": "library.path",
+    "pathBefore": "C:/mir2-build/p01-completion-20261024/account-store-wait-diagnostics-release-v1/source-lib-v1.mjs",
+    "pathAfter": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\source-lib-v1.mjs",
+    "rawInverseRestoresOriginal": true,
+    "preparedBefore": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v2.json",
+      "bytes": 31015,
+      "sha256": "cafad350d557a62587d119d6a131eb1cd0ed6496287172b1038933f4f1871ccc"
+    },
+    "preparedAfter": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\runtime-prepared-v3.json",
+      "bytes": 31015,
+      "sha256": "3a80bedf5390884069be2f3bac42d42202fb1afc9280bd585545bcd8ed6f5c41"
+    },
+    "onlyPreparedChanges": [
+      "files[1].bytes",
+      "files[1].sha256",
+      "sourceSha256"
+    ],
+    "allOtherPreparedFieldsRawValuesEqual": true
+  },
+  "checks": {
+    "absenceCheckedNow": [
+      "source-guard-readonly-verification.json",
+      "private",
+      "bin",
+      "recordings",
+      "reports",
+      "preparation.lock",
+      "execution.lock",
+      "source-pins.json"
+    ],
+    "existingSealRawUnchanged": true,
+    "existingSealMoved": false,
+    "javascriptChanged": false,
+    "nodeSyntaxRerun": false,
+    "guardExecutedByThisRepair": false,
+    "seedExecuted": false,
+    "realmStarted": false,
+    "credentialsRead": false
+  }
+}

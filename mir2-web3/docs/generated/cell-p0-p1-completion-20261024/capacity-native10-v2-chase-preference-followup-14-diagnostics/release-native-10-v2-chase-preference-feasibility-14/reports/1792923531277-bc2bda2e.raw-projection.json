@@ -1,0 +1,5403 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792923531277-bc2bda2e",
+  "rawBytes": 5219958,
+  "rawSha256": "0ebbc11aab62b1db86436117268037002f9687031e32d3e26527e6011feca1c1",
+  "rawRows": 4314,
+  "monitorSummary": {
+    "count": 162,
+    "validCount": 162,
+    "invalidCount": 0,
+    "stoppedCount": 0,
+    "complete": true,
+    "firstSampledAtMs": 1792923531087,
+    "lastSampledAtMs": 1792923833446,
+    "maxGapMs": 2090,
+    "maxRawLineBytes": 8989,
+    "first": {
+      "sampledAtMs": 1792923531087,
+      "process": {
+        "pid": 48796,
+        "creationTimeMs": 1792923522010
+      },
+      "zoneMetrics": {
+        "version": 2,
+        "scope": "gateway shared-owner transaction, may contain multiple maps",
+        "sinceInitializationMs": 8535,
+        "budgetUs": 50000,
+        "complete": true,
+        "zoneWork": {
+          "count": 0,
+          "sumUs": 0,
+          "maxUs": 0,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null
+        },
+        "ownerTickDeadlineLag": {
+          "count": 0,
+          "sumUs": 0,
+          "maxUs": 0,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 0,
+          "sumUs": 0,
+          "maxUs": 0,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null
+        },
+        "immediateRequests": {
+          "successCount": 0,
+          "failureCount": 0,
+          "duration": {
+            "count": 0,
+            "sumUs": 0,
+            "maxUs": 0,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": null,
+            "p95UpperUs": null,
+            "p99UpperUs": null,
+            "p999UpperUs": null
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 0,
+          "failureCount": 0,
+          "duration": {
+            "count": 0,
+            "sumUs": 0,
+            "maxUs": 0,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": null,
+            "p95UpperUs": null,
+            "p99UpperUs": null,
+            "p999UpperUs": null
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 0,
+          "failureCount": 0,
+          "duration": {
+            "count": 0,
+            "sumUs": 0,
+            "maxUs": 0,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": null,
+            "p95UpperUs": null,
+            "p99UpperUs": null,
+            "p999UpperUs": null
+          }
+        }
+      }
+    },
+    "last": {
+      "sampledAtMs": 1792923833446,
+      "process": {
+        "pid": 48796,
+        "creationTimeMs": 1792923522010
+      },
+      "zoneMetrics": {
+        "version": 2,
+        "scope": "gateway shared-owner transaction, may contain multiple maps",
+        "sinceInitializationMs": 310853,
+        "budgetUs": 50000,
+        "complete": true,
+        "zoneWork": {
+          "count": 3020,
+          "sumUs": 1021998,
+          "maxUs": 1154,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 23
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 127
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 2784
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 83
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 3
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": 500,
+          "p95UpperUs": 500,
+          "p99UpperUs": 1000,
+          "p999UpperUs": 1000
+        },
+        "ownerTickDeadlineLag": {
+          "count": 3020,
+          "sumUs": 24471516,
+          "maxUs": 21647,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 10
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 30
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 108
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 172
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 613
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 931
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 1155
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 1
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": 10000,
+          "p95UpperUs": 20000,
+          "p99UpperUs": 20000,
+          "p999UpperUs": 20000
+        },
+        "pendingMovementDeadlineLag": {
+          "count": 0,
+          "sumUs": 0,
+          "maxUs": 0,
+          "overBudgetCount": 0,
+          "saturated": false,
+          "discardedSamples": 0,
+          "buckets": [
+            {
+              "upperBoundUs": 100,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 2000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 10000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 20000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 35000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 50000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 75000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 100000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 150000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 250000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 500000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 1000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 5000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": 30000000,
+              "count": 0
+            },
+            {
+              "upperBoundUs": null,
+              "count": 0
+            }
+          ],
+          "p50UpperUs": null,
+          "p95UpperUs": null,
+          "p99UpperUs": null,
+          "p999UpperUs": null
+        },
+        "immediateRequests": {
+          "successCount": 36,
+          "failureCount": 0,
+          "duration": {
+            "count": 36,
+            "sumUs": 74752,
+            "maxUs": 12795,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 18
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 5
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 3
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 5
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 1
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 500,
+            "p95UpperUs": 10000,
+            "p99UpperUs": 20000,
+            "p999UpperUs": 20000
+          }
+        },
+        "lifecycleRequests": {
+          "successCount": 6,
+          "failureCount": 0,
+          "duration": {
+            "count": 6,
+            "sumUs": 2058595,
+            "maxUs": 988137,
+            "overBudgetCount": 4,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 2
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 75000,
+            "p95UpperUs": 1000000,
+            "p99UpperUs": 1000000,
+            "p999UpperUs": 1000000
+          }
+        },
+        "movementAdmissions": {
+          "successCount": 771,
+          "failureCount": 0,
+          "duration": {
+            "count": 771,
+            "sumUs": 267436,
+            "maxUs": 3895,
+            "overBudgetCount": 0,
+            "saturated": false,
+            "discardedSamples": 0,
+            "buckets": [
+              {
+                "upperBoundUs": 100,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250,
+                "count": 512
+              },
+              {
+                "upperBoundUs": 500,
+                "count": 211
+              },
+              {
+                "upperBoundUs": 1000,
+                "count": 23
+              },
+              {
+                "upperBoundUs": 2000,
+                "count": 3
+              },
+              {
+                "upperBoundUs": 5000,
+                "count": 22
+              },
+              {
+                "upperBoundUs": 10000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 20000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 35000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 50000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 75000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 100000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 150000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 250000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 500000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 1000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 5000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": 30000000,
+                "count": 0
+              },
+              {
+                "upperBoundUs": null,
+                "count": 0
+              }
+            ],
+            "p50UpperUs": 250,
+            "p95UpperUs": 1000,
+            "p99UpperUs": 5000,
+            "p999UpperUs": 5000
+          }
+        }
+      }
+    },
+    "phaseBrackets": [
+      {
+        "name": "bootstrap-2",
+        "startedAtMs": 1792923531313,
+        "endedAtMs": 1792923562524,
+        "beforeStart": {
+          "sampledAtMs": 1792923531087,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 8535,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "ownerTickDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 0,
+              "failureCount": 0,
+              "duration": {
+                "count": 0,
+                "sumUs": 0,
+                "maxUs": 0,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": null,
+                "p95UpperUs": null,
+                "p99UpperUs": null,
+                "p999UpperUs": null
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 0,
+              "failureCount": 0,
+              "duration": {
+                "count": 0,
+                "sumUs": 0,
+                "maxUs": 0,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": null,
+                "p95UpperUs": null,
+                "p99UpperUs": null,
+                "p999UpperUs": null
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 0,
+              "failureCount": 0,
+              "duration": {
+                "count": 0,
+                "sumUs": 0,
+                "maxUs": 0,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": null,
+                "p95UpperUs": null,
+                "p99UpperUs": null,
+                "p999UpperUs": null
+              }
+            }
+          }
+        },
+        "afterStart": {
+          "sampledAtMs": 1792923532993,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 10443,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 16,
+              "sumUs": 216,
+              "maxUs": 71,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 16
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 100,
+              "p95UpperUs": 100,
+              "p99UpperUs": 100,
+              "p999UpperUs": 100
+            },
+            "ownerTickDeadlineLag": {
+              "count": 16,
+              "sumUs": 144889,
+              "maxUs": 15783,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 3
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 5
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 7
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 1,
+              "failureCount": 0,
+              "duration": {
+                "count": 1,
+                "sumUs": 467,
+                "maxUs": 467,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 500,
+                "p95UpperUs": 500,
+                "p99UpperUs": 500,
+                "p999UpperUs": 500
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 2,
+              "failureCount": 0,
+              "duration": {
+                "count": 2,
+                "sumUs": 60482,
+                "maxUs": 51696,
+                "overBudgetCount": 1,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 10000,
+                "p95UpperUs": 75000,
+                "p99UpperUs": 75000,
+                "p999UpperUs": 75000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 0,
+              "failureCount": 0,
+              "duration": {
+                "count": 0,
+                "sumUs": 0,
+                "maxUs": 0,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": null,
+                "p95UpperUs": null,
+                "p99UpperUs": null,
+                "p999UpperUs": null
+              }
+            }
+          }
+        },
+        "beforeEnd": {
+          "sampledAtMs": 1792923561475,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 38926,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 301,
+              "sumUs": 74868,
+              "maxUs": 649,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 124
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 153
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 500,
+              "p95UpperUs": 500,
+              "p99UpperUs": 500,
+              "p999UpperUs": 1000
+            },
+            "ownerTickDeadlineLag": {
+              "count": 301,
+              "sumUs": 2392331,
+              "maxUs": 17034,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 5
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 22
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 13
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 51
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 103
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 105
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 10,
+              "failureCount": 0,
+              "duration": {
+                "count": 10,
+                "sumUs": 54519,
+                "maxUs": 12795,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 10000,
+                "p95UpperUs": 20000,
+                "p99UpperUs": 20000,
+                "p999UpperUs": 20000
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 6,
+              "failureCount": 0,
+              "duration": {
+                "count": 6,
+                "sumUs": 2058595,
+                "maxUs": 988137,
+                "overBudgetCount": 4,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 75000,
+                "p95UpperUs": 1000000,
+                "p99UpperUs": 1000000,
+                "p999UpperUs": 1000000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 64,
+              "failureCount": 0,
+              "duration": {
+                "count": 64,
+                "sumUs": 15587,
+                "maxUs": 803,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 46
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 14
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 4
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 250,
+                "p95UpperUs": 1000,
+                "p99UpperUs": 1000,
+                "p999UpperUs": 1000
+              }
+            }
+          }
+        },
+        "afterEnd": {
+          "sampledAtMs": 1792923563408,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 40859,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 320,
+              "sumUs": 81450,
+              "maxUs": 649,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 124
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 171
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 500,
+              "p95UpperUs": 500,
+              "p99UpperUs": 500,
+              "p999UpperUs": 1000
+            },
+            "ownerTickDeadlineLag": {
+              "count": 320,
+              "sumUs": 2528915,
+              "maxUs": 17034,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 6
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 16
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 53
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 109
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 111
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 10,
+              "failureCount": 0,
+              "duration": {
+                "count": 10,
+                "sumUs": 54519,
+                "maxUs": 12795,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 10000,
+                "p95UpperUs": 20000,
+                "p99UpperUs": 20000,
+                "p999UpperUs": 20000
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 6,
+              "failureCount": 0,
+              "duration": {
+                "count": 6,
+                "sumUs": 2058595,
+                "maxUs": 988137,
+                "overBudgetCount": 4,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 75000,
+                "p95UpperUs": 1000000,
+                "p99UpperUs": 1000000,
+                "p999UpperUs": 1000000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 69,
+              "failureCount": 0,
+              "duration": {
+                "count": 69,
+                "sumUs": 16724,
+                "maxUs": 803,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 51
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 14
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 4
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 250,
+                "p95UpperUs": 1000,
+                "p99UpperUs": 1000,
+                "p999UpperUs": 1000
+              }
+            }
+          }
+        },
+        "startBeforeGapMs": 226,
+        "startAfterGapMs": 1680,
+        "endBeforeGapMs": 1049,
+        "endAfterGapMs": 884
+      },
+      {
+        "name": "stage-2",
+        "startedAtMs": 1792923562525,
+        "endedAtMs": 1792923835207,
+        "beforeStart": {
+          "sampledAtMs": 1792923561475,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 38926,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 301,
+              "sumUs": 74868,
+              "maxUs": 649,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 124
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 153
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 500,
+              "p95UpperUs": 500,
+              "p99UpperUs": 500,
+              "p999UpperUs": 1000
+            },
+            "ownerTickDeadlineLag": {
+              "count": 301,
+              "sumUs": 2392331,
+              "maxUs": 17034,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 5
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 22
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 13
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 51
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 103
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 105
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 10,
+              "failureCount": 0,
+              "duration": {
+                "count": 10,
+                "sumUs": 54519,
+                "maxUs": 12795,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 10000,
+                "p95UpperUs": 20000,
+                "p99UpperUs": 20000,
+                "p999UpperUs": 20000
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 6,
+              "failureCount": 0,
+              "duration": {
+                "count": 6,
+                "sumUs": 2058595,
+                "maxUs": 988137,
+                "overBudgetCount": 4,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 75000,
+                "p95UpperUs": 1000000,
+                "p99UpperUs": 1000000,
+                "p999UpperUs": 1000000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 64,
+              "failureCount": 0,
+              "duration": {
+                "count": 64,
+                "sumUs": 15587,
+                "maxUs": 803,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 46
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 14
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 4
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 250,
+                "p95UpperUs": 1000,
+                "p99UpperUs": 1000,
+                "p999UpperUs": 1000
+              }
+            }
+          }
+        },
+        "afterStart": {
+          "sampledAtMs": 1792923563408,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 40859,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 320,
+              "sumUs": 81450,
+              "maxUs": 649,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 124
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 171
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 500,
+              "p95UpperUs": 500,
+              "p99UpperUs": 500,
+              "p999UpperUs": 1000
+            },
+            "ownerTickDeadlineLag": {
+              "count": 320,
+              "sumUs": 2528915,
+              "maxUs": 17034,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 2
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 6
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 16
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 53
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 109
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 111
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 10,
+              "failureCount": 0,
+              "duration": {
+                "count": 10,
+                "sumUs": 54519,
+                "maxUs": 12795,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 10000,
+                "p95UpperUs": 20000,
+                "p99UpperUs": 20000,
+                "p999UpperUs": 20000
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 6,
+              "failureCount": 0,
+              "duration": {
+                "count": 6,
+                "sumUs": 2058595,
+                "maxUs": 988137,
+                "overBudgetCount": 4,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 75000,
+                "p95UpperUs": 1000000,
+                "p99UpperUs": 1000000,
+                "p999UpperUs": 1000000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 69,
+              "failureCount": 0,
+              "duration": {
+                "count": 69,
+                "sumUs": 16724,
+                "maxUs": 803,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 51
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 14
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 4
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 250,
+                "p95UpperUs": 1000,
+                "p99UpperUs": 1000,
+                "p999UpperUs": 1000
+              }
+            }
+          }
+        },
+        "beforeEnd": {
+          "sampledAtMs": 1792923833446,
+          "process": {
+            "pid": 48796,
+            "creationTimeMs": 1792923522010
+          },
+          "zoneMetrics": {
+            "version": 2,
+            "scope": "gateway shared-owner transaction, may contain multiple maps",
+            "sinceInitializationMs": 310853,
+            "budgetUs": 50000,
+            "complete": true,
+            "zoneWork": {
+              "count": 3020,
+              "sumUs": 1021998,
+              "maxUs": 1154,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 23
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 127
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 2784
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 83
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 3
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 500,
+              "p95UpperUs": 500,
+              "p99UpperUs": 1000,
+              "p999UpperUs": 1000
+            },
+            "ownerTickDeadlineLag": {
+              "count": 3020,
+              "sumUs": 24471516,
+              "maxUs": 21647,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 10
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 30
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 108
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 172
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 613
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 931
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 1155
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 1
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": 10000,
+              "p95UpperUs": 20000,
+              "p99UpperUs": 20000,
+              "p999UpperUs": 20000
+            },
+            "pendingMovementDeadlineLag": {
+              "count": 0,
+              "sumUs": 0,
+              "maxUs": 0,
+              "overBudgetCount": 0,
+              "saturated": false,
+              "discardedSamples": 0,
+              "buckets": [
+                {
+                  "upperBoundUs": 100,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 2000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 10000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 20000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 35000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 50000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 75000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 100000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 150000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 250000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 500000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 1000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 5000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": 30000000,
+                  "count": 0
+                },
+                {
+                  "upperBoundUs": null,
+                  "count": 0
+                }
+              ],
+              "p50UpperUs": null,
+              "p95UpperUs": null,
+              "p99UpperUs": null,
+              "p999UpperUs": null
+            },
+            "immediateRequests": {
+              "successCount": 36,
+              "failureCount": 0,
+              "duration": {
+                "count": 36,
+                "sumUs": 74752,
+                "maxUs": 12795,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 18
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 5
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 1
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 500,
+                "p95UpperUs": 10000,
+                "p99UpperUs": 20000,
+                "p999UpperUs": 20000
+              }
+            },
+            "lifecycleRequests": {
+              "successCount": 6,
+              "failureCount": 0,
+              "duration": {
+                "count": 6,
+                "sumUs": 2058595,
+                "maxUs": 988137,
+                "overBudgetCount": 4,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 2
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 75000,
+                "p95UpperUs": 1000000,
+                "p99UpperUs": 1000000,
+                "p999UpperUs": 1000000
+              }
+            },
+            "movementAdmissions": {
+              "successCount": 771,
+              "failureCount": 0,
+              "duration": {
+                "count": 771,
+                "sumUs": 267436,
+                "maxUs": 3895,
+                "overBudgetCount": 0,
+                "saturated": false,
+                "discardedSamples": 0,
+                "buckets": [
+                  {
+                    "upperBoundUs": 100,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250,
+                    "count": 512
+                  },
+                  {
+                    "upperBoundUs": 500,
+                    "count": 211
+                  },
+                  {
+                    "upperBoundUs": 1000,
+                    "count": 23
+                  },
+                  {
+                    "upperBoundUs": 2000,
+                    "count": 3
+                  },
+                  {
+                    "upperBoundUs": 5000,
+                    "count": 22
+                  },
+                  {
+                    "upperBoundUs": 10000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 20000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 35000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 50000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 75000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 100000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 150000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 250000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 500000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 1000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 5000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": 30000000,
+                    "count": 0
+                  },
+                  {
+                    "upperBoundUs": null,
+                    "count": 0
+                  }
+                ],
+                "p50UpperUs": 250,
+                "p95UpperUs": 1000,
+                "p99UpperUs": 5000,
+                "p999UpperUs": 5000
+              }
+            }
+          }
+        },
+        "afterEnd": null,
+        "startBeforeGapMs": 1050,
+        "startAfterGapMs": 883,
+        "endBeforeGapMs": 1761,
+        "endAfterGapMs": null
+      }
+    ]
+  },
+  "phaseEvents": [
+    {
+      "type": "phaseStarted",
+      "at": 1792923531313,
+      "name": "bootstrap-2",
+      "kind": "bootstrap",
+      "targetActors": 2,
+      "startedAtMs": 1792923531313,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "type": "phaseEnded",
+      "at": 1792923562524,
+      "name": "bootstrap-2",
+      "kind": "bootstrap",
+      "targetActors": 2,
+      "startedAtMs": 1792923531313,
+      "endedAtMs": 1792923562524,
+      "completed": true
+    },
+    {
+      "type": "phaseStarted",
+      "at": 1792923562525,
+      "name": "stage-2",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1792923562525,
+      "endedAtMs": null,
+      "completed": false
+    },
+    {
+      "type": "phaseEnded",
+      "at": 1792923835207,
+      "name": "stage-2",
+      "kind": "measurement",
+      "targetActors": 2,
+      "startedAtMs": 1792923562525,
+      "endedAtMs": 1792923835207,
+      "completed": false
+    }
+  ],
+  "failureEvents": [
+    {
+      "type": "continuousFailure",
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "L8baceb00",
+        "role": "movement",
+        "phases": [
+          "stage-2"
+        ],
+        "seconds": 60.18221310000002,
+        "final": false,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 80,
+          "gaps": 0,
+          "moves": 73,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792923834383,
+          "runs": 52,
+          "cells": 125,
+          "nativeOpportunities": 80,
+          "nativeCompleted": 76,
+          "offeredDurationMs": 60000,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": true,
+          "completionRatio": 0.95,
+          "runRatio": 0.7123287671232876,
+          "cellsPerMinute": 124.62153871838916,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 60000,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": true,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0.05194805194805195,
+        "metrics": {
+          "run": {
+            "count": 54,
+            "status": {
+              "success": 52,
+              "corrected": 2
+            },
+            "fromSend": {
+              "count": 54,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 5,
+              "maxMs": 4.329900000011548
+            },
+            "fromPlan": {
+              "count": 54,
+              "p50Ms": 21,
+              "p95Ms": 33,
+              "p99Ms": 36,
+              "maxMs": 35.56589999998687
+            }
+          },
+          "fanout-run": {
+            "count": 5,
+            "status": {
+              "success": 5
+            },
+            "fromSend": {
+              "count": 5,
+              "p50Ms": 2,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.7263000000384636
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "turn": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.42639999999664724
+            },
+            "fromPlan": {
+              "count": 1,
+              "p50Ms": 3,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.6920000000100117
+            }
+          },
+          "walk": {
+            "count": 23,
+            "status": {
+              "success": 21,
+              "corrected": 2
+            },
+            "fromSend": {
+              "count": 23,
+              "p50Ms": 1,
+              "p95Ms": 2,
+              "p99Ms": 5,
+              "maxMs": 4.219700000016019
+            },
+            "fromPlan": {
+              "count": 23,
+              "p50Ms": 17,
+              "p95Ms": 35,
+              "p99Ms": 42,
+              "maxMs": 41.96649999998044
+            }
+          },
+          "chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.7439000000013039
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 11,
+              "p95Ms": 28,
+              "p99Ms": 28,
+              "maxMs": 27.482299999974202
+            }
+          },
+          "peerChat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.7439000000013039
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-chat": {
+            "count": 2,
+            "status": {
+              "success": 2
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.7439000000013039
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          },
+          "fanout-walk": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 1,
+              "p95Ms": 1,
+              "p99Ms": 1,
+              "maxMs": 0.9170999999623746
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      },
+      "at": 1792923835130
+    },
+    {
+      "type": "safetyStop",
+      "at": 1792923835130,
+      "reason": "Continuous activity window failed, regardless of the measured stage"
+    }
+  ],
+  "finishedEvents": [
+    {
+      "type": "finished",
+      "ok": false,
+      "playableCapacityAccepted": false
+    }
+  ]
+}

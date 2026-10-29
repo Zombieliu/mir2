@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "state": "ACTUAL_SOURCE_BINDING_NOT_EXECUTED",
+  "createdAt": "2026-10-26T00:21:29.675492+00:00",
+  "historicalPrepared": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\runtime-prepared-v1.json",
+    "bytes": 27181,
+    "sha256": "fe4d33080004632d72c5a21c7433f1e88e545002983072fb1e87307f76c20712"
+  },
+  "metadataChanges": [
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\current-driver-binding.json",
+        "bytes": 4332,
+        "sha256": "7338ee0d68ce5e59c1144007e5e5d55ac9062afb19d694cb629e28f06469bcde"
+      },
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\current-driver-binding.json.before-ended19-final-v2.txt",
+        "bytes": 4101,
+        "sha256": "37fe583d882a706a8b1ec07caa38c0898b7dc3102bfeddb4558ad545b9cd9fd2"
+      },
+      "changedTopLevelFields": [
+        "state",
+        "freshFull16"
+      ],
+      "onlyListedSemanticFieldsChanged": true,
+      "beforeImageRawPreserved": true,
+      "jsonSemanticInverseExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\backend-library-binding.json",
+        "bytes": 1809,
+        "sha256": "cd7b24f9f57d4507122ea774cb0c6c4ff43d80346eb7562f360b932627a0f8bf"
+      },
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\backend-library-binding.json.before-ended19-final-v2.txt",
+        "bytes": 808,
+        "sha256": "7f102ac2fa7b155a6a12bef52cf6d0f1343224a604f951ad4dd40100f1ad0ea5"
+      },
+      "changedTopLevelFields": [
+        "runtimeBindingDerivation",
+        "runtimeSourceReview",
+        "runtimeGuardExecution",
+        "runtimeGuardStdout"
+      ],
+      "onlyListedSemanticFieldsChanged": true,
+      "beforeImageRawPreserved": true,
+      "jsonSemanticInverseExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\candidate-release-binding.json",
+        "bytes": 8508,
+        "sha256": "a85e2720fd076dc69eadcfaf4af4edb4c56ad20f2f7c75d0fe02b4b260220613"
+      },
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\candidate-release-binding.json.before-ended19-final-v2.txt",
+        "bytes": 3604,
+        "sha256": "fc1ab6c00aa89f4b0e68f7037ae5263430ba59a8bd2379528079f8ba7f9b0647"
+      },
+      "changedTopLevelFields": [
+        "state",
+        "full16",
+        "reason"
+      ],
+      "onlyListedSemanticFieldsChanged": true,
+      "beforeImageRawPreserved": true,
+      "jsonSemanticInverseExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\preparation-plan.json",
+        "bytes": 4071,
+        "sha256": "7d1d96f0fb352c7c0e2ea95791176ed0cef8031a7d4579eeba47d789d649e215"
+      },
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\preparation-plan.json.before-ended19-final-v2.txt",
+        "bytes": 3466,
+        "sha256": "7d955f7740dd2c367de3e05fa8282a8b892836cb34629ea8cc377cba50a220d4"
+      },
+      "changedTopLevelFields": [
+        "state",
+        "freshProbe19Bound",
+        "futureConsumerSchemaValidated",
+        "missing",
+        "probe19EndedIndependentResult",
+        "actualProbe19RunId",
+        "actualProbe19Independent",
+        "independentSourceClosure",
+        "eligibleForIndependentFinalSourceReview",
+        "probe19SourceSeal"
+      ],
+      "onlyListedSemanticFieldsChanged": true,
+      "beforeImageRawPreserved": true,
+      "jsonSemanticInverseExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\run-options.json",
+        "bytes": 2956,
+        "sha256": "8c344394c9e273bdec62255258f3a34d41c90bee199b5856afa4e6a180d0cebf"
+      },
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\run-options.json.before-ended19-final-v2.txt",
+        "bytes": 2913,
+        "sha256": "294c2d6a897b933589552af1280316928ea11fd0b7d4dfc6f89d1810b9a98d08"
+      },
+      "changedTopLevelFields": [
+        "preparedProfileRevision",
+        "scope"
+      ],
+      "onlyListedSemanticFieldsChanged": true,
+      "beforeImageRawPreserved": true,
+      "jsonSemanticInverseExact": true
+    },
+    {
+      "current": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-controller-preparation-v1.json",
+        "bytes": 1365,
+        "sha256": "23d7c6bbaa64f915739af15ef00c5201c59da2c374bd9150dd990919b4a81a91"
+      },
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\root-controller-preparation-v1.json.before-ended19-final-v2.txt",
+        "bytes": 416,
+        "sha256": "c16396ab4c31d745899a60010634890ad3b00937c0a2b1d61f2c8943e42a3677"
+      },
+      "changedTopLevelFields": [
+        "state",
+        "self",
+        "eligibleForSealNow",
+        "actualSealExecuted",
+        "controller",
+        "syntax",
+        "supportInputs",
+        "sealExecuted",
+        "guardExecuted",
+        "accountsProvisioned",
+        "realmStarted",
+        "capacityAccepted"
+      ],
+      "onlyListedSemanticFieldsChanged": true,
+      "beforeImageRawPreserved": true,
+      "jsonSemanticInverseExact": true
+    }
+  ],
+  "newBoundObject": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\bound-formal15-binding-v1.json",
+    "bytes": 11981,
+    "sha256": "c13fe0175fe766666f6aed3410d5cafe346bbe18b9c7bab6796777229475a894"
+  },
+  "actualEnded": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\final-verification.json",
+    "bytes": 455554,
+    "sha256": "7a8adbf0a67f312344acba4eedfce01d9c87eff26e5a348390e92a3beae16acc"
+  },
+  "actualSourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\tool-source-frozen-v1.json",
+    "bytes": 2785,
+    "sha256": "419abe39e5b5ec71f47cbefd52a9c4e541eb9a92d86df5ea77f6504e6bd63c51"
+  },
+  "actualExecution": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+    "bytes": 813,
+    "sha256": "33dd7b9b83769800aab3a52fea3e4b884d4ceb194304c05684c6938f1f725d2d"
+  },
+  "independentActualFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-actual-terminal-independent-facts-v1.json",
+    "bytes": 9933,
+    "sha256": "c830f63be0ef332942320a184a4da9e596a633af9810e72ced0bc94fa3bad7e3"
+  },
+  "rootFactsHistoricalPendingPreserved": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe19-root-actual-terminal-and-consumer-facts-v1.json",
+    "bytes": 8316,
+    "sha256": "e2e9629496fbef2cdc5ae5bee8fede6a05fe9834a1866fc1aa6372e4bbaf47d5"
+  },
+  "canonicalGeometrySameOriginalLocation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-anti-convergence-feasibility-19\\scene-driver-compatibility-proof-v1.json",
+    "bytes": 2526,
+    "sha256": "51bfb7919a9d1108ddcf28a6ec76bd7ed128ac0be4e66f060bf2e50e85a99ea7"
+  },
+  "all32ExecutableSourcesRawUnchangedFromInitialPrepared": false,
+  "runDocumentCliMatchesExistingSource": true,
+  "policyScenarioResourceUnchanged": true,
+  "noTargetImportOrModeExecuted": true,
+  "accountsCreated": 0,
+  "realmStarted": false,
+  "capacityAccepted": false,
+  "P0Accepted": false,
+  "P2Started": false,
+  "notes": [
+    "Original metadata beforeimages retain actual raw bytes and hashes. Inverse checks concern only the listed semantic fields; they do not claim reserialization reproduces original object ordering.",
+    "Original v1 source derivation and raw executable pins remain historical evidence. Actual metadata changes are separately pinned here.",
+    "Root terminal facts pending flag records its pre-independent-replay time; the later actual independent result resolves it without editing the historical facts.",
+    "No per-request900ms dual-packet replay is newly claimed; original ended helper coverage and limitations remain."
+  ],
+  "allOther31ExecutableSourcesRawUnchangedFromInitialPrepared": true,
+  "collectedPublicChildCorrection": {
+    "before": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-probe19-collected-evidence.mjs.before-collected-child-fix-v2.txt",
+      "bytes": 17328,
+      "sha256": "ccce12c4eb3c9a708b22fd694830373f5f4b9b2eb1e58819ae4b577630176897"
+    },
+    "current": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\verify-probe19-collected-evidence.mjs",
+      "bytes": 17336,
+      "sha256": "85ea91ec6d33b2dedbda680f1127e8f59a46e4dddba97ba55bf542b6811c2fb7"
+    },
+    "oldLiteral": "capacity-native10-v2-scout-observer-followup-18-diagnostics",
+    "newLiteral": "capacity-native10-v2-scout-anti-convergence-followup-19-diagnostics",
+    "occurrences": 1,
+    "inverseRawExact": true,
+    "gameChecksUnchanged": true,
+    "syntax": {
+      "check": "node --check",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  }
+}

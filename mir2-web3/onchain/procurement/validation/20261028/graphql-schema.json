@@ -1,0 +1,306 @@
+{
+  "endpoint": "https://graphql.testnet.sui.io/graphql",
+  "observedDateUtc": "2026-10-28",
+  "event": {
+    "fields": [
+      {
+        "name": "contents",
+        "type": {
+          "kind": "OBJECT",
+          "name": "MoveValue",
+          "ofType": null
+        }
+      },
+      {
+        "name": "eventBcs",
+        "type": {
+          "kind": "SCALAR",
+          "name": "Base64",
+          "ofType": null
+        }
+      },
+      {
+        "name": "sender",
+        "type": {
+          "kind": "OBJECT",
+          "name": "Address",
+          "ofType": null
+        }
+      },
+      {
+        "name": "sequenceNumber",
+        "type": {
+          "kind": "NON_NULL",
+          "name": null,
+          "ofType": {
+            "kind": "SCALAR",
+            "name": "UInt53"
+          }
+        }
+      },
+      {
+        "name": "timestamp",
+        "type": {
+          "kind": "SCALAR",
+          "name": "DateTime",
+          "ofType": null
+        }
+      },
+      {
+        "name": "transaction",
+        "type": {
+          "kind": "OBJECT",
+          "name": "Transaction",
+          "ofType": null
+        }
+      },
+      {
+        "name": "transactionModule",
+        "type": {
+          "kind": "OBJECT",
+          "name": "MoveModule",
+          "ofType": null
+        }
+      }
+    ]
+  },
+  "filter": {
+    "inputFields": [
+      {
+        "name": "afterCheckpoint",
+        "type": {
+          "kind": "SCALAR",
+          "name": "UInt53",
+          "ofType": null
+        }
+      },
+      {
+        "name": "atCheckpoint",
+        "type": {
+          "kind": "SCALAR",
+          "name": "UInt53",
+          "ofType": null
+        }
+      },
+      {
+        "name": "beforeCheckpoint",
+        "type": {
+          "kind": "SCALAR",
+          "name": "UInt53",
+          "ofType": null
+        }
+      },
+      {
+        "name": "sender",
+        "type": {
+          "kind": "SCALAR",
+          "name": "SuiAddress",
+          "ofType": null
+        }
+      },
+      {
+        "name": "module",
+        "type": {
+          "kind": "SCALAR",
+          "name": "String",
+          "ofType": null
+        }
+      },
+      {
+        "name": "type",
+        "type": {
+          "kind": "SCALAR",
+          "name": "String",
+          "ofType": null
+        }
+      }
+    ]
+  },
+  "eventsQuery": {
+    "name": "events",
+    "args": [
+      {
+        "name": "first",
+        "type": {
+          "kind": "SCALAR",
+          "name": "Int",
+          "ofType": null
+        }
+      },
+      {
+        "name": "after",
+        "type": {
+          "kind": "SCALAR",
+          "name": "String",
+          "ofType": null
+        }
+      },
+      {
+        "name": "last",
+        "type": {
+          "kind": "SCALAR",
+          "name": "Int",
+          "ofType": null
+        }
+      },
+      {
+        "name": "before",
+        "type": {
+          "kind": "SCALAR",
+          "name": "String",
+          "ofType": null
+        }
+      },
+      {
+        "name": "filter",
+        "type": {
+          "kind": "INPUT_OBJECT",
+          "name": "EventFilter",
+          "ofType": null
+        }
+      }
+    ],
+    "type": {
+      "kind": "OBJECT",
+      "name": "EventConnection",
+      "ofType": null
+    }
+  },
+  "eventDescriptions": {
+    "fields": [
+      {
+        "name": "contents",
+        "description": "The Move value emitted for this event."
+      },
+      {
+        "name": "eventBcs",
+        "description": "The Base64 encoded BCS serialized bytes of the entire Event structure from sui-types.\nThis includes: package_id, transaction_module, sender, type, and contents (which itself contains the BCS-serialized Move struct data)."
+      },
+      {
+        "name": "sender",
+        "description": "Address of the sender of the transaction that emitted this event."
+      },
+      {
+        "name": "sequenceNumber",
+        "description": "The position of the event among the events from the same transaction."
+      },
+      {
+        "name": "timestamp",
+        "description": "Timestamp corresponding to the checkpoint this event's transaction was finalized in.\nAll events from the same transaction share the same timestamp.\n\n`null` for simulated/executed transactions as they are not included in a checkpoint."
+      },
+      {
+        "name": "transaction",
+        "description": "The transaction that emitted this event. This information is only available for events from indexed transactions, and not from transactions that have just been executed or dry-run."
+      },
+      {
+        "name": "transactionModule",
+        "description": "The module containing the function that was called in the programmable transaction, that resulted in this event being emitted."
+      }
+    ]
+  },
+  "moveValue": {
+    "fields": [
+      {
+        "name": "asAddress",
+        "type": {
+          "kind": "OBJECT",
+          "name": "Address",
+          "ofType": null
+        }
+      },
+      {
+        "name": "asVector",
+        "type": {
+          "kind": "OBJECT",
+          "name": "MoveValueConnection",
+          "ofType": null
+        }
+      },
+      {
+        "name": "bcs",
+        "type": {
+          "kind": "SCALAR",
+          "name": "Base64",
+          "ofType": null
+        }
+      },
+      {
+        "name": "display",
+        "type": {
+          "kind": "OBJECT",
+          "name": "Display",
+          "ofType": null
+        }
+      },
+      {
+        "name": "extract",
+        "type": {
+          "kind": "OBJECT",
+          "name": "MoveValue",
+          "ofType": null
+        }
+      },
+      {
+        "name": "format",
+        "type": {
+          "kind": "SCALAR",
+          "name": "JSON",
+          "ofType": null
+        }
+      },
+      {
+        "name": "json",
+        "type": {
+          "kind": "SCALAR",
+          "name": "JSON",
+          "ofType": null
+        }
+      },
+      {
+        "name": "type",
+        "type": {
+          "kind": "OBJECT",
+          "name": "MoveType",
+          "ofType": null
+        }
+      }
+    ]
+  },
+  "eventConnection": {
+    "fields": [
+      {
+        "name": "pageInfo",
+        "type": {
+          "kind": "NON_NULL",
+          "name": null,
+          "ofType": {
+            "kind": "OBJECT",
+            "name": "PageInfo"
+          }
+        }
+      },
+      {
+        "name": "edges",
+        "type": {
+          "kind": "NON_NULL",
+          "name": null,
+          "ofType": {
+            "kind": "LIST",
+            "name": null
+          }
+        }
+      },
+      {
+        "name": "nodes",
+        "type": {
+          "kind": "NON_NULL",
+          "name": null,
+          "ofType": {
+            "kind": "LIST",
+            "name": null
+          }
+        }
+      }
+    ]
+  }
+}

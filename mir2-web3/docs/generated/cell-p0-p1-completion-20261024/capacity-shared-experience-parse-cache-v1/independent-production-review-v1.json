@@ -1,0 +1,17 @@
+{
+  "reviewer": "/root/capacity_baseline",
+  "mode": "Independent read-only production diff review; Root owns actual tests",
+  "noBlockingIssueFound": true,
+  "checks": [
+    "Fresh Store/save lookup before exact identity+Option raw-JSON cache key",
+    "All authority and Store->Zone callback business bodies preserve original raw bytes",
+    "try_lock contention or optional cache poison falls through to full original parser",
+    "Arc consumers remain read-only; compiler confirmed Send+Sync",
+    "Retired full states drop after cache guard; limits are256 identities/64KiB per JSON/8MiB retained JSON"
+  ],
+  "limitations": [
+    "JSON retention bound excludes parsed heap/live Arcs and transient parses",
+    "FIFO and cross-Store replacement may reduce hit rate; insertion may allocate",
+    "No performance/capacity acceptance before actual new backend load"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "evidenceKind": "failed-real-testnet-acceptance-using-isolated-qa-wallet-adapter-not-stock-wallet",
+  "projectedAtUtc": "2026-10-28T20:47:55.541Z",
+  "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+  "result": "incomplete: external test-wallet helper refused payment before signing or broadcasting",
+  "actualComputerFlow": {
+    "nativeWindowsOrderCreated": true,
+    "registeredChromeCuaWalletConnectUsed": true,
+    "realPersonalMessageProofSigned": true,
+    "invoiceCreatedOnSuiTestnet": true,
+    "explicitPayClicked": true
+  },
+  "invoice": {
+    "state": "created",
+    "invoiceId": "0x28e2702a79a1a313f5b5e07fefb3db19097bb14b7059cba6b179ddcfd70396ee",
+    "digest": "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs",
+    "checkpoint": "400276065"
+  },
+  "actualInvoiceCreationGas": {
+    "digest": "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs",
+    "checkpoint": "400276065",
+    "success": true,
+    "gasUsed": {
+      "computationCost": "1000000",
+      "storageCost": "5373200",
+      "storageRebate": "1557844",
+      "nonRefundableStorageFee": "156"
+    },
+    "gasMist": "4815356"
+  },
+  "payment": {
+    "signed": false,
+    "broadcast": false,
+    "applied": false,
+    "noPaymentPreparedFile": true,
+    "noPaymentBudgetFile": true,
+    "noPaymentReceiptFile": true,
+    "refusalCode": "qaWalletPaymentGasOrSenderMismatch",
+    "rootCause": "Payer SUI is address balance. SDK2.16.2 resolves wallet self-paid gas with empty gasData.payment; external helper incorrectly requires at least one Gas Coin reference.",
+    "invoiceStateAfterOriginalDeadline": "unpaid",
+    "originalExpiryUtc": "2026-10-28T20:18:20.546Z",
+    "gameCredit": 0,
+    "lastDatabaseState": "invoiceBound",
+    "databaseReceiptPresent": false,
+    "databaseAppliedPresent": false
+  },
+  "separateUserTransfer": {
+    "digest": "5mrxwBAXXu8ntDmmbSnrmaHKju1wonoLCmJpqyNpgriM",
+    "checkpoint": "400277484",
+    "amountMicros": "10000",
+    "recipient": "0x8ced5edafb1264a31450a240701eab0ad4c449942a4845565e3d1dfa70ef2f02",
+    "successful": true,
+    "callsRechargeContract": false,
+    "mustNotCountAsRecharge": true
+  },
+  "separateTransferMustNotCountAsRecharge": true,
+  "sourcePins": {
+    "originalHtmlSha256": "a3acd5d58b0da37c242bed686b1ffbfcc5606b643036dcc55eefd1d4951f95a6",
+    "originalJsSha256": "0616f3df0a4b5507578ede6533d8955c993eb0a8664d1f92e5406a63cd11562e",
+    "adapterSha256": "bcaccf7f2871600d250ac95cdde92d890de31f10fd32388995b006d3e38f2258",
+    "proxySha256": "780809a0696103b1f963259d4b4e6d7a44444c6406e6a7819f37768c6c52b1c9",
+    "walletHelperSha256": "5d117db48fc90196af65b72a1c1862b644701a8a6af45410239a7eee9b677768"
+  },
+  "events": [
+    {
+      "observedAtUtc": "2026-10-28T20:05:32.652Z",
+      "phase": "checkoutHtmlInstrumented",
+      "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "originalSha256": "a3acd5d58b0da37c242bed686b1ffbfcc5606b643036dcc55eefd1d4951f95a6"
+    },
+    {
+      "observedAtUtc": "2026-10-28T20:08:51.883Z",
+      "phase": "explicitPersonalMessageRequested",
+      "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "messageSha256": "015fb5273fad991536369fb0aaeffedc3a754c7c74e01ca6ec46c646a28cd143"
+    },
+    {
+      "observedAtUtc": "2026-10-28T20:08:53.223Z",
+      "phase": "personalMessageSigned",
+      "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "signatureSha256": "9fa34fde276e030dbb4a691f3652b3f6d9d163742f776def40d70c7f28083510"
+    },
+    {
+      "observedAtUtc": "2026-10-28T20:14:46.375Z",
+      "phase": "explicitPaymentRequested",
+      "orderId": "usdc_cbd800894b0f0a8ba60438f6ef93c04ecfde30212e9559eae47878ff9e26eae2",
+      "unsignedTransactionSha256": "57d77c0519ee35172a6db45ecbbe7196910ec65ecb45c0859e808bea34f313d7"
+    },
+    {
+      "observedAtUtc": "2026-10-28T20:14:50.509Z",
+      "phase": "bridgeRejectedOrUnknown",
+      "errorCode": "qaWalletPaymentGasOrSenderMismatch"
+    }
+  ],
+  "evidenceLimitations": [
+    "No successful USDC recharge or game-credit delivery is proved by this attempt.",
+    "The wallet was an explicitly labelled external QA adapter with its key in Node, not a stock browser-extension wallet.",
+    "Current browser DOM and current native screenshots must be captured separately by the coordinator using supported Cua/Sky APIs.",
+    "Database and chain observations have independent timestamps and are not an atomic snapshot.",
+    "The running proxy 83036 remains untouched; later safeError source hardening applies only after a reviewed restart."
+  ],
+  "privacy": {
+    "noCheckoutCapability": true,
+    "noProxyNonce": true,
+    "noGameBearerOrPassword": true,
+    "noPersonalMessageSignature": true,
+    "noSigningKey": true,
+    "noSignedTransactionBytes": true
+  }
+}

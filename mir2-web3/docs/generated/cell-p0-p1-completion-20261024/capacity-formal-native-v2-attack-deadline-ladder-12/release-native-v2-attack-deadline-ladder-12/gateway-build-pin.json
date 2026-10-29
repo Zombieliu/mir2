@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceExecutable": "C:\\mir2-build\\p01-completion-20261024\\attack-deadline-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+  "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bin\\mir2-gateway.exe",
+  "sha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "bytes": 87371264,
+  "sourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "backendSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "baseCommit": "68f810b442321ae66360a2be18e31dc309efdaf7",
+  "sourceManifest": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\backend-source-attack-deadline-diagnostics-v1.json",
+    "bytes": 35581,
+    "sha256": "6c1d7d58de2259ae89b2f7c9e8d3768e9834fd9062e3e1c02a794cb7b7a1f31e",
+    "sourceManifestSha256": "13e5156025198b7c96eabad8f326138554de913abd98199da59888b23bdbe5f2",
+    "inputs": 44
+  },
+  "releaseRecord": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-attack-deadline-diagnostics-v1.json",
+    "bytes": 3146,
+    "sha256": "46f97eadf345f4c43a7711ad41ad22383940a29437e6bbaf952f6408ce2569f8"
+  },
+  "copiedAtUtc": "2026-10-25T17:56:43.746Z",
+  "sourceInputsVerifiedBeforeLaunch": true,
+  "capacityAccepted": false,
+  "formalRunStarted": false
+}

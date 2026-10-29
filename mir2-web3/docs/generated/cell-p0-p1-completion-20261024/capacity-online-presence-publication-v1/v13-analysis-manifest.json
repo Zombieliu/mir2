@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline V13 only. No repository writes, load/test/build, threshold changes, original-report changes or acceptance inference.",
+  "rawPins": {
+    "samples": {
+      "sha256": "902b26853271e250a116002837d2541c4d9a68a25265e28e6d2593041d898771",
+      "bytes": 33483909,
+      "lines": 59562,
+      "oversizeLines": 0,
+      "fullReadPasses": 1
+    },
+    "stderr": {
+      "sha256": "76067a4e1b950d871b698dbc9537c94e0ae059125e7ac9e230fe5d4cdc15d749",
+      "bytes": 50918816,
+      "lines": 231540,
+      "oversizeLines": 0,
+      "fullReadPasses": 1,
+      "acceptedDeliveryRows": 179724,
+      "acceptedSlowSpanRows": 44399,
+      "ignoredLines": 7417,
+      "rejectedDeliveryRows": 0,
+      "rejectedSlowSpanRows": 0
+    },
+    "report": {
+      "bytes": 72002,
+      "sha256": "6566ffea05af69c73b5698f4bfd6f0ed43e4a3766ccf6ccb6c6658bd5163e748"
+    },
+    "finalStore": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\private\\accounts.json",
+      "bytes": 482806,
+      "sha256": "739cb740f4cef9a82ee74cc5c8f66f1c23c4a3f0cfd3d546ba04cccf06e2e291",
+      "physicalReadPasses": 1,
+      "lastModifiedUtc": "2026-10-26T17:28:10.838Z",
+      "stableDuringRead": true
+    }
+  },
+  "originalFullPhysicalReadPasses": {
+    "samples": 1,
+    "stderr": 1,
+    "finalStore": 1
+  },
+  "primary": [
+    {
+      "file": "findings-final-v2.json",
+      "bytes": 13613,
+      "sha256": "2ea0713b50f3a8d2c1d932d79bd9c532c55c6d8f78d18076a3a36bdc5d1008b5"
+    },
+    {
+      "file": "selected-causal-chain-v2.jsonl",
+      "bytes": 3622,
+      "sha256": "89937b1a5ed6655045c975e0bf52423847cf1df4fce9ed46acb6f7635d9342c1"
+    },
+    {
+      "file": "final-saved-actor-state-v1.json",
+      "bytes": 2369,
+      "sha256": "a35c6f3ef39e6dab79572860a3d727bda976cac485e0dac6a06616cd1f8cd199"
+    }
+  ],
+  "derivedStreams": {
+    "samples": {
+      "file": "all-strict-anonymous-samples.jsonl",
+      "rows": 59562,
+      "bytes": 28655061,
+      "sha256": "ac5725dd3c11da8a41d010023efe918aeb3e78ee6b3ec72e424f63c6250ecaab"
+    },
+    "stderr": {
+      "file": "all-strict-anonymous-stderr.jsonl",
+      "rows": 224123,
+      "bytes": 63264141,
+      "sha256": "3b0056d7f3bd25b30dc3d02a546de776bc9e6a314f79589a14389feea3fae462"
+    },
+    "selected": {
+      "file": "selected-anonymous.jsonl",
+      "rows": 1498,
+      "bytes": 445880,
+      "sha256": "487edc6076ad78532bd458113691717d07d189cd4260812269b674e6dc8ca232"
+    }
+  },
+  "tools": [
+    {
+      "file": "analyze-v13.mjs",
+      "bytes": 23826,
+      "sha256": "adf168c178aaebdbf838e2450dce6fa4159f6b1c1459b30565d800f7051085e7"
+    },
+    {
+      "file": "extract-state-v13.mjs",
+      "bytes": 4297,
+      "sha256": "67ec6598c6dd731c546ce843812368e39c77e46e3793ec58ed382e64a57ba44f"
+    },
+    {
+      "file": "summarize-v13.mjs",
+      "bytes": 8178,
+      "sha256": "fce1d179236776c4177000fc9fc79d5b1b579f83a0278ba201d03e1f7e0f9daf"
+    }
+  ],
+  "verdictsUnchanged": {
+    "ok": false,
+    "playableCapacityAccepted": false,
+    "movementCapacityAccepted": false,
+    "combatCapacityAccepted": false,
+    "visualAccepted": false,
+    "safetyStopped": true,
+    "capacityUpperBound": null,
+    "peakControlledActors": 50,
+    "peakServerActive": 50,
+    "diagnosticCompleted": false
+  }
+}

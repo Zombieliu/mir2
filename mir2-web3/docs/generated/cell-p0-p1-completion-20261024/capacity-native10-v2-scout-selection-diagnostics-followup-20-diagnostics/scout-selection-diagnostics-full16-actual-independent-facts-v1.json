@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T01:30:59.498Z",
+  "state": "actual-full16-passed-metadata-independently-checked",
+  "runId": "1792977859487-2ff0ea0f",
+  "realmStamp": "1792977848891-7c9f3b5a",
+  "backendBuildCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "backendInputCount": 50,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binarySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "sources": {
+    "report": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977859487-2ff0ea0f.report.json",
+      "bytes": 104579,
+      "sha256": "699eeafa335dc2273b0a2f63ee4753443525d59c6e2035332bbfca6776303f60"
+    },
+    "realm": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.realm-evidence.json",
+      "bytes": 35137,
+      "sha256": "6af7da892450bafe1e72b089f980df4a053aafc2dd087d6b3caab6c39d62fe57"
+    },
+    "audit": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.independent-audit.json",
+      "bytes": 1905,
+      "sha256": "3d961d5c79b20e89cbe0b9998ae1063a2c9a1f36db5c80fb63420a7328c4f246"
+    },
+    "sourceVerification": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\public\\1792977848891-7c9f3b5a.source-manifest-verification.json",
+      "bytes": 725,
+      "sha256": "62e3e67e9885209e55ff94d6916872be30ab98edabac9b9698b29d315ff293e8"
+    },
+    "profile": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\full-lifecycle-profile.json",
+      "bytes": 4838,
+      "sha256": "1ca0cb2ef77f73dbc0b6e2743d77796119702d651f9cc740fbd84622995e6477"
+    },
+    "finalBinding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-selection-diagnostics-v1\\launcher-final-binding-v1.json",
+      "bytes": 2401,
+      "sha256": "9e50b74468e04753d4d0091ecbb644b827d9323b56f1c799fb56698e2ef120e5"
+    },
+    "preparedSourceReview": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-independent-review-v2.json",
+      "bytes": 4344,
+      "sha256": "d1b77c20933ab23df39731deb640baa50220e824f2c11d9ec20cf59f6758b7fa"
+    },
+    "rootIndependentCleanup": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-independent-cleanup-v1.json",
+      "bytes": 315,
+      "sha256": "522115e55c4481681dc4a7b92e192b86acc12ec4f3f2073229eaaa7b66ce1814"
+    }
+  },
+  "rootClosedLogs": {
+    "finalize_stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-finalize-stdout-v1.log",
+      "bytes": 333,
+      "sha256": "01982bcf093f8fb32dfddda0548afb4c60dcf4f3ead380358c7c351a4e343a94"
+    },
+    "finalize_stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-finalize-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "run_stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-run-stdout-v1.log",
+      "bytes": 1838,
+      "sha256": "f6d9802d8e9ee93829970810f7d8c7560c395cbb28ea55714414035d71110ae8"
+    },
+    "run_stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-run-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "audit_stdout": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-audit-stdout-v1.log",
+      "bytes": 1644,
+      "sha256": "21cc37efde8ab4e9e69effae83a5ded9d0d6dad48ddecca0da3f822184164555"
+    },
+    "audit_stderr": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-diagnostics-full16-root-audit-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "checks": {
+    "allSixteenRequiredChecksPassed": true,
+    "requiredCheckNames": [
+      "authGuards",
+      "twoAccounts",
+      "mutualVisibility",
+      "movement",
+      "turn",
+      "chat",
+      "chatLatency",
+      "sharedCombat",
+      "mapRoundTrip",
+      "logout",
+      "reloginPersistence",
+      "sharedKill",
+      "sharedDrop",
+      "uniquePickup",
+      "playerDeath",
+      "townRevive"
+    ],
+    "ordinarySentCommands": 343,
+    "onlyOrdinarySentCommands": true,
+    "currentSixOrdinaryDriverPinsMatched": 6,
+    "sixCountersZeroBeforeAndAfter": true,
+    "normalExitCode": 0,
+    "firstSharedDropAttemptFailedAndRetained": true,
+    "secondSharedDropAttemptPassed": true,
+    "rootOwnedGatewayPid": 59644,
+    "rootOwnedGatewayAbsent": true,
+    "ownedPorts": [
+      17600,
+      17610
+    ],
+    "ownedPortListenersAbsent": true,
+    "backendCAndCurrentKNamespacesSeparate": true,
+    "rootReportedCommandExitCodes": {
+      "finalize": 0,
+      "run": 0,
+      "audit": 0
+    },
+    "auditCredentialAbsenceAttestation": {
+      "checkedPublicFiles": 13,
+      "checkedPrivateValues": 6,
+      "credentialValuesAbsent": true
+    }
+  },
+  "readScope": {
+    "smallClosedPublicMetadataAndLogsOnly": true,
+    "privateValuesReadByThisReview": false,
+    "tracePayloadParsedOrReplayed": false,
+    "sixTraceOpaqueStreamHashPassesForPrerequisite": 1,
+    "binaryRead": false,
+    "guardOrAuditRerun": false
+  },
+  "scope": "Actual fresh K ordinary two-client full16 only:343 sent commands. Prior J349 and older351/341 are distinct runs. Root audit checked13 public files and six private values for credential absence; this metadata reviewer read no private value. The six ordinary drivers differ from the nine-input Node232 regression. No independent per-request900ms replay, capacity, formal25 improvement, GUI, P0 or P2 acceptance.",
+  "verdict": {
+    "actualFull16Passed": true,
+    "metadataAndRootCleanupConsistent": true,
+    "eligibleForFreshProbePrerequisiteBinding": true,
+    "blockingFindingIds": []
+  },
+  "capacityAccepted": false,
+  "p0Passed": false,
+  "p2Started": false
+}

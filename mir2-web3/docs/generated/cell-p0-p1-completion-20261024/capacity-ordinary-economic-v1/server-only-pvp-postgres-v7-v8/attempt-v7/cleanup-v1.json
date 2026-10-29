@@ -1,0 +1,15 @@
+{
+  "finishedAt": "2026-10-27T21:14:15.996Z",
+  "gatewayResult": {
+    "code": 1,
+    "signal": null
+  },
+  "postgresResult": {
+    "code": 0
+  },
+  "error": "Gateway startup failed",
+  "remainingListeners": [],
+  "closed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

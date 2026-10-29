@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.windows.actor-input-bootstrap.v1",
+  "passed": true,
+  "sourceCandidate": "WN-CANDIDATE-20261011-invited-25",
+  "sourceRevision": "d917de1ff4988e2d9fc7ca58f958cb5c80861fdf",
+  "trustedManifestSha256": "8F50807C9171B28D77424A113C2A55A8AB5DCDD507E3051222C49863E2EFC748",
+  "cmsTrustProofSha256": "77a4081d8e83fb599d594288d8c4625801e4e907ae6a1dd40bbae4f34cb240d8",
+  "library": "Monster/049",
+  "metadataSha256": "6173faeac54c9708d791c1546c0566e97af70a86c12497f7b08b63eb6a961b63",
+  "filesCreated": 225,
+  "pngCreated": 224,
+  "bytesCreated": 1240611,
+  "allFilesBoundToSignedOriginalCandidate": true,
+  "trackedInputsWritten": 0,
+  "existingInputsOverwritten": 0,
+  "sourceModified": false,
+  "closureSha256": "918ae0a98d827154cbea090bd33ef3142ec4f37f26513951e0de14783b410dec"
+}

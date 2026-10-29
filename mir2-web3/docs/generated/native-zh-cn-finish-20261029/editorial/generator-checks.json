@@ -1,0 +1,63 @@
+{
+  "passed": true,
+  "evidenceKind": "fresh read-only offline generator reproducibility and validation checks",
+  "observedAtUtc": "2026-10-29T07:33:51.510853+00:00",
+  "positiveCases": 2,
+  "rejectedCases": [
+    "duplicate",
+    "unknown-key",
+    "empty-copy",
+    "changed-placeholder",
+    "changed-amount",
+    "changed-command",
+    "human-acceptance-claim",
+    "missing-review-method",
+    "malformed-entry",
+    "stale-baseline"
+  ],
+  "totalSelftestCases": 12,
+  "allCatalogKeysChecked": 9769,
+  "reproducibleOverlaySha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f",
+  "logs": [
+    {
+      "filename": "editorial-generator-selftest.log",
+      "bytes": 351,
+      "sha256": "71ecb020d5659578355d90677f943390c361c608b9db9a61b1aa285cabc9f373",
+      "included": false
+    },
+    {
+      "filename": "editorial-generator-check.log",
+      "bytes": 261,
+      "sha256": "c3d068cc5862f688826bb534a7bc4c74c35407556cb4d9d1265ca6fad685c534",
+      "included": false
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 17874,
+      "sha256": "58ce20cf96c64c33f85f48da1b85d85ed38f5c7127f47c0c19a4c90dccb7085c"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 372613,
+      "sha256": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 621287,
+      "sha256": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "normalization": "UTF-8 CRLF to LF",
+      "bytes": 11924,
+      "sha256": "ae04a32c4315e5625e081f322e397925bdb47544bef24e6841accb58ac78090e"
+    }
+  ],
+  "runtimePlayerConversion": false,
+  "humanAccepted": false
+}

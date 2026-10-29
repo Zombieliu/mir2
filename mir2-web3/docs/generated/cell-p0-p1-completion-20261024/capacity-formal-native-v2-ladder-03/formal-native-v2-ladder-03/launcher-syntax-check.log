@@ -1,0 +1,12 @@
+collect-public.mjs: syntax passed
+initialize-private.ps1: syntax passed
+input-lib.mjs: syntax passed
+monitor-owned.mjs: syntax passed
+prepare-inputs.mjs: syntax passed
+recover-drained-owned.ps1: syntax passed
+request-stop.mjs: syntax passed
+run-owned.mjs: syntax passed
+slow-stage-public.mjs: syntax passed
+slow-stage-public.test.mjs: syntax passed
+verify-feasibility-gate.mjs: syntax passed
+verify-public.mjs: syntax passed

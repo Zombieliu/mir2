@@ -1,0 +1,999 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded read-only projection of actual formal-v4 public report and client target-supply rows; no strategy or acceptance change.",
+  "runId": "1793109793965-def55b88",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\episode\\reports\\1793109793965-def55b88.report.json",
+    "bytes": 418181,
+    "sha256": "71630f45d49ec0e2fc042bc9bdea6037fe723bc8dc676ffafbb45fe1fb9a71c9"
+  },
+  "samples": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-formal-ladder-v4\\episode\\reports\\1793109793965-def55b88.samples.jsonl",
+    "bytes": 46017024,
+    "sha256": "fc9b8598ab98c66b633dcea9547a6af2031b35590aa4887a066b0b10fcb6e6bc",
+    "rows": 78112
+  },
+  "sourceCommit": "71eea39ba667753e11f830f3c912ead3123d4974",
+  "stages": [
+    {
+      "controlledActors": 2,
+      "measuredSeconds": 300.258,
+      "completed": true,
+      "passed": true
+    },
+    {
+      "controlledActors": 10,
+      "measuredSeconds": 300.256,
+      "completed": true,
+      "passed": true
+    },
+    {
+      "controlledActors": 25,
+      "measuredSeconds": 300.217,
+      "completed": true,
+      "passed": false
+    }
+  ],
+  "failedWindows": [
+    {
+      "window": 4,
+      "startedAtMs": 1793110780833,
+      "endedAtMs": 1793110840892,
+      "seconds": 60.059,
+      "passed": false,
+      "actors": [
+        {
+          "actor": "L370e2a05",
+          "attacks": 13,
+          "hits": 13,
+          "damage": 48,
+          "plans": 69,
+          "moves": 55,
+          "passed": false
+        },
+        {
+          "actor": "L370e2a0f",
+          "attacks": 9,
+          "hits": 9,
+          "damage": 26,
+          "plans": 72,
+          "moves": 60,
+          "passed": false
+        }
+      ]
+    },
+    {
+      "window": 5,
+      "startedAtMs": 1793110840892,
+      "endedAtMs": 1793110900914,
+      "seconds": 60.022,
+      "passed": false,
+      "actors": [
+        {
+          "actor": "L370e2a05",
+          "attacks": 17,
+          "hits": 17,
+          "damage": 65,
+          "plans": 66,
+          "moves": 45,
+          "passed": false
+        },
+        {
+          "actor": "L370e2a0f",
+          "attacks": 25,
+          "hits": 25,
+          "damage": 76,
+          "plans": 58,
+          "moves": 28,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "originalAttackGate": {
+    "minimumLaunchesPerMinute": 18,
+    "minimumVerifiedHitsPerMinute": 12,
+    "unchanged": true
+  },
+  "stage25Attack": {
+    "count": 235,
+    "status": {
+      "success": 235
+    },
+    "fromSend": {
+      "count": 235,
+      "p50Ms": 61,
+      "p95Ms": 110,
+      "p99Ms": 291,
+      "maxMs": 864.3914999999106
+    },
+    "fromPlan": {
+      "count": 235,
+      "p50Ms": 77,
+      "p95Ms": 132,
+      "p99Ms": 334,
+      "maxMs": 880.308599999873
+    },
+    "attackV2Requests": 235,
+    "attackV2NotLaunched": 0
+  },
+  "failedWindowSampledDecisions": [
+    {
+      "w": 4,
+      "a": "L370e2a05",
+      "rows": 11,
+      "reasons": {
+        "chase": 3,
+        "attack": 3,
+        "scout": 5
+      },
+      "legalWeak": {
+        "0": 2,
+        "1": 5,
+        "2": 2,
+        "3": 1,
+        "4": 1
+      },
+      "candidate": {
+        "0": 5,
+        "1": 6
+      },
+      "pathSum": 3,
+      "pathNull": 0,
+      "noWitness": 7,
+      "counts": {
+        "decisions": 11,
+        "visible": 344,
+        "notMonster": 181,
+        "legalWeak": 16,
+        "outsideCoverage": 3,
+        "dead": 132,
+        "notScenario": 15,
+        "witnessCalls": 110,
+        "witnessTargetMissing": 561,
+        "witnessRange": 715,
+        "witnessAvailable": 212,
+        "approachNoWitness": 7,
+        "pathSearch": 3,
+        "chase": 3,
+        "attack": 3,
+        "scoutPathSearch": 5,
+        "scout": 5
+      }
+    },
+    {
+      "w": 4,
+      "a": "L370e2a0f",
+      "rows": 13,
+      "reasons": {
+        "chase": 4,
+        "attack": 2,
+        "scout": 7
+      },
+      "legalWeak": {
+        "0": 2,
+        "1": 2,
+        "2": 3,
+        "3": 2,
+        "4": 4
+      },
+      "candidate": {
+        "0": 7,
+        "1": 5,
+        "2": 1
+      },
+      "pathSum": 4,
+      "pathNull": 0,
+      "noWitness": 18,
+      "counts": {
+        "decisions": 13,
+        "visible": 419,
+        "notMonster": 216,
+        "legalWeak": 30,
+        "outsideCoverage": 4,
+        "dead": 148,
+        "notScenario": 25,
+        "witnessCalls": 205,
+        "witnessTargetMissing": 1693,
+        "witnessRange": 845,
+        "witnessAvailable": 245,
+        "pathSearch": 4,
+        "chase": 4,
+        "attack": 2,
+        "scoutPathSearch": 8,
+        "scout": 7,
+        "approachNoWitness": 18,
+        "claimed": 1
+      }
+    },
+    {
+      "w": 5,
+      "a": "L370e2a05",
+      "rows": 13,
+      "reasons": {
+        "scout": 5,
+        "chase": 5,
+        "attack": 2,
+        "turn": 1
+      },
+      "legalWeak": {
+        "0": 3,
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 1
+      },
+      "candidate": {
+        "0": 5,
+        "1": 4,
+        "2": 3,
+        "3": 1
+      },
+      "pathSum": 5,
+      "pathNull": 0,
+      "noWitness": 9,
+      "counts": {
+        "decisions": 13,
+        "visible": 475,
+        "notMonster": 237,
+        "dead": 180,
+        "notScenario": 36,
+        "scoutPathSearch": 6,
+        "scout": 5,
+        "legalWeak": 22,
+        "witnessCalls": 187,
+        "witnessTargetMissing": 1370,
+        "witnessRange": 1336,
+        "approachNoWitness": 9,
+        "witnessAvailable": 434,
+        "pathSearch": 5,
+        "chase": 5,
+        "attack": 2,
+        "turn": 1
+      }
+    },
+    {
+      "w": 5,
+      "a": "L370e2a0f",
+      "rows": 12,
+      "reasons": {
+        "scout": 3,
+        "turn": 2,
+        "attack": 4,
+        "chase": 3
+      },
+      "legalWeak": {
+        "0": 1,
+        "1": 1,
+        "3": 1,
+        "4": 2,
+        "5": 2,
+        "7": 1,
+        "9": 2,
+        "10": 2
+      },
+      "candidate": {
+        "0": 3,
+        "1": 4,
+        "2": 5
+      },
+      "pathSum": 3,
+      "pathNull": 0,
+      "noWitness": 16,
+      "counts": {
+        "decisions": 12,
+        "visible": 290,
+        "notMonster": 119,
+        "legalWeak": 67,
+        "dead": 86,
+        "notScenario": 18,
+        "witnessCalls": 249,
+        "witnessTargetMissing": 806,
+        "witnessRange": 927,
+        "approachNoWitness": 16,
+        "scoutPathSearch": 4,
+        "scout": 3,
+        "outsideCoverage": 37,
+        "witnessAvailable": 183,
+        "turn": 2,
+        "attack": 4,
+        "pathSearch": 3,
+        "chase": 3
+      }
+    }
+  ],
+  "actualGaps": [
+    {
+      "w": 4,
+      "a": "L370e2a05",
+      "longestGap": {
+        "start": 1793110800731,
+        "end": 1793110832907,
+        "ms": 32176,
+        "nextTarget": 206514,
+        "fromLine": 61180,
+        "toLine": 66650
+      },
+      "actionsInGap": {
+        "scout": 33,
+        "chat": 1,
+        "chase": 7
+      }
+    },
+    {
+      "w": 4,
+      "a": "L370e2a0f",
+      "longestGap": {
+        "start": 1793110799517,
+        "end": 1793110839896,
+        "ms": 40379,
+        "nextTarget": 206514,
+        "fromLine": 61005,
+        "toLine": 67776
+      },
+      "actionsInGap": {
+        "scout": 42,
+        "chat": 2,
+        "chase": 7,
+        "turn": 1
+      }
+    },
+    {
+      "w": 5,
+      "a": "L370e2a05",
+      "longestGap": {
+        "start": 1793110840892,
+        "end": 1793110861417,
+        "ms": 20525,
+        "nextTarget": 206335,
+        "fromLine": null,
+        "toLine": 71367
+      },
+      "actionsInGap": {
+        "chat": 1,
+        "scout": 19,
+        "chase": 7
+      }
+    },
+    {
+      "w": 5,
+      "a": "L370e2a0f",
+      "longestGap": {
+        "start": 1793110841297,
+        "end": 1793110855508,
+        "ms": 14211,
+        "nextTarget": 206529,
+        "fromLine": 68003,
+        "toLine": 70443
+      },
+      "actionsInGap": {
+        "scout": 12,
+        "chase": 4,
+        "turn": 1
+      }
+    }
+  ],
+  "boundedExamples": [
+    {
+      "line": 61777,
+      "at": 1793110804280,
+      "actor": "L370e2a05",
+      "sequence": 12897,
+      "mapFileName": "0",
+      "owner": {
+        "id": 1000,
+        "name": "L370e2a05",
+        "x": 244,
+        "y": 584
+      },
+      "reason": "scout",
+      "counts": {
+        "decisions": 1,
+        "visible": 40,
+        "notMonster": 21,
+        "dead": 18,
+        "notScenario": 1,
+        "scoutPathSearch": 1,
+        "scout": 1
+      },
+      "first4": [],
+      "approachRejected": [],
+      "witnessRejected": [],
+      "scout": {
+        "existing": false,
+        "homeIndex": null,
+        "goal": null,
+        "startedAt": null,
+        "activeElapsedMs": null,
+        "confirmedMoves": null,
+        "targetWaypoint": false,
+        "hintScan": {
+          "count": 0,
+          "truncated": false,
+          "preference": "insufficient-hints",
+          "selectedTargetId": null,
+          "selectedTargetPoint": null
+        },
+        "selectedHomeIndex": 15,
+        "selectedGoal": {
+          "x": 245,
+          "y": 582
+        },
+        "pathSearches": 1
+      }
+    },
+    {
+      "line": 62563,
+      "at": 1793110809089,
+      "actor": "L370e2a0f",
+      "sequence": 7012,
+      "mapFileName": "0",
+      "owner": {
+        "id": 1000,
+        "name": "L370e2a0f",
+        "x": 233,
+        "y": 577
+      },
+      "reason": "scout",
+      "counts": {
+        "decisions": 1,
+        "visible": 22,
+        "notMonster": 11,
+        "dead": 7,
+        "legalWeak": 4,
+        "outsideCoverage": 1,
+        "witnessCalls": 21,
+        "witnessTargetMissing": 165,
+        "witnessRange": 45,
+        "approachNoWitness": 3,
+        "scoutPathSearch": 1,
+        "scout": 1
+      },
+      "first4": [],
+      "approachRejected": [
+        {
+          "id": 206535,
+          "name": "Deer",
+          "x": 221,
+          "y": 573
+        },
+        {
+          "id": 206637,
+          "name": "Scarecrow",
+          "x": 221,
+          "y": 586
+        },
+        {
+          "id": 206618,
+          "name": "Scarecrow",
+          "x": 220,
+          "y": 567
+        }
+      ],
+      "witnessRejected": [
+        {
+          "targetId": 206535,
+          "observer": "L370e2a01",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 572
+          },
+          "peerPoint": {
+            "x": 236,
+            "y": 590
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 18,
+          "reason": "witnessTargetMissing"
+        },
+        {
+          "targetId": 206535,
+          "observer": "L370e2a02",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 572
+          },
+          "peerPoint": {
+            "x": 234,
+            "y": 578
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 13,
+          "reason": "witnessRange"
+        },
+        {
+          "targetId": 206535,
+          "observer": "L370e2a03",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 572
+          },
+          "peerPoint": {
+            "x": 237,
+            "y": 578
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 16,
+          "reason": "witnessRange"
+        },
+        {
+          "targetId": 206535,
+          "observer": "L370e2a0e",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 572
+          },
+          "peerPoint": {
+            "x": 246,
+            "y": 591
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 25,
+          "reason": "witnessTargetMissing"
+        }
+      ],
+      "scout": {
+        "existing": false,
+        "homeIndex": null,
+        "goal": null,
+        "startedAt": null,
+        "activeElapsedMs": null,
+        "confirmedMoves": null,
+        "targetWaypoint": false,
+        "hintScan": {
+          "count": 0,
+          "truncated": false,
+          "preference": "insufficient-hints",
+          "selectedTargetId": null,
+          "selectedTargetPoint": null
+        },
+        "selectedHomeIndex": 3,
+        "selectedGoal": {
+          "x": 236,
+          "y": 579
+        },
+        "pathSearches": 1
+      }
+    },
+    {
+      "line": 63421,
+      "at": 1793110814031,
+      "actor": "L370e2a05",
+      "sequence": 13203,
+      "mapFileName": "0",
+      "owner": {
+        "id": 1000,
+        "name": "L370e2a05",
+        "x": 257,
+        "y": 576
+      },
+      "reason": "scout",
+      "counts": {
+        "decisions": 1,
+        "visible": 27,
+        "notMonster": 14,
+        "dead": 9,
+        "notScenario": 2,
+        "legalWeak": 2,
+        "witnessCalls": 16,
+        "witnessTargetMissing": 168,
+        "witnessRange": 24,
+        "approachNoWitness": 2,
+        "scoutPathSearch": 1,
+        "scout": 1
+      },
+      "first4": [],
+      "approachRejected": [
+        {
+          "id": 206323,
+          "name": "Deer",
+          "x": 271,
+          "y": 577
+        },
+        {
+          "id": 206544,
+          "name": "Deer",
+          "x": 272,
+          "y": 569
+        }
+      ],
+      "witnessRejected": [
+        {
+          "targetId": 206323,
+          "observer": "L370e2a04",
+          "testedOwnerPoint": {
+            "x": 271,
+            "y": 576
+          },
+          "peerPoint": {
+            "x": 254,
+            "y": 587
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 17,
+          "reason": "witnessTargetMissing"
+        },
+        {
+          "targetId": 206323,
+          "observer": "L370e2a06",
+          "testedOwnerPoint": {
+            "x": 271,
+            "y": 576
+          },
+          "peerPoint": {
+            "x": 259,
+            "y": 592
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 16,
+          "reason": "witnessRange"
+        },
+        {
+          "targetId": 206323,
+          "observer": "L370e2a0e",
+          "testedOwnerPoint": {
+            "x": 271,
+            "y": 576
+          },
+          "peerPoint": {
+            "x": 246,
+            "y": 589
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 25,
+          "reason": "witnessTargetMissing"
+        },
+        {
+          "targetId": 206323,
+          "observer": "L370e2a0g",
+          "testedOwnerPoint": {
+            "x": 271,
+            "y": 576
+          },
+          "peerPoint": {
+            "x": 245,
+            "y": 586
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 26,
+          "reason": "witnessTargetMissing"
+        }
+      ],
+      "scout": {
+        "existing": true,
+        "homeIndex": 20,
+        "goal": {
+          "x": 259,
+          "y": 574
+        },
+        "startedAt": 1793110811796,
+        "activeElapsedMs": 0,
+        "confirmedMoves": 3,
+        "targetWaypoint": false,
+        "hintScan": null,
+        "selectedHomeIndex": 20,
+        "selectedGoal": {
+          "x": 259,
+          "y": 574
+        },
+        "pathSearches": 1
+      }
+    },
+    {
+      "line": 65834,
+      "at": 1793110827858,
+      "actor": "L370e2a0f",
+      "sequence": 7561,
+      "mapFileName": "0",
+      "owner": {
+        "id": 1000,
+        "name": "L370e2a0f",
+        "x": 255,
+        "y": 608
+      },
+      "reason": "scout",
+      "counts": {
+        "decisions": 1,
+        "visible": 20,
+        "notMonster": 9,
+        "dead": 5,
+        "notScenario": 2,
+        "legalWeak": 4,
+        "witnessCalls": 32,
+        "witnessTargetMissing": 184,
+        "witnessRange": 72,
+        "approachNoWitness": 4,
+        "scoutPathSearch": 2,
+        "scout": 1
+      },
+      "first4": [],
+      "approachRejected": [
+        {
+          "id": 206512,
+          "name": "Deer",
+          "x": 243,
+          "y": 613
+        },
+        {
+          "id": 206500,
+          "name": "Deer",
+          "x": 256,
+          "y": 621
+        },
+        {
+          "id": 206700,
+          "name": "Deer",
+          "x": 270,
+          "y": 599
+        },
+        {
+          "id": 206335,
+          "name": "Deer",
+          "x": 245,
+          "y": 601
+        }
+      ],
+      "witnessRejected": [
+        {
+          "targetId": 206512,
+          "observer": "L370e2a00",
+          "testedOwnerPoint": {
+            "x": 243,
+            "y": 612
+          },
+          "peerPoint": {
+            "x": 242,
+            "y": 596
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 17,
+          "reason": "witnessTargetMissing"
+        },
+        {
+          "targetId": 206512,
+          "observer": "L370e2a06",
+          "testedOwnerPoint": {
+            "x": 243,
+            "y": 612
+          },
+          "peerPoint": {
+            "x": 259,
+            "y": 592
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 21,
+          "reason": "witnessTargetMissing"
+        },
+        {
+          "targetId": 206512,
+          "observer": "L370e2a07",
+          "testedOwnerPoint": {
+            "x": 243,
+            "y": 612
+          },
+          "peerPoint": {
+            "x": 257,
+            "y": 609
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 14,
+          "reason": "witnessRange"
+        },
+        {
+          "targetId": 206512,
+          "observer": "L370e2a09",
+          "testedOwnerPoint": {
+            "x": 243,
+            "y": 612
+          },
+          "peerPoint": {
+            "x": 241,
+            "y": 602
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 11,
+          "reason": "witnessRange"
+        }
+      ],
+      "scout": {
+        "existing": false,
+        "homeIndex": null,
+        "goal": null,
+        "startedAt": null,
+        "activeElapsedMs": null,
+        "confirmedMoves": null,
+        "targetWaypoint": false,
+        "hintScan": {
+          "count": 4,
+          "truncated": true,
+          "preference": "all-hints-unshared",
+          "selectedTargetId": 206514,
+          "selectedTargetPoint": {
+            "x": 255,
+            "y": 581
+          }
+        },
+        "selectedHomeIndex": 17,
+        "selectedGoal": {
+          "x": 255,
+          "y": 580
+        },
+        "pathSearches": 2
+      }
+    },
+    {
+      "line": 69750,
+      "at": 1793110851556,
+      "actor": "L370e2a05",
+      "sequence": 14324,
+      "mapFileName": "0",
+      "owner": {
+        "id": 1000,
+        "name": "L370e2a05",
+        "x": 235,
+        "y": 589
+      },
+      "reason": "scout",
+      "counts": {
+        "decisions": 1,
+        "visible": 28,
+        "notMonster": 15,
+        "dead": 10,
+        "legalWeak": 3,
+        "witnessCalls": 24,
+        "witnessTargetMissing": 312,
+        "witnessRange": 24,
+        "approachNoWitness": 3,
+        "scoutPathSearch": 2,
+        "scout": 1
+      },
+      "first4": [],
+      "approachRejected": [
+        {
+          "id": 206637,
+          "name": "Scarecrow",
+          "x": 221,
+          "y": 586
+        },
+        {
+          "id": 206535,
+          "name": "Deer",
+          "x": 221,
+          "y": 573
+        },
+        {
+          "id": 206533,
+          "name": "Deer",
+          "x": 237,
+          "y": 602
+        }
+      ],
+      "witnessRejected": [
+        {
+          "targetId": 206637,
+          "observer": "L370e2a00",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 585
+          },
+          "peerPoint": {
+            "x": 242,
+            "y": 596
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 21,
+          "reason": "witnessTargetMissing"
+        },
+        {
+          "targetId": 206637,
+          "observer": "L370e2a01",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 585
+          },
+          "peerPoint": {
+            "x": 234,
+            "y": 590
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 13,
+          "reason": "witnessRange"
+        },
+        {
+          "targetId": 206637,
+          "observer": "L370e2a02",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 585
+          },
+          "peerPoint": {
+            "x": 234,
+            "y": 580
+          },
+          "attackerPresent": true,
+          "targetPresent": true,
+          "separation": 13,
+          "reason": "witnessRange"
+        },
+        {
+          "targetId": 206637,
+          "observer": "L370e2a03",
+          "testedOwnerPoint": {
+            "x": 221,
+            "y": 585
+          },
+          "peerPoint": {
+            "x": 239,
+            "y": 578
+          },
+          "attackerPresent": true,
+          "targetPresent": false,
+          "separation": 18,
+          "reason": "witnessTargetMissing"
+        }
+      ],
+      "scout": {
+        "existing": false,
+        "homeIndex": null,
+        "goal": null,
+        "startedAt": null,
+        "activeElapsedMs": null,
+        "confirmedMoves": null,
+        "targetWaypoint": false,
+        "hintScan": {
+          "count": 1,
+          "truncated": false,
+          "preference": "insufficient-hints",
+          "selectedTargetId": 206529,
+          "selectedTargetPoint": {
+            "x": 265,
+            "y": 575
+          }
+        },
+        "selectedHomeIndex": 20,
+        "selectedGoal": {
+          "x": 265,
+          "y": 574
+        },
+        "pathSearches": 2
+      }
+    }
+  ],
+  "limits": [
+    "Rows are capped samples, not a replay of all decisions or a unique-monster census.",
+    "At observed client decisions some local monsters were dead; other live candidates had no allowed six-cell witness. This does not prove global monster exhaustion or server overload.",
+    "The sampled chase pathSearch results in failed windows had zero pathNull; this is bounded evidence, not a claim about every possible route.",
+    "No 50/100/500 stage or two-hour soak was measured; scenario calibration and two-hour ordinary supply remain unverified."
+  ],
+  "cleanupComplete": true,
+  "independentOs": {
+    "schemaVersion": 1,
+    "verifiedAt": "2026-10-27T14:22:12.9863485Z",
+    "ownedGatewayPid": 80356,
+    "ownedGatewayAbsent": true,
+    "remainingListeners": [],
+    "portsFree": true,
+    "ports": [
+      17500,
+      17510
+    ],
+    "capacityAccepted": false,
+    "p0Accepted": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

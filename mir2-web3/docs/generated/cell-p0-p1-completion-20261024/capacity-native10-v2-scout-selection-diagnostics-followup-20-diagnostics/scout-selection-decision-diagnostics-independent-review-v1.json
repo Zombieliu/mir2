@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-26T00:58:12.444517+00:00",
+  "scope": "Bounded independent read-only review of two Node diagnostic source changes and existing actual focused evidence. No source mutation, target import, test, game run, raw/monitor/private/binary scan.",
+  "sources": {
+    "main": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.mjs",
+      "bytes": 156391,
+      "sha256": "158aaaba83967153fc8f764895c9bce823993732618be934636654cc4401f0d2"
+    },
+    "test": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs",
+      "bytes": 278248,
+      "sha256": "7cf64c8b28a7b57381dc4beaa5fa01e2d77378fa977e869205b1dc941893b68a"
+    },
+    "preservationAndFocusedEvidence": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\source-preservation-and-focused-receipt-v1.json",
+      "bytes": 6798,
+      "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5"
+    },
+    "productionMutation": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\production-mutation-v1.json",
+      "bytes": 3246,
+      "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e"
+    },
+    "patch": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\source-diff-v1.patch",
+      "bytes": 12554,
+      "sha256": "b1cf86b12bc6ffb271a9dc2c1e74316c6a92a490ee4545d6f4202dd4ced1b407"
+    }
+  },
+  "checks": {
+    "fiveProductionHunksForwardAndInverseRawExact": true,
+    "originalJMain155475RawRestored": true,
+    "existingNineInputsCurrentAggregate": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+    "otherSevenFrozenInputsRawExact": true,
+    "test270311BytePrefixRawExact": true,
+    "testsAppendedOnly": 6,
+    "sixImmutableReportDeclarationsAndAllUnchangedBytesPreserved": true,
+    "originalHintAndFallbackReturnArraysAndStablePartitionOrderPreserved": true,
+    "existingFourHintsFourTotalPathSearchesPreserved": true,
+    "originalLowHintReturnBeforeAnyPeerScoutScan": true,
+    "lowHintOtherCountsNullAndFixedInsufficientReasonApproved": true,
+    "onlyExistingSetSizeAndPartitionLengthsObserved": true,
+    "noNewScanArrayTraversalSortClockCallOrGameplayCredit": true,
+    "original32RowsPerActorPhaseCapAndSentinelShapePreserved": true,
+    "establishedScoutBudgetsAndActualAckWitnessClaimsGameGatesUnchanged": true,
+    "onlyFixedReasonEnumAndFourBoundedScalarCountsAdded": true,
+    "noNewSnapshotTargetListAccountIdentityOrPayload": true
+  },
+  "testQuality": {
+    "noHintAndSingleHintGetterSentinel": true,
+    "noActiveOtherWaypointBranch": true,
+    "mixedSharedUnsharedExistingReorder": true,
+    "allSharedAndAllUnsharedFallbackOrder": true,
+    "rowCapNoCountersInSentinelAndPhaseReset": true,
+    "plansAndNoCommandsNoClaimsNoSnapshotMutationAsserted": true
+  },
+  "actualFocusedEvidence": {
+    "red": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\focused-red-execution-v1.json",
+      "bytes": 4660,
+      "sha256": "8b752fa6ea7f5f9581b4a6ea5a83089920ff163f9e281dd0707a305d447e684e"
+    },
+    "redTests": 6,
+    "redFailed": 6,
+    "redLogRawPinAndTapCountsMatched": true,
+    "green": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\scout-selection-decision-diagnostics-v1\\focused-green-execution-v1.json",
+      "bytes": 4755,
+      "sha256": "1c8e50cdcce7c48bfb3ed2d485d728061266e33f86419c5cde7b5c7fcb66bf08"
+    },
+    "greenPassed": 22,
+    "greenFailed": 0,
+    "greenComposition": "6 new +9 existing observer preference +7 existing anti-convergence",
+    "greenLogRawPinAndTapCountsMatched": true,
+    "bothSourceBeforeAfterIdentical": true,
+    "reviewerRepeatedTests": false,
+    "rootFull232NotRunOrClaimedByThisReview": true
+  },
+  "semanticLimits": [
+    "activeOtherWaypointCount counts distinct eligible declared coordinate keys in the existing Set, not fighters or target claims.",
+    "hintPreferenceReason=reordered denotes the existing mixed stable-partition branch; the legacy array-reference boolean remains unchanged and is not proof of movement or a better alternative.",
+    "Fewer than two hints leave other three counts null because the preserved early return does not evaluate peer scouts. Zero hints still emit no detailed selection row.",
+    "Diagnostic visibility does not repair or promote Formal15 supply failure; capacity/P0/P2 are not accepted."
+  ],
+  "verdict": {
+    "sourceContractPassed": true,
+    "diagnosticOnlySemanticsPreserved": true,
+    "eligibleForRootFullRegression": true,
+    "blockingFindingIds": []
+  }
+}

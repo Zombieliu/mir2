@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "checkedAtUtc": "2026-10-26T17:28:37.3403697Z",
+  "gatewayPid": 73460,
+  "ownedPidAbsent": true,
+  "listeners": [],
+  "portsFree": true,
+  "cleanupComplete": true,
+  "eligibleForNextIndependentEpisode": false,
+  "originalReport": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v13\\episode-50\\reports\\1793035283410-2a81573b.report.json",
+    "runId": "1793035283410-2a81573b",
+    "ok": false,
+    "error": "Actor La0d3230t died or lost presence; no automatic resurrection",
+    "stages": [],
+    "phaseWindows": [
+      {
+        "name": "bootstrap-50",
+        "kind": "bootstrap",
+        "targetActors": 50,
+        "startedAtMs": 1793035283449,
+        "endedAtMs": 1793035626903,
+        "completed": true
+      },
+      {
+        "name": "stage-50",
+        "kind": "measurement",
+        "targetActors": 50,
+        "startedAtMs": 1793035626910,
+        "endedAtMs": 1793035682771,
+        "completed": false
+      }
+    ],
+    "peakControlledActors": 50,
+    "peakServerActive": 50,
+    "playableCapacityAccepted": false
+  },
+  "diagnosticSteadyOnline": {
+    "samples": 55,
+    "declaredActors": 50,
+    "minimumOnlineActors": 50,
+    "maximumOnlineActors": 50,
+    "lastOnlineActors": 50
+  },
+  "capacityAccepted": false
+}

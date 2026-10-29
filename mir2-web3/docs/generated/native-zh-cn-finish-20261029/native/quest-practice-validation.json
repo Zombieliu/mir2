@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "kind": "bounded-cached-native-quest-practice-check",
+  "observedAtUtc": "2026-10-29T08:39:54.881913+00:00",
+  "sourceHeadBeforeAndAfter": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "affectedSourcesMatchHead": true,
+  "command": "cargo +1.95.0 test --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui --offline --locked --target-dir C:/mir2-build/guild-pixel-parity-20261028/target-native --lib quest_practice:: -- --test-threads=1",
+  "passedTests": 7,
+  "failedTests": 0,
+  "ignoredTests": 0,
+  "testRunSeconds": 1.01,
+  "log": "quest-practice-final.log",
+  "logSha256": "09919e7347b988f46c4bfdb293d5cae5475f23b2fccadca4c5f6402aa56b69a4",
+  "sourceEdits": false,
+  "additionalGameBuildOrGpuRun": false,
+  "liveAcceptance": false,
+  "snapshotSourcePins": [
+    {
+      "path": "apps/game-client/client-bevy/src/quest_practice.rs",
+      "bytes": 26356,
+      "sha256Raw": "79d084e604e3ab9aa2bf86f6d1ccd5a52c1e9b6dfc3bcfc4229e0c03ca09157f"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/player_text.rs",
+      "bytes": 40697,
+      "sha256Raw": "0c34c9c9cdc1522c6a763fe1b2ab41ef801c531b0b3821bbcc6310f0c585874c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_i18n.rs",
+      "bytes": 104034,
+      "sha256Raw": "40f3f61411f7fc6c7c7bda6c95d4d7b6758fb51296e7c8a25badca12bef0b3bd"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN.json",
+      "bytes": 621287,
+      "sha256Raw": "89f6cd57e61e8bc957bb6b5ff10b317ab2948291287f5a01cffd8bb97a89d36f"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json",
+      "bytes": 379069,
+      "sha256Raw": "cd0ee06a4ecf7cda2c8c93c55b54b8d608c118f0f39b5f26e270a2ff294c7633"
+    },
+    {
+      "path": "packages/game-data/data/native-i18n/extra/zh-CN-provenance.json",
+      "bytes": 11924,
+      "sha256Raw": "ae04a32c4315e5625e081f322e397925bdb47544bef24e6841accb58ac78090e"
+    },
+    {
+      "path": "packages/tooling/scripts/generate-native-i18n-simplified.py",
+      "bytes": 17874,
+      "sha256Raw": "58ce20cf96c64c33f85f48da1b85d85ed38f5c7127f47c0c19a4c90dccb7085c"
+    }
+  ],
+  "sourceReceipt": {
+    "filename": "quest-practice-final-receipt.json",
+    "bytes": 2223,
+    "sha256": "973d4ff9d60aa46a15fc20b683fcb88088097905c0ae2eb20d3b9a48d49834de",
+    "included": false
+  },
+  "logReceipt": {
+    "filename": "quest-practice-final.log",
+    "bytes": 28174,
+    "sha256": "09919e7347b988f46c4bfdb293d5cae5475f23b2fccadca4c5f6402aa56b69a4",
+    "included": false
+  },
+  "resultLines": [
+    "test quest_practice::tests::added_classes_receive_every_authored_practice_node ... ok",
+    "test quest_practice::tests::assassin_and_archer_practice_names_are_specific_in_all_nine_locales ... ok",
+    "test quest_practice::tests::every_authored_class_requirement_has_player_instructions ... ok",
+    "test quest_practice::tests::graduation_requires_both_warrior_skills_without_other_classes ... ok",
+    "test quest_practice::tests::native_lightning_practice_uses_its_own_spell_name_and_keeps_legacy_copy ... ok",
+    "test quest_practice::tests::native_practice_and_supplies_cover_every_class_without_mutating_requirements ... ok",
+    "test quest_practice::tests::poisoning_guidance_explains_carried_supplies_and_keeps_amulets_equipped ... ok",
+    "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1606 filtered out; finished in 1.01s"
+  ]
+}

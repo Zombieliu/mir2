@@ -347,7 +347,7 @@ fn activities_file_commit_preserves_claim_across_reload_without_save_mutation() 
     let account = &loaded.accounts["demo"];
     assert_eq!(
         loaded.schema_version,
-        mir2_simulation::billing::BILLING_SCHEMA_VERSION
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION,
     );
     assert_eq!(
         account.activities.as_ref().unwrap().claims["closed-v1-lv50"].claimed_at_ms,
@@ -370,7 +370,7 @@ fn activities_schema8_without_new_authority_fields_migrates_without_data_loss() 
         .unwrap();
     assert_eq!(
         loaded.schema_version,
-        mir2_simulation::billing::BILLING_SCHEMA_VERSION
+        mir2_simulation::billing::BILLING_SCHEMA_VERSION,
     );
     assert_eq!(
         loaded.accounts["demo"].saves[&config.default_character.index]

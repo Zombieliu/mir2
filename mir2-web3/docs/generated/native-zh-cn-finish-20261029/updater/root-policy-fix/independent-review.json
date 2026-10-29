@@ -1,0 +1,122 @@
+{
+  "schema": "mir2.windows.updater-root-policy-independent-review.v1",
+  "recordedAtUtc": "2026-10-29T11:23:32.103683+00:00",
+  "reviewer": "/root/usdc_recharge_ui_audit",
+  "reviewedCommit": "81942dda7fa09e869d42fb9560e57abdbd542495",
+  "readOnlySourceReview": true,
+  "conclusion": "No material blocker found in the four reviewed updater policy/test files.",
+  "noMaterialBlockers": true,
+  "sourceFiles": [
+    {
+      "path": "apps/game-client/windows-updater/src/model.rs",
+      "bytes": 15191,
+      "sha256": "24a87f5455f3812628fcd73ab7e0a1b1120f0dcb72e62785b494fa87e154cb72"
+    },
+    {
+      "path": "apps/game-client/windows-updater/src/model_regression.rs",
+      "bytes": 6875,
+      "sha256": "bfdaf0478880e3371f96c61bcb40ec9ce1276895dfbbc18a9c97f668dd7f59f7"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "bytes": 25197,
+      "sha256": "818a8aec7bf944efd69d0ea581fb74474bc0a5582c1361926c22404153a1db6f"
+    },
+    {
+      "path": "apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "bytes": 19838,
+      "sha256": "54edfbf4ada99fb659757c28ffb8627575d7757ef242674c81c3db4aed264b03"
+    }
+  ],
+  "workerReport": {
+    "path": "updater-root-policy-fix-summary.json",
+    "bytes": 5794,
+    "sha256": "3069cd84502d374c0e73c4ee22e7627dcd48f24bc658834bb1b6800eb08b4743"
+  },
+  "evidenceHashesIndependentlyMatched": [
+    {
+      "path": "updater-root-policy-rust-focused-final.log",
+      "bytes": 1014,
+      "sha256": "9383dde6d88e42fe4abd3c1129e9b6c16bd4244c1482350440b0a3b2bab83745"
+    },
+    {
+      "path": "updater-root-policy-signed-candidate.log",
+      "bytes": 741,
+      "sha256": "282c48813b8c8544d79cb588d1aee48f39449c8a62d46ab344e116d3ee36e1a7"
+    },
+    {
+      "path": "updater-root-policy-path-security.log",
+      "bytes": 478,
+      "sha256": "9ef8c13f22e6490ac9029c07bb4f88e00bb89a308381265acaf730201578ddba"
+    },
+    {
+      "path": "updater-root-policy-python.log",
+      "bytes": 4059,
+      "sha256": "4f3ecb73cf8560905364fff64ebe58ec1a492b2349b80926c8a7c92eca9c2b1a"
+    },
+    {
+      "path": "updater-root-policy-live-inventory.json",
+      "bytes": 1346,
+      "sha256": "3bef8a0cebb477d9c07a5b56eb98b1a91a3d69b99b2103a51e2001ff92f673c8"
+    },
+    {
+      "path": "updater-root-policy-fix.diff",
+      "bytes": 9066,
+      "sha256": "98d69a9e4453028961bb4f0eca49c8609c79f7d5d111458974d2e9d66a660268"
+    }
+  ],
+  "reviewChecks": {
+    "runtimeAndPythonRootSetsEqual": true,
+    "old12RootsRetained": true,
+    "newRootsAreOnlyFiveExactNames": true,
+    "fiveExactAddedRoots": [
+      "BILLING-HAN-SOURCE.json",
+      "OFL-NotoSansCJKsc.txt",
+      "OFL-NotoSansSC-BillingHan.txt",
+      "README.zh-CN.txt",
+      "SIMPLIFIED-SOURCE.json"
+    ],
+    "runtimeNonRootTextUnchangedFromParent": true,
+    "pythonNonRootAstUnchangedFromParent": true,
+    "nearMissCases": [
+      "lowercase root name",
+      "extra- prefix",
+      ".json suffix",
+      ".exe suffix",
+      "nested/ prefix",
+      "root-name/data.txt suffix"
+    ],
+    "pathBoundsExecutableExtensionAndCmsBindingRulesUnchanged": true,
+    "realPinnedCmsCompleteManifestRegressionObserved": {
+      "passed": 1,
+      "manifestBytes": 49703926,
+      "payloadFiles": 255023,
+      "payloadBytes": 1211263759,
+      "actualExeAndAttestationHashesChecked": true
+    },
+    "testResultsReadFromPinnedLogs": {
+      "rustFocusedPassed": 5,
+      "rustFocusedIgnored": 1,
+      "rustSignedCompleteManifestPassed": 1,
+      "rustAdjacentPassed": 2,
+      "pythonPassed": 30,
+      "pythonSkipped": 3,
+      "pythonCmsIsMock": true
+    }
+  },
+  "actions": {
+    "sourceModified": false,
+    "testsRerun": false,
+    "cargoInvoked": false,
+    "pythonTestsInvoked": false,
+    "installedOrLaunched": false,
+    "signedOrGeneratedKeys": false,
+    "otherEvidenceModified": false
+  },
+  "scopeLimits": [
+    "Independent review and hash/log verification only; existing test counts are observed worker results, not newly rerun tests.",
+    "Real signed-Candidate regression verifies the complete manifest/CMS bindings and the executable/attestation file hashes; it is not an independent rehash of every payload file.",
+    "No result for actual installed Launcher to Updater to Game or Simplified Chinese tabs is claimed here; coordinator must complete r10 UI acceptance.",
+    "Python archive fixtures mock CMS and remain separate from the real Windows Rust CMS verification."
+  ]
+}

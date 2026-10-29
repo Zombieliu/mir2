@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-10-25T20:39:45.9796841+00:00",
+  "runId": "1792959622496-365f0175",
+  "expectedProcessIds": [
+    64108,
+    65388
+  ],
+  "expectedPorts": [
+    17500,
+    17510
+  ],
+  "processes": [],
+  "listeningPorts": [],
+  "allAbsentAndPortsFree": true,
+  "scope": "Fresh read-only OS observation after actual terminal; no backdated cleanup timestamp"
+}

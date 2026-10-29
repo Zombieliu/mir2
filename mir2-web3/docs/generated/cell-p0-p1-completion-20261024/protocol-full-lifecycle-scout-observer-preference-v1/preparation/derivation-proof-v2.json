@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "derived": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\projection-build-source-lib.mjs",
+        "bytes": 242,
+        "sha256": "16e2848ce480761686481efcfc2d723471dbea466b3dfa6f3c6a350bce3d35fe"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\projection-build-source-lib.mjs",
+        "bytes": 223,
+        "sha256": "4d8e456917179f8d516e39a0b6aad10be82bbd60da52ba60f1e606cc866038ce"
+      },
+      "rules": [
+        {
+          "label": "Original-location runtime reader, no relocated import.meta",
+          "before": "// Re-export the actual Release library in its original directory: its import.meta\n// locations for final binding and immutable executable must not be relocated.\nexport * from '../account-store-wait-diagnostics-release-v1/source-lib-v1.mjs';",
+          "after": "// Re-export the reviewed read-only runtime adapter in its original directory.\n// The original c743 Release/build evidence remains immutable there.\nexport * from '../scout-observer-preference-runtime-v1/source-lib-v1.mjs';",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\verify-inputs.mjs",
+        "bytes": 9407,
+        "sha256": "5960387fcf51d6d4b3be202839861727fcc44209a7eda9e8460804f080d9f8bd"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.mjs",
+        "bytes": 14002,
+        "sha256": "ac97e49bc729d6fef822c800b7090cddad4d41fb256da101fa1d5fef15e508cd"
+      },
+      "rules": [
+        {
+          "label": "Candidate separates backend c743 from actual execution/Node H",
+          "before": "candidate.state!=='FINAL_ROOT_CONFIRMED_FRESH50_RELEASE'||!/^[a-f0-9]{40}$/.test(candidate.sourceCommit??'')",
+          "after": "candidate.state!=='PENDING_ROOT_REVIEWED_RUNTIME_REUSE'||candidate.sourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||candidate.backendSourceCommit!=='c743122af05faca43d9535d8c6c2a4bfb01b924f'||candidate.executionSourceCommit!=='3a6d8c862d03ded3133605472a8f38bc6258af52'||candidate.driverSourceCommit!=='3a6d8c862d03ded3133605472a8f38bc6258af52'",
+          "count": 1
+        },
+        {
+          "label": "Require actual pinned runtime proof in addition to original build facts",
+          "before": "!['backendSourceManifest','releaseRecord','binary','buildReceipt','buildLog','rootFunctionalValidation'].every(key=>reference(candidate[key]))",
+          "after": "!['backendSourceManifest','releaseRecord','binary','buildReceipt','buildLog','rootFunctionalValidation','runtimeBinding','readonlyRuntimeGuard','currentDriverFrozen','currentNodeRegression'].every(key=>reference(candidate[key]))",
+          "count": 1
+        },
+        {
+          "label": "Expected HEAD is execution H, not historical backend C",
+          "before": "candidate.sourceCommit!==expectedHead",
+          "after": "candidate.executionSourceCommit!==expectedHead",
+          "count": 1
+        },
+        {
+          "label": "Current external library is the reviewed runtime adapter",
+          "before": "const libraryFile=path.join(base,'account-store-wait-diagnostics-release-v1/source-lib-v1.mjs');",
+          "after": "const libraryFile=path.join(base,'scout-observer-preference-runtime-v1/source-lib-v1.mjs');",
+          "count": 1
+        },
+        {
+          "label": "Profile records backend C and execution/driver H independently",
+          "before": "profile.intendedBackendSourceCommit!==expectedHead",
+          "after": "profile.intendedBackendSourceCommit!==candidate.backendSourceCommit||profile.intendedExecutionSourceCommit!==expectedHead||profile.intendedDriverSourceCommit!==candidate.driverSourceCommit",
+          "count": 1
+        },
+        {
+          "label": "Add actual runtime-binding and successful Root readonly guard pin check",
+          "before": "  // Only now import the pinned adapter; the underlying library keeps its own import.meta directory.",
+          "after": "  const runtimeBindingFile=path.join(base,'scout-observer-preference-runtime-v1/current-execution-binding-v1.json'),runtimeGuardFile=path.join(base,'scout-observer-runtime-readonly-guard-stdout-v1.log');\n  for(const [key,file] of [['runtimeBinding',runtimeBindingFile],['readonlyRuntimeGuard',runtimeGuardFile],['currentDriverFrozen',path.join(base,'capacity-scout-observer-preference-driver-frozen-v1.json')],['currentNodeRegression',path.join(base,'scout-observer-preference-root-full-driver-receipt-v1.json')]])if(normal(candidate[key].path)!==normal(file)||!match(await pin(file),candidate[key]))throw Error('Actual current runtime/Node proof pin differs');\n  const guard=await read(runtimeGuardFile);if(guard.readonlySourceGuardPassed!==true||guard.backendBuildCommit!==candidate.backendSourceCommit||guard.currentExecutionHead!==expectedHead||guard.driverSourceCommit!==candidate.driverSourceCommit||guard.backendInputs!==50||guard.allFiftyBackendInputsUnchanged!==true||guard.rebuildPerformed!==false||guard.backendSourceSha256!==profile.intendedSourceManifestSha256||guard.driverSourceSha256!==candidate.driverSourceSha256)throw Error('Root actual readonly runtime guard proof differs');\n  // Only now import the pinned original-location runtime adapter; no build library guard is called.",
+          "count": 1
+        },
+        {
+          "label": "Runtime proof must retain C/H/H roles",
+          "before": "if(frozen.manifest.files?.length!==50||",
+          "after": "if(frozen.backendSourceCommit!==candidate.backendSourceCommit||frozen.driverSourceCommit!==candidate.driverSourceCommit||frozen.executionSourceCommit!==expectedHead||frozen.rebuildPerformed!==false||frozen.current.allFiftyBackendInputsUnchanged!==true||frozen.current.driverSourceSha256!==candidate.driverSourceSha256||frozen.manifest.files?.length!==50||",
+          "count": 1
+        },
+        {
+          "label": "Original Release keeps original c743 source identity",
+          "before": "release.sourceCommit!==expectedHead",
+          "after": "release.sourceCommit!==candidate.backendSourceCommit",
+          "count": 1
+        },
+        {
+          "label": "Original build receipt keeps original c743 source identity",
+          "before": "receipt.sourceCommit!==expectedHead",
+          "after": "receipt.sourceCommit!==candidate.backendSourceCommit",
+          "count": 1
+        },
+        {
+          "label": "Final binding explicitly records three namespaces",
+          "before": "binding.expectedSourceCommit!==expectedHead||binding.backendInputCount!==50||",
+          "after": "binding.expectedSourceCommit!==expectedHead||binding.backendSourceCommit!==candidate.backendSourceCommit||binding.executionSourceCommit!==expectedHead||binding.driverSourceCommit!==candidate.driverSourceCommit||binding.backendInputCount!==50||",
+          "count": 1
+        },
+        {
+          "label": "Final mode consumes original prepared review",
+          "before": "    const binding=await read(path.join(taskRoot,'launcher-final-binding-v1.json'));",
+          "after": "    const binding=await read(path.join(taskRoot,'launcher-final-binding-v1.json'));\n    await verifyPreparedReview(taskRoot,binding.review.path,binding.review.sha256);",
+          "count": 1
+        },
+        {
+          "label": "Return additional actual identities without relabeling Release sourceCommit",
+          "before": "sourceCommit:release.sourceCommit,baseCommit:release.baseCommit,",
+          "after": "sourceCommit:release.sourceCommit,backendSourceCommit:release.sourceCommit,executionSourceCommit:expectedHead,driverSourceCommit:candidate.driverSourceCommit,baseCommit:release.baseCommit,",
+          "count": 1
+        },
+        {
+          "label": "Missing Root final binding is an explicit PENDING barrier",
+          "before": "  const binding=await read(path.join(taskRoot,'launcher-final-binding-v1.json'));\n  return validateCandidate",
+          "after": "  let binding;try{binding=await read(path.join(taskRoot,'launcher-final-binding-v1.json'));}catch(error){if(error.code==='ENOENT')throw Error('PENDING_ROOT_FINALIZATION: reviewed final launcher binding is required before private initialization, driver import or realm');throw error;}\n  return validateCandidate",
+          "count": 1
+        },
+        {
+          "label": "Root-only finalizer review contract helper",
+          "before": "export async function loadPreparedInputs(repo,taskRoot){",
+          "after": "export async function verifyPreparedReview(taskRoot,reviewFile,reviewSha){\n  if(typeof reviewFile!=='string'||!path.isAbsolute(reviewFile)||!hex(reviewSha))throw Error('Explicit actual review file and SHA are required');\n  const stat=await fs.lstat(reviewFile),real=await fs.realpath(reviewFile),relative=path.relative(base,real);if(!stat.isFile()||stat.isSymbolicLink()||!relative||path.isAbsolute(relative)||relative==='..'||relative.startsWith('..'+path.sep)||relative.split(/[\\/]/).some(p=>/^(private|store|recordings|bin)$/i.test(p)))throw Error('Review must be public regular BASE evidence');\n  const bytes=await fs.readFile(real);if(sha(bytes)!==reviewSha)throw Error('Independent prepared review SHA differs');const review=JSON.parse(bytes),preparedFile=path.join(taskRoot,'template-prepared-v1.json'),preparedBytes=await fs.readFile(preparedFile);\n  if(review.schemaVersion!==1||normal(review.preparation?.file??'')!==normal(preparedFile)||review.preparation.bytes!==preparedBytes.length||review.preparation.sha256!==sha(preparedBytes)||review.verdict?.preparedSourceContractPassed!==true||review.verdict.eligibleForRootFinalization!==true||!Array.isArray(review.verdict.blockingFindingIds)||review.verdict.blockingFindingIds.length)throw Error('Exact prepared source review must approve Root finalization without blockers');\n  const prepared=JSON.parse(preparedBytes);if(prepared.state!=='PENDING_ROOT_FINALIZATION_NOT_EXECUTED'||!Array.isArray(prepared.files)||prepared.files.length>32||sha(JSON.stringify(prepared.files))!==prepared.sourceSha256||prepared.syntax?.passed!==true||prepared.actualFull16Passed!==null)throw Error('Prepared source closure differs');\n  for(const entry of prepared.files){if(!reference({path:entry.file,bytes:entry.bytes,sha256:entry.sha256})||!normal(entry.file).startsWith(normal(taskRoot)+'/')||!match(await pin(entry.file),entry))throw Error('Prepared current raw source changed');}\n  return{review:await pin(real),preparation:await pin(preparedFile)};\n}\nexport async function loadPreparedInputs(repo,taskRoot){",
+          "count": 1
+        },
+        {
+          "label": "Windows realpath component privacy check uses native separator",
+          "before": "relative.split(/[\\/]/)",
+          "after": "relative.split(path.sep)",
+          "count": 1
+        },
+        {
+          "label": "New immutable preparation revision filename",
+          "before": "path.join(taskRoot,'template-prepared-v1.json')",
+          "after": "path.join(taskRoot,'template-prepared-v2.json')",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\finalize-launcher-inputs.mjs",
+        "bytes": 2038,
+        "sha256": "12e7392145acca4098f8586fb6e820ae99932b4514ed335975088945b76d1c06"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\finalize-launcher-inputs.mjs",
+        "bytes": 2416,
+        "sha256": "b7c9bca1ac42af49828b49163638f3f6dd1b005aea26d4f73a5ccd27ad343b33"
+      },
+      "rules": [
+        {
+          "label": "Import independent prepared review validator",
+          "before": "import { validateCandidate }",
+          "after": "import { validateCandidate,verifyPreparedReview }",
+          "count": 1
+        },
+        {
+          "label": "Explicit Root review arguments",
+          "before": "['--repository','--expected-head']",
+          "after": "['--repository','--expected-head','--review-file','--review-sha256']",
+          "count": 1
+        },
+        {
+          "label": "Review before candidate/source preflight",
+          "before": "const inputs=await validateCandidate",
+          "after": "const reviewed=await verifyPreparedReview(taskRoot,values['--review-file'],values['--review-sha256']);\nconst inputs=await validateCandidate",
+          "count": 1
+        },
+        {
+          "label": "Final binding preserves backend/driver/execution distinctions",
+          "before": "expectedSourceCommit:expectedHead,backendInputCount:50,",
+          "after": "expectedSourceCommit:expectedHead,backendSourceCommit:inputs.releaseInput.sourceCommit,executionSourceCommit:expectedHead,driverSourceCommit:inputs.releaseInput.driverSourceCommit,backendInputCount:50,review:reviewed.review,preparation:reviewed.preparation,",
+          "count": 1
+        },
+        {
+          "label": "Scope describes reused Release and independent fresh full16",
+          "before": "Explicit actual50-source/fresh Release and unchanged six-driver full16 launcher binding only; no account, service or gameplay execution.",
+          "after": "Explicit reused c743/50 Release and current H Node/execution binding with unchanged six-driver ordinary full16; no account, service or gameplay execution.",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\run-owned-full.mjs",
+        "bytes": 14401,
+        "sha256": "80114e86736d4b21eeb05a5efeed0bbe772d0602e454a21d1c3c6ba43ce139be"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\run-owned-full.mjs",
+        "bytes": 14494,
+        "sha256": "b1bf77146f5f6cdddc93198b2bf0d21ebc0ef0522ed47ec34a4a2755e2e65802"
+      },
+      "rules": [
+        {
+          "label": "New isolated full16 root",
+          "before": "full-lifecycle-account-store-wait-diagnostics-v1",
+          "after": "full-lifecycle-scout-observer-preference-v1",
+          "count": 2
+        },
+        {
+          "label": "New gateway identity",
+          "before": "cell-p0-p1-account-store-wait-diagnostics-full-",
+          "after": "cell-p0-p1-scout-observer-preference-full-",
+          "count": 1
+        },
+        {
+          "label": "New full16 evidence scope",
+          "before": "one-fresh-account-store-wait-diagnostics-release-two-ordinary-account-full-lifecycle-run",
+          "after": "one-reused-c743-release-current-scout-node-h-two-ordinary-account-full-lifecycle-run",
+          "count": 1
+        },
+        {
+          "label": "Record C backend/H execution/H capacity driver beside immutable original Release",
+          "before": "sourceCommit: releaseInput.sourceCommit, backendInputCount,",
+          "after": "sourceCommit: releaseInput.sourceCommit, executionSourceCommit: releaseInput.executionSourceCommit, driverSourceCommit: releaseInput.driverSourceCommit, backendInputCount,",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\audit-owned-full.mjs",
+        "bytes": 9078,
+        "sha256": "4a4f2679a7b306194ea904d4535c9fe7af2618623075caf4d53c70ac851c2241"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\audit-owned-full.mjs",
+        "bytes": 9481,
+        "sha256": "da2636cb33f6ce11454f45e0f684c79e98173f591c7e62bfdc0c9324794723ce"
+      },
+      "rules": [
+        {
+          "label": "New isolated full16 root",
+          "before": "full-lifecycle-account-store-wait-diagnostics-v1",
+          "after": "full-lifecycle-scout-observer-preference-v1",
+          "count": 2
+        },
+        {
+          "label": "Audit actual namespace fields",
+          "before": "assert.equal(realm.release.sourceCommit, releaseInput.sourceCommit);",
+          "after": "assert.equal(realm.release.sourceCommit, releaseInput.sourceCommit);\nassert.equal(realm.release.executionSourceCommit, releaseInput.executionSourceCommit);\nassert.equal(realm.release.driverSourceCommit, releaseInput.driverSourceCommit);",
+          "count": 1
+        },
+        {
+          "label": "Independent audit records actual H alongside backend C",
+          "before": "backendInputCount, backendSourceCommit: releaseInput.sourceCommit,",
+          "after": "backendInputCount, backendSourceCommit: releaseInput.sourceCommit, executionSourceCommit: releaseInput.executionSourceCommit, driverSourceCommit: releaseInput.driverSourceCommit,",
+          "count": 1
+        },
+        {
+          "label": "Source verification records actual H alongside backend C",
+          "before": "schemaVersion: 1, sourceCommit: releaseInput.sourceCommit, backendInputCount,",
+          "after": "schemaVersion: 1, sourceCommit: releaseInput.sourceCommit, executionSourceCommit: releaseInput.executionSourceCommit, driverSourceCommit: releaseInput.driverSourceCommit, backendInputCount,",
+          "count": 1
+        },
+        {
+          "label": "Audit scope distinguishes reused binary and fresh runtime",
+          "before": "P0 account-store-wait-diagnostics server Release normal public protocol lifecycle",
+          "after": "Reused c743 account-store server Release under current H execution normal public protocol lifecycle",
+          "count": 1
+        },
+        {
+          "label": "Source verification scope",
+          "before": "This fresh50-input account-store-wait-diagnostics Release only; historical source/binary proofs remain unchanged",
+          "after": "Current H raw/GitLF50 equals original c743/50 Release; original immutable source/binary/build evidence is unchanged",
+          "count": 1
+        }
+      ],
+      "inverseRawExact": true
+    }
+  ],
+  "copies": [
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "result": {
+        "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "rawExact": true
+    }
+  ],
+  "profile": {
+    "source": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-account-store-wait-diagnostics-v1\\full-lifecycle-profile.json",
+      "bytes": 4391,
+      "sha256": "907e150b27a0d0f82e2f4d411d49587a038a5e9ec9c031073a8d30d534bca3f4"
+    },
+    "result": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\full-lifecycle-profile.json",
+      "bytes": 4571,
+      "sha256": "8736f7c2f3c002a8a57b972cb9d5ba6be09d83a224ffcd444b277dd49f9ade98"
+    },
+    "changedKeys": [
+      "preparedAt",
+      "scope",
+      "toolPins",
+      "outputRoot",
+      "externalSourceLibrary",
+      "intendedExecutionSourceCommit",
+      "intendedDriverSourceCommit"
+    ],
+    "sixDriverPinsRawExact": true
+  },
+  "ordinaryFull16LogicUnchanged": true,
+  "oldPackagesUnmodified": true,
+  "pathFixRevision": {
+    "sourcePreimage": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\verify-inputs.before-review-path-fix-v1.mjs.txt",
+      "bytes": 14000,
+      "sha256": "86ffb40d7cdb79986aa74f70027d5f7951a45779643c939d7842a6b0988aaa1e"
+    },
+    "profilePreimage": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\full-lifecycle-profile.before-review-path-fix-v1.json",
+      "bytes": 4571,
+      "sha256": "3e7b6da86faa8670a228c2f0d081f5f00a0595550b8da87c08c34fbc65e835e2"
+    },
+    "changes": [
+      {
+        "label": "Windows realpath component privacy check uses native separator",
+        "before": "relative.split(/[\\/]/)",
+        "after": "relative.split(path.sep)"
+      },
+      {
+        "label": "New immutable preparation revision filename",
+        "before": "path.join(taskRoot,'template-prepared-v1.json')",
+        "after": "path.join(taskRoot,'template-prepared-v2.json')"
+      }
+    ],
+    "inverseToInitialPreparedRawExact": true,
+    "priorPreparation": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\template-prepared-v1.json",
+      "bytes": 6433,
+      "sha256": "a216b805bc24279644c7d3a5e25af4024fe7c39156cef03d7a79c0d1bcc4e09f"
+    },
+    "priorProof": {
+      "path": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-observer-preference-v1\\derivation-proof-v1.json",
+      "bytes": 19896,
+      "sha256": "dbe6e6002604dfddf51446aeb8567930ca8d754d8a24e328daeb575bae503411"
+    }
+  }
+}

@@ -12,5 +12,19 @@
     "Noto Sans TC",
     "Noto Sans TC Thin"
   ],
-  "embedding": "Unmodified variable font embedded in the native executable; OFL accompanies redistribution."
+  "embedding": "Unmodified variable font embedded in the native executable; OFL accompanies redistribution.",
+  "supplementalFallbacks": [
+    {
+      "family": "MIR2 Billing Han",
+      "file": "MIR2BillingHan-Regular.ttf",
+      "metadata": "BILLING-HAN-SOURCE.json",
+      "purpose": "Only missing simplified billing label characters U+5E01/U+94FE; existing TC source remains unchanged and first."
+    },
+    {
+      "family": "Noto Sans CJK SC",
+      "file": "NotoSansCJKsc-Regular.otf",
+      "metadata": "SIMPLIFIED-SOURCE.json",
+      "purpose": "Complete official Simplified Chinese face; zh-CN primary. Existing TC and two-character billing face remain first for traditional Han."
+    }
+  ]
 }

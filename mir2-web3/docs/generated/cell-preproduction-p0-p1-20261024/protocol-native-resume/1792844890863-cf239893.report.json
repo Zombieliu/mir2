@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792844890863-cf239893",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "sourceRunId": "1792844742353-ccf6fb6e",
+  "actor": 0,
+  "accountId": "ptaf85551a6",
+  "name": "Af85551a6",
+  "characterIndex": 3,
+  "scope": "real-public-nativeResumeV1-protocol-with-unclean-socket-loss",
+  "startedAt": "2026-10-24T12:28:10.863Z",
+  "checks": {
+    "ordinaryLogin": {
+      "status": "passed",
+      "evidence": {
+        "name": "Af85551a6",
+        "characterIndex": 3,
+        "objectId": 1000,
+        "mapFileName": "0",
+        "x": 298,
+        "y": 623,
+        "direction": "Left"
+      }
+    },
+    "stepBeforeDrop": {
+      "status": "passed",
+      "evidence": {
+        "from": {
+          "mapFileName": "0",
+          "x": 298,
+          "y": 623
+        },
+        "to": {
+          "x": 299,
+          "y": 623,
+          "direction": "Right"
+        },
+        "receipt": 632
+      }
+    },
+    "uncleanTransportLoss": {
+      "status": "passed",
+      "evidence": {
+        "logoutSent": false,
+        "closed": true,
+        "priorGeneration": 1,
+        "latestOwnerState": {
+          "name": "Af85551a6",
+          "playerObjectId": 1000,
+          "mapFileName": "0",
+          "x": 299,
+          "y": 623,
+          "direction": "Right",
+          "inventory": {
+            "gold": 26,
+            "inventory": [
+              {
+                "uniqueId": "2",
+                "itemIndex": 0,
+                "name": "(HP)DrugSmall",
+                "count": 1,
+                "slot": "2"
+              }
+            ],
+            "equipment": [
+              {
+                "uniqueId": "0",
+                "itemIndex": 0,
+                "name": "WoodenSword",
+                "count": 1,
+                "slot": "weapon"
+              },
+              {
+                "uniqueId": "1",
+                "itemIndex": 0,
+                "name": "BaseDress(M)",
+                "count": 1,
+                "slot": "armour"
+              },
+              {
+                "uniqueId": "3",
+                "itemIndex": 0,
+                "name": "Candle",
+                "count": 1,
+                "slot": "torch"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "nativeResume": {
+      "status": "failed",
+      "error": "Native resume rejected by the real gateway"
+    },
+    "sameState": {
+      "status": "skipped",
+      "reason": "Earlier prerequisite did not complete"
+    },
+    "rotatedTicket": {
+      "status": "skipped",
+      "reason": "Earlier prerequisite did not complete"
+    },
+    "replayRejected": {
+      "status": "skipped",
+      "reason": "Earlier prerequisite did not complete"
+    },
+    "resumedOwnerLive": {
+      "status": "skipped",
+      "reason": "Earlier prerequisite did not complete"
+    },
+    "logout": {
+      "status": "skipped",
+      "reason": "Earlier prerequisite did not complete"
+    }
+  },
+  "nativeClientUiAccepted": false,
+  "serverRestartResumeTested": false,
+  "error": "Native resume rejected by the real gateway",
+  "ok": false,
+  "finishedAt": "2026-10-24T12:28:27.472Z"
+}

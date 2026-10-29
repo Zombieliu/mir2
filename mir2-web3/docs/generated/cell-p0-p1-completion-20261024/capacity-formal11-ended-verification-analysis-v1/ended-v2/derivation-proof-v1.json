@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T15:59:26.560Z",
+  "revision": 2,
+  "cause": "v1 constructed catalog identity from realm root with release- prefix; actual collector public catalog deliberately omits release-. v1 actual execution refused before raw reading.",
+  "main": {
+    "source": {
+      "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/verify-ended-formal11-v1.mjs",
+      "bytes": 29032,
+      "sha256": "6d4dbe1fb92027ea514c70b5d59055fbd89b73e345ebb774105ef69297aae69e"
+    },
+    "target": {
+      "path": "verify-ended-formal11-v1.mjs",
+      "bytes": 29070,
+      "sha256": "cb7b98b25e01d61708b79f7c0df1197e161e78ee27a33109f73c4087f5cf0010"
+    },
+    "rules": [
+      {
+        "purpose": "Separate v2 result output directory without altering v1",
+        "from": "const OUT=path.join(BASE,'formal11-independent-verification-v1');",
+        "to": "const OUT=path.join(BASE,'formal11-independent-verification-v2');"
+      },
+      {
+        "purpose": "Use actual collected public catalog identity (not realm directory identity)",
+        "from": "catalogName=`collect-${REALM}-public-artifact-catalog.json`",
+        "to": "catalogName='collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json'"
+      }
+    ],
+    "exactRawInverse": true
+  },
+  "unchangedCopies": [
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      "target": {
+        "path": "formal-contract-v1.mjs",
+        "bytes": 6103,
+        "sha256": "0f0dcf7daacdc19b9e5397b80ce836f4f3e3bd274b8ca4f32513e8aee6798152"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "target": {
+        "path": "hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "target": {
+        "path": "expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      "target": {
+        "path": "run-ended-formal11-v1.mjs",
+        "bytes": 2259,
+        "sha256": "1ae5f984f247e5341dca5302165a2444cfba17e1cb980db8a6a6440c290a27c7"
+      },
+      "rawExact": true
+    },
+    {
+      "source": {
+        "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "target": {
+        "path": "seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "rawExact": true
+    }
+  ],
+  "actualCatalog": {
+    "path": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/docs/generated/cell-p0-p1-completion-20261024/capacity-formal-native-v2-personal-projection-ladder-11/collect-formal-native-v2-personal-projection-ladder-11-public-artifact-catalog.json",
+    "bytes": 62973,
+    "sha256": "819a199e5cfc060463b65893bfdc78896891ffc9a6ddf2c2ffa5e819421d9d78"
+  },
+  "originalToolSeal": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/tool-source-frozen-v1.json",
+    "bytes": 1955,
+    "sha256": "798799c298c188d98cf7d8bd2f9399591ead9f6fae7e1bd521edc1b2ec36aade"
+  },
+  "originalExecution": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+    "bytes": 672,
+    "sha256": "4ecaa21fc07466f1d3b32e689bd409ccd8f862308fa1b7af72cfae8e9c5455b4"
+  },
+  "originalFailureLog": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/actual-verification.log",
+    "bytes": 1435,
+    "sha256": "3c86c7718d4889eade40d0bb70c5a0d19104bc9a93ae3bbcd2f28bcf86c76ee5"
+  },
+  "originalDerivationProof": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/derivation-proof-v1.json",
+    "bytes": 11358,
+    "sha256": "6e185c890c696eab45365ed44e094a4deb2f5cd9f81dd69db08b25974e2ba9fb"
+  },
+  "originalPreparation": {
+    "path": "C:/mir2-build/p01-completion-20261024/formal11-independent-verification-v1/preparation-v1.json",
+    "bytes": 6718,
+    "sha256": "cfdfdd4051a88dfcc1010bb36582e30afa4a035818e9de801ae3f959cd7ab7ed"
+  },
+  "originalRuntimeSourceUnchanged": true,
+  "allAcceptanceRulesUnchanged": true,
+  "noRawRunScanned": true,
+  "noPreviousEvidenceChanged": true,
+  "noVerifierExecuted": true
+}

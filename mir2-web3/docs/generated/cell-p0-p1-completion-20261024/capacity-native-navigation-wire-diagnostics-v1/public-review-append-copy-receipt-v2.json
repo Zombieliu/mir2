@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-25T07:05:11.3081059Z",
+  "scope": "Exact append of independent 31-copy closure review; v1 original files and receipt preserved.",
+  "source": "C:/mir2-build/p01-completion-20261024/compact-wire-public-closure-review-v1.json",
+  "target": "public-closure-independent-review-v1.json",
+  "bytes": 14121,
+  "sha256": "0f3628a5772b1896f3730d96c156f7dff7b05e8dbddab34fe0e94b7977d9aa8c",
+  "capacityAccepted": false
+}

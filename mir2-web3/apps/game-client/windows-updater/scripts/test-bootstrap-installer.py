@@ -10,6 +10,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -44,7 +45,7 @@ def entry(name, data):
     return {"path": name, "size": len(data), "sha256": archive.sha256(data)}
 
 
-def candidate_fixture(root):
+def candidate_fixture(root, simplified=False):
     root.mkdir()
     exe = b"MZ NONEXECUTABLE game fixture; never launched"
     status = archive.sha256(b"clean source fixture")
@@ -54,6 +55,9 @@ def candidate_fixture(root):
     payload = {"mir2-platform-windows.exe": exe, "BUILD-ATTESTATION.json": dumped(build),
                "mir2-assets/fixture/data.txt": b"An asset that must not be in the installer"}
     payload.update({name: ("license fixture " + name).encode("ascii") for name in bootstrap.LICENSES})
+    if simplified:
+        payload.update({"mir2-assets/legal/" + name: ("SC exact " + name).encode("ascii")
+                        for name in archive.SIMPLIFIED_DOCUMENTS})
     for name, data in payload.items():
         put(root, name, data)
     files = [entry(name, data) for name, data in sorted(payload.items())]
@@ -169,7 +173,7 @@ class BootstrapInputsTests(unittest.TestCase):
         self.assertEqual({n[5:] for n in installed if n.startswith("game/")}, set(archive.META))
         self.assertFalse(any("mir2-assets" in n or n.endswith("BUILD-ATTESTATION.json") or
                              n.endswith("mir2-platform-windows.exe") for n in installed))
-        self.assertEqual(report["installedFileCount"], 29)
+        self.assertEqual(report["installedFileCount"], 30)
         self.assertEqual(report["sequence"], 7)
         self.assertEqual(report["engineVersion"], 2)
         self.assertEqual(report["updaterSourceRevision"], "b" * 40)
@@ -178,11 +182,11 @@ class BootstrapInputsTests(unittest.TestCase):
             source = self.output / ("inputs/" + e["path"] if not e["path"].startswith("README.") else e["path"])
             self.assertEqual(archive.sha256(source.read_bytes()), e["sha256"])
 
-    def test_nine_languages_have_existing_install_guidance_and_exact_guard_hashes(self):
+    def test_ten_languages_have_existing_install_guidance_and_exact_guard_hashes(self):
         report = self.prepare()
         text = (self.output / "verified-bootstrap-messages.iss").read_text(encoding="utf-8-sig")
-        self.assertEqual(text.count(".BootstrapExisting="), 9)
-        self.assertEqual(text.count("Mir2Launcher.exe"), 9)
+        self.assertEqual(text.count(".BootstrapExisting="), 10)
+        self.assertEqual(text.count("Mir2Launcher.exe"), 10)
         guard = (self.output / "verified-bootstrap-guard.iss").read_text(encoding="utf-8-sig")
         for e in report["files"]:
             self.assertIn("'" + e["path"] + "'", guard)
@@ -190,6 +194,17 @@ class BootstrapInputsTests(unittest.TestCase):
         self.assertNotIn("transaction.json", guard)
         self.assertNotIn("highest.txt", guard)
         self.assertNotIn("game/mir2-platform-windows.exe", guard)
+
+    def test_new_sc_legal_layout_preserves_licenses_without_shipping_game_assets(self):
+        candidate = candidate_fixture(self.root / "sc-game", simplified=True)
+        bundle = bundle_fixture(self.root / "sc-bundle", candidate)
+        report = self.prepare(candidate_root=candidate, bundle_root=bundle)
+        self.assertEqual(report["installedFileCount"], 34)
+        self.assertIn("zh-CN", report["languages"])
+        self.assertFalse(report["gameAssetsIncluded"])
+        for name in bootstrap.SIMPLIFIED_LICENSES:
+            copied = self.output / "inputs/licenses" / name
+            self.assertEqual(copied.read_bytes(), (candidate / "mir2-assets/legal" / name).read_bytes())
 
     def test_wrong_source(self):
         self.reject(expected_revision="c" * 40)
@@ -343,11 +358,12 @@ class BootstrapInputsTests(unittest.TestCase):
 class CanonicalVerifierSourceTests(unittest.TestCase):
     script_names = ("verify-windows-candidate.ps1", "entity-atlas-closure.ps1",
                     "player-sprite-closure.ps1", "candidate-release-profile.ps1",
-                    "pet-guild-asset-closure.ps1")
+                    "pet-guild-asset-closure.ps1", "simplified-document-layout.ps1")
     font_names = ("NotoSansTC.ttf", "NotoSans-Regular.ttf", "NotoSans-Bold.ttf",
                   "NotoSansDevanagari-Regular.ttf", "NotoSansDevanagari-Bold.ttf",
                   "NotoSansThai-Regular.ttf", "NotoSansThai-Bold.ttf",
-                  "NotoSansArabic-Regular.ttf", "NotoSansArabic-Bold.ttf")
+                  "NotoSansArabic-Regular.ttf", "NotoSansArabic-Bold.ttf",
+                  "MIR2BillingHan-Regular.ttf", "NotoSansCJKsc-Regular.otf")
 
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="mir2-bootstrap-verifier-")
@@ -388,7 +404,8 @@ CopyCanonicalVerifierSource $env:MIR2_BOOTSTRAP_TEST_SCRIPTS $env:MIR2_BOOTSTRAP
 """
         environment = dict(os.environ, MIR2_BOOTSTRAP_TEST_BUILDER=str(SCRIPT_ROOT / "build-bootstrap-installer.ps1"),
                            MIR2_BOOTSTRAP_TEST_SCRIPTS=str(self.scripts),
-                           MIR2_BOOTSTRAP_TEST_PROOF=str(self.output))
+                           MIR2_BOOTSTRAP_TEST_PROOF=str(self.output),
+                           MIR2_BOOTSTRAP_TEST_WITNESS=str(self.root / "must-not-exist.txt"))
         return subprocess.run([POWERSHELL, "-NoProfile", "-NonInteractive", "-Command", command],
                               capture_output=True, text=True, encoding="utf-8", env=environment, timeout=30)
 
@@ -399,7 +416,7 @@ CopyCanonicalVerifierSource $env:MIR2_BOOTSTRAP_TEST_SCRIPTS $env:MIR2_BOOTSTRAP
         prefix = "apps/game-client/platform-windows/"
         expected = {prefix + "scripts/" + n for n in self.script_names}
         expected.update(prefix + "assets/fonts/" + n for n in self.font_names)
-        self.assertEqual(len(closure), 14)
+        self.assertEqual(len(closure), 17)
         self.assertEqual({e["path"] for e in closure}, expected)
         for entry in closure:
             relative = entry["path"].removeprefix(prefix)
@@ -414,6 +431,26 @@ CopyCanonicalVerifierSource $env:MIR2_BOOTSTRAP_TEST_SCRIPTS $env:MIR2_BOOTSTRAP
         (self.fonts / "NotoSansThai-Bold.ttf").unlink()
         result = self.copy_source()
         self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.output / "canonical-verifier-source-closure.json").exists())
+
+    def test_missing_full_simplified_font_rejected_before_source_receipt(self):
+        (self.fonts / "NotoSansCJKsc-Regular.otf").unlink()
+        result = self.copy_source()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.output / "canonical-verifier-source-closure.json").exists())
+
+    def test_dynamic_scalar_pin_is_rejected_without_executing_source(self):
+        verifier = self.scripts / "verify-windows-candidate.ps1"
+        text = verifier.read_text(encoding="utf-8-sig")
+        text, replacements = re.subn(
+            r"(file\s*=\s*'NotoSansTC.ttf';\s*length\s*=\s*)\d+",
+            r"\1([IO.File]::WriteAllText($env:MIR2_BOOTSTRAP_TEST_WITNESS, 'executed'))",
+            text, count=1)
+        self.assertEqual(replacements, 1)
+        verifier.write_text(text, encoding="utf-8")
+        result = self.copy_source()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.root / "must-not-exist.txt").exists())
         self.assertFalse((self.output / "canonical-verifier-source-closure.json").exists())
 
     def test_changed_canonical_font_rejected_against_existing_pin(self):

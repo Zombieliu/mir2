@@ -1,0 +1,2141 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24T17:18:45.032Z",
+  "scope": "Actual new Release ordinary10 feasibility only; original 100000/s total-process-I/O guard unchanged; all phase quality failures retained, no capacity or hardware ceiling acceptance.",
+  "sources": [
+    {
+      "path": "release-native-10-feasibility-03/reports/1792861674728-9774b6b8.report.json",
+      "bytes": 42964,
+      "sha256": "0116dcf8453eebc35aa8599ae8270b68c472cfa9eee03afc9178fa968547c224"
+    },
+    {
+      "path": "release-native-10-feasibility-03/reports/1792861674728-9774b6b8.samples.jsonl",
+      "bytes": 1926495,
+      "sha256": "1e456b7e2fc10eaae5ef2dab70eb0126bb9932193d679f9562142ec1556e3ec7"
+    },
+    {
+      "path": "release-native-10-feasibility-03/monitor-history.jsonl",
+      "bytes": 2021536,
+      "sha256": "6373bd03478533137a02b7030b663e56e65b60516ee4267c176854a61e0d02ef"
+    },
+    {
+      "path": "native-10-io-guard-diagnostics-v2.json",
+      "bytes": 118820,
+      "sha256": "44bff493770454209dae3ef5c530ce6184c7cb227632a76edafb9e61690d5d21"
+    },
+    {
+      "path": "release-native-10-feasibility-03/spectator-recordings-summary.json",
+      "bytes": 1009,
+      "sha256": "bb90a2e2452f84b3013f00f28390b0a5bdb63b675e7a07995c8bb66e9a1a1f46"
+    }
+  ],
+  "build": {
+    "schemaVersion": 1,
+    "scope": "Unique ordinary ten-player natural workload feasibility probe only; not formal capacity acceptance",
+    "sourceExecutable": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target/release/mir2-gateway.exe",
+    "ownedExecutable": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-feasibility-03\\bin\\mir2-gateway.exe",
+    "sha256": "187775e2398ca593d4aa6021e1b2a7cf3a577ec2a19ca5e7446eaaa70a506f8c",
+    "bytes": 87128576,
+    "copiedAtUtc": "2026-10-24T17:05:28.0777466+00:00",
+    "capacityAccepted": false,
+    "formalRunStarted": false,
+    "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+    "sourceManifest": {
+      "file": "C:/mir2-build/p01-completion-20261024/backend-source-spectator-buffer-827d4c8.json",
+      "bytes": 10050,
+      "sha256": "c6cd3a1cfa0a02bb1a709d937b85457be72def4a61c5fa50a3a7768a2b2ebc1f",
+      "sourceManifestSha256": "d8936d2f2b77bfcf2f9b84c8ecc1d5c3ad37f095abe73836ed785ad852dcd5ea",
+      "inputs": 33
+    },
+    "releaseRecord": "C:/mir2-build/p01-completion-20261024/release-spectator-buffer-827d4c8.json",
+    "sourceInputsVerifiedBeforeLaunch": true
+  },
+  "verdict": {
+    "ok": false,
+    "safetyStopped": true,
+    "error": "Stage 10 did not satisfy the fixed activity, latency or coverage gates",
+    "peakControlledActors": 10,
+    "highestMeasuredStage": 10,
+    "measuredSoakSeconds": 0,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792861674778,
+        "endedAtMs": 1792861750999,
+        "completed": true
+      },
+      {
+        "name": "stage-10",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792861750999,
+        "endedAtMs": 1792861781050,
+        "completed": true
+      }
+    ],
+    "capacityAccepted": false,
+    "formalStarted": false,
+    "cleanupErrors": []
+  },
+  "timeScope": {
+    "startedAt": "2026-10-24T17:07:54.729Z",
+    "finishedAt": "2026-10-24T17:09:42.903Z",
+    "monitorTotalSamples": 226,
+    "monitorSamplesWithinRun": 52,
+    "monitorSamplesAfterRun": 171,
+    "excluded": "All post-finish samples (server idle after normal client drain) excluded from active I/O summaries; only intervals with both monitor wall endpoints in specified run/phase are selected.",
+    "denominator": "Raw OS sampledAt is not present in frozen monitor output. Each original OS deltaSeconds is reconstructed as total raw counter delta / recorded ioOperationsPerSecond, then cross-checked against all 3 stored byte rates. Wall timestamps only locate intervals, approximately 1ms different from underlying OS sample timestamps. Do not derive exact original rates from monitor evaluation timestamps.",
+    "quantile": "Nearest-rank quantiles over recorded interval rates, not I/O operation latency or continuous maxima."
+  },
+  "guard": {
+    "thresholdOperationsPerSecond": 100000,
+    "consecutiveSamples": 3,
+    "unchanged": true,
+    "definition": "Windows process read/write/other operation rate, including file/network/device/control operations; not physical disk IOPS or storage saturation."
+  },
+  "summary": {
+    "allWithinRun": {
+      "samples": 51,
+      "firstAtMs": 1792861675242,
+      "lastAtMs": 1792861782371,
+      "seconds": 107.12999999999998,
+      "stopSamples": 0,
+      "totalOps": 35174,
+      "writeOps": 1015,
+      "timeWeightedTotalOperationsPerSecond": 328.3300662746197,
+      "timeWeightedWriteOperationsPerSecond": 9.474470269765707,
+      "maxTotalOperationsPerSecond": 2840.627973358706,
+      "p99SampleTotalOperationsPerSecond": 2840.627973358706,
+      "medianSampleTotalOperationsPerSecond": 169.55684007707129,
+      "maxWriteOperationsPerSecond": 69.68810916179338,
+      "maxTotalMiBPerSecond": 15.677315977842438,
+      "maxCpuLogicalEquivalents": 0.8890469416785206,
+      "maxPrivateBytes": 360525824,
+      "maxWorkingSetBytes": 410705920,
+      "minHostFreeBytes": 35780419584,
+      "maxHandles": 190,
+      "maxThreads": 20
+    },
+    "bootstrap": {
+      "samples": 35,
+      "firstAtMs": 1792861675242,
+      "lastAtMs": 1792861749048,
+      "seconds": 73.807,
+      "stopSamples": 0,
+      "totalOps": 29727,
+      "writeOps": 700,
+      "timeWeightedTotalOperationsPerSecond": 402.76667524760524,
+      "timeWeightedWriteOperationsPerSecond": 9.484195266031676,
+      "maxTotalOperationsPerSecond": 2840.627973358706,
+      "p99SampleTotalOperationsPerSecond": 2840.627973358706,
+      "medianSampleTotalOperationsPerSecond": 177.90530846484933,
+      "maxWriteOperationsPerSecond": 15.522107243650048,
+      "maxTotalMiBPerSecond": 15.677315977842438,
+      "maxCpuLogicalEquivalents": 0.8890469416785206,
+      "maxPrivateBytes": 291799040,
+      "maxWorkingSetBytes": 342577152,
+      "minHostFreeBytes": 35895836672,
+      "maxHandles": 187,
+      "maxThreads": 19
+    },
+    "bothEndpointsAtLeast9Active": {
+      "samples": 33,
+      "firstAtMs": 1792861711206,
+      "lastAtMs": 1792861780319,
+      "seconds": 69.11200000000002,
+      "stopSamples": 0,
+      "totalOps": 12348,
+      "writeOps": 509,
+      "timeWeightedTotalOperationsPerSecond": 178.66651232781567,
+      "timeWeightedWriteOperationsPerSecond": 7.364857043639308,
+      "maxTotalOperationsPerSecond": 802.8503562945368,
+      "p99SampleTotalOperationsPerSecond": 802.8503562945368,
+      "medianSampleTotalOperationsPerSecond": 151.5587529976019,
+      "maxWriteOperationsPerSecond": 13.776722090261282,
+      "maxTotalMiBPerSecond": 0.41356476031704403,
+      "maxCpuLogicalEquivalents": 0.8890469416785206,
+      "maxPrivateBytes": 354021376,
+      "maxWorkingSetBytes": 404004864,
+      "minHostFreeBytes": 35837091840,
+      "maxHandles": 190,
+      "maxThreads": 20
+    },
+    "stage10": {
+      "samples": 14,
+      "firstAtMs": 1792861751133,
+      "lastAtMs": 1792861780319,
+      "seconds": 29.186000000000003,
+      "stopSamples": 0,
+      "totalOps": 4471,
+      "writeOps": 161,
+      "timeWeightedTotalOperationsPerSecond": 153.1898855615706,
+      "timeWeightedWriteOperationsPerSecond": 5.516343452340163,
+      "maxTotalOperationsPerSecond": 202.61754726126998,
+      "p99SampleTotalOperationsPerSecond": 202.61754726126998,
+      "medianSampleTotalOperationsPerSecond": 146.2488129154796,
+      "maxWriteOperationsPerSecond": 8.240426563257392,
+      "maxTotalMiBPerSecond": 0.3287399462027143,
+      "maxCpuLogicalEquivalents": 0.43142857142857144,
+      "maxPrivateBytes": 354021376,
+      "maxWorkingSetBytes": 404004864,
+      "minHostFreeBytes": 35837091840,
+      "maxHandles": 190,
+      "maxThreads": 20
+    }
+  },
+  "oldFailureComparison": {
+    "oldReleaseSha256": "99bca561822a2d02bd4a012546c228923f3f34e6612612085d6caed9f82ee50d",
+    "oldSourceCommit": "38194647a59bc356259e442b3f837e8c231e279d",
+    "oldStopSamples": [
+      {
+        "atMs": 1792859799484,
+        "recordedTotalOperationsPerSecond": 101986.07108549472,
+        "writeOperationsPerSecond": 101205.09125840539,
+        "writeBytesPerWriteOperation": 2.7322515886839196
+      },
+      {
+        "atMs": 1792859801566,
+        "recordedTotalOperationsPerSecond": 102721.76838058626,
+        "writeOperationsPerSecond": 102517.05910619894,
+        "writeBytesPerWriteOperation": 4.340984728459065
+      },
+      {
+        "atMs": 1792859803695,
+        "recordedTotalOperationsPerSecond": 102452.58215962442,
+        "writeOperationsPerSecond": 101684.9765258216,
+        "writeBytesPerWriteOperation": 2.7326595533475846
+      }
+    ],
+    "newMaxTotalOperationsAtLeast9Active": 802.8503562945368,
+    "newMaxWriteOperationsAtLeast9Active": 13.776722090261282,
+    "scope": "Different fresh realm/admission timing and one short stage. Buffered JSONL is consistent with large write-operation reduction and zero recording errors; no full soak, disk latency, hardware maximum, or exact causal speedup certificate."
+  },
+  "spectator": {
+    "schemaVersion": 1,
+    "createdAt": "2026-10-24T17:15:55.422Z",
+    "scope": "Post-stop streaming metadata/count/hash from this fresh explicitly owned spectator directory only; no replay/entity payload copied",
+    "directory": "C:/mir2-build/p01-completion-20261024/release-native-10-feasibility-03/recordings",
+    "sourceCommit": "827d4c8b52066d033a2f18941be80c97b337d6de",
+    "fileCount": 1,
+    "totalFrames": 397,
+    "totalBytes": 22583696,
+    "healthPersistedFramesTotal": 397,
+    "persistedCounterMatchesFiles": true,
+    "recordingErrorsTotal": 0,
+    "files": [
+      {
+        "file": "0-498017.jsonl",
+        "bytes": 22583696,
+        "sha256": "6eaba7e6ab9620dd8b59fb5c34f6bf0029e9480f7d6f35d3be6440a27a59fd79",
+        "frames": 397,
+        "minCapturedAtMs": 1792861677464,
+        "maxCapturedAtMs": 1792861782328,
+        "firstSequence": 1,
+        "lastSequence": 397,
+        "mapFileNames": [
+          "0"
+        ],
+        "schemas": [
+          "obelisk.mir2.spectator.v1"
+        ]
+      }
+    ],
+    "capacityAccepted": false
+  },
+  "allSelectedRunIntervals": [
+    {
+      "fromAtMs": 1792861675242,
+      "toAtMs": 1792861677344,
+      "seconds": 2.102,
+      "monitorWallDeltaSeconds": 2.102,
+      "phase": "bootstrap-10",
+      "activeFrom": 0,
+      "activeTo": 1,
+      "stop": false,
+      "delta": {
+        "readOperations": 4286,
+        "writeOperations": 15,
+        "otherIoOperations": 1670,
+        "readBytes": 34471588,
+        "writeBytes": 20232,
+        "otherIoBytes": 62658
+      },
+      "rates": {
+        "totalOperationsPerSecond": 2840.627973358706,
+        "readOperationsPerSecond": 2039.0104662226452,
+        "writeOperationsPerSecond": 7.136060894386299,
+        "otherOperationsPerSecond": 794.4814462416747,
+        "readBytesPerSecond": 16399423.406279735,
+        "writeBytesPerSecond": 9625.11893434824,
+        "otherBytesPerSecond": 29808.75356803045,
+        "totalMiBPerSecond": 15.677315977842438,
+        "writeBytesPerWriteOperation": 1348.8,
+        "cpuLogicalEquivalents": 0.28972407231208375
+      },
+      "memory": {
+        "privateBytes": 35004416,
+        "workingSetBytes": 59883520,
+        "hostFreeBytes": 37015523328
+      },
+      "handles": 149,
+      "threads": 10
+    },
+    {
+      "fromAtMs": 1792861677344,
+      "toAtMs": 1792861679450,
+      "seconds": 2.108,
+      "monitorWallDeltaSeconds": 2.106,
+      "phase": "bootstrap-10",
+      "activeFrom": 1,
+      "activeTo": 1,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 16,
+        "otherIoOperations": 330,
+        "readBytes": 0,
+        "writeBytes": 227949,
+        "otherIoBytes": 2872
+      },
+      "rates": {
+        "totalOperationsPerSecond": 164.13662239089183,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 7.590132827324478,
+        "otherOperationsPerSecond": 156.54648956356735,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 108135.19924098671,
+        "otherBytesPerSecond": 1362.4288425047437,
+        "totalMiBPerSecond": 0.10442507561062951,
+        "writeBytesPerWriteOperation": 14246.8125,
+        "cpuLogicalEquivalents": 0.5189753320683111
+      },
+      "memory": {
+        "privateBytes": 71729152,
+        "workingSetBytes": 124567552,
+        "hostFreeBytes": 36934868992
+      },
+      "handles": 149,
+      "threads": 10
+    },
+    {
+      "fromAtMs": 1792861679450,
+      "toAtMs": 1792861681649,
+      "seconds": 2.198,
+      "monitorWallDeltaSeconds": 2.199,
+      "phase": "bootstrap-10",
+      "activeFrom": 1,
+      "activeTo": 2,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 21,
+        "otherIoOperations": 1534,
+        "readBytes": 4420,
+        "writeBytes": 324127,
+        "otherIoBytes": 59622
+      },
+      "rates": {
+        "totalOperationsPerSecond": 719.2902638762512,
+        "readOperationsPerSecond": 11.828935395814376,
+        "writeOperationsPerSecond": 9.554140127388536,
+        "otherOperationsPerSecond": 697.9071883530482,
+        "readBytesPerSecond": 2010.9190172884441,
+        "writeBytesPerSecond": 147464.51319381257,
+        "otherBytesPerSecond": 27125.568698817107,
+        "totalMiBPerSecond": 0.16841983881942568,
+        "writeBytesPerWriteOperation": 15434.619047619048,
+        "cpuLogicalEquivalents": 0.19881710646041856
+      },
+      "memory": {
+        "privateBytes": 77242368,
+        "workingSetBytes": 130232320,
+        "hostFreeBytes": 36828995584
+      },
+      "handles": 152,
+      "threads": 10
+    },
+    {
+      "fromAtMs": 1792861681649,
+      "toAtMs": 1792861683766,
+      "seconds": 2.116,
+      "monitorWallDeltaSeconds": 2.117,
+      "phase": "bootstrap-10",
+      "activeFrom": 2,
+      "activeTo": 2,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 305,
+        "readBytes": 0,
+        "writeBytes": 377294,
+        "otherIoBytes": 3708
+      },
+      "rates": {
+        "totalOperationsPerSecond": 152.17391304347825,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.034026465028354,
+        "otherOperationsPerSecond": 144.1398865784499,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 178305.29300567106,
+        "otherBytesPerSecond": 1752.3629489603024,
+        "totalMiBPerSecond": 0.17171636195624482,
+        "writeBytesPerWriteOperation": 22193.764705882353,
+        "cpuLogicalEquivalents": 0.5760869565217391
+      },
+      "memory": {
+        "privateBytes": 83341312,
+        "workingSetBytes": 136478720,
+        "hostFreeBytes": 36851912704
+      },
+      "handles": 152,
+      "threads": 10
+    },
+    {
+      "fromAtMs": 1792861683766,
+      "toAtMs": 1792861685851,
+      "seconds": 2.085,
+      "monitorWallDeltaSeconds": 2.085,
+      "phase": "bootstrap-10",
+      "activeFrom": 2,
+      "activeTo": 3,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 19,
+        "otherIoOperations": 1504,
+        "readBytes": 4420,
+        "writeBytes": 269206,
+        "otherIoBytes": 59350
+      },
+      "rates": {
+        "totalOperationsPerSecond": 742.9256594724221,
+        "readOperationsPerSecond": 12.470023980815348,
+        "writeOperationsPerSecond": 9.112709832134293,
+        "otherOperationsPerSecond": 721.3429256594725,
+        "readBytesPerSecond": 2119.904076738609,
+        "writeBytesPerSecond": 129115.58752997602,
+        "otherBytesPerSecond": 28465.227817745803,
+        "totalMiBPerSecond": 0.15230247442670863,
+        "writeBytesPerWriteOperation": 14168.736842105263,
+        "cpuLogicalEquivalents": 0.1947242206235012
+      },
+      "memory": {
+        "privateBytes": 89440256,
+        "workingSetBytes": 142651392,
+        "hostFreeBytes": 36863750144
+      },
+      "handles": 153,
+      "threads": 10
+    },
+    {
+      "fromAtMs": 1792861685851,
+      "toAtMs": 1792861687963,
+      "seconds": 2.113,
+      "monitorWallDeltaSeconds": 2.112,
+      "phase": "bootstrap-10",
+      "activeFrom": 3,
+      "activeTo": 3,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 23,
+        "otherIoOperations": 405,
+        "readBytes": 0,
+        "writeBytes": 485807,
+        "otherIoBytes": 4724
+      },
+      "rates": {
+        "totalOperationsPerSecond": 202.55560814008518,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 10.884997633696166,
+        "otherOperationsPerSecond": 191.670610506389,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 229913.3932796971,
+        "otherBytesPerSecond": 2235.683861807856,
+        "totalMiBPerSecond": 0.22139461244726655,
+        "writeBytesPerWriteOperation": 21122.043478260868,
+        "cpuLogicalEquivalents": 0.6213913866540464
+      },
+      "memory": {
+        "privateBytes": 96317440,
+        "workingSetBytes": 149491712,
+        "hostFreeBytes": 36678336512
+      },
+      "handles": 159,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861687963,
+      "toAtMs": 1792861690097,
+      "seconds": 2.134,
+      "monitorWallDeltaSeconds": 2.134,
+      "phase": "bootstrap-10",
+      "activeFrom": 3,
+      "activeTo": 4,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 19,
+        "otherIoOperations": 1522,
+        "readBytes": 4420,
+        "writeBytes": 276592,
+        "otherIoBytes": 59638
+      },
+      "rates": {
+        "totalOperationsPerSecond": 734.3017806935333,
+        "readOperationsPerSecond": 12.18369259606373,
+        "writeOperationsPerSecond": 8.903467666354265,
+        "otherOperationsPerSecond": 713.2146204311153,
+        "readBytesPerSecond": 2071.2277413308343,
+        "writeBytesPerSecond": 129611.99625117151,
+        "otherBytesPerSecond": 27946.579194001875,
+        "totalMiBPerSecond": 0.15223484343195365,
+        "writeBytesPerWriteOperation": 14557.473684210527,
+        "cpuLogicalEquivalents": 0.16073102155576383
+      },
+      "memory": {
+        "privateBytes": 102539264,
+        "workingSetBytes": 155631616,
+        "hostFreeBytes": 36673413120
+      },
+      "handles": 160,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861690097,
+      "toAtMs": 1792861692234,
+      "seconds": 2.138,
+      "monitorWallDeltaSeconds": 2.137,
+      "phase": "bootstrap-10",
+      "activeFrom": 4,
+      "activeTo": 4,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 321,
+        "readBytes": 0,
+        "writeBytes": 468237,
+        "otherIoBytes": 4028
+      },
+      "rates": {
+        "totalOperationsPerSecond": 158.09167446211413,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 7.951356407857811,
+        "otherOperationsPerSecond": 150.1403180542563,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 219007.01590271282,
+        "otherBytesPerSecond": 1884.0037418147804,
+        "totalMiBPerSecond": 0.2106580921597744,
+        "writeBytesPerWriteOperation": 27543.352941176472,
+        "cpuLogicalEquivalents": 0.6580916744621141
+      },
+      "memory": {
+        "privateBytes": 108572672,
+        "workingSetBytes": 161603584,
+        "hostFreeBytes": 36640161792
+      },
+      "handles": 160,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861692234,
+      "toAtMs": 1792861694343,
+      "seconds": 2.109,
+      "monitorWallDeltaSeconds": 2.109,
+      "phase": "bootstrap-10",
+      "activeFrom": 4,
+      "activeTo": 5,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 24,
+        "otherIoOperations": 1624,
+        "readBytes": 4420,
+        "writeBytes": 448925,
+        "otherIoBytes": 60938
+      },
+      "rates": {
+        "totalOperationsPerSecond": 793.7411095305832,
+        "readOperationsPerSecond": 12.328117591275486,
+        "writeOperationsPerSecond": 11.379800853485063,
+        "otherOperationsPerSecond": 770.0331910858226,
+        "readBytesPerSecond": 2095.7799905168326,
+        "writeBytesPerSecond": 212861.5457562826,
+        "otherBytesPerSecond": 28894.262683736368,
+        "totalMiBPerSecond": 0.23255499690106946,
+        "writeBytesPerWriteOperation": 18705.208333333332,
+        "cpuLogicalEquivalents": 0.2072072072072072
+      },
+      "memory": {
+        "privateBytes": 116367360,
+        "workingSetBytes": 169070592,
+        "hostFreeBytes": 36612472832
+      },
+      "handles": 161,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861694343,
+      "toAtMs": 1792861696530,
+      "seconds": 2.186,
+      "monitorWallDeltaSeconds": 2.187,
+      "phase": "bootstrap-10",
+      "activeFrom": 5,
+      "activeTo": 5,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 337,
+        "readBytes": 0,
+        "writeBytes": 541375,
+        "otherIoBytes": 4348
+      },
+      "rates": {
+        "totalOperationsPerSecond": 161.93961573650503,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 7.77676120768527,
+        "otherOperationsPerSecond": 154.16285452881976,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 247655.53522415372,
+        "otherBytesPerSecond": 1989.021043000915,
+        "totalMiBPerSecond": 0.2380796015426203,
+        "writeBytesPerWriteOperation": 31845.58823529412,
+        "cpuLogicalEquivalents": 0.6290027447392498
+      },
+      "memory": {
+        "privateBytes": 122810368,
+        "workingSetBytes": 175620096,
+        "hostFreeBytes": 36587925504
+      },
+      "handles": 161,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861696530,
+      "toAtMs": 1792861698614,
+      "seconds": 2.084,
+      "monitorWallDeltaSeconds": 2.084,
+      "phase": "bootstrap-10",
+      "activeFrom": 5,
+      "activeTo": 6,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 29,
+        "otherIoOperations": 1702,
+        "readBytes": 4420,
+        "writeBytes": 570470,
+        "otherIoBytes": 61754
+      },
+      "rates": {
+        "totalOperationsPerSecond": 843.0902111324376,
+        "readOperationsPerSecond": 12.476007677543185,
+        "writeOperationsPerSecond": 13.915547024952016,
+        "otherOperationsPerSecond": 816.6986564299424,
+        "readBytesPerSecond": 2120.9213051823417,
+        "writeBytesPerSecond": 273738.0038387716,
+        "otherBytesPerSecond": 29632.437619961613,
+        "totalMiBPerSecond": 0.2913392665518909,
+        "writeBytesPerWriteOperation": 19671.379310344826,
+        "cpuLogicalEquivalents": 0.29990403071017274
+      },
+      "memory": {
+        "privateBytes": 129966080,
+        "workingSetBytes": 182534144,
+        "hostFreeBytes": 36617392128
+      },
+      "handles": 162,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861698614,
+      "toAtMs": 1792861700706,
+      "seconds": 2.092,
+      "monitorWallDeltaSeconds": 2.092,
+      "phase": "bootstrap-10",
+      "activeFrom": 6,
+      "activeTo": 6,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 349,
+        "readBytes": 0,
+        "writeBytes": 607885,
+        "otherIoBytes": 4540
+      },
+      "rates": {
+        "totalOperationsPerSecond": 174.95219885277245,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.126195028680687,
+        "otherOperationsPerSecond": 166.82600382409177,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 290576.00382409175,
+        "otherBytesPerSecond": 2170.172084130019,
+        "totalMiBPerSecond": 0.27918450918981724,
+        "writeBytesPerWriteOperation": 35757.94117647059,
+        "cpuLogicalEquivalents": 0.5750478011472275
+      },
+      "memory": {
+        "privateBytes": 136785920,
+        "workingSetBytes": 189300736,
+        "hostFreeBytes": 36632911872
+      },
+      "handles": 162,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861700706,
+      "toAtMs": 1792861702782,
+      "seconds": 2.076,
+      "monitorWallDeltaSeconds": 2.076,
+      "phase": "bootstrap-10",
+      "activeFrom": 6,
+      "activeTo": 7,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 22,
+        "otherIoOperations": 1605,
+        "readBytes": 4420,
+        "writeBytes": 455470,
+        "otherIoBytes": 60826
+      },
+      "rates": {
+        "totalOperationsPerSecond": 796.2427745664739,
+        "readOperationsPerSecond": 12.524084778420038,
+        "writeOperationsPerSecond": 10.597302504816955,
+        "otherOperationsPerSecond": 773.1213872832369,
+        "readBytesPerSecond": 2129.0944123314066,
+        "writeBytesPerSecond": 219397.88053949902,
+        "otherBytesPerSecond": 29299.61464354528,
+        "totalMiBPerSecond": 0.23920687636888097,
+        "writeBytesPerWriteOperation": 20703.18181818182,
+        "cpuLogicalEquivalents": 0.34633911368015413
+      },
+      "memory": {
+        "privateBytes": 144691200,
+        "workingSetBytes": 196820992,
+        "hostFreeBytes": 36658884608
+      },
+      "handles": 163,
+      "threads": 12
+    },
+    {
+      "fromAtMs": 1792861702782,
+      "toAtMs": 1792861704878,
+      "seconds": 2.097,
+      "monitorWallDeltaSeconds": 2.096,
+      "phase": "bootstrap-10",
+      "activeFrom": 7,
+      "activeTo": 7,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 360,
+        "readBytes": 0,
+        "writeBytes": 701381,
+        "otherIoBytes": 4764
+      },
+      "rates": {
+        "totalOperationsPerSecond": 179.78063900810682,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.106819265617549,
+        "otherOperationsPerSecond": 171.6738197424893,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 334468.7649022413,
+        "otherBytesPerSecond": 2271.8168812589415,
+        "totalMiBPerSecond": 0.32114084413862254,
+        "writeBytesPerWriteOperation": 41257.705882352944,
+        "cpuLogicalEquivalents": 0.6261325703385789
+      },
+      "memory": {
+        "privateBytes": 153092096,
+        "workingSetBytes": 205312000,
+        "hostFreeBytes": 36642824192
+      },
+      "handles": 166,
+      "threads": 13
+    },
+    {
+      "fromAtMs": 1792861704878,
+      "toAtMs": 1792861706986,
+      "seconds": 2.108,
+      "monitorWallDeltaSeconds": 2.108,
+      "phase": "bootstrap-10",
+      "activeFrom": 7,
+      "activeTo": 8,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 28,
+        "otherIoOperations": 1635,
+        "readBytes": 4420,
+        "writeBytes": 611205,
+        "otherIoBytes": 61346
+      },
+      "rates": {
+        "totalOperationsPerSecond": 801.2333965844402,
+        "readOperationsPerSecond": 12.333965844402277,
+        "writeOperationsPerSecond": 13.282732447817835,
+        "otherOperationsPerSecond": 775.6166982922201,
+        "readBytesPerSecond": 2096.774193548387,
+        "writeBytesPerSecond": 289945.4459203036,
+        "otherBytesPerSecond": 29101.518026565464,
+        "totalMiBPerSecond": 0.30626653493921036,
+        "writeBytesPerWriteOperation": 21828.75,
+        "cpuLogicalEquivalents": 0.3036053130929791
+      },
+      "memory": {
+        "privateBytes": 160817152,
+        "workingSetBytes": 212889600,
+        "hostFreeBytes": 36629020672
+      },
+      "handles": 167,
+      "threads": 13
+    },
+    {
+      "fromAtMs": 1792861706986,
+      "toAtMs": 1792861709113,
+      "seconds": 2.126,
+      "monitorWallDeltaSeconds": 2.127,
+      "phase": "bootstrap-10",
+      "activeFrom": 8,
+      "activeTo": 8,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 33,
+        "otherIoOperations": 481,
+        "readBytes": 0,
+        "writeBytes": 1024154,
+        "otherIoBytes": 6124
+      },
+      "rates": {
+        "totalOperationsPerSecond": 241.76857949200377,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 15.522107243650048,
+        "otherOperationsPerSecond": 226.24647224835374,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 481728.12793979305,
+        "otherBytesPerSecond": 2880.526810912512,
+        "totalMiBPerSecond": 0.46215882754393156,
+        "writeBytesPerWriteOperation": 31034.969696969696,
+        "cpuLogicalEquivalents": 0.7718720602069614
+      },
+      "memory": {
+        "privateBytes": 172273664,
+        "workingSetBytes": 224104448,
+        "hostFreeBytes": 36609531904
+      },
+      "handles": 170,
+      "threads": 14
+    },
+    {
+      "fromAtMs": 1792861709113,
+      "toAtMs": 1792861711206,
+      "seconds": 2.094,
+      "monitorWallDeltaSeconds": 2.093,
+      "phase": "bootstrap-10",
+      "activeFrom": 8,
+      "activeTo": 9,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 29,
+        "otherIoOperations": 1625,
+        "readBytes": 4420,
+        "writeBytes": 587146,
+        "otherIoBytes": 61322
+      },
+      "rates": {
+        "totalOperationsPerSecond": 802.2922636103152,
+        "readOperationsPerSecond": 12.41642788920726,
+        "writeOperationsPerSecond": 13.84909264565425,
+        "otherOperationsPerSecond": 776.0267430754537,
+        "readBytesPerSecond": 2110.792741165234,
+        "writeBytesPerSecond": 280394.4603629418,
+        "otherBytesPerSecond": 29284.622731614138,
+        "totalMiBPerSecond": 0.29734599670002093,
+        "writeBytesPerWriteOperation": 20246.41379310345,
+        "cpuLogicalEquivalents": 0.25358166189111747
+      },
+      "memory": {
+        "privateBytes": 180105216,
+        "workingSetBytes": 231825408,
+        "hostFreeBytes": 36619915264
+      },
+      "handles": 171,
+      "threads": 14
+    },
+    {
+      "fromAtMs": 1792861711206,
+      "toAtMs": 1792861713325,
+      "seconds": 2.119,
+      "monitorWallDeltaSeconds": 2.119,
+      "phase": "bootstrap-10",
+      "activeFrom": 9,
+      "activeTo": 9,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 27,
+        "otherIoOperations": 400,
+        "readBytes": 0,
+        "writeBytes": 913469,
+        "otherIoBytes": 5444
+      },
+      "rates": {
+        "totalOperationsPerSecond": 201.51014629542235,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 12.741859367626237,
+        "otherOperationsPerSecond": 188.7682869277961,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 431084.9457291175,
+        "otherBytesPerSecond": 2569.136385087305,
+        "totalMiBPerSecond": 0.41356476031704403,
+        "writeBytesPerWriteOperation": 33832.18518518518,
+        "cpuLogicalEquivalents": 0.8480415290231241
+      },
+      "memory": {
+        "privateBytes": 187490304,
+        "workingSetBytes": 238845952,
+        "hostFreeBytes": 36651765760
+      },
+      "handles": 171,
+      "threads": 14
+    },
+    {
+      "fromAtMs": 1792861713325,
+      "toAtMs": 1792861715431,
+      "seconds": 2.105,
+      "monitorWallDeltaSeconds": 2.106,
+      "phase": "bootstrap-10",
+      "activeFrom": 9,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 26,
+        "writeOperations": 29,
+        "otherIoOperations": 1635,
+        "readBytes": 4420,
+        "writeBytes": 607546,
+        "otherIoBytes": 61450
+      },
+      "rates": {
+        "totalOperationsPerSecond": 802.8503562945368,
+        "readOperationsPerSecond": 12.351543942992874,
+        "writeOperationsPerSecond": 13.776722090261282,
+        "otherOperationsPerSecond": 776.7220902612827,
+        "readBytesPerSecond": 2099.7624703087886,
+        "writeBytesPerSecond": 288620.42755344417,
+        "otherBytesPerSecond": 29192.399049881235,
+        "totalMiBPerSecond": 0.30509241969455164,
+        "writeBytesPerWriteOperation": 20949.862068965518,
+        "cpuLogicalEquivalents": 0.24513064133016627
+      },
+      "memory": {
+        "privateBytes": 195293184,
+        "workingSetBytes": 246894592,
+        "hostFreeBytes": 36405665792
+      },
+      "handles": 172,
+      "threads": 14
+    },
+    {
+      "fromAtMs": 1792861715431,
+      "toAtMs": 1792861717540,
+      "seconds": 2.109,
+      "monitorWallDeltaSeconds": 2.109,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 25,
+        "otherIoOperations": 407,
+        "readBytes": 0,
+        "writeBytes": 877249,
+        "otherIoBytes": 5644
+      },
+      "rates": {
+        "totalOperationsPerSecond": 204.83641536273115,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 11.853959222380276,
+        "otherOperationsPerSecond": 192.98245614035088,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 415954.95495495497,
+        "otherBytesPerSecond": 2676.149834044571,
+        "totalMiBPerSecond": 0.39923773268604235,
+        "writeBytesPerWriteOperation": 35089.96,
+        "cpuLogicalEquivalents": 0.8890469416785206
+      },
+      "memory": {
+        "privateBytes": 204718080,
+        "workingSetBytes": 256053248,
+        "hostFreeBytes": 36448391168
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861717540,
+      "toAtMs": 1792861719661,
+      "seconds": 2.12,
+      "monitorWallDeltaSeconds": 2.121,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 25,
+        "otherIoOperations": 397,
+        "readBytes": 0,
+        "writeBytes": 893493,
+        "otherIoBytes": 5500
+      },
+      "rates": {
+        "totalOperationsPerSecond": 199.0566037735849,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 11.79245283018868,
+        "otherOperationsPerSecond": 187.2641509433962,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 421458.9622641509,
+        "otherBytesPerSecond": 2594.3396226415093,
+        "totalMiBPerSecond": 0.4044087427966999,
+        "writeBytesPerWriteOperation": 35739.72,
+        "cpuLogicalEquivalents": 0.2358490566037736
+      },
+      "memory": {
+        "privateBytes": 211517440,
+        "workingSetBytes": 262791168,
+        "hostFreeBytes": 36409073664
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861719661,
+      "toAtMs": 1792861721790,
+      "seconds": 2.13,
+      "monitorWallDeltaSeconds": 2.129,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 16,
+        "otherIoOperations": 248,
+        "readBytes": 0,
+        "writeBytes": 616613,
+        "otherIoBytes": 3888
+      },
+      "rates": {
+        "totalOperationsPerSecond": 123.94366197183099,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 7.511737089201878,
+        "otherOperationsPerSecond": 116.43192488262912,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 289489.6713615024,
+        "otherBytesPerSecond": 1825.3521126760563,
+        "totalMiBPerSecond": 0.27781965587060775,
+        "writeBytesPerWriteOperation": 38538.3125,
+        "cpuLogicalEquivalents": 0.16854460093896714
+      },
+      "memory": {
+        "privateBytes": 219353088,
+        "workingSetBytes": 270598144,
+        "hostFreeBytes": 36526247936
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861721790,
+      "toAtMs": 1792861723869,
+      "seconds": 2.079,
+      "monitorWallDeltaSeconds": 2.079,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 18,
+        "otherIoOperations": 283,
+        "readBytes": 0,
+        "writeBytes": 693902,
+        "otherIoBytes": 4424
+      },
+      "rates": {
+        "totalOperationsPerSecond": 144.78114478114477,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.658008658008658,
+        "otherOperationsPerSecond": 136.1231361231361,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 333767.1957671957,
+        "otherBytesPerSecond": 2127.946127946128,
+        "totalMiBPerSecond": 0.32033456983102976,
+        "writeBytesPerWriteOperation": 38550.11111111111,
+        "cpuLogicalEquivalents": 0.2631072631072631
+      },
+      "memory": {
+        "privateBytes": 225558528,
+        "workingSetBytes": 276717568,
+        "hostFreeBytes": 36730335232
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861723869,
+      "toAtMs": 1792861725964,
+      "seconds": 2.096,
+      "monitorWallDeltaSeconds": 2.095,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 19,
+        "otherIoOperations": 297,
+        "readBytes": 0,
+        "writeBytes": 703886,
+        "otherIoBytes": 4372
+      },
+      "rates": {
+        "totalOperationsPerSecond": 150.76335877862596,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 9.064885496183205,
+        "otherOperationsPerSecond": 141.69847328244273,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 335823.4732824427,
+        "otherBytesPerSecond": 2085.8778625954196,
+        "totalMiBPerSecond": 0.32225546946052375,
+        "writeBytesPerWriteOperation": 37046.63157894737,
+        "cpuLogicalEquivalents": 0.04484732824427481
+      },
+      "memory": {
+        "privateBytes": 232427520,
+        "workingSetBytes": 283422720,
+        "hostFreeBytes": 36718387200
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861725964,
+      "toAtMs": 1792861728057,
+      "seconds": 2.091,
+      "monitorWallDeltaSeconds": 2.093,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 22,
+        "otherIoOperations": 350,
+        "readBytes": 0,
+        "writeBytes": 791180,
+        "otherIoBytes": 4984
+      },
+      "rates": {
+        "totalOperationsPerSecond": 177.90530846484933,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 10.521281683405068,
+        "otherOperationsPerSecond": 167.38402678144428,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 378373.98373983736,
+        "otherBytesPerSecond": 2383.5485413677666,
+        "totalMiBPerSecond": 0.36311867931480896,
+        "writeBytesPerWriteOperation": 35962.72727272727,
+        "cpuLogicalEquivalents": 0.38067910090865614
+      },
+      "memory": {
+        "privateBytes": 239185920,
+        "workingSetBytes": 289951744,
+        "hostFreeBytes": 36696252416
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861728057,
+      "toAtMs": 1792861730164,
+      "seconds": 2.108,
+      "monitorWallDeltaSeconds": 2.107,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 19,
+        "otherIoOperations": 311,
+        "readBytes": 0,
+        "writeBytes": 694172,
+        "otherIoBytes": 4676
+      },
+      "rates": {
+        "totalOperationsPerSecond": 156.54648956356735,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 9.013282732447818,
+        "otherOperationsPerSecond": 147.53320683111954,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 329303.60531309294,
+        "otherBytesPerSecond": 2218.2163187855786,
+        "totalMiBPerSecond": 0.3161638466185365,
+        "writeBytesPerWriteOperation": 36535.36842105263,
+        "cpuLogicalEquivalents": 0.03747628083491461
+      },
+      "memory": {
+        "privateBytes": 243896320,
+        "workingSetBytes": 294912000,
+        "hostFreeBytes": 36460449792
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861730164,
+      "toAtMs": 1792861732270,
+      "seconds": 2.106,
+      "monitorWallDeltaSeconds": 2.106,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 20,
+        "otherIoOperations": 321,
+        "readBytes": 0,
+        "writeBytes": 717460,
+        "otherIoBytes": 4592
+      },
+      "rates": {
+        "totalOperationsPerSecond": 161.91832858499527,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 9.49667616334283,
+        "otherOperationsPerSecond": 152.42165242165242,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 340674.26400759735,
+        "otherBytesPerSecond": 2180.436847103514,
+        "totalMiBPerSecond": 0.3269717224642762,
+        "writeBytesPerWriteOperation": 35873,
+        "cpuLogicalEquivalents": 0.4154795821462488
+      },
+      "memory": {
+        "privateBytes": 250232832,
+        "workingSetBytes": 301334528,
+        "hostFreeBytes": 36394074112
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861732270,
+      "toAtMs": 1792861734343,
+      "seconds": 2.073,
+      "monitorWallDeltaSeconds": 2.073,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 21,
+        "otherIoOperations": 322,
+        "readBytes": 0,
+        "writeBytes": 749364,
+        "otherIoBytes": 4780
+      },
+      "rates": {
+        "totalOperationsPerSecond": 165.46068499758803,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 10.130246020260492,
+        "otherOperationsPerSecond": 155.33043897732756,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 361487.6989869754,
+        "otherBytesPerSecond": 2305.8369512783406,
+        "totalMiBPerSecond": 0.3469405516989267,
+        "writeBytesPerWriteOperation": 35684,
+        "cpuLogicalEquivalents": 0.27882296189097927
+      },
+      "memory": {
+        "privateBytes": 257183744,
+        "workingSetBytes": 308056064,
+        "hostFreeBytes": 36333203456
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861734343,
+      "toAtMs": 1792861736423,
+      "seconds": 2.08,
+      "monitorWallDeltaSeconds": 2.08,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 281,
+        "readBytes": 0,
+        "writeBytes": 582161,
+        "otherIoBytes": 4156
+      },
+      "rates": {
+        "totalOperationsPerSecond": 143.26923076923077,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.173076923076923,
+        "otherOperationsPerSecond": 135.09615384615384,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 279885.0961538461,
+        "otherBytesPerSecond": 1998.076923076923,
+        "totalMiBPerSecond": 0.26882474239055926,
+        "writeBytesPerWriteOperation": 34244.76470588235,
+        "cpuLogicalEquivalents": 0.21778846153846154
+      },
+      "memory": {
+        "privateBytes": 261406720,
+        "workingSetBytes": 312418304,
+        "hostFreeBytes": 36375347200
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861736423,
+      "toAtMs": 1792861738571,
+      "seconds": 2.149,
+      "monitorWallDeltaSeconds": 2.148,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 21,
+        "otherIoOperations": 401,
+        "readBytes": 0,
+        "writeBytes": 822840,
+        "otherIoBytes": 5580
+      },
+      "rates": {
+        "totalOperationsPerSecond": 196.3704048394602,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 9.77198697068404,
+        "otherOperationsPerSecond": 186.59841786877618,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 382894.36947417405,
+        "otherBytesPerSecond": 2596.556537924616,
+        "totalMiBPerSecond": 0.3676327953454005,
+        "writeBytesPerWriteOperation": 39182.857142857145,
+        "cpuLogicalEquivalents": 0.501628664495114
+      },
+      "memory": {
+        "privateBytes": 265216000,
+        "workingSetBytes": 316100608,
+        "hostFreeBytes": 36373581824
+      },
+      "handles": 175,
+      "threads": 15
+    },
+    {
+      "fromAtMs": 1792861738571,
+      "toAtMs": 1792861740671,
+      "seconds": 2.099,
+      "monitorWallDeltaSeconds": 2.1,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 304,
+        "readBytes": 0,
+        "writeBytes": 600092,
+        "otherIoBytes": 4516
+      },
+      "rates": {
+        "totalOperationsPerSecond": 150.07146260123866,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.240590757503573,
+        "otherOperationsPerSecond": 144.8308718437351,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 285894.23535016674,
+        "otherBytesPerSecond": 2151.5007146260123,
+        "totalMiBPerSecond": 0.2747018204353263,
+        "writeBytesPerWriteOperation": 54553.818181818184,
+        "cpuLogicalEquivalents": 0.07432110528823249
+      },
+      "memory": {
+        "privateBytes": 271609856,
+        "workingSetBytes": 322469888,
+        "hostFreeBytes": 35895836672
+      },
+      "handles": 178,
+      "threads": 16
+    },
+    {
+      "fromAtMs": 1792861740671,
+      "toAtMs": 1792861742790,
+      "seconds": 2.119,
+      "monitorWallDeltaSeconds": 2.119,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 304,
+        "readBytes": 0,
+        "writeBytes": 566558,
+        "otherIoBytes": 4452
+      },
+      "rates": {
+        "totalOperationsPerSecond": 148.65502595563945,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.191127890514393,
+        "otherOperationsPerSecond": 143.46389806512505,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 267370.4577630958,
+        "otherBytesPerSecond": 2100.9910335063705,
+        "totalMiBPerSecond": 0.25698799972210135,
+        "writeBytesPerWriteOperation": 51505.27272727273,
+        "cpuLogicalEquivalents": 0.589900896649363
+      },
+      "memory": {
+        "privateBytes": 278712320,
+        "workingSetBytes": 329621504,
+        "hostFreeBytes": 35906908160
+      },
+      "handles": 185,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861742790,
+      "toAtMs": 1792861744885,
+      "seconds": 2.096,
+      "monitorWallDeltaSeconds": 2.095,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 299,
+        "readBytes": 0,
+        "writeBytes": 537708,
+        "otherIoBytes": 4436
+      },
+      "rates": {
+        "totalOperationsPerSecond": 147.90076335877862,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.248091603053435,
+        "otherOperationsPerSecond": 142.65267175572518,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 256540.07633587785,
+        "otherBytesPerSecond": 2116.412213740458,
+        "totalMiBPerSecond": 0.24667404990159827,
+        "writeBytesPerWriteOperation": 48882.545454545456,
+        "cpuLogicalEquivalents": 0.25333969465648853
+      },
+      "memory": {
+        "privateBytes": 283906048,
+        "workingSetBytes": 334868480,
+        "hostFreeBytes": 35895955456
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861744885,
+      "toAtMs": 1792861746978,
+      "seconds": 2.092,
+      "monitorWallDeltaSeconds": 2.093,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 296,
+        "readBytes": 0,
+        "writeBytes": 521159,
+        "otherIoBytes": 4388
+      },
+      "rates": {
+        "totalOperationsPerSecond": 146.74952198852773,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.25812619502868,
+        "otherOperationsPerSecond": 141.49139579349904,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 249119.9808795411,
+        "otherBytesPerSecond": 2097.514340344168,
+        "totalMiBPerSecond": 0.23957967302311445,
+        "writeBytesPerWriteOperation": 47378.09090909091,
+        "cpuLogicalEquivalents": 0.11233269598470363
+      },
+      "memory": {
+        "privateBytes": 288518144,
+        "workingSetBytes": 339382272,
+        "hostFreeBytes": 36230094848
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861746978,
+      "toAtMs": 1792861749048,
+      "seconds": 2.07,
+      "monitorWallDeltaSeconds": 2.07,
+      "phase": "bootstrap-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 14,
+        "otherIoOperations": 342,
+        "readBytes": 0,
+        "writeBytes": 615688,
+        "otherIoBytes": 4872
+      },
+      "rates": {
+        "totalOperationsPerSecond": 171.98067632850243,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 6.76328502415459,
+        "otherOperationsPerSecond": 165.21739130434784,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 297433.8164251208,
+        "otherBytesPerSecond": 2353.6231884057975,
+        "totalMiBPerSecond": 0.2858995815406099,
+        "writeBytesPerWriteOperation": 43977.71428571428,
+        "cpuLogicalEquivalents": 0.37729468599033816
+      },
+      "memory": {
+        "privateBytes": 291799040,
+        "workingSetBytes": 342577152,
+        "hostFreeBytes": 36198092800
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861749048,
+      "toAtMs": 1792861751133,
+      "seconds": 2.085,
+      "monitorWallDeltaSeconds": 2.085,
+      "phase": null,
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 305,
+        "readBytes": 0,
+        "writeBytes": 508522,
+        "otherIoBytes": 4532
+      },
+      "rates": {
+        "totalOperationsPerSecond": 151.5587529976019,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.275779376498801,
+        "otherOperationsPerSecond": 146.2829736211031,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 243895.44364508393,
+        "otherBytesPerSecond": 2173.621103117506,
+        "totalMiBPerSecond": 0.23466974711246627,
+        "writeBytesPerWriteOperation": 46229.27272727273,
+        "cpuLogicalEquivalents": 0.05995203836930456
+      },
+      "memory": {
+        "privateBytes": 296525824,
+        "workingSetBytes": 347086848,
+        "hostFreeBytes": 36191236096
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861751133,
+      "toAtMs": 1792861753209,
+      "seconds": 2.076,
+      "monitorWallDeltaSeconds": 2.076,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 14,
+        "otherIoOperations": 338,
+        "readBytes": 0,
+        "writeBytes": 601243,
+        "otherIoBytes": 4744
+      },
+      "rates": {
+        "totalOperationsPerSecond": 169.55684007707129,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 6.74373795761079,
+        "otherOperationsPerSecond": 162.8131021194605,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 289616.0886319846,
+        "otherBytesPerSecond": 2285.163776493256,
+        "totalMiBPerSecond": 0.27837872734878333,
+        "writeBytesPerWriteOperation": 42945.92857142857,
+        "cpuLogicalEquivalents": 0.3762042389210019
+      },
+      "memory": {
+        "privateBytes": 299704320,
+        "workingSetBytes": 350298112,
+        "hostFreeBytes": 36206546944
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861753209,
+      "toAtMs": 1792861755283,
+      "seconds": 2.074,
+      "monitorWallDeltaSeconds": 2.074,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 7,
+        "otherIoOperations": 239,
+        "readBytes": 0,
+        "writeBytes": 349636,
+        "otherIoBytes": 3848
+      },
+      "rates": {
+        "totalOperationsPerSecond": 118.61137897782065,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 3.3751205400192865,
+        "otherOperationsPerSecond": 115.23625843780135,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 168580.52073288333,
+        "otherBytesPerSecond": 1855.3519768563165,
+        "totalMiBPerSecond": 0.16254031439756358,
+        "writeBytesPerWriteOperation": 49948,
+        "cpuLogicalEquivalents": 0.24108003857280616
+      },
+      "memory": {
+        "privateBytes": 302678016,
+        "workingSetBytes": 353140736,
+        "hostFreeBytes": 36210647040
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861755283,
+      "toAtMs": 1792861757408,
+      "seconds": 2.125,
+      "monitorWallDeltaSeconds": 2.125,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 8,
+        "otherIoOperations": 253,
+        "readBytes": 0,
+        "writeBytes": 399698,
+        "otherIoBytes": 3952
+      },
+      "rates": {
+        "totalOperationsPerSecond": 122.82352941176471,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 3.764705882352941,
+        "otherOperationsPerSecond": 119.05882352941177,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 188093.17647058822,
+        "otherBytesPerSecond": 1859.764705882353,
+        "totalMiBPerSecond": 0.18115324132582722,
+        "writeBytesPerWriteOperation": 49962.25,
+        "cpuLogicalEquivalents": 0.08847058823529412
+      },
+      "memory": {
+        "privateBytes": 306909184,
+        "workingSetBytes": 357236736,
+        "hostFreeBytes": 36175417344
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861757408,
+      "toAtMs": 1792861759471,
+      "seconds": 2.063,
+      "monitorWallDeltaSeconds": 2.063,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 401,
+        "readBytes": 0,
+        "writeBytes": 702525,
+        "otherIoBytes": 5628
+      },
+      "rates": {
+        "totalOperationsPerSecond": 202.61754726126998,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.240426563257392,
+        "otherOperationsPerSecond": 194.3771206980126,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 340535.6277266117,
+        "otherBytesPerSecond": 2728.065923412506,
+        "totalMiBPerSecond": 0.32736176838877123,
+        "writeBytesPerWriteOperation": 41325,
+        "cpuLogicalEquivalents": 0.2801745031507513
+      },
+      "memory": {
+        "privateBytes": 310964224,
+        "workingSetBytes": 361480192,
+        "hostFreeBytes": 36842127360
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861759471,
+      "toAtMs": 1792861761578,
+      "seconds": 2.107,
+      "monitorWallDeltaSeconds": 2.107,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 303,
+        "readBytes": 0,
+        "writeBytes": 500398,
+        "otherIoBytes": 4468
+      },
+      "rates": {
+        "totalOperationsPerSecond": 149.02705268153773,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.220692928334124,
+        "otherOperationsPerSecond": 143.8063597532036,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 237493.11817750352,
+        "otherBytesPerSecond": 2120.550545799715,
+        "totalMiBPerSecond": 0.22851340172128987,
+        "writeBytesPerWriteOperation": 45490.72727272727,
+        "cpuLogicalEquivalents": 0.16326530612244897
+      },
+      "memory": {
+        "privateBytes": 315215872,
+        "workingSetBytes": 365506560,
+        "hostFreeBytes": 36761870336
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861761578,
+      "toAtMs": 1792861763683,
+      "seconds": 2.106,
+      "monitorWallDeltaSeconds": 2.105,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 297,
+        "readBytes": 0,
+        "writeBytes": 500520,
+        "otherIoBytes": 4420
+      },
+      "rates": {
+        "totalOperationsPerSecond": 146.2488129154796,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.223171889838556,
+        "otherOperationsPerSecond": 141.02564102564102,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 237663.81766381767,
+        "otherBytesPerSecond": 2098.7654320987654,
+        "totalMiBPerSecond": 0.2286554175337948,
+        "writeBytesPerWriteOperation": 45501.818181818184,
+        "cpuLogicalEquivalents": 0.20750237416904083
+      },
+      "memory": {
+        "privateBytes": 320425984,
+        "workingSetBytes": 370626560,
+        "hostFreeBytes": 36409700352
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861763683,
+      "toAtMs": 1792861765811,
+      "seconds": 2.127,
+      "monitorWallDeltaSeconds": 2.128,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 8,
+        "otherIoOperations": 248,
+        "readBytes": 0,
+        "writeBytes": 399025,
+        "otherIoBytes": 3888
+      },
+      "rates": {
+        "totalOperationsPerSecond": 120.35731076633758,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 3.7611659614480493,
+        "otherOperationsPerSecond": 116.59614480488953,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 187599.905970851,
+        "otherBytesPerSecond": 1827.9266572637518,
+        "totalMiBPerSecond": 0.18065245878993486,
+        "writeBytesPerWriteOperation": 49878.125,
+        "cpuLogicalEquivalents": 0.37470615890926184
+      },
+      "memory": {
+        "privateBytes": 324046848,
+        "workingSetBytes": 374308864,
+        "hostFreeBytes": 36643561472
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861765811,
+      "toAtMs": 1792861767891,
+      "seconds": 2.079,
+      "monitorWallDeltaSeconds": 2.08,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 14,
+        "otherIoOperations": 340,
+        "readBytes": 0,
+        "writeBytes": 602038,
+        "otherIoBytes": 4808
+      },
+      "rates": {
+        "totalOperationsPerSecond": 170.27417027417025,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 6.7340067340067336,
+        "otherOperationsPerSecond": 163.54016354016352,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 289580.56758056756,
+        "otherBytesPerSecond": 2312.6503126503126,
+        "totalMiBPerSecond": 0.27837106503793513,
+        "writeBytesPerWriteOperation": 43002.71428571428,
+        "cpuLogicalEquivalents": 0.11255411255411256
+      },
+      "memory": {
+        "privateBytes": 327417856,
+        "workingSetBytes": 377647104,
+        "hostFreeBytes": 36273963008
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861767891,
+      "toAtMs": 1792861769978,
+      "seconds": 2.088,
+      "monitorWallDeltaSeconds": 2.087,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 14,
+        "otherIoOperations": 356,
+        "readBytes": 0,
+        "writeBytes": 604216,
+        "otherIoBytes": 5128
+      },
+      "rates": {
+        "totalOperationsPerSecond": 177.2030651340996,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 6.704980842911877,
+        "otherOperationsPerSecond": 170.49808429118772,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 289375.47892720305,
+        "otherBytesPerSecond": 2455.9386973180076,
+        "totalMiBPerSecond": 0.278312127708932,
+        "writeBytesPerWriteOperation": 43158.28571428572,
+        "cpuLogicalEquivalents": 0.2921455938697318
+      },
+      "memory": {
+        "privateBytes": 332386304,
+        "workingSetBytes": 382304256,
+        "hostFreeBytes": 36171489280
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861769978,
+      "toAtMs": 1792861772018,
+      "seconds": 2.04,
+      "monitorWallDeltaSeconds": 2.04,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 309,
+        "readBytes": 0,
+        "writeBytes": 501603,
+        "otherIoBytes": 4612
+      },
+      "rates": {
+        "totalOperationsPerSecond": 156.86274509803923,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.3921568627450975,
+        "otherOperationsPerSecond": 151.47058823529412,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 245883.82352941175,
+        "otherBytesPerSecond": 2260.78431372549,
+        "totalMiBPerSecond": 0.2366491392547009,
+        "writeBytesPerWriteOperation": 45600.27272727273,
+        "cpuLogicalEquivalents": 0.2681372549019608
+      },
+      "memory": {
+        "privateBytes": 337768448,
+        "workingSetBytes": 387842048,
+        "hostFreeBytes": 36074819584
+      },
+      "handles": 187,
+      "threads": 19
+    },
+    {
+      "fromAtMs": 1792861772018,
+      "toAtMs": 1792861774088,
+      "seconds": 2.07,
+      "monitorWallDeltaSeconds": 2.07,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 8,
+        "otherIoOperations": 253,
+        "readBytes": 0,
+        "writeBytes": 402656,
+        "otherIoBytes": 3920
+      },
+      "rates": {
+        "totalOperationsPerSecond": 126.08695652173914,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 3.8647342995169085,
+        "otherOperationsPerSecond": 122.22222222222223,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 194519.80676328504,
+        "otherBytesPerSecond": 1893.719806763285,
+        "totalMiBPerSecond": 0.18731453568463166,
+        "writeBytesPerWriteOperation": 50332,
+        "cpuLogicalEquivalents": 0.11304347826086956
+      },
+      "memory": {
+        "privateBytes": 341598208,
+        "workingSetBytes": 391532544,
+        "hostFreeBytes": 36063739904
+      },
+      "handles": 188,
+      "threads": 20
+    },
+    {
+      "fromAtMs": 1792861774088,
+      "toAtMs": 1792861776188,
+      "seconds": 2.1,
+      "monitorWallDeltaSeconds": 2.1,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 11,
+        "otherIoOperations": 293,
+        "readBytes": 0,
+        "writeBytes": 503736,
+        "otherIoBytes": 4292
+      },
+      "rates": {
+        "totalOperationsPerSecond": 144.76190476190476,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 5.238095238095238,
+        "otherOperationsPerSecond": 139.52380952380952,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 239874.2857142857,
+        "otherBytesPerSecond": 2043.8095238095236,
+        "totalMiBPerSecond": 0.23071107410249256,
+        "writeBytesPerWriteOperation": 45794.181818181816,
+        "cpuLogicalEquivalents": 0.43142857142857144
+      },
+      "memory": {
+        "privateBytes": 346624000,
+        "workingSetBytes": 396619776,
+        "hostFreeBytes": 36277141504
+      },
+      "handles": 190,
+      "threads": 20
+    },
+    {
+      "fromAtMs": 1792861776188,
+      "toAtMs": 1792861778253,
+      "seconds": 2.064,
+      "monitorWallDeltaSeconds": 2.065,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 17,
+        "otherIoOperations": 389,
+        "readBytes": 0,
+        "writeBytes": 706139,
+        "otherIoBytes": 5340
+      },
+      "rates": {
+        "totalOperationsPerSecond": 196.70542635658913,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 8.236434108527131,
+        "otherOperationsPerSecond": 188.46899224806202,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 342121.6085271318,
+        "otherBytesPerSecond": 2587.209302325581,
+        "totalMiBPerSecond": 0.3287399462027143,
+        "writeBytesPerWriteOperation": 41537.58823529412,
+        "cpuLogicalEquivalents": 0.09108527131782945
+      },
+      "memory": {
+        "privateBytes": 350539776,
+        "workingSetBytes": 400543744,
+        "hostFreeBytes": 35962175488
+      },
+      "handles": 190,
+      "threads": 20
+    },
+    {
+      "fromAtMs": 1792861778253,
+      "toAtMs": 1792861780319,
+      "seconds": 2.067,
+      "monitorWallDeltaSeconds": 2.066,
+      "phase": "stage-10",
+      "activeFrom": 10,
+      "activeTo": 10,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 10,
+        "otherIoOperations": 291,
+        "readBytes": 0,
+        "writeBytes": 453567,
+        "otherIoBytes": 4428
+      },
+      "rates": {
+        "totalOperationsPerSecond": 145.6216739235607,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 4.837929366231252,
+        "otherOperationsPerSecond": 140.78374455732944,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 219432.51088534106,
+        "otherBytesPerSecond": 2142.235123367199,
+        "totalMiBPerSecond": 0.21131014443274332,
+        "writeBytesPerWriteOperation": 45356.7,
+        "cpuLogicalEquivalents": 0.355104015481374
+      },
+      "memory": {
+        "privateBytes": 354021376,
+        "workingSetBytes": 404004864,
+        "hostFreeBytes": 35837091840
+      },
+      "handles": 190,
+      "threads": 20
+    },
+    {
+      "fromAtMs": 1792861780319,
+      "toAtMs": 1792861782371,
+      "seconds": 2.052,
+      "monitorWallDeltaSeconds": 2.052,
+      "phase": null,
+      "activeFrom": 10,
+      "activeTo": 6,
+      "stop": false,
+      "delta": {
+        "readOperations": 0,
+        "writeOperations": 143,
+        "otherIoOperations": 517,
+        "readBytes": 0,
+        "writeBytes": 708048,
+        "otherIoBytes": 5356
+      },
+      "rates": {
+        "totalOperationsPerSecond": 321.6374269005848,
+        "readOperationsPerSecond": 0,
+        "writeOperationsPerSecond": 69.68810916179338,
+        "otherOperationsPerSecond": 251.94931773879142,
+        "readBytesPerSecond": 0,
+        "writeBytesPerSecond": 345052.63157894736,
+        "otherBytesPerSecond": 2610.1364522417152,
+        "totalMiBPerSecond": 0.33155705264204893,
+        "writeBytesPerWriteOperation": 4951.384615384615,
+        "cpuLogicalEquivalents": 0.5560428849902534
+      },
+      "memory": {
+        "privateBytes": 360525824,
+        "workingSetBytes": 410705920,
+        "hostFreeBytes": 35780419584
+      },
+      "handles": 188,
+      "threads": 20
+    }
+  ],
+  "notes": [
+    "Probe failed original observer4 Run fraction 15/38=0.3947368421 below unchanged0.5. Other9 activity gates passed. Combat16attacks16hits during30s. No360s soak was measured.",
+    "Monitor continued after failed driver exit until explicit owned cleanup; late idle data is retained in raw evidence but excluded from active comparisons.",
+    "Recording remains enabled/public/default; only MIR2_SPECTATOR_DATA_DIR changed to a dedicated fresh directory. File payloads remain outside repository."
+  ]
+}

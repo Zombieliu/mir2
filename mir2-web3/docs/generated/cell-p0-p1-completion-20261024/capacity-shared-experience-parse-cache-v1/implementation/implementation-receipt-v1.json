@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "state": "SOURCE_CANDIDATE_NOT_EXECUTED",
+  "sourceBefore": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-authority-parse-cache-v1\\shared_experience_profile.rs.before-cache-v1.txt",
+    "bytes": 76309,
+    "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+  },
+  "sourceAfter": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\simulation\\src\\runtime\\shared_experience_profile.rs",
+    "bytes": 93889,
+    "sha256": "1b4e603500b9b8bb8bf0482d750306a6a5886ed3eb9eeeb0e4387f9329880277"
+  },
+  "diff": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\shared-experience-authority-parse-cache-v1\\source-diff-v1.patch",
+    "bytes": 20043,
+    "sha256": "2f3bc74a6d71485589218fb95a1d1b085f4d401372086a75073eadaeb6b729dd"
+  },
+  "rawForwardReplayExact": true,
+  "rawInverseReplayExact": true,
+  "hunks": [
+    {
+      "beforeStartLineZeroBased": 14,
+      "beforeLines": 2,
+      "afterStartLineZeroBased": 14,
+      "afterLines": 2,
+      "oldSha256": "8cc8234e7d1d89ffd15ab7a05c1fb1c1866d0861fd51fc944a7b2ec8f8b0578b",
+      "newSha256": "284e77b72c8de199cb5b877673eab5ae99425e190065050e2037d31c455a7752"
+    },
+    {
+      "beforeStartLineZeroBased": 311,
+      "beforeLines": 0,
+      "afterStartLineZeroBased": 311,
+      "afterLines": 56,
+      "oldSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "newSha256": "580a91dd09ae5f5c7bb48f16195855f9ed7b3ca0d181791c255201381d6a4736"
+    },
+    {
+      "beforeStartLineZeroBased": 314,
+      "beforeLines": 1,
+      "afterStartLineZeroBased": 370,
+      "afterLines": 10,
+      "oldSha256": "17b232276eed32597807e9e3b79e55325659bc84f51b91e57c6fdbdbf13587d2",
+      "newSha256": "8a8146103f095608785e8f2bedea6c4304bb444da0b3c931c14972881e215d33"
+    },
+    {
+      "beforeStartLineZeroBased": 320,
+      "beforeLines": 2,
+      "afterStartLineZeroBased": 385,
+      "afterLines": 13,
+      "oldSha256": "08dc2f764eaedd2cb83cf357b7cb9014839cc349aaebf85580f56b814f7f2745",
+      "newSha256": "5b2158ef127b7f242905a2d932d32e4c19abcc10f4fb729932698f51ff270549"
+    },
+    {
+      "beforeStartLineZeroBased": 325,
+      "beforeLines": 1,
+      "afterStartLineZeroBased": 401,
+      "afterLines": 19,
+      "oldSha256": "d1885345f9cd5578d33616b64728f67f887fae3e266f322a4e3f5a4a20090408",
+      "newSha256": "3bfdeed17eae3bb25a99d08a8fb4975887ab6e794206f894c4ba8178f6302521"
+    },
+    {
+      "beforeStartLineZeroBased": 727,
+      "beforeLines": 0,
+      "afterStartLineZeroBased": 821,
+      "afterLines": 349,
+      "oldSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "newSha256": "dcab6f691bd0ae0dd2ea4a53f0b088df0fa4e3aad1d35e28279b3cdc830781a3"
+    }
+  ],
+  "unchanged": {
+    "allOldTestsFromSessionFixtureThroughEofRawExact": true,
+    "guildProjectionRefreshWritableStoreCallbackBusinessBlockRawExact": true,
+    "onlyTrackedFileChanged": [
+      "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs"
+    ]
+  },
+  "cache": {
+    "identityCapacity": 256,
+    "perJsonBlobBytes": 65536,
+    "retainedJsonBytes": 8388608,
+    "jsonBudgetIsNotRss": true,
+    "exactOptionAndIdentity": true,
+    "alwaysCurrentCheckpointLookupFirst": true,
+    "tryLockLookupAndPublish": true,
+    "fullDeserializeOutsideCacheMutexInsideOriginalStoreScope": true,
+    "evictedStateDropOutsideCacheMutex": true,
+    "cachePoisonAndContentionBypass": true,
+    "neverCachesErrorsOrAuthorityDecision": true,
+    "fifoOneVersionPerIdentity": true
+  },
+  "newTestFilter": "authority_parse_cache_",
+  "newTests": 8,
+  "testsExecutedHere": false,
+  "cargoExecutedHere": false,
+  "rustfmtExecutedHere": false,
+  "diffCheckActualExitCode": 0,
+  "suggestedValidation": [
+    "cargo test -p mir2-simulation --lib authority_parse_cache_ --locked --offline -j 4 -- --nocapture",
+    "cargo test -p mir2-simulation --lib locked_source_authority --locked --offline -j 4",
+    "cargo test -p mir2-simulation --lib source_personal_gain_context --locked --offline -j 4",
+    "cargo test -p mir2-simulation --lib source_idle_tick_buff_projection --locked --offline -j 4"
+  ],
+  "pureDefaultSources": {
+    "file": "mir2-web3/apps/simulation/src/config.rs",
+    "stateLine": 7631,
+    "defaultLine": 7697
+  },
+  "limitations": [
+    "No measured cache hit rate or performance/AOI improvement established.",
+    "At most8MiB of retained JSON, with additional parsed-state, identity, container and externally held Arc memory.",
+    "Pure parsed data may be shared across Stores only when identity and complete Option JSON bytes match; each Store checkpoint/fence remains checked."
+  ]
+}

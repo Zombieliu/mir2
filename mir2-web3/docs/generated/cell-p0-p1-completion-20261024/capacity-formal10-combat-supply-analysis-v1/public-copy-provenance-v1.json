@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:59:19.586Z",
+  "archive": "capacity-formal10-combat-supply-analysis-v1",
+  "runId": "1792915219265-d3bcff63",
+  "copies": 17,
+  "totalCopiedBytes": 3069856,
+  "sourceBeforeAfterIdentical": true,
+  "allPublicCopiesReadBackExact": true,
+  "files": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/analyze-v1.mjs",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/analyze-v1.mjs.txt",
+      "bytes": 18443,
+      "sha256": "90c4c588a22ee210530f49a4f059c0fdc87a7b1f97f5fc022965cc7303b09a2d",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/selected-native-and-packet-rows-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/selected-native-and-packet-rows-v1.json",
+      "bytes": 2507485,
+      "sha256": "fb4cdb179bf411c8b768d6cd758cacff291c655857703b3f77948c54717830f0",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/window-and-stage-replay-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/window-and-stage-replay-v1.json",
+      "bytes": 24497,
+      "sha256": "463ecef8719c00902fcb72dcda6e9d7871fb5b88ded4cc0293924ee8d422a1dc",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/attack-gap-paths-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/attack-gap-paths-v1.json",
+      "bytes": 227785,
+      "sha256": "8c351b4a9bb2a0e60354215545a2716d9eab80cf51592b0c5c5318fb86421b51",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/summary-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/summary-v1.json",
+      "bytes": 31524,
+      "sha256": "ef1fbb2a3e84da1c407ca59dff3bca777d5c1eb228089e8c085940f315438b92",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/public-whitelist-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/public-whitelist-v1.json",
+      "bytes": 2041,
+      "sha256": "dfc0bb9e600278d3d21b186c5255439cc4d596c91d01a55c7ab8c22b8f2ca391",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/overlapping-chase-v2.mjs",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/overlapping-chase-v2.mjs.txt",
+      "bytes": 8459,
+      "sha256": "0d440d7ffad9600a790d45c8592a749b0d054c90a03eed083e5c07d5f232d9e0",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/overlapping-chase-proof-v2.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/overlapping-chase-proof-v2.json",
+      "bytes": 122773,
+      "sha256": "7942e2af32745103e71a2f318fb318b9c320e0542cf1816ccc09f6974a46b106",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/chase-reservation-proposal-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/chase-reservation-proposal-v1.json",
+      "bytes": 3986,
+      "sha256": "ec9928c1f411c2c2821fa28c677b0ec27d9589ff2d343765bf14e64e6eb6d4cc",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/README-v2.md",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/README-v2.md",
+      "bytes": 2494,
+      "sha256": "f9a1a8f914eac42572ae9d8d29f28910577acbd64e23c1266d0e6e14d10d707a",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/finalize-public-v2.mjs",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/finalize-public-v2.mjs.txt",
+      "bytes": 5301,
+      "sha256": "dd69018268186ca7d866c958603ff8f8ae84e2067d31d9060775b4415d39609f",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/summary-v2.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/summary-v2.json",
+      "bytes": 39491,
+      "sha256": "bc37a4553ac4b689ff989024ef5ecaf8d64bc6f3b1ab3a909f67cb45fc1fcf04",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/verification-v2.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/verification-v2.json",
+      "bytes": 4169,
+      "sha256": "0d57864adf3434c73c995e22d7e42cc44ea9116f9f5e876875fd2bd5dfe72dd5",
+      "scope": "13-author-whitelisted-originals"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-analysis-v1/public-whitelist-v2.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/analysis/public-whitelist-v2.json",
+      "bytes": 3918,
+      "sha256": "4903896b959e84a5978ca887b4d0acd95172168e80800bd9e41262e0abbcca89",
+      "scope": "author-whitelist-original"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-supply-static-review-v1/review-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/static-review/review-v1.json",
+      "bytes": 15137,
+      "sha256": "7d87328a509e9c7c0ad5aa587cf32ec8a1a6341da385109065f9cc29665daeca",
+      "scope": "independent-static-review"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-supply-static-review-v1/forensic-cross-reference-addendum-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/static-review/forensic-cross-reference-addendum-v1.json",
+      "bytes": 7932,
+      "sha256": "d57ce2431978d3e81fdaf3d693e8eb6d39282c8036fd22de00787ad9ffe9ec28",
+      "scope": "independent-cross-reference-addendum"
+    },
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/formal10-localpool-feasibility-proposal-v1.json",
+      "path": "capacity-formal10-combat-supply-analysis-v1/formal10-localpool-feasibility-proposal-v1.json",
+      "bytes": 44421,
+      "sha256": "726fcb717c60187c99365ebb8fa6a7a8c5ad7e6f9d1cb9a30e66c5ffb6aa6158",
+      "scope": "bounded-counterfactual-localpool-inventory"
+    }
+  ],
+  "readme": {
+    "path": "capacity-formal10-combat-supply-analysis-v1/README.md",
+    "bytes": 2905,
+    "sha256": "7f3d95168ff8484e5f68578a66acaeeb19aba28394e245d5942786c081324f29"
+  },
+  "linkedIndependentCleanup": {
+    "path": "../capacity-formal10-independent-verification-v1/formal10-root-independent-cleanup-v1.json",
+    "bytes": 325,
+    "sha256": "10794052bca2e16ea2130f0f8b6d36c2244fdd920d634f5035658344ab9ab9a0"
+  },
+  "rawSampleSourcePinOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\reports\\1792915219265-d3bcff63.samples.jsonl",
+    "bytes": 52027120,
+    "sha256": "67a1bbb25857c3f049f95a60b9dd3a6d42d8748a2fde33bf9cb15fe4e59d3837",
+    "rows": 82386
+  },
+  "sourceReportPinOnly": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal-native-v2-compact-wire-ladder-10\\reports\\1792915219265-d3bcff63.report.json",
+    "bytes": 425221,
+    "sha256": "8f97fd9e1e50f82d291a44c46d3629db49bf37481b1d76c8fd76f4fcec879412"
+  },
+  "privateDataRead": false,
+  "rawOrRecordingRead": false,
+  "productOrExistingPublicChanged": false,
+  "currentP0Accepted": false,
+  "p2ImplementationPermitted": false,
+  "newChaseFixAccepted": false,
+  "presealAuthoringCorrection": {
+    "scope": "One authored README cleanup-link placeholder corrected before archive handoff. All17originalcopies unchanged; previous authored metadata preserved outside the repository.",
+    "readmePreimage": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-archive-preseal-link-v1/README.md.txt",
+      "bytes": 2804,
+      "sha256": "6ba000279c89b0cc2342d7201725503ba3b7706cb584a747dac974055c60a062"
+    },
+    "receiptPreimage": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-archive-preseal-link-v1/public-copy-provenance-v1.json",
+      "bytes": 7995,
+      "sha256": "afb1663378d4fae4d3c2cd5a4e9104bc97a55d00e2c2707111fd882f0192b19c"
+    }
+  },
+  "postReviewAuthoringCorrection": {
+    "scope": "Readonly reviewer narrowed9overlap spans to the actualstage25projection and described the current proposedfix as non-exclusivepreference, not reservation. Original17copies unchanged.",
+    "readmePreimage": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-archive-preseal-scope-v2/README.md.txt",
+      "bytes": 2876,
+      "sha256": "03fdce6c8eb56313617f7ef691269747343104f747f6355db6f02c400ffc9a7e"
+    },
+    "receiptPreimage": {
+      "file": "C:/mir2-build/p01-completion-20261024/formal10-combat-supply-archive-preseal-scope-v2/public-copy-provenance-v1.json",
+      "bytes": 8740,
+      "sha256": "0300660d505b125c40b2487a29cef123373a6b9ab5449c3b8ae1efbe5e695d6d"
+    }
+  }
+}

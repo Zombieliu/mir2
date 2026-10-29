@@ -14,6 +14,27 @@ const DEFAULT_PACKAGED_MAP_ROOT = path.join(
 const DEFAULT_CLIENT_ROOT = path.resolve(REPO_ROOT, "..", "downloads", "crystal-client-full");
 const MAX_MAP_CELLS = 4_000_000;
 
+// One synchronous lease per module instance; this retains at most 17 bytes per
+// parsed map cell, not all process memory. No path/obstacle/result is cached.
+let pathWorkspace = null;
+let pathWorkspaceInUse = false;
+
+function createPathWorkspace(cellCount, retained) {
+  const gScore = new Float64Array(cellCount);
+  gScore.fill(Number.POSITIVE_INFINITY);
+  const predecessor = new Int32Array(cellCount);
+  predecessor.fill(-2);
+  const closed = new Uint8Array(cellCount);
+  return {
+    capacity: cellCount,
+    gScore,
+    predecessor,
+    closed,
+    dirty: retained ? new Int32Array(cellCount) : null,
+    dirtyCount: 0,
+  };
+}
+
 const STEPS = Object.freeze([
   Object.freeze({ dx: 0, dy: -1, direction: "up", cost: 10 }),
   Object.freeze({ dx: 1, dy: -1, direction: "up+right", cost: 14 }),
@@ -204,46 +225,82 @@ export function findProtocolWalkPath({
   const cellCount = map.width * map.height;
   const limit = Math.max(1, Math.min(cellCount, Math.trunc(Number(maxExpanded) || cellCount)));
   const startIndex = cellIndex(map, origin.x, origin.y);
-  const gScore = new Float64Array(cellCount);
-  gScore.fill(Number.POSITIVE_INFINITY);
-  gScore[startIndex] = 0;
-  const predecessor = new Int32Array(cellCount);
-  predecessor.fill(-2);
-  predecessor[startIndex] = -1;
-  const closed = new Uint8Array(cellCount);
-  const heap = new MinHeap();
-  heap.push({ index: startIndex, score: octile(origin.x, origin.y, destination.x, destination.y), cost: 0 });
-  let expanded = 0;
-
-  while (heap.length && expanded < limit) {
-    const currentNode = heap.pop();
-    if (closed[currentNode.index] || currentNode.cost !== gScore[currentNode.index]) continue;
-    closed[currentNode.index] = 1;
-    expanded += 1;
-    const current = indexPoint(map, currentNode.index);
-    if (chebyshev(current, destination) <= radius) {
-      return reconstructPath(map, predecessor, currentNode.index);
+  // An exact destination that cannot be entered has no route. Keep all input
+  // normalization and expansion-limit conversion above this check. Accessor
+  // maps retain the original search/read ordering rather than gain extra reads.
+  if (radius === 0 && (origin.x !== destination.x || origin.y !== destination.y) &&
+      ["width", "height", "blocked"].every(key =>
+        Object.hasOwn(Object.getOwnPropertyDescriptor(map, key) ?? {}, "value")) &&
+      !walkableAt(map, destination.x, destination.y, occupied, staticallyAllowed)) return null;
+  // Reserve before any allocation: getters or instrumented constructors may
+  // synchronously reenter. A nested/oversized query keeps the old fresh path.
+  const retained = !pathWorkspaceInUse && cellCount <= MAX_MAP_CELLS;
+  if (retained) pathWorkspaceInUse = true;
+  let workspace;
+  try {
+    if (retained) {
+      if (!pathWorkspace || pathWorkspace.capacity < cellCount) {
+        pathWorkspace = createPathWorkspace(cellCount, true);
+      }
+      workspace = pathWorkspace;
+    } else {
+      workspace = createPathWorkspace(cellCount, false);
     }
+    const { gScore, predecessor, closed, dirty } = workspace;
+    if (dirty) dirty[workspace.dirtyCount++] = startIndex;
+    gScore[startIndex] = 0;
+    predecessor[startIndex] = -1;
+    const heap = new MinHeap();
+    heap.push({ index: startIndex, score: octile(origin.x, origin.y, destination.x, destination.y), cost: 0 });
+    let expanded = 0;
 
-    for (const step of STEPS) {
-      const x = current.x + step.dx;
-      const y = current.y + step.dy;
-      if (!walkableAt(map, x, y, occupied, staticallyAllowed)) continue;
-      const enteringAuthoritativeTransfer = staticallyAllowed.has(pointKey(x, y));
-      if (!enteringAuthoritativeTransfer && step.dx !== 0 && step.dy !== 0 && (
-        !walkableAt(map, current.x + step.dx, current.y, occupied, staticallyAllowed) ||
-        !walkableAt(map, current.x, current.y + step.dy, occupied, staticallyAllowed)
-      )) continue;
-      const nextIndex = cellIndex(map, x, y);
-      if (closed[nextIndex]) continue;
-      const nextCost = currentNode.cost + step.cost;
-      if (nextCost >= gScore[nextIndex]) continue;
-      gScore[nextIndex] = nextCost;
-      predecessor[nextIndex] = currentNode.index;
-      heap.push({ index: nextIndex, cost: nextCost, score: nextCost + octile(x, y, destination.x, destination.y) });
+    while (heap.length && expanded < limit) {
+      const currentNode = heap.pop();
+      if (closed[currentNode.index] || currentNode.cost !== gScore[currentNode.index]) continue;
+      closed[currentNode.index] = 1;
+      expanded += 1;
+      const current = indexPoint(map, currentNode.index);
+      if (chebyshev(current, destination) <= radius) {
+        return reconstructPath(map, predecessor, currentNode.index);
+      }
+
+      for (const step of STEPS) {
+        const x = current.x + step.dx;
+        const y = current.y + step.dy;
+        if (!walkableAt(map, x, y, occupied, staticallyAllowed)) continue;
+        const enteringAuthoritativeTransfer = staticallyAllowed.has(pointKey(x, y));
+        if (!enteringAuthoritativeTransfer && step.dx !== 0 && step.dy !== 0 && (
+          !walkableAt(map, current.x + step.dx, current.y, occupied, staticallyAllowed) ||
+          !walkableAt(map, current.x, current.y + step.dy, occupied, staticallyAllowed)
+        )) continue;
+        const nextIndex = cellIndex(map, x, y);
+        if (closed[nextIndex]) continue;
+        const nextCost = currentNode.cost + step.cost;
+        if (nextCost >= gScore[nextIndex]) continue;
+        if (dirty && gScore[nextIndex] === Number.POSITIVE_INFINITY) dirty[workspace.dirtyCount++] = nextIndex;
+        gScore[nextIndex] = nextCost;
+        predecessor[nextIndex] = currentNode.index;
+        heap.push({ index: nextIndex, cost: nextCost, score: nextCost + octile(x, y, destination.x, destination.y) });
+      }
+    }
+    return null;
+  } finally {
+    if (retained) {
+      try {
+        if (workspace) {
+          for (let i = 0; i < workspace.dirtyCount; i += 1) {
+            const index = workspace.dirty[i];
+            workspace.gScore[index] = Number.POSITIVE_INFINITY;
+            workspace.predecessor[index] = -2;
+            workspace.closed[index] = 0;
+          }
+          workspace.dirtyCount = 0;
+        }
+      } finally {
+        pathWorkspaceInUse = false;
+      }
     }
   }
-  return null;
 }
 
 /** Convert a point path into auditable one-cell normal Walk intents. */

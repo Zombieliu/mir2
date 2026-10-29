@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T20:07:29.762Z",
+  "scope": "Post-execution metadata addendum to the original small-facts review. Root actually executed the sealed ended verifier once; this author checked its final result, execution/log refs and all10 current tool source pins. No raw, monitor, recording, executable or gameplay tests were re-read or run.",
+  "priorFacts": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-actual-terminal-independent-facts-v1.json",
+    "bytes": 11241,
+    "sha256": "e354616d0557fb7a934b75e7c8e9546842d9235d3ce45424363093e2c0e8235f"
+  },
+  "runId": "1792956759820-08151b82",
+  "evidence": {
+    "toolSeal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\tool-source-frozen-v1.json",
+      "bytes": 2111,
+      "sha256": "b0dc5460824f6b621314a08a3c9596e350e07f45db54caffbf017f4c49266009"
+    },
+    "actualExecution": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "df616e6f7e602b274ac411c9c1dc154de09a9b3aedf8566a33aa6b6e314fed1c"
+    },
+    "actualLog": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\actual-verification.log",
+      "bytes": 878,
+      "sha256": "f334a9f097d67bfcbff83e209b23b710b345456cdbdfdd8e0a42e9562452df16"
+    },
+    "actualFinal": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-independent-verification-v1\\final-verification.json",
+      "bytes": 451627,
+      "sha256": "4203ff7d2384e0dfbe4a8cb7c2548168603aee67828d389d191e621ece93b519"
+    },
+    "actualRootOsReceipt": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\probe17-root-independent-cleanup-v1.json",
+      "bytes": 325,
+      "sha256": "910bc3000ad785599b31aa3eff558a1671ec0af47855b518031c5360dac050df"
+    }
+  },
+  "checks": {
+    "rootExecutionExit0And10InputsUnchanged": true,
+    "current10SourceRawPinsAndAggregateMatchSeal": true,
+    "executionSealLogAndFinalRefsRawExact": true,
+    "originalGameVerdictPreserved": true,
+    "allThreeActualPhasesAnd16WindowsPassed": true,
+    "rawActorAndContinuousActivityCounterReplayReportedConsistent": true,
+    "zeroHpDoseSemanticsNonVacuous": true,
+    "storeCompanionCompleteIndependentOfGameAcceptance": true,
+    "cleanupAndActualRootOsProofBound": true
+  },
+  "actualReplay": {
+    "independentVerificationPassed": true,
+    "probePassed": true,
+    "capacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "phaseChecks": [
+      {
+        "name": "stage-2",
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.298,
+        "completed": true,
+        "completeWindowCount": 5,
+        "requiredCompleteWindows": 5,
+        "rawReportWindowsEqual": true,
+        "activityCounterReplayEqual": true,
+        "strictGatesPassed": true
+      },
+      {
+        "name": "stage-10",
+        "configuredSeconds": 300,
+        "measuredSeconds": 300.276,
+        "completed": true,
+        "completeWindowCount": 5,
+        "requiredCompleteWindows": 5,
+        "rawReportWindowsEqual": true,
+        "activityCounterReplayEqual": true,
+        "strictGatesPassed": true
+      },
+      {
+        "name": "soak",
+        "configuredSeconds": 360,
+        "measuredSeconds": 360.388,
+        "completed": true,
+        "completeWindowCount": 6,
+        "requiredCompleteWindows": 6,
+        "rawReportWindowsEqual": true,
+        "activityCounterReplayEqual": true,
+        "strictGatesPassed": true
+      }
+    ],
+    "continuous": {
+      "rawWindows": 132,
+      "failureCount": 0,
+      "scope": "Activity counters replayed; this addendum does not run another replay."
+    },
+    "hp": {
+      "totalRows": 0,
+      "verifiedEventsChecked": 0,
+      "successProofChecked": false,
+      "noVerifiedDoseObserved": true,
+      "claim": "Only actual verified rows with matching sent/acknowledgement and effect proof are checked. Zero verified events claim neither a real dose nor survival.",
+      "proofLimitations": [
+        "The raw producer does not persist send monotonic time, receipt cursor or quantityBefore. This verifier cannot independently reconstruct the original freshness deadline or the numeric inventory decrease.",
+        "Consumed and increased HP remain distinct observations. A consumption proof alone does not claim healing.",
+        "No HP event or diagnostic proof contributes to native opportunity, launched attack, dual hit, ACK or original gameplay acceptance."
+      ]
+    },
+    "store": {
+      "sourceValid": true,
+      "countsMatch": true,
+      "complete": true,
+      "rows": 7,
+      "bytes": 1519,
+      "sha256": "88690b15a68d846c59eceb013f8f8746083b64e97221b9f8ea24aa8cfeb44137",
+      "contributesToGameAcceptance": false
+    },
+    "raw": {
+      "rows": 41450,
+      "bytes": 30010725,
+      "sha256": "3509627e3ef36ab1c35988ca0abbff695c16077c7fd177b172672a1e507021b1",
+      "independentlyRescannedHere": false
+    },
+    "cleanup": {
+      "allSevenTrue": true,
+      "gatewayExit0": true,
+      "monitorExit0": true,
+      "rootIndependentCleanupSchemaChecked": true,
+      "rootCleanupSha256": "910bc3000ad785599b31aa3eff558a1671ec0af47855b518031c5360dac050df"
+    }
+  },
+  "limits": [
+    "The actual sealed verifier does not independently replay per-request typed-result/dual-positive packet matching within900ms; this limitation remains explicit in its notes and this addendum.",
+    "HP has zero observed raw proof rows; no real dose, healing,2000ms proof, long-term survival or native activity credit is claimed.",
+    "The new Root OS receipt is an actual20:02:05Z query, distinct from the earlier stdout-only19:51 check preserved in priorFacts.",
+    "Only2/10 actors and360-second soak are certified by this probe result; formal100/two-hour capacity, original5s root cause and P0 acceptance are not established."
+  ],
+  "verdict": {
+    "actualEndedEvidenceConsistent": true,
+    "eligibleForFreshFormalPrerequisiteBinding": true,
+    "capacityAccepted": false,
+    "p0Accepted": false,
+    "p2Started": false
+  }
+}

@@ -39,6 +39,12 @@ GAME_ROOT_FILES = {
     "CONTROLS.txt", "KNOWN-ISSUES.md", "NotoSansTC-OFL.txt", "OFL-NotoSans.txt",
     "OFL-NotoSansArabic.txt", "OFL-NotoSansDevanagari.txt", "OFL-NotoSansThai.txt",
     "MULTILINGUAL-SOURCES.json", "BUILD-ATTESTATION.json",
+    "README.zh-CN.txt", "BILLING-HAN-SOURCE.json", "OFL-NotoSansSC-BillingHan.txt",
+    "SIMPLIFIED-SOURCE.json", "OFL-NotoSansCJKsc.txt",
+}
+SIMPLIFIED_DOCUMENTS = {
+    "README.zh-CN.txt", "BILLING-HAN-SOURCE.json", "OFL-NotoSansSC-BillingHan.txt",
+    "SIMPLIFIED-SOURCE.json", "OFL-NotoSansCJKsc.txt",
 }
 EXECUTABLE_TOKENS = {
     "exe", "dll", "com", "scr", "cpl", "msi", "msp", "bat", "cmd", "ps1",
@@ -86,6 +92,8 @@ def game_path(value: str) -> None:
     relative_path(value)
     if value in GAME_ROOT_FILES or value in META:
         return
+    if value.startswith("mir2-assets/legal/"):
+        require(value[len("mir2-assets/legal/"):] in SIMPLIFIED_DOCUMENTS, "unknown simplified legal document")
     require(value.startswith("mir2-assets/"), f"non-client payload: {value}")
     lower = value.lower()
     require("logs" not in lower.split("/"), "runtime logs cannot be payload")
@@ -314,6 +322,12 @@ def validate_candidate(files: dict[str, Entry]) -> dict:
         require(path in files and files[path].size == size and files[path].sha256 == digest,
                 f"payload hash/size mismatch: {path}")
         declared[path] = item
+    root_documents = set(declared) & SIMPLIFIED_DOCUMENTS
+    legal_documents = set(declared) & {"mir2-assets/legal/" + name for name in SIMPLIFIED_DOCUMENTS}
+    require((not root_documents and not legal_documents)
+            or (root_documents == SIMPLIFIED_DOCUMENTS and not legal_documents)
+            or (not root_documents and len(legal_documents) == len(SIMPLIFIED_DOCUMENTS)),
+            "mixed or incomplete simplified document layout")
     require(set(files) == set(declared) | set(META), "actual candidate file closure differs from manifest")
     require({"mir2-platform-windows.exe", "BUILD-ATTESTATION.json"} <= set(declared), "missing candidate executable/attestation")
     canonical = "".join(f"{p}\t{declared[p]['size']}\t{declared[p]['sha256']}\n" for p in sorted(declared))

@@ -1,0 +1,957 @@
+{
+  "schema": "mir2.windows.asset-input-recovery.v1",
+  "startedAtUtc": "2026-10-29T09:14:31.640Z",
+  "completedAtUtc": "2026-10-29T09:15:49.846Z",
+  "passed": true,
+  "gameMetadataSourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "checkoutRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "inventorySha256": "1f16d7bbd57d879aeeaae0c4999c0e5f31a314798df491674c959fd19bc517de",
+  "expectedMissingFiles": 98880,
+  "createdFiles": 98880,
+  "reusedAlreadyExactFiles": 0,
+  "createdBytes": 145604378,
+  "fullIndexSha256": "77a9050818df502f65a7b151976ee7d66bd01e94d87680cf0760b925dd10dbee",
+  "fullIndexContentHash": "f71b89aa38504c6c127b937043d4af6ecd26d9dd1a2b9ed3b91100e6a1f0052e",
+  "sourceLibrariesVerified": 103,
+  "packedPageReadsVerified": 184,
+  "allCreatedFilesMatchFrozenRgbaAndPngHashes": true,
+  "trackedInputsWritten": 0,
+  "existingInputsOverwritten": 0,
+  "metadataModified": false,
+  "sourceModified": false,
+  "closureSha256": "ec51ffa1284ed42c5961db0d1d19539554423d549de9d36a0190dd6e688aa818",
+  "fileManifest": {
+    "path": "asset-input-recovery-files.json",
+    "bytes": 14518332,
+    "sha256": "1df8b1f8526a958c73da2082202e27124010d3b9123e9708244f2fac81ae2d1d"
+  },
+  "libraryReceipts": [
+    {
+      "library": "CArmour/11",
+      "created": 1616,
+      "sourceSha256": "35c32a0ee4cbeb091f47d3f63b7039e67ae165b68d8b323abed91d73f26e713d",
+      "sourceManifestSha256": "130917cc93495222600660c1e71557ca930f2152f2b29ddc7625e093ae92400f",
+      "committedMetadataSha256": "9e789ac9b3ae24a3f690474548fffc7c62b3c9d5f8f20e8fe741ba3e3b2d9fb3",
+      "totalCreated": 1616,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/20",
+      "created": 1616,
+      "sourceSha256": "c26f7e00d999684da8266ff5145c262a2030fbd84bfef22007fcb7471144a571",
+      "sourceManifestSha256": "9d8f93b1e091673a967a5a01d258ab5a6d32d41b3df365796e2f2b95e7d563b0",
+      "committedMetadataSha256": "92de858929cc1be69357c05d04d93c9b75a7d94dc06633b5a29e619ae2cc1334",
+      "totalCreated": 3232,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/21",
+      "created": 1616,
+      "sourceSha256": "d78fe7494e6b3221072a12b811e940bbc83da5db9f2b8cc2873153fc6deaccb7",
+      "sourceManifestSha256": "1dcf0f48ad81e99daa32b665b17530423d1db7c797ac0dd909527c27a5a40b16",
+      "committedMetadataSha256": "19ede044337e30207664b8a21cbfffe117a3076f155e62e87f7d1fe56a9ce2f3",
+      "totalCreated": 4848,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/22",
+      "created": 1616,
+      "sourceSha256": "e61eb01c721e734e7bc2c63c5ec76284a5df5821c2c658b51d569e7fce500e47",
+      "sourceManifestSha256": "f000d7611174e711fc6d86a8a7fbc12c8ab52bdf4f432adc199c37f8b2c8e1e7",
+      "committedMetadataSha256": "71d3ef53f717aa4b1bfae78710d155aa144cd1169fe87437aed7f566c523c35f",
+      "totalCreated": 6464,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/23",
+      "created": 1616,
+      "sourceSha256": "121d54ee67e83156a422f8518fe3107c8c07e6a3a2d58cb7aafb18d01ec93763",
+      "sourceManifestSha256": "6089f56476c05e716d11829bdfdca0d442b7b8ccece412cc03056a94754da19c",
+      "committedMetadataSha256": "bba001d619930f62003b8f83ebbfdef654875c9d041a2f41ca3793418e5663ec",
+      "totalCreated": 8080,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/24",
+      "created": 1616,
+      "sourceSha256": "9dea295aef024cbba3f3d410cc839177fdbfbc2465cc2e586089046cacdbeae2",
+      "sourceManifestSha256": "2aee0d9b014cb522760a278307f245fc7bb320711704bc41e06af3a7d0040d57",
+      "committedMetadataSha256": "d038e39a8a07063698fa0a37b640e804d87e80553ac9fc1d65345f2bfefcb43a",
+      "totalCreated": 9696,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/29",
+      "created": 1616,
+      "sourceSha256": "943b81bc8122a3daab88314d057414efb0c541b0be6430fe11645f4a42358ec5",
+      "sourceManifestSha256": "cd337a7617c9dd6207587daffb9c8a3d1db00b789edd1bd0bd2b1e85f05de57d",
+      "committedMetadataSha256": "3977a3940f3db7a50802da62872d178b093802b010ac4dfde962e5d7aac9f505",
+      "totalCreated": 11312,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/35",
+      "created": 1616,
+      "sourceSha256": "fa4b37f255d0ae616759e49cbe5ddfa844175a092782ab598aee246db4463d55",
+      "sourceManifestSha256": "8250d5484f27c6b2155c7f66bad10ec07747726faee66f4d7d997be45645d949",
+      "committedMetadataSha256": "09f92a63bc5ee7b4be27b405127c77f1e5127d50c1e37451327914c72f1b8975",
+      "totalCreated": 12928,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/36",
+      "created": 1616,
+      "sourceSha256": "edc910a00b42732484f8ba996fff66b2c5d4bf5f0d5c23d3d1a45c8ef9b10f80",
+      "sourceManifestSha256": "5de8696c05f768d5870ad0c14cd289d51b7342cd2d8efbf03c0e03d61faff91c",
+      "committedMetadataSha256": "2aba2b6d37acd538efd2ecdedc368c3d91282af55884a1fc702df779bc298227",
+      "totalCreated": 14544,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/37",
+      "created": 1616,
+      "sourceSha256": "eaf77c045cb7e151e010841d9f81d970f4ca3c97f2759bda5556ea176cd69261",
+      "sourceManifestSha256": "0db2c84a84d9a1b3d18579a4d047f784ca1e672e81df820d3fbff49e5332f102",
+      "committedMetadataSha256": "06998e0f1acb068568bd59a6391f0a36072a70b088145a730d055f2732deeafa",
+      "totalCreated": 16160,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/38",
+      "created": 1616,
+      "sourceSha256": "f68def82e823ef3c55afa4fbe0d8dd5590540021717899bbabe17ab2821cb4bb",
+      "sourceManifestSha256": "e29bfbeb70c5bc23a569ac6f91991caf0d3565e017851d035a6964fb5d1bc0ed",
+      "committedMetadataSha256": "2cd24655d67aa879dd47a394fb57bb53c9874c1fb37e3cf19e4c52b48076d64f",
+      "totalCreated": 17776,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CArmour/39",
+      "created": 1616,
+      "sourceSha256": "cccaf749654730071b4c6b77c074a6cd019c01eeffb7dac29baa924ffecbc497",
+      "sourceManifestSha256": "95215cf272be35b1e65d91645fa20f0e10db2ff04b5e68a30d7b853d8de37655",
+      "committedMetadataSha256": "db8f8cd08c6991360db28290033f685b833f254247dae7c75060a750e6ced136",
+      "totalCreated": 19392,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/00",
+      "created": 352,
+      "sourceSha256": "876288217ef6ad4568a04e57913b892182d1ed6550fdf933dcf932f9a5b85c93",
+      "sourceManifestSha256": "885e2807ac9d078002729332f05ee69c2ece87bf1caaef9231ade74c71f3ed1d",
+      "committedMetadataSha256": "7073311ff92bef1c2ad393a46272d6c60b533affe571bf43e597b9c7543a36c3",
+      "totalCreated": 19744,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/01",
+      "created": 352,
+      "sourceSha256": "0efbbd32c396acbb3c27ad98e59c383d78622961e091cf46963ac838e5f078b9",
+      "sourceManifestSha256": "1ebdafa7772b7950db98827edc69d579c3dcc2541a3b5341779193834014ed66",
+      "committedMetadataSha256": "b98df4da17401d745af9ac4ae63122801c6c8eaf8873820d818945b1e2e1b6b9",
+      "totalCreated": 20096,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/02",
+      "created": 1616,
+      "sourceSha256": "63617cc8b0fd4abf161620814d8541f9c817b43d6732511b144193e7ef91fbdb",
+      "sourceManifestSha256": "4a96516cf2ed019bdd2ccc87a15dc5224a2a05efcd441ab33c983d7ae465a6f4",
+      "committedMetadataSha256": "c3579af15f92af7e986c5e9230daa2a7e14420541e64f754987d2fb22db51250",
+      "totalCreated": 21712,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/03",
+      "created": 1616,
+      "sourceSha256": "a9290a73fae35df929cca4e084f7ee4d788bdcdf61985174cbb56f9cdf9b90d9",
+      "sourceManifestSha256": "0b5d15609ce589a93e47a70a81f2aeee25d47fb4ef7e1021e8ce93cc3daf162d",
+      "committedMetadataSha256": "37660fae6e95940600d912b235b0262521f519cf53d15e22a327e3da1b2d5fc5",
+      "totalCreated": 23328,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/04",
+      "created": 1616,
+      "sourceSha256": "45a31209f83f1cf051c803eba7f9e30df3ff052453c9089ff4fd22d176f7fbac",
+      "sourceManifestSha256": "98aefbb1002e18017a17a679c8f29c5c0e2567e7fd4021faa8cc05dde6265408",
+      "committedMetadataSha256": "5701613ccc117c001c78e3df3cea3e6d5907cf32e083cd97e4f8d114841be425",
+      "totalCreated": 24944,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/05",
+      "created": 1616,
+      "sourceSha256": "a4678180c1dbd93711da61c065e6fa1523c661b77eb9e3c95f6b6dae13466548",
+      "sourceManifestSha256": "574d27451e7fac2cfc647882b3a370d17ea93935403ec0c854b3e064b9d5bad9",
+      "committedMetadataSha256": "7464b7c337a65dc2be6c43c428495621485a6384680b951180dabaa0d7ebcbc9",
+      "totalCreated": 26560,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/06",
+      "created": 1616,
+      "sourceSha256": "6f948807e5717c701d11bcab52cf13e9aee3b86272039fa5f83a1d74cd372121",
+      "sourceManifestSha256": "7f3c3b73ea3384658f46d3ddf3d46770e7d9b79b2f0f91ac1113c3ebcfaa318d",
+      "committedMetadataSha256": "a7cefd69f3393a64a0d27166c7112cc99b2afa0c1a783f062abb9ace00c4c442",
+      "totalCreated": 28176,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/07",
+      "created": 1616,
+      "sourceSha256": "8303347ccf8647d1b7ee983f2ad65a44576c3c166809a3b4ac7b5eddfc65b865",
+      "sourceManifestSha256": "cf0bfce1ba5e8c07c1f6911516186faa8ca721a3c072bac7f787ed0489d27006",
+      "committedMetadataSha256": "2cd4f16c755eeeb049efe3d9dda4a64c67f2c7287a1a248ec70ef1ad678e9f76",
+      "totalCreated": 29792,
+      "totalExpected": 98880
+    },
+    {
+      "library": "CHair/08",
+      "created": 1616,
+      "sourceSha256": "5cabf734b8b987b8a3c80ae7babb9ebfeed60a5244fffa25e98dd20e71a7650d",
+      "sourceManifestSha256": "b41b69bdf3a26bbe96561ec24f6d91aa9c1c4455260db8dc91369d780f3fa2d8",
+      "committedMetadataSha256": "c0f5ffd4387c869f6e28bff4edc56bc9adb5fcbb521368e203f1c1fb09db1028",
+      "totalCreated": 31408,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/02",
+      "created": 704,
+      "sourceSha256": "730a51415168b2f12892da894dc55c3e0a0be7c21e8c28fed250c397f76de74b",
+      "sourceManifestSha256": "34e9f848fb9e7c1bf4296d0e25cdbffadae2f78a394c5aa0f694000c7b290ed5",
+      "committedMetadataSha256": "84a8616cda59194dc88d4922e2865b58be85fde479d967eeaf6e4effe6166fb1",
+      "totalCreated": 32112,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/10",
+      "created": 704,
+      "sourceSha256": "3a2639e16b92221fa087ce3b320f8ba29e5a21016c801c615902b28a34d400b0",
+      "sourceManifestSha256": "604fa8bb81de286e43dcbe64815ef3709814c0d64f6f0138b561968ee581b060",
+      "committedMetadataSha256": "4e794ad646f86ec6ec256d65320909a69fdd58da5af9a3a97e87f3d034733bad",
+      "totalCreated": 32816,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/11",
+      "created": 704,
+      "sourceSha256": "f9630eaecd099c83aa89fdc052b7ad13327d3547bacecbb185e5cfc819954d43",
+      "sourceManifestSha256": "bb5b86b31aac58640815722661cd1a45fe7302ce20922569827e5054206f1644",
+      "committedMetadataSha256": "fda6694ce8fddae53a776fb44e5460f21cba01a86323027805d3ffbd4e46541e",
+      "totalCreated": 33520,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/29",
+      "created": 704,
+      "sourceSha256": "f0f31ad39df548d2d9d79303ef24757e3f96eefa10099735129dc33bc45901c1",
+      "sourceManifestSha256": "51df5ac5c5c27b6d424fb2029e1146ad7f355117b46469f9e6c7089a83269dd5",
+      "committedMetadataSha256": "df0ef3b57459c2624da4951919816e6393fa5845bd8ae8adfe90ddb65c2dd63b",
+      "totalCreated": 34224,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/35",
+      "created": 704,
+      "sourceSha256": "c1016f311e2efc419960dc8074c8ed43a02cf8c44ae2d045001f535508b430e8",
+      "sourceManifestSha256": "baa9e703935762805e442f701afe1fd9503456994539aae63f6feb64fa48ee3f",
+      "committedMetadataSha256": "a4c6dac4902e935e1f43cdaa5b2277bf0de0b7bd385e6ec4695d9ed65eebc417",
+      "totalCreated": 34928,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/36",
+      "created": 704,
+      "sourceSha256": "cf1e16f8d12b362fd64b85874d15e955dfa5543df1c81b6d922a0951acd65be7",
+      "sourceManifestSha256": "03b6cbf8d0bd84e138a302f3f2823d2de19920a38aad8e2ba4b9c92c8106d7b4",
+      "committedMetadataSha256": "5034ae025516c54084f6488670eb97d33255b315aab6e0f51fbaa3e1ab090930",
+      "totalCreated": 35632,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/37",
+      "created": 704,
+      "sourceSha256": "ccafbdb1ba575379e82fb57732e4e7c271d1260e0c7f8ef982e2dab4b87d6b9a",
+      "sourceManifestSha256": "8906cc24b0f9178934f83da07ad374f96679eef88b583d1914facd97a5ea9346",
+      "committedMetadataSha256": "4bc4015b691c49fea0918d1c2fceb8d6ac586f873da80309eaa957fc911ed72c",
+      "totalCreated": 36336,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/38",
+      "created": 704,
+      "sourceSha256": "ccb37872472d339af909d1f1a0e7cefeb16a802ae99500fb2a508e9397fd543f",
+      "sourceManifestSha256": "2e6ed1eac5fd5851032b6ca7a6151f21e55564b72a6d5a829b507a650ab57422",
+      "committedMetadataSha256": "4f8a672e9f9d7ea1bedf590b2bdbddc54c18c2bc6cbcf95c885aef0ebfca0229",
+      "totalCreated": 37040,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARArmour/39",
+      "created": 704,
+      "sourceSha256": "7357c5bf9e0283a9c510f8a6a4122cb752abce68dbb2fe08fcc8bcbe38b43cda",
+      "sourceManifestSha256": "c91608d6eba9bf39e891e87f870122975af508e12d78c223742d0b528cad0297",
+      "committedMetadataSha256": "95ea54e66075f509abe1c9917ba97f53d9c7b0154e89be8e7c499ca3c8c562a7",
+      "totalCreated": 37744,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/02",
+      "created": 704,
+      "sourceSha256": "d8ac0ee7d9e7258b0f676211aa4b64dc177e0b5c2b51a27fa6a4b6837c25ae58",
+      "sourceManifestSha256": "400e3e80d2fbecbb4884ce379bbe5bcf138ac797bdda5ef0c4f03f850072e69c",
+      "committedMetadataSha256": "11ee8738c11ccf64e8863767947ed448bf7ad68eb9a61cc9c7ee9b1fb4264def",
+      "totalCreated": 38448,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/03",
+      "created": 704,
+      "sourceSha256": "9443aa418a9147bf5215ce0c859da39acb7e81ca72048d0516f6b0eb11c3cc54",
+      "sourceManifestSha256": "0d47b41a46845a26c41397cdef01fb120eec1538008c119d2b48319b066bd5b2",
+      "committedMetadataSha256": "333a4a1e5953dbe1f762b8923a0d0499397372cfb508a898d35563e3b222e45e",
+      "totalCreated": 39152,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/04",
+      "created": 704,
+      "sourceSha256": "f9334ea2594d28378c43a280dc7b44b47adf6b6e6bdcc2748354afc7f990fdbb",
+      "sourceManifestSha256": "6f354f12e51a0d814baf432700ea5ed6ecfc14ee03afa83a3fcfff7d9dac3e27",
+      "committedMetadataSha256": "9ccc2d46e74f864031efd6608081a75c4cc229500d0d26e3fa42bf4ddcf50ef0",
+      "totalCreated": 39856,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/05",
+      "created": 704,
+      "sourceSha256": "7618503b60fae3dc66fa25da7511a6bf74d5d403e82a6f462f4c666df61c8992",
+      "sourceManifestSha256": "435361ebf21722bef2c102bd9e442129aa507e1134999dfe60027f3d5481ea88",
+      "committedMetadataSha256": "ee8ec533490d26f8c71df3c7abcd503a8eff167d3e7eda981c147e2c3735951f",
+      "totalCreated": 40560,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/06",
+      "created": 704,
+      "sourceSha256": "f0e4e88dcb76644dc9f8a01df51af29df960ca09b04c2c3044216ff75e7de193",
+      "sourceManifestSha256": "0fe794de198904f9093cd18b38c83e59e3a47e9fd7fab4bb7d834b8607ebe2fe",
+      "committedMetadataSha256": "1d3b6f6c79d22311230660dafc95187c3c8c3108ad6b882e65c84406c68e8432",
+      "totalCreated": 41264,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/07",
+      "created": 704,
+      "sourceSha256": "2b0503d55cfa091488ddd562c70ff7c9a6f81324b8906936a414c849c9fe39fe",
+      "sourceManifestSha256": "554751bb2d7b21b1a9c282e918d8453142f09a8cd0abf7ce3531813fd9899e46",
+      "committedMetadataSha256": "2e27ac933122cf406361e434dacce31484650aa8001837bf5aba7a7893043ebf",
+      "totalCreated": 41968,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARHair/08",
+      "created": 704,
+      "sourceSha256": "fb6e75c1b698a3ef2483be80009c6b2edd94b00d9d41a4950b096e126f225fee",
+      "sourceManifestSha256": "c30bba50edd3d7ab4352b247c29f2327fde2b264e94834e91dd03f66a97bf87c",
+      "committedMetadataSha256": "7a10aa6dbcaf28d96421e2ed2425f542116a5c92ecf42ca98b2cadc127e5b33d",
+      "totalCreated": 42672,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/00",
+      "created": 104,
+      "sourceSha256": "62318db033c204302bc696d0ff3c76cdbd1a83272ce208a10bcc83fde9cb86fd",
+      "sourceManifestSha256": "a220531c3515d35760e4ba17a4de2bf8b9c273d7eb902ca4b8aacca9110b799d",
+      "committedMetadataSha256": "76f7fcf067cc1d3ffdb75aa09cc5d589dc3985a26810c33704734665f250d10a",
+      "totalCreated": 42776,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/01",
+      "created": 104,
+      "sourceSha256": "405f4bec13f80147f5855b38396f0b4865fbbb4b601a6a6bab4f5ff69f81ecb0",
+      "sourceManifestSha256": "74fe6480c2d3c51c66d76b6b59881350b5f96f9ddc7f5c73da5d1eed14f9fcef",
+      "committedMetadataSha256": "382786645f5c9d8e6951be8070626f11352eef94aad512cb446e31f0fa0933de",
+      "totalCreated": 42880,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/03",
+      "created": 832,
+      "sourceSha256": "3aa6502a77ef7baa4b0c100f37183664e96c866ee4069bfc8c6df53c72c03fed",
+      "sourceManifestSha256": "322321236f0643223ff4069e126c2bee4fddb43bd09f4f7650e4f3537d0a69d1",
+      "committedMetadataSha256": "bfaa67d3a6dd27f7fe45bd89c2002fae4ec989c4dddd7a34c433e9d26123f09e",
+      "totalCreated": 43712,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/03 S",
+      "created": 704,
+      "sourceSha256": "bbe7236aabf2ce187ab89ed43c8fcf0ae88fdbb7d8b188e64bedde782c1ce3df",
+      "sourceManifestSha256": "0fc8d88d04a59772a4f8f3d2d8b5f452ced4c4dd9704c986988f15791d5bc714",
+      "committedMetadataSha256": "1691fd6c8e5825980343bc13e5b1061210e9fb9eefa8bce25c943c72686bac85",
+      "totalCreated": 44416,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/04",
+      "created": 832,
+      "sourceSha256": "6d0c402f2c20b7a246cae8d727654789829e276dfc0f474b1efcc33d209afe5f",
+      "sourceManifestSha256": "8ccf81c822678194c949e171765f9c45c4e6006be756606db6259553ec703f22",
+      "committedMetadataSha256": "af6564176aec9eefaa661efa69fc3337df5d97adf19b960505c729974614d922",
+      "totalCreated": 45248,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/04 S",
+      "created": 704,
+      "sourceSha256": "b38082061c69e9ccdc73f3cfda336b6accf80dcca5fab7abf7943640429905f6",
+      "sourceManifestSha256": "11ccff84c1f07cfc5988a4d7d6b5e4fd2ff244a7d34337cc22756b7b350c3135",
+      "committedMetadataSha256": "cb5ec392aed59d21e6f2012e20cef099ede3a0c119135acd607e24850fba7c10",
+      "totalCreated": 45952,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/05",
+      "created": 832,
+      "sourceSha256": "e54c4dc9c5fe48604e17908f835d01793bc1b7183cf33b81082bdc952cf633f1",
+      "sourceManifestSha256": "14d114339ef2cb633dcdecd6d6d422104ca117a52169a2f9d418fc9264579660",
+      "committedMetadataSha256": "e89e57a9915492d3cb1e74837b2e9a4557903732f6c82640bc43da20f3a12516",
+      "totalCreated": 46784,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/05 S",
+      "created": 704,
+      "sourceSha256": "4355c83228f122e6d4696975422bfe6a64cbc9624518fbdcb7cebcf10f8836c8",
+      "sourceManifestSha256": "17d71865950d0ee189a1573a84ff744a793f62d0d65a680678067a767854b556",
+      "committedMetadataSha256": "d6cc213b435bd0759a6694f5dd8ea686df1d0ee8cdd329654baa48578d187e89",
+      "totalCreated": 47488,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/07",
+      "created": 832,
+      "sourceSha256": "523f5ea8a8834a396f22b09a6d43bc7e0aae8c7137d4529c56933e706dd61683",
+      "sourceManifestSha256": "0ba810918caa74f4cb577392d584376fab86bff37578289569d12d6032beaaaf",
+      "committedMetadataSha256": "e222ad6225d78d1892ab7533d23eec9ca7485aa621b65c53e7724717ddeeff6b",
+      "totalCreated": 48320,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/07 S",
+      "created": 704,
+      "sourceSha256": "ded6a1860c81e1f8fd299f5e4263aa61f9c8f2073f0fa376902ca6f9d9f18bf3",
+      "sourceManifestSha256": "0747d68c7dd541d7db7162d4f4a445686dd13ba6b77cad922e840f94b77bbddf",
+      "committedMetadataSha256": "ba0bf011c149c980093e5a2bb3408fcc62ef84d07dccee18506a52eacf6aecda",
+      "totalCreated": 49024,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/08",
+      "created": 832,
+      "sourceSha256": "de51fb8cbe6bcefbaa2ba2fb1a8396be4f288c2f55186528468ac5ad8af06a9a",
+      "sourceManifestSha256": "553e891db4bfc1414b323eb2dcfb0c5f31a05580d0f341b0e93b59c828b21029",
+      "committedMetadataSha256": "e4fede79f7dd73b393fbb2acaa5ccfd3496ca22788d465eac4c03816c9c38420",
+      "totalCreated": 49856,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/08 S",
+      "created": 704,
+      "sourceSha256": "96f2c58c7addd8f9c687d5a2a93121dde51bf741fc077ac29a577f378fc4e9a4",
+      "sourceManifestSha256": "d6ab9f856fb33fcd91048a1f60d4219c642092f307e9cb9808adde18f28211b5",
+      "committedMetadataSha256": "9622cd3376cdb25512859506783f76634cd5a9fec9ecfa2229cd640a7e0c4c18",
+      "totalCreated": 50560,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/09",
+      "created": 832,
+      "sourceSha256": "e06de603bc1585152f1ce36234f20cc9313159db685a20f7daf1eb9655d410d7",
+      "sourceManifestSha256": "c984eb326bab80550571b1c03ccfa7c5ba2b767d0bf2360ed33bdf73ab023b3c",
+      "committedMetadataSha256": "9b18ca99d4f1534761fac31f121332332a59a464b8591fbed6ecf7717da75a5f",
+      "totalCreated": 51392,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/09 S",
+      "created": 704,
+      "sourceSha256": "5cce50bf245bbecced3c3b868da7611d72cda2a8ee35e76f8ee31856f5f6f6b1",
+      "sourceManifestSha256": "db9e8f4b5b712649e3bd68c5f5dd2d260d50e83f1f9d5e209c59f257e2c4c3f0",
+      "committedMetadataSha256": "08bb5c919ba9fcab4041f2d6c03f823041732cfe318ddd51e95c62f6a96a4a8e",
+      "totalCreated": 52096,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/10",
+      "created": 832,
+      "sourceSha256": "9ffb3f31f336d34603d27fcb6d5d699439d62586ab66fc5aa0d6639b2de512fc",
+      "sourceManifestSha256": "58d0d1178a93afb83e0736d7588af3fa25a9324699d6e12ee9d3d7569053a607",
+      "committedMetadataSha256": "6cde9dd5ac210ff82fdd151f411a3e7944c3edc37adc021644bb8bb3772a899d",
+      "totalCreated": 52928,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/10 S",
+      "created": 704,
+      "sourceSha256": "cecd63a6ff6099fd0969e7a7c48e569dda1e47318cd713735fbc6af73b12de95",
+      "sourceManifestSha256": "c76defe85a175caae20f16b812e11d47a29a6920037302e3cf9cdef08e73e50b",
+      "committedMetadataSha256": "fe41e1e1770fb2f20805dc7be1fbef279f64da4c9f1c75f17b78f69a070d4903",
+      "totalCreated": 53632,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/11",
+      "created": 832,
+      "sourceSha256": "5a53a23e01d7c74d7eef43b25fb5643eedc87356907c5ddc58c47619a392d1c2",
+      "sourceManifestSha256": "d8a4b6acac95c1b7f66bdd539551868084669a509c32d0ddf29a7fe68d47fc7d",
+      "committedMetadataSha256": "b588335cf1c0a3fb3bacf333020a42e3b4ab4b4069a630f8eab3666ee0937746",
+      "totalCreated": 54464,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/11 S",
+      "created": 704,
+      "sourceSha256": "b25652c738f9a1639cc5b54108db3d98543760569b38e733e634a81481b1e06f",
+      "sourceManifestSha256": "f288b703af705f048c7fdcc49449b4a4b72b258d5db1906588c021efc17e0a1d",
+      "committedMetadataSha256": "c1d7f8e3cd4750c9e9c2be9f6dbee3f1eefdd2e50a03aa836f66fc6c1d08644b",
+      "totalCreated": 55168,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/12",
+      "created": 832,
+      "sourceSha256": "240eac96d20d8f90fda06e251cf9ceeb05744f6f323034f466504e5ca6fb9e88",
+      "sourceManifestSha256": "0c2973ace960dccef82487aa1248709135be07f2fee03baf0e9a83dfa07c5c74",
+      "committedMetadataSha256": "6acef9d1b3b0bc7cc2f89f54be99ad57b2e3aa43a7f533c5f03db0c859d277d7",
+      "totalCreated": 56000,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/12 S",
+      "created": 704,
+      "sourceSha256": "fdc2a6568e1b7abf6a1dec17650c19d5433320c8521223527fbcd7a117de90fb",
+      "sourceManifestSha256": "d7ca87bf85a74c67d2b825edb667b1f0c03eb888441d34f2bfd285af72b59cfd",
+      "committedMetadataSha256": "b37b178e4a2ebf2b897534b5883ab5a4bf9d6630c48be5f1cae81077e7756757",
+      "totalCreated": 56704,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/13",
+      "created": 832,
+      "sourceSha256": "ff9cd2ceabe26113c658283dfb5427698970c048e1238b95d1c2f7b33f3c448f",
+      "sourceManifestSha256": "82ca2a34c6b8b36aef6197b77c571a7d7627d1b2d5a6cc8f7da58503e824812d",
+      "committedMetadataSha256": "bab106976471538a1d7f16816883887cb309063bae2e0b9d8cca6f44966d78c1",
+      "totalCreated": 57536,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/13 S",
+      "created": 704,
+      "sourceSha256": "8459a7c7c4ed9e854ca5e08a1a8b325056441164f6cf52c6bdda31cf60194e8e",
+      "sourceManifestSha256": "1e90fb20722fce906a749a0c50c6a474014abf4f41150b9cc73b61b4735b15b7",
+      "committedMetadataSha256": "d49d84922dc271d76c84b2f68cbf4f7118c315b17cb36e1e5f0a1564a6ede226",
+      "totalCreated": 58240,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/18",
+      "created": 832,
+      "sourceSha256": "d076bb696060f8b5a134c7550d8370fadc6b3dfd3971f5b2341437328eea3648",
+      "sourceManifestSha256": "2bc82b42e332489992818b627ac668344d18225caeadbed8bb84377c8b35ef3d",
+      "committedMetadataSha256": "5804cf9fd7780fd1043c132ef1f970f2080bdb09ee4d470b4ad2719ed569c7c4",
+      "totalCreated": 59072,
+      "totalExpected": 98880
+    },
+    {
+      "library": "ARWeapon/18 S",
+      "created": 704,
+      "sourceSha256": "c40df095706cb193827a702bb80f3742799fd7ea94d72db076ddf4cae8c336a6",
+      "sourceManifestSha256": "e23128b009face6ee47b2ff61a64828727cc153e3fca24c63070b9fde788f9bd",
+      "committedMetadataSha256": "20c5aa61eea27e64ce90b2dd5fd32faea474b5655f50dd714f4bab69ee513f00",
+      "totalCreated": 59776,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/02",
+      "created": 1024,
+      "sourceSha256": "c9bf93bded224da631ff8e16a04e992dfa06eb2ffb53b38424042b23757ba58a",
+      "sourceManifestSha256": "9e0b7e0caf27e93563641b506f80d5a89314d566e454992bcae6132a7c0427d1",
+      "committedMetadataSha256": "9d54faee90773a5944a48925648a44e650db029cbf90ab9baf18ba0a358ed2fc",
+      "totalCreated": 60800,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/10",
+      "created": 1024,
+      "sourceSha256": "87e759c33176c9e2c5791ddf25873173d43139eaad3203abd27063808d0a66ed",
+      "sourceManifestSha256": "8dc4608c8d41883e3fcbddcb3767010ea0ee94d4749defde531f4b6f5a7b5172",
+      "committedMetadataSha256": "24b368846eb5e0dd365666c40b68cb7d8187822cb783e0e3f898c9c9c2c62363",
+      "totalCreated": 61824,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/11",
+      "created": 1024,
+      "sourceSha256": "66bfbbcc150d6770d1ce59896943bec0b72babb2e1238bbbdb02dd5e2b005b55",
+      "sourceManifestSha256": "a030d5a3b9ed7e0450127160025126db4f94cc1256cf39898315f711727ae226",
+      "committedMetadataSha256": "d008b344868b674beba28983fc30e61bc4fdff90dd171bb4b38318ee0b6977e8",
+      "totalCreated": 62848,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/20",
+      "created": 1024,
+      "sourceSha256": "58526c9cea78d2b10dc23d7a6ff27c36a6a2d8e54b8908bb973e7a1a7617819c",
+      "sourceManifestSha256": "b0bfdf43c2f1c5301e01cef0744b47a8e0405f85deccdc2cac7e780d86640ba9",
+      "committedMetadataSha256": "0b35bc1ef653a168ba5a8b8ba5627a853085f3e329c577c7d2e8040752ce5d0e",
+      "totalCreated": 63872,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/21",
+      "created": 1024,
+      "sourceSha256": "0913a70f734912b5008b4ac0410d7c4aeb8917592c06f303e29506d7dbf8e3fc",
+      "sourceManifestSha256": "537b225eb6869cd3524c397b4aacfe9c76d660bf8186ee3e580ef99682a1af0c",
+      "committedMetadataSha256": "24f8f2569262db0d0280b3d381cf020dc13d7e0db730a635f709feb47b0c0ee7",
+      "totalCreated": 64896,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/22",
+      "created": 1024,
+      "sourceSha256": "2cc5bc4974dd70dd436160b0a5e50bd68c7989e399706bbf4713cf2e6c1c81cc",
+      "sourceManifestSha256": "cf20e56fb94802df6bac2a506aa93d491140115b10e98af042387ddf33192976",
+      "committedMetadataSha256": "a1852d1f1b77fc256d038dabe5daa188f5f80ef38b0e139c522c6e8b6fe32dca",
+      "totalCreated": 65920,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/23",
+      "created": 1024,
+      "sourceSha256": "bb21031da605d4612c507030dd3520561d078a705f0fde1a9cb8022dbd87ed89",
+      "sourceManifestSha256": "140bc8fcd4e94072771c35968b0692bae6353c32ab088f595d85f4d520f54b7f",
+      "committedMetadataSha256": "b7a58e3c0197bf471f7751a0c16c6f52a543a02c55060eb570fb056ee31a7b67",
+      "totalCreated": 66944,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/24",
+      "created": 1024,
+      "sourceSha256": "67a8facf572fe39163c84b79c890b98abc60b4ac5614fb11ba4253d596560e42",
+      "sourceManifestSha256": "ef17c70f09bedd7a3f6947533acff2cab2f1b096429ecdf32fc5a179a500aa5e",
+      "committedMetadataSha256": "828d815575e2447367331a698510deb468ae0e5f77ab36c6e2382784bc7ec8e8",
+      "totalCreated": 67968,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AArmour/29",
+      "created": 1024,
+      "sourceSha256": "e1f3ba8b774fb497ce12e0777e655758a7186ea00f97a4415a661fe52420231f",
+      "sourceManifestSha256": "395c97cbe4ac1fdb391bee72ad0b50f08f0cc2dcfc28355945ae012e83131f8c",
+      "committedMetadataSha256": "00f77035dc8fe8443d5388b2135344a16d66de3b680d2066fb97c0ec5ed69924",
+      "totalCreated": 68992,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/02",
+      "created": 1024,
+      "sourceSha256": "70f54299c0d023f71a4bc7e78f3c0c5757a76a28ac424a8c7840a82fc6c6efe4",
+      "sourceManifestSha256": "479c03dea4a6258fa58a61c87a32e83199bc69cd184736267f1712940cfed171",
+      "committedMetadataSha256": "f16b65061b1d995336dbe735abe6921b8f19fa2485159a4d21009350dbe1df87",
+      "totalCreated": 70016,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/03",
+      "created": 1024,
+      "sourceSha256": "c7b6919815498d0a0ee05db7baa14e6435ac6f8e6d09492cbe740113f5bcf8f5",
+      "sourceManifestSha256": "5a065ad3a840d035cec75548456bf66468c5689c517e9c00a54c3f34ed5b1d51",
+      "committedMetadataSha256": "3caccd10faf9f31139c5740777c16c3a0b08b416fde90b251c0ef70ff88bc50f",
+      "totalCreated": 71040,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/04",
+      "created": 1024,
+      "sourceSha256": "c2180783b023fcadc0bb7f1f7de86865da273988e39769258e0072f93f111a53",
+      "sourceManifestSha256": "6ef67386075cb87f180ffead7a6c2ecbe52317f4b77410da55fba137eb603cde",
+      "committedMetadataSha256": "d22db58714520bdf12c465f85ef2debcfcf656a7b16db77f14520294dc9f7beb",
+      "totalCreated": 72064,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/05",
+      "created": 1024,
+      "sourceSha256": "e6d83754814003864ccc329e6a5cf228428daac7688c9454c4df95aa3e3a77be",
+      "sourceManifestSha256": "91265c5ee7673215b661dff415cc5054ed1fd85732d9c1c7e271bfb91256f030",
+      "committedMetadataSha256": "faa23de73cd0b2548a70ef685551dfc3b330aacadd7559e52d82c85f5a00ebfa",
+      "totalCreated": 73088,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/06",
+      "created": 1024,
+      "sourceSha256": "fc9f4e5e64fbb72087292f4dc55379743f672a8a8884879971438eda656cf05b",
+      "sourceManifestSha256": "2d4c9e176fea8e734bfff86a09f8874466bd2a482ae7ebabcd405994375d2118",
+      "committedMetadataSha256": "da16068ef7c6e78eab05bf9708d2f1700fa42c49c5722f2998606095889b8129",
+      "totalCreated": 74112,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/07",
+      "created": 1024,
+      "sourceSha256": "7865618c26a378ad67a2b9427972bba8932c163096f05174f571ca4e3eb4a326",
+      "sourceManifestSha256": "00b61876b954e4062081c2aa6ec8f141f16080a697def12941a3513ea883bec2",
+      "committedMetadataSha256": "42f80c962403743669d499648e71381b7357b005410d4143c38fa80008e1b1e4",
+      "totalCreated": 75136,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AHair/08",
+      "created": 1024,
+      "sourceSha256": "fadad8e980c0538a176c35a1bb5221ed5a7daabf52cc87c59352463e642ae7ff",
+      "sourceManifestSha256": "833e4d7b76496060c2d71021180de59c7d415a91b7c77175b07493a1a403e3ae",
+      "committedMetadataSha256": "557d149a1a0c7940a688a0c17083e00bb2e1be70630375b96507ba2b3ffaf574",
+      "totalCreated": 76160,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/00 L",
+      "created": 48,
+      "sourceSha256": "fd71388b0e369c23680c66a7b5a47d3a9f06f91a25da2e2ea29c5e09fcedb2bb",
+      "sourceManifestSha256": "2e3f3b8feb71f4cf72554b02a9b282ea53cb1af5fb14eb7e76e59261f4935f21",
+      "committedMetadataSha256": "6fa1dcb75e5eb526adea3cd4d969d7f3b5f511c9afd746d79a2177a43866970b",
+      "totalCreated": 76208,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/00 R",
+      "created": 48,
+      "sourceSha256": "d6bf09f6e664e6f91183fd30763b165789c7d50e97d5bc715e0ad8d745f3c03a",
+      "sourceManifestSha256": "987771df76bc2291f1a92ff7d5746d2e5c2d7c3b57319f2f26a78b22936f01ee",
+      "committedMetadataSha256": "5ee4428e86b715f8a8231ac6962f7ed86c336ce110247d4c729607da9ed89145",
+      "totalCreated": 76256,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/01 L",
+      "created": 48,
+      "sourceSha256": "d40452401c57b110ac711989971f55bdee32cf9b96e9e178ffb43a222d4b3b2e",
+      "sourceManifestSha256": "90e0ad7c362fe01118418e59208925d915c441dd908975771981ca0ece62fb58",
+      "committedMetadataSha256": "707e8b457f5ae24d6d412b387dee45a6c8ba592c3bb6cb840fd668a96cf43df8",
+      "totalCreated": 76304,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/01 R",
+      "created": 48,
+      "sourceSha256": "69e14c3a95ab70a410cf0db4f80885724e06efcd5f2693f39dc7e8337e2cb9d8",
+      "sourceManifestSha256": "6c222887e29ba4ae972ecf845d497c2b44caf2ad42194b1309525d69cfd453c5",
+      "committedMetadataSha256": "f42d4b54a63482c2d37c2b5c681553c793ea3b574e3b0667b3934b175692fbbb",
+      "totalCreated": 76352,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/02 L",
+      "created": 1024,
+      "sourceSha256": "3e20ff3f7e29d6f721c054ffadd303c2bb639308d630d6463ad8f1fd3e202963",
+      "sourceManifestSha256": "e04498e771a504050adbe0c2c65d24b112dead834b79c9416d1e2fd1407d6aac",
+      "committedMetadataSha256": "ae0a5e64950a0571a178d79981bf76fff0f6b8f91858a0caabdd7209c2ea3482",
+      "totalCreated": 77376,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/02 R",
+      "created": 1024,
+      "sourceSha256": "cf4f8cd2d28826fbb30f4c844a379599242faedab6599e1ec7da5fa4bee10365",
+      "sourceManifestSha256": "489d392506bcb0bd92189089041ace71603fcf8d96ae0f5376d303a0b7ae2e2e",
+      "committedMetadataSha256": "059c3be45b6216b29cf2da4758f2fbfcc81ef91ce68634dbe84211eb10231b10",
+      "totalCreated": 78400,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/03 L",
+      "created": 1024,
+      "sourceSha256": "a9db5629009842c38a14cee8edb8de6a78923dc196d3ca27d6568d2b6b3640a0",
+      "sourceManifestSha256": "8bd842290f305f62888e18d3a35ac40e44acc789f5fb68c7a4d04f7c38667256",
+      "committedMetadataSha256": "41ae5b36074f5efc2b92f5a77f6b3d3c40cc4746505e799d0f96a340945e07bc",
+      "totalCreated": 79424,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/03 R",
+      "created": 1024,
+      "sourceSha256": "e47618bb0b7cf38b7e8099c3798a4557ec000d393140623cb2cd7b963847de0a",
+      "sourceManifestSha256": "a84709a313af5e481daecec4fc1a497798a0df48e10ee0cb382b75fabd193640",
+      "committedMetadataSha256": "0ee77a4462e43a500fec6b4829c13047ee3c15e8e9c21e2b9b19da9fea9573d6",
+      "totalCreated": 80448,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/04 L",
+      "created": 1024,
+      "sourceSha256": "cc98b53bc71102b84031d8253b716b3f6b507b8b32d7daab2de451addf4bf75d",
+      "sourceManifestSha256": "dc31b348fc5a9368102e62c6fc6d3fb2656144eaebb6324849f7acf595552b5e",
+      "committedMetadataSha256": "4765027bf28170a320d811f412c8754fa999b18cd22bff5d504b638f993b59fe",
+      "totalCreated": 81472,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/04 R",
+      "created": 1024,
+      "sourceSha256": "da982ee18983b67ddf1fff269ff1e94af9ab91497994f688cd1eae36a672c7a2",
+      "sourceManifestSha256": "bc69c7f401a798c0ec78f83e39400389983095264c46f526cc4c1a625c83beb2",
+      "committedMetadataSha256": "7e365d458a1d77f4f35af3a83d933b4740d22b2efe0718aadf13cba04c772719",
+      "totalCreated": 82496,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/05 L",
+      "created": 1024,
+      "sourceSha256": "ce9cd937b7351965fc9b0412a9a81b31ecb37e5261c803e352e070fecd6caee7",
+      "sourceManifestSha256": "900011e4cf2f806a6928905d5736fe1943584ffc95565c8aadfd7c50498023a3",
+      "committedMetadataSha256": "34df0bf8ce18e2726b2e10e15f31047dbf8f5450462872ac174cd9251a303149",
+      "totalCreated": 83520,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/05 R",
+      "created": 1024,
+      "sourceSha256": "2fb8d30028c41f3b0323f8ec3ddd4844d982da39f5d50c6e7ff0c92b85cb2702",
+      "sourceManifestSha256": "eef3e47e81577a192c115ea185be4ba311bab6070b531a92afd4a5af5035a4cf",
+      "committedMetadataSha256": "ec3ee46e9c75f0be7e75a50fe7b0bf6b04269ac77b4ca9767e319ac30e2dccbd",
+      "totalCreated": 84544,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/06 L",
+      "created": 1024,
+      "sourceSha256": "e1acec999bb625585cb27366399e56cacade7c6c6d186b9aaeed5d7073a50a96",
+      "sourceManifestSha256": "5b179ebcd7b6cb1485b71acbba5aba39190c7e959b6f8ba9d833a646746669b0",
+      "committedMetadataSha256": "0c2110e34daf708aa260d4d70f2834ebc3afb035e9320ce8780c656be4688355",
+      "totalCreated": 85568,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/06 R",
+      "created": 1024,
+      "sourceSha256": "830242535e27fb4155cb03d00b487f2b2328f9d174715fae64826af5ea6e6371",
+      "sourceManifestSha256": "906513853a808d0b386b1ed4e6ac1177b9be2a29ff66b8c0d0fd01ea0db2c3db",
+      "committedMetadataSha256": "94edda33617693b38f2f9f0363c51b20793ed11dcddb05c84ebb26a2dc9e21e0",
+      "totalCreated": 86592,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/07 L",
+      "created": 1024,
+      "sourceSha256": "cf6f0aebad39f7f07cca5a897680a0ca0fb7206e71c8065b55208cf6aad4dd70",
+      "sourceManifestSha256": "71503b018fbfa8ab8601ddcc98b6d6c28834023fff24a746c3d58407a59eb220",
+      "committedMetadataSha256": "daaef62d993b206aff3f8047f7746f2b8caf239ee347323319a2c584650398c1",
+      "totalCreated": 87616,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/07 R",
+      "created": 1024,
+      "sourceSha256": "b2c22930440347beb08e84180e99afebd1306a61c7c69b82872d8f6e49e43a7e",
+      "sourceManifestSha256": "2b1f4d2f54ed28d7fbb4dc78ed35042c0aedc97333d87a5ab8eaa0b6490a19e4",
+      "committedMetadataSha256": "c8cb3468fb710b427b696230235e54fc284c1dacb1460de69f8ea00b614571a3",
+      "totalCreated": 88640,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/08 L",
+      "created": 1024,
+      "sourceSha256": "46813d990141adc16581212cee0bd1d222aaece363d0522b3227476259383ded",
+      "sourceManifestSha256": "91e3cb236be0185c8db09365e5c5020feaec96184d6f3a73eb3757638e22dec7",
+      "committedMetadataSha256": "af6271545f469a50166961663a6b2b71b029e3d5427329ad3d13e3ecff25b579",
+      "totalCreated": 89664,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/08 R",
+      "created": 1024,
+      "sourceSha256": "8fb06bf962bbe0ccd56dea856d28866b2d7e21399d391d0e1f91f6e9f7490b83",
+      "sourceManifestSha256": "0b850ac7addf5ffa9d081e370df4fa9ab99f3f01f13cc2c6dee1df5e0adfd44b",
+      "committedMetadataSha256": "406651406d0c790b022a145dac18b282c211580b2b9f960d9f9edd73d01dbe77",
+      "totalCreated": 90688,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/09 L",
+      "created": 1024,
+      "sourceSha256": "5844ae187d66c3e3196cf673459bb5642a7e4ecec68ea8f9893cd4068f3d309e",
+      "sourceManifestSha256": "13d21c6bac158375d2d49d1ce4f92fc8586258ad9fe988a0d4d71fdd134dcdcf",
+      "committedMetadataSha256": "e19cc9415d329420d4594bc07187a2579b28c7f25ca7faab7c1e5fe33df89d8b",
+      "totalCreated": 91712,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/09 R",
+      "created": 1024,
+      "sourceSha256": "897db4817957d619e4e2092acfcfcd92a453676289f0f95fa7c7aa68277b1295",
+      "sourceManifestSha256": "cccc8a49cd5c790e2dbba0eb59e807df66bbdc95f4d9049cefd2cec8533ac9fd",
+      "committedMetadataSha256": "d9daf8f330d0c4babbd0b4c2a296e23f918af0ee7f44d6df185e41223dfd9265",
+      "totalCreated": 92736,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/10 L",
+      "created": 1024,
+      "sourceSha256": "23fe0fd48c3af45e4e8d76caed13ed470aee4623a94b98a561c0cd61910eabe7",
+      "sourceManifestSha256": "7ef486dcb6af79902fd96a5aad801ddab4d875f753095a5b0c82bc4a4aef0966",
+      "committedMetadataSha256": "8e6b01b770c47abd04b09e9c32aba720e7bbcd9f2ca61f2d2edc962ef6e3388b",
+      "totalCreated": 93760,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/10 R",
+      "created": 1024,
+      "sourceSha256": "499b6f191779a0b7f9a2a740cf6e6fe608c895e0c5aee8e08732f489b50fc206",
+      "sourceManifestSha256": "4e92dd51a65609d38501c63ae85e66e06ce5aee2f13424051d44159eee888868",
+      "committedMetadataSha256": "3d5801aba29f43daed21419d4433f53a6ed123e68c3cdbdc995797c2392600fc",
+      "totalCreated": 94784,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/11 L",
+      "created": 1024,
+      "sourceSha256": "6cd263c9de48fae4a0f4f6babfda6fe4c296f7d60eef73bb848fdc713412ebe6",
+      "sourceManifestSha256": "36401f16aadbc94d3f5cb74e56bbbc701565a349240d29ade298b9186b5e6213",
+      "committedMetadataSha256": "8e9e0a3c0495839c09bb92365837ea697b0b71f73c4cce39784e56ed6c5f1a7e",
+      "totalCreated": 95808,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/11 R",
+      "created": 1024,
+      "sourceSha256": "e88d80650d0b58aeb2b1677c75c281b0e8c92c56deeddd3eee79ae6c78410626",
+      "sourceManifestSha256": "04b4cefb5f45ffac0e1da112f278b1ff3a0db44ec3496d6744e470c9fab1705d",
+      "committedMetadataSha256": "40569bd65201fba1ac9263f9b113bff5228ae00936c61feea7029a7d92844a4b",
+      "totalCreated": 96832,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/13 L",
+      "created": 1024,
+      "sourceSha256": "b7509bd0fc4b82f5ec8035a8912e6db8a87935b08dd175652a078044ed285d93",
+      "sourceManifestSha256": "b8c9596412f68fb84d06a09d7bafb6d983359b2017438e2bbfe957169ae82c4d",
+      "committedMetadataSha256": "8c684c34c1da6189367e106bbdf4ae34acc471afa6d18a535604ed71db133156",
+      "totalCreated": 97856,
+      "totalExpected": 98880
+    },
+    {
+      "library": "AWeapon/13 R",
+      "created": 1024,
+      "sourceSha256": "0c29daae05d5f8e49c146d2c7ad6bbf84b4b965e8a66cca522ae3aecf3f016db",
+      "sourceManifestSha256": "b1ee29aedc50bb677f07b8d935dc7c8f53378e159a0b28e37758dc9ef0e4b2fb",
+      "committedMetadataSha256": "ba40606e530e90b1ea70e04382dcbcc7044ebe80bec0078afe143582cd0c9f89",
+      "totalCreated": 98880,
+      "totalExpected": 98880
+    }
+  ]
+}

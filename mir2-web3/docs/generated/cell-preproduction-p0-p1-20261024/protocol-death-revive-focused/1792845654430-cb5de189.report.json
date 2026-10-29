@@ -1,0 +1,1165 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792845654430-cb5de189",
+  "endpoint": "ws://127.0.0.1:17410/ws",
+  "sourceReport": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-preproduction-p0-p1-20261024\\protocol-full-lifecycle\\1792844742353-ccf6fb6e.core-projection.report.json",
+  "startedAt": "2026-10-24T12:40:54.431Z",
+  "scope": "one-bounded-real-ordinary-two-socket-death-and-town-revive-continuation",
+  "totalBudgetMs": 480000,
+  "exposureBudgetMs": 180000,
+  "checks": {
+    "ordinaryTwoLogin": {
+      "status": "passed",
+      "evidence": {
+        "actors": [
+          {
+            "name": "Af85551a6",
+            "characterIndex": 3,
+            "objectId": 1000,
+            "mapFileName": "0",
+            "x": 300,
+            "y": 617,
+            "direction": "Up"
+          },
+          {
+            "name": "Bf85551a6",
+            "characterIndex": 4,
+            "objectId": 1000,
+            "mapFileName": "0",
+            "x": 300,
+            "y": 622,
+            "direction": "Up"
+          }
+        ],
+        "before": [
+          {
+            "name": "Af85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 300,
+            "y": 617,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          },
+          {
+            "name": "Bf85551a6",
+            "objectId": 1000,
+            "map": "0",
+            "x": 300,
+            "y": 622,
+            "hp": 18,
+            "maxHp": 18,
+            "dead": false
+          }
+        ]
+      }
+    },
+    "armourRemoval": {
+      "status": "passed",
+      "evidence": {
+        "armourRemoved": true,
+        "uniqueId": 1,
+        "to": 0,
+        "receipt": 692,
+        "owner": {
+          "name": "Af85551a6",
+          "objectId": 1000,
+          "map": "0",
+          "x": 300,
+          "y": 617,
+          "hp": 18,
+          "maxHp": 18,
+          "dead": false
+        }
+      }
+    },
+    "ordinaryApproach": {
+      "status": "failed",
+      "error": "No walk path on 0 from 286,612 to 287,611"
+    },
+    "logout": {
+      "status": "passed",
+      "evidence": [
+        {
+          "actor": 0,
+          "receipt": 869
+        },
+        {
+          "actor": 1,
+          "receipt": 822
+        }
+      ]
+    },
+    "realmDrain": {
+      "status": "passed"
+    },
+    "sharedDeath": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    },
+    "townRevive": {
+      "status": "not_run",
+      "reason": "An earlier prerequisite did not complete"
+    }
+  },
+  "samples": [],
+  "provocations": [],
+  "fullLifecycleAccepted": false,
+  "visualAccepted": false,
+  "loadAccepted": false,
+  "routeWitness": "Correction after preserved blocked interpolation: visit every supplied western-corridor waypoint exactly with live collision-aware ordinary Walk; fresh live cats alone supply attack IDs.",
+  "predecessorFailure": "1792845433696-23f84151.report.json",
+  "corridor": [
+    {
+      "x": 288,
+      "y": 617
+    },
+    {
+      "x": 286,
+      "y": 617
+    },
+    {
+      "x": 285,
+      "y": 616
+    },
+    {
+      "x": 284,
+      "y": 616
+    },
+    {
+      "x": 282,
+      "y": 616
+    },
+    {
+      "x": 283,
+      "y": 615
+    },
+    {
+      "x": 283,
+      "y": 614
+    },
+    {
+      "x": 284,
+      "y": 613
+    },
+    {
+      "x": 284,
+      "y": 612
+    },
+    {
+      "x": 286,
+      "y": 612
+    },
+    {
+      "x": 287,
+      "y": 611
+    },
+    {
+      "x": 289,
+      "y": 611
+    },
+    {
+      "x": 291,
+      "y": 611
+    },
+    {
+      "x": 292,
+      "y": 611
+    },
+    {
+      "x": 293,
+      "y": 610
+    },
+    {
+      "x": 294,
+      "y": 610
+    },
+    {
+      "x": 294,
+      "y": 609
+    },
+    {
+      "x": 296,
+      "y": 607
+    },
+    {
+      "x": 298,
+      "y": 605
+    },
+    {
+      "x": 299,
+      "y": 604
+    },
+    {
+      "x": 299,
+      "y": 602
+    },
+    {
+      "x": 299,
+      "y": 600
+    }
+  ],
+  "preflight": {
+    "checkedAt": "2026-10-24T12:40:42.147Z",
+    "scope": "Read-only local packet-evidence estimate, not an internal-cache inspection",
+    "windowSeconds": 900,
+    "loginPolicy": {
+      "peerLimit": 30,
+      "deviceLimit": 30,
+      "pairLimit": 8,
+      "accountLimit": 50,
+      "successClearsPairAndAccount": true,
+      "source": "apps/gateway/src/web.rs:7311"
+    },
+    "evidenceFiles": 25,
+    "observedLoginRequestsInWindow": 8,
+    "observedRateLimitRejectionsInWindow": [],
+    "plannedLoginRequests": 2,
+    "estimatedPeerRoom": 22,
+    "returnStaticPaths": [
+      {
+        "from": {
+          "x": 300,
+          "y": 617
+        },
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "steps": 12
+      },
+      {
+        "from": {
+          "x": 300,
+          "y": 622
+        },
+        "to": {
+          "x": 288,
+          "y": 616
+        },
+        "steps": 12
+      }
+    ],
+    "route": [
+      {
+        "target": {
+          "x": 288,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": null
+      },
+      {
+        "target": {
+          "x": 288,
+          "y": 617
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 286,
+          "y": 617
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 285,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 284,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 282,
+          "y": 616
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 283,
+          "y": 615
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 283,
+          "y": 614
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 284,
+          "y": 613
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 284,
+          "y": 612
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 286,
+          "y": 612
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 287,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 289,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 291,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 292,
+          "y": 611
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 293,
+          "y": 610
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 294,
+          "y": 610
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 294,
+          "y": 609
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 296,
+          "y": 607
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 298,
+          "y": 605
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 299,
+          "y": 604
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 1
+      },
+      {
+        "target": {
+          "x": 299,
+          "y": 602
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      },
+      {
+        "target": {
+          "x": 299,
+          "y": 600
+        },
+        "staticWalkable": true,
+        "plannedStepsFromPrevious": 2
+      }
+    ],
+    "capacity": {
+      "maxWsConnections": null,
+      "maxActiveSessions": null,
+      "maxReconnectLeases": null,
+      "maxLoginInFlight": null,
+      "maxNewCharacterInFlight": null,
+      "maxStartGameInFlight": null,
+      "currentWsConnections": 0,
+      "currentActiveSessions": 0,
+      "currentReconnectLeases": 0,
+      "currentLoginInFlight": 0,
+      "currentNewCharacterInFlight": 0,
+      "currentStartGameInFlight": 0
+    },
+    "ok": true
+  },
+  "initialCapacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "navigation": [
+    {
+      "actor": 0,
+      "target": {
+        "x": 288,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 300,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 694,
+      "throughSequence": 738,
+      "successfulSteps": 12
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 738,
+      "throughSequence": 744,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 288,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 300,
+        "y": 622,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 667,
+      "throughSequence": 716,
+      "successfulSteps": 12
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 286,
+        "y": 617
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 762,
+      "throughSequence": 768,
+      "successfulSteps": 2
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 724,
+      "throughSequence": 729,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 285,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 285,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 772,
+      "throughSequence": 777,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 286,
+        "y": 617
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 288,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 735,
+      "throughSequence": 737,
+      "successfulSteps": 2
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 284,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 285,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 785,
+      "throughSequence": 787,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 285,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 617,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 285,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 741,
+      "throughSequence": 746,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 282,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 282,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 791,
+      "throughSequence": 795,
+      "successfulSteps": 2
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 284,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 285,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 756,
+      "throughSequence": 758,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 283,
+        "y": 615
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 282,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 799,
+      "throughSequence": 802,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 282,
+        "y": 616
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 282,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 762,
+      "throughSequence": 764,
+      "successfulSteps": 2
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 283,
+        "y": 614
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 808,
+      "throughSequence": 810,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 283,
+        "y": 615
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 282,
+        "y": 616,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 768,
+      "throughSequence": 771,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 284,
+        "y": 613
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 814,
+      "throughSequence": 818,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 283,
+        "y": 614
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 615,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 779,
+      "throughSequence": 781,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 284,
+        "y": 612
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 824,
+      "throughSequence": 828,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 284,
+        "y": 613
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 283,
+        "y": 614,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 785,
+      "throughSequence": 789,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 286,
+        "y": 612
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 836,
+      "throughSequence": 838,
+      "successfulSteps": 2
+    },
+    {
+      "actor": 1,
+      "target": {
+        "x": 284,
+        "y": 612
+      },
+      "radius": 0,
+      "before": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 613,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Bf85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 284,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 793,
+      "throughSequence": 797,
+      "successfulSteps": 1
+    },
+    {
+      "actor": 0,
+      "target": {
+        "x": 287,
+        "y": 611
+      },
+      "radius": 0,
+      "before": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "after": {
+        "name": "Af85551a6",
+        "objectId": 1000,
+        "map": "0",
+        "x": 286,
+        "y": 612,
+        "hp": 18,
+        "maxHp": 18,
+        "dead": false
+      },
+      "fromSequence": 844,
+      "throughSequence": 856,
+      "error": "No walk path on 0 from 286,612 to 287,611"
+    }
+  ],
+  "error": "Witnessed ordinary route did not complete",
+  "armourRestoration": {
+    "receipt": 861,
+    "equipped": true
+  },
+  "finalCapacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "ok": false,
+  "finishedAt": "2026-10-24T12:41:48.513Z"
+}

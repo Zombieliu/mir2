@@ -1,0 +1,529 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792902924884-3b7017e1",
+  "scope": "Immutable public original report/raw diagnosis of failed probe11. No private/store, recording payload, source/scene changes, tests or new realms. Not a formal acceptance or a complete decision/A* replay.",
+  "pins": {
+    "raw": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.samples.jsonl",
+      "bytes": 12851216,
+      "sha256": "feade9aa051be0492b3264315da19a46aa4924b12e1d84ac35b88a6c726e983f",
+      "rows": 20632
+    },
+    "report": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-11/reports/1792902924884-3b7017e1.report.json",
+      "bytes": 190911,
+      "sha256": "b542764e07bf1b19aebb017443fd9b2a086b38fd3a64c19f82514ea0061ebac1"
+    },
+    "sourcePins": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-11/source-pins.json",
+      "bytes": 55433,
+      "sha256": "57a48e8807fb4fa7f8d76b048852d144ba3df6a65cdb36d783ae300327b05265"
+    },
+    "scene": {
+      "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-halo-feasibility-11/scenario.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+    },
+    "historicalDriver": {
+      "commit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+      "file": "apps/web/scripts/playtest-capacity-soak.mjs",
+      "bytes": 144416,
+      "sha256": "2251b3a9cbdc391ecc0e68f17f7568468d677550a0f7425604a1ec0a7a485a42"
+    },
+    "driverAggregateSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+    "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b"
+  },
+  "outcome": {
+    "ok": false,
+    "error": "Stage 10 did not satisfy the fixed activity, latency or coverage gates",
+    "highestMeasuredStage": 10,
+    "highestPassedStage": 2,
+    "peakActors": 10,
+    "safetyStopped": false,
+    "continuousFailureCount": 0,
+    "stages": [
+      {
+        "name": "stage-2",
+        "completed": true,
+        "passed": true,
+        "seconds": 300,
+        "measuredSeconds": 300.315,
+        "completeWindows": 5,
+        "startedAtMs": 1792902959360,
+        "endedAtMs": 1792903259675
+      },
+      {
+        "name": "stage-10",
+        "completed": true,
+        "passed": false,
+        "seconds": 300,
+        "measuredSeconds": 300.33,
+        "completeWindows": 5,
+        "startedAtMs": 1792903317308,
+        "endedAtMs": 1792903617638
+      }
+    ],
+    "soakExecuted": false,
+    "resumeExecuted": false,
+    "saveVerificationExecuted": false,
+    "capacityAccepted": false
+  },
+  "fiveStage10Windows": [
+    {
+      "window": 1,
+      "rawLine": 8103,
+      "startedAtMs": 1792903317308,
+      "endedAtMs": 1792903377346,
+      "seconds": 60.038,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementCorrectionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L80cd4c05",
+          "attacks": 32,
+          "hits": 32,
+          "damage": 86,
+          "moves": 16,
+          "runs": 10,
+          "nativeOpportunities": 51,
+          "nativeCompleted": 51,
+          "passed": true,
+          "hp": {
+            "samples": 32,
+            "min": 14,
+            "max": 24,
+            "minimumFraction": 0.7777777777777778,
+            "maxima": [
+              18,
+              24
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 2,
+      "rawLine": 11024,
+      "startedAtMs": 1792903377346,
+      "endedAtMs": 1792903437415,
+      "seconds": 60.069,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0.0014245014245014246,
+      "movementCorrectionRatio": 0.0014245014245014246,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L80cd4c05",
+          "attacks": 34,
+          "hits": 34,
+          "damage": 91,
+          "moves": 9,
+          "runs": 4,
+          "nativeOpportunities": 48,
+          "nativeCompleted": 48,
+          "passed": true,
+          "hp": {
+            "samples": 34,
+            "min": 21,
+            "max": 24,
+            "minimumFraction": 0.875,
+            "maxima": [
+              24
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 3,
+      "rawLine": 14122,
+      "startedAtMs": 1792903437415,
+      "endedAtMs": 1792903497505,
+      "seconds": 60.09,
+      "passed": true,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementCorrectionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L80cd4c05",
+          "attacks": 25,
+          "hits": 25,
+          "damage": 70,
+          "moves": 29,
+          "runs": 13,
+          "nativeOpportunities": 58,
+          "nativeCompleted": 58,
+          "passed": true,
+          "hp": {
+            "samples": 25,
+            "min": 23,
+            "max": 30,
+            "minimumFraction": 0.9333333333333333,
+            "maxima": [
+              24,
+              30
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 4,
+      "rawLine": 17382,
+      "startedAtMs": 1792903497505,
+      "endedAtMs": 1792903557606,
+      "seconds": 60.101,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementCorrectionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L80cd4c05",
+          "attacks": 15,
+          "hits": 15,
+          "damage": 45,
+          "moves": 48,
+          "runs": 35,
+          "nativeOpportunities": 67,
+          "nativeCompleted": 67,
+          "passed": false,
+          "hp": {
+            "samples": 15,
+            "min": 28,
+            "max": 30,
+            "minimumFraction": 0.9333333333333333,
+            "maxima": [
+              30
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "window": 5,
+      "rawLine": 20577,
+      "startedAtMs": 1792903557606,
+      "endedAtMs": 1792903617638,
+      "seconds": 60.032,
+      "passed": false,
+      "timeoutRatio": 0,
+      "correctionRatio": 0,
+      "movementCorrectionRatio": 0,
+      "movementActorsPassed": 9,
+      "combat": [
+        {
+          "actor": "L80cd4c05",
+          "attacks": 11,
+          "hits": 11,
+          "damage": 28,
+          "moves": 58,
+          "runs": 40,
+          "nativeOpportunities": 72,
+          "nativeCompleted": 72,
+          "passed": false,
+          "hp": {
+            "samples": 11,
+            "min": 29,
+            "max": 30,
+            "minimumFraction": 0.9666666666666667,
+            "maxima": [
+              30
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "wholeRunCounters": {
+    "rawRows": 20632,
+    "attackTraces": 126,
+    "attackStatuses": {
+      "success": 126
+    },
+    "attackV2Requests": 126,
+    "attackV2NotLaunched": 0,
+    "movementCorrectionEvents": 1,
+    "combatChaseDeferred": 1,
+    "routeLoopDeferrals": 0,
+    "scoutAdvances": 15,
+    "navigationBlockedEvents": 0,
+    "approachPrefilterRejectedCandidateCount": "not instrumented; unknown",
+    "approachPrefilterInvocations": "not instrumented; unknown"
+  },
+  "hpMaintenance": {
+    "loggedNativeHpRecoveryRows": 0,
+    "attempted": false,
+    "verified": false,
+    "ownerAttackAtSendSamples": 126,
+    "minHp": 14,
+    "maxHp": 30,
+    "minimumFraction": 0.7777777777777778,
+    "maxima": [
+      18,
+      24,
+      30
+    ],
+    "continuousHpMinimumKnown": false,
+    "deathObserved": false,
+    "twoHourSurvivalGuaranteed": false
+  },
+  "longestAttackGap": {
+    "fromRequest": "115",
+    "toRequest": "116",
+    "fromRawLine": 16903,
+    "toRawLine": 19585,
+    "fromSentAtWallMs": 1792903548729,
+    "toSentAtWallMs": 1792903598121,
+    "sentGapMs": 49392.12900000007,
+    "fromTarget": {
+      "objectId": 206645,
+      "x": 274,
+      "y": 655,
+      "dead": false,
+      "hp": 6,
+      "maxHp": 20
+    },
+    "toTarget": {
+      "objectId": 206701,
+      "x": 261,
+      "y": 649,
+      "dead": false
+    },
+    "previousTargetBothEndpointDeath": [
+      {
+        "receiver": "owner",
+        "sequence": 5099,
+        "monotonicMs": 635782.8564,
+        "atMs": 1792903548836,
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 206645,
+          "location": {
+            "x": 274,
+            "y": 655
+          },
+          "direction": "Up"
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 5422,
+        "monotonicMs": 635782.9412,
+        "atMs": 1792903548836,
+        "packet": "ObjectDied",
+        "payload": {
+          "objectId": 206645,
+          "location": {
+            "x": 274,
+            "y": 655
+          },
+          "direction": "Up"
+        }
+      }
+    ],
+    "successfulMoves": 62,
+    "successfulScoutMoves": 53,
+    "successfulChaseMoves": 9,
+    "moveStatuses": [
+      "success"
+    ],
+    "scoutAdvanceSequence": [
+      {
+        "rawLine": 16973,
+        "at": 1792903550134,
+        "homeIndex": 6,
+        "reason": "time-budget",
+        "confirmedMoves": 1,
+        "elapsedMs": 27142
+      },
+      {
+        "rawLine": 17583,
+        "at": 1792903561416,
+        "homeIndex": 7,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 10,
+        "elapsedMs": 11282
+      },
+      {
+        "rawLine": 18194,
+        "at": 1792903573384,
+        "homeIndex": 8,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 13,
+        "elapsedMs": 11250
+      },
+      {
+        "rawLine": 18549,
+        "at": 1792903580170,
+        "homeIndex": 0,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 9,
+        "elapsedMs": 6028
+      },
+      {
+        "rawLine": 18678,
+        "at": 1792903582394,
+        "homeIndex": 1,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 3,
+        "elapsedMs": 1534
+      },
+      {
+        "rawLine": 18906,
+        "at": 1792903586167,
+        "homeIndex": 2,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 4,
+        "elapsedMs": 2305
+      },
+      {
+        "rawLine": 18994,
+        "at": 1792903587667,
+        "homeIndex": 3,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 2,
+        "elapsedMs": 779
+      },
+      {
+        "rawLine": 19247,
+        "at": 1792903592163,
+        "homeIndex": 4,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 6,
+        "elapsedMs": 3780
+      },
+      {
+        "rawLine": 19478,
+        "at": 1792903596656,
+        "homeIndex": 5,
+        "reason": "waypoint-reached",
+        "confirmedMoves": 6,
+        "elapsedMs": 3778
+      }
+    ],
+    "observedMoveBounds": {
+      "minX": 251,
+      "maxX": 282,
+      "minY": 650,
+      "maxY": 669
+    },
+    "noClaims": "Successful scout movement does not prove all visible monsters were absent, all candidates were ineligible or all A* routes were tried."
+  },
+  "soleChaseDeferral": {
+    "line": 17747,
+    "type": "combatChaseDeferred",
+    "actor": "L80cd4c05",
+    "phase": "stage-10",
+    "at": 1792903564416,
+    "targetId": 206715,
+    "mapFileName": "0",
+    "nonImprovingMoves": 3,
+    "elapsedMs": 6000,
+    "pursuitMs": 13536,
+    "confirmedMoves": 8,
+    "reason": "no-progress",
+    "ttlMs": 30000,
+    "actual": {
+      "x": 279,
+      "y": 667
+    },
+    "target": {
+      "x": 285,
+      "y": 669
+    },
+    "attacksSent": 0,
+    "closestActualObserver": {
+      "actor": "L80cd4c08",
+      "position": {
+        "x": 279,
+        "y": 674
+      },
+      "rawLine": 17718,
+      "at": 1792903563789,
+      "ageMs": 627,
+      "distanceToOwner": 7,
+      "distanceToTarget": 6,
+      "anyProspectiveNeighborWithinSix": true
+    },
+    "currentOwnerAndTargetSixGeometryCandidates": 0,
+    "prospectiveAttackTileAndTargetSixGeometryCandidates": 1,
+    "interpretation": "The fighter remained six cells from the moving target. The nearest real observer was seven cells from the current fighter but six from the target, so a future attack tile was geometrically witnessable while actual strike was not yet eligible. This matches the separation between prospective approach and current-position send checks; it is not the prior adjacent one-cell route-loop pattern.",
+    "planTimeFullMembershipRecorded": false,
+    "guardViolationProved": false
+  },
+  "observedSupply": {
+    "uniqueTargetsActuallyStruck": 14,
+    "observedDeaths": 15,
+    "bothEndpointDeaths": 15,
+    "deathsByType": {
+      "Scarecrow": 7,
+      "Deer": 8
+    },
+    "observedAliveAgainAfterDeath": [
+      {
+        "targetId": 206701,
+        "name": "Deer",
+        "deathRawLine": 9947,
+        "deathAtMs": 1792903416638,
+        "nextPositiveAttackRawLine": 19585,
+        "nextPositiveAttackAtMs": 1792903598169,
+        "elapsedToNextPositiveMs": 181531,
+        "claim": "observed alive again after death; not an exact respawn timestamp"
+      },
+      {
+        "targetId": 206712,
+        "name": "Deer",
+        "deathRawLine": 10952,
+        "deathAtMs": 1792903436030,
+        "nextPositiveAttackRawLine": 20575,
+        "nextPositiveAttackAtMs": 1792903617562,
+        "elapsedToNextPositiveMs": 181532,
+        "claim": "observed alive again after death; not an exact respawn timestamp"
+      }
+    ],
+    "allVisibleAliveMonstersKnown": false,
+    "staticInitialTargetsAreNotLiveSupplyProof": true,
+    "interpretation": "Attack volume was adequate in the first three measured minutes and inadequate in the final two. Most of the longest late gap was actual traversal between observer homes rather than repeated unwitnessed adjacent attack attempts. Some previously killed targets are observed alive again, so no claim of globally zero supply is supported."
+  },
+  "sceneDecision": {
+    "newBoundedSceneSupplyProfileJustified": true,
+    "mandatoryOrGuaranteedSceneFixProved": false,
+    "anotherDriverChangeJustifiedByThisTrace": false,
+    "reason": "The current scenario again failed sustained18/12 despite100% receipt-backed native completion,126 successful attacks, no old route-loop recurrence, and active scouting over a wide home circuit. Before a two-hour capacity run, a scene must demonstrate sufficient accessible and stable-witnessable natural targets with bounded search/travel cost. This supports a separately frozen geometry/supply experiment rather than relaxing the threshold or inferring a server ceiling.",
+    "constraints": "Any alternative must retain fresh ordinary roles, real items/XP/combat, original map content,18/12,95%,750ms cadence,900ms proof and death-stop. Static target counts and conditional DPS math must not be promoted to live acceptance."
+  },
+  "whyCompletionDoesNotPassCombat": "Real successful movement/scout/turn/chat actions can complete every native opportunity while offering fewer launched attacks and positive hits than the separate per-minute combat requirement. Overall mean or continuous-window passes do not cancel the two failed fixed complete windows.",
+  "artifacts": [
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/raw-selected-v1.json",
+      "bytes": 2374615,
+      "sha256": "cbda408c566e8719e6920a7ab99e3eb6ace9113767fe49a35626a9c9c500eced"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/stage10-window-actor-matrix-v1.json",
+      "bytes": 101623,
+      "sha256": "2261d9bc73c74458455c6659db46fdccec65c7ca4b2cfa255fc91f57c412a047"
+    },
+    {
+      "file": "C:/mir2-build/p01-completion-20261024/probe11-combat-analysis-v1/gap-geometry-supply-projection-v1.json",
+      "bytes": 22066,
+      "sha256": "8bccc63249e02af874742cc8600e57e5f78f54dc6cb8b15d819264598b9421ec"
+    }
+  ],
+  "limits": [
+    "The original raw does not retain a complete target/obstacle/peer-membership set at every planning decision. It cannot prove globally empty live supply, all eight-neighbor failures or an exact server processing sequence.",
+    "Latest own UserLocation poses are keyed per client and not substituted from another client normalized1000 entity or a merged spectator frame.",
+    "Cached exact monster hp may be stale relative to percent updates; only actual successful damage/death packets support the observed supply ledger.",
+    "HP ranges are attack-at-send samples, not continuous vitals. One unused initial potion is no evidence of two-hour survival.",
+    "The single changed-source run is not a controlled RNG-identical A/B proof against probe10.",
+    "No recording payload was needed or read for this bounded diagnosis."
+  ]
+}

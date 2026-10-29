@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "scope": "Three exact additional execution/driver H checks match the newly stable fresh full16 producer. Original backend C,source50,binary,ordinary16,6driver/rawtrace,normal cleanup and sixzero assertions are unchanged.",
+  "before": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\verify-full16-gate.mjs.before-execution-fields-v2.txt",
+    "bytes": 5281,
+    "sha256": "36cc6621feaf580d5d8c303c27b194e291d9f33576fcfe5056e7ed83de0e97ee"
+  },
+  "after": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-scout-observer-feasibility-18\\verify-full16-gate.mjs",
+    "bytes": 5649,
+    "sha256": "cad6f1112466b41e65b4415d7c28bbf679f1f838be86af135e5a7c2fb6ae9c4d"
+  },
+  "rules": [
+    {
+      "before": "audit.backendSourceCommit!==release.sourceCommit||",
+      "after": "audit.backendSourceCommit!==release.sourceCommit||audit.executionSourceCommit!==binding.executionSourceCommit||audit.driverSourceCommit!==binding.driverSourceCommit||"
+    },
+    {
+      "before": "realm.release?.sourceCommit!==release.sourceCommit||",
+      "after": "realm.release?.sourceCommit!==release.sourceCommit||realm.release?.executionSourceCommit!==binding.executionSourceCommit||realm.release?.driverSourceCommit!==binding.driverSourceCommit||"
+    },
+    {
+      "before": "source.sourceCommit!==release.sourceCommit||",
+      "after": "source.sourceCommit!==release.sourceCommit||source.executionSourceCommit!==binding.executionSourceCommit||source.driverSourceCommit!==binding.driverSourceCommit||"
+    }
+  ],
+  "inverseRawExact": true,
+  "expectedProducerFields": {
+    "audit": [
+      "executionSourceCommit",
+      "driverSourceCommit"
+    ],
+    "realmRelease": [
+      "executionSourceCommit",
+      "driverSourceCommit"
+    ],
+    "sourceVerification": [
+      "executionSourceCommit",
+      "driverSourceCommit"
+    ]
+  },
+  "currentExecutionCommit": "3a6d8c862d03ded3133605472a8f38bc6258af52",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "actualFull16RunExists": false,
+  "capacityAccepted": false
+}

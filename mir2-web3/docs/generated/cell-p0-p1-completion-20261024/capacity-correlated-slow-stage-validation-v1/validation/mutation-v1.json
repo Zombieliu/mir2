@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "scope": "Five existing slow-stage contexts only plus one pure exact-format regression; no action/save/flush/receipt/order or threshold changes.",
+  "sourceBefore": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 855687,
+    "sha256": "769186e87e166a7ba0fbb971463c8e0ae2b4dd119292798badee3b8e28522dd6"
+  },
+  "sourceAfter": {
+    "file": "C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/gateway/src/web.rs",
+    "bytes": 857503,
+    "sha256": "41d81bf7cdc6c0aaacbbd11aee12425b27b8a4c27a02b5a0d0915351fb811e40"
+  },
+  "rules": [
+    {
+      "from": "GatewaySlowStage::start(\"session_action.execute\")",
+      "to": "GatewaySlowStage::for_socket(\"session_action.execute\", &diagnostics)",
+      "count": 1
+    },
+    {
+      "from": "GatewaySlowStage::start(\"session_action.flush\")",
+      "to": "GatewaySlowStage::for_socket(\"session_action.flush\", &diagnostics)",
+      "count": 1
+    },
+    {
+      "from": "GatewaySlowStage::start(\"runtime_tick.execute\")",
+      "to": "GatewaySlowStage::for_socket(\"runtime_tick.execute\", &diagnostics)",
+      "count": 1
+    },
+    {
+      "from": "GatewaySlowStage::start(\"runtime_tick.save_checkpoint\")",
+      "to": "GatewaySlowStage::for_socket(\"runtime_tick.save_checkpoint\", &diagnostics)",
+      "count": 1
+    },
+    {
+      "from": "GatewaySlowStage::start(\"runtime_tick.flush\")",
+      "to": "GatewaySlowStage::for_socket(\"runtime_tick.flush\", &diagnostics)",
+      "count": 1
+    },
+    {
+      "from": "        #[test]\n        fn packed_phase_boundaries_omit_invalid_or_overflowed_observations()",
+      "to": "        #[test]\n        fn execution_flush_and_tick_stages_distinguish_connections_without_payload() {\n            let counter = AtomicU64::new(17);\n            let first = allocate_socket_diagnostics(true, &counter);\n            let second = allocate_socket_diagnostics(true, &counter);\n            let elapsed = Duration::from_millis(53);\n            for label in [\n                \"session_action.execute\",\n                \"session_action.flush\",\n                \"runtime_tick.execute\",\n                \"runtime_tick.save_checkpoint\",\n                \"runtime_tick.flush\",\n            ] {\n                let first_stage = GatewaySlowStage::for_socket(label, &first);\n                let second_stage = GatewaySlowStage::for_socket(label, &second);\n                let disabled = GatewaySlowStage::for_socket(label, &None);\n                assert_eq!(\n                    first_stage.log_line(elapsed),\n                    format!(\"[gateway-slow-stage] stage={label} duration_ms=53 connection=17\")\n                );\n                assert_eq!(\n                    second_stage.log_line(elapsed),\n                    format!(\"[gateway-slow-stage] stage={label} duration_ms=53 connection=18\")\n                );\n                assert_eq!(\n                    disabled.log_line(elapsed),\n                    format!(\"[gateway-slow-stage] stage={label} duration_ms=53\")\n                );\n                assert_eq!(first_stage.threshold, disabled.threshold);\n                assert_eq!(second_stage.threshold, disabled.threshold);\n                assert!(first_stage.context.as_ref().unwrap().queued.is_none());\n                assert!(second_stage.context.as_ref().unwrap().queued.is_none());\n            }\n        }\n\n        #[test]\n        fn packed_phase_boundaries_omit_invalid_or_overflowed_observations()",
+      "count": 1
+    }
+  ],
+  "exactRawInverse": true,
+  "productBehaviorTestsNotYetRun": true,
+  "externalParserFollowupRequired": "Existing strict slow-stage source allowlist must separately permit these same five static labels in scoped format before a new load; no label/type/payload introduced."
+}

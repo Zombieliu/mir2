@@ -1,0 +1,1615 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T03:15:39.398Z",
+  "archiveRoot": "C:/mir2-build/p01-completion-20261024",
+  "scope": "Independent explicit public allowlist for authentic formal standard native compact-wire span2-halo ladder14. Original partial/failure/pass report bytes are retained; strict frozen verifier plus authentic normal cleanup adjudicates formal acceptance. No private store, secret, EXE or recording payload copied.",
+  "files": [
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/collect-public.mjs",
+      "bytes": 43270,
+      "sha256": "004256839915c9e92ab37cea82da12b9dd06c94af6cc196e90d4c232b5c5b247",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/template-derivation-v1.json",
+      "bytes": 99163,
+      "sha256": "00a9c3406c961b6f79b0f646985db9124fb831201251b04f1c9f3a65b73a71ff",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/gateway-build-pin.json",
+      "bytes": 1459,
+      "sha256": "66f88ed54eb6826b6c9a9dca1dba3c7a6265e064b623763a82e0f31b32602f28",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/source-pins.json",
+      "bytes": 171979,
+      "sha256": "6a403ca26c37733867c87779ae8ed60644078b8d6c81e9ad3f2a45e81c645315",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/source-pins-admitted-v2.json",
+      "bytes": 171249,
+      "sha256": "513c4484f05e114d9ac2cc39fef2b5d07cf26b01b2c4a7033011c03f0fdbe43f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/realm-process.json",
+      "bytes": 4377,
+      "sha256": "14ba25922e5c07d2e8bf75dd7ab00aff09304821542f3e86522fa89b543e0209",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/realm-cleanup.json",
+      "bytes": 6590,
+      "sha256": "4c3a04999c508799164fdd8bb0035038f461bb9d3f1a9e5115bd8527db02d270",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/slow-stage-public.jsonl",
+      "bytes": 98654,
+      "sha256": "1427de97feef0dc060a200ea4d78b1298bf978e9aadc90916150123d7b82e351",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/slow-stage-public-status.json",
+      "bytes": 1029,
+      "sha256": "38b3568196778d1c7b5b916bb19e7908b29fdbe7d95c36d7c59da96c29a114bc",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/slow-stage-diagnostics-config.json",
+      "bytes": 4315,
+      "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/candidate-release-binding.json",
+      "bytes": 12273,
+      "sha256": "a7a3a3bf09f7771592db5315867a31da6d7cf7f4462dc4863326c72520a0de69",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/full16-gate.json",
+      "bytes": 4915,
+      "sha256": "51b65ec4bf2047623c6b1c6285d876313edbcce42cbd1023c12579957b0aab73",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/verify-full16-gate.mjs",
+      "bytes": 5651,
+      "sha256": "35e2a2f705d144711406864edda373c308855bb1e1f035230a290b0505ecc38a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/projection-build-source-lib.mjs",
+      "bytes": 174,
+      "sha256": "d07da1f1a885da5ce4bc9522469db149eb96030af51737cb3b6a16d053e1e607",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/driver-evidence-contract.mjs",
+      "bytes": 827,
+      "sha256": "096869404e2447e8187176f950c6875a99f3efb5546c2a2b35de52332a16c327",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/scene-binding.json",
+      "bytes": 6784,
+      "sha256": "25a6543936cba85f0a97498d818c66e989e33e1bb3d939be8325f43c7f5812de",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/scene-contract.mjs",
+      "bytes": 10796,
+      "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/backend-driver-source-guard.mjs",
+      "bytes": 2679,
+      "sha256": "beb01bc9f9811069d95771b010f36e101c459a3c2ae5418e622ccb3f675c7df2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/run-options.json",
+      "bytes": 3013,
+      "sha256": "ae0decc85adedcf0c60941685c24f158c6ea74f7b8919ec715134c24bf96becd",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/run-options-admitted-v2.json",
+      "bytes": 3624,
+      "sha256": "ea20201767b6bc8d61106397e2c092c965adea311ee713db31d330a11210480c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/spectator-health-before.json",
+      "bytes": 670,
+      "sha256": "02e05bbc47e6244b7817c71306bf53750415de8351ded6ebdc2d0483f812c36f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/monitor-options.json",
+      "bytes": 761,
+      "sha256": "63cdd0ab8b0572f8222ff788c146afb2370f60dc6b1c9f3ac5b8497881a416d0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/monitor-process.json",
+      "bytes": 223,
+      "sha256": "e7de29aa2a98115ba3d1a57b8888b76d970effc3c69525328efcbaf867756df6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/launcher-source-frozen-v1.json",
+      "bytes": 52689,
+      "sha256": "c2b3f4f66a34c2c70eeff33bf9db13225c642278368a58d5d4debfe7b101f1c1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/launcher-source-prepared-v1.json",
+      "bytes": 35914,
+      "sha256": "b9e5cb1ac532cd53bc269a6c5f6f127e40138c250e53b1b73888ddb1d83d48ed",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/driver-report-contract.mjs",
+      "bytes": 9785,
+      "sha256": "9d5ffc35cab3516ce7ef38af2eae9f2527a4ae17e19d679529740bf4ad978938",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/preparation-plan.json",
+      "bytes": 18488,
+      "sha256": "e0d04d5131a4dba584c6f4ce924fa68fc23b303d6f39531ac97da88827bd8e9d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/final-inputs-approved.json",
+      "bytes": 1103,
+      "sha256": "de9a4094df326cd68394c1ff1e4dbecacc34f05f5282b26761a32ef96c543665",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/report-provenance.json",
+      "bytes": 7738,
+      "sha256": "b224a895168320e4b61dc2fc5d4823ac8117742fcd2820e5066fe8d9e6ccd375",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/feasibility-gate.json",
+      "bytes": 68065,
+      "sha256": "b1781e5e97f9a7722be531c06f2ee13844e8b06bdaf5aa5a6d8eb99fe9c7f84a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/static-preparation-verification.json",
+      "bytes": 1135,
+      "sha256": "09f4c860183827ab2daa1b17b6fe51beb000b62dcf968ba8e1991e1630eb824d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/source-guard-readonly-verification.json",
+      "bytes": 2389,
+      "sha256": "8400db9fd6200e515c262c01ab652bf473386cd4e031a7b082cc8e4bc1b12179",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/initialize-private.ps1",
+      "bytes": 2677,
+      "sha256": "488d31aa467f7f589a94fbabab9af6024d55e6e34438c633b43379b79bebb683",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/input-lib.mjs",
+      "bytes": 16970,
+      "sha256": "f84fd2460eb0cc26aef6fd8259ec42d264fc03beb2170332d689a300ae327cb8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/prepare-inputs.mjs",
+      "bytes": 14304,
+      "sha256": "2f6985c0ebde4f55de40a801eca921d8c10bc4cd1263f1dd845f2b9a4e9ffcf2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/run-owned.mjs",
+      "bytes": 21610,
+      "sha256": "9367b1961ecbc66f186d906c1abf5f89d61dd349a4cd82ece69a934d841686e1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/verify-feasibility-gate.mjs",
+      "bytes": 19754,
+      "sha256": "d120e6c2b69033856d39629a34320c8eb98f781100749efc7310e557e92871ed",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/monitor-owned.mjs",
+      "bytes": 1283,
+      "sha256": "4b4030e21371f83970b39230f392c9e4d77faa41e0fcf0a7a8978ebbcd403cb0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/request-stop.mjs",
+      "bytes": 1016,
+      "sha256": "d82ccd086db1550eeaded6158d88f5eb278700fb5eaa47441c61a65503721e30",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/recover-drained-owned.ps1",
+      "bytes": 3646,
+      "sha256": "40f474fa6c6f4f3c620a16fdc9e13f86954dbc8bce81f8e76f21ecaaf99c35a0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.report.json",
+      "bytes": 422257,
+      "sha256": "ee804e825a3826749286eb22bc53fe0841e774cbc4518537457fb4db888c7e1a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/launcher-syntax-check.log",
+      "bytes": 17526,
+      "sha256": "117cf2089d6a1a70253ef63c80213055e2f04830dfcafa075b6e7edfbed658e6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/spectator-health-after.json",
+      "bytes": 678,
+      "sha256": "812f846d76350f174b7c69b346e908744fe1faa6448a6adde4e3043ec755726e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/formal-template-contract.mjs",
+      "bytes": 1595,
+      "sha256": "aa07b5fb2a3f3242230a32827b8b80ac36a5cf8778adca2c1b439fa935a0fb45",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/pending-formal16-binding-v1.json",
+      "bytes": 1354,
+      "sha256": "99f46c3914cd18dd155d4b4ce08326da25e10573eeb3eb3660ba8b3c5124e55f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/verify-probe20-collected-evidence.mjs",
+      "bytes": 17346,
+      "sha256": "de41e1bd3b4e2ed578a023ac0efed8037bf19085800259c3ad0edfcb8a06a60f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/driver-binding-contract.mjs",
+      "bytes": 1623,
+      "sha256": "682b561cdd384d54da0ff489b3c9baad860125a23e79132eed94a414c88a0a03",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/current-driver-binding.json",
+      "bytes": 2845,
+      "sha256": "9d63bebc0bb2b1bf1c9cf697a8b99944be7af2a429f2fe649b2d1b50826c1325",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/native-chase-report-contract.mjs",
+      "bytes": 2266,
+      "sha256": "66b9ce1a39a1cfbe610d3f1a98559c67d178667319718f8baaa748a5d7d102c0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/backend-library-binding.json",
+      "bytes": 1839,
+      "sha256": "dbb630453ae18709c487e81849592299d9086050dc3a8566414483a4a486c28f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/scene-driver-compatibility.mjs",
+      "bytes": 1550,
+      "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/compact-navigation-wire-terminal.json",
+      "bytes": 5089,
+      "sha256": "3f0d17e075b2d26552a7612508c42ba82a89f0d3523869eb552e566b10e8b452",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-account-store-wait-diagnostics-v1.json",
+      "bytes": 3343,
+      "sha256": "8a8228a97e4ea2005f3e47839868ba2a90615028e1c7da573130f8663c15c9fc",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "backend-source-account-store-wait-diagnostics-v1.json",
+      "bytes": 41831,
+      "sha256": "f9199f375175782b46dc0d18589cd714e2a2a75d7b8fad662af64c700d417ec5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "account-store-wait-diagnostics-v1-build-receipt.json",
+      "bytes": 2453,
+      "sha256": "146df0a5be29ddacf114f0574ef0cf0500666d23ffbae3dfa533eaf229263936",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-scout-selection-diagnostics-driver-frozen-v1.json",
+      "bytes": 12423,
+      "sha256": "e3300e34d060fb23638bdc690726b6f4376f7fdeb1049aa8871ebdb4bfd628f8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-formal-native-v2-scout-selection-diagnostics-ladder-16-recordings-metadata.json",
+      "bytes": 1247,
+      "sha256": "17139f6f37c3c46a8f37a5713419f4a121794b24617cfd1e7630b1bf8c513937",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "collect-formal-native-v2-scout-selection-diagnostics-ladder-16-monitor-endpoints.json",
+      "bytes": 4708,
+      "sha256": "a92e50e4c8087179c4cd38d4950584825c270dba9f2c06f86a058fcae6aa98e9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/verify-public.mjs",
+      "bytes": 19090,
+      "sha256": "85952b5bffdb952952a56672545ace54c924a05482c93db841f7c19546a2dc38",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "root-scout-selection-diagnostics-validation-v1/root-full-driver-receipt-v1.json",
+      "bytes": 5162,
+      "sha256": "733754ea1cade189fa92c29d5a808f7b940315909605cf636d2d3bf7b51a8446",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "root-scout-selection-diagnostics-validation-v1/root-full-driver-v1.stdout.log",
+      "bytes": 62597,
+      "sha256": "95277742a021f3c8a59eebda46e33022cb221011c2017bd5278c6dff63bf1444",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "root-scout-selection-diagnostics-validation-v1/root-full-driver-v1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-scout-anti-convergence-driver-frozen-v1.json",
+      "bytes": 9472,
+      "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-scout-observer-preference-driver-frozen-v1.json",
+      "bytes": 9465,
+      "sha256": "1cf08b52d98d557fa17ea66e336e3adbf6495cb4cb086b22bec461b713ae696e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-attack-deadline-driver-frozen-v1.json",
+      "bytes": 6759,
+      "sha256": "c7a4323971721eb54b574649d8c4efeea800fd08484349b5eb8d0ec0ffb11f7b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "capacity-native-chase-preference-driver-frozen-v1.json",
+      "bytes": 19099,
+      "sha256": "20fd347d029d9a912514e400bc74b0d08ec940bd90af20ff2f91bd64dba08bef",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/source-preservation-and-focused-receipt-v1.json",
+      "bytes": 6798,
+      "sha256": "37a687b66c9db85c0ceb0c2c567b54ed3394d362a0bd0244589ccfa6f1ab9fc5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/preimages/playtest-capacity-soak.mjs.txt",
+      "bytes": 155475,
+      "sha256": "6c2f4e3dfcbc38465a13cf05c8c8945fdb4fe7c99acaea43dfad493fb77696d8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/preimages/playtest-capacity-soak.test.mjs.txt",
+      "bytes": 270311,
+      "sha256": "f1ba119770bde34135e734780b04539206e859bd7b896977d4e6595555c032ef",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/production-mutation-v1.json",
+      "bytes": 3246,
+      "sha256": "d520eeb564accde06d8353cd8e5be0ff066071b523c011dcc6288e1a3a0a511e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-independent-review-v1.json",
+      "bytes": 4886,
+      "sha256": "6ceacd48f90475d750d3f2b43241d4c51593681a69a7bc633dd1f4193e99a8b0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-independent-review-v1/full-regression-addendum-v1.json",
+      "bytes": 3712,
+      "sha256": "4c6c4abcf14d20451e740439a417939384e06ee5db02941cd6e72812b1a517e2",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/focused-red-execution-v1.json",
+      "bytes": 4660,
+      "sha256": "8b752fa6ea7f5f9581b4a6ea5a83089920ff163f9e281dd0707a305d447e684e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/focused-red-v1.log",
+      "bytes": 10369,
+      "sha256": "6f8f90b45da83251d64e05be8315f57b7b4f758f8052c372684573c02c82901e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/focused-red-v1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/focused-green-execution-v1.json",
+      "bytes": 4755,
+      "sha256": "1c8e50cdcce7c48bfb3ed2d485d728061266e33f86419c5cde7b5c7fcb66bf08",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/focused-green-v1.log",
+      "bytes": 6385,
+      "sha256": "89970121d4a315829ebc217150ffdb69ca85749a56cb124d1e4ebafd4b3413ee",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-decision-diagnostics-v1/focused-green-v1.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/actual20-binding-proof-v2.json",
+      "bytes": 6501,
+      "sha256": "171d828d0502ae11c9f6beeef0c14dba53b2337fe22bb102432b7a1a487e90fb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/bound-formal16-binding-v1.json",
+      "bytes": 14871,
+      "sha256": "731fb797fa4a902b7d62271f4bd6915810e241811b8c21d5ad2325ff643ffdaf",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/collect-store-public.mjs",
+      "bytes": 4954,
+      "sha256": "2bb2b7b858952443ad4a863aa664ef932915570355d29a56d5d3a6a82f0aa722",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/copied-baseline-inputs.json",
+      "bytes": 1114,
+      "sha256": "a1ddc414e52483b47ed6662a6075352c3ea681d948749a4322c51499c8dbaf8e",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/root-controller-preparation-v1.json",
+      "bytes": 1562,
+      "sha256": "d507274488465d48f970e44a7a859faabd811351edfb6692c595347f007da36b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/ROOT-CONTROLLER.md",
+      "bytes": 1455,
+      "sha256": "9d50356baaab9ff9d9f8e19cd5c51670c930c925eec202d293802cfbe85946a1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/root-seal-and-guard-v1.mjs",
+      "bytes": 16525,
+      "sha256": "f9a7c26ccde23894bcca03213fdef587df323d4243c867db2eb72a3e9ddc7186",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/store-diagnostics-contract.mjs",
+      "bytes": 2720,
+      "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/template-syntax-check-v1.json",
+      "bytes": 21705,
+      "sha256": "62c8849f013b20cd40a3fd96296f81f179bbd9092b438656b7c9e18129642200",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/verify-store-public.mjs",
+      "bytes": 4776,
+      "sha256": "520aad34dec37abc4138247323315aff6472874053f19833ceb8ae73516511fc",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "account-store-slow-stage-diagnostics-v1/account-store-public-validator.mjs",
+      "bytes": 5407,
+      "sha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "account-store-slow-stage-diagnostics-v1/protocol-contract-v1.json",
+      "bytes": 5971,
+      "sha256": "02852a5ab77ec2c8f5944bdbd2d907fdb39be3b5fb22722db0d47cf1f9cfc800",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "account-store-slow-stage-diagnostics-v1/slow-stage-public.mjs",
+      "bytes": 15386,
+      "sha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "account-store-slow-stage-diagnostics-v1/source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "account-store-slow-stage-independent-review-v1/review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "full-lifecycle-scout-selection-diagnostics-v1/verify-inputs.mjs",
+      "bytes": 14340,
+      "sha256": "a421f94c8e86bd94745b57d883cb47613179eaac27d1eb53ed59baefe2ae115b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-actual-independent-facts-v1.json",
+      "bytes": 15626,
+      "sha256": "4228cc8daa663319040ab6c315d5a8cd52bb4f51f312b321fd81db88c3e0e491",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+      "bytes": 813,
+      "sha256": "1337e647fc24034d55670eae39d2946385cfefe8263ee48773c39484d070f68d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/actual-verification.log",
+      "bytes": 878,
+      "sha256": "470d4519772fabad4c60e830caceedfbb6e86f0f28ddf02eda06e07e8afa055a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/derivation-v1.json",
+      "bytes": 20091,
+      "sha256": "e0b1c0558f39f7a581cba7c767e09fd2572d42fc082c65dc0c20466c0913ac38",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/expected-probe-policy-v1.json",
+      "bytes": 1008,
+      "sha256": "e3bc309c4830ffed84c924c5d71dda6fa44e90bcbe552fd3a969dc9760edb242",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/final-verification.json",
+      "bytes": 442311,
+      "sha256": "bd4897fb45dc67d1d65e2fe488021081bcf599e745febb9d66b83659cd4b5df0",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/hp-proof-contract-v2.mjs",
+      "bytes": 4644,
+      "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/independent-review-v1.json",
+      "bytes": 6909,
+      "sha256": "844102d4cc3de34127d0c1feb0cb1762761e5f0cd2bc2c49c379cd321ebf67ce",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/preparation-v1.json",
+      "bytes": 9766,
+      "sha256": "318e3852ee8259d63058f21c04efdf75b917f81c8dd8e2c926f9a13933f0ca4a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/probe-contract-v1.mjs",
+      "bytes": 5860,
+      "sha256": "70da9fbc95c66e06dde5402ac159ccba4870c5695be9f556e8eb5c3396b0c455",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/run-ended-probe20-v1.mjs",
+      "bytes": 2257,
+      "sha256": "0665b467d2553f4355309b29b813620e6454942deee50f668ea2a7e566e7c4e9",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/seal-tool-source-v1.mjs",
+      "bytes": 3011,
+      "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/syntax-check-v1.log",
+      "bytes": 673,
+      "sha256": "ce69536a9b7903892566bc52d06022b35137d40107ad452a08345b57c4a665ab",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/tool-source-frozen-v1.json",
+      "bytes": 2290,
+      "sha256": "6f8f20969d6c5915edb60672b83556bd36a356e06c7249ddcb247890aec65a19",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-independent-verification-v1/verify-ended-probe20-v1.mjs",
+      "bytes": 44400,
+      "sha256": "335e2121bc24ad616061e829ed5e352f9658f431ef36571b1aae662eb61ad149",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-root-actual-terminal-and-consumer-facts-v1.json",
+      "bytes": 10706,
+      "sha256": "d280ca72e1bacc7147eac04867d28b8c68665155a61963a184739c429cb64a6b",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "probe20-root-independent-cleanup-v1.json",
+      "bytes": 450,
+      "sha256": "aa29be311ec8583e5c160de79f078e177d2683a52cde81f90e2171eda97cbd71",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-helper-freeze-v1.json",
+      "bytes": 2314,
+      "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.mjs",
+      "bytes": 10318,
+      "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-public.test.mjs",
+      "bytes": 22894,
+      "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-account-store-wait-feasibility-17/slow-stage-schema-contract.json",
+      "bytes": 3573,
+      "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-account-store-wait-feasibility-17/synthetic-tests-v1.log",
+      "bytes": 7579,
+      "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-scout-selection-diagnostics-feasibility-20/driver-evidence-contract.mjs",
+      "bytes": 10516,
+      "sha256": "3f94f86cd7c9ba3f7faa667911f36cd18b322c39e17be79adafbdc896b2a10eb",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-10-v2-scout-selection-diagnostics-feasibility-20/scene-driver-compatibility-proof-v1.json",
+      "bytes": 2563,
+      "sha256": "1e03413bc5a3133e2b44f4a8ebb334cafa07600c48a964186567f59d1c7eaaee",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "root-account-store-wait-diagnostics-functional-validation-v1.json",
+      "bytes": 12175,
+      "sha256": "1ad0420e74d363088b20dca95cebbb7c84b035e1edf5d0472a185d8bd81dea57",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-anti-convergence-runtime-v1/current-execution-binding-v1.json",
+      "bytes": 1402,
+      "sha256": "2a6cc9ae89a467ddeb19636b3f50b6126af968c1b5a29e6d303ca7f85bb7adea",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-anti-convergence-v1/root-full-driver-receipt-v1.json",
+      "bytes": 5113,
+      "sha256": "e487f6a3ce26d1a87d3d052282e26a1b28fbf3e63f4948e7ee8d29d1003e958a",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-anti-convergence-v1/root-full-driver-v1.stdout.log",
+      "bytes": 60940,
+      "sha256": "a1537754ffa171d088ece189a7d4f6ba741d203e08a62b947c9ecc63ca8d5592",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-observer-preference-root-full-driver-receipt-v1.json",
+      "bytes": 5378,
+      "sha256": "00dbc4862d8919a6ce52a45de66cb7e46434b66715ee08d63b0117cf253a78e1",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-observer-preference-root-full-driver-v1.log",
+      "bytes": 59078,
+      "sha256": "4b2d8af950ce74bd775bdb01a14aef9531ac3b6ef1ae9968573b1f7d4af95727",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-observer-preference-runtime-v1/current-execution-binding-v1.json",
+      "bytes": 1404,
+      "sha256": "665051040cc0a966cb48d0e8e46782cdb617279c537cc36953f096309ed8f18d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-diagnostics-full16-actual-independent-facts-v1.json",
+      "bytes": 6568,
+      "sha256": "9e64800b29037bf9ab70cddc2eaf8b28f7465527b07da48a57705dcdec0297d5",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-diagnostics-full16-public-archive-v1/full16-actual-prerequisite-v1.json",
+      "bytes": 9510,
+      "sha256": "4ef0ee82a018ee6f419dae732e8db66e4488f6686ad96f98d241e8b7dfb0b907",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-diagnostics-runtime-readonly-guard-execution-v1.json",
+      "bytes": 2980,
+      "sha256": "e8023368558947d24b4940349d8e2e07fdf33f757707738f6a9d3f8e25326bd8",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-diagnostics-runtime-readonly-guard-stdout-v1.log",
+      "bytes": 513,
+      "sha256": "d124d042a9c6385f29d649fa0d5d4c60a95a4ba731e89858effebc86e0fddd75",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-diagnostics-runtime-v1/current-execution-binding-v1.json",
+      "bytes": 1429,
+      "sha256": "1886e56e3e3846000932d053c727c21c893393cb6be35e844ee880a2a711b506",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "scout-selection-diagnostics-runtime-v1/source-lib-v1.mjs",
+      "bytes": 57227,
+      "sha256": "c94effada25cba3664c9920412d833b2356d98f503e36f8521e7d958e591f48d",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/runtime-prepared-v2.json",
+      "bytes": 54142,
+      "sha256": "c6340f21e49879896db88e59c2fe1c109dedd59eb955021ea621f99f0775ce7f",
+      "classification": "explicit-public-original"
+    },
+    {
+      "path": "formal16-runtime-independent-review-v1/preseal-independent-review-v2.json",
+      "bytes": 5707,
+      "sha256": "ef1a7f93d10b0ed8d90c8ff151c7d6b16631b3958693add8083e262a08517872",
+      "classification": "explicit-public-original"
+    }
+  ],
+  "externalArchives": [
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.samples.jsonl",
+      "bytes": 51469886,
+      "sha256": "420ef1cd80999570bf08b63f7b9c69f1e739b8ad2e322ee773180fac637fc7f1",
+      "kind": "capacity-samples-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/monitor-history.jsonl",
+      "bytes": 4978044,
+      "sha256": "5bf68f808875549d84c04f6b7a51c51f0b86c70bde921773f3957f0e96b119ea",
+      "rows": 549,
+      "kind": "resource-monitor-history-jsonl",
+      "copyToRepository": false
+    },
+    {
+      "path": "release-native-v2-scout-selection-diagnostics-ladder-16/recordings/0-498050.jsonl",
+      "bytes": 252891937,
+      "sha256": "9ece668e8d80b69088348959a63b6b94cd587c098c6161452a0c1739e7aadddd",
+      "frames": 4060,
+      "kind": "spectator-recording-jsonl",
+      "copyToRepository": false
+    }
+  ],
+  "run": {
+    "runId": "1792981760951-0079fde7",
+    "wireDiagnostics": {
+      "identity": {
+        "version": "v2",
+        "manifest": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-navigation-wire-diagnostics-v2\\source-frozen-v2.json",
+          "bytes": 10830,
+          "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+        },
+        "review": {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\compact-wire-wrapper-independent-review-v1\\review-v2.json",
+          "bytes": 6809,
+          "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+        },
+        "sourceSha256": "a3d938d2b9e92d97e445ca930640ccf1c838271d827efd45d11ff970f44cab49",
+        "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+        "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+        "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+        "wrapperTests": 28,
+        "core187CoversWrapper": false,
+        "terminalFile": "compact-navigation-wire-terminal.json",
+        "terminalOutsideRaw": true,
+        "existingWriter": {
+          "defaultMaxBufferedBytes": 4194304,
+          "addMayRecordFailureAndReturn": true,
+          "durableRowsRequireRawCrosscheck": true
+        }
+      },
+      "terminal": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\compact-navigation-wire-terminal.json",
+        "bytes": 5089,
+        "sha256": "3f0d17e075b2d26552a7612508c42ba82a89f0d3523869eb552e566b10e8b452"
+      },
+      "capture": {
+        "present": true,
+        "complete": true,
+        "reasons": [],
+        "countsMatch": true,
+        "raw": {
+          "rows": 5478,
+          "rowsByConnection": {
+            "1": 3442,
+            "2": 2036
+          },
+          "truncationRowsByConnection": {
+            "1": 0,
+            "2": 0
+          },
+          "events": {
+            "send": 1336,
+            "observe": 4142
+          }
+        },
+        "statusBeforeUninstall": {
+          "schemaVersion": 1,
+          "installed": true,
+          "scope": "Additional bounded diagnostics only; no ACK classification or metric/acceptance mutation. Callback exceptions can stop the original driver; allocation and projection overhead remain subject to unchanged driver-lag/safety gates.",
+          "limits": {
+            "minimumConnection": 1,
+            "maximumConnection": 2,
+            "minX": 241,
+            "maxX": 244,
+            "minY": 594,
+            "maxY": 599,
+            "rememberedIds": 64,
+            "localEntities": 32,
+            "pendingEvents": 64,
+            "rowsPerConnection": 12000,
+            "hintCells": 7
+          },
+          "duplicateConnectionInstances": 0,
+          "selectionFailures": 0,
+          "connections": [
+            {
+              "connection": 1,
+              "rows": 3442,
+              "rowAttempts": 3442,
+              "rememberedIds": 3,
+              "rememberedEvictions": 0,
+              "entityRowsTruncated": 0,
+              "pendingTruncated": 0,
+              "pendingWindows": 1332,
+              "pendingOpen": false,
+              "rowsTruncated": false,
+              "traceTruncated": false,
+              "sinkFailures": 0,
+              "projectionFailures": 0,
+              "diagnosticFailures": 0,
+              "observations": 2110,
+              "sends": 1332,
+              "complete": true
+            },
+            {
+              "connection": 2,
+              "rows": 2036,
+              "rowAttempts": 2036,
+              "rememberedIds": 3,
+              "rememberedEvictions": 0,
+              "entityRowsTruncated": 0,
+              "pendingTruncated": 0,
+              "pendingWindows": 4,
+              "pendingOpen": false,
+              "rowsTruncated": false,
+              "traceTruncated": false,
+              "sinkFailures": 0,
+              "projectionFailures": 0,
+              "diagnosticFailures": 0,
+              "observations": 2032,
+              "sends": 4,
+              "complete": true
+            }
+          ]
+        },
+        "statusAfterUninstall": {
+          "schemaVersion": 1,
+          "installed": false,
+          "scope": "Additional bounded diagnostics only; no ACK classification or metric/acceptance mutation. Callback exceptions can stop the original driver; allocation and projection overhead remain subject to unchanged driver-lag/safety gates.",
+          "limits": {
+            "minimumConnection": 1,
+            "maximumConnection": 2,
+            "minX": 241,
+            "maxX": 244,
+            "minY": 594,
+            "maxY": 599,
+            "rememberedIds": 64,
+            "localEntities": 32,
+            "pendingEvents": 64,
+            "rowsPerConnection": 12000,
+            "hintCells": 7
+          },
+          "duplicateConnectionInstances": 0,
+          "selectionFailures": 0,
+          "connections": [
+            {
+              "connection": 1,
+              "rows": 3442,
+              "rowAttempts": 3442,
+              "rememberedIds": 3,
+              "rememberedEvictions": 0,
+              "entityRowsTruncated": 0,
+              "pendingTruncated": 0,
+              "pendingWindows": 1332,
+              "pendingOpen": false,
+              "rowsTruncated": false,
+              "traceTruncated": false,
+              "sinkFailures": 0,
+              "projectionFailures": 0,
+              "diagnosticFailures": 0,
+              "observations": 2110,
+              "sends": 1332,
+              "complete": true
+            },
+            {
+              "connection": 2,
+              "rows": 2036,
+              "rowAttempts": 2036,
+              "rememberedIds": 3,
+              "rememberedEvictions": 0,
+              "entityRowsTruncated": 0,
+              "pendingTruncated": 0,
+              "pendingWindows": 4,
+              "pendingOpen": false,
+              "rowsTruncated": false,
+              "traceTruncated": false,
+              "sinkFailures": 0,
+              "projectionFailures": 0,
+              "diagnosticFailures": 0,
+              "observations": 2032,
+              "sends": 4,
+              "complete": true
+            }
+          ]
+        },
+        "terminalOutsideRaw": true,
+        "emitReturnCountIsDurable": false,
+        "rowsAreDiagnosticOnly": true
+      }
+    },
+    "coreCodeEvidenceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "sourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+    "executionSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+    "driverSourceSha256": "d61b7cd057e1a2a55191fe6c407b3058b5ff9205141eaf9290d16da42b028db1",
+    "socketDiagnosticsReleaseUsed": true,
+    "sceneProfile": "ordinary-native-span2-five-by-five-static-halo-v1",
+    "sceneSourceSha256": "fe2f2a2c804450b595adddfd7753ce1043fd680418ccfc1e483f67d03f4eb010",
+    "scene10Sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba",
+    "scene100Sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205",
+    "sceneStaticAnalysis": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    "reportOk": false,
+    "driverPlayableCapacityAccepted": false,
+    "rawVerifierAccepted": false,
+    "normalProcessCleanup": true,
+    "diagnosticsComplete": true,
+    "slowStageMetadata": {
+      "rows": 1051,
+      "bytes": 98654,
+      "sha256": "1427de97feef0dc060a200ea4d78b1298bf978e9aadc90916150123d7b82e351",
+      "status": {
+        "schemaVersion": 1,
+        "complete": true,
+        "reasons": [],
+        "stopRequested": false,
+        "stderrEnded": true,
+        "writerFinished": true,
+        "rowsQueued": 1051,
+        "bytesQueued": 98654,
+        "maxBufferedLineBytes": 204,
+        "lineLimitBytes": 8192,
+        "totalLimitBytes": 33554432,
+        "writeLimitBytes": 1048576,
+        "writeHighWaterMarkBytes": 1048576,
+        "maxQueuedWriteBytes": 2468,
+        "scope": "Only complete ASCII exact-format lines from the frozen static GatewaySlowStage label/phase/class allowlists. observedAtMs is the launcher receive clock, not server span start/end. connection is an opaque diagnostic counter, never identity or an action/request ID; queuedPhase and phaseElapsedMs were sampled when the input was queued. Queued counts alone do not prove durable output when incomplete. Existing50ms logging is left-censored; missing rows do not prove absence of a stall.",
+        "thresholdMs": 50,
+        "dataFile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\slow-stage-public.jsonl"
+      }
+    },
+    "normalOwnedCleanup": true,
+    "navigationCoordination": {
+      "scope": "Native tool-local conservative union of original AOI obstacles, active controlled owner receipts and one in-flight movement hint per connection; never authoritative occupancy, snapshots or AOI.",
+      "maximumHintCellsPerConnection": 7,
+      "blockedOpportunityRule": "A conflicting prepared move is still an offered navigation-blocked/native opportunity; original cadence, completion and correction gates remain."
+    },
+    "nativePatrolPlanning": {
+      "scope": "Native primed patrol fallback only; original fast path and at most four existing corner targets remain.",
+      "maximumFallbackCornerTargets": 4,
+      "pathExpansionLimit": 4000,
+      "selectionRule": "Prefer the first existing collision-aware path with two legal collinear Run steps; otherwise retain the original first Walk.",
+      "primingRule": "Only while native Run priming is active; original cadence, transfer/coverage checks and offered-opportunity accounting remain."
+    },
+    "measurementClock": {
+      "scope": "All measurement phases; seconds retains configured duration and measuredSeconds is actual elapsed wall time.",
+      "minimumCompleteWindowMs": 60000,
+      "completeWindowCountRule": "At least floor(configured seconds / 60) complete windows, each starting at the previous actual close, plus the full configured phase duration.",
+      "durationRule": "Activity and rate assessment use actual measuredSeconds; no short window is relabelled as sixty seconds or duplicated after a stall.",
+      "partialWindowRule": "The final partial minute remains in whole-phase and continuous assessment, without counting as a complete rolling window."
+    },
+    "nativeHpMaintenance": {
+      "scope": "Already-held ordinary HP potions only; no MP, purchase, grants or revival.",
+      "hpThreshold": 0.6,
+      "reuseDelayMs": 6000,
+      "evidenceDeadlineMs": 2000,
+      "commandBudgetPerSecond": 3,
+      "rule": "Fresh matching UseItem success plus complete-inventory consumption or exact HP increase within the same deadline; consumption is not proof of healing.",
+      "activityRule": "Independent auxiliary promise; native opportunities continue and HP maintenance never credits movement, attack or native completion."
+    },
+    "nativeAttackWitness": {
+      "scope": "New native attack witness selection; the original full AOI membership range remains16.",
+      "maximumOwnerAndTargetDistance": 6,
+      "rule": "Choose the nearest active living same-map observer that actually sees both attacker and target; reselect immediately before send. No witness leaves the native opportunity incomplete.",
+      "approachRule": "Native approach paths require a current active living same-map observer whose actual snapshot contains both attacker and target and whose actual position is within6 of the target and prospective attack tile; otherwise continue other eligible targets or ordinary scouting.",
+      "damageRule": "Original dual-end damage/health evidence,900ms deadline and ambiguous-target quarantine remain unchanged."
+    },
+    "nativeChasePreference": {
+      "freshReceiptMs": 3000,
+      "scope": "Client-side preference within the original first4 candidates, not an exclusive claim or a capacity result.",
+      "evidenceRule": "Only fresh matching nonzero chase UserLocation receipts establish monotonic first/last ACK priority; active living same-map fighters and live targets only.",
+      "selectionRule": "Keep adjacent witnessed attacks first, then prefer targets without an earlier recent pursuer; retain every original first4 candidate and path fallback.",
+      "budgetRule": "Original4-target/8-goal/4000-node searches, cadence, offered/completed accounting and finite chase budgets are unchanged.",
+      "restoreRule": "Resume clears receipt preference only; original chase elapsed time, ACK count and visited positions remain."
+    },
+    "gatewaySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+    "backendInputCount": 50,
+    "realGameplayAttempt": true,
+    "report": "release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.report.json",
+    "raw": "release-native-v2-scout-selection-diagnostics-ladder-16/reports/1792981760951-0079fde7.samples.jsonl",
+    "peakControlledActors": 25,
+    "highestPassedStage": 10,
+    "phaseWindows": [
+      {
+        "name": "bootstrap-2",
+        "kind": "bootstrap",
+        "targetActors": 2,
+        "startedAtMs": 1792981761009,
+        "endedAtMs": 1792981792074,
+        "completed": true
+      },
+      {
+        "name": "stage-2",
+        "kind": "measurement",
+        "targetActors": 2,
+        "startedAtMs": 1792981792074,
+        "endedAtMs": 1792982092294,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-10",
+        "kind": "bootstrap",
+        "targetActors": 10,
+        "startedAtMs": 1792982092295,
+        "endedAtMs": 1792982145193,
+        "completed": true
+      },
+      {
+        "name": "stage-10",
+        "kind": "measurement",
+        "targetActors": 10,
+        "startedAtMs": 1792982145193,
+        "endedAtMs": 1792982445416,
+        "completed": true
+      },
+      {
+        "name": "bootstrap-25",
+        "kind": "bootstrap",
+        "targetActors": 25,
+        "startedAtMs": 1792982445418,
+        "endedAtMs": 1792982528628,
+        "completed": true
+      },
+      {
+        "name": "stage-25",
+        "kind": "measurement",
+        "targetActors": 25,
+        "startedAtMs": 1792982528628,
+        "endedAtMs": 1792982828898,
+        "completed": true
+      }
+    ],
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "measuredSeconds": 300.22,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792981792074,
+        "endedAtMs": 1792982092294,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "measuredSeconds": 300.223,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792982145193,
+        "endedAtMs": 1792982445416,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-25",
+        "controlledActors": 25,
+        "seconds": 300,
+        "measuredSeconds": 300.27,
+        "completed": true,
+        "passed": false,
+        "startedAtMs": 1792982528628,
+        "endedAtMs": 1792982828898,
+        "minuteWindows": 5
+      }
+    ],
+    "soakIntervalSeconds": null,
+    "soakCompleted": false,
+    "completed60SecondSoakWindows": 0,
+    "passed60SecondSoakWindows": 0,
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-25": {
+        "complete": 5,
+        "passed": 4
+      }
+    },
+    "capacityAccepted": false,
+    "formalRunStarted": true,
+    "failureWindow": null,
+    "allSixCleanupCountersZero": true,
+    "allOwnedProcessesStopped": true,
+    "normalGatewayExit": 0,
+    "normalMonitorExit": 0
+  },
+  "limitations": [
+    "The new compact span2 halo scene is independently bound; historical scene passes are not inherited and static geometry does not prove live navigation or supply.",
+    "Failure-window counters, if any, belong only to the recorded first failing continuous window, not the entire run.",
+    "Formal policy remains five300s measured cohorts2/10/25/50/100 plus7200s soak, original five resumes, post-resume60s/100 observation, five saves and all original latency/error/activity gates. Partial runs and shorter windows never substitute for full scope.",
+    "Typed Launched proves only this command launched a swing. The original driver still requires paired positive damage/health evidence for a hit.",
+    "The first/last monitor projection is a summary. Full raw monitor bytes and spectator payloads remain external and independently SHA-bound.",
+    "This File/loopback single-host formal profile does not certify production storage/RPO, TLS/NIC bandwidth, frontend acceptance or Cell scheduling."
+  ]
+}

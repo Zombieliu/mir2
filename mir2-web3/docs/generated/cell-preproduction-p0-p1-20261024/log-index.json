@@ -1,0 +1,298 @@
+[
+  {
+    "file": "logs/production-tests.log",
+    "originalSha256": "d7ffcc3a2989e831c6ac55ec745aa609ab6cf89f78e3660e1a371d73d394bd2f",
+    "originalBytes": 4657,
+    "exportSha256": "5c7a584a8250d5e8adffa9981b89f502f4e4ebfa0ca8f1ba49d0949595bf3a6b",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 6.62s",
+      "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.75s",
+      "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s",
+      "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+    ]
+  },
+  {
+    "file": "logs/simulation-focused-final.log",
+    "originalSha256": "8f28872fe3b98a7466749742c597b06bbe2848a567f3b005b1b6412cdc92ab37",
+    "originalBytes": 60632,
+    "exportSha256": "83dafab726baa8ba564aca3e4f306abf8a964075025e8d9f957ccd5eaffa472b",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 10.47s",
+      "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.36s",
+      "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 50.32s",
+      "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.41s",
+      "test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s",
+      "error: test failed, to rerun pass `-p mir2-simulation --test shared_player_death_zone`"
+    ]
+  },
+  {
+    "file": "logs/simulation-reference-and-death.log",
+    "originalSha256": "7460687502fd0dedd82592fbafdfcd3c5edde0d1f2c2a56ee63dc9b0d184987d",
+    "originalBytes": 68376,
+    "exportSha256": "c7c6d33e5385b1025a891d120aa96b1b28c0982136f06be1ec7b1ee5c09e8dc8",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 48.78s",
+      "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s",
+      "test result: ok. 209 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.71s",
+      "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s"
+    ]
+  },
+  {
+    "file": "logs/simulation-integration-units.log",
+    "originalSha256": "34e89d35032a85a145001261694a927cf67286685829e1e6e0f994a251259a4b",
+    "originalBytes": 46089,
+    "exportSha256": "737360f8a01baf01d95671a2cc4ffa4f48fa1e2862d001825e951fabc54f562b",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 1m 25s",
+      "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 2904 filtered out; finished in 5.49s"
+    ]
+  },
+  {
+    "file": "logs/simulation-uid-production-stones.log",
+    "originalSha256": "825beda10181597d1f18ffafbe80d03a542920f83b42fe70ed9d5c19e41b35e8",
+    "originalBytes": 218905,
+    "exportSha256": "e6af14a4d2e9a024f7707525cf900ba1481f33d4b0252bfcbf770a4943b5fd9c",
+    "longPayloadLinesOmitted": 2,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 0.35s",
+      "test result: FAILED. 101 passed; 2 failed; 0 ignored; 0 measured; 2815 filtered out; finished in 308.87s",
+      "error: test failed, to rerun pass `-p mir2-simulation --lib`"
+    ]
+  },
+  {
+    "file": "logs/simulation-economic-repaired.log",
+    "originalSha256": "9fffc3750edd1e1662ae10948d2182500183d2c8c8a9bb2e549fb3febb5c8e17",
+    "originalBytes": 44653,
+    "exportSha256": "3bd97a044f406182d5470d710331382acd6c4982abf0b8ce54b1a1049e90b378",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 1m 21s",
+      "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 2916 filtered out; finished in 52.24s"
+    ]
+  },
+  {
+    "file": "logs/simulation-stone-reload-final.log",
+    "originalSha256": "da22752ed4b66a7fdf9504f5a086fdc9523c010e255e0442cc73c1c1d0387273",
+    "originalBytes": 44493,
+    "exportSha256": "09e86d58096f48bd3805c420c0318bf7c5492aa5e64ca5cd5edf0b326b18784a",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 22.11s",
+      "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2917 filtered out; finished in 48.61s"
+    ]
+  },
+  {
+    "file": "logs/gateway-build.log",
+    "originalSha256": "3acc4da53a30d885642c7ac64f7ef9579918d97b09e669cebcd71aa49d667e42",
+    "originalBytes": 63194,
+    "exportSha256": "9be6a0e05ed469f51057eaf3a89c43f24ebbe59493c2b3e30ad54d2561d574fe",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `dev` profile [unoptimized] target(s) in 1m 48s"
+    ]
+  },
+  {
+    "file": "logs/gateway-partition-bindings.log",
+    "originalSha256": "dd62ba48984a4939f035f9b230cfabbefef2889aab2b9c01f6716dfc62e1e9e9",
+    "originalBytes": 54967,
+    "exportSha256": "6cc89746b72e37ab2a198abe10c8c7533ca6e1180a54d2575ee71491d619196f",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 1m 54s",
+      "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 1176 filtered out; finished in 2.98s"
+    ]
+  },
+  {
+    "file": "logs/gateway-adjacent-regression.log",
+    "originalSha256": "2ee865a998cb93050ac195c3451beb9413844ebb7491a576d00e14799350fc73",
+    "originalBytes": 64236,
+    "exportSha256": "352c49007abe209fbbfe27298bdc6ef6fd31329bd3a26e7f13e129f4d9549b66",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 0.49s",
+      "test result: FAILED. 71 passed; 2 failed; 0 ignored; 0 measured; 1110 filtered out; finished in 113.23s",
+      "error: test failed, to rerun pass `-p mir2-gateway --lib`"
+    ]
+  },
+  {
+    "file": "logs/gateway-adjacent-repaired.log",
+    "originalSha256": "10ebc6de2c92c2c6fa75aae0b5a3a276583857e4a136dbe22cc88f01f69170de",
+    "originalBytes": 54245,
+    "exportSha256": "6401a0636908c66cbafaddc0610aec69d517b53c0a4291d47b13dbf4c41d4caf",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 15.04s",
+      "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1181 filtered out; finished in 4.96s"
+    ]
+  },
+  {
+    "file": "logs/independent-default-partition-death-final.log",
+    "originalSha256": "74be92ca2c1a5de6099b453ff2b26e99b49a16e6e9d31924a40a41527ad6fcb5",
+    "originalBytes": 52760,
+    "exportSha256": "057c7311792606f5e1b66b7c489e2c3cdbb1ffee99db2e72394264dc4c9d8734",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 10.49s",
+      "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s",
+      "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+    ]
+  },
+  {
+    "file": "logs/independent-p1-partition-final.log",
+    "originalSha256": "8f91d50fc6cfd1b718502215b40582715a3f1cf6498db6f121d7d59fcd38260e",
+    "originalBytes": 52040,
+    "exportSha256": "3b001ff5694193e50f3751fe56c54c1221bc929edde730b4dede5518d31a6dfa",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 10.58s",
+      "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s"
+    ]
+  },
+  {
+    "file": "logs/independent-activities-final.log",
+    "originalSha256": "386dd003c7a27d2ca4a36b7cded691062ca6551f582704426f648423de449cbc",
+    "originalBytes": 53627,
+    "exportSha256": "84c07031b6ac3fb388b3630ac98830537e5a1d2dc8d98cac851a44ea096e6136",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 1.40s",
+      "test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s"
+    ]
+  },
+  {
+    "file": "logs/independent-gateway-vertical-persistence-final.log",
+    "originalSha256": "628a93101349c8668524087edd80a0971b9a4174f15ff8b47949db7d1bb80e51",
+    "originalBytes": 56413,
+    "exportSha256": "d6da66039213c60c10d05fa16afc299ef9d411a1d70537629de0ad935e28be20",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "error: failed to remove file `C:/mir2-build/cell-preproduction-p0-p1-20261024/target\\debug\\mir2-gateway.exe`"
+    ]
+  },
+  {
+    "file": "logs/independent-gateway-vertical-persistence-final-retry.log",
+    "originalSha256": "4084e0db58d1d3b83dfd2e0fe0535c00ad68e4d0515bca1f9b7567c756a1009d",
+    "originalBytes": 56957,
+    "exportSha256": "3a104f8f6186a65ecfdde209fc43d5ce593ab3239bad50e97dbf7ff11ef7dc4a",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `test` profile [unoptimized] target(s) in 31.20s",
+      "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 654.99s"
+    ]
+  },
+  {
+    "file": "logs/independent-workspace-all-targets-final.log",
+    "originalSha256": "57835e06b2c59e48184fd8470f8c366a26f97a6aacb506d060f894b2ccbe5503",
+    "originalBytes": 73418,
+    "exportSha256": "e787be5c4c54389da9d44de78f033268664b14d8c9e84475fb67892e41150383",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "error: failed to run custom build command for `dubhe-node-desktop v0.1.0 (C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\dubhe-node-desktop\\src-tauri)`"
+    ]
+  },
+  {
+    "file": "logs/independent-desktop-real-sidecars-build.log",
+    "originalSha256": "7fb9c68796a745a021d8e1d3af8ec7f5ec6190e3bca996ca53d21daaddec536d",
+    "originalBytes": 56409,
+    "exportSha256": "e5955119e5e1ebba5f93b0ea1d8e42afd4e36e649f31b7597f1688d1f0d9feac",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `dev` profile [unoptimized] target(s) in 20.17s"
+    ]
+  },
+  {
+    "file": "logs/independent-workspace-all-targets-final-retry.log",
+    "originalSha256": "c422fa40bc8d13bd2a87f22c43f8a1f337e277a90ae87876d84aba45c13a045b",
+    "originalBytes": 92885,
+    "exportSha256": "156e2c25aef8137cdb9e8536b0835978bbc627d96e9ad77a6aafbbc11ede1111",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `dev` profile [unoptimized] target(s) in 1m 05s"
+    ]
+  },
+  {
+    "file": "logs/client-native-ui-check.log",
+    "originalSha256": "2213d71b7bb01e013fc4b2fb42efb5d7f74550ed76175ac9fc2425972a9bd3bb",
+    "originalBytes": 41875,
+    "exportSha256": "e24f9cb7b43302dc3e383d1557af1d17ee3c30ae44c9cc2a8ece6fb2223ffc04",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "    Finished `dev` profile [unoptimized] target(s) in 1m 48s"
+    ]
+  },
+  {
+    "file": "logs/client-ui-source-tests.log",
+    "originalSha256": "5d4ba76fdf475bedaab7e05cf75969455df59cee12e7554a2c311fe0dc703feb",
+    "originalBytes": 69353,
+    "exportSha256": "46f3c750c4250ad9615ea94c49773b542667b44fb69effafce1dcbfb8c80cca2",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "# tests 265",
+      "# pass 265",
+      "# fail 0",
+      "# skipped 0"
+    ]
+  },
+  {
+    "file": "logs/web-typegen-pinned.log",
+    "originalSha256": "8b0db89a1e25137a4cb79143a4ea63ae347e6f5f2247f026d984e133255d3084",
+    "originalBytes": 61,
+    "exportSha256": "adba4af9194e10e47dda75ff0fd0f8c2b756474896d0eba5612799c527ff372a",
+    "longPayloadLinesOmitted": 0,
+    "results": []
+  },
+  {
+    "file": "logs/web-typecheck-pinned.log",
+    "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalBytes": 0,
+    "exportSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "longPayloadLinesOmitted": 0,
+    "results": []
+  },
+  {
+    "file": "logs/playtest-runners-final.log",
+    "originalSha256": "4eaa5e36d5be834213915b3c7a57efbcab699ccb8ff86235e65c889cf6cd2a20",
+    "originalBytes": 38485,
+    "exportSha256": "b8e3fd85c7c1c80b37a5dc25a0388db98bfef1225e0b24378a12898ed6265d30",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "# tests 149",
+      "# pass 149",
+      "# fail 0",
+      "# skipped 0"
+    ]
+  },
+  {
+    "file": "logs/portable-next-source-final.log",
+    "originalSha256": "dc29d1396b646c8df978dccb2ccbcc2ab5e4469d80ccffcaacfd3b8e7acfe27e",
+    "originalBytes": 11139,
+    "exportSha256": "38acfeb06acfff6da54180e30eebfb89247bcaca5015cdd24d1c27f491748918",
+    "longPayloadLinesOmitted": 0,
+    "results": [
+      "# tests 34",
+      "# pass 32",
+      "# fail 2",
+      "# skipped 0"
+    ]
+  },
+  {
+    "file": "logs/git-fsck-precommit.log",
+    "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalBytes": 0,
+    "exportSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "longPayloadLinesOmitted": 0,
+    "results": []
+  },
+  {
+    "file": "logs/integration-whitespace-check.log",
+    "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "originalBytes": 0,
+    "exportSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "longPayloadLinesOmitted": 0,
+    "results": []
+  }
+]

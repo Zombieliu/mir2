@@ -18,9 +18,9 @@ use mir2_protocol::{
 };
 use mir2_simulation::{
     AccountRecord, ActiveSessionIdentity, CharacterHandoffCheckpoint, CharacterHandoffCommitment,
-    CharacterSaveRecord, GameShopPurchaseOutcome, NativeGameShopGiftRequest,
-    NativeGameShopPurchaseRequest, WorldCommand, WorldCommandExecution, WorldCommandOutcome,
-    WorldSnapshot,
+    CharacterSaveRecord, GameShopPurchaseOutcome, NativeAttackAdmission, NativeAttackError,
+    NativeAttackExecution, NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand,
+    WorldCommandExecution, WorldCommandOutcome, WorldSnapshot,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -56,6 +56,10 @@ mod character_handoff_rpc_tests;
 pub const ZONE_RPC_STORAGE_REQUEST_ID_V1: &str = "storageRequestIdV1";
 pub const ZONE_RPC_BILLING_V1: &str = "billingCreditsMonthlyCardV1";
 pub const ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1: &str = "durableNpcPurchaseOwnerV1";
+pub const ZONE_RPC_NATIVE_ATTACK_OUTCOME_V1: &str = "nativeAttackOutcomeV1";
+#[cfg(test)]
+#[path = "zone_rpc/native_attack_tests.rs"]
+mod native_attack_tests;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
 pub const DEFAULT_ZONE_RPC_MAX_CONNECTIONS: usize = 64;
 pub const DEFAULT_ZONE_RPC_MAX_SESSIONS: usize = 4096;
@@ -92,6 +96,35 @@ enum ZoneRpcPriority {
     Control,
     Outbound,
     Gameplay,
+}
+
+/// The boundary is the first attempt to send a mutation, not receipt of its
+/// reply. In particular a malformed or missing reply must never become a
+/// gameplay rejection or authorize a second endpoint attempt.
+enum MutationOnceError {
+    BeforeExecution(String),
+    Unknown(String),
+}
+
+impl MutationOnceError {
+    fn into_detail(self) -> String {
+        match self {
+            Self::BeforeExecution(detail) | Self::Unknown(detail) => detail,
+        }
+    }
+
+    fn into_attack_error(self) -> NativeAttackError {
+        match self {
+            Self::BeforeExecution(detail) => NativeAttackError::BeforeExecution(detail),
+            Self::Unknown(detail) => NativeAttackError::Unknown(detail),
+        }
+    }
+}
+
+impl From<String> for MutationOnceError {
+    fn from(detail: String) -> Self {
+        Self::BeforeExecution(detail)
+    }
 }
 
 #[derive(Debug)]
@@ -1824,6 +1857,9 @@ impl TcpZoneOwnerRpcTransport {
                 "durable NPC purchase mutation must use the single-attempt executor".into(),
             );
         }
+        if matches!(&request, ZoneRpcRequest::ExecuteNativeAttack { .. }) {
+            return Err("typed ordinary attack must use the single-attempt executor".into());
+        }
         let priority = request.priority();
         let envelope = ZoneRpcEnvelope {
             protocol_version: ZONE_RPC_PROTOCOL_VERSION,
@@ -1922,6 +1958,15 @@ impl TcpZoneOwnerRpcTransport {
         request: ZoneRpcRequest,
         required_capability: Option<&str>,
     ) -> Result<ZoneRpcPayload, String> {
+        self.call_mutation_once_classified(request, required_capability)
+            .map_err(MutationOnceError::into_detail)
+    }
+
+    fn call_mutation_once_classified(
+        &self,
+        request: ZoneRpcRequest,
+        required_capability: Option<&str>,
+    ) -> Result<ZoneRpcPayload, MutationOnceError> {
         validate_identifier("RPC session id", &self.session_id)?;
         let priority = request.priority();
         let encoded = encode_rpc_envelope(
@@ -1939,7 +1984,8 @@ impl TcpZoneOwnerRpcTransport {
             return Err(format!(
                 "zone RPC request frame exceeds {} bytes",
                 self.limits.max_frame_bytes
-            ));
+            )
+            .into());
         }
         let encoded_health = required_capability
             .map(|_| {
@@ -2004,11 +2050,11 @@ impl TcpZoneOwnerRpcTransport {
                     Ok(*payload)
                 }
                 Ok(ZoneRpcResponse::Error { code, message }) => {
-                    Err(format!("zone RPC {code}: {message}"))
+                    Err(MutationOnceError::Unknown(format!("zone RPC {code}: {message}")))
                 }
-                Err(error) => Err(format!(
+                Err(error) => Err(MutationOnceError::Unknown(format!(
                     "zone RPC mutating request commit state is unknown at {address}; no endpoint fallback: {error}"
-                )),
+                ))),
             };
         }
         let required_capability = required_capability
@@ -2016,7 +2062,8 @@ impl TcpZoneOwnerRpcTransport {
         Err(format!(
             "zone RPC capability {required_capability} unavailable before execution: {}",
             probe_failures.join("; ")
-        ))
+        )
+        .into())
     }
 
     fn execute_owner_request(
@@ -2138,6 +2185,54 @@ fn wire_correlated_mutation_policy(
 }
 
 impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
+    fn execute_production_attack_requiring_typed_outcome(
+        &self,
+        request: ZoneOwnerCommandRequest,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        let (owner_lease, mode, command) = request.into_parts();
+        if owner_lease.zone_id() != &self.zone_id {
+            return Err(NativeAttackError::BeforeExecution(
+                "attack lease does not match the transport Zone".into(),
+            ));
+        }
+        let (
+            ZoneOwnerCommandMode::ProductionPlayer { authenticated },
+            WorldCommand::Attack { object_id },
+        ) = (mode, command)
+        else {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires an ordinary production-player Attack".into(),
+            ));
+        };
+        if !authenticated || object_id == 0 {
+            return Err(NativeAttackError::BeforeExecution(
+                "typed attack requires authentication and a nonzero target".into(),
+            ));
+        }
+        mir2_simulation::validate_production_player_command(
+            authenticated,
+            &WorldCommand::Attack { object_id },
+        )
+        .map_err(NativeAttackError::BeforeExecution)?;
+        let payload = self
+            .call_mutation_once_classified(
+                ZoneRpcRequest::ExecuteNativeAttack {
+                    owner_lease: (&owner_lease).into(),
+                    authenticated,
+                    object_id,
+                },
+                Some(ZONE_RPC_NATIVE_ATTACK_OUTCOME_V1),
+            )
+            .map_err(MutationOnceError::into_attack_error)?;
+        match payload {
+            ZoneRpcPayload::NativeAttack { response } => response.into_execution(),
+            payload => Err(NativeAttackError::Unknown(unexpected_payload(
+                "nativeAttack",
+                &payload,
+            ))),
+        }
+    }
+
     fn supports_durable_npc_purchase_owner(&self) -> bool {
         matches!(self.call(ZoneRpcRequest::Health), Ok(ZoneRpcPayload::Health { capabilities, .. })
             if capabilities.iter().any(|capability| capability == ZONE_RPC_DURABLE_NPC_PURCHASE_OWNER_V1))
@@ -3973,6 +4068,7 @@ impl ZoneHostServer {
                     .map(|session| Arc::clone(&session.hosted))
             });
             let mut capabilities = vec![
+                ZONE_RPC_NATIVE_ATTACK_OUTCOME_V1.to_string(),
                 ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1.to_string(),
                 ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2.to_string(),
                 ZONE_RPC_STORAGE_REQUEST_ID_V1.to_string(),
@@ -4024,6 +4120,28 @@ impl ZoneHostServer {
         }
 
         let request = envelope.request;
+        if let ZoneRpcRequest::ExecuteNativeAttack {
+            owner_lease,
+            authenticated,
+            object_id,
+        } = &request
+        {
+            // Unlike the general production validator, this opt-in mutation
+            // requires an authenticated, bound world actor. Reject malformed
+            // trust input before creating even an empty hosted Session.
+            if let Err(error) = validate_native_attack_envelope(
+                &envelope.zone_id,
+                owner_lease,
+                *authenticated,
+                *object_id,
+            ) {
+                return Ok(ZoneRpcPayload::NativeAttack {
+                    response: WireNativeAttackResponse::Error {
+                        error: error.into(),
+                    },
+                });
+            }
+        }
         if matches!(request, ZoneRpcRequest::PollOutbounds { .. }) {
             let session = self.hosted_session(&envelope.session_id, &envelope.zone_id)?;
             return self.handle_session_request(
@@ -4035,8 +4153,11 @@ impl ZoneHostServer {
         }
         let zone_id = ZoneId::new(&envelope.zone_id);
         let gate_wait_started = Instant::now();
-        let slow_gate_wait = matches!(&request, ZoneRpcRequest::Execute { .. })
-            .then(|| GatewaySlowStage::start("zone_rpc.execute_gate_wait"));
+        let slow_gate_wait = matches!(
+            &request,
+            ZoneRpcRequest::Execute { .. } | ZoneRpcRequest::ExecuteNativeAttack { .. }
+        )
+        .then(|| GatewaySlowStage::start("zone_rpc.execute_gate_wait"));
         let _operation = if matches!(
             &request,
             ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. }
@@ -4278,6 +4399,35 @@ impl ZoneHostServer {
             ZoneRpcRequest::OnConnect => Ok(ZoneRpcPayload::Packets {
                 frames: encode_server_frames(session.hosted.on_connect()?)?,
             }),
+
+            ZoneRpcRequest::ExecuteNativeAttack {
+                owner_lease,
+                authenticated,
+                object_id,
+            } => {
+                let result = self.execute_native_attack_request(
+                    session_id,
+                    zone_id,
+                    &session,
+                    owner_lease,
+                    authenticated,
+                    object_id,
+                );
+                let response = match result {
+                    Ok(execution) => WireNativeAttackResponse::from_execution(execution)
+                        .unwrap_or_else(|error| WireNativeAttackResponse::Error {
+                            error: NativeAttackError::Unknown(format!(
+                                "attack executed but response encoding failed: {}",
+                                error.message,
+                            ))
+                            .into(),
+                        }),
+                    Err(error) => WireNativeAttackResponse::Error {
+                        error: error.into(),
+                    },
+                };
+                Ok(ZoneRpcPayload::NativeAttack { response })
+            }
 
             ZoneRpcRequest::NpcPurchaseOwner { request } => {
                 let payload = |response| Ok(ZoneRpcPayload::NpcPurchaseOwner { response });
@@ -4571,6 +4721,100 @@ impl ZoneHostServer {
                     .map_err(classify_runtime_error)?,
             }),
         }
+    }
+
+    fn execute_native_attack_request(
+        &self,
+        session_id: &str,
+        zone_id: &str,
+        session: &ZoneHostSession,
+        owner_lease: WireZoneOwnerLease,
+        authenticated: bool,
+        object_id: u32,
+    ) -> Result<NativeAttackExecution, NativeAttackError> {
+        self.execute_requests_total.fetch_add(1, Ordering::Relaxed);
+        validate_native_attack_envelope(zone_id, &owner_lease, authenticated, object_id)?;
+        let command = WorldCommand::Attack { object_id };
+        mir2_simulation::validate_production_player_command(authenticated, &command)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        let lease = owner_lease
+            .clone()
+            .into_lease()
+            .map_err(|error| NativeAttackError::BeforeExecution(error.message))?;
+        self.owner_lease_authority
+            .validate_owner_lease(&lease)
+            .map_err(NativeAttackError::BeforeExecution)?;
+        // Even a non-launched swing may cancel an earlier movement intent.
+        // Reserve a journal slot before entering the authoritative runtime and
+        // record the original ordinary Attack without inventing a new ledger.
+        let source_sequence = self
+            .journal
+            .lock()
+            .map_err(|_| {
+                NativeAttackError::BeforeExecution("zone host journal mutex poisoned".into())
+            })?
+            .replication
+            .next_sequence_for_append(zone_id)
+            .map_err(|error| NativeAttackError::BeforeExecution(error.message))?;
+        let request = ZoneOwnerCommandRequest::production_player(lease, authenticated, command)
+            .with_source_sequence(source_sequence);
+        let runtime_started = Instant::now();
+        #[cfg(test)]
+        self.runtime_execute_calls.fetch_add(1, Ordering::Relaxed);
+        let result = {
+            let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_runtime");
+            session
+                .hosted
+                .execute_production_attack_requiring_typed_outcome(request)
+        };
+        self.execute_runtime_duration_ns_total.fetch_add(
+            saturating_duration_ns(runtime_started.elapsed()),
+            Ordering::Relaxed,
+        );
+        let execution = match result {
+            Ok(execution) => execution,
+            Err(error) => {
+                if matches!(&error, NativeAttackError::Unknown(_)) {
+                    if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                        frozen.insert(zone_id.to_string());
+                    }
+                }
+                return Err(error);
+            }
+        };
+        let journal_started = Instant::now();
+        let recorded = self.append_journal(WireHostJournalEntry {
+            sequence: 0,
+            session_id: session_id.to_string(),
+            zone_id: zone_id.to_string(),
+            owner_lease,
+            mode: WireZoneOwnerCommandMode::ProductionPlayer { authenticated },
+            command: Some(WireWorldCommand::Attack { object_id }),
+            closed: false,
+            zone_tick_ms: None,
+        });
+        self.execute_journal_duration_ns_total.fetch_add(
+            saturating_duration_ns(journal_started.elapsed()),
+            Ordering::Relaxed,
+        );
+        if let Err(error) = recorded {
+            if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                frozen.insert(zone_id.to_string());
+            }
+            return Err(NativeAttackError::Unknown(format!(
+                "attack executed but journal publication failed: {}",
+                error.message,
+            )));
+        }
+        // The mutation is already journaled. Presentation failure does not
+        // turn its known launch into a gameplay rejection or permit retry.
+        session.refresh_live_registration(false).map_err(|error| {
+            NativeAttackError::Unknown(format!(
+                "attack executed but live registration failed: {}",
+                error.message
+            ))
+        })?;
+        Ok(execution)
     }
 
     fn close_hosted_session(
@@ -5830,6 +6074,11 @@ enum ZoneRpcRequest {
         mode: WireZoneOwnerCommandMode,
         command: WireWorldCommand,
     },
+    ExecuteNativeAttack {
+        owner_lease: WireZoneOwnerLease,
+        authenticated: bool,
+        object_id: u32,
+    },
     PollOutbounds {
         stream_id: Option<String>,
         acknowledged_sequence: u64,
@@ -5878,6 +6127,7 @@ impl ZoneRpcRequest {
             Self::NpcPurchaseOwner { .. }
             | Self::OnConnect
             | Self::Execute { .. }
+            | Self::ExecuteNativeAttack { .. }
             | Self::WorldSnapshot
             | Self::ActiveIdentity
             | Self::ActiveCharacterCheckpoint
@@ -5906,6 +6156,9 @@ enum ZoneRpcResponse {
 enum ZoneRpcPayload {
     NpcPurchaseOwner {
         response: WireNpcPurchaseOwnerResponse,
+    },
+    NativeAttack {
+        response: WireNativeAttackResponse,
     },
     Health {
         host_id: String,
@@ -5985,6 +6238,114 @@ enum ZoneRpcPayload {
     HostCheckpoint {
         bytes: Vec<u8>,
     },
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+enum WireNativeAttackAdmission {
+    Launched,
+    NotLaunched,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+enum WireNativeAttackError {
+    Unsupported,
+    BeforeExecution { detail: String },
+    Unknown { detail: String },
+}
+
+impl From<NativeAttackError> for WireNativeAttackError {
+    fn from(error: NativeAttackError) -> Self {
+        match error {
+            NativeAttackError::Unsupported => Self::Unsupported,
+            NativeAttackError::BeforeExecution(detail) => Self::BeforeExecution { detail },
+            NativeAttackError::Unknown(detail) => Self::Unknown { detail },
+        }
+    }
+}
+
+impl From<WireNativeAttackError> for NativeAttackError {
+    fn from(error: WireNativeAttackError) -> Self {
+        match error {
+            WireNativeAttackError::Unsupported => Self::Unsupported,
+            WireNativeAttackError::BeforeExecution { detail } => Self::BeforeExecution(detail),
+            WireNativeAttackError::Unknown { detail } => Self::Unknown(detail),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
+enum WireNativeAttackResponse {
+    Complete {
+        frames: Vec<Vec<u8>>,
+        packet_count: usize,
+        snapshot_tick: u64,
+        active_identity: Option<ActiveSessionIdentity>,
+        admission: WireNativeAttackAdmission,
+    },
+    Error {
+        error: WireNativeAttackError,
+    },
+}
+
+impl WireNativeAttackResponse {
+    fn from_execution(execution: NativeAttackExecution) -> Result<Self, ZoneRpcFault> {
+        let NativeAttackExecution {
+            execution,
+            admission,
+        } = execution;
+        Ok(Self::Complete {
+            frames: encode_server_frames(execution.packets)?,
+            packet_count: execution.outcome.packet_count,
+            snapshot_tick: execution.outcome.snapshot_tick,
+            active_identity: execution.outcome.active_identity,
+            admission: match admission {
+                NativeAttackAdmission::Launched => WireNativeAttackAdmission::Launched,
+                NativeAttackAdmission::NotLaunched => WireNativeAttackAdmission::NotLaunched,
+            },
+        })
+    }
+
+    fn into_execution(self) -> Result<NativeAttackExecution, NativeAttackError> {
+        let Self::Complete {
+            frames,
+            packet_count,
+            snapshot_tick,
+            active_identity,
+            admission,
+        } = self
+        else {
+            let Self::Error { error } = self else {
+                unreachable!()
+            };
+            return Err(error.into());
+        };
+        let packets = decode_server_frames(frames).map_err(NativeAttackError::Unknown)?;
+        if packets.len() != packet_count {
+            return Err(NativeAttackError::Unknown(format!(
+                "zone RPC attack packet count mismatch: declared {packet_count}, decoded {}",
+                packets.len()
+            )));
+        }
+        Ok(NativeAttackExecution {
+            execution: WorldCommandExecution {
+                packets,
+                outcome: WorldCommandOutcome {
+                    command_kind: WorldCommand::Attack { object_id: 0 }.kind(),
+                    packet_count,
+                    snapshot_tick,
+                    active_identity,
+                },
+                game_shop_purchase_outcome: None,
+            },
+            admission: match admission {
+                WireNativeAttackAdmission::Launched => NativeAttackAdmission::Launched,
+                WireNativeAttackAdmission::NotLaunched => NativeAttackAdmission::NotLaunched,
+            },
+        })
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -7485,6 +7846,25 @@ fn unexpected_payload(operation: &str, payload: &ZoneRpcPayload) -> String {
     format!("zone RPC {operation} returned unexpected payload {payload:?}")
 }
 
+fn validate_native_attack_envelope(
+    zone_id: &str,
+    owner_lease: &WireZoneOwnerLease,
+    authenticated: bool,
+    object_id: u32,
+) -> Result<(), NativeAttackError> {
+    if !authenticated || object_id == 0 {
+        return Err(NativeAttackError::BeforeExecution(
+            "typed attack requires authentication and a nonzero target".into(),
+        ));
+    }
+    if owner_lease.zone_id != zone_id {
+        return Err(NativeAttackError::BeforeExecution(
+            "attack lease zone does not match envelope zone".into(),
+        ));
+    }
+    Ok(())
+}
+
 fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
     if let ZoneRpcRequest::NpcPurchaseOwner { request } = request {
         return request.action.is_mutation();
@@ -7493,6 +7873,7 @@ fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
         request,
         ZoneRpcRequest::OnConnect
             | ZoneRpcRequest::Execute { .. }
+            | ZoneRpcRequest::ExecuteNativeAttack { .. }
             | ZoneRpcRequest::PrepareCharacterHandoff { .. }
             | ZoneRpcRequest::ResumeCharacterHandoff { .. }
             | ZoneRpcRequest::SaveActiveCharacter
@@ -7507,6 +7888,7 @@ fn zone_rpc_request_requires_active_session(request: &ZoneRpcRequest) -> bool {
         ZoneRpcRequest::NpcPurchaseOwner { .. }
             | ZoneRpcRequest::OnConnect
             | ZoneRpcRequest::Execute { .. }
+            | ZoneRpcRequest::ExecuteNativeAttack { .. }
             | ZoneRpcRequest::PrepareCharacterHandoff { .. }
             | ZoneRpcRequest::ResumeCharacterHandoff { .. }
             | ZoneRpcRequest::PollOutbounds { .. }

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "archivedAt": "2026-10-25T00:39:03.827Z",
+  "scope": "Original static scene admission only, not live acceptance; historical driver pins remain immutable.",
+  "files": [
+    {
+      "name": "partition-ordinary-two-name-span4-halo-100-v1.json",
+      "bytes": 5844,
+      "sha256": "19c80f2722a9fc992f6834304c4fc5bf54f2fe86dbcf7c53887589d11aa9f8fb"
+    },
+    {
+      "name": "partition-ordinary-two-name-span4-halo-10-v1.json",
+      "bytes": 804,
+      "sha256": "539c8abab8a3930a33a5a130601591c3bfdaede166e5b93cec995479df1c745c"
+    },
+    {
+      "name": "partition-span4-halo-static-validation-v1.json",
+      "bytes": 418137,
+      "sha256": "42cdbc23e1ed57f32563aa5780e8622a493dca9644ad99fa98ae0ec663805be6"
+    },
+    {
+      "name": "partition-span4-halo-scene-readiness-v1.json",
+      "bytes": 16294,
+      "sha256": "46990e2515e2dc12b9d6b7d94caf829ff55781883913afe4d750802c56d31bbb"
+    },
+    {
+      "name": "partition-span4-halo-static-author-v1.mjs",
+      "bytes": 20655,
+      "sha256": "41316723c8dbc1010a1e9e643dea7616b6088bf8611a9f3dd4fc461538c07167"
+    }
+  ],
+  "capacityAccepted": false
+}

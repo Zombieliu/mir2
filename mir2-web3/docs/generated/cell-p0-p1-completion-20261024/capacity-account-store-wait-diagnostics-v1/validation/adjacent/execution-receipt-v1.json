@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 1,
+  "toolchain": "1.95.0",
+  "buildJobs": 4,
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3",
+  "externalTargetDirectory": "C:/mir2-build/cell-preproduction-p0-p1-20261024/target",
+  "diagnosticsEnabledThresholdMs": 1,
+  "testInventory": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\test-list-v1.log",
+    "bytes": 355876,
+    "sha256": "72c5a9a4c0d2b5370a1450000ec13cc245fa58a187d3f38eecc10ead9747cf36"
+  },
+  "actualListedTests": 2938,
+  "sourceBefore": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "apps/simulation/src/config_account_store_diagnostics.rs",
+      "bytes": 10863,
+      "sha256": "bdd0805104f396d924a6663be46166a9b2bb759c580efcb6e07b6fbf0cb970e4"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "bytes": 7191,
+      "sha256": "0724307baaf0ca81c7a55e3ab0300e28b40f2fb376f06a389a84548f7fa910c3"
+    },
+    {
+      "path": "apps/simulation/src/config.rs",
+      "bytes": 347044,
+      "sha256": "df3eceebeb434b817e32ebc9bb4c2901257f5e4199901252ec18234a5260b07d"
+    },
+    {
+      "path": "apps/simulation/src/config_file_authority.rs",
+      "bytes": 24828,
+      "sha256": "ba3d5318241173429abe5b73c836e1a2a8082fef11a1d42c768f1438ea73deff"
+    },
+    {
+      "path": "apps/simulation/src/config_shared_guilds.rs",
+      "bytes": 53319,
+      "sha256": "e73b5c6b095f84447f99d41d0cc5f2952d208655dd81c9555cee49e2ebe36bd0"
+    },
+    {
+      "path": "apps/simulation/src/config_guild_clock_driver.rs",
+      "bytes": 22968,
+      "sha256": "5b5e41dde7a38eb8f1eae3893dc54c085aa13716fd6624cad5738d3c5016b8b8"
+    },
+    {
+      "path": "apps/simulation/src/runtime/shared_experience_profile.rs",
+      "bytes": 76309,
+      "sha256": "8a6cbcb3cb1177111e8700c279583f730f8d26d475b121a316e270b7a1a8ceab"
+    }
+  ],
+  "sourceUnchanged": true,
+  "cases": [
+    {
+      "filter": "file_authority::tests::",
+      "startedAt": "2026-10-25T18:38:26.8634327Z",
+      "endedAt": "2026-10-25T18:38:27.6602135Z",
+      "command": "rustup",
+      "arguments": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "file_authority::tests::",
+        "-j",
+        "4",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "expectedTests": [
+        "config::file_authority::tests::config_fences_before_external_writer_and_preserves_uncertain_restart",
+        "config::file_authority::tests::definite_file_failure_settles_marker_and_allows_retry",
+        "config::file_authority::tests::durable_freeze_child_reopen_probe",
+        "config::file_authority::tests::durable_freeze_survives_last_authority_release",
+        "config::file_authority::tests::guild_clock_file_child_lock_probe",
+        "config::file_authority::tests::guild_clock_file_configs_share_store_mutex_and_frozen_state",
+        "config::file_authority::tests::guild_clock_file_independent_configs_preserve_concurrent_account_writes",
+        "config::file_authority::tests::guild_clock_file_second_process_is_rejected_and_release_allows_reopen",
+        "config::file_authority::tests::interrupted_operator_reconciliation_blocks_an_empty_publication_marker",
+        "config::file_authority::tests::malformed_publication_marker_is_fail_closed_and_preserved",
+        "config::file_authority::tests::pending_publication_requires_explicit_settlement"
+      ],
+      "exitCode": 0,
+      "tests": {
+        "status": "ok",
+        "passed": 11,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 2927
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\case-01.log",
+        "bytes": 64859,
+        "sha256": "87b14cf2a3410d641754ebf3756c552d1d2645080a7d09127fc37a41e095305e"
+      }
+    },
+    {
+      "filter": "guild_clock_driver::tests::",
+      "startedAt": "2026-10-25T18:38:27.6959776Z",
+      "endedAt": "2026-10-25T18:38:28.3658952Z",
+      "command": "rustup",
+      "arguments": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "guild_clock_driver::tests::",
+        "-j",
+        "4",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "expectedTests": [
+        "config::guild_clock_driver::tests::guild_clock_file_late_same_owner_keeps_anchor_and_charges_one_minute",
+        "config::guild_clock_driver::tests::guild_clock_file_pump_publication_failure_preserves_anchor_and_retries_once",
+        "config::guild_clock_driver::tests::guild_clock_file_pump_runs_without_players_and_duplicate_factories_share_one_anchor"
+      ],
+      "exitCode": 0,
+      "tests": {
+        "status": "ok",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 2935
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\case-02.log",
+        "bytes": 75023,
+        "sha256": "84763baa12a7e3b0e774db5499b784448cf02ad6f10acada5537fa966c0ea3db"
+      }
+    },
+    {
+      "filter": "config_account_store_durability_tests::",
+      "startedAt": "2026-10-25T18:38:28.3975309Z",
+      "endedAt": "2026-10-25T18:38:28.8465488Z",
+      "command": "rustup",
+      "arguments": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "config_account_store_durability_tests::",
+        "-j",
+        "4",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "expectedTests": [
+        "config::config_account_store_durability_tests::post_rename_unknown_keeps_live_old_and_freezes_all_shared_writers",
+        "config::config_account_store_durability_tests::pre_rename_failure_keeps_live_and_disk_old_but_allows_a_later_write"
+      ],
+      "exitCode": 0,
+      "tests": {
+        "status": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 2936
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\case-03.log",
+        "bytes": 47742,
+        "sha256": "04346316b00c20cb2421aa3864439feba7a44a106de616d4f88ceb4cd8833f02"
+      }
+    },
+    {
+      "filter": "locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity",
+      "startedAt": "2026-10-25T18:38:28.8803309Z",
+      "endedAt": "2026-10-25T18:38:29.7853177Z",
+      "command": "rustup",
+      "arguments": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity",
+        "-j",
+        "4",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "expectedTests": [
+        "runtime::shared_experience_profile::tests::locked_source_authority_keeps_legacy_profile_absent_and_rejects_wrong_identity"
+      ],
+      "exitCode": 0,
+      "tests": {
+        "status": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 2937
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\case-04.log",
+        "bytes": 44944,
+        "sha256": "7ebc61d6fc362cb3a8841de5779082b3d21922f87a8de720efbdebc32c3d03f9"
+      }
+    },
+    {
+      "filter": "guild_scoped_read_and_account_save_cannot_write_authority",
+      "startedAt": "2026-10-25T18:38:29.8090677Z",
+      "endedAt": "2026-10-25T18:38:30.1865688Z",
+      "command": "rustup",
+      "arguments": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "guild_scoped_read_and_account_save_cannot_write_authority",
+        "-j",
+        "4",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "expectedTests": [
+        "config::shared_guild_store::tests::guild_scoped_read_and_account_save_cannot_write_authority"
+      ],
+      "exitCode": 0,
+      "tests": {
+        "status": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 2937
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\case-05.log",
+        "bytes": 44359,
+        "sha256": "91bbe7088d06aaee35d7495fdd792944570ac43084339db1ddd9402abee3a9d8"
+      }
+    },
+    {
+      "filter": "guild_file_transaction_keeps_wallet_and_bank_atomic_on_failure",
+      "startedAt": "2026-10-25T18:38:30.2061852Z",
+      "endedAt": "2026-10-25T18:38:30.6237592Z",
+      "command": "rustup",
+      "arguments": [
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "guild_file_transaction_keeps_wallet_and_bank_atomic_on_failure",
+        "-j",
+        "4",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "expectedTests": [
+        "config::shared_guild_store::tests::guild_file_transaction_keeps_wallet_and_bank_atomic_on_failure"
+      ],
+      "exitCode": 0,
+      "tests": {
+        "status": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 2937
+      },
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-validation-v1\\adjacent-v1\\case-06.log",
+        "bytes": 45694,
+        "sha256": "79b61ee1b73131225f578d0fc7b1a396b6541788c709a1815222933b7582f920"
+      }
+    }
+  ],
+  "allSelectedPassed": true,
+  "scope": "Existing File publication, guild clock, durability, experience and guild isolation regressions with diagnostics enabled; no realm/capacity/full-workspace claim."
+}

@@ -7,7 +7,6 @@ use super::entity_combat::{
 use super::*;
 use crate::runtime::zone::online_identity::OnlineOwner;
 use crate::runtime::zone::types::ZoneOwnedPetPlayerKillReceipt;
-use rand_core::{OsRng, RngCore};
 
 const LAST_HITTER_MS: u64 = 10_000;
 const BROWN_MS: u64 = 60_000;
@@ -265,7 +264,7 @@ struct OwnedPetTarget {
     target: ZoneCombatEntityRef,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct OwnedPetThreatActor {
     entity: ZoneCombatEntityRef,
     online: Option<OnlineOwner>,
@@ -276,7 +275,7 @@ struct OwnedPetThreatActor {
 
 /// The actual positive HP mutation fixes the causal Human and optional pet.
 /// Old clocks without this evidence can still drive guard AI, never PK billing.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 struct OwnedPetPlayerDamageSource {
     owner: OwnedPetOwner,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -284,7 +283,7 @@ struct OwnedPetPlayerDamageSource {
 }
 
 /// Online map handoff state, never client-authored or a durable character mode.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct OwnedPetPlayerClock {
     online: OnlineOwner,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -3204,7 +3203,7 @@ impl ZoneRuntime {
             victim_name: victim.name.clone(),
             protected_by_law,
             unlawful,
-            curse_roll: (OsRng.next_u32() & 3) as u8,
+            curse_roll: (self.combat_random.next_u32()? & 3) as u8,
         };
         let state = self.owned_pet_state_mut();
         state.kill_sequence = receipt.sequence;
@@ -3903,11 +3902,21 @@ impl ZoneRuntime {
                     });
                     continue;
                 }
-                let mut rng = OsRng;
-                if rng.next_u32() % u32::from(4 - cast.level) != 0 {
+                let Some(roll) = self.combat_random.next_u32() else {
+                    continue;
+                };
+                if roll % u32::from(4 - cast.level) != 0 {
                     continue;
                 }
-                if cast.target_owner.as_ref() == Some(&cast.caster) || rng.next_u32() % 2 > 0 {
+                let shock = if cast.target_owner.as_ref() == Some(&cast.caster) {
+                    true
+                } else {
+                    let Some(roll) = self.combat_random.next_u32() else {
+                        continue;
+                    };
+                    roll % 2 > 0
+                };
+                if shock {
                     out.extend(self.shock_owned_monster(id, now.saturating_add(duration), now));
                     continue;
                 }
@@ -3934,12 +3943,22 @@ impl ZoneRuntime {
                 {
                     continue;
                 }
-                if rng.next_u32() % (u32::from(level) + 20 + u32::from(cast.level) * 5)
+                let Some(roll) = self.combat_random.next_u32() else {
+                    continue;
+                };
+                if roll % (u32::from(level) + 20 + u32::from(cast.level) * 5)
                     <= u32::from(monster.level) + 10
                 {
-                    if rng.next_u32() % 5 > 0 && monster.owner_session_id.is_none() {
-                        if let Some(c) = self.owned_monster_clock_mut(id) {
-                            c.rage_until_ms = now + (u64::from(rng.next_u32() % 20) + 10) * 1000;
+                    let Some(roll) = self.combat_random.next_u32() else {
+                        continue;
+                    };
+                    if roll % 5 > 0 && monster.owner_session_id.is_none() {
+                        if self.owned_monster_clock_mut(id).is_some() {
+                            let Some(roll) = self.combat_random.next_u32() else {
+                                continue;
+                            };
+                            self.owned_monster_clock_mut(id).unwrap().rage_until_ms =
+                                now + (u64::from(roll % 20) + 10) * 1000;
                         }
                         self.clear_native_entity_target(id);
                         out.extend(self.refresh_owned_monster_control_packet(id, now));
@@ -3962,7 +3981,10 @@ impl ZoneRuntime {
                 } else {
                     monster.max_hp / 100 * 2
                 };
-                if rng.next_u32() % rate.max(1) as u32 != 0 {
+                let Some(roll) = self.combat_random.next_u32() else {
+                    continue;
+                };
+                if roll % rate.max(1) as u32 != 0 {
                     continue;
                 }
                 out.extend(self.tame_owned_monster(&cast.caster, id, cast.level, now));
@@ -5259,6 +5281,13 @@ impl ZoneRuntime {
         &self,
         session: &SessionId,
     ) -> Option<OwnedPetPlayerClock> {
+        self.player_owned_pet_clock_ref(session).cloned()
+    }
+
+    pub(crate) fn player_owned_pet_clock_ref(
+        &self,
+        session: &SessionId,
+    ) -> Option<&OwnedPetPlayerClock> {
         self.owned_pet_state()?
             .players
             .get(session)
@@ -5267,7 +5296,6 @@ impl ZoneRuntime {
                     .get(session)
                     .is_some_and(|p| p.owner == clock.online)
             })
-            .cloned()
     }
 
     pub(crate) fn restore_player_owned_pet_clock(

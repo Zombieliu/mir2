@@ -3,7 +3,7 @@
 use super::*;
 use mir2_game_data::{crystal_mine_set, crystal_mining_item, crystal_mining_map};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneMiningTool {
     pub unique_id: u64,
     pub durability: u16,
@@ -13,7 +13,7 @@ pub struct ZoneMiningTool {
     pub attack_delay_ms: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ZoneMinedOre {
     pub item_name: String,
     /// Crystal ore quantity/purity, independent of the item's MaxDura.
@@ -43,7 +43,7 @@ pub(super) struct ZoneMiningState {
     effects: Vec<PendingMiningEffect>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ZoneMiningSwing {
     pub(crate) account_id: String,
     pub(crate) character_index: i32,

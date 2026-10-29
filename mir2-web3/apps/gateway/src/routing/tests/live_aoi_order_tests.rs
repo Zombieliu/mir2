@@ -12,6 +12,12 @@ struct Pair {
 impl Pair {
     fn new(distance: i32) -> Self {
         let mut state = SharedInProcessZoneState::new();
+        assert!(state
+            .zone_manager
+            .install_empty_zone(ZoneRuntime::new_with_collision(
+                ZoneKey::for_map("live-aoi-order-fixture"),
+                ZoneCollision::unbounded(),
+            )));
         let keys = [0, 1].map(|index| ZonePresenceKey {
             account_id: format!("aoi-order-{index}"),
             character_index: 0,
@@ -77,7 +83,15 @@ impl Pair {
         // Prime ordinary Run with an ordinary Walk from standstill. No admin
         // relocation occurs in either of the actual boundary-crossing steps.
         pair.step(0, false, 1000);
+        pair.assert_position(0, Point { x: 100, y: 99 });
         pair.step(1, false, 1000);
+        pair.assert_position(
+            1,
+            Point {
+                x: 109,
+                y: 99 + distance,
+            },
+        );
         for key in &pair.keys {
             pair.shared.lock().unwrap().take_pending_zone_packets(key);
         }
@@ -121,6 +135,17 @@ impl Pair {
         state
             .dispatch_zone_outbounds(outbounds, Some(&self.keys[index]))
             .0
+    }
+
+    fn assert_position(&self, index: usize, expected: Point) {
+        let actual = self
+            .shared
+            .lock()
+            .unwrap()
+            .zone_manager
+            .player_transform(&self.sessions[index])
+            .map(|(position, _)| position);
+        assert_eq!(actual, Some(expected), "fixture movement must really occur");
     }
 
     fn visible(&self) -> bool {
@@ -187,8 +212,10 @@ fn live_aoi_order_old_direct_remove_cannot_delete_new_live_reentry() {
     let mut live = pair.live(32);
     let initial = Some(pair.remote_position());
     let delayed_owner_response = pair.step(0, true, 1750); // 15 -> 17, leaves view.
+    pair.assert_position(0, Point { x: 100, y: 97 });
     assert!(!pair.visible());
     pair.step(1, true, 1750); // 17 -> 15, enters view again.
+    pair.assert_position(1, Point { x: 109, y: 112 });
     assert!(pair.visible());
 
     // Live sender wins scheduling, then the suspended old reader resumes.
@@ -209,8 +236,10 @@ fn live_aoi_order_old_live_create_cannot_resurrect_after_new_direct_remove() {
     let mut live = pair.live(32);
     assert!(!pair.visible());
     pair.step(1, true, 1750); // 17 -> 15, queues the first visibility entry.
+    pair.assert_position(1, Point { x: 109, y: 114 });
     assert!(pair.visible());
     let newer_owner_response = pair.step(0, true, 1750); // 15 -> 17, leaves again.
+    pair.assert_position(0, Point { x: 100, y: 97 });
     assert!(!pair.visible());
 
     // Opposite scheduling: the reader wins while the live sender is delayed.
@@ -230,10 +259,12 @@ fn live_aoi_order_no_live_registration_keeps_synchronous_owner_lifecycle() {
     let pair = Pair::new(15);
     let initial = Some(pair.remote_position());
     let owner = pair.step(0, true, 1750);
+    pair.assert_position(0, Point { x: 100, y: 97 });
     assert!(owner.iter().any(|packet| matches!(packet, ServerPacket::ObjectRemove { object_id } if *object_id == pair.ids[1])));
     let absent = project(initial, pair.ids[1], &owner);
     assert_eq!(absent, None);
     pair.step(1, true, 1750);
+    pair.assert_position(1, Point { x: 109, y: 112 });
     let pending = pair
         .shared
         .lock()
@@ -561,6 +592,15 @@ fn live_aoi_order_monster_lifecycle_uses_viewport_fifo_while_personal_rewards_st
         .0;
     assert_eq!(direct, vec![ServerPacket::GainExperience { amount: 17 }]);
     assert_eq!(drain_live(&mut live), expected[..2]);
+    assert!(drain_live(&mut live).is_empty());
+    let peer_pending = pair
+        .shared
+        .lock()
+        .unwrap()
+        .take_pending_zone_packets(&pair.keys[1]);
+    assert!(!peer_pending
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainExperience { .. })));
 }
 
 #[test]
@@ -707,7 +747,7 @@ fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_f
         state.queue_zone_packets(pair.keys[0].clone(), personal.clone());
         // Raw health is a viewport projection. A rebuilt registration must
         // obtain current health instead of replaying this pre-overflow value.
-        state.queue_zone_packets(pair.keys[0].clone(), vec![viewport_health]);
+        state.queue_zone_packets(pair.keys[0].clone(), vec![viewport_health.clone()]);
         for index in 0..crate::routing::MAX_PENDING_ZONE_PACKETS_PER_PLAYER + 20 {
             state.queue_zone_packets(
                 pair.keys[0].clone(),
@@ -724,6 +764,7 @@ fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_f
             "a slow viewer must not pause all Zone ticks"
         );
         assert_eq!(state.pending_zone_packets[&pair.keys[0]], personal);
+        assert!(!state.pending_zone_packets[&pair.keys[0]].contains(&viewport_health));
     }
     assert_eq!(*observed.borrow(), registration);
     let queued_before_overflow = live.try_recv().unwrap();
@@ -733,8 +774,8 @@ fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_f
     );
     assert_eq!(queued_before_overflow.registration_id(), registration);
 
-    // The authoritative personal receipt is still available for ordinary
-    // teardown, while fresh projection waits for a rebuilt registration.
+    // Only durable personal receipts survive ordinary teardown. Health belongs
+    // to the old viewport epoch and must not enter the replacement registration.
     let (replacement_sender, mut replacement) = tokio::sync::mpsc::channel(4);
     let (new_id, receipts) = {
         let mut state = pair.shared.lock().unwrap();
@@ -754,10 +795,14 @@ fn live_aoi_order_wss_overflow_stops_broken_epoch_preserves_personal_state_and_f
         (next, receipts)
     };
     assert_eq!(receipts, personal);
+    assert!(!receipts.contains(&viewport_health));
     assert_ne!(new_id, registration);
     let fresh = replacement.try_recv().unwrap();
     assert!(!fresh.is_overloaded());
     assert_eq!(fresh.registration_id(), new_id);
+    let mut replacement_packets = vec![fresh.into_packet()];
+    replacement_packets.extend(drain_live(&mut replacement));
+    assert!(!replacement_packets.contains(&viewport_health));
     assert_eq!(
         *observed.borrow(),
         registration,

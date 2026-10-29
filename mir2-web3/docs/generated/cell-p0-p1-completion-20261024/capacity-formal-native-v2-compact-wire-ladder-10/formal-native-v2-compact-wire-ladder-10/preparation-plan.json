@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "preparedAt": "2026-10-25T07:22:46.094Z",
+  "state": "formal10-template-pending-probe13-success-and-independent-preseal",
+  "driverSourceCommit": "4cab00893b861395b63906b1b8183a021d397cdb",
+  "coreCodeEvidenceCommit": "6d70d02d0bc390156b77a3e48acee714fc87cda3",
+  "coreDriverSourceSha256": "05c07c2e487e4b65c5068f8803f96bdc6a66a342c5fc44c21f3a64b6b8581073",
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputs": 41,
+  "gatewaySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "onlyProbeRunId": "1792912711217-e7ea81f2",
+  "probePreparedSourceConfigSha256": "f80a5894c1d47ad02016ab8116bfb2404ba99398f5b4f667b3981a8066486cbb",
+  "independentReceipt": "C:\\mir2-build\\p01-completion-20261024\\probe13-independent-verification-v1\\final-verification.json",
+  "freshProbeRequirements": {
+    "configuredSeconds": [
+      300,
+      300,
+      360
+    ],
+    "completePassingWindows": [
+      5,
+      5,
+      6
+    ],
+    "minimumTrueWindowSeconds": 60,
+    "measuredSecondsRequired": true,
+    "collectedAndIndependentVerificationRequired": true,
+    "normalCleanupRequired": true,
+    "wire": {
+      "terminalPresent": true,
+      "sourceValid": true,
+      "countsMatch": true,
+      "uninstallSucceeded": true,
+      "producerTruncationIsSeparate": true
+    }
+  },
+  "formalPhases": [
+    "stage-2",
+    "stage-10",
+    "stage-25",
+    "stage-50",
+    "stage-100",
+    "soak",
+    "post-resume-observation"
+  ],
+  "formalConfiguredSeconds": [
+    300,
+    300,
+    300,
+    300,
+    300,
+    7200,
+    60
+  ],
+  "resumeSamples": 5,
+  "saveSamples": 5,
+  "wallSeconds": 18000,
+  "actualAdmissionCaps": [
+    128,
+    100,
+    100,
+    4,
+    1,
+    2
+  ],
+  "resource": {
+    "logicalCpuEquivalents": 24,
+    "privateBytes": 34359738368,
+    "workingSetBytes": 42949672960,
+    "hardQuota": false
+  },
+  "tokioWorkers": 4,
+  "slowStageThresholdMs": 50,
+  "diagnostics": {
+    "wrapper": "v2",
+    "unitAssertions": 28,
+    "adapterAssertions": 8,
+    "core187CoversExtraDiagnostics": false,
+    "rowCapPerConnection": 12000,
+    "twoHourProjectionMayBeIncomplete": true,
+    "noNewAckOrCapacityClassification": true
+  },
+  "originalFormalPolicyResourcePreserved": true,
+  "scenario": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\partition-span2-compact-halo-repair-v1\\candidate-100-repaired-v4.json",
+    "bytes": 5844,
+    "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+  },
+  "liveRisks": [
+    "100representative tour886unitsteps is not an actual complete online tour.",
+    "53..65unitstep legs can exceed the original24ACK/20s waypoint advance boundary; no budget is changed.",
+    "Conditional positive-hit supply does not prove180 launched attacks/120 positive hits per minute or2h progression."
+  ],
+  "sourceConfigNotYet": true,
+  "finalFreezePending": true,
+  "freshProbeGateExecuted": false,
+  "sourceGuardExecuted": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

@@ -1,0 +1,863 @@
+TAP version 13
+# Subtest: native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+ok 1 - native HP maintenance verifies ordinary inventory UID consumption without inventing healing or activity
+  ---
+  duration_ms: 4.4564
+  type: 'test'
+  ...
+# Subtest: native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+ok 2 - native HP maintenance verifies ordinary belt UID consumption without inventing healing or activity
+  ---
+  duration_ms: 0.4451
+  type: 'test'
+  ...
+# Subtest: native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+ok 3 - native HP maintenance requires the matching successful ACK as well as a fresh exact HP increase
+  ---
+  duration_ms: 0.5414
+  type: 'test'
+  ...
+# Subtest: native HP maintenance rejected cannot credit recovery and fails closed
+ok 4 - native HP maintenance rejected cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.5551
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-uid cannot credit recovery and fails closed
+ok 5 - native HP maintenance wrong-uid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3903
+  type: 'test'
+  ...
+# Subtest: native HP maintenance wrong-grid cannot credit recovery and fails closed
+ok 6 - native HP maintenance wrong-grid cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.2536
+  type: 'test'
+  ...
+# Subtest: native HP maintenance ack-only cannot credit recovery and fails closed
+ok 7 - native HP maintenance ack-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.3665
+  type: 'test'
+  ...
+# Subtest: native HP maintenance effect-only cannot credit recovery and fails closed
+ok 8 - native HP maintenance effect-only cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.249
+  type: 'test'
+  ...
+# Subtest: native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+ok 9 - native HP maintenance incomplete-inventory cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.508
+  type: 'test'
+  ...
+# Subtest: native HP maintenance late-proof cannot credit recovery and fails closed
+ok 10 - native HP maintenance late-proof cannot credit recovery and fails closed
+  ---
+  duration_ms: 0.5166
+  type: 'test'
+  ...
+# Subtest: native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+ok 11 - native HP maintenance keeps unknown health, missing supplies and exhausted command budget bounded and never sends MP
+  ---
+  duration_ms: 0.6884
+  type: 'test'
+  ...
+# Subtest: native HP pending evidence does not pause native movement and drain captures the existing dose
+ok 12 - native HP pending evidence does not pause native movement and drain captures the existing dose
+  ---
+  duration_ms: 22.9637
+  type: 'test'
+  ...
+# Subtest: native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+not ok 13 - native post-strike same-target chase starts once at a real send and again obeys nonprogress limits
+  ---
+  duration_ms: 2.2991
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:288:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected "actual" not to be reference-equal to "expected":
+    
+    {
+      activeElapsedMs: 0,
+      attackSent: true,
+      bestDistance: 5,
+      confirmedMoves: 39,
+      lastProgressAt: 1792899955931,
+      lastReceiptSequence: 0,
+      mapFileName: '0',
+      name: 'Deer',
+      nonImprovingMoves: 0,
+      objectId: 900,
+      startedAt: 1792899865931,
+      targetPoint: {
+        x: 10,
+        y: 5
+      },
+      visited: Map(0) {}
+    }
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    objectId: 900
+    name: 'Deer'
+    mapFileName: '0'
+    bestDistance: 5
+    lastProgressAt: 1792899955931
+    nonImprovingMoves: 0
+    lastReceiptSequence: 0
+    attackSent: true
+    targetPoint:
+      x: 10
+      y: 5
+    startedAt: 1792899865931
+    activeElapsedMs: 0
+    confirmedMoves: 39
+    visited:
+  actual:
+    objectId: 900
+    name: 'Deer'
+    mapFileName: '0'
+    bestDistance: 5
+    lastProgressAt: 1792899955931
+    nonImprovingMoves: 0
+    lastReceiptSequence: 0
+    attackSent: true
+    targetPoint:
+      x: 10
+      y: 5
+    startedAt: 1792899865931
+    activeElapsedMs: 0
+    confirmedMoves: 39
+    visited:
+  operator: 'notStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:294:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native post-strike segment retains the original movement-budget boundary
+not ok 14 - native post-strike segment retains the original movement-budget boundary
+  ---
+  duration_ms: 1.1019
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:302:72'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + {
+    +   activeElapsedMs: 0,
+    +   attackSent: true,
+    +   bestDistance: 5,
+    +   confirmedMoves: 39,
+    +   lastProgressAt: 1792899955932,
+    +   lastReceiptSequence: 0,
+    +   mapFileName: '0',
+    +   name: 'Deer',
+    +   nonImprovingMoves: 0,
+    +   objectId: 900,
+    +   startedAt: 1792899955932,
+    +   targetPoint: {
+    +     x: 10,
+    +     y: 5
+    +   },
+    +   visited: Map(0) {}
+    + }
+    - null
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: ~
+  actual:
+    objectId: 900
+    name: 'Deer'
+    mapFileName: '0'
+    bestDistance: 5
+    lastProgressAt: 1792899955932
+    nonImprovingMoves: 0
+    lastReceiptSequence: 0
+    attackSent: true
+    targetPoint:
+      x: 10
+      y: 5
+    startedAt: 1792899955932
+    activeElapsedMs: 0
+    confirmedMoves: 39
+    visited:
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:311:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native post-strike segment retains the original time-budget boundary
+not ok 15 - native post-strike segment retains the original time-budget boundary
+  ---
+  duration_ms: 0.6536
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:302:72'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + {
+    +   activeElapsedMs: 0,
+    +   attackSent: true,
+    +   bestDistance: 5,
+    +   confirmedMoves: 0,
+    +   lastProgressAt: 1792899955933,
+    +   lastReceiptSequence: 0,
+    +   mapFileName: '0',
+    +   name: 'Deer',
+    +   nonImprovingMoves: 0,
+    +   objectId: 900,
+    +   startedAt: 1792899925934,
+    +   targetPoint: {
+    +     x: 10,
+    +     y: 5
+    +   },
+    +   visited: Map(0) {}
+    + }
+    - null
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: ~
+  actual:
+    objectId: 900
+    name: 'Deer'
+    mapFileName: '0'
+    bestDistance: 5
+    lastProgressAt: 1792899955933
+    nonImprovingMoves: 0
+    lastReceiptSequence: 0
+    attackSent: true
+    targetPoint:
+      x: 10
+      y: 5
+    startedAt: 1792899925934
+    activeElapsedMs: 0
+    confirmedMoves: 0
+    visited:
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:311:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native post-strike segment retains the original route-loop boundary
+not ok 16 - native post-strike segment retains the original route-loop boundary
+  ---
+  duration_ms: 0.7813
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:302:72'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + {
+    +   activeElapsedMs: 0,
+    +   attackSent: true,
+    +   bestDistance: 5,
+    +   confirmedMoves: 0,
+    +   lastProgressAt: 1792899955934,
+    +   lastReceiptSequence: 0,
+    +   mapFileName: '0',
+    +   name: 'Deer',
+    +   nonImprovingMoves: 0,
+    +   objectId: 900,
+    +   startedAt: 1792899955934,
+    +   targetPoint: {
+    +     x: 10,
+    +     y: 5
+    +   },
+    +   visited: Map(1) {
+    +     '6,5' => 2
+    +   }
+    + }
+    - null
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: ~
+  actual:
+    objectId: 900
+    name: 'Deer'
+    mapFileName: '0'
+    bestDistance: 5
+    lastProgressAt: 1792899955934
+    nonImprovingMoves: 0
+    lastReceiptSequence: 0
+    attackSent: true
+    targetPoint:
+      x: 10
+      y: 5
+    startedAt: 1792899955934
+    activeElapsedMs: 0
+    confirmedMoves: 0
+    visited:
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:311:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+ok 17 - native post-strike planning, pending work, budget gaps, navigation rejection and failed sends never reset a chase
+  ---
+  duration_ms: 2.7708
+  type: 'test'
+  ...
+# Subtest: native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+ok 18 - native attack witness skips the first AOI-edge peer and requires both real objects on a nearby living connection
+  ---
+  duration_ms: 0.9307
+  type: 'test'
+  ...
+# Subtest: native attack witness uses nearest eligible peer with original order on equal separation
+ok 19 - native attack witness uses nearest eligible peer with original order on equal separation
+  ---
+  duration_ms: 0.3706
+  type: 'test'
+  ...
+# Subtest: native attack witness is reselected with its current namespace and cursor immediately before the real send
+ok 20 - native attack witness is reselected with its current namespace and cursor immediately before the real send
+  ---
+  duration_ms: 1.7437
+  type: 'test'
+  ...
+# Subtest: native attack witness loss before send retains the original incomplete opportunity without a fake attack
+ok 21 - native attack witness loss before send retains the original incomplete opportunity without a fake attack
+  ---
+  duration_ms: 34.8466
+  type: 'test'
+  ...
+# Subtest: native initial no-witness selection can use another genuinely witnessed adjacent target
+ok 22 - native initial no-witness selection can use another genuinely witnessed adjacent target
+  ---
+  duration_ms: 0.3975
+  type: 'test'
+  ...
+# Subtest: native initial no-witness target with no approach route retains the original bounded scout fallback
+ok 23 - native initial no-witness target with no approach route retains the original bounded scout fallback
+  ---
+  duration_ms: 0.5963
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+ok 24 - native witnessed approach avoids the probe10 unobservable 206513 neighbour loop
+  ---
+  duration_ms: 1.3154
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+ok 25 - native witnessed approach avoids the probe10 unobservable 206704 neighbour loop
+  ---
+  duration_ms: 1.0054
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+ok 26 - native witnessed approach avoids the probe10 unobservable 206507 neighbour loop
+  ---
+  duration_ms: 1.03
+  type: 'test'
+  ...
+# Subtest: native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+ok 27 - native witnessed approach avoids the probe10 unobservable 206715 neighbour loop
+  ---
+  duration_ms: 1.3472
+  type: 'test'
+  ...
+# Subtest: native witnessed approach skips cheap ineligible targets before the original four path-target limit
+ok 28 - native witnessed approach skips cheap ineligible targets before the original four path-target limit
+  ---
+  duration_ms: 0.3235
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a not-ready observer without replacing real membership with distance
+ok 29 - native witnessed approach rejects a not-ready observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1724
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a dead observer without replacing real membership with distance
+ok 30 - native witnessed approach rejects a dead observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1399
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+ok 31 - native witnessed approach rejects a wrong-map observer without replacing real membership with distance
+  ---
+  duration_ms: 0.0829
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+ok 32 - native witnessed approach rejects a missing-attacker observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1204
+  type: 'test'
+  ...
+# Subtest: native witnessed approach rejects a missing-target observer without replacing real membership with distance
+ok 33 - native witnessed approach rejects a missing-target observer without replacing real membership with distance
+  ---
+  duration_ms: 0.1147
+  type: 'test'
+  ...
+# Subtest: native witnessed approach retains the original four path targets and eight adjacent destinations
+ok 34 - native witnessed approach retains the original four path targets and eight adjacent destinations
+  ---
+  duration_ms: 108.6886
+  type: 'test'
+  ...
+# Subtest: native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+ok 35 - native witnessed approach metadata is immutable and does not start gameplay without its original monitor
+  ---
+  duration_ms: 7.9901
+  type: 'test'
+  ...
+# Subtest: navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+ok 36 - navigation coordination unions true owner receipts and bounded pending cells without replacing AOI, identities or snapshots
+  ---
+  duration_ms: 0.6695
+  type: 'test'
+  ...
+# Subtest: navigation coordination is native-only and preserves the baseline obstacle and send path
+ok 37 - navigation coordination is native-only and preserves the baseline obstacle and send path
+  ---
+  duration_ms: 0.1856
+  type: 'test'
+  ...
+# Subtest: navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+ok 38 - navigation hints cover Run intermediate and diagonal corner cells with one immutable bounded entry per active connection
+  ---
+  duration_ms: 0.3777
+  type: 'test'
+  ...
+# Subtest: navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+ok 39 - navigation coordination prevents two same-tick sends to one destination while preserving the blocked native opportunity
+  ---
+  duration_ms: 0.9712
+  type: 'test'
+  ...
+# Subtest: navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+ok 40 - navigation ACK cleanup cannot let an old finally delete a newer hint and close/map/death release their own entry
+  ---
+  duration_ms: 0.627
+  type: 'test'
+  ...
+# Subtest: navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+ok 41 - navigation hints release on send errors and real owner timeouts without suppressing old failure counters
+  ---
+  duration_ms: 0.421
+  type: 'test'
+  ...
+# Subtest: navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+ok 42 - navigation hints release on a same-position owner receipt while the original movement correction still fails acceptance
+  ---
+  duration_ms: 0.4953
+  type: 'test'
+  ...
+# Subtest: native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+ok 43 - native fast patrol and normal A* both avoid controlled in-flight Run cells while leaving snapshots untouched
+  ---
+  duration_ms: 0.3229
+  type: 'test'
+  ...
+# Subtest: native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+ok 44 - native primed fallback chooses a real Run from an existing corner under two observed approximate Scarecrow arrangements
+  ---
+  duration_ms: 39.6501
+  type: 'test'
+  ...
+# Subtest: native primed fallback keeps the original first Walk when no original corner route has a legal Run
+ok 45 - native primed fallback keeps the original first Walk when no original corner route has a legal Run
+  ---
+  duration_ms: 0.3853
+  type: 'test'
+  ...
+# Subtest: native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+ok 46 - native fallback does not prefer later Run routes when unprimed and leaves baseline first-path selection unchanged
+  ---
+  duration_ms: 0.1836
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+ok 47 - native fallback Run preference retains controlled-owner and pending-path obstacles without changing snapshots
+  ---
+  duration_ms: 1.0959
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains diagonal side-cell collision checks
+ok 48 - native fallback Run preference retains diagonal side-cell collision checks
+  ---
+  duration_ms: 0.2213
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference cannot enter a transfer in its first or second step
+ok 49 - native fallback Run preference cannot enter a transfer in its first or second step
+  ---
+  duration_ms: 0.4434
+  type: 'test'
+  ...
+# Subtest: native fallback Run preference retains routeAllowed on the complete route to each original goal
+ok 50 - native fallback Run preference retains routeAllowed on the complete route to each original goal
+  ---
+  duration_ms: 0.2898
+  type: 'test'
+  ...
+# Subtest: attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays
+ok 51 - attackResultV2 matching rejects wrong IDs, malformed versions/results and conflicting cache replays
+  ---
+  duration_ms: 0.2534
+  type: 'test'
+  ...
+# Subtest: V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage
+ok 52 - V2 admission measurements keep legacy counters unchanged and never dilute movement corrections or credit unlaunched damage
+  ---
+  duration_ms: 1.1135
+  type: 'test'
+  ...
+# Subtest: active observer coverage binds only declared living movement clients and never borrows a future home
+ok 53 - active observer coverage binds only declared living movement clients and never borrows a future home
+  ---
+  duration_ms: 1.8509
+  type: 'test'
+  ...
+# Subtest: temporary observer coverage loss and restore do not wash a live pursuit movement budget
+not ok 54 - temporary observer coverage loss and restore do not wash a live pursuit movement budget
+  ---
+  duration_ms: 0.4837
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:910:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    undefined !== 900
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 900
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:913:61)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    node:internal/test_runner/test:981:31
+    node:internal/process/task_queues:151:7
+    AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    AsyncResource.runMicrotask (node:internal/process/task_queues:148:8)
+  ...
+# Subtest: pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+ok 55 - pending attack diagnostics retain same-position receipts, exclude unrelated data and cap packets without changing outcomes
+  ---
+  duration_ms: 0.9014
+  type: 'test'
+  ...
+# Subtest: pending attack packet subscriptions are removed after synchronous send failure and transport close
+ok 56 - pending attack packet subscriptions are removed after synchronous send failure and transport close
+  ---
+  duration_ms: 0.6244
+  type: 'test'
+  ...
+# Subtest: native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+ok 57 - native scout uses ordinary covered adjacent goals to explore another declared observer instead of circling one home
+  ---
+  duration_ms: 0.2827
+  type: 'test'
+  ...
+# Subtest: native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+ok 58 - native scout goal selection also excludes a controlled in-flight hint without injecting it into the fighter snapshot
+  ---
+  duration_ms: 0.5975
+  type: 'test'
+  ...
+# Subtest: native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+ok 59 - native scout never crosses a coverage gap, map transfer or real blocked route and performs at most four searches
+  ---
+  duration_ms: 3.7309
+  type: 'test'
+  ...
+# Subtest: native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+ok 60 - native scout counts only fresh real successful movement and preserves pursuit, deferral and ambiguous-attack budgets
+  ---
+  duration_ms: 0.2632
+  type: 'test'
+  ...
+# Subtest: native scout advances its finite waypoint on real position loops, movement budget and time budget
+ok 61 - native scout advances its finite waypoint on real position loops, movement budget and time budget
+  ---
+  duration_ms: 0.6308
+  type: 'test'
+  ...
+# Subtest: native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+ok 62 - native scout yields immediately to a real witnessed combat candidate without changing native pacing or thresholds
+  ---
+  duration_ms: 0.2533
+  type: 'test'
+  ...
+# Subtest: native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+ok 63 - native hunt prioritizes a legal adjacent target visible to both peers over an unwitnessed nearer candidate
+  ---
+  duration_ms: 0.1209
+  type: 'test'
+  ...
+# Subtest: native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+ok 64 - native hunt keeps its selected reachable target when another nonadjacent monster becomes nearer
+  ---
+  duration_ms: 0.2318
+  type: 'test'
+  ...
+# Subtest: native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+ok 65 - native hunt follows confirmed A* detour progress even while Chebyshev distance initially increases
+  ---
+  duration_ms: 1.1707
+  type: 'test'
+  ...
+# Subtest: native hunt does not credit a newly planned route when the target moves during each authoritative step
+not ok 66 - native hunt does not credit a newly planned route when the target moves during each authoritative step
+  ---
+  duration_ms: 0.4084
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:1110:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    undefined !== 900
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 900
+  operator: 'strictEqual'
+  stack: |-
+    acknowledgeEscapingTarget (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1080:66)
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1113:22)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+ok 67 - native hunt cannot turn real blocking corrections into detour progress or successful movement evidence
+  ---
+  duration_ms: 4.408
+  type: 'test'
+  ...
+# Subtest: native hunt defers an authoritative position loop even when replanned routes claim progress
+ok 68 - native hunt defers an authoritative position loop even when replanned routes claim progress
+  ---
+  duration_ms: 0.3418
+  type: 'test'
+  ...
+# Subtest: native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+ok 69 - native hunt retains confirmed loop evidence across genuinely blocked replans and ordinary fallback patrol ACKs
+  ---
+  duration_ms: 90.4302
+  type: 'test'
+  ...
+# Subtest: native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+ok 70 - native hunt keeps finite movement and time budgets despite continually decreasing replanned route lengths
+  ---
+  duration_ms: 0.4448
+  type: 'test'
+  ...
+# Subtest: native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+ok 71 - native hunt resume preserves consumed pursuit budgets without charging offline time or sharing mutable route history
+  ---
+  duration_ms: 0.3654
+  type: 'test'
+  ...
+# Subtest: native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+not ok 72 - native hunt defers a repeatedly escaping unattacked target for30s then selects another without touching attack quarantine
+  ---
+  duration_ms: 0.5156
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:1214:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    undefined !== 900
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 900
+  operator: 'strictEqual'
+  stack: |-
+    acknowledgeEscapingTarget (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1080:66)
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1219:44)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+ok 73 - native hunt time threshold requires repeated actual movement and never counts plans, duplicate receipts or corrected steps
+  ---
+  duration_ms: 1.9476
+  type: 'test'
+  ...
+# Subtest: native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+not ok 74 - native hunt distance improvement resets futile-chase evidence and already attacked pursuits never enter the temporary deferral map
+  ---
+  duration_ms: 0.4981
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:1248:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    undefined !== 900
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 900
+  operator: 'strictEqual'
+  stack: |-
+    acknowledgeEscapingTarget (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1080:66)
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1251:44)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native hunt movement hook keeps all corrected and successful actions in the original denominator
+not ok 75 - native hunt movement hook keeps all corrected and successful actions in the original denominator
+  ---
+  duration_ms: 0.5892
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:1265:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'nonImprovingMoves')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1280:98)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+ok 76 - native hunt drops dead, missing, friendly, claimed and unreachable targets without laundering failed attack identities
+  ---
+  duration_ms: 24.2822
+  type: 'test'
+  ...
+# Subtest: native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+not ok 77 - native hunt deferrals stay bounded and resume rebases only pursuit timing while retaining quarantine and map resets
+  ---
+  duration_ms: 0.6734
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-soak.test.mjs:1308:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    undefined !== 900
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 900
+  operator: 'strictEqual'
+  stack: |-
+    acknowledgeEscapingTarget (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1080:66)
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/cell-preproduction-p0-p1/mir2-player-journey/mir2-web3/apps/web/scripts/playtest-capacity-soak.test.mjs:1312:44)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: native timing follows authoritative level, attack speed and slow while preserving the 550/600ms difference
+ok 78 - native timing follows authoritative level, attack speed and slow while preserving the 550/600ms difference
+  ---
+  duration_ms: 0.1555
+  type: 'test'
+  ...
+# Subtest: native attack pacing uses the real sparse WorldSnapshot zero-stat contract without guessing absent or malformed blocks
+ok 79 - native attack pacing uses the real sparse WorldSnapshot zero-stat contract without guessing absent or malformed blocks
+  ---
+  duration_ms: 0.2405
+  type: 'test'
+  ...
+# Subtest: native calendar never catches up by violating elapsed cooldown after jitter or a stall
+ok 80 - native calendar never catches up by violating elapsed cooldown after jitter or a stall
+  ---
+  duration_ms: 0.0532
+  type: 'test'
+  ...
+# Subtest: native evidence waiting cannot be hidden as reduced offered load or mislabeled busy
+ok 81 - native evidence waiting cannot be hidden as reduced offered load or mislabeled busy
+  ---
+  duration_ms: 0.1448
+  type: 'test'
+  ...
+# Subtest: native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive
+ok 82 - native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive
+  ---
+  duration_ms: 77.5629
+  type: 'test'
+  ...
+# Subtest: native pending evidence is recorded separately and never sends another attack into an ambiguous hit window
+ok 83 - native pending evidence is recorded separately and never sends another attack into an ambiguous hit window
+  ---
+  duration_ms: 0.3384
+  type: 'test'
+  ...
+# Subtest: planned disconnect waits existing observer obligations while newly offered peer actions keep running
+ok 84 - planned disconnect waits existing observer obligations while newly offered peer actions keep running
+  ---
+  duration_ms: 0.1137
+  type: 'test'
+  ...
+# Subtest: drain includes observer evidence created by the captured owner acknowledgement
+ok 85 - drain includes observer evidence created by the captured owner acknowledgement
+  ---
+  duration_ms: 0.0877
+  type: 'test'
+  ...
+# Subtest: fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+ok 86 - fanout latency geometry accounts for simultaneous runs without shrinking the complete AOI denominator
+  ---
+  duration_ms: 0.2608
+  type: 'test'
+  ...
+# Subtest: real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+ok 87 - real hit correlation accepts either packet order, rejects another attacker, zero damage and divergent shared HP
+  ---
+  duration_ms: 0.1757
+  type: 'test'
+  ...
+# Subtest: shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+ok 88 - shared combat requires this strike's finite post-damage HP, never old AOI health or unrelated death
+  ---
+  duration_ms: 0.1666
+  type: 'test'
+  ...
+1..88
+# tests 88
+# suites 0
+# pass 78
+# fail 10
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 542.3901

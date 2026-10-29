@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "runId": "1792853910738-69505bbc",
+  "rawBytes": 748552,
+  "rawSha256": "e8a45b98581201f235626d0873048bbf6f56b13e981a353677f56294c7e45bd7",
+  "rawRows": 1407,
+  "monitorSummary": {
+    "count": 52,
+    "validCount": 0,
+    "invalidCount": 52,
+    "stoppedCount": 0,
+    "complete": false,
+    "firstSampledAtMs": null,
+    "lastSampledAtMs": null,
+    "maxGapMs": 0,
+    "maxRawLineBytes": 3645,
+    "first": null,
+    "last": null,
+    "phaseBrackets": []
+  },
+  "phaseEvents": [],
+  "failureEvents": [
+    {
+      "type": "continuousFailure",
+      "reason": "Continuous activity window failed, regardless of the measured stage",
+      "evidence": {
+        "actor": "L8d384904",
+        "role": "movement",
+        "phases": [
+          "ramp",
+          "settle",
+          "stage-5"
+        ],
+        "seconds": 35.7357843,
+        "final": true,
+        "activityDurationSufficient": true,
+        "activity": {
+          "plans": 47,
+          "gaps": 39,
+          "moves": 7,
+          "attacks": 0,
+          "hits": 0,
+          "damage": 0,
+          "lastSuccessAt": 1792853989311,
+          "runs": 5,
+          "cells": 12,
+          "nativeOpportunities": 47,
+          "nativeCompleted": 8,
+          "offeredDurationMs": 35250,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "unknownPacing": 0
+        },
+        "nativeActivity": {
+          "passed": false,
+          "completionRatio": 0.1702127659574468,
+          "runRatio": 0.7142857142857143,
+          "cellsPerMinute": 20.14787177904474,
+          "positiveHitsPerMinute": 0,
+          "evidenceWaits": 0,
+          "ownerAckWaits": 0,
+          "offeredDurationMs": 35250,
+          "unknownPacing": 0,
+          "coverageFailureMeaning": "Insufficient native offered/completed load is not, by itself, proof of server overload"
+        },
+        "activityPassed": false,
+        "latencyPassed": true,
+        "fanoutPassed": true,
+        "timeoutRatio": 0,
+        "correctionRatio": 0,
+        "metrics": {
+          "walk": {
+            "count": 41,
+            "status": {
+              "success": 2,
+              "navigation-blocked": 39
+            },
+            "fromSend": {
+              "count": 2,
+              "p50Ms": 2,
+              "p95Ms": 2,
+              "p99Ms": 2,
+              "maxMs": 1.4149999999935972
+            },
+            "fromPlan": {
+              "count": 2,
+              "p50Ms": 16,
+              "p95Ms": 18,
+              "p99Ms": 18,
+              "maxMs": 17.733299999992596
+            }
+          },
+          "run": {
+            "count": 5,
+            "status": {
+              "success": 5
+            },
+            "fromSend": {
+              "count": 5,
+              "p50Ms": 2,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.064799999992829
+            },
+            "fromPlan": {
+              "count": 5,
+              "p50Ms": 26,
+              "p95Ms": 28,
+              "p99Ms": 28,
+              "maxMs": 27.705999999991036
+            }
+          },
+          "chat": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 3,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.722300000008545
+            },
+            "fromPlan": {
+              "count": 1,
+              "p50Ms": 24,
+              "p95Ms": 24,
+              "p99Ms": 24,
+              "maxMs": 23.21259999999893
+            }
+          },
+          "selfChat": {
+            "count": 1,
+            "status": {
+              "success": 1
+            },
+            "fromSend": {
+              "count": 1,
+              "p50Ms": 3,
+              "p95Ms": 3,
+              "p99Ms": 3,
+              "maxMs": 2.722300000008545
+            },
+            "fromPlan": {
+              "count": 0,
+              "p50Ms": null,
+              "p95Ms": null,
+              "p99Ms": null,
+              "maxMs": 0
+            }
+          }
+        },
+        "passed": false
+      },
+      "at": 1792854026659
+    },
+    {
+      "type": "safetyStop",
+      "at": 1792854026659,
+      "reason": "Continuous activity window failed, regardless of the measured stage"
+    }
+  ],
+  "finishedEvents": [
+    {
+      "type": "finished",
+      "ok": false,
+      "playableCapacityAccepted": false
+    }
+  ]
+}

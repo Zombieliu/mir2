@@ -1,5 +1,6 @@
 pub mod ai_distribution;
 pub mod ai_live;
+pub mod attack_protocol;
 mod auth;
 pub mod beta;
 mod browser_commands;
@@ -46,6 +47,8 @@ pub mod node_security;
 pub mod npc_gold_buy_route;
 pub mod npc_purchase_browser;
 pub mod npc_purchase_owner_route;
+pub mod procurement_worker;
+pub mod sui_usdc_billing;
 pub mod operator;
 pub mod regional;
 mod resume;
@@ -61,6 +64,7 @@ pub mod topology;
 pub mod web;
 pub mod world_director;
 pub mod zone_lease;
+pub mod zone_metrics;
 pub mod zone_replication;
 pub mod zone_rpc;
 

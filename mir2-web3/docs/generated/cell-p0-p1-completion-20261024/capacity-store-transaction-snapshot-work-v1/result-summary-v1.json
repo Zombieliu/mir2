@@ -1,0 +1,51 @@
+{
+  "scope": "Local loopback preconfigured PvP comparison; not ordinary economic or production capacity qualification",
+  "sourceBaseCommit": "1e27cef7f",
+  "change": "Borrow original Store image and omit discarded full-store preflight encoding only for pure PostgreSQL SourceOfTruth",
+  "actualRustTests": {
+    "refreshAndFailClosed": 36,
+    "fileDurability": 2,
+    "postgresSourceMode": 4,
+    "postgresMultiAccountRollback": 1,
+    "mirrorFencedCompensation": 1,
+    "total": 44,
+    "initialIgnoredInvocationCounted": false
+  },
+  "freshOrdinaryFullLifecycle": {
+    "passed": true,
+    "checks": 16
+  },
+  "pvpV9": {
+    "plannedStages": [
+      25,
+      50,
+      100,
+      250,
+      500
+    ],
+    "stageSeconds": 300,
+    "admission25Ms": 61556,
+    "totalElapsedMs": 251157,
+    "completedStages": 0,
+    "failureCategory": "attack-result-not-received-by-2s",
+    "actorIndex": 17,
+    "requestId": "144",
+    "lastObservedRequestId": "143",
+    "wholeRunIncludingAdmission": {
+      "requests": 3882,
+      "launched": 3858,
+      "positive": 2357,
+      "heals": 35,
+      "timeouts": 1
+    },
+    "normalLogouts": 25,
+    "cleanupComplete": true,
+    "gatewayExit": 0,
+    "postgresExit": 0
+  },
+  "performanceFixed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "p2Started": false,
+  "higherTiersAndTwoHourSoak": "unmeasured"
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25T20:18:45.822Z",
+  "passed": true,
+  "readOnly": true,
+  "sourceSeal": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\launcher-source-frozen-v1.json",
+    "bytes": 43488,
+    "sha256": "55d2344aa547e8c1a00dbb9b0d457c5637dc3a388606cc817a7d6c44f4f22c4a"
+  },
+  "preparedReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\runtime-prepared-v5.json",
+    "bytes": 42479,
+    "sha256": "5fa6efbe226d6f320489fd9beb73a775eb1e2be28c919f5cccce4fa235ac109e"
+  },
+  "independentReview": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-runtime-independent-review-v1\\preseal-independent-review-v5.json",
+    "bytes": 6774,
+    "sha256": "04bd8cec3d573bacd900c9c2e931ebec83dff7b578aa955e6aa9778ac3e326c5"
+  },
+  "rootSealExecutor": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs",
+    "bytes": 16198,
+    "sha256": "7e9cdcf6e49cfa6da418690f85d77ef4d975e9cdc1e6d33fa744660961ad48a5"
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "backendInputCount": 50,
+  "backendSourceUnchangedSinceBuild": true,
+  "rebuildPerformed": true,
+  "backendSourceAggregate": "09081ea9b49d968574b99f444c238932045eccb0dc3f7de4b24496a932c895f7",
+  "binary": {
+    "path": "C:\\mir2-build\\p01-completion-20261024\\account-store-wait-diagnostics-release-v1\\bin\\mir2-gateway.exe",
+    "bytes": 87396864,
+    "sha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc"
+  },
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "coreCodeEvidenceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "driverSourceSha256": "5ba46ae4a729c4ae8514721284da0f91d796aff247cd7c017b206790be88e2d9",
+  "driverClosurePins": 43,
+  "full16RunId": "1792955151058-4afb2f09",
+  "full16Passed": true,
+  "wireSourcePins": 11,
+  "sceneSourceSha256": "e3eaf0604f0e99fde70fbbe90585f171e3a5068b6e89e1fffbaab13dafe92adf",
+  "sceneStaticEvidenceNotRerun": true,
+  "prepareEntryPointInvoked": false,
+  "runEntryPointInvoked": false,
+  "accountsProvisioned": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

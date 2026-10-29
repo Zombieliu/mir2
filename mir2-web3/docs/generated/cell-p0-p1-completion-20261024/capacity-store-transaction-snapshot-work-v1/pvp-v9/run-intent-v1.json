@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-27T21:45:53.046Z",
+  "profile": "server-only-preconfigured-pvp-full-combat-v1",
+  "storageBackend": "postgres-source-of-truth-isolated",
+  "freshFullLifecycle": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v3/integration-v1.json",
+    "bytes": 885,
+    "sha256": "776ab5039be4cc4611b905567e21352292c960c6925031bbba1f4f0c3903b87c"
+  },
+  "sessionCache": "development-in-memory",
+  "postgresImportValidation": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-only-pvp-postgres-v2/import-validation-v1.json",
+    "bytes": 1426,
+    "sha256": "9d45877c34cd7b70f2875179bca12c44940273389e7a0c85be446c9566c1615b"
+  },
+  "backend": {
+    "file": "C:/mir2-build/p01-completion-20261024/server-stress-backend-v3/bin/mir2-gateway.exe",
+    "bytes": 87432192,
+    "sha256": "9451e972e16281320867c2135695e942e21ae442f97e90f22f697ffa4722fb28"
+  },
+  "driver": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\playtest-capacity-pvp-stress.mjs",
+    "bytes": 46798,
+    "sha256": "a28701928adec72e401d004ad0bd5590b1a52d51ee1c275bdb03b49558bda3ca"
+  },
+  "fixture": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\fixture\\public\\fixture-manifest-v1.json",
+    "bytes": 135980,
+    "sha256": "28286c72da18cc3f1a3abd72590cfb890fa2dd2014a59047a67944f88c0752cb"
+  },
+  "normalPasswordLogin": true,
+  "authenticationBucket": "prior stress-v8 same-endpoint auth ledger copied unchanged; ordinary-run ledger and authentication controls unchanged",
+  "normalCombatAndHealing": true,
+  "legalPreconfiguredLevel40EquipmentAndLargeHp194": true,
+  "ordinarySupplyAccepted": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

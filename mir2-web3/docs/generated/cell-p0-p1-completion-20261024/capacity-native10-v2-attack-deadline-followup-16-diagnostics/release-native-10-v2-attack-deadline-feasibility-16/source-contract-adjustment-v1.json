@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "file": "input-lib.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\input-lib.mjs.before-source-adapt-v1.txt",
+        "bytes": 16507,
+        "sha256": "0d3bc730dd8a0e7754ed00556d26888800e436302e746958e7e194baa1c83806"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\input-lib.mjs",
+        "bytes": 16479,
+        "sha256": "2da9c9b4a173875b1ddf761fa26b74021268f08a6b54be84656acacd591635cd"
+      }
+    },
+    {
+      "file": "collect-public.mjs",
+      "before": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\collect-public.mjs.before-source-adapt-v1.txt",
+        "bytes": 43579,
+        "sha256": "e56354d073da9facb6fedffd9ed222473b324c5e5b676d46eab75a8dbd0aa681"
+      },
+      "after": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-attack-deadline-feasibility-16\\collect-public.mjs",
+        "bytes": 43666,
+        "sha256": "3c5476d3beb57a3d88c4d9665a172df8327b846900755981c88bd6a93eb567c3"
+      }
+    }
+  ],
+  "driverEvidenceContract": "Actual210 path-reference schema, no currentfocused13/evidenceArtifacts assumptions.",
+  "declarations": "Six priorFreeze declarations remain historical20fd and exact current-source checked, without editing new6759 freeze.",
+  "thresholdsChanged": false,
+  "gameVerdictInherited": false
+}

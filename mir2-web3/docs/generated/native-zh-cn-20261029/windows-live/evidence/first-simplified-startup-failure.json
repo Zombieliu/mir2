@@ -1,0 +1,30 @@
+{
+  "evidenceKind": "sanitized-actual-windows-startup-failure",
+  "observedBy": "root coordinator through the owned actual Windows client stderr",
+  "status": "fixed-and-actual-windows-startup-menu-navigation-restart-retested",
+  "attemptedExecutableSha256": "5dc223de381b32cecc5b13f7e52e48c9ed12a4b1f6998a52709d691140ba58ce",
+  "attemptedExecutableBytes": 149408256,
+  "locale": "zh-CN",
+  "failure": {
+    "file": "apps/game-client/client-bevy/src/native_display.rs",
+    "line": 233,
+    "kind": "index-out-of-bounds",
+    "arrayLength": 9,
+    "attemptedLocaleIndex": 9,
+    "cause": "A pre-existing nine-column display-label table was indexed with the new Simplified Chinese locale index."
+  },
+  "interactionBoundary": "First Simplified Chinese desktop startup; no game controls were clicked. Owned client was stopped. This failed attempt does not establish successful UI navigation or economic-state acceptance.",
+  "privateStderrIncluded": false,
+  "privatePreferencesIncluded": false,
+  "nextRequiredEvidence": [],
+  "fixEvidence": {
+    "displayFocusedPassed": 7,
+    "displayGpuIgnored": 1,
+    "questCounterFocusedPassed": 1,
+    "finalGameplayGpuCaptures": 3,
+    "newExecutableSha256": "abd92be30f421328c3309eac66bbafcdd542df4117ed24ced872098e9b9b64ff",
+    "newExecutableBytes": 149412864,
+    "actualDesktopRetestPending": false,
+    "actualDesktopReceipt": "../navigation-result.json"
+  }
+}

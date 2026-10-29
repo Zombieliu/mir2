@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-27T21:53:26.841Z",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\run-intent-v1.json",
+        "bytes": 926,
+        "sha256": "11deb0a18d7e00c33640b6a7ea6fd5d642366113ec6c803f2fe45b8c0d6a6e10"
+      },
+      "destination": "ordinary-full16/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\cleanup-v1.json",
+        "bytes": 341,
+        "sha256": "3a0b8b3f1638292b80733fe9a64680b2a96774a579d3814be36691e27f18e672"
+      },
+      "destination": "ordinary-full16/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\resource-profile-v1.json",
+        "bytes": 2042,
+        "sha256": "4f6c93020553034724c3c9a1dfef71795309e05be13e0dcee883dd8b83a78ad7"
+      },
+      "destination": "ordinary-full16/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\health-before-v1.json",
+        "bytes": 13397,
+        "sha256": "b339ea1bbbbe5f46db6cf2c01c3be36bf9777f66934abb02aa080994708ce61d"
+      },
+      "destination": "ordinary-full16/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\health-after-v1.json",
+        "bytes": 13517,
+        "sha256": "a852279c19a917690c4d1b2307ef56446374f23161da9a9340361930521f325d"
+      },
+      "destination": "ordinary-full16/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\monitor-current.json",
+        "bytes": 9128,
+        "sha256": "77b3a18d94d4eefd103ed1735393824caf26adeab927a8cd1aba140ce5adb40e"
+      },
+      "destination": "ordinary-full16/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\monitor-history.jsonl",
+        "bytes": 410499,
+        "sha256": "68cd241218eb459dbe96fd9b9240bee2d7afe022c7c576293932c1ec80c3ead4"
+      },
+      "destination": "ordinary-full16/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "d9320b3200c41ca236426ea878165ee9b54ea82a46631e5c9cd95e49e51abb36"
+      },
+      "destination": "ordinary-full16/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314-a.trace.jsonl",
+        "bytes": 973158,
+        "sha256": "269e8a1029dcc46ed36fc2b111d673d82f92506482454bead411b5d2066f10e5"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314-a.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314-b.trace.jsonl",
+        "bytes": 899848,
+        "sha256": "82df824a79411aba1da71cbb1f809cd3b8674178c5aa25d99b6cc91939f112ee"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314-b.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314-guard-newCharacter.trace.jsonl",
+        "bytes": 3468,
+        "sha256": "5bde9765af70b4800a2e7f785b16f4de76f470f0be1db28dcf968bab3acde408"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314-guard-newCharacter.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314-guard-startGame.trace.jsonl",
+        "bytes": 3434,
+        "sha256": "ac415a4ea3fac444aa691d303ce876a093ef11b3e74208d6f23dd5b7918f0f5f"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314-guard-startGame.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314-relogin-0.trace.jsonl",
+        "bytes": 682502,
+        "sha256": "6e87610b546e061682c3e7368ca599ff835f9fb75e3f115e2173d7b7df1ac7da"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314-relogin-0.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314-relogin-1.trace.jsonl",
+        "bytes": 679347,
+        "sha256": "5f131edb1c0057a27daad5d2d9f630a3a08d353e3bbe93029626e52d90ce39bb"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314-relogin-1.trace.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-store-optimization-v1\\reports\\1793137319083-149bb314.report.json",
+        "bytes": 104565,
+        "sha256": "a4a3fe227b73393d00188aede73595acc8594c7cb40044e496901465a27acdb8"
+      },
+      "destination": "ordinary-full16/reports/1793137319083-149bb314.report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\run-intent-v1.json",
+        "bytes": 1822,
+        "sha256": "5af4d91b5fe455b42cf30e96e175b159357e44c1bf407f69cd86c4c4747ce1c3"
+      },
+      "destination": "pvp-v9/run-intent-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\cleanup-v1.json",
+        "bytes": 382,
+        "sha256": "b545ad26ed429fcbb8c35a09ff2080f18b0e0caa264083b911d3d42ac4a1ad93"
+      },
+      "destination": "pvp-v9/cleanup-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\resource-profile-v1.json",
+        "bytes": 2170,
+        "sha256": "9a6675aacdd74f3967f460d099e6211be028c81a0aab18d74ca0dbd64af44401"
+      },
+      "destination": "pvp-v9/resource-profile-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\health-before-v1.json",
+        "bytes": 13509,
+        "sha256": "12eff98509d92dc5aeb590f1f55f4c85027b9cb5daa7b54c2efe9b4a0521f27e"
+      },
+      "destination": "pvp-v9/health-before-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\health-after-v1.json",
+        "bytes": 13667,
+        "sha256": "61bc4c419b3a0c057f16e0489d9fc443857287862b048d8534b47f28733063c4"
+      },
+      "destination": "pvp-v9/health-after-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\monitor-current.json",
+        "bytes": 9160,
+        "sha256": "8ddc402678c5eaf1e9a681410c55713314230b129c3237e76e84e6d6103b6c03"
+      },
+      "destination": "pvp-v9/monitor-current.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\monitor-history.jsonl",
+        "bytes": 1133298,
+        "sha256": "d64f09e25bf22fe9bdeebabdc0a46e0faf61e0675ddcc8f6cdf3bac60644581d"
+      },
+      "destination": "pvp-v9/monitor-history.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\owned-process-v1.json",
+        "bytes": 158,
+        "sha256": "b9f034e27495240368d799c42392d38935739bf56f064531e0a126169f866805"
+      },
+      "destination": "pvp-v9/owned-process-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\reports\\1793137555463-0e8870e7.pvp-stress-report.json",
+        "bytes": 49526,
+        "sha256": "5c9bb9fb2aa47cccdd2d4a5c5293a85af8c5194afe878d8a359b37f84271d55a"
+      },
+      "destination": "pvp-v9/reports/1793137555463-0e8870e7.pvp-stress-report.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\reports\\1793137555463-0e8870e7.pvp-stress-samples.jsonl",
+        "bytes": 1212677,
+        "sha256": "93dc7ff9185b69ead08b14162414f0b676aef5414aab16a067e2f888195a3214"
+      },
+      "destination": "pvp-v9/reports/1793137555463-0e8870e7.pvp-stress-samples.jsonl"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-capacity-v9\\fixture\\public\\fixture-manifest-v1.json",
+        "bytes": 135980,
+        "sha256": "28286c72da18cc3f1a3abd72590cfb890fa2dd2014a59047a67944f88c0752cb"
+      },
+      "destination": "pvp-v9/fixture-manifest-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\validation-v1.json",
+        "bytes": 2990,
+        "sha256": "72b0a436f316475c6c1a1b75c4d79a89a7f866640f2189685a72eec136e6e6f6"
+      },
+      "destination": "backend-v3/validation-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\integration-v1.json",
+        "bytes": 885,
+        "sha256": "776ab5039be4cc4611b905567e21352292c960c6925031bbba1f4f0c3903b87c"
+      },
+      "destination": "backend-v3/integration-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-executions-v1.json",
+        "bytes": 858,
+        "sha256": "7ecc3aff7232263a9c13a89ad6a53ec4dfaa808041bb583a137c41a5191a4524"
+      },
+      "destination": "backend-v3/test-executions-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\verified-selected-tests-v1.json",
+        "bytes": 1169,
+        "sha256": "5d03586073d118793eea6806399660c41edcaab9b39f861337bd7331f894e8bb"
+      },
+      "destination": "backend-v3/verified-selected-tests-v1.json"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\gateway-release.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "destination": "backend-v3/gateway-release.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\gateway-release.stderr.log",
+        "bytes": 57423,
+        "sha256": "ee34a60014afc13129c4bda36558a0a3f4b9a1abbeaff5c3faf5083b890bd26d"
+      },
+      "destination": "backend-v3/gateway-release.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-0.stdout.log",
+        "bytes": 4376,
+        "sha256": "2e8e239e3c5030845f7dfa2291eac69beff42ea965f452c51795e411ec37c967"
+      },
+      "destination": "backend-v3/test-0.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-0.stderr.log",
+        "bytes": 44284,
+        "sha256": "f54caee8d09d5836837ead348b2919bbc0600526c8152956870441c72c289eef"
+      },
+      "destination": "backend-v3/test-0.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-1.stdout.log",
+        "bytes": 368,
+        "sha256": "d7603dc98cc013f65f0cdbb12311ef34e3627401d18889a4b34e0c1e48d77c6a"
+      },
+      "destination": "backend-v3/test-1.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-1.stderr.log",
+        "bytes": 44133,
+        "sha256": "642550abdfbdb3a8131ded23621c5df6ef065b09756c2e2d4e0dbfd0e8617fe9"
+      },
+      "destination": "backend-v3/test-1.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-2.stdout.log",
+        "bytes": 469,
+        "sha256": "f95561ab8d566adb19fa202c50f96b9782cca3c8c31268faf5dc9a775d338dfa"
+      },
+      "destination": "backend-v3/test-2.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-2.stderr.log",
+        "bytes": 44133,
+        "sha256": "a4564b1e39b1d485380c1c6e6957e5bddb8231efc75cf44d18dafc6afd57d450"
+      },
+      "destination": "backend-v3/test-2.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-3.stdout.log",
+        "bytes": 206,
+        "sha256": "a896aeee51c42ecd5033fd3497a827960226d5fd1bb7f215b859ca5e9b5b32cd"
+      },
+      "destination": "backend-v3/test-3.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-3.stderr.log",
+        "bytes": 44133,
+        "sha256": "a4564b1e39b1d485380c1c6e6957e5bddb8231efc75cf44d18dafc6afd57d450"
+      },
+      "destination": "backend-v3/test-3.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-4.stdout.log",
+        "bytes": 337,
+        "sha256": "94ef7d7a3f2b775b59e2f6f910048a966564cd5a380bbb44799aca02fbdb6fc2"
+      },
+      "destination": "backend-v3/test-4.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-4.stderr.log",
+        "bytes": 44133,
+        "sha256": "6432946aa728dd3dcfbad7be339162051b494a9f00a0fa1b743aa2824a0d00e7"
+      },
+      "destination": "backend-v3/test-4.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-5.stdout.log",
+        "bytes": 240,
+        "sha256": "c63c490b90fd30756dc13e72741fb9cc3dbd29c6ec29aad55b51cb03b115bf93"
+      },
+      "destination": "backend-v3/test-5.stdout.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-stress-backend-v3\\test-5.stderr.log",
+        "bytes": 44133,
+        "sha256": "31cc16cdc9da5ea41133d34d70f93a2ee9df30ee3949f9c4cafc9832128d40fb"
+      },
+      "destination": "backend-v3/test-5.stderr.log"
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\server-only-pvp-postgres-v2\\import-validation-v1.json",
+        "bytes": 1426,
+        "sha256": "9d45877c34cd7b70f2875179bca12c44940273389e7a0c85be446c9566c1615b"
+      },
+      "destination": "postgres-fixture-import-v2.json"
+    }
+  ]
+}

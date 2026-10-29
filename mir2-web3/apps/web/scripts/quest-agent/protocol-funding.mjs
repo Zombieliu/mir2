@@ -153,6 +153,10 @@ export async function collectSafeFundingVenison(owner, {
   sustain,
   refreshWhileWaiting,
   requiredCount = 2,
+  hasRequiredBudget,
+  preferCandidate,
+  qualifiedOnlyCandidates = false,
+  refreshUnqualifiedCandidates = false,
   maxHunts = 8,
   maxEmptySearchRefreshes = 20,
   clearMonster = clearTravelBlockingMonster,
@@ -166,7 +170,20 @@ export async function collectSafeFundingVenison(owner, {
   if (typeof navigate !== 'function') throw new TypeError('navigate must be a function');
   if (typeof clearMonster !== 'function') throw new TypeError('clearMonster must be a function');
 
+  if (hasRequiredBudget !== undefined && typeof hasRequiredBudget !== 'function') throw new TypeError('hasRequiredBudget must be a function');
+  if (preferCandidate !== undefined && typeof preferCandidate !== 'function') throw new TypeError('preferCandidate must be a function');
+  if (typeof qualifiedOnlyCandidates !== 'boolean') throw new TypeError('qualifiedOnlyCandidates must be a literal boolean');
+  if (qualifiedOnlyCandidates && typeof preferCandidate !== 'function') throw new TypeError('qualifiedOnlyCandidates requires preferCandidate');
+  if (typeof refreshUnqualifiedCandidates !== 'boolean') throw new TypeError('refreshUnqualifiedCandidates must be a literal boolean');
+  if (refreshUnqualifiedCandidates && typeof refreshWhileWaiting !== 'function') throw new TypeError('candidate discovery requires refreshWhileWaiting');
+  const capitalMode = hasRequiredBudget !== undefined;
   const targetCount = positiveInteger(requiredCount, 'requiredCount');
+  async function requiredBudgetSatisfied() {
+    if (!capitalMode) return inventoryQuantity(owner.snapshot, 'Venison') >= targetCount;
+    const satisfied = await hasRequiredBudget(owner);
+    if (typeof satisfied !== 'boolean') throw new TypeError('hasRequiredBudget must return a literal boolean');
+    return satisfied;
+  }
   const huntLimit = positiveInteger(maxHunts, 'maxHunts');
   const emptySearchLimit = positiveInteger(maxEmptySearchRefreshes, 'maxEmptySearchRefreshes');
   const beforeCount = inventoryQuantity(owner.snapshot, 'Venison');
@@ -182,9 +199,17 @@ export async function collectSafeFundingVenison(owner, {
   let hunts = 0;
   let huntAttempts = 0;
   let emptySearchRefreshes = 0;
-  const contestedDeerIds = new Set();
-  while (inventoryQuantity(owner.snapshot, 'Venison') < targetCount && huntAttempts < huntLimit) {
-    let target = liveFundingDeer(owner.snapshot, contestedDeerIds);
+  const contestedDeerIds = new Set(), refreshedCueIds = new Set();
+  let cueRefreshCount = 0;
+  function reserveEmptyRefresh() {
+    emptySearchRefreshes += 1;
+    if (emptySearchRefreshes > emptySearchLimit) throw new Error(`safe Deer funding found no live Deer after ${emptySearchLimit} bounded refreshes`);
+  }
+  let goalSatisfied = false;
+  // Check after the last allowed attempt too; the predicate never refunds or
+  // skips a selection attempt, and errors remain terminal.
+  while (!(goalSatisfied = await requiredBudgetSatisfied()) && huntAttempts < huntLimit) {
+    let target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate, qualifiedOnlyCandidates);
     if (!target) {
       const actor = selfPlayer(owner);
       const ordered = [...fundingSearchPoints].sort((left, right) =>
@@ -196,8 +221,23 @@ export async function collectSafeFundingVenison(owner, {
           2_048,
           Math.max(96, travelDistance * 2 + 192),
         );
+        let cue = null, stopFailed = false, stopFailure;
         try {
-          await navigate(candidate.position, 8, () => Boolean(liveFundingDeer(owner.snapshot, contestedDeerIds)), {
+          await navigate(candidate.position, 8, () => {
+            try {
+              if (cue) return true;
+              if (liveFundingDeer(owner.snapshot, contestedDeerIds,
+                qualifiedOnlyCandidates ? preferCandidate : undefined, qualifiedOnlyCandidates)) return true;
+              if (refreshUnqualifiedCandidates && cueRefreshCount < emptySearchLimit) {
+                const unknown = unqualifiedFundingDeer(owner.snapshot, contestedDeerIds, refreshedCueIds);
+                if (unknown) {
+                  cue = { objectId: fundingCueId(unknown.objectId), sequence: Number.isSafeInteger(owner.sequence) && owner.sequence >= 0 ? owner.sequence : null };
+                  return true;
+                }
+              }
+              return false;
+            } catch (error) { if (!stopFailed) { stopFailed = true; stopFailure = error; } throw stopFailure; }
+          }, {
             hostileAvoidanceRadius: 2,
             // Map 0 has entrances hundreds of cells from the beginner fields.
             // Bound the trip by authoritative distance plus a fixed detour
@@ -212,8 +252,14 @@ export async function collectSafeFundingVenison(owner, {
             maxSuccessfulSteps: successfulStepBudget,
             maxAttempts: 2_048,
           });
+          if (stopFailed) throw stopFailure;
         } catch (error) {
-          if (!String(error?.message ?? '').startsWith('No walk path')) throw error;
+          // A qualification/guard failure is not a route-planning failure,
+          // regardless of its text or the shape of its message property.
+          if (stopFailed) throw stopFailure;
+          let noPath = false;
+          try { noPath = String(error?.message ?? '').startsWith('No walk path'); } catch { /* Classification must not replace the original NAV error. */ }
+          if (!noPath) throw error;
           if (typeof owner.record === 'function') {
             owner.record('diagnostic', {
               type: 'safeSupplyFundingSpawnUnreachable',
@@ -223,17 +269,21 @@ export async function collectSafeFundingVenison(owner, {
           }
           continue;
         }
-        target = liveFundingDeer(owner.snapshot, contestedDeerIds);
+        if (cue) {
+          // A normally fulfilled navigation has drained before this paced raw
+          // request. Never retry this waypoint or treat the cue as live HP.
+          reserveEmptyRefresh();
+          refreshedCueIds.add(cue.objectId); cueRefreshCount += 1;
+          await refreshWhileWaiting(owner, { type:'fundingCandidateDiscovery', objectId:cue.objectId,
+            triggerSequence:cue.sequence, searchPoint:{x:Number(candidate.position.x),y:Number(candidate.position.y)},
+            refresh:emptySearchRefreshes, cueRefresh:cueRefreshCount, limit:emptySearchLimit });
+        }
+        target = liveFundingDeer(owner.snapshot, contestedDeerIds, preferCandidate, qualifiedOnlyCandidates);
         if (target) break;
       }
     }
     if (!target) {
-      emptySearchRefreshes += 1;
-      if (emptySearchRefreshes > emptySearchLimit) {
-        throw new Error(
-          `safe Deer funding found no live Deer after ${emptySearchLimit} bounded refreshes`,
-        );
-      }
+      reserveEmptyRefresh();
       if (typeof owner.record === 'function') {
         owner.record('diagnostic', {
           type: 'safeSupplyFundingAwaitRespawn',
@@ -320,7 +370,8 @@ export async function collectSafeFundingVenison(owner, {
 
   const afterCount = inventoryQuantity(owner.snapshot, 'Venison');
   const collected = afterCount - beforeCount;
-  if (afterCount < targetCount) {
+  if (capitalMode ? !goalSatisfied : afterCount < targetCount) {
+    if (capitalMode) throw new Error(`safe Deer funding capital insufficient with ${afterCount} Venison after ${hunts} hunts and ${huntAttempts} attempts`);
     throw new Error(`safe Deer funding holds ${afterCount}/${targetCount} Venison after ${hunts} hunts and ${huntAttempts} attempts`);
   }
   if (typeof owner.record === 'function') {
@@ -332,7 +383,9 @@ export async function collectSafeFundingVenison(owner, {
       mapFileName: String(owner.snapshot?.mapFileName ?? ''),
     });
   }
-  return { method: 'DeerVenison', collected, hunts, beforeCount, afterCount };
+  const result = { method: 'DeerVenison', collected, hunts, beforeCount, afterCount };
+  return capitalMode ? { ...result, completionMode: 'actual-capital', estimatedRequiredCount: targetCount,
+    huntAttempts, budgetSatisfied: true } : result;
 }
 
 async function physicalFundingAttack(client, target) {
@@ -346,20 +399,49 @@ async function physicalFundingAttack(client, target) {
 }
 
 function recoverableFundingTargetLoss(error) {
-  const message = String(error?.message ?? '');
+  let message;
+  try { message = String(error?.message ?? ''); } catch { return false; }
   return /^target \d+ left the authoritative snapshot before (?:attack|death was confirmed)$/i.test(message) ||
     /^target \d+ has no walk path from the current map region$/i.test(message) ||
     /^target \d+ made no authoritative combat progress after \d+ attacks$/i.test(message);
 }
 
-function liveFundingDeer(snapshot, ignoredObjectIds) {
+// Discovery is not a live/neutral/attack qualification. Missing exact HP
+// requires a full raw receipt; percentages and invalid HP values never fill it.
+const fundingCueId = value => typeof value === 'number' && Number.isSafeInteger(value) && value > 0 && value <= 0xffff_ffff ? value :
+  typeof value === 'string' && /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) <= 0xffff_ffff ? Number(value) : null;
+function unqualifiedFundingDeer(snapshot, contested, refreshed) {
+  const actor = selfPlayer({snapshot}), entities = snapshot?.entities ?? [];
+  return entities.filter(entity => {
+    const id = fundingCueId(entity?.objectId);
+    return id !== null && !contested.has(id) && !refreshed.has(id) &&
+      entity.kind === 'monster' && entity.name === 'Deer' && entity.dead === false &&
+      Number.isSafeInteger(entity.x) && entity.x >= 0 && entity.x <= 65535 &&
+      Number.isSafeInteger(entity.y) && entity.y >= 0 && entity.y <= 65535 &&
+      (entity.hp === undefined || entity.hp === null) &&
+      entities.filter(other => fundingCueId(other?.objectId) === id).length === 1;
+  }).sort((a,b)=>pointDistance(actor,a)-pointDistance(actor,b)||fundingCueId(a.objectId)-fundingCueId(b.objectId))[0] ?? null;
+}
+
+function liveFundingDeer(snapshot, ignoredObjectIds, preferCandidate, qualifiedOnly = false) {
   const actor = selfPlayer({ snapshot });
-  return (snapshot?.entities ?? [])
+  const candidates = (snapshot?.entities ?? [])
     .filter(entity => normalized(entity?.kind) === 'monster' &&
       normalized(entity?.name) === 'deer' && entity?.dead !== true && Number(entity?.hp) > 0 &&
       !ignoredObjectIds.has(Number(entity?.objectId)))
     .sort((left, right) => pointDistance(actor, left) - pointDistance(actor, right) ||
-      Number(left.objectId) - Number(right.objectId))[0] ?? null;
+      Number(left.objectId) - Number(right.objectId));
+  if (preferCandidate === undefined) return candidates[0] ?? null;
+  // Priority never removes a candidate or charges an attempt. Evaluate every
+  // current candidate so callback failures cannot be hidden by an early match.
+  const preferred = candidates.map(candidate => {
+    const result = preferCandidate(candidate);
+    if (typeof result !== 'boolean') throw new TypeError('preferCandidate must return a literal boolean');
+    return result;
+  });
+  const first = preferred.indexOf(true);
+  if (qualifiedOnly && first < 0) return null;
+  return candidates[first < 0 ? 0 : first] ?? null;
 }
 
 async function harvestFundingCorpse(owner, initialCorpse, navigate, targetInventoryCount, sleep) {

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "state": "PENDING_CURRENT_JS_ROOT_QUALIFICATION_NO_RUNTIME_EXECUTION",
+  "packageId": "ordinary-capacity-bank-prepare-v17",
+  "tools": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\source-lib-v1.mjs",
+      "bytes": 18471,
+      "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\copy-source-bank-v1.mjs",
+      "bytes": 15794,
+      "sha256": "7fbbd202e3c564fbd267d20f4341db496dffe8ed08fac7b9cc39137fd770b687"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\freeze-prepare-v1.mjs",
+      "bytes": 8895,
+      "sha256": "ed3e6ddf07e85cad0db6e9d2a0c2ae3f69f20cf9e6ff2774763c7942601643db"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\run-owned-prepare-v1.mjs",
+      "bytes": 26463,
+      "sha256": "9e2b1d2a9801962b82ae3eb0b711e6ad88f5b39de36c175d596d939fbe2a448a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\owned-child-v1.mjs",
+      "bytes": 2401,
+      "sha256": "b7808473d1c9f480c3f6464cae5fefb96c34ba937abf0e1d95c45410b8aa250b"
+    }
+  ],
+  "sourcePlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\source-bank-plan-pending-v1.json",
+    "bytes": 22082,
+    "sha256": "45183dd2e1ad548adefc023aae0e0bc732d051e22858400116abf5109dc326e2"
+  },
+  "config": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\prepare-config-pending-v1.json",
+    "bytes": 9569,
+    "sha256": "d55767b03300195a9c688609ceeabda66b537bc0ab885a8095fac440fb4ff144"
+  },
+  "binding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\backend-release-binding-pending-v1.json",
+    "bytes": 1216,
+    "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\derivation-v1.json",
+    "bytes": 38703,
+    "sha256": "a179b1ced66a935441a328e0f08b46ed6e167b503e22d7907e1e664b6a4b658c"
+  },
+  "syntax": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\syntax-checks-v1.json",
+    "bytes": 1227,
+    "sha256": "e5b08e370445e10a10abee662d2762c7b4c134a166dd357a0952369f9c95f8b1"
+  },
+  "readme": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v17\\README-pending-v1.md",
+    "bytes": 1846,
+    "sha256": "ea4742e34efdc8a5b379659fa09fd76c62720c6b5ef6bef45e0a59c358cc6f76"
+  },
+  "generator": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\derive-ordinary-capacity-bank-prepare-v17.mjs",
+    "bytes": 67088,
+    "sha256": "442b4f72501b54455e705430d30b8b591a983e6f07acf9561693f0a639fa8e59"
+  },
+  "source11PinsMatched": true,
+  "prior4PinsMatched": true,
+  "twoHistoryGroups8PinsMatched": true,
+  "rootHistoryPreflight": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v16\\history-supplement-v1\\actual-two-group-history-receipt-v1.json",
+    "bytes": 3471,
+    "sha256": "42d81552f82d480aac085d67ff9239e3238ad353abe833475f215eedebb4966e"
+  },
+  "sourceLibWholeRawUnchanged": true,
+  "currentJsCommit": null,
+  "currentRootReceipt": null,
+  "currentFreshTestCount": null,
+  "currentBackendVerification": null,
+  "actualFreeze": null,
+  "continuation": {
+    "mode": "historical-prepared-index-v1",
+    "historicalPreparedCount": 58,
+    "historicalNotFresh": true,
+    "expectedThisRun": 42,
+    "freshOriginalPoolIndices1Based": [
+      59,
+      100
+    ],
+    "first4FreshReusePerformedThisRun": false
+  },
+  "eligibleForFreezeNow": false,
+  "ownedExecutionPerformed": false,
+  "sourceBankCopyPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

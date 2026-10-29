@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-25T20:46:23.779Z",
+  "runId": "1792959622496-365f0175",
+  "scope": "Root actual terminal and ended consumer facts; failed original game verdict preserved. This is not a fresh live run or independent per-request packet replay.",
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "d2407fb84055e2088e3ca6ccdb4f8b80d15a9d16",
+  "gatewaySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "backendInputCount": 50,
+  "actualRootInvocations": [
+    {
+      "mode": "run-owned --execute-authorized-probe --attack-results=v2",
+      "sessionId": 15289,
+      "exitCode": 1
+    },
+    {
+      "mode": "posthoc v2 collect-after-owned-cleanup",
+      "exitCode": 0
+    },
+    {
+      "mode": "original verify-collected-public",
+      "exitCode": 0
+    },
+    {
+      "mode": "original collect-store-after-owned-cleanup",
+      "exitCode": 0
+    },
+    {
+      "mode": "original verify-collected-store",
+      "exitCode": 0
+    }
+  ],
+  "originalGameVerdict": {
+    "reportOk": false,
+    "rawVerifierAccepted": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p1EngineeringContractsPassed": true,
+    "p2Started": false,
+    "peakControlledActors": 25,
+    "highestPassedStage": 10,
+    "stages": [
+      {
+        "name": "stage-2",
+        "controlledActors": 2,
+        "seconds": 300,
+        "measuredSeconds": 300.259,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792959653921,
+        "endedAtMs": 1792959954180,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-10",
+        "controlledActors": 10,
+        "seconds": 300,
+        "measuredSeconds": 300.261,
+        "completed": true,
+        "passed": true,
+        "startedAtMs": 1792960009375,
+        "endedAtMs": 1792960309636,
+        "minuteWindows": 5
+      },
+      {
+        "name": "stage-25",
+        "controlledActors": 25,
+        "seconds": 300,
+        "measuredSeconds": 300.254,
+        "completed": true,
+        "passed": false,
+        "startedAtMs": 1792960394310,
+        "endedAtMs": 1792960694564,
+        "minuteWindows": 5
+      }
+    ],
+    "windowsByPhase": {
+      "stage-2": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-10": {
+        "complete": 5,
+        "passed": 5
+      },
+      "stage-25": {
+        "complete": 5,
+        "passed": 3
+      }
+    },
+    "unexecuted": [
+      "stage-50",
+      "stage-100",
+      "7200-second soak",
+      "save",
+      "resume",
+      "post-resume measurement"
+    ],
+    "reason": "Stage25 W3/W4 per-fighter combat launch supply; actor05 positive-hit rate also below actual-duration threshold. Stage25 218 observed attack actions all classified successful, no timeout/not-launched. All original gates remain."
+  },
+  "baseVerification": {
+    "originalCopiesVerified": 185,
+    "publicFilesVerifiedBeforeThisReceipt": 189,
+    "externalArchivesVerified": 3,
+    "rawRows": 82186,
+    "rawBytes": 50578926,
+    "rawSha256": "1aaa687e95642e46a5db8acbbf7a8ffb571293b63f3c07b965c70ff454de8cd4",
+    "invalidRawMonitorRows": 0,
+    "originalVerdictPreserved": true,
+    "normalOwnedCleanup": true
+  },
+  "storeVerification": {
+    "rows": 106,
+    "bytes": 23083,
+    "sha256": "927baeb695360376d15ade2f3fa8a7dd5d873fcc33ca329e456d807268ee56d8",
+    "diagnosticComplete": true,
+    "captureReasons": [],
+    "contributesToGameAcceptance": false
+  },
+  "independentCleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-root-independent-cleanup-v1.json",
+    "bytes": 409,
+    "sha256": "1daaa6cb91e6554da86bed13a977bc2f75f59fb27f2e70b41ca4be80cff3d1e1"
+  },
+  "analysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-report-failure-analysis-v1\\analysis-v1.json",
+    "bytes": 42280,
+    "sha256": "a71c159e87ed0fd1b88c94d69d768addd233aa589ef236369815d7e48fa8af1e"
+  },
+  "storeAnalysis": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-wait-analysis-v1\\analysis-v1.json",
+    "bytes": 24819,
+    "sha256": "8d7ff05c9f0ace2a05a00b0871fa50beeacb811c275005caebda6bfed565eaf5"
+  },
+  "coreArtifacts": [
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\collect-formal-native-v2-account-store-wait-ladder-13-public-artifact-catalog.json",
+      "bytes": 65388,
+      "sha256": "f96df32acb661959bd36c402710b4f7cac2ea91bfb6f634be977cd5cad6fbe44"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13\\public-verification.json",
+      "bytes": 7105,
+      "sha256": "392c37e6d3035bb35717fd1668f581e0cb6c68447a59e1a7d351109da8445389"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-public-verification.json",
+      "bytes": 1426,
+      "sha256": "e4a7c66ff54fe439b230036389843705c8cc753260aee44c40fa0400b94cf081"
+    },
+    {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-account-store-wait-ladder-13-store-diagnostics\\store-artifact-catalog.json",
+      "bytes": 5157,
+      "sha256": "98037f21748c1d866764a94ba6574d1d2ee240eb936abd8e1a389075e1a2315e"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\launcher-source-frozen-v1.json",
+      "bytes": 43488,
+      "sha256": "55d2344aa547e8c1a00dbb9b0d457c5637dc3a388606cc817a7d6c44f4f22c4a"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\source-guard-readonly-verification.json",
+      "bytes": 2290,
+      "sha256": "b7b2239389a3d66d3db74747ec51518f49acda27521dd618bed457eaf11e901c"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\source-pins.json",
+      "bytes": 167649,
+      "sha256": "242edddda787fb565f720723cbca72a584e90b13fbb6a38c9b8b2c1aad9dbf91"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\realm-cleanup.json",
+      "bytes": 6409,
+      "sha256": "48ee7d0f03a5f9649cb1b1d0da5279251c479745f65071fbd32de75ec8235577"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-execution-v1.json",
+      "bytes": 813,
+      "sha256": "1455f843604b6a826f2e461667e1ebf6b82afdc44e6c19d19e5cde0fd3d14813"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-post-collector-independent-review-v1\\review-v2.json",
+      "bytes": 1994,
+      "sha256": "b9973e5f2065b19a646407e326528958631f4a77b283099ff43942249b7decc1"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-post-collector-independent-review-v1\\review-v1.json",
+      "bytes": 6,
+      "sha256": "abdfbffecbe18ed94df9829819e596ee285b52a94aa108514452a9121721c789"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-stdout-v1.log",
+      "bytes": 132826,
+      "sha256": "221b99478b2fd446966a3f29fff4c90f42f39be7dd215897120f9a1734dac985"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-collection-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-verification-stdout-v1.log",
+      "bytes": 5017,
+      "sha256": "ea47fbbe35c0de602731cabfa393e0ad6b6a3ef6388b17d45cd973b457cb8cfc"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-base-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-collection-stdout-v1.log",
+      "bytes": 393,
+      "sha256": "77a89f6c51729ddd5684ce2be25c1426c372bb3e4c0c3c601729b606f0f95a78"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-collection-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-verification-stdout-v1.log",
+      "bytes": 1244,
+      "sha256": "cd7acecf0ded42bbdda38c20b29b991db8df106bb579eac55a5bc62d3ced6eef"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\formal13-store-verification-stderr-v1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "limits": [
+    "No stage50/100 or two-hour capacity result exists for this run.",
+    "Successful action rows are not an independent replay of every typed request plus dual positive packets within900ms.",
+    "Store completed-only records above50ms omit unfinished/subthreshold/uninstrumented waits; nested spans are not additive.",
+    "No cause of prior five-second stall is established or declared fixed.",
+    "Local protocol clients and File backend do not establish cloud sizing, WAN/TLS/production database, browser rendering, N+1 or human acceptance.",
+    "Posthoc collector changes only public scope identity and self/proof allowlist; original100 runtime input bytes remain preserved.",
+    "The first Root review receipt is preserved null JSON after a PowerShell record-construction error; the valid v2 receipt preceded actual collection."
+  ]
+}

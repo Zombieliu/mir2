@@ -1,0 +1,26 @@
+{
+  "schema": "mir2.windows.map-atlas-input-provenance.v1",
+  "capturedAtUtc": "2026-10-29T08:33:51.252Z",
+  "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410",
+  "passed": true,
+  "trackedPngFiles": 16816,
+  "actualPngFiles": 16816,
+  "totalInputPngBytes": 88684274,
+  "allWorkingPngBytesMatchCommittedGitBlobs": true,
+  "trackedAndActualPngSetsExactlyEqual": true,
+  "scopedWorkingAndIndexDiffsEmpty": true,
+  "sourceListCommand": "git ls-files -s -z -- apps/web/public/original-map",
+  "gitIndexListRawSha256": "05a726fd7f990a66c3c64bc329ae18032865673c4c5053fac27047c16877b29f",
+  "inputClosureSha256": "5a9169e923f99524713d5f0e06ee60c27587c258e54ed1868d8e7b077269318c",
+  "inputFileManifest": {
+    "path": "map-atlas-input-files.json",
+    "bytes": 3625474,
+    "sha256": "c31c94472cbc767b6656b31e360a60e40e6d66fe4c73c70bb1a6768fc5029dc1"
+  },
+  "builder": {
+    "path": "apps/web/scripts/build-map-atlas-pack.mjs",
+    "rawSha256": "92fdf9ea427ba6524d84a1017784d0a212b9f2d7edf76e63cfdc9e07d911723a",
+    "normalizedLfSha256": "92fdf9ea427ba6524d84a1017784d0a212b9f2d7edf76e63cfdc9e07d911723a"
+  },
+  "limits": "This pins all committed/actual exported original-map PNG inputs. Atlas regeneration/output and full209-map completion/coverage are separate coordinator runs."
+}

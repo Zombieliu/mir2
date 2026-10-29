@@ -1,0 +1,1088 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_ONLY_NOT_SEALED",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-driver-source-guard.mjs",
+        "bytes": 1876,
+        "sha256": "7e768af2eca2e5fdd56ad8d2783595fb9bc0767594aacf04ffe884158433df24"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\backend-driver-source-guard.mjs",
+        "bytes": 1876,
+        "sha256": "7e768af2eca2e5fdd56ad8d2783595fb9bc0767594aacf04ffe884158433df24"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 1876,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\backend-library-binding.json",
+        "bytes": 346,
+        "sha256": "55a7e8475c2ce8b178c4ecd89274a0e29718c08deef44e00ee73729447808883"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\backend-library-binding.json",
+        "bytes": 346,
+        "sha256": "55a7e8475c2ce8b178c4ecd89274a0e29718c08deef44e00ee73729447808883"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 346,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\candidate-release-binding.json",
+        "bytes": 6758,
+        "sha256": "3e545c5206ca8cf4a7605b5578a98691e6342c016b7cc2c794f4b76ce16eb611"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\candidate-release-binding.json",
+        "bytes": 6758,
+        "sha256": "3e545c5206ca8cf4a7605b5578a98691e6342c016b7cc2c794f4b76ce16eb611"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 6758,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\collect-public.mjs",
+        "bytes": 43338,
+        "sha256": "0b42ec9ac66116cab7e2c32ed8e9f3ddf7dede63c1708de5036f14e0dafd1115"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-public.mjs",
+        "bytes": 43271,
+        "sha256": "5131b65ae652f36442ea1fadb6cebb37da4c0fc37c9b911f8bc7a940b87ae562"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 138,
+        "commonSuffixBytes": 357,
+        "originalMiddleBytes": 42843,
+        "originalMiddleSha256": "48b4ae8b82ef00a9b7ce17f90bf9ab54ebe9a6aad491b8291272b71ca8bbcb93",
+        "derivedMiddleBytes": 42776,
+        "derivedMiddleSha256": "40cbfeb343a8b3fc261b225c55cd20cedf9ff4d66f28cdb56d9239b31183a7d1",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\collect-store-public.mjs",
+        "bytes": 4693,
+        "sha256": "b35acb37bbca1fff58c15f0594e83d2ad58eda11bbb7b87091e02426583358d0"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\collect-store-public.mjs",
+        "bytes": 4927,
+        "sha256": "bb8203d69ac110112e2d7f31e589a4c7cdda1b60b955c3e109a9c95a55e4d048"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 7,
+        "commonSuffixBytes": 5,
+        "originalMiddleBytes": 4681,
+        "originalMiddleSha256": "c1dda3b6368668c953abde8037010ba6fa764591fc7cc8180dc5244387bd5d19",
+        "derivedMiddleBytes": 4915,
+        "derivedMiddleSha256": "4e0a2aa77a0d7d8d4716139cd4656ee32c69a1f638062dbfc069d759f8bc0b1d",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\current-driver-binding.json",
+        "bytes": 2361,
+        "sha256": "a2f953249edb7b08c7a12d1ae0fd64b6343f45638e31e6ebdbd159264ca1d4ed"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\current-driver-binding.json",
+        "bytes": 2361,
+        "sha256": "a2f953249edb7b08c7a12d1ae0fd64b6343f45638e31e6ebdbd159264ca1d4ed"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2361,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\driver-binding-contract.mjs",
+        "bytes": 1303,
+        "sha256": "f2f2cf8371a2b67c23a1e9353edd3a51a8e6e4d44c3239290aef5164c9ec0378"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\driver-binding-contract.mjs",
+        "bytes": 1303,
+        "sha256": "f2f2cf8371a2b67c23a1e9353edd3a51a8e6e4d44c3239290aef5164c9ec0378"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 1303,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\driver-evidence-contract.mjs",
+        "bytes": 4579,
+        "sha256": "8aca8c26abcd4f3def242a73068ff2ed00a48f92e4ca42627d092970a9582469"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\driver-evidence-contract.mjs",
+        "bytes": 4579,
+        "sha256": "8aca8c26abcd4f3def242a73068ff2ed00a48f92e4ca42627d092970a9582469"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 4579,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\driver-report-contract.mjs",
+        "bytes": 9783,
+        "sha256": "dd024929a405d4d1eb62557c0e06ad14d852ec5a15e8dbee99d5083e6559b7b2"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\driver-report-contract.mjs",
+        "bytes": 9783,
+        "sha256": "dd024929a405d4d1eb62557c0e06ad14d852ec5a15e8dbee99d5083e6559b7b2"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 9783,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\full16-actual-prerequisite-v1.json",
+        "bytes": 4677,
+        "sha256": "644597aa08abc083d7d0108ee6361b898991a2527b39feb494efdfd3b6aaba46"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\full16-actual-prerequisite-v1.json",
+        "bytes": 4677,
+        "sha256": "644597aa08abc083d7d0108ee6361b898991a2527b39feb494efdfd3b6aaba46"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 4677,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\hp-maintenance-status-schema.mjs",
+        "bytes": 1509,
+        "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 1509,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\initialize-private.ps1",
+        "bytes": 2226,
+        "sha256": "12fa31e59cfc1729a8d9b332cdd2cb0f044281a1910bcd388386a479b78bc9bf"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\initialize-private.ps1",
+        "bytes": 2499,
+        "sha256": "19cdd3a211e206517a21af53fdabb63a3c1853c701a52ff89ba1ccb5e68fb97e"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 91,
+        "commonSuffixBytes": 2135,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 273,
+        "derivedMiddleSha256": "b67a3f1d6f7cc98ed56eeab5a504413354a61f58a3a15b0107c53d32f151aaa5",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\input-lib.mjs",
+        "bytes": 16656,
+        "sha256": "f35186d28950b8aa67f84a15c63dd04e9c917426b06045783ee95aa8f1a3d11a"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\input-lib.mjs",
+        "bytes": 16659,
+        "sha256": "e2d47628023af96b7a9a00cd2f745d1e58504ee61439e41523811a759c15c7a6"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 1552,
+        "commonSuffixBytes": 15095,
+        "originalMiddleBytes": 9,
+        "originalMiddleSha256": "c32adb51ee5e0799db8e121622d7c990a2060dc8654df0bf2eef60ab7638d346",
+        "derivedMiddleBytes": 12,
+        "derivedMiddleSha256": "19b9de59d74b3d42c39b11ead747aa1bef1813a71359c8d45a9ba745057ee893",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\legacy14-original.mjs.txt",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\legacy14-original.mjs.txt",
+        "bytes": 10310,
+        "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 10310,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\measured-phase-contract.mjs",
+        "bytes": 772,
+        "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 772,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\monitor-owned.mjs",
+        "bytes": 1182,
+        "sha256": "204abfb6fa4000b9da770a8dbc128225ff3583caf9e7763dbedcf6b22d5adc72"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\monitor-owned.mjs",
+        "bytes": 1283,
+        "sha256": "de79844fbb6d79a9ab3e63c4fae24a3952886058b30fd55f615c10e36917f597"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 15,
+        "commonSuffixBytes": 1167,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 101,
+        "derivedMiddleSha256": "50aa6969c8d27e3ca87e3a630dc1a20dbcbc640b088d5754d0e9ebe44e888eb9",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\phase-window-contract.mjs",
+        "bytes": 3442,
+        "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 3442,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\preparation-plan.json",
+        "bytes": 2078,
+        "sha256": "9eb6b726621d23e1afc4e000311b77614177c0a0e4d5dae26e6da2dceb909a23"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\preparation-plan.json",
+        "bytes": 1334,
+        "sha256": "5cd52efd074c8f1ec772065367f3d8aa8905324896bd81935552f3447536d3ac"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 36,
+        "commonSuffixBytes": 3,
+        "originalMiddleBytes": 2039,
+        "originalMiddleSha256": "9017c511d950796524bcc2cf494189b2434380d98e5598330c999edf9554d531",
+        "derivedMiddleBytes": 1295,
+        "derivedMiddleSha256": "0e388eb5009dc977b821920bd464972d138950d01cbe6150a3d6eae01618187e",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\prepare-inputs.mjs",
+        "bytes": 11766,
+        "sha256": "bdc10b1aa572b00cb1e0732deaa56e4bf11296d73dc1d2be11eeb239d7addf21"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\prepare-inputs.mjs",
+        "bytes": 13963,
+        "sha256": "0f18dd7259c70e6534ce87f71b93fcaf8fa2b61faa250f40357bc772e9c07d82"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 21,
+        "commonSuffixBytes": 1136,
+        "originalMiddleBytes": 10609,
+        "originalMiddleSha256": "cf9706a67d5b769a83149e5fbf3710edff3b5b14af5ec8aac52d2dc1d26d2bd4",
+        "derivedMiddleBytes": 12806,
+        "derivedMiddleSha256": "2a8b127c938a583d91e0f5a3970ef426022872281b84e2d943b770c2a91970a3",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\projection-build-source-lib.mjs",
+        "bytes": 156,
+        "sha256": "5793e909eb1c552e01c3ee24b95992e921d5efb6bb1fe6702780badfac5d753b"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\projection-build-source-lib.mjs",
+        "bytes": 156,
+        "sha256": "5793e909eb1c552e01c3ee24b95992e921d5efb6bb1fe6702780badfac5d753b"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 156,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\recover-drained-owned.ps1",
+        "bytes": 3195,
+        "sha256": "92345903964b600be994b59874ccd953ae3d4e70c0b88987665edcac48c31583"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\recover-drained-owned.ps1",
+        "bytes": 3468,
+        "sha256": "67cf7583ff2d90dd8d8127a76f0dc69a8b19e33c7affe282f9896d22a93274cb"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 103,
+        "commonSuffixBytes": 3092,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 273,
+        "derivedMiddleSha256": "b67a3f1d6f7cc98ed56eeab5a504413354a61f58a3a15b0107c53d32f151aaa5",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\request-stop.mjs",
+        "bytes": 915,
+        "sha256": "14a5c691187006ebb50798068100d47af7ed3a6c4358c29f75b6774c79ebc90f"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\request-stop.mjs",
+        "bytes": 1016,
+        "sha256": "0652b171ed5f15602ba9246f8640a0e44db55fe0d5f89645758938d70cbf5047"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 15,
+        "commonSuffixBytes": 900,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 101,
+        "derivedMiddleSha256": "50aa6969c8d27e3ca87e3a630dc1a20dbcbc640b088d5754d0e9ebe44e888eb9",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\resource-profile.json",
+        "bytes": 1630,
+        "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\resource-profile.json",
+        "bytes": 1630,
+        "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 1630,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-options.json",
+        "bytes": 2915,
+        "sha256": "391d142894828f7232ef038b6e5a63222067ec403bcb31f0253ce89e1578aaaf"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\run-options.json",
+        "bytes": 2968,
+        "sha256": "69858ede71cde02cb186eb58f2432ff8dd583dcc8f1255a70f0e016f08222664"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 416,
+        "commonSuffixBytes": 52,
+        "originalMiddleBytes": 2447,
+        "originalMiddleSha256": "c3e29b8aa2ded34b59c65bc3a7843b67cbb2c1ced07f9a76713bdd4571d34af7",
+        "derivedMiddleBytes": 2500,
+        "derivedMiddleSha256": "2ccc158af8c07e10d69bcb6b041e01b0c509011209e78bcb2a43cfe6c4b55828",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\run-owned.mjs",
+        "bytes": 19850,
+        "sha256": "3bae40e1a20cd17b44ef9ba060ab0fd9f0facb961ca4a500651bc522c5b67b43"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\run-owned.mjs",
+        "bytes": 21238,
+        "sha256": "87873b4dc48971e03c33d3ca115757a30fd0904089ac949d126a090c96647124"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 21,
+        "commonSuffixBytes": 1669,
+        "originalMiddleBytes": 18160,
+        "originalMiddleSha256": "66ae13ef2d0841fbf097e5bedc4e0aeed5267ed1521509651044eb4513fdb6ff",
+        "derivedMiddleBytes": 19548,
+        "derivedMiddleSha256": "4e486ab44622a1000ba9e07e8a99e57aaffb419edab92ee9cac76c66d3ea58c2",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scenario-prefix-readiness.json",
+        "bytes": 2279,
+        "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2279,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\scenario.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scenario.json",
+        "bytes": 5844,
+        "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 5844,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\scene-binding.json",
+        "bytes": 6572,
+        "sha256": "8e5d1042f9c57b0ce4d83df57815d6b94808e2260ce77e556b20be500f3aa68a"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scene-binding.json",
+        "bytes": 6572,
+        "sha256": "8e5d1042f9c57b0ce4d83df57815d6b94808e2260ce77e556b20be500f3aa68a"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 6572,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scene-contract.mjs",
+        "bytes": 10796,
+        "sha256": "6f91a930d2c1d05a7ca813aaff0c1e44d29289303913d470ac2a72c4211b207f"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 10796,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\scene-driver-compatibility-proof-v1.json",
+        "bytes": 4074,
+        "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scene-driver-compatibility-proof-v1.json",
+        "bytes": 4074,
+        "sha256": "f9b695b3c1c3d7299e27e6bd5a0809a5e7811f14e035b327ca00e4a64d5e6656"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 4074,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\scene-driver-compatibility.mjs",
+        "bytes": 1550,
+        "sha256": "260b80faa43d6a52936097cb1587989cc7a9dc52022dc5f667b10dd3e76c0289"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 1550,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-diagnostics-config.json",
+        "bytes": 4315,
+        "sha256": "1868fd25df6bd3a9e3f2405668bf80c0f7fec5b41a9e2db95e14361fc4f2411f"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-diagnostics-config.json",
+        "bytes": 4445,
+        "sha256": "94d15b550ba934a13eb24dcc2c67f8eede457f3ac2bac627c666790d40ee5daf"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 4312,
+        "commonSuffixBytes": 3,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 130,
+        "derivedMiddleSha256": "c6e851086fd441c7d8e35033cad9e7197b9723c893ecdf64f75ba301aaf3d25c",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-helper-freeze-v1.json",
+        "bytes": 2314,
+        "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-helper-freeze-v1.json",
+        "bytes": 2314,
+        "sha256": "f554d0e280318f3a3624046e3344d8c3becdc7057ca261b28df99c419c283a00"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2314,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-public.mjs",
+        "bytes": 10318,
+        "sha256": "8033874548d93323ef6390b07509887e727b5920850d0c3a1c2a0f810c56677c"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 10318,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-public.test.mjs",
+        "bytes": 22894,
+        "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-public.test.mjs",
+        "bytes": 22894,
+        "sha256": "a0f10c9d721404378e8b5bc56070425393fdf82af21588bbf70de2c274af76ae"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 22894,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-row-contract.mjs",
+        "bytes": 1553,
+        "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 1553,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\slow-stage-schema-contract.json",
+        "bytes": 3573,
+        "sha256": "b8a66eaeb6dd6518b9d242c6d9d794ff1f0252d75f3c017eb2ef62d01728b512"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 3573,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\store-diagnostics-contract.mjs",
+        "bytes": 2720,
+        "sha256": "c31a1c25d6a49f3c1575afaa058f8cd022f430e80c00269e7fffcf12a26e8a08"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2720,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\synthetic-tests-v1.log",
+        "bytes": 7579,
+        "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\synthetic-tests-v1.log",
+        "bytes": 7579,
+        "sha256": "451c97bfe087895450890a37e42f21e9f2305da127a73f9ce9857b8955bf9d37"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 7579,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\verify-full16-gate.mjs",
+        "bytes": 5262,
+        "sha256": "8d370a0819bf9fec3b0de57c25769ff84cac5bf5134cf4327630c76113ae8055"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-full16-gate.mjs",
+        "bytes": 5262,
+        "sha256": "8d370a0819bf9fec3b0de57c25769ff84cac5bf5134cf4327630c76113ae8055"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 5262,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\verify-public.mjs",
+        "bytes": 19042,
+        "sha256": "155567b67a1c1b93b6683c9d553cbb1f002662bfaeb119d7c0956debcc585987"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-public.mjs",
+        "bytes": 19054,
+        "sha256": "3cb3aaa6d4bc7b3b16eac25dc6d2fdab88844d0e7d2578aa330b1b6ac9d19d89"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 21,
+        "commonSuffixBytes": 81,
+        "originalMiddleBytes": 18940,
+        "originalMiddleSha256": "60b608159e0b66077a4364e2a246d7ee8a645337e44d973d67e9462c5521eb9f",
+        "derivedMiddleBytes": 18952,
+        "derivedMiddleSha256": "52c5a1a3255352e8f4fbcbe389e4dede5dba23688f00803c9ade7fcf4655ec10",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\verify-store-public.mjs",
+        "bytes": 4609,
+        "sha256": "742bdeb41c432286c6885b912d7ee4c9e4fce38da7ad48667ab19647b99b3924"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\verify-store-public.mjs",
+        "bytes": 4749,
+        "sha256": "51a3fceb27b61be23bdb945ff22fe8ec0a2a8a48be7bc4bfc6afd8087017779c"
+      },
+      "byteExact": false,
+      "inverse": {
+        "commonPrefixBytes": 7,
+        "commonSuffixBytes": 151,
+        "originalMiddleBytes": 4451,
+        "originalMiddleSha256": "f8abe7d7fa2e762c8049bf7b7e0bc79cbf5e2674dcb9f7c11f7f71611a7e60ee",
+        "derivedMiddleBytes": 4591,
+        "derivedMiddleSha256": "8a28b9529e7cc8793ab2434c1c114e77d4045ceada04747c6d972a82b6e2e62e",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\wire-adapter-synthetic-tests.json",
+        "bytes": 2413,
+        "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\wire-adapter-synthetic-tests.json",
+        "bytes": 2413,
+        "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2413,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\wire-adapter-synthetic-tests.log",
+        "bytes": 2205,
+        "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\wire-adapter-synthetic-tests.log",
+        "bytes": 2205,
+        "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2205,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\wire-diagnostics-adapter.mjs",
+        "bytes": 2514,
+        "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 2514,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\wire-diagnostics-adapter.test.mjs",
+        "bytes": 7373,
+        "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\wire-diagnostics-adapter.test.mjs",
+        "bytes": 7373,
+        "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 7373,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-account-store-wait-feasibility-17\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\wire-diagnostics-contract.mjs",
+        "bytes": 15767,
+        "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+      },
+      "byteExact": true,
+      "inverse": {
+        "commonPrefixBytes": 15767,
+        "commonSuffixBytes": 0,
+        "originalMiddleBytes": 0,
+        "originalMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "derivedMiddleBytes": 0,
+        "derivedMiddleSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "method": "Replace derived middle with the same-range middle read from exact pinned donor; preserve common prefix/suffix.",
+        "rawExact": true
+      }
+    }
+  ],
+  "scope": "Explicit source/config only; no runtime output, lock, private data, pool, executable, recording or prior acceptance copied. Changed source ranges are mechanically reversible against pinned existing donors."
+}

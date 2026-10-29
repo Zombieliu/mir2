@@ -239,6 +239,9 @@ fn run_native_client() -> bevy::app::AppExit {
             crate::packed_assets::read_if_present,
         ));
     }
+    app.insert_resource(billing_browser::SuiCheckoutOrigin::from_gateway(
+        &session.gateway_url,
+    ));
     // Keep OS-DPI sizing constraints separate from the chosen physical client
     // area. The display plugin scales the fixed Crystal stage as one unit.
     let world = app.world_mut();

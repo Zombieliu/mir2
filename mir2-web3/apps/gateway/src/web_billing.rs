@@ -3,6 +3,8 @@ use super::*;
 use crate::stripe_billing::StripeBilling;
 use mir2_simulation::billing::RechargeOrderState;
 use mir2_simulation::monthly_card::monthly_card_now_ms;
+#[path = "web_sui_usdc.rs"]
+mod sui_usdc;
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -36,6 +38,7 @@ pub(super) struct ActivateRequest {
 pub(super) enum Request {
     Status(StatusRequest),
     Checkout(CheckoutRequest),
+    UsdcCheckout(CheckoutRequest),
     Buy(BuyRequest),
     Activate(ActivateRequest),
 }
@@ -44,6 +47,7 @@ impl Request {
         match self {
             Self::Status(r) => r.character_index,
             Self::Checkout(r) => r.character_index,
+            Self::UsdcCheckout(r) => r.character_index,
             Self::Buy(r) => r.character_index,
             Self::Activate(r) => r.character_index,
         }
@@ -52,6 +56,7 @@ impl Request {
         match self {
             Self::Status(r) => r.request_id,
             Self::Checkout(r) => r.request_id,
+            Self::UsdcCheckout(r) => r.request_id,
             Self::Buy(r) => r.request_id,
             Self::Activate(r) => r.request_id,
         }
@@ -60,6 +65,7 @@ impl Request {
         match self {
             Self::Status(_) => "status",
             Self::Checkout(_) => "checkout",
+            Self::UsdcCheckout(_) => "usdcCheckout",
             Self::Buy(_) => "buyMonthlyCard",
             Self::Activate(_) => "activateMonthlyCard",
         }
@@ -198,10 +204,19 @@ fn status_value(
         .take(20)
         .map(|order| json!({"id":order.id,"state":order.state}))
         .collect::<Vec<_>>();
+    let usdc = crate::sui_usdc_billing::UsdcBilling::from_env()?;
+    if let Some(p) = &usdc { p.validate_store(config)?; }
+    let usdc_enabled = usdc.as_ref().is_some_and(|p| p.enabled);
+    let usdc_orders = config.usdc_recharge_orders(account, character)?.iter().rev().take(20)
+        .map(crate::sui_usdc_billing::public_order).collect::<Vec<_>>();
     Ok(
-        json!({"enabled":provider.is_some()||config.billing_monthly_card_credit_price.is_some(),
+        json!({"enabled":provider.is_some()||usdc_enabled||config.billing_monthly_card_credit_price.is_some(),
         "checkoutEnabled":provider.is_some(),"credit":credit,"pendingCredit":pending,
         "offers":provider.map(StripeBilling::public_offers).unwrap_or_default(),
+        "suiUsdcEnabled":usdc_enabled,
+        "suiUsdcCheckoutOrigin":usdc.as_ref().map(|p|p.origin.as_str()),
+        "suiUsdcOffers":usdc.as_ref().filter(|p|p.enabled).map(|p|p.public_offers()).unwrap_or_default(),
+        "suiUsdcOrders":usdc_orders,
         "monthlyCardCreditPrice":config.billing_monthly_card_credit_price,
         "ownedMonthlyCards":cards,"orders":orders,
         "monthlyCard":config.refresh_monthly_card_status(account,monthly_card_now_ms())?}),
@@ -303,6 +318,17 @@ pub(super) async fn socket_action(
     let config = session.monthly_card_config()?.clone();
     let provider = StripeBilling::from_env()?;
     rate_limit(cache.as_ref(), &account, request.operation())?;
+    if let Request::UsdcCheckout(checkout) = &request {
+        let result = tokio::task::block_in_place(|| -> Result<Value, String> {
+            durable(&config)?;
+            let usdc = crate::sui_usdc_billing::UsdcBilling::from_env()?.ok_or("billingUnavailable")?;
+            let (url, _) = usdc.checkout(&config, &account, checkout.character_index,
+                &checkout.order_request_id, &checkout.offer_id)?;
+            Ok(json!({"checkoutUrl":url,"status":status_value(&config,&account,checkout.character_index,provider.as_ref())?}))
+        });
+        sender.send(Message::Text(reply(&request,result).to_string().into())).await.map_err(|_|"billingSendFailed")?;
+        return Ok(());
+    }
     if let Request::Checkout(checkout) = &request {
         let permit = checkout_permit()?;
         let prepared: Result<_, String> = tokio::task::block_in_place(|| {
@@ -442,6 +468,7 @@ pub(super) fn router() -> Router<WebState> {
         .route("/v1/billing/status", get(http_status))
         .route("/v1/billing/checkout", post(http_checkout))
         .route("/v1/billing/return", get(return_page))
+        .merge(sui_usdc::router())
         .layer(axum::extract::DefaultBodyLimit::max(64 * 1024))
 }
 fn private_response(status: StatusCode, value: Value) -> Response {

@@ -91,9 +91,11 @@ pub fn initial_shell_model(auto_login: Option<&NativeAutoLogin>) -> NativeShellM
 /// that mutates shell state from network input.
 pub fn drain_gateway_events(
     mut shell: ResMut<NativeShellModel>,
+    mut procurement: Option<ResMut<mir2_client_bevy::native_procurement::ProcurementModel>>,
     inbox: Res<GatewayEventInbox>,
     commands: Res<GatewayCommands>,
     mut auto_login: ResMut<NativeAutoLoginFlow>,
+    checkout_origin: Option<Res<crate::billing_browser::SuiCheckoutOrigin>>,
 ) {
     for envelope in inbox.drain() {
         if let Some(stamp) = envelope.stamp {
@@ -104,10 +106,29 @@ pub fn drain_gateway_events(
             continue;
         }
         let event = envelope.event;
+        if let NativeGatewayEvent::ProcurementReply(reply) = event {
+            if let Some(model) = procurement.as_deref_mut() {
+                model.accept(
+                    reply,
+                    shell.last_account.as_deref().unwrap_or_default(),
+                    shell.billing_character_index(),
+                    mir2_client_bevy::native_procurement::now_ms(),
+                );
+            }
+            continue;
+        }
         if let NativeGatewayEvent::BillingReply(reply) = event {
+            shell
+                .billing
+                .set_sui_checkout_origin(checkout_origin.as_ref().and_then(|o| o.0.clone()));
             if shell.apply_gateway_event(NativeGatewayEvent::BillingReply(reply)) {
                 if let Some(url) = shell.billing.take_checkout_url() {
-                    if crate::billing_browser::open_checkout_url(&url).is_err() {
+                    if crate::billing_browser::open_checkout_url(
+                        &url,
+                        checkout_origin.as_ref().and_then(|o| o.0.as_deref()),
+                    )
+                    .is_err()
+                    {
                         shell.billing.browser_failed();
                     }
                 }
@@ -279,6 +300,7 @@ pub fn send_verified_identity_login(
 /// navigation/selection intents are intentionally ignored here.
 pub fn forward_native_ui_intents(
     mut shell: ResMut<NativeShellModel>,
+    mut procurement: Option<ResMut<mir2_client_bevy::native_procurement::ProcurementModel>>,
     mut intents: ResMut<NativeUiIntentQueue>,
     commands: Res<GatewayCommands>,
     mut billing_forwarded: Local<Option<u64>>,
@@ -428,6 +450,23 @@ pub fn forward_native_ui_intents(
         }
     }
     forward_billing_request(&mut shell, &commands, &mut billing_forwarded);
+    if let Some(model) = procurement.as_deref_mut() {
+        if shell.screen == NativeShellScreen::InGame
+            && model.scope_matches(
+                shell.last_account.as_deref().unwrap_or_default(),
+                shell.billing_character_index(),
+            )
+        {
+            if let Some(request) = model.unsent_request().cloned() {
+                let id = request.request_id.clone();
+                if commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::Procurement {
+                    request,
+                })) {
+                    model.mark_sent(&id);
+                }
+            }
+        }
+    }
 }
 
 fn forward_billing_request(
@@ -477,6 +516,15 @@ fn forward_billing_request(
             order_request_id,
             request_id,
         },
+        Some(BillingPurchase::UsdcCheckout {
+            offer_id,
+            order_request_id,
+        }) => NativeOutboundCommand::BillingUsdcCheckout {
+            character_index,
+            offer_id,
+            order_request_id,
+            request_id,
+        },
         Some(BillingPurchase::BuyMonthlyCard { order_request_id }) => {
             NativeOutboundCommand::BillingBuyMonthlyCard {
                 character_index,
@@ -505,6 +553,105 @@ fn forward_billing_request(
 mod tests {
     use super::*;
     use std::sync::mpsc;
+
+    #[test]
+    fn verified_wallet_account_change_rejects_previous_billing_and_procurement_replies() {
+        use mir2_client_bevy::{
+            native_billing::{BillingOperation, BillingReply},
+            native_procurement::ProcurementModel,
+            native_shell::CharacterSummary,
+        };
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::CharacterSelect;
+        shell.last_account = Some("alice".into());
+        shell.characters = vec![CharacterSummary::new(7, "Alice", 22, "Warrior", "Male")];
+        shell.selected_character_index = Some(7);
+        assert!(shell.open_billing());
+        let billing = shell.billing.unsent_request().unwrap().clone();
+        shell.billing.mark_sent(billing.request_id);
+        let mut procurement = ProcurementModel::default();
+        procurement.open_for("alice", 7, 12, 1000);
+        let request = procurement.unsent_request().unwrap().clone();
+        procurement.mark_sent(&request.request_id);
+
+        // Exercise the actual verified-wallet admission and ordinary roster
+        // transition while an older account's correlated results arrive late.
+        shell.screen = NativeShellScreen::Login;
+        let (sender, _receiver) = mpsc::channel();
+        let commands = GatewayCommands::new(sender);
+        let account = "obl_00112233445566778899aabbccddeeff";
+        assert!(send_verified_identity_login(
+            &commands,
+            &mut shell,
+            account.into(),
+            "isolated-test-proof".into(),
+        ));
+        assert!(shell.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            account: account.into(),
+            characters: vec![CharacterSummary::new(7, "Wallet", 22, "Warrior", "Male")],
+        }));
+        shell.advance_login_opening(std::time::Duration::from_secs(2));
+        assert_eq!(shell.screen, NativeShellScreen::CharacterSelect);
+        assert!(
+            !shell.apply_gateway_event(NativeGatewayEvent::BillingReply(BillingReply {
+                operation: BillingOperation::Status,
+                request_id: billing.request_id,
+                character_index: 7,
+                status: None,
+                checkout_url: None,
+                error: Some("late-previous-account".into()),
+                replayed: Some(false),
+            }))
+        );
+        let reply = mir2_protocol::procurement::ProcurementReply {
+            protocol_version: mir2_protocol::procurement::PROTOCOL_VERSION,
+            request_id: request.request_id,
+            character_index: 7,
+            status: None,
+            quote: None,
+            error: Some("late-previous-account".into()),
+            replayed: false,
+        };
+        assert!(!procurement.accept(reply, account, Some(7), 2000));
+        assert!(!shell.billing.scope_matches(account, Some(7)));
+        assert!(!procurement.scope_matches(account, Some(7)));
+    }
+
+    #[test]
+    fn procurement_bridge_sends_one_stable_request_and_never_crosses_account_scope() {
+        use mir2_client_bevy::native_procurement::ProcurementModel;
+        let (sender, receiver) = mpsc::channel();
+        let mut model = ProcurementModel::default();
+        model.open_for("alice", 0, 12, 1000);
+        let request = model.unsent_request().unwrap().clone();
+        let mut app = bevy::prelude::App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            last_account: Some("alice".into()),
+            active_character: Some(mir2_client_bevy::native_shell::CharacterSummary::new(
+                0, "Buyer", 22, "Warrior", "Male",
+            )),
+            ..Default::default()
+        })
+        .insert_resource(model)
+        .init_resource::<NativeUiIntentQueue>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_native_ui_intents);
+        app.update();
+        app.update();
+        let GatewayCommand::Wire(NativeOutboundCommand::Procurement { request: sent }) =
+            receiver.try_recv().unwrap()
+        else {
+            panic!("typed procurement request");
+        };
+        assert_eq!(sent, request);
+        assert!(receiver.try_recv().is_err());
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .last_account = Some("bob".into());
+        app.update();
+        assert!(receiver.try_recv().is_err());
+    }
 
     #[test]
     fn billing_scope_stays_local_and_closing_cancels_the_exact_request() {

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-25T23:26:42.302Z",
+  "scope": "Read-only final J binding and actual freeze/schema delta review; no target import, guard, Git/backend50 capture, binary read, test, build or service execution.",
+  "preparation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\preparation-v2.json",
+    "bytes": 5582,
+    "sha256": "265a7c3ee37b86ff44d88c2c52a75cd7c3c657d1de5367d647e8897c2d65f3c8"
+  },
+  "binding": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\current-execution-binding-v1.json",
+    "bytes": 1402,
+    "sha256": "2a6cc9ae89a467ddeb19636b3f50b6126af968c1b5a29e6d303ca7f85bb7adea"
+  },
+  "pendingPreimage": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\current-execution-binding-before-J-v1.json",
+    "bytes": 1269,
+    "sha256": "ceb14a0e8867ca48398487921a6ed9567ff7378aae0788640b8b1bc6d3f093e0"
+  },
+  "derivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\root-final-binding-derivation-v1.json",
+    "bytes": 1900,
+    "sha256": "6d9fbf94488a5db4ac3ed30dbb5f55f4046807a1194f2eb2394795b732b6ecca"
+  },
+  "actualDriverFreeze": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\capacity-scout-anti-convergence-driver-frozen-v1.json",
+    "bytes": 9472,
+    "sha256": "ed0d9783871dd74107c3ec7980574a31acf06a1ed7c5daac40f1f94e78a40182"
+  },
+  "readerLibrary": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\source-lib-v1.mjs",
+    "bytes": 43452,
+    "sha256": "c8188c54c2bec952fb3877da5218d1ad91ef3efc4d40c53008939e8e8d987bca"
+  },
+  "readerGuard": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-anti-convergence-runtime-v1\\readonly-source-guard-v1.mjs",
+    "bytes": 724,
+    "sha256": "0969b4edc588e96c147fdaa86b6c8347636134b6ce27fa855eb029f99bff2490"
+  },
+  "checks": {
+    "twelveCurrentPinsAndAggregateExact": true,
+    "pendingRawPreimagePreserved": true,
+    "onlyFiveLeafFieldsChanged": true,
+    "reverseJSONRestoresPending": true,
+    "otherNineOriginalPreparedInputsRawExact": true,
+    "readerLibraryAndGuardUnchanged": true,
+    "actualJ9472FreezeMatchesApprovedReader": true,
+    "backendCAndDriverExecutionJSeparated": true,
+    "actual226ArrayCountsAndLogReferencesExact": true,
+    "focusedSevenSubsetAndPrior219PrefixAndReviewsConsistent": true,
+    "priorH219AndHistoricalD240BuildBasisRemainSeparate": true,
+    "immutableC743FiftyInputManifestAndReleaseReferencesUnchanged": true,
+    "originalSourceReviewStillApplicable": true
+  },
+  "limitations": [
+    "This is source/binding eligibility only. Root must execute the actual read-only runtime guard to recheck current Git clean, all50 Rust/Cargo raw/GitLF inputs and immutable dae1 binary.",
+    "No fresh full16, capacity, formal25 improvement or P0/P2 acceptance is established."
+  ],
+  "verdict": {
+    "runtimeSourceContractPassed": true,
+    "eligibleForRootReadOnlyGuard": true,
+    "blockingFindingIds": [],
+    "guardExecuted": false,
+    "capacityAccepted": false,
+    "p0Passed": false,
+    "p2Started": false
+  }
+}

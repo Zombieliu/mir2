@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "phase": "r10-before-uninstall",
+  "ownedProcesses": 0,
+  "files": [
+    {
+      "name": "locale.json",
+      "size": 29,
+      "sha256": "108D3D7D3F4DE720733D8B60E1B103A2117A1BA8E9478FA09485B05D5F19ACB8",
+      "value": {
+        "schema": 1,
+        "locale": "zh-CN"
+      }
+    },
+    {
+      "name": "locale-seed.json",
+      "size": 29,
+      "sha256": "108D3D7D3F4DE720733D8B60E1B103A2117A1BA8E9478FA09485B05D5F19ACB8",
+      "value": {
+        "schema": 1,
+        "locale": "zh-CN"
+      }
+    }
+  ]
+}

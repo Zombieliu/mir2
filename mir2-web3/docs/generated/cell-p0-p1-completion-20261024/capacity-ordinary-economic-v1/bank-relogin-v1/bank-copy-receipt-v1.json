@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "scope": "Ordinary-earned V3 bank reused by exclusive raw copying; no seed/grant/store edits",
+  "sourcePlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\bank-plan-pending-v1.json",
+    "bytes": 7710,
+    "sha256": "bc40a37dd2f4074d60fbc0ff32181e88b9bb904ff8f429905b58b79b5d63df69"
+  },
+  "sourceFiles": 11,
+  "totalBytes": 35098,
+  "copies": [
+    {
+      "source": {
+        "relative": "accounts.json",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\accounts.json",
+        "bytes": 33570,
+        "sha256": "481c03348cb46042722a970efa568ee4a4f5f20c57644ec5a2e282df796c8f9d"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\accounts.json",
+        "bytes": 33570,
+        "sha256": "481c03348cb46042722a970efa568ee4a4f5f20c57644ec5a2e282df796c8f9d"
+      }
+    },
+    {
+      "source": {
+        "relative": "capacity-auth-budget.json",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\capacity-auth-budget.json",
+        "bytes": 255,
+        "sha256": "e7ce88e9f263c6f5e2c72ddabfe993aebc1640863508346cd6e7b35e0a42c1bc"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\capacity-auth-budget.json",
+        "bytes": 255,
+        "sha256": "e7ce88e9f263c6f5e2c72ddabfe993aebc1640863508346cd6e7b35e0a42c1bc"
+      }
+    },
+    {
+      "source": {
+        "relative": "capacity-pool.json",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\capacity-pool.json",
+        "bytes": 619,
+        "sha256": "2ab44eea8010bc4a50ad3dbf11140a081a7a1a896fd43f38bb6fa7ced8bd92b8"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\capacity-pool.json",
+        "bytes": 619,
+        "sha256": "2ab44eea8010bc4a50ad3dbf11140a081a7a1a896fd43f38bb6fa7ced8bd92b8"
+      }
+    },
+    {
+      "source": {
+        "relative": "identity-recovery-pepper.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "3c081a6cc1c1fb7187b9183402f6b514a0cdbf9bbf10f468230b8096ceedfeac"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\identity-recovery-pepper.txt",
+        "bytes": 64,
+        "sha256": "3c081a6cc1c1fb7187b9183402f6b514a0cdbf9bbf10f468230b8096ceedfeac"
+      }
+    },
+    {
+      "source": {
+        "relative": "identity-session-secret.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "097b3ca4dcd7612673333c6d4f5485e8caa8f70c1aa284d2fea0465db07f12b3"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\identity-session-secret.txt",
+        "bytes": 64,
+        "sha256": "097b3ca4dcd7612673333c6d4f5485e8caa8f70c1aa284d2fea0465db07f12b3"
+      }
+    },
+    {
+      "source": {
+        "relative": "passkey-auth-secret.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "3489e7133811f4127dbcf265f73b23307acce1e9aa4fd560fb08f5a19ebf3a00"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\passkey-auth-secret.txt",
+        "bytes": 64,
+        "sha256": "3489e7133811f4127dbcf265f73b23307acce1e9aa4fd560fb08f5a19ebf3a00"
+      }
+    },
+    {
+      "source": {
+        "relative": "recovery-mac-key.txt",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "93f7587aa6a941e0c7f0ac548255506e12972398308ebabd34d4dd215cf1e10c"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\recovery-mac-key.txt",
+        "bytes": 64,
+        "sha256": "93f7587aa6a941e0c7f0ac548255506e12972398308ebabd34d4dd215cf1e10c"
+      }
+    },
+    {
+      "source": {
+        "relative": "save-recovery/.mir2-directory-durability",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\source-save-recovery-preserved\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    },
+    {
+      "source": {
+        "relative": "save-recovery/.mir2-recovery-exclusive.lock",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-exclusive.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "source": {
+        "relative": "save-recovery/.mir2-recovery-owner-v1.json",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "1eb50ae95eb16f11d0bfd16abc5347bc29bc5fcd6c2afa4e9d5e6cb86b7c4055"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\source-save-recovery-preserved\\.mir2-recovery-owner-v1.json",
+        "bytes": 340,
+        "sha256": "1eb50ae95eb16f11d0bfd16abc5347bc29bc5fcd6c2afa4e9d5e6cb86b7c4055"
+      }
+    },
+    {
+      "source": {
+        "relative": "save-recovery/quarantine/.mir2-directory-durability",
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-economic-preparation-pilot-v3\\episode\\private\\save-recovery\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      },
+      "target": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\source-save-recovery-preserved\\quarantine\\.mir2-directory-durability",
+        "bytes": 29,
+        "sha256": "49f358ea406bd4a68597120e55264cd2a128cbd8441f790e1813a75535790ac3"
+      }
+    }
+  ],
+  "sourceUnchangedAfterCopy": true,
+  "recoveryJournalPayloads": 0,
+  "sourceRecoveryPreserved": true,
+  "activityRecoveryInitializedByGateway": false,
+  "activityRecoveryDirectory": "C:\\mir2-build\\p01-completion-20261024\\ordinary-bank-relogin-pilot-v1\\episode\\private\\save-recovery",
+  "authLedgerCopiedUnchanged": true,
+  "sourcePoolManualRewritePerformed": false,
+  "sourceAccountStoreRewritePerformed": false,
+  "accountWriterLockCopied": false,
+  "readyCharacters": [
+    {
+      "name": "L23d06a00",
+      "characterIndex": 1
+    },
+    {
+      "name": "L23d06a01",
+      "characterIndex": 2
+    }
+  ],
+  "ordinaryReloginReadbackPending": true,
+  "freshZeroCharacterPool": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

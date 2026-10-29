@@ -333,6 +333,7 @@ import type {
   TerrainPatch,
 } from "../lib/scene-types";
 import {
+  applyObjectActionScenePose,
   applyObjectAttackSceneState,
 } from "../lib/scene-effect-runtime";
 import type { ClientScreen } from "../lib/original-ui";
@@ -14462,9 +14463,8 @@ export default function HomePage() {
         break;
       }
       case "ObjectAttack":
-        // Stage-2: markWorldEntityAttack's single updater already applies the location patch
-        // (x/y/direction) alongside the attack-animation fields, so the prior separate
-        // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
+        // Action snapshots update pose and animation while preserving the owner's
+        // latest authoritative movement position.
         markWorldEntityAttack(payload);
         break;
       case "ObjectHarvest":
@@ -14478,7 +14478,7 @@ export default function HomePage() {
         markWorldEntityStruck(payload);
         break;
       case "ObjectRangeAttack":
-        updateWorldEntityFromLocationPacket(payload);
+        updateWorldEntityFromLocationPacket(payload, true);
         gameBusRef.current!.emit({ type: "entityAttack", objectId: stringifyId(payload.objectId) });
         spawnRangeProjectile(payload);
         restoreObjectSelection(stringifyId(payload.targetId));
@@ -14511,9 +14511,7 @@ export default function HomePage() {
         enqueueSceneEffect(payload, "objectSpell");
         break;
       case "ObjectMagic":
-        // Stage-2: markWorldEntityMagic's single updater already applies the location patch
-        // (x/y/direction) alongside the cast/range-attack fields, so the prior separate
-        // updateWorldEntityFromLocationPacket call was a redundant {...world} clone. One clone now.
+        // Keep the owner's current position when a delayed cast snapshot arrives.
         // spawnRangeProjectile stays as-is (it adds the projectile + caster attack pose).
         markWorldEntityMagic(payload);
         enqueueSceneEffect(payload, "spell");
@@ -17067,19 +17065,26 @@ export default function HomePage() {
     return payload;
   }
 
-  function updateWorldEntityFromLocationPacket(payload: Record<string, unknown>) {
+  function updateWorldEntityFromLocationPacket(
+    payload: Record<string, unknown>,
+    ownerAction = false,
+  ) {
     const location = payload.location as { x?: number; y?: number } | undefined;
     const objectId = stringifyId(payload.objectId);
 
     updateWorld((current) => {
       const nextWorld = {
         ...current,
-        entities: patchEntityInList(current.entities, objectId, (entity) => ({
-          ...entity,
-          x: numberOrZero(location?.x),
-          y: numberOrZero(location?.y),
-          direction: stringOrNull(payload.direction) ?? entity.direction,
-        })),
+        entities: patchEntityInList(current.entities, objectId, (entity) =>
+          ownerAction
+            ? applyObjectActionScenePose(entity, payload, current.playerObjectId)
+            : {
+                ...entity,
+                x: numberOrZero(location?.x),
+                y: numberOrZero(location?.y),
+                direction: stringOrNull(payload.direction) ?? entity.direction,
+              },
+        ),
       };
       worldRef.current = nextWorld;
       return nextWorld;
@@ -17121,6 +17126,7 @@ export default function HomePage() {
         payload,
         now,
         crystalAttackActionDurationMs,
+        current.playerObjectId,
       );
       return {
         ...current,
@@ -17137,16 +17143,12 @@ export default function HomePage() {
     // Crystal plays magic-cast sounds (20000 + Spell*10); most are not yet in SoundList, so this
     // resolves only for the few that are and is otherwise a graceful no-op.
     gameBusRef.current!.emit({ type: "magicCast", objectId, spell });
-    const location = payload.location as { x?: number; y?: number } | undefined;
     const now = Date.now();
 
     updateWorld((current) => ({
       ...current,
       entities: patchEntityInList(current.entities, objectId, (entity) => ({
-        ...entity,
-        x: typeof location?.x === "number" ? location.x : entity.x,
-        y: typeof location?.y === "number" ? location.y : entity.y,
-        direction: stringOrNull(payload.direction) ?? entity.direction,
+        ...applyObjectActionScenePose(entity, payload, current.playerObjectId),
         attackAnimation: "spell",
         attackStartedAt: now,
         attackUntil: now + crystalAttackActionDurationMs(entity, "spell"),

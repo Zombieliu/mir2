@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-25T07:43:00.332Z",
+  "scope": "Only minute-clock/schema boundary synthetic assertions; no fake full gameplay acceptance.",
+  "tests": 6,
+  "passed": 6,
+  "failed": 0,
+  "exitCode": 0,
+  "log": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\synthetic-v2.log",
+    "bytes": 1433,
+    "sha256": "4e83d2c923798c108a4aa4ef6dea8e88d652cf57fc5492f0828ded362ebf2821"
+  },
+  "sourceBefore": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\passed-probe-window-contract.test.mjs",
+      "bytes": 3366,
+      "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\collect-public-v2.mjs",
+      "bytes": 42746,
+      "sha256": "df55f9cd3997daab72e18e59ade3b8169b74ddbd7d68d2fa00994396cf430645"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\verify-public-v2.mjs",
+      "bytes": 19177,
+      "sha256": "0d44c606d100aee65b90b585cf43e1372fe515ca57a6f93044fd39bda6e22f94"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\passed-probe-window-contract.mjs",
+      "bytes": 3040,
+      "sha256": "3a238991e9ee9b81b93cdcb282cdd7c718afa076ec5eb1db11ef96cbe4b15cdb"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\passed-probe-window-contract.test.mjs",
+      "bytes": 3366,
+      "sha256": "7ab914ff3e0ed491b8b897b3099efd3ab4ad6613d452ec0e70351b092a8ceb58"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\collect-public-v2.mjs",
+      "bytes": 42746,
+      "sha256": "df55f9cd3997daab72e18e59ade3b8169b74ddbd7d68d2fa00994396cf430645"
+    },
+    {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\posthoc13-collection-v2\\verify-public-v2.mjs",
+      "bytes": 19177,
+      "sha256": "0d44c606d100aee65b90b585cf43e1372fe515ca57a6f93044fd39bda6e22f94"
+    }
+  ],
+  "sourceUnchanged": true,
+  "liveRawRead": false,
+  "gameModulesEvaluated": false,
+  "realmStarted": false
+}

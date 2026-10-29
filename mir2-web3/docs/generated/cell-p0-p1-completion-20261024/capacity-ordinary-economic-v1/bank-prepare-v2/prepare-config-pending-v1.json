@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 4,
+  "packageId": "ordinary-capacity-bank-prepare-v2",
+  "state": "PENDING_ROOT_CURRENT_SOURCE_FREEZE_NOT_RUN",
+  "purpose": "ordinary-capacity-bank-preparation-only",
+  "actors": 100,
+  "maxPrepared": 100,
+  "preparationOnly": true,
+  "workerCount": 1,
+  "options": {
+    "realm": "isolated",
+    "endpoint": "ws://127.0.0.1:17510/ws",
+    "maxPrepared": 100,
+    "finiteWallSeconds": 18000,
+    "targetHp": 12,
+    "attackResults": "v2"
+  },
+  "scenarioSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\scenario-preparation-v2.json",
+    "bytes": 22813,
+    "sha256": "116fd663f0b49403975d9c48368f59b39daa2c74a66c4567e8ba2edccc2021fc"
+  },
+  "routeSource": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\quest-agent\\warrior-1-30-newcomer-v1.json",
+    "bytes": 2661153,
+    "sha256": "ba415e68f7c3724d367542320809d4b43b122845a3e1b7a9e3b998b2cedbc975"
+  },
+  "resourceProfile": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\resource-profile-v1.json",
+    "bytes": 1630,
+    "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+  },
+  "fixedGateway": {
+    "tcp": "127.0.0.1:17500",
+    "web": "127.0.0.1:17510",
+    "tokioWorkers": 4,
+    "maxActiveSessions": 100,
+    "maxWsConnections": 128,
+    "maxReconnectLeases": 100,
+    "maxLoginInFlight": 4,
+    "maxNewCharacterInFlight": 1,
+    "maxStartGameInFlight": 2,
+    "contentProfile": "platinum_176",
+    "zoneDeliveryTrace": true
+  },
+  "monitorWallSeconds": 18300,
+  "authOrigin": {
+    "mode": "copiedExistingLedgerNoOverride",
+    "existingLedgerOverrideAllowed": false,
+    "loginNotBeforeAllowed": false,
+    "loginBudgetWindowMs": 901000,
+    "ordinaryAdmissionLimit": 25,
+    "verificationLimit": 5,
+    "sourceAddressRotation": false,
+    "scope": "Complete actualV1 ledger copied unchanged. No loginNotBefore option is permitted for this existing partial bank; normal prune/wait remains authoritative."
+  },
+  "sourceQualification": {
+    "expectedHead": null,
+    "rootReceipt": null,
+    "state": "PENDING_NEW_ACTUAL_HEAD_AND_FRESH_ZERO_SKIP_ROOT_RECEIPT",
+    "oldV1ReportIsNotCurrentQualification": true
+  },
+  "progress": {
+    "counts": [
+      25,
+      50,
+      100
+    ],
+    "coldCheckpoint": false,
+    "meaning": "Progress only after ordinary preparation and normal logout. Only final Gateway/monitor/driver normalcleanup allows a cold bank; formal ordinary100relogin remains later work."
+  },
+  "formalReference": {
+    "scenario": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-target-waypoint-routing-ladder-17\\scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    "stages": "2,10,25,50,100",
+    "stageSeconds": 300,
+    "soakSeconds": 7200,
+    "combatActors": 10,
+    "resumeSamples": 5,
+    "saveSamples": 5,
+    "executed": false
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "formalAcceptanceEligible": false,
+  "sustainableTwoHourStockProven": false,
+  "scope": "Continue the complete raw100account partial bank through ordinary relogin and preparation only. Original failed fourth and all unprepared entries are retained; first3 require fresh12HP stock/no new economic-work readback. No seeder, Store/pool/stock/position edits, authledger reset, loginNotBefore override, engine, measurement, resume exercise or synthetic supply. OriginalV1 false result remains unchanged.",
+  "staticProofSource": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v1\\static-staging-proof-v2.json",
+    "bytes": 25000,
+    "sha256": "9fe1834dd3d7adac7cf1246e95952221b19b88c37de21ae8e5f7fbbf06bc3232"
+  },
+  "stagingSelection": {
+    "candidatePolicy": "fresh-unoccupied-distinct-saved-v1",
+    "staticCandidates": 335,
+    "preferredPoints": 100,
+    "actualPointsFrom": "Original production report.preparedIndex after final normal save",
+    "formalMustReuseActualSavedPoints": true
+  },
+  "reusedPartialOrdinaryBank": true,
+  "freshZeroCharacterPool": false,
+  "bankPlan": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v2\\source-bank-plan-pending-v1.json",
+    "bytes": 7769,
+    "sha256": "c1ed7d1d33b369c95457688ee5d258c0a3ada2e287f14eef4b67e4b8d63d165e"
+  },
+  "sourcePartialBank": {
+    "controlledAccounts": 100,
+    "readyCharacters": 4,
+    "preparedActors": 3,
+    "failedFourthNotPrepared": true,
+    "sourceEligibilityInherited": false,
+    "first3MustBeOrdinarilyReloggedAndReuseActualStock": true
+  }
+}

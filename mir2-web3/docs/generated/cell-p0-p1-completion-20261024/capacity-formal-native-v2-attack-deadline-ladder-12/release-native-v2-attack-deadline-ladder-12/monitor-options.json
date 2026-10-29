@@ -1,0 +1,11 @@
+{
+  "gatewayPid": 68516,
+  "gatewayExe": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\bin\\mir2-gateway.exe",
+  "expectedSha256": "1980b7bed58499977eb6443aa3f1bf0fabcb9e8262b490f2bc6fb74cf6f7b318",
+  "healthUrl": "http://127.0.0.1:17510/health",
+  "output": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\monitor-current.json",
+  "history": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\monitor-history.jsonl",
+  "resourceProfile": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-attack-deadline-ladder-12\\resource-profile.json",
+  "intervalMs": 1000,
+  "wallSeconds": 18000
+}

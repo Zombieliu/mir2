@@ -28,6 +28,62 @@ pub const MAX_PACKS: usize = mir2_resource_pack::MAX_PACKS;
 pub const MAX_GENERATION_TOTAL: u64 = mir2_resource_pack::MAX_TOTAL_BYTES;
 const SELECTOR: &str = "state/active-generation.json";
 const HIGHEST: &str = "state/pack-highest.txt";
+
+/// A fresh, authenticated pack feed from an older release line is not a
+/// migration for an installation with a newer signed v4 seed. Only this exact
+/// pre-download rejection may retain an untouched, verified legacy install.
+/// Signature, schema, expiry, equal-sequence and payload failures stay errors.
+#[derive(Debug)]
+struct BelowLegacyFloor {
+    offered: u64,
+    floor: u64,
+}
+impl std::fmt::Display for BelowLegacyFloor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "authenticated packed sequence {} is below legacy floor {}",
+            self.offered, self.floor
+        )
+    }
+}
+impl std::error::Error for BelowLegacyFloor {}
+
+fn require_legacy_advance(offered: u64, floor: u64) -> Result<()> {
+    if offered < floor {
+        return Err(BelowLegacyFloor { offered, floor }.into());
+    }
+    ensure!(
+        offered > floor,
+        "packed sequence must exceed every legacy bridge"
+    );
+    Ok(())
+}
+
+/// No discovery retry, state mutation, or alternate release is allowed here.
+/// A migrated/pending install must keep its existing signed selector policy.
+pub fn retain_verified_legacy_after_rejected_feed(
+    root: &Path,
+    error: &anyhow::Error,
+) -> Result<bool> {
+    let Some(rejected) = error.downcast_ref::<BelowLegacyFloor>() else {
+        return Ok(false);
+    };
+    if active_record(root)?.is_some() || highest(root)?.is_some() {
+        return Ok(false);
+    }
+    ensure!(
+        !crate::transaction::pending_activation(root)?,
+        "legacy activation must recover before retaining an installation"
+    );
+    let floor = crate::update::legacy_sequence_floor(root)?;
+    ensure!(
+        floor == rejected.floor && rejected.offered < floor,
+        "legacy floor changed during rejected discovery"
+    );
+    crate::update::verify_launch(root)?;
+    Ok(true)
+}
 struct Phase<'a> {
     root: &'a Path,
     name: &'static str,
@@ -954,10 +1010,7 @@ pub fn check_update(
     };
     let feed = authenticated_feed(&feed_bytes, &feed_sig, true)?;
     let floor = crate::update::legacy_sequence_floor(root)?;
-    ensure!(
-        feed.sequence > floor,
-        "packed sequence must exceed every legacy bridge"
-    );
+    require_legacy_advance(feed.sequence, floor)?;
     if let Some((old, digest)) = highest(root)? {
         ensure!(
             feed.sequence > old.sequence

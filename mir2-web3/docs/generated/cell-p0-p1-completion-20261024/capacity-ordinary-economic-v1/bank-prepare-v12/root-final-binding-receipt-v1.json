@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "expectedHead": "ad80376b45f43b1f6baabce9b3710b6c0278be46",
+  "scope": "Current helper JS fresh selected qualification; original V6 backend/Rust32 reused after55 raw/GitLF/object/closure equality. No new Rust build/tests or capacity acceptance.",
+  "before": {
+    "binding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\backend-release-binding-pending-v1.json",
+      "bytes": 1216,
+      "sha256": "0e68b64abdf8d4b579c42295d956117099b41be7730fd3fdfedf0c9908e64ef7"
+    },
+    "config": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\prepare-config-pending-v1.json",
+      "bytes": 6726,
+      "sha256": "781415ed198ba2a47ef7b78fceb2360c71695abb47701036abe4cd4aa02738f4"
+    }
+  },
+  "after": {
+    "binding": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\backend-release-binding-pending-v1.json",
+      "bytes": 1513,
+      "sha256": "c4d919d085441e93ca1caaf10f0e08ad1d8183811f8a838f8c210f36ec3808f6"
+    },
+    "config": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v12\\prepare-config-pending-v1.json",
+      "bytes": 7051,
+      "sha256": "489004241802f160f7cb2c0d00a25cb62e93f602ddcf55478068712f78af795d"
+    }
+  },
+  "node": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-capacity-preparation-validation-v12\\root-focused-receipt-v1.json",
+    "bytes": 20865,
+    "sha256": "af0980182b0f217a0e0a937d51903aec0eebb890b4ecbfb01f16199531ff0cd4"
+  },
+  "actualFreshNodeTestsPassed": 719,
+  "reusedBackendCommit": "ee06c05f3813a1e627c8756d1f5fe8e2e0fbf856",
+  "reusedRelease": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-hp-wake-release-v6\\release-v6.json",
+    "bytes": 2257,
+    "sha256": "5e6326b1994cb771fefbcd8187de0d9dedaa47d1fe3fa68f136ddc58fb08cc8d"
+  },
+  "reusedRustReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\root-ordinary-hp-wake-validation-v2\\root-focused-receipt-v1.json",
+    "bytes": 28585,
+    "sha256": "b11edacef0931e437503df444d87c16c4d95b98d6b026a242e5eb1cf3861783d"
+  },
+  "reusedRustTestsPassed": 32,
+  "backendSourcesExact": 55,
+  "newRustBuildPerformed": false,
+  "freshRustTestsPerformed": false,
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

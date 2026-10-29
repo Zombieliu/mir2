@@ -91,6 +91,39 @@ fn stone_real_npc_dialog_drives_seal_appraise_cut_and_rejects_stale_click() {
     f.assert_checkpoint();
 }
 #[test]
+fn stone_quote_cannot_recover_display_permission_from_cloned_dialog_state() {
+    let mut f = Fixture::new("menu-permission", 824);
+    let next = |session: &SimulationSession, prefix: &str| {
+        session.app.world().resource::<NpcStateResource>().active_npc_dialog
+            .as_ref().unwrap().links.iter()
+            .find(|link| link.target.starts_with(prefix)).unwrap().target.clone()
+    };
+    for prefix in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:"] {
+        let target = next(&f.session, prefix);
+        f.session.select_npc_dialog_target_impl(&target);
+    }
+    let target = next(&f.session, "@stone:v1:seal:");
+    let cloned_dialog = f.session.app.world().resource::<NpcStateResource>()
+        .active_npc_dialog.clone();
+    let before = fs::read(&f.path).unwrap();
+    super::super::npc_input::invalidate(f.session.app.world_mut());
+    f.session.app.world_mut().resource_mut::<NpcStateResource>().active_npc_dialog = cloned_dialog;
+    assert!(f.session.select_npc_dialog_target_impl(&target).is_empty());
+    assert_eq!(fs::read(&f.path).unwrap(), before);
+    assert!(f.view().stones.is_empty());
+
+    // Only a normal server display publication restores the permission. The
+    // decorated workshop links must be included in that exact published page.
+    f.session.interact(f.npc);
+    for prefix in ["@stone:v1:home", "@stone:v1:list:ore:", "@stone:v1:ore:", "@stone:v1:seal:"] {
+        let target = next(&f.session, prefix);
+        f.session.select_npc_dialog_target_impl(&target);
+    }
+    assert_eq!(f.view().stones.len(), 1);
+    f.assert_checkpoint();
+}
+
+#[test]
 fn stone_three_grades_pay_frozen_fees_and_keep_real_uid_binding_and_slot() {
     for (ore,grade) in [(824,StoneGrade::Rough),(826,StoneGrade::Fine),(827,StoneGrade::Precious)] {
         let mut f=Fixture::new("grades",ore);
@@ -204,22 +237,25 @@ fn stone_save_reload_keeps_original_secret_and_physical_reference() {
     fresh.execute_stone_workshop(cut.clone()).unwrap();
     assert_eq!(try_user_item_from_item_state(&fresh.app.world().resource::<InventoryResource>().inventory_items[0])
         .unwrap().item_index,frozen.private_output().template_id);
-    let durable=fs::read(&path).unwrap();
-    let cut_store:crate::AccountStore=serde_json::from_slice(&durable).unwrap();
+    let durable:crate::AccountStore=serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
     drop(fresh);drop(config);
     let config=SimulationConfig::default().with_crystal_world_runtime().with_account_store_path(&path);
     let mut reloaded=login(config);reloaded.begin_stone_workshops().unwrap();reloaded.interact(npc);
     assert!(reloaded.stone_workshop_view().unwrap().stones.is_empty());
-    // Cold login may checkpoint NPC/login state, while the private cut
-    // tombstone and exact physical output must survive unchanged.
-    let after_login=fs::read(&path).unwrap();
-    let reloaded_store:crate::AccountStore=serde_json::from_slice(&after_login).unwrap();
-    assert_eq!(reloaded_store.sealed_stones,cut_store.sealed_stones);
-    assert_eq!(reloaded_store.accounts["demo"].saves[&0].inventory_items_json,
-        cut_store.accounts["demo"].saves[&0].inventory_items_json);
+    // A real new Login hook may publish unrelated character metadata. The
+    // canonical stone registry must survive it exactly, and replay itself must
+    // leave the complete post-login source byte-for-byte unchanged.
+    let before_replay=fs::read(&path).unwrap();
+    let after_login:crate::AccountStore=serde_json::from_slice(&before_replay).unwrap();
+    assert_eq!(serde_json::to_value(&after_login.sealed_stones).unwrap(),serde_json::to_value(&durable.sealed_stones).unwrap());
+    let saved=&durable.accounts["demo"].saves[&0];
+    let loaded=&after_login.accounts["demo"].saves[&0];
+    assert_eq!(loaded.gold,saved.gold);
+    assert_eq!(loaded.inventory_items_json,saved.inventory_items_json);
+    assert_eq!(loaded.belt_items_json,saved.belt_items_json);
     let replay=reloaded.execute_stone_workshop(cut).unwrap();
     assert!(replay.replayed);assert!(replay.packets.is_empty());
-    assert_eq!(fs::read(&path).unwrap(),after_login);
+    assert_eq!(fs::read(&path).unwrap(),before_replay);
 }
 #[test]
 fn stone_ordinary_account_scope_and_restore_cannot_rewind_secret_or_cut_tombstone() {

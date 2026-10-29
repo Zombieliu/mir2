@@ -1,0 +1,791 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T08:20:43.875Z",
+  "hashMode": "raw-bytes",
+  "scope": "Exact explicit public allowlist only. Full capacity raw, monitor raw and recording payload remain external. No private/store/credentials/EXE payload copied.",
+  "files": [
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "source": "compact-navigation-wire-diagnostics-v2/source-frozen-v2.json",
+      "bytes": 10830,
+      "sha256": "4ca6eee4f0ef9b2046bb5f56531ceec6eb2e1958141d0b7325cdb47de28e8ce3"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "source": "compact-wire-wrapper-independent-review-v1/review-v2.json",
+      "bytes": 6809,
+      "sha256": "4cda8f7ec69f710090cc3c4999cb847a8bf620bba6f2573978fe9245ddc50603"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/README.md",
+      "source": "compact-navigation-wire-diagnostics-v2/README.md",
+      "bytes": 7876,
+      "sha256": "6ad7017bb924f9f9e5dde7822f796103fb32b921e01db907daeb15ccbe6fbfa6"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/create-from-v1.mjs",
+      "bytes": 5182,
+      "sha256": "dc675829fa7e6bb11fb2e9767a7daba83f75cb20979f80afb93dd17a3a03d4ba"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/freeze.mjs",
+      "bytes": 6062,
+      "sha256": "a34e328a606e86a2523d3c9920702883d7633d4610e370c6ada549fa519af973"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/run-synthetic-tests.mjs",
+      "bytes": 1982,
+      "sha256": "7a89a295e77db9149147fe015dcf09f59fd9cd1f2af4ecd91cb047035262cb33"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "source": "compact-navigation-wire-diagnostics-v2/tests-v1.json",
+      "bytes": 1711,
+      "sha256": "b4786feaae7542f73cb7f6c5a6a75cdc45df592e51a3457b2a5f4c862ec93ab9"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "source": "compact-navigation-wire-diagnostics-v2/tests-v1.log",
+      "bytes": 7111,
+      "sha256": "1a2b03fb727ec2e1249ab18e3307fa7736b04b93b27311622afd450098e77a3b"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "source": "compact-navigation-wire-diagnostics-v2/v1-baseline-binding.json",
+      "bytes": 2021,
+      "sha256": "be83f33aefb41306d3b950810950d71e6b2ee43f72ab814be5348f856e753ccf"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/wrapper.mjs",
+      "bytes": 14598,
+      "sha256": "169da7ebf4d9e7227494ece8413998baee0694519011b5528f2bae250b9fe98f"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "source": "compact-navigation-wire-diagnostics-v2/wrapper.test.mjs",
+      "bytes": 21656,
+      "sha256": "216fb7fce356fbba4ee73124014270d3e968f3c68b9cd49e6c5e6c7f297abac3"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/gateway-build-pin.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/gateway-build-pin.json",
+      "bytes": 1328,
+      "sha256": "f1e0623588cca42a753882f02c266a833124b84cf78aaf5e16f8d8aec9efb538"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/source-pins.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/source-pins.json",
+      "bytes": 162400,
+      "sha256": "caa57f967957500ff60ebb5275bad59ed7199b4447cf7e4b9cc333e7328ccda6"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/source-pins-admitted-v2.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/source-pins-admitted-v2.json",
+      "bytes": 162600,
+      "sha256": "cb761bdc235e2025626cb24dba09bea279f12f9298fb9931034e1b7c578609d5"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/realm-process.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/realm-process.json",
+      "bytes": 3232,
+      "sha256": "488ec88102efb82c9f01450cd5c6b58befefb8325c266ebdde5d423e45f02886"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/realm-cleanup.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/realm-cleanup.json",
+      "bytes": 4840,
+      "sha256": "3f336a5f5f466d6f9f146686c50683207dd475b75b219f0e80dc2247145ebe95"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-public.jsonl",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-public.jsonl",
+      "bytes": 110687,
+      "sha256": "8e3ee3ea289db02241bf06dd30dab584295d2cd163d3599000f6bca02318f406"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-public-status.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-public-status.json",
+      "bytes": 1014,
+      "sha256": "4af4d11708a823eddba36faab1bbe6d20f0ced0aeb451af4c23596d43e7b6724"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-diagnostics-config.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-diagnostics-config.json",
+      "bytes": 3963,
+      "sha256": "0e6b211a78c02fdf94a415a5a3ea7ecd8b7cdc9fdf0a6e25a746a75a59f2d885"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-public.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-public.mjs",
+      "bytes": 10186,
+      "sha256": "c2a137084f2166cbae603f721c6dde7322790c8dc2e05c2b8d59b79d7a58619f"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-public.test.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-public.test.mjs",
+      "bytes": 20681,
+      "sha256": "3315da0fe78985e95fc5b68f0f61689bee4bfc7c7108ebe6de8d8fcb5a1e0309"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/synthetic-tests-v1.log",
+      "source": "formal-native-v2-compact-wire-ladder-10/synthetic-tests-v1.log",
+      "bytes": 6131,
+      "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-helper-freeze-v1.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-helper-freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-schema-contract.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-schema-contract.json",
+      "bytes": 7923,
+      "sha256": "a566d2357976ce4ec0a14c92da2e8f1490e724c527dcb757be46e3c6642ea6f6"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/legacy14-original.mjs.txt",
+      "source": "formal-native-v2-compact-wire-ladder-10/legacy14-original.mjs.txt",
+      "bytes": 10310,
+      "sha256": "d6d2bc6954d546cccc0d3273fbe9e236f381a10963a0a1d039087e74ae46e7ee"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/candidate-release-binding.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/candidate-release-binding.json",
+      "bytes": 6386,
+      "sha256": "442246921e74e6614bbd6280150765bcda16ddc4eb9aec57cf7f3c3df8e67835"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/full16-gate.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/full16-gate.json",
+      "bytes": 4772,
+      "sha256": "1880b5e8fe7774c32b1a3575f39db5c456888b29ac64b7606292862e48d085b4"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/slow-stage-row-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/slow-stage-row-contract.mjs",
+      "bytes": 1553,
+      "sha256": "cc860f6578109f0a615ae83d9675c1f099f4814109f0fd95fcf475a7632d6db8"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/verify-full16-gate.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/verify-full16-gate.mjs",
+      "bytes": 4660,
+      "sha256": "32455188735a191a4c6635b2d4342ef0ffb46d6afb4917c8906301f37e3e0d0c"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/socket-build-source-lib.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/socket-build-source-lib.mjs",
+      "bytes": 10176,
+      "sha256": "267bc8e45eb16ced1e7a0888d3855b4f3b00f36fbe0e61643802b8c832105298"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/driver-evidence-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/driver-evidence-contract.mjs",
+      "bytes": 4477,
+      "sha256": "a5ed6c5ae64857bd891372b87488bfa335a97c2ee8a993f8d2de130a44dbb47a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/scene-binding.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/scene-binding.json",
+      "bytes": 6417,
+      "sha256": "b11055102404d50a8c14d43faaaf331bdde1b73cf1fb9f2ff5f5e6adcf1a7bcb"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/scene-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/scene-contract.mjs",
+      "bytes": 10033,
+      "sha256": "2baa5ee428dfb3b95acb664993988977a570ac7c93c8bf28d8b0f70d859909ad"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/backend-driver-source-guard.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/backend-driver-source-guard.mjs",
+      "bytes": 1748,
+      "sha256": "444cf6501ce72eb51f465fac540fe96f196ff30259791586e17fa635a0dc108a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/measured-phase-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/measured-phase-contract.mjs",
+      "bytes": 772,
+      "sha256": "b0977c31d9ee2345977e6af85f79beabc369d4c3e5c9448a50fa39133e0e2b39"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/resource-profile.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/resource-profile.json",
+      "bytes": 1630,
+      "sha256": "9c5825d9a0c1a002081e439151d9d158dcbd78af64347f339f83b8e690924a88"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/run-options.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/run-options.json",
+      "bytes": 3065,
+      "sha256": "2d49d53cbe638aedc002a30fd229e3dfe9d1e1fa103c3bd4515546c88933a76a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/run-options-admitted-v2.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/run-options-admitted-v2.json",
+      "bytes": 3589,
+      "sha256": "303811acf3bfaeff1d1a7804f34c823eba1cd80a660da2889d284139bed2319c"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/scenario.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/scenario.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/provisioning.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/provisioning.json",
+      "bytes": 332,
+      "sha256": "754c451d51b23e06e8f4e755eede64937e542c7fd046e75510f5d038e8a3975e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/spectator-health-before.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/spectator-health-before.json",
+      "bytes": 654,
+      "sha256": "465c4bccb46055759e4699c0a7b85e39b6509b2e4b19751858cb603a052c0d79"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/monitor-options.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/monitor-options.json",
+      "bytes": 697,
+      "sha256": "999d7ffb3fbc99a0ed75e0b58a8c8c1e6d0daf99fa074b0a85367a3476cd0bc7"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/monitor-process.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/monitor-process.json",
+      "bytes": 223,
+      "sha256": "10bc0ed722fa28320a8f1ff7aeb8ebf562b84041be829cd9b0b9b20bea9cefa4"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/launcher-source-frozen-v1.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/launcher-source-frozen-v1.json",
+      "bytes": 23133,
+      "sha256": "c4b83227e99e9a3b131e3ea80d77afb6afde0c128de7b179c383f451be023724"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/launcher-source-prepared-v1.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/launcher-source-prepared-v1.json",
+      "bytes": 3129,
+      "sha256": "ce9d0951b7cacc7d95d00601e8132d2f1d967f877f7ce6dbeb1c2c417ce825ba"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/driver-report-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/driver-report-contract.mjs",
+      "bytes": 9319,
+      "sha256": "a53b9b58f3142487e6a197c5987aed04459d68ae81340b2a40008de0ba3418f9"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/preparation-plan.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/preparation-plan.json",
+      "bytes": 3054,
+      "sha256": "018fca2f9150602ec5efadb4f91980d8830a591072ae61d8b12e2acf5fa61403"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/final-inputs-approved.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/final-inputs-approved.json",
+      "bytes": 81841,
+      "sha256": "47d844f00d1c1931cb0ca651fc6a78df9fcc7c600b92f030f4790f7a5a0835eb"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/report-provenance.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/report-provenance.json",
+      "bytes": 5793,
+      "sha256": "4d1b4474c7ecce3b385aace65796ad68c031e66fb0426812a77636cf1f454717"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/feasibility-gate.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/feasibility-gate.json",
+      "bytes": 51470,
+      "sha256": "82ba2059e5a059667d8b43b5d1d3b2b2e3f2f1ac6fa175a8726d2a7784c63fd6"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/static-preparation-verification.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/static-preparation-verification.json",
+      "bytes": 3399,
+      "sha256": "e3fc79cdf4899ad28e2285491f3464dffe6e4590c1f5aee8587a823aeb9c8076"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/source-guard-readonly-verification.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/source-guard-readonly-verification.json",
+      "bytes": 3985,
+      "sha256": "b43ec523e8fc1a443cd27a054da3db63448c78923a23ff6b20ddb0c4127e184e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/scenario-prefix-readiness.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/scenario-prefix-readiness.json",
+      "bytes": 2279,
+      "sha256": "7029269c6148b39f9c3def94d5d5313102b7e57e4df1d792e0343a98f9ee88ba"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/initialize-private.ps1",
+      "source": "formal-native-v2-compact-wire-ladder-10/initialize-private.ps1",
+      "bytes": 1941,
+      "sha256": "4deff086a5f53aaad191bcfd7e99de8e23c297fc6e1a121852a3fc13c1cf390e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/input-lib.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/input-lib.mjs",
+      "bytes": 14680,
+      "sha256": "05fa358a0c286cdcb3dbd879bc1049dff534bbee195810230b72b90a687caee9"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/prepare-inputs.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/prepare-inputs.mjs",
+      "bytes": 11454,
+      "sha256": "c0baf33cceeaaa04ca773028a2011e0e660a0532a036bd6508a6058a19f55ea0"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/run-owned.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/run-owned.mjs",
+      "bytes": 19575,
+      "sha256": "66d52557bc31a92468e8c84384a3258d72c8cbc092f4f5144f0abdfe91d2b2f0"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/verify-feasibility-gate.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/verify-feasibility-gate.mjs",
+      "bytes": 19527,
+      "sha256": "1271b11da525a7c228bcfca473a1255f224e7919826ffd1bc86d25b4d193cdc4"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/monitor-owned.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/monitor-owned.mjs",
+      "bytes": 1082,
+      "sha256": "f2d56c3eb26182251b6c8cc69c2274e5708d4e633c17bc4abb1414ed81c66c47"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/request-stop.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/request-stop.mjs",
+      "bytes": 815,
+      "sha256": "13c6a9aee3cc0845344ebd0ebb5aa43a62da8b1629daf0fd77e7bb6d9b89d639"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/recover-drained-owned.ps1",
+      "source": "formal-native-v2-compact-wire-ladder-10/recover-drained-owned.ps1",
+      "bytes": 2910,
+      "sha256": "443b47eb1988c982ffafb3b228e0aafff06734e1542d8219054d5c35ce408735"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/reports/1792915219265-d3bcff63.report.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/reports/1792915219265-d3bcff63.report.json",
+      "bytes": 425221,
+      "sha256": "8f97fd9e1e50f82d291a44c46d3629db49bf37481b1d76c8fd76f4fcec879412"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/launcher-syntax-check.log",
+      "source": "formal-native-v2-compact-wire-ladder-10/launcher-syntax-check.log",
+      "bytes": 1428,
+      "sha256": "4b314c2328896de6b10b16ec0d3e74431e3b951cabb18fcfc36e6f285cb053b3"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/spectator-health-after.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/spectator-health-after.json",
+      "bytes": 662,
+      "sha256": "e7978bac7f245c2ecdd0e45ff8f45f07ee46584fa67534125b727b61fb7f9d15"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/phase-window-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/phase-window-contract.mjs",
+      "bytes": 3442,
+      "sha256": "f62c44c11d415a6a277c1259b047adf04d823c553b75b4d36b74f47de9d82ea7"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/hp-maintenance-status-schema.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/hp-maintenance-status-schema.mjs",
+      "bytes": 1509,
+      "sha256": "8d0c42a5cfc0fe1651c6a3840c5672a6d46c9f2c778e7538d2745f17e42d118c"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/DIAGNOSTICS-PREPARED.md",
+      "source": "formal-native-v2-compact-wire-ladder-10/DIAGNOSTICS-PREPARED.md",
+      "bytes": 3587,
+      "sha256": "2ce5193cf2d4ec8f45bc85c4af1f03a780512e0c2e679a5e228a6aa90e3cdf5e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/copied-baseline-inputs.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/copied-baseline-inputs.json",
+      "bytes": 14132,
+      "sha256": "1c88d0fd6e0bbff5caa93a6dd4c4ecda0c403b7cdb485f94aa0ebfeb6434efbe"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/create-from-formal08-probe13.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/create-from-formal08-probe13.mjs",
+      "bytes": 7064,
+      "sha256": "c9b4d4d94404579443e4629b450338335e07f34795d04bb5737b06062a60920e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/complete-fresh13-gate-v1.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/complete-fresh13-gate-v1.mjs",
+      "bytes": 6748,
+      "sha256": "6d78e738f44b7aa4838d2f94c7207f14463127ee356801505ce15f58b94cc5e8"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/integrate-wire-source-v1.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/integrate-wire-source-v1.mjs",
+      "bytes": 4340,
+      "sha256": "09b3285cb44fc8d1265bd6a89f83b2d0596cbefd1f0fc22002a8ebb60ef82d13"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/integrate-wire-collection-v1.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/integrate-wire-collection-v1.mjs",
+      "bytes": 5850,
+      "sha256": "8ab0c9141f9bac706c5ecf0e88b1b6c433c63cb169e17371bb677c4d0af7cfc2"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/run-adapter-synthetics.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/run-adapter-synthetics.mjs",
+      "bytes": 2034,
+      "sha256": "09b381ec6fcfc99628666e2a2d1107f1a271bcff2685bb6045a9d1e83dd7510f"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/wire-diagnostics-contract.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/wire-diagnostics-contract.mjs",
+      "bytes": 15767,
+      "sha256": "8d2c06f251a3b623d4ff135211046b9d039b31e9bfdad799c0cb1fd3ddfda13a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/wire-diagnostics-adapter.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/wire-diagnostics-adapter.mjs",
+      "bytes": 2514,
+      "sha256": "82c5ae7432cb7b69e576e7c283e4a4ca6afe074b692342ea5a82516dd3fef164"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/wire-diagnostics-adapter.test.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/wire-diagnostics-adapter.test.mjs",
+      "bytes": 7373,
+      "sha256": "8ffa525f9df27dae593faeb355f4a82d227ae0576af4afc2b5f807cb8baab3c5"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/wire-adapter-synthetic-tests.log",
+      "source": "formal-native-v2-compact-wire-ladder-10/wire-adapter-synthetic-tests.log",
+      "bytes": 2205,
+      "sha256": "910421ec8ebcd51e3caee4cc7a936ba2e61b71f90a81ae3ea0217ac692c4f633"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/wire-adapter-synthetic-tests.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/wire-adapter-synthetic-tests.json",
+      "bytes": 2413,
+      "sha256": "5a6905e7ad356e1c41266d92332b1694a2f9a16a80b26b4c4951a40a8ecc9d5a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/verify-probe13-collected-evidence.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/verify-probe13-collected-evidence.mjs",
+      "bytes": 13659,
+      "sha256": "be17670e9203446fe40be75282bef05d43895dabba36fc2c19b7cfd8558f9c2a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-terminal.json",
+      "source": "formal-native-v2-compact-wire-ladder-10/compact-navigation-wire-terminal.json",
+      "bytes": 5089,
+      "sha256": "194435859c32411e2b349924245147f53c1023b0a0f2e040455d72729fadb10a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/release-socket-diagnostics-v1.json",
+      "source": "release-socket-diagnostics-v1.json",
+      "bytes": 1920,
+      "sha256": "cdcf7ec17ffbdb7ef1a8c529deaf8d8dd957d16a8129315390760e910a4b9c3f"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/backend-source-socket-diagnostics-v1.json",
+      "source": "backend-source-socket-diagnostics-v1.json",
+      "bytes": 14000,
+      "sha256": "4da9d4dac73773bae041c98b641874a9ad4427217c1b36bb453f1a014ad7b058"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/socket-diagnostics-v1-build-receipt.json",
+      "source": "socket-diagnostics-v1-build-receipt.json",
+      "bytes": 2095,
+      "sha256": "36181ed0755c44bafd676f44bda8a33c72f958777660fb649686f0119478eabd"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/capacity-native-witness-approach-driver-frozen-v1.json",
+      "source": "capacity-native-witness-approach-driver-frozen-v1.json",
+      "bytes": 41896,
+      "sha256": "5cd1dafffa530e145828183e8b9089c6900b67760d79c3fe225f2399d904cada"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/collection-manifest-v4.json",
+      "bytes": 7084,
+      "sha256": "7409b23e47db0c10c8000d8e0b5bab193c9283a8f9f72deb7d8acf5ca39fd9e1"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/actor-92-candidate-list-v1.json",
+      "bytes": 11865,
+      "sha256": "0fbdc1f7a7dd1cb0e2836ff2ef2cf2d2f23637e1075ba3573bb82a49f903d863"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/attempt-count-correction-v1.json",
+      "bytes": 987,
+      "sha256": "6072db3eac7c26b7d67928ac4455d649c6cbdd12d3e20d80209a10078f46b7e8"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/build-validation-adapters.mjs",
+      "bytes": 3222,
+      "sha256": "8e7fde40929dc1d9fec006a6040ed00d81ba67ae56fafa45f7e5d1ee53324a78"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/candidate-10-repaired-v4.json",
+      "bytes": 804,
+      "sha256": "a42a26a195dd5ac25135bff57e73f7f21b71f97b5cc1814351920ece621362ba"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/candidate-100-repaired-v4.json",
+      "bytes": 5844,
+      "sha256": "f87aae78a2d68d8daa63916a93580c33f4ef974da4769bd3531a62aafcf0f205"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.json",
+      "bytes": 48359,
+      "sha256": "503c9ce74452bd65fc5c30e1bfbfbd5ef419e7652be99914f99d139ab275ab8a"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-supply-repaired-v4.mjs",
+      "bytes": 8728,
+      "sha256": "edf736ebffa3636d3ef15099c0999d76c18721c5f90dd1a779022b943cbf15aa"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/conditional-level-validation-v4.log",
+      "bytes": 4757,
+      "sha256": "a5f99254e3a5c745b89a34f54f3506acd795d8e89d0ac2a961458e0a9b3aa501"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v1.mjs.txt",
+      "bytes": 4731,
+      "sha256": "a46e45348b490742757b4bb3c1a17294194fbc918620baac0e3d4b4caa840b07"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure-setup-preimage-v2.mjs.txt",
+      "bytes": 4709,
+      "sha256": "ad7b353af37e03fcf0bb8a2a829ea908b2c35ffe89b52cb684881936bda65cc9"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-failure.mjs",
+      "bytes": 4795,
+      "sha256": "06360009df1b441d5555e367d7f73258e10cca7c4496abdf4eb1ead60df0961c"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v2.log",
+      "bytes": 817,
+      "sha256": "9c13066c8bccd17626d0f233b0e7b0313e8c4649b57baf98fb2a8f449fa93243"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "source": "partition-span2-compact-halo-repair-v1/diagnose-original-run-v3.log",
+      "bytes": 1620,
+      "sha256": "2415609f238bf44af74bbc102f2586c33fe9e5f5f73c7f881f7d2b718ec67e55"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/diagnostic-adapter-setup-failure-v1.json",
+      "bytes": 344,
+      "sha256": "41064e86ccfeed611faaf654c19574e8b555a686add0d09e9c3926eacb470723"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/final-independent-review-binding-v4.json",
+      "bytes": 2272,
+      "sha256": "0317e14bc05559c610ff89620eff96cca477925c56059d0ced2effbe91c80056"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/full-static-validation-v4.log",
+      "bytes": 821,
+      "sha256": "78942d30c23f4d5958b621ab0ae7c44c01f6a5d6da6c72e492b9080bdccf2dc6"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "source": "partition-span2-compact-halo-repair-v1/full-static-validation-v5.log",
+      "bytes": 1377,
+      "sha256": "d0d9e8e2c40929523a0ac0f47c202763a2f0131bec0b3febf73d268cb08d679c"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/independent-first10-review-v1.json",
+      "bytes": 11639,
+      "sha256": "6edf7561725c020f321bb06cdfc83043de7c0aa88735aa57c7a1c3aeaa3b85d6"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/independent-repair-review-v1.json",
+      "bytes": 13583,
+      "sha256": "793e2334baf32a2c1963cf32f45ee4781bdb1dcc7fa486809b1b54b0f0b9f76e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/original-failure-diagnosis-v1.json",
+      "bytes": 20418,
+      "sha256": "b974d00a999c0a92642de89bb2d2c78ba7cd5c16a0afc6517902d682ea101a67"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/original-prefix-contracts-v4.json",
+      "bytes": 19490,
+      "sha256": "39dcc8ec245cf784370f956f84f655aed9b350b59f13f07deb52d2b9cb562836"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.json",
+      "bytes": 80434,
+      "sha256": "83a0430b4ea1c399897cf0ffadff4b4bc693c4d46cc4162a5f1048be4e33468d"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-cost-repaired-v4.mjs",
+      "bytes": 2887,
+      "sha256": "2fa36a3c9fbf439147ac6030292680feb10dc834d729ec75ced5e29b3e7ba653"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "source": "partition-span2-compact-halo-repair-v1/prefix-scout-validation-v4.log",
+      "bytes": 1308,
+      "sha256": "6c36694e71d6dcf789edcac4aee56182eea5ad7e19fd196912b0c21d35033544"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/protocol-navigation-counted.mjs",
+      "bytes": 18581,
+      "sha256": "9dd96b3b02ec142f4e0304b65fb1311105099679dd7707fb1610b0415ccd2304"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/prove-repaired-leg-v4.mjs",
+      "bytes": 3000,
+      "sha256": "02edd4c73fe68c738c93cd7a5783d0ad4a90d85d0e6cf95f9f13cc416c408284"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/repair-layout.mjs",
+      "bytes": 8094,
+      "sha256": "90f28ee99b7a8e4a1205f912046ef7a8fd792f38035fc330ab159a15127844d1"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/repair-result-v1.json",
+      "bytes": 82947,
+      "sha256": "79a52f8ac854eb9d03c987f8f2a7a15c1ddded8d0751ebab9a8de58c75da748b"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "source": "partition-span2-compact-halo-repair-v1/repair-run-v1.log",
+      "bytes": 1776,
+      "sha256": "02091a9c9b5a200a9f3e778b7f74878aae22a9164d32cb788d63839a2779df82"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/repaired-leg-proof-v4.json",
+      "bytes": 19105,
+      "sha256": "5b52ae5354a304db24ca09d402d8ceeb6040225836418befed63ebdf839b0759"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/review-summary-v4.json",
+      "bytes": 20628,
+      "sha256": "1669a862e5281a7623e0ba112471282556804df1c6eac24ea2d2cd78c5e43fd5"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/seal-review-summary-v4.mjs",
+      "bytes": 9199,
+      "sha256": "9d16605e5f0e69d2949c802097f930a793d467a0b2f7e047ce6aa27cd481d9f0"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/syntax-verification-v4.json",
+      "bytes": 3328,
+      "sha256": "9247be56b96304eab9f1dd9c3e1541dcaa1c74a1da45800a32b5ff99bd26a870"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/trial-actor-92-01-v1.json",
+      "bytes": 19398,
+      "sha256": "5688dd3e4a324789db00a6aba644965bfc70f6d0a7770d9a6dd0d02f195a0f2c"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "source": "partition-span2-compact-halo-repair-v1/trial-actor-92-02-v1.json",
+      "bytes": 37886,
+      "sha256": "c3139f6f2b6f3b9a45eb085b8a83f6d50f5a5ad826516009b4b37d6a0430c9c9"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/validate-prefix-contracts-v4.mjs",
+      "bytes": 2240,
+      "sha256": "9a9c81fc4b7a6b19ec0fce72d5c4f2363128e32d7e626348e728bf87e94037cf"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "source": "partition-span2-compact-halo-repair-v1/validate-repaired.mjs",
+      "bytes": 11508,
+      "sha256": "e73e073ba446334ce836a31a2374f31700a618be947ea1bea57bc870c3de672b"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "source": "partition-span2-compact-halo-repair-v1/validation-adapter-provenance-v2.json",
+      "bytes": 5649,
+      "sha256": "5106653752e12466e88de26e5f38fdb28956ed25d7853532d979f97541d1ac8b"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "source": "partition-span2-compact-halo-repair-v1/validation-repaired-v4.json",
+      "bytes": 7220826,
+      "sha256": "25f4d6261eff656654d3ed9cbc97c49355440fd6deb3ced3cd5e1dc2b97ea9aa"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/compact-halo-repair-summary-review-addendum-v1.json",
+      "source": "compact-halo-repair-summary-review-addendum-v1.json",
+      "bytes": 3473,
+      "sha256": "b37ff2ae3443b7fb1f10c6a9b217beff3d2c1a239851548975daff43660347aa"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/collect-formal-native-v2-compact-wire-ladder-10-recordings-metadata.json",
+      "source": "collect-formal-native-v2-compact-wire-ladder-10-recordings-metadata.json",
+      "bytes": 1231,
+      "sha256": "d477a7aca5ca4747f16108bb033318f892e79dff7789cab4c9c05928b80f98a3"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/collect-formal-native-v2-compact-wire-ladder-10-monitor-endpoints.json",
+      "source": "collect-formal-native-v2-compact-wire-ladder-10-monitor-endpoints.json",
+      "bytes": 4688,
+      "sha256": "6b482236b285a46b8d2ee0fc715c8e3b311313a7acab14e63aea42b9a29a7b7e"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/collect-public.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/collect-public.mjs",
+      "bytes": 41882,
+      "sha256": "59f25bff4ca5f6da894b9c6fae157883c10f2efea47365e8c36e25ecd2c98650"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/formal-native-v2-compact-wire-ladder-10/verify-public.mjs",
+      "source": "formal-native-v2-compact-wire-ladder-10/verify-public.mjs",
+      "bytes": 18729,
+      "sha256": "42b634bdf9f31ecc27e1eda803a8b730e298887316f7b07a6d1dd96a632fbab3"
+    },
+    {
+      "path": "capacity-formal-native-v2-compact-wire-ladder-10/collect-formal-native-v2-compact-wire-ladder-10-public-artifact-catalog.json",
+      "source": "collect-formal-native-v2-compact-wire-ladder-10-public-artifact-catalog.json",
+      "bytes": 50121,
+      "sha256": "cdb59eaa682da18d4c160a413e18e9ce2a1fdda017818102ee91f41b9dc4a94c"
+    }
+  ],
+  "allOriginalCopiesByteEqual": true,
+  "structurallyUnredactedSensitiveJsonFields": 0,
+  "privateSecretValuesReadOrClaimedChecked": false
+}

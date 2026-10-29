@@ -1,0 +1,28 @@
+
+running 23 tests
+test web::web_live_overflow_tests::live_overflow_cancels_stalled_real_websocket_writer_and_closes_transport ... ok
+test web::web_live_overflow_tests::live_overflow_old_registration_signal_cannot_stop_replacement ... ok
+test web::web_live_overflow_tests::live_overflow_prepared_registration_signal_waits_for_matching_activation ... ok
+test web::web_live_overflow_tests::live_overflow_transport_loss_saves_authoritative_move_and_keeps_one_use_resume ... ok
+test web::web_live_overflow_tests::owner_ack_order_real_tick_map_information_rebinds_owner_and_observer_after_portal ... ok
+test web::web_live_overflow_tests::owner_ack_order_web_sender_waits_for_prepared_registration_activation ... ok
+test web::web_live_overflow_tests::owner_health_web_current_health_is_sent_once_before_next_normal_packet ... ok
+test web::web_live_overflow_tests::owner_health_web_final_gate_rejects_already_dequeued_stale_health ... ok
+test web::web_live_overflow_tests::owner_health_web_validation_failure_cancels_the_whole_current_transport ... ok
+test web::web_live_overflow_tests::zone_delivery_trace_disabled_and_nonplayer_remove_preserve_wire ... ok
+test web::web_live_overflow_tests::zone_delivery_trace_full_and_closed_are_not_enqueue_success ... ok
+test web::web_live_overflow_tests::zone_delivery_trace_player_remove_keeps_distinct_recipient_and_target ... ok
+test web::web_live_overflow_tests::zone_delivery_trace_same_packet_survives_queue_gate_and_send ... ok
+test web::web_live_overflow_tests::zone_delivery_trace_terminal_results_preserve_sender_fences ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_health_claim_remains_validated_between_normal_packets ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_health_completion_rechecks_epoch_before_send_or_failure ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_overload_stops_before_later_packet ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_prepared_ack_waits_for_bootstrap_and_filters_stale_epoch ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_preserves_first_packet_then_owner_priority_and_closed_channel ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_ready_fifo_precedes_queued_writer_after_bootstrap_wait ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_send_error_stops_and_releases_gate ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_slow_empty_health_releases_budget_before_next_packet ... ok
+test web::web_live_overflow_tests::zone_outbound_batch_stale_backlog_is_count_bounded_and_yields_to_writer ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 1244 filtered out; finished in 39.30s
+

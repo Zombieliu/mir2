@@ -1,0 +1,20 @@
+{
+  "verifiedAtUtc": "2026-10-24T13:00:44.123Z",
+  "hashChecks": 138,
+  "committedEvidenceFiles": 0,
+  "reportCounts": {
+    "originalFull": {
+      "passed": 14,
+      "not_run": 2
+    },
+    "native": {
+      "passed": 9
+    },
+    "separateFocusedDeathRevive": {
+      "passed": 7
+    }
+  },
+  "originalFullUnchangedAndIncomplete": true,
+  "redactionManifestsVerified": 3,
+  "scope": "Independent hash/report-status verification. Source-only CRLF/LF variants use explicit normalized pins; recorded evidence bytes never normalize. Known-secret scans themselves were performed by the evidence worker; no private credentials are loaded by this verifier."
+}

@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "thresholdMs": 50,
+  "helperSchema": "socket-context-v1",
+  "normalizedKeys": {
+    "legacy": [
+      "observedAtMs",
+      "stage",
+      "durationMs"
+    ],
+    "scoped": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "connection"
+    ],
+    "queue": [
+      "observedAtMs",
+      "stage",
+      "durationMs",
+      "connection",
+      "queuedPhase",
+      "phaseElapsedMs",
+      "inputClass"
+    ]
+  },
+  "stageLabels": [
+    "serial_gate.zone_outbound_wait",
+    "socket_input.queue_residence",
+    "serial_gate.input_wait",
+    "session_action.execute",
+    "session_action.flush",
+    "runtime_tick.execute",
+    "runtime_tick.save_checkpoint",
+    "runtime_tick.flush",
+    "flush.responses",
+    "flush.external_state",
+    "flush.save",
+    "snapshot.build_and_send",
+    "zone_owner.in_process.execute_request",
+    "zone_owner.hosted.runtime_lock_wait",
+    "zone_owner.hosted.execute_request",
+    "zone_cadence.total",
+    "zone_cadence.gate_wait",
+    "zone_cadence.manager_tick",
+    "zone_cadence.dispatch",
+    "shared_session.predrain.monster_activation",
+    "shared_session.predrain.shared_entity_projection",
+    "shared_session.predrain.pending_lock_wait",
+    "shared_session.predrain.journey_reposition",
+    "shared_session.predrain",
+    "shared_session.inner_execute",
+    "shared_session.reconcile",
+    "shared_session.tail",
+    "socket_turn.input",
+    "socket_turn.chat",
+    "socket_turn.injection",
+    "socket_turn.spectator",
+    "socket_turn.ai_live",
+    "runtime_tick.total",
+    "runtime_tick.identity_cache",
+    "runtime_tick.identity_database",
+    "runtime_tick.resume_credential",
+    "runtime_tick.owner_heartbeat",
+    "runtime_tick.serial_gate_wait",
+    "runtime_tick.preflight",
+    "socket_turn.input_owner_heartbeat"
+  ],
+  "allowedNonQueueScopedStages": [
+    "serial_gate.input_wait",
+    "serial_gate.zone_outbound_wait",
+    "socket_turn.input",
+    "socket_turn.chat",
+    "socket_turn.injection",
+    "socket_turn.spectator",
+    "socket_turn.ai_live",
+    "runtime_tick.total",
+    "runtime_tick.identity_cache",
+    "runtime_tick.identity_database",
+    "runtime_tick.resume_credential",
+    "runtime_tick.owner_heartbeat",
+    "runtime_tick.serial_gate_wait",
+    "runtime_tick.preflight",
+    "socket_turn.input_owner_heartbeat"
+  ],
+  "allowedQueuedPhases": [
+    "select_wait",
+    "input",
+    "input_gate",
+    "input_owner_heartbeat",
+    "chat",
+    "injection",
+    "spectator",
+    "ai_live",
+    "runtime_tick",
+    "identity_cache",
+    "identity_database",
+    "resume_credential",
+    "owner_heartbeat",
+    "tick_gate",
+    "preflight"
+  ],
+  "allowedInputClasses": [
+    "move",
+    "attack_v2",
+    "other"
+  ],
+  "lineLimitBytes": 8192,
+  "totalLimitBytes": 33554432,
+  "writeLimitBytes": 1048576,
+  "writeHighWaterMarkBytes": 1048576,
+  "finishWaitMs": 15000,
+  "publicDataFile": "slow-stage-public.jsonl",
+  "publicStatusFile": "slow-stage-public-status.json",
+  "newFailureReasons": [
+    "noncanonical-connection",
+    "unsafe-connection",
+    "noncanonical-phase-elapsed",
+    "unsafe-phase-elapsed"
+  ],
+  "validation": {
+    "reusedExactHelperSource": true,
+    "reusedExactTestSource": true,
+    "testsRerun": false,
+    "synthetic": {
+      "tests": 25,
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "durationMs": 154.3198,
+      "legacyScenariosPassed": 14,
+      "newContextScenariosPassed": 11,
+      "log": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\synthetic-tests-v1.log",
+        "bytes": 6131,
+        "sha256": "f9a3757f968410a1e60ce48abcc9296c5a4014407e418608974034db1c67449b"
+      }
+    },
+    "helperFreeze": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\slow-stage-socket-context-v1\\freeze-v1.json",
+      "bytes": 4235,
+      "sha256": "875ecbb07a386d339fc2e5f78f62dd9804dde7a5ad93a6114c01c34a3fd2b29d"
+    }
+  }
+}

@@ -6,6 +6,7 @@ pub mod ids;
 pub mod io;
 mod item_image;
 pub mod packets;
+pub mod procurement;
 pub mod trace;
 pub mod types;
 

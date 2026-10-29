@@ -1,0 +1,73 @@
+{
+  "digest": "8fA3zipy2erzhNZgQASunHy5PyZBVumYxoU7NxubhQGy",
+  "checkpoint": "400174320",
+  "effects": {
+    "status": {
+      "status": "success",
+      "error": null
+    },
+    "gasUsed": {
+      "computationCost": "1000000",
+      "storageCost": "15025200",
+      "storageRebate": "5995800",
+      "nonRefundableStorageFee": "600"
+    }
+  },
+  "events": [
+    {
+      "type": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dubhe_events::DappCreated",
+      "parsedJson": null,
+      "id": {
+        "txDigest": "8fA3zipy2erzhNZgQASunHy5PyZBVumYxoU7NxubhQGy",
+        "eventSeq": "0"
+      },
+      "bcs": "U2YyNzkwOTkwNjUzODFjZmZiNTc1YjVjMWZhNGNmZjg2Nzc0ZDM3ZGZmZjc3YmMzYmVhOWMyZjY2OGM0OWQ4ODA6OmRhcHBfa2V5OjpEYXBwS2V5xYe6EntHh04cg/vqIJRWuOqmsJSLL5QSVEpE6k1udIfiBsOCoQEAAHEvCi3su+LnyM5ClLxHjak0bTW2ziLydK0FSgNji+DJ"
+    },
+    {
+      "type": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dubhe_events::DappFeeStateUpdated",
+      "parsedJson": null,
+      "id": {
+        "txDigest": "8fA3zipy2erzhNZgQASunHy5PyZBVumYxoU7NxubhQGy",
+        "eventSeq": "1"
+      },
+      "bcs": "U2YyNzkwOTkwNjUzODFjZmZiNTc1YjVjMWZhNGNmZjg2Nzc0ZDM3ZGZmZjc3YmMzYmVhOWMyZjY2OGM0OWQ4ODA6OmRhcHBfa2V5OjpEYXBwS2V5gDgBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD0AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC6HdIFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+    }
+  ],
+  "objectChanges": [
+    {
+      "type": "created",
+      "objectId": "0x122acc01b78f29412c81d4aa5a32d7070ebdb8ee382f253d270cb01d6a6c62c6",
+      "objectType": "0x2::dynamic_field::Field<0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dapp_service::DappGenesisKey<0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::dapp_key::DappKey>,bool>",
+      "version": "1070151247",
+      "digest": "FR2btmUQmFc9LpJxrjLZFqxvPYxRFr4T7WwtmPwGkDWh"
+    },
+    {
+      "type": "mutated",
+      "objectId": "0x3a6401294afd546661ecf135a18504c48e54a58a8ac3edda13efda9351d8a5df",
+      "objectType": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::AdminCap",
+      "version": "1070151247",
+      "digest": "DVDEjgSrKdUaaMmXWrgeKnRpz3toTw5knA54b1J6DoyU"
+    },
+    {
+      "type": "created",
+      "objectId": "0x712f0a2decbbe2e7c8ce4294bc478da9346d35b6ce22f274ad054a03638be0c9",
+      "objectType": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dapp_service::DappStorage",
+      "version": "1070151247",
+      "digest": "4YVW55Jx1b675grPEivT14vJCWef3B4phDAtX6JRoBDT"
+    },
+    {
+      "type": "mutated",
+      "objectId": "0x80391929a8772aba091156fd1f099bf79240d2cf4471a14026b4aa68e3a240cc",
+      "objectType": "0xae33be6675639d6f1a5c468ae6bbc457ae4e22e57cd7526741d6143ce219d995::dapp_service::DappHub",
+      "version": "1070151247",
+      "digest": "EUt6Qu2VkwqYhfMmxvM7EtX59rTMW4WNbU4cTaRrf1qS"
+    },
+    {
+      "type": "created",
+      "objectId": "0xbfbcb135da63537ab67e537ab92f65b30b59df97bcd3138a7a37dc581e2615ea",
+      "objectType": "0xf279099065381cffb575b5c1fa4cff86774d37dfff77bc3bea9c2f668c49d880::procurement_system::Config",
+      "version": "1070151247",
+      "digest": "DwFaK8Nv1YWfaa182VKr3ekSH4KxDofJxvewBHFgEJ9G"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-26T22:03:35.8810437Z",
+  "gatewayPid": 66720,
+  "gatewayPidAbsent": true,
+  "portsFree": true,
+  "listeners": [],
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

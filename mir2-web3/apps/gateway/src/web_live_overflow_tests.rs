@@ -49,6 +49,7 @@ async fn health_sender_socket_case(
                             gate.clone(),
                             active.clone(),
                             failure_tx,
+                            None,
                         );
                         let decision = Arc::new(std::sync::atomic::AtomicUsize::new(1));
                         let outbound = SharedZoneLiveOutbound::new(
@@ -191,6 +192,7 @@ async fn owner_ack_order_web_sender_waits_for_prepared_registration_activation()
                         Arc::clone(&gate),
                         Arc::clone(&active),
                         watch::channel(0).0,
+                        None,
                     );
                     let location = |x| ServerPacket::UserLocation {
                         location: mir2_protocol::UserLocation {
@@ -337,6 +339,7 @@ async fn live_overflow_cancels_stalled_real_websocket_writer_and_closes_transpor
                                 writer_terminal,
                                 Arc::new(transport::MovementDrain::default()),
                                 "overflow-transport-fixture".to_owned(),
+                                None,
                             );
                             // A permanently occupied writer lock models a stalled
                             // send. The control path must not acquire this lock.
@@ -724,4 +727,810 @@ async fn live_overflow_transport_loss_saves_authoritative_move_and_keeps_one_use
     assert!(store
         .take_by_credential(&issued.credential, &issued.binding, gateway_unix_ms())
         .is_none());
+}
+// Real socket fixture for the bounded sender. Bootstrap starts locked so tests
+// can establish channel contents and the fair-lock waiter order explicitly.
+struct OutboundBatchSocket {
+    client: tokio_tungstenite::WebSocketStream<
+        tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+    >,
+    sender: SharedWebSocketSender,
+    terminal: transport::TransportSignal,
+    gate: SharedSerialExecutionGate,
+    bootstrap: Option<tokio::sync::OwnedRwLockWriteGuard<()>>,
+    active: Arc<AtomicU64>,
+    normal: Option<mpsc::Sender<SharedZoneLiveOutbound>>,
+    owner: Option<mpsc::Sender<SharedZoneLiveOutbound>>,
+    failure: watch::Receiver<u64>,
+    writer: ZoneOutboundSenderTask,
+    _done: oneshot::Sender<()>,
+    server: tokio::task::JoinHandle<()>,
+}
+
+impl Drop for OutboundBatchSocket {
+    fn drop(&mut self) {
+        self.writer.handle.abort();
+        self.server.abort();
+    }
+}
+
+impl OutboundBatchSocket {
+    async fn new() -> Self {
+        Self::new_with_clock(Instant::now).await
+    }
+
+    async fn new_with_clock(now: impl Fn() -> Instant + Send + 'static) -> Self {
+        let (ready_tx, ready_rx) = oneshot::channel();
+        let (done_tx, done_rx) = oneshot::channel();
+        let handoff = Arc::new(Mutex::new(Some((ready_tx, done_rx))));
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let address = listener.local_addr().unwrap();
+        let router = Router::new().route(
+            "/ws",
+            get(move |upgrade: WebSocketUpgrade| {
+                let (ready, done) = handoff.lock().unwrap().take().unwrap();
+                async move {
+                    upgrade.on_upgrade(move |socket| async move {
+                        let (sink, _stream) = socket.split();
+                        let terminal = transport::TransportSignal::new();
+                        let sender = Arc::new(transport::SocketSender::new(sink, terminal.clone()));
+                        let _ = ready.send((sender, terminal));
+                        let _ = done.await;
+                    })
+                }
+            }),
+        );
+        let server = tokio::spawn(async move {
+            axum::serve(listener, router).await.unwrap();
+        });
+        let (client, _) = tokio_tungstenite::connect_async(format!("ws://{address}/ws"))
+            .await
+            .unwrap();
+        let (sender, terminal) = ready_rx.await.unwrap();
+        let gate = Arc::new(AsyncRwLock::new(()));
+        let bootstrap = gate.clone().write_owned().await;
+        let active = Arc::new(AtomicU64::new(42));
+        let (normal, normal_rx) = mpsc::channel(128);
+        let (owner, owner_rx) = mpsc::channel(16);
+        let (failure_tx, failure) = watch::channel(0);
+        let writer = spawn_zone_outbound_sender_with_clock(
+            normal_rx,
+            owner_rx,
+            sender.clone(),
+            gate.clone(),
+            active.clone(),
+            failure_tx,
+            None,
+            now,
+        );
+        Self {
+            client,
+            sender,
+            terminal,
+            gate,
+            bootstrap: Some(bootstrap),
+            active,
+            normal: Some(normal),
+            owner: Some(owner),
+            failure,
+            writer,
+            _done: done_tx,
+            server,
+        }
+    }
+
+    async fn enqueue(&self, epoch: u64, time: i64) {
+        self.normal
+            .as_ref()
+            .unwrap()
+            .send(SharedZoneLiveOutbound::new(
+                epoch,
+                ServerPacket::KeepAlive { time },
+            ))
+            .await
+            .unwrap();
+    }
+
+    async fn packet(&mut self) -> Value {
+        let message = tokio::time::timeout(Duration::from_secs(2), self.client.next())
+            .await
+            .unwrap()
+            .unwrap()
+            .unwrap();
+        let tokio_tungstenite::tungstenite::Message::Text(text) = message else {
+            panic!("expected packet, received {message:?}");
+        };
+        serde_json::from_str(&text).unwrap()
+    }
+}
+
+async fn outbound_batch_wait_until(mut ready: impl FnMut() -> bool) {
+    tokio::time::timeout(Duration::from_secs(2), async {
+        while !ready() {
+            tokio::task::yield_now().await;
+        }
+    })
+    .await
+    .unwrap();
+}
+
+async fn outbound_batch_queue_writer<F: std::future::Future>(mut writer: std::pin::Pin<&mut F>) {
+    assert!(
+        std::future::poll_fn(|cx| {
+            std::task::Poll::Ready(std::future::Future::poll(writer.as_mut(), cx).is_pending())
+        })
+        .await
+    );
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_ready_fifo_precedes_queued_writer_after_bootstrap_wait() {
+    let base = Instant::now();
+    let elapsed_ms = Arc::new(AtomicU64::new(0));
+    let clock = elapsed_ms.clone();
+    let mut socket = OutboundBatchSocket::new_with_clock(move || {
+        base + Duration::from_millis(clock.load(Ordering::Acquire))
+    })
+    .await;
+    socket.enqueue(42, 1).await;
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    socket.enqueue(42, 2).await;
+    socket.enqueue(42, 3).await;
+    let mut next_writer = Box::pin(socket.gate.clone().write_owned());
+    outbound_batch_queue_writer(next_writer.as_mut()).await;
+    // Advance while the reader waits, then freeze. Bootstrap wait must not
+    // consume the batch budget, regardless of real socket or task scheduling.
+    elapsed_ms.store(5, Ordering::Release);
+    drop(socket.bootstrap.take());
+    let guard = tokio::time::timeout(Duration::from_secs(2), next_writer)
+        .await
+        .unwrap();
+    send_server_packet(&socket.sender, &ServerPacket::KeepAlive { time: 99 })
+        .await
+        .unwrap();
+    drop(guard);
+    for time in [1, 2, 3, 99] {
+        assert_eq!(socket.packet().await["payload"]["time"], time);
+    }
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_stale_backlog_is_count_bounded_and_yields_to_writer() {
+    let frozen = Instant::now();
+    let mut socket = OutboundBatchSocket::new_with_clock(move || frozen).await;
+    socket.enqueue(41, 0).await;
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    for time in 1..96 {
+        socket.enqueue(41, time).await;
+    }
+    let mut next_writer = Box::pin(socket.gate.clone().write_owned());
+    outbound_batch_queue_writer(next_writer.as_mut()).await;
+    drop(socket.bootstrap.take());
+    let guard = tokio::time::timeout(Duration::from_secs(2), next_writer)
+        .await
+        .unwrap();
+    let consumed = 96 - (128 - socket.normal.as_ref().unwrap().capacity());
+    // The next batch may have dequeued its first packet outside the read gate.
+    assert!(
+        (32..=33).contains(&consumed),
+        "consumed {consumed} before writer"
+    );
+    assert!(!socket.writer.handle.is_finished());
+    drop(guard);
+    socket.enqueue(42, 99).await;
+    assert_eq!(socket.packet().await["payload"]["time"], 99);
+}
+
+#[derive(Debug)]
+struct OutboundBatchSlowHealth;
+
+impl crate::routing::OwnerHealthValidator for OutboundBatchSlowHealth {
+    fn validate(&self, _: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String> {
+        // A deliberately slow single claim exceeds the between-packet budget.
+        std::thread::sleep(Duration::from_millis(5));
+        Ok(false)
+    }
+}
+
+fn outbound_batch_health(
+    validator: Arc<dyn crate::routing::OwnerHealthValidator>,
+) -> SharedZoneLiveOutbound {
+    SharedZoneLiveOutbound::new(42, ServerPacket::HealthChanged { hp: 10, mp: 9 })
+        .with_owner_health(crate::routing::OwnerHealthDelivery {
+            change: mir2_simulation::ZoneOwnerHealthChange {
+                cursor: mir2_simulation::ZoneOwnerHealthCursor {
+                    session_id: mir2_simulation::SessionId::new("batch-health-probe"),
+                    online_owner: "private-batch-probe".into(),
+                    object_id: 1,
+                    life_generation: 1,
+                    dead: false,
+                    health_sequence: 1,
+                },
+                hp_before: 11,
+                mp_before: 9,
+                hp: 10,
+                mp: 9,
+            },
+            validator,
+            highest_sent_sequence: Arc::new(Mutex::new(0)),
+        })
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_slow_empty_health_releases_budget_before_next_packet() {
+    let mut socket = OutboundBatchSocket::new().await;
+    socket
+        .normal
+        .as_ref()
+        .unwrap()
+        .send(outbound_batch_health(Arc::new(OutboundBatchSlowHealth)))
+        .await
+        .unwrap();
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    socket.enqueue(42, 2).await;
+    let mut next_writer = Box::pin(socket.gate.clone().write_owned());
+    outbound_batch_queue_writer(next_writer.as_mut()).await;
+    drop(socket.bootstrap.take());
+    let guard = tokio::time::timeout(Duration::from_secs(2), next_writer)
+        .await
+        .unwrap();
+    send_server_packet(&socket.sender, &ServerPacket::KeepAlive { time: 99 })
+        .await
+        .unwrap();
+    drop(guard);
+    assert_eq!(socket.packet().await["payload"]["time"], 99);
+    assert_eq!(socket.packet().await["payload"]["time"], 2);
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_preserves_first_packet_then_owner_priority_and_closed_channel() {
+    let mut socket = OutboundBatchSocket::new().await;
+    socket.enqueue(42, 1).await;
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    socket.enqueue(42, 2).await;
+    socket.enqueue(41, 90).await;
+    socket.enqueue(42, 3).await;
+    socket
+        .owner
+        .as_ref()
+        .unwrap()
+        .send(SharedZoneLiveOutbound::new(
+            42,
+            ServerPacket::UserLocation {
+                location: mir2_protocol::UserLocation {
+                    position: Point { x: 25, y: 23 },
+                    direction: MirDirection::Right,
+                },
+            },
+        ))
+        .await
+        .unwrap();
+    drop(socket.owner.take());
+    drop(socket.bootstrap.take());
+    assert_eq!(socket.packet().await["payload"]["time"], 1);
+    assert_eq!(socket.packet().await["packet"], "UserLocation");
+    assert_eq!(socket.packet().await["payload"]["time"], 2);
+    assert_eq!(socket.packet().await["payload"]["time"], 3);
+    // One channel is closed and the other empty/open: neither can hold the gate.
+    let guard = tokio::time::timeout(Duration::from_secs(2), socket.gate.write())
+        .await
+        .unwrap();
+    drop(guard);
+    socket.enqueue(42, 4).await;
+    assert_eq!(socket.packet().await["payload"]["time"], 4);
+    drop(socket.normal.take());
+    outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+    assert_eq!(*socket.failure.borrow(), 0);
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_prepared_ack_waits_for_bootstrap_and_filters_stale_epoch() {
+    let mut socket = OutboundBatchSocket::new().await;
+    socket.active.store(0, Ordering::Release);
+    socket
+        .owner
+        .as_ref()
+        .unwrap()
+        .send(SharedZoneLiveOutbound::new(
+            42,
+            ServerPacket::UserLocation {
+                location: mir2_protocol::UserLocation {
+                    position: Point { x: 25, y: 23 },
+                    direction: MirDirection::Right,
+                },
+            },
+        ))
+        .await
+        .unwrap();
+    outbound_batch_wait_until(|| socket.owner.as_ref().unwrap().capacity() == 16).await;
+    socket.enqueue(41, 90).await;
+    socket.enqueue(42, 2).await;
+    send_server_packet(&socket.sender, &ServerPacket::KeepAlive { time: 11 })
+        .await
+        .unwrap();
+    assert_eq!(socket.packet().await["payload"]["time"], 11);
+    assert!(
+        tokio::time::timeout(Duration::from_millis(20), socket.client.next())
+            .await
+            .is_err()
+    );
+    socket.active.store(42, Ordering::Release);
+    drop(socket.bootstrap.take());
+    assert_eq!(socket.packet().await["packet"], "UserLocation");
+    assert_eq!(socket.packet().await["payload"]["time"], 2);
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_health_claim_remains_validated_between_normal_packets() {
+    for validation in [0, 1, 2] {
+        let mut socket = OutboundBatchSocket::new().await;
+        socket.enqueue(42, 1).await;
+        outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+        socket
+            .normal
+            .as_ref()
+            .unwrap()
+            .send(outbound_batch_health(Arc::new(HealthValidationProbe(
+                Arc::new(AtomicUsize::new(validation)),
+            ))))
+            .await
+            .unwrap();
+        socket.enqueue(42, 2).await;
+        drop(socket.bootstrap.take());
+        assert_eq!(socket.packet().await["payload"]["time"], 1);
+        if validation == 2 {
+            outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+            assert_eq!(*socket.failure.borrow(), 42);
+            assert!(
+                tokio::time::timeout(Duration::from_millis(20), socket.client.next())
+                    .await
+                    .is_err()
+            );
+        } else {
+            if validation == 1 {
+                assert_eq!(socket.packet().await["packet"], "HealthChanged");
+            }
+            assert_eq!(socket.packet().await["payload"]["time"], 2);
+            assert_eq!(*socket.failure.borrow(), 0);
+        }
+    }
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_overload_stops_before_later_packet() {
+    let mut socket = OutboundBatchSocket::new().await;
+    socket.enqueue(42, 1).await;
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    let mut overloaded = SharedZoneLiveOutbound::new(42, ServerPacket::KeepAlive { time: 90 });
+    overloaded.with_transport_failure_flag(Arc::new(AtomicBool::new(true)));
+    socket
+        .normal
+        .as_ref()
+        .unwrap()
+        .send(overloaded)
+        .await
+        .unwrap();
+    socket.enqueue(42, 2).await;
+    drop(socket.bootstrap.take());
+    assert_eq!(socket.packet().await["payload"]["time"], 1);
+    outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+    assert_eq!(*socket.failure.borrow(), 42);
+    assert!(
+        tokio::time::timeout(Duration::from_millis(20), socket.client.next())
+            .await
+            .is_err()
+    );
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_send_error_stops_and_releases_gate() {
+    let mut socket = OutboundBatchSocket::new().await;
+    socket.enqueue(42, 1).await;
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    socket.enqueue(42, 2).await;
+    socket.terminal.end(transport::TransportEnd::WriteError);
+    drop(socket.bootstrap.take());
+    outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+    assert_eq!(*socket.failure.borrow(), 42);
+    assert_eq!(
+        socket.terminal.reason(),
+        Some(transport::TransportEnd::WriteError)
+    );
+    assert!(socket.gate.try_write().is_ok());
+    assert!(
+        tokio::time::timeout(Duration::from_millis(20), socket.client.next())
+            .await
+            .is_err()
+    );
+}
+
+#[derive(Debug)]
+struct OutboundBatchReplacedHealth {
+    active: Arc<AtomicU64>,
+    fail: bool,
+}
+
+impl crate::routing::OwnerHealthValidator for OutboundBatchReplacedHealth {
+    fn validate(&self, _: &mir2_simulation::ZoneOwnerHealthChange) -> Result<bool, String> {
+        self.active.store(43, Ordering::Release);
+        if self.fail {
+            Err("old registration validation failed after replacement".into())
+        } else {
+            Ok(true)
+        }
+    }
+}
+
+#[tokio::test]
+async fn zone_outbound_batch_health_completion_rechecks_epoch_before_send_or_failure() {
+    for fail in [false, true] {
+        let mut socket = OutboundBatchSocket::new().await;
+        socket
+            .normal
+            .as_ref()
+            .unwrap()
+            .send(outbound_batch_health(Arc::new(
+                OutboundBatchReplacedHealth {
+                    active: socket.active.clone(),
+                    fail,
+                },
+            )))
+            .await
+            .unwrap();
+        outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+        socket.enqueue(42, 90).await;
+        socket.enqueue(43, 3).await;
+        drop(socket.bootstrap.take());
+        // Neither a successful old health claim nor its failure may escape
+        // the final epoch fence or cancel the replacement registration.
+        assert_eq!(socket.packet().await["payload"]["time"], 3);
+        assert_eq!(*socket.failure.borrow(), 0);
+        assert_eq!(socket.active.load(Ordering::Acquire), 43);
+    }
+}
+
+// Per-stamp capture avoids process-global environment changes in parallel tests.
+fn delivery_trace_packet() -> ServerPacket {
+    ServerPacket::UserLocation {
+        location: mir2_protocol::UserLocation {
+            position: Point { x: 25, y: 23 },
+            direction: MirDirection::Right,
+        },
+    }
+}
+
+fn delivery_trace_fields(line: &str) -> std::collections::BTreeMap<&str, &str> {
+    assert!(line.starts_with("[gateway-zone-delivery-trace] "));
+    line.split_whitespace()
+        .skip(1)
+        .map(|field| field.split_once('=').unwrap())
+        .collect()
+}
+
+fn delivery_trace_stages(events: &Arc<Mutex<Vec<String>>>) -> Vec<String> {
+    events
+        .lock()
+        .unwrap()
+        .iter()
+        .map(|line| delivery_trace_fields(line)["stage"].to_owned())
+        .collect()
+}
+
+#[test]
+fn zone_delivery_trace_disabled_and_nonplayer_remove_preserve_wire() {
+    let packet = delivery_trace_packet();
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let plain = SharedZoneLiveOutbound::new(42, packet.clone());
+    assert!(plain.delivery_trace().is_none());
+    let disabled = plain.with_test_delivery_trace(false, 50048, &packet, true, events.clone());
+    assert!(disabled.delivery_trace().is_none());
+    assert_eq!(
+        serde_json::to_value(disabled.into_packet()).unwrap(),
+        serde_json::to_value(&packet).unwrap()
+    );
+    let monster_remove = ServerPacket::ObjectRemove { object_id: 77 };
+    let excluded = SharedZoneLiveOutbound::new(42, monster_remove.clone())
+        .with_test_delivery_trace(true, 50048, &monster_remove, false, events.clone());
+    assert!(excluded.delivery_trace().is_none());
+    assert!(events.lock().unwrap().is_empty());
+}
+
+#[test]
+fn zone_delivery_trace_player_remove_keeps_distinct_recipient_and_target() {
+    let packet = ServerPacket::ObjectRemove { object_id: 50041 };
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let outbound = SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+        true,
+        50048,
+        &packet,
+        true,
+        events.clone(),
+    );
+    outbound.delivery_trace().unwrap().emit(
+        crate::routing::ZoneDeliveryTraceStage::Dequeue,
+        Some(Instant::now()),
+        None,
+    );
+    let events = events.lock().unwrap();
+    let fields = delivery_trace_fields(&events[0]);
+    assert_eq!(fields["recipientZoneID"], "50048");
+    assert_eq!(fields["targetObjectID"], "50041");
+    assert_eq!(fields["kind"], "ObjectRemove");
+    assert_eq!(fields["hasPosition"], "0");
+    assert_eq!(
+        serde_json::to_value(outbound.into_packet()).unwrap(),
+        serde_json::to_value(packet).unwrap()
+    );
+}
+
+#[test]
+fn zone_delivery_trace_full_and_closed_are_not_enqueue_success() {
+    let (tx, rx) = mpsc::channel(1);
+    let sender = SharedZoneLiveOutboundSender::single(tx);
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let packet = delivery_trace_packet();
+    for _ in 0..2 {
+        let result = sender.try_send(
+            SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+                true,
+                50048,
+                &packet,
+                true,
+                events.clone(),
+            ),
+        );
+        if events.lock().unwrap().len() == 1 {
+            assert!(result.is_ok());
+        } else {
+            assert!(matches!(result, Err(mpsc::error::TrySendError::Full(_))));
+        }
+    }
+    drop(rx);
+    assert!(matches!(
+        sender.try_send(
+            SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+                true,
+                50048,
+                &packet,
+                true,
+                events.clone()
+            )
+        ),
+        Err(mpsc::error::TrySendError::Closed(_))
+    ));
+    assert_eq!(
+        delivery_trace_stages(&events),
+        ["enqueue", "full", "closed"]
+    );
+    let events = events.lock().unwrap();
+    let ids = events
+        .iter()
+        .map(|line| delivery_trace_fields(line)["serverTraceID"])
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(ids.len(), 3);
+}
+
+#[tokio::test]
+async fn zone_delivery_trace_same_packet_survives_queue_gate_and_send() {
+    let mut socket = OutboundBatchSocket::new().await;
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let packet = delivery_trace_packet();
+    let sender = SharedZoneLiveOutboundSender::new(
+        socket.normal.as_ref().unwrap().clone(),
+        socket.owner.as_ref().unwrap().clone(),
+    );
+    sender
+        .try_send(
+            SharedZoneLiveOutbound::new(42, packet.clone()).with_test_delivery_trace(
+                true,
+                50048,
+                &packet,
+                true,
+                events.clone(),
+            ),
+        )
+        .unwrap();
+    outbound_batch_wait_until(|| socket.owner.as_ref().unwrap().capacity() == 16).await;
+    assert!(!delivery_trace_stages(&events)
+        .iter()
+        .any(|stage| stage == "gate"));
+    drop(socket.bootstrap.take());
+    assert_eq!(socket.packet().await["packet"], "UserLocation");
+    outbound_batch_wait_until(|| {
+        delivery_trace_stages(&events)
+            .iter()
+            .any(|stage| stage == "sent")
+    })
+    .await;
+    let events = events.lock().unwrap();
+    assert_eq!(events.len(), 5);
+    let trace_id = delivery_trace_fields(&events[0])["serverTraceID"].to_owned();
+    for line in events.iter() {
+        let fields = delivery_trace_fields(line);
+        assert_eq!(fields["serverTraceID"], trace_id);
+        assert_eq!(fields["recipientZoneID"], "50048");
+        assert_eq!(fields["targetObjectID"], "50048");
+        assert_eq!(fields["kind"], "UserLocation");
+        for (key, value) in fields {
+            if key != "stage" && key != "kind" {
+                assert!(value.parse::<i128>().is_ok(), "non-numeric field: {key}");
+            }
+        }
+        for sensitive in [
+            "account",
+            "character",
+            "credential",
+            "private",
+            "payload",
+            "name",
+        ] {
+            assert!(!line.contains(sensitive));
+        }
+    }
+    let stages = events
+        .iter()
+        .map(|line| delivery_trace_fields(line)["stage"])
+        .filter(|stage| *stage != "enqueue")
+        .collect::<Vec<_>>();
+    assert_eq!(stages, ["dequeue", "gate", "send", "sent"]);
+}
+
+#[tokio::test]
+async fn zone_delivery_trace_terminal_results_preserve_sender_fences() {
+    for terminal in [
+        "stale",
+        "health-empty",
+        "health-error",
+        "overload",
+        "send-error",
+    ] {
+        let mut socket = OutboundBatchSocket::new().await;
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let metadata_packet = delivery_trace_packet();
+        let mut outbound = if terminal.starts_with("health-") {
+            let decision = if terminal == "health-empty" { 0 } else { 2 };
+            outbound_batch_health(Arc::new(HealthValidationProbe(Arc::new(AtomicUsize::new(
+                decision,
+            )))))
+        } else {
+            SharedZoneLiveOutbound::new(42, metadata_packet.clone())
+        }
+        .with_test_delivery_trace(true, 50048, &metadata_packet, true, events.clone());
+        if terminal == "stale" {
+            socket.active.store(43, Ordering::Release);
+        } else if terminal == "overload" {
+            outbound.with_transport_failure_flag(Arc::new(AtomicBool::new(true)));
+        } else if terminal == "send-error" {
+            socket.terminal.end(transport::TransportEnd::WriteError);
+        }
+        socket
+            .normal
+            .as_ref()
+            .unwrap()
+            .send(outbound)
+            .await
+            .unwrap();
+        outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+        // An untraced trailing packet proves skip cases still continue normally.
+        socket
+            .enqueue(if terminal == "stale" { 43 } else { 42 }, 123)
+            .await;
+        drop(socket.bootstrap.take());
+        if terminal == "stale" || terminal == "health-empty" {
+            assert_eq!(socket.packet().await["payload"]["time"], 123);
+            assert_eq!(*socket.failure.borrow(), 0);
+        } else {
+            outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+            assert_eq!(*socket.failure.borrow(), 42);
+            assert!(socket.gate.try_write().is_ok());
+            assert!(
+                tokio::time::timeout(Duration::from_millis(20), socket.client.next())
+                    .await
+                    .is_err()
+            );
+        }
+        let stages = delivery_trace_stages(&events);
+        assert_eq!(stages.last().map(String::as_str), Some(terminal));
+        assert!(!stages.iter().any(|stage| stage == "sent"));
+        assert_eq!(
+            stages
+                .iter()
+                .filter(|stage| stage.as_str() == "send")
+                .count(),
+            usize::from(terminal == "send-error")
+        );
+    }
+}
+
+#[test]
+fn zone_outbound_block_flag_requires_exact_opt_in_without_env_mutation() {
+    assert!(!zone_outbound_block_enabled_value(None));
+    for value in ["", "0", "true", "01", " 1", "1 "] {
+        assert!(!zone_outbound_block_enabled_value(Some(value)));
+    }
+    assert!(zone_outbound_block_enabled_value(Some("1")));
+    assert!(matches!(
+        ZoneOutboundBlockKind::for_packet(&delivery_trace_packet()),
+        ZoneOutboundBlockKind::UserLocation
+    ));
+    assert!(matches!(
+        ZoneOutboundBlockKind::for_packet(&ServerPacket::ObjectRemove { object_id: 50041 }),
+        ZoneOutboundBlockKind::ObjectRemove
+    ));
+    assert!(matches!(
+        ZoneOutboundBlockKind::for_packet(&ServerPacket::KeepAlive { time: 123 }),
+        ZoneOutboundBlockKind::Other
+    ));
+}
+
+#[test]
+fn zone_outbound_block_threshold_and_schema_are_numeric_or_fixed_enums() {
+    for kind in [
+        ZoneOutboundBlockKind::OwnerHealth,
+        ZoneOutboundBlockKind::UserLocation,
+        ZoneOutboundBlockKind::ObjectPlayer,
+        ZoneOutboundBlockKind::ObjectRemove,
+        ZoneOutboundBlockKind::Other,
+    ] {
+        for lane in [ZoneOutboundBlockLane::Owner, ZoneOutboundBlockLane::Normal] {
+            for stage in [
+                ZoneOutboundBlockStage::ReadGate,
+                ZoneOutboundBlockStage::HealthSchedule,
+                ZoneOutboundBlockStage::HealthRun,
+                ZoneOutboundBlockStage::HealthAwait,
+                ZoneOutboundBlockStage::Send,
+                ZoneOutboundBlockStage::CompletionToPop,
+            ] {
+                let context = ZoneOutboundBlockContext {
+                    registration: 49,
+                    batch_id: 3,
+                    batch_index: 1,
+                    kind,
+                    lane,
+                    normal_depth: 7,
+                    owner_depth: 2,
+                };
+                assert!(context.line(stage, Duration::ZERO, 123).is_none());
+                assert!(context
+                    .line(stage, Duration::from_micros(49_999), 123)
+                    .is_none());
+                for elapsed_us in [50_000_u64, 50_001, 1_495_209] {
+                    let line = context
+                        .line(stage, Duration::from_micros(elapsed_us), 123)
+                        .unwrap();
+                    assert!(line.starts_with("[gateway-zone-outbound-block] "));
+                    let fields = line
+                        .split_whitespace()
+                        .skip(1)
+                        .map(|field| field.split_once('=').unwrap())
+                        .collect::<std::collections::BTreeMap<_, _>>();
+                    assert_eq!(fields.len(), 10);
+                    assert_eq!(fields["stage"], stage.label());
+                    assert_eq!(fields["kind"], kind.label());
+                    assert_eq!(fields["lane"], lane.label());
+                    for (key, expected) in [
+                        ("registration", 49_u128),
+                        ("batchID", 3),
+                        ("batchIndex", 1),
+                        ("normalDepth", 7),
+                        ("ownerDepth", 2),
+                        ("elapsedUs", u128::from(elapsed_us)),
+                        ("recordedUnixMs", 123),
+                    ] {
+                        assert_eq!(fields[key].parse::<u128>().unwrap(), expected);
+                    }
+                    for sensitive in [
+                        "account",
+                        "character",
+                        "credential",
+                        "payload",
+                        "name",
+                        "received",
+                    ] {
+                        assert!(!line.contains(sensitive));
+                    }
+                }
+            }
+        }
+    }
 }

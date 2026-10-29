@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only the required canonical Release pin is added to the pre-seal temporary binding. All formal gates, mode conditions, project-path usage, policy and runtime behavior remain unchanged.",
+  "original": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs.before-release-pin-v2.txt",
+    "bytes": 16158,
+    "sha256": "38cf515930674244a108e88d77f0fc471f5d218fd6db63633c87b2ed8fb68a9e"
+  },
+  "derived": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs",
+    "bytes": 16198,
+    "sha256": "7e9cdcf6e49cfa6da418690f85d77ef4d975e9cdc1e6d33fa744660961ad48a5"
+  },
+  "rule": {
+    "before": "driverSourceCommit:CORE,full16Gate:await verifyFull16Gate(candidate,release,validated.backendManifest)",
+    "after": "driverSourceCommit:CORE,releasePin:await pin(input.releaseFile),full16Gate:await verifyFull16Gate(candidate,release,validated.backendManifest)",
+    "occurrences": 1
+  },
+  "inverseRawExact": true,
+  "priorDerivation": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-controller-derivation-v1.json",
+    "bytes": 6603,
+    "sha256": "fbd6e67578a7fcda847b5bc667a8e9e93486237e465b05b29441a3273b97e1f2"
+  },
+  "actualSyntax": {
+    "command": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "--check",
+      "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\root-seal-and-guard-v1.mjs"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "stdout": "",
+    "stderr": ""
+  },
+  "other33SyntaxResultsReusedFromExactUnchangedSources": true,
+  "priorSyntaxLog": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-account-store-wait-ladder-13\\launcher-syntax-check.log.before-release-pin-v2.txt",
+    "bytes": 12441,
+    "sha256": "cb781467229f0191d9868d3cfdb521380331b3414ef37366e19f42f5c7c72617"
+  },
+  "modeExecuted": false
+}

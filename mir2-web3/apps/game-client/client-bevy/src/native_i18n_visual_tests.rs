@@ -35,6 +35,295 @@ use std::{
 const WIDTH: u32 = 1024;
 const HEIGHT: u32 = 768;
 
+#[cfg(target_os = "windows")]
+fn read_guild_pixel_reference_png(path: &Path) -> Image {
+    Image::from_buffer(
+        &fs::read(path).expect("read existing Guild reference PNG"),
+        bevy::image::ImageType::Extension("png"),
+        bevy::image::CompressedImageFormats::NONE,
+        true,
+        bevy::image::ImageSampler::nearest(),
+        bevy::asset::RenderAssetUsages::default(),
+    )
+    .expect("decode Guild reference through Bevy's existing PNG support")
+}
+
+#[cfg(target_os = "windows")]
+fn warm_guild_pixel_images(app: &mut App, report: &Path) {
+    use crate::crystal_ui::guild_pixel_text_view::{GuildPixelLabel, GuildPixelTextRendering};
+    let began = Instant::now();
+    loop {
+        i18n_step(app);
+        let handles: Vec<_> = app
+            .world_mut()
+            .query::<&ImageNode>()
+            .iter(app.world())
+            .map(|node| node.image.clone())
+            .collect();
+        let labels: Vec<_> = app.world_mut().query::<(&GuildPixelLabel, Option<&GuildPixelTextRendering>)>()
+            .iter(app.world()).map(|(label, status)| json!({"text":label.text,
+                "gdi":matches!(status,Some(GuildPixelTextRendering::Gdi96Dpi)),"status":format!("{status:?}")})).collect();
+        let images = app.world().resource::<Assets<Image>>();
+        let server = app.world().resource::<AssetServer>();
+        let states: Vec<_> = handles
+            .iter()
+            .map(|handle| {
+                let path = handle.path().map(ToString::to_string);
+                let contains = images.contains(handle.id());
+                let dependencies =
+                    handle.path().is_none() || server.is_loaded_with_dependencies(handle.id());
+                json!({"id":format!("{:?}",handle.id()),"path":path,"contains":contains,
+                "loadedWithDependencies":dependencies,"ready":contains&&dependencies})
+            })
+            .collect();
+        let required = [
+            "original-ui/Prguse/180.png",
+            "original-ui/Prguse/1850.png",
+            "original-ui/Title/25.png",
+            "original-ui/Title/94.png",
+            "original-ui/Title/104.png",
+        ];
+        let missing: Vec<_> = required
+            .into_iter()
+            .filter(|path| {
+                !states
+                    .iter()
+                    .any(|row| row["path"].as_str() == Some(*path) && row["ready"] == true)
+            })
+            .collect();
+        // This fixture creates only the real Guild renderer. Login/character
+        // preview readiness is not a Guild asset gate; do not borrow the
+        // generic nine-language fixture's unrelated preview-layer condition.
+        let ready = !states.is_empty()
+            && missing.is_empty()
+            && states.iter().all(|row| row["ready"] == true)
+            && labels.len() >= 6
+            && labels.iter().all(|row| row["gdi"] == true);
+        if ready {
+            break;
+        }
+        if began.elapsed() >= Duration::from_secs(30) {
+            let diagnostics = json!({"passed":false,"complete":false,"phase":"Guild asset warmup",
+                "elapsedMs":began.elapsed().as_millis(),"missingRequiredGuildAssets":missing,
+                "imageNodeCount":states.len(),"imageStates":states.into_iter().take(128).collect::<Vec<_>>(),
+                "guildLabels":labels.into_iter().take(32).collect::<Vec<_>>(),"timeoutExtended":false});
+            fs::write(report, serde_json::to_vec_pretty(&diagnostics).unwrap()).unwrap();
+            panic!("Guild-only assets did not load; exact handle/path/contains/dependency status: {diagnostics}");
+        }
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    for _ in 0..8 {
+        i18n_step(app);
+    }
+}
+
+/// The production Guild renderer, not a reconstruction of its label positions.
+#[cfg(target_os = "windows")]
+fn spawn_guild_pixel_main_window(mut commands: Commands, assets: Res<AssetServer>) {
+    let mut social = crate::social::SocialModel::default();
+    social.guild = crate::social::GuildModel {
+        name: Some("hahah".into()),
+        level: 0,
+        member_count: 1,
+        max_members: 5,
+        max_experience: 100,
+        my_options: 0xff,
+        permissions: vec!["recruit".into(), "notice".into()],
+        notice: vec![],
+        ..default()
+    };
+    let mut state = crate::crystal_ui::NativePlayerUiState::default();
+    state.guild_panel.sync_recruit("");
+    let player = crate::read_model::PlayerStats::default();
+    commands
+        .spawn(Node {
+            width: Val::Px(WIDTH as f32),
+            height: Val::Px(HEIGHT as f32),
+            position_type: PositionType::Absolute,
+            ..default()
+        })
+        .with_children(|parent| {
+            crate::crystal_ui::overlays::render_guild_panel(
+                parent,
+                Some(&assets),
+                &social,
+                &state,
+                &player,
+            );
+        });
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+#[ignore = "explicit real-asset Guild main-window GPU/GDI pixel comparison; run alone with fresh output and independent C# reference"]
+fn guild_main_window_matches_independent_crystal_gdi_reference_96dpi() {
+    use crate::crystal_ui::guild_pixel_text_view::{
+        GuildPixelLabel, GuildPixelTextPlugin, GuildPixelTextRendering,
+    };
+    let assets = PathBuf::from(
+        std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("real packaged assets"),
+    )
+    .canonicalize()
+    .unwrap();
+    let reference = PathBuf::from(
+        std::env::var_os("MIR2_GUILD_GDI_REFERENCE_ROOT")
+            .expect("independent C# 96DPI reference directory"),
+    )
+    .canonicalize()
+    .unwrap();
+    let output = PathBuf::from(
+        std::env::var_os("MIR2_GUILD_PIXEL_VISUAL_OUTPUT")
+            .expect("new Guild pixel evidence directory"),
+    );
+    assert!(
+        output.is_absolute() && !output.starts_with(&assets) && !output.starts_with(&reference)
+    );
+    fs::create_dir_all(&output).unwrap();
+    let report = output.join("guild-main-window-pixel-report.json");
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&report)
+        .unwrap();
+    fs::write(&report, b"{\"passed\":false,\"complete\":false}").unwrap();
+    struct RestoreGuildLocale(Locale);
+    impl Drop for RestoreGuildLocale {
+        fn drop(&mut self) {
+            native_i18n::activate(self.0);
+        }
+    }
+    let _restore = RestoreGuildLocale(native_i18n::locale());
+    native_i18n::activate(Locale::English);
+    let (mut app, target, _) = i18n_offscreen_app_configured(&assets, false, |app| {
+        app.add_plugins(GuildPixelTextPlugin)
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Startup, spawn_guild_pixel_main_window);
+    });
+    warm_guild_pixel_images(&mut app, &report);
+    let screenshot = output.join("guild-main-window-english-1024x768.png");
+    capture_i18n(&mut app, &target, &screenshot);
+    let actual = read_guild_pixel_reference_png(&screenshot)
+        .try_into_dynamic()
+        .unwrap()
+        .to_rgba8();
+    let expected = read_guild_pixel_reference_png(
+        &reference.join("guild-notice-statistics-label-reference.png"),
+    )
+    .try_into_dynamic()
+    .unwrap()
+    .to_rgba8();
+    assert_eq!(expected.dimensions(), (590, 432));
+    let reference_rows: Value =
+        serde_json::from_slice(&fs::read(reference.join("glyphbounds.json")).unwrap()).unwrap();
+    assert_eq!(reference_rows["dpi"], 96);
+    let labels: Vec<_> = app
+        .world_mut()
+        .query::<(
+            &GuildPixelLabel,
+            Option<&ImageNode>,
+            Option<&GuildPixelTextRendering>,
+        )>()
+        .iter(app.world())
+        .map(|(label, image, backend)| {
+            (
+                label.text.clone(),
+                label.rect,
+                image.map(|i| i.image.clone()),
+                matches!(backend, Some(GuildPixelTextRendering::Gdi96Dpi)),
+            )
+        })
+        .collect();
+    let mut checks = Vec::new();
+    for row in reference_rows["labels"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|r| r["kind"] == "MirLabel")
+    {
+        let text = row["text"].as_str().unwrap();
+        let x = row["windowX"].as_f64().unwrap() as f32 + 217.;
+        let y = row["windowY"].as_f64().unwrap() as f32 + 168.;
+        let found = labels
+            .iter()
+            .find(|(t, rect, _, _)| t == text && rect.left == x && rect.top == y);
+        let png = read_guild_pixel_reference_png(&reference.join(row["file"].as_str().unwrap()))
+            .try_into_dynamic()
+            .unwrap()
+            .to_rgba8();
+        let mut mismatches = None;
+        let mut correct_size = false;
+        let mut gdi = false;
+        if let Some((_, _, Some(handle), is_gdi)) = found {
+            gdi = *is_gdi;
+            if let Some(image) = app.world().resource::<Assets<Image>>().get(handle) {
+                correct_size = image.width() == png.width() && image.height() == png.height();
+                if let Some(data) = image.data.as_ref() {
+                    if correct_size && data.len() == png.as_raw().len() {
+                        mismatches = Some(
+                            data.iter()
+                                .zip(png.as_raw())
+                                .filter(|(a, b)| a != b)
+                                .count(),
+                        );
+                    }
+                }
+            }
+        }
+        checks.push(json!({"kind":"independent_csharp_gdi_texture","id":row["id"],"text":text,
+            "stageOrigin":[x,y],"expectedGlyphBounds":row["foregroundNonBlackBounds"],"gdi":gdi,
+            "sizeMatches":correct_size,"differentRgbaBytes":mismatches,"passed":gdi && correct_size && mismatches==Some(0)}));
+    }
+    // Compare real GPU output for primary statistics and baked original tab
+    // art. Recruit input is a separate 10pt editor and not falsely compared
+    // against the independent label-only composition. The experience reference
+    // includes the real source-library 424 frame, not a synthetic empty bar.
+    for (id, x, y, width, height) in [
+        ("source-title", 18, 9, 49, 15),
+        ("source-notice-tab", 20, 38, 72, 24),
+        ("source-statistics-tab", 501, 38, 72, 24),
+        ("primary-statistics", 362, 107, 200, 70),
+        ("recruit-label", 391, 343, 150, 15),
+        ("source-experience-zero-percent", 322, 403, 260, 22),
+    ] {
+        let mut mismatches = 0u64;
+        let mut compared = 0u64;
+        let mut maximum = 0u8;
+        for dy in 0..height {
+            for dx in 0..width {
+                let e = expected.get_pixel(x + dx, y + dy);
+                if e.0[3] != 255 {
+                    continue;
+                }
+                let a = actual.get_pixel(217 + x + dx, 168 + y + dy);
+                compared += 1;
+                let delta = (0..4).map(|i| a.0[i].abs_diff(e.0[i])).max().unwrap();
+                maximum = maximum.max(delta);
+                if delta != 0 {
+                    mismatches += 1;
+                }
+            }
+        }
+        checks.push(json!({"kind":"actual_gpu_against_original_bitmap_and_gdi","id":id,
+            "windowRect":[x,y,width,height],"opaquePixelsCompared":compared,"differentPixels":mismatches,
+            "maxChannelDifference":maximum,"passed":compared>0 && mismatches==0}));
+    }
+    let passed = checks.iter().all(|row| row["passed"] == true);
+    fs::write(&report,serde_json::to_vec_pretty(&json!({"schemaVersion":1,"passed":passed,"complete":true,
+        "scope":"English 96DPI 1024x768 actual production Guild main window; independent Crystal GDI reference",
+        "gameplayPerformed":false,"serverConnected":false,"liveAcceptance":false,"screenshot":screenshot,
+        "referenceDirectory":reference,"checks":checks,
+        "limitations":["No non-English or other-DPI equality claim","Editor IME and recruit input are separate from MirLabel",
+            "Comparison covers named primary regions and every independent label raster, not every page or all window pixels"]})).unwrap()).unwrap();
+    assert!(
+        passed,
+        "Guild pixel mismatch; retain actual screenshot and report at {}",
+        report.display()
+    );
+}
+
 #[derive(Resource, Default)]
 struct CapturedI18nImage(Option<Image>);
 
@@ -76,6 +365,8 @@ fn install_fixture_fonts(app: &mut App) {
     let mut pinned = FixtureFonts::default();
     for file in [
         "NotoSansTC.ttf",
+        "NotoSansCJKsc-Regular.otf",
+        "MIR2BillingHan-Regular.ttf",
         "NotoSans-Regular.ttf",
         "NotoSans-Bold.ttf",
         "NotoSansDevanagari-Regular.ttf",
@@ -125,16 +416,53 @@ fn configure_fixture_script_fallbacks(mut cx: ResMut<FontCx>) {
             .collection
             .family_id(name)
             .expect("bundled fixture family registered");
+        let families = if tag == *b"Hani" {
+            vec![
+                family,
+                cx.collection
+                    .family_id("MIR2 Billing Han")
+                    .expect("bundled billing Han supplement registered"),
+                cx.collection
+                    .family_id("Noto Sans CJK SC")
+                    .expect("full Simplified Chinese face registered"),
+            ]
+        } else {
+            vec![family]
+        };
         let script = fontique::Script::from_bytes(tag);
-        if cx.collection.fallback_families(script).next() != Some(family) {
-            assert!(cx.collection.set_fallbacks(script, std::iter::once(family)));
+        if !cx
+            .collection
+            .fallback_families(script)
+            .eq(families.iter().copied())
+        {
+            assert!(cx
+                .collection
+                .set_fallbacks(script, families.iter().copied()));
         }
         if tag == *b"Hani" {
-            for locale in ["zh-TW", "zh-HK", "zh-CN", "ja", "ko"] {
-                if cx.collection.fallback_families((script, locale)).next() != Some(family) {
+            for locale in ["zh-TW", "zh-HK", "zh-MO", "zh-Hant", "ja", "ko"] {
+                if !cx
+                    .collection
+                    .fallback_families((script, locale))
+                    .eq(families.iter().copied())
+                {
                     assert!(cx
                         .collection
-                        .set_fallbacks((script, locale), std::iter::once(family)));
+                        .set_fallbacks((script, locale), families.iter().copied()));
+                }
+            }
+            let simplified_families = [families[2], families[0], families[1]];
+            // Match the host: fontique shares zh-CN/Hans with generic Han.
+            // Locale::SimplifiedChinese chooses the SC primary explicitly.
+            for locale in ["zh-SG"] {
+                if !cx
+                    .collection
+                    .fallback_families((script, locale))
+                    .eq(simplified_families)
+                {
+                    assert!(cx
+                        .collection
+                        .set_fallbacks((script, locale), simplified_families.into_iter()));
                 }
             }
         }
@@ -364,11 +692,7 @@ fn font_counts(app: &App) -> Value {
     })
 }
 
-fn capture_nine_language_popups(
-    app: &mut App,
-    target: &Handle<Image>,
-    output: &Path,
-) -> Vec<Value> {
+fn capture_language_popups(app: &mut App, target: &Handle<Image>, output: &Path) -> Vec<Value> {
     let mut cases = Vec::new();
     for locale in [Locale::English, Locale::Arabic] {
         set_screen(app, locale, NativeShellScreen::Login);
@@ -394,7 +718,7 @@ fn capture_nine_language_popups(
         let filename = format!("shell-{}-language-popup.png", locale.code());
         capture_i18n(app, target, &output.join(&filename));
         cases.push(
-            json!({"locale":locale.code(),"image":filename,"visibleAutonyms":9,"texts":layouts}),
+            json!({"locale":locale.code(),"image":filename,"visibleAutonyms":Locale::COUNT,"texts":layouts}),
         );
         native_i18n::set_language_popup_for_tests(app.world_mut(), false);
         warm_i18n_images(app);
@@ -733,10 +1057,10 @@ fn multilingual_shell_screens_and_font_switches_render_offscreen() {
             }
         }
     }
-    let popups = capture_nine_language_popups(&mut app, &target, &output);
+    let popups = capture_language_popups(&mut app, &target, &output);
     let baseline = font_counts(&app);
     assert!(baseline["atlasBytes"].as_u64().unwrap() > 0);
-    assert_eq!(baseline["pinnedHandles"], 9);
+    assert_eq!(baseline["pinnedHandles"], 11);
     let mut checkpoints = Vec::new();
     // Thirty complete cycles: 270 language selections / 1080 production screen
     // rebuilds. This is a bounded regression, not a long-duration leak claim.
@@ -1169,6 +1493,7 @@ fn guild_name_and_sabuk_npc_pages_render_offscreen() {
         let composition = match locale {
             Locale::English => "Guild",
             Locale::TraditionalChinese => "龍城",
+            Locale::SimplifiedChinese => "龙城",
             Locale::BrazilianPortuguese => "Dragões",
             Locale::Russian => "Драконы",
             Locale::Hindi => "वीर",
@@ -1357,4 +1682,265 @@ fn guild_name_and_sabuk_npc_pages_render_offscreen() {
         failures.is_empty(),
         "Guild/Sabuk production layout failures: {failures:?}"
     );
+}
+
+#[test]
+#[ignore = "explicit Simplified Chinese production NPC, quest and bag GPU evidence; no server or account"]
+fn simplified_chinese_npc_quest_and_inventory_render_offscreen() {
+    use crate::crystal_ui::overlays::NativePlayerUiState;
+    use crate::crystal_ui::{bag_paint, item_tooltip, widget};
+    use crate::inventory::{InventoryModel, ItemModel};
+    use crate::quest_model::{
+        NpcDialogLine, NpcDialogModel, NpcDialogOption, Quest, QuestDetailText, QuestReward,
+        QuestStatus, QuestTracker,
+    };
+    use crate::quest_ui::{Mir2QuestUiPlugin, QuestUiState};
+    use crate::read_model::{PlayerStats, UiReadModel};
+    let assets =
+        PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("real assets"));
+    let output = PathBuf::from(std::env::var_os("MIR2_ZH_CN_VISUAL_OUTPUT").expect("fresh output"));
+    assert!(assets.is_absolute() && output.is_absolute() && !output.starts_with(&assets));
+    fs::create_dir_all(&output).unwrap();
+    let report = output.join("zh-cn-gameplay-layouts.json");
+    OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&report)
+        .unwrap();
+    fs::write(&report, b"{\"passed\":false}").unwrap();
+    struct Restore(Locale);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            native_i18n::activate(self.0);
+        }
+    }
+    let _restore = Restore(native_i18n::locale());
+    native_i18n::activate(Locale::SimplifiedChinese);
+    let (mut app, target, camera) = i18n_offscreen_app_configured(&assets, false, |app| {
+        crate::crystal_ui::item_image::install_original_item_image_layout(app);
+        app.add_plugins(Mir2QuestUiPlugin)
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            });
+    });
+    warm_i18n_images(&mut app);
+    let opaque_name = "龍城{Gold}";
+    let source_greeting = format!("Hello {opaque_name}, Are you a beginner in this game?");
+    let mut npc = NpcDialogModel {
+        is_open: true,
+        npc_object_id: Some(1),
+        npc_name: Some("Administrator".into()),
+        lines: vec![NpcDialogLine {
+            text: source_greeting.clone(),
+        }],
+        options: vec![NpcDialogOption {
+            option_id: "@Exit".into(),
+            label: "Close".into(),
+            enabled: true,
+        }],
+    };
+    app.insert_resource(npc.clone());
+    let player = PlayerStats {
+        name: Some(opaque_name.into()),
+        level: 22,
+        class_name: Some("Warrior".into()),
+        gold: 10_000,
+        ..default()
+    };
+    app.world_mut().resource_mut::<UiReadModel>().player = player.clone();
+    let mut evidence = Vec::new();
+    let mut capture = |app: &mut App, name: &str, expected: &[&str]| {
+        warm_i18n_images(app);
+        let rows = i18n_text_layouts(app);
+        let failures = rows
+            .iter()
+            .filter(|r| {
+                r["missingGlyphs"] != 0
+                    || r["layoutExceedsNode"] == true
+                    || r["nodeOutsideViewport"] == true
+            })
+            .collect::<Vec<_>>();
+        assert!(failures.is_empty(), "{name}: {failures:?}");
+        for expected_text in expected {
+            assert!(
+                rows.iter().any(|r| r["text"]
+                    .as_str()
+                    .is_some_and(|t| t.contains(expected_text))),
+                "{name} missing Simplified text {expected_text}: {rows:?}"
+            );
+        }
+        let filename = format!("zh-CN-{name}-1024x768.png");
+        capture_i18n(app, &target, &output.join(&filename));
+        evidence.push(json!({"case":name,"image":filename,"expected":expected,"layouts":rows}));
+    };
+    capture(&mut app, "npc-opaque-name", &["你好，龍城{Gold}", "管理员"]);
+    assert_eq!(
+        app.world().resource::<NpcDialogModel>().lines[0].text,
+        source_greeting
+    );
+    assert_eq!(
+        app.world().resource::<NpcDialogModel>().options[0].option_id,
+        "@Exit"
+    );
+    assert_eq!(
+        app.world().resource::<NpcDialogModel>().npc_name.as_deref(),
+        Some("Administrator")
+    );
+    npc.close();
+    app.insert_resource(npc);
+
+    let title =
+        native_i18n::format_for(Locale::English, "quest.2110001.title", "Growth reward", &[]);
+    let quest = Quest {
+        quest_index: 2_110_001,
+        accept_npc_index: None,
+        finish_npc_index: None,
+        title: title.clone(),
+        npc_name: None,
+        group: Some("Recommended".into()),
+        min_level_needed: 1,
+        detail: QuestDetailText::default(),
+        status: QuestStatus::InProgress,
+        objectives: vec![],
+        rewards: vec![QuestReward::Gold { amount: 100 }],
+        unknown_text: None,
+    };
+    app.insert_resource(QuestTracker {
+        active_quests: vec![quest],
+    });
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::QuestLog;
+    app.world_mut()
+        .resource_mut::<QuestUiState>()
+        .detail_quest_index = Some(2_110_001);
+    capture(
+        &mut app,
+        "quest-diary-detail",
+        &["首套巡逻装备", "推荐", "列表：1/20"],
+    );
+    assert_eq!(
+        app.world().resource::<QuestTracker>().active_quests[0].title,
+        title
+    );
+    assert_eq!(
+        app.world().resource::<QuestTracker>().active_quests[0]
+            .group
+            .as_deref(),
+        Some("Recommended")
+    );
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::None;
+    app.world_mut()
+        .resource_mut::<QuestUiState>()
+        .detail_quest_index = None;
+    app.insert_resource(QuestTracker::default());
+
+    let template =
+        mir2_game_data::crystal_item_by_index(226).expect("canonical IronSword template");
+    let item = ItemModel {
+        key: "fixture-iron-sword".into(),
+        name: template.name.clone(),
+        icon: template.image,
+        quantity: 1,
+        container: 0,
+        slot: 6,
+        unique_id: Some(42),
+        ..default()
+    };
+    let inventory = InventoryModel {
+        gold: 10_000,
+        items: vec![item.clone()],
+        ..default()
+    };
+    let document = item_tooltip::crystal_item_tooltip_document(&item, &player);
+    let asset_server = app.world().resource::<AssetServer>().clone();
+    let mut queue = bevy::ecs::world::CommandQueue::default();
+    let mut commands = Commands::new(&mut queue, app.world());
+    commands
+        .spawn((
+            UiTargetCamera(camera),
+            Node {
+                width: px(1024.0),
+                height: px(768.0),
+                ..default()
+            },
+        ))
+        .with_children(|root| {
+            root.spawn(Node {
+                position_type: PositionType::Absolute,
+                left: px(520.0),
+                top: px(80.0),
+                width: px(316.0),
+                height: px(236.0),
+                ..default()
+            })
+            .with_children(|bag| {
+                bag_paint::paint_crystal_inventory(
+                    bag,
+                    &asset_server,
+                    &inventory,
+                    &player,
+                    &bag_paint::BagPaintOptions {
+                        page: 0,
+                        delete_mode: false,
+                        weight_ratio: None,
+                        free_slots: Some(39),
+                        font: crate::crystal_ui::typography::crystal_text_font(10.0),
+                        stack_split_hint: default(),
+                    },
+                    |_| (),
+                    |cell| {
+                        bag_paint::BagCellPolicy::new(
+                            cell.item.is_some(),
+                            cell.item.is_some(),
+                            false,
+                        )
+                    },
+                    |_, _| {},
+                )
+            });
+            root.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(120.0),
+                    top: px(120.0),
+                    width: px(310.0),
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                },
+                BackgroundColor(Color::srgb(0.02, 0.02, 0.02)),
+            ))
+            .with_children(|tooltip| {
+                widget::spawn_crystal_item_hint_document(
+                    tooltip,
+                    &document,
+                    &crate::crystal_ui::typography::crystal_text_font(
+                        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    ),
+                )
+            });
+        });
+    queue.apply(app.world_mut());
+    capture(&mut app, "bag-item-tooltip", &["铁剑"]);
+    assert!(app
+        .world_mut()
+        .query_filtered::<(&Node, &ImageNode), With<crate::crystal_ui::item_image::OriginalItemImage>>()
+        .iter(app.world())
+        .any(|(node, image)| node.display != Display::None
+            && image.image.path().is_some_and(|path| path.path()
+                == Path::new("original-ui/Items/36.png"))),
+        "the canonical sword icon must be loaded and visible, not only its translated tooltip"
+    );
+    assert_eq!(inventory.items[0].name, template.name);
+    assert_eq!(inventory.items[0].unique_id, Some(42));
+    assert_eq!(
+        app.world().resource::<UiReadModel>().player.name.as_deref(),
+        Some(opaque_name)
+    );
+    fs::write(report, serde_json::to_vec_pretty(&json!({"passed":true,"evidenceKind":"offline-native-production-renderer", "locale":"zh-CN", "systemFonts":false, "width":1024,"height":768,"captures":evidence,"missingGlyphs":0,"overflowingTextNodes":0,"outsideViewportNodes":0,"opaquePlayerName":opaque_name,"liveAcceptance":false})).unwrap()).unwrap();
 }

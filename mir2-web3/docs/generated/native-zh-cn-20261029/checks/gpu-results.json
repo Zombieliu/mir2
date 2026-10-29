@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "suites": [
+    {
+      "evidenceKind": "separately-executed-ignored-gpu-test",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "Before the two scoped system captions and generic Han fallback compatibility correction; those areas independently retested below.",
+      "sourceLog": {
+        "filename": "gpu-shell-v1.log",
+        "included": false,
+        "bytes": 28028,
+        "sha256": "7686242c632d1fc21545ae03309a7a7447f96b5c99063bbf0cb03ec766756913"
+      },
+      "testLines": [
+        "test native_shell_ui::i18n_visual_tests::multilingual_shell_screens_and_font_switches_render_offscreen ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1609 filtered out; finished in 170.88s"
+      ],
+      "report": "native-mock/shell/shell-i18n-report.json",
+      "screenshots": 44,
+      "includedScreenshots": 6,
+      "screenshotCountMeaning": "44 measured captures; six selected PNGs archived, with all layout records"
+    },
+    {
+      "evidenceKind": "separately-executed-ignored-gpu-test",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "Final production font registration/fallbacks; 180 locale switches.",
+      "sourceLog": {
+        "filename": "gpu-fonts-v1.log",
+        "included": false,
+        "bytes": 53860,
+        "sha256": "401ee1900c6fe402f69d7a97ea2922505c31513d0295884a58e16c96b93c8d6e"
+      },
+      "testLines": [
+        "test native_fonts::gpu_tests::bundled_fonts_gpu_shapes_and_switches_without_os_fonts ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1151 filtered out; finished in 2.32s"
+      ],
+      "report": "native-mock/fonts/font-gpu-evidence.json",
+      "screenshots": 10
+    },
+    {
+      "evidenceKind": "separately-executed-ignored-gpu-test",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "Final system captions, localized quest counters and real production item image after the display-label bounds fix.",
+      "sourceLog": {
+        "filename": "gpu-gameplay-v5.log",
+        "included": false,
+        "bytes": 27571,
+        "sha256": "17c6fdac962c90238eea643042e25b41fe0b5f8b03c04eff89b9b819ae7b3ac4"
+      },
+      "testLines": [
+        "test native_shell_ui::i18n_visual_tests::simplified_chinese_npc_quest_and_inventory_render_offscreen ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1611 filtered out; finished in 2.86s"
+      ],
+      "report": "native-mock/gameplay/zh-cn-gameplay-layouts.json",
+      "screenshots": 3
+    },
+    {
+      "evidenceKind": "separately-executed-ignored-gpu-test",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "sourcePhase": "Three locales/13 states before two scoped system caption additions; billing code/text unchanged by those additions. Final gameplay and production fonts independently retested.",
+      "sourceLog": {
+        "filename": "gpu-billing-v1.log",
+        "included": false,
+        "bytes": 28008,
+        "sha256": "fcf448a843150335af3980999c957ff389ba3ac1c22cb83c4e50c4d762cae1de"
+      },
+      "testLines": [
+        "test native_billing::ui::tests::billing_windows_gpu_three_routes_and_channel_states ... ok",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1609 filtered out; finished in 18.48s"
+      ],
+      "report": "../billing-entry-ui-20261029/native-mock/gpu/report.json",
+      "screenshots": 39
+    }
+  ],
+  "mockOnly": true,
+  "newPaymentsOrLiveConnection": false
+}

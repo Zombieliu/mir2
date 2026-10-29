@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "state": "AUTHORING_ONLY_NO_EXECUTION",
+  "sourceBlueprint": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-target-waypoint-routing-v1\\run-owned-full.mjs",
+    "bytes": 14524,
+    "sha256": "955af2b507a71d3571261b27e342691614330af91c74bb06f2c09f855c61f1f4"
+  },
+  "sourceAudit": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-target-waypoint-routing-v1\\audit-owned-full.mjs",
+    "bytes": 9495,
+    "sha256": "80a3f09b6932051f4778eab0453400d1233e111bebc35a57731ef8db6f5d5b2b"
+  },
+  "backendBlueprint": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-capacity-bank-prepare-v8\\source-lib-v1.mjs",
+    "bytes": 18471,
+    "sha256": "bdbcb65eb6027f8d0c0812ab6975b5d53beee28d133be36d8cdf75593f57ca16"
+  },
+  "backendCompleteSectionInverseExact": true,
+  "backendAssertionsRemoved": 0,
+  "changes": [
+    {
+      "label": "Independent backend binding destination",
+      "from": "BACKEND_RELEASE_BINDING=path.join(DIRECTORY,'backend-release-binding-pending-v1.json')",
+      "to": "BACKEND_RELEASE_BINDING=path.join(DIRECTORY,'backend-release-binding-v1.json')"
+    },
+    {
+      "label": "Prospective strict validation before any final file is written",
+      "from": "export function backendBinding(repo,head){",
+      "to": "export function backendBinding(repo,head,prospectiveBinding=null){"
+    },
+    {
+      "label": "Same complete backend assertions against either explicit prospective or existing raw binding",
+      "from": "const bindingPin=pin(BACKEND_RELEASE_BINDING),binding=read(bindingPin);",
+      "to": "const candidateBytes=prospectiveBinding?Buffer.from(JSON.stringify(prospectiveBinding,null,2)+'\\n'):null; const bindingPin=candidateBytes?{file:BACKEND_RELEASE_BINDING,bytes:candidateBytes.length,sha256:sha(candidateBytes)}:pin(BACKEND_RELEASE_BINDING),binding=prospectiveBinding??read(bindingPin);"
+    },
+    {
+      "label": "Runtime own-directory resolution",
+      "from": "import { pathToFileURL } from 'node:url';",
+      "to": "import { pathToFileURL, fileURLToPath } from 'node:url';"
+    },
+    {
+      "label": "Independent owned task root",
+      "from": "const taskRoot = \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\full-lifecycle-scout-target-waypoint-routing-v1\";",
+      "to": "const taskRoot = path.dirname(fileURLToPath(import.meta.url));"
+    },
+    {
+      "label": "Independent owned public output",
+      "from": "const output = \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\full-lifecycle-scout-target-waypoint-routing-v1\\\\public\";",
+      "to": "const output = path.join(taskRoot,'public');"
+    },
+    {
+      "label": "Explicit strict frozen source validation before driver import or private setup",
+      "from": "const { profile, releaseInput, backendBytes, backendManifest, backendInputCount, releaseRecordBytes } = await loadPreparedInputs(repo, taskRoot);",
+      "to": "if(process.argv.length!==3)throw Error('Usage: node run-owned-full.mjs FROZEN_INPUT_SHA256');\nconst { profile, releaseInput, backendBytes, backendManifest, backendInputCount, releaseRecordBytes, frozenPin } = await loadPreparedInputs(repo, taskRoot, process.argv[2]);"
+    },
+    {
+      "label": "Every recursive local runtime dependency participates in before/after source checks",
+      "from": "const sourceFiles = ['apps/web/scripts/playtest-multiplayer-smoke.mjs', 'apps/web/scripts/playtest-lifecycle.mjs',\n  'apps/web/scripts/playtest-catalog-transport.mjs', 'apps/web/scripts/quest-agent/protocol-play.mjs',\n  'apps/web/scripts/quest-agent/protocol-navigation.mjs', 'apps/web/scripts/quest-agent/protocol-observation.mjs'];",
+      "to": "const sourceFiles = profile.driverPins.map(pin=>pin.file);"
+    },
+    {
+      "label": "Independent gateway identity",
+      "from": "'cell-p0-p1-scout-target-waypoint-routing-full-'",
+      "to": "'cell-p0-p1-ordinary-v6-full-'"
+    },
+    {
+      "label": "Accurate V6 and separate current JS provenance",
+      "from": "scope: 'one-reused-c743-release-current-target-waypoint-routing-node-l-two-ordinary-account-full-lifecycle-run',",
+      "to": "scope: 'one-strictly-reused-ee06-v6-55-input-release-current-full-closure-two-ordinary-account-full-lifecycle-run', full16InputFrozen:frozenPin,"
+    },
+    {
+      "label": "Recheck complete frozen backend/JS/Root provenance after the unchanged driver",
+      "from": "record.backendManifestVerifiedInputs = backendInputCount;",
+      "to": "await loadPreparedInputs(repo,taskRoot,process.argv[2]);\n  record.backendManifestVerifiedInputs = backendInputCount;"
+    },
+    {
+      "label": "Read-only OS PID absence check; no PID-name kill, force cleanup or borrowed listener",
+      "from": "record.remainingOwnedPortListeners = listeners();",
+      "to": "record.ownedProcessAfterStop = JSON.parse(ps(`$ErrorActionPreference='Stop';$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${child.pid}';if($null -eq $p){@{absent=$true}|ConvertTo-Json -Compress}else{@{absent=$false;pid=[int]$p.ProcessId;executable=[string]$p.ExecutablePath;created=[string]$p.CreationDate}|ConvertTo-Json -Compress}`));\n  record.ownedProcessAbsent = record.ownedProcessAfterStop.absent === true;\n  if(!record.ownedProcessAbsent){record.ok=false;record.checks.ownedProcessAbsent='failed';}\n  else record.checks.ownedProcessAbsent='passed';\n  record.remainingOwnedPortListeners = listeners();"
+    },
+    {
+      "label": "Own-directory audit resolution",
+      "from": "import assert from 'node:assert/strict';",
+      "to": "import assert from 'node:assert/strict';\nimport {fileURLToPath} from 'node:url';"
+    },
+    {
+      "label": "Independent audit public root",
+      "from": "const root = \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\full-lifecycle-scout-target-waypoint-routing-v1\\\\public\";",
+      "to": "const root = path.join(path.dirname(fileURLToPath(import.meta.url)),'public');"
+    },
+    {
+      "label": "Independent audit task root",
+      "from": "const taskRoot = \"C:\\\\mir2-build\\\\p01-completion-20261024\\\\full-lifecycle-scout-target-waypoint-routing-v1\";",
+      "to": "const taskRoot = path.dirname(fileURLToPath(import.meta.url));"
+    },
+    {
+      "label": "Current V6/55 frozen input verification before audit",
+      "from": "const { profile, releaseInput, backendBytes, backendManifest: backend, backendInputCount, releaseRecordBytes } = await loadPreparedInputs(repo, taskRoot);",
+      "to": "assert.equal(process.argv.length,4,'Usage: node audit-owned-full.mjs REALM_STAMP FROZEN_INPUT_SHA256');\nconst { profile, releaseInput, backendBytes, backendManifest: backend, backendInputCount, releaseRecordBytes, frozenPin } = await loadPreparedInputs(repo, taskRoot, process.argv[3]);"
+    },
+    {
+      "label": "Bind OS absence and exact frozen inputs in the terminal proof",
+      "from": "assert.equal(realm.ok, true); assert.equal(realm.shutdown.code, 0); assert.deepEqual(realm.remainingOwnedPortListeners, []);",
+      "to": "assert.equal(realm.ok, true); assert.equal(realm.shutdown.code, 0); assert.deepEqual(realm.remainingOwnedPortListeners, []);\nassert.equal(realm.ownedProcessAbsent,true);assert.deepEqual(realm.full16InputFrozen,frozenPin);"
+    },
+    {
+      "label": "Count actual complete recursive local source closure, retain all six entry roots",
+      "from": "frozenDriverRawPinsMatched: 6,",
+      "to": "frozenDriverRawPinsMatched: profile.driverPins.length, originalEntryRootCount:6,"
+    },
+    {
+      "label": "Correct V6 scope; no capacity or P0 credit",
+      "from": "scope: 'Reused c743 account-store server Release under current execution normal public protocol lifecycle; neutral receipt checks from pinned verifier snapshot only. Independent dynamically counted candidate-source proof; historical builds remain separate. No frontend/native UI, two-computer, capacity, Cell or global ghost census acceptance'",
+      "to": "scope: 'Strictly reused ee06 V6/55/Rust32 build under independently bound current full16 source closure. Original16 normal-protocol assertions and pinned neutral verifier are unchanged. No frontend/native UI, two-computer, capacity, Cell or global ghost census acceptance'"
+    },
+    {
+      "label": "Complete closure source count in verification artifact",
+      "from": "matchedRawDriverPins: 6,",
+      "to": "matchedRawDriverPins: profile.driverPins.length, originalEntryRootCount:6,"
+    },
+    {
+      "label": "No old50 or new-Rust qualification claims",
+      "from": "scope: 'Current execution raw/GitLF50 equals original c743/50 Release; original immutable source/binary/build evidence is unchanged'",
+      "to": "scope: 'Current execution complete55 raw/GitLF/object/closure equals original ee06 V6 Release; historical Rust32/build are strictly reused, not reexecuted'"
+    }
+  ],
+  "exactRawCopies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-target-waypoint-routing-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\frozen-audit-support.mjs",
+        "bytes": 46572,
+        "sha256": "3988052a4ba9de791dbdb887b267eced6ca8bc915fa5676228f6d70c0761f4d5"
+      },
+      "same": true
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\full-lifecycle-scout-target-waypoint-routing-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "destination": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-v6-full-lifecycle-v1\\initialize-fresh-private.ps1",
+        "bytes": 1643,
+        "sha256": "c3a8ddecafe8c82752d963ee3237b55b25841d9674af83ea791e67ef8a82fd77"
+      },
+      "same": true
+    }
+  ],
+  "preserved": {
+    "full16Assertions": [
+      "authGuards",
+      "twoAccounts",
+      "mutualVisibility",
+      "movement",
+      "turn",
+      "chat",
+      "chatLatency",
+      "sharedCombat",
+      "mapRoundTrip",
+      "logout",
+      "reloginPersistence",
+      "sharedKill",
+      "sharedDrop",
+      "uniquePickup",
+      "playerDeath",
+      "townRevive"
+    ],
+    "profile": "full-lifecycle",
+    "durationSeconds": 900,
+    "ordinaryRegistrationCount": 2,
+    "attackCadenceMs": 900,
+    "freshPrivateAndFourSecrets": true,
+    "sixCountersBeforeAfter": true,
+    "normalStdinShutdown": true,
+    "noForceKill": true,
+    "noQa": true,
+    "noStoreEdit": true
+  },
+  "sourcePreviewCount": 14,
+  "entryRootCount": 6,
+  "dynamicImportsUnexpanded": 0,
+  "executionHeadUnknown": true,
+  "newRootReceiptUnknown": true,
+  "realmStarted": false,
+  "accountsCreated": 0,
+  "capacityAccepted": false,
+  "p0Accepted": false,
+  "runInverseMatchesOriginalRaw": true,
+  "auditInverseMatchesOriginalRaw": true
+}

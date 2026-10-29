@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## 普通用药 Tick 唤醒（2026-10-27，北京时间）
+
+普通用药短 Tick 唤醒已通过32项 Rust 回归、828项工具检查及新 Release 构建；真实准备取得190.544ms内扣药与精确HP恢复。第四次准备仍因回村寻路失败停在prepared4/100，无新容量通过；500CCU目标保留，P0未通过、P2未启动，详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。
+
+## Cell 共享快照发布回归（2026-10-27，北京时间）
+
+当前P1工程合同已通过、P0容量未通过、P2未启动。`7b43caa41`通过新鲜116项Rust测试及Release构建；V13全50准备完成，计量55.861秒因死亡保护停止，最终HP0/18、gold0、HP药耗尽。普通准备与补给待证明；原场景/门槛保留，无新100资格或容量通过，不提高整体Candidate/Accepted，见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-online-presence-publication-v1/README.md)。
+
+## Cell 上线前架构：P0 / P1 partial（2026-10-24，北京时间）
+
+一地图单写兼容路径已引入 Partition 0、64 格 Cell、版本化效果 owner 引用及派生目录，checkpoint v3/v7 不变；跨执行域重复逻辑分区的歧义查询拒绝。schema 10 三项边界测试通过；原双协议完整报告仍为 14 passed / 2 not_run、fullLifecyclePassed=false，独立死亡/复活 focused 补测 7/7 passed；native protocol 断线恢复 9/9 passed，失败历史保留。
+
+生产容量规格、稳定行为 ID、全局持久目录与完整跨界语义仍是开放门槛，UI 和生产环境未验收，P0/P1 不标 completed；动态 Cell、多机及整体 Candidate/Accepted 不因本轮局部结果晋级。后续范围按[改造方案](CELL-ZONING-PREPRODUCTION-PLAN.zh-CN.md)，命令、输入和结果统一见[本轮主题证据](generated/cell-preproduction-p0-p1-20261024/README.md)。
+
 ## Windows 钱包与完整分支合并（2026-10-28）
 
 本轮合入远端完整历史并保留本地玩法、石头与生产持久化，九语言钱包沿用原登录偏好；schema 兼容、共享世界及客户端回归结果集中在[合并记录](BRANCH-INTEGRATION-20261028.zh-CN.md)。不据此提升项目完成度、生产发布或玩家 Accepted 状态。

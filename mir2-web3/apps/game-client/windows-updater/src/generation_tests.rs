@@ -69,6 +69,78 @@ fn pending() -> ActiveRecord {
 }
 
 #[test]
+fn newer_signed_legacy_floor_classifies_only_strictly_older_authenticated_feed() {
+    let floor = 2_026_102_910;
+    let old = require_legacy_advance(31, floor).unwrap_err();
+    let classified = old.downcast_ref::<BelowLegacyFloor>().unwrap();
+    assert_eq!((classified.offered, classified.floor), (31, floor));
+    assert!(require_legacy_advance(floor, floor)
+        .unwrap_err()
+        .downcast_ref::<BelowLegacyFloor>()
+        .is_none());
+    assert!(require_legacy_advance(floor + 1, floor).is_ok());
+    let root = tempfile::tempdir().unwrap();
+    for untrusted in [
+        "bad signature",
+        "expired/future pack feed",
+        "invalid generation",
+        "pack hash mismatch",
+        "authenticated packed sequence 31 is below legacy floor 2026102910",
+    ] {
+        assert!(!retain_verified_legacy_after_rejected_feed(
+            root.path(),
+            &anyhow::anyhow!(untrusted)
+        )
+        .unwrap());
+    }
+    // Correct typed classification is insufficient without authenticated local
+    // release receipts and a verified executable/attestation.
+    assert!(retain_verified_legacy_after_rejected_feed(root.path(), &old).is_err());
+}
+
+#[test]
+fn rejected_old_feed_cannot_discard_pending_packed_selection() {
+    let root = tempfile::tempdir().unwrap();
+    save_record(root.path(), &pending()).unwrap();
+    let before = fs::read(root.path().join(SELECTOR)).unwrap();
+    let old = require_legacy_advance(31, 2_026_102_910).unwrap_err();
+    assert!(!retain_verified_legacy_after_rejected_feed(root.path(), &old).unwrap());
+    assert_eq!(fs::read(root.path().join(SELECTOR)).unwrap(), before);
+}
+
+#[cfg(windows)]
+#[test]
+#[ignore = "requires MIR2_UPDATER_TEST_LEGACY_ROOT; read-only real signed r10 installation, never launches"]
+fn signed_r10_legacy_retention_checks_cms_seed_and_content_without_floor_or_selector_writes() {
+    let root = PathBuf::from(
+        std::env::var_os("MIR2_UPDATER_TEST_LEGACY_ROOT")
+            .expect("explicit immutable legacy installation"),
+    );
+    assert!(root.is_absolute());
+    let witnesses = || {
+        [
+            "updater/seed-feed.json",
+            "updater/seed-feed.p7s",
+            ".update/highest.txt",
+            ".update/accepted-feed.json",
+            SELECTOR,
+            HIGHEST,
+        ]
+        .map(|name| (name, fs::read(root.join(name)).ok()))
+    };
+    let before = witnesses();
+    let floor = crate::update::legacy_sequence_floor(&root).unwrap();
+    assert!(floor >= 2_026_102_910);
+    let old = require_legacy_advance(31, floor).unwrap_err();
+    assert!(retain_verified_legacy_after_rejected_feed(&root, &old).unwrap());
+    assert_eq!(before, witnesses());
+    assert_eq!(crate::update::legacy_sequence_floor(&root).unwrap(), floor);
+    assert!(
+        !retain_verified_legacy_after_rejected_feed(&root, &anyhow::anyhow!("bad CMS")).unwrap()
+    );
+}
+
+#[test]
 fn manifest_closes_paths_sources_engine_profile_counts_and_sizes() {
     let valid = manifest();
     assert!(GenerationManifest::parse(&serde_json::to_vec(&valid).unwrap()).is_ok());
@@ -362,9 +434,27 @@ fn invalid_cms_is_not_legacy_absence_or_a_selector_change() {
     let root = tempfile::tempdir().unwrap();
     let mut source = MemorySource::empty();
     source.pair = Some((serde_json::to_vec(&feed(&manifest())).unwrap(), vec![]));
-    assert!(check_update(root.path(), &source, &TestStatus).is_err());
+    let error = check_update(root.path(), &source, &TestStatus).unwrap_err();
+    assert!(!retain_verified_legacy_after_rejected_feed(root.path(), &error).unwrap());
     assert!(active_record(root.path()).unwrap().is_none());
     assert!(!root.path().join(HIGHEST).exists());
+}
+
+#[test]
+fn malformed_feed_and_damaged_packed_state_are_not_retained_legacy_classifications() {
+    let root = tempfile::tempdir().unwrap();
+    let mut source = MemorySource::empty();
+    source.pair = Some((br#"{"schema":"unknown","sequence":31}"#.to_vec(), vec![1]));
+    let error = check_update(root.path(), &source, &TestStatus).unwrap_err();
+    assert!(!retain_verified_legacy_after_rejected_feed(root.path(), &error).unwrap());
+    assert!(!root.path().join(HIGHEST).exists());
+    safe::atomic_write(&root.path().join(HIGHEST), b"corrupt pointer").unwrap();
+    let typed = require_legacy_advance(31, 2_026_102_910).unwrap_err();
+    assert!(retain_verified_legacy_after_rejected_feed(root.path(), &typed).is_err());
+    assert_eq!(
+        fs::read(root.path().join(HIGHEST)).unwrap(),
+        b"corrupt pointer"
+    );
 }
 #[test]
 fn whole_object_hash_and_immutable_publication_precede_selection() {

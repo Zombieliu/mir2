@@ -1,0 +1,30 @@
+
+running 25 tests
+test routing::tests::owner_health_sync_tests::owner_health_routing_actual_town_revive_tail_preserves_new_life_damage ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_authenticated_key_sun_potion_publishes_exact_pools_once ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_authenticated_key_town_scroll_commits_same_map_relocation ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_cast_and_toggle_cannot_overtake_mp_on_the_live_channel ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_closed_at_fifo_cap_preserves_normal_death_for_source_drain ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_confirmed_level_keeps_ceiling_but_cannot_replay_old_life_refill ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_duplicate_reverse_sequence_and_payload_tamper_fail_closed ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_exact_hp_then_mp_uses_only_owner_channel ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_full_channel_preserves_death_then_health_then_revived_fifo ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_late_old_cancellation_cannot_replace_current_signal ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_live_queued_level_is_saved_in_actual_fenced_teardown ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_mentor_peer_uses_confirmed_source_level_before_viewport_refresh ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_mentor_source_level_graduates_immediately_and_during_fenced_teardown ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_metadata_tail_cannot_overwrite_a_later_shared_death ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_normal_drug_tick_starts_at_latest_zone_hp_and_keeps_recovery ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_overload_closes_instead_of_silently_truncating_tcp_health ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_personal_delta_cannot_cross_replaced_teardown_fence ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_personal_potion_cannot_revive_a_concurrent_death_or_new_life ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_personal_potion_delta_preserves_a_concurrent_zone_hit ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_queued_old_life_is_rejected_after_revive_without_cache_tick ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_replaced_registration_and_cold_state_reject_old_capability ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_repository_admission_can_acquire_zone_while_personal_tick_waits ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_same_life_history_survives_lethal_commit ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_social_receipts_survive_bootstrap_and_checkpoint ... ok
+test routing::tests::owner_health_sync_tests::owner_health_routing_unchanged_mirror_does_not_advance_an_extra_personal_tick ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 1246 filtered out; finished in 40.54s
+

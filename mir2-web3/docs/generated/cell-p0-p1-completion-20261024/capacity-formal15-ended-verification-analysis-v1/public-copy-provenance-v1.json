@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "copiedAt": "2026-10-26T00:54:00.697Z",
+  "whitelist": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-ended-public-archive-v1\\public-whitelist-v1.json",
+    "bytes": 9698,
+    "sha256": "9516d8639cbd421310f4f7ca824086dc429f270eee91784a17b28eb32a0430d9"
+  },
+  "copyTool": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\formal15-ended-public-archive-v1\\copy-public-v1.mjs",
+    "bytes": 5174,
+    "sha256": "8304b3682fa0afbd6fba4c7e16685cb93645a1f52b91a20fd9378c712db653cf"
+  },
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1",
+  "copies": [
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/verify-ended-formal15-v1.mjs",
+        "bytes": 41893,
+        "sha256": "4ea12ad4e9abb3271ad3aa8a5b861df54d8670a6c22a49169f5e121671f3e77c"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\verify-ended-formal15-v1.mjs",
+        "bytes": 41893,
+        "sha256": "4ea12ad4e9abb3271ad3aa8a5b861df54d8670a6c22a49169f5e121671f3e77c"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/formal-contract-v1.mjs",
+        "bytes": 6143,
+        "sha256": "5bfc446cae0a3da263cf74fce8078b73173da9b55619487fd9f831e36afd54aa"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\formal-contract-v1.mjs",
+        "bytes": 6143,
+        "sha256": "5bfc446cae0a3da263cf74fce8078b73173da9b55619487fd9f831e36afd54aa"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\hp-proof-contract-v2.mjs",
+        "bytes": 4644,
+        "sha256": "cbf67686e1fa385404782c27548dbe3fbaa10f55a5d97c3379d5a41ed01cf285"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\expected-formal-policy-v1.json",
+        "bytes": 1038,
+        "sha256": "b949f19d4460da9c8a38a00a96cf785a9e9a4bba7c343af27094b5192f00921a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/run-ended-formal15-v1.mjs",
+        "bytes": 2259,
+        "sha256": "e0488f9d726e5588f1a75dd140849d82487a3dd3df6a48a7cac268914f176fe2"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\run-ended-formal15-v1.mjs",
+        "bytes": 2259,
+        "sha256": "e0488f9d726e5588f1a75dd140849d82487a3dd3df6a48a7cac268914f176fe2"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\seal-tool-source-v1.mjs",
+        "bytes": 3011,
+        "sha256": "cc646ed39d511137b83655ec7abe215091dca4e81ac5e10b24c93af2a4f7b499"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/derivation-final-v1.json",
+        "bytes": 10841,
+        "sha256": "5192c844355d29f8fd90b23cb403b0d504bd88eac36db34d3b991c15bc9790d5"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\derivation-final-v1.json",
+        "bytes": 10841,
+        "sha256": "5192c844355d29f8fd90b23cb403b0d504bd88eac36db34d3b991c15bc9790d5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/root-actual-terminal-and-consumer-facts-v1.json",
+        "bytes": 7547,
+        "sha256": "ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\root-actual-terminal-and-consumer-facts-v1.json",
+        "bytes": 7547,
+        "sha256": "ba15eabedb1ad456e464cc121a4baea38f44b887cb68ad25a94642146c4a4fd1"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/syntax-check-final-v1.log",
+        "bytes": 91,
+        "sha256": "eae7637bc657ecfaa5eb75b5cd43d2036db030d0a501662fb5fc2e575e047b01"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\syntax-check-final-v1.log",
+        "bytes": 91,
+        "sha256": "eae7637bc657ecfaa5eb75b5cd43d2036db030d0a501662fb5fc2e575e047b01"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/preparation-v1.json",
+        "bytes": 7073,
+        "sha256": "b3e8d06dbb5fbb797c7c62c09e836ce9153f212e3a4a6163fe166a5fa371d57f"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\preparation-v1.json",
+        "bytes": 7073,
+        "sha256": "b3e8d06dbb5fbb797c7c62c09e836ce9153f212e3a4a6163fe166a5fa371d57f"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/independent-review-v1.json",
+        "bytes": 6437,
+        "sha256": "fc934febdc85851c0038adcdac3e1fafe3ada2c6cf5e9546465534756733a4be"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\independent-review-v1.json",
+        "bytes": 6437,
+        "sha256": "fc934febdc85851c0038adcdac3e1fafe3ada2c6cf5e9546465534756733a4be"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/tool-source-frozen-v1.json",
+        "bytes": 2305,
+        "sha256": "9376a31a430ce2fa457d1dddeee635a4efcb0076e7155b6416fadff2e0cbcbd7"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\tool-source-frozen-v1.json",
+        "bytes": 2305,
+        "sha256": "9376a31a430ce2fa457d1dddeee635a4efcb0076e7155b6416fadff2e0cbcbd7"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/actual-verification-execution-receipt-v1.json",
+        "bytes": 814,
+        "sha256": "58247884163c476a6cec43dc6ead63d7f0fbe8c571ea3fffebd2d22929123455"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\actual-verification-execution-receipt-v1.json",
+        "bytes": 814,
+        "sha256": "58247884163c476a6cec43dc6ead63d7f0fbe8c571ea3fffebd2d22929123455"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/actual-verification.log",
+        "bytes": 1810,
+        "sha256": "ea8719d16f0c50324b19c5b9cce621b0fc42e8d4a9a646124f8dfc54c3ea6867"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\actual-verification.log",
+        "bytes": 1810,
+        "sha256": "ea8719d16f0c50324b19c5b9cce621b0fc42e8d4a9a646124f8dfc54c3ea6867"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/final-verification.json",
+        "bytes": 567259,
+        "sha256": "91a5907737a1772f09d033cf79581c3d2f5cf3ba835ffb8f2c3d1100bf7eaca7"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\final-verification.json",
+        "bytes": 567259,
+        "sha256": "91a5907737a1772f09d033cf79581c3d2f5cf3ba835ffb8f2c3d1100bf7eaca7"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/derivation-draft-v1.json",
+        "bytes": 30508,
+        "sha256": "b77e8b30f279f8a231115590e85e2f33b0aaa3803dbfe270677ad04a83ff3ab5"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\derivation-draft-v1.json",
+        "bytes": 30508,
+        "sha256": "b77e8b30f279f8a231115590e85e2f33b0aaa3803dbfe270677ad04a83ff3ab5"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-independent-verification-v1/store-child-delta-v2.json",
+        "bytes": 1153,
+        "sha256": "0d747c3f19ef9d97f7c3af9e6faa42c9f6ab30e0ff2d767dbf5f797f5268ad0a"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\tool\\store-child-delta-v2.json",
+        "bytes": 1153,
+        "sha256": "0d747c3f19ef9d97f7c3af9e6faa42c9f6ab30e0ff2d767dbf5f797f5268ad0a"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-root-independent-cleanup-v1.json",
+        "bytes": 401,
+        "sha256": "2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\root\\formal15-root-independent-cleanup-v1.json",
+        "bytes": 401,
+        "sha256": "2f560a2c82a6f3ee744f35d54e0cd79726e1c8a5a0df7499393dec7eaa5601de"
+      }
+    },
+    {
+      "source": {
+        "file": "C:/mir2-build/p01-completion-20261024/formal15-ended-public-archive-v1/summary-v1.json",
+        "bytes": 7822,
+        "sha256": "48c1845379f841fa20159b67f0abf0d8f774a4691ab8532669f08b6194c6f8a2"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\summary-v1.json",
+        "bytes": 7822,
+        "sha256": "48c1845379f841fa20159b67f0abf0d8f774a4691ab8532669f08b6194c6f8a2"
+      }
+    }
+  ],
+  "count": 19,
+  "totalBytes": 703049,
+  "readme": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal15-ended-verification-analysis-v1\\README.md",
+    "bytes": 2798,
+    "sha256": "6767535fce5f41ea820940a89bb850e43348d633eb208cb929887052c9a030c8"
+  },
+  "links": [
+    {
+      "relative": "summary-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/final-verification.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/actual-verification-execution-receipt-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/tool-source-frozen-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/preparation-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/independent-review-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/derivation-final-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "tool/root-actual-terminal-and-consumer-facts-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "root/formal15-root-independent-cleanup-v1.json",
+      "exists": true
+    },
+    {
+      "relative": "../capacity-formal-native-v2-scout-anti-convergence-ladder-15/release-native-v2-scout-anti-convergence-ladder-15/reports/1792974410829-a5288349.report.json",
+      "exists": true
+    },
+    {
+      "relative": "../capacity-formal-native-v2-scout-anti-convergence-ladder-15-store-diagnostics/store-public-verification.json",
+      "exists": true
+    }
+  ],
+  "sourceAfterCopyRawExact": true,
+  "destinationReadbackRawExact": true,
+  "referenceOnlyNotCopied": true,
+  "privateRawTraceBinaryNotCopied": true,
+  "verifierRerun": false,
+  "testsRun": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}

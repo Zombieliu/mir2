@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-24T22:14:55.736Z",
+  "scope": "Read-only invocation of the frozen formal04 gate against the original failed07 report; no prepare, provisioning, service or load.",
+  "runId": "1792878747018-da931241",
+  "report": {
+    "file": "C:/mir2-build/p01-completion-20261024/release-native-10-v2-patrol-feasibility-07/reports/1792878747018-da931241.report.json",
+    "bytes": 326916,
+    "sha256": "f1e003be92a13a195d5f958e45adb005c56823a2f7c4733842b6ae2b3e8edd02"
+  },
+  "reportOk": false,
+  "rawCapacityAccepted": false,
+  "gateRejected": true,
+  "rejection": "Real coordinated probe07 has not passed; a probe remains ineligible for capacity acceptance",
+  "backendSourceCommit": "461f1d85eed6309a55a88bd79a0022f7b97febe4",
+  "driverSourceCommit": "0998105c30f35502b8b569b82fb7942a5d356c89",
+  "driverSourceSha256": "8c29818d96fc7d0974d248fe7b4f140812385216cc98b04a0712fecfe25385b7",
+  "formalPrepared": false,
+  "formalStarted": false
+}

@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "state": "PREPARED_PENDING_ACTUAL_FRESH44_RELEASE_FULL16_BINDING",
+  "root": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-personal-projection-feasibility-15",
+  "activeBackendSourceCommit": null,
+  "activeExecutionSourceCommit": null,
+  "backendInputCount": 44,
+  "actualNodeCodeEvidenceCommit": "b84d5d02a8299b6ac36c5e56cb7006f6bc80d3bd",
+  "nodeSourceSha256": "db4e22c69b4f1365d8135023e158f4de00ff35d58330cf7eca98801780e674e7",
+  "nodeFocusedPassed": 13,
+  "nodeFullPassed": 200,
+  "historicalWrapper": {
+    "coreFull": 187,
+    "wrapper": 28,
+    "adapter": 8
+  },
+  "futureRequired": {
+    "manifest": null,
+    "release": null,
+    "binary": null,
+    "rootFunctionalValidation": null,
+    "freshFull16": null,
+    "launcherFreeze": null,
+    "readonlySourceGuard": null
+  },
+  "workload": {
+    "stages": [
+      2,
+      10
+    ],
+    "stageSeconds": 300,
+    "soakSeconds": 360,
+    "requiredCompleteWindows": [
+      5,
+      5,
+      6
+    ],
+    "wallSeconds": 3600,
+    "movementIntervalMs": 750,
+    "caps": [
+      24,
+      10,
+      10,
+      4,
+      1,
+      2
+    ],
+    "tokioWorkers": 4,
+    "slowStageThresholdMs": 50,
+    "attackResults": "v2",
+    "scenarioSameAs14": true,
+    "resourcesSameAs14": true,
+    "policySameAs14": true
+  },
+  "beforeProvisioning": [
+    "Root actual fresh44 backend/execution HEAD, Release/build/manifest/rootvalidation pins",
+    "Exact matching new full-lifecycle-personal-monster-projection-v1 passed audit/report/realm/source/pairedraw artifact pins",
+    "Bind known b84d Node9 evidence separately from the new runtime HEAD",
+    "Independent final preseal QA, wx source seal and actual readonly sourceguard",
+    "Separate root account and owned-run authorization"
+  ],
+  "accountPrepared": false,
+  "binaryCopied": false,
+  "realmStarted": false,
+  "sealed": false,
+  "capacityAccepted": false,
+  "risks": [
+    "Compact100 representative886steps and24ACK/20s waypoint budget are unchanged.",
+    "Conditional hit supply does not prove180launch/120hit each minute or two-hour capacity.",
+    "A singlefighter10-player probe does not certify25-player conflict reduction or complete formal100 capacity."
+  ]
+}

@@ -64,14 +64,30 @@ function CopyCanonicalVerifierSource([string]$PlatformScripts,[string]$ProofRoot
         $node.Name-ceq'Get-PinnedFontScanDefinitions'
     },$false))
     if($definitions.Count-ne1){throw 'Canonical font pin definition missing or ambiguous'}
-    $pins=@($definitions[0].Body.FindAll({param($node)
+    # SC has a nested constant additionalTables record for its cmap mask. Do
+    # not evaluate the containing [pscustomobject] expression (or execute any
+    # verifier code). Read only the three scalar copy pins from dictionaries
+    # with an exact file key. Nested table dictionaries are not font records.
+    $pinNodes=@($definitions[0].Body.FindAll({param($node)
         $node-is[Management.Automation.Language.HashtableAst]
-    },$false)|ForEach-Object {$_.SafeGetValue()})
+    },$false)|Where-Object {
+        @($_.KeyValuePairs | Where-Object { $_.Item1.SafeGetValue() -ceq 'file' }).Count -eq 1
+    })
+    $pins=@(foreach($node in $pinNodes){
+        $pin=@{}
+        foreach($field in @('file','length','sha256')){
+            $pairs=@($node.KeyValuePairs | Where-Object { $_.Item1.SafeGetValue() -ceq $field })
+            if($pairs.Count-ne1){throw 'Canonical font scalar pin missing or ambiguous'}
+            $pin[$field]=$pairs[0].Item2.SafeGetValue()
+        }
+        [pscustomobject]$pin
+    })
     $expectedFonts=@('NotoSansTC.ttf','NotoSans-Regular.ttf','NotoSans-Bold.ttf',
         'NotoSansDevanagari-Regular.ttf','NotoSansDevanagari-Bold.ttf',
         'NotoSansThai-Regular.ttf','NotoSansThai-Bold.ttf',
-        'NotoSansArabic-Regular.ttf','NotoSansArabic-Bold.ttf')
-    if($pins.Count-ne$expectedFonts.Count){throw 'Exactly nine canonical font pins required'}
+        'NotoSansArabic-Regular.ttf','NotoSansArabic-Bold.ttf',
+        'MIR2BillingHan-Regular.ttf','NotoSansCJKsc-Regular.otf')
+    if($pins.Count-ne$expectedFonts.Count){throw 'Exactly eleven canonical font pins required'}
     $seen=[Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     $fontRoot=Join-Path (Split-Path -Parent $PlatformScripts) 'assets/fonts'
     $fontSources=@()
@@ -99,7 +115,8 @@ function CopyCanonicalVerifierSource([string]$PlatformScripts,[string]$ProofRoot
     [IO.File]::WriteAllText((Join-Path $verificationRoot 'Cargo.toml'),'# Verification marker only; never compiled.')
     $closure=@()
     foreach($name in @('verify-windows-candidate.ps1','entity-atlas-closure.ps1',
-        'player-sprite-closure.ps1','candidate-release-profile.ps1','pet-guild-asset-closure.ps1')){
+        'player-sprite-closure.ps1','candidate-release-profile.ps1','pet-guild-asset-closure.ps1',
+        'simplified-document-layout.ps1')){
         $source=Join-Path $PlatformScripts $name
         NoLinks $source
         $destination=Join-Path $verificationScripts $name
@@ -373,8 +390,8 @@ try {
     $recipe=[regex]::Replace($recipe,'(?m)^#define AppVersion "[^"]+"\r?$',('#define AppVersion "'+$SetupVersion+'"'))
     $recipe=[regex]::Replace($recipe,'(?m)^VersionInfoVersion=[^\r\n]+\r?$',('VersionInfoVersion='+$SetupVersion))
     [IO.File]::WriteAllText($recipePath,$recipe,[Text.UTF8Encoding]::new($true))
-    InvokeLogged $PythonPath @((Join-Path $installerRoot 'validate-recipe.py'),(Split-Path -Parent $InnoCompiler)) 'nine-language-validation'
-    $proof.stages+=@{stage='literal-inputs-and-nine-languages';passed=$true;installedFiles=$inputs.installedFileCount
+    InvokeLogged $PythonPath @((Join-Path $installerRoot 'validate-recipe.py'),(Split-Path -Parent $InnoCompiler)) 'ten-language-validation'
+    $proof.stages+=@{stage='literal-inputs-and-ten-languages';passed=$true;installedFiles=$inputs.installedFileCount
         installedBytes=$inputs.installedBytes;fullPackageFiles=$inputs.fullPackageFileCount}
     $artifacts=Join-Path $OutputRoot 'artifacts'
     [IO.Directory]::CreateDirectory($artifacts)|Out-Null

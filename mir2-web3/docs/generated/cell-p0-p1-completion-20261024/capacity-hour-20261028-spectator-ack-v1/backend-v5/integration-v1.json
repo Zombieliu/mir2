@@ -1,0 +1,17 @@
+{
+  "at": "2026-10-28T08:30:26.560Z",
+  "freshFullLifecyclePassed": true,
+  "actualCheckCount": 16,
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\reports\\1793176072026-624a5ae7.report.json",
+    "bytes": 104717,
+    "sha256": "7cbd7ceecd2b0187df393e4299f9d93daf818d5646f56a8b119e468d266d78a1"
+  },
+  "cleanup": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\ordinary-full-lifecycle-attack-ack-v1\\cleanup-v1.json",
+    "bytes": 341,
+    "sha256": "58052c114457f15b06bdbb0457833bf85c84793d8dc13176f17cabc3c953fa9e"
+  },
+  "capacityAccepted": false,
+  "p0Accepted": false
+}

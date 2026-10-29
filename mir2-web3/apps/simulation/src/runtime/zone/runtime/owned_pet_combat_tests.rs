@@ -1,6 +1,9 @@
 use super::*;
 use mir2_protocol::MirGender;
 
+#[path = "owned_pet_random_tests.rs"]
+mod random_tests;
+
 // The bundled D024 terrain has the original line-hit and recall cells open.
 const REAL_MAP: &str = "d024";
 

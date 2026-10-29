@@ -1,0 +1,2382 @@
+{
+  "schemaVersion": 1,
+  "kind": "v7-bootstrap-resource-and-completed-wait-correlation",
+  "runId": "1793018136789-d65f6a9c",
+  "analyzedAt": "2026-10-26T12:50:20.796Z",
+  "sources": {
+    "monitor-history.jsonl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\monitor-history.jsonl",
+      "bytes": 1594864,
+      "sha256": "c713b98e50cbef43030fb7a3243c268de1f31462e89b7de046abf77928fb1844",
+      "rows": 176,
+      "emptyLines": 0,
+      "readParseCount": 1
+    },
+    "slow-stage-public.jsonl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\slow-stage-public.jsonl",
+      "bytes": 11151415,
+      "sha256": "77b238b2f5c1bdd3a9fc89007b216ec790fef487a9b21fd161bc4bfb3beaa213",
+      "rows": 116382,
+      "emptyLines": 0,
+      "readParseCount": 1
+    },
+    "store-stage-public.jsonl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\store-stage-public.jsonl",
+      "bytes": 2666800,
+      "sha256": "19fef611679f8e7313965835171acc31da590cbfd46ce8393d33e90a8c20d5c8",
+      "rows": 12151,
+      "emptyLines": 0,
+      "readParseCount": 1
+    }
+  },
+  "rootProvidedOutcome": {
+    "bootstrap": {
+      "startedAtMs": 1793018136831,
+      "endedAtMs": 1793018480344,
+      "completed": false
+    },
+    "serverActiveReached50": true,
+    "originalFailure": "AOI fatal during bootstrap/settle",
+    "measuredStages": [],
+    "cleanupSevenChecksPassed": true,
+    "reportNotReadHere": true
+  },
+  "alignment": {
+    "anchorAtMs": 1793018480344,
+    "anchorMeaning": "Root-provided incomplete bootstrap endedAt, used as fatal-neighborhood alignment proxy; no exact failing packet/action timestamp independently established.",
+    "fatalNeighborhood": {
+      "startedAtMs": 1793018477344,
+      "endedAtMs": 1793018483344
+    },
+    "baseSelection": "Rows received by public stderr capture within inclusive observation-time bounds; observedAtMs is receive time and is not necessarily actual stage completion time.",
+    "storeOverlapSelection": "Additionally compute approximate max completed occurrence intervals as startedUnixMs+maxStartUs/1000 through startedUnixMs+maxEndUs/1000; integer Unix origin and diagnostic receive delay limit precision."
+  },
+  "resource": {
+    "definition": "Nearest-rank unweighted distributions of sampled public monitor values; rates describe each preceding observation interval, not continuous maxima.",
+    "bootstrap": {
+      "samples": 166,
+      "firstAtMs": 1793018138689,
+      "lastAtMs": 1793018478858,
+      "cpuLogicalCoreEquivalents": {
+        "count": 166,
+        "min": 0.15619047619047619,
+        "p50": 1.604313173933427,
+        "p95": 2.111988159842131,
+        "p99": 2.5518731988472623,
+        "max": 2.6255400864138263
+      },
+      "privateBytes": {
+        "count": 166,
+        "min": 34955264,
+        "p50": 608038912,
+        "p95": 1322246144,
+        "p99": 1400725504,
+        "max": 1410277376
+      },
+      "workingSetBytes": {
+        "count": 166,
+        "min": 58400768,
+        "p50": 653250560,
+        "p95": 1357164544,
+        "p99": 1434718208,
+        "max": 1443414016
+      },
+      "hostFreeBytes": {
+        "count": 166,
+        "min": 42763206656,
+        "p50": 43616882688,
+        "p95": 44099792896,
+        "p99": 44201598976,
+        "max": 44205367296
+      },
+      "busiestHostLogicalCorePercent": {
+        "count": 166,
+        "min": 22,
+        "p50": 81,
+        "p95": 100,
+        "p99": 100,
+        "max": 100
+      },
+      "activeSessions": {
+        "count": 166,
+        "min": 1,
+        "p50": 42,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      },
+      "processWriteBytesPerSecond": {
+        "count": 166,
+        "min": 185.15037593984962,
+        "p50": 563590.6234896085,
+        "p95": 1155957.5471698113,
+        "p99": 1383284.304047384,
+        "max": 1383855.9769563128
+      },
+      "processIoOperationsPerSecond": {
+        "count": 166,
+        "min": 155.98086124401914,
+        "p50": 1661.8635926993277,
+        "p95": 3425,
+        "p99": 3575.238095238095,
+        "max": 3735.3773584905657
+      },
+      "hostNetworkBytesPerSecond": {
+        "count": 166,
+        "min": 9682.04365079365,
+        "p50": 34986.75496688741,
+        "p95": 298879.25851703406,
+        "p99": 383354.4776119403,
+        "max": 396283.06490971206
+      }
+    },
+    "bootstrapLast120s": {
+      "samples": 57,
+      "firstAtMs": 1793018360506,
+      "lastAtMs": 1793018478858,
+      "cpuLogicalCoreEquivalents": {
+        "count": 57,
+        "min": 1.402524544179523,
+        "p50": 1.727187206020696,
+        "p95": 2.0317693059628548,
+        "p99": 2.0733178654292344,
+        "max": 2.0733178654292344
+      },
+      "privateBytes": {
+        "count": 57,
+        "min": 799240192,
+        "p50": 1106513920,
+        "p95": 1389211648,
+        "p99": 1410277376,
+        "max": 1410277376
+      },
+      "workingSetBytes": {
+        "count": 57,
+        "min": 841445376,
+        "p50": 1144602624,
+        "p95": 1423093760,
+        "p99": 1443414016,
+        "max": 1443414016
+      },
+      "hostFreeBytes": {
+        "count": 57,
+        "min": 42763206656,
+        "p50": 43056361472,
+        "p95": 43365277696,
+        "p99": 43368267776,
+        "max": 43368267776
+      },
+      "busiestHostLogicalCorePercent": {
+        "count": 57,
+        "min": 63,
+        "p50": 81,
+        "p95": 100,
+        "p99": 100,
+        "max": 100
+      },
+      "activeSessions": {
+        "count": 57,
+        "min": 50,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      },
+      "processWriteBytesPerSecond": {
+        "count": 57,
+        "min": 379529.9303944316,
+        "p50": 613286.750483559,
+        "p95": 1208969.9570815451,
+        "p99": 1325792.711784193,
+        "max": 1325792.711784193
+      },
+      "processIoOperationsPerSecond": {
+        "count": 57,
+        "min": 2286.5792129162464,
+        "p50": 3235.0692785475394,
+        "p95": 3539.4862036156046,
+        "p99": 3575.238095238095,
+        "max": 3575.238095238095
+      },
+      "hostNetworkBytesPerSecond": {
+        "count": 57,
+        "min": 9682.04365079365,
+        "p50": 32104.097974564294,
+        "p95": 277797.80639008107,
+        "p99": 347566.6347075743,
+        "max": 347566.6347075743
+      }
+    },
+    "firstObserved50ToBootstrapEndProxy": {
+      "startedAtMs": 1793018356495,
+      "samples": 59,
+      "firstAtMs": 1793018356495,
+      "lastAtMs": 1793018478858,
+      "cpuLogicalCoreEquivalents": {
+        "count": 59,
+        "min": 1.402524544179523,
+        "p50": 1.7281746031746033,
+        "p95": 2.068095238095238,
+        "p99": 2.263392857142857,
+        "max": 2.263392857142857
+      },
+      "privateBytes": {
+        "count": 59,
+        "min": 790646784,
+        "p50": 1094791168,
+        "p95": 1389211648,
+        "p99": 1410277376,
+        "max": 1410277376
+      },
+      "workingSetBytes": {
+        "count": 59,
+        "min": 833085440,
+        "p50": 1133215744,
+        "p95": 1423093760,
+        "p99": 1443414016,
+        "max": 1443414016
+      },
+      "hostFreeBytes": {
+        "count": 59,
+        "min": 42763206656,
+        "p50": 43069788160,
+        "p95": 43365277696,
+        "p99": 43368267776,
+        "max": 43368267776
+      },
+      "busiestHostLogicalCorePercent": {
+        "count": 59,
+        "min": 63,
+        "p50": 81,
+        "p95": 100,
+        "p99": 100,
+        "max": 100
+      },
+      "activeSessions": {
+        "count": 59,
+        "min": 50,
+        "p50": 50,
+        "p95": 50,
+        "p99": 50,
+        "max": 50
+      },
+      "processWriteBytesPerSecond": {
+        "count": 59,
+        "min": 357253.26492537314,
+        "p50": 613286.750483559,
+        "p95": 1208969.9570815451,
+        "p99": 1325792.711784193,
+        "max": 1325792.711784193
+      },
+      "processIoOperationsPerSecond": {
+        "count": 59,
+        "min": 2286.5792129162464,
+        "p50": 3235.0692785475394,
+        "p95": 3539.4862036156046,
+        "p99": 3575.238095238095,
+        "max": 3575.238095238095
+      },
+      "hostNetworkBytesPerSecond": {
+        "count": 59,
+        "min": 9682.04365079365,
+        "p50": 42752.20417633411,
+        "p95": 343645.5813953489,
+        "p99": 383354.4776119403,
+        "max": 383354.4776119403
+      }
+    },
+    "byObservedActiveSessions": [
+      {
+        "activeSessionsRange": "0-9",
+        "samples": 18,
+        "firstAtMs": 1793018138689,
+        "lastAtMs": 1793018173156,
+        "cpuLogicalCoreEquivalents": {
+          "count": 18,
+          "min": 0.15619047619047619,
+          "p50": 0.380066762041011,
+          "p95": 0.6895687061183551,
+          "p99": 0.6895687061183551,
+          "max": 0.6895687061183551
+        },
+        "privateBytes": {
+          "count": 18,
+          "min": 34955264,
+          "p50": 109322240,
+          "p95": 164347904,
+          "p99": 164347904,
+          "max": 164347904
+        },
+        "workingSetBytes": {
+          "count": 18,
+          "min": 58400768,
+          "p50": 161374208,
+          "p95": 215687168,
+          "p99": 215687168,
+          "max": 215687168
+        },
+        "hostFreeBytes": {
+          "count": 18,
+          "min": 43973033984,
+          "p50": 44098805760,
+          "p95": 44205367296,
+          "p99": 44205367296,
+          "max": 44205367296
+        },
+        "busiestHostLogicalCorePercent": {
+          "count": 18,
+          "min": 34,
+          "p50": 68,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "activeSessions": {
+          "count": 18,
+          "min": 1,
+          "p50": 5,
+          "p95": 9,
+          "p99": 9,
+          "max": 9
+        },
+        "processWriteBytesPerSecond": {
+          "count": 18,
+          "min": 185.15037593984962,
+          "p50": 210887.45827372436,
+          "p95": 508303.13253012043,
+          "p99": 508303.13253012043,
+          "max": 508303.13253012043
+        },
+        "processIoOperationsPerSecond": {
+          "count": 18,
+          "min": 156.1376476630714,
+          "p50": 233.73493975903614,
+          "p95": 2821.898496240601,
+          "p99": 2821.898496240601,
+          "max": 2821.898496240601
+        },
+        "hostNetworkBytesPerSecond": {
+          "count": 18,
+          "min": 15046.610169491525,
+          "p50": 74188.56569709128,
+          "p95": 299167.18426501035,
+          "p99": 299167.18426501035,
+          "max": 299167.18426501035
+        }
+      },
+      {
+        "activeSessionsRange": "10-24",
+        "samples": 30,
+        "firstAtMs": 1793018175166,
+        "lastAtMs": 1793018233216,
+        "cpuLogicalCoreEquivalents": {
+          "count": 30,
+          "min": 0.16425361957064402,
+          "p50": 0.6452736318407961,
+          "p95": 1.1745711402623613,
+          "p99": 1.308277830637488,
+          "max": 1.308277830637488
+        },
+        "privateBytes": {
+          "count": 30,
+          "min": 170917888,
+          "p50": 250802176,
+          "p95": 339763200,
+          "p99": 346390528,
+          "max": 346390528
+        },
+        "workingSetBytes": {
+          "count": 30,
+          "min": 222109696,
+          "p50": 301027328,
+          "p95": 388931584,
+          "p99": 395542528,
+          "max": 395542528
+        },
+        "hostFreeBytes": {
+          "count": 30,
+          "min": 43869704192,
+          "p50": 43950788608,
+          "p95": 44030001152,
+          "p99": 44041297920,
+          "max": 44041297920
+        },
+        "busiestHostLogicalCorePercent": {
+          "count": 30,
+          "min": 22,
+          "p50": 88,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "activeSessions": {
+          "count": 30,
+          "min": 10,
+          "p50": 17,
+          "p95": 24,
+          "p99": 24,
+          "max": 24
+        },
+        "processWriteBytesPerSecond": {
+          "count": 30,
+          "min": 158193.93336648433,
+          "p50": 375755.980861244,
+          "p95": 810892.0282542886,
+          "p99": 946659.0457256461,
+          "max": 946659.0457256461
+        },
+        "processIoOperationsPerSecond": {
+          "count": 30,
+          "min": 155.98086124401914,
+          "p50": 256.6079295154185,
+          "p95": 900.3595274781716,
+          "p99": 910.3848181338956,
+          "max": 910.3848181338956
+        },
+        "hostNetworkBytesPerSecond": {
+          "count": 30,
+          "min": 10662.854301342613,
+          "p50": 17849.76278334212,
+          "p95": 259289.94974874373,
+          "p99": 306297.512437811,
+          "max": 306297.512437811
+        }
+      },
+      {
+        "activeSessionsRange": "25-49",
+        "samples": 59,
+        "firstAtMs": 1793018235279,
+        "lastAtMs": 1793018354353,
+        "cpuLogicalCoreEquivalents": {
+          "count": 59,
+          "min": 0.3430941922889214,
+          "p50": 1.7107558139534884,
+          "p95": 2.4236622484045163,
+          "p99": 2.6255400864138263,
+          "max": 2.6255400864138263
+        },
+        "privateBytes": {
+          "count": 59,
+          "min": 352870400,
+          "p50": 573952000,
+          "p95": 766066688,
+          "p99": 776597504,
+          "max": 776597504
+        },
+        "workingSetBytes": {
+          "count": 59,
+          "min": 401846272,
+          "p50": 619606016,
+          "p95": 808890368,
+          "p99": 819359744,
+          "max": 819359744
+        },
+        "hostFreeBytes": {
+          "count": 59,
+          "min": 43357560832,
+          "p50": 43635777536,
+          "p95": 43884322816,
+          "p99": 43891965952,
+          "max": 43891965952
+        },
+        "busiestHostLogicalCorePercent": {
+          "count": 59,
+          "min": 34,
+          "p50": 82,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "activeSessions": {
+          "count": 59,
+          "min": 25,
+          "p50": 39,
+          "p95": 49,
+          "p99": 49,
+          "max": 49
+        },
+        "processWriteBytesPerSecond": {
+          "count": 59,
+          "min": 228650.84745762713,
+          "p50": 705354.2084168337,
+          "p95": 1314267.0509125842,
+          "p99": 1383855.9769563128,
+          "max": 1383855.9769563128
+        },
+        "processIoOperationsPerSecond": {
+          "count": 59,
+          "min": 173.22097378277152,
+          "p50": 1244.7115384615383,
+          "p95": 3419.7886647454375,
+          "p99": 3735.3773584905657,
+          "max": 3735.3773584905657
+        },
+        "hostNetworkBytesPerSecond": {
+          "count": 59,
+          "min": 10025.502697400685,
+          "p50": 33646.939807789575,
+          "p95": 317870.39764359355,
+          "p99": 396283.06490971206,
+          "max": 396283.06490971206
+        }
+      },
+      {
+        "activeSessionsRange": "50",
+        "samples": 59,
+        "firstAtMs": 1793018356495,
+        "lastAtMs": 1793018478858,
+        "cpuLogicalCoreEquivalents": {
+          "count": 59,
+          "min": 1.402524544179523,
+          "p50": 1.7281746031746033,
+          "p95": 2.068095238095238,
+          "p99": 2.263392857142857,
+          "max": 2.263392857142857
+        },
+        "privateBytes": {
+          "count": 59,
+          "min": 790646784,
+          "p50": 1094791168,
+          "p95": 1389211648,
+          "p99": 1410277376,
+          "max": 1410277376
+        },
+        "workingSetBytes": {
+          "count": 59,
+          "min": 833085440,
+          "p50": 1133215744,
+          "p95": 1423093760,
+          "p99": 1443414016,
+          "max": 1443414016
+        },
+        "hostFreeBytes": {
+          "count": 59,
+          "min": 42763206656,
+          "p50": 43069788160,
+          "p95": 43365277696,
+          "p99": 43368267776,
+          "max": 43368267776
+        },
+        "busiestHostLogicalCorePercent": {
+          "count": 59,
+          "min": 63,
+          "p50": 81,
+          "p95": 100,
+          "p99": 100,
+          "max": 100
+        },
+        "activeSessions": {
+          "count": 59,
+          "min": 50,
+          "p50": 50,
+          "p95": 50,
+          "p99": 50,
+          "max": 50
+        },
+        "processWriteBytesPerSecond": {
+          "count": 59,
+          "min": 357253.26492537314,
+          "p50": 613286.750483559,
+          "p95": 1208969.9570815451,
+          "p99": 1325792.711784193,
+          "max": 1325792.711784193
+        },
+        "processIoOperationsPerSecond": {
+          "count": 59,
+          "min": 2286.5792129162464,
+          "p50": 3235.0692785475394,
+          "p95": 3539.4862036156046,
+          "p99": 3575.238095238095,
+          "max": 3575.238095238095
+        },
+        "hostNetworkBytesPerSecond": {
+          "count": 59,
+          "min": 9682.04365079365,
+          "p50": 42752.20417633411,
+          "p95": 343645.5813953489,
+          "p99": 383354.4776119403,
+          "max": 383354.4776119403
+        }
+      }
+    ],
+    "bootstrapSampleGapMs": {
+      "count": 165,
+      "min": 1816,
+      "p50": 2076,
+      "p95": 2153,
+      "p99": 2205,
+      "max": 2220
+    },
+    "fatalNeighborhoodSamples": [
+      {
+        "sampledAtMs": 1793018478858,
+        "offsetFromBootstrapEndMs": -1486,
+        "activeSessions": 50,
+        "cpuLogicalCoreEquivalents": 1.8018728437654017,
+        "privateBytes": 1410277376,
+        "workingSetBytes": 1443414016,
+        "hostFreeBytes": 42788560896,
+        "zoneWorkCumulative": {
+          "count": 3752,
+          "maxUs": 19365,
+          "p95UpperUs": 20000,
+          "overBudgetCount": 0
+        },
+        "ownerTickDeadlineLagCumulative": {
+          "count": 3141,
+          "maxUs": 387012,
+          "p95UpperUs": 150000,
+          "overBudgetCount": 798
+        },
+        "stop": false,
+        "reason": null
+      },
+      {
+        "sampledAtMs": 1793018480970,
+        "offsetFromBootstrapEndMs": 626,
+        "activeSessions": 50,
+        "cpuLogicalCoreEquivalents": 1.5035902345619914,
+        "privateBytes": 1418592256,
+        "workingSetBytes": 1451909120,
+        "hostFreeBytes": 42769661952,
+        "zoneWorkCumulative": {
+          "count": 3781,
+          "maxUs": 19365,
+          "p95UpperUs": 20000,
+          "overBudgetCount": 0
+        },
+        "ownerTickDeadlineLagCumulative": {
+          "count": 3158,
+          "maxUs": 387012,
+          "p95UpperUs": 150000,
+          "overBudgetCount": 811
+        },
+        "stop": false,
+        "reason": null
+      },
+      {
+        "sampledAtMs": 1793018482961,
+        "offsetFromBootstrapEndMs": 2617,
+        "activeSessions": 46,
+        "cpuLogicalCoreEquivalents": 1.9076923076923076,
+        "privateBytes": 1430077440,
+        "workingSetBytes": 1463619584,
+        "hostFreeBytes": 42745475072,
+        "zoneWorkCumulative": {
+          "count": 3798,
+          "maxUs": 19365,
+          "p95UpperUs": 20000,
+          "overBudgetCount": 0
+        },
+        "ownerTickDeadlineLagCumulative": {
+          "count": 3175,
+          "maxUs": 387012,
+          "p95UpperUs": 150000,
+          "overBudgetCount": 816
+        },
+        "stop": false,
+        "reason": null
+      }
+    ],
+    "terminal": {
+      "type": "monitorStopped",
+      "sampledAtMs": 1793018495140,
+      "offsetFromBootstrapEndMs": 14796,
+      "reason": "Operator requested load drain",
+      "reasonScope": "Operator requested load drain is monitor cleanup reason after the original Root-reported AOI fatal, not a replacement original failure.",
+      "stopTrueOrdinaryMonitorSamples": 0
+    }
+  },
+  "slow": {
+    "wholeFileRows": 116382,
+    "bootstrapReceivedRows": 111565,
+    "bootstrapByStage": [
+      {
+        "key": "socket_turn.input",
+        "count": 4496,
+        "min": 50,
+        "p50": 263,
+        "p95": 591,
+        "p99": 1061,
+        "max": 3425,
+        "maximumRow": {
+          "observedAtMs": 1793018350976,
+          "stage": "socket_turn.input",
+          "durationMs": 3425,
+          "connection": 49
+        }
+      },
+      {
+        "key": "session_action.execute",
+        "count": 4476,
+        "min": 50,
+        "p50": 263,
+        "p95": 573,
+        "p99": 1008,
+        "max": 3117,
+        "maximumRow": {
+          "observedAtMs": 1793018350668,
+          "stage": "session_action.execute",
+          "durationMs": 3117,
+          "connection": 49
+        }
+      },
+      {
+        "key": "zone_owner.in_process.execute_request",
+        "count": 17624,
+        "min": 50,
+        "p50": 272,
+        "p95": 516,
+        "p99": 761,
+        "max": 2980,
+        "maximumRow": {
+          "observedAtMs": 1793018350532,
+          "stage": "zone_owner.in_process.execute_request",
+          "durationMs": 2980
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait",
+        "count": 12944,
+        "min": 50,
+        "p50": 249,
+        "p95": 525,
+        "p99": 725,
+        "max": 2399,
+        "maximumRow": {
+          "observedAtMs": 1793018474196,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 2399,
+          "connection": 46
+        }
+      },
+      {
+        "key": "runtime_tick.execute",
+        "count": 16397,
+        "min": 50,
+        "p50": 282,
+        "p95": 516,
+        "p99": 715,
+        "max": 2033,
+        "maximumRow": {
+          "observedAtMs": 1793018342966,
+          "stage": "runtime_tick.execute",
+          "durationMs": 2033,
+          "connection": 46
+        }
+      },
+      {
+        "key": "runtime_tick.total",
+        "count": 16403,
+        "min": 50,
+        "p50": 283,
+        "p95": 518,
+        "p99": 717,
+        "max": 2033,
+        "maximumRow": {
+          "observedAtMs": 1793018342966,
+          "stage": "runtime_tick.total",
+          "durationMs": 2033,
+          "connection": 46
+        }
+      },
+      {
+        "key": "shared_session.inner_execute",
+        "count": 2823,
+        "min": 50,
+        "p50": 80,
+        "p95": 211,
+        "p99": 1005,
+        "max": 1448,
+        "maximumRow": {
+          "observedAtMs": 1793018349006,
+          "stage": "shared_session.inner_execute",
+          "durationMs": 1448
+        }
+      },
+      {
+        "key": "socket_input.queue_residence",
+        "count": 3907,
+        "min": 50,
+        "p50": 194,
+        "p95": 464,
+        "p99": 674,
+        "max": 1132,
+        "maximumRow": {
+          "observedAtMs": 1793018462034,
+          "stage": "socket_input.queue_residence",
+          "durationMs": 1132,
+          "connection": 16,
+          "queuedPhase": "input",
+          "phaseElapsedMs": 1229,
+          "inputClass": "other"
+        }
+      },
+      {
+        "key": "shared_session.reconcile",
+        "count": 4063,
+        "min": 50,
+        "p50": 84,
+        "p95": 224,
+        "p99": 350,
+        "max": 1114,
+        "maximumRow": {
+          "observedAtMs": 1793018333862,
+          "stage": "shared_session.reconcile",
+          "durationMs": 1114
+        }
+      },
+      {
+        "key": "session_action.flush",
+        "count": 82,
+        "min": 52,
+        "p50": 229,
+        "p95": 710,
+        "p99": 1094,
+        "max": 1094,
+        "maximumRow": {
+          "observedAtMs": 1793018474125,
+          "stage": "session_action.flush",
+          "durationMs": 1094,
+          "connection": 46
+        }
+      },
+      {
+        "key": "shared_session.predrain",
+        "count": 14583,
+        "min": 50,
+        "p50": 180,
+        "p95": 379,
+        "p99": 458,
+        "max": 991,
+        "maximumRow": {
+          "observedAtMs": 1793018343644,
+          "stage": "shared_session.predrain",
+          "durationMs": 991
+        }
+      },
+      {
+        "key": "socket_turn.spectator",
+        "count": 11984,
+        "min": 50,
+        "p50": 132,
+        "p95": 346,
+        "p99": 453,
+        "max": 737,
+        "maximumRow": {
+          "observedAtMs": 1793018369290,
+          "stage": "socket_turn.spectator",
+          "durationMs": 737,
+          "connection": 25
+        }
+      },
+      {
+        "key": "flush.save",
+        "count": 30,
+        "min": 50,
+        "p50": 264,
+        "p95": 696,
+        "p99": 716,
+        "max": 716,
+        "maximumRow": {
+          "observedAtMs": 1793018473938,
+          "stage": "flush.save",
+          "durationMs": 716
+        }
+      },
+      {
+        "key": "shared_session.tail",
+        "count": 891,
+        "min": 50,
+        "p50": 72,
+        "p95": 166,
+        "p99": 351,
+        "max": 572,
+        "maximumRow": {
+          "observedAtMs": 1793018342064,
+          "stage": "shared_session.tail",
+          "durationMs": 572
+        }
+      },
+      {
+        "key": "runtime_tick.serial_gate_wait",
+        "count": 205,
+        "min": 50,
+        "p50": 87,
+        "p95": 284,
+        "p99": 404,
+        "max": 441,
+        "maximumRow": {
+          "observedAtMs": 1793018456978,
+          "stage": "runtime_tick.serial_gate_wait",
+          "durationMs": 441,
+          "connection": 35
+        }
+      },
+      {
+        "key": "runtime_tick.save_checkpoint",
+        "count": 8,
+        "min": 130,
+        "p50": 199,
+        "p95": 406,
+        "p99": 406,
+        "max": 406,
+        "maximumRow": {
+          "observedAtMs": 1793018360176,
+          "stage": "runtime_tick.save_checkpoint",
+          "durationMs": 406,
+          "connection": 48
+        }
+      },
+      {
+        "key": "zone_cadence.total",
+        "count": 537,
+        "min": 50,
+        "p50": 76,
+        "p95": 158,
+        "p99": 205,
+        "max": 381,
+        "maximumRow": {
+          "observedAtMs": 1793018459730,
+          "stage": "zone_cadence.total",
+          "durationMs": 381
+        }
+      },
+      {
+        "key": "snapshot.build_and_send",
+        "count": 53,
+        "min": 52,
+        "p50": 111,
+        "p95": 267,
+        "p99": 380,
+        "max": 380,
+        "maximumRow": {
+          "observedAtMs": 1793018435004,
+          "stage": "snapshot.build_and_send",
+          "durationMs": 380
+        }
+      },
+      {
+        "key": "flush.external_state",
+        "count": 11,
+        "min": 54,
+        "p50": 68,
+        "p95": 123,
+        "p99": 123,
+        "max": 123,
+        "maximumRow": {
+          "observedAtMs": 1793018328204,
+          "stage": "flush.external_state",
+          "durationMs": 123
+        }
+      },
+      {
+        "key": "shared_session.predrain.pending_lock_wait",
+        "count": 33,
+        "min": 50,
+        "p50": 63,
+        "p95": 89,
+        "p99": 95,
+        "max": 95,
+        "maximumRow": {
+          "observedAtMs": 1793018434961,
+          "stage": "shared_session.predrain.pending_lock_wait",
+          "durationMs": 95
+        }
+      },
+      {
+        "key": "shared_session.predrain.journey_reposition",
+        "count": 15,
+        "min": 50,
+        "p50": 56,
+        "p95": 83,
+        "p99": 83,
+        "max": 83,
+        "maximumRow": {
+          "observedAtMs": 1793018410043,
+          "stage": "shared_session.predrain.journey_reposition",
+          "durationMs": 83
+        }
+      }
+    ],
+    "fatalNeighborhood": {
+      "receivedRows": 2757,
+      "beforeAnchorRows": 1707,
+      "afterAnchorRows": 1050,
+      "byStage": [
+        {
+          "key": "serial_gate.zone_outbound_wait",
+          "count": 401,
+          "min": 50,
+          "p50": 306,
+          "p95": 1013,
+          "p99": 1305,
+          "max": 1868,
+          "maximumRow": {
+            "observedAtMs": 1793018478189,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 1868,
+            "connection": 46
+          }
+        },
+        {
+          "key": "socket_turn.input",
+          "count": 124,
+          "min": 76,
+          "p50": 296,
+          "p95": 836,
+          "p99": 1313,
+          "max": 1868,
+          "maximumRow": {
+            "observedAtMs": 1793018478189,
+            "stage": "socket_turn.input",
+            "durationMs": 1868,
+            "connection": 46
+          }
+        },
+        {
+          "key": "zone_owner.in_process.execute_request",
+          "count": 392,
+          "min": 50,
+          "p50": 379,
+          "p95": 1268,
+          "p99": 1570,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 1657
+          }
+        },
+        {
+          "key": "runtime_tick.execute",
+          "count": 357,
+          "min": 60,
+          "p50": 387,
+          "p95": 1274,
+          "p99": 1570,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1657,
+            "connection": 37
+          }
+        },
+        {
+          "key": "runtime_tick.total",
+          "count": 357,
+          "min": 60,
+          "p50": 387,
+          "p95": 1274,
+          "p99": 1570,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "runtime_tick.total",
+            "durationMs": 1657,
+            "connection": 37
+          }
+        },
+        {
+          "key": "session_action.execute",
+          "count": 124,
+          "min": 76,
+          "p50": 296,
+          "p95": 653,
+          "p99": 936,
+          "max": 1299,
+          "maximumRow": {
+            "observedAtMs": 1793018482716,
+            "stage": "session_action.execute",
+            "durationMs": 1299,
+            "connection": 4
+          }
+        },
+        {
+          "key": "shared_session.predrain",
+          "count": 379,
+          "min": 50,
+          "p50": 263,
+          "p95": 513,
+          "p99": 846,
+          "max": 903,
+          "maximumRow": {
+            "observedAtMs": 1793018482368,
+            "stage": "shared_session.predrain",
+            "durationMs": 903
+          }
+        },
+        {
+          "key": "session_action.flush",
+          "count": 5,
+          "min": 304,
+          "p50": 485,
+          "p95": 769,
+          "p99": 769,
+          "max": 769,
+          "maximumRow": {
+            "observedAtMs": 1793018478087,
+            "stage": "session_action.flush",
+            "durationMs": 769,
+            "connection": 46
+          }
+        },
+        {
+          "key": "flush.save",
+          "count": 1,
+          "min": 696,
+          "p50": 696,
+          "p95": 696,
+          "p99": 696,
+          "max": 696,
+          "maximumRow": {
+            "observedAtMs": 1793018478087,
+            "stage": "flush.save",
+            "durationMs": 696
+          }
+        },
+        {
+          "key": "socket_input.queue_residence",
+          "count": 105,
+          "min": 53,
+          "p50": 246,
+          "p95": 595,
+          "p99": 655,
+          "max": 683,
+          "maximumRow": {
+            "observedAtMs": 1793018477636,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 683,
+            "connection": 20,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 20,
+            "inputClass": "move"
+          }
+        },
+        {
+          "key": "shared_session.reconcile",
+          "count": 95,
+          "min": 50,
+          "p50": 184,
+          "p95": 562,
+          "p99": 666,
+          "max": 666,
+          "maximumRow": {
+            "observedAtMs": 1793018482774,
+            "stage": "shared_session.reconcile",
+            "durationMs": 666
+          }
+        },
+        {
+          "key": "socket_turn.spectator",
+          "count": 309,
+          "min": 50,
+          "p50": 150,
+          "p95": 386,
+          "p99": 488,
+          "max": 626,
+          "maximumRow": {
+            "observedAtMs": 1793018480893,
+            "stage": "socket_turn.spectator",
+            "durationMs": 626,
+            "connection": 50
+          }
+        },
+        {
+          "key": "shared_session.tail",
+          "count": 17,
+          "min": 50,
+          "p50": 75,
+          "p95": 385,
+          "p99": 385,
+          "max": 385,
+          "maximumRow": {
+            "observedAtMs": 1793018477829,
+            "stage": "shared_session.tail",
+            "durationMs": 385
+          }
+        },
+        {
+          "key": "shared_session.inner_execute",
+          "count": 57,
+          "min": 54,
+          "p50": 126,
+          "p95": 334,
+          "p99": 364,
+          "max": 364,
+          "maximumRow": {
+            "observedAtMs": 1793018481928,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 364
+          }
+        },
+        {
+          "key": "snapshot.build_and_send",
+          "count": 2,
+          "min": 57,
+          "p50": 57,
+          "p95": 362,
+          "p99": 362,
+          "max": 362,
+          "maximumRow": {
+            "observedAtMs": 1793018481386,
+            "stage": "snapshot.build_and_send",
+            "durationMs": 362
+          }
+        },
+        {
+          "key": "runtime_tick.serial_gate_wait",
+          "count": 3,
+          "min": 79,
+          "p50": 150,
+          "p95": 209,
+          "p99": 209,
+          "max": 209,
+          "maximumRow": {
+            "observedAtMs": 1793018477802,
+            "stage": "runtime_tick.serial_gate_wait",
+            "durationMs": 209,
+            "connection": 37
+          }
+        },
+        {
+          "key": "zone_cadence.total",
+          "count": 22,
+          "min": 52,
+          "p50": 76,
+          "p95": 143,
+          "p99": 188,
+          "max": 188,
+          "maximumRow": {
+            "observedAtMs": 1793018477802,
+            "stage": "zone_cadence.total",
+            "durationMs": 188
+          }
+        },
+        {
+          "key": "flush.external_state",
+          "count": 2,
+          "min": 51,
+          "p50": 51,
+          "p95": 97,
+          "p99": 97,
+          "max": 97,
+          "maximumRow": {
+            "observedAtMs": 1793018480882,
+            "stage": "flush.external_state",
+            "durationMs": 97
+          }
+        },
+        {
+          "key": "shared_session.predrain.pending_lock_wait",
+          "count": 5,
+          "min": 50,
+          "p50": 54,
+          "p95": 74,
+          "p99": 74,
+          "max": 74,
+          "maximumRow": {
+            "observedAtMs": 1793018478690,
+            "stage": "shared_session.predrain.pending_lock_wait",
+            "durationMs": 74
+          }
+        }
+      ],
+      "beforeAnchorByStage": [
+        {
+          "key": "serial_gate.zone_outbound_wait",
+          "count": 277,
+          "min": 60,
+          "p50": 286,
+          "p95": 633,
+          "p99": 871,
+          "max": 1868,
+          "maximumRow": {
+            "observedAtMs": 1793018478189,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 1868,
+            "connection": 46
+          }
+        },
+        {
+          "key": "socket_turn.input",
+          "count": 107,
+          "min": 76,
+          "p50": 292,
+          "p95": 587,
+          "p99": 936,
+          "max": 1868,
+          "maximumRow": {
+            "observedAtMs": 1793018478189,
+            "stage": "socket_turn.input",
+            "durationMs": 1868,
+            "connection": 46
+          }
+        },
+        {
+          "key": "session_action.execute",
+          "count": 106,
+          "min": 76,
+          "p50": 290,
+          "p95": 581,
+          "p99": 820,
+          "max": 936,
+          "maximumRow": {
+            "observedAtMs": 1793018478003,
+            "stage": "session_action.execute",
+            "durationMs": 936,
+            "connection": 28
+          }
+        },
+        {
+          "key": "zone_owner.in_process.execute_request",
+          "count": 232,
+          "min": 50,
+          "p50": 330,
+          "p95": 667,
+          "p99": 787,
+          "max": 912,
+          "maximumRow": {
+            "observedAtMs": 1793018480019,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 912
+          }
+        },
+        {
+          "key": "runtime_tick.execute",
+          "count": 206,
+          "min": 60,
+          "p50": 358,
+          "p95": 682,
+          "p99": 787,
+          "max": 912,
+          "maximumRow": {
+            "observedAtMs": 1793018480019,
+            "stage": "runtime_tick.execute",
+            "durationMs": 912,
+            "connection": 24
+          }
+        },
+        {
+          "key": "runtime_tick.total",
+          "count": 206,
+          "min": 60,
+          "p50": 359,
+          "p95": 682,
+          "p99": 787,
+          "max": 912,
+          "maximumRow": {
+            "observedAtMs": 1793018480019,
+            "stage": "runtime_tick.total",
+            "durationMs": 912,
+            "connection": 24
+          }
+        },
+        {
+          "key": "session_action.flush",
+          "count": 1,
+          "min": 769,
+          "p50": 769,
+          "p95": 769,
+          "p99": 769,
+          "max": 769,
+          "maximumRow": {
+            "observedAtMs": 1793018478087,
+            "stage": "session_action.flush",
+            "durationMs": 769,
+            "connection": 46
+          }
+        },
+        {
+          "key": "flush.save",
+          "count": 1,
+          "min": 696,
+          "p50": 696,
+          "p95": 696,
+          "p99": 696,
+          "max": 696,
+          "maximumRow": {
+            "observedAtMs": 1793018478087,
+            "stage": "flush.save",
+            "durationMs": 696
+          }
+        },
+        {
+          "key": "socket_input.queue_residence",
+          "count": 96,
+          "min": 54,
+          "p50": 245,
+          "p95": 601,
+          "p99": 683,
+          "max": 683,
+          "maximumRow": {
+            "observedAtMs": 1793018477636,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 683,
+            "connection": 20,
+            "queuedPhase": "runtime_tick",
+            "phaseElapsedMs": 20,
+            "inputClass": "move"
+          }
+        },
+        {
+          "key": "shared_session.predrain",
+          "count": 202,
+          "min": 57,
+          "p50": 270,
+          "p95": 461,
+          "p99": 556,
+          "max": 616,
+          "maximumRow": {
+            "observedAtMs": 1793018478087,
+            "stage": "shared_session.predrain",
+            "durationMs": 616
+          }
+        },
+        {
+          "key": "socket_turn.spectator",
+          "count": 194,
+          "min": 51,
+          "p50": 146,
+          "p95": 367,
+          "p99": 488,
+          "max": 497,
+          "maximumRow": {
+            "observedAtMs": 1793018478010,
+            "stage": "socket_turn.spectator",
+            "durationMs": 497,
+            "connection": 6
+          }
+        },
+        {
+          "key": "shared_session.tail",
+          "count": 14,
+          "min": 50,
+          "p50": 75,
+          "p95": 385,
+          "p99": 385,
+          "max": 385,
+          "maximumRow": {
+            "observedAtMs": 1793018477829,
+            "stage": "shared_session.tail",
+            "durationMs": 385
+          }
+        },
+        {
+          "key": "shared_session.reconcile",
+          "count": 26,
+          "min": 55,
+          "p50": 96,
+          "p95": 245,
+          "p99": 264,
+          "max": 264,
+          "maximumRow": {
+            "observedAtMs": 1793018480091,
+            "stage": "shared_session.reconcile",
+            "durationMs": 264
+          }
+        },
+        {
+          "key": "runtime_tick.serial_gate_wait",
+          "count": 3,
+          "min": 79,
+          "p50": 150,
+          "p95": 209,
+          "p99": 209,
+          "max": 209,
+          "maximumRow": {
+            "observedAtMs": 1793018477802,
+            "stage": "runtime_tick.serial_gate_wait",
+            "durationMs": 209,
+            "connection": 37
+          }
+        },
+        {
+          "key": "shared_session.inner_execute",
+          "count": 18,
+          "min": 54,
+          "p50": 75,
+          "p95": 202,
+          "p99": 202,
+          "max": 202,
+          "maximumRow": {
+            "observedAtMs": 1793018479881,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 202
+          }
+        },
+        {
+          "key": "zone_cadence.total",
+          "count": 15,
+          "min": 54,
+          "p50": 76,
+          "p95": 188,
+          "p99": 188,
+          "max": 188,
+          "maximumRow": {
+            "observedAtMs": 1793018477802,
+            "stage": "zone_cadence.total",
+            "durationMs": 188
+          }
+        },
+        {
+          "key": "shared_session.predrain.pending_lock_wait",
+          "count": 3,
+          "min": 54,
+          "p50": 56,
+          "p95": 74,
+          "p99": 74,
+          "max": 74,
+          "maximumRow": {
+            "observedAtMs": 1793018478690,
+            "stage": "shared_session.predrain.pending_lock_wait",
+            "durationMs": 74
+          }
+        }
+      ],
+      "afterAnchorByStage": [
+        {
+          "key": "zone_owner.in_process.execute_request",
+          "count": 160,
+          "min": 70,
+          "p50": 426,
+          "p95": 1396,
+          "p99": 1621,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "zone_owner.in_process.execute_request",
+            "durationMs": 1657
+          }
+        },
+        {
+          "key": "runtime_tick.execute",
+          "count": 151,
+          "min": 70,
+          "p50": 426,
+          "p95": 1419,
+          "p99": 1621,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1657,
+            "connection": 37
+          }
+        },
+        {
+          "key": "runtime_tick.total",
+          "count": 151,
+          "min": 70,
+          "p50": 426,
+          "p95": 1419,
+          "p99": 1621,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "runtime_tick.total",
+            "durationMs": 1657,
+            "connection": 37
+          }
+        },
+        {
+          "key": "serial_gate.zone_outbound_wait",
+          "count": 124,
+          "min": 50,
+          "p50": 484,
+          "p95": 1225,
+          "p99": 1371,
+          "max": 1518,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "serial_gate.zone_outbound_wait",
+            "durationMs": 1518,
+            "connection": 37
+          }
+        },
+        {
+          "key": "socket_turn.input",
+          "count": 17,
+          "min": 258,
+          "p50": 519,
+          "p95": 1313,
+          "p99": 1313,
+          "max": 1313,
+          "maximumRow": {
+            "observedAtMs": 1793018482729,
+            "stage": "socket_turn.input",
+            "durationMs": 1313,
+            "connection": 4
+          }
+        },
+        {
+          "key": "session_action.execute",
+          "count": 18,
+          "min": 258,
+          "p50": 456,
+          "p95": 1299,
+          "p99": 1299,
+          "max": 1299,
+          "maximumRow": {
+            "observedAtMs": 1793018482716,
+            "stage": "session_action.execute",
+            "durationMs": 1299,
+            "connection": 4
+          }
+        },
+        {
+          "key": "shared_session.predrain",
+          "count": 177,
+          "min": 50,
+          "p50": 244,
+          "p95": 627,
+          "p99": 900,
+          "max": 903,
+          "maximumRow": {
+            "observedAtMs": 1793018482368,
+            "stage": "shared_session.predrain",
+            "durationMs": 903
+          }
+        },
+        {
+          "key": "shared_session.reconcile",
+          "count": 69,
+          "min": 50,
+          "p50": 266,
+          "p95": 565,
+          "p99": 666,
+          "max": 666,
+          "maximumRow": {
+            "observedAtMs": 1793018482774,
+            "stage": "shared_session.reconcile",
+            "durationMs": 666
+          }
+        },
+        {
+          "key": "socket_turn.spectator",
+          "count": 115,
+          "min": 50,
+          "p50": 157,
+          "p95": 413,
+          "p99": 525,
+          "max": 626,
+          "maximumRow": {
+            "observedAtMs": 1793018480893,
+            "stage": "socket_turn.spectator",
+            "durationMs": 626,
+            "connection": 50
+          }
+        },
+        {
+          "key": "session_action.flush",
+          "count": 4,
+          "min": 304,
+          "p50": 424,
+          "p95": 486,
+          "p99": 486,
+          "max": 486,
+          "maximumRow": {
+            "observedAtMs": 1793018481397,
+            "stage": "session_action.flush",
+            "durationMs": 486,
+            "connection": 4
+          }
+        },
+        {
+          "key": "socket_input.queue_residence",
+          "count": 9,
+          "min": 53,
+          "p50": 284,
+          "p95": 456,
+          "p99": 456,
+          "max": 456,
+          "maximumRow": {
+            "observedAtMs": 1793018481416,
+            "stage": "socket_input.queue_residence",
+            "durationMs": 456,
+            "connection": 4,
+            "queuedPhase": "input",
+            "phaseElapsedMs": 449,
+            "inputClass": "other"
+          }
+        },
+        {
+          "key": "shared_session.inner_execute",
+          "count": 39,
+          "min": 56,
+          "p50": 127,
+          "p95": 348,
+          "p99": 364,
+          "max": 364,
+          "maximumRow": {
+            "observedAtMs": 1793018481928,
+            "stage": "shared_session.inner_execute",
+            "durationMs": 364
+          }
+        },
+        {
+          "key": "snapshot.build_and_send",
+          "count": 2,
+          "min": 57,
+          "p50": 57,
+          "p95": 362,
+          "p99": 362,
+          "max": 362,
+          "maximumRow": {
+            "observedAtMs": 1793018481386,
+            "stage": "snapshot.build_and_send",
+            "durationMs": 362
+          }
+        },
+        {
+          "key": "shared_session.tail",
+          "count": 3,
+          "min": 51,
+          "p50": 72,
+          "p95": 177,
+          "p99": 177,
+          "max": 177,
+          "maximumRow": {
+            "observedAtMs": 1793018481257,
+            "stage": "shared_session.tail",
+            "durationMs": 177
+          }
+        },
+        {
+          "key": "zone_cadence.total",
+          "count": 7,
+          "min": 52,
+          "p50": 114,
+          "p95": 143,
+          "p99": 143,
+          "max": 143,
+          "maximumRow": {
+            "observedAtMs": 1793018481411,
+            "stage": "zone_cadence.total",
+            "durationMs": 143
+          }
+        },
+        {
+          "key": "flush.external_state",
+          "count": 2,
+          "min": 51,
+          "p50": 51,
+          "p95": 97,
+          "p99": 97,
+          "max": 97,
+          "maximumRow": {
+            "observedAtMs": 1793018480882,
+            "stage": "flush.external_state",
+            "durationMs": 97
+          }
+        },
+        {
+          "key": "shared_session.predrain.pending_lock_wait",
+          "count": 2,
+          "min": 50,
+          "p50": 50,
+          "p95": 52,
+          "p99": 52,
+          "max": 52,
+          "maximumRow": {
+            "observedAtMs": 1793018482216,
+            "stage": "shared_session.predrain.pending_lock_wait",
+            "durationMs": 52
+          }
+        }
+      ],
+      "largestPerPublicConnection": [
+        {
+          "key": 46,
+          "count": 32,
+          "min": 54,
+          "p50": 381,
+          "p95": 1868,
+          "p99": 1868,
+          "max": 1868,
+          "maximumRow": {
+            "observedAtMs": 1793018478189,
+            "stage": "socket_turn.input",
+            "durationMs": 1868,
+            "connection": 46
+          }
+        },
+        {
+          "key": 37,
+          "count": 42,
+          "min": 60,
+          "p50": 232,
+          "p95": 1518,
+          "p99": 1657,
+          "max": 1657,
+          "maximumRow": {
+            "observedAtMs": 1793018483094,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1657,
+            "connection": 37
+          }
+        },
+        {
+          "key": 27,
+          "count": 32,
+          "min": 67,
+          "p50": 265,
+          "p95": 1621,
+          "p99": 1621,
+          "max": 1621,
+          "maximumRow": {
+            "observedAtMs": 1793018483084,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1621,
+            "connection": 27
+          }
+        },
+        {
+          "key": 8,
+          "count": 30,
+          "min": 65,
+          "p50": 353,
+          "p95": 1602,
+          "p99": 1602,
+          "max": 1602,
+          "maximumRow": {
+            "observedAtMs": 1793018483042,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1602,
+            "connection": 8
+          }
+        },
+        {
+          "key": 36,
+          "count": 33,
+          "min": 61,
+          "p50": 378,
+          "p95": 1570,
+          "p99": 1570,
+          "max": 1570,
+          "maximumRow": {
+            "observedAtMs": 1793018483016,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1570,
+            "connection": 36
+          }
+        },
+        {
+          "key": 17,
+          "count": 33,
+          "min": 65,
+          "p50": 295,
+          "p95": 1544,
+          "p99": 1544,
+          "max": 1544,
+          "maximumRow": {
+            "observedAtMs": 1793018482991,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1544,
+            "connection": 17
+          }
+        },
+        {
+          "key": 28,
+          "count": 33,
+          "min": 55,
+          "p50": 308,
+          "p95": 1472,
+          "p99": 1472,
+          "max": 1472,
+          "maximumRow": {
+            "observedAtMs": 1793018482931,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1472,
+            "connection": 28
+          }
+        },
+        {
+          "key": 43,
+          "count": 40,
+          "min": 50,
+          "p50": 324,
+          "p95": 1187,
+          "p99": 1431,
+          "max": 1431,
+          "maximumRow": {
+            "observedAtMs": 1793018482897,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1431,
+            "connection": 43
+          }
+        },
+        {
+          "key": 16,
+          "count": 34,
+          "min": 58,
+          "p50": 292,
+          "p95": 1419,
+          "p99": 1419,
+          "max": 1419,
+          "maximumRow": {
+            "observedAtMs": 1793018482873,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1419,
+            "connection": 16
+          }
+        },
+        {
+          "key": 50,
+          "count": 30,
+          "min": 70,
+          "p50": 294,
+          "p95": 1396,
+          "p99": 1396,
+          "max": 1396,
+          "maximumRow": {
+            "observedAtMs": 1793018482835,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1396,
+            "connection": 50
+          }
+        },
+        {
+          "key": 12,
+          "count": 41,
+          "min": 57,
+          "p50": 306,
+          "p95": 1225,
+          "p99": 1379,
+          "max": 1379,
+          "maximumRow": {
+            "observedAtMs": 1793018482802,
+            "stage": "runtime_tick.total",
+            "durationMs": 1379,
+            "connection": 12
+          }
+        },
+        {
+          "key": 18,
+          "count": 36,
+          "min": 58,
+          "p50": 219,
+          "p95": 1352,
+          "p99": 1352,
+          "max": 1352,
+          "maximumRow": {
+            "observedAtMs": 1793018482786,
+            "stage": "runtime_tick.execute",
+            "durationMs": 1352,
+            "connection": 18
+          }
+        }
+      ],
+      "connectionScope": "Opaque public connection numbers only; no gameplay actor/request linkage established here."
+    }
+  },
+  "store": {
+    "wholeFileRows": 12151,
+    "wholeFileByOperationStage": [
+      {
+        "key": "guild_lookup/account_store.store_wait",
+        "count": 6508,
+        "min": 50,
+        "p50": 75,
+        "p95": 151,
+        "p99": 205,
+        "max": 442,
+        "maximumRow": {
+          "observedAtMs": 1793018459812,
+          "stage": "account_store.store_wait",
+          "durationMs": 442,
+          "operation": "guild_lookup",
+          "traceId": 89957,
+          "startedUnixMs": 1793018459371,
+          "maxStartUs": 0,
+          "maxEndUs": 442223,
+          "samples": 1,
+          "totalUs": 442222
+        }
+      },
+      {
+        "key": "experience_admission/account_store.store_wait",
+        "count": 5596,
+        "min": 50,
+        "p50": 79,
+        "p95": 164,
+        "p99": 218,
+        "max": 423,
+        "maximumRow": {
+          "observedAtMs": 1793018445671,
+          "stage": "account_store.store_wait",
+          "durationMs": 423,
+          "operation": "experience_admission",
+          "traceId": 86333,
+          "startedUnixMs": 1793018445238,
+          "maxStartUs": 0,
+          "maxEndUs": 423729,
+          "samples": 1,
+          "totalUs": 423729
+        }
+      },
+      {
+        "key": "guild_clock/account_store.driver_held",
+        "count": 13,
+        "min": 57,
+        "p50": 74,
+        "p95": 207,
+        "p99": 207,
+        "max": 207,
+        "maximumRow": {
+          "observedAtMs": 1793018372447,
+          "stage": "account_store.driver_held",
+          "durationMs": 207,
+          "operation": "guild_clock",
+          "traceId": 66485,
+          "startedUnixMs": 1793018372233,
+          "maxStartUs": 0,
+          "maxEndUs": 207497,
+          "samples": 1,
+          "totalUs": 207496
+        }
+      },
+      {
+        "key": "transaction/account_store.store_held",
+        "count": 5,
+        "min": 54,
+        "p50": 144,
+        "p95": 171,
+        "p99": 171,
+        "max": 171,
+        "maximumRow": {
+          "observedAtMs": 1793018361744,
+          "stage": "account_store.store_held",
+          "durationMs": 171,
+          "operation": "transaction",
+          "traceId": 63389,
+          "startedUnixMs": 1793018361519,
+          "maxStartUs": 53196,
+          "maxEndUs": 225048,
+          "samples": 1,
+          "totalUs": 171852
+        }
+      },
+      {
+        "key": "transaction/account_store.persist_wait",
+        "count": 2,
+        "min": 60,
+        "p50": 60,
+        "p95": 169,
+        "p99": 169,
+        "max": 169,
+        "maximumRow": {
+          "observedAtMs": 1793018372489,
+          "stage": "account_store.persist_wait",
+          "durationMs": 169,
+          "operation": "transaction",
+          "traceId": 66490,
+          "startedUnixMs": 1793018372270,
+          "maxStartUs": 0,
+          "maxEndUs": 169965,
+          "samples": 1,
+          "totalUs": 169964
+        }
+      },
+      {
+        "key": "guild_clock/account_store.store_held",
+        "count": 1,
+        "min": 160,
+        "p50": 160,
+        "p95": 160,
+        "p99": 160,
+        "max": 160,
+        "maximumRow": {
+          "observedAtMs": 1793018372447,
+          "stage": "account_store.store_held",
+          "durationMs": 160,
+          "operation": "guild_clock",
+          "traceId": 66485,
+          "startedUnixMs": 1793018372233,
+          "maxStartUs": 46812,
+          "maxEndUs": 207493,
+          "samples": 1,
+          "totalUs": 160680
+        }
+      },
+      {
+        "key": "transaction/account_store.marker_begin_sync",
+        "count": 4,
+        "min": 66,
+        "p50": 137,
+        "p95": 155,
+        "p99": 155,
+        "max": 155,
+        "maximumRow": {
+          "observedAtMs": 1793018361744,
+          "stage": "account_store.marker_begin_sync",
+          "durationMs": 155,
+          "operation": "transaction",
+          "traceId": 63389,
+          "startedUnixMs": 1793018361519,
+          "maxStartUs": 55020,
+          "maxEndUs": 210433,
+          "samples": 1,
+          "totalUs": 155412
+        }
+      },
+      {
+        "key": "guild_clock/account_store.marker_begin_sync",
+        "count": 1,
+        "min": 155,
+        "p50": 155,
+        "p95": 155,
+        "p99": 155,
+        "max": 155,
+        "maximumRow": {
+          "observedAtMs": 1793018372447,
+          "stage": "account_store.marker_begin_sync",
+          "durationMs": 155,
+          "operation": "guild_clock",
+          "traceId": 66485,
+          "startedUnixMs": 1793018372233,
+          "maxStartUs": 46914,
+          "maxEndUs": 202429,
+          "samples": 1,
+          "totalUs": 155515
+        }
+      },
+      {
+        "key": "transaction/account_store.store_wait",
+        "count": 10,
+        "min": 53,
+        "p50": 70,
+        "p95": 144,
+        "p99": 144,
+        "max": 144,
+        "maximumRow": {
+          "observedAtMs": 1793018473938,
+          "stage": "account_store.store_wait",
+          "durationMs": 144,
+          "operation": "transaction",
+          "traceId": 93490,
+          "startedUnixMs": 1793018473723,
+          "maxStartUs": 60591,
+          "maxEndUs": 205115,
+          "samples": 1,
+          "totalUs": 144523
+        }
+      },
+      {
+        "key": "guild_clock/account_store.store_wait",
+        "count": 11,
+        "min": 53,
+        "p50": 64,
+        "p95": 121,
+        "p99": 121,
+        "max": 121,
+        "maximumRow": {
+          "observedAtMs": 1793018473333,
+          "stage": "account_store.store_wait",
+          "durationMs": 121,
+          "operation": "guild_clock",
+          "traceId": 93366,
+          "startedUnixMs": 1793018473204,
+          "maxStartUs": 1,
+          "maxEndUs": 121122,
+          "samples": 1,
+          "totalUs": 121121
+        }
+      }
+    ],
+    "fatalNeighborhood": {
+      "receivedRows": 396,
+      "beforeAnchorRows": 271,
+      "afterAnchorRows": 125,
+      "byOperationStage": [
+        {
+          "key": "guild_lookup/account_store.store_wait",
+          "count": 201,
+          "min": 50,
+          "p50": 84,
+          "p95": 177,
+          "p99": 222,
+          "max": 354,
+          "maximumRow": {
+            "observedAtMs": 1793018477866,
+            "stage": "account_store.store_wait",
+            "durationMs": 354,
+            "operation": "guild_lookup",
+            "traceId": 94496,
+            "startedUnixMs": 1793018477513,
+            "maxStartUs": 0,
+            "maxEndUs": 354089,
+            "samples": 1,
+            "totalUs": 354089
+          }
+        },
+        {
+          "key": "experience_admission/account_store.store_wait",
+          "count": 193,
+          "min": 50,
+          "p50": 88,
+          "p95": 177,
+          "p99": 246,
+          "max": 327,
+          "maximumRow": {
+            "observedAtMs": 1793018481384,
+            "stage": "account_store.store_wait",
+            "durationMs": 327,
+            "operation": "experience_admission",
+            "traceId": 95332,
+            "startedUnixMs": 1793018481048,
+            "maxStartUs": 0,
+            "maxEndUs": 327306,
+            "samples": 1,
+            "totalUs": 327306
+          }
+        },
+        {
+          "key": "transaction/account_store.store_held",
+          "count": 1,
+          "min": 73,
+          "p50": 73,
+          "p95": 73,
+          "p99": 73,
+          "max": 73,
+          "maximumRow": {
+            "observedAtMs": 1793018478086,
+            "stage": "account_store.store_held",
+            "durationMs": 73,
+            "operation": "transaction",
+            "traceId": 94594,
+            "startedUnixMs": 1793018478013,
+            "maxStartUs": 1,
+            "maxEndUs": 73874,
+            "samples": 1,
+            "totalUs": 73873
+          }
+        },
+        {
+          "key": "transaction/account_store.marker_begin_sync",
+          "count": 1,
+          "min": 66,
+          "p50": 66,
+          "p95": 66,
+          "p99": 66,
+          "max": 66,
+          "maximumRow": {
+            "observedAtMs": 1793018478086,
+            "stage": "account_store.marker_begin_sync",
+            "durationMs": 66,
+            "operation": "transaction",
+            "traceId": 94594,
+            "startedUnixMs": 1793018478013,
+            "maxStartUs": 2402,
+            "maxEndUs": 68638,
+            "samples": 1,
+            "totalUs": 66235
+          }
+        }
+      ],
+      "maxCompletedOccurrenceOverlapRows": 397,
+      "overlapByOperationStage": [
+        {
+          "key": "guild_lookup/account_store.store_wait",
+          "count": 202,
+          "min": 50,
+          "p50": 83,
+          "p95": 177,
+          "p99": 222,
+          "max": 354,
+          "maximumRow": {
+            "observedAtMs": 1793018477866,
+            "stage": "account_store.store_wait",
+            "durationMs": 354,
+            "operation": "guild_lookup",
+            "traceId": 94496,
+            "startedUnixMs": 1793018477513,
+            "maxStartUs": 0,
+            "maxEndUs": 354089,
+            "samples": 1,
+            "totalUs": 354089
+          }
+        },
+        {
+          "key": "experience_admission/account_store.store_wait",
+          "count": 193,
+          "min": 50,
+          "p50": 90,
+          "p95": 177,
+          "p99": 246,
+          "max": 327,
+          "maximumRow": {
+            "observedAtMs": 1793018481384,
+            "stage": "account_store.store_wait",
+            "durationMs": 327,
+            "operation": "experience_admission",
+            "traceId": 95332,
+            "startedUnixMs": 1793018481048,
+            "maxStartUs": 0,
+            "maxEndUs": 327306,
+            "samples": 1,
+            "totalUs": 327306
+          }
+        },
+        {
+          "key": "transaction/account_store.store_held",
+          "count": 1,
+          "min": 73,
+          "p50": 73,
+          "p95": 73,
+          "p99": 73,
+          "max": 73,
+          "maximumRow": {
+            "observedAtMs": 1793018478086,
+            "stage": "account_store.store_held",
+            "durationMs": 73,
+            "operation": "transaction",
+            "traceId": 94594,
+            "startedUnixMs": 1793018478013,
+            "maxStartUs": 1,
+            "maxEndUs": 73874,
+            "samples": 1,
+            "totalUs": 73873
+          }
+        },
+        {
+          "key": "transaction/account_store.marker_begin_sync",
+          "count": 1,
+          "min": 66,
+          "p50": 66,
+          "p95": 66,
+          "p99": 66,
+          "max": 66,
+          "maximumRow": {
+            "observedAtMs": 1793018478086,
+            "stage": "account_store.marker_begin_sync",
+            "durationMs": 66,
+            "operation": "transaction",
+            "traceId": 94594,
+            "startedUnixMs": 1793018478013,
+            "maxStartUs": 2402,
+            "maxEndUs": 68638,
+            "samples": 1,
+            "totalUs": 66235
+          }
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Slow/Store datasets contain completed emitted observations at a >=50ms threshold; missing rows do not exclude incomplete waits, subthreshold work or uninstrumented paths.",
+    "Nested runtime/execute/input/outbound and same-trace Store stages overlap and must not be summed into one request duration.",
+    "Before/after classifications refer to diagnostic receive time; stderr batching and scheduler delay prevent exact packet-level causality.",
+    "Bootstrap includes admission and settle, not a measured stage; post-anchor rows and monitor observations can include drain work.",
+    "Low sampled total CPU/RAM use does not exclude a saturated logical core, serialized lock/queue, scheduler stalls or between-sample resource spikes. Host core utilization includes unrelated processes.",
+    "Windows process I/O is file/device I/O, not disk latency/physical IOPS; host NIC data can exclude loopback and process network rates are absent.",
+    "No gameplay samples raw, old run or CPU profile was read. No actor/request AOI correlation, root cause, capacity upper bound or acceptance is inferred."
+  ],
+  "verdict": {
+    "diagnosticAnalysisComplete": true,
+    "rootCauseProven": false,
+    "capacityAccepted": false,
+    "p0Accepted": false
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "dataset": "account-store",
+  "files": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\store-stage-public-status.json",
+        "bytes": 2592,
+        "sha256": "f96755f98a9e13db6022df398af9d6c46ccd319d83cb9e262b994acb84a043ab"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-anti-convergence-ladder-15-store-diagnostics\\store-stage-public-status.json",
+        "bytes": 2592,
+        "sha256": "f96755f98a9e13db6022df398af9d6c46ccd319d83cb9e262b994acb84a043ab"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-anti-convergence-ladder-15\\store-stage-public.jsonl",
+        "bytes": 20154,
+        "sha256": "c4d814b9c7281c1c283b01050d66e3ffd56481760fbcd6787a5d074e621afce8"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-anti-convergence-ladder-15-store-diagnostics\\store-stage-public.jsonl",
+        "bytes": 20154,
+        "sha256": "c4d814b9c7281c1c283b01050d66e3ffd56481760fbcd6787a5d074e621afce8"
+      }
+    }
+  ],
+  "sourceIdentity": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "storeOnly": true,
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+    "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+    "separateFromBaseThreeFourSeven": true,
+    "contributesToGameAcceptance": false
+  },
+  "originalGameDataModified": false
+}

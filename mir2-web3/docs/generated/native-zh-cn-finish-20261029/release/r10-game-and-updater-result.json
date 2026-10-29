@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "kind": "formal-game242-and-policy-corrected-updater819-component-assembly-only",
+  "game": {
+    "path": "../candidate/validation.json",
+    "candidate": "WN-CANDIDATE-20261029-invited-09",
+    "sourceRevision": "24216899acd4301d8c3b1eff08b825f4896cc410"
+  },
+  "updater": {
+    "path": "../updater/final-r10/validation.json",
+    "sourceRevision": "81942dda7fa09e869d42fb9560e57abdbd542495",
+    "sequence": 2026102910,
+    "files": 9,
+    "launcherSha256": "76d46b6e52246462d4c57f1fb843bc0b0e557d06e735a4c02abdc24c07b957ac",
+    "engineSha256": "10b94f60286afeaae43db0117a9c73b2dccecae1ddd79d562379ac316b40c6bc"
+  },
+  "rootPolicyFix": "../updater/root-policy-fix/validation.json",
+  "r9RuntimeFailure": "../windows-live/r9-startup-failure/validation.json",
+  "actualR10InstalledStartupNotYetClaimed": true,
+  "installerAndInstalledGuiVerifiedByThisReport": false,
+  "humanAccepted": false,
+  "productionDeployment": false
+}

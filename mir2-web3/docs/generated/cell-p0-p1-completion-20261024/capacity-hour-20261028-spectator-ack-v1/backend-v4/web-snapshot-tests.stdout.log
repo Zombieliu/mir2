@@ -1,0 +1,8 @@
+
+running 3 tests
+test web::tests::spectator_snapshot_disabled_never_constructs_world_or_publishes ... ok
+test web::tests::spectator_snapshot_enabled_keeps_publishing_and_private_redaction ... ok
+test web::tests::spectator_snapshot_enabled_without_active_identity_does_not_publish ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1277 filtered out; finished in 0.79s
+

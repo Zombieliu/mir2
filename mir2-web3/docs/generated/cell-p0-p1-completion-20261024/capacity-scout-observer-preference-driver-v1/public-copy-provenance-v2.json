@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-25T21:09:10.380Z",
+  "scope": "Single explicit append of actual full219 independent QA; previous receipt, whitelist, README and 21 copied originals are unchanged.",
+  "previousReceipt": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\scout-observer-preference-public-archive-v1\\public-copy-provenance-v1.json",
+    "bytes": 9898,
+    "sha256": "71e41765bc5f7023c51fc28729b2db01737c506f1b57f05870136802bf8b7987",
+    "public": {
+      "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-observer-preference-driver-v1\\public-copy-provenance-v1.json",
+      "bytes": 9898,
+      "sha256": "71e41765bc5f7023c51fc28729b2db01737c506f1b57f05870136802bf8b7987"
+    }
+  },
+  "addedFiles": [
+    {
+      "source": "C:/mir2-build/p01-completion-20261024/scout-observer-preference-independent-review-v1/full-regression-addendum-v1.json",
+      "destination": "review/full-regression-addendum-v1.json",
+      "bytes": 3152,
+      "sha256": "281d5faacadc10c0df2f476b9c5ed2b9ce50ddfaf4dc5e37979c4624dc08af6a"
+    }
+  ],
+  "addedOriginalCount": 1,
+  "addedOriginalBytes": 3152,
+  "cumulativeOriginalCount": 22,
+  "cumulativeOriginalBytes": 1006281,
+  "cumulativeRawCopiesIncludingOriginalWhitelist": 23,
+  "cumulativeRawCopyBytesIncludingOriginalWhitelist": 1013633,
+  "README": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-scout-observer-preference-driver-v1\\README.md",
+    "bytes": 4199,
+    "sha256": "83583b276e3a80436352ec48330c67701c270925e5a58cf801f55cea620af6ef",
+    "unchangedFromV1": true,
+    "relativeLinkCount": 13,
+    "allLinksExist": true
+  },
+  "publicFileCount": 26,
+  "allSourceAndPublicRawPinsRechecked": true,
+  "currentCodeUnchanged": true,
+  "newDriverFreezeCreated": false,
+  "newCommitClaimed": false,
+  "capacityAccepted": false,
+  "realCapacityRerun": false
+}

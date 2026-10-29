@@ -1,0 +1,304 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original matchedlaunched request49 lacks mandatory observerdamage, so its originalmiss/quarantine remains. Ownerpositive damage is not retroactively promoted to dual-endhit.",
+  "raw": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.samples.jsonl",
+    "bytes": 8938171,
+    "sha256": "0c7d4f33b2e0a50dfc9a16c5331e5a6b3b25feb150cda01972a7244bec96443f",
+    "rows": 14021
+  },
+  "trace": {
+    "line": 12457,
+    "type": "pendingAttackEvidence",
+    "actor": "L26466205",
+    "phase": "stage-10",
+    "connection": 6,
+    "at": 1792891567213,
+    "sentAtMs": 544592.4156,
+    "sentAtWallMs": 1792891566304,
+    "sendCursor": 3533,
+    "endedAtMs": 545501.4375,
+    "endedAtWallMs": 1792891567213,
+    "owner": {
+      "objectId": 1000,
+      "x": 274,
+      "y": 654,
+      "dead": false,
+      "hp": 17,
+      "maxHp": 24
+    },
+    "target": {
+      "objectId": 206528,
+      "x": 273,
+      "y": 653,
+      "dead": false,
+      "hp": 8,
+      "maxHp": 25
+    },
+    "outcome": "miss",
+    "protocolVersion": 2,
+    "requestId": "49",
+    "maximumPackets": 64,
+    "packetCount": 16,
+    "truncated": false,
+    "packets": [
+      {
+        "receiver": "owner",
+        "sequence": 3535,
+        "monotonicMs": 544592.718,
+        "atMs": 1792891566304,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 206528,
+          "location": {
+            "x": 273,
+            "y": 653
+          },
+          "direction": "DownRight"
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 8057,
+        "monotonicMs": 544601.716,
+        "atMs": 1792891566313,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 50005,
+          "location": {
+            "x": 274,
+            "y": 654
+          },
+          "direction": "UpLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3537,
+        "monotonicMs": 544605.8796,
+        "atMs": 1792891566317,
+        "type": "attackResultV2",
+        "protocolVersion": 2,
+        "requestId": "49",
+        "objectId": 206528,
+        "result": "launched"
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3538,
+        "monotonicMs": 544605.984,
+        "atMs": 1792891566317,
+        "packet": "UserLocation",
+        "payload": {
+          "x": 274,
+          "y": 654,
+          "direction": "UpLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3539,
+        "monotonicMs": 544606.0258,
+        "atMs": 1792891566317,
+        "packet": "ObjectAttack",
+        "payload": {
+          "objectId": 1000,
+          "location": {
+            "x": 274,
+            "y": 654
+          },
+          "direction": "UpLeft"
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 8059,
+        "monotonicMs": 544628.7219,
+        "atMs": 1792891566340,
+        "packet": "ObjectRemove",
+        "payload": {
+          "objectId": 50005
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 8064,
+        "monotonicMs": 544629.0211,
+        "atMs": 1792891566340,
+        "packet": "ObjectRemove",
+        "payload": {
+          "objectId": 206528
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3541,
+        "monotonicMs": 544690.7487,
+        "atMs": 1792891566402,
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 206528,
+          "attackerId": 1000,
+          "location": {
+            "x": 273,
+            "y": 653
+          },
+          "direction": "DownRight"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3542,
+        "monotonicMs": 544690.797,
+        "atMs": 1792891566402,
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 206528,
+          "damage": 2
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3543,
+        "monotonicMs": 544690.8132,
+        "atMs": 1792891566402,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206528,
+          "percent": 8
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 8071,
+        "monotonicMs": 544800.246,
+        "atMs": 1792891566512,
+        "packet": "ObjectRemove",
+        "payload": {
+          "objectId": 206528
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3550,
+        "monotonicMs": 545187.8503,
+        "atMs": 1792891566899,
+        "packet": "ObjectStruck",
+        "payload": {
+          "objectId": 1000,
+          "attackerId": 206528,
+          "location": {
+            "x": 274,
+            "y": 654
+          },
+          "direction": "UpLeft"
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3551,
+        "monotonicMs": 545187.8715,
+        "atMs": 1792891566899,
+        "packet": "DamageIndicator",
+        "payload": {
+          "objectId": 1000,
+          "damage": 2
+        }
+      },
+      {
+        "receiver": "owner",
+        "sequence": 3552,
+        "monotonicMs": 545187.8852,
+        "atMs": 1792891566899,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 1000,
+          "percent": 62
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 8087,
+        "monotonicMs": 545377.4461,
+        "atMs": 1792891567089,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206528,
+          "percent": 8
+        }
+      },
+      {
+        "receiver": "observer",
+        "sequence": 8097,
+        "monotonicMs": 545488.7593,
+        "atMs": 1792891567200,
+        "packet": "ObjectHealth",
+        "payload": {
+          "objectId": 206528,
+          "percent": 100
+        }
+      }
+    ],
+    "rule": "Observed public packet fields only; no server incarnation is present or inferred. Diagnostic evidence never changes timeout, miss, rejection or damage accounting."
+  },
+  "action": {
+    "line": 12456,
+    "type": "action",
+    "at": 1792891567213,
+    "phase": "stage-10",
+    "actor": "L26466205",
+    "kind": "attack",
+    "plannedGameplay": true,
+    "scheduledAtMs": 544587.2371,
+    "sentAtMs": 544592.4156,
+    "targetId": 206528,
+    "hunting": "Deer",
+    "nativeOpportunity": true,
+    "plannedIntervalMs": 1422,
+    "pacingKnown": true,
+    "cadence": {
+      "intervalMs": 1422,
+      "cooldownMs": 1372,
+      "pacingKnown": true,
+      "nativeAttackMs": 1372,
+      "zoneAttackFloorMs": 600,
+      "level": 2,
+      "attackSpeed": 0,
+      "statBlockPresent": true,
+      "statCount": 24,
+      "attackSpeedSource": "authoritative-sparse-zero"
+    },
+    "declaredHome": {
+      "x": 261,
+      "y": 669
+    },
+    "initialCombatTransit": false,
+    "targetPosition": {
+      "x": 273,
+      "y": 653
+    },
+    "attackResults": "v2",
+    "requestId": "49",
+    "attackRequestSent": true,
+    "attackResult": "launched",
+    "status": "miss",
+    "latencyMs": 908.8981000001077,
+    "plannedLatencyMs": 914.078499999945,
+    "error": "L26466205 timed out waiting for attack authoritative acknowledgement",
+    "targetStillAdjacent": true,
+    "ambiguousTargetQuarantined": true
+  },
+  "facts": {
+    "sentAtMs": 1792891566304,
+    "typedLaunchedAtMs": 1792891566317,
+    "observerActorAndTargetRemovedAtMs": 1792891566340,
+    "ownerTargetStruckDamage2Health8AtMs": 1792891566402,
+    "ownerRetaliatoryDeerDamage2AtMs": 1792891566899,
+    "originalMissFinalizedAtMs": 1792891567213,
+    "observerTargetDamageIndicatorCaptured": false,
+    "ownerTargetPositiveDamageCaptured": true,
+    "receiptTimeout": false,
+    "physicalRandomMissProven": false,
+    "fatalAttackerProven": false
+  }
+}

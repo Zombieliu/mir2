@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "state": "WORKING_TREE_CANDIDATE",
+  "startedAt": "2026-10-26T09:35:29.803Z",
+  "endedAt": "2026-10-26T09:36:14.434Z",
+  "changedBackendInput": "mir2-web3/apps/simulation/src/runtime/shared_experience_profile.rs",
+  "unchangedBackendInputs": 49,
+  "driverInputs": 9,
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "name": "format",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "rustfmt",
+        "--check",
+        "--edition",
+        "2021",
+        "apps/simulation/src/runtime/shared_experience_profile.rs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "durationMs": 58.244,
+      "totals": [],
+      "passed": true,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v2\\format-stdout-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v2\\format-stderr-v1.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "name": "experience-profile",
+      "command": [
+        "C:/Users/Administrator/.cargo/bin/rustup.exe",
+        "run",
+        "1.95.0",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--jobs",
+        "4",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "runtime::shared_experience_profile::tests::",
+        "--",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "exitCode": 101,
+      "signal": null,
+      "error": null,
+      "durationMs": 44563.149600000004,
+      "totals": [
+        {
+          "status": "FAILED",
+          "passed": 19,
+          "failed": 2,
+          "ignored": 0,
+          "measured": 0,
+          "filteredOut": 2925
+        }
+      ],
+      "passed": false,
+      "logs": [
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v2\\experience-profile-stdout-v1.log",
+          "bytes": 3072,
+          "sha256": "661a474d1f83b8152614ed5884774b27cdac045bd4438e4ef4c392825ecace43"
+        },
+        {
+          "file": "C:\\mir2-build\\p01-completion-20261024\\root-shared-experience-parse-cache-validation-v2\\experience-profile-stderr-v1.log",
+          "bytes": 54945,
+          "sha256": "5e26d8efb98c0ab82f87b95e52d41b9270330393eb03d49d11ae0760c299210c"
+        }
+      ]
+    }
+  ],
+  "passed": false,
+  "capacityAcceptance": false
+}

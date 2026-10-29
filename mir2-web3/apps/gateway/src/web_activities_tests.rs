@@ -265,6 +265,7 @@ fn web_state(config: GatewayConfig) -> WebState {
     WebState {
         config: Arc::new(config),
         deploy_revision: None,
+        auth_rate_limit_policy: crate::web::AuthRateLimitPolicy::default(),
         zone_registry: Arc::new(crate::ZoneRegistry::in_process()),
         chat_hub: crate::tcp::chat_broadcast::ChatBroadcastHub::for_tests(),
         session_cache: Arc::new(InMemoryGatewaySessionCache::default()),

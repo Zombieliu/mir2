@@ -1,0 +1,243 @@
+{
+  "checkedAt": "2026-10-24T12:44:10.219Z",
+  "scope": "Read-only local packet-evidence estimate, not an internal-cache inspection",
+  "windowSeconds": 900,
+  "loginPolicy": {
+    "peerLimit": 30,
+    "deviceLimit": 30,
+    "pairLimit": 8,
+    "accountLimit": 50,
+    "successClearsPairAndAccount": true,
+    "source": "apps/gateway/src/web.rs:7311"
+  },
+  "evidenceFiles": 27,
+  "observedLoginRequestsInWindow": 5,
+  "observedRateLimitRejectionsInWindow": [],
+  "plannedLoginRequests": 2,
+  "estimatedPeerRoom": 25,
+  "returnStaticPaths": [
+    {
+      "from": {
+        "x": 300,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 616
+      },
+      "steps": 12
+    },
+    {
+      "from": {
+        "x": 300,
+        "y": 622
+      },
+      "to": {
+        "x": 288,
+        "y": 616
+      },
+      "steps": 12
+    }
+  ],
+  "route": [
+    {
+      "target": {
+        "x": 288,
+        "y": 616
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": null
+    },
+    {
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 286,
+        "y": 617
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 285,
+        "y": 616
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 284,
+        "y": 616
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 282,
+        "y": 616
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 283,
+        "y": 615
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 283,
+        "y": 614
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 284,
+        "y": 613
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 284,
+        "y": 612
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 286,
+        "y": 612
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 287,
+        "y": 611
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 289,
+        "y": 611
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 291,
+        "y": 611
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 292,
+        "y": 611
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 293,
+        "y": 610
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 294,
+        "y": 610
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 294,
+        "y": 609
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 296,
+        "y": 607
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 298,
+        "y": 605
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 299,
+        "y": 604
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 1
+    },
+    {
+      "target": {
+        "x": 299,
+        "y": 602
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    },
+    {
+      "target": {
+        "x": 299,
+        "y": 600
+      },
+      "staticWalkable": true,
+      "plannedStepsFromPrevious": 2
+    }
+  ],
+  "capacity": {
+    "maxWsConnections": null,
+    "maxActiveSessions": null,
+    "maxReconnectLeases": null,
+    "maxLoginInFlight": null,
+    "maxNewCharacterInFlight": null,
+    "maxStartGameInFlight": null,
+    "currentWsConnections": 0,
+    "currentActiveSessions": 0,
+    "currentReconnectLeases": 0,
+    "currentLoginInFlight": 0,
+    "currentNewCharacterInFlight": 0,
+    "currentStartGameInFlight": 0
+  },
+  "ok": true
+}

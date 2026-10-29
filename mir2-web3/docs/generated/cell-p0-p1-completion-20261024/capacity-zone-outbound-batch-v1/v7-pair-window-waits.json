@@ -1,0 +1,714 @@
+{
+  "schemaVersion": 1,
+  "kind": "v7-existing-memory-exact-pair-window-completed-wait-selection",
+  "runId": "1793018136789-d65f6a9c",
+  "analyzedAt": "2026-10-26T13:02:37.474Z",
+  "window": {
+    "startedAtMs": 1793018479103,
+    "endedAtMs": 1793018480120,
+    "spanMs": 1017,
+    "rootReportedFatalAtMs": 1793018480110
+  },
+  "sourceReferences": {
+    "monitor-history.jsonl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\monitor-history.jsonl",
+      "bytes": 1594864,
+      "sha256": "c713b98e50cbef43030fb7a3243c268de1f31462e89b7de046abf77928fb1844",
+      "rows": 176,
+      "emptyLines": 0,
+      "readParseCount": 1
+    },
+    "slow-stage-public.jsonl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\slow-stage-public.jsonl",
+      "bytes": 11151415,
+      "sha256": "77b238b2f5c1bdd3a9fc89007b216ec790fef487a9b21fd161bc4bfb3beaa213",
+      "rows": 116382,
+      "emptyLines": 0,
+      "readParseCount": 1
+    },
+    "store-stage-public.jsonl": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\native-steady-single-stage-diagnostic-v7\\episode-50\\store-stage-public.jsonl",
+      "bytes": 2666800,
+      "sha256": "19fef611679f8e7313965835171acc31da590cbfd46ce8393d33e90a8c20d5c8",
+      "rows": 12151,
+      "emptyLines": 0,
+      "readParseCount": 1
+    }
+  },
+  "originalSourceReadsThisOperation": 0,
+  "originalSourceHashesThisOperation": 0,
+  "inputOrigin": "Persistent slowV7/storeV7 arrays from the already completed single parse/hash; no source file reopened.",
+  "definitions": {
+    "receivedInWindow": "Completed diagnostic lines whose public capture receive timestamp is within the inclusive requested bounds.",
+    "receiveDurationProxy": "[observedAtMs-durationMs,observedAtMs]; unknown stderr capture/scheduling delay means this is not the actual execution interval.",
+    "proxyOverlapsWindow": "Receive-duration proxy intersects the requested interval, including lines received after observer Remove.",
+    "proxyCoversEntireWindow": "Receive-duration proxy starts no later than owner ACK and ends no earlier than observer Remove.",
+    "storeProducerInterval": "For comparison only, approximate max completed occurrence from startedUnixMs+maxStartUs/1000 to startedUnixMs+maxEndUs/1000; origin rounding and completed-only scope remain."
+  },
+  "slow": {
+    "receivedInWindowCount": 158,
+    "receivedInWindowByStage": [
+      {
+        "key": "runtime_tick.execute",
+        "count": 69,
+        "min": 60,
+        "p50": 359,
+        "p95": 705,
+        "p99": 912,
+        "max": 912,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "runtime_tick.execute",
+          "durationMs": 912,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479107,
+            "endedAtMs": 1793018480019
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait",
+        "count": 89,
+        "min": 94,
+        "p50": 353,
+        "p95": 634,
+        "p99": 871,
+        "max": 871,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 871,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479148,
+            "endedAtMs": 1793018480019
+          }
+        }
+      }
+    ],
+    "proxyOverlapCount": 211,
+    "proxyOverlapByStage": [
+      {
+        "key": "runtime_tick.execute",
+        "count": 88,
+        "min": 60,
+        "p50": 371,
+        "p95": 705,
+        "p99": 912,
+        "max": 912,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "runtime_tick.execute",
+          "durationMs": 912,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479107,
+            "endedAtMs": 1793018480019
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait",
+        "count": 123,
+        "min": 86,
+        "p50": 328,
+        "p95": 633,
+        "p99": 820,
+        "max": 871,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 871,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479148,
+            "endedAtMs": 1793018480019
+          }
+        }
+      }
+    ],
+    "proxyCoversEntireWindowCount": 0,
+    "proxyCoversEntireWindowByStage": [],
+    "largestPerStageAndPublicConnectionReceived": [
+      {
+        "key": "runtime_tick.execute/conn24",
+        "count": 1,
+        "min": 912,
+        "p50": 912,
+        "p95": 912,
+        "p99": 912,
+        "max": 912,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "runtime_tick.execute",
+          "durationMs": 912,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479107,
+            "endedAtMs": 1793018480019
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn24",
+        "count": 1,
+        "min": 871,
+        "p50": 871,
+        "p95": 871,
+        "p99": 871,
+        "max": 871,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 871,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479148,
+            "endedAtMs": 1793018480019
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn50",
+        "count": 2,
+        "min": 272,
+        "p50": 272,
+        "p95": 820,
+        "p99": 820,
+        "max": 820,
+        "maximumRow": {
+          "observedAtMs": 1793018479427,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 820,
+          "connection": 50,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018478607,
+            "endedAtMs": 1793018479427
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn3",
+        "count": 1,
+        "min": 761,
+        "p50": 761,
+        "p95": 761,
+        "p99": 761,
+        "max": 761,
+        "maximumRow": {
+          "observedAtMs": 1793018479881,
+          "stage": "runtime_tick.execute",
+          "durationMs": 761,
+          "connection": 3,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479120,
+            "endedAtMs": 1793018479881
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn3",
+        "count": 1,
+        "min": 734,
+        "p50": 734,
+        "p95": 734,
+        "p99": 734,
+        "max": 734,
+        "maximumRow": {
+          "observedAtMs": 1793018479881,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 734,
+          "connection": 3,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479147,
+            "endedAtMs": 1793018479881
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn4",
+        "count": 2,
+        "min": 205,
+        "p50": 205,
+        "p95": 707,
+        "p99": 707,
+        "max": 707,
+        "maximumRow": {
+          "observedAtMs": 1793018480047,
+          "stage": "runtime_tick.execute",
+          "durationMs": 707,
+          "connection": 4,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479340,
+            "endedAtMs": 1793018480047
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn15",
+        "count": 1,
+        "min": 705,
+        "p50": 705,
+        "p95": 705,
+        "p99": 705,
+        "max": 705,
+        "maximumRow": {
+          "observedAtMs": 1793018479767,
+          "stage": "runtime_tick.execute",
+          "durationMs": 705,
+          "connection": 15,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479062,
+            "endedAtMs": 1793018479767
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn15",
+        "count": 1,
+        "min": 687,
+        "p50": 687,
+        "p95": 687,
+        "p99": 687,
+        "max": 687,
+        "maximumRow": {
+          "observedAtMs": 1793018479767,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 687,
+          "connection": 15,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479080,
+            "endedAtMs": 1793018479767
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn44",
+        "count": 1,
+        "min": 667,
+        "p50": 667,
+        "p95": 667,
+        "p99": 667,
+        "max": 667,
+        "maximumRow": {
+          "observedAtMs": 1793018480006,
+          "stage": "runtime_tick.execute",
+          "durationMs": 667,
+          "connection": 44,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479339,
+            "endedAtMs": 1793018480006
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn8",
+        "count": 1,
+        "min": 657,
+        "p50": 657,
+        "p95": 657,
+        "p99": 657,
+        "max": 657,
+        "maximumRow": {
+          "observedAtMs": 1793018479767,
+          "stage": "runtime_tick.execute",
+          "durationMs": 657,
+          "connection": 8,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479110,
+            "endedAtMs": 1793018479767
+          }
+        }
+      }
+    ],
+    "largestPerStageAndPublicConnectionProxyOverlap": [
+      {
+        "key": "runtime_tick.execute/conn24",
+        "count": 1,
+        "min": 912,
+        "p50": 912,
+        "p95": 912,
+        "p99": 912,
+        "max": 912,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "runtime_tick.execute",
+          "durationMs": 912,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479107,
+            "endedAtMs": 1793018480019
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn24",
+        "count": 2,
+        "min": 391,
+        "p50": 391,
+        "p95": 871,
+        "p99": 871,
+        "max": 871,
+        "maximumRow": {
+          "observedAtMs": 1793018480019,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 871,
+          "connection": 24,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479148,
+            "endedAtMs": 1793018480019
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn50",
+        "count": 3,
+        "min": 175,
+        "p50": 272,
+        "p95": 820,
+        "p99": 820,
+        "max": 820,
+        "maximumRow": {
+          "observedAtMs": 1793018479427,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 820,
+          "connection": 50,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018478607,
+            "endedAtMs": 1793018479427
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn36",
+        "count": 2,
+        "min": 175,
+        "p50": 175,
+        "p95": 787,
+        "p99": 787,
+        "max": 787,
+        "maximumRow": {
+          "observedAtMs": 1793018480124,
+          "stage": "runtime_tick.execute",
+          "durationMs": 787,
+          "connection": 36,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479337,
+            "endedAtMs": 1793018480124
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn3",
+        "count": 1,
+        "min": 761,
+        "p50": 761,
+        "p95": 761,
+        "p99": 761,
+        "max": 761,
+        "maximumRow": {
+          "observedAtMs": 1793018479881,
+          "stage": "runtime_tick.execute",
+          "durationMs": 761,
+          "connection": 3,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479120,
+            "endedAtMs": 1793018479881
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn3",
+        "count": 2,
+        "min": 323,
+        "p50": 323,
+        "p95": 734,
+        "p99": 734,
+        "max": 734,
+        "maximumRow": {
+          "observedAtMs": 1793018479881,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 734,
+          "connection": 3,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479147,
+            "endedAtMs": 1793018479881
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn4",
+        "count": 2,
+        "min": 205,
+        "p50": 205,
+        "p95": 707,
+        "p99": 707,
+        "max": 707,
+        "maximumRow": {
+          "observedAtMs": 1793018480047,
+          "stage": "runtime_tick.execute",
+          "durationMs": 707,
+          "connection": 4,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479340,
+            "endedAtMs": 1793018480047
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn15",
+        "count": 1,
+        "min": 705,
+        "p50": 705,
+        "p95": 705,
+        "p99": 705,
+        "max": 705,
+        "maximumRow": {
+          "observedAtMs": 1793018479767,
+          "stage": "runtime_tick.execute",
+          "durationMs": 705,
+          "connection": 15,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479062,
+            "endedAtMs": 1793018479767
+          }
+        }
+      },
+      {
+        "key": "runtime_tick.execute/conn41",
+        "count": 3,
+        "min": 286,
+        "p50": 454,
+        "p95": 698,
+        "p99": 698,
+        "max": 698,
+        "maximumRow": {
+          "observedAtMs": 1793018480774,
+          "stage": "runtime_tick.execute",
+          "durationMs": 698,
+          "connection": 41,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018480076,
+            "endedAtMs": 1793018480774
+          }
+        }
+      },
+      {
+        "key": "serial_gate.zone_outbound_wait/conn15",
+        "count": 1,
+        "min": 687,
+        "p50": 687,
+        "p95": 687,
+        "p99": 687,
+        "max": 687,
+        "maximumRow": {
+          "observedAtMs": 1793018479767,
+          "stage": "serial_gate.zone_outbound_wait",
+          "durationMs": 687,
+          "connection": 15,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479080,
+            "endedAtMs": 1793018479767
+          }
+        }
+      }
+    ]
+  },
+  "store": {
+    "receivedInWindowCount": 89,
+    "receivedInWindowByOperationStage": [
+      {
+        "key": "guild_lookup/account_store.store_wait",
+        "count": 44,
+        "min": 50,
+        "p50": 92,
+        "p95": 153,
+        "p99": 212,
+        "max": 212,
+        "maximumRow": {
+          "observedAtMs": 1793018479532,
+          "stage": "account_store.store_wait",
+          "durationMs": 212,
+          "operation": "guild_lookup",
+          "traceId": 94919,
+          "startedUnixMs": 1793018479321,
+          "maxStartUs": 0,
+          "maxEndUs": 212113,
+          "samples": 1,
+          "totalUs": 212113,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479320,
+            "endedAtMs": 1793018479532
+          },
+          "producerMaxOccurrenceApproximateInterval": {
+            "startedAtMs": 1793018479321,
+            "endedAtMs": 1793018479533.113
+          }
+        }
+      },
+      {
+        "key": "experience_admission/account_store.store_wait",
+        "count": 45,
+        "min": 50,
+        "p50": 87,
+        "p95": 140,
+        "p99": 153,
+        "max": 153,
+        "maximumRow": {
+          "observedAtMs": 1793018480074,
+          "stage": "account_store.store_wait",
+          "durationMs": 153,
+          "operation": "experience_admission",
+          "traceId": 95053,
+          "startedUnixMs": 1793018479907,
+          "maxStartUs": 0,
+          "maxEndUs": 153987,
+          "samples": 1,
+          "totalUs": 153986,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479921,
+            "endedAtMs": 1793018480074
+          },
+          "producerMaxOccurrenceApproximateInterval": {
+            "startedAtMs": 1793018479907,
+            "endedAtMs": 1793018480060.987
+          }
+        }
+      }
+    ],
+    "proxyOverlapCount": 89,
+    "proxyOverlapByOperationStage": [
+      {
+        "key": "guild_lookup/account_store.store_wait",
+        "count": 44,
+        "min": 50,
+        "p50": 92,
+        "p95": 153,
+        "p99": 212,
+        "max": 212,
+        "maximumRow": {
+          "observedAtMs": 1793018479532,
+          "stage": "account_store.store_wait",
+          "durationMs": 212,
+          "operation": "guild_lookup",
+          "traceId": 94919,
+          "startedUnixMs": 1793018479321,
+          "maxStartUs": 0,
+          "maxEndUs": 212113,
+          "samples": 1,
+          "totalUs": 212113,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479320,
+            "endedAtMs": 1793018479532
+          },
+          "producerMaxOccurrenceApproximateInterval": {
+            "startedAtMs": 1793018479321,
+            "endedAtMs": 1793018479533.113
+          }
+        }
+      },
+      {
+        "key": "experience_admission/account_store.store_wait",
+        "count": 45,
+        "min": 50,
+        "p50": 87,
+        "p95": 140,
+        "p99": 153,
+        "max": 153,
+        "maximumRow": {
+          "observedAtMs": 1793018480074,
+          "stage": "account_store.store_wait",
+          "durationMs": 153,
+          "operation": "experience_admission",
+          "traceId": 95053,
+          "startedUnixMs": 1793018479907,
+          "maxStartUs": 0,
+          "maxEndUs": 153987,
+          "samples": 1,
+          "totalUs": 153986,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479921,
+            "endedAtMs": 1793018480074
+          },
+          "producerMaxOccurrenceApproximateInterval": {
+            "startedAtMs": 1793018479907,
+            "endedAtMs": 1793018480060.987
+          }
+        }
+      }
+    ],
+    "producerMaxOccurrenceOverlapCount": 89,
+    "producerMaxOccurrenceOverlapByOperationStage": [
+      {
+        "key": "guild_lookup/account_store.store_wait",
+        "count": 44,
+        "min": 50,
+        "p50": 92,
+        "p95": 153,
+        "p99": 212,
+        "max": 212,
+        "maximumRow": {
+          "observedAtMs": 1793018479532,
+          "stage": "account_store.store_wait",
+          "durationMs": 212,
+          "operation": "guild_lookup",
+          "traceId": 94919,
+          "startedUnixMs": 1793018479321,
+          "maxStartUs": 0,
+          "maxEndUs": 212113,
+          "samples": 1,
+          "totalUs": 212113,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479320,
+            "endedAtMs": 1793018479532
+          },
+          "producerMaxOccurrenceApproximateInterval": {
+            "startedAtMs": 1793018479321,
+            "endedAtMs": 1793018479533.113
+          }
+        }
+      },
+      {
+        "key": "experience_admission/account_store.store_wait",
+        "count": 45,
+        "min": 50,
+        "p50": 87,
+        "p95": 140,
+        "p99": 153,
+        "max": 153,
+        "maximumRow": {
+          "observedAtMs": 1793018480074,
+          "stage": "account_store.store_wait",
+          "durationMs": 153,
+          "operation": "experience_admission",
+          "traceId": 95053,
+          "startedUnixMs": 1793018479907,
+          "maxStartUs": 0,
+          "maxEndUs": 153987,
+          "samples": 1,
+          "totalUs": 153986,
+          "receiveMinusDurationProxy": {
+            "startedAtMs": 1793018479921,
+            "endedAtMs": 1793018480074
+          },
+          "producerMaxOccurrenceApproximateInterval": {
+            "startedAtMs": 1793018479907,
+            "endedAtMs": 1793018480060.987
+          }
+        }
+      }
+    ]
+  },
+  "limits": [
+    "Public connection tags are opaque and are not mapped to the failing actors or AOI pair.",
+    "These >=50ms completed diagnostics cannot exclude incomplete waits, subthreshold work, omitted instrumentation, or server/send/capture scheduling delay.",
+    "Nested runtime/outbound/Store rows overlap and cannot be summed into a causal latency budget.",
+    "This selection can guide precise instrumentation or lock-scope review but does not establish that any selected row delayed the specific Remove or justify bypassing state ordering."
+  ],
+  "verdict": {
+    "selectionCompleteFromExistingMemory": true,
+    "rootCauseProven": false,
+    "capacityAccepted": false
+  }
+}

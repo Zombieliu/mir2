@@ -1,0 +1,38 @@
+{
+  "evidenceKind": "external QA wallet native address-balance gas fix validation",
+  "observedAtUtc": "2026-10-28T20:47:34.385Z",
+  "helperPath": "C:/mir2-build/sui-usdc-recharge-20261029/real-payment/qa-wallet.mjs",
+  "helperSha256": "65b111f611840a86631f8ec1b2aa1b1adbac8fc99b7d5ee32be7e6addfd12cb2",
+  "tests": {
+    "command": "node --test C:/mir2-build/sui-usdc-recharge-20261029/real-payment/address-gas.test.mjs",
+    "pass": 25,
+    "fail": 0,
+    "sourceSha256": "f18781d820936debf451bc9c8ba5a6dae511bb69a9b34bacd9f917342a4ff7ef",
+    "scope": "External helper only; separate from product Node22/Move14"
+  },
+  "unsignedBuildEvidence": "C:/mir2-build/sui-usdc-recharge-20261029/real-payment/evidence/address-gas-unsigned-build-2026-10-28T20-47-20-611Z.json",
+  "preservedGuards": [
+    "exact fresh canonical DRIVER.buildPay JSON equality",
+    "frozen order and invoice terms",
+    "one immutable signed payment digest",
+    "wallet owner and gas budget50m",
+    "full Testnet genesis and ValidDuring nonce",
+    "no arbitrary empty gas payment",
+    "no client private keys"
+  ],
+  "noKeyLoadedByValidation": true,
+  "noSignatureOrBroadcast": true,
+  "noNewOrder": true,
+  "issuerBudgetMigrationReview": {
+    "currentMaxLifetimeBudgetMist": "50000000",
+    "currentReservedMist": "50000000",
+    "currentDigests": [
+      "7X3c28NTZuPC58qv6vCw6P83qKQgsepEfGe12cvGfKVs"
+    ],
+    "envOnlyIncreaseFails": "usdcGasLedgerDomainMismatch",
+    "reviewedProposedMaximumMist": "100000000",
+    "requires": "Stop worker, exclusive same-path .lock, backup exact old ledger and SHA, preserve every reservation and all other domain fields, reviewed max-only durable atomic replacement, matching env and public operator audit. No reset or migration was performed.",
+    "proposedSetupPlusInvoiceReservedMist": "240000000",
+    "proposedOverallCapMist": "250000000"
+  }
+}

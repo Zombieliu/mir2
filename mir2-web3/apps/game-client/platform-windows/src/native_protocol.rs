@@ -32,6 +32,10 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    Procurement {
+        #[serde(flatten)]
+        request: mir2_protocol::procurement::ProcurementRequest,
+    },
     DepositRefineItem {
         from: i32,
         to: i32,
@@ -155,6 +159,16 @@ pub enum NativeOutboundCommand {
         request_id: u64,
     },
     BillingCheckout {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        #[serde(rename = "offerId")]
+        offer_id: String,
+        #[serde(rename = "orderRequestId")]
+        order_request_id: String,
+        #[serde(rename = "requestId")]
+        request_id: u64,
+    },
+    BillingUsdcCheckout {
         #[serde(rename = "characterIndex")]
         character_index: i32,
         #[serde(rename = "offerId")]
@@ -688,6 +702,7 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::Procurement { .. } => "procurement",
             Self::DepositRefineItem { .. } => "depositRefineItem",
             Self::RetrieveRefineItem { .. } => "retrieveRefineItem",
             Self::RefineCancel => "refineCancel",
@@ -719,6 +734,7 @@ impl NativeOutboundCommand {
             Self::ClientVersion => "clientVersion",
             Self::BillingStatus { .. } => "billingStatus",
             Self::BillingCheckout { .. } => "billingCheckout",
+            Self::BillingUsdcCheckout { .. } => "billingUsdcCheckout",
             Self::BillingBuyMonthlyCard { .. } => "billingBuyMonthlyCard",
             Self::BillingActivateMonthlyCard { .. } => "billingActivateMonthlyCard",
             Self::MonthlyCardStatus => "monthlyCardStatus",
@@ -1044,6 +1060,7 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    Procurement(mir2_protocol::procurement::ProcurementReply),
     Billing(mir2_client_bevy::native_billing::BillingReply),
     MonthlyCard(mir2_client_bevy::native_monthly_card::MonthlyCardReply),
     Packet(PacketEvent),
@@ -1104,6 +1121,9 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "procurement" => serde_json::from_value(payload)
+            .map(InboundEvent::Procurement)
+            .map_err(|_| ParseInboundError::InvalidJson("invalid procurement response".into())),
         "billing" => serde_json::from_value(payload)
             .map(InboundEvent::Billing)
             .map_err(|_| ParseInboundError::InvalidJson("invalid billing response".into())),
@@ -1565,6 +1585,22 @@ fn coerce_u64(value: Option<&Value>) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     #[test]
+    fn procurement_uses_exact_typed_shared_json_contract() {
+        use mir2_protocol::procurement::*;
+        let command = super::NativeOutboundCommand::Procurement { request: ProcurementRequest {
+            protocol_version: PROTOCOL_VERSION, request_id: "stable-test-request".into(), character_index: 0,
+            action: ProcurementAction::Status { npc_object_id: 12 },
+        }};
+        assert_eq!(command.to_wire_json(), serde_json::json!({"type":"procurement","protocolVersion":1,
+            "requestId":"stable-test-request","characterIndex":0,"action":{"kind":"status","npcObjectId":12}}));
+        let json = serde_json::to_string(&serde_json::json!({"type":"procurement","payload":{
+            "protocolVersion":1,"requestId":"stable-test-request","characterIndex":0,
+            "status":null,"quote":null,"error":null,"replayed":false}})).unwrap();
+        let super::InboundEvent::Procurement(reply) = super::parse_inbound_event(&json).unwrap() else { panic!("typed response"); };
+        assert_eq!(reply.request_id,"stable-test-request");
+        assert!(super::parse_inbound_event(r#"{"type":"procurement","payload":{"unexpected":true}}"#).is_err());
+    }
+    #[test]
     fn ranking_and_inspect_use_ordinary_exact_wire_commands() {
         assert_eq!(
             super::NativeOutboundCommand::GetRanking {
@@ -1596,6 +1632,11 @@ mod tests {
 
     #[test]
     fn billing_commands_use_only_server_owned_account_and_offer_identity() {
+        assert_serialized(
+            NativeOutboundCommand::BillingUsdcCheckout { character_index:7, offer_id:"usdc-small".into(),
+                order_request_id:"native-stable-usdc-order".into(), request_id:15 },
+            serde_json::json!({"type":"billingUsdcCheckout","characterIndex":7,"offerId":"usdc-small","orderRequestId":"native-stable-usdc-order","requestId":15}),
+        );
         assert_serialized(
             NativeOutboundCommand::BillingStatus {
                 character_index: 7,

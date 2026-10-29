@@ -49,20 +49,32 @@ pub(super) struct PublicationGuard<'a> {
 impl PublicationGuard<'_> {
     /// Only call after all stores have committed, or a definite failure has been
     /// fully compensated. An unknown outcome must never use this method.
-    pub fn settle(mut self) -> Result<(), String> {
+    pub fn settle(self) -> Result<(), String> {
+        self.settle_with_diagnostics(None)
+    }
+
+    pub(super) fn settle_with_diagnostics(
+        mut self,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<(), String> {
+        let marker_wait = diagnostics.map(|record| record.span(DiagnosticStage::MarkerWait));
         let _marker = self
             .authority
             .marker_lock
             .lock()
             .map_err(|_| "publication marker mutex poisoned")?;
+        drop(marker_wait);
+        let state_wait = diagnostics.map(|record| record.span(DiagnosticStage::MarkerStateWait));
         let state = self
             .authority
             .write_state
             .lock()
             .map_err(|_| "publication write state poisoned")?;
+        drop(state_wait);
         if let AccountStoreWriteState::Frozen { reason } = &*state {
             return Err(format!("cannot settle frozen publication: {reason}"));
         }
+        let _settle_sync = diagnostics.map(|record| record.span(DiagnosticStage::MarkerSettleSync));
         if let Err(error) = self
             .authority
             ._writer_lock
@@ -217,14 +229,24 @@ impl FileAuthority {
     }
     /// Caller holds the shared persist mutex throughout the complete operation.
     pub fn begin_publication(&self) -> Result<PublicationGuard<'_>, String> {
+        self.begin_publication_with_diagnostics(None)
+    }
+
+    pub(super) fn begin_publication_with_diagnostics(
+        &self,
+        diagnostics: Option<&DiagnosticRecord>,
+    ) -> Result<PublicationGuard<'_>, String> {
         use std::io::{Seek, SeekFrom, Write};
+        let marker_wait = diagnostics.map(|record| record.span(DiagnosticStage::MarkerWait));
         let _marker = self
             .marker_lock
             .lock()
             .map_err(|_| "publication marker mutex poisoned")?;
-        if let AccountStoreWriteState::Frozen { reason } = &*self
-            .write_state
-            .lock()
+        drop(marker_wait);
+        if let AccountStoreWriteState::Frozen { reason } =
+            &*diagnostic_measure(diagnostics, DiagnosticStage::MarkerStateWait, || {
+                self.write_state.lock()
+            })
             .map_err(|_| "publication write state poisoned")?
         {
             return Err(format!("publication is frozen: {reason}"));
@@ -238,6 +260,7 @@ impl FileAuthority {
         {
             return Err("publication marker is already present; reconciliation required".into());
         }
+        let _begin_sync = diagnostics.map(|record| record.span(DiagnosticStage::MarkerBeginSync));
         let mut file = &self._writer_lock;
         file.seek(SeekFrom::Start(0))
             .and_then(|_| file.write_all(b"PENDING PUBLICATION\n"))

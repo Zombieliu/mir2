@@ -1,0 +1,11 @@
+file:///C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/diagnose-failure.mjs:14
+for(const[a,b]of mutations){if(counted.split(a).length!==2)throw new Error('Unexpected original navigation source shape for counted-only adapter');counted=counted.replace(a,b);}
+                                                                 ^
+
+Error: Unexpected original navigation source shape for counted-only adapter
+    at file:///C:/mir2-build/p01-completion-20261024/partition-span2-compact-halo-repair-v1/diagnose-failure.mjs:14:66
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:647:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.18.0

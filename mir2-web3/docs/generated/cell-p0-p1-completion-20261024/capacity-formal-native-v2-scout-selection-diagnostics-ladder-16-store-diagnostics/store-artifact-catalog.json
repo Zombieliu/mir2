@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-26T03:15:48.964Z",
+  "dataset": "account-store",
+  "runId": "1792981760951-0079fde7",
+  "sourceIdentity": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "storeOnly": true,
+    "manifest": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-diagnostics-v1\\source-freeze-v1.json",
+      "bytes": 4628,
+      "sha256": "632e875bd2d56299009411d6d22ee8912eed3f15c3d26f8b95466be2bd22f9cb"
+    },
+    "review": {
+      "file": "C:\\mir2-build\\p01-completion-20261024\\account-store-slow-stage-independent-review-v1\\review-v1.json",
+      "bytes": 6459,
+      "sha256": "54a9c1a27336537d0232b6f8b76ac18f92ef76f8064899b2a253f78d68eefb68"
+    },
+    "sourceSha256": "8db992f5b7246f585d0158a914e616bbf9397421b66d92f27b350444b1939c8c",
+    "helperSha256": "6cde67571184692d7b89da32adb21fb2f8a228db5e0865cb9cc96bf3a34925c7",
+    "validatorSha256": "d71add02703a84acc2d870d5c7daf96dd17e0533b2d49af0480e55dea7aea262",
+    "separateFromBaseThreeFourSeven": true,
+    "contributesToGameAcceptance": false
+  },
+  "backendSourceCommit": "c743122af05faca43d9535d8c6c2a4bfb01b924f",
+  "driverSourceCommit": "b5374083d257d375437af3de42bead159cd2b917",
+  "backendInputCount": 50,
+  "gatewaySha256": "dae1f873878ee5212e8d84cd57cb9cc737104aaec8a644c4aeb33a49980d82cc",
+  "originalReportOk": false,
+  "originalCapacityAccepted": false,
+  "gameplayVerdictModified": false,
+  "contributesToGameAcceptance": false,
+  "diagnosticComplete": true,
+  "validation": {
+    "schemaVersion": 1,
+    "dataset": "account-store",
+    "complete": true,
+    "formatValid": true,
+    "captureComplete": true,
+    "countsMatch": true,
+    "readEnded": true,
+    "reasons": [],
+    "captureReasons": [],
+    "rows": 107,
+    "validRows": 107,
+    "bytes": 23371,
+    "sha256": "f4312abf01cd24d69e45063d4d30bed7f57d7beb7d604019b96ea50da71f6fb4",
+    "rowsByStage": {
+      "account_store.writable_wait": 0,
+      "account_store.persist_wait": 0,
+      "account_store.store_wait": 88,
+      "account_store.store_held": 9,
+      "account_store.file_writer_wait": 0,
+      "account_store.serialize": 0,
+      "account_store.temp_write_sync": 1,
+      "account_store.atomic_replace": 0,
+      "account_store.marker_wait": 0,
+      "account_store.marker_state_wait": 0,
+      "account_store.marker_begin_sync": 8,
+      "account_store.marker_settle_sync": 0,
+      "account_store.driver_wait": 0,
+      "account_store.driver_held": 1
+    },
+    "rowsByOperation": {
+      "experience_admission": 10,
+      "guild_lookup": 78,
+      "save": 0,
+      "transaction": 16,
+      "guild_clock": 3
+    },
+    "scope": "Independent completed account-store scalar projection only. Queued callback counts are compared with actual ended JSONL; they are not durable proof alone. Completeness is diagnostic only, never game acceptance, ACK credit, a holder/deadlock diagnosis, or proof of absence."
+  },
+  "copies": [
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\store-stage-public-status.json",
+        "bytes": 2598,
+        "sha256": "90fbaff3cbbd094ba72aa22a1f18b70c67769685cb28559a6e4e5c44e570448d"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-selection-diagnostics-ladder-16-store-diagnostics\\store-stage-public-status.json",
+        "bytes": 2598,
+        "sha256": "90fbaff3cbbd094ba72aa22a1f18b70c67769685cb28559a6e4e5c44e570448d"
+      }
+    },
+    {
+      "source": {
+        "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-v2-scout-selection-diagnostics-ladder-16\\store-stage-public.jsonl",
+        "bytes": 23371,
+        "sha256": "f4312abf01cd24d69e45063d4d30bed7f57d7beb7d604019b96ea50da71f6fb4"
+      },
+      "destination": {
+        "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-selection-diagnostics-ladder-16-store-diagnostics\\store-stage-public.jsonl",
+        "bytes": 23371,
+        "sha256": "f4312abf01cd24d69e45063d4d30bed7f57d7beb7d604019b96ea50da71f6fb4"
+      }
+    }
+  ],
+  "baseCatalog": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-selection-diagnostics-ladder-16\\collect-formal-native-v2-scout-selection-diagnostics-ladder-16-public-artifact-catalog.json",
+    "bytes": 69934,
+    "sha256": "7a611626ba7b8c5b66663b2dc4e86b5693f47e0fc996832d8c8a8886e3be239c"
+  },
+  "baseVerification": {
+    "file": "C:\\Users\\Administrator\\.codex\\worktrees\\cell-preproduction-p0-p1\\mir2-player-journey\\mir2-web3\\docs\\generated\\cell-p0-p1-completion-20261024\\capacity-formal-native-v2-scout-selection-diagnostics-ladder-16\\public-verification.json",
+    "bytes": 7114,
+    "sha256": "1fc6a86b8f686fff233737fad4366c082fb76f53fb4ebe79a77b64ae0089af8f"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25T01:32:21.087Z",
+  "operation": "Read-only actual formal06 gate invocation; no preparation/seed/service/realm",
+  "gateRejected": true,
+  "reason": "Real coordinated probe09 has not passed; a probe remains ineligible for capacity acceptance",
+  "rejectionReachedOriginalFailedReport": true,
+  "rejectedForSourceOrSchema": false,
+  "originalError": "Actor L26466205 died or lost presence; no automatic resurrection",
+  "runId": "1792891029840-02155527",
+  "report": {
+    "file": "C:\\mir2-build\\p01-completion-20261024\\release-native-10-v2-halo-feasibility-09\\reports\\1792891029840-02155527.report.json",
+    "bytes": 75433,
+    "sha256": "1cb07e72c7341b1d200c3145e4799604c0737c4a59c38f48ebf7100046106819"
+  },
+  "backendSourceCommit": "46880bd1ef415131c4cf85aeb4dd2fa4f6fd4f9b",
+  "backendInputCount": 41,
+  "binarySha256": "a43078b05e70b480f948fee505e23d2757ce1ae20fdc1f22b2348df46ee7125d",
+  "driverSourceCommit": "30ba328ad3d1b1eb46e51540cb1880d66eba3ee1",
+  "driverSourceSha256": "72005514809dd480a015ee5414b14f60fe6264f10e35a7b825a6dc5e35e85c82",
+  "prepareExecuted": false,
+  "realmStarted": false,
+  "capacityAccepted": false
+}
