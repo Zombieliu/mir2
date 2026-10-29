@@ -20,7 +20,7 @@ fn usdc_runtime_gate_checks_all_markers_and_normalizes_production_aliases() {
             let mut markers = [Some("development".into()), Some("test".into()), None];
             markers[slot] = Some(format!("  {}\t", alias.to_ascii_uppercase()));
             assert_eq!(
-                validate_testnet_runtime(markers.map(Ok)).unwrap_err(),
+                validate_testnet_runtime(markers.map(Ok), Ok(None)).unwrap_err(),
                 "usdcTestnetConfigurationRequired",
                 "alias {alias}, marker {slot}"
             );
@@ -29,7 +29,7 @@ fn usdc_runtime_gate_checks_all_markers_and_normalizes_production_aliases() {
 }
 #[test]
 fn usdc_runtime_gate_accepts_absent_and_explicit_local_test_markers() {
-    assert!(validate_testnet_runtime([Ok(None), Ok(None), Ok(None)]).is_ok());
+    assert!(validate_testnet_runtime([Ok(None), Ok(None), Ok(None)], Ok(None)).is_ok());
     for value in [
         "development",
         "dev",
@@ -38,18 +38,104 @@ fn usdc_runtime_gate_accepts_absent_and_explicit_local_test_markers() {
         "local",
         " \t",
     ] {
-        assert!(validate_testnet_runtime([Ok(Some(value.into())), Ok(None), Ok(None)]).is_ok());
+        assert!(
+            validate_testnet_runtime([Ok(Some(value.into())), Ok(None), Ok(None)], Ok(None))
+                .is_ok()
+        );
     }
 }
 #[test]
 fn usdc_runtime_gate_fails_closed_on_unreadable_marker_and_conflicting_aliases() {
-    assert!(validate_testnet_runtime([Ok(Some("development".into())), Err(()), Ok(None)]).is_err());
-    assert!(validate_testnet_runtime([
-        Ok(Some("test".into())),
-        Ok(Some("stage".into())),
-        Ok(Some("development".into()))
-    ])
+    assert!(validate_testnet_runtime(
+        [Ok(Some("development".into())), Err(()), Ok(None)],
+        Ok(None)
+    )
     .is_err());
+    assert!(validate_testnet_runtime(
+        [
+            Ok(Some("test".into())),
+            Ok(Some("stage".into())),
+            Ok(Some("development".into()))
+        ],
+        Ok(None)
+    )
+    .is_err());
+}
+#[test]
+fn usdc_playtest_opt_in_allows_only_staging_aliases_and_never_production() {
+    for enabled in [None, Some("0"), Some("false"), Some("1"), Some("true")] {
+        for alias in [
+            "staging",
+            "stage",
+            "preprod",
+            "preproduction",
+            "production",
+            "prod",
+        ] {
+            for slot in 0..3 {
+                let mut markers = [Some("development".into()), None, Some("test".into())];
+                markers[slot] = Some(format!(" \t{}  ", alias.to_ascii_uppercase()));
+                let expected = matches!(enabled, Some("1" | "true"))
+                    && !matches!(alias, "production" | "prod");
+                assert_eq!(
+                    validate_testnet_runtime(markers.map(Ok), Ok(enabled.map(str::to_owned)))
+                        .is_ok(),
+                    expected,
+                    "flag {enabled:?}, alias {alias}, marker {slot}"
+                );
+            }
+        }
+    }
+    assert!(validate_testnet_runtime(
+        [
+            Ok(Some("staging".into())),
+            Ok(Some("production".into())),
+            Ok(Some("test".into()))
+        ],
+        Ok(Some("1".into()))
+    )
+    .is_err());
+}
+#[test]
+fn usdc_playtest_flag_and_unreadable_markers_fail_closed() {
+    for value in ["", "yes", "TRUE", "FALSE", " 1", "true ", "2"] {
+        assert!(
+            validate_testnet_runtime([Ok(None), Ok(None), Ok(None)], Ok(Some(value.into())))
+                .is_err()
+        );
+    }
+    assert!(validate_testnet_runtime([Ok(None), Ok(None), Ok(None)], Err(())).is_err());
+    for slot in 0..3 {
+        let mut markers = [Ok(Some("staging".into())), Ok(None), Ok(None)];
+        markers[slot] = Err(());
+        assert!(validate_testnet_runtime(markers, Ok(Some("true".into()))).is_err());
+    }
+}
+#[test]
+fn usdc_playtest_opt_in_does_not_authorize_another_network_or_asset() {
+    assert!(validate_testnet_runtime(
+        [Ok(Some("unknown".into())), Ok(None), Ok(None)],
+        Ok(Some("1".into()))
+    )
+    .is_ok());
+    let config = json!({"enabled":true,"environmentTag":"isolated-test","network":"testnet",
+        "chainIdentifier":TESTNET_CHAIN_IDENTIFIER,"coinType":TESTNET_USDC_COIN_TYPE});
+    assert!(validate_testnet_driver_config(&config).is_ok());
+    for (field, invalid) in [
+        ("network", "mainnet"),
+        ("network", "localnet"),
+        ("network", "unknown"),
+        ("chainIdentifier", "35834a8a"),
+        ("coinType", "0x2::sui::SUI"),
+        ("environmentTag", "production"),
+    ] {
+        let mut other = config.clone();
+        other[field] = invalid.into();
+        assert!(
+            validate_testnet_driver_config(&other).is_err(),
+            "{field}={invalid}"
+        );
+    }
 }
 fn address(c: char) -> String {
     format!("0x{}", c.to_string().repeat(64))

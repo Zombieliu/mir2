@@ -56,22 +56,37 @@ fn flag(value: Option<&str>) -> Result<bool, String> {
         _ => Err("usdcConfigurationInvalid".into()),
     }
 }
-/// All deployment markers participate: an explicit production-like marker
-/// cannot be overridden by another marker saying development or by disabling
-/// new sales. Unreadable environment values cannot authorize test payments.
+/// Public playtest opt-in permits staging only. Production and unreadable
+/// markers always fail closed, including when only recovering existing orders.
 fn validate_testnet_runtime(
     markers: impl IntoIterator<Item = Result<Option<String>, ()>>,
+    playtest_testnet: Result<Option<String>, ()>,
 ) -> Result<(), String> {
+    let playtest_testnet = flag(
+        playtest_testnet
+            .map_err(|_| "usdcTestnetConfigurationRequired")?
+            .as_deref(),
+    )?;
     for marker in markers {
         let value = marker.map_err(|_| "usdcTestnetConfigurationRequired")?;
-        if value.is_some_and(|value| {
-            matches!(
-                value.trim().to_ascii_lowercase().as_str(),
-                "production" | "prod" | "staging" | "stage" | "preprod" | "preproduction"
-            )
+        if value.is_some_and(|value| match value.trim().to_ascii_lowercase().as_str() {
+            "production" | "prod" => true,
+            "staging" | "stage" | "preprod" | "preproduction" => !playtest_testnet,
+            _ => false,
         }) {
             return Err("usdcTestnetConfigurationRequired".into());
         }
+    }
+    Ok(())
+}
+fn validate_testnet_driver_config(config: &Value) -> Result<(), String> {
+    if config["enabled"] != true
+        || config["environmentTag"] != "isolated-test"
+        || config["network"] != "testnet"
+        || config["chainIdentifier"] != TESTNET_CHAIN_IDENTIFIER
+        || config["coinType"] != TESTNET_USDC_COIN_TYPE
+    {
+        return Err("usdcTestnetConfigurationRequired".into());
     }
     Ok(())
 }
@@ -227,20 +242,18 @@ impl UsdcBilling {
                     Err(std::env::VarError::NotPresent) => Ok(None),
                     Err(std::env::VarError::NotUnicode(_)) => Err(()),
                 }),
+            match std::env::var("MIR2_PLAYTEST_TESTNET") {
+                Ok(value) => Ok(Some(value)),
+                Err(std::env::VarError::NotPresent) => Ok(None),
+                Err(std::env::VarError::NotUnicode(_)) => Err(()),
+            },
         )?;
         let bytes = std::fs::read(config_path).map_err(|_| "usdcConfigurationMissing")?;
         if bytes.len() > 64 * 1024 {
             return Err("usdcConfigurationInvalid".into());
         }
         let c: Value = serde_json::from_slice(&bytes).map_err(|_| "usdcConfigurationInvalid")?;
-        if c["enabled"] != true
-            || c["environmentTag"] != "isolated-test"
-            || c["network"] != "testnet"
-            || c["chainIdentifier"] != TESTNET_CHAIN_IDENTIFIER
-            || c["coinType"] != TESTNET_USDC_COIN_TYPE
-        {
-            return Err("usdcTestnetConfigurationRequired".into());
-        }
+        validate_testnet_driver_config(&c)?;
         let rule_version = std::env::var("MIR2_SUI_USDC_RULE_VERSION")
             .unwrap_or("1".into())
             .parse::<u64>()
