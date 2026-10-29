@@ -106,7 +106,7 @@ test("test gameplay is selected only by the explicit route, not by a crafted URL
 test("all nine billing locales are complete and no-role view offers the explicit test game", () => {
   const copies = load("../app/promotions/promotion-copy.ts");
   const model = load("../app/promotions/promotion-model.ts");
-  const billing = load("../app/promotions/promotion-billing.tsx", { require: spec => spec === "./promotion-model" ? model : spec.endsWith(".module.css") ?
+  const billing = load("../app/promotions/promotion-billing.tsx", { require: spec => spec === "./promotion-model" ? model : spec === "./promotion-checkout-recovery" ? load("../app/promotions/promotion-checkout-recovery.ts") : spec.endsWith(".module.css") ?
     { default: new Proxy({}, { get: (_, name) => String(name) }) } : require(spec) });
   for (const [locale] of copies.PROMOTION_LANGUAGES) {
     assert.equal(billing.PROMOTION_BILLING_LABELS[locale].length, 9);

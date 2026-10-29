@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PromotionCopy, PromotionLocale } from "./promotion-copy";
 import { formatPromotionUsd, promotionRequest, type PromotionBootstrap } from "./promotion-model";
 import styles from "./promotion.module.css";
+import { prepareCheckoutIntent, recoverCheckoutIntents, type CheckoutIntent, type CheckoutOrder } from "./promotion-checkout-recovery";
 
 // Order: title, recharge, buy, activate, open, credits, review, offline, play.
 export const PROMOTION_BILLING_LABELS = {
@@ -17,48 +18,86 @@ export const PROMOTION_BILLING_LABELS = {
   ar: ["الشحن والعضوية", "الشحن بعملة USDC التجريبية", "شراء بطاقة شهرية", "تفعيل البطاقة الشهرية", "فتح الدفع بالمحفظة", "الرصيد", "راجعت السعر بالنقاط وأريد شراء هذه البطاقة لمدة 30 يومًا.", "اخرج من اللعبة قبل الشراء أو التفعيل هنا. حدّث النتيجة غير المؤكدة قبل إعادة المحاولة.", "دخول اللعبة التجريبية"],
 } as const;
 
+const RECOVERY_LABELS = {
+  en: ["Continue original order", "A recharge is unresolved. Continue or check its original order before starting another.", "Order result pending confirmation."],
+  "zh-Hant": ["繼續原訂單", "有充值訂單尚未確認，請繼續或查詢原訂單，再開始新的充值。", "訂單結果待確認。"],
+  "pt-BR": ["Continuar pedido original", "Há uma recarga pendente. Continue ou consulte o pedido original antes de iniciar outra.", "Resultado do pedido aguardando confirmação."],
+  ru: ["Продолжить исходный заказ", "Результат пополнения ещё не подтверждён. Проверьте исходный заказ перед новым.", "Результат заказа ожидает подтверждения."],
+  hi: ["मूल ऑर्डर जारी रखें", "एक रिचार्ज की पुष्टि बाकी है। नया रिचार्ज शुरू करने से पहले मूल ऑर्डर जारी रखें या उसकी स्थिति जाँचें।", "ऑर्डर के परिणाम की पुष्टि बाकी है।"],
+  id: ["Lanjutkan pesanan semula", "Ada isi ulang yang belum pasti. Lanjutkan atau periksa pesanan semula sebelum membuat yang baru.", "Hasil pesanan menunggu konfirmasi."],
+  vi: ["Tiếp tục đơn ban đầu", "Một lần nạp chưa được xác nhận. Tiếp tục hoặc kiểm tra đơn ban đầu trước khi tạo đơn mới.", "Kết quả đơn đang chờ xác nhận."],
+  th: ["ดำเนินการคำสั่งเดิมต่อ", "มีรายการเติมเงินที่ยังไม่ยืนยัน โปรดดำเนินการหรือตรวจสอบคำสั่งเดิมก่อนเริ่มรายการใหม่", "กำลังรอยืนยันผลคำสั่ง"],
+  ar: ["متابعة الطلب الأصلي", "هناك عملية شحن لم تُحسم. تابع الطلب الأصلي أو تحقّق منه قبل بدء طلب جديد.", "نتيجة الطلب بانتظار التأكيد."],
+} as const;
+
 type BillingStatus = { credit: number; pendingCredit: number; monthlyCardCreditPrice: number | null; suiUsdcEnabled: boolean;
   suiUsdcOffers: { id: string; label: string; credits: number; amountMicros: string }[];
   ownedMonthlyCards: { uniqueId: string; label: string }[];
-  suiUsdcOrders: { id: string; state: string; transactionDigest?: string | null }[] };
+  suiUsdcOrders: CheckoutOrder[] };
 
 export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: PromotionBootstrap; copy: PromotionCopy; locale: PromotionLocale }) {
   const labels = PROMOTION_BILLING_LABELS[locale];
+  const recoveryLabels = RECOVERY_LABELS[locale];
+  const credentialId = bootstrap.binding?.credentialId ?? "";
   const [character, setCharacter] = useState(bootstrap.characters[0]?.index ?? -1);
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [reviewed, setReviewed] = useState(false);
   const [checkout, setCheckout] = useState<string | null>(null);
+  const [recoveries, setRecoveries] = useState<CheckoutIntent[]>([]);
+  const [recoveryReady, setRecoveryReady] = useState(false);
   const keys = useRef(new Map<string, string>());
+  const operationBusy = useRef(false);
+  const context = `${credentialId}:${character}`;
+  const activeContext = useRef(context); activeContext.current = context;
   const generation = useRef(0);
   const refresh = useCallback(async (signal?: AbortSignal) => {
     const current = ++generation.current;
     try {
       const value = await promotionRequest<BillingStatus>(`billing/status?characterIndex=${character}&requestId=${Date.now()}`, { signal });
-      if (!signal?.aborted && current === generation.current) { setStatus(value); setError(false); }
+      if (!signal?.aborted && current === generation.current) {
+        setStatus(value);
+        try {
+          setRecoveries(recoverCheckoutIntents(window.sessionStorage, { credentialId, characterIndex: character }, value.suiUsdcOrders));
+          setRecoveryReady(true); setError(false);
+        } catch { setRecoveryReady(false); setError(true); }
+      }
     } catch { if (!signal?.aborted && current === generation.current) setError(true); }
-  }, [character]);
+  }, [character, credentialId]);
   useEffect(() => {
-    setStatus(null); setReviewed(false); setCheckout(null);
+    setStatus(null); setReviewed(false); setCheckout(null); setRecoveries([]); setRecoveryReady(false);
+    keys.current.clear(); operationBusy.current = false; setBusy(false);
     if (character < 0) return;
     const controller = new AbortController(); void refresh(controller.signal);
     return () => { controller.abort(); ++generation.current; };
-  }, [character, refresh]);
+  }, [character, credentialId, refresh]);
+  useEffect(() => {
+    if (!bootstrap.characters.some(value => value.index === character)) setCharacter(bootstrap.characters[0]?.index ?? -1);
+  }, [bootstrap.characters, character]);
 
-  async function mutate(operation: "refresh" | "checkout" | "buy" | "activate", fields: Record<string, unknown> = {}) {
-    if (busy || !bootstrap.csrfToken) return;
-    setBusy(true); setError(false);
+  async function mutate(operation: "refresh" | "checkout" | "buy" | "activate", fields: Record<string, unknown> = {}, originalRequestId?: string) {
+    if (operationBusy.current || !bootstrap.csrfToken) return;
+    operationBusy.current = true; setBusy(true); setError(false);
+    const requestContext = context;
     const scope = `${operation}:${character}:${JSON.stringify(fields)}`;
-    const key = keys.current.get(scope) ?? crypto.randomUUID(); keys.current.set(scope, key);
+    let key = keys.current.get(scope) ?? crypto.randomUUID();
     try {
+      if (operation === "checkout") {
+        if (!status || !recoveryReady || typeof fields.offerId !== "string") throw new Error("checkout_recovery_required");
+        const intent = prepareCheckoutIntent(window.sessionStorage, { credentialId, characterIndex: character }, status.suiUsdcOrders, fields.offerId, originalRequestId);
+        key = intent.orderRequestId;
+        setRecoveries(recoverCheckoutIntents(window.sessionStorage, { credentialId, characterIndex: character }, status.suiUsdcOrders));
+      } else { keys.current.set(scope, key); }
       const result = await promotionRequest<{ checkoutUrl?: string }>(`billing/${operation}`, { csrfToken: bootstrap.csrfToken, idempotencyKey: key,
         body: { characterIndex: character, requestId: Date.now(), ...fields, ...(["checkout", "buy"].includes(operation) ? { orderRequestId: key } : {}) } });
-      keys.current.delete(scope);
+      if (activeContext.current !== requestContext) return;
+      if (operation !== "checkout") keys.current.delete(scope);
       if (result.checkoutUrl) setCheckout(result.checkoutUrl);
       if (operation === "buy") setReviewed(false);
       await refresh();
-    } catch { setError(true); } finally { setBusy(false); }
+    } catch { if (activeContext.current === requestContext) setError(true); }
+    finally { if (activeContext.current === requestContext) { operationBusy.current = false; setBusy(false); } }
   }
   return <section className={styles.section}><h2>{labels[0]}</h2><p className={styles.notice}>{copy.testnetBody}</p>
     <a className={styles.secondary} href={`/promotions/play${bootstrap.campaign?.campaignId ? `?campaignId=${encodeURIComponent(bootstrap.campaign.campaignId)}` : ""}`}>{labels[8]} ↗</a>
@@ -68,8 +107,15 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
       </select></label><p>{labels[7]}</p>
       <button className={styles.secondary} disabled={busy} onClick={() => void mutate("refresh")}>{copy.refresh}</button>
       {status ? <><p>{labels[5]}: {status.credit} · {copy.pending}: {status.pendingCredit}</p>
-        <div className={styles.actions}>{status.suiUsdcEnabled ? status.suiUsdcOffers.map(offer => <button key={offer.id} className={styles.primary} disabled={busy} onClick={() => void mutate("checkout", { offerId: offer.id })}>
+        <div className={styles.actions}>{status.suiUsdcEnabled ? status.suiUsdcOffers.map(offer => <button key={offer.id} className={styles.primary} disabled={busy || !recoveryReady || recoveries.length > 0} onClick={() => void mutate("checkout", { offerId: offer.id })}>
           {labels[1]} · {formatPromotionUsd(offer.amountMicros, locale)} · {offer.credits} {labels[5]}</button>) : null}</div>
+        {recoveries.length > 0 ? <div role="status"><p>{recoveryLabels[1]}</p>
+          {recoveries.map(intent => <p key={`${intent.offerId}:${intent.orderRequestId}`}>
+            <span className={styles.code}>{intent.orderId || intent.orderRequestId} · {intent.state || recoveryLabels[2]}</span>{" "}
+            <button className={styles.secondary} disabled={busy || !recoveryReady || intent.state === "review"} onClick={() => void mutate("checkout", { offerId: intent.offerId }, intent.orderRequestId)}>{recoveryLabels[0]}</button>
+          </p>)}
+          <button className={styles.secondary} disabled={busy} onClick={() => void refresh()}>{copy.refresh}</button>
+        </div> : null}
         {checkout ? <p><a className={styles.primary} href={checkout} target="_blank" rel="noopener noreferrer">{labels[4]} ↗</a></p> : null}
         {status.monthlyCardCreditPrice !== null ? <><label className={styles.check}><input type="checkbox" checked={reviewed} disabled={busy} onChange={event => setReviewed(event.target.checked)} />{labels[6]} ({status.monthlyCardCreditPrice} {labels[5]})</label>
           <button className={styles.secondary} disabled={busy || !reviewed || status.credit < status.monthlyCardCreditPrice} onClick={() => void mutate("buy")}>{labels[2]}</button></> : null}
