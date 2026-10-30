@@ -1,3 +1,4 @@
+import { promotionCheckoutOrigin } from "./promotion-backend";
 import "server-only";
 import { promotionWalletNetwork } from "./promotion-wallet-context";
 import { promotionBrowserRequest, promotionCsrf, promotionError, promotionFail, promotionGateway,
@@ -55,8 +56,8 @@ export async function promotionBilling(request: Request, operation: string): Pro
     if (result.ok && operation === "checkout") {
       let checkout: URL;
       try { checkout = new URL(String(result.payload.checkoutUrl)); } catch { promotionFail(502, "invalid_checkout_response"); }
-      const configured = new URL(process.env.MIR2_PROMOTION_GATEWAY_HTTP_URL!);
-      if (checkout.origin !== configured.origin || checkout.pathname !== "/v1/billing/sui-usdc/pay" || checkout.username || checkout.password || checkout.search ||
+      const configured = promotionCheckoutOrigin();
+      if (checkout.origin !== configured || checkout.pathname !== "/v1/billing/sui-usdc/pay" || checkout.username || checkout.password || checkout.search ||
         !/^#usdc_[a-f0-9]{64}\.[A-Za-z0-9_-]{43}$/.test(checkout.hash)) promotionFail(502, "invalid_checkout_response");
     }
     return promotionJson(result.status >= 500 ? { error: "promotion_billing_unavailable" } : safe(result.payload), result.status);

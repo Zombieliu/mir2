@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { test } from "node:test";
 import vm from "node:vm";
 import ts from "typescript";
+const require = createRequire(import.meta.url);
 
 function moduleFrom(path, context = {}) {
   const source = readFileSync(new URL(path, import.meta.url), "utf8");
@@ -10,7 +12,8 @@ function moduleFrom(path, context = {}) {
     target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS,
   } }).outputText;
   const module = { exports: {} };
-  vm.runInNewContext(compiled, { module, exports: module.exports, URL, Request, Response, Headers, AbortSignal, Intl, ...context });
+  vm.runInNewContext(compiled, { module, exports: module.exports, URL, Request, Response, Headers, AbortSignal, Intl,
+    require: name => name === "../../lib/promotion-season-context" ? moduleFrom("../lib/promotion-season-context.ts") : require(name), ...context });
   return module.exports;
 }
 const model = moduleFrom("../app/promotions/promotion-model.ts");
@@ -67,8 +70,11 @@ function bootstrapFixture() {
       } };
     },
   };
-  const api = moduleFrom("../lib/server/promotion-api.ts", { process: { env: { MIR2_PROMOTION_CAMPAIGN_ID: "original-seven-day-season" } },
+  const process = { env: { MIR2_PROMOTION_CAMPAIGN_ID: "original-seven-day-season" } };
+  const backend = moduleFrom("../lib/server/promotion-backend.ts", { process, require: name => name === "server-only" ? {} : require(name) });
+  const api = moduleFrom("../lib/server/promotion-api.ts", { process,
     require: name => name === "server-only" ? {} : name === "./promotion-auth" ? auth :
+      name === "./promotion-backend" ? backend :
       name === "./promotion-wallet-context" ? { promotionWalletNetwork: () => "testnet" } : assert.fail(`unexpected module ${name}`),
   });
   return { api, calls };

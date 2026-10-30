@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { PromotionCopy } from "./promotion-copy";
 import { validatePromotionApprovalUrl } from "./promotion-model";
+import { promotionSeasonHeaders } from "../../lib/promotion-season-context";
 import styles from "./promotion.module.css";
 
 type LoginState = "creating" | "pending" | "approved" | "rejected" | "expired" | "error";
@@ -10,6 +11,7 @@ type LoginState = "creating" | "pending" | "approved" | "rejected" | "expired" |
 async function authRequest(path: string, signal: AbortSignal): Promise<Record<string, unknown>> {
   const response = await fetch(`/api/promotions/auth/${path}`, {
     method: "POST", credentials: "same-origin", cache: "no-store",
+    headers: promotionSeasonHeaders(),
     signal: AbortSignal.any([signal, AbortSignal.timeout(12_000)]),
   });
   const body: unknown = await response.json();

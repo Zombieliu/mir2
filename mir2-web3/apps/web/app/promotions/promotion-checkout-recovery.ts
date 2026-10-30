@@ -4,7 +4,7 @@ export type CheckoutOrder = {
 };
 export type CheckoutIntent = { orderRequestId: string; offerId: string; orderId?: string; state?: string };
 export type CheckoutStorage = Pick<Storage, "getItem" | "setItem" | "removeItem" | "key" | "length">;
-export type CheckoutScope = { credentialId: string; characterIndex: number };
+export type CheckoutScope = { credentialId: string; characterIndex: number; authority?: "windows" };
 const PREFIX = "numeron-promotion-recharge-intent-v1:";
 const REQUEST = /^[A-Za-z0-9_-]{16,128}$/;
 const OFFER = /^[A-Za-z0-9_-]{1,128}$/;
@@ -12,7 +12,10 @@ function prefix(scope: CheckoutScope): string {
   if (!scope.credentialId || scope.credentialId.length > 256 || !Number.isSafeInteger(scope.characterIndex) || scope.characterIndex < 0) {
     throw new Error("checkout_wallet_scope_required");
   }
-  return `${PREFIX}${encodeURIComponent(scope.credentialId)}:${scope.characterIndex}:`;
+  // Leave existing recovery keys readable; the original Windows ledger has a
+  // separate namespace even when wallet credential and character indices match.
+  if (scope.authority !== undefined && scope.authority !== "windows") throw new Error("checkout_authority_invalid");
+  return `${PREFIX}${scope.authority === "windows" ? "windows-v1:" : ""}${encodeURIComponent(scope.credentialId)}:${scope.characterIndex}:`;
 }
 function terminal(state: string): boolean { return state === "applied" || state === "expired"; }
 function valid(order: CheckoutOrder): boolean {

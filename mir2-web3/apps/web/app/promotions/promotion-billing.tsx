@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PromotionCopy, PromotionLocale } from "./promotion-copy";
 import { formatPromotionUsd, promotionRequest, type PromotionBootstrap } from "./promotion-model";
 import styles from "./promotion.module.css";
+import { PROMOTION_WINDOWS_COPY, windowsDownloadPath } from "./promotion-windows-copy";
 import { prepareCheckoutIntent, recoverCheckoutIntents, type CheckoutIntent, type CheckoutOrder } from "./promotion-checkout-recovery";
 
 // Order: title, recharge, buy, activate, open, credits, review, offline, play.
@@ -41,6 +42,7 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
   const labels = PROMOTION_BILLING_LABELS[locale];
   const recoveryLabels = RECOVERY_LABELS[locale];
   const credentialId = bootstrap.binding?.credentialId ?? "";
+  const authority = bootstrap.gameClient === "windows" ? "windows" as const : undefined;
   const [character, setCharacter] = useState(bootstrap.characters[0]?.index ?? -1);
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [busy, setBusy] = useState(false);
@@ -51,7 +53,7 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
   const [recoveryReady, setRecoveryReady] = useState(false);
   const keys = useRef(new Map<string, string>());
   const operationBusy = useRef(false);
-  const context = `${credentialId}:${character}`;
+  const context = `${authority ?? "legacy"}:${credentialId}:${character}`;
   const activeContext = useRef(context); activeContext.current = context;
   const generation = useRef(0);
   const refresh = useCallback(async (signal?: AbortSignal) => {
@@ -61,19 +63,19 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
       if (!signal?.aborted && current === generation.current) {
         setStatus(value);
         try {
-          setRecoveries(recoverCheckoutIntents(window.sessionStorage, { credentialId, characterIndex: character }, value.suiUsdcOrders));
+          setRecoveries(recoverCheckoutIntents(window.sessionStorage, { credentialId, characterIndex: character, authority }, value.suiUsdcOrders));
           setRecoveryReady(true); setError(false);
         } catch { setRecoveryReady(false); setError(true); }
       }
     } catch { if (!signal?.aborted && current === generation.current) setError(true); }
-  }, [character, credentialId]);
+  }, [character, credentialId, authority]);
   useEffect(() => {
     setStatus(null); setReviewed(false); setCheckout(null); setRecoveries([]); setRecoveryReady(false);
     keys.current.clear(); operationBusy.current = false; setBusy(false);
     if (character < 0) return;
     const controller = new AbortController(); void refresh(controller.signal);
     return () => { controller.abort(); ++generation.current; };
-  }, [character, credentialId, refresh]);
+  }, [character, credentialId, authority, refresh]);
   useEffect(() => {
     if (!bootstrap.characters.some(value => value.index === character)) setCharacter(bootstrap.characters[0]?.index ?? -1);
   }, [bootstrap.characters, character]);
@@ -87,9 +89,9 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
     try {
       if (operation === "checkout") {
         if (!status || !recoveryReady || typeof fields.offerId !== "string") throw new Error("checkout_recovery_required");
-        const intent = prepareCheckoutIntent(window.sessionStorage, { credentialId, characterIndex: character }, status.suiUsdcOrders, fields.offerId, originalRequestId);
+        const intent = prepareCheckoutIntent(window.sessionStorage, { credentialId, characterIndex: character, authority }, status.suiUsdcOrders, fields.offerId, originalRequestId);
         key = intent.orderRequestId;
-        setRecoveries(recoverCheckoutIntents(window.sessionStorage, { credentialId, characterIndex: character }, status.suiUsdcOrders));
+        setRecoveries(recoverCheckoutIntents(window.sessionStorage, { credentialId, characterIndex: character, authority }, status.suiUsdcOrders));
       } else { keys.current.set(scope, key); }
       const result = await promotionRequest<{ checkoutUrl?: string }>(`billing/${operation}`, { csrfToken: bootstrap.csrfToken, idempotencyKey: key,
         body: { characterIndex: character, requestId: Date.now(), ...fields, ...(["checkout", "buy"].includes(operation) ? { orderRequestId: key } : {}) } });
@@ -102,8 +104,9 @@ export function PromotionBilling({ bootstrap, copy, locale }: { bootstrap: Promo
     finally { if (activeContext.current === requestContext) { operationBusy.current = false; setBusy(false); } }
   }
   return <section className={styles.section}><h2>{labels[0]}</h2><p className={styles.notice}>{copy.testnetBody}</p>
-    <a className={styles.secondary} href={`/promotions/play${bootstrap.campaign?.campaignId ? `?campaignId=${encodeURIComponent(bootstrap.campaign.campaignId)}` : ""}`}>{labels[8]} ↗</a>
-    {!bootstrap.characters.length ? <p className={styles.empty}>{copy.noCharacters}</p> : <>
+    {bootstrap.gameClient === "windows" ? <a className={styles.secondary} href={windowsDownloadPath(locale)}>{PROMOTION_WINDOWS_COPY[locale].download} ↗</a> :
+      <a className={styles.secondary} href={`/promotions/play${bootstrap.campaign?.campaignId ? `?campaignId=${encodeURIComponent(bootstrap.campaign.campaignId)}` : ""}`}>{labels[8]} ↗</a>}
+    {!bootstrap.characters.length ? <p className={styles.empty}>{bootstrap.gameClient === "windows" ? PROMOTION_WINDOWS_COPY[locale].body : copy.noCharacters}</p> : <>
       <label className={styles.field}>{copy.selectCharacter}<select value={character} disabled={busy} onChange={event => setCharacter(Number(event.target.value))}>
         {bootstrap.characters.map(item => <option key={item.index} value={item.index}>{item.name} · {item.level}</option>)}
       </select></label><p>{labels[7]}</p>

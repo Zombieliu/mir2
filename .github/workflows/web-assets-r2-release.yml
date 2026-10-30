@@ -8,7 +8,7 @@ on:
         required: true
         default: context
         type: choice
-        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, backend-build]
+        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, backend-build]
       deployment_id:
         description: Exact accepted production candidate; required only for promote
         required: false
@@ -40,7 +40,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        if: startsWith(inputs.operation, 'unified-') || startsWith(inputs.operation, 'realtime-')
+        if: startsWith(inputs.operation, 'unified-') || startsWith(inputs.operation, 'realtime-') || startsWith(inputs.operation, 'windows-')
         with:
           persist-credentials: false
       - name: Stage or promote the two existing websites from one immutable source
@@ -80,8 +80,28 @@ jobs:
           path: promotion-realtime-release.json
           if-no-files-found: error
           retention-days: 14
+      - name: Configure, stage or promote the original Windows promotion bridge
+        if: startsWith(inputs.operation, 'windows-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          MIR2_PROMOTION_WINDOWS_SESSION_SECRET: ${{ secrets.MIR2_PROMOTION_WINDOWS_SESSION_SECRET }}
+          MIR2_PROMOTION_WINDOWS_WALLET_AUTH_SECRET: ${{ secrets.MIR2_PROMOTION_WINDOWS_WALLET_AUTH_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/promotion-windows-release.mjs
+      - name: Save the immutable Windows promotion website candidate identity
+        if: inputs.operation == 'windows-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-windows-release
+          path: promotion-windows-release.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Verify original project and perform the requested bounded operation
-        if: ${{ !startsWith(inputs.operation, 'unified-') && !startsWith(inputs.operation, 'realtime-') }}
+        if: ${{ !startsWith(inputs.operation, 'unified-') && !startsWith(inputs.operation, 'realtime-') && !startsWith(inputs.operation, 'windows-') }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -282,7 +302,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '24'
-      - name: Build only the isolated native promotion backend
+      - name: Build the original Windows realm with the promotion bridge
         working-directory: mir2-web3
         env:
           CARGO_BUILD_JOBS: '2'
@@ -293,12 +313,13 @@ jobs:
           CARGO_PROFILE_RELEASE_STRIP: symbols
         run: |
           set -euo pipefail
+          test "$GITHUB_SHA" = '${{ inputs.backend_source_sha }}'
           rustup toolchain install 1.95.0 --profile minimal
           cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway
-          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_recalculate --example promotion_chain_acceptance
+          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance
           mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
-          cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/
-          cp config/promotion-playtest-20261029.test.json ../promotion-backend-release/
+          cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/
+          cp config/promotion-windows-playtest-20261030.test.json ../promotion-backend-release/
           cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json onchain/usdc-recharge/.npmrc ../promotion-backend-release/usdc-recharge/
           cp onchain/usdc-recharge/service/cli.mjs onchain/usdc-recharge/service/driver.mjs onchain/usdc-recharge/service/model.mjs ../promotion-backend-release/usdc-recharge/service/
           cp "$(command -v node)" ../promotion-backend-release/runtime/node
@@ -306,10 +327,54 @@ jobs:
           (cd ../promotion-backend-release/usdc-recharge && npm ci --omit=dev --ignore-scripts)
           ../promotion-backend-release/runtime/node --check ../promotion-backend-release/usdc-recharge/service/cli.mjs
           git rev-parse HEAD > ../promotion-backend-release/SOURCE-SHA.txt
+          node -e 'require("fs").writeFileSync("../promotion-backend-release/SOURCE-SHA.json", JSON.stringify({sourceSha:process.env.GITHUB_SHA}))'
           cd ../promotion-backend-release
           find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
           ldd mir2-gateway
           ldd runtime/node
+      - name: Run native PostgreSQL promotion and billing regressions
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          MIR2_RUN_PROMOTION_PG_TESTS: '1'
+          MIR2_PROMOTION_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_promotion_windows_ci
+        run: |
+          set -euo pipefail
+          PG_BIN="$(pg_config --bindir)"
+          PG_DATA="$RUNNER_TEMP/windows-promotion-pg"
+          "$PG_BIN/initdb" -D "$PG_DATA" --auth=trust --username=postgres > "$RUNNER_TEMP/windows-promotion-pg-init.log"
+          "$PG_BIN/pg_ctl" -D "$PG_DATA" -l "$RUNNER_TEMP/windows-promotion-pg.log" -o '-h 127.0.0.1 -p 55483' start
+          trap '"$PG_BIN/pg_ctl" -D "$PG_DATA" -m fast stop' EXIT
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_promotion_windows_ci
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment -- --test-threads=1 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance -- --test-threads=1 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib web::promotions::tests -- --test-threads=1 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const files=['NATIVE-PG-TESTS.log','CLONE-CLI-TESTS.log','WALLET-IDENTITY-TESTS.log'];
+          const logs=Object.fromEntries(files.map(file=>{
+            const bytes=readFileSync('../promotion-backend-release/'+file);
+            const results=[...bytes.toString().matchAll(/test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;/g)];
+            if(!results.length||results.some(row=>Number(row[2])||Number(row[3])))throw Error('Native acceptance suite missing or skipped');
+            const testsExecuted=results.reduce((sum,row)=>sum+Number(row[1]),0);
+            if(testsExecuted<=0)throw Error('Native acceptance suite was empty');
+            return [file,{passed:true,testsExecuted,logSha256:createHash('sha256').update(bytes).digest('hex')}];
+          }));
+          writeFileSync('../promotion-backend-release/CI-ACCEPTANCE.json',JSON.stringify({
+            schema:'mir2.windows-promotion-native-pg.v1',sourceSha:process.env.GITHUB_SHA,
+            workflowRunId:process.env.GITHUB_RUN_ID,jobName:'backend',stepName:'Run native PostgreSQL promotion and billing regressions',
+            environment:'test',postgresBackend:'native',docker:false,passed:true,
+            testsExecuted:Object.values(logs).reduce((sum,value)=>sum+value.testsExecuted,0),skipped:0,
+            checks:{idempotentPaymentAttribution:logs['NATIVE-PG-TESTS.log'],noHistoricalRevenueInferred:logs['NATIVE-PG-TESTS.log'],
+              walletIdentityRegression:logs['WALLET-IDENTITY-TESTS.log'],cloneAudit:logs['CLONE-CLI-TESTS.log']},logs,
+            realMobileSignature:false
+          },null,2));
+          NODE
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: promotion-backend-${{ inputs.backend_source_sha }}

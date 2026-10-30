@@ -1,3 +1,4 @@
+import { promotionSetting, promotionCookieName, promotionCookieScope, promotionCheckoutOrigin } from "./promotion-backend";
 import "server-only";
 
 import { createCipheriv, createDecipheriv, createHash, randomBytes, timingSafeEqual } from "node:crypto";
@@ -30,7 +31,7 @@ function record(value: unknown): Record<string, unknown> {
 function origin(request: Request): string {
   // A reverse proxy / Next dev server may expose its internal localhost URL.
   // Pin the public origin in server configuration, never forwarded headers.
-  const configured = process.env.MIR2_PROMOTION_PUBLIC_ORIGIN?.trim();
+  const configured = promotionSetting("MIR2_PROMOTION_PUBLIC_ORIGIN")?.trim();
   if (promotionDedicatedConfigurationRequired() && !configured) promotionFail(503, "promotion_public_origin_required");
   const url = new URL(configured || request.url);
   if (url.username || url.password || (configured && configured !== url.origin)) promotionFail(503, "invalid_public_origin");
@@ -48,9 +49,9 @@ export function promotionBrowserRequest(request: Request, write = false) {
   return expected;
 }
 function key(): Buffer {
-  const secret = process.env.MIR2_PROMOTION_SESSION_SECRET;
+  const secret = promotionSetting("MIR2_PROMOTION_SESSION_SECRET");
   if (!secret || secret.length < 32 || secret === process.env.MIR2_PASSKEY_AUTH_SECRET ||
-      secret === process.env.MIR2_PROMOTION_WALLET_AUTH_SECRET) {
+      secret === promotionSetting("MIR2_PROMOTION_WALLET_AUTH_SECRET")) {
     promotionFail(503, "promotion_session_secret_required");
   }
   return createHash("sha256").update("mir2-promotion-cookie-v1\0").update(secret).digest();
@@ -59,7 +60,7 @@ export function promotionCookieReady() { key(); }
 function seal(value: unknown, purpose: string, request: Request): string {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", key(), iv);
-  cipher.setAAD(Buffer.from(`mir2-promotion-v1\0${purpose}\0${origin(request)}`));
+  cipher.setAAD(Buffer.from(`mir2-promotion-v1\0${purpose}\0${origin(request)}${promotionCookieScope()}`));
   const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value), "utf8"), cipher.final()]);
   const token = Buffer.concat([iv, cipher.getAuthTag(), ciphertext]).toString("base64url");
   if (token.length > 3800) promotionFail(503, "promotion_cookie_too_large");
@@ -67,8 +68,9 @@ function seal(value: unknown, purpose: string, request: Request): string {
 }
 function open(request: Request, name: string, purpose: string): Record<string, unknown> | null {
   key(); // Misconfiguration must never look like an anonymous authenticated fallback.
+  const scopedName = promotionCookieName(name);
   const values = (request.headers.get("cookie") ?? "").split(";").map((v) => v.trim())
-    .filter((v) => v.startsWith(`${name}=`)).map((v) => v.slice(name.length + 1));
+    .filter((v) => v.startsWith(`${scopedName}=`)).map((v) => v.slice(scopedName.length + 1));
   if (!values.length) return null;
   if (values.length !== 1 || values[0].length > 3800 || !/^[A-Za-z0-9_-]+$/.test(values[0])) {
     promotionFail(401, "invalid_promotion_cookie");
@@ -77,13 +79,13 @@ function open(request: Request, name: string, purpose: string): Record<string, u
     const bytes = Buffer.from(values[0], "base64url");
     if (bytes.length < 29) promotionFail(401, "invalid_promotion_cookie");
     const decipher = createDecipheriv("aes-256-gcm", key(), bytes.subarray(0, 12));
-    decipher.setAAD(Buffer.from(`mir2-promotion-v1\0${purpose}\0${origin(request)}`));
+    decipher.setAAD(Buffer.from(`mir2-promotion-v1\0${purpose}\0${origin(request)}${promotionCookieScope()}`));
     decipher.setAuthTag(bytes.subarray(12, 28));
     return record(JSON.parse(Buffer.concat([decipher.update(bytes.subarray(28)), decipher.final()]).toString("utf8")));
   } catch { promotionFail(401, "invalid_promotion_cookie"); }
 }
 function cookie(response: Response, name: string, token: string, maxAge: number) {
-  response.headers.append("set-cookie", `${name}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`);
+  response.headers.append("set-cookie", `${promotionCookieName(name)}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`);
 }
 function clear(response: Response, name: string) { cookie(response, name, "", 0); }
 export async function promotionReadBody(request: Request, limit = MAX_BODY): Promise<Record<string, unknown>> {
@@ -117,7 +119,7 @@ async function readBytes(response: Response, limit: number): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 function gateway(): string {
-  const value = process.env.MIR2_PROMOTION_GATEWAY_HTTP_URL?.trim() ||
+  const value = promotionSetting("MIR2_PROMOTION_GATEWAY_HTTP_URL")?.trim() ||
     (promotionDedicatedConfigurationRequired() ? undefined : process.env.MIR2_GATEWAY_HTTP_URL?.trim());
   if (!value) promotionFail(503, "promotion_gateway_not_configured");
   let url: URL;
@@ -126,7 +128,7 @@ function gateway(): string {
   if (url.username || url.password || url.search || url.hash ||
     (url.protocol !== "https:" && !(url.protocol === "http:" && ["127.0.0.1", "localhost", "[::1]"].includes(url.hostname))) ||
     !/^\/(?:playtest\/?)?$/.test(url.pathname)) promotionFail(503, "invalid_promotion_gateway");
-  const allowed = (process.env.MIR2_PROMOTION_GATEWAY_ALLOWED_ORIGINS ?? url.origin).split(",").map((v) => v.trim());
+  const allowed = (promotionSetting("MIR2_PROMOTION_GATEWAY_ALLOWED_ORIGINS") ?? url.origin).split(",").map((v) => v.trim());
   if (allowed.some(value => {
     try { const target = new URL(value); return value !== target.origin || !!target.username || !!target.password; }
     catch { return true; }
@@ -149,7 +151,7 @@ export async function promotionGateway(path: string, options: { method?: "GET" |
   if (options.body !== undefined) headers.set("content-type", "application/json");
   if (options.idempotencyKey) headers.set("idempotency-key", options.idempotencyKey);
   // This is the fixed server-to-server checkout origin, never browser input.
-  if (path.startsWith("/v1/billing/")) headers.set("origin", new URL(gateway()).origin);
+  if (path.startsWith("/v1/billing/")) headers.set("origin", promotionCheckoutOrigin());
   let response: Response;
   try {
     response = await fetch(`${gateway()}${path}${options.query ?? ""}`, {

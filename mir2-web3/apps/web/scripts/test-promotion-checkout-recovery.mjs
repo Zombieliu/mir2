@@ -21,6 +21,17 @@ const ID = "original-intent-request-0001";
 const NEXT = "second-intent-request-0002";
 const order = (changes = {}) => ({ id: "usdc_existing", orderRequestId: ID, offerId: "test-usdc-1", state: "paymentSubmitted", ...changes });
 
+test("Windows and legacy payment authorities retain separate unresolved orders for an identical wallet and character", () => {
+  const h = load(), storage = new SessionStorage();
+  const windows = { ...scope, authority: "windows" };
+  h.prepareCheckoutIntent(storage, scope, [], "test-usdc-1", undefined, () => ID);
+  assert.equal(h.recoverCheckoutIntents(storage, windows, []).length, 0);
+  h.prepareCheckoutIntent(storage, windows, [], "test-usdc-1", undefined, () => NEXT);
+  assert.equal(h.recoverCheckoutIntents(storage, scope, [order({ state: "applied" })]).length, 0);
+  assert.equal(h.recoverCheckoutIntents(storage, windows, [order({ state: "applied" })])[0].orderRequestId, NEXT);
+  assert.equal(h.recoverCheckoutIntents(storage, windows, [order({ state: "applied", orderRequestId: NEXT })]).length, 0);
+});
+
 test("a timed-out checkout survives page reload and retries the original request without another order", async () => {
   const data = new Map(), backend = new Map(); const calls = [];
   async function send(helper, storage, original, timeout = false) {

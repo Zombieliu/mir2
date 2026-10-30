@@ -23,6 +23,7 @@ const program = ts.createProgram([
   types: [],
   lib: ["lib.es2022.d.ts", "lib.dom.d.ts", "lib.dom.iterable.d.ts"],
   outDir: temporary,
+  rootDir: fileURLToPath(new URL("../", import.meta.url)),
   noEmitOnError: true,
 });
 const diagnostics = ts.getPreEmitDiagnostics(program);
@@ -33,9 +34,9 @@ assert.equal(diagnostics.length, 0, ts.formatDiagnosticsWithColorAndContext(diag
 }));
 assert.equal(program.emit().emitSkipped, false);
 const require = createRequire(import.meta.url);
-const { PROMOTION_EARNINGS_COPY } = require(path.join(temporary, "promotion-earnings-copy.js"));
-const { PROMOTION_LANGUAGES } = require(path.join(temporary, "promotion-copy.js"));
-const { formatPromotionRefreshTime } = require(path.join(temporary, "promotion-model.js"));
+const { PROMOTION_EARNINGS_COPY } = require(path.join(temporary, "app/promotions/promotion-earnings-copy.js"));
+const { PROMOTION_LANGUAGES } = require(path.join(temporary, "app/promotions/promotion-copy.js"));
+const { formatPromotionRefreshTime } = require(path.join(temporary, "app/promotions/promotion-model.js"));
 
 test("every supported locale distinguishes accrued commission from finalized records", () => {
   const locales = PROMOTION_LANGUAGES.map(([locale]) => locale);

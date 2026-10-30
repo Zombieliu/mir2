@@ -1,3 +1,4 @@
+import { promotionSetting, promotionBackendId } from "./promotion-backend";
 import "server-only";
 import { promotionWalletNetwork } from "./promotion-wallet-context";
 
@@ -28,7 +29,7 @@ function bodyWithoutIdentity(value: unknown, path: string[] = [], allowExcludedT
     bodyWithoutIdentity(child, [...path, key], allowExcludedTarget);
   }
 }
-function campaignId(value: unknown = process.env.MIR2_PROMOTION_CAMPAIGN_ID?.trim()): string | null {
+function campaignId(value: unknown = promotionSetting("MIR2_PROMOTION_CAMPAIGN_ID")?.trim()): string | null {
   if (value === undefined || value === null || value === "") return null;
   if (typeof value !== "string" || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(value)) promotionFail(400, "invalid_promotion_campaign");
   return value;
@@ -71,13 +72,14 @@ export async function promotionBootstrap(request: Request): Promise<Response> {
   try {
     promotionBrowserRequest(request);
     const session = await promotionSession(request, false);
+    const gameClient = promotionBackendId() === "windows" ? "windows" : "web";
     const selection = new URL(request.url).searchParams;
     if ([...selection.keys()].some(key => key !== "campaignId") || selection.getAll("campaignId").length > 1) {
       promotionFail(400, "invalid_promotion_query");
     }
     const campaignSelection = campaignId(selection.get("campaignId") ?? undefined);
     if (!campaignSelection) return promotionJson({
-      authenticated: !!session, csrfToken: session?.csrfToken ?? null, campaign: null, campaignStatus: "unconfigured",
+      authenticated: !!session, csrfToken: session?.csrfToken ?? null, gameClient, campaign: null, campaignStatus: "unconfigured",
       characters: [], leader: null, dashboard: null, sourceGaps: ["promotion_campaign_not_configured"], permissions: [], binding: binding(session),
       public: { status: "unconfigured", dataMode: "no_campaign", recruitmentEnabled: false, commissionEnabled: false, payoutExecutionEnabled: false },
     });
@@ -87,7 +89,7 @@ export async function promotionBootstrap(request: Request): Promise<Response> {
     const publicData = result.payload;
     const campaign = publicData.campaign ?? (publicData.campaignId && publicData.status !== "unconfigured" ? safePayload(publicData) : null);
     if (!session) return promotionJson({
-      authenticated: false, csrfToken: null, campaign, campaignStatus: publicData.status ?? null,
+      authenticated: false, csrfToken: null, gameClient, campaign, campaignStatus: publicData.status ?? null,
       characters: [], leader: null, dashboard: null, sourceGaps: publicData.sourceGaps ?? [], permissions: [],
       binding: binding(session), public: safePayload(publicData),
     });
@@ -95,7 +97,7 @@ export async function promotionBootstrap(request: Request): Promise<Response> {
     if (!mine.ok) promotionFail(mine.status, "promotion_account_unavailable");
     const me = mine.payload;
     return promotionJson({
-      authenticated: true, csrfToken: session.csrfToken, campaign, campaignStatus: publicData.status ?? null,
+      authenticated: true, csrfToken: session.csrfToken, gameClient, campaign, campaignStatus: publicData.status ?? null,
       characters: Array.isArray(me.characters) ? safePayload(me.characters) : [],
       leader: safePayload(me.leader ?? null), dashboard: safePayload(me.dashboard ?? null),
       sourceGaps: me.sourceGaps ?? publicData.sourceGaps ?? [], permissions: permissions(me.permissions),

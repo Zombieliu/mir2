@@ -1,4 +1,5 @@
 import type { PromotionLocale } from "./promotion-copy";
+import { promotionSeasonHeaders } from "../../lib/promotion-season-context";
 
 export type PromotionCampaign = {
   campaignId: string; environment: string; status: string; termsVersion?: string;
@@ -33,6 +34,7 @@ export type PromotionMe = {
   appeals: PromotionAppeal[]; permissions: { isLeader: boolean; isAdmin: boolean; roles?: string[] };
 };
 export type PromotionBootstrap = {
+  gameClient?: "windows" | "web";
   authenticated: boolean; csrfToken: string | null; campaign: PromotionCampaign | null;
   characters: PromotionCharacter[]; leader: PromotionLeader | null; dashboard: PromotionDashboard | null;
   sourceGaps: string[]; permissions: string[] | { isLeader?: boolean; isAdmin?: boolean; roles?: string[] };
@@ -94,9 +96,10 @@ export async function promotionRequest<T>(path: string, options: { body?: Record
   const response = await fetch(`/api/promotions/${selected.path}`, {
     method: writing ? "POST" : "GET", credentials: "same-origin", cache: "no-store",
     headers: writing ? {
+      ...promotionSeasonHeaders(),
       "content-type": "application/json", "x-promotion-csrf": options.csrfToken || "",
       "Idempotency-Key": options.idempotencyKey || crypto.randomUUID(),
-    } : undefined,
+    } : promotionSeasonHeaders(),
     body: writing ? JSON.stringify(selected.body) : undefined,
     signal: options.signal ? AbortSignal.any([options.signal, AbortSignal.timeout(15_000)]) : AbortSignal.timeout(15_000),
   });
@@ -115,7 +118,7 @@ export async function promotionRequest<T>(path: string, options: { body?: Record
 export async function readPromotionSettlementExport(settlementId: string): Promise<Blob> {
   const selected = promotionSeasonRequest(`export?settlementId=${encodeURIComponent(settlementId)}`);
   const response = await fetch(`/api/promotions/${selected.path}`, {
-    credentials: "same-origin", cache: "no-store", signal: AbortSignal.timeout(30_000),
+    credentials: "same-origin", cache: "no-store", headers: promotionSeasonHeaders(), signal: AbortSignal.timeout(30_000),
   });
   if (!response.ok || !response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
     throw new PromotionApiError(response.status || 502, "settlement_export_unavailable");

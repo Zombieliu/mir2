@@ -1,3 +1,4 @@
+import { promotionSetting } from "./promotion-backend";
 import "server-only";
 
 import { passkeyGatewaySecret } from "./passkey-auth";
@@ -20,10 +21,10 @@ function exactOrigin(value: string): string {
 
 export function promotionWalletContext(): DubheAuthContext {
   const hosted = promotionDedicatedConfigurationRequired();
-  const secret = process.env.MIR2_PROMOTION_WALLET_AUTH_SECRET ?? (hosted ? undefined : passkeyGatewaySecret());
-  const originList = process.env.MIR2_PROMOTION_ALLOWED_ORIGINS ?? (hosted ? undefined :
+  const secret = promotionSetting("MIR2_PROMOTION_WALLET_AUTH_SECRET") ?? (hosted ? undefined : passkeyGatewaySecret());
+  const originList = promotionSetting("MIR2_PROMOTION_ALLOWED_ORIGINS") ?? (hosted ? undefined :
     process.env.MIR2_PASSKEY_ALLOWED_ORIGINS ?? process.env.MIR2_ALLOWED_WEB_ORIGINS);
-  const network = process.env.MIR2_PROMOTION_DUBHE_CONNECT_NETWORK?.trim() ||
+  const network = promotionSetting("MIR2_PROMOTION_DUBHE_CONNECT_NETWORK")?.trim() ||
     (hosted ? undefined : process.env.MIR2_DUBHE_CONNECT_NETWORK?.trim() || "testnet");
   if (!secret || secret.length < 32 || !originList || (network !== "testnet" && network !== "mainnet")) {
     throw new Error("promotion_wallet_configuration_required");
@@ -33,12 +34,12 @@ export function promotionWalletContext(): DubheAuthContext {
     throw new Error("promotion_wallet_configuration_invalid");
   }
   allowedOrigins.forEach(exactOrigin);
-  const publicOrigin = process.env.MIR2_PROMOTION_PUBLIC_ORIGIN?.trim();
+  const publicOrigin = promotionSetting("MIR2_PROMOTION_PUBLIC_ORIGIN")?.trim();
   if (hosted && (!publicOrigin || !publicOrigin.startsWith("https://"))) throw new Error("promotion_public_origin_required");
   if (publicOrigin && !allowedOrigins.includes(exactOrigin(publicOrigin))) throw new Error("promotion_public_origin_not_allowed");
-  const relayOrigin = exactOrigin(process.env.MIR2_PROMOTION_DUBHE_CONNECT_RELAY_URL?.trim() ||
+  const relayOrigin = exactOrigin(promotionSetting("MIR2_PROMOTION_DUBHE_CONNECT_RELAY_URL")?.trim() ||
     (!hosted && process.env.MIR2_DUBHE_CONNECT_RELAY_URL?.trim()) || "https://dubhe-connect-relay.zombiesliu.workers.dev");
-  const walletOrigin = exactOrigin(process.env.MIR2_PROMOTION_DUBHE_WALLET_ORIGIN?.trim() ||
+  const walletOrigin = exactOrigin(promotionSetting("MIR2_PROMOTION_DUBHE_WALLET_ORIGIN")?.trim() ||
     (!hosted && process.env.MIR2_DUBHE_WALLET_ORIGIN?.trim()) || "https://wallet.dubhe.obelisk.build");
   return Object.freeze({ secret, allowedOrigins: Object.freeze(allowedOrigins), network, relayOrigin, walletOrigin });
 }

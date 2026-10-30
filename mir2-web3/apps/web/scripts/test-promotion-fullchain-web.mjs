@@ -16,7 +16,8 @@ function load(path, extras = {}) {
     target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX,
   } }).outputText;
   const module = { exports: {} };
-  vm.runInNewContext(compiled, { module, exports: module.exports, Request, Response, Headers, URL, AbortSignal, Intl, crypto, ...extras });
+  vm.runInNewContext(compiled, { module, exports: module.exports, Request, Response, Headers, URL, AbortSignal, Intl, crypto,
+    require: spec => ["../../lib/promotion-season-context", "./promotion-season-context"].includes(spec) ? load("../lib/promotion-season-context.ts") : require(spec), ...extras });
   return module.exports;
 }
 function fixture({ network = "testnet", anonymous = false, bound = true, payload = { accepted: true } } = {}) {
@@ -33,7 +34,10 @@ function fixture({ network = "testnet", anonymous = false, bound = true, payload
     promotionFail: fail, promotionError: error => Response.json({ error: error.message }, { status: error.status || 503 }),
     promotionGateway: async (path, options) => { calls.push({ path, ...options }); return { ok: true, status: 200, payload }; },
   };
-  const extras = { process: { env: { MIR2_PROMOTION_GATEWAY_HTTP_URL: GATEWAY } }, require: spec =>
+  const process = { env: { MIR2_PROMOTION_GATEWAY_HTTP_URL: GATEWAY } };
+  const backend = load("../lib/server/promotion-backend.ts", { process, require: spec => spec === "server-only" ? {} : require(spec) });
+  const extras = { process, require: spec =>
+    spec === "./promotion-backend" ? backend :
     spec === "server-only" ? {} : spec === "./promotion-auth" ? auth : spec === "./promotion-wallet-context" ?
       { promotionWalletNetwork: () => network } : assert.fail(`unexpected import ${spec}`) };
   return { billing: load("../lib/server/promotion-billing.ts", extras).promotionBilling,
@@ -103,15 +107,22 @@ test("test gameplay is selected only by the explicit route, not by a crafted URL
   for (const path of ["/", "/promotions", "/?gatewayWs=wss://untrusted.invalid", "/promotions/play-other"]) assert.equal(realm.isPromotionGamePath(path), false);
   assert.equal(realm.PROMOTION_GAME_WS, "wss://promotion-playtest.165.154.65.136.sslip.io/ws");
 });
-test("all nine billing locales are complete and no-role view offers the explicit test game", () => {
+test("all billing locales are complete and each profile offers its own character entry", () => {
   const copies = load("../app/promotions/promotion-copy.ts");
   const model = load("../app/promotions/promotion-model.ts");
-  const billing = load("../app/promotions/promotion-billing.tsx", { require: spec => spec === "./promotion-model" ? model : spec === "./promotion-checkout-recovery" ? load("../app/promotions/promotion-checkout-recovery.ts") : spec.endsWith(".module.css") ?
+  const windows = load("../app/promotions/promotion-windows-copy.ts");
+  const billing = load("../app/promotions/promotion-billing.tsx", { require: spec => spec === "./promotion-model" ? model : spec === "./promotion-windows-copy" ? windows : spec === "./promotion-checkout-recovery" ? load("../app/promotions/promotion-checkout-recovery.ts") : spec.endsWith(".module.css") ?
     { default: new Proxy({}, { get: (_, name) => String(name) }) } : require(spec) });
   for (const [locale] of copies.PROMOTION_LANGUAGES) {
     assert.equal(billing.PROMOTION_BILLING_LABELS[locale].length, 9);
     assert.ok(billing.PROMOTION_BILLING_LABELS[locale].every(label => label.trim()));
     const html = renderToStaticMarkup(createElement(billing.PromotionBilling, { bootstrap: { characters: [], csrfToken: "synthetic" }, copy: copies.PROMOTION_COPY[locale], locale }));
     assert.ok(html.includes('/promotions/play')); assert.ok(!html.includes(TOKEN));
+    const native = renderToStaticMarkup(createElement(billing.PromotionBilling, { bootstrap: { gameClient: "windows", characters: [], csrfToken: "synthetic" }, copy: copies.PROMOTION_COPY[locale], locale }));
+    assert.ok(native.includes(windows.windowsDownloadPath(locale)), locale);
+    assert.ok(native.includes(windows.PROMOTION_WINDOWS_COPY[locale].download), locale);
+    assert.ok(native.includes(windows.PROMOTION_WINDOWS_COPY[locale].body), locale);
+    assert.ok(!native.includes('/promotions/play'), locale);
+    assert.ok(!native.includes(TOKEN), locale);
   }
 });
