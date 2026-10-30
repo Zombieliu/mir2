@@ -22,10 +22,11 @@
     "journal-deployment.json": "b6cf5e94c70fc1ccc9bddb04ee4beb45b4e236dee9a72fa9749c9232f3cc0b41",
     "linux-cleanup-tests.json": "16200ed620b97d9ab9475e24e4eb9068c32fc18d60a130197c312b05fa91b474",
     "public-channels-post.json": "edd2054501d8bfdc2f16b42af101265cc9b661f8dfb43f61340d46677bd0f191",
-    "README.md": "d61aa854daccc43a354bde728b5eb2bc3ac89d2997ecccd430aba6541e5f5272",
+    "README.md": "e297dbd2a97bb7e52c115e9f46fd48f39b8b88f347e91cf55f3877d36d6cd37d",
     "reference-audit.py": "e624fc14821ee6cd4b6c8f3c087fb3ebf4a471045011b141bb3b75c34c27c441",
     "reference-before-execution.json": "33f3ccc39c26912ff28e1523a7583133acf610061d2274899a219319ccec1a7f",
-    "runbook-update.json": "7924eb1c55f9cc4298694d11f0fbdad1fe6f5c6928c4337a3173903c66cbf759"
+    "runbook-update.json": "7924eb1c55f9cc4298694d11f0fbdad1fe6f5c6928c4337a3173903c66cbf759",
+    "protected-baseline.json": "665eef37906a2b38a58d941f70533248b7a1d32d1ab4cadbe0ed3c6fc7f5f935"
   },
   "validation": {
     "cleanupLinux": {

@@ -19,3 +19,5 @@ No Docker operations, game restarts, account changes, real funds, release change
 - [final-verification.json](final-verification.json): 28 deletion paths absent, all 13 remaining candidates present; four live PIDs unchanged, health/Redis OK, feeds unchanged, deployed pins match, private report permissions and active timer verified. Warning is expected because recovered free disk is 17.9%, below the configured 20% threshold; there are no collection errors.
 
 - [runbook-update.json](runbook-update.json): installed-status prose correction only, with old/new runbook pins; final verification uses the updated runbook hash. Runtime settings did not change.
+
+- [protected-baseline.json](protected-baseline.json): original 2026-10-30T05:06:20Z read-only baseline (844,476,416 B available), original service PIDs, feed hashes/resolved paths, health and pre-maintenance journal settings. Later pre-execution free-space readings differ because services remained live.
