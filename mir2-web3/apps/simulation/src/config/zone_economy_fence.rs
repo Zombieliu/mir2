@@ -127,6 +127,21 @@ impl ZoneEconomyWritePermit {
 }
 
 impl SimulationConfig {
+    /// A durable source change is known to have committed, but its live Session
+    /// could not publish the matching revision. Never admit another stale save.
+    /// Fixed server-owned text keeps backend diagnostics out of this gate.
+    pub(crate) fn freeze_committed_source_publication(&self) -> String {
+        self.freeze_account_store_writes("SOURCE_COMMITTED_LIVE_PUBLICATION_FAILED".into())
+    }
+
+    pub(crate) fn freeze_unknown_item_uid_publication(&self) {
+        // Caller supplies no raw backend diagnostic or player-controlled text.
+        // File authorities persist their ordinary source freeze marker too.
+        self.freeze_account_store_writes(
+            crate::runtime::item_uid_issuance::ITEM_UID_COMMIT_OUTCOME_UNKNOWN.into(),
+        );
+    }
+
     /// Receipt lookup may obtain this server-only binding while writes are
     /// frozen. Only lock_and_validate may admit a new external mutation.
     pub fn zone_economy_write_permit(&self) -> Result<ZoneEconomyWritePermit, String> {

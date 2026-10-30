@@ -1,0 +1,27 @@
+    Finished `test` profile [unoptimized] target(s) in 0.28s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 21 tests
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_duplicate_max_history_rejected_without_real_floor_update ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_exact_parent_hidden_grandchild_conflict_rejects_before_real_issuer ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_exact_parent_restores_every_legacy_descendant_without_remint ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_exact_zero_is_not_reidentified_by_controlled_legacy_start ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_failed_issuance_does_not_publish_character_or_restart_uid ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_file_source_failure_burns_ids_and_reload_keeps_exact_save ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_fresh_exact_parent_preserves_legacy_descendants_and_issues_all_nodes ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_invalid_max_template_rejected_without_real_floor_update ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_keeps_class_gender_equipment_loadouts ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_late_invalid_fresh_tree_prevents_all_real_reservations ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_legacy_fishing_rod_equipment_migration_persists_canonical_slot_width ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_mixed_zero_parent_with_assigned_child_is_rejected ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_mount_bells_keep_original_protocol_position_and_exact_attributes ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_nested_fresh_tree_and_equipment_preserve_attributes ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_preallocates_outside_account_lock_and_cross_account_unique ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_private_preflight_never_installs_or_issues_temporary_ids ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_restore_gate_rejects_zero_duplicate_and_missing_equipment_id ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_same_template_zero_socket_children_each_receive_one_identity ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_start_cas_rejects_source_change_after_reservation ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_start_migration_is_source_cas_and_idempotent ... ok
+test runtime::save::starter_uid_planning::tests::starter_uid_planning_unavailable_and_fenced_cannot_create_or_repair ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 3207 filtered out; finished in 0.26s

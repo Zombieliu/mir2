@@ -140,6 +140,7 @@ fn zone_save_operation_stage_captures_durable_mail_and_protected_journals_in_exa
     }))
     .unwrap();
     let mail = Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 7001,
         delivery_nonce: "00112233445566778899aabbccddeeff".into(),
         from: "Procurement".into(),

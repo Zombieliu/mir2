@@ -2,7 +2,9 @@
 //! and rolls; the authenticated session owns the equipped tool and ore carrier.
 use super::crystal_compat::{CRYSTAL_STAT_ACCURACY, CRYSTAL_STAT_STRONG};
 use super::equipment::user_item_from_equipment_state;
-use super::inventory::{add_or_increment_item_with_random_metadata, crystal_empty_add_item_slots};
+use super::inventory::{
+    crystal_empty_add_item_slots, try_add_or_increment_item_with_random_metadata,
+};
 use super::items::{
     crystal_item_key_for_template, crystal_item_stat_value, crystal_item_template_for_item_key,
 };
@@ -86,83 +88,97 @@ impl SimulationSession {
             .ok_or("mining checkpoint unavailable")?;
         let (position, direction) = swing.player_transform();
         self.force_authoritative_player_transform(position, direction);
-        let mut packets = Vec::new();
-        let world = self.app.world_mut();
-        if let Some(ore) = swing.ore.as_ref() {
-            if let Some(template) = crystal_item_by_name(&ore.item_name) {
-                let key = crystal_item_key_for_template(&template);
-                let inventory = world.resource::<InventoryResource>();
-                let config = &world.resource::<RuntimeConfigResource>().config;
-                // Original AddItem prefers all unlocked bag cells for Ore,
-                // then falls back to any of the six belt cells. FreeSpace
-                // counts the complete inventory, even for non-potion items.
-                let destination =
-                    crystal_empty_add_item_slots(inventory, ItemContainer::Bag1, &key)
-                        .into_iter()
-                        .next()
-                        .or_else(|| {
-                            crystal_empty_add_item_slots(inventory, ItemContainer::Belt, &key)
-                                .into_iter()
-                                .next()
-                        });
-                if let Some((container, slot)) =
-                    destination.filter(|_| config.item_is_allowed(&template.name))
+        let mutation = (|| -> Result<Vec<ServerPacket>, String> {
+            let mut packets = Vec::new();
+            let world = self.app.world_mut();
+            if let Some(ore) = swing.ore.as_ref() {
+                if let Some(template) = crystal_item_by_name(&ore.item_name) {
+                    let key = crystal_item_key_for_template(&template);
+                    let inventory = world.resource::<InventoryResource>();
+                    let config = &world.resource::<RuntimeConfigResource>().config;
+                    // Original AddItem prefers all unlocked bag cells for Ore,
+                    // then falls back to any of the six belt cells. FreeSpace
+                    // counts the complete inventory, even for non-potion items.
+                    let destination =
+                        crystal_empty_add_item_slots(inventory, ItemContainer::Bag1, &key)
+                            .into_iter()
+                            .next()
+                            .or_else(|| {
+                                crystal_empty_add_item_slots(inventory, ItemContainer::Belt, &key)
+                                    .into_iter()
+                                    .next()
+                            });
+                    if let Some((container, slot)) =
+                        destination.filter(|_| config.item_is_allowed(&template.name))
+                    {
+                        let random = super::drops::crystal_random_drop_stats(
+                            &template,
+                            swing.now_ms(),
+                            swing.object_id,
+                            0,
+                        );
+                        let max_dura = template.durability.saturating_add(random.durability_bonus);
+                        let items = try_add_or_increment_item_with_random_metadata(
+                            world,
+                            container,
+                            &key,
+                            &template.name,
+                            template.tooltip.as_deref().unwrap_or(""),
+                            slot,
+                            1,
+                            u16::from(template.weight),
+                            Some(ore.current_dura),
+                            Some(max_dura),
+                            random.added_attack,
+                            random.added_defence,
+                            random.added_stats,
+                            random.cursed,
+                            template.slots.saturating_add(random.socket_slots),
+                            crate::UserItemUidReason::Mining,
+                        )?;
+                        packets.extend(items.iter().map(|item| ServerPacket::GainedItem {
+                            item: super::items::user_item_from_item_state(item),
+                        }));
+                    }
+                }
+            }
+            let mut inventory = world.resource_mut::<InventoryResource>();
+            let weapon = inventory
+                .equipment_items
+                .iter_mut()
+                .find(|w| w.slot == EquipmentSlot::Weapon)
+                .ok_or("mining tool disappeared")?;
+            weapon.durability_current = weapon
+                .durability_current
+                .saturating_sub(swing.durability_damage);
+            packets.push(ServerPacket::DuraChanged {
+                unique_id: swing.tool.unique_id,
+                current_dura: weapon.durability_current,
+            });
+            drop(inventory);
+            super::stats::refresh_player_stats(world);
+            if swing.durability_damage >= swing.tool.durability {
+                if let Some(vitals) = super::components::player_entity(world)
+                    .and_then(|entity| super::components::entity_player_vitals(world, entity))
                 {
-                    let random = super::drops::crystal_random_drop_stats(
-                        &template,
-                        swing.now_ms(),
-                        swing.object_id,
-                        0,
-                    );
-                    let max_dura = template.durability.saturating_add(random.durability_bonus);
-                    let item = add_or_increment_item_with_random_metadata(
-                        world,
-                        container,
-                        &key,
-                        &template.name,
-                        template.tooltip.as_deref().unwrap_or(""),
-                        slot,
-                        1,
-                        u16::from(template.weight),
-                        Some(ore.current_dura),
-                        Some(max_dura),
-                        random.added_attack,
-                        random.added_defence,
-                        random.added_stats,
-                        random.cursed,
-                        template.slots.saturating_add(random.socket_slots),
-                    );
-                    packets.push(ServerPacket::GainedItem {
-                        item: super::items::user_item_from_item_state(&item),
+                    packets.push(ServerPacket::HealthChanged {
+                        hp: vitals.hp,
+                        mp: vitals.mp,
                     });
                 }
             }
-        }
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        let weapon = inventory
-            .equipment_items
-            .iter_mut()
-            .find(|w| w.slot == EquipmentSlot::Weapon)
-            .ok_or("mining tool disappeared")?;
-        weapon.durability_current = weapon
-            .durability_current
-            .saturating_sub(swing.durability_damage);
-        packets.push(ServerPacket::DuraChanged {
-            unique_id: swing.tool.unique_id,
-            current_dura: weapon.durability_current,
-        });
-        drop(inventory);
-        super::stats::refresh_player_stats(world);
-        if swing.durability_damage >= swing.tool.durability {
-            if let Some(vitals) = super::components::player_entity(world)
-                .and_then(|entity| super::components::entity_player_vitals(world, entity))
-            {
-                packets.push(ServerPacket::HealthChanged {
-                    hp: vitals.hp,
-                    mp: vitals.mp,
-                });
+            Ok(packets)
+        })();
+        let packets = match mutation {
+            Ok(packets) => packets,
+            Err(error) => {
+                self.restore_active_character_checkpoint(&checkpoint)
+                    .map_err(|restore| {
+                        format!("mining preparation failed ({error}); rollback failed ({restore})")
+                    })?;
+                return Err(error);
             }
-        }
+        };
         if let Err(error) = self.save_active_character() {
             self.restore_active_character_checkpoint(&checkpoint)
                 .map_err(|restore| {
@@ -175,3 +191,7 @@ impl SimulationSession {
         Ok(packets)
     }
 }
+
+#[cfg(test)]
+#[path = "mining_player_uid_tests.rs"]
+mod uid_tests;

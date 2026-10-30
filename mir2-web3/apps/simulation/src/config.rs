@@ -187,14 +187,14 @@ impl CharacterRecord {
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
+#[path = "config_prepared_kill.rs"]
+mod prepared_kill;
+#[path = "config/zone_economy_fence.rs"]
+pub mod zone_economy_fence;
 #[path = "config/zone_save_fence.rs"]
 pub mod zone_save_fence;
 #[path = "config/zone_save_operation.rs"]
 pub mod zone_save_operation;
-#[path = "config/zone_economy_fence.rs"]
-pub mod zone_economy_fence;
-#[path = "config_prepared_kill.rs"]
-mod prepared_kill;
 pub use prepared_kill::{
     PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure,
 };
@@ -3074,6 +3074,7 @@ mod tests {
         let mut systems = Stage5SystemsState::default();
         systems.guild.name = "Crimson".to_string();
         systems.mail.push(Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 9,
             delivery_nonce: "fixture-mail-9".to_string(),
             from: "GM".to_string(),
@@ -5001,7 +5002,7 @@ impl SimulationConfig {
         if error.starts_with(zone_save_fence::COMMIT_OUTCOME_UNKNOWN)
             || error.starts_with(ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN)
             || (plan.carries_billing_source()
-            && error.starts_with(crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN))
+                && error.starts_with(crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN))
             || (plan.clock.is_some()
                 && error.starts_with(guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN))
             || ((!plan.guilds.is_empty() || plan.carries_guild_experience_source())
@@ -5124,7 +5125,8 @@ impl SimulationConfig {
                 database_url,
                 self.account_store_database_mode,
                 &mutation_plan,
-            ).map_err(|error| self.map_clock_repository_error(&mutation_plan, error))?;
+            )
+            .map_err(|error| self.map_clock_repository_error(&mutation_plan, error))?;
             if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
                 let mut live_store = self
                     .account_store
@@ -5885,7 +5887,9 @@ impl SimulationConfig {
         };
         self.refresh_account_store_account_with_loader(account_id, || {
             load_account_from_postgres(
-                database_url.to_string(), account_id.to_string(), self.zone_save_fence.is_none(),
+                database_url.to_string(),
+                account_id.to_string(),
+                self.zone_save_fence.is_none(),
             )
         })
     }
@@ -6469,7 +6473,11 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     let carries_stones = plan.stones.is_some();
     std::thread::spawn(move || {
         let mut client = pool.connection().map_err(|error| {
-            if carries_zone_fence { zone_save_fence::UNAVAILABLE.to_string() } else { error }
+            if carries_zone_fence {
+                zone_save_fence::UNAVAILABLE.to_string()
+            } else {
+                error
+            }
         })?;
         // A fenced save is never a schema-provisioning capability.
         if !carries_zone_fence {
@@ -6534,8 +6542,14 @@ fn write_account_store_mutation_plan_to_postgres(
         .map_err(|error|if plan.zone_save_fence.is_some(){zone_save_fence::classify_commit_error(error)}else if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!("{}: stone commit response unavailable: {error}",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
     #[cfg(test)]
     match plan.zone_save_fence_test_fault {
-        Some(zone_save_fence::TestFault::PanicAfterCommit) => panic!("ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT"),
-        Some(zone_save_fence::TestFault::LoseResponseAfterCommit) => return Err(zone_save_fence::commit_outcome_unknown("test-only response loss after confirmed commit")),
+        Some(zone_save_fence::TestFault::PanicAfterCommit) => {
+            panic!("ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT")
+        }
+        Some(zone_save_fence::TestFault::LoseResponseAfterCommit) => {
+            return Err(zone_save_fence::commit_outcome_unknown(
+                "test-only response loss after confirmed commit",
+            ))
+        }
         None => {}
     }
     Ok(source_versions)
@@ -8125,6 +8139,24 @@ impl Default for Stage5MentorState {
     }
 }
 
+/// Attachment provenance is trusted only when committed by its canonical
+/// server source. Sender names, subjects and other player-visible text must
+/// never be used to infer an origin for an older delivery.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Stage5MailAttachmentOrigin {
+    #[default]
+    LegacyUnknown,
+    FreshGrant,
+    ExistingCustody,
+}
+
+impl Stage5MailAttachmentOrigin {
+    pub fn is_legacy_unknown(&self) -> bool {
+        matches!(self, Self::LegacyUnknown)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5MailMessage {
@@ -8140,12 +8172,66 @@ pub struct Stage5MailMessage {
     pub items: Vec<String>,
     #[serde(default)]
     pub item_states_json: Vec<String>,
+    /// All attachments in this delivery have one canonical origin. Mixed-origin
+    /// batches require separate deliveries; absent historical evidence remains
+    /// unknown until explicitly reconciled by a trusted migration.
+    #[serde(
+        default,
+        skip_serializing_if = "Stage5MailAttachmentOrigin::is_legacy_unknown"
+    )]
+    pub attachment_origin: Stage5MailAttachmentOrigin,
     #[serde(default)]
     pub opened: bool,
     #[serde(default)]
     pub locked: bool,
     pub claimed: bool,
     pub deleted: bool,
+}
+
+#[cfg(test)]
+mod stage5_mail_attachment_origin_tests {
+    use super::{Stage5MailAttachmentOrigin, Stage5MailMessage};
+
+    fn legacy_delivery() -> serde_json::Value {
+        serde_json::json!({
+            "id": 1,
+            "from": "Gameshop",
+            "to": "Owner",
+            "subject": "Rental item returned",
+            "body": "Player-visible text is not provenance",
+            "gold": 0,
+            "claimed": false,
+            "deleted": false
+        })
+    }
+
+    #[test]
+    fn stage5_mail_attachment_origin_legacy_text_does_not_authorize_a_grant_or_transfer() {
+        let mail: Stage5MailMessage = serde_json::from_value(legacy_delivery()).unwrap();
+        assert_eq!(
+            mail.attachment_origin,
+            Stage5MailAttachmentOrigin::LegacyUnknown
+        );
+        let encoded = serde_json::to_value(mail).unwrap();
+        assert!(encoded.get("attachmentOrigin").is_none());
+    }
+
+    #[test]
+    fn stage5_mail_attachment_origin_explicit_canonical_kinds_round_trip() {
+        for origin in [
+            Stage5MailAttachmentOrigin::FreshGrant,
+            Stage5MailAttachmentOrigin::ExistingCustody,
+        ] {
+            let mut mail: Stage5MailMessage = serde_json::from_value(legacy_delivery()).unwrap();
+            mail.attachment_origin = origin;
+            let encoded = serde_json::to_value(&mail).unwrap();
+            assert!(encoded.get("attachmentOrigin").is_some());
+            assert_eq!(
+                serde_json::from_value::<Stage5MailMessage>(encoded).unwrap(),
+                mail
+            );
+        }
+    }
 }
 
 /// Generate an opaque, persistent identity for one logical mail delivery.
@@ -8255,6 +8341,7 @@ pub fn deliver_stage5_system_mail(
                 .unwrap_or(0)
                 .saturating_add(1);
             systems.mail.push(Stage5MailMessage {
+                attachment_origin: Stage5MailAttachmentOrigin::FreshGrant,
                 id,
                 delivery_nonce: new_stage5_mail_delivery_nonce(),
                 from: delivery.from.clone(),

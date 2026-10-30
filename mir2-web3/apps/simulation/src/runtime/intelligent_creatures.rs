@@ -401,6 +401,7 @@ fn produce_blackstone(world: &mut World) -> Option<Vec<ServerPacket>> {
         .stage5_systems
         .mail
         .push(Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: next_id,
             delivery_nonce: crate::new_stage5_mail_delivery_nonce(),
             from: "BlackStone".into(),
@@ -578,7 +579,8 @@ fn use_creature_reward_box(
         staged.item_uid_issuance,
         super::item_uid_issuance::ItemUidIssuance::Unavailable
             | super::item_uid_issuance::ItemUidIssuance::Fenced
-    ) || super::item_uid_issuance::refresh_world_history_floor(world).is_err() {
+    ) || super::item_uid_issuance::refresh_world_history_floor(world).is_err()
+    {
         return (false, vec![]);
     }
     if current.quantity > 1 {
@@ -656,10 +658,14 @@ fn use_creature_reward_box(
         return (false, vec![]);
     }
     item.unique_id = match &staged.item_uid_issuance {
-        super::item_uid_issuance::ItemUidIssuance::Legacy =>
-            allocate_item_unique_id_avoiding(&staged, container, slot, std::slice::from_ref(source)),
+        super::item_uid_issuance::ItemUidIssuance::Legacy => {
+            allocate_item_unique_id_avoiding(&staged, container, slot, std::slice::from_ref(source))
+        }
         _ => match super::item_uid_issuance::issue_for_staged_inventory(
-            &staged, crate::UserItemUidReason::CreatureRewardBox, container, slot,
+            &staged,
+            crate::UserItemUidReason::CreatureRewardBox,
+            container,
+            slot,
         ) {
             Ok(uid) => uid,
             Err(_) => return (false, vec![]),

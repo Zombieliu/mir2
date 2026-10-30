@@ -62,6 +62,385 @@ fn with_option(url: &str, option: &str) -> String {
     format!("{url}{}{option}", if url.contains('?') { '&' } else { '?' })
 }
 
+fn shared_uid_stored_character(
+    db: &Database,
+    account: &str,
+    character_index: i32,
+) -> mir2_simulation::CharacterSaveRecord {
+    let value: serde_json::Value = db
+        .connect()
+        .query_one(
+            "SELECT snapshot_json FROM character_saves WHERE account_id=$1 AND character_index=$2",
+            &[&account, &character_index],
+        )
+        .unwrap()
+        .get(0);
+    serde_json::from_value(value).unwrap()
+}
+
+fn shared_uid_owned_character_ids(save: &mir2_simulation::CharacterSaveRecord) -> BTreeSet<u64> {
+    fn collect(value: &serde_json::Value, ids: &mut BTreeSet<u64>) {
+        match value {
+            serde_json::Value::Object(fields) => {
+                for (key, value) in fields {
+                    if matches!(
+                        key.as_str(),
+                        "unique_id" | "uniqueId" | "user_item_unique_id"
+                    ) {
+                        let id = value
+                            .as_u64()
+                            .or_else(|| value.as_str().and_then(|v| v.parse().ok()))
+                            .expect("owned saved tree requires an exact UID");
+                        assert!(
+                            id > 0,
+                            "owned saved tree must not retain an unassigned zero"
+                        );
+                        ids.insert(id);
+                    }
+                    collect(value, ids);
+                }
+            }
+            serde_json::Value::Array(values) => {
+                for value in values {
+                    collect(value, ids);
+                }
+            }
+            _ => {}
+        }
+    }
+    let mut ids = BTreeSet::new();
+    for encoded in save
+        .inventory_items_json
+        .iter()
+        .chain(&save.belt_items_json)
+        .chain(&save.storage_items_json)
+        .chain(&save.equipment_items_json)
+        .chain(&save.hero_inventory_items_json)
+        .chain(&save.hero_equipment_items_json)
+    {
+        collect(
+            &serde_json::from_str::<serde_json::Value>(encoded).unwrap(),
+            &mut ids,
+        );
+    }
+    ids
+}
+
+fn shared_uid_character_assets(save: &mir2_simulation::CharacterSaveRecord) -> serde_json::Value {
+    serde_json::json!({
+        "gold": save.gold, "credit": save.credit,
+        "inventory": save.inventory_items_json, "belt": save.belt_items_json,
+        "storage": save.storage_items_json, "equipment": save.equipment_items_json,
+        "hero_inventory": save.hero_inventory_items_json,
+        "hero_equipment": save.hero_equipment_items_json,
+        "stage5": save.stage5_systems_json,
+    })
+}
+
+fn shared_uid_relogin(
+    config: SimulationConfig,
+    account: &str,
+    character_index: i32,
+) -> mir2_simulation::InProcessWorldRuntime {
+    use mir2_protocol::{ClientPacket, ServerPacket};
+    use mir2_simulation::{WorldCommand, WorldRuntime};
+    let mut runtime = mir2_simulation::InProcessWorldRuntime::new(config);
+    assert!(runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: account.into(),
+            password: account.into(),
+        }))
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    assert!(runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index
+        }))
+        .unwrap()
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+    assert_eq!(
+        runtime.active_identity().unwrap().character_index,
+        character_index
+    );
+    runtime
+}
+
+#[test]
+#[ignore = "requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority"]
+fn player_drop_shared_uid_pg_runtime_new_character_starter_survives_save_and_relogin_without_remint(
+) {
+    use mir2_simulation::WorldRuntime;
+    let db = Database::new();
+    let config = initialized(&db, 2_000_000);
+    let allocator = config.server_item_uid_allocator().unwrap();
+    let floor = allocator.issued_through().unwrap();
+    let account = "shared-uid-starter-login";
+    let mut runtime =
+        crate::economy::start_test_runtime_with_config(config.clone(), account, "UidStarterLogin")
+            .unwrap();
+    let identity = runtime
+        .active_identity()
+        .expect("actual NewCharacter and StartGame succeeded");
+    let active = runtime.active_character_checkpoint().unwrap();
+    let stored = shared_uid_stored_character(&db, account, identity.character_index);
+    let owned = shared_uid_owned_character_ids(&active);
+    assert!(
+        !owned.is_empty(),
+        "the fixture must exercise real starter item roots"
+    );
+    let through = allocator.issued_through().unwrap();
+    assert_eq!(
+        owned,
+        (floor + 1..=through).collect(),
+        "every newly issued PG identity is in the complete starter save"
+    );
+    assert_eq!(shared_uid_owned_character_ids(&stored), owned);
+    runtime.save_active_character().unwrap();
+    let committed = shared_uid_stored_character(&db, account, identity.character_index);
+    assert_eq!(shared_uid_owned_character_ids(&committed), owned);
+    assert_eq!(allocator.issued_through().unwrap(), through);
+    drop(runtime);
+
+    let mut relogged = shared_uid_relogin(config, account, identity.character_index);
+    let restored = relogged.active_character_checkpoint().unwrap();
+    assert_eq!(shared_uid_owned_character_ids(&restored), owned);
+    assert_eq!(
+        allocator.issued_through().unwrap(),
+        through,
+        "StartGame restores the original exact identities"
+    );
+    relogged.save_active_character().unwrap();
+    assert_eq!(
+        shared_uid_owned_character_ids(&shared_uid_stored_character(
+            &db,
+            account,
+            identity.character_index,
+        )),
+        owned
+    );
+    assert_eq!(allocator.issued_through().unwrap(), through);
+    assert_eq!(
+        counts(&db),
+        (1, 1, 0, 0),
+        "starter issuance shares the scalar floor without fake drop batches"
+    );
+}
+
+#[test]
+#[ignore = "requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority"]
+fn player_drop_shared_uid_pg_public_system_mail_claim_commits_once_and_old_owner_cannot_issue() {
+    use mir2_protocol::{ClientPacket, ServerPacket};
+    use mir2_simulation::{
+        deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
+        WorldRuntime,
+    };
+    let db = Database::new();
+    let config = initialized(&db, 3_000_000);
+    let allocator = config.server_item_uid_allocator().unwrap();
+    let account = "shared-uid-mail-claim";
+    let character_name = "UidMailClaim";
+    let mut runtime =
+        crate::economy::start_test_runtime_with_config(config.clone(), account, character_name)
+            .unwrap();
+    runtime.save_active_character().unwrap();
+    let identity = runtime.active_identity().unwrap();
+    let before = shared_uid_stored_character(&db, account, identity.character_index);
+    let before_ids = shared_uid_owned_character_ids(&before);
+    let before_floor = allocator.issued_through().unwrap();
+    let helmet = mir2_game_data::crystal_item_by_name("BronzeHelmet").unwrap();
+    let bell = mir2_game_data::crystal_item_by_name("BronzeBell").unwrap();
+    let receipt = deliver_stage5_system_mail(
+        &config,
+        Stage5MailDelivery {
+            target_kind: Stage5MailTargetKind::Character,
+            target_id: character_name.into(),
+            from: "Owned PG fixture".into(),
+            subject: "Fresh shared authority reward".into(),
+            body: "Public delivery; collect with the real packet path".into(),
+            gold: 77,
+            items: vec![
+                format!("crystal-item-{}", helmet.item_index),
+                format!("crystal-item-{}", bell.item_index),
+            ],
+        },
+    )
+    .unwrap();
+    assert_eq!(receipt.delivered_count, 1);
+    assert_eq!(receipt.mail_ids.len(), 1);
+    assert_eq!(
+        allocator.issued_through().unwrap(),
+        before_floor,
+        "delivery publishes the trusted reward, claim performs issuance"
+    );
+    let mail_id = receipt.mail_ids[0];
+    let delivered = shared_uid_stored_character(&db, account, identity.character_index);
+    let delivered_systems: mir2_simulation::Stage5SystemsState =
+        serde_json::from_str(delivered.stage5_systems_json.as_deref().unwrap()).unwrap();
+    assert_eq!(
+        delivered_systems
+            .mail
+            .iter()
+            .find(|mail| mail.id == mail_id)
+            .unwrap()
+            .attachment_origin,
+        mir2_simulation::Stage5MailAttachmentOrigin::FreshGrant,
+        "the public canonical delivery, not this test, authorizes fresh issuance"
+    );
+    drop(runtime);
+
+    let mut runtime = shared_uid_relogin(config.clone(), account, identity.character_index);
+    assert!(runtime
+        .world_snapshot()
+        .stage5_systems
+        .mail
+        .iter()
+        .any(|mail| mail.id == mail_id && !mail.claimed));
+    let packets = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }))
+        .unwrap();
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 77 })));
+    let packet_items: Vec<_> = packets
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::GainedItem { item } => Some(item),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(packet_items.len(), 2);
+    assert_eq!(
+        packet_items
+            .iter()
+            .map(|item| item.item_index)
+            .collect::<BTreeSet<_>>(),
+        [helmet.item_index, bell.item_index].into_iter().collect()
+    );
+    let committed = shared_uid_stored_character(&db, account, identity.character_index);
+    let after_ids = shared_uid_owned_character_ids(&committed);
+    let fresh: BTreeSet<_> = after_ids.difference(&before_ids).copied().collect();
+    let after_floor = allocator.issued_through().unwrap();
+    assert_eq!(fresh, (before_floor + 1..=after_floor).collect());
+    assert_eq!(fresh.len(), 2);
+    assert_eq!(
+        packet_items
+            .iter()
+            .map(|item| item.unique_id)
+            .collect::<BTreeSet<_>>(),
+        fresh
+    );
+    assert_eq!(committed.gold, before.gold.checked_add(77).unwrap());
+    let systems: mir2_simulation::Stage5SystemsState =
+        serde_json::from_str(committed.stage5_systems_json.as_deref().unwrap()).unwrap();
+    let claimed = systems.mail.iter().find(|mail| mail.id == mail_id).unwrap();
+    assert!(claimed.claimed);
+    assert_eq!(claimed.gold, 0);
+    assert!(claimed.items.is_empty() && claimed.item_states_json.is_empty());
+    assert_eq!(
+        shared_uid_character_assets(&runtime.active_character_checkpoint().unwrap()),
+        shared_uid_character_assets(&committed)
+    );
+
+    let repeat = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }))
+        .unwrap();
+    assert!(!repeat.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ParcelCollected { result: 1 }
+            | ServerPacket::GainedGold { .. }
+            | ServerPacket::GainedItem { .. }
+    )));
+    assert_eq!(allocator.issued_through().unwrap(), after_floor);
+    assert_eq!(
+        shared_uid_character_assets(&shared_uid_stored_character(
+            &db,
+            account,
+            identity.character_index
+        )),
+        shared_uid_character_assets(&committed)
+    );
+    drop(runtime);
+    let mut runtime = shared_uid_relogin(config.clone(), account, identity.character_index);
+    assert_eq!(
+        shared_uid_owned_character_ids(&runtime.active_character_checkpoint().unwrap()),
+        after_ids
+    );
+    assert_eq!(allocator.issued_through().unwrap(), after_floor);
+
+    let repeat_after_relogin = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }))
+        .unwrap();
+    assert!(!repeat_after_relogin.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ParcelCollected { result: 1 }
+            | ServerPacket::GainedGold { .. }
+            | ServerPacket::GainedItem { .. }
+    )));
+    assert_eq!(allocator.issued_through().unwrap(), after_floor);
+    assert_eq!(runtime.world_snapshot().gold, committed.gold);
+
+    let fenced_receipt = deliver_stage5_system_mail(
+        &config,
+        Stage5MailDelivery {
+            target_kind: Stage5MailTargetKind::Character,
+            target_id: character_name.into(),
+            from: "Owned PG fixture".into(),
+            subject: "Must remain unclaimed after takeover".into(),
+            body: "Old owner cannot mint or publish assets".into(),
+            gold: 19,
+            items: vec![format!("crystal-item-{}", helmet.item_index)],
+        },
+    )
+    .unwrap();
+    assert!(runtime.refresh_active_external_mail());
+    let before_fenced_live =
+        shared_uid_character_assets(&runtime.active_character_checkpoint().unwrap());
+    let before_fenced_db = serde_json::to_value(shared_uid_stored_character(
+        &db,
+        account,
+        identity.character_index,
+    ))
+    .unwrap();
+    db.lease("owner-b", 8);
+    let rejected = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+            mail_id: u64::from(fenced_receipt.mail_ids[0]),
+        }))
+        .unwrap();
+    assert!(!rejected.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ParcelCollected { result: 1 }
+            | ServerPacket::GainedGold { .. }
+            | ServerPacket::GainedItem { .. }
+    )));
+    assert_eq!(allocator.issued_through().unwrap(), after_floor);
+    assert_eq!(
+        shared_uid_character_assets(&runtime.active_character_checkpoint().unwrap()),
+        before_fenced_live
+    );
+    assert_eq!(
+        serde_json::to_value(shared_uid_stored_character(
+            &db,
+            account,
+            identity.character_index
+        ))
+        .unwrap(),
+        before_fenced_db
+    );
+    assert_eq!(counts(&db), (1, 1, 0, 0));
+}
+
 #[test]
 #[ignore = "requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority"]
 fn player_drop_shared_uid_pg_independent_issuers_drop_batches_and_restart_share_one_floor() {

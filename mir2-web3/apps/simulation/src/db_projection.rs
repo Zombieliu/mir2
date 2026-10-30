@@ -113,7 +113,9 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
     ),
     (
         "0022_zone_player_drop_recovery_receipts",
-        include_str!("../../../infra/postgres/migrations/0022_zone_player_drop_recovery_receipts.sql"),
+        include_str!(
+            "../../../infra/postgres/migrations/0022_zone_player_drop_recovery_receipts.sql"
+        ),
     ),
     (
         "0023_zone_player_drop_admissions",
@@ -763,7 +765,11 @@ mod tests {
     fn migration_union_preserves_both_historical_stone_ids_and_new_authority_guards() {
         let versions: Vec<_> = MIGRATIONS.iter().map(|(version, _)| *version).collect();
         assert_eq!(
-            versions.iter().copied().collect::<std::collections::BTreeSet<_>>().len(),
+            versions
+                .iter()
+                .copied()
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
             versions.len(),
             "full migration IDs, including historical aliases, must remain unique"
         );
@@ -778,7 +784,10 @@ mod tests {
             "historical aliases must have identical SQL after Windows line-ending normalization"
         );
         assert!(current < position("0018_procurement_authority_guard"));
-        assert!(position("0018_procurement_authority_guard") < position("0019_sui_usdc_billing_authority"));
+        assert!(
+            position("0018_procurement_authority_guard")
+                < position("0019_sui_usdc_billing_authority")
+        );
     }
 
     fn sample_save() -> CharacterSaveRecord {
@@ -808,6 +817,7 @@ mod tests {
         let mut systems = Stage5SystemsState::default();
         systems.guild.name = "Heroes".to_string();
         systems.mail.push(crate::config::Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 1,
             delivery_nonce: "projection-fixture-mail-1".to_string(),
             from: "GM".to_string(),

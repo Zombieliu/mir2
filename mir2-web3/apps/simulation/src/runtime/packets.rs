@@ -150,8 +150,7 @@ use super::social_economy::{
 };
 use super::stage5::{
     exact_mail_item_state_is_valid, game_shop_stock_level, push_unique, push_unique_u8,
-    stage5_claim_mail_authoritative, stage5_item_name, stage5_player_name,
-    validate_stage5_guild_storage_item_carriers, Stage5MailClaimOutcome,
+    stage5_item_name, stage5_player_name, validate_stage5_guild_storage_item_carriers,
 };
 use super::RankingInspectPresence;
 
@@ -660,6 +659,10 @@ fn stage5_commit_mail_transaction(
             .map(serde_json::to_string)
             .collect::<Result<Vec<_>, _>>()
             .map_err(|error| format!("failed to encode authoritative mail attachment: {error}"))?;
+        // The same canonical transaction debits these exact instances from
+        // their sender and places them in recipient custody. Collection must
+        // preserve their identities rather than issue replacement instances.
+        mail.attachment_origin = crate::config::Stage5MailAttachmentOrigin::ExistingCustody;
 
         let _committed_mail = if self_mail {
             stage5_append_mail_to_save(&mut sender_save, &target.character_name, mail)?
@@ -858,6 +861,7 @@ fn stage5_send_mail_packet(
         Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
     };
     let mail = Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 0,
         delivery_nonce: new_stage5_mail_delivery_nonce(),
         from: sender.character_name.clone(),
@@ -950,101 +954,20 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
     let Some(mail_id) = u32::try_from(mail_id).ok() else {
         return Vec::new();
     };
-    // Capture immutable issuance authority before the save transaction takes
-    // the Store lock; the staged claim must not re-enter that lock.
-    let card_units = match super::billing_monthly_card::trusted_claim_units(world) {
-        Ok(units) => units,
+    let committed = match super::stage5::mail_uid_planning::commit_claims(world, &[mail_id]) {
+        Ok(committed) => committed,
         Err(error) => {
-            super::shared_guild_experience::reject_source(world, error);
+            if world
+                .resource::<RuntimeConfigResource>()
+                .config
+                .ensure_account_store_writable()
+                .is_err()
+            {
+                super::shared_guild_experience::reject_source(world, error);
+            }
             return Vec::new();
         }
     };
-    let base_inventory = world.resource::<InventoryResource>().clone();
-    let base_player = world.resource::<PlayerRuntimeResource>().clone();
-    let base_mail = world
-        .resource::<Stage5SystemsResource>()
-        .stage5_systems
-        .mail
-        .clone();
-    let committed = commit_active_character_save_transaction(world, move |save| {
-        let mut staged_inventory = base_inventory;
-        staged_inventory.inventory_items =
-            decode_mail_claim_item_states(&save.inventory_items_json, "active inventory")?;
-        staged_inventory.belt_items =
-            decode_mail_claim_item_states(&save.belt_items_json, "active belt")?;
-        staged_inventory.storage_items =
-            decode_mail_claim_item_states(&save.storage_items_json, "active storage")?;
-
-        let mut staged_player = base_player;
-        staged_player.gold = save.gold;
-        staged_player.credit = save.credit;
-        let mut staged_systems = save
-            .stage5_systems_json
-            .as_deref()
-            .map(serde_json::from_str::<Stage5SystemsState>)
-            .transpose()
-            .map_err(|error| format!("failed to decode staged claim mailbox: {error}"))?
-            .unwrap_or_default();
-        let mut visible_mail = base_mail;
-        merge_external_stage5_mail(&mut visible_mail, std::mem::take(&mut staged_systems.mail))?;
-        staged_systems.mail = visible_mail;
-
-        let mut staged_world = World::new();
-        staged_world.insert_resource(card_units);
-        staged_world.insert_resource(staged_inventory);
-        staged_world.insert_resource(staged_player);
-        staged_world.insert_resource(Stage5SystemsResource {
-            stage5_systems: staged_systems,
-        });
-        let claim = stage5_claim_mail_authoritative(&mut staged_world, mail_id)
-            .map_err(|error| format!("mail claim rejected: {error:?}"))?;
-
-        let staged_inventory = staged_world.resource::<InventoryResource>().clone();
-        let staged_player = staged_world.resource::<PlayerRuntimeResource>();
-        let committed_gold = staged_player.gold;
-        let committed_credit = staged_player.credit;
-        let staged_systems = staged_world
-            .resource::<Stage5SystemsResource>()
-            .stage5_systems
-            .clone();
-        save.gold = committed_gold;
-        save.credit = committed_credit;
-        save.inventory_items_json = encode_state_vec(&staged_inventory.inventory_items);
-        save.belt_items_json = encode_state_vec(&staged_inventory.belt_items);
-        save.stage5_systems_json = Some(
-            serde_json::to_string(&staged_systems)
-                .map_err(|error| format!("failed to encode staged claim mailbox: {error}"))?,
-        );
-
-        Ok(Stage5MailClaimCommit {
-            claim,
-            gold: committed_gold,
-            inventory_items: staged_inventory.inventory_items,
-            belt_items: staged_inventory.belt_items,
-            stage5_systems: staged_systems,
-        })
-    });
-    let Ok(committed) = committed else {
-        if let Err(error) = committed {
-            eprintln!("mail claim transaction failed: {error}");
-        }
-        // Crystal PlayerObject.CollectMail silently returns when the addressed
-        // mail is absent or cannot be collected. ParcelCollected(-1) belongs to
-        // the NPCScript bulk [@COLLECTPARCEL] path, not this single-mail command.
-        return Vec::new();
-    };
-
-    // The durable account-store transaction is authoritative. Only after it
-    // succeeds do we mirror the exact staged result into the active World and
-    // emit currency/item/success packets.
-    world.resource_mut::<PlayerRuntimeResource>().gold = committed.gold;
-    {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        inventory.inventory_items = committed.inventory_items;
-        inventory.belt_items = committed.belt_items;
-    }
-    world.resource_mut::<Stage5SystemsResource>().stage5_systems = committed.stage5_systems;
-
     let mut packets = Vec::new();
     if committed.claim.gold > 0 {
         packets.push(ServerPacket::GainedGold {
@@ -1059,25 +982,6 @@ fn stage5_collect_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPack
     packets.push(ServerPacket::ParcelCollected { result: 1 });
     packets.push(stage5_receive_mail_packet(world));
     packets
-}
-
-#[derive(Debug, Clone)]
-struct Stage5MailClaimCommit {
-    claim: Stage5MailClaimOutcome,
-    gold: u32,
-    inventory_items: Vec<ItemState>,
-    belt_items: Vec<ItemState>,
-    stage5_systems: Stage5SystemsState,
-}
-
-fn decode_mail_claim_item_states(states: &[String], label: &str) -> Result<Vec<ItemState>, String> {
-    states
-        .iter()
-        .map(|state| {
-            serde_json::from_str::<ItemState>(state)
-                .map_err(|error| format!("failed to decode {label} for mail claim: {error}"))
-        })
-        .collect()
 }
 
 #[derive(Debug, Clone, Copy)]

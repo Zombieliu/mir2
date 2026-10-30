@@ -1,0 +1,37 @@
+    Finished `test` profile [unoptimized] target(s) in 0.29s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 31 tests
+test config::tests::account_store_runtime_backend_defaults_to_postgres_for_production ... ok
+test config::tests::account_store_runtime_backend_rejects_file_backend_in_production ... ok
+test procurement::tests::procurement_playtest_gate_normalizes_all_three_markers_and_never_allows_production ... ok
+test procurement::tests::procurement_playtest_gate_rejects_conflicting_production_even_without_free_credits ... ok
+test procurement::tests::procurement_test_package_production_gates_ownership_expiry_and_rule_snapshot ... ok
+test runtime::production::tests::production_authoritative_range_and_disabled_gates_do_not_debit ... ok
+test runtime::production::tests::production_belt_and_bag_lots_propagate_binding_to_frozen_output ... ok
+test runtime::production::tests::production_cancel_preserves_bound_partial_origin_and_issues_new_uid ... ok
+test runtime::production::tests::production_changed_request_payload_cannot_spend_twice ... ok
+test runtime::production::tests::production_collect_raises_live_numeric_custody_reservation_floor ... ok
+test runtime::production::tests::production_double_session_cas_and_original_request_recovery ... ok
+test runtime::production::tests::production_file_start_collect_relogin_and_replay_conserve_real_inventory_and_gold ... ok
+test runtime::production::tests::production_full_bag_rejects_whole_delivery_without_uid_or_job_loss ... ok
+test runtime::production::tests::production_known_postcommit_failure_keeps_receipt_and_never_reissues ... ok
+test runtime::production::tests::production_ordinary_save_and_restore_cannot_manufacture_or_rewind_jobs ... ok
+test runtime::production::tests::production_ore_purity_is_not_stack_count_and_black_iron_is_protected ... ok
+test runtime::production::tests::production_overweight_rejects_whole_batch_before_global_uid_issuance ... ok
+test runtime::production::tests::production_persist_failure_leaves_live_and_file_unchanged ... ok
+test runtime::production::tests::production_rebind_cannot_mint_with_old_service_but_original_receipt_stays_queryable ... ok
+test runtime::production::tests::production_rejects_a_second_uid_service_without_replacing_config_or_assets ... ok
+test runtime::production::tests::production_safe_inputs_exclude_rental_equipment_and_other_owner_binding ... ok
+test runtime::production::tests::production_uid_floor_includes_other_character_equipment_and_whitespace_carriers ... ok
+test runtime::production::tests::production_unknown_file_publication_freezes_while_file_retains_original_receipt ... ok
+test runtime::production::uid_planning_tests::production_uid_backend_runs_without_account_lock_and_duplicate_query_never_mints ... ok
+test runtime::production::uid_planning_tests::production_uid_failed_capacity_plan_does_not_mint_and_postcommit_replay_never_reissues ... ok
+test runtime::production::uid_planning_tests::production_uid_failed_source_publication_burns_reservation_without_asset_debit ... ok
+test runtime::production::uid_planning_tests::production_uid_history_growth_after_reservation_rejects_then_retires_the_colliding_uid ... ok
+test runtime::refine_oven::clock_tests::production_wrapper_uses_a_real_single_capture_and_safe_sample_wire_shape ... ok
+test runtime::stage5::game_shop_validation_tests::production_game_shop_path_selects_exact_transaction_scope_and_preserves_behavior ... ok
+test runtime::zone::runtime::qa_natural_movement_delay_tests::defaults_to_production_and_only_shortens_when_explicitly_enabled ... ok
+test world_runtime::tests::debug_crystal_transfer_parser_and_production_guard_are_strictly_identical ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 3197 filtered out; finished in 12.59s

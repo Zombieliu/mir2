@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized] target(s) in 56.73s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 12 tests
+test runtime::item_grants::tests::batch_capacity_failure_does_not_keep_an_earlier_merge_or_mint ... ok
+test runtime::item_grants::tests::batch_mints_unique_roots_and_projects_final_wire_items ... ok
+test runtime::item_grants::tests::bound_or_cursed_stack_never_absorbs_plain_reward ... ok
+test runtime::item_grants::tests::fresh_batch_cannot_import_custody_or_nested_objects ... ok
+test runtime::item_grants::tests::fresh_unassigned_same_template_children_get_distinct_real_ids_without_temporary_floor ... ok
+test runtime::item_grants::tests::generic_capacity_failure_discards_a_partial_stack_merge_and_invalid_template ... ok
+test runtime::item_grants::tests::generic_delivery_reports_every_merged_and_fresh_stack ... ok
+test runtime::item_grants::tests::generic_metadata_delivery_preserves_legacy_fields_and_disables_merge ... ok
+test runtime::item_grants::tests::quest_slots_are_independent_and_fresh_grant_never_overwrites_a_full_slot ... ok
+test runtime::item_grants::tests::same_batch_plain_grants_share_new_stack_and_emit_its_final_count_once ... ok
+test runtime::item_grants::tests::shadow_and_fenced_batches_cannot_grow_an_existing_stack ... ok
+test runtime::item_grants::tests::uid_exhaustion_after_one_mint_burns_id_without_partial_delivery ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 3216 filtered out; finished in 4.48s

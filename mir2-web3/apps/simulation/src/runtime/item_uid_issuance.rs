@@ -2,7 +2,28 @@
 //! not enable this binding until every remaining grant path has migrated.
 //! A snapshot contains item identities, never an allocator or a mint cursor.
 use super::resources::InventoryResource;
-use crate::{SimulationConfig, UserItemUidAllocator, UserItemUidReason};
+use crate::{SimulationConfig, UserItemUidAllocator, UserItemUidError, UserItemUidReason};
+
+pub(crate) const ITEM_UID_COMMIT_OUTCOME_UNKNOWN: &str = "ITEM_UID_COMMIT_OUTCOME_UNKNOWN";
+
+pub(crate) fn item_uid_error(error: UserItemUidError) -> String {
+    match error {
+        UserItemUidError::CommitOutcomeUnknown { .. }
+        | UserItemUidError::DatabaseCommitOutcomeUnknown => ITEM_UID_COMMIT_OUTCOME_UNKNOWN.into(),
+        other => other.to_string(),
+    }
+}
+
+pub(crate) fn handle_item_uid_failure(config: &SimulationConfig, error: String) -> String {
+    if error == ITEM_UID_COMMIT_OUTCOME_UNKNOWN {
+        config.freeze_unknown_item_uid_publication();
+    }
+    error
+}
+
+pub(crate) fn source_item_uid_error(config: &SimulationConfig, error: UserItemUidError) -> String {
+    handle_item_uid_failure(config, item_uid_error(error))
+}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) enum ItemUidIssuance {
@@ -53,7 +74,7 @@ impl ItemUidIssuance {
             Self::Durable(allocator) => allocator
                 .ensure_issued_through_at_least(floor)
                 .map(|_| ())
-                .map_err(|error| error.to_string()),
+                .map_err(item_uid_error),
             Self::Legacy | Self::Unavailable | Self::Fenced => Ok(()),
         }
     }
@@ -75,10 +96,32 @@ impl ItemUidIssuance {
 /// Conservative scan of a complete account/save image, including JSON-encoded
 /// custody. This is a floor adjustment, not a complete deployment census.
 pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> Result<u64, String> {
+    let mut floor = 0;
+    visit_historical_uids(value, depth, &mut |uid| floor = floor.max(uid))?;
+    Ok(floor)
+}
+
+/// Local CAS protection uses the same conservative carriers as the floor scan.
+/// This is not a complete-history census or a physical ownership checker.
+pub(crate) fn historical_uid_conflicts(
+    value: &serde_json::Value,
+    ids: &std::collections::BTreeSet<u64>,
+) -> Result<bool, String> {
+    let mut conflict = false;
+    visit_historical_uids(value, 0, &mut |uid| {
+        conflict |= uid != 0 && ids.contains(&uid)
+    })?;
+    Ok(conflict)
+}
+
+fn visit_historical_uids(
+    value: &serde_json::Value,
+    depth: usize,
+    visitor: &mut impl FnMut(u64),
+) -> Result<(), String> {
     if depth > 64 {
         return Err("item UID history scan depth exceeded".into());
     }
-    let mut floor = 0;
     match value {
         serde_json::Value::Object(fields) => {
             for (key, value) in fields {
@@ -112,14 +155,14 @@ pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> R
                     } else {
                         return Err("invalid historical item UID".into());
                     };
-                    floor = floor.max(uid);
+                    visitor(uid);
                 }
-                floor = floor.max(historical_uid_floor(value, depth + 1)?);
+                visit_historical_uids(value, depth + 1, visitor)?;
             }
         }
         serde_json::Value::Array(rows) => {
             for row in rows {
-                floor = floor.max(historical_uid_floor(row, depth + 1)?);
+                visit_historical_uids(row, depth + 1, visitor)?;
             }
         }
         serde_json::Value::String(encoded)
@@ -129,12 +172,12 @@ pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> R
             // begin with '[' or '{'. A complete deployment census must decode
             // its declared carriers strictly instead of using this heuristic.
             if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(encoded) {
-                floor = floor.max(historical_uid_floor(&parsed, depth + 1)?);
+                visit_historical_uids(&parsed, depth + 1, visitor)?;
             }
         }
         _ => {}
     }
-    Ok(floor)
+    Ok(())
 }
 
 pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> Result<(), String> {
@@ -164,9 +207,13 @@ pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> R
     };
     // PostgreSQL issuers take the lease/UID row locks. Never retain the local
     // account mutex while contacting a durable issuer.
-    policy.raise_floor(floor)?;
+    policy
+        .raise_floor(floor)
+        .map_err(|error| handle_item_uid_failure(config, error))?;
     if let Some(save) = super::save::snapshot_active_character_save(world) {
-        policy.raise_serialized_floor(&save)?;
+        policy
+            .raise_serialized_floor(&save)
+            .map_err(|error| handle_item_uid_failure(config, error))?;
     }
     Ok(())
 }
@@ -206,7 +253,7 @@ impl SimulationConfig {
         };
         allocator
             .ensure_issued_through_at_least(floor)
-            .map_err(|error| error.to_string())?;
+            .map_err(|error| source_item_uid_error(&self, error))?;
         self.item_uid_issuance = ItemUidIssuance::Durable(allocator);
         Ok(self)
     }
@@ -259,7 +306,7 @@ impl SimulationConfig {
         };
         allocator
             .ensure_issued_through_at_least(floor)
-            .map_err(|error| error.to_string())?;
+            .map_err(|error| source_item_uid_error(&self, error))?;
         self.item_uid_issuance = ItemUidIssuance::Durable(allocator);
         Ok(self)
     }
@@ -286,11 +333,11 @@ pub(super) fn issue_for_staged_inventory(
                 .ensure_issued_through_at_least(super::inventory::inventory_max_unique_id(
                     resources,
                 ))
-                .map_err(|error| error.to_string())?;
+                .map_err(item_uid_error)?;
             allocator
                 .issue(reason)
                 .map(|uid| uid.get())
-                .map_err(|error| error.to_string())
+                .map_err(item_uid_error)
         }
     }
 }

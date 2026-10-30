@@ -90,10 +90,10 @@ mod activities;
 mod billing;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
-#[path = "web_procurement.rs"]
-mod procurement;
 #[path = "web_packet_batch.rs"]
 mod packet_batch;
+#[path = "web_procurement.rs"]
+mod procurement;
 #[path = "web_transport.rs"]
 mod transport;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
@@ -4996,8 +4996,10 @@ async fn handle_socket(
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
     let admission_state = state.clone();
-    let admission = tokio::task::spawn_blocking(move || new_gateway_session_for_web(&admission_state))
-        .await.unwrap_or_else(|_| Err("zone owner admission task failed".into()));
+    let admission =
+        tokio::task::spawn_blocking(move || new_gateway_session_for_web(&admission_state))
+            .await
+            .unwrap_or_else(|_| Err("zone owner admission task failed".into()));
     let mut session = match admission {
         Ok(session) => session,
         Err(_) => {
@@ -6092,9 +6094,10 @@ fn new_gateway_session_for_web(state: &WebState) -> Result<GatewaySession, Strin
             &state.zone_registry,
             Arc::clone(sink),
         ),
-        None => {
-            GatewaySession::try_new_with_zone_registry((*state.config).clone(), &state.zone_registry)
-        }
+        None => GatewaySession::try_new_with_zone_registry(
+            (*state.config).clone(),
+            &state.zone_registry,
+        ),
     }?;
     session.configure_zone_owner_heartbeat(gateway_zone_owner_heartbeat_interval_ms(), 0);
     Ok(session)
@@ -9996,9 +9999,9 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::BillingCheckout(request) => {
             Ok(SessionAction::Billing(billing::Request::Checkout(request)))
         }
-        BrowserCommand::BillingUsdcCheckout(request) => {
-            Ok(SessionAction::Billing(billing::Request::UsdcCheckout(request)))
-        }
+        BrowserCommand::BillingUsdcCheckout(request) => Ok(SessionAction::Billing(
+            billing::Request::UsdcCheckout(request),
+        )),
         BrowserCommand::BillingBuyMonthlyCard(request) => {
             Ok(SessionAction::Billing(billing::Request::Buy(request)))
         }
@@ -17234,6 +17237,7 @@ mod tests {
         let mut full_systems = Stage5SystemsState::default();
         full_systems.mail = (1..=100)
             .map(|id| Stage5MailMessage {
+                attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
                 id,
                 delivery_nonce: format!("native-shop-full-{id}"),
                 from: "System".to_string(),

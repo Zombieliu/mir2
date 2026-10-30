@@ -10,7 +10,7 @@ use std::{
     fs,
     path::PathBuf,
     sync::{
-        atomic::{AtomicU64, AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
         Arc, Mutex,
     },
 };
@@ -25,6 +25,7 @@ struct ObservedStore {
     after_issue: Mutex<Option<AfterIssue>>,
     unlocked_checks: AtomicUsize,
     ensures: AtomicUsize,
+    starting_character: AtomicBool,
 }
 impl ObservedStore {
     fn assert_account_unlocked(&self) {
@@ -42,7 +43,14 @@ impl ObservedStore {
 impl UserItemUidStore for ObservedStore {
     fn issue_one(&self, reason: UserItemUidReason) -> Result<UserItemUid, UserItemUidError> {
         self.assert_account_unlocked();
-        assert_eq!(reason, UserItemUidReason::Crafting);
+        assert_eq!(
+            reason,
+            if self.starting_character.load(Ordering::SeqCst) {
+                UserItemUidReason::CharacterStartItem
+            } else {
+                UserItemUidReason::Crafting
+            }
+        );
         let uid = crate::player_drop::player_drop_next_ordinary_item_uid(
             self.high.load(Ordering::SeqCst),
         )
@@ -100,8 +108,12 @@ impl Fixture {
             })
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+        // Starter migration is a distinct legitimate issuer phase. After a
+        // successful start every issuance remains strictly a crafting action.
+        store.starting_character.store(true, Ordering::SeqCst);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
         assert!(session.active_identity().is_some());
+        store.starting_character.store(false, Ordering::SeqCst);
         let choices: Vec<_> = mir2_game_data::crystal_item_manifest()
             .items
             .into_iter()

@@ -269,6 +269,7 @@ fn record_entry(
     } else {
         let id = next_mail_id(state)?;
         let mail = Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id,
             delivery_nonce: LEDGER_NONCE.into(),
             from: LEDGER_FROM.into(),
@@ -820,6 +821,7 @@ impl SimulationSession {
                     .map_err(|_| "gameShopGiftItemInvalid")?;
             }
             recipient_state.mail.push(Stage5MailMessage {
+                attachment_origin: crate::config::Stage5MailAttachmentOrigin::FreshGrant,
                 id: mail_id,
                 delivery_nonce: nonce.clone(),
                 from: "Gameshop".into(),
@@ -1124,6 +1126,7 @@ mod tests {
         let newer = ledger_mail(vec![entry(1), entry(2)]);
         let older = ledger_mail(vec![entry(1)]);
         let ordinary = Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: newer.id,
             delivery_nonce: "gift-external-ordinary-mail".into(),
             from: "Friend".into(),

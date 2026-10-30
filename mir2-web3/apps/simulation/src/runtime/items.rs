@@ -33,11 +33,10 @@ use super::equipment::{
     try_luck_weapon, CrystalLuckWeaponOutcome, EquipmentState,
 };
 use super::inventory::{
-    add_minutes_to_binary_datetime, add_or_increment_item_with_durability_and_stats,
-    binary_datetime_ticks, can_gain_item_quantity, consume_item_at_use_location,
-    crystal_duration_label_from_minutes, crystal_duration_label_from_seconds,
-    current_binary_datetime, find_use_item_location, future_binary_datetime_minutes,
-    item_at_use_location, UseItemLocation,
+    add_minutes_to_binary_datetime, binary_datetime_ticks, can_gain_item_quantity,
+    consume_item_at_use_location, crystal_duration_label_from_minutes,
+    crystal_duration_label_from_seconds, current_binary_datetime, find_use_item_location,
+    future_binary_datetime_minutes, item_at_use_location, UseItemLocation,
 };
 use super::map::{
     current_map_disallows_drug, current_map_disallows_escape,
@@ -70,7 +69,7 @@ use super::skills::{
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct ItemState {
     /// Server registry reference only; no hidden outcome or random seed.
-    #[serde(default, skip_serializing_if="Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub(super) stone_serial: Option<u64>,
     pub(super) key: String,
     pub(super) name: String,
@@ -2644,10 +2643,19 @@ pub(super) fn craft_item_impl(
         }
     }
 
-    // Validation passed — apply consumption (tool durability, ingredients, gold).
+    // Freeze the original roll and complete source consumption in a clone.
+    // A failed result issuance must not consume tools, ingredients or gold.
     let current_tick = runtime_tick(world);
+    let roll = deterministic_roll(
+        current_tick,
+        recipe.output.item_index.max(0) as usize,
+        unique_id as usize,
+        100,
+    );
+    let produces_output = roll < u64::from(recipe.chance);
+    let mut next_inventory = world.resource::<InventoryResource>().clone();
     {
-        let mut resources = world.resource_mut::<InventoryResource>();
+        let resources = &mut next_inventory;
         for &inv_index in &tool_indexes {
             let item = &mut resources.inventory_items[inv_index];
             let remaining = u32::from(item.durability_current.unwrap_or(0))
@@ -2671,45 +2679,72 @@ pub(super) fn craft_item_impl(
         }
     }
 
+    let gained = if produces_output {
+        if let Err(error) = super::item_uid_issuance::refresh_world_history_floor(world) {
+            super::item_uid_issuance::handle_item_uid_failure(
+                &world.resource::<RuntimeConfigResource>().config,
+                error,
+            );
+            return fail();
+        }
+        let produced = goods_count.saturating_mul(craft_count);
+        let plan = match plan_crystal_craft_output(&next_inventory, &goods_template, produced) {
+            Ok(plan) => plan,
+            Err(error) => {
+                super::item_uid_issuance::handle_item_uid_failure(
+                    &world.resource::<RuntimeConfigResource>().config,
+                    error,
+                );
+                return fail();
+            }
+        };
+        next_inventory = plan.inventory;
+        plan.changed
+    } else {
+        // A valid failed chance roll retains Crystal's original attempt costs.
+        // It does not need, and must not request, an unused output identity.
+        Vec::new()
+    };
+
+    *world.resource_mut::<InventoryResource>() = next_inventory;
     world.resource_mut::<PlayerRuntimeResource>().gold -= needed_gold;
     let mut packets = vec![ServerPacket::LoseGold { gold: needed_gold }];
-
-    // Success roll mirrors `Random.Next(100) >= Chance` (no CraftRatePercent source).
-    let roll = deterministic_roll(
-        current_tick,
-        recipe.output.item_index.max(0) as usize,
-        unique_id as usize,
-        100,
-    );
-    if roll < u64::from(recipe.chance) {
-        let key = crystal_item_key_for_template(&goods_template);
-        let produced = goods_count.saturating_mul(craft_count);
-        let durability = (goods_template.durability > 0).then_some(goods_template.durability);
-        let gained = add_or_increment_item_with_durability_and_stats(
-            world,
-            ItemContainer::Bag1,
-            &key,
-            &goods_template.name,
-            goods_template
-                .tooltip
-                .as_deref()
-                .unwrap_or("Crystal crafted item."),
-            8,
-            produced,
-            u16::from(goods_template.weight.max(1)),
-            durability,
-            durability,
-            0,
-            0,
-        );
-        packets.push(ServerPacket::GainedItem {
-            item: user_item_from_item_state(&gained),
-        });
-    }
+    packets.extend(gained.iter().map(|item| ServerPacket::GainedItem {
+        item: user_item_from_item_state(item),
+    }));
 
     packets.push(ServerPacket::CraftItem { success: true });
     packets
 }
+
+fn plan_crystal_craft_output(
+    inventory: &InventoryResource,
+    template: &CrystalItemTemplate,
+    produced: u32,
+) -> Result<super::item_grants::FreshGrantPlan, String> {
+    let durability = (template.durability > 0).then_some(template.durability);
+    let mut grant = super::item_grants::FreshItemGrant::plain(
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(template),
+        &template.name,
+        template
+            .tooltip
+            .as_deref()
+            .unwrap_or("Crystal crafted item."),
+        8,
+        produced,
+        u16::from(template.weight.max(1)),
+        crate::UserItemUidReason::Crafting,
+    )?;
+    grant.prototype.durability_current = durability;
+    grant.prototype.durability_max = durability;
+    grant.allow_stack_merge = durability.is_none() && grant.prototype.socket_slots == 0;
+    super::item_grants::plan_fresh_item_grants(inventory, &[grant])
+}
+
+#[cfg(test)]
+#[path = "craft_uid_transaction_tests.rs"]
+pub(in crate::runtime) mod craft_uid_transaction_tests;
 
 pub(super) fn revive_current_player_from_resurrection_scroll(
     world: &mut World,

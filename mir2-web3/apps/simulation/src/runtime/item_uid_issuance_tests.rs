@@ -123,6 +123,19 @@ fn uid_history_floor_includes_equipment_custody_sockets_and_receipt_only_merged_
 }
 
 #[test]
+fn history_conflict_checks_exact_reserved_ids_without_rejecting_unrelated_high_history() {
+    let ids = std::collections::BTreeSet::from([40_001, 40_002]);
+    let unrelated = serde_json::json!({
+        "mail": "[{\"unique_id\":18446744073709551614}]",
+        "receipt": {"incomingUniqueId": "40003"}
+    });
+    assert!(!historical_uid_conflicts(&unrelated, &ids).unwrap());
+    let matching = serde_json::json!({"custody":"{\"slots\":[{\"uniqueId\":40002}]}"});
+    assert!(historical_uid_conflicts(&matching, &ids).unwrap());
+    assert!(historical_uid_conflicts(&serde_json::json!({"unique_id":"0040002"}), &ids).is_err());
+}
+
+#[test]
 fn uid_history_floor_includes_retired_escrow_carriers_and_authority_watermarks() {
     for key in [
         "item_uid",

@@ -174,6 +174,7 @@ fn fill_mail(config: &SimulationConfig, account_id: &str, index: i32) {
     let mut state = Stage5SystemsState::default();
     for id in 1..=100 {
         state.mail.push(Stage5MailMessage {
+            attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
             id,
             delivery_nonce: format!("gift-fixture-full-{account_id}-{id}"),
             from: "Fixture".into(),

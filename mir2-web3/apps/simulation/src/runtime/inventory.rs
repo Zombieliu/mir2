@@ -2731,6 +2731,157 @@ pub(super) fn add_exact_ground_drop_items(
     *world.resource_mut::<InventoryResource>() = plan.inventory;
     Some(changed_items)
 }
+/// Complete fallible fresh delivery. Quantity zero retains the historical
+/// minimum-one grant convention; callers that require zero to mean no grant
+/// must reject/filter that input before requesting delivery.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn try_add_or_increment_item(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    quantity: u32,
+    weight: u16,
+    reason: crate::UserItemUidReason,
+) -> Result<Vec<ItemState>, String> {
+    try_add_or_increment_item_with_durability(
+        world,
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        quantity,
+        weight,
+        None,
+        None,
+        reason,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn try_add_or_increment_item_with_durability(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    quantity: u32,
+    weight: u16,
+    durability_current: Option<u16>,
+    durability_max: Option<u16>,
+    reason: crate::UserItemUidReason,
+) -> Result<Vec<ItemState>, String> {
+    try_add_or_increment_item_with_durability_and_stats(
+        world,
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        quantity,
+        weight,
+        durability_current,
+        durability_max,
+        0,
+        0,
+        reason,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(super) fn try_add_or_increment_item_with_durability_and_stats(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    quantity: u32,
+    weight: u16,
+    durability_current: Option<u16>,
+    durability_max: Option<u16>,
+    added_attack: i32,
+    added_defence: i32,
+    reason: crate::UserItemUidReason,
+) -> Result<Vec<ItemState>, String> {
+    try_add_or_increment_item_with_random_metadata(
+        world,
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        quantity,
+        weight,
+        durability_current,
+        durability_max,
+        added_attack,
+        added_defence,
+        Vec::new(),
+        false,
+        0,
+        reason,
+    )
+}
+
+/// Plans every merge/new stack in a clone and reserves all new identities
+/// before publishing the complete inventory. Capacity failure never overwrites
+/// a preferred slot or publishes only the first part of a requested grant.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn try_add_or_increment_item_with_random_metadata(
+    world: &mut World,
+    container: ItemContainer,
+    key: &str,
+    name: &str,
+    description: &str,
+    preferred_slot: u8,
+    quantity: u32,
+    weight: u16,
+    durability_current: Option<u16>,
+    durability_max: Option<u16>,
+    added_attack: i32,
+    added_defence: i32,
+    added_stats: Vec<UserItemStat>,
+    cursed: bool,
+    socket_slots: u8,
+    reason: crate::UserItemUidReason,
+) -> Result<Vec<ItemState>, String> {
+    let template = crystal_item_template_for_item_key(key)
+        .ok_or_else(|| format!("fresh grant template unavailable: {key}"))?;
+    let mut grant = super::item_grants::FreshItemGrant::plain(
+        container,
+        key,
+        name,
+        description,
+        preferred_slot,
+        quantity.max(1),
+        weight,
+        reason,
+    )?;
+    let template_durability = (template.durability > 0).then_some(template.durability);
+    grant.prototype.durability_current = durability_current.or(template_durability);
+    grant.prototype.durability_max = durability_max.or(template_durability);
+    grant.prototype.added_attack = added_attack;
+    grant.prototype.added_defence = added_defence;
+    grant.prototype.added_stats = added_stats;
+    grant.prototype.cursed = cursed;
+    grant.prototype.socket_slots = socket_slots.max(template.slots);
+    // Keep the original helper's per-item metadata policy even if a stack's
+    // other fields happen to compare equal to this prototype.
+    grant.allow_stack_merge = grant.prototype.durability_current.is_none()
+        && grant.prototype.durability_max.is_none()
+        && added_attack == 0
+        && added_defence == 0
+        && grant.prototype.added_stats.is_empty()
+        && !cursed
+        && grant.prototype.socket_slots == 0;
+    super::item_grants::publish_world_grants(world, &[grant])
+}
+
 pub(super) fn add_or_increment_item(
     world: &mut World,
     container: ItemContainer,

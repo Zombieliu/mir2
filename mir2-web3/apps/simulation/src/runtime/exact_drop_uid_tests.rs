@@ -1,8 +1,10 @@
 //! Controlled File issuance through actual pickup/custody planners. No live server.
-use super::*;
 use super::super::item_grants::tests::{fill_bag, inventory_image, trusted_session};
+use super::*;
 use crate::{SimulationSession, UserItemUidAllocator};
-use mir2_protocol::{ClientPacket, UserItemExpireInfo, UserItemRentalInformation, UserItemSealedInfo};
+use mir2_protocol::{
+    ClientPacket, UserItemExpireInfo, UserItemRentalInformation, UserItemSealedInfo,
+};
 use std::fs;
 
 const DROP_DESCRIPTION: &str = "drop uid test";
@@ -11,7 +13,10 @@ fn payload(name: &str) -> GroundDropItemPayload {
     let template = mir2_game_data::crystal_item_by_name(name).unwrap();
     let mut state = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
     state.unique_id = 600_001;
-    GroundDropItemPayload { item: try_user_item_from_item_state(&state).unwrap(), uid_assigned: false }
+    GroundDropItemPayload {
+        item: try_user_item_from_item_state(&state).unwrap(),
+        uid_assigned: false,
+    }
 }
 
 fn nested_payload() -> GroundDropItemPayload {
@@ -28,13 +33,18 @@ fn nested_payload() -> GroundDropItemPayload {
     root.item.refine_added = 7;
     root.item.refine_success_chance = 88;
     root.item.wedding_ring = 23;
-    root.item.expire_info = Some(UserItemExpireInfo { expiry_binary_datetime: 123_456 });
+    root.item.expire_info = Some(UserItemExpireInfo {
+        expiry_binary_datetime: 123_456,
+    });
     root.item.rental_information = Some(UserItemRentalInformation {
-        owner_name: "owner".into(), binding_flags: 3,
-        expiry_binary_datetime: 234_567, rental_locked: true,
+        owner_name: "owner".into(),
+        binding_flags: 3,
+        expiry_binary_datetime: 234_567,
+        rental_locked: true,
     });
     root.item.sealed_info = Some(UserItemSealedInfo {
-        expiry_binary_datetime: 345_678, next_seal_binary_datetime: 456_789,
+        expiry_binary_datetime: 345_678,
+        next_seal_binary_datetime: 456_789,
     });
     root.item.is_shop_item = true;
     root.item.gm_made = true;
@@ -55,35 +65,64 @@ fn template_for(payload: &GroundDropItemPayload) -> CrystalItemTemplate {
 
 fn preview(session: &SimulationSession, payload: &GroundDropItemPayload) -> bool {
     let template = template_for(payload);
-    can_gain_exact_ground_drop_item(session.app.world(), ItemContainer::Bag1,
-        &crystal_item_key_for_template(&template), &template.name, DROP_DESCRIPTION, 8,
-        u32::from(payload.item.count), payload)
+    can_gain_exact_ground_drop_item(
+        session.app.world(),
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(&template),
+        &template.name,
+        DROP_DESCRIPTION,
+        8,
+        u32::from(payload.item.count),
+        payload,
+    )
 }
 
-fn collect(session: &mut SimulationSession, payload: &GroundDropItemPayload) -> Option<Vec<ItemState>> {
+fn collect(
+    session: &mut SimulationSession,
+    payload: &GroundDropItemPayload,
+) -> Option<Vec<ItemState>> {
     let template = template_for(payload);
-    add_exact_ground_drop_items(session.app.world_mut(), ItemContainer::Bag1,
-        &crystal_item_key_for_template(&template), &template.name, DROP_DESCRIPTION, 8,
-        u32::from(payload.item.count), payload)
+    add_exact_ground_drop_items(
+        session.app.world_mut(),
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(&template),
+        &template.name,
+        DROP_DESCRIPTION,
+        8,
+        u32::from(payload.item.count),
+        payload,
+    )
 }
 
 fn set_ids(item: &mut UserItem, next: &mut u64) {
     item.unique_id = *next;
     *next += 1;
-    for child in item.slots.iter_mut().flatten() { set_ids(child, next); }
+    for child in item.slots.iter_mut().flatten() {
+        set_ids(child, next);
+    }
 }
 
 fn clear_ids(item: &mut UserItem) {
     item.unique_id = 0;
-    for child in item.slots.iter_mut().flatten() { clear_ids(child); }
+    for child in item.slots.iter_mut().flatten() {
+        clear_ids(child);
+    }
 }
 
 fn same_authority_session(allocator: &UserItemUidAllocator) -> SimulationSession {
-    let config = SimulationConfig::default().with_item_uid_allocator(allocator.clone()).unwrap();
+    let config = SimulationConfig::default()
+        .with_item_uid_allocator(allocator.clone())
+        .unwrap();
     let mut session = SimulationSession::new(config);
-    let packets = session.handle_packet(ClientPacket::Login { account_id: "demo".into(), password: "demo".into() });
-    assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+    let packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".into(),
+        password: "demo".into(),
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    assert!(session.active_identity().is_some());
     let mut inv = session.app.world_mut().resource_mut::<InventoryResource>();
     inv.inventory_items.clear();
     inv.belt_items.clear();
@@ -91,7 +130,13 @@ fn same_authority_session(allocator: &UserItemUidAllocator) -> SimulationSession
     session
 }
 
-fn carried(payload: &GroundDropItemPayload, container: ItemContainer, slot: u8, uid: u64, count: u16) -> ItemState {
+fn carried(
+    payload: &GroundDropItemPayload,
+    container: ItemContainer,
+    slot: u8,
+    uid: u64,
+    count: u16,
+) -> ItemState {
     let template = template_for(payload);
     let mut base = embedded_item_state_from_template(&template, container, slot);
     base.description = DROP_DESCRIPTION.into();
@@ -109,7 +154,9 @@ fn nested_drop_preview_is_pure_and_commit_mints_each_raw_node_once() {
     let source = payload.item.clone();
     let file_before = fs::read(&path).unwrap();
     let inventory_before = inventory_image(&session);
-    for _ in 0..10 { assert!(preview(&session, &payload)); }
+    for _ in 0..10 {
+        assert!(preview(&session, &payload));
+    }
     assert_eq!(fs::read(&path).unwrap(), file_before);
     assert_eq!(inventory_image(&session), inventory_before);
     assert_eq!(payload.item, source);
@@ -121,8 +168,14 @@ fn nested_drop_preview_is_pure_and_commit_mints_each_raw_node_once() {
     assert_eq!(gained.slots[2].as_ref().unwrap().unique_id, 5_000_003);
     assert_eq!(gained.slots[3].as_ref().unwrap().unique_id, 5_000_004);
     assert_eq!(allocator.issued_through().unwrap(), 5_000_004);
-    let persisted = session.app.world().resource::<InventoryResource>().inventory_items.iter()
-        .find(|item| item.unique_id == gained.unique_id).unwrap();
+    let persisted = session
+        .app
+        .world()
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .find(|item| item.unique_id == gained.unique_id)
+        .unwrap();
     assert_eq!(try_user_item_from_item_state(persisted).unwrap(), gained);
     clear_ids(&mut gained);
     let mut expected = source;
@@ -134,11 +187,12 @@ fn nested_drop_preview_is_pure_and_commit_mints_each_raw_node_once() {
 fn fresh_drop_sessions_share_authority_without_using_planning_ids_as_history() {
     let (mut first, allocator, _) = trusted_session("drop-two-sessions", 5_000_000);
     let mut second = same_authority_session(&allocator);
+    let before_drops = allocator.issued_through().unwrap();
     let source = payload("GoldOre");
     let a = collect(&mut first, &source).unwrap()[0].unique_id;
     let b = collect(&mut second, &source).unwrap()[0].unique_id;
-    assert_eq!(a, 5_000_001);
-    assert_eq!(b, 5_000_002);
+    assert_eq!(a, before_drops + 1);
+    assert_eq!(b, before_drops + 2);
     assert_eq!(allocator.issued_through().unwrap(), b);
 }
 
@@ -166,12 +220,32 @@ fn fresh_raw_preflight_keeps_original_shape_and_committed_carrier_limits() {
     let before = inventory_image(&session);
     let floor = allocator.issued_through().unwrap();
     for invalid in [deep, slots, stats, awake, child_zero_count, wrong_template] {
-        let key = if invalid.item.item_index < 0 { crystal_item_key_for_template(&template) }
-            else { crystal_item_key_for_template(&template_for(&invalid)) };
-        assert!(!can_gain_exact_ground_drop_item(session.app.world(), ItemContainer::Bag1,
-            &key, "invalid", "invalid", 8, u32::from(invalid.item.count), &invalid));
-        assert!(add_exact_ground_drop_items(session.app.world_mut(), ItemContainer::Bag1,
-            &key, "invalid", "invalid", 8, u32::from(invalid.item.count), &invalid).is_none());
+        let key = if invalid.item.item_index < 0 {
+            crystal_item_key_for_template(&template)
+        } else {
+            crystal_item_key_for_template(&template_for(&invalid))
+        };
+        assert!(!can_gain_exact_ground_drop_item(
+            session.app.world(),
+            ItemContainer::Bag1,
+            &key,
+            "invalid",
+            "invalid",
+            8,
+            u32::from(invalid.item.count),
+            &invalid
+        ));
+        assert!(add_exact_ground_drop_items(
+            session.app.world_mut(),
+            ItemContainer::Bag1,
+            &key,
+            "invalid",
+            "invalid",
+            8,
+            u32::from(invalid.item.count),
+            &invalid
+        )
+        .is_none());
         assert_eq!(inventory_image(&session), before);
         assert_eq!(allocator.issued_through().unwrap(), floor);
     }
@@ -186,7 +260,17 @@ fn failed_capacity_discards_earlier_merge_and_never_mints() {
     assert!(max > 2);
     source.item.count = 2;
     let existing = carried(&source, ItemContainer::Bag1, 0, 400_001, max - 1);
-    let belt = (0..6).map(|slot| carried(&source, ItemContainer::Belt, slot, 410_000 + u64::from(slot), max)).collect();
+    let belt = (0..6)
+        .map(|slot| {
+            carried(
+                &source,
+                ItemContainer::Belt,
+                slot,
+                410_000 + u64::from(slot),
+                max,
+            )
+        })
+        .collect();
     let mut inv = session.app.world_mut().resource_mut::<InventoryResource>();
     inv.inventory_items[0] = existing;
     inv.belt_items = belt;
@@ -197,9 +281,17 @@ fn failed_capacity_discards_earlier_merge_and_never_mints() {
     let mut one_unit = source.clone();
     one_unit.item.count = 1;
     let template = template_for(&one_unit);
-    let plan = plan_exact_ground_drop_item(session.app.world().resource::<InventoryResource>(),
-        ItemContainer::Bag1, &crystal_item_key_for_template(&template), &template.name,
-        DROP_DESCRIPTION, 8, 1, &one_unit).unwrap();
+    let plan = plan_exact_ground_drop_item(
+        session.app.world().resource::<InventoryResource>(),
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(&template),
+        &template.name,
+        DROP_DESCRIPTION,
+        8,
+        1,
+        &one_unit,
+    )
+    .unwrap();
     assert!(plan.fresh_locations.is_empty());
     assert_eq!(plan.changed.len(), 1);
     assert_eq!(plan.changed[0].unique_id, 400_001);
@@ -220,14 +312,29 @@ fn local_pickup_uid_failure_keeps_ground_object_and_emits_no_gain() {
     let world = session.app.world_mut();
     let player = super::super::components::player_entity(world).unwrap();
     let position = super::super::components::entity_position(world, player).unwrap();
-    super::super::drops::spawn_ground_drop(world, position, "uid-test", None,
+    super::super::drops::spawn_ground_drop(
+        world,
+        position,
+        "uid-test",
+        None,
         super::super::drops::DropLoot::InventoryItem {
-            key: crystal_item_key_for_template(&template), name: template.name.clone(),
-            description: "frozen".into(), weight: u16::from(template.weight),
-            durability_current: None, durability_max: None, added_attack: 0,
-            added_defence: 0, added_stats: Vec::new(), cursed: false,
-            socket_slots: template.slots, show_group_pickup: false, exact_item: Some(source),
-        }, 1, template.name);
+            key: crystal_item_key_for_template(&template),
+            name: template.name.clone(),
+            description: "frozen".into(),
+            weight: u16::from(template.weight),
+            durability_current: None,
+            durability_max: None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots: template.slots,
+            show_group_pickup: false,
+            exact_item: Some(source),
+        },
+        1,
+        template.name,
+    );
     let before = inventory_image(&session);
     let ground_before = session.world_snapshot().ground_drops;
     assert_eq!(ground_before.len(), 1);
@@ -235,7 +342,9 @@ fn local_pickup_uid_failure_keeps_ground_object_and_emits_no_gain() {
     let packets = session.handle_packet(ClientPacket::PickUp);
     assert_eq!(inventory_image(&session), before);
     assert_eq!(session.world_snapshot().ground_drops, ground_before);
-    assert!(!packets.iter().any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
+    assert!(!packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::GainedItem { .. })));
 }
 
 #[test]
@@ -246,28 +355,59 @@ fn actual_pickup_emits_final_uid_and_normal_relogin_preserves_it() {
     let world = session.app.world_mut();
     let player = super::super::components::player_entity(world).unwrap();
     let position = super::super::components::entity_position(world, player).unwrap();
-    super::super::drops::spawn_ground_drop(world, position, "uid-save-test", None,
+    super::super::drops::spawn_ground_drop(
+        world,
+        position,
+        "uid-save-test",
+        None,
         super::super::drops::DropLoot::InventoryItem {
-            key: crystal_item_key_for_template(&template), name: template.name.clone(),
-            description: "saved".into(), weight: u16::from(template.weight),
-            durability_current: None, durability_max: None, added_attack: 0,
-            added_defence: 0, added_stats: Vec::new(), cursed: false,
-            socket_slots: template.slots, show_group_pickup: false, exact_item: Some(source),
-        }, 1, template.name);
+            key: crystal_item_key_for_template(&template),
+            name: template.name.clone(),
+            description: "saved".into(),
+            weight: u16::from(template.weight),
+            durability_current: None,
+            durability_max: None,
+            added_attack: 0,
+            added_defence: 0,
+            added_stats: Vec::new(),
+            cursed: false,
+            socket_slots: template.slots,
+            show_group_pickup: false,
+            exact_item: Some(source),
+        },
+        1,
+        template.name,
+    );
     let packets = session.handle_packet(ClientPacket::PickUp);
-    let gained = packets.iter().find_map(|packet| match packet {
-        ServerPacket::GainedItem { item } => Some(item.clone()), _ => None,
-    }).unwrap();
+    let gained = packets
+        .iter()
+        .find_map(|packet| match packet {
+            ServerPacket::GainedItem { item } => Some(item.clone()),
+            _ => None,
+        })
+        .unwrap();
     assert_eq!(gained.unique_id, 5_000_001);
     assert!(session.world_snapshot().ground_drops.is_empty());
-    let config = session.app.world().resource::<RuntimeConfigResource>().config.clone();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
     session.handle_packet(ClientPacket::LogOut);
     let mut restored = SimulationSession::new(config);
-    restored.handle_packet(ClientPacket::Login { account_id: "demo".into(), password: "demo".into() });
+    restored.handle_packet(ClientPacket::Login {
+        account_id: "demo".into(),
+        password: "demo".into(),
+    });
     restored.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let inv = restored.app.world().resource::<InventoryResource>();
-    let saved = inv.inventory_items.iter().chain(inv.belt_items.iter())
-        .find(|item| item.unique_id == gained.unique_id).unwrap();
+    let saved = inv
+        .inventory_items
+        .iter()
+        .chain(inv.belt_items.iter())
+        .find(|item| item.unique_id == gained.unique_id)
+        .unwrap();
     assert_eq!(try_user_item_from_item_state(saved).unwrap(), gained);
     assert_eq!(allocator.issued_through().unwrap(), gained.unique_id);
 }
@@ -295,7 +435,10 @@ fn assigned_custody_preserves_entire_nested_tree_without_new_issuance() {
     let floor = allocator.issued_through().unwrap();
     assert!(preview(&session, &source));
     let gained = collect(&mut session, &source).unwrap();
-    assert_eq!(try_user_item_from_item_state(&gained[0]).unwrap(), source.item);
+    assert_eq!(
+        try_user_item_from_item_state(&gained[0]).unwrap(),
+        source.item
+    );
     assert_eq!(allocator.issued_through().unwrap(), floor);
 }
 
@@ -305,9 +448,16 @@ fn custody_conflicts_cannot_hide_inside_full_stack_absorption() {
     let mut source = payload("(HP)DrugSmall");
     let max = template_for(&source).stack_size.max(1);
     let existing = carried(&source, ItemContainer::Bag1, 0, 400_001, max - 1);
-    assert!(item_stack_identity_compatible(&existing,
-        &carried(&source, ItemContainer::Bag1, 8, source.item.unique_id, 1)));
-    session.app.world_mut().resource_mut::<InventoryResource>().inventory_items.push(existing);
+    assert!(item_stack_identity_compatible(
+        &existing,
+        &carried(&source, ItemContainer::Bag1, 8, source.item.unique_id, 1)
+    ));
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(existing);
     source.uid_assigned = true;
     let before = inventory_image(&session);
     let floor = allocator.issued_through().unwrap();
@@ -316,7 +466,12 @@ fn custody_conflicts_cannot_hide_inside_full_stack_absorption() {
     assert!(collect(&mut session, &source).is_none());
     assert_eq!(inventory_image(&session), before);
     source.item.unique_id = 400_555;
-    session.app.world_mut().resource_mut::<InventoryResource>().reserved_item_unique_ids.insert(400_555);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .reserved_item_unique_ids
+        .insert(400_555);
     let reserved_before = inventory_image(&session);
     assert!(!preview(&session, &source));
     assert!(collect(&mut session, &source).is_none());
@@ -330,9 +485,16 @@ fn absorbed_custody_source_raises_retired_id_floor_without_minting() {
     let mut source = payload("(HP)DrugSmall");
     let max = template_for(&source).stack_size.max(1);
     let existing = carried(&source, ItemContainer::Bag1, 0, 400_001, max - 1);
-    assert!(item_stack_identity_compatible(&existing,
-        &carried(&source, ItemContainer::Bag1, 8, source.item.unique_id, 1)));
-    session.app.world_mut().resource_mut::<InventoryResource>().inventory_items.push(existing);
+    assert!(item_stack_identity_compatible(
+        &existing,
+        &carried(&source, ItemContainer::Bag1, 8, source.item.unique_id, 1)
+    ));
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(existing);
     source.item.unique_id = 6_000_000;
     source.uid_assigned = true;
     assert!(preview(&session, &source));
@@ -352,32 +514,70 @@ fn fresh_merge_only_is_fenced_and_full_bag_never_uses_out_of_range_preference() 
     let source = payload("(HP)DrugSmall");
     let max = template_for(&source).stack_size.max(1);
     let existing = carried(&source, ItemContainer::Bag1, 0, 400_001, max - 1);
-    session.app.world_mut().resource_mut::<InventoryResource>().inventory_items.push(existing);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .push(existing);
     let template = template_for(&source);
-    let plan = plan_exact_ground_drop_item(session.app.world().resource::<InventoryResource>(),
-        ItemContainer::Bag1, &crystal_item_key_for_template(&template), &template.name,
-        DROP_DESCRIPTION, 8, 1, &source).unwrap();
+    let plan = plan_exact_ground_drop_item(
+        session.app.world().resource::<InventoryResource>(),
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(&template),
+        &template.name,
+        DROP_DESCRIPTION,
+        8,
+        1,
+        &source,
+    )
+    .unwrap();
     assert!(plan.fresh_locations.is_empty());
     assert_eq!(plan.changed.len(), 1);
     assert_eq!(plan.changed[0].unique_id, 400_001);
     assert_eq!(plan.changed[0].quantity, u32::from(max));
     assert_eq!(allocator.issued_through().unwrap(), 5_000_000);
     for policy in [ItemUidIssuance::Unavailable, ItemUidIssuance::Fenced] {
-        session.app.world_mut().resource_mut::<InventoryResource>().item_uid_issuance = policy;
+        session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>()
+            .item_uid_issuance = policy;
         let before = inventory_image(&session);
         assert!(preview(&session, &source));
         assert!(collect(&mut session, &source).is_none());
         assert_eq!(inventory_image(&session), before);
     }
-    session.app.world_mut().resource_mut::<InventoryResource>().item_uid_issuance = ItemUidIssuance::Durable(allocator.clone());
+    session
+        .app
+        .world_mut()
+        .resource_mut::<InventoryResource>()
+        .item_uid_issuance = ItemUidIssuance::Durable(allocator.clone());
     fill_bag(&mut session);
     let source = payload("GoldOre");
     let template = template_for(&source);
     let before = inventory_image(&session);
-    assert!(!can_gain_exact_ground_drop_item(session.app.world(), ItemContainer::Bag1,
-        &crystal_item_key_for_template(&template), &template.name, "full", 255, 1, &source));
-    assert!(add_exact_ground_drop_items(session.app.world_mut(), ItemContainer::Bag1,
-        &crystal_item_key_for_template(&template), &template.name, "full", 255, 1, &source).is_none());
+    assert!(!can_gain_exact_ground_drop_item(
+        session.app.world(),
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(&template),
+        &template.name,
+        "full",
+        255,
+        1,
+        &source
+    ));
+    assert!(add_exact_ground_drop_items(
+        session.app.world_mut(),
+        ItemContainer::Bag1,
+        &crystal_item_key_for_template(&template),
+        &template.name,
+        "full",
+        255,
+        1,
+        &source
+    )
+    .is_none());
     assert_eq!(inventory_image(&session), before);
     assert_eq!(allocator.issued_through().unwrap(), 5_000_000);
 }
