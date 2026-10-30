@@ -97,6 +97,27 @@ jobs:
               }
             }
             visit(tree);
+            const fs = await import('node:fs/promises');
+            const path = await import('node:path');
+            const {createHash} = await import('node:crypto');
+            const recovered = [];
+            const sourceFiles = files.filter(file => file.type === 'file' && file.path.startsWith('src/') && !file.path.endsWith('.tsbuildinfo'));
+            if (sourceFiles.length < 20 || sourceFiles.length > 150) throw Error('Unexpected main-site source inventory');
+            for (const file of sourceFiles) {
+              const relative = file.path.slice(4);
+              if (!/^(?:app\/|lib\/|public\/|scripts\/|AGENTS\.md$|CLAUDE\.md$|README\.md$|package(?:-lock)?\.json$|next-env\.d\.ts$|next\.config\.mjs$|tsconfig\.json$|vercel\.json$)/.test(relative) || relative.split('/').some(part => part === '..' || part.startsWith('.'))) throw Error('Unapproved source path');
+              if (!/^[a-f0-9]{40}$/.test(file.uid)) throw Error('Expected immutable source file ID');
+              const content = await api(`/v8/deployments/${id}/files/${file.uid}`);
+              const encoded = typeof content === 'string' ? content : content.data;
+              if (typeof encoded !== 'string') throw Error(`Unexpected source response shape: ${Object.keys(content).join(',')}`);
+              const bytes = Buffer.from(encoded,'base64');
+              if (bytes.length > 25*1024*1024 || createHash('sha1').update(bytes).digest('hex') !== file.uid) throw Error('Recovered source content digest mismatch');
+              const destination = path.join('recovered-main-website',relative);
+              await fs.mkdir(path.dirname(destination),{recursive:true});
+              await fs.writeFile(destination,bytes,{flag:'wx'});
+              recovered.push({path:relative,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+            }
+            await fs.writeFile('recovered-main-website/RECOVERY-MANIFEST.json',JSON.stringify({deploymentId:id,projectId:mainProject,recovered},null,2)+'\n',{flag:'wx'});
             console.log(JSON.stringify({mainSiteSource:{id:deployment.id,url:deployment.url,
               readyState:deployment.readyState,createdAt:deployment.createdAt,
               source:deployment.source,rootDirectory:deployment.projectSettings?.rootDirectory,
@@ -186,6 +207,14 @@ jobs:
             console.log(JSON.stringify({operation,id,url:deployment.url,sourceSha:process.env.GITHUB_SHA},null,2));
           } else throw Error('Unsupported release operation');
           NODE
+      - name: Preserve verified current main-site source
+        if: inputs.operation == 'inspect-main-source'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: recovered-main-website
+          path: recovered-main-website/
+          if-no-files-found: error
+          retention-days: 7
   backend:
     if: inputs.operation == 'backend-build'
     runs-on: ubuntu-24.04
