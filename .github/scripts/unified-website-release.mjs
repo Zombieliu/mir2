@@ -125,7 +125,10 @@ if (operation === 'unified-context') {
     const candidate = await api(`/v13/deployments/${id}?withGitRepoInfo=true`);
     if (candidate.projectId !== SITES[key].project) throw Error('Candidate project mismatch');
     const snapshot = await deploymentSnapshot(key, id);
-    console.log(JSON.stringify({ candidate: summary(key, { ...candidate, verifiedRoot: snapshot.projectSettings?.rootDirectory }), errorCode: candidate.errorCode }));
+    console.log(JSON.stringify({ candidate: summary(key, { ...candidate, verifiedRoot: snapshot.projectSettings?.rootDirectory }), errorCode: candidate.errorCode,
+      snapshotKeys: Object.keys(snapshot), snapshotSettings: snapshot.projectSettings,
+      builds: (candidate.builds || []).map(build => ({ src: build.src, use: build.use, configKeys: Object.keys(build.config || {}), rootDirectory: build.config?.rootDirectory })),
+      configKeys: Object.keys(candidate.config || {}), configRoot: candidate.config?.rootDirectory }));
   }
 } else if (operation === 'unified-stage') {
   baselineGuard(initial);
