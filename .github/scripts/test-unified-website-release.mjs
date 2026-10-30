@@ -17,19 +17,20 @@ const executable = source.replace(/^import\s+\{\s*writeFile\s*\}\s+from\s+['"]no
 assert.notEqual(executable, source, 'only filesystem import is replaced with an in-memory writer');
 
 function fixture(operation = 'unified-promote') {
-  const projects = {}, candidates = {}, calls = [], logs = [], files = new Map();
+  const projects = {}, candidates = {}, snapshots = {}, calls = [], logs = [], files = new Map();
   for (const [key, site] of Object.entries(sites)) {
     projects[key] = { id: site.project, accountId: TEAM, name: site.name, rootDirectory: site.root,
       targets: { production: { id: site.baseline } }, link: { type: 'github', repo: 'mir2', repoId: 123456 },
       env: [{ key: 'MIR2_PROMOTION_SESSION_SECRET', value: SECRET, target: ['production'] }] };
     candidates[key] = { id: site.candidate, url: `${key}-candidate.protected.vercel.app`, projectId: site.project,
-      readyState: 'READY', target: 'production', projectSettings: { rootDirectory: site.root }, gitSource: { sha: SHA },
+      readyState: 'READY', target: 'production', gitSource: { sha: SHA },
       meta: { unifiedSourceSha: SHA, unifiedMainBaseline: sites.main.baseline, unifiedGameBaseline: sites.game.baseline } };
+    snapshots[key] = [{ uid: site.candidate, projectId: site.project, projectSettings: { rootDirectory: site.root } }];
   }
   const env = { GITHUB_REF: `refs/heads/${BRANCH}`, GITHUB_SHA: SHA, RELEASE_OPERATION: operation,
     VERCEL_TOKEN: TOKEN, VERCEL_ORG_ID: TEAM, VERCEL_PROJECT_ID: sites.game.project,
     RELEASE_MAIN_DEPLOYMENT_ID: sites.main.candidate, RELEASE_DEPLOYMENT_ID: sites.game.candidate };
-  const state = { projects, candidates, env, calls, logs, files, onRequest: undefined };
+  const state = { projects, candidates, snapshots, env, calls, logs, files, onRequest: undefined };
   const projectKey = id => Object.keys(sites).find(key => sites[key].project === id);
   const json = value => Response.json(JSON.parse(JSON.stringify(value)));
   const fetch = async (input, init = {}) => {
@@ -60,8 +61,17 @@ function fixture(operation = 'unified-promote') {
     if (projectRead && request.method === 'GET') return json(projects[projectKey(projectRead[1])]);
     const candidateRead = request.path.match(/^\/v13\/deployments\/([^/]+)$/);
     if (candidateRead && request.method === 'GET') {
+      assert.equal(url.searchParams.get('withGitRepoInfo'), 'true');
       const value = Object.values(candidates).find(candidate => candidate.id === candidateRead[1]);
       return value ? json(value) : Response.json({ error: { code: 'NOT_FOUND' } }, { status: 404 });
+    }
+    if (request.path === '/v7/deployments' && request.method === 'GET') {
+      const key = projectKey(url.searchParams.get('projectId'));
+      assert.ok(key, 'snapshot list is constrained to an original project');
+      assert.equal(url.searchParams.get('sha'), env.RELEASE_SOURCE_SHA || env.GITHUB_SHA);
+      assert.equal(url.searchParams.get('target'), 'production');
+      assert.equal(url.searchParams.get('limit'), '100');
+      return json({ deployments: snapshots[key], pagination: { next: null } });
     }
     if (request.path === '/v13/deployments' && request.method === 'POST') {
       const key = projectKey(request.body.project);
@@ -98,6 +108,39 @@ test('immutable source and original CI identity fail before any network I/O', as
   for (const change of [{ GITHUB_REF: 'refs/heads/main' }, { GITHUB_SHA: 'moving-ref' }, { VERCEL_ORG_ID: 'wrong-team' }, { VERCEL_PROJECT_ID: sites.main.project }, { VERCEL_TOKEN: '' }]) {
     const f = fixture(); Object.assign(f.env, change);
     const result = await f.run(); assertFailed(result); assert.equal(result.calls.length, 0);
+  }
+});
+
+test('malformed explicit source and malformed workflow source fail before network I/O', async () => {
+  for (const change of [
+    ...['main', 'A'.repeat(40), 'a'.repeat(39), 'a'.repeat(41), ` ${SHA}`].map(value => ({ RELEASE_SOURCE_SHA: value })),
+    { GITHUB_SHA: 'moving-ref', RELEASE_SOURCE_SHA: SHA },
+  ]) {
+    const f = fixture(); Object.assign(f.env, change);
+    const result = await f.run(); assertFailed(result, /immutable release source/); assert.equal(result.calls.length, 0);
+  }
+});
+
+test('staging cannot build from an older explicit source than the checked-out workflow commit', async () => {
+  const f = fixture('unified-stage'); f.env.GITHUB_SHA = 'b'.repeat(40); f.env.RELEASE_SOURCE_SHA = SHA;
+  const result = await f.run(); assertFailed(result, /Staging must use the checked-out workflow commit/);
+  assert.equal(result.calls.length, 0); assert.equal(writes(result).length, 0);
+});
+
+test('a newer release tool can promote already reviewed candidates from their explicit immutable source', async () => {
+  const f = fixture(); f.env.GITHUB_SHA = 'b'.repeat(40); f.env.RELEASE_SOURCE_SHA = SHA;
+  const result = await f.run(); assert.equal(result.error, undefined);
+  assert.equal(writes(result).length, 2);
+  assert.ok(result.logs.some(value => value.includes('"publicSmoke":"passed"')));
+  assert.equal(f.projects.main.targets.production.id, sites.main.candidate);
+  assert.equal(f.projects.game.targets.production.id, sites.game.candidate);
+});
+
+test('a different explicit source cannot authorize candidates by metadata alone or change production', async () => {
+  for (const spoofMetadata of [false, true]) {
+    const f = fixture(); f.env.GITHUB_SHA = 'b'.repeat(40); f.env.RELEASE_SOURCE_SHA = 'b'.repeat(40);
+    if (spoofMetadata) for (const candidate of Object.values(f.candidates)) candidate.meta.unifiedSourceSha = f.env.RELEASE_SOURCE_SHA;
+    const result = await f.run(); assertFailed(result, /candidate identity/); assert.equal(writes(result).length, 0);
   }
 });
 
@@ -143,11 +186,64 @@ test('staging stops before the second candidate if an external release changes p
   const result = await f.run(); assertFailed(result, /production changed/); assert.equal(writes(result).length, 1);
 });
 
-test('promotion rejects mismatched source, root, project, readiness and review metadata', async () => {
-  for (const change of [candidate => { candidate.gitSource.sha = 'b'.repeat(40); }, candidate => { candidate.projectSettings.rootDirectory = 'other-root'; }, candidate => { candidate.projectId = sites.game.project; }, candidate => { candidate.readyState = 'BUILDING'; }, candidate => { candidate.target = 'preview'; }, candidate => { candidate.meta.unifiedMainBaseline = 'dpl_otherbaseline'; }, candidate => { candidate.meta.unifiedSourceSha = 'b'.repeat(40); }]) {
+test('promotion rejects mismatched source, project, readiness and review metadata', async () => {
+  for (const change of [candidate => { candidate.gitSource.sha = 'b'.repeat(40); }, candidate => { candidate.projectId = sites.game.project; }, candidate => { candidate.readyState = 'BUILDING'; }, candidate => { candidate.target = 'preview'; }, candidate => { candidate.meta.unifiedMainBaseline = 'dpl_otherbaseline'; }, candidate => { candidate.meta.unifiedSourceSha = 'b'.repeat(40); }]) {
     const f = fixture(); change(f.candidates.main);
     const result = await f.run(); assertFailed(result, /candidate identity/); assert.equal(writes(result).length, 0);
   }
+});
+
+test('missing single-deployment root is accepted only with the exact verified deployment snapshot', async () => {
+  const f = fixture();
+  assert.equal(f.candidates.main.projectSettings, undefined); assert.equal(f.candidates.game.projectSettings, undefined);
+  const result = await f.run(); assert.equal(result.error, undefined);
+  const promoted = result.logs.map(value => JSON.parse(value)).filter(value => value.promoted);
+  assert.equal(promoted.find(value => value.promoted.site === 'main').promoted.root, sites.main.root);
+  assert.equal(promoted.find(value => value.promoted.site === 'game').promoted.root, sites.game.root);
+});
+
+test('a forged single-deployment root cannot bypass a wrong or missing snapshot root', async () => {
+  for (const key of ['main', 'game']) for (const missing of [false, true]) {
+    const f = fixture(); f.candidates[key].projectSettings = { rootDirectory: sites[key].root };
+    if (missing) delete f.snapshots[key][0].projectSettings;
+    else f.snapshots[key][0].projectSettings.rootDirectory = 'unreviewed/root';
+    const result = await f.run(); assertFailed(result, /candidate identity/); assert.equal(writes(result).length, 0);
+  }
+});
+
+test('a neighboring snapshot UID or a snapshot from another project cannot authorize a candidate', async () => {
+  for (const key of ['main', 'game']) for (const wrongProject of [false, true]) {
+    const f = fixture();
+    if (wrongProject) f.snapshots[key][0].projectId = 'prj_foreign';
+    else f.snapshots[key][0].uid += 'Neighbor';
+    const result = await f.run(); assertFailed(result, wrongProject ? /snapshot project mismatch/ : /Exact deployment snapshot not found/);
+    assert.equal(writes(result).length, 0);
+  }
+});
+
+test('snapshot pagination finds the exact deployment and bounds an absent deployment lookup', async () => {
+  const found = fixture(); let pages = 0;
+  found.state.onRequest = request => {
+    if (request.path === '/v7/deployments' && request.query.get('projectId') === sites.main.project && pages++ === 0) {
+      return Response.json({ deployments: [], pagination: { next: 1700000000 } });
+    }
+  };
+  const successful = await found.run(); assert.equal(successful.error, undefined);
+  assert.ok(successful.calls.some(call => call.path === '/v7/deployments' && call.query.get('until') === '1700000000'));
+  const absent = fixture();
+  absent.state.onRequest = request => request.path === '/v7/deployments'
+    ? Response.json({ deployments: [], pagination: { next: Number(request.query.get('until') || 1700000000) - 1 } }) : undefined;
+  const rejected = await absent.run(); assertFailed(rejected, /Exact deployment snapshot not found/);
+  assert.equal(rejected.calls.filter(call => call.path === '/v7/deployments').length, 5);
+  assert.equal(writes(rejected).length, 0);
+});
+
+test('read-only candidate context reports the root from the verified snapshot without mutating projects', async () => {
+  const f = fixture('unified-context'); const result = await f.run(); assert.equal(result.error, undefined);
+  const inspected = result.logs.map(value => JSON.parse(value)).filter(value => value.candidate);
+  assert.equal(inspected.find(value => value.candidate.site === 'main').candidate.root, sites.main.root);
+  assert.equal(inspected.find(value => value.candidate.site === 'game').candidate.root, sites.game.root);
+  assert.equal(writes(result).length, 0);
 });
 
 test('promotion rejects a deployment response whose ID differs from the exact reviewed input', async () => {
@@ -238,5 +334,6 @@ test('workflow serializes website releases and never supplies promotion secrets 
   assert.match(workflow, /website:[\s\S]*?timeout-minutes: 12/);
   const unified = workflow.split('- name: Stage or promote the two existing websites from one immutable source')[1].split('- name: Save paired immutable candidate identities')[0];
   assert.match(unified, /RELEASE_MAIN_DEPLOYMENT_ID:/);
+  assert.match(unified, /RELEASE_SOURCE_SHA:\s*\$\{\{\s*inputs\.unified_source_sha\s*\}\}/);
   assert.doesNotMatch(unified, /MIR2_PROMOTION_.*SECRET/);
 });

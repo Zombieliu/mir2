@@ -8,9 +8,10 @@ const SITES = {
   game: { project: 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz', name: 'mir2-web3-web',
     baseline: 'dpl_GuricEhcXbVub8u3u3HSt2VR5wGe', root: 'mir2-web3/apps/web' },
 };
-const sha = process.env.GITHUB_SHA;
 const operation = process.env.RELEASE_OPERATION;
-if (process.env.GITHUB_REF !== `refs/heads/${BRANCH}` || !/^[a-f0-9]{40}$/.test(sha || '')) throw Error('Unexpected immutable release source');
+const sha = process.env.RELEASE_SOURCE_SHA || process.env.GITHUB_SHA;
+if (process.env.GITHUB_REF !== `refs/heads/${BRANCH}` || !/^[a-f0-9]{40}$/.test(process.env.GITHUB_SHA || '') || !/^[a-f0-9]{40}$/.test(sha || '')) throw Error('Unexpected immutable release source');
+if (operation === 'unified-stage' && sha !== process.env.GITHUB_SHA) throw Error('Staging must use the checked-out workflow commit');
 if (!process.env.VERCEL_TOKEN || process.env.VERCEL_ORG_ID !== TEAM || process.env.VERCEL_PROJECT_ID !== SITES.game.project) throw Error('Existing CI identity does not match the original website');
 
 async function api(path, method = 'GET', body) {
@@ -39,20 +40,36 @@ async function projects() {
 function baselineGuard(values) {
   for (const [key, site] of Object.entries(SITES)) if (production(values[key]) !== site.baseline) throw Error(`${key} production changed; inspect before release`);
 }
-function candidateGuard(key, candidate) {
+function candidateGuard(key, candidate, snapshot) {
   const site = SITES[key];
   if (candidate.projectId !== site.project || candidate.target !== 'production' || candidate.readyState !== 'READY' ||
       candidate.meta?.unifiedSourceSha !== sha || candidate.meta?.unifiedMainBaseline !== SITES.main.baseline ||
-      candidate.meta?.unifiedGameBaseline !== SITES.game.baseline || candidate.projectSettings?.rootDirectory !== site.root ||
-      (candidate.gitSource?.sha || candidate.meta?.githubCommitSha) !== sha) throw Error(`${key} candidate identity, source, root or readiness mismatch`);
+      candidate.meta?.unifiedGameBaseline !== SITES.game.baseline || snapshot?.projectSettings?.rootDirectory !== site.root ||
+      candidate.gitSource?.sha !== sha) throw Error(`${key} candidate identity, source, root or readiness mismatch`);
+}
+async function deploymentSnapshot(key, id) {
+  let until;
+  for (let page = 0; page < 5; page++) {
+    const list = await api(`/v7/deployments?projectId=${SITES[key].project}&sha=${sha}&target=production&limit=100${until ? `&until=${until}` : ''}`);
+    const snapshot = list.deployments?.find(entry => entry.uid === id);
+    if (snapshot) {
+      if (snapshot.projectId !== SITES[key].project) throw Error('Deployment snapshot project mismatch');
+      return snapshot;
+    }
+    until = list.pagination?.next;
+    if (!until) break;
+  }
+  throw Error('Exact deployment snapshot not found');
 }
 async function candidates() {
   const result = {};
   for (const [key, id] of Object.entries({ main: process.env.RELEASE_MAIN_DEPLOYMENT_ID, game: process.env.RELEASE_DEPLOYMENT_ID })) {
     if (!/^dpl_[a-zA-Z0-9]+$/.test(id || '')) throw Error(`Exact ${key} candidate deployment ID required`);
-    result[key] = await api(`/v13/deployments/${id}`);
+    result[key] = await api(`/v13/deployments/${id}?withGitRepoInfo=true`);
     if (result[key].id !== id) throw Error('Candidate deployment ID mismatch');
-    candidateGuard(key, result[key]);
+    const snapshot = await deploymentSnapshot(key, id);
+    candidateGuard(key, result[key], snapshot);
+    result[key] = { ...result[key], verifiedRoot: snapshot.projectSettings.rootDirectory };
   }
   return result;
 }
@@ -66,7 +83,7 @@ async function waitProduction(key, id) {
 }
 function summary(key, value) {
   return { site: key, id: value.id, url: value.url, readyState: value.readyState, target: value.target,
-    root: value.projectSettings?.rootDirectory, sha: value.gitSource?.sha || value.meta?.githubCommitSha || value.meta?.unifiedSourceSha };
+    root: value.verifiedRoot, sha: value.gitSource?.sha || value.meta?.githubCommitSha || value.meta?.unifiedSourceSha };
 }
 
 async function publicSmoke() {
@@ -107,10 +124,8 @@ if (operation === 'unified-context') {
     if (!/^dpl_[a-zA-Z0-9]+$/.test(id)) throw Error('Invalid candidate ID');
     const candidate = await api(`/v13/deployments/${id}?withGitRepoInfo=true`);
     if (candidate.projectId !== SITES[key].project) throw Error('Candidate project mismatch');
-    console.log(JSON.stringify({ candidate: summary(key, candidate), errorCode: candidate.errorCode,
-      responseKeys: Object.keys(candidate), rootDirectory: candidate.rootDirectory,
-      projectKeys: Object.keys(candidate.project || {}), projectRoot: candidate.project?.rootDirectory,
-      projectSettingsKeys: Object.keys(candidate.projectSettings || {}) }));
+    const snapshot = await deploymentSnapshot(key, id);
+    console.log(JSON.stringify({ candidate: summary(key, { ...candidate, verifiedRoot: snapshot.projectSettings?.rootDirectory }), errorCode: candidate.errorCode }));
   }
 } else if (operation === 'unified-stage') {
   baselineGuard(initial);

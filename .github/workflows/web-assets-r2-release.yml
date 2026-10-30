@@ -21,6 +21,10 @@ on:
         description: Exact marketing candidate paired with deployment_id for unified-promote
         required: false
         type: string
+      unified_source_sha:
+        description: Reviewed immutable source of both existing candidates; promote only, defaults to workflow commit
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -48,6 +52,7 @@ jobs:
           RELEASE_OPERATION: ${{ inputs.operation }}
           RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
           RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
         run: node .github/scripts/unified-website-release.mjs
       - name: Save paired immutable candidate identities
         if: inputs.operation == 'unified-stage'
