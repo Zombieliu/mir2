@@ -732,6 +732,7 @@ fn fetch_checked(
     status: &impl Status,
     wire: &AtomicU64,
 ) -> Result<Vec<u8>> {
+    ensure!(!status.cancelled(), "packed update cancelled");
     let mut counted = 0;
     let bytes = source.get(&entry.path, entry.size, &mut |count| {
         ensure!(
@@ -811,17 +812,45 @@ fn ensure_object_inner(
         safe::regular(&part)?;
         fs::remove_file(&part)?;
     }
+    let mut receipt = None;
     if !part.exists() || !safe::matches(&part, entry)? {
+        let resume_limit = if part.exists() && source.permits_partial_resume() {
+            safe::regular(&part)?.len()
+        } else {
+            0
+        };
         let mut counted = 0;
-        source.download_resuming(remote, entry, &part, &mut |p| {
+        let mut prefix = None;
+        if let Some(status) = status {
+            status.set("downloading", 10);
+            status.transfer(0, entry.size);
+        }
+        let reused = source.download_resuming(remote, entry, &part, &mut |p| {
             ensure!(
                 !cancel.load(Ordering::Relaxed) && status.is_none_or(|status| !status.cancelled()),
                 "packed update cancelled"
             );
+            ensure!(
+                p.reused <= resume_limit && prefix.is_none_or(|value| value == p.reused),
+                "packed source reuse differs from retained prefix"
+            );
+            prefix = Some(p.reused);
+            ensure!(
+                p.received <= entry.size.saturating_sub(p.reused),
+                "packed source payload exceeds bound"
+            );
             wire.fetch_add(p.received.saturating_sub(counted), Ordering::Relaxed);
-            counted = p.received;
+            counted = counted.max(p.received);
+            if let Some(status) = status {
+                status.transfer(counted, entry.size - p.reused);
+            }
             Ok(())
         })?;
+        ensure!(
+            reused <= resume_limit && prefix.is_none_or(|value| value == reused),
+            "packed source resume receipt mismatch"
+        );
+        receipt = Some((counted, entry.size - reused));
     }
     // Hash and flush the same actual no-reparse, single-link writable handle.
     // The Windows share-zero lease excludes tampering until it is dropped for
@@ -854,6 +883,14 @@ fn ensure_object_inner(
             && format!("{:X}", digest.finalize()) == entry.sha256,
         "downloaded packed object hash differs"
     );
+    if let Some((counted, total)) = receipt {
+        // A successful adapter may omit its last callback. Only the complete,
+        // hash-verified object establishes the exact remaining network bytes.
+        wire.fetch_add(total.saturating_sub(counted), Ordering::Relaxed);
+        if let Some(status) = status {
+            status.transfer(total, total);
+        }
+    }
     file.sync_all()?;
     drop(file);
     fs::create_dir_all(target.parent().unwrap())?;
@@ -868,6 +905,13 @@ fn download_packs(
     status: &impl Status,
     wire: &AtomicU64,
 ) -> Result<usize> {
+    let total = manifest.packs.iter().try_fold(0u64, |sum, entry| {
+        let target = safe::target(root, &entry.path)?;
+        Ok::<_, anyhow::Error>(sum + if target.exists() { 0 } else { entry.size })
+    })?;
+    let before = wire.load(Ordering::Relaxed);
+    status.set_final("downloading", 10);
+    status.transfer(0, total);
     let queue = Mutex::new(
         manifest
             .packs
@@ -912,6 +956,10 @@ fn download_packs(
         let mut first_error = None;
         let mut completed = 0;
         loop {
+            // Workers report only new response bytes to the shared counter.
+            // The UI stays on the caller thread and updates within one object,
+            // including when the first large pack has not completed yet.
+            status.transfer(wire.load(Ordering::Relaxed).saturating_sub(before), total);
             if status.cancelled() {
                 cancelled.store(true, Ordering::Relaxed);
                 if first_error.is_none() {
@@ -940,6 +988,7 @@ fn download_packs(
                 first_error = Some(anyhow::anyhow!("packed download worker panicked"));
             }
         }
+        status.transfer(wire.load(Ordering::Relaxed).saturating_sub(before), total);
         if let Some(error) = first_error {
             return Err(error);
         }
@@ -949,6 +998,35 @@ fn download_packs(
         );
         Ok(downloaded.load(Ordering::Relaxed) as usize)
     })
+}
+fn confirm_generation_update(
+    root: &Path,
+    generation: &Path,
+    manifest: &GenerationManifest,
+    already_selected: bool,
+    status: &impl Status,
+) -> Result<()> {
+    // Presence plans an upper bound without hashing each immutable pack twice.
+    // ensure_object and PackStore still verify the same objects before commit.
+    let mut missing_bytes = 0;
+    for entry in [&manifest.exe, &manifest.signed_config, &manifest.catalog] {
+        if !safe::target(generation, &entry.path)?.exists() {
+            missing_bytes += entry.size;
+        }
+    }
+    for entry in &manifest.packs {
+        if !safe::target(root, &entry.path)?.exists() {
+            missing_bytes += entry.size;
+        }
+    }
+    if !already_selected || missing_bytes != 0 {
+        status.confirm_update(&format!("r{}", manifest.sequence), missing_bytes)?;
+        ensure!(
+            !status.cancelled(),
+            "packed update cancelled before download"
+        );
+    }
+    Ok(())
 }
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -960,37 +1038,23 @@ pub struct Outcome {
     pub activated: bool,
     pub elapsed_ms: u128,
 }
-/// Caller holds the installation mutex and an exclusive game lease. Only an
-/// authenticated, wholly durable generation may cross the selector boundary.
-pub fn check_update(
+struct DiscoveredGeneration {
+    feed: PackFeed,
+    feed_bytes: Vec<u8>,
+    feed_sig: Vec<u8>,
+    manifest: GenerationManifest,
+    manifest_bytes: Vec<u8>,
+    signature: Vec<u8>,
+    already_selected: bool,
+}
+fn discover_generation(
     root: &Path,
     source: &impl PackSource,
     status: &impl Status,
-) -> Result<Option<Outcome>> {
-    let started = Instant::now();
-    let record = active_record(root)?;
-    if let Some(record) = &record {
-        if record.health == Health::Pending {
-            verify_selection(root, &record.active)?;
-            let Selection::Generation {
-                manifest_sha256,
-                sequence,
-            } = &record.active
-            else {
-                anyhow::bail!("pending legacy selector")
-            };
-            return Ok(Some(Outcome {
-                sequence: *sequence,
-                manifest_sha256: manifest_sha256.clone(),
-                downloaded_packs: 0,
-                wire_bytes: 0,
-                activated: false,
-                elapsed_ms: started.elapsed().as_millis(),
-            }));
-        }
-    }
-    let wire = AtomicU64::new(0);
-    let mut metadata_phase = Phase::new(root, "discovery-and-metadata", &wire);
+    wire: &AtomicU64,
+    record: &Option<ActiveRecord>,
+) -> Result<Option<DiscoveredGeneration>> {
+    ensure!(!status.cancelled(), "optional update check cancelled");
     let mut pair_bytes = 0u64;
     let pair = source.packed_pair(&mut |count| {
         pair_bytes = pair_bytes
@@ -1067,8 +1131,82 @@ pub fn check_update(
             && (already_selected || engine.source_revision == manifest.engine_source_revision),
         "pack target requires a different engine"
     );
+    Ok(Some(DiscoveredGeneration {
+        feed,
+        feed_bytes,
+        feed_sig,
+        manifest,
+        manifest_bytes,
+        signature,
+        already_selected,
+    }))
+}
+/// Read only authenticated optional-update metadata. Unlike check_update this
+/// never records a high-water mark, downloads control/payload objects, repairs a
+/// generation, takes a game/write lock or changes the active selector.
+pub fn probe_update(
+    root: &Path,
+    source: &impl PackSource,
+    status: &impl Status,
+) -> Result<Option<crate::update::Probe>> {
+    let record = active_record(root)?;
+    let wire = AtomicU64::new(0);
+    Ok(
+        discover_generation(root, source, status, &wire, &record)?.map(|target| {
+            crate::update::Probe {
+                version: format!("r{}", target.manifest.sequence),
+                update_available: !target.already_selected,
+            }
+        }),
+    )
+}
+/// Caller holds the installation mutex and an exclusive game lease. Only an
+/// authenticated, wholly durable generation may cross the selector boundary.
+pub fn check_update(
+    root: &Path,
+    source: &impl PackSource,
+    status: &impl Status,
+) -> Result<Option<Outcome>> {
+    let started = Instant::now();
+    let record = active_record(root)?;
+    if let Some(record) = &record {
+        if record.health == Health::Pending {
+            verify_selection(root, &record.active)?;
+            let Selection::Generation {
+                manifest_sha256,
+                sequence,
+            } = &record.active
+            else {
+                anyhow::bail!("pending legacy selector")
+            };
+            return Ok(Some(Outcome {
+                sequence: *sequence,
+                manifest_sha256: manifest_sha256.clone(),
+                downloaded_packs: 0,
+                wire_bytes: 0,
+                activated: false,
+                elapsed_ms: started.elapsed().as_millis(),
+            }));
+        }
+    }
+    let wire = AtomicU64::new(0);
+    let mut metadata_phase = Phase::new(root, "discovery-and-metadata", &wire);
+    let Some(DiscoveredGeneration {
+        feed,
+        feed_bytes,
+        feed_sig,
+        manifest,
+        manifest_bytes,
+        signature,
+        already_selected,
+    }) = discover_generation(root, source, status, &wire, &record)?
+    else {
+        return Ok(None);
+    };
+    let digest = feed.manifest.sha256.clone();
     remember_highest(root, &feed_bytes, &feed_sig)?;
     let generation = safe::target(root, &directory(&digest)?)?;
+    confirm_generation_update(root, &generation, &manifest, already_selected, status)?;
     immutable_bytes(&generation.join("GENERATION.json"), &manifest_bytes)?;
     immutable_bytes(&generation.join("GENERATION.p7s"), &signature)?;
     immutable_bytes(&generation.join("PACK-FEED.json"), &feed_bytes)?;

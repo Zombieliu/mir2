@@ -62,10 +62,17 @@ fn source_for_version(digest: &str) -> Result<Option<HttpsSource>> {
 /// Only exact authenticated baseline byte identities select a compiled
 /// production channel. An unknown signed baseline never enables network I/O.
 pub fn network_source(root: &Path) -> Result<Option<HttpsSource>> {
+    network_source_inner(root, true)
+}
+/// The Home notification uses identical signed channel selection without writes.
+pub fn probe_network_source(root: &Path) -> Result<Option<HttpsSource>> {
+    network_source_inner(root, false)
+}
+fn network_source_inner(root: &Path, record_activity: bool) -> Result<Option<HttpsSource>> {
     let (_, meta) = local_game(root)?;
     let digest = hash(&meta["VERSION.json"]);
     let source = source_for_version(&digest)?;
-    if source.is_none() {
+    if source.is_none() && record_activity {
         log(
             root,
             "engine-maintenance-unsupported-scope",
@@ -210,9 +217,24 @@ impl Handoff {
         command.spawn()
     }
 }
-/// Source is already the one compiled baseline channel (or explicit offline
-/// fixture). No game object is fetched and no generation selector is written.
-pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<Option<Handoff>> {
+struct DiscoveredEngine {
+    meta: BTreeMap<String, Vec<u8>>,
+    old_engine: Engine,
+    feed: Feed,
+    bytes: Vec<u8>,
+    sig: Vec<u8>,
+    previous: Option<(Receipt, Feed, String)>,
+    retry: bool,
+    metadata: BTreeMap<String, Vec<u8>>,
+    engine: Engine,
+    wire_bytes: u64,
+}
+fn discover_engine(
+    root: &Path,
+    source: &impl Source,
+    status: &impl Status,
+    record_activity: bool,
+) -> Result<Option<DiscoveredEngine>> {
     ensure!(
         !transaction::pending_activation(root)?,
         "legacy pending activation precedes engine maintenance"
@@ -220,7 +242,12 @@ pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<
     let (_, meta) = local_game(root)?;
     let (old_engine, _) = active_engine(root)?;
     let mut transfers = Transfers::default();
-    let (feed, bytes, sig) = fresh_discovery(root, source, status, &mut transfers)?;
+    let (feed, bytes, sig) = fresh_discovery_inner(
+        record_activity.then_some(root),
+        source,
+        status,
+        &mut transfers,
+    )?;
     bind_baseline(&feed, &meta)?;
     let previous = receipt(root)?;
     if let Some((_, old, identity)) = &previous {
@@ -240,11 +267,13 @@ pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<
         .as_ref()
         .is_some_and(|(_, old, id)| old.sequence == feed.sequence && *id == hash(&bytes));
     if feed.sequence < global_floor || (feed.sequence == global_floor && !retry) {
-        log(
-            root,
-            "engine-maintenance-stale",
-            serde_json::json!({"sequence":feed.sequence,"globalFloor":global_floor,"responseBodyBytes":transfers.wire_bytes}),
-        );
+        if record_activity {
+            log(
+                root,
+                "engine-maintenance-stale",
+                serde_json::json!({"sequence":feed.sequence,"globalFloor":global_floor,"responseBodyBytes":transfers.wire_bytes}),
+            );
+        }
         return Ok(None);
     }
     for entry in &feed.engine.metadata {
@@ -272,7 +301,67 @@ pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<
         !quarantine(root, &engine.exe_sha256)?.exists(),
         "engine patch quarantined after OS spawn failure"
     );
+    Ok(Some(DiscoveredEngine {
+        meta,
+        old_engine,
+        feed,
+        bytes,
+        sig,
+        previous,
+        retry,
+        metadata,
+        engine,
+        wire_bytes: transfers.wire_bytes,
+    }))
+}
+/// Read-only metadata check. A patch announcement is optional; it cannot switch
+/// the engine or hold an installation/game lock while Home offers local play.
+pub fn probe(root: &Path, source: &impl Source, status: &impl Status) -> Result<Option<Probe>> {
+    Ok(
+        discover_engine(root, source, status, false)?.map(|target| Probe {
+            version: format!(
+                "engine {} / r{}",
+                target.engine.version, target.feed.sequence
+            ),
+            update_available: target.engine.exe_sha256 != target.old_engine.exe_sha256,
+        }),
+    )
+}
+/// Source is already the one compiled baseline channel (or explicit offline
+/// fixture). No game object is fetched and no generation selector is written.
+pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<Option<Handoff>> {
+    let Some(DiscoveredEngine {
+        meta,
+        old_engine,
+        feed,
+        bytes,
+        sig,
+        previous,
+        retry,
+        metadata,
+        engine,
+        wire_bytes,
+    }) = discover_engine(root, source, status, true)?
+    else {
+        return Ok(None);
+    };
     let dir = safe::target(root, &format!("updater/engines/{}", engine.exe_sha256))?;
+    let changing = engine.exe_sha256 != old_engine.exe_sha256;
+    if changing {
+        let download_bytes = if dir.join("Mir2Updater.exe").exists() {
+            0
+        } else {
+            engine.exe_size
+        };
+        status.confirm_update(
+            &format!("engine {} / r{}", engine.version, feed.sequence),
+            download_bytes,
+        )?;
+        ensure!(
+            !status.cancelled(),
+            "engine maintenance cancelled before download"
+        );
+    }
     for name in ["ENGINE.json", "ENGINE.p7s"] {
         generation::immutable_bytes(&dir.join(name), &metadata[name])?;
     }
@@ -281,7 +370,7 @@ pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<
         size: engine.exe_size,
         sha256: engine.exe_sha256.clone(),
     };
-    let wire = AtomicU64::new(transfers.wire_bytes);
+    let wire = AtomicU64::new(wire_bytes);
     let cancel = AtomicBool::new(false);
     ensure!(!status.cancelled(), "engine maintenance cancelled");
     generation::ensure_object_observed(
@@ -300,7 +389,6 @@ pub fn check(root: &Path, source: &impl Source, status: &impl Status) -> Result<
         "stored engine differs"
     );
     let source_lease = safe::FileLease::verified(&source_exe, &entry)?;
-    let changing = engine.exe_sha256 != old_engine.exe_sha256;
     // For an identical receipt retry after a crash, keep its original old-engine
     // binding; otherwise an already switched pointer would mutate immutable data.
     let previous_sha = if retry {

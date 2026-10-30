@@ -444,6 +444,63 @@ fn range_ignored_200_resets_prefix_instead_of_appending() {
 }
 
 #[test]
+fn live_transfer_counts_only_received_body_and_resets_each_object() {
+    #[derive(Default)]
+    struct Observe(std::cell::RefCell<Vec<(u64, u64)>>);
+    impl Status for Observe {
+        fn set(&self, _: &str, _: u32) {}
+        fn cancelled(&self) -> bool {
+            false
+        }
+        fn transfer(&self, received: u64, total: u64) {
+            self.0.borrow_mut().push((received, total));
+        }
+    }
+    let root = tempfile::tempdir().unwrap();
+    let data: Vec<u8> = (0..262144).map(|i| (i % 251) as u8).collect();
+    let file = entry(&data);
+    let offset = 65536;
+    write_prefix(root.path(), &file, &data[..offset]);
+    let reply = Reply::new(
+        "206 Partial Content",
+        &range_headers(offset, data.len()),
+        data[offset..].to_vec(),
+    );
+    let status = Observe::default();
+    let (result, transfer) = fetch(root.path(), &reply.source, &file, &status);
+    assert!(result.is_ok());
+    reply.finish();
+    let remaining = file.size - offset as u64;
+    let rows = status.0.borrow().clone();
+    assert_eq!(rows[0], (0, file.size));
+    assert!(rows
+        .iter()
+        .any(|&(received, total)| received > 0 && received < remaining && total == remaining));
+    assert_eq!(rows.last(), Some(&(remaining, remaining)));
+    assert_eq!(transfer.wire_bytes, remaining);
+    assert!(!rows.iter().any(|&(received, _)| received > remaining));
+
+    // Reusing the completed object adds no network observations at all.
+    let (source, listener) = no_http_source();
+    let count = status.0.borrow().len();
+    assert!(fetch(root.path(), &source, &file, &status).0.is_ok());
+    assert_eq!(status.0.borrow().len(), count);
+    no_request(&listener);
+
+    let other_data = b"another payload";
+    let other = entry(other_data);
+    let next = Reply::new(
+        "200 OK",
+        &full_headers(other_data.len()),
+        other_data.to_vec(),
+    );
+    assert!(fetch(root.path(), &next.source, &other, &status).0.is_ok());
+    next.finish();
+    assert_eq!(status.0.borrow()[count], (0, other.size));
+    assert_eq!(status.0.borrow().last(), Some(&(other.size, other.size)));
+}
+
+#[test]
 fn complete_valid_prefix_recovers_with_zero_requests_and_bad_or_oversize_restarts() {
     let data = b"complete immutable payload";
     let file = entry(data);

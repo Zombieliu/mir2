@@ -2,6 +2,12 @@
 #define AppVersion "2026.10.29.11"
 #define AppExe "mir2-platform-windows.exe"
 #define LauncherExe "Mir2Launcher.exe"
+#ifndef Mir2IconFile
+  #define Mir2IconFile "..\..\resources\numeron.ico"
+#endif
+#if !FileExists(Mir2IconFile)
+  #error Numeron icon is missing. Supply /DMir2IconFile=<path-to-numeron.ico> when compiling a staged recipe.
+#endif
 
 [Setup]
 #ifdef Mir2ValidationInstall
@@ -32,6 +38,7 @@ MinVersion=10.0
 OutputDir=..
 VersionInfoVersion=2026.10.29.11
 VersionInfoDescription=Numeron - Legend of Rebirth multilingual playtest installer
+SetupIconFile={#Mir2IconFile}
 UninstallDisplayName={#AppName}
 #ifdef Mir2Bootstrap
 UninstallDisplayIcon={app}\{#LauncherExe}
@@ -249,10 +256,10 @@ Source: "README.ar.txt"; DestDir: "{app}"; Flags: ignoreversion
 Name: "{app}\game\logs"
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"
+Name: "{group}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; IconFilename: "{app}\{#LauncherExe}"; IconIndex: 0
 Name: "{group}\{cm:ReadmeTitle}"; Filename: "{app}\{cm:ReadmeFile}"
 Name: "{group}\{cm:UninstallTitle}"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; IconFilename: "{app}\{#LauncherExe}"; IconIndex: 0; Tasks: desktopicon
 
 ; Finish-page choices are executed in Pascal code so Windows launch errors
 ; can be reported without security-policy workarounds. Silent installs never launch.

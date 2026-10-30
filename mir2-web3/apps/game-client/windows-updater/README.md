@@ -1,4 +1,4 @@
-# Native Windows automatic updates
+# Native Windows launcher and updates
 
 This implements the native Windows distribution path independently of the old
 web-only Tauri shell. The installer installs the verified r7 game Candidate plus
@@ -6,6 +6,37 @@ a separately attested launcher/updater bundle. It preserves the stable AppId.
 
 Desktop/start-menu shortcut -> app/Mir2Launcher.exe -> authenticated engine copy
 in app/.update -> signed HTTPS update -> app/game/mir2-platform-windows.exe.
+
+Normal interactive startup verifies the installed game locally and opens Home
+with **Start game** enabled when that verification succeeds. An independent
+background worker checks authenticated version metadata; pending or failed
+requests cannot block local play. **View update** opens the authenticated plan,
+where **Play installed version** remains available. Only **Update** authorizes
+payload downloads or activation, including cached new releases. A missing,
+corrupt or unverifiable installation does not offer Start game. Existing game
+sign-in and server compatibility rules still apply.
+
+The native window uses embedded original fantasy artwork, a dark gold frame,
+separate primary play/secondary update buttons, and DPI-aware native controls.
+The bundled art and its exact generation prompt are in `assets/launcher-hero-v2.*`.
+
+The window shows work elapsed time, local file counts, and live bytes/speed/estimated
+remaining time for the current download. Estimates exclude later verification
+and installation; caches, transfer packages and retries can change actual wire
+size. Idle Home/confirmation time is not counted as work. The existing explicit `--check-only` maintenance command retains automatic
+update-without-launch semantics for tooling; the desktop shortcut has no such flag.
+
+Launcher and updater EXEs embed the native game's shared six-resolution
+`platform-windows/resources/numeron.ico`; setup and shortcuts use the same icon.
+Installing a new trusted installer refreshes an older fixed bootstrap/desktop
+icon. An engine update alone does not replace that bootstrap.
+
+For an offline UI fixture, run `cargo run --example launcher-preview` from this
+crate (`-- --failure` also exercises failure/retry). Its versions and download
+counters are synthetic; its Start game button closes the fixture and never
+starts a game. It never reads an installation or contacts a server. For actual
+play use the installed launcher, not this example.
+[Validation and delivery limits](../../../docs/WINDOWS-LAUNCHER-UX-20261030.zh-CN.md).
 
 Trust and activation:
 
@@ -42,7 +73,7 @@ Trust and activation:
   cancels before activation/game start. Logs and personal non-manifest files,
   per-user language/display preferences and server accounts/saves are preserved.
 
-Nine native updater languages: en/zh-TW/pt-BR/ru/hi/id/vi/th/ar. The native dialog
+Ten native updater languages: en/zh-TW/pt-BR/ru/hi/id/vi/th/ar/zh-CN. The native dialog
 uses Windows font fallback and DPI scaling, separately from game font atlases.
 It reads the same roaming language preference as the installer/game, with a
 legacy local-preference fallback.

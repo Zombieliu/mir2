@@ -21,6 +21,18 @@ and license filenames. The r9 installer compiled and installed correctly but
 its updater rejected those files before launching the game; it is not a usable
 final installer. Keep that failed launch evidence separately.
 
+The launcher enables Start game on its home screen after local verification of
+the installed version. Its background check of signed update information does
+not block that verified version. View update shows the estimated update data;
+the confirmation screen still offers Play current version alongside Update.
+Only choosing Update starts downloading changed files. The launcher shows
+download progress, speed and an estimate for the current download; the actual
+download size can vary with caching and transfer packages. The player starts
+the game explicitly, including after an update. A failed check or update can be
+retried, and a still-verified installed version can be played. A damaged or
+unverifiable installation disables launch and needs repair with the trusted
+installer. Server compatibility remains part of the game's sign-in flow.
+
 ## Inputs and ordinary internal Candidate build
 
 Use a fresh external directory. Copy this recipe, `prepare-installer-input.py`,
@@ -29,6 +41,14 @@ Supply `tools/vc_redist.x64.exe` from Microsoft and Inno Setup 7. Verify the
 compiler and runtime publisher signatures. The pinned runtime used here is
 14.51.36247.0, SHA256
 `843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C`.
+
+The setup uses the game's existing multi-resolution Numeron icon from
+`platform-windows/resources/numeron.ico`. When copying the recipe outside the
+source tree, also copy that exact file to the staging directory and compile
+with `/DMir2IconFile=numeron.ico` (or supply its absolute path). A missing icon
+stops compilation. The desktop/start-menu shortcuts use the embedded launcher
+icon, and the uninstall entry uses its selected launcher/game EXE icon. No loose
+icon is added to the signed payload.
 
 After `verify-windows-candidate.ps1` passes on the untouched Candidate:
 
@@ -60,7 +80,7 @@ Do not use a junction or skip stream inspection to shorten the path.
 
 ```text
 python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-commit>
-ISCC.exe /Qp Mir2-Invite.iss
+ISCC.exe /Qp /DMir2IconFile=numeron.ico Mir2-Invite.iss
 ```
 
 The preparation tool requires `WN-CANDIDATE-20261029-unified-11`, exact clean

@@ -5,6 +5,8 @@ use std::cell::RefCell;
 #[derive(Default)]
 struct CapturedStatus {
     rows: RefCell<Vec<(String, u32)>>,
+    transfers: RefCell<Vec<(u64, u64)>>,
+    confirmations: RefCell<Vec<(String, u64)>>,
     cancel: std::cell::Cell<bool>,
 }
 impl Status for CapturedStatus {
@@ -13,6 +15,16 @@ impl Status for CapturedStatus {
     }
     fn cancelled(&self) -> bool {
         self.cancel.get()
+    }
+    fn confirm_update(&self, version: &str, download_bytes: u64) -> Result<()> {
+        self.confirmations
+            .borrow_mut()
+            .push((version.into(), download_bytes));
+        ensure!(!self.cancelled(), "update cancelled by player");
+        Ok(())
+    }
+    fn transfer(&self, received: u64, total: u64) {
+        self.transfers.borrow_mut().push((received, total));
     }
 }
 
@@ -253,6 +265,10 @@ fn cached_payloads_advance_staging_counts_with_zero_wire_and_preserve_personal()
     assert_eq!(*source.downloads.borrow(), 0);
     assert_eq!(transfers.downloaded_files, 0);
     assert_eq!(transfers.wire_bytes, 0);
+    assert!(
+        raw.transfers.borrow().is_empty(),
+        "disk cache is not a network transfer"
+    );
     assert!(raw.rows.borrow().iter().any(|(k, _)| k == "staging:3/3"));
     for entry in &files {
         assert!(safe::matches(
@@ -381,7 +397,16 @@ fn display_cadence_throttles_only_snapshots_and_forces_phase_and_final() {
         start + Duration::from_millis(202),
     );
     assert_eq!(raw.rows.borrow().len(), 4);
+    status.transfer(0, 100);
+    status.transfer(17, 100);
+    assert_eq!(*raw.transfers.borrow(), [(0, 100), (17, 100)]);
+    status.confirm_update("candidate-r8", 100).unwrap();
     raw.cancel.set(true);
+    assert!(status.confirm_update("candidate-r9", 200).is_err());
+    assert_eq!(
+        *raw.confirmations.borrow(),
+        [("candidate-r8".into(), 100), ("candidate-r9".into(), 200)]
+    );
     assert!(status.cancelled(), "cancellation must not be throttled");
 }
 

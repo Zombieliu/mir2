@@ -80,6 +80,9 @@ function AssertSourceTracked {
     $sources=@(Get-ChildItem -LiteralPath (Join-Path $crate 'src') -Recurse -Force -File)
     $sources+=Get-Item -LiteralPath (Join-Path $crate 'Cargo.toml'),(Join-Path $crate 'Cargo.lock') -Force
     if(Test-Path -LiteralPath (Join-Path $crate 'build.rs')){$sources+=Get-Item -LiteralPath (Join-Path $crate 'build.rs') -Force}
+    # RC and ICO bytes are now compiler inputs to both executable resources.
+    $sources+=Get-Item -LiteralPath (Join-Path $crate 'assets/numeron.rc'),(Join-Path $project 'apps/game-client/platform-windows/resources/numeron.ico') -Force
+    $sources+=Get-Item -LiteralPath (Join-Path $crate 'assets/launcher-hero-v2.png') -Force
     # The shared parser is now a compiled path dependency. Ignored/untracked
     # parser inputs must not produce a clean-looking updater attestation.
     $packCrate=Join-Path $project 'apps/game-client/resource-pack'
