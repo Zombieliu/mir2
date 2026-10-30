@@ -113,3 +113,5 @@ r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文�
 用户随后提供 `inv_baa…455ae` 的完整旧链接。[19:14:52 UTC 码归因](evidence/usdc-native-transfer-20261031/EXACT-INVITE-BAA9-READONLY.json)确认它在 `numeron-playtest-20261029` 属于 approved 团长钱包 `0x8ced5e…ef2f02`，旧公开邀请接口仍返回 200；当前 Windows 活动 `numeron-windows-playtest-20261030` 中同码数量为 0。不能只修改 URL 的活动参数来转码。当前 Windows 账号仍无候选或最终归属，且已有付款；正常后续测试应由团长提供当前活动的新链接，由新成员在首次付款前确认归属。本轮没有提交候选 / 确认、迁移归属、生成游戏事实、追溯分配充值或中断服务。
 
 本补丁已推送为 `d1d2d82bd99a019e3fd1c739a2cff9114d7959d6`，精确 [CI 41113336591](https://github.com/Zombieliu/mir2/actions/runs/41113336591) 已派发，记录时尚在运行，不能把本地 PG 通过写成新 Linux 工件或原服验收。原服仍为 `868ef2d2…`；后续须核验工件、自然空闲、正常保存及新备份后才能切换 GW/worker。本补丁没有迁移、旧单恢复或 operator 需求，不能重复执行前述旧恢复流程。
+
+用户随后完成真实游戏行为并正常退出。[19:24:29 UTC 退出后只读验收](evidence/usdc-native-transfer-20261031/PLAYDAY-AFTER-NORMAL-EXIT.json)确认：角色等级 2 → 3、saveVersion 33 → 43，保存时间 19:23:14 UTC；真实任务完成和升级事件各 1，源事件均已投递且事实各已入库，当前 Windows 活动有效游玩日为 **1/1**。本次满足有效日的是任务事件，不把升级事件或未观测到的击杀冒充有效日。六项在线计数和 Redis owner lease 均为 0；GW/worker 仍为原 `868ef2d2…` / 原 PID。诊断未补记事实、修改归属或账目，也未停服；这证明真实保存及采集链路正常，不是必须等待满 24 小时。
