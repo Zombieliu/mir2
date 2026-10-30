@@ -37,6 +37,17 @@ impl ItemUidIssuance {
         }
     }
 
+    pub(crate) fn validate_source_config(&self, config: &SimulationConfig) -> Result<(), String> {
+        if let Self::Durable(allocator) = self {
+            if allocator.requires_postgres_source() || config.account_store_database_url.is_some() {
+                allocator
+                    .validate_postgres_source(config)
+                    .map_err(|error| error.to_string())?;
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn raise_floor(&self, floor: u64) -> Result<(), String> {
         match self {
             Self::Durable(allocator) => allocator
@@ -80,6 +91,14 @@ pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> R
                         | "userItemUniqueId"
                         | "incomingUniqueId"
                         | "incoming_unique_id"
+                        | "item_uid"
+                        | "itemUid"
+                        | "carrier_uid"
+                        | "carrierUid"
+                        | "consume_carrier_uid"
+                        | "issuedThrough"
+                        | "issued_through"
+                        | "high_watermark"
                 ) && !value.is_null()
                 {
                     let uid = if let Some(uid) = value.as_u64() {
@@ -106,6 +125,9 @@ pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> R
         serde_json::Value::String(encoded)
             if encoded.trim_start().starts_with('{') || encoded.trim_start().starts_with('[') =>
         {
+            // This helper adjusts a local floor; arbitrary player text can
+            // begin with '[' or '{'. A complete deployment census must decode
+            // its declared carriers strictly instead of using this heuristic.
             if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(encoded) {
                 floor = floor.max(historical_uid_floor(&parsed, depth + 1)?);
             }
@@ -128,13 +150,21 @@ pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> R
         .ok_or("server item UID configuration unavailable")?
         .config;
     config.item_uid_issuance.require_same(allocator)?;
+    config.item_uid_issuance.validate_source_config(config)?;
     config.ensure_account_store_writable()?;
-    let store = config
-        .account_store
-        .lock()
-        .map_err(|_| "account store lock poisoned")?;
-    policy.raise_serialized_floor(&*store)?;
-    drop(store);
+    let floor = {
+        let store = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store lock poisoned")?;
+        historical_uid_floor(
+            &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
+            0,
+        )?
+    };
+    // PostgreSQL issuers take the lease/UID row locks. Never retain the local
+    // account mutex while contacting a durable issuer.
+    policy.raise_floor(floor)?;
     if let Some(save) = super::save::snapshot_active_character_save(world) {
         policy.raise_serialized_floor(&save)?;
     }
@@ -142,6 +172,55 @@ pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> R
 }
 
 impl SimulationConfig {
+    /// Explicit trusted integration only. A complete-history census must have
+    /// initialized the existing shared PG floor before this is called. This
+    /// binding does not migrate remaining grant paths or enable a public route.
+    pub fn with_postgres_item_uid_allocator(mut self) -> Result<Self, String> {
+        if !matches!(self.item_uid_issuance, ItemUidIssuance::Legacy) {
+            return Err("cannot replace a live or unavailable item UID authority".into());
+        }
+        self.ensure_account_store_writable()?;
+        let permit = self.zone_economy_write_permit()?;
+        let database_url = self
+            .account_store_database_url
+            .as_deref()
+            .ok_or("PostgreSQL item UID source unavailable")?;
+        let authority = crate::user_item_uid_postgres::PostgresUserItemUidAuthority::open_existing(
+            database_url,
+            permit,
+        )
+        .map_err(|error| error.to_string())?;
+        let allocator = UserItemUidAllocator::from_store(std::sync::Arc::new(authority));
+        allocator
+            .validate_postgres_source(&self)
+            .map_err(|error| error.to_string())?;
+        let floor = {
+            let store = self
+                .account_store
+                .lock()
+                .map_err(|_| "account store lock poisoned")?;
+            historical_uid_floor(
+                &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
+                0,
+            )?
+        };
+        allocator
+            .ensure_issued_through_at_least(floor)
+            .map_err(|error| error.to_string())?;
+        self.item_uid_issuance = ItemUidIssuance::Durable(allocator);
+        Ok(self)
+    }
+
+    /// Server-only handle for staged NPC/production integration. Returning a
+    /// clone does not admit SQL writes; each issuance rechecks its own permit.
+    pub fn server_item_uid_allocator(&self) -> Result<UserItemUidAllocator, String> {
+        self.item_uid_issuance.validate_source_config(self)?;
+        match &self.item_uid_issuance {
+            ItemUidIssuance::Durable(allocator) => Ok(allocator.clone()),
+            _ => Err("server item UID authority unavailable".into()),
+        }
+    }
+
     /// Trusted integration only. Reuse ONE allocator handle across sessions and
     /// production. Initialize its sidecar separately during exclusive migration
     /// after scanning all external/world history; missing state is never rebuilt.
@@ -151,7 +230,7 @@ impl SimulationConfig {
         mut self,
         allocator: UserItemUidAllocator,
     ) -> Result<Self, String> {
-        if self.account_store_database_url.is_some() {
+        if allocator.requires_postgres_source() || self.account_store_database_url.is_some() {
             return Err(
                 "File item UID binding cannot bypass a configured PostgreSQL source".into(),
             );

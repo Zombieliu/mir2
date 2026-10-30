@@ -123,6 +123,34 @@ fn uid_history_floor_includes_equipment_custody_sockets_and_receipt_only_merged_
 }
 
 #[test]
+fn uid_history_floor_includes_retired_escrow_carriers_and_authority_watermarks() {
+    for key in [
+        "item_uid",
+        "itemUid",
+        "carrier_uid",
+        "carrierUid",
+        "consume_carrier_uid",
+        "issuedThrough",
+        "issued_through",
+        "high_watermark",
+    ] {
+        let image = serde_json::json!({(key): "18446744073709551614"});
+        assert_eq!(
+            historical_uid_floor(&image, 0).unwrap(),
+            u64::MAX - 1,
+            "{key}"
+        );
+        assert!(historical_uid_floor(&serde_json::json!({(key): "001"}), 0).is_err());
+    }
+    // Ordinary player text is not a declared JSON asset carrier. This local
+    // floor helper must not advertise itself as complete-history certification.
+    assert_eq!(
+        historical_uid_floor(&serde_json::json!({"name":"[Player]"}), 0).unwrap(),
+        0
+    );
+}
+
+#[test]
 fn staged_purchase_clones_share_file_authority_and_aborted_plan_cannot_reissue_uid() {
     let (allocator, path) = authority("shared-clones", 10_000);
     let config = SimulationConfig::default()

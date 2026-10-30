@@ -57,6 +57,35 @@ impl ZoneEconomyWritePermit {
         self.source_config.ensure_account_store_writable()
     }
 
+    /// A server-owned issuer must retain the same source and shared Unknown
+    /// gate as its runtime. Equal connection strings alone do not establish
+    /// that a separately constructed config shares the original write freeze.
+    pub(crate) fn validate_source_configuration(
+        &self,
+        config: &SimulationConfig,
+    ) -> Result<(), String> {
+        config
+            .validate_zone_save_fence_binding()
+            .map_err(|_| REJECTED.to_string())?;
+        if config.zone_save_operation.is_some()
+            || config.account_store_database_url.as_deref()
+                != Some(self.source_database_url.as_str())
+            || config.zone_save_fence.as_ref() != Some(&self.fence)
+            || !std::sync::Arc::ptr_eq(&config.account_store, &self.source_config.account_store)
+            || !std::sync::Arc::ptr_eq(
+                &config.account_store_persist_lock,
+                &self.source_config.account_store_persist_lock,
+            )
+            || !std::sync::Arc::ptr_eq(
+                &config.account_store_write_state,
+                &self.source_config.account_store_write_state,
+            )
+        {
+            return Err(REJECTED.into());
+        }
+        Ok(())
+    }
+
     /// The ledger must call this before taking economy/account mutation locks.
     /// The shared lease row and its DB-time check remain in this transaction
     /// until the caller confirms COMMIT or rolls the entire mutation back.
@@ -69,7 +98,10 @@ impl ZoneEconomyWritePermit {
     ) -> Result<(), String> {
         self.validate_mutation_admission(ledger_database_url, zone_id, generation)?;
         self.fence
-            .lock_and_validate(transaction, AccountStoreDatabaseMode::SourceOfTruth)
+            .lock_and_validate(transaction, AccountStoreDatabaseMode::SourceOfTruth)?;
+        // A different writer can publish Unknown while this transaction waits
+        // for the lease. A queued request must not rely on its earlier check.
+        self.validate_mutation_admission(ledger_database_url, zone_id, generation)
     }
 
     fn validate_mutation_admission(

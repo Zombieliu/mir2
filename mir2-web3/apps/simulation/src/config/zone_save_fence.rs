@@ -121,10 +121,15 @@ pub(super) fn classify_commit_error(_error: postgres::Error) -> String {
 impl SimulationConfig {
     pub fn with_zone_save_fence(mut self, fence: ZoneSaveFence) -> Result<Self, String> {
         self.validate_zone_save_fence_binding()?;
-        if self.zone_save_operation.as_ref().is_some_and(|operation| operation.fence() != &fence) {
+        if self
+            .zone_save_operation
+            .as_ref()
+            .is_some_and(|operation| operation.fence() != &fence)
+        {
             return Err(REJECTED.to_string());
         }
         self.zone_save_fence = Some(fence);
+        self.item_uid_issuance.validate_source_config(&self)?;
         Ok(self)
     }
 

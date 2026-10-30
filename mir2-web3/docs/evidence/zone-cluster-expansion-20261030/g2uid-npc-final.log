@@ -1,0 +1,115 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 86 tests
+test npc_purchase_journal::tests::all_five_supported_combinations_preserve_actual_terminal_results ... ok
+test npc_purchase_journal::tests::canonical_account_exact_character_and_nonzero_actor_are_required ... ok
+test npc_purchase_journal::tests::corrupted_existing_state_is_never_extended_or_returned_as_a_lookup_hit ... ok
+test npc_purchase_journal::tests::duplicate_keys_are_invalid_even_with_increasing_revisions_or_new_intents ... ok
+test npc_purchase_journal::tests::exact_duplicate_and_changed_tuple_outcome_or_revision_never_append ... ok
+test npc_purchase_journal::tests::final_sequence_and_largest_usable_revision_preserve_full_u64_item_identity ... ok
+test npc_purchase_journal::tests::full_capacity_refuses_new_purchase_record_and_never_evicts_old_keys ... ok
+test npc_purchase_journal::tests::lookup_conflicts_for_every_changed_intent_and_never_returns_retry_miss ... ok
+test npc_purchase_journal::tests::malformed_outcomes_leave_room_for_the_following_actual_result ... ok
+test npc_purchase_journal::tests::request_scopes_are_part_of_the_key_and_sequence_does_not_sort_revisions ... ok
+test npc_purchase_journal::tests::revision_zero_max_repetition_and_reordering_are_refused ... ok
+test npc_purchase_journal::tests::schema_refuses_unknown_outcomes_and_missing_binding_fields ... ok
+test npc_purchase_journal::tests::serde_refuses_raw_duplicate_and_escaped_duplicate_fields ... ok
+test npc_purchase_journal::tests::serde_refuses_wrong_opaque_width_and_numeric_types_without_coercion ... ok
+test npc_purchase_journal::tests::strict_camel_case_schema_roundtrips_and_unknown_fields_are_refused ... ok
+test npc_purchase_journal::tests::terminal_rejection_is_retained_and_checkpoint_revision_is_required ... ok
+test npc_purchase_journal::tests::whole_merge_zero_uid_and_free_charge_need_no_inventory_presence ... ok
+test npc_purchase_journal::tests::zero_opaque_sequence_quantity_and_wrong_panel_are_rejected_without_mutation ... ok
+test npc_purchase_owner::tests::action_wire_names_and_mutation_classification_preserve_original_operations ... ok
+test npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_action_fields_are_refused ... ok
+test npc_purchase_owner::tests::raw_duplicate_and_escaped_duplicate_reply_fields_are_refused ... ok
+test npc_purchase_owner::tests::raw_full_u64_identity_and_zero_incoming_uid_decode_losslessly ... ok
+test npc_purchase_owner::tests::recovery_requires_explicit_receipt_and_only_null_represents_a_miss ... ok
+test npc_purchase_owner::tests::replies_roundtrip_all_named_variants_without_private_journal_or_account_fields ... ok
+test npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_action_layer ... ok
+test npc_purchase_owner::tests::unknown_fields_are_rejected_at_every_reply_layer ... ok
+test npc_purchase_owner::tests::unknown_tags_and_wrong_variant_shapes_are_rejected ... ok
+test npc_purchase_owner::tests::wrong_numeric_types_and_ranges_are_never_coerced ... ok
+test npc_purchase_owner::tests::wrong_opaque_width_and_nested_enum_shapes_are_rejected ... ok
+test runtime::npc::pearl_tests::pearl_npc_purchase_uses_only_pearl_wallet_and_rejects_insufficient_funds ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_all_primary_branches_capture_actual_currency_source_and_delivery ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_insufficient_currency_is_rejected_without_reusing_previous_commit ... ok
+
+thread 'runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic' panicked at apps\simulation\src\runtime\packets.rs:9790:57:
+controlled postprocessing panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic' panicked at apps\simulation\src\runtime\packets.rs:9790:57:
+controlled postprocessing panic
+
+thread 'runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic' panicked at apps\simulation\src\runtime\packets.rs:9790:57:
+controlled postprocessing panic
+test runtime::npc_purchase_outcome::tests::npc_purchase_known_resale_commit_survives_postprocessing_failure_or_panic ... ok
+
+thread 'runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit' panicked at apps\simulation\src\runtime\components.rs:304:37:
+Requested resource Enable the debug feature to see the name does not exist in the `World`.
+                Did you forget to add it using `app.insert_resource` / `app.init_resource`?
+                Resources are also implicitly added via `app.add_message`,
+                and can be added by plugins.
+test runtime::npc_purchase_outcome::tests::npc_purchase_missing_capture_or_precommit_panic_is_unknown_and_does_not_debit ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_pearl_used_fallback_keeps_currency_and_source_orthogonal ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_resale_admitted_count_is_clamped_and_removes_legacy_whole_entry ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_resale_delivery_matches_valid_old_gain_carrier ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_resale_invalid_source_or_roster_never_debits_or_removes_stock ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_resale_stack_slack_without_free_cells_cannot_overwrite_inventory ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_session_and_runtime_require_authentication_and_start_game ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_unsupported_runtime_never_executes_legacy_fallback ... ok
+test runtime::npc_purchase_outcome::tests::npc_purchase_zero_resale_selector_is_not_reconstructed_from_template_index ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_hero_maximum_is_actual_current_level_table ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_legacy_decode_defaults_only_new_optional_fields ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_market_preserves_full_u64_and_actual_stock ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_pearl_currency_comes_from_current_service ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_purchase_updates_same_owner_display_and_keeps_service ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_retired_or_nonbuy_context_withdraws_catalogue ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_service_popup_keeps_real_parent_without_text_dialog ... ok
+test runtime::npc_purchase_snapshot::tests::npc_purchase_snapshot_trade_matches_actual_packet_without_mutation ... ok
+test runtime::npc_purchase_transaction::tests::actual_delete_and_recreate_retires_old_actor_and_recovery_key ... ok
+test runtime::npc_purchase_transaction::tests::actual_durable_mentor_credit_merge_publishes_level_xp_roster_and_complete_stage5 ... ok
+test runtime::npc_purchase_transaction::tests::actual_external_mail_is_merged_into_complete_purchase_checkpoint_and_published_live ... ok
+test runtime::npc_purchase_transaction::tests::ambiguous_rename_freezes_stale_cache_and_query_but_actual_file_retains_terminal_result ... ok
+test runtime::npc_purchase_transaction::tests::committed_empty_checkpoint_reopens_without_demo_wallet_or_container_reseeding_before_actor ... ok
+test runtime::npc_purchase_transaction::tests::conflicting_nonce_tuple_foreign_actor_and_missing_query_never_write_or_debit ... ok
+test runtime::npc_purchase_transaction::tests::durable_duplicate_original_id_has_empty_packets_without_second_wallet_delivery_or_stock_change ... ok
+test runtime::npc_purchase_transaction::tests::durable_purchase_five_actual_currency_source_branches_share_full_file_checkpoint ... ok
+test runtime::npc_purchase_transaction::tests::durable_terminal_rejection_advances_revision_without_economic_debit ... ok
+test runtime::npc_purchase_transaction::tests::durable_zero_raw_resale_selector_survives_actual_file_journal_and_recovery ... ok
+simulation packet execution rejected; details suppressed
+simulation packet execution rejected; details suppressed
+test runtime::npc_purchase_transaction::tests::failed_logout_or_disconnect_save_retires_authority_while_preserving_original_recovery_state ... ok
+test runtime::npc_purchase_transaction::tests::genuine_new_session_producer_queries_original_scope_but_cannot_execute_it ... ok
+test runtime::npc_purchase_transaction::tests::legacy_missing_journal_enables_persistent_actor_and_ordinary_save_keeps_history ... ok
+test runtime::npc_purchase_transaction::tests::legacy_revision_zero_demo_checkpoint_still_seeds_missing_wallet_and_containers ... ok
+test runtime::npc_purchase_transaction::tests::older_complete_checkpoint_cannot_roll_back_committed_purchase_or_actor ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_checkpoint_replica_apply_mirrors_complete_state_without_reexecution_or_source_writes ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_actual_purchase_and_exact_replay_preserve_receipt_and_full_live_authority ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_authentication_epoch_and_enrollment_preflight_leave_actual_source_unchanged ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_begin_same_epoch_is_stable_idempotent_and_reports_verified_complete_revision ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_capability_requires_real_durable_source_and_refuses_memory_runtime ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_current_revision_and_journal_cannot_certify_unpublished_wallet_or_delivery ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_epoch_change_requires_begin_and_recovers_original_identity_without_old_scope_execution ... ok
+simulation packet execution rejected; details suppressed
+simulation packet execution rejected; details suppressed
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_failed_begin_and_failed_logout_or_disconnect_retire_authority_without_losing_recovery ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_partial_or_stale_live_publication_cannot_certify_recovered_receipt_revision ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_quote_and_original_id_query_never_write_file_revision_or_live_state ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_bootstrap_refuses_source_and_unbound_images_then_normal_login_runs_one_hook ... ok
+test runtime::npc_purchase_transaction::tests::owner_tests::owner_replica_refuses_source_truth_apply_and_older_foreign_or_rewritten_actual_history ... ok
+
+thread 'runtime::npc_purchase_transaction::tests::postcommit_error_and_panic_preserve_exact_receipt_for_original_id_query' panicked at apps\simulation\src\runtime\npc_purchase_transaction.rs:1004:54:
+controlled post-commit panic
+test runtime::npc_purchase_transaction::tests::postcommit_error_and_panic_preserve_exact_receipt_for_original_id_query ... ok
+test runtime::npc_purchase_transaction::tests::prepublication_faults_preserve_live_file_stock_carrier_and_buyback_expiry ... ok
+test runtime::npc_purchase_transaction::tests::revision_and_journal_capacity_exhaustion_fail_closed_before_live_purchase ... ok
+test runtime::npc_purchase_transaction::tests::uid_tests::global_uid_authority_failure_cannot_charge_currency_remove_resale_or_gain_item ... ok
+test runtime::npc_purchase_transaction::tests::uid_tests::global_uid_exact_purchase_replay_uses_original_receipt_even_when_mint_is_unavailable ... ok
+test runtime::npc_purchase_transaction::tests::uid_tests::global_uid_failed_account_publication_burns_planned_id_and_retry_issues_another ... ok
+test runtime::npc_purchase_transaction::tests::uid_tests::global_uid_five_durable_purchase_branches_share_binding_and_keep_metadata ... ok
+test runtime::npc_purchase_transaction::tests::uid_tests::global_uid_merged_purchase_retains_retired_incoming_identity_in_history_floor ... ok
+test runtime::npc_purchase_transaction::tests::wellformed_wrong_catalog_currency_or_source_rejects_without_removing_resale_stock ... ok
+
+test result: ok. 86 passed; 0 failed; 0 ignored; 0 measured; 3083 filtered out; finished in 55.45s

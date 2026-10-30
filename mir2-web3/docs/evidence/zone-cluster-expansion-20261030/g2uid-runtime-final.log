@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+
+running 12 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test runtime::item_uid_issuance::tests::corrupt_or_missing_uid_sidecar_rejects_staged_purchase_without_local_fallback ... ok
+test runtime::item_uid_issuance::tests::exhausted_uid_authority_cannot_consume_source_or_publish_successful_split ... ok
+test runtime::item_uid_issuance::tests::history_refresh_keeps_legacy_worlds_and_rejects_missing_or_mismatched_durable_config ... ok
+test runtime::item_uid_issuance::tests::invalid_live_rebind_stays_fenced_but_trusted_shadow_promotion_can_bind ... ok
+test runtime::item_uid_issuance::tests::inventory_and_storage_split_issue_fresh_global_uid_before_consuming_source ... ok
+test runtime::item_uid_issuance::tests::isolated_replay_cannot_mint_or_reacquire_live_authority ... ok
+test runtime::item_uid_issuance::tests::rebind_and_save_restore_preserve_server_binding_and_cannot_downgrade_to_slots ... ok
+test runtime::item_uid_issuance::tests::server_binding_rejects_replacement_authority_and_postgres_bypass ... ok
+test runtime::item_uid_issuance::tests::staged_purchase_clones_share_file_authority_and_aborted_plan_cannot_reissue_uid ... ok
+test runtime::item_uid_issuance::tests::uid_history_floor_includes_equipment_custody_sockets_and_receipt_only_merged_id ... ok
+test runtime::item_uid_issuance::tests::uid_history_floor_includes_retired_escrow_carriers_and_authority_watermarks ... ok
+test runtime::item_uid_issuance::tests::uid_issuance_raises_reserved_custody_floor_and_catalog_selector_is_not_history ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 3157 filtered out; finished in 1.79s

@@ -23,12 +23,43 @@ fn bound_config() -> SimulationConfig {
 }
 
 #[test]
-fn zone_economy_permit_requires_existing_bound_postgres_source_and_no_file_or_mirror() {
-    assert!(
-        SimulationConfig::default()
-            .zone_economy_write_permit()
-            .is_err()
+fn zone_economy_uid_binding_requires_the_original_shared_source_and_freeze_state() {
+    let config = bound_config();
+    let permit = config.zone_economy_write_permit().unwrap();
+    permit.validate_source_configuration(&config).unwrap();
+    permit
+        .validate_source_configuration(&config.clone())
+        .unwrap();
+    assert_eq!(
+        permit
+            .validate_source_configuration(&bound_config())
+            .unwrap_err(),
+        REJECTED
     );
+    for mutation in 0..6 {
+        let mut changed = config.clone();
+        let other = SimulationConfig::default();
+        match mutation {
+            0 => changed.account_store = other.account_store,
+            1 => changed.account_store_persist_lock = other.account_store_persist_lock,
+            2 => changed.account_store_write_state = other.account_store_write_state,
+            3 => changed.account_store_database_url = None,
+            4 => changed.account_store_database_mode = AccountStoreDatabaseMode::Mirror,
+            _ => changed.zone_save_fence = Some(fence("owner-b", 18)),
+        }
+        assert_eq!(
+            permit.validate_source_configuration(&changed).unwrap_err(),
+            REJECTED,
+            "changed binding {mutation} must not borrow the original issuer"
+        );
+    }
+}
+
+#[test]
+fn zone_economy_permit_requires_existing_bound_postgres_source_and_no_file_or_mirror() {
+    assert!(SimulationConfig::default()
+        .zone_economy_write_permit()
+        .is_err());
     assert!(source_config().zone_economy_write_permit().is_err());
     let config = bound_config();
     assert!(config.zone_economy_write_permit().is_ok());
@@ -111,34 +142,26 @@ fn zone_economy_permit_unknown_freezes_shared_source_clones_but_preserves_readon
     let before = serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap();
     permit.validate_source_write_state().unwrap();
     let error = permit.commit_outcome_unknown();
-    assert!(
-        clone
-            .validate_source_write_state()
-            .unwrap_err()
-            .contains("COMMIT_OUTCOME_UNKNOWN")
-    );
+    assert!(clone
+        .validate_source_write_state()
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
     assert!(error.starts_with(zone_save_fence::COMMIT_OUTCOME_UNKNOWN));
     assert!(error.contains("ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN"));
     assert!(!error.contains("private-test-password"));
     assert!(!error.contains("zone-economy-test.invalid"));
-    assert!(
-        config
-            .ensure_account_store_writable()
-            .unwrap_err()
-            .contains("writes are frozen")
-    );
-    assert!(
-        shared
-            .ensure_account_store_writable()
-            .unwrap_err()
-            .contains("writes are frozen")
-    );
-    assert!(
-        clone
-            .validate_mutation_admission(SOURCE_URL, "economy-permit-zone", 17)
-            .unwrap_err()
-            .contains("writes are frozen")
-    );
+    assert!(config
+        .ensure_account_store_writable()
+        .unwrap_err()
+        .contains("writes are frozen"));
+    assert!(shared
+        .ensure_account_store_writable()
+        .unwrap_err()
+        .contains("writes are frozen"));
+    assert!(clone
+        .validate_mutation_admission(SOURCE_URL, "economy-permit-zone", 17)
+        .unwrap_err()
+        .contains("writes are frozen"));
     // Issuance, context and target checks remain usable for an old receipt.
     for readonly in [clone, config.zone_economy_write_permit().unwrap()] {
         readonly.validate_target_database(SOURCE_URL).unwrap();
@@ -160,12 +183,10 @@ fn zone_economy_permit_unknown_keeps_prior_freeze_but_never_returns_prior_privat
     let error = permit.commit_outcome_unknown();
     assert!(error.starts_with(zone_save_fence::COMMIT_OUTCOME_UNKNOWN));
     assert!(!error.contains("prior-private-driver-detail"));
-    assert!(
-        config
-            .ensure_account_store_writable()
-            .unwrap_err()
-            .contains("prior-private-driver-detail")
-    );
+    assert!(config
+        .ensure_account_store_writable()
+        .unwrap_err()
+        .contains("prior-private-driver-detail"));
 }
 
 #[test]
@@ -220,10 +241,8 @@ fn zone_economy_permit_runtime_getter_uses_the_runtime_source_binding_and_shared
     readonly
         .validate_context("economy-permit-zone", 17)
         .unwrap();
-    assert!(
-        readonly
-            .validate_mutation_admission(SOURCE_URL, "economy-permit-zone", 17)
-            .is_err()
-    );
+    assert!(readonly
+        .validate_mutation_admission(SOURCE_URL, "economy-permit-zone", 17)
+        .is_err());
     assert!(source.ensure_account_store_writable().is_err());
 }

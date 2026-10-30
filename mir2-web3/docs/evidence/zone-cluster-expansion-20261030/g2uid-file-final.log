@@ -1,0 +1,42 @@
+    Finished `test` profile [unoptimized] target(s) in 50.26s
+     Running tests\user_item_uid_file.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\user_item_uid_file-9529953f20ec631a.exe)
+
+running 18 tests
+test concurrent_child_processes_share_the_file_authority ...
+running 1 test
+test concurrent_child_processes_share_the_file_authority ...
+running 1 test
+test concurrent_child_processes_share_the_file_authority ...
+running 1 test
+test concurrent_child_processes_share_the_file_authority ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.95s
+
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.96s
+
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.96s
+
+ok
+test concurrent_threads_issue_one_contiguous_set ... ok
+test corrupt_truncated_and_unknown_state_fail_closed ... ok
+test durable_issuer_skips_monthly_card_range_and_commits_the_gap_before_return ... ok
+test exhaustion_never_wraps_or_reuses_zero ... ok
+test first_uid_is_one_and_restart_is_monotonic ... ok
+test floor_raise_refuses_generation_overflow_without_mutation ... ok
+test initialize_new_refuses_existing_state ... ok
+test missing_state_after_initialization_fails_closed ... ok
+test nonzero_initial_floor_issues_floor_plus_one ... ok
+test open_existing_refuses_missing_state ... ok
+test parent_directory_components_are_rejected ... ok
+test raise_floor_is_monotonic_durable_and_restart_safe ... ok
+test replacing_authority_directory_is_detected_fail_closed ... ok
+test replacing_lock_file_is_detected_fail_closed ... ok
+test symbolic_link_state_is_never_followed ... ok
+test windows_file_id_info_detects_recreated_lock_identity ... ok
+test windows_rejects_unc_verbatim_unc_and_device_paths_before_io ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.06s

@@ -101,26 +101,36 @@ impl PostgresEconomyStore {
             binding.zone_id(),
             binding.owner_epoch(),
         )?;
-        let authority=tx.query_opt("SELECT issued_through::text FROM public.zone_player_drop_item_uid_authority WHERE source_namespace=current_schema() AND singleton=TRUE FOR UPDATE",&[]).map_err(|e|e.to_string())?.ok_or("player drop PostgreSQL UID authority requires an explicit complete-history census")?;
+        let namespace: String = tx
+            .query_one("SELECT current_schema()::text", &[])
+            .map_err(|_| "player drop UID namespace unavailable")?
+            .try_get(0)
+            .map_err(|_| "player drop UID namespace unavailable")?;
+        mir2_simulation::user_item_uid_postgres::lock_existing_ordinary_item_uid_authority_in_transaction(
+            &mut tx,
+            &self.database_url,
+            &namespace,
+            permit,
+        )
+        .map_err(|error| error.to_string())?;
         if let Some(ids) = read_reservation(&mut tx, binding, count)? {
             return Ok(ids);
         }
-        let mut through = authority
-            .get::<_, String>(0)
-            .parse::<u64>()
-            .map_err(|_| "invalid durable player drop UID authority")?;
-        let mut ids = Vec::with_capacity(count);
-        for _ in 0..count {
-            through = mir2_simulation::player_drop::player_drop_next_ordinary_item_uid(through)?;
-            ids.push(through);
-        }
+        let ids =
+            mir2_simulation::user_item_uid_postgres::reserve_ordinary_item_uids_in_transaction(
+                &mut tx,
+                &self.database_url,
+                &namespace,
+                permit,
+                count,
+            )
+            .map_err(|error| error.to_string())?;
         tx.execute("INSERT INTO public.zone_player_drop_item_uid_batches(operation_key,binding,item_count,reserved_at_ms) VALUES($1,$2,$3,$4)",
             &[&binding.operation_key(),&serde_json::to_value(binding).map_err(|e|e.to_string())?,&(count as i32),&(now_ms() as i64)]).map_err(|e|e.to_string())?;
         for (ordinal, uid) in ids.iter().enumerate() {
             tx.execute("INSERT INTO public.zone_player_drop_item_uid_reservations(operation_key,ordinal,item_uid) VALUES($1,$2,$3::text::numeric)",
                 &[&binding.operation_key(),&(ordinal as i32),&uid.to_string()]).map_err(|e|e.to_string())?;
         }
-        tx.execute("UPDATE public.zone_player_drop_item_uid_authority SET issued_through=$1::text::numeric WHERE source_namespace=current_schema() AND singleton=TRUE",&[&through.to_string()]).map_err(|e|e.to_string())?;
         tx.commit().map_err(|_| permit.commit_outcome_unknown())?;
         Ok(ids)
     }

@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存/经济 fence、普通掉落 custody、canonical source/CAS 与受控 Host 恢复，以及第六片 Prepared 前持久准入/精确审计/v2恢复回执；最新193次选定检查和 bins 通过，含27个显式 PG 函数（3个为 in-process Host）。仍缺全体 UID issuer 协同、冻结进程受控对账及耗材动作耦合；不能据此启动完整迁移或宣称容量/成本 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接保存/经济 fence、掉落 custody、持久准入/受控恢复及第七片共享 PG UID 与制作锁外预留；最新265次选定检查和 bins 通过，含45个实际 PG 函数（8个新增共享UID）和18个File检查。仍缺邮件/起始物品/通用grant迁移、完整历史census/切换、冻结进程对账及耗材动作耦合；不能据此启动完整迁移或宣称容量/成本 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -181,3 +181,61 @@ Host 成功 append 后必须精确确认 operation key/intent digest，之前 ru
 本片新增验证范围按实际测试函数列示：5个真实 PG 服务函数覆盖准入后、bootstrap 后、UID 预留后、Prepared+Linked 后的注入缺口，以及正常 Gold/完整嵌套拆堆和已知拒绝；4个真实 PG 恢复函数覆盖完整分页、集合变化、精确 Linked 及无归属 UID 批次；2个真实 PG COMMIT 函数覆盖已提交后丢确认和真实 deferred COMMIT 回滚；1个真实 PG + in-process Host 函数循环阶段1/2/4，不把三个循环分支计作三个测试函数。另有4个纯模型函数及 known-rejection routing 纯测试，检查完整冻结预览、篡改、审计代次、UID 见证和已知拒绝后的路由清理。最终13组 qualification 通过：193次选定测试执行、Gateway bins，70个选定源文件哈希一致；其中27个 PG 函数均被显式运行，过滤器重叠不代表唯一覆盖数或人数。命令、结果和边界统一记录在[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-durable-prepared-admission-and-recovery)。
 
 服务/Host 缺口使用明确注入点，提交后丢确认也使用标记的测试 hook；不冒称物理 kill、原生网络故障、自动启动恢复或自动解除 Unknown。当前下一项仍是**全体普通 UID issuer 的共享 PG adapter 与完整 census**，随后补齐技能耗材与已接受世界动作的持久原子耦合（funded action）。G3–G7 的完整迁移、跨入口恢复、调度和3000–5000人持续战斗仍未完成；本片没有新增 CCU、硬件或服务器/月卡成本验收结论。
+
+## G2 第七片：共享 PG 物品编号与制作预留
+
+本片基线为 `54d0e32ede55e54b8babffc61f37e126c9bf37b5`。实现普通物品编号的 PostgreSQL adapter，使显式启用的服务端制作、NPC/拆堆准备路径与玩家丢物预留共用已有编号源；**最终12组验证通过：265次选定测试执行、Gateway bins、60个共同选定源文件哈希与独立File测试源哈希核对；其中45个实际PG函数和18个File检查通过，G2仍未闭合**。结果、源码摘要及真实/模拟边界集中在[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-shared-postgresql-uid-authority-and-staged-production)，以该记录的最终接受结果为准。
+
+### 已实现的共享编号边界
+
+`apps/simulation/src/user_item_uid_postgres.rs` 实现现有 `UserItemUidStore`，使用0021已有的 `public.zone_player_drop_item_uid_authority`，按 `source_namespace` 共用同一 `issued_through`，并核对匹配的 `zone_player_drop_item_uid_census_audit`。没有新增DDL，没有启用未注册的 `0015_shared_item_identity.sql`，也没有创建第二套编号高水位。缺少已初始化源、匹配审计或有效命名空间时拒绝；普通分配不建表、不从当前背包重建 census、不按零初始化。
+
+`SimulationConfig::with_postgres_item_uid_allocator` 是显式可信配置入口，要求 SourceOfTruth、原 `ZoneSaveFence` 和完整源连接绑定。adapter 固定完整DSN（含启动 options/search_path）、实际 schema、原 permit，以及账号源、持久化锁和共享 Unknown 状态的相同 `Arc`。相同DSN但独立的配置不能偷用另一个配置的权限；后续改DSN、移除URL、改mode/fence、替换源或进入shadow，不能借原allocator恢复写入。Debug及数据库错误只保留固定领域信息，不输出连接秘密。
+
+每次分配或提高高水位，都在同一源事务中先锁现有Zone lease，以数据库时钟验证原 owner/epoch/有效期，再锁本namespace已有编号行并核对census审计。即使请求的floor相等或更低，也必须验证当前写权限，不能成为旧owner或冻结状态的旁路。原玩家丢物的幂等批次沿用同一组事务内锁与分配函数；重复批次只返回原不可变列表，普通单件发行不会伪造drop batch。编号跨SQL以精确十进制文本/NUMERIC传递，保持完整u64，检查溢出并跳过月卡保留区间；不会回退到slot或进程内计数器。
+
+成功COMMIT后才向调用方返回可用编号；COMMIT确认未知冻结原配置及其所有共享clone，已可能烧掉的编号不回收、不补发。`issued_through` 保留只读核对能力，换主后也可查询，但读到高水位不构成解冻、重放或发行原编号的证据。新的可信owner可从同一既有高水位继续，原owner不能恢复写入。连接/语句/锁等待有界设置不等于底层驱动IO硬取消，也不等于原生网络故障已经验收。
+
+File绑定入口拒绝PG句柄，避免无DSN配置借用旧permit。请求取得lease及UID行锁后、PG COMMIT前重查共享Unknown；已观测排队期间发布的冻结必须拒绝，不能以普通锁超时冒充验收。这不是跨主机全局内存/COMMIT原子屏障，不追溯撤销其他此前已获准的事务。
+
+### 制作结果先预留，再做原源事务
+
+`runtime/production.rs` 先完成完整背包计划，扫描当前账号源、活跃角色和计划背包的历史高水位，释放本地账号锁后，再调用共享allocator预留结果UID；不能在账号/持久化锁内另开连接等待Zone lease，从而形成与正常源事务相反的锁顺序。随后沿原制作源事务校验角色incarnation、revision/CAS、制作账本和完整载体，再发布资产、回执及包。预留失败不发布成功包；后续源CAS或制作提交拒绝会留下编号空洞，不回退编号源。
+
+源事务重新核对预留前扫描的历史高水位。只要任意账号使该高水位增长，就拒绝原计划，要求重新计划；并非只检查当前角色，也不只在恰好发现编号碰撞时才拒绝。原请求已有明确制作回执时走原查询/重放路径，不重新发行结果UID。此处使用的账号镜像扫描是分配前的局部保护，不能替代下面的部署完整历史认证；本片也不声称制作功能已经提供可公开使用的PG端到端入口。
+
+本片没有新增wire字段、日志结构或同步命令，因此继续沿用 `mir2-zone/v5-durable-drop-admission/`，不因仅替换服务端编号后端而改协议版本。这不放宽v5既有的完整源、准入、冻结结果和受控恢复合同。
+
+### 完整历史census：已定位来源，认证工具仍待实现
+
+以下是必须盘点的真实来源，不能把“PG当前背包最大UID”命名为完整census。PG可在明确源数据库/schema清单的同一一致快照中分页读取；所有终态历史也参与不可复用高水位，不能按当前余额、在线角色、未领取或未过期过滤：
+
+| 来源 | 盘点范围 |
+| --- | --- |
+| 账号及离线角色 | `accounts.raw_json`、`characters.raw_json`、`character_saves.snapshot_json/stage5_systems_json`。包括背包、腰带、仓库、装备、Hero兼容镜像、NPC回购/旧货、租赁引用、邮件附件、拍卖、精炼炉、购买收据和个人制作账本/材料托管；按声明格式严格解码嵌套JSON字符串。 |
+| 共享独立权威 | `shared_guilds.raw_json`、`shared_heroes.raw_json`、`sealed_stone_authority.registry_json`。Hero与石头的 `carrier_uid`、已消费/释放墓碑也需覆盖；共享征战等无物品表必须在schema清单中明确审计为无UID载体，而非遗漏。 |
+| 个人求购 | `accounts.raw_json` 中procurement的装备锁、原始实例、待领取交付及其 `item_uid`。高水位包括已释放锁、已领取历史，不能只扫描当前托管。 |
+| 保存操作历史 | `public.zone_character_save_operations` 的 `frozen_checkpoint`、`expected_checkpoint`、`saved_checkpoint`，包括原角色删除后保留的操作。 |
+| 丢物与准入历史 | 全部drop operations/admissions的冻结实例、before/after源、终态和abort audit；UID batches/reservations、authority及历次census audit均参与，不回用已中止预留。 |
+| 恢复世界 | `zone_player_drop_recovery_receipts.receipt/base_snapshot_bytes`。验证base摘要、gzip/base64封装和内部 `zone_state_bytes` 后读取世界、Session、地面掉落、已领取及托管历史；普通JSON键递归看不到压缩或字节载荷。 |
+| 交易/经济历史 | `game_economy_balances` 中item的 `asset_key`，transactions receipt、outbox/inbox payload、trade/ground-drop projections及bootstrap details。已投影、余额为零或已派送均不意味着UID可重新发行。 |
+
+`db_projection.rs` 的 `character_items` 等是派生展示，部分u64按i64写入BIGINT，并且载体范围不完整，不能对该表直接 `MAX(unique_id)` 作为权威高水位。现有Hero物理carrier census可复用严格遍历、预算和兼容镜像判别思路，但它有意排除历史收据，不能直接签发完整历史认证。
+
+PG当前库不能证明外部历史不存在。操作员必须提供同一UID域的全部来源manifest：现用/退役机器的File或Mirror账号库及保留备份、导入存档，独立 `UserItemUid` sidecar和旧 `.item-identity.json` 及其最高水位，各副本/WAL归档的 `base-snapshot-v5.json`、`mutation-batches-v5.jsonl`，以及 `.mir2-save-recovery-v1` 或显式恢复目录中的待处理和quarantine记录。已清理收据、已删除账号、丢失sidecar或退役机器无法由当前PG补证；缺来源时必须输出incomplete，不能自动生成“完整”摘要。恢复日志须核对原MAC/hash，错误记录保留并人工审计，不能略过后认证。
+
+当前 `historical_uid_floor` 已补充托管、carrier和authority高水位键，但仍是**floor heuristic**：普通玩家文本可能以 `[` 或 `{` 开头，因此它对任意字符串不能全部按严格资产JSON处理；它也没有外部来源清单、完整分页、PG一致快照或压缩世界解码认证。它不能签发完整census。生产完整census CLI和不可伪造的完成capability **尚未实现**；现有管理员floor+digest初始化接口仍明确依赖管理员完成真实盘点，不能把格式正确的摘要当作完整性证明。
+
+切换门禁应按以下顺序补齐：
+
+1. 固定UID域、所有DB/schema和外部来源清单；停止并排空全部相关发行者及可恢复写入者。只拿census advisory lock不足以约束Legacy或文件发行器。
+2. 在同一PG一致快照中严格分页扫描全部声明来源，记录迁移/schema指纹、行数、规范摘要、最大UID和出处；权限不足、缺表、未知载体格式、损坏/截断/超预算均阻断认证，不能忽略。
+3. 只读扫描固定外部清单，前后核对文件身份、长度和摘要；验证WAL/base/恢复日志封装。分别报告历史不可复用高水位与当前物理唯一归属：历史引用、原收据和兼容镜像不能误判成重复持有，真实重复持有也不能靠提高floor掩盖。
+4. 合并所有历史UID、旧/现authority水位和已预留编号，保持精确u64、只增及月卡保留规则；缺失历史来源继续关闭切换，不能根据当前存档自举。
+5. 仅在完整来源与维护期证据仍有效时签发完成capability，将manifest摘要与现有共享floor/audit同事务绑定；确认未知只查原认证。所有普通issuer迁移、恢复与故障验证完成后，才允许公开入口切换。不得启用旧0015或第二个floor来绕开本门禁。
+
+### 验证与回退边界
+
+本片新增验证设计包括：8个严格自建disposable PG函数，覆盖独立issuer/独立连接与原drop批次交错及并发、重启、owner/expiry/DSN/schema与配置替换、缺census/audit、真实COMMIT后测试hook丢确认、完整u64与月卡边界，以及实际运行时SplitItem、完整属性和持久化；2个adapter纯函数检查边界与诊断；4个真实Session/File加可观察Mock UID store的制作函数检查锁外预留、历史变化、CAS失败烧号和重复查询不发号；另有新增permit绑定与history键纯检查。最终统一检查已通过，完整命令、哈希与过滤器重叠口径见本片证据；制作Mock测试不是PG制作端到端验证，提交确认hook也不是物理kill或原生数据库网络分区。
+
+无新DDL的代码回退仍必须保留0021/0022/0023与全部共享floor、census审计、预留、准入和恢复证据；先关闭新请求并对账未决结果，保留已烧掉的UID，不能降低高水位、恢复旧sidecar或重新启用Legacy writer。现有公共入口默认未切换，邮件、角色起始物品和其他通用grant路径尚未全部迁移。技能耗材与已接受世界动作的持久耦合、完整census与issuer切换仍属于G2；G3–G7及3000–5000人持续战斗的容量和多机故障资格仍未完成。本片没有更新远程测试服、公网更新频道、Docker或生产收费，也没有新增每人月成本或硬件承载结论。

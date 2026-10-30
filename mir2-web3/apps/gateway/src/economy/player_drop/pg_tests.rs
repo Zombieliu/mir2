@@ -5,14 +5,16 @@ use mir2_simulation::{
     AccountStoreDatabaseMode, PlayerDropRequest, PreparedPlayerDropPublication,
     PreparedPlayerDropPublicationFailure, SimulationConfig, ZoneSaveFence,
 };
-#[path = "recovery_pg_tests.rs"]
-mod recovery_pg_tests;
-#[path = "admission_service_pg_tests.rs"]
-mod admission_service_pg_tests;
-#[path = "admission_recovery_pg_tests.rs"]
-mod admission_recovery_pg_tests;
 #[path = "admission_commit_pg_tests.rs"]
 mod admission_commit_pg_tests;
+#[path = "admission_recovery_pg_tests.rs"]
+mod admission_recovery_pg_tests;
+#[path = "admission_service_pg_tests.rs"]
+mod admission_service_pg_tests;
+#[path = "recovery_pg_tests.rs"]
+mod recovery_pg_tests;
+#[path = "shared_uid_pg_tests.rs"]
+mod shared_uid_pg_tests;
 
 pub(crate) struct Database {
     control_url: String,

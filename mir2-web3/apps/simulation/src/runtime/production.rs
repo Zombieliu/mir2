@@ -64,8 +64,8 @@ pub struct PersonalProductionConfig {
     /// is explicitly set. Gold/black-iron templates must never be bound here.
     pub ordinary_ore_purity_caps: BTreeMap<String, u16>,
     /// Must be shared with ALL item issuers before a public route is enabled.
-    /// Each production issuance also raises its floor from the locked complete
-    /// account image, including sockets, held items and old job debit custody.
+    /// Each production issuance scans the complete account image, then releases
+    /// its lock before reserving identities. Commit rechecks that history floor.
     pub global_uid_allocator: UserItemUidAllocator,
 }
 #[derive(Debug, Clone)]
@@ -443,6 +443,77 @@ fn now_ms() -> Result<u64, String> {
     )
     .map_err(|_| "production clock overflow".into())
 }
+
+/// Reserve only after the complete inventory plan succeeds, and before taking
+/// account/persist locks. A rejected source CAS burns these IDs, never rewinds
+/// the authority or publishes the staged packets.
+fn reserve_production_output_uids(
+    config: &crate::SimulationConfig,
+    allocator: &UserItemUidAllocator,
+    active: &CharacterSaveRecord,
+    plan: &mut InventoryPlan,
+) -> Result<Option<u64>, String> {
+    config.item_uid_issuance.validate_source_config(config)?;
+    config.ensure_account_store_writable()?;
+    if plan.fresh_indices.is_empty() {
+        return Ok(None);
+    }
+    let store_floor = {
+        let store = config
+            .account_store
+            .lock()
+            .map_err(|_| "production source lock poisoned")?;
+        super::item_uid_issuance::historical_uid_floor(
+            &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
+            0,
+        )?
+    };
+    let floor = store_floor
+        .max(super::item_uid_issuance::historical_uid_floor(
+            &serde_json::to_value(active).map_err(|error| error.to_string())?,
+            0,
+        )?)
+        .max(super::inventory::inventory_max_unique_id(&plan.inventory));
+    allocator
+        .ensure_issued_through_at_least(floor)
+        .map_err(|error| error.to_string())?;
+    let mut previous = floor;
+    for index in &plan.fresh_indices {
+        let uid = allocator
+            .issue(UserItemUidReason::Crafting)
+            .map_err(|error| error.to_string())?
+            .get();
+        if uid <= previous {
+            return Err("production UID authority returned an overlapping identity".into());
+        }
+        previous = uid;
+        let item = &mut plan.inventory.inventory_items[*index];
+        item.unique_id = uid;
+        validate_committed_item_state_carrier(item).map_err(|error| error.to_string())?;
+        plan.packets.push(ServerPacket::GainedItem {
+            item: try_user_item_from_item_state(item).map_err(|error| error.to_string())?,
+        });
+    }
+    Ok(Some(floor))
+}
+
+fn validate_production_uid_history(
+    store: &AccountStore,
+    reserved_history_floor: Option<u64>,
+) -> Result<(), String> {
+    if let Some(floor) = reserved_history_floor {
+        let current = super::item_uid_issuance::historical_uid_floor(
+            &serde_json::to_value(store).map_err(|error| error.to_string())?,
+            0,
+        )?;
+        if current > floor {
+            return Err(
+                "production UID history changed after reservation; retry a fresh plan".into(),
+            );
+        }
+    }
+    Ok(())
+}
 impl SimulationSession {
     /// Server-only opt-in. The default/bundled catalog is disabled. This is not
     /// player-facing availability and does not add a second NPC crafting path.
@@ -635,6 +706,12 @@ impl SimulationSession {
         let mut staged = false;
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(
             || -> Result<Vec<ServerPacket>, String> {
+                let reserved_history_floor = reserve_production_output_uids(
+                    &config,
+                    &cfg.global_uid_allocator,
+                    &active,
+                    &mut plan,
+                )?;
                 let (save, publication) = super::shared_guild_experience::commit_source(
                     self.app.world(),
                     &config,
@@ -660,37 +737,9 @@ impl SimulationSession {
                                 "stale production checkpoint; reload before a new operation".into(),
                             );
                         }
+                        validate_production_uid_history(store, reserved_history_floor)?;
                         let mut save = active.clone();
                         merge_persisted_mail_into_character_save(&mut save, durable)?;
-                        if !plan.fresh_indices.is_empty() {
-                            let floor = super::item_uid_issuance::historical_uid_floor(
-                                &serde_json::to_value(&store).map_err(|error| error.to_string())?,
-                                0,
-                            )?
-                            .max(super::item_uid_issuance::historical_uid_floor(
-                                &serde_json::to_value(&active)
-                                    .map_err(|error| error.to_string())?,
-                                0,
-                            )?)
-                            .max(super::inventory::inventory_max_unique_id(&plan.inventory));
-                            cfg.global_uid_allocator
-                                .ensure_issued_through_at_least(floor)
-                                .map_err(|error| error.to_string())?;
-                            for index in &plan.fresh_indices {
-                                let item = &mut plan.inventory.inventory_items[*index];
-                                item.unique_id = cfg
-                                    .global_uid_allocator
-                                    .issue(UserItemUidReason::Crafting)
-                                    .map_err(|error| error.to_string())?
-                                    .get();
-                                validate_committed_item_state_carrier(item)
-                                    .map_err(|error| error.to_string())?;
-                                plan.packets.push(ServerPacket::GainedItem {
-                                    item: try_user_item_from_item_state(item)
-                                        .map_err(|error| error.to_string())?,
-                                });
-                            }
-                        }
                         save.gold = plan.gold;
                         save.inventory_items_json =
                             encode_state_vec(&plan.inventory.inventory_items);
@@ -766,3 +815,7 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "production_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "production_uid_planning_tests.rs"]
+mod uid_planning_tests;

@@ -1,0 +1,89 @@
+    Finished `test` profile [unoptimized] target(s) in 1m 14s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 75 tests
+test economy::player_drop::abort::tests::player_drop_abort_audit_binds_original_operation_successor_and_canonical_evidence ... ok
+test economy::player_drop::abort::tests::player_drop_abort_records_newer_canonical_without_replaying_old_before_or_after ... ok
+test economy::player_drop::admission::tests::admission_abort_retains_exact_uid_witness_and_never_accepts_reused_or_extra_ids ... ok
+test economy::player_drop::admission::tests::admission_freezes_request_placement_absolute_expiry_and_rejects_tampering ... ok
+test economy::player_drop::admission::tests::admission_owner_rejection_and_successor_abort_have_distinct_epoch_rules ... ok
+test economy::player_drop::admission::tests::admission_split_preview_accepts_only_complete_zero_tree_and_preserves_all_attributes ... ok
+test economy::player_drop::pg_tests::admission_commit_pg_tests::player_drop_postgres_admission_commit_lost_ack_has_no_continuation_and_successor_aborts ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_commit_pg_tests::player_drop_postgres_admission_deferred_commit_rollback_freezes_and_certifies_empty_successor ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_admission_recovery_link_requires_its_exact_prepared_digest ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_admission_recovery_reads_every_page_and_blocks_unresolved_admissions ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_admission_recovery_rejects_changed_sets_and_only_retires_audited_terminal_actors ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_recovery_pg_tests::player_drop_postgres_recovery_rejects_unattributed_legacy_uid_batches_without_reissuing_them ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_gold_gaps_before_and_after_bootstrap_are_query_only_and_successor_audited ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_linked_prepared_gap_aborts_without_source_debit_or_uid_refund ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_missing_uid_authority_is_audited_known_rejection_without_freeze ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_reserved_split_gap_survives_restart_and_never_reuses_retired_uids ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::admission_service_pg_tests::player_drop_admission_service_success_links_gold_and_exact_split_once ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_abort_unknown_freezes_successor_and_only_queries_original_operation ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_complete_source_ledger_ack_restart_and_terminal_pickup ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_namespace_cannot_adopt_prepared_operation_or_uid_authority ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_service_gold_exact_retry_and_successor_terminal_preserve_newer_canonical ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_service_split_preserves_exact_nested_attributes_and_reserves_uids_once ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_successor_abort_retires_old_prepared_source_without_assets_or_uid_reuse ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_uid_requires_census_idempotent_full_u64_fenced_and_exhaustion ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_unknown_commit_keeps_prepared_and_freezes_absent_receipt_retry ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_accepts_deleted_terminal_actors_only_with_completed_delivery_and_roster_absence ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_certifies_successor_abort_and_database_expiry_without_asset_mutation ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_commit_unknown_keeps_durable_base_but_freezes_all_new_writes ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_reads_all_pages_and_never_certifies_truncated_or_changed_prepared_set ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::recovery_pg_tests::player_drop_postgres_recovery_retains_exact_base_without_original_session_and_rejects_stale_source_or_head ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_actual_runtime_stack_split_uses_and_persists_shared_authority ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_committed_lost_ack_burns_uid_and_freezes_all_source_clones ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_full_u64_and_monthly_reserved_boundaries_are_atomic ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_independent_issuers_drop_batches_and_restart_share_one_floor ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_live_fence_and_source_configuration_cannot_be_substituted ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_missing_census_never_initializes_or_falls_back ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_namespace_isolation_and_matching_census_audit_are_required ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_queued_issuer_rechecks_shared_freeze_after_uid_row_lock ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::recovery::tests::recovery_admission_abort_requires_exact_owner_rejection_or_newer_successor_audit ... ok
+test economy::player_drop::recovery::tests::recovery_admission_source_retirement_requires_terminal_resolution ... ok
+test economy::player_drop::recovery::tests::recovery_base_checksum_and_complete_pre_head_are_bound ... ok
+test economy::player_drop::recovery::tests::recovery_empty_set_is_not_a_cross_zone_or_cross_namespace_proof ... ok
+test economy::player_drop::recovery::tests::recovery_linked_admission_requires_exact_operation_and_preserves_legacy_operations ... ok
+test economy::player_drop::recovery::tests::recovery_receipt_keeps_exact_base_bytes_and_rejects_receipt_or_base_tampering ... ok
+test economy::player_drop::recovery::tests::recovery_roster_absence_only_retires_terminal_source_actors ... ok
+test economy::player_drop::recovery::tests::recovery_v1_receipt_keeps_legacy_bytes_and_v2_requires_complete_admission_evidence ... ok
+test economy::player_drop::tests::player_drop_pickup_logical_identity_survives_presentation_change_and_preserves_recipient ... ok
+test economy::player_drop::tests::player_drop_pickup_rejects_changed_amount_placement_expiry_and_missing_binding ... ok
+test economy::player_drop::tests::player_drop_source_uses_complete_source_delta_and_preserves_historical_kill_projection ... ok
+test routing::player_drop_guard_tests::player_drop_journal_peeks_retain_evidence_until_exact_acknowledgement ... ok
+test routing::player_drop_guard_tests::player_drop_known_terminal_refusal_releases_placement_without_freezing_next_request ... ok
+test routing::player_drop_guard_tests::player_drop_pending_journal_blocks_all_source_save_callbacks_and_handoff ... ok
+test routing::player_drop_guard_tests::player_drop_standalone_durable_runtime_without_journal_rejects_before_debit_or_service ... ok
+test routing::player_drop_recovery::tests::empty_recovery_creates_a_promotable_inactive_owner_resource ... ok
+test routing::player_drop_recovery::tests::expired_recovery_deadline_never_enables_replica_ticks ... ok
+test routing::player_drop_recovery::tests::host_clock_cannot_silently_expire_a_canonical_live_receipt ... ok
+test routing::player_drop_recovery::tests::late_projection_conflict_leaves_world_and_unrelated_drop_unchanged ... ok
+test routing::player_drop_recovery::tests::recovery_creates_inactive_resources_without_original_session ... ok
+test routing::player_drop_recovery::tests::recovery_installs_all_logical_maps_without_original_session_and_prunes_empty_sets ... ok
+test routing::player_drop_recovery::tests::recovery_rejects_wrong_owner_group_and_duplicate_effects_without_publishing ... ok
+test routing::player_drop_recovery::tests::recovery_requires_replica_and_disabled_ticks ... ok
+gateway lifecycle session_id=gateway-94532-1793383004868-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94532-1793383004868-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94532-1793383004867-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94532-1793383004867-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_broadcasts_player_drop_gold_spawn ... ok
+test zone_rpc::admission_recovery_pg_tests::player_drop_admission_host_pg_recovers_prepared_and_preparedless_gaps_without_asset_replay ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test zone_rpc::player_drop_journal_tests::authenticated_digest_verified_batch_applies_frozen_result_without_execute ... ok
+test zone_rpc::player_drop_journal_tests::frozen_checkpoint_replay_dispatch_preserves_per_zone_binding ... ok
+test zone_rpc::player_drop_journal_tests::frozen_player_drop_binds_zone_lease_and_zone_sequence_not_outer_rpc_session ... ok
+test zone_rpc::player_drop_journal_tests::frozen_player_drop_is_rejected_as_client_execute_before_runtime_or_journal ... ok
+test zone_rpc::player_drop_journal_tests::frozen_result_peek_retains_guard_until_exact_publication_acknowledgement ... ok
+test zone_rpc::player_drop_journal_tests::ordinary_journal_entries_keep_legacy_canonical_bytes ... ok
+test zone_rpc::player_drop_journal_tests::post_commit_acknowledgement_failure_is_unknown_and_retains_runtime_guard ... ok
+test zone_rpc::player_drop_journal_tests::post_commit_host_append_failure_is_unknown_and_freezes_zone ... ok
+
+thread 'zone_rpc::player_drop_journal_tests::post_commit_registration_refresh_failure_is_unknown_and_freezes_zone' panicked at apps\gateway\src\zone_rpc\player_drop_journal_tests.rs:628:9:
+fixture registration refresh failure after runtime execution
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test zone_rpc::player_drop_journal_tests::post_commit_registration_refresh_failure_is_unknown_and_freezes_zone ... ok
+test zone_rpc::player_drop_journal_tests::source_of_truth_promotion_requires_canonical_recovery_before_snapshot_or_seed ... ok
+test zone_rpc::player_drop_journal_tests::successful_host_drop_replaces_procedure_with_exact_frozen_result ... ok
+test zone_rpc::player_drop_journal_tests::unknown_zone_freeze_blocks_shared_tick_authorizer_before_world_mutation ... ok
+
+test result: ok. 42 passed; 0 failed; 33 ignored; 0 measured; 1485 filtered out; finished in 14.71s
