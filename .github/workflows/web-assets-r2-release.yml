@@ -8,7 +8,7 @@ on:
         required: true
         default: context
         type: choice
-        options: [context, stage, promote, backend-build]
+        options: [context, discover-main-site, stage, promote, backend-build]
       deployment_id:
         description: Exact accepted production candidate; required only for promote
         required: false
@@ -80,6 +80,29 @@ jobs:
             if (!result.ok) throw Error(`Vercel ${method} request failed: HTTP ${result.status}`);
             const responseBody = await result.text();
             return responseBody.length === 0 ? {} : JSON.parse(responseBody);
+          }
+          if (operation === 'discover-main-site') {
+            // Read only public routing/build metadata; never export environment values.
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
+            const deployment = await api(`/v13/deployments/${id}`);
+            if (deployment.projectId !== project) throw Error('Historical deployment belongs to another project');
+            console.log(JSON.stringify({historicalDeployment:{id:deployment.id,url:deployment.url,
+              readyState:deployment.readyState,alias:deployment.alias,
+              rootDirectory:deployment.projectSettings?.rootDirectory,
+              sourceSha:deployment.meta?.githubCommitSha,sourceRef:deployment.meta?.githubCommitRef}},null,2));
+            const projects = await api('/v9/projects?limit=100');
+            const candidates = (projects.projects || []).filter(entry => /mir2|numeron|website/i.test(entry.name));
+            for (const candidate of candidates) {
+              const details = await api(`/v9/projects/${candidate.id}`);
+              const domains = await api(`/v9/projects/${candidate.id}/domains`);
+              console.log(JSON.stringify({websiteCandidate:{id:details.id,name:details.name,
+                rootDirectory:details.rootDirectory,
+                git:details.link?{repo:details.link.repo,productionBranch:details.link.productionBranch}:null,
+                production:details.targets?.production?{id:details.targets.production.id,url:details.targets.production.url}:null,
+                domains:(domains.domains||[]).map(domain=>({name:domain.name,redirect:domain.redirect}))}},null,2));
+            }
+            process.exit(0);
           }
           const current = value.targets?.production?.id || value.targets?.production?.deploymentId;
           if (current !== baseline) throw Error('Production changed since inspection; inspect and rebase before continuing');
