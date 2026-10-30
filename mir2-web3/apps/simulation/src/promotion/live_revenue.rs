@@ -5,7 +5,7 @@ use postgres::{Client, NoTls, Transaction};
 use serde_json::{json, Value};
 
 use super::store::{audit, db, hash, positive, refresh_account_qualifications, signed};
-use super::PromotionStore;
+use super::{PromotionRules, PromotionStore, RevenueRecognition};
 use crate::billing_provenance::monthly_revenue_sources;
 use crate::{with_account_store_postgres_client, AccountRecord};
 
@@ -95,7 +95,10 @@ impl PromotionStore {
         for (campaign_id, account_id) in &pairs {
             let counts = with_account_store_postgres_client(&self.database_url, |client| {
                 let mut tx = db(client.transaction())?;
-                let campaign=db(tx.query_one("SELECT starts_at_ms,ends_at_ms FROM promotion_campaigns WHERE environment=$1 AND campaign_id=$2 FOR UPDATE",&[&self.environment,&campaign_id]))?;
+                let campaign=db(tx.query_one("SELECT starts_at_ms,ends_at_ms,rules_json FROM promotion_campaigns WHERE environment=$1 AND campaign_id=$2 FOR UPDATE",&[&self.environment,&campaign_id]))?;
+                let recognition = serde_json::from_value::<PromotionRules>(campaign.get(2))
+                    .map_err(|_| "promotionRulesInvalid")?
+                    .revenue_recognition;
                 let attribution=db(tx.query_one("SELECT confirmed_at_ms FROM promotion_attributions WHERE environment=$1 AND campaign_id=$2 AND account_id=$3 FOR UPDATE",&[&self.environment,&campaign_id,&account_id]))?;
                 let confirmed = positive(attribution.get(0));
                 let raw: Value = db(tx.query_one(
@@ -166,19 +169,37 @@ impl PromotionStore {
                     }) {
                         continue;
                     }
-                    if existing.is_none()
-                        && (source.service_end_ms <= positive(campaign.get(0))
-                            || source.service_start_ms >= positive(campaign.get(1)))
-                    {
-                        continue;
+                    if existing.is_none() {
+                        let start = positive(campaign.get(0));
+                        let end = positive(campaign.get(1));
+                        if recognition == RevenueRecognition::MonthlyPurchaseFull {
+                            // Activated renewals can serve future months, but an
+                            // older full-price season must not claim a later
+                            // season's immutable monthly UID before calculation.
+                            if !(start..end).contains(&source.paid_at_ms)
+                                || !(start..end).contains(&source.entitlement_at_ms)
+                            {
+                                continue;
+                            }
+                        } else if source.service_end_ms <= start || source.service_start_ms >= end {
+                            continue;
+                        }
                     }
                     let mut early_payment = false;
                     for part in &source.parts {
-                        if part.paid_at_ms > 0 && part.paid_at_ms < confirmed &&
-                            part.reason_code != "payment_environment_mismatch" &&
-                            !super::attribution_migration::permits_preconfirmation_payment(
-                                &mut tx,&self.environment,campaign_id,account_id,
-                                &part.source_order_id,part.paid_at_ms,confirmed)? {
+                        if part.paid_at_ms > 0
+                            && part.paid_at_ms < confirmed
+                            && part.reason_code != "payment_environment_mismatch"
+                            && !super::attribution_migration::permits_preconfirmation_payment(
+                                &mut tx,
+                                &self.environment,
+                                campaign_id,
+                                account_id,
+                                &part.source_order_id,
+                                part.paid_at_ms,
+                                confirmed,
+                            )?
+                        {
                             early_payment = true;
                             break;
                         }

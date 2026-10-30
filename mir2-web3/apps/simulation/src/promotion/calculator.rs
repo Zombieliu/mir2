@@ -9,6 +9,28 @@ pub const BASIS_POINTS: u64 = 10_000;
 pub const TESTNET_USDC_COIN_TYPE: &str =
     "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC";
 pub const TESTNET_CHAIN_IDENTIFIER: &str = "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD";
+pub const FULL_MONTHLY_ALGORITHM_VERSION: &str = "numeron-segmented-full-monthly-v3";
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum RevenueRecognition {
+    #[default]
+    ServicePeriodProrated,
+    MonthlyPurchaseFull,
+}
+
+impl RevenueRecognition {
+    pub fn algorithm_version(self) -> &'static str {
+        match self {
+            Self::ServicePeriodProrated => ALGORITHM_VERSION,
+            Self::MonthlyPurchaseFull => FULL_MONTHLY_ALGORITHM_VERSION,
+        }
+    }
+
+    fn is_legacy(&self) -> bool {
+        *self == Self::ServicePeriodProrated
+    }
+}
 
 fn wallet_enrollment_disabled(value: &bool) -> bool {
     !*value
@@ -17,6 +39,9 @@ fn wallet_enrollment_disabled(value: &bool) -> bool {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct PromotionRules {
+    /// Omission preserves the original service-period calculation and serialized rules.
+    #[serde(default, skip_serializing_if = "RevenueRecognition::is_legacy")]
+    pub revenue_recognition: RevenueRecognition,
     /// Explicit test-only enrollment using a verified wallet, without a game role.
     /// This never supplies gameplay qualification or payment evidence.
     #[serde(default, skip_serializing_if = "wallet_enrollment_disabled")]
@@ -40,6 +65,7 @@ impl Default for PromotionRules {
     /// Engineering defaults are draft only. They cannot enable a campaign.
     fn default() -> Self {
         Self {
+            revenue_recognition: RevenueRecognition::default(),
             test_wallet_enrollment: false,
             test_usdc_micro_payouts: false,
             test_first_payout_address_no_cooldown: false,
@@ -201,7 +227,7 @@ fn uncovered_ranges(start: u64, end: u64, occupied: &[(u64, u64)]) -> Vec<(u64, 
 /// never treats a recharge as a subscription. Inputs must already be backed by
 /// authenticated paid-lot/beneficiary evidence in the repository.
 pub fn calculate_commission(input: &CommissionInput) -> Result<CommissionResult, String> {
-    calculate_commission_precision(input, false)
+    calculate_commission_precision(input, false, RevenueRecognition::ServicePeriodProrated)
 }
 
 /// Preserve genuine service-period proration, qualification and rates. Only the
@@ -212,16 +238,32 @@ pub fn calculate_test_usdc_micro_commission(
     if input.environment != "test" {
         return Err("promotionEnvironmentMismatch".into());
     }
-    calculate_commission_precision(input, true)
+    calculate_commission_precision(input, true, RevenueRecognition::ServicePeriodProrated)
+}
+
+/// Recognize the complete verified net price of a monthly card paid for and
+/// activated in this season. Funding and owned redemption evidence are supplied
+/// by the repository, as for the legacy calculation. Service duration and season
+/// overlap do not discount the purchase price. Test-only micro precision remains
+/// a separate, explicitly selected payout policy.
+pub fn calculate_full_monthly_commission(
+    input: &CommissionInput,
+    micro: bool,
+) -> Result<CommissionResult, String> {
+    if micro && input.environment != "test" {
+        return Err("promotionEnvironmentMismatch".into());
+    }
+    calculate_commission_precision(input, micro, RevenueRecognition::MonthlyPurchaseFull)
 }
 
 fn calculate_commission_precision(
     input: &CommissionInput,
     micro: bool,
+    recognition: RevenueRecognition,
 ) -> Result<CommissionResult, String> {
     if input.starts_at_ms == 0
         || input.ends_at_ms <= input.starts_at_ms
-        || input.maximum_coverage_ms == 0
+        || (recognition.is_legacy() && input.maximum_coverage_ms == 0)
         || input.reserve_bps > 10_000
         || !matches!(
             input.environment.as_str(),
@@ -273,7 +315,7 @@ fn calculate_commission_precision(
         let mut basis = Vec::new();
         let mut first_payment: Option<u64> = None;
         for item in sorted {
-            if coverage_left == 0 || revenue_left == 0 {
+            if (recognition.is_legacy() && coverage_left == 0) || revenue_left == 0 {
                 break;
             }
             if !(input.starts_at_ms..input.ends_at_ms).contains(&item.paid_at_ms)
@@ -282,28 +324,33 @@ fn calculate_commission_precision(
             {
                 continue;
             }
-            let start = item.service_start_ms.max(input.starts_at_ms);
-            let end = item.service_end_ms.min(input.ends_at_ms);
-            if end <= start {
-                continue;
-            }
-            let mut covered = 0u64;
-            for (left, right) in uncovered_ranges(start, end, &occupied) {
-                let duration = (right - left).min(coverage_left);
-                if duration == 0 {
-                    break;
+            let service_duration = item.service_end_ms - item.service_start_ms;
+            let covered = if recognition.is_legacy() {
+                let start = item.service_start_ms.max(input.starts_at_ms);
+                let end = item.service_end_ms.min(input.ends_at_ms);
+                if end <= start {
+                    continue;
                 }
-                occupied.push((left, left + duration));
-                coverage_left -= duration;
-                covered += duration;
-            }
-            occupied.sort_unstable();
+                let mut covered = 0u64;
+                for (left, right) in uncovered_ranges(start, end, &occupied) {
+                    let duration = (right - left).min(coverage_left);
+                    if duration == 0 {
+                        break;
+                    }
+                    occupied.push((left, left + duration));
+                    coverage_left -= duration;
+                    covered += duration;
+                }
+                occupied.sort_unstable();
+                covered
+            } else {
+                // Freeze a complete period as the refund basis; unlike the
+                // legacy policy, distinct purchases do not compete for coverage.
+                service_duration
+            };
             let full = u128::from(item.amount_micro_usd - item.reversed_micro_usd);
-            let prorated = u64_from(
-                full * u128::from(covered)
-                    / u128::from(item.service_end_ms - item.service_start_ms),
-            )?
-            .min(revenue_left);
+            let prorated = u64_from(full * u128::from(covered) / u128::from(service_duration))?
+                .min(revenue_left);
             amount = amount
                 .checked_add(prorated)
                 .ok_or("promotionAmountOverflow")?;
@@ -320,7 +367,7 @@ fn calculate_commission_precision(
                 );
                 basis.push(AllocationBasis {
                     allocation_id: item.allocation_id.clone(),
-                    service_duration_ms: item.service_end_ms - item.service_start_ms,
+                    service_duration_ms: service_duration,
                     covered_ms: covered,
                     original_amount_micro_usd: item.amount_micro_usd,
                     reversed_at_snapshot_micro_usd: item.reversed_micro_usd,
@@ -407,7 +454,7 @@ fn calculate_commission_precision(
             .ok_or("promotionAmountOverflow")?
     };
     Ok(CommissionResult {
-        algorithm_version: ALGORITHM_VERSION.into(),
+        algorithm_version: recognition.algorithm_version().into(),
         members,
         eligible_revenue_micro_usd: u64_from(total_revenue)?,
         commission_micro_usd: commission_micro,

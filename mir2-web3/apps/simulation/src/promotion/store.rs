@@ -8,7 +8,7 @@ use sha2::{Digest, Sha256};
 
 use super::{
     calculate_commission, CommissionInput, CommissionResult, MemberInput, PromotionRules,
-    RevenueInput, ALGORITHM_VERSION,
+    RevenueInput, RevenueRecognition, ALGORITHM_VERSION,
 };
 use crate::{with_account_store_postgres_client, AccountRecord};
 
@@ -321,10 +321,25 @@ fn configured_commission<T: GenericClient>(
     input: &CommissionInput,
 ) -> Result<CommissionResult, String> {
     let row = campaign(client, &input.environment, &input.campaign_id, false)?;
-    if super::production_gate::test_micro_enabled(&input.environment, &row.get::<_, Value>(4))? {
+    let micro =
+        super::production_gate::test_micro_enabled(&input.environment, &row.get::<_, Value>(4))?;
+    if rules(&row)?.revenue_recognition == RevenueRecognition::MonthlyPurchaseFull {
+        super::calculate_full_monthly_commission(input, micro)
+    } else if micro {
         super::calculate_test_usdc_micro_commission(input)
     } else {
         calculate_commission(input)
+    }
+}
+
+fn commission_input_hash(
+    input: &CommissionInput,
+    result: &CommissionResult,
+) -> Result<String, String> {
+    if result.algorithm_version == ALGORITHM_VERSION {
+        hash(input)
+    } else {
+        hash(&json!({"input":input,"algorithmVersion":result.algorithm_version}))
     }
 }
 
@@ -421,6 +436,12 @@ pub(super) fn audit(
     // Reading an audited dashboard/export must not recursively create work for
     // the very queue being inspected. Historical read events remain supported.
     if matches!(action, "admin.read" | "settlement.export") {
+        return Ok(());
+    }
+    // This narrowly scoped amendment has already reconciled every leader in
+    // the same transaction. The durable audit records completion; it does not
+    // create a second projection or an external delivery obligation.
+    if action == "rules.full_monthly_adopted" {
         return Ok(());
     }
     db(tx.execute("INSERT INTO promotion_outbox(environment,event_type,resource_id,event_json,created_at_ms) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING",&[&env,&action,&resource,&value,&signed(now)?]))?;
@@ -719,8 +740,16 @@ impl PromotionStore {
             let leader=db(client.query_opt("SELECT leader_id,status,display_name,display_character_index,invite_code FROM promotion_leaders WHERE environment=$1 AND campaign_id=$2 AND account_id=$3",&[&self.environment,&campaign_id,&account_id]))?;
             let leader_json=leader.as_ref().map(|r|json!({"id":r.get::<_,String>(0),"status":r.get::<_,String>(1),"displayName":r.get::<_,String>(2),"characterIndex":r.get::<_,i32>(3),"inviteCode":if r.get::<_,String>(1)=="approved"{Some(r.get::<_,String>(4))}else{None}}));
             let mut attribution=db(client.query_opt("SELECT leader_id,confirmed_at_ms,status,reason_code,qualified_at_ms FROM promotion_attributions WHERE environment=$1 AND campaign_id=$2 AND account_id=$3",&[&self.environment,&campaign_id,&account_id]))?.map(|r|json!({"leaderId":r.get::<_,String>(0),"confirmedAtMs":positive(r.get(1)),"status":r.get::<_,String>(2),"reasonCode":r.get::<_,String>(3),"qualifiedAtMs":r.get::<_,Option<i64>>(4).map(positive)}));
-            let (migration_candidate,migration)=super::attribution_migration::account_view(client,&self.environment,campaign_id,account_id,now_ms)?;
-            if let (Some(attribution),Some(migration))=(attribution.as_mut(),migration) { attribution["migration"]=migration; }
+            let (migration_candidate, migration) = super::attribution_migration::account_view(
+                client,
+                &self.environment,
+                campaign_id,
+                account_id,
+                now_ms,
+            )?;
+            if let (Some(attribution), Some(migration)) = (attribution.as_mut(), migration) {
+                attribution["migration"] = migration;
+            }
             let max_level = characters
                 .iter()
                 .filter_map(|c| c["level"].as_u64())
@@ -1484,7 +1513,7 @@ impl PromotionStore {
                     for member in &members {refresh_account_qualifications(tx,&self.environment,&member.get::<_,String>(0),now_ms)?;}
                     let leaders=db(tx.query("SELECT leader_id FROM promotion_leaders WHERE environment=$1 AND campaign_id=$2",&[&self.environment,&campaign_id]))?;
                     for leader in &leaders {
-                        let id:String=leader.get(0); let input=build_input(tx,&self.environment,campaign_id,&id)?; let input_hash=hash(&input)?; let result=configured_commission(tx,&input)?;
+                        let id:String=leader.get(0); let input=build_input(tx,&self.environment,campaign_id,&id)?; let result=configured_commission(tx,&input)?; let input_hash=commission_input_hash(&input,&result)?;
                         db(tx.execute("INSERT INTO promotion_commission_runs(environment,campaign_id,leader_id,input_sha256,input_json,result_json,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING",&[&self.environment,&campaign_id,&id,&input_hash,&serde_json::to_value(&input).map_err(|_|"promotionSnapshotInvalid")?,&serde_json::to_value(&result).map_err(|_|"promotionSnapshotInvalid")?,&signed(now_ms)?]))?;
                     }
                     json!({"status":"reconciled","memberCount":members.len(),"leaderCount":leaders.len(),"sourceGaps":super::production_gate::gaps(tx,&self.environment,campaign_id)?})
@@ -1504,7 +1533,7 @@ impl PromotionStore {
                     let input=build_input(tx,&self.environment,campaign_id,&leader_id)?; let result=configured_commission(tx,&input)?;
                     let snapshot=json!({"input":input,"result":result,"inputWatermarkMs":row.get::<_,Option<i64>>(13),"evidenceRef":evidence});
                     let snapshot_hash=hash(&snapshot)?; let id=token("settle_")?;
-                    db(tx.execute("INSERT INTO promotion_settlements(environment,campaign_id,settlement_id,leader_id,algorithm_version,snapshot_json,snapshot_sha256,total_micro_usd,payable_cents,reserve_micro_usd,created_by,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",&[&self.environment,&campaign_id,&id,&leader_id,&ALGORITHM_VERSION,&snapshot,&snapshot_hash,&signed(result.commission_micro_usd)?,&signed(result.payable_cents)?,&signed(result.reserve_micro_usd)?,&actor_account,&signed(now_ms)?]))?;
+                    db(tx.execute("INSERT INTO promotion_settlements(environment,campaign_id,settlement_id,leader_id,algorithm_version,snapshot_json,snapshot_sha256,total_micro_usd,payable_cents,reserve_micro_usd,created_by,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)",&[&self.environment,&campaign_id,&id,&leader_id,&result.algorithm_version,&snapshot,&snapshot_hash,&signed(result.commission_micro_usd)?,&signed(result.payable_cents)?,&signed(result.reserve_micro_usd)?,&actor_account,&signed(now_ms)?]))?;
                     db(tx.execute("UPDATE promotion_campaigns SET recruitment_enabled=FALSE,status='locked' WHERE environment=$1 AND campaign_id=$2",&[&self.environment,&campaign_id]))?;
                     json!({"settlementId":id,"status":"review","snapshotSha256":snapshot_hash,"totalMicroUsd":result.commission_micro_usd.to_string(),"payableCents":result.payable_cents,"payableMicroUsd":result.payable_micro_usd.unwrap_or(result.payable_cents*10_000).to_string(),"payoutPrecision":if result.payable_micro_usd.is_some(){6}else{2},"payoutEnabled":campaign_payout_enabled(tx,&self.environment,campaign_id)?})
                 }
@@ -1881,7 +1910,7 @@ fn reconcile_projection(
                 };
                 let at = qualified.map(|m| signed(m.qualified_at_ms)).transpose()?;
                 member.established_qualification_at_ms = qualified.map(|v| v.qualified_at_ms);
-                let changed=db(tx.execute("UPDATE promotion_attributions SET status=$4,reason_code=$5,qualified_at_ms=$6,qualification_algorithm_version=$7 WHERE environment=$1 AND campaign_id=$2 AND account_id=$3 AND status NOT IN ('review','excluded') AND (status<>$4 OR reason_code<>$5 OR qualified_at_ms IS DISTINCT FROM $6 OR qualification_algorithm_version IS DISTINCT FROM $7)",&[&env,&campaign_id,&member.account_id,&status,&reason,&at,&ALGORITHM_VERSION]))?;
+                let changed=db(tx.execute("UPDATE promotion_attributions SET status=$4,reason_code=$5,qualified_at_ms=$6,qualification_algorithm_version=$7 WHERE environment=$1 AND campaign_id=$2 AND account_id=$3 AND status NOT IN ('review','excluded') AND (status<>$4 OR reason_code<>$5 OR qualified_at_ms IS DISTINCT FROM $6 OR qualification_algorithm_version IS DISTINCT FROM $7)",&[&env,&campaign_id,&member.account_id,&status,&reason,&at,&result.algorithm_version]))?;
                 if changed > 0 {
                     audit(
                         tx,
@@ -1898,7 +1927,7 @@ fn reconcile_projection(
             let result = configured_commission(tx, &input)?;
             (input, result)
         };
-        let input_hash = hash(&input)?;
+        let input_hash = commission_input_hash(&input, &result)?;
         inserted+=db(tx.execute("INSERT INTO promotion_commission_runs(environment,campaign_id,leader_id,input_sha256,input_json,result_json,created_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT DO NOTHING",&[&env,&campaign_id,&id,&input_hash,&serde_json::to_value(&input).map_err(|_|"promotionSnapshotInvalid")?,&serde_json::to_value(&result).map_err(|_|"promotionSnapshotInvalid")?,&signed(now_ms)?]))?;
     }
     verify_budget(tx, env, campaign_id, &row)?;
@@ -2019,7 +2048,7 @@ fn build_input<T: GenericClient>(
     for attr in db(client.query("SELECT a.account_id,a.status,a.qualified_at_ms,a.qualification_algorithm_version,owner.is_banned FROM promotion_attributions a JOIN accounts owner ON owner.account_id=a.account_id WHERE a.environment=$1 AND a.campaign_id=$2 AND a.leader_id=$3 ORDER BY a.account_id",&[&env,&campaign_id,&leader]))? {
         let account:String=attr.get(0);let (level,play)=qualification_times(client,env,&account,start,end,&rules)?;
         let revenue=db(client.query("SELECT r.allocation_id,r.paid_at_ms,r.service_start_ms,r.service_end_ms,r.eligible_micro_usd,COALESCE((SELECT sum(a.reversal_micro_usd) FROM promotion_revenue_adjustments a WHERE a.environment=r.environment AND a.allocation_id=r.allocation_id),0)::bigint,r.is_card_payment,r.entitlement_at_ms FROM promotion_revenue_allocations r WHERE r.environment=$1 AND r.campaign_id=$2 AND r.account_id=$3 AND r.funding_status='verified_paid' AND NOT EXISTS(SELECT 1 FROM promotion_revenue_source_holds h WHERE h.environment=r.environment AND h.campaign_id=r.campaign_id AND h.account_id=r.account_id AND h.subscription_id=r.subscription_id AND h.active) ORDER BY r.service_start_ms,r.allocation_id",&[&env,&campaign_id,&account]))?.iter().map(|r|RevenueInput{allocation_id:r.get(0),paid_at_ms:positive(r.get(1)),service_start_ms:positive(r.get(2)),service_end_ms:positive(r.get(3)),amount_micro_usd:positive(r.get(4)),reversed_micro_usd:positive(r.get(5)),is_card_payment:r.get(6),entitlement_at_ms:positive(r.get(7))}).collect();
-        let established=if attr.get::<_,Option<String>>(3).as_deref()==Some(ALGORITHM_VERSION){attr.get::<_,Option<i64>>(2).map(positive)}else{None};
+        let prior_version=attr.get::<_,Option<String>>(3); let expected_version=rules.revenue_recognition.algorithm_version(); let established=if prior_version.as_deref()==Some(expected_version) || (rules.revenue_recognition==RevenueRecognition::MonthlyPurchaseFull && prior_version.as_deref()==Some(ALGORITHM_VERSION)){attr.get::<_,Option<i64>>(2).map(positive)}else{None};
         members.push(MemberInput{account_id:account,level_completed_at_ms:level,play_completed_at_ms:play,established_qualification_at_ms:established,excluded:attr.get::<_,bool>(4)||matches!(attr.get::<_,String>(1).as_str(),"excluded"|"review"),revenue});
     }
     Ok(CommissionInput {
@@ -2069,7 +2098,7 @@ fn dashboard<T: GenericClient>(
     let tiers=[1000u16,2000,3000].iter().map(|bps|json!({"rateBps":bps,"count":estimate.members.iter().filter(|m|m.rate_bps==*bps).count()})).collect::<Vec<_>>();
     let reversals:i64=db(client.query_one("SELECT COALESCE(-sum(amount_micro_usd),0)::bigint FROM promotion_commission_entries WHERE environment=$1 AND campaign_id=$2 AND leader_id=$3",&[&env,&campaign_id,&leader]))?.get(0);
     Ok(
-        json!({"clicks":clicks,"clickMeasurement":"anonymous_clicks_and_manual_candidates","registrations":registrations,"confirmed":confirmed,"qualified":estimate.members.len(),"tiers":tiers,"eligibleRevenueMicroUsd":estimate.eligible_revenue_micro_usd.to_string(),"estimatedCommissionMicroUsd":if row.get::<_,bool>(7){estimate.commission_micro_usd.saturating_sub(positive(reversals))}else{0}.to_string(),"reserveMicroUsd":estimate.reserve_micro_usd.to_string(),"reversalMicroUsd":reversals.to_string(),"commissionEnabled":row.get::<_,bool>(7),"status":if row.get::<_,String>(1)=="locked"{"locked"}else if row.get::<_,bool>(7){"estimated"}else{"commission_disabled"},"asOfMs":now,"algorithmVersion":ALGORITHM_VERSION}),
+        json!({"clicks":clicks,"clickMeasurement":"anonymous_clicks_and_manual_candidates","registrations":registrations,"confirmed":confirmed,"qualified":estimate.members.len(),"tiers":tiers,"eligibleRevenueMicroUsd":estimate.eligible_revenue_micro_usd.to_string(),"estimatedCommissionMicroUsd":if row.get::<_,bool>(7){estimate.commission_micro_usd.saturating_sub(positive(reversals))}else{0}.to_string(),"reserveMicroUsd":estimate.reserve_micro_usd.to_string(),"reversalMicroUsd":reversals.to_string(),"commissionEnabled":row.get::<_,bool>(7),"status":if row.get::<_,String>(1)=="locked"{"locked"}else if row.get::<_,bool>(7){"estimated"}else{"commission_disabled"},"asOfMs":now,"algorithmVersion":estimate.algorithm_version}),
     )
 }
 
@@ -2103,7 +2132,7 @@ pub(super) fn refresh_account_qualifications(
             "authoritative_sources_pending"
         };
         let at = qualified.map(|m| signed(m.qualified_at_ms)).transpose()?;
-        let changed=db(tx.execute("UPDATE promotion_attributions SET status=$4,reason_code=$5,qualified_at_ms=$6,qualification_algorithm_version=$7 WHERE environment=$1 AND campaign_id=$2 AND account_id=$3 AND (status<>$4 OR reason_code<>$5 OR qualified_at_ms IS DISTINCT FROM $6 OR qualification_algorithm_version IS DISTINCT FROM $7)",&[&env,&campaign_id,&account_id,&status,&reason,&at,&ALGORITHM_VERSION]))?;
+        let changed=db(tx.execute("UPDATE promotion_attributions SET status=$4,reason_code=$5,qualified_at_ms=$6,qualification_algorithm_version=$7 WHERE environment=$1 AND campaign_id=$2 AND account_id=$3 AND (status<>$4 OR reason_code<>$5 OR qualified_at_ms IS DISTINCT FROM $6 OR qualification_algorithm_version IS DISTINCT FROM $7)",&[&env,&campaign_id,&account_id,&status,&reason,&at,&result.algorithm_version]))?;
         if changed > 0 {
             audit(
                 tx,
@@ -2118,6 +2147,161 @@ pub(super) fn refresh_account_qualifications(
         }
     }
     Ok(())
+}
+
+fn full_monthly_policy_guard<T: GenericClient>(
+    client: &mut T,
+    env: &str,
+    campaign_id: &str,
+    now: u64,
+    lock: bool,
+) -> Result<postgres::Row, String> {
+    if env != "test" || campaign_id != super::TARGET_CAMPAIGN_ID {
+        return Err("promotionFullMonthlyPolicyScopeInvalid".into());
+    }
+    let row = campaign(client, env, campaign_id, lock)?;
+    if !row.get::<_, bool>(5)
+        || !matches!(row.get::<_, String>(1).as_str(), "approved" | "active")
+        || now < positive(row.get(2))
+        || now >= positive(row.get(3))
+        || campaign_payout_enabled(client, env, campaign_id)?
+    {
+        return Err("promotionFullMonthlyPolicyStateInvalid".into());
+    }
+    let locked: bool = db(client.query_one(
+        "SELECT EXISTS(SELECT 1 FROM promotion_settlements WHERE environment=$1 AND campaign_id=$2)",
+        &[&env,&campaign_id],
+    ))?.get(0);
+    if locked {
+        return Err("promotionSeasonLocked".into());
+    }
+    rules(&row)?.validate_environment(env)?;
+    Ok(row)
+}
+
+fn full_monthly_policy_preview<T: GenericClient>(
+    client: &mut T,
+    env: &str,
+    campaign_id: &str,
+    row: &postgres::Row,
+) -> Result<Value, String> {
+    let policy = rules(row)?;
+    let micro = super::production_gate::test_micro_enabled(env, &row.get::<_, Value>(4))?;
+    let mut leaders = Vec::new();
+    for leader in db(client.query("SELECT leader_id FROM promotion_leaders WHERE environment=$1 AND campaign_id=$2 ORDER BY leader_id", &[&env,&campaign_id]))? {
+        let id: String = leader.get(0);
+        ensure_no_source_holds(client,env,campaign_id,&id)?;
+        let input = build_input(client,env,campaign_id,&id)?;
+        let before = configured_commission(client,&input)?;
+        let after = super::calculate_full_monthly_commission(&input,micro)?;
+        leaders.push(json!({"leaderId":id,"before":before,"after":after}));
+    }
+    Ok(
+        json!({"campaignId":campaign_id,"currentRecognition":policy.revenue_recognition,
+        "rulesSha256":hash(&row.get::<_,Value>(4))?,"leaders":leaders,"payoutEnabled":false}),
+    )
+}
+
+impl PromotionStore {
+    /// Narrow test-only preview. It never creates a settlement, entitlement or payment.
+    pub fn preview_full_monthly_policy(
+        &self,
+        campaign_id: &str,
+        now_ms: u64,
+    ) -> Result<Value, String> {
+        with_account_store_postgres_client(&self.database_url, |client| {
+            let mut tx = db(client.build_transaction().read_only(true).start())?;
+            let row =
+                full_monthly_policy_guard(&mut tx, &self.environment, campaign_id, now_ms, false)?;
+            let result =
+                full_monthly_policy_preview(&mut tx, &self.environment, campaign_id, &row)?;
+            db(tx.commit())?;
+            Ok(result)
+        })
+    }
+
+    /// Owner-authorized favorable amendment for this single unlocked Testnet season.
+    /// Existing role identities are checked, not created or presented as human signatures.
+    pub fn adopt_full_monthly_policy(
+        &self,
+        campaign_id: &str,
+        operations_actor: &str,
+        finance_actor: &str,
+        expected_rules_sha256: &str,
+        evidence_ref: &str,
+        now_ms: u64,
+    ) -> Result<Value, String> {
+        if evidence_ref.trim().is_empty()
+            || evidence_ref.len() > 512
+            || expected_rules_sha256.len() != 64
+            || !expected_rules_sha256.bytes().all(|b| b.is_ascii_hexdigit())
+        {
+            return Err("promotionFullMonthlyPolicyEvidenceInvalid".into());
+        }
+        if operations_actor == finance_actor {
+            return Err("promotionDistinctReviewerRequired".into());
+        }
+        with_account_store_postgres_client(&self.database_url, |client| {
+            let mut tx = db(client.transaction())?;
+            let row =
+                full_monthly_policy_guard(&mut tx, &self.environment, campaign_id, now_ms, true)?;
+            for (actor, role) in [(operations_actor, "operations"), (finance_actor, "finance")] {
+                let _ = account(&mut tx, actor, false)?;
+                let allowed: bool=db(tx.query_one("SELECT EXISTS(SELECT 1 FROM promotion_operator_roles WHERE environment=$1 AND account_id=$2 AND role=$3 AND revoked_at_ms IS NULL)", &[&self.environment,&actor,&role]))?.get(0);
+                if !allowed {
+                    return Err("promotionPermissionDenied".into());
+                }
+            }
+            let policy_id = hash(&json!([
+                "full-monthly-policy-v1",
+                &self.environment,
+                campaign_id,
+                operations_actor,
+                finance_actor,
+                expected_rules_sha256,
+                evidence_ref
+            ]))?;
+            if let Some(prior)=db(tx.query_opt("SELECT summary_json FROM promotion_audit_log WHERE environment=$1 AND action='rules.full_monthly_adopted' AND resource_id=$2", &[&self.environment,&policy_id]))? {
+                if rules(&row)?.revenue_recognition!=RevenueRecognition::MonthlyPurchaseFull { return Err("promotionFullMonthlyPolicyChanged".into()); }
+                let mut result:Value=prior.get::<_,Value>(0)["result"].clone();result["status"]=json!("already_applied");
+                db(tx.commit())?;return Ok(result);
+            }
+            let old_rules: Value = row.get(4);
+            if hash(&old_rules)? != expected_rules_sha256 {
+                return Err("promotionFullMonthlyPolicyChanged".into());
+            }
+            if rules(&row)?.revenue_recognition != RevenueRecognition::ServicePeriodProrated {
+                return Err("promotionFullMonthlyPolicyChanged".into());
+            }
+            let mut result =
+                full_monthly_policy_preview(&mut tx, &self.environment, campaign_id, &row)?;
+            let mut new_rules = old_rules.clone();
+            new_rules["revenueRecognition"] = json!("monthly_purchase_full");
+            serde_json::from_value::<PromotionRules>(new_rules.clone())
+                .map_err(|_| "promotionRulesInvalid")?
+                .validate_environment(&self.environment)?;
+            db(tx.execute("UPDATE promotion_campaigns SET rules_json=$3 WHERE environment=$1 AND campaign_id=$2", &[&self.environment,&campaign_id,&new_rules]))?;
+            let projection = reconcile_projection(&mut tx, &self.environment, campaign_id, now_ms)?;
+            result["status"] = json!("applied");
+            result["policyId"] = json!(policy_id);
+            result["newRulesSha256"] = json!(hash(&new_rules)?);
+            result["newRecognition"] = json!("monthly_purchase_full");
+            result["projection"] = projection;
+            audit(
+                &mut tx,
+                &self.environment,
+                operations_actor,
+                "rules.full_monthly_adopted",
+                &policy_id,
+                evidence_ref,
+                json!({"campaignId":campaign_id,"operationsActor":operations_actor,"financeActor":finance_actor,
+                    "authorization":"owner_requested_test_policy_amendment","beforeRules":old_rules,"afterRules":new_rules,"result":result}),
+                now_ms,
+            )?;
+            db(tx.commit())?;
+            Ok(result)
+        })
+    }
 }
 
 #[cfg(test)]

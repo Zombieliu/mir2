@@ -43,6 +43,303 @@ fn published_segmented_boundaries_use_distinct_accounts() {
     }
 }
 
+fn full_monthly_input(count: usize) -> CommissionInput {
+    const DAY: u64 = 86_400_000;
+    let mut data = input(count);
+    data.ends_at_ms = data.starts_at_ms + 7 * DAY;
+    data.maximum_coverage_ms = 1;
+    for member in &mut data.members {
+        let card = &mut member.revenue[0];
+        card.service_start_ms = data.ends_at_ms - 5 * DAY;
+        card.service_end_ms = card.service_start_ms + 30 * DAY;
+        card.paid_at_ms = card.service_start_ms - 1;
+        card.entitlement_at_ms = card.service_start_ms;
+    }
+    data
+}
+
+#[test]
+fn recognition_policy_defaults_to_legacy_without_changing_serialized_rules() {
+    let rules = PromotionRules::default();
+    let legacy = serde_json::to_value(&rules).unwrap();
+    assert!(legacy.get("revenueRecognition").is_none());
+    assert_eq!(
+        serde_json::from_value::<PromotionRules>(legacy.clone()).unwrap(),
+        rules
+    );
+    let mut explicit = legacy.clone();
+    explicit["revenueRecognition"] = serde_json::json!("service_period_prorated");
+    assert_eq!(
+        serde_json::from_value::<PromotionRules>(explicit).unwrap(),
+        rules
+    );
+    let mut full = rules.clone();
+    full.revenue_recognition = RevenueRecognition::MonthlyPurchaseFull;
+    let mut expected = legacy;
+    expected["revenueRecognition"] = serde_json::json!("monthly_purchase_full");
+    assert_eq!(serde_json::to_value(&full).unwrap(), expected);
+    assert_eq!(
+        serde_json::from_value::<PromotionRules>(expected.clone()).unwrap(),
+        full
+    );
+    expected["revenueRecognition"] = serde_json::json!("unreviewed_policy");
+    assert!(serde_json::from_value::<PromotionRules>(expected).is_err());
+}
+
+#[test]
+fn full_monthly_purchase_in_last_five_days_earns_full_price_commission() {
+    let mut data = full_monthly_input(1);
+    for micro in [false, true] {
+        let full = calculate_full_monthly_commission(&data, micro).unwrap();
+        assert_eq!(full.algorithm_version, FULL_MONTHLY_ALGORITHM_VERSION);
+        assert_eq!(full.eligible_revenue_micro_usd, 10_000_000);
+        assert_eq!(full.commission_micro_usd, 1_000_000);
+        assert_eq!(full.total_cents, 100);
+        assert_eq!(full.payable_cents, 100);
+        assert_eq!(full.payable_micro_usd, micro.then_some(1_000_000));
+        let basis = &full.members[0].allocation_basis[0];
+        assert_eq!(basis.covered_ms, 30 * 86_400_000);
+        assert_eq!(basis.covered_ms, basis.service_duration_ms);
+    }
+    data.maximum_coverage_ms = 30 * 86_400_000;
+    let legacy = calculate_commission(&data).unwrap();
+    assert_eq!(legacy.algorithm_version, ALGORITHM_VERSION);
+    assert_eq!(legacy.eligible_revenue_micro_usd, 1_666_666);
+    assert_eq!(legacy.commission_micro_usd, 166_666);
+    assert_eq!(
+        calculate_test_usdc_micro_commission(&data)
+            .unwrap()
+            .commission_micro_usd,
+        166_666
+    );
+}
+
+#[test]
+fn full_monthly_distinct_purchases_ignore_time_coverage_but_keep_money_cap() {
+    let mut data = full_monthly_input(1);
+    let mut second = data.members[0].revenue[0].clone();
+    second.allocation_id = "second-owned-monthly-card".into();
+    data.members[0].revenue.push(second);
+    for maximum in [0, 1, 86_400_000] {
+        data.maximum_coverage_ms = maximum;
+        let full = calculate_full_monthly_commission(&data, true).unwrap();
+        assert_eq!(full.eligible_revenue_micro_usd, 20_000_000);
+        assert_eq!(full.commission_micro_usd, 2_000_000);
+        assert_eq!(full.members[0].allocation_basis.len(), 2);
+    }
+    data.per_member_revenue_cap_micro_usd = 13_000_000;
+    let capped = calculate_full_monthly_commission(&data, true).unwrap();
+    assert_eq!(capped.eligible_revenue_micro_usd, 13_000_000);
+    assert_eq!(capped.commission_micro_usd, 1_300_000);
+    assert_eq!(
+        capped.members[0].allocation_basis[1].eligible_at_snapshot_micro_usd,
+        3_000_000
+    );
+    assert_eq!(
+        capped.members[0].allocation_basis[1].covered_ms,
+        30 * 86_400_000
+    );
+}
+
+#[test]
+fn full_monthly_requires_payment_and_activation_within_half_open_season() {
+    let data = full_monthly_input(1);
+    for (paid, activated) in [
+        (data.starts_at_ms - 1, data.starts_at_ms),
+        (data.ends_at_ms, data.starts_at_ms),
+        (data.starts_at_ms, data.starts_at_ms - 1),
+        (data.starts_at_ms, data.ends_at_ms),
+        (data.starts_at_ms, data.ends_at_ms + 1),
+    ] {
+        let mut outside = data.clone();
+        outside.members[0].revenue[0].paid_at_ms = paid;
+        outside.members[0].revenue[0].entitlement_at_ms = activated;
+        assert!(calculate_full_monthly_commission(&outside, true)
+            .unwrap()
+            .members
+            .is_empty());
+    }
+    let mut at_start = data;
+    at_start.members[0].revenue[0].paid_at_ms = at_start.starts_at_ms;
+    at_start.members[0].revenue[0].entitlement_at_ms = at_start.starts_at_ms;
+    assert_eq!(
+        calculate_full_monthly_commission(&at_start, true)
+            .unwrap()
+            .commission_micro_usd,
+        1_000_000
+    );
+    // An owned renewal activated now can extend service beyond this season.
+    at_start.members[0].revenue[0].service_start_ms = at_start.ends_at_ms;
+    at_start.members[0].revenue[0].service_end_ms = at_start.ends_at_ms + 30 * 86_400_000;
+    assert_eq!(
+        calculate_full_monthly_commission(&at_start, true)
+            .unwrap()
+            .commission_micro_usd,
+        1_000_000
+    );
+}
+
+#[test]
+fn full_monthly_keeps_gameplay_qualification_and_exclusion_gates() {
+    let data = full_monthly_input(1);
+    for gate in 0..5 {
+        let mut disqualified = data.clone();
+        let member = &mut disqualified.members[0];
+        match gate {
+            0 => member.level_completed_at_ms = None,
+            1 => member.play_completed_at_ms = None,
+            2 => member.excluded = true,
+            3 => member.level_completed_at_ms = Some(data.ends_at_ms),
+            _ => member.play_completed_at_ms = Some(data.starts_at_ms - 1),
+        }
+        assert!(calculate_full_monthly_commission(&disqualified, true)
+            .unwrap()
+            .members
+            .is_empty());
+    }
+}
+
+#[test]
+fn full_monthly_rejects_duplicate_allocations_and_malformed_source_values() {
+    let data = full_monthly_input(1);
+    let mut duplicate = data.clone();
+    duplicate.members[0]
+        .revenue
+        .push(data.members[0].revenue[0].clone());
+    assert_eq!(
+        calculate_full_monthly_commission(&duplicate, true).unwrap_err(),
+        "promotionDuplicateAllocation"
+    );
+    let mut across_members = full_monthly_input(2);
+    across_members.members[1].revenue[0].allocation_id =
+        across_members.members[0].revenue[0].allocation_id.clone();
+    assert_eq!(
+        calculate_full_monthly_commission(&across_members, true).unwrap_err(),
+        "promotionDuplicateAllocation"
+    );
+    let mut account_duplicate = data.clone();
+    account_duplicate.members.push(data.members[0].clone());
+    assert_eq!(
+        calculate_full_monthly_commission(&account_duplicate, true).unwrap_err(),
+        "promotionDuplicateAccount"
+    );
+    for invalid in 0..3 {
+        let mut malformed = data.clone();
+        let card = &mut malformed.members[0].revenue[0];
+        match invalid {
+            0 => card.service_end_ms = card.service_start_ms,
+            1 => card.service_end_ms = card.service_start_ms - 1,
+            _ => card.reversed_micro_usd = card.amount_micro_usd + 1,
+        }
+        assert_eq!(
+            calculate_full_monthly_commission(&malformed, true).unwrap_err(),
+            "promotionRevenueInputInvalid"
+        );
+    }
+    let mut empty_id = data;
+    empty_id.members[0].revenue[0].allocation_id.clear();
+    assert_eq!(
+        calculate_full_monthly_commission(&empty_id, true).unwrap_err(),
+        "promotionDuplicateAllocation"
+    );
+}
+
+#[test]
+fn full_monthly_uses_segmented_rates_for_distinct_qualified_members() {
+    for (count, dollars) in [(0, 0), (1, 1), (50, 50), (51, 52), (200, 350), (201, 353)] {
+        let result = calculate_full_monthly_commission(&full_monthly_input(count), true).unwrap();
+        assert_eq!(result.members.len(), count);
+        assert_eq!(result.commission_micro_usd, dollars * 1_000_000);
+        for member in &result.members {
+            let expected = match member.rank {
+                1..=50 => 1000,
+                51..=200 => 2000,
+                _ => 3000,
+            };
+            assert_eq!(member.rate_bps, expected);
+        }
+    }
+}
+
+#[test]
+fn full_monthly_partial_and_full_refunds_reduce_the_actual_net_purchase() {
+    let mut data = full_monthly_input(1);
+    data.members[0].revenue[0].reversed_micro_usd = 2_500_000;
+    let partial = calculate_full_monthly_commission(&data, true).unwrap();
+    assert_eq!(partial.eligible_revenue_micro_usd, 7_500_000);
+    assert_eq!(partial.commission_micro_usd, 750_000);
+    let member = &partial.members[0];
+    let id = member.allocation_ids[0].clone();
+    let mut reversals = BTreeMap::from([(id.clone(), 5_000_000)]);
+    assert_eq!(
+        frozen_member_reversal_micro_usd(member, &reversals, 0).unwrap(),
+        250_000
+    );
+    reversals.insert(id, 10_000_000);
+    assert_eq!(
+        frozen_member_reversal_micro_usd(member, &reversals, 250_000).unwrap(),
+        500_000
+    );
+    assert_eq!(
+        frozen_member_reversal_micro_usd(member, &reversals, 750_000).unwrap(),
+        0
+    );
+    data.members[0].revenue[0].reversed_micro_usd = 10_000_000;
+    let full = calculate_full_monthly_commission(&data, true).unwrap();
+    assert!(full.members.is_empty());
+    assert_eq!(full.commission_micro_usd, 0);
+}
+
+#[test]
+fn full_monthly_locked_refunds_keep_money_cap_and_original_higher_rate() {
+    for (count, bps, initial, partial) in
+        [(51, 2000, 600_000, 200_000), (201, 3000, 900_000, 300_000)]
+    {
+        let mut data = full_monthly_input(count);
+        data.per_member_revenue_cap_micro_usd = 3_000_000;
+        let snapshot = calculate_full_monthly_commission(&data, true).unwrap();
+        let member = snapshot.members.last().unwrap();
+        assert_eq!(member.rate_bps, bps);
+        assert_eq!(member.commission_micro_usd, initial);
+        let id = member.allocation_ids[0].clone();
+        // A refund first consumes source value above the frozen revenue cap.
+        let mut reversals = BTreeMap::from([(id.clone(), 6_000_000)]);
+        assert_eq!(
+            frozen_member_reversal_micro_usd(member, &reversals, 0).unwrap(),
+            0
+        );
+        reversals.insert(id.clone(), 8_000_000);
+        assert_eq!(
+            frozen_member_reversal_micro_usd(member, &reversals, 0).unwrap(),
+            partial
+        );
+        reversals.insert(id, 10_000_000);
+        assert_eq!(
+            frozen_member_reversal_micro_usd(member, &reversals, partial).unwrap(),
+            initial - partial
+        );
+        assert_eq!(
+            frozen_member_reversal_micro_usd(member, &reversals, initial).unwrap(),
+            0
+        );
+    }
+}
+
+#[test]
+fn full_monthly_micro_precision_is_explicitly_test_only() {
+    for environment in ["production", "development"] {
+        let mut data = full_monthly_input(1);
+        data.environment = environment.into();
+        assert_eq!(
+            calculate_full_monthly_commission(&data, true).unwrap_err(),
+            "promotionEnvironmentMismatch"
+        );
+        let cents = calculate_full_monthly_commission(&data, false).unwrap();
+        assert_eq!(cents.payable_cents, 100);
+        assert_eq!(cents.payable_micro_usd, None);
+    }
+}
+
 #[test]
 fn three_service_periods_are_prorated_not_blindly_multiplied() {
     let mut data = input(201);
