@@ -430,7 +430,8 @@ body::before {
 .footer-enter { width: min(230px, 100%); height: 46px; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(240, 204, 127, .42); color: var(--gold-bright); font-size: 10px; letter-spacing: .15em; transition: color .2s, background .2s; }
 .footer-enter:hover { color: #111; background: var(--gold-bright); }
 .footer-directory { display: grid; grid-template-columns: repeat(6, minmax(92px, 1fr)); gap: 28px; }
-.footer-directory section { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
+.footer-directory section { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 15px; }
+.footer-directory a, .footer-directory h2 { max-width: 100%; overflow-wrap: anywhere; }
 .footer-directory h2 { margin: 0 0 10px; color: rgba(240, 204, 127, .55); font: 8px/1 monospace; letter-spacing: .18em; text-transform: uppercase; }
 .footer-directory a { color: #c3bba9; font-size: 11px; line-height: 1.4; transition: color .2s, transform .2s; }
 .footer-directory a:hover { color: var(--gold-bright); transform: translateX(3px); }
@@ -656,15 +657,11 @@ body::before {
 .truth-statuses i.is-live { background: var(--cyan); box-shadow: 0 0 10px rgba(103,201,194,.6); }
 .download-truth .button { width: min(100%, 320px); }
 
-@media (max-width: 1180px) and (min-width: 961px) {
+@media (max-width: 1280px) {
+  .site-header { grid-template-columns: minmax(0, 1fr) auto; }
   .wordmark-sub { display: none; }
-  .primary-nav { gap: 20px; }
   .header-actions { gap: 12px; }
   .header-play { min-width: 112px; }
-}
-
-@media (max-width: 960px) {
-  .site-header { grid-template-columns: 1fr auto; }
   .primary-nav { display: none; }
   .mobile-menu { position: relative; display: block; }
   .mobile-menu > summary { width: 42px; height: 42px; display: grid; place-content: center; gap: 5px; list-style: none; cursor: pointer; border: 1px solid var(--line); }
@@ -673,15 +670,21 @@ body::before {
   .mobile-menu > summary i { display: block; width: 16px; height: 1px; background: var(--gold-bright); transition: transform .2s; }
   .mobile-menu[open] > summary i:first-of-type { transform: translateY(3px) rotate(45deg); }
   .mobile-menu[open] > summary i:last-of-type { transform: translateY(-3px) rotate(-45deg); }
-  .mobile-menu-panel { position: fixed; z-index: 25; left: 0; right: 0; top: 84px; max-height: calc(100svh - 84px); padding: 20px var(--page-pad) 28px; overflow: auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(8, 8, 7, .985); box-shadow: 0 30px 80px rgba(0, 0, 0, .55); }
+  .mobile-menu-panel { position: fixed; z-index: 25; left: 0; right: 0; top: 104px; max-height: calc(100svh - 104px); padding: 20px var(--page-pad) 28px; overflow: auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(8, 8, 7, .985); box-shadow: 0 30px 80px rgba(0, 0, 0, .55); }
   .mobile-menu-panel .nav-group { display: block; border-bottom: 1px solid var(--line-soft); }
   .mobile-menu-panel .nav-group > summary, .mobile-menu-panel .nav-direct { width: 100%; min-height: 58px; justify-content: space-between; font-size: 12px; }
+  .mobile-menu-panel .nav-direct { white-space: normal; overflow-wrap: anywhere; }
   .mobile-menu-panel .nav-group > summary::before, .mobile-menu-panel .nav-direct::before { display: none; }
   .mobile-menu-panel .nav-dropdown { position: static; width: 100%; padding: 0 0 10px 15px; border: 0; box-shadow: none; background: transparent; opacity: 1; visibility: visible; pointer-events: auto; transform: none; display: none; }
   .mobile-menu-panel .nav-group[open] .nav-dropdown { display: block; transform: none; }
   .mobile-menu-panel .nav-dropdown a { min-height: 44px; padding: 0 9px; }
   .mobile-menu-panel .nav-dropdown a:hover { padding-left: 13px; }
   .mobile-play { min-height: 48px; margin-top: 20px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(240, 204, 127, .48); color: var(--gold-bright); font-size: 11px; letter-spacing: .15em; }
+  .site-footer { grid-template-columns: minmax(0, 1fr); }
+  .footer-directory { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 960px) {
   .hero { min-height: 900px; align-items: flex-end; padding-bottom: 190px; }
   .hero::before { left: 50%; }
   .hero-art { width: 70vw; right: -8%; top: 37%; }
@@ -858,7 +861,7 @@ body::before {
   .download-truth-orbit { width: 76vw; }
   .download-truth h2 { font-size: 48px; }
   .site-footer { padding: 58px 20px 100px; row-gap: 50px; }
-  .footer-directory { grid-template-columns: repeat(2, 1fr); row-gap: 45px; }
+  .footer-directory { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 45px; }
   .footer-meta { flex-direction: column; gap: 12px; }
 }
 
