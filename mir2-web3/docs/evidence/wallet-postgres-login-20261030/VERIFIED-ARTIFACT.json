@@ -1,0 +1,9 @@
+{
+  "runId": 41033137982,
+  "sourceSha": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+  "artifactId": 12968045359,
+  "zipSha256": "92fda72311119002c640c73ace1f8fdbef41cde42a77393dafb05f18138d9e5b",
+  "binarySha256": "d082013fa1791933c831cafe44fe1e6c07830a5339c066d33604a3170e88dbbd",
+  "binaryBytes": 85430136,
+  "ciUrl": "https://github.com/Zombieliu/mir2/actions/runs/41033137982"
+}

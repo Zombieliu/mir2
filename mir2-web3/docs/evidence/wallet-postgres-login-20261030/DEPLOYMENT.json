@@ -1,0 +1,91 @@
+{
+  "checkedAtUtc": "2026-10-30T09:52:55.525981+00:00",
+  "sourceSha": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+  "binarySha256": "d082013fa1791933c831cafe44fe1e6c07830a5339c066d33604a3170e88dbbd",
+  "ci": {
+    "runId": "41033137982",
+    "headSha": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+    "conclusion": "success",
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/41033137982",
+    "workflowPath": ".github/workflows/web-assets-r2-release.yml",
+    "name": "Wallet Account PostgreSQL Verification"
+  },
+  "oldRevision": "e824e520b902e5fc616dc8fbb806b3a4363a60ba",
+  "newRevision": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+  "newPid": 1088288,
+  "configurationPreserved": true,
+  "otherServiceProcessesPreserved": true,
+  "retentionBefore": {
+    "accounts": 119,
+    "tables": {
+      "accounts": {
+        "count": 119,
+        "sha256": "fdf1de8273bfa8dcf266a7b316d8250837b090b25431d54f2a0287a87f6ef8f6"
+      },
+      "character_items": {
+        "count": 210,
+        "sha256": "8bd7c7f9e3d796e5a05d73cceec87e8f5014b8f207d5ea8bfe8f5c7805f45491"
+      },
+      "character_mail": {
+        "count": 8,
+        "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+      },
+      "character_saves": {
+        "count": 35,
+        "sha256": "fb28560ed782236f198bf72d16144104837e6502c2726b695d1a6a207ea96e12"
+      },
+      "characters": {
+        "count": 35,
+        "sha256": "7b496bef880a63467ec3bbd7aa72ddc7980147e6693387689b9d6d1bd3f1abe4"
+      },
+      "schema_migrations": {
+        "count": 19,
+        "sha256": "a503b5389d1353d78194e6d5fd6d939617bd950cea61dbe92e15410a3fb5749a"
+      }
+    }
+  },
+  "retentionAfter": {
+    "accounts": 119,
+    "tables": {
+      "accounts": {
+        "count": 119,
+        "sha256": "fdf1de8273bfa8dcf266a7b316d8250837b090b25431d54f2a0287a87f6ef8f6"
+      },
+      "character_items": {
+        "count": 210,
+        "sha256": "8bd7c7f9e3d796e5a05d73cceec87e8f5014b8f207d5ea8bfe8f5c7805f45491"
+      },
+      "character_mail": {
+        "count": 8,
+        "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+      },
+      "character_saves": {
+        "count": 35,
+        "sha256": "fb28560ed782236f198bf72d16144104837e6502c2726b695d1a6a207ea96e12"
+      },
+      "characters": {
+        "count": 35,
+        "sha256": "7b496bef880a63467ec3bbd7aa72ddc7980147e6693387689b9d6d1bd3f1abe4"
+      },
+      "schema_migrations": {
+        "count": 19,
+        "sha256": "a503b5389d1353d78194e6d5fd6d939617bd950cea61dbe92e15410a3fb5749a"
+      }
+    }
+  },
+  "retentionExactMatch": true,
+  "onlineBackup": {
+    "bytes": 446386,
+    "catalogVerified": true,
+    "sha256": "2cc88d5449eb99063da475570220c225efcaf122afbde50f1aa34c0746a19854"
+  },
+  "offlineBackup": {
+    "bytes": 446338,
+    "catalogVerified": true,
+    "sha256": "55374ab511e1705c3ba00f84c093bb02473dd6cb92a6c28e963d1ec10c698c23"
+  },
+  "deployment": "promoted",
+  "humanPhoneAndCharacterSelectionAcceptance": "pending",
+  "dockerStarted": false,
+  "windowsClientPublished": false
+}

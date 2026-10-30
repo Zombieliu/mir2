@@ -1,0 +1,47 @@
+{
+  "checkedAtUtc": "2026-10-30T09:51:08.040106+00:00",
+  "expectedGatewayRevision": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+  "expectedAuthRevision": "600444277cdee49055d9c2cb9df1b0a71246e1c9",
+  "gateway": {
+    "url": "https://165.154.65.136.sslip.io/playtest/health",
+    "method": "GET",
+    "attempts": 1,
+    "status": 200,
+    "revision": "2decb491856dcd8d9b91aa40c7fca32dcf18101a",
+    "ok": true,
+    "http": "ready",
+    "ws": "ready",
+    "identityBackend": "postgres",
+    "channelIdentityBackend": "postgres",
+    "channelIdentityDurable": true,
+    "sessionCacheBackend": "redis",
+    "sessionCacheHealthy": true,
+    "passed": true
+  },
+  "walletAuth": {
+    "url": "https://auth-playtest.165.154.65.136.sslip.io/health",
+    "method": "GET",
+    "attempts": 1,
+    "status": 200,
+    "ready": true,
+    "revision": "600444277cdee49055d9c2cb9df1b0a71246e1c9",
+    "passed": true
+  },
+  "nativeWebSocket": {
+    "url": "wss://165.154.65.136.sslip.io/playtest/ws",
+    "origin": "https://165.154.65.136.sslip.io",
+    "applicationMessagesSent": 0,
+    "loginAttempted": false,
+    "attempts": 1,
+    "status": 101,
+    "upgrade": "websocket",
+    "acceptVerified": true,
+    "passed": true,
+    "closeFrameSent": true,
+    "closeCodeSent": 1000
+  },
+  "noPostRequests": true,
+  "noAccountWrites": true,
+  "dockerStarted": false,
+  "passed": true
+}
