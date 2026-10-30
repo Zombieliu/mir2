@@ -1,0 +1,92 @@
+    Finished `test` profile [unoptimized] target(s) in 44.55s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 79 tests
+test zone_owner_resolver::postgres::tests::already_expired_reply_is_rejected_even_when_success_is_queued ... ok
+test zone_owner_resolver::postgres::tests::bounded_queue_rejects_saturation_without_waiting ... ok
+test zone_owner_resolver::postgres::tests::caller_deadline_bounds_a_stalled_worker ... ok
+test zone_owner_resolver::postgres::tests::clones_share_worker_queue_and_do_not_disclose_zone_or_dsn ... ok
+test zone_owner_resolver::postgres::tests::configuration_overrides_dsn_options_and_sets_finite_network_server_limits ... ok
+test zone_owner_resolver::postgres::tests::disconnected_worker_and_reply_fail_closed ... ok
+test zone_owner_resolver::postgres::tests::expired_queue_work_is_never_admitted ... ok
+test zone_owner_resolver::postgres::tests::invalid_dsn_and_defaults_fail_without_connecting_or_secret_output ... ok
+test zone_owner_resolver::postgres::tests::limits_reject_zero_unbounded_and_inverted_timeouts ... ok
+test zone_owner_resolver::postgres::tests::postgres_explicit_forbidden_role_fixtures_fail_privilege_audit ... ok
+test zone_owner_resolver::postgres::tests::postgres_invalid_stored_values_fail_closed ... ok
+test zone_owner_resolver::postgres::tests::postgres_last_observer_drop_on_current_thread_async_runtime_is_safe ... ok
+test zone_owner_resolver::postgres::tests::postgres_lock_wait_has_finite_caller_budget_and_later_request_recovers ... ok
+test zone_owner_resolver::postgres::tests::postgres_normal_reader_with_default_pg_settings_session_update_privilege_is_accepted ... ok
+test zone_owner_resolver::postgres::tests::postgres_reader_observes_live_changes_without_cache_or_migrations ... ok
+test zone_owner_resolver::postgres::tests::postgres_reader_rejects_writer_credentials_and_actual_reader_cannot_write ... ok
+test zone_owner_resolver::postgres::tests::postgres_terminated_owned_reader_recovers_on_a_later_explicit_request ... ok
+test zone_owner_resolver::postgres::tests::reconnect_cooldown_and_expired_deadlines_fail_without_waiting ... ok
+test zone_owner_resolver::runtime::tests::an_uninitialized_global_is_compatible_only_when_activation_is_absent ... ok
+test zone_owner_resolver::runtime::tests::blank_required_configuration_is_an_error ... ok
+test zone_owner_resolver::runtime::tests::disabled_mode_preserves_legacy_and_unrelated_environment ... ok
+test zone_owner_resolver::runtime::tests::disabled_requires_both_activation_variables_to_be_absent ... ok
+test zone_owner_resolver::runtime::tests::every_nonloopback_registry_endpoint_requires_a_token_before_connecting ... ok
+test zone_owner_resolver::runtime::tests::every_real_gate15_or_static_route_knob_conflicts_even_when_empty ... ok
+test zone_owner_resolver::runtime::tests::explicit_token_and_readonly_dsn_are_preserved_but_never_debugged ... ok
+test zone_owner_resolver::runtime::tests::loopback_including_normalized_mapped_ipv4_can_omit_the_token ... ok
+test zone_owner_resolver::runtime::tests::nonunicode_credentials_are_rejected_without_source_text ... ok
+
+thread 'zone_owner_resolver::runtime::tests::observation_failure_is_never_replaced_by_a_cached_or_fabricated_lease' panicked at apps\gateway\src\zone_owner_resolver\runtime.rs:109:14:
+read-only Zone owner observation failed: "zone_owner_observer_unavailable"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'zone_owner_resolver::runtime::tests::observation_failure_is_never_replaced_by_a_cached_or_fabricated_lease' panicked at apps\gateway\src\zone_owner_resolver\runtime.rs:121:14:
+read-only Zone owner refresh failed: "zone_owner_observer_unavailable"
+test zone_owner_resolver::runtime::tests::observation_failure_is_never_replaced_by_a_cached_or_fabricated_lease ... ok
+test zone_owner_resolver::runtime::tests::observed_authority_refresh_sees_current_owner_but_validation_cannot_adopt_it ... ok
+test zone_owner_resolver::runtime::tests::observer_connection_failures_use_one_fixed_error ... ok
+test zone_owner_resolver::runtime::tests::oversized_injected_registry_is_rejected_before_parsing_or_connecting ... ok
+test zone_owner_resolver::runtime::tests::real_file_reader_enforces_the_byte_limit ... ok
+test zone_owner_resolver::runtime::tests::registry_io_and_parser_failures_are_fixed_and_sanitized ... ok
+test zone_owner_resolver::runtime::tests::renewal_observes_once_and_cannot_adopt_a_generation_between_two_reads ... ok
+test zone_owner_resolver::runtime::tests::renewal_only_accepts_current_expiry_and_ignores_caller_clock ... ok
+test zone_owner_resolver::runtime::tests::runtime_shares_one_resolver_and_observation_authority ... ok
+test zone_owner_resolver::runtime::tests::session_projection_factory_creates_no_shared_zone_or_remote_observation ... ok
+test zone_owner_resolver::runtime::tests::startup_records_disabled_without_repeating_initialization ... ok
+test zone_owner_resolver::runtime::tests::startup_records_failure_without_request_time_retries_or_fallback ... ok
+test zone_owner_resolver::runtime::tests::startup_shares_the_enabled_runtime_without_environment_rechecks ... ok
+test zone_owner_resolver::runtime::tests::unrelated_host_rpc_and_gateway_configuration_is_ignored ... ok
+test zone_owner_resolver::tests::a_clock_outside_postgres_range_is_rejected ... ok
+test zone_owner_resolver::tests::an_expired_or_removed_current_lease_never_accepts_an_old_pin ... ok
+test zone_owner_resolver::tests::endpoint_change_in_another_registry_cannot_reuse_an_old_pin ... ok
+test zone_owner_resolver::tests::endpoints_require_explicit_nonzero_unicast_ip_sockets ... ok
+test zone_owner_resolver::tests::errors_are_sanitized_and_rebind_has_a_machine_readable_code ... ok
+test zone_owner_resolver::tests::expected_fence_outside_postgres_range_is_not_observed_or_accepted ... ok
+test zone_owner_resolver::tests::expiry_is_checked_after_observation_finishes ... ok
+test zone_owner_resolver::tests::invalid_observed_owner_and_heartbeat_are_rejected_without_panicking ... ok
+test zone_owner_resolver::tests::lease_expiry_must_be_future_and_fit_postgres_bigint ... ok
+test zone_owner_resolver::tests::missing_lease_is_not_created_or_replaced_with_a_fallback ... ok
+test zone_owner_resolver::tests::observed_fences_must_fit_positive_postgres_bigint ... ok
+test zone_owner_resolver::tests::observer_failure_cannot_reuse_a_previous_success ... ok
+test zone_owner_resolver::tests::owner_identifiers_are_exact_bounded_ascii_components ... ok
+test zone_owner_resolver::tests::owner_or_epoch_change_requires_explicit_rebind_even_if_new_owner_is_unknown ... ok
+test zone_owner_resolver::tests::registry_additions_and_reordering_do_not_change_an_existing_route ... ok
+test zone_owner_resolver::tests::registry_rejects_duplicate_json_fields_at_both_levels ... ok
+test zone_owner_resolver::tests::registry_rejects_duplicate_owners_and_canonical_endpoint_aliases ... ok
+test zone_owner_resolver::tests::registry_rejects_unknown_missing_and_wrongly_typed_fields ... ok
+test zone_owner_resolver::tests::registry_version_and_size_are_bounded ... ok
+test zone_owner_resolver::tests::resolution_uses_observed_owner_instead_of_zone_hash_or_host_order ... ok
+test zone_owner_resolver::tests::same_epoch_renewal_preserves_the_binding_without_writing_a_lease ... ok
+test zone_owner_resolver::tests::unknown_owner_is_not_hashed_to_a_registered_host ... ok
+test zone_owner_resolver::transport::tests::a_capability_probe_that_crosses_an_owner_change_fails_closed ... ok
+test zone_owner_resolver::transport::tests::a_confirmed_mutation_survives_an_epoch_change_during_the_call ... ok
+test zone_owner_resolver::transport::tests::a_different_endpoint_cannot_reuse_an_existing_pin_or_probe_the_new_host ... ok
+test zone_owner_resolver::transport::tests::a_read_that_crosses_an_owner_change_does_not_publish_its_old_result ... ok
+test zone_owner_resolver::transport::tests::a_wrong_real_host_identity_cannot_create_a_bound_transport ... ok
+test zone_owner_resolver::transport::tests::an_epoch_change_during_the_initial_health_probe_rejects_the_binding ... ok
+test zone_owner_resolver::transport::tests::an_unknown_mutation_outcome_is_preserved_and_never_replayed ... ok
+test zone_owner_resolver::transport::tests::capabilities_and_specialized_native_methods_are_forwarded ... ok
+test zone_owner_resolver::transport::tests::confirmed_typed_economic_success_is_not_relabelled_when_the_epoch_changes ... ok
+test zone_owner_resolver::transport::tests::expired_removed_or_unavailable_observation_never_reuses_previous_authorization ... ok
+test zone_owner_resolver::transport::tests::identity_probe_requires_exact_owner_spelling ... ok
+test zone_owner_resolver::transport::tests::lifecycle_and_read_methods_keep_the_inner_behavior ... ok
+test zone_owner_resolver::transport::tests::native_unknown_keeps_its_typed_classification_after_epoch_change ... ok
+test zone_owner_resolver::transport::tests::owner_or_epoch_change_dispatches_no_old_owner_mutations_or_reads ... ok
+test zone_owner_resolver::transport::tests::request_lease_cannot_switch_the_transport_to_a_different_owner_epoch_or_zone ... ok
+test zone_owner_resolver::transport::tests::same_epoch_renewal_reuses_one_transport_and_one_identity_probe ... ok
+
+test result: ok. 79 passed; 0 failed; 0 ignored; 0 measured; 1346 filtered out; finished in 2.54s

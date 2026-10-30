@@ -46,9 +46,13 @@ pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
 #[cfg(test)]
 #[path = "zone_rpc/lease_failure_tests.rs"]
 mod lease_failure_tests;
+
 #[cfg(test)]
 #[path = "zone_rpc/owner_health_sync_tests.rs"]
 mod owner_health_sync_tests;
+#[cfg(test)]
+#[path = "zone_rpc/stable_owner_poll_tests.rs"]
+mod stable_owner_poll_tests;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_PURCHASE_V2: &str = "nativeGameShopPurchaseV2";
 pub const ZONE_RPC_NATIVE_GAME_SHOP_GIFT_V1: &str = "nativeGameShopGiftV1";
@@ -1331,6 +1335,7 @@ pub struct TcpZoneOwnerRpcTransport {
     outbound_acknowledged: Arc<AtomicU64>,
     outbound_generation: Arc<AtomicU64>,
     outbound_stream_id: Arc<Mutex<Option<String>>>,
+    owner_route_guard: Option<Arc<dyn Fn() -> Result<(), String> + Send + Sync>>,
 }
 
 impl fmt::Debug for TcpZoneOwnerRpcTransport {
@@ -1354,6 +1359,49 @@ impl fmt::Debug for TcpZoneOwnerRpcTransport {
 }
 
 impl TcpZoneOwnerRpcTransport {
+    /// One explicit endpoint, with no environment-derived routing, codec or
+    /// shared pool. Stable owner routing must never fall back to another Host.
+    pub fn with_explicit_options(
+        address: std::net::SocketAddr,
+        zone_id: ZoneId,
+        session_id: String,
+        auth_token: Option<String>,
+        limits: ZoneRpcLimits,
+    ) -> Self {
+        Self {
+            addresses: Arc::new(vec![address.to_string()]),
+            active_endpoint: Arc::new(AtomicUsize::new(0)),
+            zone_id,
+            session_id,
+            auth_token,
+            limits,
+            codec: ZoneRpcCodec::Json,
+            reuse_connections: false,
+            connections: Arc::new(vec![Mutex::new(None)]),
+            shared_connections: None,
+            outbound_acknowledged: Arc::new(AtomicU64::new(0)),
+            outbound_generation: Arc::new(AtomicU64::new(0)),
+            outbound_stream_id: Arc::new(Mutex::new(None)),
+            owner_route_guard: None,
+        }
+    }
+
+    /// Clones captured by live pollers retain the same immutable owner pin.
+    pub fn with_owner_route_guard(
+        mut self,
+        guard: Arc<dyn Fn() -> Result<(), String> + Send + Sync>,
+    ) -> Self {
+        self.owner_route_guard = Some(guard);
+        self
+    }
+
+    fn validate_owner_route(&self) -> Result<(), String> {
+        if let Some(guard) = &self.owner_route_guard {
+            guard()?;
+        }
+        Ok(())
+    }
+
     pub fn new(address: impl Into<String>, zone_id: ZoneId) -> Self {
         Self::with_options(
             address,
@@ -1417,6 +1465,7 @@ impl TcpZoneOwnerRpcTransport {
             outbound_acknowledged: Arc::new(AtomicU64::new(0)),
             outbound_generation: Arc::new(AtomicU64::new(0)),
             outbound_stream_id: Arc::new(Mutex::new(None)),
+            owner_route_guard: None,
         })
     }
 
@@ -1727,6 +1776,7 @@ impl TcpZoneOwnerRpcTransport {
         acknowledged_sequence: u64,
         max_items: usize,
     ) -> Result<ZoneHostOutboundBatch, String> {
+        self.validate_owner_route()?;
         let max_items = max_items.max(1).min(self.limits.outbound_poll_limit);
         let stream_id = self
             .outbound_stream_id
@@ -1741,6 +1791,8 @@ impl TcpZoneOwnerRpcTransport {
             },
             None,
         )?;
+        // Do not deliver an old batch observed across an owner/epoch change.
+        self.validate_owner_route()?;
         match payload {
             ZoneRpcPayload::Outbounds {
                 items,
@@ -2476,6 +2528,11 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                         idle_poll = minimum_idle_poll;
                         let source_registration = batch.current_source_registration_id;
                         for item in batch.items {
+                            if transport.validate_owner_route().is_err() {
+                                sender
+                                    .cancel_registration(registration_id, transport_failed.clone());
+                                return;
+                            }
                             if worker_stop.load(Ordering::Acquire)
                                 || current_generation.load(Ordering::Acquire) != generation
                             {
@@ -2497,6 +2554,7 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                             let mut outbound =
                                 SharedZoneLiveOutbound::new(registration_id, item.packet);
                             outbound.with_transport_failure_flag(transport_failed.clone());
+                            outbound.with_owner_route_guard(transport.owner_route_guard.clone());
                             if let Some(change) = item.owner_health {
                                 outbound = outbound.with_owner_health(OwnerHealthDelivery {
                                     change,
@@ -2526,7 +2584,10 @@ impl ZoneOwnerRpcTransport for TcpZoneOwnerRpcTransport {
                         {
                             return;
                         }
-                        if error.contains("outbound_gap") || error.contains("health_validation") {
+                        if error.starts_with("zone_owner_")
+                            || error.contains("outbound_gap")
+                            || error.contains("health_validation")
+                        {
                             eprintln!("zone RPC live outbound requires snapshot resync: {error}");
                             sender.cancel_registration(registration_id, transport_failed.clone());
                             return;

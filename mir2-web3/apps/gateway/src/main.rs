@@ -22,6 +22,13 @@ fn main() -> std::io::Result<()> {
 }
 
 async fn async_main() -> std::io::Result<()> {
+    // Complete the synchronous read-only audit before competing routing modes
+    // initialize or any player is admitted.
+    let stable_owner_runtime = tokio::task::spawn_blocking(
+        mir2_gateway::zone_owner_resolver::runtime::init_global_from_env,
+    ).await
+        .map_err(|_| io::Error::other("zone owner resolver startup task failed"))?
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     mir2_gateway::gate15::initialize_from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     let tcp_addr =
@@ -120,17 +127,30 @@ async fn async_main() -> std::io::Result<()> {
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let topology = mir2_gateway::ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let factory = topology.runtime_factory();
+    let owner_authority = match &stable_owner_runtime {
+        Some(runtime) => runtime.owner_lease_authority(),
+        None => mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),
+    };
+    let local_factory = topology.runtime_factory();
+    let factory: mir2_gateway::SharedZoneRuntimeFactory = match &stable_owner_runtime {
+        Some(runtime) => runtime.session_runtime_factory(),
+        None => local_factory.clone(),
+    };
     let registry = Arc::new(
         mir2_gateway::ZoneRegistry::with_router_and_owner_lease_authority(
             topology.default_zone_id().clone(),
             factory.clone(),
             topology.router(),
-            mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),
+            owner_authority,
         ),
     );
-    let _conquest_clock =
-        mir2_gateway::conquest_clock::ConquestClockService::start(config.clone(), factory)?;
+    // Stable mode has no authoritative Gateway Zone. Its world clocks must be
+    // hosted and verified on the owner topology before this opt-in is released.
+    let _conquest_clock = if stable_owner_runtime.is_some() {
+        None
+    } else {
+        Some(mir2_gateway::conquest_clock::ConquestClockService::start(config.clone(), local_factory)?)
+    };
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 

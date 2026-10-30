@@ -1,0 +1,9 @@
+{
+  "executable": "C:\\mir2-build\\hunting-permit-postgres\\pgsql\\bin\\postgres.exe",
+  "postmasterPidRemoved": true,
+  "unrelatedClustersModified": false,
+  "exitCode": 0,
+  "atUtc": "2026-10-30T07:04:12.1918452Z",
+  "processId": 87888,
+  "dataDirectory": "E:/mir2-capacity-goal-20261030/pgdata"
+}

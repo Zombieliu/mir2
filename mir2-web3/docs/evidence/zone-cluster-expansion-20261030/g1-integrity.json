@@ -1,0 +1,27 @@
+{
+  "atUtc": "2026-10-30T07:05:49.5713574Z",
+  "algorithm": "SHA-256",
+  "artifacts": {
+    "g1-health-accepted.log": "3e51a82166715fbd38a8152959986def124b8cbf2d032249f988dd75bd0b2c94",
+    "g1-attack-accepted.log": "17806c31e6a4ff658bdd8213ad69b9a9dcf928048ed24fd9256b1c3eeed405a0",
+    "g1-verification.json": "8a6eeecf2c0f96f12ca4c1bbe179a980eb60683a6b861bca4231e84575b39f94",
+    "g1-route-integration-accepted-result.json": "aa88c17a8a1a2eb42c0b94f2d73f064c5752e0ecfa29c13b6ad3f44b3d4095a4",
+    "g1-resolver-accepted-result.json": "7a05ed56421c358a46afb3c1bf439720b1d86361d39cd0a51817e27b179ca1cc",
+    "g1-fixture-stop.json": "42ae9617b06d4013724425bcd1eff09bbc97b21e696fcdf9c8cc4e7e3e6b9b08",
+    "g1-web-send-adjacent.log": "7c26e306150f8cccb58b396bac6f4b211f7896c9edc3c7822497a6acfff3ed2d",
+    "g1-session-accepted.log": "4b372fb7734042471bd3fc572ffe2ccf2ea9464379debbdd5dac95c6873f2669",
+    "g1-session-accepted-result.json": "dc82bbe4a2a38087aca7d3336598e80fdd95d1c4616892841f3a6b01c5e9c188",
+    "g1-lease-failure-accepted.log": "03f8158e3bcca709340cfe85a67d90b94222907ef2119d9fb6ad5a148b861736",
+    "g1-handoff-accepted.log": "1b1e803612c273bf61c9a679f240b5b5f3ca8d4fed401e913bdd5c2f9fdafce5",
+    "g1-attack-accepted-result.json": "b973e239af37474704b342f5beafb362aa99c939dacd0786c496f42bb21c4e6a",
+    "g1-bins-accepted.log": "65f389cdfd38f7b64290b4a7597d5290f64bf463671787c3f9bd9df331758842",
+    "g1-lease-failure-accepted-result.json": "4ad934fba8de7654ed580aebdcb8d50190c3672b792a63fb1803be062596f059",
+    "g1-resolver-accepted.log": "ecc15815a8fab8d7b5cf6e22d9775dedf2e40eb974c585a09d7ed196ea5db96a",
+    "g1-health-accepted-result.json": "8fce42065fa2c580e5fc0b6bba867117000a222989ce6e750a8495b68e76db34",
+    "g1-web-send-adjacent-result.json": "70c4a1eccf3063e276950f8242b591a7ecfe554b0fc6a73a345e67a348d1977b",
+    "g1-postgres-final.json": "cca88bb8679b9b712635e6705ee37527f2f493fb32038ea2adf8c0f019a03eea",
+    "g1-handoff-accepted-result.json": "30bb69e72f2396f3d47f0773eb6b6bc797aa3e6015185727d178fc0e83cfe512",
+    "g1-bins-accepted-result.json": "089ab022a1f24da2bb1b63f4c2cd0c2e3a778a7e177979be8053c0bf78cddeae",
+    "g1-route-integration-accepted.log": "40a68789cf69a13de58d6dc9d39086c87247ce1d78631565422ce101ce7f085c"
+  }
+}

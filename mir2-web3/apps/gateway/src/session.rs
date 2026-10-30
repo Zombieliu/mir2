@@ -287,12 +287,12 @@ impl GatewaySession {
     ) -> Result<Self, String> {
         let routed = registry
             .try_open_session_for(config.clone(), SessionRouteRequest::anonymous())?;
-        Ok(Self::with_routed_world_runtime_and_owner_authority(
+        Ok(Self::try_with_routed_world_runtime_and_owner_authority(
             routed.zone_id,
             routed.owner_lease,
             Some(routed.owner_lease_authority),
             routed.runtime,
-        )
+        )?
         .with_routing_context(config, registry.clone()))
     }
 
@@ -336,10 +336,21 @@ impl GatewaySession {
         zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
         runtime: ZoneRuntimeHandle,
     ) -> Self {
+        Self::try_with_routed_world_runtime_and_owner_authority(
+            zone_id, zone_owner_lease, zone_owner_lease_authority, runtime,
+        ).expect("Zone owner transport should be available")
+    }
+
+    pub fn try_with_routed_world_runtime_and_owner_authority(
+        zone_id: ZoneId,
+        zone_owner_lease: ZoneOwnerLease,
+        zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+        runtime: ZoneRuntimeHandle,
+    ) -> Result<Self, String> {
         let zone_owner_command_client =
-            default_zone_owner_command_client(&zone_id, zone_owner_lease_authority.as_ref());
+            default_zone_owner_command_client(&zone_id, &zone_owner_lease, zone_owner_lease_authority.as_ref())?;
         let active_identity_binding = runtime.active_identity();
-        Self {
+        Ok(Self {
             session_id: next_gateway_session_id(),
             zone_id,
             zone_owner_lease,
@@ -356,7 +367,7 @@ impl GatewaySession {
             handoff_generation: 0,
             active_identity_binding,
             teardown_checkpoint: None,
-        }
+        })
     }
 
     pub fn with_routed_world_runtime_and_event_sink(
@@ -396,29 +407,24 @@ impl GatewaySession {
         runtime: ZoneRuntimeHandle,
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
-        let zone_owner_command_client =
-            default_zone_owner_command_client(&zone_id, zone_owner_lease_authority.as_ref());
-        let gameplay_event_publisher =
-            GatewayGameplayEventPublisher::new(zone_id.clone(), gameplay_event_sink);
-        let active_identity_binding = runtime.active_identity();
-        Self {
-            session_id: next_gateway_session_id(),
-            zone_id,
-            zone_owner_lease,
-            zone_owner_lease_authority,
-            zone_owner_command_client,
-            zone_owner_heartbeat_interval_ms: None,
-            next_zone_owner_heartbeat_at_ms: 0,
-            runtime,
-            gameplay_event_publisher: Some(gameplay_event_publisher),
-            routing_context: None,
-            current_route_request: None,
-            requested_explicit_line: None,
-            global_message_bus: None,
-            handoff_generation: 0,
-            active_identity_binding,
-            teardown_checkpoint: None,
-        }
+        Self::try_with_routed_world_runtime_and_owner_authority_and_event_sink(
+            zone_id, zone_owner_lease, zone_owner_lease_authority, runtime, gameplay_event_sink,
+        ).expect("Zone owner transport should be available")
+    }
+
+    pub fn try_with_routed_world_runtime_and_owner_authority_and_event_sink(
+        zone_id: ZoneId,
+        zone_owner_lease: ZoneOwnerLease,
+        zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+        runtime: ZoneRuntimeHandle,
+        gameplay_event_sink: SharedGameplayEventSink,
+    ) -> Result<Self, String> {
+        let publisher = GatewayGameplayEventPublisher::new(zone_id.clone(), gameplay_event_sink);
+        let mut session = Self::try_with_routed_world_runtime_and_owner_authority(
+            zone_id, zone_owner_lease, zone_owner_lease_authority, runtime,
+        )?;
+        session.gameplay_event_publisher = Some(publisher);
+        Ok(session)
     }
 
     pub fn new_with_zone_registry_and_event_sink(
@@ -437,13 +443,13 @@ impl GatewaySession {
     ) -> Result<Self, String> {
         let routed = registry
             .try_open_session_for(config.clone(), SessionRouteRequest::anonymous())?;
-        Ok(Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
+        Ok(Self::try_with_routed_world_runtime_and_owner_authority_and_event_sink(
             routed.zone_id,
             routed.owner_lease,
             Some(routed.owner_lease_authority),
             routed.runtime,
             gameplay_event_sink,
-        )
+        )?
         .with_routing_context(config, registry.clone()))
     }
 
@@ -1395,8 +1401,18 @@ impl GatewaySession {
         let routed = routing
             .registry
             .try_open_session_for(routing.config.clone(), route_request.clone())?;
-        let target_client =
-            default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
+        let target_client = match default_zone_owner_command_client(
+            &routed.zone_id, &routed.owner_lease, Some(&routed.owner_lease_authority),
+        ) {
+            Ok(client) => client,
+            Err(error) => {
+                let _ = routing.registry.release_session(&route_request, gateway_now_ms());
+                return Err(handoff_failure_with_rollback(
+                    format!("Zone handoff target owner unavailable: {error}"),
+                    self.rollback_failed_handoff(previous_snapshot),
+                ));
+            }
+        };
         let mut target_runtime = routed.runtime;
         let prepare_result = (|| -> Result<(), String> {
             let target_commitment = target_client
@@ -1651,22 +1667,29 @@ mod abnormal_teardown_persistence_tests {
 
 fn default_zone_owner_command_client(
     zone_id: &ZoneId,
+    owner_lease: &ZoneOwnerLease,
     zone_owner_lease_authority: Option<&SharedZoneOwnerLeaseAuthority>,
-) -> SharedZoneOwnerCommandClient {
+) -> Result<SharedZoneOwnerCommandClient, String> {
+    // A configured stable route is mandatory. Configuration/observation/Host
+    // errors must never choose the legacy hash route or a local shadow world.
+    if let Some(runtime) = crate::zone_owner_resolver::runtime::global()? {
+        let transport = runtime.transport(owner_lease.clone())?;
+        return Ok(std::sync::Arc::new(RpcZoneOwnerCommandClient::new(transport)));
+    }
     if let Some(transport) = crate::gate15::zone_owner_rpc_transport(zone_id.clone()) {
-        return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(transport));
+        return Ok(std::sync::Arc::new(RpcZoneOwnerCommandClient::new(transport)));
     }
     if let Some(transport) = crate::zone_rpc::TcpZoneOwnerRpcTransport::from_env(zone_id.clone()) {
-        return std::sync::Arc::new(RpcZoneOwnerCommandClient::new(std::sync::Arc::new(
+        return Ok(std::sync::Arc::new(RpcZoneOwnerCommandClient::new(std::sync::Arc::new(
             transport,
-        )));
+        ))));
     }
     let client = if let Some(authority) = zone_owner_lease_authority {
         InProcessZoneOwnerCommandClient::with_owner_lease_authority(authority.clone())
     } else {
         InProcessZoneOwnerCommandClient::new()
     };
-    std::sync::Arc::new(client)
+    Ok(std::sync::Arc::new(client))
 }
 
 static NEXT_GATEWAY_SESSION_SEQUENCE: AtomicU64 = AtomicU64::new(1);

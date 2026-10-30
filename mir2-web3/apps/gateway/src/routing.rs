@@ -3284,13 +3284,25 @@ fn zone_delivery_trace_enabled_for(recipient_zone_object_id: u32) -> bool {
 }
 
 #[doc(hidden)]
-#[derive(Debug)]
 pub struct SharedZoneLiveOutbound {
     registration_id: u64,
     packet: ServerPacket,
     overloaded: Option<Arc<AtomicBool>>,
     owner_health: Option<OwnerHealthDelivery>,
     delivery_trace: Option<ZoneDeliveryTrace>,
+    owner_route_guard: Option<Arc<dyn Fn() -> Result<(), String> + Send + Sync>>,
+}
+
+impl fmt::Debug for SharedZoneLiveOutbound {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.debug_struct("SharedZoneLiveOutbound")
+            .field("registration_id", &self.registration_id)
+            .field("packet", &self.packet)
+            .field("overloaded", &self.overloaded)
+            .field("owner_health", &self.owner_health)
+            .field("owner_route_guard", &self.owner_route_guard.is_some())
+            .finish_non_exhaustive()
+    }
 }
 
 impl SharedZoneLiveOutbound {
@@ -3301,6 +3313,7 @@ impl SharedZoneLiveOutbound {
             overloaded: None,
             owner_health: None,
             delivery_trace: None,
+            owner_route_guard: None,
         }
     }
 
@@ -3347,9 +3360,25 @@ impl SharedZoneLiveOutbound {
         self.overloaded = Some(flag);
     }
 
+    pub(crate) fn with_owner_route_guard(
+        &mut self,
+        guard: Option<Arc<dyn Fn() -> Result<(), String> + Send + Sync>>,
+    ) {
+        self.owner_route_guard = guard;
+    }
+
+    pub(crate) fn requires_send_validation(&self) -> bool {
+        self.owner_health.is_some() || self.owner_route_guard.is_some()
+    }
+
     pub(crate) fn claim_for_send(self) -> Result<Option<ServerPacket>, String> {
         if self.is_overloaded() {
             return Err("shared Zone presentation requires snapshot resync".into());
+        }
+        // Poll-time validation alone cannot protect a frame that waited in a
+        // bounded output queue across a lease/epoch change.
+        if let Some(guard) = &self.owner_route_guard {
+            guard()?;
         }
         if let Some(delivery) = &self.owner_health {
             if !matches!(&self.packet, ServerPacket::HealthChanged { hp, mp }
@@ -3420,6 +3449,7 @@ impl SharedZoneLiveOutboundSender {
             overloaded: Some(overloaded),
             owner_health: None,
             delivery_trace: None,
+            owner_route_guard: None,
         });
     }
 
@@ -5367,6 +5397,7 @@ impl SharedInProcessZoneState {
             overloaded: Some(overloaded),
             owner_health: None,
             delivery_trace,
+            owner_route_guard: None,
         };
         let created_player = match &outbound.packet {
             ServerPacket::ObjectPlayer { info } => Some(info.object_id),

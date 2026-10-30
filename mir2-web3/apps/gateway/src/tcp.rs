@@ -138,14 +138,14 @@ async fn handle_client(
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
     let peer = stream.peer_addr().ok();
-    let mut session = match gameplay_event_sink {
+    let mut session = gateway_blocking(|| match gameplay_event_sink {
         Some(sink) => GatewaySession::try_new_with_zone_registry_and_event_sink(
             (*config).clone(),
             &zone_registry,
             sink,
         ),
         None => GatewaySession::try_new_with_zone_registry((*config).clone(), &zone_registry),
-    }
+    })
     .map_err(io::Error::other)?;
     session.configure_zone_owner_heartbeat(tcp_zone_owner_heartbeat_interval_ms(), 0);
     let result = handle_client_inner(&mut stream, &mut session, peer, &chat_hub).await;

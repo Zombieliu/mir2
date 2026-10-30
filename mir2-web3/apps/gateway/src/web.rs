@@ -4995,7 +4995,10 @@ async fn handle_socket(
     user_agent: String,
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
-    let mut session = match new_gateway_session_for_web(&state) {
+    let admission_state = state.clone();
+    let admission = tokio::task::spawn_blocking(move || new_gateway_session_for_web(&admission_state))
+        .await.unwrap_or_else(|_| Err("zone owner admission task failed".into()));
+    let mut session = match admission {
         Ok(session) => session,
         Err(_) => {
             // No runtime or live admission exists yet. Reject this connection
@@ -5668,9 +5671,10 @@ fn spawn_zone_outbound_sender_with_clock(
                     failure_signal.send_replace(registration_id);
                     return;
                 }
-                // Health may have waited through a death/revival while this read
-                // gate was blocked. Validate its server-only stamp at final send.
-                let packet = if outbound.owner_health().is_some() {
+                // Both health proofs and stable owner pins can become stale
+                // while a frame waits behind the final send gate. Their IO
+                // validation belongs off the async network executor.
+                let packet = if outbound.requires_send_validation() {
                     let health_span = block_trace
                         .as_ref()
                         .map(|trace| (trace.context, Instant::now()));

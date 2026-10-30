@@ -13,6 +13,12 @@ use std::fmt;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
 
+mod postgres;
+pub mod runtime;
+mod transport;
+pub use postgres::{PostgresObserverLimits, PostgresZoneLeaseObserver};
+pub use transport::StableZoneOwnerRpcTransport;
+
 const REGISTRY_VERSION: u32 = 1;
 const MAX_REGISTRY_BYTES: usize = 256 * 1024;
 const MAX_REGISTRY_HOSTS: usize = 1024;

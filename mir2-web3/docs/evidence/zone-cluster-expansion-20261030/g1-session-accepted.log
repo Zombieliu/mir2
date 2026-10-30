@@ -1,0 +1,112 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 36 tests
+gateway lifecycle session_id=gateway-57292-1793343472367-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343472367-1 stage=session.close phase=end elapsed_ms=0
+test session::tests::chat_before_start_game_rejects_without_packets ... ok
+gateway lifecycle session_id=gateway-57292-1793343472368-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343472368-2 stage=session.close phase=end elapsed_ms=0
+test session::tests::chat_normal_message_emits_crystal_object_chat_only ... ok
+gateway lifecycle session_id=gateway-57292-1793343472966-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343472966-3 stage=session.close phase=end elapsed_ms=0
+test session::tests::delete_character_removes_entry_from_character_list ... ok
+gateway lifecycle session_id=gateway-57292-1793343473179-4 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343473179-4 stage=session.close phase=end elapsed_ms=0
+test session::tests::drop_item_creates_ground_drop_packet ... ok
+
+thread 'session::tests::gateway_panic_boundary_returns_operation_error' panicked at apps\gateway\src\session.rs:1914:65:
+boom
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+gateway session panic during unit-test: boom
+test session::tests::gateway_panic_boundary_returns_operation_error ... ok
+gateway lifecycle session_id=gateway-57292-1793343473465-5 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343473465-5 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_accepts_current_zone_owner_fenced_command ... ok
+gateway lifecycle session_id=gateway-57292-1793343473466-6 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343473466-6 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_dispatches_valid_zone_owner_request_through_command_client ... ok
+gateway lifecycle session_id=gateway-57292-1793343473467-7 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343473467-7 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_exposes_world_command_outcome ... ok
+gateway lifecycle session_id=gateway-57292-1793343474133-8 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474133-8 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_generic_execute_auto_forces_native_typed_path ... ok
+gateway lifecycle session_id=gateway-57292-1793343474134-9 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474134-9 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_generic_gift_forces_typed_path_and_separate_capability ... ok
+gateway lifecycle session_id=gateway-57292-1793343474135-10 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474135-10 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_heartbeat_rejects_expired_zone_owner ... ok
+gateway lifecycle session_id=gateway-57292-1793343474136-11 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474136-11 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_heartbeat_renews_zone_owner_before_ttl_expiry ... ok
+gateway lifecycle session_id=gateway-57292-1793343474136-12 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474136-12 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_movement_event_skips_snapshot_tick ... ok
+gateway lifecycle session_id=gateway-57292-1793343474395-13 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474395-13 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_publishes_gameplay_event_from_world_outcome ... ok
+gateway lifecycle session_id=gateway-57292-1793343474648-14 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474648-14 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_refreshes_finalized_zone_owner_after_handoff ... ok
+gateway lifecycle session_id=gateway-57292-1793343474648-15 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474648-15 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_rejects_stale_zone_owner_before_command_client ... ok
+gateway lifecycle session_id=gateway-57292-1793343474649-16 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474649-16 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_rejects_stale_zone_owner_fencing_token ... ok
+gateway lifecycle session_id=gateway-57292-1793343474650-17 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474650-17 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_rejects_superseded_zone_owner_after_handoff ... ok
+gateway lifecycle session_id=gateway-57292-1793343474651-18 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474651-18 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_rejects_wrong_zone_owner_before_production_command ... ok
+gateway lifecycle session_id=gateway-57292-1793343474651-19 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474651-19 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_rejects_zone_owner_renewal_after_handoff ... ok
+gateway lifecycle session_id=gateway-57292-1793343474652-20 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474652-20 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_session_renews_current_zone_owner_lease ... ok
+gateway lifecycle session_id=gateway-57292-1793343474653-21 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474653-21 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_zone_movement_ingress_publishes_gameplay_event_once ... ok
+gateway packet execution rejected; details suppressed
+gateway lifecycle session_id=gateway-57292-1793343474897-22 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474897-22 stage=session.close phase=end elapsed_ms=0
+test session::tests::gateway_zone_movement_ingress_rejects_stale_owner_lease ... ok
+gateway lifecycle session_id=gateway-57292-1793343474899-23 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343474899-23 stage=session.close phase=end elapsed_ms=0
+test session::tests::hosted_zone_owner_command_client_executes_on_owner_runtime_not_gateway_runtime ... ok
+test session::tests::hosted_zone_owner_command_client_rejects_stale_request_at_owner_boundary ... ok
+gateway lifecycle session_id=gateway-57292-1793343475355-25 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343475355-25 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-57292-1793343475133-24 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343475133-24 stage=session.close phase=end elapsed_ms=0
+test session::tests::hosted_zone_owner_runtime_handoff_moves_state_to_next_owner_host ... ok
+test session::tests::in_process_zone_owner_command_client_rejects_stale_request_at_owner_boundary ... ok
+gateway lifecycle session_id=gateway-57292-1793343475366-26 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343475366-26 stage=session.close phase=end elapsed_ms=0
+test session::tests::login_returns_character_list ... ok
+gateway lifecycle session_id=gateway-57292-1793343475578-27 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343475578-27 stage=session.close phase=end elapsed_ms=0
+test session::tests::native_attack_result_binding_is_checked_before_session_identity_changes ... ok
+gateway lifecycle session_id=gateway-57292-1793343475821-28 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343475821-28 stage=session.close phase=end elapsed_ms=0
+test session::tests::new_character_is_added_and_returned ... ok
+test session::tests::reexported_character_record_matches_expected_shape ... ok
+gateway lifecycle session_id=gateway-57292-1793343476030-29 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343476030-29 stage=session.close phase=end elapsed_ms=0
+test session::tests::retained_bootstrap_requires_exact_authenticated_custody ... ok
+gateway lifecycle session_id=gateway-57292-1793343476316-30 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343476316-30 stage=session.close phase=end elapsed_ms=0
+test session::tests::rpc_zone_owner_command_client_executes_on_transport_owner_runtime ... ok
+test session::tests::rpc_zone_owner_command_client_rejects_stale_request_at_transport_boundary ... ok
+gateway lifecycle session_id=gateway-57292-1793343476539-31 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343476539-31 stage=session.close phase=end elapsed_ms=0
+test session::tests::start_game_emits_bootstrap_sequence ... ok
+gateway lifecycle session_id=gateway-57292-1793343476785-32 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-57292-1793343476785-32 stage=session.close phase=end elapsed_ms=0
+test session::tests::walk_updates_self_location ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 1389 filtered out; finished in 4.77s
