@@ -36,4 +36,8 @@
 
 使用原 CI 中已有的 Vercel 凭据，从同一不可变提交创建不分配正式域名的候选。候选通过内容、静态资源、活动开关及 `/game`、宣传主站回归后才提升；失败仅回滚游戏／推广项目。
 
+首轮候选检查通过，但提升后公网仍返回旧推广页面资源，已自动恢复原部署。发布工具随后补上 Vercel 异步域名分配完成检查（`lastAliasRequest`），同时确认主域名及 Cloudflare Worker 使用的稳定源站域名均指向候选，再等待普通 `/version` 和页面内容通过。此流程参考 [Vercel CLI 56.4.1 的 promotion 状态实现](https://github.com/vercel/vercel/blob/vercel%4056.4.1/packages/cli/src/commands/promote/status.ts)。
+
+Cloudflare 只读检查确认主域名由现有 `mir2-web3-domain-proxy` 转发至 `https://mir2-web3-web.vercel.app`；未修改 Worker、路由、缓存或 DNS。
+
 发布结果与不可变提交／部署编号将在上线验证后补入本记录。

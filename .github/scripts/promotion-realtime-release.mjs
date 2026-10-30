@@ -8,6 +8,7 @@ const WEB = { project: 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz', name: 'mir2-web3-web'
 const MAIN = { project: 'prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA', name: 'numeron-legend-of-rebirth',
   baseline: 'dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97' };
 const CAMPAIGN = 'numeron-playtest-20261029';
+const WEB_ALIASES = ['mir2.obelisk.build', 'mir2-web3-web.vercel.app'];
 const operation = process.env.RELEASE_OPERATION;
 const sha = process.env.RELEASE_SOURCE_SHA || process.env.GITHUB_SHA;
 if (!['realtime-context', 'realtime-stage', 'realtime-promote'].includes(operation)) throw Error('Unsupported realtime release operation');
@@ -36,7 +37,7 @@ function production(project) { return project.targets?.production?.id || project
 async function projects() {
   const values = {};
   for (const [key, site] of Object.entries({ web: WEB, main: MAIN })) {
-    const value = await api(`/v9/projects/${site.project}`);
+    const value = await api(`/v9/projects/${site.project}?rollbackInfo=true`);
     if (value.id !== site.project || value.accountId !== TEAM || value.name !== site.name) throw Error('Project identity mismatch');
     values[key] = value;
   }
@@ -100,6 +101,12 @@ function publicReader() {
       const response = await fetch(`https://mir2.obelisk.build${path}`, {
         cache: 'no-store', redirect: 'manual', signal: AbortSignal.timeout(30000),
       });
+      if (path === '/version' || path === '/promotions?lang=zh-CN') {
+        console.log(JSON.stringify({ publicResponse: path, status: response.status, cache: Object.fromEntries(
+          ['age', 'cache-control', 'x-vercel-cache', 'cf-cache-status', 'x-vercel-id']
+            .map(header => [header, response.headers.get(header)]),
+        ) }));
+      }
       if (!response.ok) throw Error(`Public HTTP check ${path} failed: ${response.status}`);
       cache.set(path, await response.text());
     }
@@ -118,6 +125,11 @@ async function staticResponse(read, path) {
   return content;
 }
 async function verifyRoutes(read, phase) {
+  const version = JSON.parse(await read('/version'));
+  if (version.revision !== sha) {
+    const observed = /^[a-f0-9]{40}$/.test(version.revision || '') ? version.revision : 'unavailable';
+    throw Error(`Website revision has not converged to the candidate (${observed})`);
+  }
   const promotions = await read('/promotions?lang=zh-CN');
   if (!promotions.includes('Promotion program') || !promotions.includes('/_next/static/')) throw Error('Promotion route application mismatch');
   const promotionAssets = assets(promotions);
@@ -128,9 +140,9 @@ async function verifyRoutes(read, phase) {
   })));
   const promotionJavaScript = loadedPromotionAssets.filter(asset => /\.js(?:\?|$)/.test(asset.path))
     .map(asset => asset.content).join('\n');
-  for (const marker of ['Accrued commission (pending settlement)', 'Updates every 10 seconds', 'data-promotion-live-updates']) {
-    if (!promotionJavaScript.includes(marker)) throw Error('Candidate realtime commission copy or live-update implementation is missing');
-  }
+  const markers = ['Accrued commission (pending settlement)', 'Updates every 10 seconds', 'data-promotion-live-updates'];
+  const missingMarkers = markers.filter(marker => !promotionJavaScript.includes(marker));
+  if (missingMarkers.length) throw Error(`Realtime implementation is missing ${missingMarkers.length} expected markers (${phase}, ${promotionAssets.length} assets)`);
   const bootstrap = JSON.parse(await read('/api/promotions/bootstrap'));
   if (typeof bootstrap.authenticated !== 'boolean' || !Array.isArray(bootstrap.characters) ||
       bootstrap.campaign?.campaignId !== CAMPAIGN || bootstrap.campaign?.environment !== 'test' ||
@@ -140,7 +152,6 @@ async function verifyRoutes(read, phase) {
   const game = await read('/game');
   if (!game.includes('/_next/static/') || game.includes('navigation_promotions')) throw Error('Game application routing mismatch');
   const manifest = JSON.parse(await read('/manifest.webmanifest'));
-  const version = JSON.parse(await read('/version'));
   if (manifest.start_url !== '/game' || manifest.scope !== '/' || version.revision !== sha) throw Error('Game manifest or source revision mismatch');
 
   const main = await read('/');
@@ -158,20 +169,35 @@ async function verifyRoutes(read, phase) {
     commissionEnabled: true, payoutEnabled: false, realtimeBundleChecks: 'passed', promotionAssetCount: promotionAssets.length,
     marketingBaseline: MAIN.baseline }));
 }
-async function waitWebProduction(id) {
-  for (let attempt = 0; attempt < 30; attempt++) {
+async function waitWebProduction(id, requirePromotionJob = true) {
+  // The production pointer can update before the asynchronous alias job finishes.
+  const deadline = Date.now() + 180000;
+  let previous;
+  while (Date.now() < deadline) {
     const values = await projects();
     if (production(values.main) !== MAIN.baseline) throw Error('Marketing production changed during game website release');
-    if (production(values.web) === id) return;
+    const job = values.web.lastAliasRequest;
+    if (requirePromotionJob && job?.toDeploymentId === id && job.jobStatus === 'failed') throw Error('Game website alias assignment failed');
+    const aliases = await Promise.all(WEB_ALIASES.map(async alias => {
+      const value = await api(`/v4/aliases/${alias}?projectId=${WEB.project}`);
+      if (value.projectId !== WEB.project) throw Error('Game website alias project mismatch');
+      return { alias, deployment: value.deploymentId || value.deployment?.id };
+    }));
+    const state = JSON.stringify({ production: production(values.web), aliases,
+      aliasJob: job ? { toDeploymentId: job.toDeploymentId, status: job.jobStatus } : null });
+    if (state !== previous) { console.log(state); previous = state; }
+    const jobReady = !requirePromotionJob || job?.toDeploymentId === id && job.jobStatus === 'succeeded';
+    if (production(values.web) === id && aliases.every(alias => alias.deployment === id) && jobReady) return;
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  throw Error('Game website production mapping did not converge');
+  throw Error('Game website production, assignment job and origin aliases did not converge');
 }
 
 const initial = await projects();
 if (operation === 'realtime-context') {
   for (const [key, value] of Object.entries(initial)) console.log(JSON.stringify({ site: key, id: value.id,
     name: value.name, production: production(value), root: value.rootDirectory, framework: value.framework,
+    aliasJob: value.lastAliasRequest ? { toDeploymentId: value.lastAliasRequest.toDeploymentId, status: value.lastAliasRequest.jobStatus } : null,
     git: value.link ? { type: value.link.type, org: value.link.org, repo: value.link.repo, repoId: value.link.repoId } : null }));
   if (process.env.RELEASE_DEPLOYMENT_ID) {
     const reviewed = await candidate(false);
@@ -208,10 +234,11 @@ if (operation === 'realtime-context') {
     promotionRequested = true;
     await api(`/v10/projects/${WEB.project}/promote/${reviewed.id}`, 'POST');
     await waitWebProduction(reviewed.id);
+    const publicDeadline = Date.now() + 90000;
     for (let attempt = 0; ; attempt++) {
       try { await verifyRoutes(publicReader(), 'public-production'); break; }
       catch (error) {
-        if (attempt === 3) throw error;
+        if (attempt === 29 || Date.now() >= publicDeadline) throw error;
         await new Promise(resolve => setTimeout(resolve, 3000));
       }
     }
@@ -222,7 +249,7 @@ if (operation === 'realtime-context') {
       const current = await projects();
       if (production(current.web) === reviewed.id) {
         await api(`/v1/projects/${WEB.project}/rollback/${WEB.baseline}`, 'POST');
-        await waitWebProduction(WEB.baseline);
+        await waitWebProduction(WEB.baseline, false);
         console.log(JSON.stringify({ restored: 'game-website', deployment: WEB.baseline, marketingUnchanged: production((await projects()).main) === MAIN.baseline }));
       } else if (production(current.web) !== WEB.baseline) {
         throw Error('Game website changed concurrently; automatic rollback will not overwrite another deployment');
