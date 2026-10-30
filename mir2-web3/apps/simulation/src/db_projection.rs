@@ -111,6 +111,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0021_zone_player_drop_operations",
         include_str!("../../../infra/postgres/migrations/0021_zone_player_drop_operations.sql"),
     ),
+    (
+        "0022_zone_player_drop_recovery_receipts",
+        include_str!("../../../infra/postgres/migrations/0022_zone_player_drop_recovery_receipts.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

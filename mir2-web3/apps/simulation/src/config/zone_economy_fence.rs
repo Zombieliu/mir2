@@ -51,6 +51,12 @@ impl ZoneEconomyWritePermit {
         Ok(())
     }
 
+    /// Inspect the shared source freeze without admitting a SQL mutation.
+    /// A caller must still validate the lease inside its own transaction.
+    pub fn validate_source_write_state(&self) -> Result<(), String> {
+        self.source_config.ensure_account_store_writable()
+    }
+
     /// The ledger must call this before taking economy/account mutation locks.
     /// The shared lease row and its DB-time check remain in this transaction
     /// until the caller confirms COMMIT or rolls the entire mutation back.

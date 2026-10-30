@@ -204,6 +204,9 @@ pub use prepared_player_drop::{
     PreparedPlayerDropAccountSource, PreparedPlayerDropPublication,
     PreparedPlayerDropPublicationFailure,
 };
+#[path = "config_zone_source_recovery.rs"]
+mod zone_source_recovery;
+pub use zone_source_recovery::PreparedZoneSourceRecovery;
 #[cfg(test)]
 #[path = "config_item_identity.rs"]
 mod item_identity;
@@ -4278,6 +4281,9 @@ impl SimulationConfig {
     /// into the active file/PostgreSQL account repository.
     pub fn fork_for_replica_apply(&self) -> Result<Self, String> {
         let mut fork = self.fork_with_isolated_account_store()?;
+        // A shadow uses only its seeded image. Leaving SourceOfTruth here
+        // makes account reads try to refresh through the deliberately absent DSN.
+        fork.account_store_database_mode = AccountStoreDatabaseMode::Mirror;
         fork.account_store_path = None;
         fork.file_authority = None;
         fork.account_store_database_url = None;

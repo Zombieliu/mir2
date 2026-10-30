@@ -1,0 +1,130 @@
+{
+  "atUtc": "2026-10-30T17:00:27.6138040Z",
+  "artifacts": [
+    {
+      "bytes": 9585,
+      "sha256": "863a4adce96f3fda128a0f14f83dc0432a235174ffd2b372a1e7105e1cbd3908",
+      "path": "g2recover-admission-final-result.json"
+    },
+    {
+      "bytes": 903,
+      "sha256": "797442f0fd8f5973d8afad5d8c02f10f11c05ab943ac8eeb3fa552a60d85b9de",
+      "path": "g2recover-admission-final.log"
+    },
+    {
+      "bytes": 9548,
+      "sha256": "59940bb9f11632682f2565e7b92c8b4a1854b326bdf1cc4b1962ff35b6cb0bc1",
+      "path": "g2recover-base-final-result.json"
+    },
+    {
+      "bytes": 724,
+      "sha256": "c2a917b4a248a674a4f3c590831ddeeb96ef7cfefc07baba7ee341d3a71606ec",
+      "path": "g2recover-base-final.log"
+    },
+    {
+      "bytes": 9510,
+      "sha256": "5106cfae71a31865c096dd37a27e0bac3c1f1e0e2034db58ee503ed8d8e59c6b",
+      "path": "g2recover-bins-final-result.json"
+    },
+    {
+      "bytes": 61,
+      "sha256": "7d22e74387bdc22662bd98b2bd64e61286fce7f9455f48a6c61b6e5ceb6173c8",
+      "path": "g2recover-bins-final.log"
+    },
+    {
+      "bytes": 9544,
+      "sha256": "3cae1f752fb91c8e6151a60bf421b5ed09253c7f3cbeb333b400bfe335e4d392",
+      "path": "g2recover-drop-final-result.json"
+    },
+    {
+      "bytes": 7872,
+      "sha256": "02173a237c340abe995df74c2f268c890547f4591b92231b0ee76dd3673b4a1a",
+      "path": "g2recover-drop-final.log"
+    },
+    {
+      "bytes": 9566,
+      "sha256": "71dfa84f3e3fa1fe35e98b97749794a7da2d61202b241f6dd095305295f6a044",
+      "path": "g2recover-economy-permit-final-result.json"
+    },
+    {
+      "bytes": 1216,
+      "sha256": "7eb7d91bec2a573dae136ac95707f0a4e38e2a7e5f67692ba04d01c9a4f25358",
+      "path": "g2recover-economy-permit-final.log"
+    },
+    {
+      "bytes": 309,
+      "sha256": "d4b4602192101f14b8ac433b921b843cec79209fe709178b99bc5b19b992100a",
+      "path": "g2recover-fixture-stop.json"
+    },
+    {
+      "bytes": 9586,
+      "sha256": "3847ef9bd4d04598000fd05a665c80f7bdad018b0247017dd2c6c314698cad25",
+      "path": "g2recover-host-pg-second-result.json"
+    },
+    {
+      "bytes": 919,
+      "sha256": "beef2a18b70cbd3c8a1ac0b1cf42a082e17d9a085a555a07acce72c4fe21186b",
+      "path": "g2recover-host-pg-second.log"
+    },
+    {
+      "bytes": 9574,
+      "sha256": "076b48bbec83a2b596c27c42825efa966974da9253a62d9566beeb7da27da250",
+      "path": "g2recover-ledger-pg-final-result.json"
+    },
+    {
+      "bytes": 2163,
+      "sha256": "76b206a3a435c6dc8eada0714fb39aa1901fa763e903414b29ccf4b658ef216e",
+      "path": "g2recover-ledger-pg-final.log"
+    },
+    {
+      "bytes": 492,
+      "sha256": "2190f4c0ab1833368a67fe9d29479f518a62414eb747de8b49c948f2a7c38c12",
+      "path": "g2recover-postgres-final.json"
+    },
+    {
+      "bytes": 9540,
+      "sha256": "371dcb2157608ef5d7a95f332e86c704260810aa861ac5a3bc9de56388ce4fba",
+      "path": "g2recover-promotion-final-result.json"
+    },
+    {
+      "bytes": 732,
+      "sha256": "015891a6d4b8be81702e8c078a87d0976a77aa86b4228560e8eef414f58a3824",
+      "path": "g2recover-promotion-final.log"
+    },
+    {
+      "bytes": 9558,
+      "sha256": "39b3fde98d44b36470c2544dc1e4624f4b4c033dd4b1d44370b543e80111a28d",
+      "path": "g2recover-reset-final-result.json"
+    },
+    {
+      "bytes": 1824,
+      "sha256": "9dd6ee26f33f779c1aa3edef82459f3fc86abaa7dbc7576b6aa1c6e255331594",
+      "path": "g2recover-reset-final.log"
+    },
+    {
+      "bytes": 9558,
+      "sha256": "0195c0fa23a2577283f1fd080912995cf34790b8d7c15b7a47f0096da7723f29",
+      "path": "g2recover-save-fence-final-result.json"
+    },
+    {
+      "bytes": 2724,
+      "sha256": "ae955009ce8507471ce25edf6f43f79f5820e07e130d317f5648e608d4df9bef",
+      "path": "g2recover-save-fence-final.log"
+    },
+    {
+      "bytes": 9568,
+      "sha256": "faaf93268c4ea49d52021fe8629626743aafefce2c551a3b63ac922855e1ee5a",
+      "path": "g2recover-source-final-result.json"
+    },
+    {
+      "bytes": 2932,
+      "sha256": "c8e4bc3e4e7a46dbe985d95f9eb93b862b9358a51718cc0aa7a0efe82b8e7f97",
+      "path": "g2recover-source-final.log"
+    },
+    {
+      "bytes": 15447,
+      "sha256": "a5e79948ca33bc7898f997d22c3b3965a01e5534f757d93dead463edad5fbea8",
+      "path": "g2recover-verification.json"
+    }
+  ]
+}

@@ -33,6 +33,9 @@ use admission::ManagerMapRandomMaster;
 #[cfg(test)]
 #[path = "manager_presence_publication_tests.rs"]
 mod presence_publication_tests;
+#[cfg(test)]
+#[path = "manager_reconstructed_admission_tests.rs"]
+mod reconstructed_admission_tests;
 
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
@@ -125,11 +128,17 @@ impl ZoneManager {
     /// execution strategies can compare full outputs and committed state.
     #[cfg(any(test, feature = "test-support"))]
     pub fn fork_for_deterministic_reference(&self) -> Self {
+        self.transaction_fork()
+    }
+
+    /// Stage an in-process transaction without cold-restoring serialized world
+    /// bytes. Live online, monster and pet authority remain in the same epoch.
+    pub fn transaction_fork(&self) -> Self {
         Self {
             zones: self
                 .zones
                 .iter()
-                .map(|(key, runtime)| (key.clone(), runtime.fork_for_deterministic_reference()))
+                .map(|(key, runtime)| (key.clone(), runtime.transaction_fork()))
                 .collect(),
             session_zones: self.session_zones.clone(),
             online_identities: self.online_identities.clone(),
@@ -346,6 +355,47 @@ impl ZoneManager {
     }
     pub fn online_owner_proof_for_session(&self, session_id: &SessionId) -> Option<String> {
         Some(self.online_identities.owner(session_id)?.encoded())
+    }
+
+    /// The trusted Host calls this only after reconstructing an actual private
+    /// Session. A cold checkpoint itself never grants a live online identity.
+    /// This issues a fresh admission without replaying Join or resetting world,
+    /// movement, life, combat, pets, or player-drop custody.
+    pub fn readmit_restored_player(
+        &mut self,
+        identity: &crate::ActiveSessionIdentity,
+        join: &ZoneJoin,
+    ) -> Result<(), String> {
+        if identity.account_id.is_empty() || identity.character_index < 0
+            || identity.character_name.is_empty() || join.session_id.as_str().is_empty()
+            || join.object_id == 0 || join.account_id != identity.account_id
+            || join.character_index != identity.character_index || join.name != identity.character_name {
+            return Err("restored online admission private identity mismatch".into());
+        }
+        let key = self.session_zones.get(&join.session_id)
+            .ok_or("restored online admission has no retained session route")?;
+        if crate::runtime::map::normalize_map_file_name(&key.map_file_name)
+            != crate::runtime::map::normalize_map_file_name(&join.map_file_name) {
+            return Err("restored online admission retained map mismatch".into());
+        }
+        let zone = self.zones.get(key).ok_or("restored online admission retained Zone missing")?;
+        if zone.player_identity(&join.session_id)
+            != Some((join.session_id.clone(), identity.account_id.clone(), identity.character_index))
+            || zone.player_object_id(&join.session_id).map(|id| id.0) != Some(join.object_id) {
+            return Err("restored online admission retained player identity mismatch".into());
+        }
+        // Validate name through the existing exact player projection. Mint in a
+        // private candidate first so failed validation cannot advance the book.
+        let mut admitted = self.online_identities.clone();
+        admitted.admit(join, true).ok_or("restored online admission epoch exhausted")?;
+        let presence = zone.online_player_snapshot(&admitted);
+        if presence.get(&join.session_id).is_none_or(|player|
+            player.name != identity.character_name || &player.key != key) {
+            return Err("restored online admission retained character mismatch".into());
+        }
+        self.online_identities = admitted;
+        self.refresh_online_presence();
+        Ok(())
     }
     pub fn owner_health_cursor(
         &self,
@@ -612,6 +662,15 @@ impl ZoneManager {
         self.zones
             .get(key)?
             .player_drop_effect_state(world_effect_id)
+    }
+    pub fn player_drop_custody_states_for_key(
+        &self,
+        key: &ZoneKey,
+    ) -> Vec<(String, super::PlayerDropCustodyState)> {
+        self.zones
+            .get(key)
+            .map(|zone| zone.player_drop_custody_states())
+            .unwrap_or_default()
     }
     pub fn ground_drop_snapshot_for_key(
         &self,

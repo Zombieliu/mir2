@@ -12,6 +12,12 @@ mod experience_rates;
 pub use experience_rates::apply_crystal_experience_rates;
 mod player_weights;
 mod prepared_player_drop;
+mod zone_source_recovery;
+pub(crate) fn validate_zone_source_recovery_checkpoint(
+    save: &crate::CharacterSaveRecord,
+) -> Result<(), String> {
+    save::validate_character_save_record(save)
+}
 pub(crate) fn validate_player_drop_exact_item(item: &mir2_protocol::UserItem) -> Result<(), String> {
     items::validate_committed_user_item_carrier(item).map_err(|error| error.to_string())
 }

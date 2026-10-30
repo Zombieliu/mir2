@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存及外部 economy bootstrap/transact/trade fence、可信 runtime permit、Host 保存回执及 Unknown 隔离。本轮347次选定检查通过、8项既有忽略，包含10个真实PG经济函数。完整 source/world custody、重启后的 Unknown 受控恢复仍未完成；不能据此启动迁移或宣称容量 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存/经济 fence、普通掉落 custody 及第五片 canonical source/CAS 与受控 Host 接管恢复；最新110次选定检查和 bins 通过，含13个显式 PG 账本及2个 PG Host 用例。仍缺 pre-Prepared 持久准入、全体 UID issuer 协同、冻结进程受控对账及耗材动作耦合；不能据此启动完整迁移或宣称容量 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -142,8 +142,26 @@ Zone checkpoint v9 认证稳定托管元数据和 terminal tombstone，兼容旧
 
 Host 成功 append 后必须精确确认 operation key/intent digest，之前 runtime 保留结果并阻断保存、交接和下一条命令。append、registration refresh 或确认失败均返回 Unknown；后台 Tick 使用相同 Zone gate 和共享 Unknown 集合。真实 PG 丢物只允许具有该日志发布器的 Host 路径；独立本地 owner 在扣资产前明确拒绝，避免首单成功后丢失发布证据。没有降级到旧的分步扣款流程。
 
-**SourceOfTruth 晋升暂时明确返回 `canonical_recovery_required`。** 原代码会把 replica 的旧角色快照 seed 进权威账号缓存；本片在任何 seed 前阻断这个入口。安全拒绝不是迁移完成，不能据此更新远端测试服或公网频道。
+**第四片当时将 SourceOfTruth 晋升明确拒绝为 `canonical_recovery_required`。** 原代码会把 replica 的旧角色快照 seed 进权威账号缓存；本片在任何 seed 前阻断这个入口。后续第五片才接入受控 canonical 恢复入口，旧的直接 seed 入口仍拒绝。安全拒绝不是迁移完成，不能据此更新远端测试服或公网频道。
 
 迁移与回退：0021 仅由启动/管理边界执行，worker 不建表；部署前先保留数据库备份并盘点所有账号、离线托管、世界物品和历史 UID。当前尚无生产盘点/初始化工具，不能开放拆堆权限。发生未决托管后不得删表、删回执、降低 epoch、回退到旧 writer 或回用 UID。回退先关闭新请求并保留事务/托管表，只能在有完整对账证据后处理旧数据；本片没有执行线上迁移。
 
 验证及限制集中在[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-durable-player-drop-contract-and-journal-checkpoint)，Mock/in-process Host 与真实 PG 服务测试分别列示。下一片必须实现 quiesced Host 协调器：一致性读取 canonical save 和 CAS versions、分页核对所有存活/终态/Prepared、恢复世界并持久观察回执、在新 lease/source/world head 下重新评估 readiness，最后才允许晋升。还须覆盖 COMMIT 到日志之间的崩溃、无原 Session 恢复、较新 canonical 状态、Pre-Prepared Unknown 编号持久化、完整 UID 发号协同和受控解冻。技能耗材动作耦合及 G3–G7 未完成；没有新增 CCU 结论或采购配置承诺。
+
+## G2 第五片：数据库权威源与受控接管恢复
+
+本片以 `63c09aa84da2b4f0b4218cfc64a7b373ad7a3a85` 为基线，接入保持 quiesced 的 SourceOfTruth 晋升协调器。第四片中直接激活旧 replica 的入口仍拒绝 `canonical_recovery_required`；新的受控入口必须先完成以下恢复证据，才允许启用 Tick。该实现不是 G2、完整世界迁移或容量验收完成。
+
+协调器在 successor lease 下，用一致性事务读取完整账号、角色列表、canonical save 和各自 CAS versions，并核对 raw account/save projection。暂存读集是不可伪造的服务端能力，固定源库、账号命名空间、原配置共享指针及 fence。缓存只在原读前镜像未变化时安装，重复安装须仍与 canonical 完全一致；不会清除原共享 Unknown 冻结。先给所有已恢复 Session 安装源读集，再处理待交付投影，最后重新读取并安装最新源和 CAS，避免前一位玩家交付后给下一位安装旧缓存。
+
+全部掉落按稳定编号分页枚举，包括已 ACK 的 Live、终态、Prepared 和 Aborted。更高 epoch 可审计中止旧 Prepared；到期由 PG 时钟决定。世界以数据库证明恢复或移除原效果，原强化、UID、完整物品树和绝对到期不变；若 Host 时钟让 SQL Live 变成世界 Expired，整个暂存恢复失败。恢复用进程内事务副本保留当前在线、怪物和宠物临时权限，不能用会撤销这些权限的冷反序列化充当事务副本。
+
+新增启动迁移 `0022_zone_player_drop_recovery_receipts.sql`，以 append-only 回执持久保存精确压缩基础快照字节、完整源读集摘要、全部托管集合摘要、原 Host head、恢复后的 world/base head、successor fence 和观察编号。最终事务重新锁定租约、源和托管，拒绝变化、未解决交付、未观察终态或到期 Live；回执有效期不超过租约、最早存活效果到期和5秒。最终重新验证返回 PG 剩余期限，用保守单调时钟带到实际激活锁内再次检查，重试不能延长原回执有效期。
+
+恢复基础快照在原序列 N 处锚定，随后以服务端专用 `CanonicalZoneRecovery` 日志从 N 推进到 N+1。正常客户端、普通 Execute 和 Session 分派都不能请求该命令。standby 必须认证、核对摘要链并安装完整基础快照后才能回放后续命令；重置项超过单批字节上限时明确要求重新取基础快照，不永久卡在同一游标。构建协议前缀升为 `mir2-zone/v4-canonical-recovery-reset/`，不得宣称与旧 Host 日志混跑兼容。
+
+冷快照本身仍不授予在线权限。只有实际重建的 private Session 与保留的账号、角色、地图、Session route、权威 object ID 和名称一致时，服务端才重新签发在线身份，不重放 Join 或重置战斗。单 Zone 从临时 factory 转移后，必须把 Session 的四个 registry/social 引用重新绑定到目标 factory，并核对它持有的确为同一个世界状态。激活前先取得所有清理锁；启用 Tick 后不再因清理失败返回一次假失败。
+
+迁移与回退：0022 仅在启动/管理边界执行，worker 不创建表。回执基础快照包含 private 资产数据，按源账号数据权限保护；元数据不复制账号密码或 DSN。回退先停止新的恢复/晋升，保留0021/0022、原源库、编号和所有未决记录；不能删除回执、回退 epoch、启用旧 seed 路径或解冻一个尚未对账的旧进程。没有执行远程数据库迁移或发布。
+
+本片验证记录集中在[恢复证据](evidence/zone-cluster-expansion-20261030/README.md#g2-canonical-source-and-controlled-host-recovery)。真实 PG Host 用例经实际 in-process Host 执行；提交到日志之间的故障使用明确注入点，冷 Host 由测试显式加载持久回执中的基础快照，不冒称自动启动恢复、物理进程崩溃或网络分区已验证。G2 下一项仍是 **pre-Prepared 请求身份与阶段的持久准入记录**，其后还有全体 UID issuer 协同、技能耗材与已接受世界动作的原子耦合，以及 G3–G7。3000–5000 人持续战斗、实际硬件和每人月成本仍未得到新实测结论。

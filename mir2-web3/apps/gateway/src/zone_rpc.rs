@@ -76,6 +76,13 @@ mod unknown_economy_freeze_tests;
 #[path = "zone_rpc/player_drop_journal_tests.rs"]
 mod player_drop_journal_tests;
 #[cfg(test)]
+#[path = "zone_rpc/canonical_recovery_replay_tests.rs"]
+mod canonical_recovery_replay_tests;
+#[cfg(test)]
+#[path = "zone_rpc/canonical_recovery_pg_tests.rs"]
+mod canonical_recovery_pg_tests;
+mod canonical_recovery;
+#[cfg(test)]
 #[path = "zone_rpc/zone_save_operation_tests.rs"]
 mod zone_save_operation_tests;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
@@ -901,6 +908,19 @@ impl ZoneReplicationCatalog {
         if let Some(WireWorldCommand::PlayerDropJournalResult { result }) = &entry.command {
             entry.validate_player_drop_result(result, source_sequence)?;
         }
+        if let Some(WireWorldCommand::CanonicalZoneRecovery { snapshot }) = &entry.command {
+            let head = self.head(&entry.zone_id);
+            entry.validate_canonical_zone_recovery(snapshot, &head)?;
+            if head.base_snapshot_id.as_deref() != Some(snapshot.snapshot_id.as_str())
+                || head.base_sequence != snapshot.base_sequence
+                || head.next_sequence != head.base_sequence
+            {
+                return Err(ZoneRpcFault::new(
+                    "canonical_recovery_base_unanchored",
+                    "canonical recovery reset requires its exact base to be installed before append",
+                ));
+            }
+        }
         let cursor = self.cursors.entry(entry.zone_id.clone()).or_default();
         debug_assert_eq!(cursor.next_sequence, source_sequence);
         let next_sequence = source_sequence
@@ -1056,6 +1076,12 @@ impl ZoneReplicationCatalog {
                 )
             })?;
             if payload.len() > max_payload_bytes && entries.is_empty() {
+                if matches!(host_entry.command, Some(WireWorldCommand::CanonicalZoneRecovery { .. })) {
+                    return Err(ZoneRpcFault::new(
+                        "replication_cursor_compacted",
+                        "canonical recovery exceeds this mutation batch; install a fresh base snapshot",
+                    ));
+                }
                 return Err(ZoneRpcFault::new(
                     "replication_entry_too_large",
                     format!(
@@ -3165,6 +3191,8 @@ pub struct ZoneHostServer {
     execute_requests_total: AtomicU64,
     #[cfg(test)]
     runtime_execute_calls: AtomicU64,
+    #[cfg(test)]
+    test_player_drop_before_journal_failure: AtomicBool,
     execute_runtime_duration_ns_total: AtomicU64,
     execute_journal_duration_ns_total: AtomicU64,
     checkpoint_exports_total: AtomicU64,
@@ -3357,6 +3385,8 @@ impl ZoneHostServer {
             execute_requests_total: AtomicU64::new(0),
             #[cfg(test)]
             runtime_execute_calls: AtomicU64::new(0),
+            #[cfg(test)]
+            test_player_drop_before_journal_failure: AtomicBool::new(false),
             execute_runtime_duration_ns_total: AtomicU64::new(0),
             execute_journal_duration_ns_total: AtomicU64::new(0),
             checkpoint_exports_total: AtomicU64::new(0),
@@ -4001,24 +4031,39 @@ impl ZoneHostServer {
                 "standby replication head changed after readiness was assessed",
             ));
         }
-        self.activate_replica_session_persistence(zone_id)?;
-        self.runtime_factory
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?
-            .promote_zone_from_replica(zone_id)
+        let source_of_truth = self.config.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "Host configuration poisoned"))?
+            .account_store_database_mode == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth;
+        let (current_head, canonical_deadline) = if source_of_truth {
+            let recovered = self.recover_source_of_truth_replica(zone_id, owner_lease, &current_head)
+                .map_err(|error| {
+                    if let Ok(mut records) = self.promotion_readiness.lock() { records.remove(readiness_id); }
+                    if error.message.contains("COMMIT_OUTCOME_UNKNOWN") {
+                        self.classify_zone_runtime_error(zone_id.as_str(), error.message)
+                    } else { error }
+                })?;
+            (recovered.head, Some(recovered.valid_until))
+        } else {
+            self.activate_replica_session_persistence(zone_id)?;
+            (current_head, None)
+        };
+        self.owner_lease_authority.validate_owner_lease(owner_lease)
+            .map_err(|detail| ZoneRpcFault::new("promotion_fence_rejected", detail))?;
+        // Acquire cleanup guards before enabling ticks. No fallible operation
+        // may report failed promotion after the Zone has become active.
+        let factory = self.runtime_factory.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "zone host factory mutex poisoned"))?;
+        let mut quiesced = self.quiesced_zones.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?;
+        let mut readiness = self.promotion_readiness.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?;
+        let mut frozen = self.promotion_frozen_zones.lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?;
+        factory.promote_zone_from_replica_before(zone_id, canonical_deadline)
             .map_err(|message| ZoneRpcFault::new("promotion_replica_invalid", message))?;
-        self.quiesced_zones
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "quiesced Zone mutex poisoned"))?
-            .remove(zone_id.as_str());
-        self.promotion_readiness
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "promotion readiness mutex poisoned"))?
-            .remove(readiness_id);
-        self.promotion_frozen_zones
-            .lock()
-            .map_err(|_| ZoneRpcFault::new("internal", "promotion freeze mutex poisoned"))?
-            .remove(zone_id.as_str());
+        quiesced.remove(zone_id.as_str());
+        readiness.remove(readiness_id);
+        frozen.remove(zone_id.as_str());
         self.promotions_total.fetch_add(1, Ordering::Relaxed);
         self.promotion_last_promoted_at_ms
             .store(now_ms, Ordering::Release);
@@ -5086,6 +5131,15 @@ impl ZoneHostServer {
                         result.receipt.intent_digest().to_string(),
                     )
                 });
+                #[cfg(test)]
+                if player_drop_result.is_some()
+                    && self.test_player_drop_before_journal_failure.swap(false, Ordering::AcqRel)
+                {
+                    return Err(self.classify_zone_runtime_error(
+                        zone_id,
+                        "PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: injected failure after real source commit before journal publication".into(),
+                    ));
+                }
                 let journal_started = Instant::now();
                 {
                     let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_journal");
@@ -5833,6 +5887,12 @@ impl ZoneHostServer {
             Ok(published) => published,
             Err(error) => return Err(error),
         };
+        if published {
+            for session in live_sessions.values() {
+                session.hosted.rebind_adopted_replica_factory(&target_factory)
+                    .map_err(classify_runtime_error)?;
+            }
+        }
         drop(target_factory);
         if !published && !payload.sessions.is_empty() {
             return Err(ZoneRpcFault::new(
@@ -6014,7 +6074,19 @@ impl ZoneHostServer {
                     )
                 })?;
             let key = (entry.session_id.clone(), entry.zone_id.clone());
-            if let Some(now_ms) = entry.zone_tick_ms {
+            if let Some(WireWorldCommand::CanonicalZoneRecovery { snapshot }) = &entry.command {
+                let pre_head = self
+                    .journal
+                    .lock()
+                    .map_err(|_| ZoneRpcFault::new("internal", "zone host journal mutex poisoned"))?
+                    .replication
+                    .head(requested_zone_id);
+                entry.validate_canonical_zone_recovery(snapshot, &pre_head)?;
+                // The batch was authenticated and digest-verified above. This
+                // replaces the whole shadow Zone before any Session routing;
+                // canonical recovery is never ordinary Execute or a PG write.
+                self.install_base_snapshot(requested_zone_id, snapshot)?;
+            } else if let Some(now_ms) = entry.zone_tick_ms {
                 if entry.command.is_some() || entry.closed {
                     return Err(ZoneRpcFault::new(
                         "mutation_decode",
@@ -6391,7 +6463,7 @@ fn zone_replication_build_id() -> String {
     // schema, even when deployment supplied only a reusable version label.
     // Bound the identifier without truncating the source build identity.
     format!(
-        "mir2-zone/player-drop-journal-v3/{}",
+        "mir2-zone/v4-canonical-recovery-reset/{}",
         hex_lower_bytes(&Sha256::digest(source_build.as_bytes()))
     )
 }
@@ -7188,6 +7260,9 @@ enum WireWorldCommand {
     PlayerDropJournalResult {
         result: Box<PlayerDropJournalResult>,
     },
+    CanonicalZoneRecovery {
+        snapshot: Box<ZoneBaseSnapshot>,
+    },
     Tick,
 }
 
@@ -7390,6 +7465,7 @@ impl WireWorldCommand {
             Self::RestoreActiveCharacterCheckpoint { .. }
             | Self::NpcPurchaseOwnerCheckpoint { .. }
             | Self::PlayerDropJournalResult { .. }
+            | Self::CanonicalZoneRecovery { .. }
             | Self::ResumeCharacterHandoff { .. } => {
                 return Err(ZoneRpcFault::new(
                     "checkpoint_command",
@@ -7417,6 +7493,39 @@ struct WireHostJournalEntry {
 }
 
 impl WireHostJournalEntry {
+    fn validate_canonical_zone_recovery(
+        &self,
+        snapshot: &ZoneBaseSnapshot,
+        pre_head: &ZoneReplicationHead,
+    ) -> Result<(), ZoneRpcFault> {
+        snapshot.verify().map_err(|detail| {
+            ZoneRpcFault::new("canonical_recovery_reset_invalid", detail)
+        })?;
+        self.owner_lease.clone().into_lease()?;
+        if self.session_id != "__canonical_recovery__"
+            || !matches!(&self.mode, WireZoneOwnerCommandMode::Direct)
+            || self.closed
+            || self.zone_tick_ms.is_some()
+            || self.owner_lease.zone_id != self.zone_id
+            || snapshot.zone_id != self.zone_id
+            || pre_head.zone_id != self.zone_id
+            || pre_head.version != ZONE_REPLICATION_HEAD_VERSION
+            || snapshot.build_id != zone_replication_build_id()
+            || snapshot.build_id != pre_head.build_id
+            || snapshot.mutation_coverage != ZoneReplicationCoverage::CommandJournal
+            || snapshot.mutation_coverage != pre_head.mutation_coverage
+            || !snapshot.apply_ready
+            || snapshot.base_sequence != pre_head.next_sequence
+            || snapshot.latest_digest != pre_head.latest_digest
+        {
+            return Err(ZoneRpcFault::new(
+                "canonical_recovery_reset_invalid",
+                "canonical recovery reset differs from its reserved entry, Zone, build or pre-recovery head",
+            ));
+        }
+        Ok(())
+    }
+
     fn validate_player_drop_result(
         &self,
         result: &PlayerDropJournalResult,
@@ -7472,6 +7581,12 @@ impl WireHostJournalEntry {
         source_sequence: u64,
         replicated: bool,
     ) -> Result<(), ZoneRpcFault> {
+        if matches!(&self.command, Some(WireWorldCommand::CanonicalZoneRecovery { .. })) {
+            return Err(ZoneRpcFault::new(
+                "checkpoint_command",
+                "canonical Zone recovery requires the Zone-level journal dispatcher",
+            ));
+        }
         if let Some(WireWorldCommand::PlayerDropJournalResult { result }) = self.command.as_ref() {
             self.validate_player_drop_result(result, source_sequence)?;
             session

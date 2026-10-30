@@ -11,8 +11,10 @@ use mir2_simulation::{
 };
 mod abort;
 mod item_uid;
+mod recovery;
 mod service;
 pub use abort::PlayerDropAbortAudit;
+pub use recovery::{PlayerDropRecoveryHostHeads, PlayerDropRecoveryReceipt, PlayerDropRecoverySet};
 
 fn connection_binding_digest(database_url: &str) -> String {
     let mut digest = Sha256::new();
@@ -129,6 +131,8 @@ pub struct PlayerDropOperationRecord {
     status: PlayerDropOperationStatus,
     receipt: Option<EconomyTransactionReceipt>,
     terminal_event_id: Option<String>,
+    terminal_recipient: Option<(String, i32)>,
+    observation: Option<(String, u64, u64)>,
     abort_audit: Option<PlayerDropAbortAudit>,
 }
 impl PlayerDropOperationRecord {
@@ -149,6 +153,16 @@ impl PlayerDropOperationRecord {
     }
     pub fn terminal_event_id(&self) -> Option<&str> {
         self.terminal_event_id.as_deref()
+    }
+    pub fn terminal_recipient(&self) -> Option<(&str, i32)> {
+        self.terminal_recipient
+            .as_ref()
+            .map(|(account, index)| (account.as_str(), *index))
+    }
+    pub fn observation(&self) -> Option<(&str, u64, u64)> {
+        self.observation
+            .as_ref()
+            .map(|(owner, epoch, sequence)| (owner.as_str(), *epoch, *sequence))
     }
     pub fn committed_effect(
         &self,
@@ -383,7 +397,7 @@ fn source_envelope(
     }
 }
 
-const RECORD_QUERY:&str="SELECT op.source_namespace,op.operation_key,op.world_effect_id,op.zone_id,op.owner_id,op.owner_epoch,op.operation_digest,op.intent_digest,op.operation,op.expires_at_ms,op.status,op.event_id,op.terminal_event_id,op.terminal_account_id,op.terminal_character_index,op.aborted_at_ms,op.abort_audit,op.abort_digest,abort_audit.audited_receipt AS audited_abort_receipt,abort_audit.audit_digest AS audited_abort_digest,abort_audit.recovery_id AS audited_recovery_id,abort_audit.recovery_owner_id AS audited_recovery_owner_id,abort_audit.recovery_epoch AS audited_recovery_epoch,EXISTS(SELECT 1 FROM game_economy_transactions original_tx WHERE original_tx.idempotency_key=op.operation_key OR original_tx.event_id=op.abort_audit->>'unpublishedEventId') AS original_ledger_exists,EXISTS(SELECT 1 FROM game_economy_outbox original_outbox WHERE original_outbox.idempotency_key=op.operation_key OR original_outbox.event_id=op.abort_audit->>'unpublishedEventId') AS original_outbox_exists,tx.receipt,outbox.payload,terminal_tx.receipt AS terminal_receipt,terminal_outbox.payload AS terminal_payload FROM (SELECT * FROM public.zone_player_drop_operations WHERE source_namespace=current_schema()) op LEFT JOIN game_economy_transactions tx ON tx.event_id=op.event_id LEFT JOIN game_economy_outbox outbox ON outbox.event_id=op.event_id LEFT JOIN game_economy_transactions terminal_tx ON terminal_tx.event_id=op.terminal_event_id LEFT JOIN game_economy_outbox terminal_outbox ON terminal_outbox.event_id=op.terminal_event_id LEFT JOIN public.zone_player_drop_abort_audit abort_audit ON abort_audit.source_namespace=op.source_namespace AND abort_audit.operation_key=op.operation_key";
+const RECORD_QUERY:&str="SELECT op.source_namespace,op.operation_key,op.world_effect_id,op.zone_id,op.owner_id,op.owner_epoch,op.operation_digest,op.intent_digest,op.operation,op.expires_at_ms,op.status,op.event_id,op.terminal_event_id,op.terminal_account_id,op.terminal_character_index,op.ack_owner_id,op.ack_owner_epoch,op.ack_sequence,op.aborted_at_ms,op.abort_audit,op.abort_digest,abort_audit.audited_receipt AS audited_abort_receipt,abort_audit.audit_digest AS audited_abort_digest,abort_audit.recovery_id AS audited_recovery_id,abort_audit.recovery_owner_id AS audited_recovery_owner_id,abort_audit.recovery_epoch AS audited_recovery_epoch,EXISTS(SELECT 1 FROM game_economy_transactions original_tx WHERE original_tx.idempotency_key=op.operation_key OR original_tx.event_id=op.abort_audit->>'unpublishedEventId') AS original_ledger_exists,EXISTS(SELECT 1 FROM game_economy_outbox original_outbox WHERE original_outbox.idempotency_key=op.operation_key OR original_outbox.event_id=op.abort_audit->>'unpublishedEventId') AS original_outbox_exists,tx.receipt,outbox.payload,terminal_tx.receipt AS terminal_receipt,terminal_outbox.payload AS terminal_payload FROM (SELECT * FROM public.zone_player_drop_operations WHERE source_namespace=current_schema()) op LEFT JOIN game_economy_transactions tx ON tx.event_id=op.event_id LEFT JOIN game_economy_outbox outbox ON outbox.event_id=op.event_id LEFT JOIN game_economy_transactions terminal_tx ON terminal_tx.event_id=op.terminal_event_id LEFT JOIN game_economy_outbox terminal_outbox ON terminal_outbox.event_id=op.terminal_event_id LEFT JOIN public.zone_player_drop_abort_audit abort_audit ON abort_audit.source_namespace=op.source_namespace AND abort_audit.operation_key=op.operation_key";
 
 fn decode_record(
     row: postgres::Row,
@@ -494,6 +508,25 @@ fn decode_record(
     } else {
         None
     };
+    let terminal_recipient = match (
+        row.get::<_, Option<String>>("terminal_account_id"),
+        row.get::<_, Option<i32>>("terminal_character_index"),
+    ) {
+        (Some(account), Some(index)) => Some((account, index)),
+        (None, None) => None,
+        _ => return Err("player drop terminal recipient is incomplete".into()),
+    };
+    let observation = match (
+        row.get::<_, Option<String>>("ack_owner_id"),
+        row.get::<_, Option<i64>>("ack_owner_epoch"),
+        row.get::<_, Option<i64>>("ack_sequence"),
+    ) {
+        (Some(owner), Some(epoch), Some(sequence)) if epoch > 0 && sequence >= 0 => {
+            Some((owner, epoch as u64, sequence as u64))
+        }
+        (None, None, None) => None,
+        _ => return Err("player drop observation is incomplete".into()),
+    };
     Ok(PlayerDropOperationRecord {
         source_namespace: row.get("source_namespace"),
         connection_binding_digest,
@@ -501,6 +534,8 @@ fn decode_record(
         status,
         receipt,
         terminal_event_id: row.get("terminal_event_id"),
+        terminal_recipient,
+        observation,
         abort_audit,
     })
 }
@@ -830,6 +865,6 @@ pub(super) fn duplicate_pickup_effect(
 }
 
 #[cfg(test)]
-mod pg_tests;
+pub(crate) mod pg_tests;
 #[cfg(test)]
 mod tests;

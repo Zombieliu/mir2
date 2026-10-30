@@ -173,6 +173,15 @@ impl ZoneRuntime {
         Some(self.player_drop_effects.get(world_effect_id)?.state.clone())
     }
 
+    /// Read-only custody inventory for quiesced Host recovery. Includes claimed
+    /// live objects whose presentation is already absent from the active set.
+    pub fn player_drop_custody_states(&self) -> Vec<(String, PlayerDropCustodyState)> {
+        self.player_drop_effects
+            .iter()
+            .map(|(id, record)| (id.clone(), record.state.clone()))
+            .collect()
+    }
+
     pub fn query_player_drop_effect(
         &self,
         world_effect_id: &str,

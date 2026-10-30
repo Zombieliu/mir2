@@ -1,11 +1,11 @@
 use super::super::{
+    ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN, AccountStoreMutationScope, PostgresClientConfig,
     build_account_store_mutation_plan, write_account_store_mutation_plan_in_transaction,
-    AccountStoreMutationScope, PostgresClientConfig, ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN,
 };
 use super::*;
 use postgres::{Client, NoTls};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::{Arc, Mutex, mpsc};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 fn fence() -> ZoneSaveFence {
@@ -79,6 +79,10 @@ fn zone_save_fence_binding_requires_explicit_postgres_source_and_rechecks_on_wri
     assert!(!ran.load(Ordering::SeqCst));
     assert_eq!(changed.save_account_store().unwrap_err(), REJECTED);
     let shadow = config.fork_for_replica_apply().unwrap();
+    assert_eq!(
+        shadow.account_store_database_mode,
+        AccountStoreDatabaseMode::Mirror
+    );
     assert!(shadow.zone_save_fence().is_none());
     assert!(shadow.account_store_database_url.is_none());
     assert!(shadow.account_store_path.is_none());
@@ -110,10 +114,12 @@ fn zone_save_fence_snapshot_plans_carry_fence_and_unknown_freezes_shared_writers
             .unwrap_err();
         assert!(error.starts_with(COMMIT_OUTCOME_UNKNOWN));
         assert!(error.contains(ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN));
-        assert!(clone
-            .save_account_store_account("demo")
-            .unwrap_err()
-            .contains("writes are frozen"));
+        assert!(
+            clone
+                .save_account_store_account("demo")
+                .unwrap_err()
+                .contains("writes are frozen")
+        );
         assert_eq!(
             config.account_store.lock().unwrap().source_account_versions,
             before
@@ -634,10 +640,12 @@ fn zone_save_fence_postgres_killed_lock_and_save_connections_rollback_every_writ
     });
     let mut admin = db.admin();
     wait_for_lock(&mut admin, pid);
-    assert!(admin
-        .query_one("SELECT pg_terminate_backend($1)", &[&pid])
-        .unwrap()
-        .get::<_, bool>(0));
+    assert!(
+        admin
+            .query_one("SELECT pg_terminate_backend($1)", &[&pid])
+            .unwrap()
+            .get::<_, bool>(0)
+    );
     assert!(worker.join().unwrap().is_err());
     lease.rollback().unwrap();
     assert_eq!(db.password(), baseline);
@@ -666,10 +674,12 @@ fn zone_save_fence_postgres_killed_lock_and_save_connections_rollback_every_writ
     );
     assert_eq!(db.password(), baseline);
     assert_eq!(db.image(), before);
-    assert!(admin
-        .query_one("SELECT pg_terminate_backend($1)", &[&pid])
-        .unwrap()
-        .get::<_, bool>(0));
+    assert!(
+        admin
+            .query_one("SELECT pg_terminate_backend($1)", &[&pid])
+            .unwrap()
+            .get::<_, bool>(0)
+    );
     assert!(tx.commit().is_err());
     assert_eq!(db.password(), baseline);
     assert!(config.ensure_account_store_writable().is_ok());
@@ -708,18 +718,22 @@ fn zone_save_fence_postgres_after_commit_faults_freeze_no_replay_and_no_live_pub
         drop(live);
         let ran = Arc::new(AtomicBool::new(false));
         let flag = ran.clone();
-        assert!(clone
-            .commit_account_store_transaction(&["demo".into()], move |_| {
-                flag.store(true, Ordering::SeqCst);
-                Ok(())
-            })
-            .unwrap_err()
-            .contains("writes are frozen"));
+        assert!(
+            clone
+                .commit_account_store_transaction(&["demo".into()], move |_| {
+                    flag.store(true, Ordering::SeqCst);
+                    Ok(())
+                })
+                .unwrap_err()
+                .contains("writes are frozen")
+        );
         assert!(!ran.load(Ordering::SeqCst));
-        assert!(clone
-            .save_account_store()
-            .unwrap_err()
-            .contains("writes are frozen"));
+        assert!(
+            clone
+                .save_account_store()
+                .unwrap_err()
+                .contains("writes are frozen")
+        );
     }
 
     let Some(db) = Database::from_env() else {
@@ -762,12 +776,14 @@ fn zone_save_fence_postgres_after_commit_faults_freeze_no_replay_and_no_live_pub
     assert!(error.starts_with(COMMIT_OUTCOME_UNKNOWN));
     assert_eq!(db.image(), durable_before);
     let ran = AtomicBool::new(false);
-    assert!(clone
-        .commit_account_store_transaction(&["demo".into()], |_| {
-            ran.store(true, Ordering::SeqCst);
-            Ok(())
-        })
-        .unwrap_err()
-        .contains("writes are frozen"));
+    assert!(
+        clone
+            .commit_account_store_transaction(&["demo".into()], |_| {
+                ran.store(true, Ordering::SeqCst);
+                Ok(())
+            })
+            .unwrap_err()
+            .contains("writes are frozen")
+    );
     assert!(!ran.load(Ordering::SeqCst));
 }

@@ -35,6 +35,10 @@ const MAX_ECONOMY_LEGS: usize = 128;
 mod prepared_kill;
 use prepared_kill::{PreparedKillProjection, PreparedKillSource};
 pub mod player_drop;
+#[cfg(test)]
+pub(crate) use player_drop::pg_tests::Database as PlayerDropPostgresTestDatabase;
+#[cfg(test)]
+pub(crate) use tests::start_test_runtime_with_config;
 mod zone_fence;
 #[cfg(test)]
 mod zone_fence_pg_tests;
@@ -3700,7 +3704,7 @@ mod tests {
         start_test_runtime_with_config(crate::GatewayConfig::default(), account_id, character_name)
     }
 
-    pub(super) fn start_test_runtime_with_config(
+    pub(crate) fn start_test_runtime_with_config(
         config: crate::GatewayConfig,
         account_id: &str,
         character_name: &str,

@@ -815,7 +815,7 @@ impl ZoneRuntime {
     /// Fork the complete Zone state for an all-or-nothing command. The ECS and
     /// AOI grids are derived mirrors, so they are rebuilt from the cloned
     /// authoritative maps instead of requiring `bevy_ecs::World: Clone`.
-    fn transaction_fork(&self) -> Self {
+    pub(super) fn transaction_fork(&self) -> Self {
         let mut fork = Self::new_with_collision_config_and_random(
             self.key.clone(),
             self.collision.clone(),

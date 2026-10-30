@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized] target(s) in 0.36s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 4 tests
+test routing::tests::failed_replica_promotion_preserves_the_replica_marker ... ok
+test zone_rpc::native_attack_tests::real_host_promotion_and_sequence_gates_cover_dedicated_attack ... ok
+test zone_rpc::player_drop_journal_tests::source_of_truth_promotion_requires_canonical_recovery_before_snapshot_or_seed ... ok
+test zone_rpc::unknown_economy_freeze_tests::readiness_assessment_resume_and_promotion_cannot_admit_an_unknown_zone ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 1527 filtered out; finished in 0.10s

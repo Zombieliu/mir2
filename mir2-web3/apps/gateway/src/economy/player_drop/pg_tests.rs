@@ -5,15 +5,17 @@ use mir2_simulation::{
     AccountStoreDatabaseMode, PlayerDropRequest, PreparedPlayerDropPublication,
     PreparedPlayerDropPublicationFailure, SimulationConfig, ZoneSaveFence,
 };
+#[path = "recovery_pg_tests.rs"]
+mod recovery_pg_tests;
 
-struct Database {
+pub(crate) struct Database {
     control_url: String,
     url: String,
     name: String,
     zone: String,
 }
 impl Database {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         let control_url = std::env::var("MIR2_TEST_ZONE_SAVE_OPERATION_URL")
             .expect("dedicated Zone PostgreSQL fixture is required");
         let parsed: postgres::Config = control_url.parse().expect("valid fixture URL");
@@ -57,13 +59,13 @@ impl Database {
         db.lease("owner-a", 7);
         db
     }
-    fn connect(&self) -> Client {
+    pub(crate) fn connect(&self) -> Client {
         Client::connect(&self.url, NoTls).expect("disposable fixture connection")
     }
-    fn store(&self) -> PostgresEconomyStore {
+    pub(crate) fn store(&self) -> PostgresEconomyStore {
         PostgresEconomyStore::new(&self.url)
     }
-    fn config(&self, owner: &str, epoch: u64) -> SimulationConfig {
+    pub(crate) fn config(&self, owner: &str, epoch: u64) -> SimulationConfig {
         let mut config = SimulationConfig::default();
         config.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
         config.account_store_database_url = Some(self.url.clone());
@@ -73,7 +75,7 @@ impl Database {
             )
             .unwrap()
     }
-    fn lease(&self, owner: &str, epoch: i64) {
+    pub(crate) fn lease(&self, owner: &str, epoch: i64) {
         self.connect().execute("INSERT INTO public.zone_owner_leases(zone_id,owner_id,fencing_token,expires_at_ms,heartbeat_at_ms) VALUES($1,$2,$3,floor(extract(epoch FROM clock_timestamp())*1000)::bigint+120000,1) ON CONFLICT(zone_id) DO UPDATE SET owner_id=$2,fencing_token=$3,expires_at_ms=EXCLUDED.expires_at_ms,heartbeat_at_ms=1",&[&self.zone,&owner,&epoch]).unwrap();
     }
     fn binding(&self, key: &str) -> PlayerDropOperationBinding {
@@ -88,6 +90,12 @@ impl Database {
             1,
         )
         .unwrap()
+    }
+    pub(crate) fn url(&self) -> &str {
+        &self.url
+    }
+    pub(crate) fn zone(&self) -> &str {
+        &self.zone
     }
 }
 impl Drop for Database {

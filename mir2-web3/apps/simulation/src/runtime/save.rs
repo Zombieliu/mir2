@@ -234,6 +234,24 @@ fn rebased_durable_cooldown_ticks(
         .min(u64::from(cooldown_ticks))
 }
 
+pub(super) fn canonical_recovery_skill_states(
+    save: &CharacterSaveRecord,
+    tick: u64,
+) -> Result<Vec<SkillState>, String> {
+    let now_ms = unix_now_ms();
+    decode_durable_skill_states(&save.skill_states_json)
+        .ok_or_else(|| "canonical recovery skill clock invalid".to_string())?
+        .into_iter()
+        .map(|(mut skill, clock)| {
+            skill.cooldown_ends_at = tick
+                .checked_add(rebased_durable_cooldown_ticks(skill.cooldown_ticks, clock, now_ms))
+                .ok_or("canonical recovery skill deadline overflow")?;
+            skill.cast_time_ms = 0;
+            Ok(skill)
+        })
+        .collect()
+}
+
 pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
     snapshot_active_character_save_at(world, &super::refine_oven::capture_clock())
 }

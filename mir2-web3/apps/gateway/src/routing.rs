@@ -12,6 +12,8 @@ mod shared_conquest;
 mod shared_creatures;
 #[path = "shared_experience_profiles.rs"]
 mod shared_experience_profiles;
+#[path = "routing/replica_restore.rs"]
+mod replica_restore;
 #[path = "shared_groups.rs"]
 mod shared_groups;
 #[path = "shared_guilds.rs"]
@@ -99,6 +101,10 @@ mod player_drop;
 #[cfg(test)]
 #[path = "routing/player_drop_guard_tests.rs"]
 mod player_drop_guard_tests;
+#[path = "routing/player_drop_recovery.rs"]
+mod player_drop_recovery;
+#[path = "routing/canonical_source_recovery.rs"]
+mod canonical_source_recovery;
 #[cfg(test)]
 #[path = "routing/zone_save_operation_pg_tests.rs"]
 mod zone_save_operation_pg_tests;
@@ -8342,6 +8348,14 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn promote_zone_from_replica(&self, zone_id: &ZoneId) -> Result<(), String> {
+        self.promote_zone_from_replica_before(zone_id, None)
+    }
+
+    pub(crate) fn promote_zone_from_replica_before(
+        &self,
+        zone_id: &ZoneId,
+        valid_until: Option<std::time::Instant>,
+    ) -> Result<(), String> {
         // Keep the same replicas -> Zones lock order as mark/restore.
         let mut replica_zone_ids = self
             .replica_zone_ids
@@ -8358,6 +8372,24 @@ impl SharedInProcessZoneRuntimeFactory {
             .get(zone_id)
             .cloned()
             .ok_or_else(|| format!("Zone {zone_id} has no installed replica state"))?;
+        {
+            let mut state = resources.zone_state.lock()
+                .map_err(|_| "recovered Zone state mutex poisoned")?;
+            // Check after all potentially blocking world locks. The deadline
+            // is conservative monotonic time derived from the DB receipt TTL.
+            if valid_until.is_some_and(|deadline| std::time::Instant::now() >= deadline) {
+                return Err("canonical recovery receipt expired before activation".into());
+            }
+            for key in state.zone_manager.zone_keys() {
+                state.zone_manager.set_player_drop_replica_mode_for_key(&key, false);
+            }
+            if valid_until.is_some_and(|deadline| std::time::Instant::now() >= deadline) {
+                for key in state.zone_manager.zone_keys() {
+                    state.zone_manager.set_player_drop_replica_mode_for_key(&key, true);
+                }
+                return Err("canonical recovery receipt expired before activation".into());
+            }
+        }
         replica_zone_ids.remove(zone_id);
         resources
             .autonomous_ticks_enabled
@@ -11652,16 +11684,26 @@ impl SharedInProcessZoneSessionRuntime {
             .collect::<Vec<_>>();
         let key = ZonePresenceKey::from_identity(&identity);
         let last_seen_move_seq = {
-            let zone_state = self
+            let mut zone_state = self
                 .zone_state
                 .lock()
                 .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
-            let Some(session_id) = zone_state.zone_sessions.get(&key) else {
+            let Some(session_id) = zone_state.zone_sessions.get(&key).cloned() else {
                 return Ok(());
             };
+            let player = zone_state.players.get(&key)
+                .ok_or("restored Session lacks its shared presence")?;
+            if player.map_file_name != map_file_name {
+                return Err("restored Session shared map mismatch".into());
+            }
+            let mut join = self.inner.active_zone_join_snapshot(session_id.as_str())
+                .ok_or("restored Session lacks its trusted join identity")?;
+            join.object_id = player.zone_object_id;
+            zone_state.zone_manager.readmit_restored_player(&identity, &join)?;
+            zone_state.experience_authority = self.inner.shared_mentor_config();
             zone_state
                 .zone_manager
-                .player_last_seen_move_seq(session_id)
+                .player_last_seen_move_seq(&session_id)
                 .unwrap_or_default()
         };
         let mut movement = self

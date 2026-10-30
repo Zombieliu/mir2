@@ -748,6 +748,15 @@ impl InProcessWorldRuntime {
         self.session.rebind_account_store(authoritative);
     }
 
+    pub fn install_zone_source_recovery(
+        &mut self,
+        source: &crate::PreparedZoneSourceRecovery,
+        authoritative: &SimulationConfig,
+    ) -> Result<(), String> {
+        self.session
+            .install_zone_source_recovery(source, authoritative)
+    }
+
     pub fn shared_social_message(&self, key: &str, args: &[String]) -> ServerPacket {
         self.session.shared_social_message(key, args)
     }
