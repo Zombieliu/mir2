@@ -1,0 +1,81 @@
+{
+  "gatewayPID": 1218467,
+  "legacyRelation": {
+    "confirmedAtMs": 1793351088394,
+    "relationCount": 1,
+    "source": "invite_link",
+    "status": "bound",
+    "termsVersion": "numeron-playtest-20261029-v1"
+  },
+  "member": {
+    "accountSaveCredit": 100,
+    "amountMicro": "1000000",
+    "appliedCredits": 100,
+    "characterIndex": 36,
+    "credit": 100,
+    "monthlyCardExpiresAtMs": null,
+    "monthlyCardItemReceipts": 0,
+    "monthlyItemProvenanceSources": 0,
+    "orderCredits": 100,
+    "orderState": "applied",
+    "paidLots": [
+      {
+        "acquiredAtMs": 1793384631148,
+        "consumedCredits": 0,
+        "kind": "paid",
+        "originalCredits": 100
+      }
+    ],
+    "redeemedMonthlyCardItemReceipts": 0
+  },
+  "memberAccountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+  "monthlyCardSku": {
+    "creditPrice": 1000,
+    "gameShopIndex": 1000001,
+    "itemIndex": 1000001,
+    "runtimeEnvironmentKey": "MIR2_MONTHLY_CARD_CREDIT_PRICE"
+  },
+  "noPurchaseConfirmationPaymentOrWrite": true,
+  "observedAtUtc": "2026-10-30T21:40:41.547070+00:00",
+  "orderId": "usdc_c7fe28d1a3a8f3ee865c30bc7798b00b59649f5a9cd77a0d5273c9d2882ca34c",
+  "pending": {
+    "candidateCount": 1,
+    "candidateExpiresAtMs": 1793398108665,
+    "eligibilityAnchorMs": 1793381130814,
+    "evidenceExpiresAtMs": 1793398108665,
+    "evidencePreparedAtMs": 1793396308665,
+    "memberAttributionCount": 1,
+    "memberConfirmationCount": 1,
+    "memberRevenueAllocationCount": 0,
+    "sourceConfirmedAtMs": 1793351088394,
+    "targetTermsVersion": "numeron-windows-playtest-20261030-v1"
+  },
+  "readOnly": true,
+  "stageVerification": {
+    "adjacentWorkerProjection": {
+      "outboxState": "pending",
+      "projectionRunRows": 0,
+      "workerAuditRows": 0
+    },
+    "automaticRetryAllowed": false,
+    "candidateId": "migration_candidate_29f9333e2ad4ea497263a946b148a1bf510b813090eb71e1b0085e02c2e7708b",
+    "connectionTransportRewritten": false,
+    "fiveExactPendingRowsAndLinksVerified": true,
+    "memberConfirmationPerformed": false,
+    "migrationId": "migration_87be916c85c9477e92213692c6049a76b0e2c47f59f304bda4a7065fbff2e050",
+    "originalSourceBusinessRowsPreserved": true,
+    "paymentOperationsPerformed": false,
+    "protectedAccountCharacterFinancialRowsPreserved": true,
+    "schema": "mir2.original-invitation.stage.v1",
+    "scopeSha256": "b4386e3ff730f4901d036ba40074e9509593483d122703367a9610192a76ee4b",
+    "snapshotSha256": "a322289d5158f7cc6ce42c6cfc089b80431bd84d428fd3ce3df44dee4b06daa1",
+    "sourceOriginalTimeKeptSeparate": true,
+    "sourcePhysicalSelectOnlyRoleVerified": false,
+    "sourceReadOnlyBoundary": "existing exact source URL; core RepeatableRead read_only transactions",
+    "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+    "stageCommitted": true,
+    "status": "pending_member_confirmation",
+    "verification": "passed"
+  },
+  "stageVerificationFileSha256": "002e2db78083b848b46bb052d484e6616be04c871ac25767d6c765d753bc16c7"
+}

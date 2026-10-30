@@ -1,6 +1,6 @@
 # 原生 USDC 直转核账与旧单恢复（2026-10-31）
 
-状态：精确后端源码已部署到原 Windows 测试服，用户指定旧款已恢复为 Applied，实际增加 100 点券。发布前备份、迁移保留和目标发券护栏通过。已核实的公网 r12 安装包仍含旧游戏源码 `1875c6c20`，缺少独立充值域名补丁；客户端点击到手机扫码的完整链路尚未完成发布和人工验收。
+状态：原 Windows 测试服 GW／worker 已升级到 `173332a004c0` 并通过数据保留核验；用户指定旧款已恢复为 Applied，旧邀请关系也已由团员本人接受当前条款并确认承接。C7 的 100 点券未消费，尚无月卡购买／激活或可计佣收入。Windows 客户端发布由另一会话负责；下文 r12 安装包结论为当时核验记录，不当作当前发布渠道的最新结论。
 
 ## 本轮授权与边界
 
@@ -159,3 +159,7 @@ r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文�
 随后使用原服现存的精确 Gateway DSN 与旧活动既有源连接创建全新只读预览。来源连接未被改写，只声明 core repeatable-read／read-only 事务，不声称数据库角色已被物理限制为 SELECT-only。[原服预览](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ORIGINAL-PREVIEW.json)的 snapshot 为 `a322289d…6daa1`，与克隆不同：团员账号 SHA `9a77de96…`、团长 `12691db5…`、旧确认 `1793351088394`、资格锚点 `1793381130814`、当前 v1 条款、一笔独立核验付款均通过独立复核。现有 Operations／Finance 两个互异系统身份及审计证据没有新建或替换。
 
 [原服单次准备](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ORIGINAL-PENDING.json)已提交并通过保留核验，仅追加准确的候选、不可变证据、审计、出箱及幂等记录。状态为 `pending_member_confirmation`，没有最终归属、付款 claim、点券消费、佣金补发或新链转账。团员钱包 `0xb99297…6cd282` 须本人在当前 Windows 活动刷新总览，核对原团长 `0x8ced5e…ef2f02`，独立勾选当前条款并确认；团长无需重复报名。准备凭据有效期 30 分钟，超时不能自动代签或重放原 stage。只有最终本人确认及后续真实合格月卡条件成立，才可能产生佣金；付款开关保持关闭。
+
+团员随后已本人完成该操作。[最终原服只读核验](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-MEMBER-CONFIRMED.json)10 项全部通过：真实确认时间 `1793396439895`（北京时间 10 月 31 日 05:40:39.895），当前 v1 条款、精确团长／团员／候选一致；归属为 `migration_import / bound`，确认与成员自身审计同时间，旧确认及资格锚点保持独立，未倒填。该 migration 及源关系各唯一确认，精确 C7 付款 claim 仅 1，确认出箱已 completed／attempts1／无错误。工具仅准备候选与读取最终结果，没有代替成员确认。
+
+[月卡与余额只读核对](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-MONTHLY-READONLY.json)确认角色 36 仍有 100 点券、C7 paid lot 原始 100／消耗 0；无月卡购买、兑换、激活或收入分配。实际运行配置 `MIR2_MONTHLY_CARD_CREDIT_PRICE=1000`，商店／物品 index `1000001`。角色真实等级 3／有效 UTC 日 1 已观测，但 `qualified_at_ms` 仍空；邀请已承接不等于合格月卡收入成立。后续需真实购买并激活自用月卡，仍不能把充值、登记身份或本次迁移表述成即时返币。未发起新链转账、消费点券、赠券或打开付款开关。
