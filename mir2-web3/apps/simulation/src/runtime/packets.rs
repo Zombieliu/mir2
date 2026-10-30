@@ -356,6 +356,10 @@ fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bo
 #[path = "mail_parcel_tests.rs"]
 mod mail_parcel_tests;
 
+#[cfg(test)]
+#[path = "mail_send_publication_tests.rs"]
+mod mail_send_publication_tests;
+
 #[derive(Debug, Clone)]
 struct Stage5MailSender {
     account_id: String,
@@ -894,17 +898,34 @@ fn stage5_send_mail_packet(
                 return Vec::new();
             }
             eprintln!("mail transaction failed: {error}");
+            if config.ensure_account_store_writable().is_err() {
+                return Vec::new();
+            }
             return vec![ServerPacket::MailSent { result: -1 }];
         }
     };
 
-    if committed.sender_baseline_revision == sender_save.revision {
-        world
-            .resource::<SessionResource>()
-            .advance_active_save_revision(
-                sender_save.revision,
-                committed.sender_committed_revision,
-            );
+    stage5_publish_mail_commit(world, &config, sender_save.revision, committed, total)
+}
+
+fn stage5_publish_mail_commit(
+    world: &mut World,
+    config: &SimulationConfig,
+    sender_revision: u64,
+    committed: Stage5MailCommit,
+    total: u32,
+) -> Vec<ServerPacket> {
+    let session = world.resource::<SessionResource>();
+    let revision_published = if committed.sender_baseline_revision == sender_revision {
+        session.advance_active_save_revision(sender_revision, committed.sender_committed_revision)
+    } else {
+        // Only the committed affected assets below are refreshed. Other private
+        // business state remains stale, so it must not acquire a newer revision.
+        session.active_save_revision() == Some(sender_revision)
+    };
+    if !revision_published {
+        config.freeze_committed_source_publication();
+        return Vec::new();
     }
 
     // The durable sender image is authoritative. A stale same-account session

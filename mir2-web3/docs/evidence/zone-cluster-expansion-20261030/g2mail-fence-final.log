@@ -1,0 +1,22 @@
+    Finished `test` profile [unoptimized] target(s) in 0.30s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 12 tests
+test config::zone_save_fence::tests::zone_save_fence_binding_requires_explicit_postgres_source_and_rechecks_on_write ... ok
+test config::zone_save_fence::tests::zone_save_fence_constructor_rejects_invalid_server_capabilities ... ok
+test config::zone_save_fence::tests::zone_save_fence_mixed_domain_unknown_freezes_independently_of_domain_prefix ... ok
+test config::zone_save_fence::tests::zone_save_fence_pg_fixture_url_cannot_target_default_or_shared_database ... ok
+
+thread '<unnamed>' panicked at apps\simulation\src\config.rs:6584:13:
+ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test config::zone_save_fence::tests::zone_save_fence_postgres_after_commit_faults_freeze_no_replay_and_no_live_publish ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_expiry_is_read_after_waiting_for_the_lease_lock ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_killed_lock_and_save_connections_rollback_every_write ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_matching_stale_owner_token_expiry_missing_and_malformed ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_missing_table_and_bounded_lock_wait_fail_closed ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_takeover_waits_for_account_transaction_commit ... ok
+test config::zone_save_fence::tests::zone_save_fence_prepared_source_cannot_cross_fence_bindings ... ok
+test config::zone_save_fence::tests::zone_save_fence_snapshot_plans_carry_fence_and_unknown_freezes_shared_writers ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 3269 filtered out; finished in 12.01s

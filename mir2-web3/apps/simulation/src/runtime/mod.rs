@@ -50,6 +50,8 @@ mod item_grants;
 mod item_sets;
 pub(crate) mod item_uid_issuance;
 mod items;
+#[path = "../config/mail_transfer_items.rs"]
+pub(crate) mod mail_transfer_items;
 
 /// Pure catalogue lookup shared by durable player-drop admission validation.
 /// Reuses the same legacy aliases as runtime item selection; grants no authority.

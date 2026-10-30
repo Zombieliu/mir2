@@ -1,0 +1,27 @@
+{
+  "payloadSha256": {
+    "g2mail-admin-check-final-result.json": "64e7d6f5a232a588bcfba5123c6f9c808471a5005efa4f1ecf43b3a449b8cef7",
+    "g2mail-admin-check-final.log": "d7ba34e20b61e9242d2488631b62fd0c0608b42c1b083224644cb867e388fbb5",
+    "g2mail-fence-final-result.json": "874e71ac96ef93cb57932f256fedcb8b4647f117710f130bc0e154ed58cc9ef1",
+    "g2mail-fence-final.log": "1d39c668603119798032206140e7b9445d85f4a895c5062e44efdb4965c2adbc",
+    "g2mail-fixture-stop.json": "736919e1fd2c33ea6f415f2720ffe4196c5724cc3b2b312c8d15396cb5b22403",
+    "g2mail-gateway-check-final-result.json": "391dedbbe34720a97a17c54496d2db92ff0cadb2968789e417891863ea68853a",
+    "g2mail-gateway-check-final.log": "7577aa7e72bd95d44e50fb707f07dc512d91a639aa3e0b6d5893dc2b5958ae45",
+    "g2mail-pg-final-result.json": "957af012034fe169af03b62ea8f2120b4782fb6e11802e9a4b5a3d28d8e3f04c",
+    "g2mail-pg-final.log": "2f03b1d4ef93b5ee577c66e12948c72adc35b81c89a18c898100b7dc8beb8300",
+    "g2mail-postgres-final.json": "b98fdb0d3a4528576d575e7c12f6c6bf5c0122998418169def0f4f4df54b49a4",
+    "g2mail-save-final-result.json": "a493aa43e7533d17029a43dc24f058b3e7cb1eacf0ba7da8dd02a9bbe4995597",
+    "g2mail-save-final.log": "bcf89680d4281cf5865ba9d676b4e2bf9cb8f4c4767c41e63a23c660e0978df1",
+    "g2mail-shared-uid-pg-final-result.json": "dbbf1f5d1c47d85ebda85d33068ec949030e97c409f18cc3cff67228b88808b6",
+    "g2mail-shared-uid-pg-final.log": "a80b0da8fe07640b173387a2660973df0abcb348e884e01cfe5af28540bb52e8",
+    "g2mail-sim-final-result.json": "f96824d42cc8ee8adf5b91506ca5540f615ebe8f6818f8eda97e9ca3ecfe457f",
+    "g2mail-sim-final.log": "c368a4247224c9105d26b0cd9a1368a23059bc16197cad71a191e73af2d799e3",
+    "g2mail-sim-targets-check-final-result.json": "3be0ede3933526cd0a78b063d627fa8f25427f307442096cab94e48343cee4d3",
+    "g2mail-sim-targets-check-final.log": "7e8397b3c3d5ef73830e57f61ffa6f2cfd565f338d3d371aefe79dbf3b020764",
+    "g2mail-store-final-result.json": "3a47746a065dee65b2e4de0ea2c526fad9c3a3f0b16d73fd2c3539c52ef377f2",
+    "g2mail-store-final.log": "3c8923a2827a5618dbf2b574dba9b26e8c3f4a29ab34698530c171403ea87db9",
+    "g2mail-verification.json": "d8b205b64377de0842d459124a0c19f5a1fc3caefee7d6676654d598050965d1"
+  },
+  "manifestExcludedFromOwnHash": true,
+  "atUtc": "2026-10-30T20:23:58.1802165Z"
+}

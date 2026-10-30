@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+
+running 2 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test config::config_account_store_durability_tests::post_rename_unknown_keeps_live_old_and_freezes_all_shared_writers ... ok
+test config::config_account_store_durability_tests::pre_rename_failure_keeps_live_and_disk_old_but_allows_a_later_write ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3279 filtered out; finished in 0.12s

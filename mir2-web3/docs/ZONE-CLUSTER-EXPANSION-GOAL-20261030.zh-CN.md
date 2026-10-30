@@ -283,3 +283,19 @@ NPC journal在实际账号/角色/revision校验后，只读取Committed的`inco
 验证分为纯typed载体/账本、File与Session、实际PG三个层级。新增PG用例通过公开SendMail提交MAX、非法/非规范UID及80层JSON正文，要求原文落库且水位不变，再经独立可信绑定、实际重登、公开奖励与CollectParcel到账、重复领取及直接PG水位/存档读回核对。独立绑定复用同源cache，不能称为物理进程重启或多机故障试验。原始坏状态不会自动修复，已经烧掉或推进的水位也不能下降。
 
 无新增DDL或持久字段；回退必须保留所有水位、预留、来源和收据，并保持新请求关闭，不能重新启用会解码任意玩家文本的旧writer。完整外部/世界历史census、按UID的持久归属及不可变转移收据、其他issuer切换、租赁原子托管、冻结进程对账及耗材动作耦合仍属G2。当前全cache历史遍历和串行水位成本尚无吞吐资格；后续需随完整切换消除全量扫描依赖，再做G3–G7与3000–5000人全战斗实测。远程TEST、公网更新、Docker和生产收费保持未改。
+
+## G2 第十片：真实寄件事务的不可变原实例回执
+
+本片基线为 `e9f0990989859901556ebe3d975bda1ee179f6cb`，范围是寄件来源证据和提交确认修复。最终9组通过：182次选定执行（过滤器可能重叠）、Gateway/admin binaries及simulation test targets编译，62个共同选定源文件哈希；显式重跑4个新寄件和11个共享UID PG函数，另跑12个配置save-fence边界函数。转移回执接入所有账号源事务汇合的 `write_account_store_mutation_plan_in_transaction`，与完整源存档、双方账号和 save 版本 CAS、既有 Zone fence 同一个 SQL 事务；不是事后异步补一张表。验证结果见[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-atomic-player-mail-transfer-receipts)。此片不完成 G2 或全局物品归属，也不放行 PG ExistingCustody 领取。
+
+新 `0024_mail_item_transfer_receipts.sql` 只新增 append-only 表、收件人索引和防改删 trigger，无自动历史 backfill、无新 UID 发行器。主键固定 namespace 和原 delivery nonce；UI 邮件编号和读/锁状态可以变化。回执保存双方实际账号/角色、已有 NPC actor（无历史 incarnation 时明确为 null）、原账号/save 版本及前后修订号、原始完整附件 JSON、已建模完整树、全部当前 live UID 和摘要。旧角色没有 actor 不能因此被称为已认证完整 incarnation；后续持有人索引切换仍须处理此缺口。
+
+新 ExistingCustody 附件必须匹配同一变更计划中实际发送者原背包中的完整原实例，源中移除后才追加回执；同一计划不能重复转移同一 UID。物理 manifest 拒绝零号、重复当前节点和月卡普通编号混用，保留完整属性和已移除子物品引用；当前 live 子树与已被替代的旧 slots 明确区分。无关月卡和合法 Legacy 未编号物品不会被当作本次附件核验。普通正文始终是文本；原始扩展字段另行比较并冻结，不因 typed 反序列化忽略字段而接受替换。
+
+源保存中的已记录邮件允许读/锁/UI 重编号及单调的领取/删除状态，禁止活跃载体篡改和终态复活。删除角色或账号后回执继续保留，不级联删除。已有无回执邮件不会自动获得证明；同 nonce 的 Unknown/FreshGrant 升级或追加附件被拒绝。File-primary 的 PG mirror 不虚构转移回执，仍保留原有 File 寄件路径；已存在的回执不能被 Mirror 覆盖。
+
+File 或 fenced PG 提交结果未知时不发送 `MailSent {-1}`，避免把不确定提交当成明确失败。确认源已提交但 Session 修订号发布失败时冻结共享写入且不发成功包；stale Session 仅刷新实际受影响资产，不能取得更新修订号后覆盖其他旧状态。含原实例附件的无 Zone fence PG source 寄件也对全部失败 COMMIT 保守冻结，包括带 SQLSTATE 的 Unknown；此新增检测不覆盖无附件且无 fence 的旧 PG 寄件路径，完整 writer 切换前仍须补齐。恢复须读取真实源和独立回执，不自动解冻、不重新生成旧物品或降低 UID 水位。
+
+回退：先关闭新寄件请求并对账未决结果，保留新增表、全部原始回执及恢复证据，不删除 migration 记录或切回会覆盖回执载体的旧 writer。本片仅对自建本机隔离 PostgreSQL 16 应用迁移；没有部署远程 TEST 或公网更新。
+
+下一步仍是按完整 u64 UID 的持久当前 holder、合法发行/销毁/转移能力、普通 save 同事务维护、完整外部/世界 census 和所有 writer 切换。回执不能证明其他未触及账号或世界中无人持有同 UID，亦不能独立授权 PG 领取。租赁原子托管、冻结进程统一恢复和耗材动作耦合仍开放；G3–G7 迁移、战斗连续性、跨入口恢复、调度和真实容量验收未完成。回执查询当前按参与账号保留历史读取，其长期规模及全源扫描/共享水位成本须压测后再优化；本片不提供 CCU、硬件成本或月卡定价结论。

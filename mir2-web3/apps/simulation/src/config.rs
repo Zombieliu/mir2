@@ -187,6 +187,11 @@ impl CharacterRecord {
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
+#[path = "config/mail_transfer.rs"]
+mod mail_transfer;
+#[cfg(test)]
+#[path = "config/mail_transfer_source_tests.rs"]
+mod mail_transfer_source_tests;
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 #[path = "config/zone_economy_fence.rs"]
@@ -5011,6 +5016,7 @@ impl SimulationConfig {
                 && error.starts_with(hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN))
             || (plan.stones.is_some() && error.starts_with(stone_authority::COMMIT_UNKNOWN))
             || (!plan.conquests.is_empty() && error.starts_with("CONQUEST_COMMIT_OUTCOME_UNKNOWN"))
+            || error.starts_with("MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN")
         {
             self.freeze_account_store_writes(error)
         } else {
@@ -6471,6 +6477,8 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     let carries_conquests = !plan.conquests.is_empty();
     let carries_billing = plan.carries_billing_source();
     let carries_stones = plan.stones.is_some();
+    let carries_mail =
+        mode == AccountStoreDatabaseMode::SourceOfTruth && mail_transfer::carries_source(&plan);
     std::thread::spawn(move || {
         let mut client = pool.connection().map_err(|error| {
             if carries_zone_fence {
@@ -6489,6 +6497,8 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     .map_err(|_| {
         if carries_zone_fence {
             zone_save_fence::commit_outcome_unknown("transaction worker panicked")
+        } else if carries_mail {
+            "MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN: postgres mail worker panicked".into()
         } else if carries_billing {
             format!(
                 "{}: postgres billing transaction worker panicked",
@@ -6539,7 +6549,35 @@ fn write_account_store_mutation_plan_to_postgres(
         write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
         .commit()
-        .map_err(|error|if plan.zone_save_fence.is_some(){zone_save_fence::classify_commit_error(error)}else if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!("{}: stone commit response unavailable: {error}",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
+        .map_err(|error| {
+            if plan.zone_save_fence.is_some() {
+                zone_save_fence::classify_commit_error(error)
+            } else if mode == AccountStoreDatabaseMode::SourceOfTruth
+                && mail_transfer::carries_source(plan)
+            {
+                // SQLSTATE 40003/08007 can be DbError too. No failed COMMIT
+                // response is sufficient proof that a transfer did not commit.
+                "MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN: commit outcome unavailable".into()
+            } else if plan.carries_billing_source() && error.as_db_error().is_none() {
+                format!("{}: postgres billing commit response unavailable: {error}", crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)
+            } else if plan.clock.is_some() {
+                guild_clock::classify_commit_error(error).to_string()
+            } else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source())
+                && error.as_db_error().is_none()
+            {
+                format!("{}: postgres guild commit response unavailable: {error}", guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)
+            } else if plan.stones.is_some() && error.as_db_error().is_none() {
+                format!("{}: stone commit response unavailable: {error}", stone_authority::COMMIT_UNKNOWN)
+            } else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some())
+                && error.as_db_error().is_none()
+            {
+                format!("{}: postgres Hero commit response unavailable: {error}", hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)
+            } else if !plan.conquests.is_empty() && error.as_db_error().is_none() {
+                format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")
+            } else {
+                format!("postgres account-store commit failed: {error}")
+            }
+        })?;
     #[cfg(test)]
     match plan.zone_save_fence_test_fault {
         Some(zone_save_fence::TestFault::PanicAfterCommit) => {
@@ -6604,6 +6642,10 @@ fn write_account_store_mutation_plan_in_transaction(
             plan,
         )?)
     };
+    // Exact player-mail withdrawals and their immutable provenance share the
+    // source transaction. Later account/save CAS failures roll back both.
+    // This is not the global current-holder index required to enable PG claims.
+    mail_transfer::write(transaction, plan, mode)?;
     let mut source_versions =
         execute_account_store_mutation_plan(plan, |operation| match operation {
             AccountStoreMutationOperation::GlobalStock(mutation) => {

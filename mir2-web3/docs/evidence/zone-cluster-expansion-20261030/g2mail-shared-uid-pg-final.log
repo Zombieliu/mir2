@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 11 tests
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_actual_runtime_stack_split_uses_and_persists_shared_authority ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_committed_lost_ack_burns_uid_and_freezes_all_source_clones ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_full_u64_and_monthly_reserved_boundaries_are_atomic ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_independent_issuers_drop_batches_and_restart_share_one_floor ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_live_fence_and_source_configuration_cannot_be_substituted ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_missing_census_never_initializes_or_falls_back ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_namespace_isolation_and_matching_census_audit_are_required ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_player_mail_text_cannot_poison_floor_or_block_fresh_delivery ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_public_system_mail_claim_commits_once_and_old_owner_cannot_issue ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_queued_issuer_rechecks_shared_freeze_after_uid_row_lock ... ok
+test economy::player_drop::pg_tests::shared_uid_pg_tests::player_drop_shared_uid_pg_runtime_new_character_starter_survives_save_and_relogin_without_remint ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1556 filtered out; finished in 32.24s

@@ -11,6 +11,8 @@ mod admission_commit_pg_tests;
 mod admission_recovery_pg_tests;
 #[path = "admission_service_pg_tests.rs"]
 mod admission_service_pg_tests;
+#[path = "mail_transfer_pg_tests.rs"]
+mod mail_transfer_pg_tests;
 #[path = "recovery_pg_tests.rs"]
 mod recovery_pg_tests;
 #[path = "shared_uid_pg_tests.rs"]
