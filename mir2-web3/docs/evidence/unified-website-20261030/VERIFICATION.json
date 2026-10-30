@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-30",
+  "sourceSha": "427f1d11d9612e04a7c243cf41f9a1f77fa4dd3a",
+  "releaseToolSha": "427f1d11d9612e04a7c243cf41f9a1f77fa4dd3a",
+  "status": "deployed; public HTTP and actual browser navigation verified",
+  "canonicalOrigin": "https://mir2.obelisk.build",
+  "routes": {
+    "marketing": "/",
+    "game": "/game",
+    "promotions": "/promotions"
+  },
+  "sourceRecovery": {
+    "deployment": "dpl_4uHMwZobvDW1tUwszUdbq14z8eMj",
+    "files": 44,
+    "immutableSha1AndSha256Verified": true
+  },
+  "candidates": {
+    "main": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97",
+    "game": "dpl_CYQVRcyaxmFERsYoeK9zqQ41vhbr",
+    "bothProductionBuildsReady": true
+  },
+  "baseline": {
+    "main": "dpl_4uHMwZobvDW1tUwszUdbq14z8eMj",
+    "game": "dpl_GuricEhcXbVub8u3u3HSt2VR5wGe"
+  },
+  "workflowRuns": {
+    "stage": 41021493368,
+    "readyContext": 41021644973,
+    "promote": 41021799386,
+    "earlierGuardedRollbacks": [
+      41019288838,
+      41020959924
+    ]
+  },
+  "focusedChecks": {
+    "marketingRouteMatching": "8/8 using Next route compiler; exact locale homepages and required child paths, all matching-rule uniqueness, query preservation, native standalone exclusion",
+    "promotionAuthBillingAndSeasonRegression": "31/31",
+    "releaseGuardsCandidateResponsesAndCompensation": "30/30 with sealed network/process mocks, including real asset URL extraction and locale redirect-loop handling",
+    "websiteLocales": "16 locale completeness, strict TypeScript, typegen and navigation render checks passed",
+    "gameTypeScript": "tsc --noEmit passed",
+    "pwaAndAssetProxyContracts": "passed",
+    "responsiveNavigationPreview": {
+      "de1024": "passed; document width equals scrollWidth",
+      "zhCN390": "passed; menu opened with visible referral link, no horizontal overflow",
+      "scope": "actual source-rendered header/footer with original CSS; placeholder main is not full-page acceptance"
+    }
+  },
+  "deploymentEvidenceLimit": "Modern Git deployments omit rootDirectory in both detail and list responses and return 404 for deployment files. Exact project, actual gitSource SHA, production readiness and baselines are checked. Explicit conflicting root metadata is rejected. Actual authenticated candidate page, navigation, footer, download, manifest, revision and game responses are required before any promotion.",
+  "preserved": [
+    "existing promotion origin and signing secrets",
+    "game databases and character data",
+    "existing Windows distribution configuration"
+  ],
+  "dockerStarted": false,
+  "windowsPackagePublished": false,
+  "resolvedIssues": [
+    "The first public static-asset smoke detected a redirect loop and restored both baselines. Native Next 15+ asset prefixes are now retained; obsolete prefix-stripping rewrites were removed. Authenticated CSS and JS downloads precede alias changes.",
+    "Narrow-screen header and footer now avoid overflow; desktop navigation switches to accessible menu at 1280px.",
+    "Locale homepages now have exact rewrite rules. Child rules require one or more segments; no appended empty-segment slash or redirect loop. Both candidate English homepages are checked before switching aliases."
+  ],
+  "browserVerification": {
+    "main": "https://mir2.obelisk.build/zh-CN",
+    "wideDesktop1600": "visible main navigation contains 团长推广; lang zh-CN",
+    "menuClick": "actual main navigation link opened /promotions?lang=zh-CN",
+    "promotion": "title 团长推广计划 · Numeron; selected 简体中文; current test campaign numeron-playtest-20261029",
+    "returnLink": "clicked 游戏官网 and verified Chinese main page with all three referral anchors",
+    "screenshot": "PUBLIC-MAIN-NAV.png",
+    "temporaryViewportReset": true,
+    "temporaryPreviewServerStopped": true
+  },
+  "humanFrontendAcceptance": "not asserted; user may review the deployed website"
+}
