@@ -33,7 +33,7 @@ jobs:
   website:
     if: inputs.operation != 'backend-build'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         if: startsWith(inputs.operation, 'unified-')

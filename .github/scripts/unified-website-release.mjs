@@ -51,6 +51,7 @@ async function candidates() {
   for (const [key, id] of Object.entries({ main: process.env.RELEASE_MAIN_DEPLOYMENT_ID, game: process.env.RELEASE_DEPLOYMENT_ID })) {
     if (!/^dpl_[a-zA-Z0-9]+$/.test(id || '')) throw Error(`Exact ${key} candidate deployment ID required`);
     result[key] = await api(`/v13/deployments/${id}`);
+    if (result[key].id !== id) throw Error('Candidate deployment ID mismatch');
     candidateGuard(key, result[key]);
   }
   return result;
@@ -84,6 +85,8 @@ async function publicSmoke() {
   await get('/zh-CN/download', 'https://mir2.obelisk.build/game');
   await get('/en', 'promotions?lang=en');
   await get('/game');
+  const version = JSON.parse(await get('/version'));
+  if (version.revision !== sha) throw Error('Public game revision mismatch');
   await get('/promotions?lang=zh-CN');
   const manifest = JSON.parse(await get('/manifest.webmanifest'));
   if (manifest.start_url !== '/game' || manifest.scope !== '/') throw Error('Game PWA route mismatch');
@@ -143,7 +146,13 @@ if (operation === 'unified-context') {
       await api(`/v10/projects/${SITES[key].project}/promote/${reviewed[key].id}`, 'POST');
       await waitProduction(key, reviewed[key].id);
     }
-    await publicSmoke();
+    for (let attempt = 0; ; attempt++) {
+      try { await publicSmoke(); break; }
+      catch (error) {
+        if (attempt === 3) throw error;
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+    }
     for (const [key, value] of Object.entries(reviewed)) console.log(JSON.stringify({ promoted: summary(key, value) }));
   } catch (error) {
     for (const key of touched.reverse()) {

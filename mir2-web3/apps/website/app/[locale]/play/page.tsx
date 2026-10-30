@@ -8,7 +8,7 @@ import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { getProductCopy } from "@/lib/product-copy";
 import { getCopy, getLocalizedAlternates, isLocale } from "@/lib/site-copy";
 
-const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build";
+const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game";
 
 type PlayPageProps = { params: Promise<{ locale: string }> };
 

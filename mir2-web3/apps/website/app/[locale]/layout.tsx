@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const copy = getCopy(locale);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3080";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mir2.obelisk.build";
   const pageTitle = locale === "zh-CN"
     ? `${copy.hero.titleTop}${copy.hero.titleBottom}`
     : `${copy.hero.titleTop} ${copy.hero.titleBottom}`;
@@ -66,7 +66,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3080";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mir2.obelisk.build";
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [

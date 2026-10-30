@@ -36,7 +36,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
 
   const copy = getDownloadCopy(locale);
   const siteCopy = getCopy(locale);
-  const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build";
+  const gameUrl = process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game";
   const windowsUrl = publicHttpsUrl(process.env.NEXT_PUBLIC_WINDOWS_DOWNLOAD_URL);
   const androidUrl = publicHttpsUrl(process.env.NEXT_PUBLIC_ANDROID_DOWNLOAD_URL);
   const explorerUrl = process.env.NEXT_PUBLIC_EXPLORER_URL?.replace("{locale}", locale) ?? `/${locale}/explore`;

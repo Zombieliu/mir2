@@ -1,5 +1,5 @@
-const gameUrl = (process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build").replace(/\/$/, "");
-const healthUrl = process.env.GAME_HEALTH_URL ?? `${gameUrl}/health`;
+const gameUrl = (process.env.NEXT_PUBLIC_GAME_URL ?? "https://mir2.obelisk.build/game").replace(/\/$/, "");
+const healthUrl = process.env.GAME_HEALTH_URL ?? new URL("/health", gameUrl).href;
 
 export async function GET() {
   const startedAt = Date.now();

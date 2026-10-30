@@ -3,7 +3,7 @@ import { getProductCopy, legalDocuments, productSections } from "@/lib/product-c
 import { locales } from "@/lib/site-copy";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://numeron-legend-of-rebirth.vercel.app").replace(/\/$/, "");
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mir2.obelisk.build").replace(/\/$/, "");
   const localizedPaths = [
     "",
     "/play",
