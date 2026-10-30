@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-30T04:43:10.924Z",
+  "sourceBaseline": "5eafc1b64a53e1e1c30ef6f92f4a1d119e9c99d4",
+  "scope": "local offline configuration and mocked unit-stop tests only",
+  "finalWorkload": {
+    "targetCcu": [
+      3000,
+      5000
+    ],
+    "allPlayersContinuousCombat": true,
+    "multipleMaps": true,
+    "actuallyRun": false
+  },
+  "checks": [
+    {
+      "command": "python -B scripts/test_verify_zone_cluster_config.py",
+      "tests": 57,
+      "exitCode": 0,
+      "result": "PASS",
+      "networkCalls": 0
+    },
+    {
+      "command": "python -B scripts/capacity/test_stop_isolated_units.py",
+      "tests": 29,
+      "exitCode": 0,
+      "result": "PASS",
+      "realSystemctlCalls": 0
+    }
+  ],
+  "independentReview": "InvocationID identity, garbage-collection race, physical IP/host consistency, migration of state/recovery locations, malformed inputs, port0 and recovery-key diversity reviewed and corrected",
+  "sourceFiles": [
+    {
+      "file": "scripts/verify_zone_cluster_config.py",
+      "bytes": 18458,
+      "sha256": "5f6822a516cb8c30b9a3d4f8d1c49af469372d5cd81760ccf433e9beacd06403"
+    },
+    {
+      "file": "scripts/test_verify_zone_cluster_config.py",
+      "bytes": 21307,
+      "sha256": "6bcefd802d0657d4387e20f3fee0de90e275b9c03612a033b25676ebc3a3df84"
+    },
+    {
+      "file": "scripts/capacity/stop_isolated_units.py",
+      "bytes": 10929,
+      "sha256": "03233b83b322e233076eb958c969986a04d645cf9a20b5209ccf71a1c90de1b4"
+    },
+    {
+      "file": "scripts/capacity/test_stop_isolated_units.py",
+      "bytes": 14765,
+      "sha256": "b278dc301ed90caea6c29ab6ee1ab6d804be63c3f2081d877cb9e41e95f58236"
+    }
+  ],
+  "deployed": false,
+  "gameCapacityVerified": false,
+  "multiGatewayRuntimeVerified": false,
+  "productionProfileVerified": false,
+  "knownNextWork": [
+    "multi-map fighter fixture and coordinated generator/shared authentication budgets",
+    "native isolated 2Gateway/2ZoneHost runtime/fencing/combat/save and recovery tests",
+    "timeout root-cause tracing before qualifying a load stage",
+    "independent hardware and actual 3000/5000 full-combat qualification"
+  ]
+}

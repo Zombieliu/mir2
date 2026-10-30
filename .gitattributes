@@ -27,6 +27,11 @@ mir2-web3/scripts/cloudflare_read_authority_probe.py -text
 mir2-web3/scripts/test_cloudflare_read_authority_probe.py -text
 mir2-web3/scripts/native_r17_r2_delivery.py -text
 mir2-web3/scripts/test_native_r17_r2_delivery.py -text
+# Keep capacity-tool evidence hashes stable across Windows and Linux checkouts.
+mir2-web3/scripts/verify_zone_cluster_config.py text eol=lf
+mir2-web3/scripts/test_verify_zone_cluster_config.py text eol=lf
+mir2-web3/scripts/capacity/stop_isolated_units.py text eol=lf
+mir2-web3/scripts/capacity/test_stop_isolated_units.py text eol=lf
 # Signed R19 publication source identities must match on Windows and Linux.
 mir2-web3/scripts/prepare_native_r19_s15_fixed.py -text
 mir2-web3/scripts/native_r19_s15_r2_delivery.py -text
