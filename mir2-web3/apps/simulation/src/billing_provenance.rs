@@ -130,6 +130,8 @@ pub struct MonthlyRevenuePart {
     pub reason_code: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source: Option<SuiRevenueEvidence>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_transfer_source: Option<SuiNativeTransferRevenueEvidence>,
 }
 
 /// Immutable native-chain payment facts. Testnet value is test accounting only.
@@ -140,6 +142,13 @@ pub struct SuiRevenueEvidence {
     pub network: String,
     pub module: String,
     pub receipt: crate::sui_usdc_billing::VerifiedUsdcReceipt,
+}
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SuiNativeTransferRevenueEvidence {
+    pub provider: String,
+    pub network: String,
+    pub receipt: crate::sui_usdc_billing::VerifiedNativeUsdcTransferReceipt,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -730,12 +739,43 @@ fn sui_monthly_revenue_part(
 ) -> Result<MonthlyRevenuePart, String> {
     use crate::sui_usdc_billing::{account_ref, UsdcOrderState};
     order.validate()?;
-    let receipt = order
-        .receipt
-        .as_ref()
-        .ok_or("billingProvenanceUsdcReceiptMissing")?;
+    let (paid_at_ms, amount_micro, evidence_ref, invoice_source, transfer_source) =
+        if let Some(receipt) = &order.receipt {
+            (
+                receipt.confirmed_at_ms,
+                receipt.amount_micro,
+                format!(
+                    "sui:testnet:{}:{}:{}",
+                    receipt.chain_identifier, receipt.digest, receipt.event_seq
+                ),
+                Some(SuiRevenueEvidence {
+                    provider: "sui_native_usdc".into(),
+                    network: "sui:testnet".into(),
+                    module: "recharge".into(),
+                    receipt: receipt.clone(),
+                }),
+                None,
+            )
+        } else if let Some(receipt) = &order.transfer_receipt {
+            (
+                receipt.confirmed_at_ms,
+                receipt.amount_micro,
+                format!(
+                    "sui-native-transfer:testnet:{}:{}",
+                    receipt.chain_identifier, receipt.digest
+                ),
+                None,
+                Some(SuiNativeTransferRevenueEvidence {
+                    provider: "sui_native_usdc_transfer".into(),
+                    network: "sui:testnet".into(),
+                    receipt: receipt.clone(),
+                }),
+            )
+        } else {
+            return Err("billingProvenanceUsdcReceiptMissing".into());
+        };
     if order.account_ref != account_ref(owner, order.character_index)
-        || receipt.confirmed_at_ms > issued_at_ms
+        || paid_at_ms > issued_at_ms
         || order
             .applied
             .as_ref()
@@ -755,7 +795,7 @@ fn sui_monthly_revenue_part(
         indirect_tax_minor: if !livemode { Some(0) } else { None },
         eligible_micro_usd: if eligible {
             portion(
-                receipt.amount_micro,
+                amount_micro,
                 part.credits_offset,
                 part.credits,
                 order.offer.credits,
@@ -764,12 +804,9 @@ fn sui_monthly_revenue_part(
             0
         },
         reversed_micro_usd: 0,
-        paid_at_ms: receipt.confirmed_at_ms,
+        paid_at_ms,
         fx_snapshot_ref: "testnet-native-usdc6:1testUSDC=1000000testMicroUSD:v1".into(),
-        evidence_ref: format!(
-            "sui:testnet:{}:{}:{}",
-            receipt.chain_identifier, receipt.digest, receipt.event_seq
-        ),
+        evidence_ref,
         funding_status: if eligible { "verified_paid" } else { "pending" }.into(),
         reason_code: if livemode {
             "payment_environment_mismatch"
@@ -779,12 +816,8 @@ fn sui_monthly_revenue_part(
             "verified_paid_credit_fifo"
         }
         .into(),
-        source: Some(SuiRevenueEvidence {
-            provider: "sui_native_usdc".into(),
-            network: "sui:testnet".into(),
-            module: "recharge".into(),
-            receipt: receipt.clone(),
-        }),
+        source: invoice_source,
+        native_transfer_source: transfer_source,
     })
 }
 
@@ -916,6 +949,7 @@ pub fn monthly_revenue_sources(
                 funding_status: "pending".into(),
                 reason_code: "payment_revenue_evidence_missing".into(),
                 source: None,
+                native_transfer_source: None,
             };
             if order.livemode != livemode {
                 output.reason_code = "payment_environment_mismatch".into();

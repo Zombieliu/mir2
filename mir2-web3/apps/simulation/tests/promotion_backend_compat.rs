@@ -12,7 +12,34 @@ use std::collections::BTreeMap;
 struct OriginalBillingReader {
     orders: BTreeMap<String, RechargeOrder>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    sui_usdc_orders: BTreeMap<String, UsdcRechargeOrder>,
+    sui_usdc_orders: BTreeMap<String, OriginalV13UsdcOrderReader>,
+}
+// Freeze the historical wire shape: reusing today's Order type would let a
+// newly added authority field silently weaken this older-writer regression.
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct OriginalV13UsdcOrderReader {
+    id: String,
+    request_id: String,
+    character_index: i32,
+    offer: RechargeOffer,
+    domain: UsdcDomain,
+    credit_origin: mir2_simulation::procurement_fees::CreditOrigin,
+    account_ref: String,
+    amount_micro: u64,
+    created_at_ms: u64,
+    expires_at_ms: u64,
+    capability_hash: String,
+    capability_expires_at_ms: u64,
+    payer: Option<String>,
+    state: UsdcOrderState,
+    prepared_tx: Option<UsdcPreparedTransaction>,
+    invoice: Option<UsdcInvoiceBinding>,
+    payment_hint: Option<String>,
+    receipt: Option<VerifiedUsdcReceipt>,
+    applied: Option<mir2_simulation::billing::RechargeAppliedReceipt>,
+    job_lease: Option<UsdcJobLease>,
+    review_reason: Option<String>,
 }
 // Exact original account field set including procurement and metadata.
 #[derive(Serialize, Deserialize)]
@@ -283,15 +310,42 @@ fn original_account_full_field_roundtrip_preserves_old_orders_and_refuses_unknow
     assert!(serde_json::from_value::<AccountRecord>(future).is_err());
 }
 #[test]
+fn original_v13_usdc_reader_rejects_new_transfer_authority_instead_of_dropping_it() {
+    let original = historical_account();
+    let raw = serde_json::to_value(&original).unwrap();
+    let (_, old_order) = raw["billing"]["suiUsdcOrders"]
+        .as_object()
+        .unwrap()
+        .iter()
+        .next()
+        .unwrap();
+    let legacy: OriginalV13UsdcOrderReader = serde_json::from_value(old_order.clone()).unwrap();
+    assert_eq!(serde_json::to_value(legacy).unwrap(), *old_order);
+    for (key, value) in [
+        ("paymentMode", json!("direct_transfer")),
+        ("transferReceipt", json!({"future":true})),
+        ("directScanCursor", json!("{}")),
+        ("directScanComplete", json!(true)),
+    ] {
+        let mut future = old_order.clone();
+        future[key] = value;
+        assert!(
+            serde_json::from_value::<OriginalV13UsdcOrderReader>(future).is_err(),
+            "{key}"
+        );
+    }
+}
+#[test]
 fn migration_union_keeps_original_nineteen_and_never_repeats_usdc_backfill() {
-    assert_eq!(MIGRATIONS.len(), 26);
+    assert_eq!(MIGRATIONS.len(), 27);
     assert!(MIGRATIONS[..19]
         .iter()
         .all(|(id, _)| !id.contains("promotion")));
     assert_eq!(MIGRATIONS[18].0, "0019_sui_usdc_billing_authority");
-    assert!(MIGRATIONS[19..]
+    assert!(MIGRATIONS[19..26]
         .iter()
         .all(|(id, _)| id.contains("promotion")));
+    assert_eq!(MIGRATIONS[26].0, "0024_sui_usdc_native_transfer_authority");
     assert!(MIGRATIONS
         .iter()
         .all(|(id, _)| *id != "0024_sui_usdc_billing_authority"));
@@ -355,7 +409,7 @@ fn native_postgres_original_migrations_upgrade_and_typed_roundtrip_preserve_ever
         db.query_one("SELECT count(*) FROM schema_migrations", &[])
             .unwrap()
             .get::<_, i64>(0),
-        26
+        MIGRATIONS.len() as i64
     );
     let preserved: Value = db
         .query_one("SELECT raw_json FROM accounts WHERE account_id='demo'", &[])

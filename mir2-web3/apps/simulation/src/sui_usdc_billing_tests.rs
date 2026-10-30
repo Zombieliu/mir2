@@ -99,6 +99,384 @@ fn payment(o: &UsdcRechargeOrder) -> VerifiedUsdcReceipt {
     }
 }
 
+// These are authority unit fixtures, not observed chain payments. Public direct
+// creation additionally requires a live PostgreSQL wallet credential.
+fn native_order(c: &SimulationConfig, request: &str, payer: &str, at: u64) -> UsdcRechargeOrder {
+    c.prepare_usdc_order_with_mode(
+        "demo",
+        c.default_character.index,
+        request,
+        &offer(),
+        &domain(),
+        &cap(),
+        at + 1_800_000,
+        at + 1_200_000,
+        at,
+        UsdcPaymentMode::DirectTransfer,
+        Some(payer),
+    )
+    .unwrap()
+}
+fn native_payment(o: &UsdcRechargeOrder) -> VerifiedNativeUsdcTransferReceipt {
+    VerifiedNativeUsdcTransferReceipt {
+        chain_identifier: TESTNET_CHAIN_IDENTIFIER.into(),
+        genesis_digest: TESTNET_GENESIS_DIGEST.into(),
+        order_id: o.id.clone(),
+        account_ref: o.account_ref.clone(),
+        payer: o.payer.clone().unwrap(),
+        merchant: o.domain.merchant.clone(),
+        coin_type: o.domain.coin_type.clone(),
+        amount_micro: o.amount_micro,
+        frozen_hash: o.frozen_hash().unwrap(),
+        digest: "2".repeat(44),
+        checkpoint: 124,
+        confirmed_at_ms: o.created_at_ms + 10,
+        observed_at_ms: o.created_at_ms + 11,
+    }
+}
+
+#[test]
+fn native_usdc_invoice_defaults_keep_original_json_and_frozen_hash() {
+    let c = SimulationConfig::default();
+    let mut o = prepared(&c);
+    o.id = format!("usdc_{}", "a".repeat(64));
+    o.character_index = 0;
+    o.account_ref = account_ref("demo", 0);
+    o.payer = Some(addr('4'));
+    o.state = UsdcOrderState::PayerBound;
+    assert_eq!(
+        o.frozen_hash().unwrap(),
+        "0x4b82627a29e042dc4f9d994b315766fb36193d8a25f2d10cde451ee78a8a0df3"
+    );
+    let old = serde_json::to_value(&o).unwrap();
+    for field in [
+        "paymentMode",
+        "transferReceipt",
+        "directScanCursor",
+        "directScanComplete",
+    ] {
+        assert!(old.get(field).is_none(), "{field}");
+    }
+    let round: UsdcRechargeOrder = serde_json::from_value(old.clone()).unwrap();
+    assert_eq!(serde_json::to_value(&round).unwrap(), old);
+    assert_eq!(round, o);
+    let mut future = old;
+    future["unknownFinancialAuthority"] = serde_json::json!(1);
+    assert!(serde_json::from_value::<UsdcRechargeOrder>(future).is_err());
+    o.payment_mode = UsdcPaymentMode::DirectTransfer;
+    assert_ne!(o.frozen_hash().unwrap(), round.frozen_hash().unwrap());
+}
+
+#[test]
+fn native_usdc_public_creation_requires_postgres_wallet_and_receipts_apply_once() {
+    let c = SimulationConfig::default();
+    assert_eq!(
+        c.prepare_direct_usdc_recharge_order(
+            "demo",
+            0,
+            "untrusted",
+            &offer(),
+            &domain(),
+            "credential",
+            &addr('4'),
+            &cap(),
+            NOW + 60_000,
+            NOW + 60_000,
+            NOW
+        )
+        .unwrap_err(),
+        "usdcVerifiedWalletRequired"
+    );
+    let o = native_order(&c, "native-once", &addr('4'), NOW);
+    let r = native_payment(&o);
+    assert!(o.prepared_tx.is_none() && o.invoice.is_none() && o.receipt.is_none());
+    c.confirm_usdc_native_transfer_payment("demo", &o.id, &r, NOW + 12)
+        .unwrap();
+    let mut later = r.clone();
+    later.observed_at_ms = NOW + 20;
+    let replay = c
+        .confirm_usdc_native_transfer_payment("demo", &o.id, &later, NOW + 21)
+        .unwrap();
+    assert_eq!(replay.transfer_receipt.as_ref(), Some(&r));
+    assert_eq!(
+        c.consume_inactive_pending_recharge_credits("demo", o.character_index, NOW + 22)
+            .unwrap()
+            .granted,
+        1000
+    );
+    assert_eq!(
+        c.consume_inactive_pending_recharge_credits("demo", o.character_index, NOW + 23)
+            .unwrap()
+            .granted,
+        0
+    );
+    let applied = c.usdc_recharge_order("demo", &o.id).unwrap();
+    assert_eq!(applied.state, UsdcOrderState::Applied);
+    assert!(
+        applied.receipt.is_none() && applied.invoice.is_none() && applied.prepared_tx.is_none()
+    );
+    assert_eq!(applied.transfer_receipt, Some(r));
+}
+
+#[test]
+fn native_usdc_facts_fail_closed_for_wrong_binding_and_original_time_window() {
+    let c = SimulationConfig::default();
+    let o = native_order(&c, "native-bad", &addr('4'), NOW);
+    for change in 0..9 {
+        let mut r = native_payment(&o);
+        match change {
+            0 => r.genesis_digest = "mainnet".into(),
+            1 => r.payer = addr('5'),
+            2 => r.merchant = addr('5'),
+            3 => r.amount_micro += 1,
+            4 => r.frozen_hash = addr('a'),
+            5 => r.confirmed_at_ms = o.created_at_ms - 1,
+            6 => r.confirmed_at_ms = o.expires_at_ms,
+            7 => r.checkpoint = 0,
+            _ => r.observed_at_ms = r.confirmed_at_ms - 1,
+        }
+        assert!(
+            c.confirm_usdc_native_transfer_payment("demo", &o.id, &r, NOW + 2_000_000)
+                .is_err(),
+            "{change}"
+        );
+    }
+    let r = native_payment(&o);
+    assert!(c
+        .confirm_usdc_native_transfer_payment("demo", &o.id, &r, NOW + 10)
+        .is_err());
+    assert_eq!(
+        c.consume_inactive_pending_recharge_credits("demo", o.character_index, NOW + 30)
+            .unwrap()
+            .granted,
+        0
+    );
+    assert!(c
+        .record_usdc_prepared_transaction(
+            "demo",
+            &o.id,
+            "none",
+            &UsdcPreparedTransaction {
+                bytes_base64: "TUFDSw==".into(),
+                signature_base64: "c2ln".into(),
+                digest: "1".repeat(44)
+            },
+            NOW + 1
+        )
+        .is_err());
+}
+
+#[test]
+fn native_usdc_whole_transaction_claim_is_shared_with_invoice_in_both_directions() {
+    for direct_first in [false, true] {
+        let c = SimulationConfig::default();
+        let invoice = invoice(&c);
+        let direct = native_order(&c, "native-two", &addr('6'), NOW);
+        let a = payment(&invoice);
+        let b = native_payment(&direct);
+        assert_eq!(a.digest, b.digest);
+        if direct_first {
+            c.confirm_usdc_native_transfer_payment("demo", &direct.id, &b, NOW + 20)
+                .unwrap();
+            assert!(c
+                .confirm_usdc_recharge_payment("demo", &invoice.id, &a, NOW + 21)
+                .is_err());
+        } else {
+            c.confirm_usdc_recharge_payment("demo", &invoice.id, &a, NOW + 20)
+                .unwrap();
+            assert!(c
+                .confirm_usdc_native_transfer_payment("demo", &direct.id, &b, NOW + 21)
+                .is_err());
+        }
+    }
+}
+
+#[test]
+fn native_usdc_unsettled_windows_reject_ambiguity_but_settlement_allows_a_new_order() {
+    let c = SimulationConfig::default();
+    let first = native_order(&c, "native-window", &addr('4'), NOW);
+    let second = || {
+        c.prepare_usdc_order_with_mode(
+            "demo",
+            0,
+            "native-overlap",
+            &offer(),
+            &domain(),
+            &cap(),
+            NOW + 1_800_100,
+            NOW + 1_200_100,
+            NOW + 100,
+            UsdcPaymentMode::DirectTransfer,
+            Some(&addr('4')),
+        )
+    };
+    assert!(second().is_err());
+    c.confirm_usdc_native_transfer_payment("demo", &first.id, &native_payment(&first), NOW + 20)
+        .unwrap();
+    second().unwrap();
+    let invoice_config = SimulationConfig::default();
+    let o = prepared(&invoice_config);
+    invoice_config
+        .bind_usdc_recharge_payer("demo", &o.id, &addr('4'), &cap(), NOW + 1)
+        .unwrap();
+    assert!(invoice_config
+        .prepare_usdc_order_with_mode(
+            "demo",
+            0,
+            "native-overlap",
+            &offer(),
+            &domain(),
+            &cap(),
+            NOW + 1_800_100,
+            NOW + 1_200_100,
+            NOW + 100,
+            UsdcPaymentMode::DirectTransfer,
+            Some(&addr('4'))
+        )
+        .is_err());
+}
+
+#[test]
+fn native_usdc_only_untouched_prepared_can_recover_and_before_deadline_payments_settle_late() {
+    let c = SimulationConfig::default();
+    let old = prepared(&c);
+    let direct = c
+        .recover_prepared_native_transfer("demo", &old.id, &addr('4'), &"2".repeat(44))
+        .unwrap();
+    assert_eq!(direct.payment_mode, UsdcPaymentMode::DirectTransfer);
+    assert_eq!(direct.expires_at_ms, old.expires_at_ms);
+    c.claim_usdc_recharge_job("demo", &old.id, "late-worker", old.expires_at_ms + 1)
+        .unwrap()
+        .unwrap();
+    let r = native_payment(&direct);
+    c.confirm_usdc_native_transfer_payment("demo", &old.id, &r, old.expires_at_ms + 2)
+        .unwrap();
+    assert_eq!(
+        c.consume_inactive_pending_recharge_credits(
+            "demo",
+            old.character_index,
+            old.expires_at_ms + 3
+        )
+        .unwrap()
+        .granted,
+        1000
+    );
+    let other = SimulationConfig::default();
+    let issued = invoice(&other);
+    assert!(other
+        .recover_prepared_native_transfer("demo", &issued.id, &addr('4'), &"2".repeat(44))
+        .is_err());
+}
+
+#[test]
+fn native_usdc_scan_progress_requires_current_lease_and_complete_window_is_monotonic() {
+    let c = SimulationConfig::default();
+    let o = native_order(&c, "native-scan", &addr('4'), NOW);
+    assert!(c
+        .save_usdc_native_transfer_scan("demo", &o.id, "scanner", "{}", false, NOW + 1)
+        .is_err());
+    c.claim_usdc_recharge_job("demo", &o.id, "scanner", NOW + 1)
+        .unwrap()
+        .unwrap();
+    for cursor in ["", "null", "[]", "not-json"] {
+        assert!(c
+            .save_usdc_native_transfer_scan("demo", &o.id, "scanner", cursor, false, NOW + 2)
+            .is_err());
+    }
+    c.save_usdc_native_transfer_scan("demo", &o.id, "scanner", "{\"page\":1}", false, NOW + 2)
+        .unwrap();
+    assert!(c
+        .save_usdc_native_transfer_scan("demo", &o.id, "other", "{}", false, NOW + 3)
+        .is_err());
+    assert!(c
+        .save_usdc_native_transfer_scan("demo", &o.id, "scanner", "{}", true, NOW + 3)
+        .is_err());
+    c.claim_usdc_recharge_job("demo", &o.id, "scanner", o.expires_at_ms + 1)
+        .unwrap()
+        .unwrap();
+    c.save_usdc_native_transfer_scan(
+        "demo",
+        &o.id,
+        "scanner",
+        "{\"complete\":true}",
+        true,
+        o.expires_at_ms + 2,
+    )
+    .unwrap();
+    assert!(c
+        .save_usdc_native_transfer_scan("demo", &o.id, "scanner", "{}", false, o.expires_at_ms + 3)
+        .is_err());
+}
+
+#[test]
+fn native_usdc_expired_untouched_prepared_releases_only_new_checkout_capacity() {
+    let c = SimulationConfig::default();
+    let mut huge = offer();
+    huge.credits = u32::MAX;
+    let first = c
+        .prepare_usdc_recharge_order(
+            "demo",
+            0,
+            "huge-expired",
+            &huge,
+            &domain(),
+            &cap(),
+            NOW + 60_000,
+            NOW + 60_000,
+            NOW,
+        )
+        .unwrap();
+    assert!(c
+        .prepare_usdc_recharge_order(
+            "demo",
+            0,
+            "new-order",
+            &offer(),
+            &domain(),
+            &cap(),
+            NOW + 120_000,
+            NOW + 120_000,
+            NOW + 1
+        )
+        .is_err());
+    c.prepare_usdc_recharge_order(
+        "demo",
+        0,
+        "new-order",
+        &offer(),
+        &domain(),
+        &cap(),
+        NOW + 120_000,
+        NOW + 120_000,
+        NOW + 60_000,
+    )
+    .unwrap();
+    assert_eq!(c.usdc_recharge_order("demo", &first.id).unwrap(), first);
+    assert!(ensure_deletable(&c.account_store.lock().unwrap().accounts["demo"], 0).is_err());
+}
+
+#[test]
+fn native_usdc_schema13_cannot_be_relabelled_as_transfer_authority() {
+    let c = SimulationConfig::default();
+    native_order(&c, "schema-native", &addr('4'), NOW);
+    let mut snapshot = c.account_store.lock().unwrap().clone();
+    let (path, _) = file_config("native-schema");
+    snapshot.schema_version = 13;
+    snapshot.save_to_path(&path).unwrap();
+    assert!(FileAccountStoreRepository::new(path.clone())
+        .load(c.default_character.clone())
+        .is_err());
+    snapshot.schema_version = SCHEMA_VERSION;
+    snapshot.save_to_path(&path).unwrap();
+    let restored = FileAccountStoreRepository::new(path)
+        .load(c.default_character.clone())
+        .unwrap();
+    assert_eq!(
+        restored.accounts["demo"].billing,
+        snapshot.accounts["demo"].billing
+    );
+}
+
 #[test]
 fn usdc_existing_usd_offer_has_exact_six_decimal_price_and_test_provenance() {
     let c = SimulationConfig::default();
@@ -553,7 +931,7 @@ fn usdc_schema12_cannot_claim_new_authority_and_legacy_clean_store_upgrades() {
             .load(c.default_character.clone())
             .unwrap()
             .schema_version,
-        13
+        SCHEMA_VERSION
     );
 }
 #[test]

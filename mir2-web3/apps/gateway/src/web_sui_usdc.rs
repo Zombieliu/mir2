@@ -1,7 +1,7 @@
 //! Restricted browser handoff: one recharge capability, never a game login.
 use super::*;
 use crate::sui_usdc_billing::{self as usdc, UsdcBilling};
-use mir2_simulation::sui_usdc_billing::UsdcRechargeOrder;
+use mir2_simulation::sui_usdc_billing::{UsdcOrderState, UsdcPaymentMode, UsdcRechargeOrder};
 
 const HTML: &str = include_str!("sui_usdc_checkout.html");
 const SCRIPT: &str = include_str!("sui_usdc_checkout.js");
@@ -50,9 +50,7 @@ async fn dubhe_script() -> Response {
 }
 
 fn wallet_connect_project(value: Option<&str>) -> Option<&str> {
-    value.filter(|value| {
-        value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
-    })
+    value.filter(|value| value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit()))
 }
 
 fn dubhe_wallet_config() -> Value {
@@ -134,14 +132,43 @@ fn authorize(
     if !equal {
         return Err("usdcCheckoutAuthenticationRequired".into());
     }
-    if usdc::now() > order.capability_expires_at_ms {
+    if usdc::now() >= order.capability_expires_at_ms {
         return Err("usdcCheckoutExpired".into());
     }
     provider.ensure_domain(&order)?;
     Ok((account, order, actual))
 }
 fn browser_state(o: &UsdcRechargeOrder) -> Value {
-    json!({"order":usdc::public_order(o),"payer":o.payer,"merchant":o.domain.merchant,"coinType":o.domain.coin_type,"chain":"sui:testnet","decimals":6,"testPayment":true,"gasPayer":"wallet","invoiceId":o.invoice.as_ref().map(|i|i.invoice_id.as_str()),"chainConfirmed":o.receipt.is_some(),"gameDelivered":o.applied.is_some(),"payExpired":usdc::now()>o.expires_at_ms,"dubheWallet":dubhe_wallet_config()})
+    let mut state = json!({"order":usdc::public_order(o),"payer":o.payer,"merchant":o.domain.merchant,"coinType":o.domain.coin_type,"chain":"sui:testnet","decimals":6,"testPayment":true,"gasPayer":"wallet","invoiceId":o.invoice.as_ref().map(|i|i.invoice_id.as_str()),"chainConfirmed":o.receipt.is_some()||o.transfer_receipt.is_some(),"gameDelivered":o.applied.is_some(),"payExpired":usdc::now()>=o.expires_at_ms,"dubheWallet":dubhe_wallet_config()});
+    if o.payment_mode == UsdcPaymentMode::DirectTransfer {
+        let available = o.state == UsdcOrderState::PayerBound
+            && o.transfer_receipt.is_none()
+            && o.applied.is_none()
+            && o.payment_hint.is_none()
+            && usdc::now() < o.expires_at_ms;
+        let mut url = reqwest::Url::parse("https://wallet.dubhe.obelisk.build/send")
+            .expect("fixed wallet origin");
+        url.query_pairs_mut().extend_pairs([
+            ("recipient", o.domain.merchant.clone()),
+            ("coinType", o.domain.coin_type.clone()),
+            (
+                "amount",
+                format!(
+                    "{}.{:06}",
+                    o.amount_micro / 1_000_000,
+                    o.amount_micro % 1_000_000
+                ),
+            ),
+            ("requestId", o.id.clone()),
+            ("request", "1".to_string()),
+        ]);
+        state["paymentMode"] = json!("direct_transfer");
+        state["directTransfer"] = json!({"available":available,"payerVerified":true,
+            "payer":o.payer,"merchant":o.domain.merchant,"chain":"sui:testnet","coinType":o.domain.coin_type,
+            "amountMicros":o.amount_micro.to_string(),"expiresAtMs":o.expires_at_ms,
+            "walletRequestUrl":if available {Some(url.as_str())} else {None}});
+    }
+    state
 }
 async fn checkout(
     State(state): State<WebState>,
@@ -175,12 +202,16 @@ async fn checkout(
         let config = state.config.clone();
         let provider = UsdcBilling::from_env()?.ok_or("billingUnavailable")?;
         same_origin(&headers, &provider)?;
-        let (url, order) = provider.checkout(
+        let credential = state.identity.verified_wallet_credential(&verified).ok();
+        let (url, order) = provider.checkout_for_wallet(
             &config,
             &verified.account_id,
             request.character_index,
             &request.order_request_id,
             &request.offer_id,
+            credential
+                .as_ref()
+                .map(|c| (c.credential_id.as_str(), c.credential_subject.as_str())),
         )?;
         Ok(json!({"orderId":order.id,"checkoutUrl":url,"requestId":request.request_id}))
     })
@@ -223,11 +254,13 @@ async fn operation(
         match op {
             CheckoutOperation::Status{}=>Ok(browser_state(&order)),
             CheckoutOperation::Challenge{payer}=>{
-                if usdc::now()>order.expires_at_ms{return Err("usdcCheckoutExpired".into());}
+                if !order.payment_mode.is_invoice(){return Err("usdcOperationRejected".into());}
+                if usdc::now()>=order.expires_at_ms{return Err("usdcCheckoutExpired".into());}
                 if order.payer.as_ref().is_some_and(|p|p!=&payer){return Err("usdcPayerMismatch".into());}
                 Ok(json!({"message":usdc::wallet_message(&order,&payer,&provider.origin)?,"state":browser_state(&order)}))
             }
             CheckoutOperation::BindPayer{payer,signature}=>{
+                if !order.payment_mode.is_invoice(){return Err("usdcOperationRejected".into());}
                 if signature.len()>2048{return Err("usdcWalletProofInvalid".into());}
                 let message=usdc::wallet_message(&order,&payer,&provider.origin)?;
                 let proof=provider.driver.call("verifyWalletProof",json!({"message":message,"signature":signature,"address":payer}))?;
@@ -236,8 +269,9 @@ async fn operation(
                 Ok(browser_state(&bound))
             }
             operation @ (CheckoutOperation::BuildPay{}|CheckoutOperation::BuildPayBytes{})=>{
-                if usdc::now()>order.expires_at_ms{return Err("usdcCheckoutExpired".into());}
-                if order.payment_hint.is_some()||order.receipt.is_some(){return Err("usdcPaymentAlreadySubmitted".into());}
+                if !order.payment_mode.is_invoice(){return Err("usdcOperationRejected".into());}
+                if usdc::now()>=order.expires_at_ms{return Err("usdcCheckoutExpired".into());}
+                if order.payment_hint.is_some()||order.has_payment_receipt(){return Err("usdcPaymentAlreadySubmitted".into());}
                 let invoice=order.invoice.as_ref().ok_or("usdcInvoiceNotReady")?;
                 let bytes=matches!(operation,CheckoutOperation::BuildPayBytes{});
                 let built=provider.driver.call(if bytes{"buildPayBytes"}else{"buildPay"},json!({"invoiceId":invoice.invoice_id,"order":usdc::chain_order(&order)?}))?;
@@ -246,6 +280,9 @@ async fn operation(
                 Ok(json!({(field):built[field],"state":browser_state(&order)}))
             }
             CheckoutOperation::Submitted{digest}=>{
+                // Native transfers are discovered independently. A browser hint
+                // must not disable the QR or masquerade as a submitted payment.
+                if !order.payment_mode.is_invoice(){return Err("usdcOperationRejected".into());}
                 let submitted=config.submit_usdc_payment_hint(&account,&order.id,&cap_hash,&digest,usdc::now())?;
                 Ok(browser_state(&submitted))
             }
@@ -260,6 +297,95 @@ async fn operation(
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn direct_order() -> UsdcRechargeOrder {
+        use mir2_simulation::{
+            billing::RechargeOffer,
+            sui_usdc_billing::{UsdcDomain, TESTNET_CHAIN_IDENTIFIER, TESTNET_USDC_COIN_TYPE},
+            SimulationConfig,
+        };
+        let config = SimulationConfig::default();
+        let now = usdc::now();
+        let mut order = config
+            .prepare_usdc_recharge_order(
+                "demo",
+                config.default_character.index,
+                "browser-direct-fixture",
+                &RechargeOffer {
+                    id: "test-usdc".into(),
+                    label: "Test fixture".into(),
+                    currency: "usd".into(),
+                    amount_minor: 100,
+                    credits: 100,
+                },
+                &UsdcDomain {
+                    chain_identifier: TESTNET_CHAIN_IDENTIFIER.into(),
+                    package_id: format!("0x{}", "1".repeat(64)),
+                    config_id: format!("0x{}", "2".repeat(64)),
+                    merchant: format!("0x{}", "3".repeat(64)),
+                    coin_type: TESTNET_USDC_COIN_TYPE.into(),
+                    rule_version: 1,
+                },
+                &"c".repeat(64),
+                now + 1_800_000,
+                now + 1_200_000,
+                now,
+            )
+            .unwrap();
+        order.payment_mode = UsdcPaymentMode::DirectTransfer;
+        order.payer = Some(format!("0x{}", "4".repeat(64)));
+        order.state = UsdcOrderState::PayerBound;
+        order.validate().unwrap();
+        order
+    }
+    #[test]
+    fn native_checkout_card_exposes_only_frozen_public_fields_and_exact_wallet_url() {
+        let order = direct_order();
+        let state = browser_state(&order);
+        assert_eq!(state["paymentMode"], "direct_transfer");
+        assert_eq!(state["directTransfer"]["available"], true);
+        assert_eq!(state["order"]["state"], "awaitingPayment");
+        assert_eq!(
+            state["directTransfer"]["payer"],
+            order.payer.as_deref().unwrap()
+        );
+        let url = reqwest::Url::parse(
+            state["directTransfer"]["walletRequestUrl"]
+                .as_str()
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            url.origin().ascii_serialization(),
+            "https://wallet.dubhe.obelisk.build"
+        );
+        assert_eq!(url.path(), "/send");
+        assert_eq!(url.query_pairs().count(), 5);
+        let pairs: std::collections::BTreeMap<_, _> = url.query_pairs().into_owned().collect();
+        assert_eq!(pairs["recipient"], order.domain.merchant);
+        assert_eq!(pairs["amount"], "1.000000");
+        assert_eq!(pairs["requestId"], order.id);
+        assert_eq!(pairs["coinType"], order.domain.coin_type);
+        assert_eq!(pairs["request"], "1");
+        assert!(!state.to_string().contains(&order.capability_hash));
+    }
+    #[test]
+    fn invoice_and_expired_native_orders_never_enable_direct_payment() {
+        let mut order = direct_order();
+        order.payment_mode = UsdcPaymentMode::Invoice;
+        order.state = UsdcOrderState::Prepared;
+        order.payer = None;
+        let state = browser_state(&order);
+        assert!(state.get("directTransfer").is_none());
+        order.payment_mode = UsdcPaymentMode::DirectTransfer;
+        order.state = UsdcOrderState::PayerBound;
+        order.payer = Some(format!("0x{}", "4".repeat(64)));
+        order.expires_at_ms = usdc::now();
+        let state = browser_state(&order);
+        assert_eq!(state["payExpired"], true);
+        assert_eq!(state["directTransfer"]["available"], false);
+        assert!(state["directTransfer"]["walletRequestUrl"].is_null());
+        assert_eq!(state["order"]["state"], "expired");
+    }
     #[test]
     fn capability_never_accepts_game_tokens_or_query_strings() {
         let mut h = HeaderMap::new();
@@ -297,11 +423,23 @@ mod tests {
     #[test]
     fn qr_project_configuration_is_public_but_never_a_url_or_secret() {
         assert!(wallet_connect_project(None).is_none());
-        assert_eq!(wallet_connect_project(Some("0123456789abcdef0123456789abcdef")),Some("0123456789abcdef0123456789abcdef"));
-        for invalid in ["", "https://evil.invalid", " short ", "0123456789abcdef0123456789abcdef?", "g123456789abcdef0123456789abcdef"] {
+        assert_eq!(
+            wallet_connect_project(Some("0123456789abcdef0123456789abcdef")),
+            Some("0123456789abcdef0123456789abcdef")
+        );
+        for invalid in [
+            "",
+            "https://evil.invalid",
+            " short ",
+            "0123456789abcdef0123456789abcdef?",
+            "g123456789abcdef0123456789abcdef",
+        ] {
             assert!(wallet_connect_project(Some(invalid)).is_none());
         }
-        assert!(serde_json::from_value::<CheckoutOperation>(json!({"operation":"buildPayBytes"})).is_ok());
+        assert!(
+            serde_json::from_value::<CheckoutOperation>(json!({"operation":"buildPayBytes"}))
+                .is_ok()
+        );
         assert!(DUBHE_SCRIPT.contains("sui_signAndExecuteTransaction"));
     }
     #[test]

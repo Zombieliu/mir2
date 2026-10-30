@@ -9,7 +9,7 @@ const { chromium } = require(process.env.MIR2_PLAYWRIGHT_MODULE || 'playwright')
 const source = new URL('../apps/gateway/src/', import.meta.url);
 const gatewayRequire = createRequire(new URL('../apps/gateway/package.json', import.meta.url));
 const QRCode = gatewayRequire('qrcode');
-const output = fileURLToPath(new URL('../docs/evidence/usdc-dubhe-qr-20261030/', import.meta.url));
+const output = process.env.MIR2_USDC_BROWSER_OUTPUT || fileURLToPath(new URL('../docs/evidence/usdc-dubhe-qr-20261030/', import.meta.url));
 mkdirSync(output, { recursive: true });
 const previewText = 'MIR2_UI_PREVIEW_NOT_A_PAYMENT';
 // Both screenshot QR paths use this one harmless image. A dummy merchant must

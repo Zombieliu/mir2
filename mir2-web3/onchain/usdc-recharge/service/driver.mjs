@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,openSync,closeSync,fsyncSync,renameSync,unlinkSync} from 'node:fs';
 import {isAbsolute} from 'node:path';
-import { address,assertPaymentBalanceChanges,assertTerms,decodeConfig,decodeInvoice,digest,exactKeys,finalized,GENESIS_DIGEST,hash32,integer,matchingEvent,NETWORK_HASH,objectEffect,Reader,validateConfig,validateOrder } from './model.mjs';
+import { address,assertDirectTransfer,assertPaymentBalanceChanges,assertTerms,decodeConfig,decodeInvoice,digest,DIRECT_ORDER_KEYS,exactKeys,finalized,GENESIS_DIGEST,hash32,integer,matchingEvent,NETWORK_HASH,objectEffect,protobufTimestampMs,Reader,validateConfig,validateDirectOrder,validateOrder } from './model.mjs';
 
 const unknown=()=>({state:'unknown'});
 const txMask=['digest','checkpoint','effects','events','transaction','timestamp','balance_changes'];
@@ -241,12 +241,224 @@ export async function verifyWalletProof(p){
   const key=await verifyPersonalMessageSignature(Buffer.from(p.message,'utf8'),p.signature,{address:p.address});
   if(key.toSuiAddress()!==p.address)throw Error('usdcWalletAddressMismatch');return {verified:true,address:p.address};
 }
+
+export async function observeDirectTransfer(c,p,env=process.env,providedClient){
+  exactKeys(p,['order','digest']);validateConfig(c);const o=validateDirectOrder(p.order,c);digest(p.digest);
+  // load validates the full public merchant/package configuration and genesis,
+  // but never reads issuer authority or performs a signing/broadcast operation.
+  const {client}=await load(c,providedClient);
+  let tx,checkpoint;
+  try{
+    const result=await client.ledgerService.getTransaction({digest:p.digest,readMask:{paths:[...txMask,'objects']}});
+    tx=result.response.transaction;
+    if(!finalized(tx,p.digest)||integer(String(tx.checkpoint))===0n)return unknown();
+    const resultCheckpoint=await client.ledgerService.getCheckpoint({checkpointId:{oneofKind:'sequenceNumber',sequenceNumber:tx.checkpoint},readMask:{paths:['sequence_number','digest','summary.sequence_number','summary.timestamp','contents.transactions.transaction','contents.transactions.effects']}});
+    checkpoint=resultCheckpoint.response.checkpoint;
+  }catch{return unknown();}
+  const inclusion=checkpoint?.contents?.transactions?.filter(info=>info.transaction===p.digest);
+  if(!checkpoint||String(checkpoint.sequenceNumber)!==String(tx.checkpoint)||String(checkpoint.summary?.sequenceNumber)!==String(tx.checkpoint)||
+    inclusion?.length!==1||!tx.effects.digest||inclusion[0].effects!==tx.effects.digest||tx.effects.transactionDigest!==p.digest)return unknown();
+  let paidAtMs;
+  try{
+    paidAtMs=protobufTimestampMs(checkpoint.summary?.timestamp);
+    if(protobufTimestampMs(tx.timestamp)!==paidAtMs)return unknown();
+  }catch{return unknown();}
+  if(!tx.effects.status.success)return {state:'unpaid'};
+  if(integer(paidAtMs)<integer(o.createdAtMs)||integer(paidAtMs)>=integer(o.expiresAtMs))return {state:'unpaid'};
+  try{
+    const raw=tx.transaction?.bcs?.value;
+    if(!(raw instanceof Uint8Array)||!raw.length||raw.length>65536)return unknown();
+    const {Transaction}=await import('@mysten/sui/transactions');
+    const parsed=Transaction.from(raw);
+    if(await parsed.getDigest()!==p.digest)return unknown();
+    if(tx.transaction.sender!==parsed.getData().sender)return unknown();
+    if(tx.effects.changedObjects?.some(effect=>effect.outputState===4))await verifyDirectAccumulatorEffects(tx);
+    assertDirectTransfer(tx,parsed.getData(),o,c);
+  }catch(error){
+    if(['usdcDirectObjectsUnavailable','usdcDirectUnsupported','usdcBalanceChangesUnavailable','usdcCoinTypeInvalid'].includes(error?.message))return unknown();
+    return {state:'unpaid'};
+  }
+  return {state:'paid',receipt:{genesisDigest:GENESIS_DIGEST,transactionDigest:p.digest,checkpoint:String(tx.checkpoint),paidAtMs,
+    payer:o.payer,merchant:o.merchant,coinType:c.coinType,amountMicros:o.amountMicros}};
+}
+
+async function verifyDirectAccumulatorEffects(tx){
+  const raw=tx.effects.bcs?.value;
+  if(!(raw instanceof Uint8Array)||!raw.length||raw.length>262144)throw Error('usdcDirectObjectsUnavailable');
+  const [{bcs},{blake2b},{toBase58}]=await Promise.all([import('@mysten/sui/bcs'),import('@noble/hashes/blake2.js'),import('@mysten/sui/utils')]);
+  if(toBase58(blake2b(Buffer.concat([Buffer.from('TransactionEffects::'),raw]),{dkLen:32}))!==tx.effects.digest)throw Error('usdcDirectObjectsUnavailable');
+  let decoded;
+  try{decoded=bcs.TransactionEffects.parse(raw);}catch{throw Error('usdcDirectObjectsUnavailable');}
+  const effects=decoded.V2;
+  if(!effects||effects.status.$kind!=='Success'||effects.transactionDigest!==tx.digest||effects.eventsDigest!==null||
+    !Buffer.from(bcs.TransactionEffects.serialize(decoded).toBytes()).equals(Buffer.from(raw)))throw Error('usdcDirectObjectsUnavailable');
+  for(const key of ['computationCost','storageCost','storageRebate','nonRefundableStorageFee']){
+    if(String(tx.effects.gasUsed?.[key])!==effects.gasUsed[key])throw Error('usdcDirectObjectsUnavailable');
+  }
+  const accumulators=effects.changedObjects.filter(([,change])=>change.outputState.$kind==='AccumulatorWriteV1');
+  const indexed=tx.effects.changedObjects.filter(change=>change.outputState===4);
+  if(accumulators.length!==indexed.length)throw Error('usdcDirectObjectsUnavailable');
+  const ownerMatches=(raw,indexed)=>{
+    if(raw?.$kind==='AddressOwner')return indexed?.kind===1&&indexed.address===raw.AddressOwner;
+    if(raw?.$kind==='ObjectOwner')return indexed?.kind===2&&indexed.address===raw.ObjectOwner;
+    if(raw?.$kind==='Shared')return indexed?.kind===3&&String(indexed.version)===raw.Shared.initialSharedVersion;
+    if(raw?.$kind==='Immutable')return indexed?.kind===4;
+    if(raw?.$kind==='ConsensusAddressOwner')return indexed?.kind===5&&indexed.address===raw.ConsensusAddressOwner.owner&&String(indexed.version)===raw.ConsensusAddressOwner.startVersion;
+    return false;
+  };
+  if(effects.changedObjects.length!==tx.effects.changedObjects.length)throw Error('usdcDirectObjectsUnavailable');
+  for(const [objectId,change]of effects.changedObjects){
+    const matches=tx.effects.changedObjects.filter(effect=>effect.objectId===objectId);
+    if(matches.length!==1)throw Error('usdcDirectObjectsUnavailable');
+    const effect=matches[0],input=change.inputState,output=change.outputState;
+    if(effect.idOperation!==({None:1,Created:2,Deleted:3})[change.idOperation.$kind])throw Error('usdcDirectObjectsUnavailable');
+    if(input.$kind==='NotExist'){
+      if(effect.inputState!==1)throw Error('usdcDirectObjectsUnavailable');
+    }else if(input.$kind!=='Exist'||effect.inputState!==2||String(effect.inputVersion)!==input.Exist[0][0]||effect.inputDigest!==input.Exist[0][1]||!ownerMatches(input.Exist[1],effect.inputOwner))throw Error('usdcDirectObjectsUnavailable');
+    if(output.$kind==='NotExist'){
+      if(effect.outputState!==1)throw Error('usdcDirectObjectsUnavailable');
+    }else if(output.$kind==='ObjectWrite'){
+      if(effect.outputState!==2||String(effect.outputVersion)!==effects.lamportVersion||effect.outputDigest!==output.ObjectWrite[0]||!ownerMatches(output.ObjectWrite[1],effect.outputOwner))throw Error('usdcDirectObjectsUnavailable');
+    }else if(output.$kind==='AccumulatorWriteV1'){
+      if(effect.outputState!==4)throw Error('usdcDirectObjectsUnavailable');
+    }else throw Error('usdcDirectObjectsUnavailable');
+  }
+  const type=value=>typeof value==='string'?value.replace(/0x0{1,63}2::/g,'0x2::'):null;
+  for(const [objectId,change]of accumulators){
+    const rawWrite=change.outputState.AccumulatorWriteV1,matches=indexed.filter(effect=>effect.objectId===objectId);
+    if(matches.length!==1||rawWrite.value.$kind!=='Integer')throw Error('usdcDirectObjectsUnavailable');
+    const write=matches[0].accumulatorWrite;
+    if(write?.address!==rawWrite.address.address||type(write.accumulatorType)!==type(rawWrite.address.ty)||
+      write.operation!==(rawWrite.operation.$kind==='Merge'?1:2)||String(write.value)!==rawWrite.value.Integer)throw Error('usdcDirectObjectsUnavailable');
+  }
+}
+
+export const DIRECT_GRAPHQL_URL='https://graphql.testnet.sui.io/graphql';
+// Four 19s observation subprocesses plus discovery fit the 120s job lease even
+// at their worst-case bound. Pagination continues until the entire window ends.
+export const DIRECT_DISCOVERY_PAGE_SIZE=4;
+const INDEX_QUERY=`query DirectIndex {
+  chainIdentifier genesis:checkpoint(sequenceNumber:0){digest}
+  serviceConfig{availableRange(type:"Query",field:"transactions",filters:["sentAddress"]){first{sequenceNumber timestamp}last{sequenceNumber timestamp}}}
+}`;
+const PAGE_QUERY=`query DirectTransfers($payer:SuiAddress!,$from:UInt53!,$through:UInt53!,$after:String){
+  transactions(first:${DIRECT_DISCOVERY_PAGE_SIZE},after:$after,filter:{sentAddress:$payer,afterCheckpoint:$from,beforeCheckpoint:$through}){
+    pageInfo{hasNextPage endCursor}nodes{digest sender{address}effects{timestamp checkpoint{sequenceNumber}}}
+  }
+}`;
+const CHECKPOINT_QUERY='query DirectCheckpoint($sequence:UInt53!){checkpoint(sequenceNumber:$sequence){sequenceNumber timestamp}}';
+function indexNumber(value){
+  const n=typeof value==='number'&&Number.isSafeInteger(value)?BigInt(value):typeof value==='string'?integer(value):null;
+  if(n==null||n<0n||n>=BigInt(Number.MAX_SAFE_INTEGER))throw Error('usdcDirectIndexInvalid');return n;
+}
+function indexTime(value){
+  if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,3})?Z$/.test(value))throw Error('usdcDirectIndexInvalid');
+  const ms=Date.parse(value);if(!Number.isSafeInteger(ms)||ms<0)throw Error('usdcDirectIndexInvalid');return BigInt(ms);
+}
+function indexPoint(value){
+  return {sequence:indexNumber(value?.sequenceNumber),time:indexTime(value?.timestamp)};
+}
+async function directGraphql(query,variables,fetcher,deadline){
+  const remaining=deadline-Date.now();if(remaining<=0)throw Error('usdcDirectIndexUnavailable');
+  const response=await fetcher(DIRECT_GRAPHQL_URL,{method:'POST',redirect:'error',credentials:'omit',headers:{'content-type':'application/json'},
+    body:JSON.stringify({query,variables}),signal:AbortSignal.timeout(Math.min(4000,remaining))});
+  if(!response.ok)throw Error('usdcDirectIndexUnavailable');
+  // Stream with a hard bound; a large public response must not exhaust a CLI.
+  let size=0;const chunks=[];
+  for await(const chunk of response.body){size+=chunk.byteLength;if(size>1048576)throw Error('usdcDirectIndexInvalid');chunks.push(Buffer.from(chunk));}
+  const result=JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  if(result.errors?.length||!result.data||typeof result.data!=='object')throw Error('usdcDirectIndexUnavailable');return result.data;
+}
+function directBinding(o){return createHash('sha256').update(JSON.stringify(DIRECT_ORDER_KEYS.map(key=>o[key]))).digest('hex');}
+function parseDirectCursor(value,binding){
+  if(value===null)return null;
+  if(typeof value!=='string'||value.length>4096)throw Error('usdcDirectCursorInvalid');
+  let cursor;try{cursor=JSON.parse(value);}catch{throw Error('usdcDirectCursorInvalid');}
+  exactKeys(cursor,['v','binding','from','through','throughMs','after','done','phase','lo','hi']);
+  integer(cursor.from);integer(cursor.through);
+  if(cursor.phase==='seek'){integer(cursor.lo);integer(cursor.hi);}
+  if(cursor.v!==1||cursor.binding!==binding||typeof cursor.done!=='boolean'||
+    !(cursor.after===null||typeof cursor.after==='string'&&cursor.after.length>0&&cursor.after.length<=2048&&!/[\x00-\x1f]/.test(cursor.after))||
+    indexNumber(cursor.from)>indexNumber(cursor.through)||integer(cursor.throughMs)>BigInt(Number.MAX_SAFE_INTEGER)||cursor.done&&cursor.after!==null||
+    !['seek','scan'].includes(cursor.phase)||cursor.phase==='scan'&&(cursor.lo!==null||cursor.hi!==null)||
+    cursor.phase==='seek'&&(cursor.done||cursor.after!==null||indexNumber(cursor.lo)>indexNumber(cursor.hi)||indexNumber(cursor.hi)>indexNumber(cursor.through)))throw Error('usdcDirectCursorInvalid');
+  return cursor;
+}
+function discoveryResult(cursor,digests,o){
+  return {state:'scanned',digests,cursor:JSON.stringify(cursor),indexedThroughCheckpoint:cursor.through,indexedThroughMs:cursor.throughMs,
+    scanComplete:cursor.done,windowComplete:cursor.done&&integer(cursor.throughMs)>=integer(o.expiresAtMs)};
+}
+export async function discoverDirectTransfers(c,p,env=process.env,providedClient,providedFetch=globalThis.fetch){
+  exactKeys(p,['order','cursor']);validateConfig(c);const o=validateDirectOrder(p.order,c),binding=directBinding(o);
+  let cursor=parseDirectCursor(p.cursor,binding);
+  await load(c,providedClient);
+  const deadline=Date.now()+10000;
+  let seekProgress=false,pageConsumed=false;
+  try{
+    const query=(q,variables={})=>directGraphql(q,variables,providedFetch,deadline);
+    const metadata=await query(INDEX_QUERY);
+    if(metadata.chainIdentifier!==GENESIS_DIGEST||metadata.genesis?.digest!==GENESIS_DIGEST)throw Error('usdcWrongNetwork');
+    const first=indexPoint(metadata.serviceConfig?.availableRange?.first),last=indexPoint(metadata.serviceConfig?.availableRange?.last);
+    if(first.sequence>last.sequence||first.time>last.time||first.time>integer(o.createdAtMs))return unknown();
+    if(cursor){
+      if(indexNumber(cursor.from)+1n<first.sequence||indexNumber(cursor.through)>last.sequence||integer(cursor.throughMs)>last.time)return unknown();
+      if(cursor.done){
+        if(integer(cursor.throughMs)>=integer(o.expiresAtMs)||indexNumber(cursor.through)===last.sequence)return discoveryResult(cursor,[],o);
+        cursor={v:1,binding,from:cursor.through,through:last.sequence.toString(),throughMs:last.time.toString(),after:null,done:false,phase:'scan',lo:null,hi:null};
+      }
+    }else{
+      // Find the checkpoint immediately before the creation time. Starting from
+      // "last 50" would permanently miss older pages for a busy payer.
+      cursor={v:1,binding,from:(first.sequence===0n?0n:first.sequence-1n).toString(),through:last.sequence.toString(),throughMs:last.time.toString(),after:null,done:false,
+        phase:'seek',lo:first.sequence.toString(),hi:last.sequence.toString()};
+    }
+    if(cursor.phase==='seek'){
+      let lo=indexNumber(cursor.lo),hi=indexNumber(cursor.hi),from=indexNumber(cursor.from);
+      // Persist the binary-search bounds instead of repeating an initial
+      // ~30-RPC search whenever a bounded subprocess or network times out.
+      for(let step=0;step<8&&lo<=hi;step++){
+        if(deadline-Date.now()<1000)break;
+        const mid=(lo+hi)/2n,point=indexPoint((await query(CHECKPOINT_QUERY,{sequence:Number(mid)})).checkpoint);
+        if(point.sequence!==mid||point.time<first.time||point.time>last.time)return unknown();
+        if(point.time<integer(o.createdAtMs)){from=mid;lo=mid+1n;}else hi=mid-1n;
+        seekProgress=true;
+        cursor={...cursor,from:from.toString(),lo:lo.toString(),hi:hi.toString()};
+        if(lo>hi)cursor={...cursor,phase:'scan',lo:null,hi:null};
+      }
+      if(cursor.phase==='seek')return discoveryResult(cursor,[],o);
+    }
+    if(cursor.from===cursor.through){cursor.done=true;return discoveryResult(cursor,[],o);}
+    const data=await query(PAGE_QUERY,{payer:o.payer,from:Number(indexNumber(cursor.from)),through:Number(indexNumber(cursor.through)+1n),after:cursor.after});
+    const page=data.transactions;
+    if(!Array.isArray(page?.nodes)||page.nodes.length>DIRECT_DISCOVERY_PAGE_SIZE||typeof page.pageInfo?.hasNextPage!=='boolean')return unknown();
+    const {hasNextPage,endCursor}=page.pageInfo;
+    if(hasNextPage&&(!page.nodes.length||typeof endCursor!=='string'||!endCursor.length||endCursor.length>2048||endCursor===cursor.after||/[\x00-\x1f]/.test(endCursor)))return unknown();
+    const seen=new Set(),digests=[];
+    for(const node of page.nodes){
+      digest(node.digest);if(seen.has(node.digest)||node.sender?.address!==o.payer)return unknown();seen.add(node.digest);
+      const point=indexPoint({...node.effects?.checkpoint,timestamp:node.effects?.timestamp});
+      if(point.sequence<=indexNumber(cursor.from)||point.sequence>indexNumber(cursor.through)||point.time>integer(cursor.throughMs))return unknown();
+      if(point.time>=integer(o.createdAtMs)&&point.time<integer(o.expiresAtMs))digests.push(node.digest);
+    }
+    pageConsumed=true;
+    cursor={...cursor,after:hasNextPage?endCursor:null,done:!hasNextPage};
+    return discoveryResult(cursor,digests,o);
+  }catch(error){
+    if(error?.message==='usdcWrongNetwork')throw error;
+    // The final seek step may already have entered scan before its first page
+    // times out. Preserve that verified start without consuming any page.
+    if(seekProgress&&!pageConsumed&&cursor?.done===false)return discoveryResult(cursor,[],o);
+    // Unknown means retry the SAME persisted cursor. It never means unpaid,
+    // and an unavailable/pruned page must not advance a scan watermark.
+    return unknown();
+  }
+}
 export async function dispatch(request,env=process.env){
   exactKeys(request,['operation','config','params']);
   if(request.operation==='verifyWalletProof'){validateConfig(request.config);return verifyWalletProof(request.params);}
   validateConfig(request.config);
   if(request.operation==='configureValidate'){exactKeys(request.params,[]);validateGasEnvironment(env);const l=await load(request.config);return {validated:true,network:'testnet',networkHash:NETWORK_HASH,publishingEnabled:l.config.publishingEnabled};}
-  const operations={prepareInvoice,submitPrepared,observeCreate,buildPay,buildPayBytes,observeInvoice};
+  const operations={prepareInvoice,submitPrepared,observeCreate,buildPay,buildPayBytes,observeInvoice,observeDirectTransfer,discoverDirectTransfers};
   if(!Object.hasOwn(operations,request.operation))throw Error('usdcOperationInvalid');
   return operations[request.operation](request.config,request.params,env);
 }

@@ -131,6 +131,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0023_promotion_revenue_share",
         include_str!("../../../infra/postgres/migrations/0023_promotion_revenue_share.sql"),
     ),
+    (
+        "0024_sui_usdc_native_transfer_authority",
+        include_str!("../../../infra/postgres/migrations/0024_sui_usdc_native_transfer_authority.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.
@@ -791,6 +795,11 @@ mod tests {
         );
         assert!(current < position("0018_procurement_authority_guard"));
         assert!(position("0018_procurement_authority_guard") < position("0019_sui_usdc_billing_authority"));
+        assert!(position("0019_sui_usdc_billing_authority") < position("0024_sui_usdc_native_transfer_authority"));
+        assert!(position("0023_promotion_revenue_share") < position("0024_sui_usdc_native_transfer_authority"));
+        let transfer = MIGRATIONS[position("0024_sui_usdc_native_transfer_authority")].1;
+        assert!(!transfer.contains("UPDATE accounts"), "V14 migration must preserve historical account rows");
+        assert!(transfer.contains("FROM sui_usdc_payment_receipts ON CONFLICT DO NOTHING"));
     }
 
     fn sample_save() -> CharacterSaveRecord {

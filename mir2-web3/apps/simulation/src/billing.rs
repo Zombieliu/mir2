@@ -450,10 +450,8 @@ pub(crate) fn apply_pending_to_save(
             (
                 order.offer.credits,
                 order
-                    .receipt
-                    .as_ref()
-                    .ok_or("usdcReceiptMissing")?
-                    .confirmed_at_ms,
+                    .payment_confirmed_at_ms()
+                    .ok_or("usdcReceiptMissing")?,
             )
         };
         if now_ms < paid_at {
@@ -617,7 +615,7 @@ impl SimulationConfig {
                         .values()
                         .filter(|o| {
                             o.character_index == character_index
-                                && crate::sui_usdc_billing::reserves_capacity(o)
+                                && crate::sui_usdc_billing::reserves_capacity_at(o, now_ms)
                         })
                         .map(|o| o.offer.credits),
                 )

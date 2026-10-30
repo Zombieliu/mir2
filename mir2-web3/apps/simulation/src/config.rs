@@ -391,6 +391,17 @@ impl AccountStore {
     }
 
     fn migrate_to_current_schema(mut self) -> Self {
+        let impossible_native_usdc_transfer = self.schema_version < 14
+            && self.accounts.values().any(|a| {
+                a.billing.as_ref().is_some_and(|b| {
+                    b.sui_usdc_orders.values().any(|o| {
+                        !o.payment_mode.is_invoice()
+                            || o.transfer_receipt.is_some()
+                            || o.direct_scan_cursor.is_some()
+                            || o.direct_scan_complete
+                    })
+                })
+            });
         let impossible_usdc = self.schema_version < 13
             && self.accounts.values().any(|a| {
                 a.billing
@@ -448,6 +459,7 @@ impl AccountStore {
             && !impossible_procurement
             && !impossible_procurement_quota
             && !impossible_usdc
+            && !impossible_native_usdc_transfer
         {
             self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
         }

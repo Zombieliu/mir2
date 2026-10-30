@@ -153,6 +153,8 @@ impl UsdcDriver for NodeDriver {
                 | "buildPay"
                 | "buildPayBytes"
                 | "observeInvoice"
+                | "observeDirectTransfer"
+                | "discoverDirectTransfers"
                 | "verifyWalletProof"
         ) {
             return Err("usdcOperationRejected".into());
@@ -219,6 +221,7 @@ impl UsdcDriver for NodeDriver {
 #[derive(Clone)]
 pub(crate) struct UsdcBilling {
     pub enabled: bool,
+    pub direct_enabled: bool,
     pub domain: UsdcDomain,
     pub offers: Vec<RechargeOffer>,
     pub origin: String,
@@ -228,6 +231,11 @@ pub(crate) struct UsdcBilling {
 impl UsdcBilling {
     pub(crate) fn from_env() -> Result<Option<Self>, String> {
         let enabled = flag(std::env::var("MIR2_SUI_USDC_ENABLED").ok().as_deref())?;
+        let direct_enabled = flag(
+            std::env::var("MIR2_SUI_USDC_DIRECT_ENABLED")
+                .ok()
+                .as_deref(),
+        )?;
         let Some(config_path) = std::env::var_os("MIR2_SUI_USDC_DRIVER_CONFIG") else {
             return if enabled {
                 Err("usdcConfigurationMissing".into())
@@ -339,6 +347,7 @@ impl UsdcBilling {
         }
         Ok(Some(Self {
             enabled,
+            direct_enabled,
             domain,
             offers,
             origin,
@@ -381,6 +390,17 @@ impl UsdcBilling {
         request: &str,
         offer_id: &str,
     ) -> Result<(String, UsdcRechargeOrder), String> {
+        self.checkout_for_wallet(config, account, character, request, offer_id, None)
+    }
+    pub(crate) fn checkout_for_wallet(
+        &self,
+        config: &SimulationConfig,
+        account: &str,
+        character: i32,
+        request: &str,
+        offer_id: &str,
+        verified_wallet: Option<(&str, &str)>,
+    ) -> Result<(String, UsdcRechargeOrder), String> {
         self.validate_store(config)?;
         let token = self.token(account, character, request)?;
         // Recover the same frozen order after client re-login, an offer change,
@@ -409,17 +429,36 @@ impl UsdcBilling {
             .find(|o| o.id == offer_id)
             .ok_or("billingOfferMissing")?;
         let at = now();
-        let order = config.prepare_usdc_recharge_order(
-            account,
-            character,
-            request,
-            offer,
-            &self.domain,
-            &sha(token.as_bytes()),
-            at.checked_add(30 * 60 * 1000).ok_or("usdcClockInvalid")?,
-            at.checked_add(20 * 60 * 1000).ok_or("usdcClockInvalid")?,
-            at,
-        )?;
+        let capability_expires = at.checked_add(30 * 60 * 1000).ok_or("usdcClockInvalid")?;
+        let expires = at.checked_add(20 * 60 * 1000).ok_or("usdcClockInvalid")?;
+        let order = if self.direct_enabled {
+            let (credential_id, payer) = verified_wallet.ok_or("usdcWalletLoginRequired")?;
+            config.prepare_direct_usdc_recharge_order(
+                account,
+                character,
+                request,
+                offer,
+                &self.domain,
+                credential_id,
+                payer,
+                &sha(token.as_bytes()),
+                capability_expires,
+                expires,
+                at,
+            )?
+        } else {
+            config.prepare_usdc_recharge_order(
+                account,
+                character,
+                request,
+                offer,
+                &self.domain,
+                &sha(token.as_bytes()),
+                capability_expires,
+                expires,
+                at,
+            )?
+        };
         let url = format!(
             "{}/v1/billing/sui-usdc/pay#{}.{}",
             self.origin, order.id, token
@@ -449,6 +488,11 @@ pub(crate) fn chain_order(o: &UsdcRechargeOrder) -> Result<Value, String> {
         json!({"orderRef":prefixed(&order_ref(&o.id)),"accountRef":prefixed(&o.account_ref),"snapshotHash":prefixed(&o.frozen_hash()?),"payer":o.payer.as_ref().ok_or("usdcPayerMissing")?,"merchant":o.domain.merchant,"amountMicros":o.amount_micro.to_string(),"expiresAtMs":o.expires_at_ms.to_string()}),
     )
 }
+pub(crate) fn native_chain_order(o: &UsdcRechargeOrder) -> Result<Value, String> {
+    let mut terms = chain_order(o)?;
+    terms["createdAtMs"] = json!(o.created_at_ms.to_string());
+    Ok(terms)
+}
 pub(crate) fn wallet_message(
     o: &UsdcRechargeOrder,
     payer: &str,
@@ -475,6 +519,9 @@ fn public_order_at(o: &UsdcRechargeOrder, now_ms: u64) -> Value {
     } else {
         match o.state {
             UsdcOrderState::Prepared => "prepared",
+            UsdcOrderState::PayerBound if o.payment_mode == UsdcPaymentMode::DirectTransfer => {
+                "awaitingPayment"
+            }
             UsdcOrderState::PayerBound | UsdcOrderState::InvoicePrepared => "invoicePending",
             UsdcOrderState::InvoiceBound => {
                 if o.payment_hint.is_some() {
@@ -488,7 +535,251 @@ fn public_order_at(o: &UsdcRechargeOrder, now_ms: u64) -> Value {
             _ => "review",
         }
     };
-    json!({"id":o.id,"orderRequestId":o.request_id,"offerId":o.offer.id,"credits":o.offer.credits,"amountMicros":o.amount_micro.to_string(),"network":"testnet","state":state,"createdAtMs":o.created_at_ms,"expiresAtMs":o.expires_at_ms,"transactionDigest":o.receipt.as_ref().map(|r|r.digest.as_str()).or(o.payment_hint.as_deref())})
+    json!({"id":o.id,"orderRequestId":o.request_id,"offerId":o.offer.id,"credits":o.offer.credits,"amountMicros":o.amount_micro.to_string(),"network":"testnet","state":state,"createdAtMs":o.created_at_ms,"expiresAtMs":o.expires_at_ms,"transactionDigest":o.payment_digest().or(o.payment_hint.as_deref())})
+}
+
+fn native_observed_receipt(
+    provider: &UsdcBilling,
+    o: &UsdcRechargeOrder,
+    digest: &str,
+) -> Result<Option<VerifiedNativeUsdcTransferReceipt>, String> {
+    let observed = provider.driver.call(
+        "observeDirectTransfer",
+        json!({"order":native_chain_order(o)?,"digest":digest}),
+    )?;
+    match observed["state"].as_str() {
+        Some("unpaid") => return Ok(None),
+        Some("paid") => {}
+        _ => return Err("usdcResultUnknown".into()),
+    }
+    let r = &observed["receipt"];
+    if text(r, "transactionDigest")? != digest {
+        return Err("usdcPaymentBindingMismatch".into());
+    }
+    let receipt = VerifiedNativeUsdcTransferReceipt {
+        chain_identifier: o.domain.chain_identifier.clone(),
+        genesis_digest: text(r, "genesisDigest")?.into(),
+        order_id: o.id.clone(),
+        account_ref: o.account_ref.clone(),
+        payer: text(r, "payer")?.into(),
+        merchant: text(r, "merchant")?.into(),
+        coin_type: text(r, "coinType")?.into(),
+        amount_micro: decimal(r, "amountMicros")?,
+        frozen_hash: o.frozen_hash()?,
+        digest: digest.into(),
+        checkpoint: decimal(r, "checkpoint")?,
+        confirmed_at_ms: decimal(r, "paidAtMs")?,
+        observed_at_ms: now(),
+    };
+    Ok(Some(receipt))
+}
+fn confirm_native_observation(
+    config: &SimulationConfig,
+    provider: &UsdcBilling,
+    account: &str,
+    o: &UsdcRechargeOrder,
+    digest: &str,
+) -> Result<bool, String> {
+    let Some(receipt) = native_observed_receipt(provider, o, digest)? else {
+        return Ok(false);
+    };
+    config.confirm_usdc_native_transfer_payment(account, &o.id, &receipt, now())?;
+    Ok(true)
+}
+
+/// Operator-only recovery of a user-identified legacy order. This is not a
+/// client command or HTTP route. The exact chain receipt is verified before a
+/// clean Prepared order can switch mode; application still uses Source/save CAS.
+pub fn reconcile_native_recharge_from_env(
+    config: &SimulationConfig,
+    account: &str,
+    id: &str,
+    credential_id: &str,
+    payer: &str,
+    digest: &str,
+) -> Result<Value, String> {
+    if std::env::var("MIR2_SUI_USDC_NATIVE_RECOVERY")
+        .ok()
+        .as_deref()
+        != Some("1")
+    {
+        return Err("usdcRecoveryNotEnabled".into());
+    }
+    let provider = UsdcBilling::from_env()?.ok_or("billingUnavailable")?;
+    if !provider.direct_enabled {
+        return Err("usdcRecoveryNotEnabled".into());
+    }
+    let (owner, mut candidate) = config
+        .find_usdc_recharge_order(id)?
+        .ok_or("usdcOrderMissing")?;
+    if owner != account {
+        return Err("usdcOrderMissing".into());
+    }
+    provider.ensure_domain(&candidate)?;
+    if candidate.has_payment_receipt() {
+        if candidate.payment_digest() == Some(digest) {
+            return Ok(public_order(&candidate));
+        }
+        return Err("usdcPaymentAlreadySubmitted".into());
+    }
+    if candidate.payment_mode.is_invoice() {
+        if candidate.state != UsdcOrderState::Prepared
+            || candidate.payer.is_some()
+            || candidate.prepared_tx.is_some()
+            || candidate.invoice.is_some()
+            || candidate.payment_hint.is_some()
+            || candidate.applied.is_some()
+        {
+            return Err("usdcRecoveryOrderInvalid".into());
+        }
+        candidate.payment_mode = UsdcPaymentMode::DirectTransfer;
+        candidate.payer = Some(payer.into());
+        candidate.state = UsdcOrderState::PayerBound;
+    } else if candidate.payer.as_deref() != Some(payer) {
+        return Err("usdcPayerMismatch".into());
+    }
+    candidate.validate()?;
+    let receipt = native_observed_receipt(&provider, &candidate, digest)?
+        .ok_or("usdcPaymentBindingMismatch")?;
+    // The account-store transaction independently rechecks the exact live
+    // credential, clean legacy state, overlap fence and immutable terms.
+    let recovered = config.recover_prepared_usdc_native_transfer(
+        account,
+        id,
+        credential_id,
+        payer,
+        digest,
+        now(),
+    )?;
+    if recovered.frozen_hash()? != receipt.frozen_hash {
+        return Err("usdcPaymentBindingMismatch".into());
+    }
+    let confirmed = config.confirm_usdc_native_transfer_payment(account, id, &receipt, now())?;
+    Ok(public_order(&confirmed))
+}
+
+/// Optional operator delivery uses the same shared Redis owner fence as the
+/// authenticated character-select billing route. It never writes an online
+/// Source's save; online delivery remains the ordinary Source billing tick.
+pub fn deliver_inactive_native_recharge_from_env(
+    config: &SimulationConfig,
+    account: &str,
+    id: &str,
+) -> Result<Value, String> {
+    use crate::cache::{
+        gateway_session_cache_from_env, gateway_session_cache_runtime_backend_from_env,
+        GatewaySessionCacheKey, GatewaySessionCacheRuntimeBackend,
+    };
+    if std::env::var("MIR2_SUI_USDC_NATIVE_RECOVERY")
+        .ok()
+        .as_deref()
+        != Some("1")
+    {
+        return Err("usdcRecoveryNotEnabled".into());
+    }
+    if !matches!(
+        gateway_session_cache_runtime_backend_from_env()?,
+        GatewaySessionCacheRuntimeBackend::Redis
+    ) {
+        return Err("usdcRecoverySharedCacheRequired".into());
+    }
+    let (owner, order) = config
+        .find_usdc_recharge_order(id)?
+        .ok_or("usdcOrderMissing")?;
+    if owner != account
+        || order.payment_mode != UsdcPaymentMode::DirectTransfer
+        || !order.has_payment_receipt()
+    {
+        return Err("usdcRecoveryOrderInvalid".into());
+    }
+    let cache = gateway_session_cache_from_env()?;
+    let key = GatewaySessionCacheKey {
+        account_id: account.into(),
+        character_index: order.character_index,
+    };
+    if cache.get(&key).is_some() {
+        return Ok(json!({"order":public_order(&order),"delivery":{"status":"source_pending"}}));
+    }
+    let mut random = [0u8; 32];
+    use rand::RngCore;
+    rand::rngs::OsRng
+        .try_fill_bytes(&mut random)
+        .map_err(|_| "usdcRecoveryUnavailable")?;
+    let lease_owner = format!("billing-offline-{}", sha(&random));
+    cache
+        .acquire_route_lease(&key, &lease_owner, 300)
+        .map_err(|_| "billingCharacterOnline")?;
+    if cache.get(&key).is_some() {
+        let _ = cache.release_route_lease(&key, &lease_owner);
+        return Err("billingCharacterOnline".into());
+    }
+    let result =
+        config.consume_inactive_pending_recharge_credits(account, order.character_index, now());
+    if result
+        .as_ref()
+        .is_err_and(|e| e.contains("COMMIT_OUTCOME_UNKNOWN"))
+    {
+        return Err("usdcResultUnknown".into());
+    }
+    cache.release_route_lease(&key, &lease_owner)?;
+    let delivered = result?;
+    let (_, fresh) = config
+        .find_usdc_recharge_order(id)?
+        .ok_or("usdcOrderMissing")?;
+    Ok(
+        json!({"order":public_order(&fresh),"delivery":{"status":"applied","granted":delivered.granted,"revision":delivered.revision}}),
+    )
+}
+
+fn run_native_order(
+    config: &SimulationConfig,
+    provider: &UsdcBilling,
+    account: &str,
+    o: &UsdcRechargeOrder,
+    worker: &str,
+) -> Result<(), String> {
+    if o.has_payment_receipt() {
+        return Ok(());
+    }
+    if let Some(digest) = &o.payment_hint {
+        if confirm_native_observation(config, provider, account, o, digest)? {
+            return Ok(());
+        }
+    }
+    if o.direct_scan_complete {
+        return Ok(());
+    }
+    let scan = provider.driver.call(
+        "discoverDirectTransfers",
+        json!({"order":native_chain_order(o)?,"cursor":o.direct_scan_cursor}),
+    )?;
+    if scan["state"] != "scanned" {
+        return Err("usdcResultUnknown".into());
+    }
+    let digests = scan["digests"].as_array().ok_or("usdcDriverReplyInvalid")?;
+    if digests.len() > 50 {
+        return Err("usdcDriverReplyInvalid".into());
+    }
+    for value in digests {
+        let digest = value.as_str().ok_or("usdcDriverReplyInvalid")?;
+        if confirm_native_observation(config, provider, account, o, digest)? {
+            return Ok(());
+        }
+    }
+    let complete = scan["windowComplete"]
+        .as_bool()
+        .ok_or("usdcDriverReplyInvalid")?;
+    // A cursor advances only after every candidate is conclusively checked.
+    // Unknown RPC results retain this page for restart-safe reconciliation.
+    config.save_usdc_native_transfer_scan(
+        account,
+        &o.id,
+        worker,
+        text(&scan, "cursor")?,
+        complete,
+        now(),
+    )?;
+    Ok(())
 }
 
 pub(crate) fn run_order(
@@ -503,7 +794,10 @@ pub(crate) fn run_order(
     };
     let result = (|| {
         provider.ensure_domain(&o)?;
-        if o.payer.is_none() || o.receipt.is_some() {
+        if o.payment_mode == UsdcPaymentMode::DirectTransfer {
+            return run_native_order(config, provider, account, &o, worker);
+        }
+        if o.payer.is_none() || o.has_payment_receipt() {
             return Ok(());
         }
         let terms = chain_order(&o)?;

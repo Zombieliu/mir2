@@ -330,12 +330,16 @@ pub(super) async fn socket_action(
             durable(&config)?;
             let usdc =
                 crate::sui_usdc_billing::UsdcBilling::from_env()?.ok_or("billingUnavailable")?;
-            let (url, _) = usdc.checkout(
+            let credential = verified.and_then(|v| identity.verified_wallet_credential(v).ok());
+            let (url, _) = usdc.checkout_for_wallet(
                 &config,
                 &account,
                 checkout.character_index,
                 &checkout.order_request_id,
                 &checkout.offer_id,
+                credential
+                    .as_ref()
+                    .map(|c| (c.credential_id.as_str(), c.credential_subject.as_str())),
             )?;
             Ok(
                 json!({"checkoutUrl":url,"status":status_value(&config,&account,checkout.character_index,provider.as_ref())?}),
