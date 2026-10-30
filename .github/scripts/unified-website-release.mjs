@@ -105,9 +105,12 @@ if (operation === 'unified-context') {
   for (const [key, id] of Object.entries({ main: process.env.RELEASE_MAIN_DEPLOYMENT_ID, game: process.env.RELEASE_DEPLOYMENT_ID })) {
     if (!id) continue;
     if (!/^dpl_[a-zA-Z0-9]+$/.test(id)) throw Error('Invalid candidate ID');
-    const candidate = await api(`/v13/deployments/${id}`);
+    const candidate = await api(`/v13/deployments/${id}?withGitRepoInfo=true`);
     if (candidate.projectId !== SITES[key].project) throw Error('Candidate project mismatch');
-    console.log(JSON.stringify({ candidate: summary(key, candidate), errorCode: candidate.errorCode }));
+    console.log(JSON.stringify({ candidate: summary(key, candidate), errorCode: candidate.errorCode,
+      responseKeys: Object.keys(candidate), rootDirectory: candidate.rootDirectory,
+      projectKeys: Object.keys(candidate.project || {}), projectRoot: candidate.project?.rootDirectory,
+      projectSettingsKeys: Object.keys(candidate.projectSettings || {}) }));
   }
 } else if (operation === 'unified-stage') {
   baselineGuard(initial);
