@@ -8,6 +8,7 @@ import { prepareCheckoutIntent, recoverCheckoutIntents, type CheckoutIntent, typ
 // Order: title, recharge, buy, activate, open, credits, review, offline, play.
 export const PROMOTION_BILLING_LABELS = {
   en: ["Recharge & membership", "Recharge test USDC", "Buy monthly card", "Activate monthly card", "Open wallet payment", "Credits", "I reviewed the credit price and want to buy this 30-day card.", "Log out of the game before buying or activating here. Refresh an uncertain result before retrying.", "Enter the test game"],
+  "zh-Hans": ["充值与月卡", "测试 USDC 充值", "购买月卡", "启用月卡", "打开钱包付款", "点券", "我已核对点券价格，确认购买此 30 天月卡。", "在此购买或启用前，请先退出游戏。结果未确认时请先刷新，勿重复操作。", "进入测试游戏"],
   "zh-Hant": ["充值與月卡", "測試 USDC 充值", "購買月卡", "啟用月卡", "開啟錢包付款", "點券", "我已核對點券價格，確認購買此30天月卡。", "在此購買或啟用前，請先退出遊戲。結果未確認時先重新整理，勿重複操作。", "進入測試遊戲"],
   "pt-BR": ["Recarga e assinatura", "Recarregar USDC de teste", "Comprar cartão mensal", "Ativar cartão mensal", "Abrir pagamento na carteira", "Créditos", "Conferi o preço em créditos e quero comprar este cartão de 30 dias.", "Saia do jogo antes de comprar ou ativar aqui. Atualize um resultado incerto antes de tentar novamente.", "Entrar no jogo de teste"],
   ru: ["Пополнение и подписка", "Пополнить тестовыми USDC", "Купить месячную карту", "Активировать карту", "Открыть оплату в кошельке", "Кредиты", "Я проверил цену в кредитах и покупаю карту на 30 дней.", "Перед покупкой или активацией выйдите из игры. При неизвестном результате сначала обновите статус.", "Войти в тестовую игру"],
@@ -20,6 +21,7 @@ export const PROMOTION_BILLING_LABELS = {
 
 const RECOVERY_LABELS = {
   en: ["Continue original order", "A recharge is unresolved. Continue or check its original order before starting another.", "Order result pending confirmation."],
+  "zh-Hans": ["继续原订单", "有充值订单尚未确认，请继续或查询原订单，再开始新的充值。", "订单结果待确认。"],
   "zh-Hant": ["繼續原訂單", "有充值訂單尚未確認，請繼續或查詢原訂單，再開始新的充值。", "訂單結果待確認。"],
   "pt-BR": ["Continuar pedido original", "Há uma recarga pendente. Continue ou consulte o pedido original antes de iniciar outra.", "Resultado do pedido aguardando confirmação."],
   ru: ["Продолжить исходный заказ", "Результат пополнения ещё не подтверждён. Проверьте исходный заказ перед новым.", "Результат заказа ожидает подтверждения."],

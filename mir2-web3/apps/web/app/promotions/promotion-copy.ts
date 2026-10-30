@@ -1,6 +1,6 @@
-/** Same nine locales and optional language preference as the independent Numeron website. */
+/** Promotion locales, including both Chinese scripts, with an optional saved preference. */
 export const PROMOTION_LANGUAGES = [
-  ["zh-Hant", "繁體中文"], ["en", "English"], ["pt-BR", "Português (Brasil)"],
+  ["zh-Hans", "简体中文"], ["zh-Hant", "繁體中文"], ["en", "English"], ["pt-BR", "Português (Brasil)"],
   ["ru", "Русский"], ["hi", "हिन्दी"], ["id", "Bahasa Indonesia"],
   ["vi", "Tiếng Việt"], ["th", "ไทย"], ["ar", "العربية"],
 ] as const;
@@ -27,6 +27,24 @@ const english = {
 };
 export type PromotionCopy = { [K in keyof typeof english]: string };
 export type PromotionTextKey = keyof PromotionCopy;
+
+const simplified: PromotionCopy = {
+  program: "团长推广计划", language: "语言", home: "游戏官网", overview: "总览", characters: "本人角色", members: "邀请成员", earnings: "收益与结算", payout: "收款钱包", rules: "活动规则", support: "申诉与支持", admin: "管理后台", login: "连接 Dubhe Wallet", logout: "退出登录", refresh: "刷新", loading: "加载中…", retry: "重试", cancel: "取消", close: "关闭", submit: "提交", save: "保存", empty: "暂无记录", unavailable: "服务暂时不可用，本次请求尚未确认。", notConfigured: "尚未配置", error: "请求尚未确认", pending: "待审核", approved: "已批准", rejected: "已拒绝", expired: "已过期", paused: "已暂停", closed: "已关闭", draft: "草案", unknown: "结果未知", confirmed: "已确认", failed: "已确认失败", cancelled: "已取消", qualified: "合格", excluded: "已排除", bound: "已确认归属", conditionsPending: "条件未满足",
+  heroEyebrow: "NUMERON · 相聚冒险", heroTitle: "邀上伙伴，\n开启新的旅程。", heroBody: "为带领新玩家认识 Numeron 的你而设。验证本人角色、申请团长，并在同一处查看邀请成果。", proposal: "活动条款与上线审核", proposalBody: "本赛季按实际合格收入分成，不预设总预算。招募、计佣与付款按当前活动开关执行。参与以正式批准的条款为准，预估金额不代表收益承诺。", programIdentity: "推广团长与游戏行会会长是不同身份。首期只提供单层直接邀请。", stepsTitle: "参与流程", stepWallet: "使用钱包登录", stepCharacter: "选择本人角色", stepReview: "接受条款并等待审核", stepShare: "批准后分享邀请",
+  walletTitle: "使用 Dubhe Wallet 登录", walletBody: "用手机扫码，或在当前设备继续。在钱包中确认登录签名。登录签名不授权转账。", walletPending: "等待钱包确认", walletApproved: "钱包已确认，正在建立会话…", walletRejected: "已拒绝本次登录，可以重试。", walletExpired: "登录二维码已过期，请重新生成。", walletError: "无法验证钱包登录，请重试。", walletSameDevice: "在当前设备继续", qrLabel: "Dubhe Wallet 登录二维码", expires: "到期倒计时", season: "活动", termsVersion: "条款版本", timeZone: "时间按你的时区显示", start: "开始", end: "结束", awaitingApproval: "待批准", recruitment: "招募", commission: "佣金计提", payments: "付款", on: "已开启", off: "已关闭",
+  charactersTitle: "属于你的角色", charactersBody: "角色从已登录的游戏账号中查询。在网页中输入角色名或账号 ID 不能认领角色。", noCharacters: "此钱包账号尚无角色，请先在游戏中创建角色。绑定旧账号须同时证明两个账号的控制权，请联系支持。", selectCharacter: "展示角色", level: "等级", acceptTerms: "我已阅读并接受当前显示版本的活动条款。", apply: "提交团长申请", applicationState: "申请状态", noLeader: "你在本活动中尚无团长资料。", inviteLink: "你的邀请链接", copy: "复制链接", copied: "链接已复制", copyFailed: "复制失败，请选中链接手动复制。", clicks: "邀请点击", registered: "注册账号", attributed: "已确认归属", qualifiedMembers: "合格付费成员", estimatedCommission: "预估佣金", estimateNote: "预估金额可能因来源核实、退款与审核而调整，不代表已审核余额或可提现金额。", noDashboard: "本活动暂无已验证的统计数据。", membersTitle: "你邀请的伙伴", member: "脱敏成员编号", qualification: "资格状态", reason: "原因分类", nextPage: "下一页", previousPage: "上一页",
+  settlements: "结算单", settlementId: "结算单编号", amount: "金额", currency: "币种", status: "状态", transaction: "交易记录", noSettlements: "暂无已批准的结算单，预估收益不能提现。", payoutBody: "须先批准收款方式、网络、资产与参与资格政策。验证地址不代表申请或授权付款。", address: "收款地址", network: "网络", asset: "资产／币种类型", verifyAddress: "重新验证本人当前登录钱包", cooldown: "新付款暂停至", noPayout: "尚未验证收款钱包。", unknownPayment: "这笔付款结果未知，须查询原交易，请勿提交替代转账。", inviteTitle: "一份来自 Numeron 的邀请", inviteDisclosure: "邀请团长可在审核后，从合格月卡收入中获得佣金。注册与未付费活动不产生现金奖励。归属冻结前，由你确认选择。", confirmAttribution: "确认此邀请归属", inviteClosed: "有奖邀请当前不可用。你仍可选择试玩，但不承诺奖励资格。", invitationCode: "邀请码",
+  termsBody: "本版本根据提案实现，只有已批准且具有版本号的活动才能构成正式邀约。显示的示例仅供说明，并非账户金额。", rates: "建议分段阶梯", tier1: "第 1–50 名", tier2: "第 51–200 名", tier3: "第 201 名起", rateProposal: "10%／20%／30% 为建议分段费率。进入更高档位不会将全团统一改为该费率。", rules1: "仅计算合格月卡收入。点券充值、赠送及资金来源未知的余额不会自动产生佣金。", rules2: "建议门槛为 30 级、3 个 UTC 日期有效游玩及首次合格付款，资格根据服务器证据判定。", rules3: "每个新游戏账号每赛季只能有一位团长。多个角色或钱包不重复计数，禁止自邀及多层抽成。", rules4: "建议候选有效期为 7 天，须在注册 24 小时内且首次充值前确认，不可覆盖已有归属。", rules5: "本赛季按实际合格收入分成，不预设总预算或成员上限。设置的活动日期、费率、地区、付款政策与条款仍须批准。", rules6: "付款须先核账，再由两名独立审核人批准并安全签名。测试网转账仍须完成真实链上验收，之后才能开放正式付款。", rules7: "共享 IP 或家庭设备只是审核信号，并非滥用证据。可通过支持渠道提出申诉。", sourceGaps: "待验证的数据集成", privacy: "成员编号已脱敏。团长无法搜索全服账号，也无法查看成员付款明细。", supportBody: "请描述问题并引用已有证据，不要提交私钥、密码或付款密钥。", subject: "主题", message: "问题描述", evidence: "证据引用", appeal: "提交申诉", noAppeals: "暂无申诉记录。", adminTitle: "审核工作台", adminBody: "服务器根据角色验证操作权限，审核与付款提交须由不同人员负责。所有变更须附理由及证据；本页不签署转账。", permission: "已授予权限", resourceId: "资源编号", action: "操作", reasonRequired: "理由", actorEvidence: "证据引用", acknowledge: "我已核对来源记录与审批范围。", resultId: "已记录请求", notAuthenticated: "连接钱包以查看本人记录。", sessionExpired: "会话已过期，请重新连接钱包。", unavailableAction: "当前活动状态不允许此操作。", approvedTerms: "正式活动条款", totalsNoData: "暂无已验证的财务数据",
+  testnet: "测试网验收",
+  testnetBody: "当前为测试环境。测试网资产没有真实货币价值，显示金额与测试转账均不代表真实付款。",
+  testEnrollmentTitle: "钱包体验报名",
+  testEnrollmentBody: "此独立测试报名无需游戏角色，只建立测试邀请身份，不会创建角色或取得佣金资格。收益仍须符合配置的真实游玩与合格月卡付款条件。测试资产没有真实价值。",
+  testEnrollmentAction: "参加本次测试赛季",
+  testStepsTitle: "体验邀请流程",
+  testStepJoin: "同意测试条款并报名",
+  testStepShare: "复制并分享测试邀请",
+  configuredEligibility: "资格条件为 {level} 级、{days} 个 UTC 日期有效游玩及首次合格付款，根据服务器证据判定。",
+};
 
 const traditional: PromotionCopy = {
   program: "團長推廣計畫", language: "語言", home: "遊戲官網", overview: "總覽", characters: "本人角色", members: "邀請成員", earnings: "收益與結算", payout: "收款錢包", rules: "活動規則", support: "申訴與支援", admin: "管理後台", login: "連接 Dubhe Wallet", logout: "登出", refresh: "重新整理", loading: "載入中…", retry: "重試", cancel: "取消", close: "關閉", submit: "提交", save: "儲存", empty: "尚無紀錄", unavailable: "服務暫時無法使用，本次請求尚未確認。", notConfigured: "尚未配置", error: "請求尚未確認", pending: "待審核", approved: "已批准", rejected: "已拒絕", expired: "已過期", paused: "已暫停", closed: "已關閉", draft: "草案", unknown: "結果未知", confirmed: "已確認", failed: "確定失敗", cancelled: "已取消", qualified: "合格", excluded: "已排除", bound: "已確認歸屬", conditionsPending: "條件未滿",
@@ -176,15 +194,22 @@ const arabic: PromotionCopy = {
 
 export function normalizePromotionLocale(value: string | null | undefined): PromotionLocale {
   if (!value) return "en";
-  if (PROMOTION_LANGUAGES.some(([key]) => key === value)) return value as PromotionLocale;
-  const base = value.toLowerCase().split("-")[0];
-  if (base === "zh") return "zh-Hant";
+  const tag = value.trim().replaceAll("_", "-").toLowerCase();
+  const configured = PROMOTION_LANGUAGES.find(([key]) => key.toLowerCase() === tag);
+  if (configured) return configured[0];
+  const parts = tag.split("-");
+  const base = parts[0];
+  if (base === "zh") {
+    if (parts.includes("hans")) return "zh-Hans";
+    if (parts.includes("hant")) return "zh-Hant";
+    return parts.some(part => ["tw", "hk", "mo"].includes(part)) ? "zh-Hant" : "zh-Hans";
+  }
   if (base === "pt") return "pt-BR";
   return PROMOTION_LANGUAGES.some(([key]) => key === base) ? base as PromotionLocale : "en";
 }
 
 // Other dictionaries follow below; each must satisfy the full copy contract.
 export const PROMOTION_COPY: Record<PromotionLocale, PromotionCopy> = {
-  en: english, "zh-Hant": traditional, "pt-BR": portuguese,
+  en: english, "zh-Hans": simplified, "zh-Hant": traditional, "pt-BR": portuguese,
   ru: russian, hi: hindi, id: indonesian, vi: vietnamese, th: thai, ar: arabic,
 };
