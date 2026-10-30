@@ -115,3 +115,11 @@ r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文�
 本补丁已推送为 `d1d2d82bd99a019e3fd1c739a2cff9114d7959d6`，精确 [CI 41113336591](https://github.com/Zombieliu/mir2/actions/runs/41113336591) 已派发，记录时尚在运行，不能把本地 PG 通过写成新 Linux 工件或原服验收。原服仍为 `868ef2d2…`；后续须核验工件、自然空闲、正常保存及新备份后才能切换 GW/worker。本补丁没有迁移、旧单恢复或 operator 需求，不能重复执行前述旧恢复流程。
 
 用户随后完成真实游戏行为并正常退出。[19:24:29 UTC 退出后只读验收](evidence/usdc-native-transfer-20261031/PLAYDAY-AFTER-NORMAL-EXIT.json)确认：角色等级 2 → 3、saveVersion 33 → 43，保存时间 19:23:14 UTC；真实任务完成和升级事件各 1，源事件均已投递且事实各已入库，当前 Windows 活动有效游玩日为 **1/1**。本次满足有效日的是任务事件，不把升级事件或未观测到的击杀冒充有效日。六项在线计数和 Redis owner lease 均为 0；GW/worker 仍为原 `868ef2d2…` / 原 PID。诊断未补记事实、修改归属或账目，也未停服；这证明真实保存及采集链路正常，不是必须等待满 24 小时。
+
+## 旧活动最终归属的补查与处理路径
+
+用户继续询问如何处理后，新增[19:33:28 UTC 只读跨活动事实核对](evidence/usdc-native-transfer-20261031/LEGACY-CONFIRMED-WINDOWS-LINK-READONLY.json)。同一付款钱包在旧 realm 的账号 SHA 为 `f82b2bb7…`，与 Windows 账号 SHA `9a77de96…` 不同；旧 `numeron-playtest-20261029` **确实已有正式 bound 归属**，指向旧团长 `0x8ced5e…ef2f02`，不是仅有候选。原确认时间 `1793351088394` 早于当前 Windows c7fe 付款 `1793384620286`。此前 Windows 活动没有归属的结论正确，但不能据此推断玩家从未确认过旧邀请；问题包含两个 realm / 活动尚未承接旧关系。
+
+旧团长钱包在 Windows realm 有唯一 active 账号映射，但没有当前 Windows 活动的团长记录或邀请码。当前付款账号则本身已有 approved Windows 团长身份及[现成邀请入口收据](evidence/usdc-native-transfer-20261031/WINDOWS-CURRENT-LEADER-LINK-READONLY.json)；邀请码不是本轮新建。角色等级 3、100 点券和有效日 1/1 均保留。
+
+当前源码没有跨 realm / 活动归属导入、管理员重绑或迁移审批接口：归属主键和团长外键按活动限定；普通 `confirm` 的已付款门禁仍成立；改 URL 或复制记录不构成合法迁移，`Reconcile` / 申诉也不会创建新活动的归属。给用户的两条具体路径为：①保留原团长→团员关系，新增明确允许来源、钱包一致性、原始凭据、当前条款、冲突/去重/名额与不可变审计的迁移流程，原始确认时间与实际迁移时间分开记录，不能倒填普通确认或自动追认收入；②不迁移旧关系，当前已充值账号继续作为 Windows 团长，让另一未在 Windows 付款的钱包通过现成邀请入口先本人确认，再充值并购买激活月卡。两者都不删除或重建现有角色及账本。记录时已请求用户确定处理路径，尚未选择或执行任何迁移、补绑、换角色、计佣追认或付款操作。

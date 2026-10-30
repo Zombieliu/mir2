@@ -1,10 +1,10 @@
 {
   "schema": "mir2.usdc-native.public-evidence-privacy-check.v1",
-  "observedAtUtc": "2026-10-30T19:25:54.399Z",
+  "observedAtUtc": "2026-10-30T19:37:26.018Z",
   "sourceSha": "d1d2d82bd99a019e3fd1c739a2cff9114d7959d6",
   "scope": "one topic Markdown and its JSON receipts; only explicitly approved public receipt files copied",
-  "jsonParsed": 23,
-  "topicLocalLinksChecked": 22,
+  "jsonParsed": 25,
+  "topicLocalLinksChecked": 24,
   "missingLinks": 0,
   "findings": [],
   "checks": [

@@ -1,0 +1,24 @@
+{
+  "schema": "mir2.current-windows-leader-link.readonly.v1",
+  "observedAtUtc": "2026-10-30T19:34:20.063105+00:00",
+  "campaignId": "numeron-windows-playtest-20261030",
+  "existingLeaderRecords": [
+    {
+      "status": "approved",
+      "ends_at_ms": 1793824538449,
+      "invite_code": "inv_0757c208fdcba979352e87703f51ea366d0e68d35102ad61",
+      "starts_at_ms": 1793219738449,
+      "applied_at_ms": 1793384559489,
+      "campaign_status": "active",
+      "recruitment_enabled": true,
+      "accepted_terms_version": "numeron-windows-playtest-20261030-v1",
+      "accountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+      "publicInvitationUrl": "https://mir2.obelisk.build/promotions/invite/inv_0757c208fdcba979352e87703f51ea366d0e68d35102ad61?campaignId=numeron-windows-playtest-20261030"
+    }
+  ],
+  "inviteGenerated": false,
+  "roleChanged": false,
+  "candidateOrConfirmPosted": false,
+  "anyFinancialOrConfigurationMutation": false,
+  "dockerStarted": false
+}
