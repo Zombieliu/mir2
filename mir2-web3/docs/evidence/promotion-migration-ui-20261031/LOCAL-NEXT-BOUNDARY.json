@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.promotion-migration.browser-boundary.v1",
+  "origin": "http://127.0.0.1:7368",
+  "sourceWorktree": "C:/Users/Administrator/.codex/worktrees/promotion-vercel-release/mir2-player-journey",
+  "chromeLaunchesSucceeded": 2,
+  "browserContextsWereFresh": true,
+  "allApiTrafficMocked": true,
+  "realUserCookiesRead": false,
+  "realFinancialWrites": 0,
+  "uiChecksCompleted": 0,
+  "screenshots": [],
+  "attempts": [
+    {
+      "command": "node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 7368 --webpack",
+      "serverStartup": "Next.js 16.2.11 webpack ready in 1018ms",
+      "httpStatus": 500,
+      "qaExitCode": 1,
+      "failure": "Can't resolve './E:/mir2-player-journey/mir2-web3/apps/web/node_modules/next/dist/client/app-next-dev.js'; same error for next-dev.js; fallback-build-manifest.json absent",
+      "receipt": "ATTEMPT-1-SERVER-PATH-FAILURE.json"
+    },
+    {
+      "command": "node --preserve-symlinks --preserve-symlinks-main node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 7368 --webpack",
+      "serverStartup": "Next.js 16.2.11 webpack ready in 472ms",
+      "httpStatus": 500,
+      "qaExitCode": 1,
+      "failure": "./app/promotions/promotion.module.css: You forgot to add 'mini-css-extract-plugin' plugin",
+      "receipt": "MIGRATION-UI-RECEIPT.json"
+    }
+  ],
+  "boundary": "The isolated browser launched, but this local Next development server could not compile the actual page. No pending/completed UI or real backend acceptance is claimed.",
+  "repoFilesWrittenForThisQaTask": [],
+  "serverCleanup": "Only the two local dev sessions created for this QA task were stopped; no existing user service or browser was changed."
+}

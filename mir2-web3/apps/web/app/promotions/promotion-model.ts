@@ -24,11 +24,20 @@ export type PromotionMember = { memberRef: string; status: string; reasonCode?: 
 export type PromotionSettlement = { id: string; status: string; totalMicroUsd: string; payableCents: number; payableMicroUsd?: string; paidMicroUsd?: string; reserveMicroUsd: string; reversalMicroUsd: string; payoutId?: string | null; payoutStatus?: string | null; txDigest?: string | null; checkpoint?: string | null; createdAtMs?: number; snapshotSha256: string };
 export type PromotionPayoutSettings = { status: string; address?: string; network?: string; version?: number; cooldownUntilMs?: number | null; payoutEnabled: boolean };
 export type PromotionAppeal = { id: string; status: string; category?: string; message?: string; createdAtMs?: number };
+export type PromotionMigrationCandidate = {
+  migrationId: string; candidateId: string; leaderDisplayName: string; sourceCampaignId: string;
+  sourceConfirmedAtMs: number; eligibilityAnchorMs: number; preparedAtMs: number; expiresAtMs: number; targetTermsVersion: string;
+};
+export type PromotionAttributionMigration = {
+  migrationId: string; sourceCampaignId: string; sourceConfirmedAtMs: number; eligibilityAnchorMs: number;
+  preparedAtMs: number; confirmedAtMs: number; snapshotSha256: string; leaderDisplayName: string;
+};
 export type PromotionMe = {
   account: { id: string; registeredAtMs: number; banned?: boolean };
   characters: PromotionCharacter[]; leader: PromotionLeader | null;
   dashboard: PromotionDashboard | null; sourceGaps: string[];
-  attribution: { leaderId: string; confirmedAtMs: number; status: string; reasonCode?: string } | null;
+  attribution: { leaderId: string; confirmedAtMs: number; status: string; reasonCode?: string; migration?: PromotionAttributionMigration | null } | null;
+  migrationCandidate?: PromotionMigrationCandidate | null;
   qualification?: { levelReached: boolean; activeUtcDays: number; qualifiedAtMs: number | null; status: string };
   settlements: PromotionSettlement[]; payoutSettings: PromotionPayoutSettings;
   appeals: PromotionAppeal[]; permissions: { isLeader: boolean; isAdmin: boolean; roles?: string[] };

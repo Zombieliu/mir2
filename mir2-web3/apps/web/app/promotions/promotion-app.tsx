@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PROMOTION_ACCOUNT_COPY, promotionInvitationError } from "./promotion-account-copy";
 import { PROMOTION_EARNINGS_COPY } from "./promotion-earnings-copy";
+import { PROMOTION_MIGRATION_COPY, promotionMigrationError } from "./promotion-migration-copy";
 import { createPromotionRefresh } from "./promotion-refresh";
 import { PROMOTION_COPY, PROMOTION_LANGUAGES, normalizePromotionLocale, type PromotionCopy, type PromotionLocale, type PromotionTextKey } from "./promotion-copy";
 import { canEnrollTestWallet, hasTestWalletEnrollment, testWalletApplication, formatPromotionCents, formatPromotionDate, formatPromotionRefreshTime, formatPromotionUsd, promotionRequest, promotionTimezone, PromotionApiError,
@@ -13,6 +14,13 @@ import { PromotionBilling, PROMOTION_BILLING_LABELS } from "./promotion-billing"
 import styles from "./promotion.module.css";
 
 type View = "overview" | "characters" | "members" | "earnings" | "payout" | "rules" | "support" | "admin" | "billing";
+function migrationContext(bootstrap: PromotionBootstrap | null) {
+  const proof = bootstrap?.me?.migrationCandidate;
+  return JSON.stringify([bootstrap?.authenticated, bootstrap?.me?.account.id, bootstrap?.binding?.credentialId,
+    bootstrap?.campaign?.campaignId, bootstrap?.campaign?.termsVersion, proof?.migrationId, proof?.candidateId,
+    proof?.targetTermsVersion, proof?.preparedAtMs, proof?.expiresAtMs, proof?.sourceCampaignId,
+    proof?.sourceConfirmedAtMs, proof?.eligibilityAnchorMs, proof?.leaderDisplayName]);
+}
 const NAVIGATION: readonly { view: View; icon: string }[] = [
   { view: "overview", icon: "◈" }, { view: "characters", icon: "♙" }, { view: "members", icon: "♧" },
   { view: "earnings", icon: "▤" }, { view: "payout", icon: "◇" }, { view: "rules", icon: "≡" },
@@ -137,6 +145,11 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const [walletOpen, setWalletOpen] = useState(false);
   const [characterIndex, setCharacterIndex] = useState<number | null>(null);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  // Consent belongs to this exact identity, activity and migration proof. A
+  // previous render's checkbox can never authorize a replacement proof.
+  const [acceptedMigrationTerms, setAcceptedMigrationTerms] = useState<string | null>(null);
+  const [migrationFeedback, setMigrationFeedback] = useState<{ context: string; error?: string; submitted?: boolean } | null>(null);
+  const [, setMigrationExpiryTick] = useState(0);
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [preview, setPreview] = useState<InvitationPreview | null>(null);
@@ -164,11 +177,29 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const earningsCopy = PROMOTION_EARNINGS_COPY[locale];
   const homeLocale = locale === "zh-Hans" ? "zh-CN" : locale === "zh-Hant" ? "zh-TW" : locale === "hi" ? "en" : locale;
   const accountCopy = PROMOTION_ACCOUNT_COPY[locale];
+  const migrationCopy = PROMOTION_MIGRATION_COPY[locale];
   const authenticated = bootstrap?.authenticated === true;
   const bound = bootstrap?.binding?.status === "linked";
   const campaign = bootstrap?.campaign;
   const testWalletEnrollment = hasTestWalletEnrollment(campaign);
   const me = bootstrap?.me;
+  const migrationCandidate = !me?.attribution ? me?.migrationCandidate : undefined;
+  const currentMigrationContext = migrationContext(bootstrap);
+  const migrationTermsAccepted = acceptedMigrationTerms === currentMigrationContext;
+  const currentMigrationFeedback = migrationFeedback?.context === currentMigrationContext ? migrationFeedback : null;
+  const migrationProofValid = !!migrationCandidate && [migrationCandidate.migrationId, migrationCandidate.candidateId,
+    migrationCandidate.leaderDisplayName, migrationCandidate.sourceCampaignId, migrationCandidate.targetTermsVersion]
+    .every(value => typeof value === "string" && value.trim().length > 0) &&
+    [migrationCandidate.sourceConfirmedAtMs, migrationCandidate.eligibilityAnchorMs, migrationCandidate.preparedAtMs, migrationCandidate.expiresAtMs]
+      .every(value => Number.isSafeInteger(value) && value > 0 && Number.isFinite(new Date(value).getTime())) &&
+    migrationCandidate.sourceConfirmedAtMs <= migrationCandidate.preparedAtMs &&
+    migrationCandidate.eligibilityAnchorMs <= migrationCandidate.preparedAtMs && migrationCandidate.preparedAtMs < migrationCandidate.expiresAtMs;
+  const migrationExpired = !!migrationCandidate && migrationCandidate.expiresAtMs <= Date.now();
+  const migrationTermsCurrent = !!migrationCandidate && !!campaign?.termsVersion && campaign.termsStatus === "approved" &&
+    migrationCandidate.targetTermsVersion === campaign.termsVersion;
+  const canConfirmMigration = authenticated && bound && !!bootstrap?.csrfToken && migrationProofValid && !migrationExpired &&
+    migrationTermsCurrent && campaign?.status === "active" && campaign.recruitmentEnabled && migrationTermsAccepted &&
+    !busy && !currentMigrationFeedback?.submitted;
   const characters = bootstrap?.characters || [];
   const leader = bootstrap?.leader;
   const dashboard = bootstrap?.dashboard;
@@ -176,7 +207,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const commissionTitle = campaign?.status === "locked" ? earningsCopy.finalizedCommission : earningsCopy.accruedCommission;
   const settlementNote = campaign?.status === "locked" ? earningsCopy.finalizedNote : earningsCopy.settlementTiming;
   const canAdmin = Array.isArray(bootstrap?.permissions) ? bootstrap.permissions.includes("isAdmin") : bootstrap?.permissions?.isAdmin === true;
-  const errorMessage = (code: string | null) => code === "session_expired" ? copy.sessionExpired : code && (promotionInvitationError(code, locale) || ({
+  const errorMessage = (code: string | null) => code === "session_expired" ? copy.sessionExpired : code && (promotionMigrationError(code, locale) || promotionInvitationError(code, locale) || ({
     promotionBudgetFull: copy.inviteClosed, promotionRecruitmentClosed: copy.inviteClosed,
     promotionConfirmationExpired: copy.expired, promotionCandidateExpired: copy.expired,
     promotionSelfReferral: copy.rules3, promotionExistingAccountExcluded: copy.rules3,
@@ -218,7 +249,10 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
       if (identityChanged) {
         setMembers(null); setSettlements(null); setNextMemberOffset(null); setMemberOffset(0);
       }
-      if (invitationContextChanged) { setInvitationError(null); setCandidate(null); setAcceptedTerms(false); setNotice(null); }
+      if (invitationContextChanged) {
+        setInvitationError(null); setCandidate(null); setAcceptedTerms(false); setNotice(null);
+        setAcceptedMigrationTerms(null); setMigrationFeedback(null);
+      }
       setBootstrap(next); setError(null);
       if (nextMembers) { setMembers(nextMembers.items); setNextMemberOffset(nextMembers.nextOffset); }
       if (nextSettlements) setSettlements(nextSettlements);
@@ -321,15 +355,30 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     setAcceptedTerms(false); setCandidate(null); setInvitationError(null); setNotice(null);
   }, [bootstrap?.me?.account.id, bootstrap?.binding?.credentialId, campaign?.campaignId, campaign?.termsVersion, authenticated]);
 
-  async function write(path: string, body: Record<string, unknown>): Promise<Record<string, unknown> | null> {
+  useEffect(() => {
+    setAcceptedMigrationTerms(null); setMigrationFeedback(null);
+  }, [currentMigrationContext]);
+
+  useEffect(() => {
+    if (!migrationCandidate || !Number.isSafeInteger(migrationCandidate.expiresAtMs)) return;
+    const timer = window.setTimeout(() => setMigrationExpiryTick(current => current + 1),
+      Math.min(2_147_483_647, Math.max(0, migrationCandidate.expiresAtMs - Date.now() + 1)));
+    return () => window.clearTimeout(timer);
+  }, [currentMigrationContext, migrationCandidate?.expiresAtMs]);
+
+  async function write(path: string, body: Record<string, unknown>, feedback?: "migration"): Promise<Record<string, unknown> | null> {
+    const migrationWrite = feedback === "migration";
     const invitationWrite = path === "candidate" || path === "confirm";
     if (busy) return null;
     if (!bootstrap?.csrfToken) {
-      (invitationWrite ? setInvitationError : setError)("session_expired"); return null;
+      if (migrationWrite) setMigrationFeedback({ context: currentMigrationContext, error: "session_expired" });
+      else (invitationWrite ? setInvitationError : setError)("session_expired");
+      return null;
     }
     cancelRefresh();
     setBusy(true); setError(null); setNotice(null);
-    if (invitationWrite) setInvitationError(null);
+    if (migrationWrite) setMigrationFeedback(null);
+    else if (invitationWrite) setInvitationError(null);
     // Retry an uncertain operation with its original key, never with a new payment/ledger intent.
     const intent = `${path}:${JSON.stringify(body)}`;
     const key = mutationKeys.current.get(intent) || crypto.randomUUID();
@@ -338,12 +387,18 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
       const result = await promotionRequest<Record<string, unknown>>(path, { body, csrfToken: bootstrap.csrfToken, idempotencyKey: key });
       mutationKeys.current.delete(intent);
       const id = result.appealId || result.leaderId || result.settlementId || result.id;
-      if (path === "confirm") setNotice("invitation_confirmed");
+      if (migrationWrite) setMigrationFeedback({ context: currentMigrationContext, submitted: true });
+      else if (path === "confirm") setNotice("invitation_confirmed");
       else if (!invitationWrite) setNotice(typeof id === "string" ? id : typeof result.status === "string" ? result.status : "recorded");
       return result;
     } catch (cause) {
+      // A retired migration request cannot expire a replacement identity or
+      // proof, nor replace feedback belonging to that newer context.
+      if (migrationWrite && migrationContext(refreshContext.current.bootstrap) !== currentMigrationContext) return null;
       if (cause instanceof PromotionApiError && cause.status === 401) { setBootstrap(null); setMembers(null); setSettlements(null); setError("session_expired"); }
-      (invitationWrite ? setInvitationError : setError)(cause instanceof PromotionApiError && cause.status === 401 ? "session_expired" : cause instanceof PromotionApiError ? cause.code : "network_unavailable");
+      const code = cause instanceof PromotionApiError && cause.status === 401 ? "session_expired" : cause instanceof PromotionApiError ? cause.code : "network_unavailable";
+      if (migrationWrite) setMigrationFeedback({ context: currentMigrationContext, error: code });
+      else (invitationWrite ? setInvitationError : setError)(code);
       return null;
     } finally { setBusy(false); }
   }
@@ -382,6 +437,13 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     if (!candidate || !acceptedTerms || !campaign?.termsVersion) return;
     const result = await write("confirm", { candidateId: candidate.candidateId, termsVersion: campaign.termsVersion });
     if (result) { setCandidate(null); setAcceptedTerms(false); await refresh(); }
+  }
+
+  async function confirmMigration() {
+    if (!canConfirmMigration || !migrationCandidate || !campaign?.termsVersion || migrationCandidate.expiresAtMs <= Date.now() ||
+      migrationContext(refreshContext.current.bootstrap) !== currentMigrationContext) return;
+    const result = await write("confirm", { candidateId: migrationCandidate.candidateId, termsVersion: campaign.termsVersion }, "migration");
+    if (result) { setAcceptedMigrationTerms(null); await refresh(); }
   }
 
   function connectButton(label = copy.login) {
@@ -468,7 +530,32 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
               <button className={styles.secondary} disabled={busy || !account.trim() || !password}>{busy ? copy.loading : accountCopy.verifyAccount}</button>
             </form>
           </details>}
-          {authenticated && !me?.attribution ? <section className={styles.panel} aria-label={copy.invitationCode}><h3>{copy.inviteTitle}</h3><p className={styles.muted}>{copy.inviteDisclosure}</p>
+          {authenticated && migrationCandidate ? <section id="promotion-migration-pending" className={styles.panel} aria-label={migrationCopy.pendingTitle}>
+            <h3>{migrationCopy.pendingTitle}</h3><p className={styles.muted}>{migrationCopy.pendingBody}</p>
+            <dl className={styles.form}>
+              <div><dt>{migrationCopy.leader}</dt><dd>{migrationCandidate.leaderDisplayName}</dd></div>
+              <div><dt>{migrationCopy.sourceActivity}</dt><dd className={styles.code}>{migrationCandidate.sourceCampaignId}</dd></div>
+              <div><dt>{migrationCopy.sourceConfirmedAt}</dt><dd>{formatPromotionDate(migrationCandidate.sourceConfirmedAtMs, locale)}</dd></div>
+              <div><dt>{migrationCopy.preparedAt}</dt><dd>{formatPromotionDate(migrationCandidate.preparedAtMs, locale)}</dd></div>
+              <div><dt>{copy.termsVersion}</dt><dd className={styles.code}>{campaign?.termsVersion || copy.notConfigured}</dd></div>
+              <div><dt>{copy.end}</dt><dd>{formatPromotionDate(migrationCandidate.expiresAtMs, locale)}</dd></div>
+              <div><dt>{migrationCopy.auditId}</dt><dd className={styles.code}>{migrationCandidate.migrationId}</dd></div>
+            </dl>
+            <p id="promotion-migration-finance-note" className={styles.muted}>{migrationCopy.financeNote}</p>
+            {!bound ? <p className={styles.muted}>{accountCopy.bindingBody}</p> : null}
+            {!migrationProofValid ? <p className={styles.error} role="alert">{migrationCopy.proofInvalid}</p> : migrationExpired ?
+              <p className={styles.error} role="alert">{migrationCopy.expired}</p> : !migrationTermsCurrent ?
+                <p className={styles.error} role="alert">{migrationCopy.termsRequired}</p> : null}
+            <label className={styles.check} style={{ marginTop: 12 }}><input id="promotion-migration-terms" type="checkbox" checked={migrationTermsAccepted}
+              disabled={busy || !bound || !migrationProofValid || migrationExpired || !migrationTermsCurrent || !!currentMigrationFeedback?.submitted}
+              aria-describedby="promotion-migration-finance-note"
+              onChange={event => setAcceptedMigrationTerms(event.target.checked ? currentMigrationContext : null)} />{copy.acceptTerms} ({campaign?.termsVersion || copy.notConfigured})</label>
+            {currentMigrationFeedback?.error ? <div id="promotion-migration-error" className={`${styles.notice} ${styles.error}`} role="alert">{errorMessage(currentMigrationFeedback.error)}</div> : null}
+            {currentMigrationFeedback?.submitted ? <p id="promotion-migration-submitted" role="status">{migrationCopy.submitted}</p> : null}
+            <button id="promotion-migration-confirm" className={styles.primary} style={{ marginTop: 14 }} disabled={!canConfirmMigration}
+              onClick={() => void confirmMigration()}>{busy ? copy.loading : migrationCopy.confirmAction}</button>
+          </section> : null}
+          {authenticated && !me?.attribution && !migrationCandidate ? <section className={styles.panel} aria-label={copy.invitationCode}><h3>{copy.inviteTitle}</h3><p className={styles.muted}>{copy.inviteDisclosure}</p>
             <p className={styles.muted} id="promotion-invitation-steps">{accountCopy.invitationSteps}</p>
             <form className={styles.form} onSubmit={event => { event.preventDefault(); void (async () => {
               const result = await write("candidate", { code: inviteCode.trim(), source: invitationCode && inviteCode.trim() === invitationCode ? "invite_link" : "manual_code" });
@@ -486,7 +573,20 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
               <button className={styles.primary} style={{ marginTop: 14 }} disabled={busy || !acceptedTerms || !bound || !campaign?.recruitmentEnabled || !campaign?.termsVersion} onClick={() => void confirmCandidate()}>{copy.confirmAttribution}</button>
             </div> : null}
           </section> : null}
-          {me?.attribution ? <section className={styles.panel}><h3>{accountCopy.finalAttribution}</h3><PromotionStatus value={me.attribution.status} copy={copy} /><p className={styles.muted} style={{ marginTop: 10 }}>{accountCopy.finalAttributionBody}</p></section> : null}
+          {me?.attribution ? <section className={styles.panel}><h3>{accountCopy.finalAttribution}</h3><PromotionStatus value={me.attribution.status} copy={copy} /><p className={styles.muted} style={{ marginTop: 10 }}>{accountCopy.finalAttributionBody}</p>
+            {me.attribution.migration ? <div id="promotion-migration-completed">
+              <h3>{migrationCopy.completedTitle}</h3><p className={styles.muted}>{migrationCopy.completedBody}</p>
+              <dl className={styles.form}>
+                <div><dt>{migrationCopy.leader}</dt><dd>{me.attribution.migration.leaderDisplayName}</dd></div>
+                <div><dt>{migrationCopy.sourceActivity}</dt><dd className={styles.code}>{me.attribution.migration.sourceCampaignId}</dd></div>
+                <div><dt>{migrationCopy.sourceConfirmedAt}</dt><dd>{formatPromotionDate(me.attribution.migration.sourceConfirmedAtMs, locale)}</dd></div>
+                <div><dt>{migrationCopy.confirmedAt}</dt><dd>{formatPromotionDate(me.attribution.migration.confirmedAtMs, locale)}</dd></div>
+                <div><dt>{migrationCopy.auditId}</dt><dd className={styles.code}>{me.attribution.migration.migrationId}</dd></div>
+                <div><dt>{migrationCopy.evidenceHash}</dt><dd className={styles.code}>{me.attribution.migration.snapshotSha256}</dd></div>
+              </dl>
+              <p className={styles.muted}>{migrationCopy.financeNote}</p>
+            </div> : null}
+          </section> : null}
         </> : null}
 
         {authenticated && !bound && view !== "rules" ? <div className={styles.notice}><strong>{accountCopy.bindingRequired}</strong>{accountCopy.bindingBody}<div className={styles.heroActions}>{connectButton()}</div></div> : null}

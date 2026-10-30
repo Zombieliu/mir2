@@ -9,7 +9,7 @@ const BRANCH = 'codex/promotion-vercel-20261029';
 const SHA = 'a'.repeat(40);
 const WEB = 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz';
 const MAIN = 'prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA';
-const BASE = 'dpl_2ekBnauSAihEAWLFguLcHKrs7kx3';
+const BASE = 'dpl_9yLef9wXkWDovACg9atHU1W1uBSx';
 const MAIN_BASE = 'dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97';
 const ID = 'dpl_windowscandidate';
 const CAMPAIGN = 'numeron-windows-playtest-20261030';
@@ -67,7 +67,7 @@ function fixture(operation = 'windows-promote') {
     '/version': JSON.stringify({ revision: SHA }),
     '/promotions?lang=zh-CN': '<html>Promotion program<link href="/_next/static/css/promotion.css?v=one&amp;theme=dark"><script src="/_next/static/chunks/promotion.js"></script></html>',
     '/_next/static/css/promotion.css': 'body { color: #ededdd; background: #10110d; }',
-    '/_next/static/chunks/promotion.js': '/* Accrued commission (pending settlement); Updates every 10 seconds; data-promotion-live-updates; Create your character in the Windows game */',
+    '/_next/static/chunks/promotion.js': '/* Accrued commission (pending settlement); Updates every 10 seconds; data-promotion-live-updates; Create your character in the Windows game; promotion-migration-pending; promotion-migration-confirm; promotion-migration-completed */',
     '/api/promotions/bootstrap': bootstrap('windows', campaign),
     [`/api/promotions/bootstrap?campaignId=${CAMPAIGN}`]: bootstrap('windows', campaign),
     '/game': '<html><script src="/_next/static/chunks/game.js"></script></html>',
@@ -266,6 +266,11 @@ test('protected default Windows realm period commission and payout-off checks pr
     f.pages['/api/promotions/bootstrap'] = JSON.stringify(value);
     const r = await f.run(); failed(r, /Windows campaign/); assert.equal(writes(r).length, 0);
   }
+});
+test('candidate missing migration UI assets cannot be promoted even with matching revision', async () => {
+  const f = fixture();
+  f.pages['/_next/static/chunks/promotion.js'] = f.pages['/_next/static/chunks/promotion.js'].replace('promotion-migration-confirm', 'absent');
+  const r = await f.run(); failed(r, /Promotion implementation is missing/); assert.equal(writes(r).length, 0);
 });
 test('each explicit legacy ID stays web realm with unchanged historical flags and dates', async () => {
   for (const legacy of LEGACY) {

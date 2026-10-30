@@ -1,0 +1,39 @@
+{
+  "schema": "mir2.promotion-migration-ui.local-verification.v1",
+  "observedAtUtc": "2026-10-30T20:15:17.4615289Z",
+  "canonicalLfSourceSha256": {
+    ".github/scripts/promotion-windows-release.mjs": "7c3a43e48e54dfcfb6893864a71e30cc073a5843f83b30ed6ccad3fce65ea178",
+    ".github/scripts/test-promotion-windows-release.mjs": "45fb9e8c21cb33b7f161edbd36ca3c3dfca64b6f5e68fc7d2649a296345e1368",
+    "mir2-web3/apps/web/app/promotions/promotion-model.ts": "96c6e2c15a8fb0c79b5e815bde9c3c8926e3295e361d7986b0e48740df376238",
+    "mir2-web3/apps/web/app/promotions/promotion-app.tsx": "edaff4e36d5655100c5f567d54d075154bf213a4f1468126d37f8377260a115c",
+    "mir2-web3/apps/web/scripts/test-promotion-fullchain-web.mjs": "48e51e2a0ab84785327b572bfc210ae28aeec8f34edb6bfcc2b32d45d7c87cda",
+    "mir2-web3/apps/web/app/promotions/promotion-migration-copy.ts": "cb229a46002f2bb170606ba8af225142c714f4df98bb3963d66902410e6f1f8e"
+  },
+  "focused": {
+    "skipped": 0,
+    "ignored": 0,
+    "command": "node --test mir2-web3/apps/web/scripts/test-promotion-fullchain-web.mjs",
+    "failed": 0,
+    "passed": 29
+  },
+  "releaseGuard": {
+    "skipped": 0,
+    "ignored": 0,
+    "command": "node --test .github/scripts/test-promotion-windows-release.mjs",
+    "failed": 0,
+    "passed": 23
+  },
+  "typecheck": {
+    "executor": "bounded UI worker before source freeze",
+    "exitCode": 0,
+    "command": "tsc --noEmit --incremental false"
+  },
+  "componentBrowserFixture": {
+    "realBackendAcceptance": false,
+    "realComponent": true,
+    "apiMocked": true,
+    "passed": 6
+  },
+  "liveMigrationStaged": false,
+  "docker": false
+}

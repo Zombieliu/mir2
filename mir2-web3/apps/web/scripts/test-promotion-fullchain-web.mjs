@@ -130,20 +130,25 @@ test("all billing locales are complete and each profile offers its own character
 // Exercise the actual TSX controller and its rendered event handlers. The hook
 // scheduler only supplies React state/effect semantics; business behavior stays
 // in promotion-app.tsx and every API operation is a synthetic local fixture.
-async function invitationApp() {
+async function invitationApp(initial = {}) {
   const copies = load("../app/promotions/promotion-copy.ts");
   const accounts = load("../app/promotions/promotion-account-copy.ts");
+  const migrations = load("../app/promotions/promotion-migration-copy.ts");
   const actualModel = load("../app/promotions/promotion-model.ts");
   const f = { calls: [], candidateError: null, confirmError: null, candidateStatus: 409, confirmStatus: 409,
     authenticated: true, csrfToken: "synthetic-csrf", accountId: "synthetic-account", credentialId: "synthetic-credential",
-    campaignId: "synthetic-season", termsVersion: "synthetic-v1", attribution: null, poll: null, bootstrapGate: null };
+    campaignId: "synthetic-season", termsVersion: "synthetic-v1", attribution: null, poll: null, bootstrapGate: null,
+    confirmGate: null, bound: true, termsStatus: "approved", migrationCandidate: undefined, ...initial };
   const now = Date.now();
+  f.now = now;
+  const timers = new Set();
   const bootstrap = () => ({ authenticated: f.authenticated, csrfToken: f.authenticated ? f.csrfToken : null, characters: [], leader: null,
-    binding: f.authenticated ? { status: "linked", credentialId: f.credentialId } : { status: "pending" }, sourceGaps: [], permissions: [],
+    binding: f.authenticated && f.bound ? { status: "linked", credentialId: f.credentialId } : { status: "pending" }, sourceGaps: [], permissions: [],
     campaign: { campaignId: f.campaignId, environment: "test", status: "active", startsAtMs: now - 60_000,
-      endsAtMs: now + 86_400_000, termsVersion: f.termsVersion, termsStatus: "approved", recruitmentEnabled: true,
-      commissionEnabled: true, payoutEnabled: false, rules: { minimumLevel: 1, activeUtcDays: 1 } },
-    me: f.authenticated ? { account: { id: f.accountId }, attribution: f.attribution, settlements: [] } : undefined });
+      endsAtMs: now + 86_400_000, termsVersion: f.termsVersion, termsStatus: f.termsStatus, recruitmentEnabled: true,
+      commissionEnabled: true, payoutEnabled: false, rules: { minimumLevel: 1, activeUtcDays: 1, testWalletEnrollment: f.testWalletEnrollment === true } },
+    me: f.authenticated ? { account: { id: f.accountId }, attribution: f.attribution, settlements: [],
+      ...(f.migrationCandidate === undefined ? {} : { migrationCandidate: structuredClone(f.migrationCandidate) }) } : undefined });
   const model = { ...actualModel, async promotionRequest(path, options = {}) {
     f.calls.push({ path, body: options.body });
     if (path === "bootstrap") {
@@ -156,8 +161,19 @@ async function invitationApp() {
       return { candidateId: "synthetic-candidate", leaderDisplayName: "Synthetic inviting leader", expiresAtMs: now + 60_000 };
     }
     if (path === "confirm") {
-      if (f.confirmError) throw new actualModel.PromotionApiError(f.confirmStatus, f.confirmError);
-      f.attribution = { status: "attributed" }; return { status: "attributed" };
+      const code = f.confirmError, status = f.confirmStatus, gate = f.confirmGate; f.confirmGate = null;
+      if (gate) await gate;
+      if (code) throw new actualModel.PromotionApiError(status, code);
+      if (!f.confirmWithoutAttribution) {
+        const proof = options.body?.candidateId === f.migrationCandidate?.candidateId ? f.migrationCandidate : null;
+        f.attribution = { status: "attributed", ...(proof ? { leaderId: "synthetic-leader", confirmedAtMs: f.now, migration: {
+          migrationId: proof.migrationId, sourceCampaignId: proof.sourceCampaignId, sourceConfirmedAtMs: proof.sourceConfirmedAtMs,
+          eligibilityAnchorMs: proof.eligibilityAnchorMs, preparedAtMs: proof.preparedAtMs, confirmedAtMs: f.now,
+          snapshotSha256: "c".repeat(64), leaderDisplayName: proof.leaderDisplayName,
+        } } : {}) };
+        if (proof) f.migrationCandidate = undefined;
+      }
+      return { status: "bound" };
     }
     assert.fail(`Unexpected fixture operation ${path}`);
   } };
@@ -183,18 +199,22 @@ async function invitationApp() {
     },
   };
   const location = { search: "", hash: "", origin: ORIGIN };
-  const app = load("../app/promotions/promotion-app.tsx", { AbortController, URLSearchParams,
-    window: { location, addEventListener() {}, removeEventListener() {} }, location,
+  const ui = load("../app/promotions/promotion-app.tsx", { AbortController, URLSearchParams, Date: class extends Date { static now() { return f.now; } },
+    window: { location, addEventListener() {}, removeEventListener() {},
+      setTimeout(callback, ms) { const timer = { callback, at: f.now + ms }; timers.add(timer); return timer; },
+      clearTimeout(timer) { timers.delete(timer); } }, location, history: { replaceState() {} },
     navigator: { language: "zh-CN" }, localStorage: { getItem: () => "zh-Hans" },
     document: { documentElement: {}, title: "Fixture", visibilityState: "visible", addEventListener() {}, removeEventListener() {} },
     require: spec => spec === "react" ? hooks : spec === "./promotion-copy" ? copies :
       spec === "./promotion-account-copy" ? accounts : spec === "./promotion-model" ? model :
+      spec === "./promotion-migration-copy" ? migrations :
       spec === "./promotion-earnings-copy" ? load("../app/promotions/promotion-earnings-copy.ts") :
       spec === "./promotion-refresh" ? { createPromotionRefresh(options) { f.poll = options; return { request() {}, stop() {} }; } } :
       spec === "./promotion-billing" ? { PromotionBilling() {}, PROMOTION_BILLING_LABELS: Object.fromEntries(copies.PROMOTION_LANGUAGES.map(([locale]) => [locale, ["Billing"]])) } :
       ["./promotion-wallet-login", "./promotion-admin"].includes(spec) ? {} :
       spec.endsWith(".module.css") ? { default: new Proxy({}, { get: (_, key) => String(key) }) } : require(spec),
-  }).PromotionApp;
+  });
+  const app = ui.PromotionApp;
   f.flush = async () => {
     for (let round = 0; round < 20; ++round) {
       dirty = false; cursor = 0; tree = app({});
@@ -220,7 +240,18 @@ async function invitationApp() {
   f.statuses = () => nodes(tree).filter(node => node.props.role === "status").map(f.text);
   f.alerts = () => nodes(tree).filter(node => node.props.role === "alert").map(f.text);
   f.holdBootstrap = () => { let release; f.bootstrapGate = new Promise(resolve => { release = resolve; }); return release; };
+  f.holdConfirm = () => { let release; f.confirmGate = new Promise(resolve => { release = resolve; }); return release; };
+  f.advance = async ms => { f.now += ms; for (const timer of [...timers]) if (timer.at <= f.now) { timers.delete(timer); timer.callback(); } await f.flush(); };
+  f.migrationPanel = () => f.find("section", props => props.id === "promotion-migration-pending");
+  f.migrationConfirm = () => f.find("button", props => props.id === "promotion-migration-confirm");
+  f.migrationTerms = () => f.find("input", props => props.id === "promotion-migration-terms");
+  f.acceptMigration = async () => { f.migrationTerms().props.onChange({ target: { checked: true } }); await f.flush(); };
+  f.migrationError = () => f.find("div", props => props.id === "promotion-migration-error");
+  f.enrollment = () => f.find(ui.PromotionTestWalletEnrollment);
+  f.navigate = async label => { f.find("button", props => f.text(props.children).endsWith(label)).props.onClick(); await f.flush(); };
   f.accounts = accounts;
+  f.migrations = migrations;
+  f.formatDate = value => actualModel.formatPromotionDate(value, "zh-Hans");
   f.copy = copies.PROMOTION_COPY["zh-Hans"];
   await f.flush(); return f;
 }
@@ -313,6 +344,179 @@ test("a missing write token keeps the session-expired reason inline while the au
   assert.ok(f.find("input", props => props.autoComplete === "off"));
   assert.equal(f.text(f.inlineError()), f.copy.sessionExpired);
   assert.equal(f.calls.filter(call => call.path === "candidate").length, 0, "No unauthenticated mutation may be sent");
+});
+
+function migrationProof(overrides = {}) {
+  const now = Date.now();
+  return { migrationId: "synthetic-migration", candidateId: "synthetic-migration-candidate", leaderDisplayName: "Synthetic original leader",
+    sourceCampaignId: "synthetic-legacy-season", sourceConfirmedAtMs: now - 3 * 86_400_000, eligibilityAnchorMs: now - 3 * 86_400_000,
+    preparedAtMs: now - 60_000, expiresAtMs: now + 3_600_000, targetTermsVersion: "synthetic-v1", ...overrides };
+}
+
+test("a migration proof is read-only until its own terms are accepted; only the ordinary confirm contract is sent", async () => {
+  const proof = migrationProof(), f = await invitationApp({ migrationCandidate: proof });
+  assert.ok(f.migrationPanel()); assert.equal(f.migrationTerms().props.checked, false);
+  assert.equal(f.migrationConfirm().props.disabled, true);
+  assert.equal(f.find("input", props => props.autoComplete === "off"), undefined, "A staged migration is not a manual-code candidate");
+  await f.poll.refresh(new AbortController().signal); await f.flush();
+  f.migrationConfirm().props.onClick(); await f.flush();
+  assert.equal(f.calls.filter(call => call.body).length, 0, "Rendering, reading and a disabled action never confirm a migration");
+  await f.acceptMigration(); assert.equal(f.migrationConfirm().props.disabled, false);
+  f.migrationConfirm().props.onClick(); await f.flush();
+  const writes = f.calls.filter(call => call.body);
+  assert.deepEqual(writes.map(call => call.path), ["confirm"]);
+  assert.equal(JSON.stringify(writes[0].body), JSON.stringify({ candidateId: proof.candidateId, termsVersion: proof.targetTermsVersion }));
+  assert.equal(f.migrationPanel(), undefined);
+  const completed = f.find("div", props => props.id === "promotion-migration-completed"), text = f.text(completed);
+  const copy = f.migrations.PROMOTION_MIGRATION_COPY["zh-Hans"];
+  assert.ok(completed); assert.ok(text.includes(copy.completedTitle));
+  assert.ok(text.includes(copy.sourceConfirmedAt) && text.includes(f.formatDate(proof.sourceConfirmedAtMs)));
+  assert.ok(text.includes(copy.confirmedAt) && text.includes(f.formatDate(f.now)));
+  assert.notEqual(f.formatDate(proof.sourceConfirmedAtMs), f.formatDate(f.now));
+  assert.ok(text.includes(proof.migrationId) && text.includes("c".repeat(64)) && text.includes(copy.financeNote));
+  assert.ok(!f.statuses().includes(f.accounts.PROMOTION_ACCOUNT_COPY["zh-Hans"].attributionConfirmed), "Migration does not use the ordinary optimistic notice");
+});
+
+test("ordinary invitation consent does not authorize a newly staged migration", async () => {
+  const f = await invitationApp(); await f.enter("SYNTHETIC-INVITE"); await f.submit(); await f.accept();
+  assert.equal(f.confirm().props.disabled, false);
+  f.migrationCandidate = migrationProof(); await f.poll.refresh(new AbortController().signal); await f.flush();
+  assert.equal(f.migrationTerms().props.checked, false); assert.equal(f.migrationConfirm().props.disabled, true);
+  f.migrationConfirm().props.onClick(); await f.flush();
+  assert.equal(f.calls.filter(call => call.path === "confirm").length, 0);
+});
+
+test("wallet-enrollment terms do not authorize the independent member migration confirmation", async () => {
+  const f = await invitationApp({ testWalletEnrollment: true, migrationCandidate: migrationProof() });
+  await f.navigate(f.copy.testEnrollmentTitle);
+  f.enrollment().props.onAccept(true); await f.flush();
+  assert.equal(f.enrollment().props.acceptedTerms, true, "Fixture accepted only the leader enrollment terms");
+  await f.navigate(f.copy.overview);
+  assert.equal(f.migrationTerms().props.checked, false); assert.equal(f.migrationConfirm().props.disabled, true);
+  f.migrationConfirm().props.onClick(); await f.flush();
+  assert.equal(f.calls.filter(call => call.body).length, 0, "Neither enrollment nor migration is submitted by accepting the other form's terms");
+});
+
+test("migration failures remain visible through successful reads and use each safe public rejection category", async () => {
+  const f = await invitationApp({ migrationCandidate: migrationProof() }); await f.acceptMigration();
+  const codes = ["ProofInvalid", "Expired", "IdentityConflict", "LeaderConsentRequired", "TermsRequired", "PaymentUnverified",
+    "PaymentPrecedesSource", "Conflict", "PolicyDenied", "SourceChanged"];
+  for (const suffix of codes) {
+    const code = `promotionMigration${suffix}`; f.confirmError = code;
+    f.migrationConfirm().props.onClick(); await f.flush();
+    const expected = f.migrations.promotionMigrationError(code, "zh-Hans");
+    assert.ok(expected); assert.equal(f.text(f.migrationError()), expected);
+    await f.poll.refresh(new AbortController().signal); await f.flush();
+    assert.equal(f.text(f.migrationError()), expected, `${code}: successful refresh must preserve the rejected write`);
+    assert.equal(f.find("div", props => props.id === "promotion-migration-completed"), undefined);
+  }
+  assert.ok(f.calls.filter(call => call.body).every(call => call.path === "confirm"));
+});
+
+test("migration consent and feedback are isolated by identity, activity, proof and terms; stale handlers cannot confirm", async () => {
+  for (const field of ["accountId", "credentialId", "campaignId", "migrationId", "candidateId", "termsVersion"]) {
+    const f = await invitationApp({ migrationCandidate: migrationProof() }); await f.acceptMigration();
+    const oldButton = f.migrationConfirm(); f.confirmError = "promotionMigrationProofInvalid";
+    oldButton.props.onClick(); await f.flush(); assert.ok(f.migrationError());
+    if (["migrationId", "candidateId"].includes(field)) f.migrationCandidate = { ...f.migrationCandidate, [field]: `${f.migrationCandidate[field]}-next` };
+    else f[field] += "-next";
+    if (field === "termsVersion") f.migrationCandidate = { ...f.migrationCandidate, targetTermsVersion: f.termsVersion };
+    await f.poll.refresh(new AbortController().signal); await f.flush();
+    assert.equal(f.migrationError(), undefined, field); assert.equal(f.migrationTerms().props.checked, false, field);
+    assert.equal(f.migrationConfirm().props.disabled, true, field);
+    const writes = f.calls.filter(call => call.body).length;
+    oldButton.props.onClick(); await f.flush();
+    assert.equal(f.calls.filter(call => call.body).length, writes, `${field}: a previous context's event handler is retired`);
+  }
+});
+
+test("a late migration rejection belongs only to the old proof and is not shown on a replacement proof", async () => {
+  const f = await invitationApp({ migrationCandidate: migrationProof() }); await f.acceptMigration();
+  const release = f.holdConfirm(); f.confirmError = "promotionMigrationIdentityConflict";
+  f.migrationConfirm().props.onClick(); await f.flush();
+  f.migrationCandidate = migrationProof({ migrationId: "synthetic-replacement", candidateId: "synthetic-replacement-candidate" });
+  await f.poll.refresh(new AbortController().signal); await f.flush();
+  release(); await f.flush();
+  assert.equal(f.migrationError(), undefined); assert.equal(f.migrationTerms().props.checked, false);
+  assert.equal(f.migrationConfirm().props.disabled, true);
+  assert.equal(f.find("div", props => props.id === "promotion-migration-completed"), undefined);
+});
+
+test("a late migration 401 cannot clear a newly refreshed account, credential or replacement proof", async () => {
+  for (const change of ["accountId", "credentialId", "proof"]) {
+    const f = await invitationApp({ migrationCandidate: migrationProof() }); await f.acceptMigration();
+    f.confirmError = "promotionAuthenticationRequired"; f.confirmStatus = 401;
+    const release = f.holdConfirm(); f.migrationConfirm().props.onClick(); await f.flush();
+    if (change === "proof") f.migrationCandidate = migrationProof({ migrationId: "synthetic-new-proof", candidateId: "synthetic-new-candidate" });
+    else f[change] += "-new-session";
+    await f.poll.refresh(new AbortController().signal); await f.flush();
+    assert.ok(f.migrationPanel(), `${change}: the new authenticated bootstrap was committed`);
+    assert.equal(f.migrationTerms().props.checked, false);
+    release(); await f.flush();
+    assert.ok(f.migrationPanel(), `${change}: a retired request must not clear the new bootstrap`);
+    assert.ok(f.find("button", props => f.text(props.children) === f.copy.logout), `${change}: new identity remains signed in`);
+    assert.ok(!f.alerts().includes(f.copy.sessionExpired), `${change}: old session failure must not label the new context expired`);
+    assert.equal(f.migrationError(), undefined, change);
+    f.confirmError = null; await f.acceptMigration();
+    assert.equal(f.migrationConfirm().props.disabled, false, `${change}: the new proof remains usable after fresh consent`);
+  }
+});
+
+test("successful confirm does not fabricate completed migration while the read model still returns a pending proof", async () => {
+  const f = await invitationApp({ migrationCandidate: migrationProof(), confirmWithoutAttribution: true });
+  await f.acceptMigration(); f.migrationConfirm().props.onClick(); await f.flush();
+  assert.ok(f.migrationPanel()); assert.equal(f.find("div", props => props.id === "promotion-migration-completed"), undefined);
+  assert.ok(f.statuses().includes(f.migrations.PROMOTION_MIGRATION_COPY["zh-Hans"].submitted));
+  assert.equal(f.migrationConfirm().props.disabled, true, "Wait for an authoritative read instead of repeating a successful write");
+  await f.poll.refresh(new AbortController().signal); await f.flush();
+  assert.ok(f.statuses().includes(f.migrations.PROMOTION_MIGRATION_COPY["zh-Hans"].submitted));
+  assert.equal(f.calls.filter(call => call.path === "confirm").length, 1);
+});
+
+test("migration confirmation fails closed for wrong terms, unbound wallets, malformed proof and expiry", async () => {
+  for (const config of [{ termsStatus: "draft" }, { termsVersion: "different-terms" }, { bound: false },
+    { migrationCandidate: migrationProof({ expiresAtMs: 0 }) }]) {
+    const f = await invitationApp({ migrationCandidate: migrationProof(), ...config });
+    assert.equal(f.migrationConfirm().props.disabled, true);
+    f.migrationConfirm().props.onClick(); await f.flush(); assert.equal(f.calls.filter(call => call.body).length, 0);
+  }
+  const f = await invitationApp({ migrationCandidate: migrationProof({ expiresAtMs: Date.now() + 30_000 }) });
+  await f.acceptMigration(); const button = f.migrationConfirm(); assert.equal(button.props.disabled, false);
+  await f.advance(30_100); assert.equal(f.migrationConfirm().props.disabled, true);
+  assert.ok(f.alerts().includes(f.migrations.PROMOTION_MIGRATION_COPY["zh-Hans"].expired));
+  button.props.onClick(); await f.flush(); assert.equal(f.calls.filter(call => call.body).length, 0);
+});
+
+test("migration 401 remains visible globally and old-backend responses retain the normal invitation flow", async () => {
+  const f = await invitationApp({ migrationCandidate: migrationProof() }); await f.acceptMigration();
+  f.confirmError = "promotionAuthenticationRequired"; f.confirmStatus = 401;
+  f.migrationConfirm().props.onClick(); await f.flush();
+  assert.equal(f.migrationPanel(), undefined); assert.ok(f.alerts().includes(f.copy.sessionExpired));
+  const legacy = await invitationApp();
+  assert.equal(legacy.migrationPanel(), undefined); assert.equal(legacy.find("div", props => props.id === "promotion-migration-completed"), undefined);
+  await legacy.enter("SYNTHETIC-LEGACY"); await legacy.submit(); await legacy.accept();
+  assert.equal(legacy.confirm().props.disabled, false);
+  const ordinary = await invitationApp({ attribution: { status: "bound", leaderId: "synthetic-leader", confirmedAtMs: Date.now() } });
+  assert.equal(ordinary.migrationPanel(), undefined); assert.equal(ordinary.find("div", props => props.id === "promotion-migration-completed"), undefined);
+});
+
+test("all ten migration locales provide complete pending, audit, completed and safe-error copy", () => {
+  const { PROMOTION_LANGUAGES } = load("../app/promotions/promotion-copy.ts");
+  const { PROMOTION_MIGRATION_COPY, promotionMigrationError } = load("../app/promotions/promotion-migration-copy.ts");
+  const codes = ["ProofInvalid", "Expired", "IdentityConflict", "LeaderConsentRequired", "TermsRequired", "PaymentUnverified",
+    "PaymentPrecedesSource", "Conflict", "PolicyDenied", "SourceChanged"];
+  assert.equal(Object.keys(PROMOTION_MIGRATION_COPY).length, PROMOTION_LANGUAGES.length);
+  const englishKeys = Object.keys(PROMOTION_MIGRATION_COPY.en).sort();
+  for (const [locale] of PROMOTION_LANGUAGES) {
+    const copy = PROMOTION_MIGRATION_COPY[locale];
+    assert.deepEqual(Object.keys(copy).sort(), englishKeys);
+    assert.ok(Object.values(copy).every(value => typeof value === "string" && value.trim()));
+    assert.notEqual(copy.pendingTitle, copy.completedTitle); assert.notEqual(copy.sourceConfirmedAt, copy.confirmedAt);
+    for (const suffix of codes) assert.ok(promotionMigrationError(`promotionMigration${suffix}`, locale));
+    assert.equal(promotionMigrationError("synthetic-private-proof-payload", locale), null);
+  }
+  assert.match(PROMOTION_MIGRATION_COPY["zh-Hans"].financeNote, /只迁移邀请关系/);
+  assert.match(PROMOTION_MIGRATION_COPY.en.paymentUnverified, /Do not make a replacement payment/);
 });
 
 test("all invitation locales explain public failure categories without exposing account details", () => {

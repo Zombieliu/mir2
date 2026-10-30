@@ -1,0 +1,20 @@
+{
+  "schema": "mir2.promotion-migration.component-visual-review.v1",
+  "scope": "Actual PromotionApp.tsx and its real CSS Modules bundled with existing esbuild; isolated browser; mock promotion APIs only",
+  "inspectedImages": [
+    "migration-pending-desktop.png",
+    "migration-completed-desktop.png",
+    "migration-pending-mobile.png"
+  ],
+  "findings": {
+    "desktopPendingEvidenceAndConsentReadable": true,
+    "desktopCompletedShowsDistinctLegacyAndCurrentTimeLabels": true,
+    "auditIdAndEvidenceDigestVisible": true,
+    "nonFinancialApprovalDisclosureVisible": true,
+    "mobileConsentAndDisabledButtonVisible": true,
+    "syntheticEvidenceWatermarkVisible": true
+  },
+  "nextServerAcceptanceClaimed": false,
+  "realBackendOrFinancialAcceptanceClaimed": false,
+  "productionSourcesChangedForHarness": false
+}
