@@ -107,6 +107,7 @@ async function ready(page, view = "earnings") {
   await page.getByRole("button", { name: "退出登录", exact: true }).waitFor();
   await page.getByRole("button", { name: "刷新", exact: true }).waitFor({ state: "visible" });
   if (view !== "members") await page.waitForFunction(() => document.querySelector("time")?.getAttribute("datetime"));
+  return response;
 }
 const refresh = page => page.getByRole("button", { name: "刷新", exact: true });
 const nav = (page, name) => page.locator("nav").getByRole("button", { name, exact: true });
@@ -131,7 +132,19 @@ async function check(name, operation) {
 
 try {
   const f = state(), desktop = await fixturePage(f), page = desktop.page;
-  await ready(page);
+  const initialDocument = await ready(page);
+  await check("SSR neutral timezone hydrates to the browser zone without mismatched text", async () => {
+    const html = await initialDocument.text();
+    const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/i)?.[1];
+    assert.ok(footer, "Expected an SSR footer in the initial document");
+    const footerText = footer.replace(/<[^>]*>/g, "");
+    assert.match(footerText, / · —/);
+    assert.doesNotMatch(footerText, /Asia\/Shanghai|\bUTC\b/,
+      "The SSR document must not bake in the server or browser timezone");
+    await page.waitForFunction(() => document.querySelector("footer")?.innerText.includes("Asia/Shanghai"));
+    assert.deepEqual(desktop.errors, [], "Timezone hydration must not raise React #418");
+    return { ssrTimezonePlaceholder: "—", browserTimezone: "Asia/Shanghai", hydrationErrors: 0 };
+  });
   await check("Chinese earnings remain available while payout execution is off", async () => {
     assert.equal(bootstrap(f).campaign.payoutEnabled, false);
     await page.getByText("本赛季累计佣金（待结算）", { exact: true }).waitFor();

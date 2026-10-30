@@ -124,6 +124,7 @@ function InvitationQr({ link, alt }: { link: string; alt: string }) {
 
 export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const [locale, setLocale] = useState<PromotionLocale>("en");
+  const [timeZone, setTimeZone] = useState("—");
   const [view, setView] = useState<View>("overview");
   const [bootstrap, setBootstrap] = useState<PromotionBootstrap | null>(null);
   const [loading, setLoading] = useState(true);
@@ -238,6 +239,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     const requestedLanguage = new URLSearchParams(location.search).get("lang");
     const initialLocale = normalizePromotionLocale(requestedLanguage || initial);
     setLocale(initialLocale);
+    setTimeZone(promotionTimezone());
     if (requestedLanguage) {
       try { localStorage.setItem("numeron-language", initialLocale); } catch { /* Optional language preference. */ }
     }
@@ -536,7 +538,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
 
         {view === "admin" ? canAdmin && bootstrap ? <PromotionAdmin copy={copy} accountCopy={accountCopy} locale={locale} busy={busy} write={write}
           campaignId={campaign?.campaignId || (typeof bootstrap.public?.campaignId === "string" ? bootstrap.public.campaignId : null)} onChanged={() => void refresh()} /> : <p className={styles.empty}>{copy.unavailableAction}</p> : null}
-        <footer className={styles.footer}><span>© NUMERON · {copy.program}</span><a href={`/${homeLocale}`}>{copy.home} ↗</a><span>{copy.timeZone} · {promotionTimezone()}</span></footer>
+        <footer className={styles.footer}><span>© NUMERON · {copy.program}</span><a href={`/${homeLocale}`}>{copy.home} ↗</a><span>{copy.timeZone} · {timeZone}</span></footer>
       </main>
     </div>
     {walletOpen ? <PromotionWalletLogin copy={copy} onClose={() => setWalletOpen(false)} onAuthenticated={() => { setWalletOpen(false); void refresh(); }} /> : null}

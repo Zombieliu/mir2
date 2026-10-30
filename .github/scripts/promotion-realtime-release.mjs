@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 const TEAM = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
 const BRANCH = 'codex/promotion-vercel-20261029';
 const WEB = { project: 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz', name: 'mir2-web3-web',
-  baseline: 'dpl_CYQVRcyaxmFERsYoeK9zqQ41vhbr', root: 'mir2-web3/apps/web' };
+  baseline: 'dpl_9ZJvkBjUxwrXy7hiqt8aG1aNZpnT', root: 'mir2-web3/apps/web' };
 const MAIN = { project: 'prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA', name: 'numeron-legend-of-rebirth',
   baseline: 'dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97' };
 const CAMPAIGN = 'numeron-playtest-20261029';
