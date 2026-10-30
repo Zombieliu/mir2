@@ -540,7 +540,7 @@ fn unknown_fault_classification_freezes_only_the_affected_zone_and_query_checks_
     assert_eq!(error.code, "commit_outcome_unknown");
     assert_eq!(
         server
-            .promotion_frozen_zones
+            .unknown_commit_frozen_zones
             .lock()
             .unwrap()
             .iter()
@@ -555,7 +555,7 @@ fn unknown_fault_classification_freezes_only_the_affected_zone_and_query_checks_
         "runtime"
     );
     assert!(!server
-        .promotion_frozen_zones
+        .unknown_commit_frozen_zones
         .lock()
         .unwrap()
         .contains("other-zone"));

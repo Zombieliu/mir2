@@ -92,6 +92,8 @@ use mir2_simulation::{
 
 #[path = "routing/zone_save_operation.rs"]
 mod zone_save_operation;
+#[path = "routing/zone_economy_guard.rs"]
+mod zone_economy_guard;
 #[cfg(test)]
 #[path = "routing/zone_save_operation_pg_tests.rs"]
 mod zone_save_operation_pg_tests;
@@ -2757,6 +2759,18 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         SharedTradeSettlementOutcome::Committed
     }
 
+    /// A durable service derives its write permit from the authoritative
+    /// runtime, never from the serializable recovery/execution context.
+    fn settle_trade_with_runtime(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.settle_trade_fenced(context, first, second)
+    }
+
     /// Retry a previously uncertain durable trade under its checkpointed
     /// context and key. See `retry_commit_fenced`.
     fn retry_trade_fenced(
@@ -2767,6 +2781,17 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         self.settle_trade_fenced(context, first, second)
+    }
+
+    fn retry_trade_with_runtime(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.retry_trade_fenced(context, expected_idempotency_key, first, second)
     }
 
     fn reconcile_ground_drop_projections_fenced(
@@ -10113,6 +10138,7 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             inventory_zone_id: zone_id.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
+            unresolved_economy_command: None,
             npc_owner_execution_slot: Arc::new(Mutex::new(
                 npc_population_binding::NpcOwnerExecutionSlot::default(),
             )),
@@ -10888,6 +10914,7 @@ struct SharedInProcessZoneSessionRuntime {
     inventory_zone_id: ZoneId,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
+    unresolved_economy_command: Option<zone_economy_guard::UnresolvedEconomyCommand>,
     // One process-local accepted execution; not part of world/account images.
     npc_owner_execution_slot: Arc<Mutex<npc_population_binding::NpcOwnerExecutionSlot>>,
     last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
@@ -11409,14 +11436,6 @@ impl SharedInProcessZoneSessionRuntime {
         outcome
     }
 
-    fn commit_account_inventory(
-        &mut self,
-        envelope: SharedAccountInventoryCommandEnvelope,
-    ) -> SharedAccountInventoryTransactionReceipt {
-        self.commit_account_inventory_outcome(envelope)
-            .into_receipt()
-    }
-
     fn bootstrap_account_inventory(&self) -> bool {
         self.account_inventory_service
             .bootstrap_fenced(&self.inner, self.economy_execution_context.as_ref())
@@ -11427,7 +11446,8 @@ impl SharedInProcessZoneSessionRuntime {
         first: &SharedTradeOffer,
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
-        self.account_inventory_service.settle_trade_fenced(
+        self.account_inventory_service.settle_trade_with_runtime(
+            &self.inner,
             self.economy_execution_context.as_ref(),
             first,
             second,
@@ -11441,7 +11461,8 @@ impl SharedInProcessZoneSessionRuntime {
         first: &SharedTradeOffer,
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
-        self.account_inventory_service.retry_trade_fenced(
+        self.account_inventory_service.retry_trade_with_runtime(
+            &self.inner,
             Some(recovery_context),
             expected_idempotency_key,
             first,
@@ -11544,20 +11565,20 @@ impl SharedInProcessZoneSessionRuntime {
             .expect("shared zone request sequence exhausted")
     }
 
-    fn execute_shared_gold_drop(&mut self, amount: u32) -> Vec<ServerPacket> {
+    fn execute_shared_gold_drop(&mut self, amount: u32) -> Result<Vec<ServerPacket>, String> {
         let Some(identity) = self.inner.active_identity() else {
-            return Vec::new();
+            return Ok(Vec::new());
         };
         let request_id = self.next_shared_economy_request_id();
         let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
             identity,
             command: SharedAccountInventoryCommand::GoldDrop { amount, request_id },
-        });
+        })?;
         debug_assert_eq!(
             receipt.kind,
             SharedAccountInventoryTransactionKind::GoldDrop
         );
-        receipt.packets
+        Ok(receipt.packets)
     }
 
     fn execute_shared_inventory_item_drop(
@@ -11565,21 +11586,26 @@ impl SharedInProcessZoneSessionRuntime {
         unique_id: u64,
         count: u16,
         hero_inventory: bool,
-    ) -> Option<Vec<ServerPacket>> {
-        let drop = self
+    ) -> Result<Option<Vec<ServerPacket>>, String> {
+        let Some(drop) = self
             .inner
-            .shared_inventory_item_drop(unique_id, count, hero_inventory)?;
-        let identity = self.inner.active_identity()?;
+            .shared_inventory_item_drop(unique_id, count, hero_inventory)
+        else {
+            return Ok(None);
+        };
+        let Some(identity) = self.inner.active_identity() else {
+            return Ok(None);
+        };
         let request_id = self.next_shared_economy_request_id();
         let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
             identity,
             command: SharedAccountInventoryCommand::InventoryItemDrop { drop, request_id },
-        });
+        })?;
         debug_assert_eq!(
             receipt.kind,
             SharedAccountInventoryTransactionKind::InventoryItemDrop
         );
-        Some(receipt.packets)
+        Ok(Some(receipt.packets))
     }
 
     fn filter_stale_owner_dead_entity_packets(&mut self, packets: &mut Vec<ServerPacket>) {
@@ -12912,6 +12938,7 @@ impl SharedInProcessZoneSessionRuntime {
         &mut self,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<Option<PreparedZoneTeardown>, String> {
+        self.ensure_resolved_economy_command()?;
         let Some(identity) = self.inner.active_identity() else {
             return Ok(None);
         };
@@ -13091,6 +13118,7 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn release_teardown_fence(&mut self) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         let Some(key) = self.current_presence_key() else {
             return Ok(());
         };
@@ -15355,12 +15383,15 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
+    // Successful legacy fixtures unwrap the same fallible dispatcher. Live
+    // commands call the observing dispatcher and propagate Unknown unchanged.
+    #[cfg(test)]
     fn execute_zone_native_player_attack(
         &mut self,
         attack: ZoneNativePlayerAttack,
     ) -> Vec<ServerPacket> {
         self.execute_zone_native_player_attack_observing(attack, None)
-            .expect("legacy native attack dispatch retains its infallible packet contract")
+            .expect("test native attack fixture must have a resolved execution")
     }
 
     fn execute_zone_native_player_attack_observing(
@@ -15495,7 +15526,7 @@ impl SharedInProcessZoneSessionRuntime {
                             request_id,
                             components,
                         },
-                    });
+                    })?;
                 if !receipt.committed {
                     return Ok(Vec::new());
                 }
@@ -17710,6 +17741,7 @@ impl SharedInProcessZoneSessionRuntime {
         mut npc_gold_buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
         mut native_attack_admission: Option<&mut Option<NativeAttackAdmission>>,
     ) -> Result<Vec<ServerPacket>, String> {
+        self.ensure_resolved_economy_command()?;
         if !matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
@@ -18315,9 +18347,9 @@ impl SharedInProcessZoneSessionRuntime {
         } else if let Some(partner_name) = shared_rental_partner {
             self.execute_shared_item_rental_request(partner_name)
         } else if let Some(amount) = shared_gold_drop_amount {
-            self.execute_shared_gold_drop(amount)
+            self.execute_shared_gold_drop(amount)?
         } else if let Some((unique_id, count, hero_inventory)) = shared_inventory_item_drop {
-            match self.execute_shared_inventory_item_drop(unique_id, count, hero_inventory) {
+            match self.execute_shared_inventory_item_drop(unique_id, count, hero_inventory)? {
                 Some(packets) => packets,
                 None => self.execute_personal_command(command)?,
             }
@@ -18339,7 +18371,7 @@ impl SharedInProcessZoneSessionRuntime {
                     native_attack_admission.as_deref_mut(),
                 )?
             } else {
-                self.execute_zone_native_player_attack(attack)
+                self.execute_zone_native_player_attack_observing(attack, None)?
             }
         } else if let Some(direction) = zone_mining_direction {
             self.execute_zone_native_mining(direction)
@@ -18746,6 +18778,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        self.ensure_resolved_economy_command()?;
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.prepare_character_handoff()
@@ -18755,6 +18788,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         &mut self,
         checkpoint: &CharacterHandoffCheckpoint,
     ) -> Result<CharacterHandoffCommitment, String> {
+        self.ensure_resolved_economy_command()?;
         let was_prepared = self.inner.active_identity().is_none();
         let result = (|| {
             self.inner.resume_character_handoff(checkpoint)?;
@@ -19274,16 +19308,19 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         &mut self,
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         self.inner.restore_active_character_checkpoint(checkpoint)
     }
 
     fn save_active_character(&mut self) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character()
     }
 
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character_for_logout()
@@ -19293,6 +19330,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         &mut self,
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         let key = self
             .current_presence_key()
             .ok_or("frozen shared teardown requires its prepared presence")?;
@@ -19704,6 +19742,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "zone_economy_adapter_tests.rs"]
+    mod zone_economy_adapter_tests;
     #[path = "cadence_map_transfer_tests.rs"]
     mod cadence_map_transfer_tests;
     #[path = "creature_authority_tests.rs"]
@@ -35003,6 +35043,7 @@ mod tests {
             inventory_zone_id: ZoneId::new("test-shared-zone"),
             npc_world_service,
             economy_execution_context: None,
+            unresolved_economy_command: None,
             npc_owner_execution_slot: Arc::new(Mutex::new(
                 super::npc_population_binding::NpcOwnerExecutionSlot::default(),
             )),

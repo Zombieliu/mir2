@@ -621,6 +621,16 @@ impl SimulationSession {
             .cloned()
     }
 
+    /// Trusted external-ledger authority from this runtime's existing source
+    /// binding. Checkpoints and client packets cannot provide or replace it.
+    pub fn zone_economy_write_permit(&self) -> Result<crate::ZoneEconomyWritePermit, String> {
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .zone_economy_write_permit()
+    }
+
     /// The authoritative host supplies the final frozen checkpoint and its RPC
     /// binding. Preparing stores an immutable operation, never a live save CAS.
     pub fn prepare_zone_save_operation(

@@ -675,6 +675,11 @@ impl InProcessWorldRuntime {
         }
     }
 
+    /// Trusted server capability for the external ledger's own transaction.
+    pub fn zone_economy_write_permit(&self) -> Result<crate::ZoneEconomyWritePermit, String> {
+        self.session.zone_economy_write_permit()
+    }
+
     pub fn character_handoff_commitment(
         &self,
         checkpoint: &CharacterHandoffCheckpoint,

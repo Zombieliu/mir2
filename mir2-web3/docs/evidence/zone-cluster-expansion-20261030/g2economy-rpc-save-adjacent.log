@@ -1,0 +1,30 @@
+    Finished `test` profile [unoptimized] target(s) in 0.39s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 22 tests
+test routing::zone_save_operation_pg_tests::hosted_zone_save_postgres_committed_receipt_survives_takeover_as_readonly_evidence ... ok
+test routing::zone_save_operation_pg_tests::hosted_zone_save_postgres_deferred_commit_rollback_unknown_stays_fenced_without_replay ... ok
+test routing::zone_save_operation_pg_tests::hosted_zone_save_postgres_full_shared_lifecycle_duplicate_and_fresh_runtime_query ... ok
+gateway transport_registration registration_id=1 stage=unregister phase=begin
+gateway transport_registration registration_id=1 stage=unregister phase=end elapsed_ms=0
+test routing::zone_save_operation_pg_tests::hosted_zone_save_postgres_real_tcp_lifecycle_and_new_host_query_admits_no_session ... ok
+test routing::zone_save_operation_pg_tests::hosted_zone_save_postgres_takeover_blocks_prepared_publication_and_retains_presence_fence ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_binding_extension_checks_version_shape_and_capability_tuple ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_binding_tamper_remains_mac_rejected_even_with_recomputed_hash ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_envelope_dispatches_remote_before_any_legacy_session_restore ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_journal_never_falls_back_to_legacy_file_save_and_blocks_login ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_legacy_v1_payload_retains_exact_canonical_hash_and_mac_bytes ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_pending_absent_or_unavailable_receipt_is_deferred_without_source_work ... ok
+test session::save_recovery::zone_save_operation_tests::remote_recovery_terminal_receipt_requires_exact_binding_identity_and_frozen_image ... ok
+test zone_rpc::zone_save_operation_tests::capability_requires_postgres_source_and_transactional_lease_without_world_admission ... ok
+test zone_rpc::zone_save_operation_tests::checked_receipts_roundtrip_both_codecs_and_writes_submit_only_binding ... ok
+test zone_rpc::zone_save_operation_tests::legacy_or_multi_endpoint_and_foreign_bindings_fail_before_contact ... ok
+test zone_rpc::zone_save_operation_tests::malformed_bindings_reject_before_capability_or_world_admission ... ok
+test zone_rpc::zone_save_operation_tests::malformed_or_foreign_receipt_never_establishes_commitment ... ok
+test zone_rpc::zone_save_operation_tests::prepare_persist_release_reply_loss_is_unknown_and_never_retried ... ok
+test zone_rpc::zone_save_operation_tests::query_is_readonly_control_and_mutations_cannot_use_retrying_helper ... ok
+test zone_rpc::zone_save_operation_tests::real_loopback_host_without_capability_rejects_both_codecs_without_creating_runtime ... ok
+test zone_rpc::zone_save_operation_tests::transactional_owner_rejects_legacy_save_before_world_admission ... ok
+test zone_rpc::zone_save_operation_tests::unknown_fault_classification_freezes_only_the_affected_zone_and_query_checks_auth_first ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 1457 filtered out; finished in 10.03s

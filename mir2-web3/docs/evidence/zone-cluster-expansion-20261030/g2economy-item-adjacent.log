@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized] target(s) in 0.37s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 2 tests
+test routing::tests::shared_drop_aoi_tests::shared_item_aoi_leave_preserves_global_drop_and_reentry_projection ... ok
+test routing::tests::shared_drop_aoi_tests::shared_item_real_pickup_removes_zone_object_and_global_drop ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1477 filtered out; finished in 2.35s

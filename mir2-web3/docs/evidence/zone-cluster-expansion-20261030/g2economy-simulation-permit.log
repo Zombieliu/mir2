@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized] target(s) in 0.67s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 7 tests
+test config::zone_economy_fence::tests::zone_economy_permit_matches_exact_zone_generation_without_granting_new_authority ... ok
+test config::zone_economy_fence::tests::zone_economy_permit_matches_full_database_configuration_and_account_namespace ... ok
+test config::zone_economy_fence::tests::zone_economy_permit_redacts_configuration_and_is_not_issued_from_operation_scoped_config ... ok
+test config::zone_economy_fence::tests::zone_economy_permit_requires_existing_bound_postgres_source_and_no_file_or_mirror ... ok
+test config::zone_economy_fence::tests::zone_economy_permit_runtime_getter_uses_the_runtime_source_binding_and_shared_freeze ... ok
+test config::zone_economy_fence::tests::zone_economy_permit_unknown_freezes_shared_source_clones_but_preserves_readonly_binding ... ok
+test config::zone_economy_fence::tests::zone_economy_permit_unknown_keeps_prior_freeze_but_never_returns_prior_private_detail ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 3093 filtered out; finished in 0.19s

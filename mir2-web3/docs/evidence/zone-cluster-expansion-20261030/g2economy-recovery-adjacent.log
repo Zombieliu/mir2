@@ -1,0 +1,49 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 35 tests
+test session::save_recovery::tests::atomic_publish_never_overwrites_an_existing_final_path ... ok
+test session::save_recovery::tests::atomic_publish_rejects_temp_replacement_and_preserves_both_files ... ok
+[save-recovery] status=quarantined transport=recovery-replay count=1 detail=identity-mismatch
+test session::save_recovery::tests::authenticated_filename_identity_mismatch_blocks_payload_and_claimed_accounts ... ok
+test session::save_recovery::tests::authenticated_final_replacement_is_rejected_before_store_receipt ... ok
+test session::save_recovery::tests::directory_durability_marker_and_active_temp_are_ignored_by_journal_scans ... ok
+test session::save_recovery::tests::entry_limit_rejects_without_silent_eviction ... ok
+[save-recovery] status=saved transport=recovery-replay count=1 detail=journal checkpoint committed to account store
+test session::save_recovery::tests::journal_is_secret_free_idempotent_and_replays_before_cleanup ... ok
+[save-recovery] status=quarantined transport=recovery-replay count=2 detail=state-conflict
+test session::save_recovery::tests::newer_durable_state_is_quarantined_instead_of_overwritten ... ok
+test session::save_recovery::tests::path_swap_during_open_is_rejected_by_stable_identity_check ... ok
+test session::save_recovery::tests::postgres_style_config_uses_explicit_recovery_directory ... ok
+test session::save_recovery::tests::postgres_style_startup_without_recovery_directory_is_rejected ... ok
+test session::save_recovery::tests::publication_final_and_different_temp_fails_closed_without_cleanup ... ok
+test session::save_recovery::tests::publication_final_and_same_hard_link_temp_fails_closed_and_retains_evidence ... ok
+test session::save_recovery::tests::publication_temp_only_is_promoted_idempotently ... ok
+test session::save_recovery::tests::record_size_limit_rejects_before_creating_a_file ... ok
+test session::save_recovery::tests::recovery_directory_cannot_overlap_account_store_parent ... ok
+test session::save_recovery::tests::recovery_enabled_without_dedicated_mac_key_is_rejected_before_directory_adoption ... ok
+test session::save_recovery::tests::recovery_path_comparison_resolves_missing_descendants_without_creating_them ... ok
+test session::save_recovery::tests::recovery_publication_source_has_no_link_then_unlink_fallback ... ok
+test session::save_recovery::tests::recovery_root_below_a_symlink_or_reparse_ancestor_is_rejected ... ok
+test session::save_recovery::tests::recovery_root_replacement_is_blocked_or_detected_by_stable_identity ... ok
+test session::save_recovery::tests::replacement_after_authenticated_read_blocks_commit_cleanup ... ok
+test session::save_recovery::tests::replacement_after_authenticated_read_blocks_quarantine_move ... ok
+test session::save_recovery::tests::second_independent_manager_cannot_lock_same_recovery_directory ... ok
+test session::save_recovery::tests::symlink_or_reparse_journal_entry_is_rejected_without_following ... ok
+test session::save_recovery::tests::tamper_with_recomputed_sha_is_rejected_by_mac_without_quarantining_untrusted_bytes ... ok
+[save-recovery] status=saved transport=recovery-replay count=2 detail=journal checkpoint was already committed
+test session::save_recovery::tests::transport_recovery_lost_save_ack_keeps_dead_character_and_learned_skill_exactly_once ... ok
+[save-recovery] status=saved transport=recovery-replay count=3 detail=journal checkpoint committed to account store
+[save-recovery] status=saved transport=recovery-replay count=4 detail=journal checkpoint was already committed
+[save-recovery] status=saved transport=recovery-replay count=5 detail=journal checkpoint was already committed
+[save-recovery] status=saved transport=recovery-replay count=6 detail=journal checkpoint was already committed
+test session::save_recovery::tests::transport_recovery_preserves_running_refine_and_buff_bytes_across_primary_save_and_replay ... ok
+test session::save_recovery::tests::unowned_nonempty_directory_fails_closed_without_moving_unrelated_content ... ok
+test session::save_recovery::tests::windows_full_file_id_detects_path_replacement_while_original_handle_is_held ... ok
+test session::save_recovery::tests::windows_path_regressions::drive_and_unc_slashes_are_normalized_before_verbatim_prefix ... ok
+test session::save_recovery::tests::windows_path_regressions::durable_rename_accepts_forward_slash_and_mixed_nonexistent_destination ... ok
+test session::save_recovery::tests::windows_path_regressions::embedded_nul_is_rejected_without_native_path_truncation ... ok
+test session::save_recovery::tests::windows_path_regressions::existing_extended_paths_and_utf16_are_preserved_exactly ... ok
+test session::save_recovery::tests::windows_path_regressions::relative_paths_and_dot_components_do_not_need_existing_targets ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 1444 filtered out; finished in 2.39s

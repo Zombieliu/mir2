@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存 fence、Host 冻结快照与持久回执、显式 lease RPC、只读恢复及 Execute Unknown promotion freeze；本片与相邻回归293通过、1既有忽略。外部 economy 普通提交/bootstrap/trade 的同事务 fence，以及 Prepared/Unknown 的受控恢复仍未完成；旧 NPC 的另一连接 callback guard 不能当作原子屏障 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存及外部 economy bootstrap/transact/trade fence、可信 runtime permit、Host 保存回执及 Unknown 隔离。本轮347次选定检查通过、8项既有忽略，包含10个真实PG经济函数。完整 source/world custody、重启后的 Unknown 受控恢复仍未完成；不能据此启动迁移或宣称容量 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -105,3 +105,29 @@ Gateway 的恢复日志新增可选、版本化的 remote operation 绑定，仍
 真实 deferred COMMIT 拒绝验证的是实际回滚后的保守 Unknown；实际提交后丢确认使用 store 测试 hook，TCP 丢回包使用脚本对端，两者不冒称原生数据库网络故障。完整源快照/CAS、只读换主查询及重复提交在真实 PG 验证；没有验证整张战斗地图迁移或5000人吞吐。测试集群核对二进制/PID/数据目录后干净停止，仅保留已有 reader 权限反例 schema，未动远程测试服、公网更新或 Docker。
 
 **下一片仍属 G2。** 只读审计确认 `apps/gateway/src/economy.rs::PostgresEconomyStore::transact_with_source(None)` 的普通余额/物品提交与 trade，以及 `bootstrap_character`，尚未在同一事务锁定完整 owner/epoch。context 的 generation 和提交前路由验证不能替代该锁。prepared-kill 的 complete-source participant 已接原保存 fence，但更早的 bootstrap 和普通 ledger COMMIT 仍有缺口；稍后保存 projection 的 fence 也不能补保护已发生的 ledger COMMIT。下一步先补服务端可信 fence capability、生产 bootstrap/transact/trade 的同事务锁、旧回执只读查询和故障用例，再做 Prepared/Unknown 受控恢复，随后进入 G3。
+
+## G2 第三片：外部经济事务权限与未知结果隔离
+
+上节末尾的外部 ledger 屏障缺口已在本片补齐，G2 整体仍开放。simulation 仅从已经可信绑定的 PG SourceOfTruth runtime 签发不可序列化的 `ZoneEconomyWritePermit`，其 Debug 隐去权限资料。permit 固定完整源库连接配置（包括 namespace/options）、Zone、owner 和原 fencing token；序列化的 execution context、角色快照或 Gateway 的路由结果都不能签发或更换它。File/Mirror、未绑定 runtime、不同源库或已进入冻结保存操作的配置不得作为新经济写入权限。
+
+生产 `PostgresEconomyAccountInventoryService` 的 bootstrap、普通事务、prepared-kill 和 trade 均从真实 runtime 获得 permit。新事务在同一连接中先锁公共 lease 行，以数据库时钟核对完整 owner/token/有效期，再取得经济、Guild 和账号锁，直到 COMMIT 才释放。事务设置250ms锁等待、2s语句和5s空闲事务限制；fenced worker 不执行 migrations。原始 store API 保留给显式管理/fixture 边界，正常服务不回落这些 API。只给 context 的旧 trade 接口在真实 PG 服务中拒绝新写入，新增 runtime-aware 接口保留原始重试 context。
+
+精确匹配的既有回执可在换主、旧代次或共享写冻结后只读查询；查不到回执不代表未知提交可以重放。所有 fenced COMMIT 错误都冻结共享源配置并返回 Unknown；原操作编号和 context 保留，重试只查账，不重做 bootstrap、资产提交或补偿。bootstrap 的已存在回执也只读核对完整 details/digest，不能用新的 runtime 快照重建期初账本。
+
+修复了普通 GoldDrop、ItemDrop、技能耗材路径把 Unknown 压成普通失败回执后仍执行 shared pipeline 尾部的问题：现在保留原 envelope，撤销该 presence 的移动/展示入场，返回固定 Unknown，阻止候选掉落发布、技能后续执行、保存、交接与解冻。Host 的 Unknown 集合与临时 promotion-readiness 集合分离，不再随 readiness TTL 被清除；同 Zone 的新写入、迁移、晋升、状态安装和可权威恢复的快照导出均阻断。Health 和原编号保存回执查询保持只读可用。
+
+本片没有新增数据库迁移，依赖已有源库/经济表、0003 lease 表及已记录的0020保存回执迁移。部署准备须预先迁移并配置可信绑定；旧的未绑定/File/Mirror PG 经济服务不会被静默授权。回退不得通过恢复弱 writer、清 lease、删回执或删除未决操作恢复可用性。本片仅提交实验分支，没有更新测试服、公网频道或 Docker。
+
+[新鲜证据](evidence/zone-cluster-expansion-20261030/README.md#g2-external-economy-fence-and-unknown-containment-checkpoint)记录23组、51个相同源码哈希、347次通过的选定检查（相邻过滤器可重叠，不是独立覆盖数）、8项既有忽略及 Gateway bins check。26个新增用例含7个 permit、12个经济测试（10个真实PG、2个纯检查）、3个 routing 和4个 Host Unknown 用例。两项真实 PG strict prepared-kill 验证完整源快照/ledger/outbox 同事务、NoGuild 经验、重登、重复与未知提交；不冒称已运行旧的7项 legacy prepared-kill fixture。隔离 PG 最终 lease/保存回执行均为0，无其他客户端，仅保留既有权限反例 schema，核对 PID/二进制/目录后干净停止。
+
+**下一个必须完成的部分是持久世界资产恢复，而非直接进入自动调度。** 当前 Unknown envelope、Host freeze 和不确定 key 集合仍在进程内；没有持久证据不能自动解冻。普通玩家丢物仍是 ledger、个人 projection/save、共享掉落发布的分步流程，崩溃可能发生在这些步骤之间。完整装备载体已有 `exact_item`，但只登记 Spawn/Applied 不足以恢复：重启后的 object_id/drop_generation 变化会使同一掉落变成新的拾取经济身份。
+
+后续完整实现必须一起覆盖：
+
+1. 在资产扣减前冻结原 owner/代次、完整 before/after source、逻辑地图、合法落点、绝对有效期、完整装备实例及独立 `world_effect_id`；按 epoch 隔离操作编号。源快照、ledger、typed intent 和回执在同一源事务提交。
+2. 共享 Zone 按不可变 effect ID 幂等发布；不依赖原玩家在线。所有仍存活的效果都能恢复，Applied 不能从重启枚举中消失；过期不重置 TTL。
+3. 拾取用 effect ID 绑定经济身份，保留临时 generation 的 ABA 校验，并在同一拾取事务终结原 effect；旧 checkpoint 不能复活已经消耗的掉落。完整/拆堆 UID 和全部装备属性沿用既有规则。
+4. 新 owner 在 quiesced 状态核对原操作与当前 canonical PG save，恢复/剔除世界资产并持久回执后才允许晋升。当前 replica persistence 的旧快照 seed 不能覆盖较新的 SourceOfTruth 角色。journal 必须记录冻结结果；standby 不重跑扣减、选落点或访问 PG。
+5. 验证 Prepared、COMMIT后未发布、已发布未ack、已ack未checkpoint、拾取COMMIT后未交付，以及旧快照/新Host/无原Session恢复等崩溃点；Unknown 未决时继续阻断。
+
+这之后仍有技能耗材与已接受世界动作的持久耦合、其他 Unknown 受控恢复，以及 G3–G7 完整迁移、跨入口恢复、调度和真实容量测试；不能把本片的安全拒写当作这些目标完成。

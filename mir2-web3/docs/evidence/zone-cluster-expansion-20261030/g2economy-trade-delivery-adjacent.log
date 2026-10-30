@@ -1,0 +1,21 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+
+running 3 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+gateway lifecycle session_id=gateway-94956-1793371003354-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94956-1793371003354-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94956-1793371003353-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94956-1793371003353-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_commits_trade_through_economy_boundary ... ok
+gateway lifecycle session_id=gateway-94956-1793371005733-4 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94956-1793371005733-4 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94956-1793371005732-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94956-1793371005732-3 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_commits_two_sided_item_rental_delivery ... ok
+gateway lifecycle session_id=gateway-94956-1793371007845-6 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94956-1793371007845-6 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-94956-1793371007844-5 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-94956-1793371007844-5 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_commits_two_sided_trade_delivery ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1476 filtered out; finished in 6.84s

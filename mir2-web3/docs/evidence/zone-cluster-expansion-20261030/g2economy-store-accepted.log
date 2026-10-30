@@ -1,0 +1,57 @@
+    Finished `test` profile [unoptimized] target(s) in 45.40s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 51 tests
+test economy::prepared_kill::tests::prepared_kill_postgres_actual_runtime_source_and_ledger_retry_relogin ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL
+test economy::prepared_kill::tests::prepared_kill_postgres_commit_error_is_never_a_definite_retry_receipt ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL
+test economy::prepared_kill::tests::prepared_kill_postgres_mirror_file_failure_keeps_committed_ledger_and_durable_fence ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL
+test economy::prepared_kill::tests::prepared_kill_postgres_source_guild_ledger_rollback_and_exact_checkpoint_replay ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL
+test economy::prepared_kill::tests::prepared_kill_postgres_source_of_truth_runtime_and_ledger_retry_relogin ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL
+test economy::prepared_kill::tests::prepared_kill_postgres_two_connections_only_publish_source_once ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL; independent connections
+test economy::prepared_kill::tests::prepared_kill_postgres_zero_xp_still_commits_source_and_fences_new_writes ... ignored, requires dedicated MIR2_GUILD_TEST_DATABASE_URL
+test economy::tests::business_effect_id_ignores_attempt_fields_but_binds_payload ... ok
+test economy::tests::commit_ack_error_with_lookup_failure_returns_ground_outcome_unknown ... ok
+test economy::tests::commit_ack_error_with_lookup_failure_returns_trade_outcome_unknown ... ok
+test economy::tests::committed_ground_drop_survives_full_projection_and_reconciles_later ... ok
+test economy::tests::committed_then_ack_error_ground_pickup_recovers_exactly_once ... ok
+test economy::tests::committed_then_ack_error_trade_recovers_by_lookup_and_keeps_projections_pending ... ok
+test economy::tests::corrupted_duplicate_receipt_fields_fail_closed ... ok
+test economy::tests::delayed_commit_visibility_is_resolved_before_absent_can_be_observed ... ok
+test economy::tests::durable_commit_before_projection_replays_under_new_context_exactly_once ... ok
+test economy::tests::durable_marked_pickup_bypasses_capacity_preflight_after_state_changes ... ok
+test economy::tests::durable_projection_marker_prevents_replay_after_offsetting_transaction ... ok
+test economy::tests::durable_trade_rows_reconcile_each_party_after_ledger_commit_and_retry_mark ... ok
+test economy::tests::event_id_is_deterministic_and_binds_the_fence ... ok
+test economy::tests::gateway_ground_projection_save_failure_rolls_back_then_retries_once ... ok
+test economy::tests::ground_bootstrap_unknown_stays_unknown_when_retry_receipt_is_absent ... ok
+test economy::tests::ground_drop_projection_mark_failure_retries_without_double_credit ... ok
+test economy::tests::ground_initial_lookup_failure_stays_unknown_when_retry_receipt_is_absent ... ok
+test economy::tests::ground_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key ... ok
+test economy::tests::missing_context_ground_drop_is_explicitly_deferred_without_store_access ... ok
+test economy::tests::missing_context_trade_is_explicitly_deferred_without_store_access ... ok
+test economy::tests::pending_trade_projection_query_failure_fails_closed ... ok
+test economy::tests::player_gold_and_item_drops_map_to_fenced_debits ... ok
+test economy::tests::player_trade_maps_gold_and_item_quantities_to_conserved_ledger_legs ... ok
+test economy::tests::reused_idempotency_key_with_changed_payload_fails_closed ... ok
+test economy::tests::skill_consumption_maps_exact_runtime_components_to_negative_ledger_legs ... ok
+test economy::tests::stale_cross_player_reclaim_keeps_original_ground_projection_pending ... ok
+test economy::tests::stale_cross_player_reclaim_removes_drop_without_second_credit ... ok
+test economy::tests::standby_context_cannot_authorize_an_external_commit ... ok
+test economy::tests::store_failure_before_commit_leaves_ledger_and_projection_unchanged ... ok
+test economy::tests::trade_requires_two_sided_asset_conservation ... ok
+test economy::tests::trade_retry_rejects_regenerated_zone_key_before_store_and_uses_original_key ... ok
+test economy::tests::zone_gold_pickup_binds_business_key_fence_and_source_sequence ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_fixture_and_wrong_database_binding_reject_before_connect ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_permissionless_service_rejects_forged_context_without_store_connection ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_actual_service_gold_claim_uses_runtime_permit_and_denies_stale_owner ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_bootstrap_gold_item_skill_and_trade_with_current_owner ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_commit_unknown_freezes_no_receipt_retry_but_old_receipt_stays_readable ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_lease_lock_survives_until_actual_commit ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_prepared_kill_source_ledger_replay_relogin_and_stale_owner ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_prepared_kill_unknown_freezes_source_and_absent_receipt_retry ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_runtime_trade_override_requires_permit_and_has_no_legacy_fallback ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_runtime_trade_unknown_none_receipt_never_retries_publication ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_stale_owner_token_expiry_missing_lease_and_schema_write_nothing ... ok
+test economy::zone_fence_pg_tests::economy_zone_fence_postgres_terminated_commit_backend_rolls_back_every_asset_and_receipt ... ok
+
+test result: ok. 44 passed; 0 failed; 7 ignored; 0 measured; 1428 filtered out; finished in 48.80s

@@ -70,6 +70,9 @@ pub const ZONE_RPC_ZONE_SAVE_OPERATIONS_V1: &str = "zoneSaveOperationsV1";
 #[path = "zone_rpc/native_attack_tests.rs"]
 mod native_attack_tests;
 #[cfg(test)]
+#[path = "zone_rpc/unknown_economy_freeze_tests.rs"]
+mod unknown_economy_freeze_tests;
+#[cfg(test)]
 #[path = "zone_rpc/zone_save_operation_tests.rs"]
 mod zone_save_operation_tests;
 pub const DEFAULT_ZONE_RPC_MAX_FRAME_BYTES: usize = 16 * 1024 * 1024;
@@ -3129,6 +3132,9 @@ pub struct ZoneHostServer {
     promotion_readiness: Mutex<BTreeMap<String, ZonePromotionReadinessRecord>>,
     quiesced_zones: Mutex<BTreeSet<String>>,
     promotion_frozen_zones: Mutex<BTreeSet<String>>,
+    // Unknown source commits have no TTL and must never share the readiness
+    // lifecycle. Only explicit durable recovery can resolve these outcomes.
+    unknown_commit_frozen_zones: Mutex<BTreeSet<String>>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
     zone_capacity: usize,
@@ -3308,6 +3314,7 @@ impl ZoneHostServer {
             promotion_readiness: Mutex::new(BTreeMap::new()),
             quiesced_zones: Mutex::new(BTreeSet::new()),
             promotion_frozen_zones: Mutex::new(BTreeSet::new()),
+            unknown_commit_frozen_zones: Mutex::new(BTreeSet::new()),
             auth_token,
             limits,
             zone_capacity: zone_capacity.max(1),
@@ -3599,11 +3606,40 @@ impl ZoneHostServer {
         self.owner_ids.contains(owner_id)
     }
 
+    fn require_known_zone_commit(&self, zone_id: &str) -> Result<(), ZoneRpcFault> {
+        if self
+            .unknown_commit_frozen_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "unknown commit freeze mutex poisoned"))?
+            .contains(zone_id)
+        {
+            return Err(ZoneRpcFault::new(
+                "commit_outcome_unknown",
+                "ZONE_COMMIT_OUTCOME_UNKNOWN: Zone requires explicit durable reconciliation",
+            ));
+        }
+        Ok(())
+    }
+
+    fn require_all_zone_commits_known(&self) -> Result<(), ZoneRpcFault> {
+        if !self
+            .unknown_commit_frozen_zones
+            .lock()
+            .map_err(|_| ZoneRpcFault::new("internal", "unknown commit freeze mutex poisoned"))?
+            .is_empty()
+        {
+            return Err(ZoneRpcFault::new("commit_outcome_unknown",
+                "ZONE_COMMIT_OUTCOME_UNKNOWN: host checkpoint requires explicit durable reconciliation"));
+        }
+        Ok(())
+    }
+
     fn quiesce_for_promotion_locked(
         &self,
         zone_id: &ZoneId,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<ZoneQuiesceReceipt, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         if owner_lease.zone_id() != zone_id {
             return Err(ZoneRpcFault::new(
                 "zone_mismatch",
@@ -3654,6 +3690,7 @@ impl ZoneHostServer {
         zone_id: &ZoneId,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<(), ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         if owner_lease.zone_id() != zone_id || !self.accepts_owner_id(owner_lease.owner_id()) {
             return Err(ZoneRpcFault::new(
                 "resume_owner_mismatch",
@@ -3702,6 +3739,7 @@ impl ZoneHostServer {
         source_observed_at_ms: u64,
         max_lag_ms: u64,
     ) -> Result<ZonePromotionReadiness, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         if active_head.version != ZONE_REPLICATION_HEAD_VERSION {
             return Err(ZoneRpcFault::new(
                 "promotion_head_version",
@@ -3880,6 +3918,7 @@ impl ZoneHostServer {
         readiness_id: &str,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<ZonePromotionReceipt, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         self.promotion_attempts_total
             .fetch_add(1, Ordering::Relaxed);
         if readiness_id.trim().is_empty() {
@@ -4271,7 +4310,7 @@ impl ZoneHostServer {
 
     fn classify_zone_runtime_error(&self, zone_id: &str, message: String) -> ZoneRpcFault {
         if message.contains("COMMIT_OUTCOME_UNKNOWN") {
-            if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+            if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
                 frozen.insert(zone_id.to_string());
             }
         }
@@ -4378,7 +4417,9 @@ impl ZoneHostServer {
 
         let request = envelope.request;
         if matches!(&request, ZoneRpcRequest::SaveActiveCharacter)
-            && self.owner_lease_authority.requires_transactional_zone_save_fence()
+            && self
+                .owner_lease_authority
+                .requires_transactional_zone_save_fence()
         {
             return Err(ZoneRpcFault::new(
                 "unsupported_capability",
@@ -4496,6 +4537,22 @@ impl ZoneHostServer {
         self.zone_gate_wait_duration_ns_max
             .fetch_max(gate_wait_duration_ns, Ordering::Relaxed);
         self.prune_expired_promotion_readiness(unix_now_ms())?;
+        if zone_rpc_request_requires_active_mutation(&request)
+            || matches!(
+                &request,
+                ZoneRpcRequest::RestoreActiveCharacterCheckpoint { .. }
+                    | ZoneRpcRequest::InstallBaseSnapshot { .. }
+                    | ZoneRpcRequest::CompactMutationJournal { .. }
+                    | ZoneRpcRequest::ApplyMutationBatch { .. }
+                    | ZoneRpcRequest::AssessPromotionReadiness { .. }
+                    | ZoneRpcRequest::PromoteReplica { .. }
+                    | ZoneRpcRequest::QuiesceForPromotion { .. }
+                    | ZoneRpcRequest::ResumeAfterQuiesce { .. }
+                    | ZoneRpcRequest::InstallHostCheckpoint { .. }
+            )
+        {
+            self.require_known_zone_commit(&envelope.zone_id)?;
+        }
         let replica_is_read_only = zone_rpc_request_requires_active_session(&request)
             && self
                 .runtime_factory
@@ -4563,6 +4620,7 @@ impl ZoneHostServer {
                         .lock()
                         .map_err(|_| ZoneRpcFault::new("internal", "freeze mutex poisoned"))?
                         .contains(&envelope.zone_id);
+                let blocked = blocked || self.require_known_zone_commit(&envelope.zone_id).is_err();
                 if blocked {
                     return Ok(ZoneRpcPayload::Bool { value: false });
                 }
@@ -4875,7 +4933,7 @@ impl ZoneHostServer {
                                 closed: false, zone_tick_ms: None,
                             }).map_err(|error| format!("NPC purchase checkpoint journal publication failed: {error:?}")));
                         if let Err(detail) = recorded {
-                            if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                            if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
                                 frozen.insert(zone_id.to_string());
                             }
                             result = Err(crate::npc_purchase_owner_route::failure(detail, known));
@@ -4883,7 +4941,7 @@ impl ZoneHostServer {
                     } else if matches!(&result, Err(NpcPurchaseDurableError::Unknown { .. })) {
                         // No replica may be promoted past an unrecorded unknown
                         // source commit. Original-ID read-only recovery remains.
-                        if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                        if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
                             frozen.insert(zone_id.to_string());
                         }
                     }
@@ -5101,7 +5159,10 @@ impl ZoneHostServer {
                 })
             }
             ZoneRpcRequest::SaveActiveCharacter => {
-                if self.owner_lease_authority.requires_transactional_zone_save_fence() {
+                if self
+                    .owner_lease_authority
+                    .requires_transactional_zone_save_fence()
+                {
                     return Err(ZoneRpcFault::new(
                         "unsupported_capability",
                         "transactional owners require zoneSaveOperationsV1",
@@ -5170,7 +5231,7 @@ impl ZoneHostServer {
             Ok(execution) => execution,
             Err(error) => {
                 if matches!(&error, NativeAttackError::Unknown(_)) {
-                    if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+                    if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
                         frozen.insert(zone_id.to_string());
                     }
                 }
@@ -5193,7 +5254,7 @@ impl ZoneHostServer {
             Ordering::Relaxed,
         );
         if let Err(error) = recorded {
-            if let Ok(mut frozen) = self.promotion_frozen_zones.lock() {
+            if let Ok(mut frozen) = self.unknown_commit_frozen_zones.lock() {
                 frozen.insert(zone_id.to_string());
             }
             return Err(NativeAttackError::Unknown(format!(
@@ -5361,6 +5422,7 @@ impl ZoneHostServer {
         requested_zone_id: &str,
         snapshot: &ZoneBaseSnapshot,
     ) -> Result<usize, ZoneRpcFault> {
+        self.require_known_zone_commit(requested_zone_id)?;
         if snapshot.zone_id != requested_zone_id {
             return Err(ZoneRpcFault::new(
                 "zone_mismatch",
@@ -5401,6 +5463,7 @@ impl ZoneHostServer {
     }
 
     fn export_host_checkpoint(&self) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        self.require_all_zone_commits_known()?;
         let started = Instant::now();
         let journal = self
             .journal
@@ -5492,6 +5555,7 @@ impl ZoneHostServer {
     }
 
     fn export_base_snapshot(&self, zone_id: &ZoneId) -> Result<ZoneRpcPayload, ZoneRpcFault> {
+        self.require_known_zone_commit(zone_id.as_str())?;
         let head = self
             .journal
             .lock()
@@ -5553,6 +5617,7 @@ impl ZoneHostServer {
         requested_zone_id: &str,
         snapshot: &ZoneBaseSnapshot,
     ) -> Result<(), ZoneRpcFault> {
+        self.require_known_zone_commit(requested_zone_id)?;
         snapshot.verify().map_err(|error| {
             ZoneRpcFault::new(
                 "base_snapshot_invalid",
@@ -5776,6 +5841,7 @@ impl ZoneHostServer {
         requested_zone_id: &str,
         batch: &ZoneMutationBatch,
     ) -> Result<(), ZoneRpcFault> {
+        self.require_known_zone_commit(requested_zone_id)?;
         batch.verify().map_err(|error| {
             ZoneRpcFault::new(
                 "mutation_batch_invalid",
@@ -5920,6 +5986,7 @@ impl ZoneHostServer {
     }
 
     fn install_host_checkpoint(&self, bytes: &[u8]) -> Result<(), ZoneRpcFault> {
+        self.require_all_zone_commits_known()?;
         let started = Instant::now();
         let checkpoint: WireZoneHostCheckpoint =
             serde_json::from_slice(bytes).map_err(|error| {

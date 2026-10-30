@@ -191,6 +191,8 @@ pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
 pub mod zone_save_fence;
 #[path = "config/zone_save_operation.rs"]
 pub mod zone_save_operation;
+#[path = "config/zone_economy_fence.rs"]
+pub mod zone_economy_fence;
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 pub use prepared_kill::{
