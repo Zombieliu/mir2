@@ -20,6 +20,32 @@ function load(path, extras = {}) {
     require: spec => ["../../lib/promotion-season-context", "./promotion-season-context"].includes(spec) ? load("../lib/promotion-season-context.ts") : require(spec), ...extras });
   return module.exports;
 }
+
+test("rendered commission disclosure follows the selected campaign rule in every locale", () => {
+  const { PROMOTION_LANGUAGES } = load("../app/promotions/promotion-copy.ts");
+  const earnings = load("../app/promotions/promotion-earnings-copy.ts");
+  const { PromotionRevenueBasis } = load("../app/promotions/promotion-app.tsx", { require: spec =>
+    spec === "./promotion-earnings-copy" ? earnings : spec === "./promotion-copy" || spec === "./promotion-model" ||
+    spec === "./promotion-account-copy" || spec === "./promotion-migration-copy" || spec === "./promotion-refresh" ||
+    spec === "./promotion-wallet-login" || spec === "./promotion-admin" || spec === "./promotion-billing" ? {} :
+    spec.endsWith(".module.css") ? { default: new Proxy({}, { get: (_, key) => String(key) }) } : require(spec) });
+  assert.equal(renderToStaticMarkup(createElement(PromotionRevenueBasis, { campaign: null, locale: "en" })), "");
+  for (const [locale] of PROMOTION_LANGUAGES) {
+    const copy = earnings.PROMOTION_EARNINGS_COPY[locale];
+    for (const policy of [undefined, "monthly_service_prorated", "monthly_purchase_full", "unknown"]) {
+      const campaign = { rules: { ...(policy === undefined ? {} : { revenueRecognition: policy }) } };
+      const html = renderToStaticMarkup(createElement(PromotionRevenueBasis, { campaign, locale }));
+      const full = policy === "monthly_purchase_full";
+      assert.ok(html.includes(`data-promotion-revenue-basis="${full ? "monthly_purchase_full" : "monthly_service_prorated"}"`));
+      for (const text of [copy.revenueBasis, full ? copy.monthlyPurchaseFull : copy.monthlyServiceProrated, copy.revenueAdjustments]) {
+        // Compare actual text through React escaping, including apostrophes in translated copy.
+        assert.ok(html.includes(renderToStaticMarkup(createElement("span", null, text)).slice(6, -7)), `${locale}: ${policy}`);
+      }
+      assert.ok(!html.includes(full ? copy.monthlyServiceProrated : copy.monthlyPurchaseFull), locale);
+    }
+  }
+});
+
 function fixture({ network = "testnet", anonymous = false, bound = true, payload = { accepted: true } } = {}) {
   const calls = [];
   const fail = (status, code) => { throw Object.assign(new Error(code), { status }); };

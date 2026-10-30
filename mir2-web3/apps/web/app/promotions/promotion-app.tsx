@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PROMOTION_ACCOUNT_COPY, promotionInvitationError } from "./promotion-account-copy";
-import { PROMOTION_EARNINGS_COPY } from "./promotion-earnings-copy";
+import { PROMOTION_EARNINGS_COPY, promotionRevenueBasis } from "./promotion-earnings-copy";
 import { PROMOTION_MIGRATION_COPY, promotionMigrationError } from "./promotion-migration-copy";
 import { createPromotionRefresh } from "./promotion-refresh";
 import { PROMOTION_COPY, PROMOTION_LANGUAGES, normalizePromotionLocale, type PromotionCopy, type PromotionLocale, type PromotionTextKey } from "./promotion-copy";
@@ -102,7 +102,17 @@ export function PromotionTestWalletEnrollment({ campaign, copy, locale, bound, a
   </section>;
 }
 
-function RulePanel({ copy, campaign }: { copy: PromotionCopy; campaign?: PromotionCampaign | null }) {
+export function PromotionRevenueBasis({ campaign, locale }: { campaign?: PromotionCampaign | null; locale: PromotionLocale }) {
+  if (!campaign) return null;
+  const copy = PROMOTION_EARNINGS_COPY[locale];
+  return <div className={styles.notice} data-promotion-revenue-basis={campaign.rules?.revenueRecognition === "monthly_purchase_full" ? "monthly_purchase_full" : "monthly_service_prorated"}>
+    <strong>{copy.revenueBasis}</strong>
+    <p>{promotionRevenueBasis(campaign, locale)}</p>
+    <p>{copy.revenueAdjustments}</p>
+  </div>;
+}
+
+function RulePanel({ copy, campaign, locale }: { copy: PromotionCopy; campaign?: PromotionCampaign | null; locale: PromotionLocale }) {
   const level = campaign?.rules?.minimumLevel, days = campaign?.rules?.activeUtcDays;
   const eligibility = campaign?.termsStatus === "approved" && typeof level === "number" && Number.isSafeInteger(level) && level > 0 &&
     typeof days === "number" && Number.isSafeInteger(days) && days > 0
@@ -115,6 +125,7 @@ function RulePanel({ copy, campaign }: { copy: PromotionCopy; campaign?: Promoti
       </div>)}
     </div>
     <p className={styles.muted} style={{ marginTop: 13 }}>{copy.rateProposal}</p>
+    <PromotionRevenueBasis campaign={campaign} locale={locale} />
     <ol className={styles.rulesList}>{(["rules1", "rules2", "rules3", "rules4", "rules5", "rules6", "rules7"] as const).map(key => <li key={key}>{key === "rules2" ? eligibility : copy[key]}</li>)}</ol>
   </section>;
 }
@@ -620,6 +631,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
         </section> : null}
 
         {view === "earnings" ? <section className={styles.section}><div className={styles.sectionHeading}><div><h2>{copy.earnings}</h2><p>{settlementNote}</p></div></div>
+          <PromotionRevenueBasis campaign={campaign} locale={locale} />
           {!authenticated ? <p className={styles.empty}>{copy.notAuthenticated}</p> : <>
             {dashboard ? <div className={styles.card}><p className={styles.cardTitle}>{commissionTitle}</p><p className={styles.metric}>{formatPromotionUsd(dashboard.estimatedCommissionMicroUsd, locale)}</p>
               <p className={styles.muted}>{earningsCopy.seasonEnd}: {formatPromotionDate(campaign?.endsAtMs, locale)}</p></div> : <p className={styles.empty}>{copy.totalsNoData}</p>}
@@ -641,7 +653,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
         </section> : null}
 
         {view === "billing" && campaign?.environment === "test" ? authenticated && bootstrap ? <PromotionBilling key={bootstrap.csrfToken} bootstrap={bootstrap} copy={copy} locale={locale} /> : <p className={styles.empty}>{copy.notAuthenticated}</p> : null}
-        {view === "rules" ? <><PromotionDisclosure copy={copy} gaps={bootstrap?.sourceGaps || []} environment={campaign?.environment === "test" || bootstrap?.public?.environment === "test" ? "test" : campaign?.environment} /><RulePanel copy={copy} campaign={campaign} /></> : null}
+        {view === "rules" ? <><PromotionDisclosure copy={copy} gaps={bootstrap?.sourceGaps || []} environment={campaign?.environment === "test" || bootstrap?.public?.environment === "test" ? "test" : campaign?.environment} /><RulePanel copy={copy} campaign={campaign} locale={locale} /></> : null}
 
         {view === "support" ? <section className={styles.section}><div className={styles.sectionHeading}><div><h2>{copy.support}</h2><p>{copy.supportBody}</p></div></div>
           {!authenticated ? <p className={styles.empty}>{copy.notAuthenticated}</p> : <>

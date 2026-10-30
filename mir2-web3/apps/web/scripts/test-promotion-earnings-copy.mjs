@@ -34,7 +34,7 @@ assert.equal(diagnostics.length, 0, ts.formatDiagnosticsWithColorAndContext(diag
 }));
 assert.equal(program.emit().emitSkipped, false);
 const require = createRequire(import.meta.url);
-const { PROMOTION_EARNINGS_COPY } = require(path.join(temporary, "app/promotions/promotion-earnings-copy.js"));
+const { PROMOTION_EARNINGS_COPY, promotionRevenueBasis } = require(path.join(temporary, "app/promotions/promotion-earnings-copy.js"));
 const { PROMOTION_LANGUAGES } = require(path.join(temporary, "app/promotions/promotion-copy.js"));
 const { formatPromotionRefreshTime } = require(path.join(temporary, "app/promotions/promotion-model.js"));
 
@@ -42,7 +42,8 @@ test("every supported locale distinguishes accrued commission from finalized rec
   const locales = PROMOTION_LANGUAGES.map(([locale]) => locale);
   assert.equal(locales.length, 10);
   assert.deepEqual(Object.keys(PROMOTION_EARNINGS_COPY).sort(), [...locales].sort());
-  const keys = ["accruedCommission", "finalizedCommission", "autoUpdate", "updatedAt", "seasonEnd", "settlementTiming", "finalizedNote"];
+  const keys = ["accruedCommission", "finalizedCommission", "autoUpdate", "updatedAt", "seasonEnd", "settlementTiming", "finalizedNote",
+    "revenueBasis", "monthlyPurchaseFull", "monthlyServiceProrated", "revenueAdjustments"];
   for (const locale of locales) {
     const copy = PROMOTION_EARNINGS_COPY[locale];
     assert.deepEqual(Object.keys(copy).sort(), [...keys].sort(), locale);
@@ -53,6 +54,22 @@ test("every supported locale distinguishes accrued commission from finalized rec
   assert.equal(PROMOTION_EARNINGS_COPY["zh-Hans"].accruedCommission, "本赛季累计佣金（待结算）");
   assert.equal(PROMOTION_EARNINGS_COPY["zh-Hans"].finalizedCommission, "本赛季已封账佣金");
   assert.equal(PROMOTION_EARNINGS_COPY.en.autoUpdate, "Updates every 10 seconds");
+});
+
+test("full purchase recognition is shown only for the exact server-selected campaign rule", () => {
+  for (const [locale] of PROMOTION_LANGUAGES) {
+    const copy = PROMOTION_EARNINGS_COPY[locale];
+    for (const environment of ["test", "production"]) {
+      assert.equal(promotionRevenueBasis({ environment, rules: { revenueRecognition: "monthly_purchase_full" } }, locale), copy.monthlyPurchaseFull);
+      for (const rules of [null, {}, { revenueRecognition: "monthly_service_prorated" }, { revenueRecognition: "unknown" },
+        { revenueRecognition: true }, { monthly_purchase_full: true }]) {
+        assert.equal(promotionRevenueBasis({ environment, rules }, locale), copy.monthlyServiceProrated, `${locale}: ${JSON.stringify(rules)}`);
+      }
+    }
+    assert.notEqual(copy.monthlyPurchaseFull, copy.monthlyServiceProrated);
+  }
+  assert.match(PROMOTION_EARNINGS_COPY["zh-Hans"].monthlyPurchaseFull, /实付金额全额计佣.*分段费率.*不按赛季剩余时长折算.*只计佣一次/);
+  assert.match(PROMOTION_EARNINGS_COPY["zh-Hans"].revenueAdjustments, /充值点券本身不计佣.*退款会扣回.*赛季结束核账后统一结算/);
 });
 
 test("refresh time includes seconds in all supported locales", () => {

@@ -160,7 +160,7 @@ export function PromotionAdmin({ copy, accountCopy, locale, busy, write, campaig
       await complete({ action: "configureDraft", evidenceRef: evidenceRef.trim(), draft: {
         campaignId, termsVersion: draft.termsVersion.trim(), startsAtMs, endsAtMs,
         ...promotionFundingLimits(draft.fundingMode,draft),
-        rules: { minimumLevel: integer(draft.minimumLevel), activeUtcDays: integer(draft.activeDays), candidateTtlMs: integer(draft.candidateDays, 86_400_000),
+        rules: { revenueRecognition: "monthly_purchase_full", minimumLevel: integer(draft.minimumLevel), activeUtcDays: integer(draft.activeDays), candidateTtlMs: integer(draft.candidateDays, 86_400_000),
           confirmationWindowMs: integer(draft.confirmHours, 3_600_000), maximumCoverageMs: integer(draft.coverageDays, 86_400_000),
           reserveBps: integer(draft.reserveBps), walletCooldownMs: integer(draft.cooldownHours, 3_600_000) },
       } });
@@ -185,7 +185,7 @@ export function PromotionAdmin({ copy, accountCopy, locale, busy, write, campaig
             ["termsVersion", copy.termsVersion, "text"], ["startsAt", `${copy.start} (UTC)`, "datetime-local"], ["endsAt", `${copy.end} (UTC)`, "datetime-local"],
             ["budget", labels.budget, "text"], ["memberLimit", labels.memberLimit, "number"], ["leaderLimit", labels.leaderLimit, "number"], ["perLeaderMemberLimit", labels.perLeaderLimit, "number"],
             ["revenueCap", labels.revenueCap, "text"], ["minimumLevel", labels.minimumLevel, "number"], ["activeDays", labels.activeDays, "number"],
-            ["candidateDays", labels.candidateDays, "number"], ["confirmHours", labels.confirmHours, "number"], ["coverageDays", labels.coverageDays, "number"],
+            ["candidateDays", labels.candidateDays, "number"], ["confirmHours", labels.confirmHours, "number"],
             ["reserveBps", labels.reserveBps, "number"], ["cooldownHours", labels.cooldownHours, "number"],
           ] as const).filter(([key]) => draft.fundingMode === "budget_capped" || !["budget", "memberLimit", "leaderLimit", "perLeaderMemberLimit", "revenueCap"].includes(key)).map(([key, label, type]) => <label key={key} className={styles.field}>{label}<input value={draft[key]} type={type} min={type === "number" ? 0 : undefined} step={type === "number" ? 1 : undefined} maxLength={type === "text" ? 128 : undefined} required onChange={event => setDraft(current => ({ ...current, [key]: event.target.value }))} /></label>)}
           <label className={styles.field}>{copy.actorEvidence}<input value={evidenceRef} onChange={event => setEvidenceRef(event.target.value)} minLength={3} maxLength={512} required /></label>
