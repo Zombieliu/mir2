@@ -1,0 +1,166 @@
+{
+  "schema": "mir2.client-origin.focused-local-verification.v1",
+  "observedAtUtc": "2026-10-30T18:22:45.649638+00:00",
+  "verificationHeadSha": "ed95edd1f8e5befdabb71f6b7346b3a2c998921a",
+  "nativePatchSha": "5022a2423ddb0aaf9bb3b5370c68c1862ce31853",
+  "allFiveNativePatchFilesUnchangedAtVerification": true,
+  "passed": true,
+  "testsExecuted": 19,
+  "rustTestsExecuted": 7,
+  "candidateProfileTestsExecuted": 12,
+  "candidateProfileAssertions": 48,
+  "realSourceIncluded": true,
+  "runtimeSourceEdited": false,
+  "sourceFiles": {
+    "mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1": {
+      "sha256": "1c15e9d8213af1fa4a6537a215daff0be7061d1af2a07a2e56810ffeacc8eb7e",
+      "canonicalLfSha256": "39cb174b24257095ca2f0e6e1e2e6a231287f986d8ea970c2ac4b33c125c3733",
+      "gitBlobAtHead": "26c047a77bd509052346d0c5d0baf1124ed28e06"
+    },
+    "mir2-web3/apps/game-client/platform-windows/scripts/package-windows-candidate.ps1": {
+      "sha256": "b1323cda5247ddfa28935559c3baf7532e9bdd46728b3e19df5d697a20990b40",
+      "canonicalLfSha256": "822ceddb211ecf9d52d4efaf4d80ee840953939c758ac932449c5fa62cc4dd4a",
+      "gitBlobAtHead": "60747b7a7a0fdebdbe9da6b82d2c1b15a6f57d80"
+    },
+    "mir2-web3/apps/game-client/platform-windows/src/billing_browser.rs": {
+      "sha256": "eb7c5212a90119a9001f061fd4b259b27e8f689fd63a34c05af825f16644813e",
+      "canonicalLfSha256": "eb7c5212a90119a9001f061fd4b259b27e8f689fd63a34c05af825f16644813e",
+      "gitBlobAtHead": "eb88aa17c1157dc2c3a7200e8f18a03f16f61b2a"
+    },
+    "mir2-web3/apps/game-client/platform-windows/src/main.rs": {
+      "sha256": "1d15a55d7b9b3cd1d93efdadf8c9e83183b142a8182e94415eeac3b7c3303b7e",
+      "canonicalLfSha256": "1d15a55d7b9b3cd1d93efdadf8c9e83183b142a8182e94415eeac3b7c3303b7e",
+      "gitBlobAtHead": "3383e6703114eb6f9038f1b68e696b1a58ae5697"
+    },
+    "mir2-web3/apps/game-client/platform-windows/src/session_config.rs": {
+      "sha256": "0d6d4a04d0bbf83a478a3294044f43615d0995810af488bb616f7d47ed291a52",
+      "canonicalLfSha256": "0d6d4a04d0bbf83a478a3294044f43615d0995810af488bb616f7d47ed291a52",
+      "gitBlobAtHead": "9ec0431d65c87bc68a236390a241a4474103a55f"
+    },
+    "mir2-web3/apps/game-client/platform-windows/src/wallet_login_http.rs": {
+      "sha256": "b6a1c30cde1376139a21d10e5d1e60b13b4caf9636e896b613f7ff1e2990a730",
+      "canonicalLfSha256": "b6a1c30cde1376139a21d10e5d1e60b13b4caf9636e896b613f7ff1e2990a730",
+      "gitBlobAtHead": "4aebf8a4f6da7dc5539b059d86bf8948269424e2"
+    },
+    "mir2-web3/apps/game-client/platform-windows/src/gateway.rs": {
+      "sha256": "e1946d71986e3912fc6da4410e9aeb703b9e1861bbb18e48b65b729b6b74a310",
+      "canonicalLfSha256": "e1946d71986e3912fc6da4410e9aeb703b9e1861bbb18e48b65b729b6b74a310",
+      "gitBlobAtHead": "bed2cc95e252bae06ea67d79d886dccdd2ab3637"
+    }
+  },
+  "harness": {
+    "kind": "isolated rustc --test harness; no Cargo package build",
+    "path": "E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/client_origin_harness.rs",
+    "sha256": "3b21a18f7e9dc03623c96b3377d3feae4a4cc6ae822879b6cfc5cf99ef6804dd",
+    "actualPathIncludedModules": [
+      "billing_browser.rs",
+      "session_config.rs",
+      "wallet_login_http.rs"
+    ],
+    "otherCode": "exact DEFAULT_GATEWAY_WS_URL declaration copied from actual gateway.rs only to resolve an unrelated native-entry fixture; no mirrored payment/config implementation",
+    "dependencyMode": "real existing rlibs read only; not stub crates or fake URL parser",
+    "dependencyCache": "F:/mir2-build/unified-20261029/native-target/debug/deps",
+    "dependencyCacheWritten": false,
+    "priorOwnedReceiptUsedOnlyToLocateCache": "native-billing-origin-20261030/candidate/LOCAL-VALIDATION.json",
+    "externals": {
+      "bevy": "F:/mir2-build/unified-20261029/native-target/debug/deps/libbevy-faac7d243b32d4d7.rlib",
+      "url": "F:/mir2-build/unified-20261029/native-target/debug/deps/liburl-81ce2b0006e7a3bb.rlib",
+      "tokio_tungstenite": "F:/mir2-build/unified-20261029/native-target/debug/deps/libtokio_tungstenite-8fbdfad22a7e4e33.rlib",
+      "mir2_client_bevy": "F:/mir2-build/unified-20261029/native-target/debug/deps/libmir2_client_bevy-64cc1e5348349768.rlib",
+      "toml": "F:/mir2-build/unified-20261029/native-target/debug/deps/libtoml-c4908b9bc8cb32fb.rlib",
+      "ureq": "F:/mir2-build/unified-20261029/native-target/debug/deps/libureq-79b12f4bf1d9054c.rlib",
+      "serde_json": "F:/mir2-build/unified-20261029/native-target/debug/deps/libserde_json-2a49cc7e56805aab.rlib"
+    },
+    "compile": {
+      "exitCode": 0,
+      "fullClientCompiled": false,
+      "elapsedSeconds": 15.1251776,
+      "cachedDependenciesReadOnly": true,
+      "compiler": "rustc1.95.0"
+    },
+    "executableSha256": "e0bd4bf6db0d80e9ebe6d7c80c21b7dd5223f095c958ee7c666eacf9d5598f7c",
+    "compiler": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "compileCommand": "cmd.exe /d /c 'call \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\Build\\vcvars64.bat\" >nul && pwsh -NoProfile -File E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/run-focused-rust.ps1'",
+    "compileArgumentsFile": "E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/rustc-focused-args.json",
+    "compileArgumentsSha256": "bc24e77cdce6978f1b1d07183e87268902d68363b3bd96b78fa8d21b3a194428",
+    "runnerSha256": "4c633a3b393eaf849357a7d7ad61257b711ae24209ff6c2604cdcde64ae58c65"
+  },
+  "commands": [
+    "E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/client_origin_harness.exe billing_browser::tests:: --nocapture --test-threads=1",
+    "E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/client_origin_harness.exe session_config::tests::billing_origin_is_optional_and_explicit_environment_wins_without_silent_fallback --exact --nocapture --test-threads=1",
+    "E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/client_origin_harness.exe session_config::tests::native_entry_loads_invited_wss_and_keeps_explicit_local_overrides --exact --nocapture --test-threads=1",
+    "pwsh -NoProfile -File E:/mir2-task-temp/client-origin-local-20261031-7dd1a21e/test-candidate-profile.ps1"
+  ],
+  "rustLogEvidence": [
+    {
+      "name": "billing-browser-tests.log",
+      "sha256": "c052bd59933a3fd23b01981b99842c2c01c4f7314e846d33c05dfc5a5aadd2f8",
+      "testsExecuted": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "billing-config-tests.log",
+      "sha256": "9c59f253b0c1154396c6838747bce172d6e2c82ee19c8ee8d631ba0064af8975",
+      "testsExecuted": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "native-config-entry-tests.log",
+      "sha256": "49c614d3db4c5cef1be37f9940f6ef761b3bb514ade157b7f082ad8d93122f87",
+      "testsExecuted": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "candidateProfile": {
+    "sourceScript": "mir2-web3/apps/game-client/platform-windows/scripts/candidate-release-profile.ps1",
+    "sourceScriptSha256": "1c15e9d8213af1fa4a6537a215daff0be7061d1af2a07a2e56810ffeacc8eb7e",
+    "testScriptSha256": "9dbebc0cdf68b455e7228397fb18bdd5a147bb1be4e140bfcb8fc3878a8f93a3",
+    "logSha256": "63f262c03668f67df53e4d9396da4fb00ee9d6e8b79e0ecc6df9ba819b1fde69",
+    "testsExecuted": 12,
+    "assertions": 48,
+    "cases": [
+      "legacy-config-remains-without-billing-pin",
+      "actual-realm-three-origins-roundtrip",
+      "nondefault-port-is-preserved",
+      "bad-origin-list-is-rejected",
+      "loopback-and-reserved-release-origins-rejected",
+      "duplicate-billing-pin-rejected",
+      "nonstring-config-origin-rejected",
+      "checkout-capability-is-not-a-trusted-origin",
+      "explicit-whitespace-has-no-silent-default",
+      "unknown-server-credentials-rejected",
+      "other-release-config-fields-still-validate",
+      "missing-required-field-still-rejected"
+    ],
+    "realProfileFunctions": true,
+    "networkRequests": false,
+    "packagingInvoked": false
+  },
+  "coverage": [
+    "locally pinned canonical HTTPS payment origin overrides gateway-derived default",
+    "exact USDC checkout origin/path/order-capability format; Stripe allowlist remains exact",
+    "invalid origin configuration rejects rather than silently falling back",
+    "real native config loading: default, CWD file, executable sibling file, environment override",
+    "candidate config generation and validation preserve legacy omitted pin and actual realm gateway/auth/billing separation",
+    "credentials/query/fragment/path/default-port/loopback/reserved release origins and duplicate/nonstring keys rejected"
+  ],
+  "nativeFilePrecedenceSubprocessScenarios": 4,
+  "fullClientCompiled": false,
+  "bevyRebuilt": false,
+  "gameClientLaunched": false,
+  "browserOpened": false,
+  "newTransactionsCreated": false,
+  "networkRequests": false,
+  "updaterInstallerOrCdnPublished": false,
+  "otherChatContacted": false,
+  "docker": false,
+  "limitations": [
+    "focused origin/config source tests only; cached dependency libraries were not rebuilt or certified against every current dependency source",
+    "full native main linkage, installed client/update payload and actual in-game recharge click are not accepted by this receipt",
+    "real phone QR/sign/transfer for a newly created client checkout remains human-unaccepted",
+    "this receipt does not prove the public game1875 payload includes patch5022 or change that payload"
+  ]
+}

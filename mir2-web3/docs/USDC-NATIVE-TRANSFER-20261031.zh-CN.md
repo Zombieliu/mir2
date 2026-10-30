@@ -1,6 +1,6 @@
 # 原生 USDC 直转核账与旧单恢复（2026-10-31）
 
-状态：精确源码已部署到原 Windows 测试服，用户指定旧款已恢复为 Applied，实际增加 100 点券。发布前备份、迁移保留和目标发券护栏通过；新订单的手机扫码付款尚未取得人工验收。
+状态：精确后端源码已部署到原 Windows 测试服，用户指定旧款已恢复为 Applied，实际增加 100 点券。发布前备份、迁移保留和目标发券护栏通过。已核实的公网 r12 安装包仍含旧游戏源码 `1875c6c20`，缺少独立充值域名补丁；客户端点击到手机扫码的完整链路尚未完成发布和人工验收。
 
 ## 本轮授权与边界
 
@@ -63,6 +63,28 @@
 公网 `pay`、`pay.js`、`dubhe-wallet.js` 三次 GET 均 200，规范化源码 hash 与 `868ef2d2…` 一致；no-store、限制 CSP、no-referrer、nosniff 及内容类型通过。该静态检查没有 cookie、授权头、创建订单或操作钱包。见[公网资源验收](evidence/usdc-native-transfer-20261031/PUBLIC-ASSET-RECEIPT.json)。
 
 ## 尚待人工验收与范围限制
+
+### Windows 客户端发布交接：充值域名
+
+已核实的[公网 r12 安装包元数据](https://165.154.65.136.sslip.io/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/release.json)标明游戏为 `WN-CANDIDATE-20261029-unified-11` / `1875c6c20e1285ffefc45ef6c21eab33e26fc536`，游戏 EXE SHA256 为 `85879bfeb1b44d4c759e6a338338bb58a383b7701f886d1090a96b6267f00c6f`。该源码已有下单后打开浏览器的逻辑，但只从 Gateway URL 推导可信充值 origin；测试服返回独立的 `billing-playtest…`，会使原生 USDC 按钮或浏览器 URL 校验拒绝。后端上线不代表这个旧 EXE 已修好。
+
+独立修复为 [`5022a2423ddb0aaf9bb3b5370c68c1862ce31853`](https://github.com/Zombieliu/mir2/commit/5022a2423ddb0aaf9bb3b5370c68c1862ce31853)，只修改 `platform-windows` 的 `billing_browser.rs`、`main.rs`、`session_config.rs` 和两个 candidate 打包脚本。该提交父版本中的这 5 个文件与 `1875c6c20` 一致，可对该旧源码单独 cherry-pick，无需为此合并后端或更换更新器。发布分支若已修改同文件，应逐段合并并保留新工作，不能整文件覆盖。
+
+客户端发布者需将修复后的新 EXE 与以下配置一起打包；旧 `1875` EXE 不识别这个新字段，不能只改旧安装目录 TOML：
+
+```toml
+[server]
+# 保留该发行包原有 gateway_ws_url、auth_http_url 及其他配置
+billing_http_origin = "https://billing-playtest.165.154.65.136.sslip.io"
+```
+
+调用现有 `package-windows-candidate.ps1` 时，在原发行参数中增加 `-BillingHttpOrigin 'https://billing-playtest.165.154.65.136.sslip.io'`。它会写入上述字段。充值 origin 必须来自本地发布配置；客户端继续要求精确 HTTPS origin、`/v1/billing/sui-usdc/pay` 路径及有效订单 capability，拒绝其他域名、错误路径及命令注入字符。
+
+r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文件，正常升级按新文件 hash 在事务中替换，完整安装器同样更新它。应在签名之前把新配置放入包，验收实际安装目录中的新 EXE / TOML；不在签名后手改配置。客户端优先读取 EXE 同目录配置，语言偏好另存于 `%APPDATA%/mir2-web3/locale.json`，无需为本项增加覆盖个人偏好的迁移。
+
+本轮对补丁真实源文件做了[有界本地验证](evidence/usdc-native-transfer-20261031/CLIENT-ORIGIN-LOCAL-VERIFICATION.json)：7 项 Rust 测试通过，覆盖 URL 校验、配置和真实入口配置优先级；打包 profile 真实函数 12 组 / 48 个断言通过。这些测试使用只读已有依赖库，没有重新编译完整主程序、生成新游戏 EXE、启动游戏、操作钱包或发布下载包，不代表新安装/升级后的完整客户端验收。
+
+验收顺序：新 EXE/配置和包签名核对 → 同钱包 F8 登录原服 → 游戏内 USDC 页出现可用档位 → 点支付后自动打开精确充值页并显示该订单二维码 → 用户手机核对并确认一笔 Testnet 付款 → 后台唯一核账、游戏存档到账 → 再次查询不重复发券。当前后端与旧款恢复证据不能代替新 EXE 的这次交互验收。客户端发布仍由用户指定的另一会话负责；本轮不改其安装包、更新频道或下载服务。
 
 新下单后的 Dubhe Wallet 手机实扫、确认新转账、自动发券完整交互仍需用户验收；本轮旧真实付款恢复不能代替这一步。扫码付款的钱包须为下单时已验证的钱包，用户仍须核对 Sui Testnet、USDC、金额与商户地址。原生收款请求中的 requestId 不在链上；归单由精确付款事实、原窗口、无歧义付款窗口及全局 digest claim 共同约束。付款必须发生在原窗口内，过期后的查询只补核截止前的付款。
 
