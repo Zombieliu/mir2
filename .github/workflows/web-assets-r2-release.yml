@@ -8,13 +8,17 @@ on:
         required: true
         default: context
         type: choice
-        options: [context, discover-main-site, inspect-main-source, stage, promote, backend-build]
+        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, backend-build]
       deployment_id:
         description: Exact accepted production candidate; required only for promote
         required: false
         type: string
       backend_source_sha:
         description: Reviewed immutable backend source commit; required only for backend-build
+        required: false
+        type: string
+      main_deployment_id:
+        description: Exact marketing candidate paired with deployment_id for unified-promote
         required: false
         type: string
 
@@ -31,7 +35,30 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: startsWith(inputs.operation, 'unified-')
+        with:
+          persist-credentials: false
+      - name: Stage or promote the two existing websites from one immutable source
+        if: startsWith(inputs.operation, 'unified-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+        run: node .github/scripts/unified-website-release.mjs
+      - name: Save paired immutable candidate identities
+        if: inputs.operation == 'unified-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: unified-website-release
+          path: unified-release.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Verify original project and perform the requested bounded operation
+        if: ${{ !startsWith(inputs.operation, 'unified-') }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

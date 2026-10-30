@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Legend of Mir 2",
     short_name: "Mir 2",
     description: "Play Legend of Mir 2 from an installable browser game client.",
-    start_url: "/",
+    start_url: "/game",
     scope: "/",
     display: "fullscreen",
     orientation: "landscape",

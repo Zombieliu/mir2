@@ -151,6 +151,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const app = useRef<HTMLDivElement>(null);
   const existingAccountSection = useRef<HTMLDetailsElement>(null);
   const copy = PROMOTION_COPY[locale];
+  const homeLocale = locale === "zh-Hans" ? "zh-CN" : locale === "zh-Hant" ? "zh-TW" : locale === "hi" ? "en" : locale;
   const accountCopy = PROMOTION_ACCOUNT_COPY[locale];
   const authenticated = bootstrap?.authenticated === true;
   const bound = bootstrap?.binding?.status === "linked";
@@ -196,7 +197,12 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   useEffect(() => {
     let initial = "en";
     try { initial = localStorage.getItem("numeron-language") || navigator.language; } catch { initial = navigator.language; }
-    setLocale(normalizePromotionLocale(initial));
+    const requestedLanguage = new URLSearchParams(location.search).get("lang");
+    const initialLocale = normalizePromotionLocale(requestedLanguage || initial);
+    setLocale(initialLocale);
+    if (requestedLanguage) {
+      try { localStorage.setItem("numeron-language", initialLocale); } catch { /* Optional language preference. */ }
+    }
     const hash = location.hash.slice(1);
     if (NAVIGATION.some(item => item.view === hash)) setView(hash as View);
     const controller = new AbortController();
@@ -305,10 +311,12 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   return <div ref={app} className={styles.app} lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
     <header className={styles.header}>
       <a href="/promotions" className={styles.brand}><span className={styles.mark} aria-hidden="true">N</span><span>NUMERON<small>{copy.program}</small></span></a>
-      <div className={styles.headerActions}><a href="/" className={styles.home}>{copy.home} ↗</a>
+      <div className={styles.headerActions}><a href={`/${homeLocale}`} className={styles.home}>{copy.home} ↗</a>
         <label><span className={styles.srOnly}>{copy.language}</span><select className={styles.language} value={locale} onChange={event => {
           const next = normalizePromotionLocale(event.target.value); setLocale(next);
           try { localStorage.setItem("numeron-language", next); } catch { /* Optional language preference. */ }
+          const url = new URL(location.href); url.searchParams.set("lang", next);
+          history.replaceState(history.state, "", url);
         }}>{PROMOTION_LANGUAGES.map(([key, name]) => <option key={key} value={key}>{name}</option>)}</select></label>
       </div>
     </header>
@@ -459,7 +467,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
 
         {view === "admin" ? canAdmin && bootstrap ? <PromotionAdmin copy={copy} accountCopy={accountCopy} locale={locale} busy={busy} write={write}
           campaignId={campaign?.campaignId || (typeof bootstrap.public?.campaignId === "string" ? bootstrap.public.campaignId : null)} onChanged={() => void refresh()} /> : <p className={styles.empty}>{copy.unavailableAction}</p> : null}
-        <footer className={styles.footer}><span>© NUMERON · {copy.program}</span><span>{copy.timeZone} · {promotionTimezone()}</span></footer>
+        <footer className={styles.footer}><span>© NUMERON · {copy.program}</span><a href={`/${homeLocale}`}>{copy.home} ↗</a><span>{copy.timeZone} · {promotionTimezone()}</span></footer>
       </main>
     </div>
     {walletOpen ? <PromotionWalletLogin copy={copy} onClose={() => setWalletOpen(false)} onAuthenticated={() => { setWalletOpen(false); void refresh(); }} /> : null}

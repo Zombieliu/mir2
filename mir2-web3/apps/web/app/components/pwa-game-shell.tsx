@@ -56,6 +56,7 @@ const COPY: Record<"en" | "pt" | "zh", PwaCopy> = {
 
 export function PwaGameShell() {
   const pathname = usePathname();
+  const isGamePath = pathname === "/" || pathname === "/game" || pathname === "/game/";
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [mobileBrowser, setMobileBrowser] = useState(false);
   const [standalone, setStandalone] = useState(false);
@@ -78,7 +79,7 @@ export function PwaGameShell() {
   }, []);
 
   useEffect(() => {
-    if (pathname !== "/") return;
+    if (!isGamePath) return;
 
     const detectedIos = isIosDevice();
     const coarsePointer = window.matchMedia("(pointer: coarse)");
@@ -135,7 +136,7 @@ export function PwaGameShell() {
       standaloneQuery.removeEventListener("change", refreshDisplayMode);
       fullscreenQuery.removeEventListener("change", refreshDisplayMode);
     };
-  }, [pathname, refreshDisplayMode]);
+  }, [isGamePath, refreshDisplayMode]);
 
   const install = useCallback(async () => {
     setStatus("");
@@ -176,7 +177,7 @@ export function PwaGameShell() {
     setStatus("");
   }, []);
 
-  if (pathname !== "/" || !mobileBrowser || standalone || fullscreenActive) return null;
+  if (!isGamePath || !mobileBrowser || standalone || fullscreenActive) return null;
 
   return (
     <aside className="mir-pwa-shell" data-ios={ios ? "true" : "false"} data-ui-interactive="true">
