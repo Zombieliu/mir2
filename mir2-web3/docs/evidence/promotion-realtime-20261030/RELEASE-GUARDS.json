@@ -1,0 +1,136 @@
+{
+  "schema": "mir2.promotion-realtime.release-guards.v1",
+  "date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "script": ".github/scripts/promotion-realtime-release.mjs",
+  "scriptSha256": "e3d401e5cdf164166d24efb1e68f0205375bd2dd843a5de1802f0a36ae1e0e1b",
+  "matchingCommit": "0a05d9e1fcd61a9427c40e18e5fcf177960a7bd5",
+  "verification": {
+    "method": "Execute the script in an in-memory AsyncFunction with mocked fetch, candidate CLI, writeFile, Date.now and setTimeout; no deployment command was executed.",
+    "mockExecutionExternalRequests": 0,
+    "mockExecutionExternalApiWrites": 0,
+    "mockExecutionFileWrites": 0,
+    "passed": 13,
+    "failed": 0,
+    "assertions": [
+      "Project metadata requests include rollbackInfo=true.",
+      "Promotion waits for the exact alias job to succeed and both canonical and Worker-origin aliases to point to the candidate.",
+      "Public checks read the ordinary /version URL before loading promotion assets and require all three realtime markers.",
+      "Persistent public marker failure, failed alias assignment and uncertain promotion responses restore the web baseline.",
+      "Rollback accepts absent promotion-job metadata only after the web production target and both aliases point to the baseline.",
+      "All simulated mutations target the web project; the marketing production deployment remains unchanged.",
+      "Context performs no mutation; stage creates one production candidate without alias assignment or environment writes."
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "success",
+      "passed": true,
+      "simulatedMutations": 1,
+      "publicVersionReads": 1,
+      "publicPromotionReads": 1,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "alias-lag",
+      "passed": true,
+      "simulatedMutations": 1,
+      "publicVersionReads": 1,
+      "publicPromotionReads": 1,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "revision-lag",
+      "passed": true,
+      "simulatedMutations": 1,
+      "publicVersionReads": 3,
+      "publicPromotionReads": 1,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "revision-then-markers",
+      "passed": true,
+      "simulatedMutations": 1,
+      "publicVersionReads": 5,
+      "publicPromotionReads": 3,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "marker-failure",
+      "passed": true,
+      "simulatedMutations": 2,
+      "publicVersionReads": 30,
+      "publicPromotionReads": 30,
+      "rollbackProjectReads": 4
+    },
+    {
+      "name": "failed-job",
+      "passed": true,
+      "simulatedMutations": 2,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 4
+    },
+    {
+      "name": "uncertain-promote",
+      "passed": true,
+      "simulatedMutations": 2,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 4
+    },
+    {
+      "name": "marketing-drift",
+      "passed": true,
+      "simulatedMutations": 0,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "wrong-root",
+      "passed": true,
+      "simulatedMutations": 0,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "wrong-source",
+      "passed": true,
+      "simulatedMutations": 0,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "unexpected-payout",
+      "passed": true,
+      "simulatedMutations": 0,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "context",
+      "passed": true,
+      "simulatedMutations": 0,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 0
+    },
+    {
+      "name": "stage",
+      "passed": true,
+      "simulatedMutations": 1,
+      "publicVersionReads": 0,
+      "publicPromotionReads": 0,
+      "rollbackProjectReads": 0
+    }
+  ],
+  "limitations": "Mocks verify release control flow and guards, not actual Vercel alias propagation, CDN timing, browser refresh, wallet authentication or commission accounting. Protected-candidate and ordinary production URL verification remain separate release requirements.",
+  "webBaseline": "dpl_9ZJvkBjUxwrXy7hiqt8aG1aNZpnT",
+  "marketingBaseline": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97",
+  "executionStartedAtUtc": "2026-10-30T11:08:50.834Z",
+  "executionCompletedAtUtc": "2026-10-30T11:08:50.849Z"
+}
