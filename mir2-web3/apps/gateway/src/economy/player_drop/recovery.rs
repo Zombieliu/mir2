@@ -2,7 +2,7 @@
 //! exact, durable Host base. A receipt is historical evidence, never authority
 //! to replay a source transition or to unfreeze a writer.
 use super::*;
-use crate::zone_rpc::{ZONE_REPLICATION_HEAD_VERSION, ZoneBaseSnapshot, ZoneReplicationHead};
+use crate::zone_rpc::{ZoneBaseSnapshot, ZoneReplicationHead, ZONE_REPLICATION_HEAD_VERSION};
 use flate2::read::GzDecoder;
 use mir2_simulation::{CharacterSaveRecord, PreparedZoneSourceRecovery, Stage5SystemsState};
 use postgres::GenericClient;
@@ -76,6 +76,8 @@ pub struct PlayerDropRecoverySet {
     connection_binding_digest: String,
     zone_id: String,
     records: Vec<PlayerDropOperationRecord>,
+    admissions: Vec<PlayerDropAdmissionRecord>,
+    admission_set_digest: String,
     operation_set_digest: String,
     required_characters: Vec<(String, i32)>,
     max_operations: usize,
@@ -83,6 +85,15 @@ pub struct PlayerDropRecoverySet {
 impl PlayerDropRecoverySet {
     pub fn records(&self) -> &[PlayerDropOperationRecord] {
         &self.records
+    }
+    pub fn admissions(&self) -> &[PlayerDropAdmissionRecord] {
+        &self.admissions
+    }
+    pub fn admission_set_digest(&self) -> &str {
+        &self.admission_set_digest
+    }
+    pub fn admission_count(&self) -> usize {
+        self.admissions.len()
     }
     pub fn operation_set_digest(&self) -> &str {
         &self.operation_set_digest
@@ -105,8 +116,15 @@ fn make_set(
     database_url: &str,
     zone: &str,
     records: Vec<PlayerDropOperationRecord>,
+    admissions: Vec<PlayerDropAdmissionRecord>,
     max_operations: usize,
 ) -> Result<PlayerDropRecoverySet, String> {
+    if !(1..=MAX_OPERATIONS).contains(&max_operations)
+        || records.len() > max_operations
+        || admissions.len() > max_operations
+    {
+        return Err("invalid player drop recovery complete-set bound".into());
+    }
     let mut subjects = BTreeSet::new();
     let mut evidence = Vec::with_capacity(records.len());
     let mut previous: Option<String> = None;
@@ -141,19 +159,97 @@ fn make_set(
                 .transpose()?,
         ));
     }
+    let operations = records
+        .iter()
+        .map(|record| (record.operation().binding().operation_key(), record))
+        .collect::<BTreeMap<_, _>>();
+    let mut admission_evidence = Vec::with_capacity(admissions.len());
+    let mut all_keys = operations.keys().cloned().collect::<BTreeSet<_>>();
+    let mut previous: Option<String> = None;
+    for admission in &admissions {
+        let binding = admission.frozen().binding();
+        let key = binding.operation_key();
+        if admission.account_namespace() != namespace
+            || binding.zone_id() != zone
+            || previous.as_ref().is_some_and(|previous| previous >= &key)
+        {
+            return Err(
+                "player drop admission recovery enumeration is not a complete ordered set".into(),
+            );
+        }
+        previous = Some(key.clone());
+        all_keys.insert(key.clone());
+        if all_keys.len() > max_operations {
+            return Err("player drop recovery exceeds its explicit combined total bound".into());
+        }
+        if let Some(operation) = linked_recovery_operation(
+            binding,
+            admission.status(),
+            admission.operation_digest(),
+            operations.get(&key).copied(),
+        )? {
+            admission.validate_operation(operation.operation())?;
+        }
+        subjects.insert((binding.account_id().into(), binding.character_index()));
+        // The admission decoder checks its exact UID/bootstrap and abort audit
+        // witnesses. Include those immutable witnesses, not just its status.
+        admission_evidence.push(admission.recovery_evidence()?);
+    }
+    let admission_set_digest = hash_value(
+        b"mir2.player-drop-recovery-admissions.v1\0",
+        &(&namespace, zone, admission_evidence),
+    )?;
     let digest = hash_value(
-        b"mir2.player-drop-recovery-set.v1\0",
-        &(&namespace, zone, evidence),
+        b"mir2.player-drop-recovery-set.v2\0",
+        &(
+            &namespace,
+            zone,
+            evidence,
+            &admission_set_digest,
+            admissions.len(),
+        ),
     )?;
     Ok(PlayerDropRecoverySet {
         source_namespace: namespace,
         connection_binding_digest: connection_binding_digest(database_url),
         zone_id: zone.into(),
         records,
+        admissions,
+        admission_set_digest,
         operation_set_digest: digest,
         required_characters: subjects.into_iter().collect(),
         max_operations,
     })
+}
+
+fn linked_recovery_operation<'a>(
+    binding: &PlayerDropOperationBinding,
+    status: PlayerDropAdmissionStatus,
+    operation_digest: Option<&str>,
+    operation: Option<&'a PlayerDropOperationRecord>,
+) -> Result<Option<&'a PlayerDropOperationRecord>, String> {
+    match status {
+        PlayerDropAdmissionStatus::Linked => {
+            let operation =
+                operation.ok_or("linked player drop admission has no Prepared operation")?;
+            if operation.operation().binding() != binding
+                || operation_digest != Some(operation.operation().operation_digest())
+            {
+                return Err(
+                    "linked player drop admission differs from its exact Prepared operation".into(),
+                );
+            }
+            Ok(Some(operation))
+        }
+        PlayerDropAdmissionStatus::Admitted | PlayerDropAdmissionStatus::Aborted => {
+            if operation_digest.is_some() || operation.is_some() {
+                return Err(
+                    "unlinked player drop admission unexpectedly has a Prepared operation".into(),
+                );
+            }
+            Ok(None)
+        }
+    }
 }
 fn read_set(
     client: &mut impl GenericClient,
@@ -191,7 +287,39 @@ fn read_set(
             }
         }
     }
-    make_set(namespace, database_url, zone, records, max_operations)
+    let mut admissions = Vec::new();
+    let mut cursor = None;
+    loop {
+        let limit = PAGE_SIZE.min(max_operations.saturating_sub(admissions.len()) + 1);
+        let page = admission::read_admission_page(
+            client,
+            database_url,
+            zone,
+            cursor.as_deref(),
+            limit,
+            lock,
+        )?;
+        if page.is_empty() {
+            break;
+        }
+        for admission in page {
+            cursor = Some(admission.frozen().binding().operation_key());
+            admissions.push(admission);
+            if admissions.len() > max_operations {
+                return Err(
+                    "player drop admission recovery exceeds its explicit total bound".into(),
+                );
+            }
+        }
+    }
+    make_set(
+        namespace,
+        database_url,
+        zone,
+        records,
+        admissions,
+        max_operations,
+    )
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -373,6 +501,12 @@ struct ReceiptData {
     source_characters: Vec<(String, i32)>,
     operation_set_digest: String,
     operation_count: usize,
+    // Absence retains the canonical bytes of historical v1 receipts. Such
+    // receipts remain readable but cannot certify the complete admission set.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    admission_set_digest: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    admission_count: Option<usize>,
     max_operations: usize,
     state_counts: BTreeMap<String, u64>,
     observation_sequence: u64,
@@ -416,6 +550,12 @@ impl PlayerDropRecoveryReceipt {
     pub fn operation_count(&self) -> usize {
         self.data.operation_count
     }
+    pub fn admission_set_digest(&self) -> Option<&str> {
+        self.data.admission_set_digest.as_deref()
+    }
+    pub fn admission_count(&self) -> Option<usize> {
+        self.data.admission_count
+    }
     pub fn receipt_digest(&self) -> &str {
         &self.receipt_digest
     }
@@ -446,6 +586,25 @@ impl PlayerDropRecoveryReceipt {
     }
 }
 const RECEIPT_QUERY: &str = "SELECT * FROM public.zone_player_drop_recovery_receipts WHERE source_namespace=current_schema() AND zone_id=$1 AND recovery_id=$2";
+fn receipt_data_digest(data: &ReceiptData) -> Result<String, String> {
+    let domain: &[u8] = match data.version {
+        1 if data.admission_set_digest.is_none() && data.admission_count.is_none() => {
+            b"mir2.player-drop-recovery-receipt.v1\0"
+        }
+        2 if data
+            .admission_set_digest
+            .as_deref()
+            .is_some_and(valid_digest)
+            && data
+                .admission_count
+                .is_some_and(|count| count <= MAX_OPERATIONS) =>
+        {
+            b"mir2.player-drop-recovery-receipt.v2\0"
+        }
+        _ => return Err("player drop recovery receipt admission evidence is invalid".into()),
+    };
+    hash_value(domain, data)
+}
 fn decode_receipt(
     row: postgres::Row,
     database_url: &str,
@@ -454,8 +613,7 @@ fn decode_receipt(
         .map_err(|_| "invalid player drop recovery receipt")?;
     let digest: String = row.get("receipt_digest");
     let bytes: Vec<u8> = row.get("base_snapshot_bytes");
-    if data.version != 1
-        || bytes.is_empty()
+    if bytes.is_empty()
         || bytes.len() > MAX_BASE_JSON_BYTES
         || data.valid_until_ms <= data.observed_at_ms
         || data.requested_lifetime_ms == 0
@@ -479,7 +637,7 @@ fn decode_receipt(
         || data.host.base_snapshot_digest != row.get::<_, String>("base_snapshot_digest")
         || data.observed_at_ms as i64 != row.get::<_, i64>("observed_at_ms")
         || data.valid_until_ms as i64 != row.get::<_, i64>("valid_until_ms")
-        || hash_value(b"mir2.player-drop-recovery-receipt.v1\0", &data)? != digest
+        || receipt_data_digest(&data)? != digest
     {
         return Err("player drop recovery receipt immutable evidence conflict".into());
     }
@@ -532,7 +690,64 @@ fn validate_bindings(
             }
         }
     }
+    let operations = expected
+        .records
+        .iter()
+        .map(|record| (record.operation().binding().operation_key(), record))
+        .collect::<BTreeMap<_, _>>();
+    for admission in &expected.admissions {
+        let actor = admission.frozen().binding();
+        let linked = operations.get(&actor.operation_key()).copied();
+        let linked = linked_recovery_operation(
+            actor,
+            admission.status(),
+            admission.operation_digest(),
+            linked,
+        )?;
+        if source
+            .checkpoint(actor.account_id(), actor.character_index())
+            .is_none()
+            && (!admission_source_may_retire(
+                admission.status(),
+                linked.map(|record| record.status()),
+            ) || !source.is_retired_character(actor.account_id(), actor.character_index())?)
+        {
+            return Err(
+                "player drop recovery source omits a live or unresolved admission actor".into(),
+            );
+        }
+    }
     Ok(())
+}
+fn admission_source_may_retire(
+    status: PlayerDropAdmissionStatus,
+    linked_status: Option<PlayerDropOperationStatus>,
+) -> bool {
+    match status {
+        PlayerDropAdmissionStatus::Admitted => false,
+        PlayerDropAdmissionStatus::Aborted => linked_status.is_none(),
+        PlayerDropAdmissionStatus::Linked => linked_status.is_some_and(terminal_source_may_retire),
+    }
+}
+fn admission_abort_authority_matches(
+    binding: &PlayerDropOperationBinding,
+    resolution_kind: &str,
+    recovery_owner: &str,
+    recovery_epoch: u64,
+    current_owner: &str,
+    current_epoch: u64,
+) -> bool {
+    let resolved = match resolution_kind {
+        "ownerRejected" => {
+            recovery_owner == binding.owner_id() && recovery_epoch == binding.owner_epoch()
+        }
+        "successorAborted" => recovery_epoch > binding.owner_epoch(),
+        _ => false,
+    };
+    resolved
+        && !recovery_owner.is_empty()
+        && recovery_epoch <= current_epoch
+        && (recovery_epoch != current_epoch || recovery_owner == current_owner)
 }
 fn terminal_source_may_retire(status: PlayerDropOperationStatus) -> bool {
     matches!(
@@ -587,6 +802,71 @@ fn validate_retired_recipient_delivery(
     }
     Ok(())
 }
+
+fn validate_attributed_uid_batches(
+    tx: &mut Transaction<'_>,
+    set: &PlayerDropRecoverySet,
+) -> Result<(), String> {
+    let operations = set
+        .records
+        .iter()
+        .map(|record| {
+            (
+                record.operation().binding().operation_key(),
+                record.operation().binding(),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    let admissions = set
+        .admissions
+        .iter()
+        .map(|record| {
+            (
+                record.frozen().binding().operation_key(),
+                record.frozen().binding(),
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    let mut cursor = String::new();
+    let mut count = 0usize;
+    loop {
+        let limit = PAGE_SIZE.min(set.max_operations.saturating_sub(count) + 1);
+        let rows = tx.query(
+            "SELECT operation_key,binding,item_count FROM public.zone_player_drop_item_uid_batches \
+             WHERE source_namespace=current_schema() AND binding->>'zone_id'=$1 AND operation_key>$2 \
+             ORDER BY operation_key LIMIT $3 FOR SHARE",
+            &[&set.zone_id, &cursor, &(limit as i64)],
+        ).map_err(|e| e.to_string())?;
+        if rows.is_empty() {
+            break;
+        }
+        for row in rows {
+            let binding: PlayerDropOperationBinding = serde_json::from_value(row.get("binding"))
+                .map_err(|_| "recovery UID batch binding is invalid")?;
+            binding.validate_integrity()?;
+            cursor = row.get("operation_key");
+            count += 1;
+            if count > set.max_operations || cursor != binding.operation_key() {
+                return Err("recovery UID batch exceeds its bound or immutable identity".into());
+            }
+            if operations.get(&cursor).copied() != Some(&binding)
+                && admissions.get(&cursor).copied() != Some(&binding)
+            {
+                // Historical pre-admission reservations stay retired, but an
+                // unbound batch cannot be certified as a resolved source action.
+                return Err("recovery has an unattributed player drop UID batch; explicit audited reconciliation required".into());
+            }
+            let item_count = usize::try_from(row.get::<_, i32>("item_count"))
+                .map_err(|_| "recovery UID batch count is invalid")?;
+            if !(1..=1024).contains(&item_count)
+                || item_uid::read_reservation(tx, &binding, item_count)?.is_none()
+            {
+                return Err("recovery UID batch has no complete immutable reservation".into());
+            }
+        }
+    }
+    Ok(())
+}
 fn validate_final_set(
     tx: &mut Transaction<'_>,
     permit: &ZoneEconomyWritePermit,
@@ -620,10 +900,12 @@ fn validate_final_set(
         true,
     )?;
     if actual.operation_set_digest != expected.operation_set_digest
+        || actual.admission_set_digest != expected.admission_set_digest
         || actual.source_namespace != expected.source_namespace
     {
         return Err("player drop recovery custody changed after enumeration".into());
     }
+    validate_attributed_uid_batches(tx, &actual)?;
     // No per-operation advisory locks here: ordinary commit/abort lock those
     // before the lease. The held lease serializes all custody mutations.
     // The character locks also block another Zone crediting a hosted recipient
@@ -647,6 +929,37 @@ fn validate_final_set(
         .get(0);
     let mut valid_until = u64::try_from(expiry).map_err(|_| "recovery lease expiry invalid")?;
     let mut counts = BTreeMap::new();
+    for admission in &actual.admissions {
+        let binding = admission.frozen().binding();
+        if binding.owner_epoch() > permit.fence().fencing_token() {
+            return Err("recovery encountered a newer admission writer".into());
+        }
+        let status = match admission.status() {
+            PlayerDropAdmissionStatus::Admitted => {
+                return Err("recovery still contains an unresolved Admitted player drop".into());
+            }
+            PlayerDropAdmissionStatus::Linked => "AdmissionLinked",
+            PlayerDropAdmissionStatus::Aborted => {
+                let audit = admission
+                    .abort_audit()
+                    .ok_or("recovery admission lacks its audited abort")?;
+                if !admission_abort_authority_matches(
+                    binding,
+                    audit.resolution_kind(),
+                    audit.recovery_owner_id(),
+                    audit.recovery_epoch(),
+                    permit.fence().owner_id(),
+                    permit.fence().fencing_token(),
+                ) {
+                    return Err(
+                        "recovery admission abort has no valid owner-resolution witness".into(),
+                    );
+                }
+                "AdmissionAborted"
+            }
+        };
+        *counts.entry(status.into()).or_insert(0) += 1;
+    }
     for record in &actual.records {
         *counts
             .entry(status_name(record.status()).into())
@@ -853,7 +1166,7 @@ impl PostgresEconomyStore {
             return Ok(receipt);
         }
         let data = ReceiptData {
-            version: 1,
+            version: 2,
             source_namespace: expected.source_namespace.clone(),
             zone_id: expected.zone_id.clone(),
             recovery_id: recovery_id.into(),
@@ -864,6 +1177,8 @@ impl PostgresEconomyStore {
             source_characters: source.character_keys().to_vec(),
             operation_set_digest: expected.operation_set_digest.clone(),
             operation_count: expected.records.len(),
+            admission_set_digest: Some(expected.admission_set_digest.clone()),
+            admission_count: Some(expected.admissions.len()),
             max_operations: expected.max_operations,
             state_counts: counts,
             observation_sequence,
@@ -872,7 +1187,7 @@ impl PostgresEconomyStore {
             valid_until_ms: expiry.min(now.saturating_add(requested_lifetime_ms)),
             requested_lifetime_ms,
         };
-        let digest = hash_value(b"mir2.player-drop-recovery-receipt.v1\0", &data)?;
+        let digest = receipt_data_digest(&data)?;
         let json = serde_json::to_value(&data).map_err(|e| e.to_string())?;
         tx.execute("INSERT INTO public.zone_player_drop_recovery_receipts(zone_id,recovery_id,owner_id,owner_epoch,source_digest,operation_set_digest,operation_count,observation_sequence,base_snapshot_id,base_snapshot_digest,base_snapshot_bytes,receipt,receipt_digest,observed_at_ms,valid_until_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)",
             &[&data.zone_id,&data.recovery_id,&data.owner_id,&(data.owner_epoch as i64),&data.source_digest,&data.operation_set_digest,&(data.operation_count as i64),&(data.observation_sequence as i64),&data.host.base_snapshot_id,&data.host.base_snapshot_digest,&heads.base_bytes,&json,&digest,&(data.observed_at_ms as i64),&(data.valid_until_ms as i64)]).map_err(|e|e.to_string())?;
@@ -899,7 +1214,10 @@ impl PostgresEconomyStore {
         sequence: u64,
     ) -> Result<(), String> {
         let data = &receipt.data;
-        if receipt.connection_binding_digest != connection_binding_digest(&self.database_url)
+        if data.version != 2
+            || data.admission_set_digest.as_deref() != Some(expected.admission_set_digest.as_str())
+            || data.admission_count != Some(expected.admissions.len())
+            || receipt.connection_binding_digest != connection_binding_digest(&self.database_url)
             || data.source_namespace != expected.source_namespace
             || data.zone_id != expected.zone_id
             || data.owner_id != permit.fence().owner_id()

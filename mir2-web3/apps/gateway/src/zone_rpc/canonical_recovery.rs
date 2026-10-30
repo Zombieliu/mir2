@@ -2,7 +2,9 @@
 use super::*;
 use crate::economy::{
     PostgresEconomyStore,
-    player_drop::{PlayerDropOperationStatus, PlayerDropRecoveryHostHeads},
+    player_drop::{
+        PlayerDropAdmissionStatus, PlayerDropOperationStatus, PlayerDropRecoveryHostHeads,
+    },
 };
 use crate::routing::SharedAccountInventoryExecutionContext;
 use mir2_simulation::AccountStoreDatabaseMode;
@@ -91,6 +93,14 @@ impl ZoneHostServer {
         let initial = store
             .read_zone_player_drop_recovery_set(zone_id.as_str(), MAX_RECOVERY_OPERATIONS)
             .map_err(classify_runtime_error)?;
+        for admission in initial.admissions() {
+            if admission.status() == PlayerDropAdmissionStatus::Admitted {
+                store.abort_admitted_player_drop(
+                    &permit, admission.frozen().binding(), &abort_id,
+                    "quiesced successor resolves pre-Prepared admission; original writer fenced",
+                ).map_err(classify_runtime_error)?;
+            }
+        }
         for record in initial.records() {
             match record.status() {
                 PlayerDropOperationStatus::Prepared => {

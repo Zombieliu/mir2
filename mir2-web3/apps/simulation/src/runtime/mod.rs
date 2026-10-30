@@ -50,6 +50,12 @@ mod item_grants;
 mod item_sets;
 pub(crate) mod item_uid_issuance;
 mod items;
+
+/// Pure catalogue lookup shared by durable player-drop admission validation.
+/// Reuses the same legacy aliases as runtime item selection; grants no authority.
+pub fn player_drop_item_template_index(key: &str) -> Option<i32> {
+    items::crystal_item_template_for_item_key(key).map(|template| template.item_index)
+}
 mod leveling;
 mod map;
 mod map_events;

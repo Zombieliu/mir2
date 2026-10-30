@@ -130,16 +130,20 @@ fn player_drop_journal_peeks_retain_evidence_until_exact_acknowledgement() {
         assert_eq!(serde_json::to_value(observed).unwrap(), expected);
     }
     assert_guard(runtime.execute(WorldCommand::Tick).unwrap_err());
-    assert!(runtime
-        .acknowledge_player_drop_journal_result("wrong-operation", &digest)
-        .is_err());
+    assert!(
+        runtime
+            .acknowledge_player_drop_journal_result("wrong-operation", &digest)
+            .is_err()
+    );
     assert_eq!(
         serde_json::to_value(runtime.take_player_drop_journal_result().unwrap()).unwrap(),
         expected
     );
-    assert!(runtime
-        .acknowledge_player_drop_journal_result(&key, "wrong-intent")
-        .is_err());
+    assert!(
+        runtime
+            .acknowledge_player_drop_journal_result(&key, "wrong-intent")
+            .is_err()
+    );
     assert_eq!(
         serde_json::to_value(runtime.take_player_drop_journal_result().unwrap()).unwrap(),
         expected
@@ -216,6 +220,7 @@ fn player_drop_pending_journal_blocks_all_source_save_callbacks_and_handoff() {
 struct StandaloneDurableServiceProbe {
     publications: AtomicU64,
     legacy_commits: AtomicU64,
+    known_rejection: bool,
 }
 impl SharedAccountInventoryService for StandaloneDurableServiceProbe {
     fn supports_durable_player_drops(&self) -> bool {
@@ -232,6 +237,11 @@ impl SharedAccountInventoryService for StandaloneDurableServiceProbe {
         _request: PlayerDropRequest,
     ) -> Result<SharedPlayerDropCommit, PreparedPlayerDropPublicationFailure> {
         self.publications.fetch_add(1, Ordering::SeqCst);
+        if self.known_rejection {
+            return Err(PreparedPlayerDropPublicationFailure::Rejected(
+                "fixture models acknowledged terminal refusal".into(),
+            ));
+        }
         panic!("standalone runtime must reject before the durable publication service");
     }
     fn commit(
@@ -242,6 +252,68 @@ impl SharedAccountInventoryService for StandaloneDurableServiceProbe {
         self.legacy_commits.fetch_add(1, Ordering::SeqCst);
         panic!("standalone durable drop must not fall back to a legacy debit");
     }
+}
+
+#[test]
+fn player_drop_known_terminal_refusal_releases_placement_without_freezing_next_request() {
+    // Pure Shared routing contract; actual admission audits are covered in PG.
+    let mut runtime = started_runtime();
+    let probe = Arc::new(StandaloneDurableServiceProbe {
+        known_rejection: true,
+        ..Default::default()
+    });
+    runtime.account_inventory_service = probe.clone();
+    runtime.player_drop_journal_capture_configured = true;
+    let mut source = GatewayConfig::default();
+    source.account_store_database_mode = mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth;
+    source.account_store_database_url =
+        Some("postgresql://fixture@known-drop-refusal.invalid/source".into());
+    let fence = ZoneSaveFence::new(
+        runtime.inventory_zone_id.as_str().into(),
+        "owner-a".into(),
+        1,
+    )
+    .unwrap();
+    let source = source.with_zone_save_fence(fence.clone()).unwrap();
+    runtime.inner.rebind_account_store(&source);
+    runtime.inner.bind_zone_save_fence(fence).unwrap();
+    runtime.economy_execution_context = Some(SharedAccountInventoryExecutionContext {
+        zone_id: runtime.inventory_zone_id.clone(),
+        fencing_generation: 1,
+        source_sequence: 1,
+        created_at_ms: 100,
+        external_commit_authorized: true,
+    });
+    let before = runtime.inner.active_character_checkpoint().unwrap();
+    for _ in 0..2 {
+        assert!(
+            runtime
+                .try_publish_durable_player_drop(PlayerDropRequest::Gold { amount: 7 })
+                .unwrap()
+                .unwrap()
+                .is_empty()
+        );
+        assert!(runtime.pending_player_drop_binding.is_none());
+        assert!(runtime.last_player_drop_journal_result.is_none());
+        runtime
+            .inner
+            .zone_economy_write_permit()
+            .unwrap()
+            .validate_source_write_state()
+            .unwrap();
+        runtime
+            .zone_state
+            .lock()
+            .unwrap()
+            .zone_manager
+            .checkpoint_bytes()
+            .unwrap();
+    }
+    let after = runtime.inner.active_character_checkpoint().unwrap();
+    assert_eq!(after.gold, before.gold);
+    assert_eq!(after.inventory_items_json, before.inventory_items_json);
+    assert_eq!(probe.publications.load(Ordering::SeqCst), 2);
+    assert_eq!(probe.legacy_commits.load(Ordering::SeqCst), 0);
 }
 
 #[test]

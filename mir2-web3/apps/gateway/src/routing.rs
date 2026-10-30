@@ -2795,6 +2795,9 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         false
     }
 
+    /// Rejected guarantees no pending source debit: a created admission has
+    /// an acknowledged terminal rejection. Prepared/Linked or ambiguous
+    /// outcomes must return OutcomeUnknown and retain the original identity.
     #[allow(clippy::too_many_arguments)]
     fn publish_durable_player_drop(
         &self,

@@ -230,3 +230,35 @@ Intermediate tests found a private fixture freeze call, a shadow source-mode/DSN
 Migration0022 is startup/admin-only. Preserve source, custody, recovery bytes and unresolved identities during rollback; do not delete receipts, lower epochs, revive old weak writers or treat an expired historical receipt as new activation authority. Private base bytes require account-data access protection. [Clean PG readback](g2recover-postgres-final.json) records zero lease/save/drop rows, no remaining disposable drop databases or other clients. The exact owned PG16 process was [cleanly stopped](g2recover-fixture-stop.json).
 
 **G2 remains open:** durable pre-Prepared admission/binding recovery, complete UID issuer coordination, controlled reconciliation of frozen processes, and funded accepted-action/source coupling. G3 durable migration, full combat continuity, cross-Gateway recovery, scheduling and actual 3000–5000 all-combat CCU qualification remain open. No remote TEST, public updater, player data or Docker changes; no hardware/cost qualification. [Next gates](../../ZONE-CLUSTER-EXPANSION-GOAL-20261030.zh-CN.md#g2-第五片数据库权威源与受控接管恢复). [Artifact hashes](g2recover-integrity.json) cover this evidence checkpoint.
+
+## G2 durable Prepared admission and recovery
+
+Baseline c52817a003dc9a005606918c03d7958a8cf5db70. [Verification](g2admit-verification.json) records **193 passing selected test executions**, a successful Gateway bins check and **70 identical selected source hashes** across 13 groups. Filters overlap; this is not unique coverage, a CCU count or a cost benchmark. The 27 ignored executions in ordinary selections were explicitly run as 25 player-drop PG functions and both existing canonical-recovery Host functions. The save-fence selection also exercises its existing real-PG boundaries.
+
+| Run | Passed | Ignored | Evidence |
+| --- | ---: | ---: | --- |
+| g2admit-gateway-final | 42 | 25 | [Result](g2admit-gateway-final-result.json), [log](g2admit-gateway-final.log) |
+| g2admit-postgres-final | 25 | 0 | [Result](g2admit-postgres-final-result.json), [log](g2admit-postgres-final.log) |
+| g2admit-reset-final | 6 | 2 | [Result](g2admit-reset-final-result.json), [log](g2admit-reset-final.log) |
+| g2admit-canonical-host-final | 2 | 0 | [Result](g2admit-canonical-host-final-result.json), [log](g2admit-canonical-host-final.log) |
+| g2admit-save-operation-final | 22 | 0 | [Result](g2admit-save-operation-final-result.json), [log](g2admit-save-operation-final.log) |
+| g2admit-unknown-final | 4 | 0 | [Result](g2admit-unknown-final-result.json), [log](g2admit-unknown-final.log) |
+| g2admit-promotion-final | 4 | 0 | [Result](g2admit-promotion-final-result.json), [log](g2admit-promotion-final.log) |
+| g2admit-base-final | 2 | 0 | [Result](g2admit-base-final-result.json), [log](g2admit-base-final.log) |
+| g2admit-ground-final | 8 | 0 | [Result](g2admit-ground-final-result.json), [log](g2admit-ground-final.log) |
+| g2admit-simulation-final | 39 | 0 | [Result](g2admit-simulation-final-result.json), [log](g2admit-simulation-final.log) |
+| g2admit-source-final | 20 | 0 | [Result](g2admit-source-final-result.json), [log](g2admit-source-final.log) |
+| g2admit-fence-final | 19 | 0 | [Result](g2admit-fence-final-result.json), [log](g2admit-fence-final.log) |
+| g2admit-bins-final | 0 | 0 | [Result](g2admit-bins-final-result.json), [log](g2admit-bins-final.log) |
+
+The ordinary service now durably freezes the original request, binding, complete preview, selected cell and absolute lifetime before bootstrap or UID allocation. Only the acknowledged fresh admission INSERT yields a non-cloneable, non-serializable continuation capability. Existing records are query-only. Exact Prepared creation and admission linking share one transaction, including the exact reserved item UID tree. Changed requests, templates, attributes, cells and reservations cannot silently continue another operation.
+
+A known refusal can close only its original Admitted record through acknowledged ownerRejected audit; a higher-epoch successor uses successorAborted. Both retain exact bootstrap and UID witnesses, burn reservations and prohibit source debit, refund or snapshot replacement. Linked/Prepared and ambiguous outcomes remain Unknown and frozen. The pure routing probe verifies placement release, pending-binding cleanup and a second request after acknowledged refusal; its synthetic source gate is not a PG result.
+
+Recovery pages both operation and admission sets and checks complete exact links, audited terminal authority, retirement and UID attribution again under the final fenced transaction. A legacy UID batch with neither operation nor admission blocks certification and is preserved for explicit reconciliation. Receipt v2 binds admission digest/count; historical v1 bytes remain readable but cannot authorize a new certification. The controlled Host resolves old Admitted rows before canonical source/custody recovery. Build identity is now mir2-zone/v5-durable-drop-admission/; mixed old writers are not qualified.
+
+The **12 new actual-PG functions** comprise five service, four recovery, two admission COMMIT and one Host function. They cover gold/nested split success, query-only duplicate/new-service retry, all four preparation gaps, exact known refusal, more than one 256-row page, changed sets, Linked integrity, orphan UID batches and no UID reuse. COMMIT tests distinguish actual successful SQL followed by lost acknowledgement from actual deferred SQL COMMIT rollback: neither mints a continuation capability after an uncertain/failed acknowledgement. The single new Host function loops phases 1, 2 and 4, promotes under a successor lease, checks no phantom drop/debit, rejects the old owner and admits a subsequent Tick. These are explicit in-process injection points, not physical process kill, native network loss, TCP handoff or automatic startup recovery. The 15 earlier PG functions also pass; total explicit functions are 24 ledger/service and three Host.
+
+Migration0023 is startup/admin-only. Rollback must preserve source, admissions, operations, abort audit, recovery receipts, UID reservations and monotonic epochs. Close new requests and reconcile unresolved records; do not delete evidence, recycle IDs, revive weak writers or automatically unfreeze old processes. The [final readback](g2admit-postgres-final.json) records zero lease/save/drop/admission/audit/recovery rows, no leftover owned disposable databases and no other clients. The exact owned PG16 process was [cleanly stopped](g2admit-fixture-stop.json). [Artifact hashes](g2admit-integrity.json) cover these published records; private fixture credentials were scanned out.
+
+**G2 remains open:** complete ordinary UID issuer/census integration, controlled reconciliation of frozen processes and funded accepted-action/source coupling. G3–G7 migration, full combat continuity, cross-Gateway recovery, scheduling and 3000–5000 all-combat qualification remain open. No remote TEST, public updater, player data, Docker, production payment or hardware/month-card cost conclusion changed.

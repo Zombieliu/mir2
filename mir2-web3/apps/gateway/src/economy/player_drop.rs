@@ -10,10 +10,15 @@ use mir2_simulation::{
     PreparedPlayerDropAccountSource,
 };
 mod abort;
+mod admission;
 mod item_uid;
 mod recovery;
 mod service;
 pub use abort::PlayerDropAbortAudit;
+pub use admission::{
+    FrozenPlayerDropAdmission, PlayerDropAdmissionAbortAudit, PlayerDropAdmissionCapability,
+    PlayerDropAdmissionPublication, PlayerDropAdmissionRecord, PlayerDropAdmissionStatus,
+};
 pub use recovery::{PlayerDropRecoveryHostHeads, PlayerDropRecoveryReceipt, PlayerDropRecoverySet};
 
 fn connection_binding_digest(database_url: &str) -> String {
@@ -540,9 +545,25 @@ fn decode_record(
     })
 }
 
+fn insert_prepared_operation_in_transaction(
+    tx: &mut Transaction<'_>,
+    operation: &PlayerDropPreparedOperation,
+) -> Result<(), String> {
+    operation.validate_integrity()?;
+    let binding = operation.binding();
+    let encoded = serde_json::to_value(operation).map_err(|e| e.to_string())?;
+    tx.execute("INSERT INTO public.zone_player_drop_operations(operation_key,world_effect_id,zone_id,owner_id,owner_epoch,operation_digest,intent_digest,operation,expires_at_ms,status,prepared_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'Prepared',$10) ON CONFLICT(source_namespace,operation_key) DO NOTHING",
+        &[&binding.operation_key(),&operation.intent().world_effect_id(),&binding.zone_id(),&binding.owner_id(),&(binding.owner_epoch() as i64),&operation.operation_digest(),&operation.intent().intent_digest(),&encoded,&(operation.intent().expires_at_unix_ms() as i64),&(now_ms() as i64)]).map_err(|e|e.to_string())?;
+    let stored:serde_json::Value=tx.query_one("SELECT operation FROM public.zone_player_drop_operations WHERE operation_key=$1 AND source_namespace=current_schema()",&[&binding.operation_key()]).map_err(|e|e.to_string())?.get(0);
+    if stored != encoded {
+        return Err("player drop prepared operation identity conflict".into());
+    }
+    Ok(())
+}
+
 impl PostgresEconomyStore {
-    /// A fresh preparation is fenced; an exact old operation is recovered by
-    /// lookup, never by treating a missing receipt as permission to replay.
+    /// Explicit legacy/admin/fixture boundary. Production services use
+    /// prepare_admitted_player_drop_operation with its live continuation.
     pub fn prepare_player_drop_operation(
         &self,
         permit: &ZoneEconomyWritePermit,
@@ -566,19 +587,7 @@ impl PostgresEconomyStore {
             binding.zone_id(),
             binding.owner_epoch(),
         )?;
-        let encoded = serde_json::to_value(operation).map_err(|e| e.to_string())?;
-        tx.execute("INSERT INTO public.zone_player_drop_operations(operation_key,world_effect_id,zone_id,owner_id,owner_epoch,operation_digest,intent_digest,operation,expires_at_ms,status,prepared_at_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'Prepared',$10) ON CONFLICT(source_namespace,operation_key) DO NOTHING",
-            &[&binding.operation_key(),&operation.intent().world_effect_id(),&binding.zone_id(),&binding.owner_id(),&(binding.owner_epoch() as i64),&operation.operation_digest(),&operation.intent().intent_digest(),&encoded,&(operation.intent().expires_at_unix_ms() as i64),&(now_ms() as i64)]).map_err(|e|e.to_string())?;
-        let stored: serde_json::Value = tx
-            .query_one(
-                "SELECT operation FROM public.zone_player_drop_operations WHERE operation_key=$1 AND source_namespace=current_schema()",
-                &[&binding.operation_key()],
-            )
-            .map_err(|e| e.to_string())?
-            .get(0);
-        if stored != encoded {
-            return Err("player drop prepared operation identity conflict".into());
-        }
+        insert_prepared_operation_in_transaction(&mut tx, operation)?;
         tx.commit().map_err(|_| permit.commit_outcome_unknown())
     }
 

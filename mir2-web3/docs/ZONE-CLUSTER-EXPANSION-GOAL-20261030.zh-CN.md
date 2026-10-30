@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存/经济 fence、普通掉落 custody 及第五片 canonical source/CAS 与受控 Host 接管恢复；最新110次选定检查和 bins 通过，含13个显式 PG 账本及2个 PG Host 用例。仍缺 pre-Prepared 持久准入、全体 UID issuer 协同、冻结进程受控对账及耗材动作耦合；不能据此启动完整迁移或宣称容量 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存/经济 fence、普通掉落 custody、canonical source/CAS 与受控 Host 恢复，以及第六片 Prepared 前持久准入/精确审计/v2恢复回执；最新193次选定检查和 bins 通过，含27个显式 PG 函数（3个为 in-process Host）。仍缺全体 UID issuer 协同、冻结进程受控对账及耗材动作耦合；不能据此启动完整迁移或宣称容量/成本 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -165,3 +165,19 @@ Host 成功 append 后必须精确确认 operation key/intent digest，之前 ru
 迁移与回退：0022 仅在启动/管理边界执行，worker 不创建表。回执基础快照包含 private 资产数据，按源账号数据权限保护；元数据不复制账号密码或 DSN。回退先停止新的恢复/晋升，保留0021/0022、原源库、编号和所有未决记录；不能删除回执、回退 epoch、启用旧 seed 路径或解冻一个尚未对账的旧进程。没有执行远程数据库迁移或发布。
 
 本片验证记录集中在[恢复证据](evidence/zone-cluster-expansion-20261030/README.md#g2-canonical-source-and-controlled-host-recovery)。真实 PG Host 用例经实际 in-process Host 执行；提交到日志之间的故障使用明确注入点，冷 Host 由测试显式加载持久回执中的基础快照，不冒称自动启动恢复、物理进程崩溃或网络分区已验证。G2 下一项仍是 **pre-Prepared 请求身份与阶段的持久准入记录**，其后还有全体 UID issuer 协同、技能耗材与已接受世界动作的原子耦合，以及 G3–G7。3000–5000 人持续战斗、实际硬件和每人月成本仍未得到新实测结论。
+
+## G2 第六片：Prepared 前的持久准入与恢复
+
+本片基线为 `c52817a003dc9a005606918c03d7958a8cf5db70`，补上普通丢物在 Prepared 之前的持久身份和恢复证据。源扣减、世界托管及第五片的受控 canonical 恢复合同继续保留；本片不是 G2 整体完成，也不改变此前各片证据的历史范围。
+
+普通服务先冻结完整 `FrozenPlayerDropAdmission`，固定原操作绑定、请求、服务器落点、绝对创建/到期时间及完整物品预览，再持久写入 Admitted。只有该次 INSERT 的 COMMIT 已确认，才签发不可 Clone、不可序列化的 Fresh continuation capability，随后依次执行原角色 bootstrap、所需 UID 预留及源准备。Prepared 操作和准入记录的 Linked 状态在同一事务提交，并绑定完全相同的操作摘要和预留 UID 树。查询既有记录只返回数据证据，不能重新签发 continuation、重做 bootstrap、重新发号或继续扣资产；收到 Unknown 后保留原编号，原共享写冻结不自动解除。
+
+明确未提交源操作的拒绝通过 `ownerRejected` 审计关闭 Admitted，要求相同原 owner/epoch，并保存固定领域原因和当时精确的 bootstrap/UID 见证；普通缺失 UID authority 的已知拒绝不会被提升为共享 Unknown。更高 epoch 的 successor 可用 `successorAborted` 审计关闭旧 Admitted，无需原 Session。Linked 已归属 Prepared，必须沿原 Prepared 恢复路径处理，不能改走准入中止。所有中止保留既有 UID 预留和 bootstrap 证据，不补偿退款、不回收或回用 UID，也不重装旧角色快照。
+
+恢复枚举现在完整分页读取操作和准入两个集合，最终事务重新核对集合摘要、每条 Linked 的精确操作绑定、已审计终态及 canonical source。未解决 Admitted 阻止认证；没有操作或准入归属的历史 UID 批次仍保持退休，并明确拒绝恢复认证，等待显式审计，不能靠新建准入或重新发号补齐。恢复回执升为 v2，绑定全部准入集合摘要和数量；历史 v1 保持原字节及只读查询，但不能授权新的完整恢复或晋升。受控 Host 在取得新 lease 且保持 quiesced 时，先处理旧 Admitted，再执行源和托管恢复及最终认证，不自动解冻旧进程。
+
+构建协议前缀升为 `mir2-zone/v5-durable-drop-admission/`。新增启动/管理迁移 `0023_zone_player_drop_admissions.sql`；普通 worker 不建表。部署或回退必须保留0021/0022/0023、源库、准入/操作/恢复回执、审计、UID 预留及原 epoch 证据；先关闭新请求并完成逐项对账，不能删表、降低 epoch、重新使用 UID，或启用绕过持久准入和 fence 的旧 writer。本片没有执行远程迁移或更新公网频道。
+
+本片新增验证范围按实际测试函数列示：5个真实 PG 服务函数覆盖准入后、bootstrap 后、UID 预留后、Prepared+Linked 后的注入缺口，以及正常 Gold/完整嵌套拆堆和已知拒绝；4个真实 PG 恢复函数覆盖完整分页、集合变化、精确 Linked 及无归属 UID 批次；2个真实 PG COMMIT 函数覆盖已提交后丢确认和真实 deferred COMMIT 回滚；1个真实 PG + in-process Host 函数循环阶段1/2/4，不把三个循环分支计作三个测试函数。另有4个纯模型函数及 known-rejection routing 纯测试，检查完整冻结预览、篡改、审计代次、UID 见证和已知拒绝后的路由清理。最终13组 qualification 通过：193次选定测试执行、Gateway bins，70个选定源文件哈希一致；其中27个 PG 函数均被显式运行，过滤器重叠不代表唯一覆盖数或人数。命令、结果和边界统一记录在[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-durable-prepared-admission-and-recovery)。
+
+服务/Host 缺口使用明确注入点，提交后丢确认也使用标记的测试 hook；不冒称物理 kill、原生网络故障、自动启动恢复或自动解除 Unknown。当前下一项仍是**全体普通 UID issuer 的共享 PG adapter 与完整 census**，随后补齐技能耗材与已接受世界动作的持久原子耦合（funded action）。G3–G7 的完整迁移、跨入口恢复、调度和3000–5000人持续战斗仍未完成；本片没有新增 CCU、硬件或服务器/月卡成本验收结论。

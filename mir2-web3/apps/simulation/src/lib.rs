@@ -127,5 +127,5 @@ pub use world_runtime::{
 
 pub use runtime::apply_crystal_experience_rates;
 pub use runtime::{
-    crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence,
+    crystal_social_experience_peer_eligible, player_drop_item_template_index, ExperienceCharacter, ExperiencePresence,
 };

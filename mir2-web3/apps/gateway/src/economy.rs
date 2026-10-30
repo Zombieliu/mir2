@@ -2006,6 +2006,8 @@ pub struct PostgresEconomyAccountInventoryService {
     store: Arc<dyn EconomySettlementStore>,
     projected_receipts: Mutex<BTreeMap<String, SharedAccountInventoryTransactionReceipt>>,
     uncertain_transactions: Mutex<BTreeSet<String>>,
+    #[cfg(test)]
+    test_player_drop_admission_phase: std::sync::atomic::AtomicU8,
 }
 
 impl PostgresEconomyAccountInventoryService {
@@ -2022,6 +2024,8 @@ impl PostgresEconomyAccountInventoryService {
             store,
             projected_receipts: Mutex::new(BTreeMap::new()),
             uncertain_transactions: Mutex::new(BTreeSet::new()),
+            #[cfg(test)]
+            test_player_drop_admission_phase: std::sync::atomic::AtomicU8::new(0),
         }
     }
 

@@ -2,7 +2,7 @@
 //! unavailable authority, never permission to reconstruct a floor from zero.
 use super::*;
 
-fn read_reservation(
+pub(super) fn read_reservation(
     tx: &mut Transaction<'_>,
     binding: &PlayerDropOperationBinding,
     count: usize,

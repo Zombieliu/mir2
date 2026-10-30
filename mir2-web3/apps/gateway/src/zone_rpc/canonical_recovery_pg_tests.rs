@@ -2,8 +2,8 @@
 //! Commands enter the real in-process Host; these are not TCP fault tests.
 use super::*;
 use crate::economy::{
-    start_test_runtime_with_config, PlayerDropPostgresTestDatabase,
-    PostgresEconomyAccountInventoryService,
+    PlayerDropPostgresTestDatabase, PostgresEconomyAccountInventoryService,
+    start_test_runtime_with_config,
 };
 use crate::routing::{SharedAccountInventoryService, ZoneOwnerLeaseAuthority};
 use crate::zone_lease::PostgresZoneOwnerLeaseAuthority;
@@ -11,12 +11,12 @@ use mir2_simulation::{
     GroundDropLootSnapshot, GroundDropSnapshot, InProcessWorldRuntime, PlayerDropCustodyState,
     PlayerDropOperationBinding, PlayerDropRequest, WorldRuntime, ZoneKey, ZoneManager,
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 const ACCOUNT: &str = "host-drop-source";
 const RPC_SESSION: &str = "host-drop-recovery-rpc";
 
-fn seeded_source(db: &PlayerDropPostgresTestDatabase) -> InProcessWorldRuntime {
+pub(super) fn seeded_source(db: &PlayerDropPostgresTestDatabase) -> InProcessWorldRuntime {
     let mut runtime =
         start_test_runtime_with_config(db.config("owner-a", 7), ACCOUNT, "HostDropSource").unwrap();
     let seed = GroundDropSnapshot {
@@ -41,7 +41,7 @@ fn seeded_source(db: &PlayerDropPostgresTestDatabase) -> InProcessWorldRuntime {
     runtime
 }
 
-fn host(
+pub(super) fn host(
     db: &PlayerDropPostgresTestDatabase,
     owner: &str,
     epoch: u64,
@@ -82,7 +82,7 @@ fn envelope(zone: &ZoneId, request: ZoneRpcRequest) -> ZoneRpcEnvelope {
     }
 }
 
-fn execute(
+pub(super) fn execute(
     server: &ZoneHostServer,
     lease: &ZoneOwnerLease,
     command: WorldCommand,
@@ -99,7 +99,7 @@ fn execute(
     ))
 }
 
-fn snapshot(server: &ZoneHostServer, zone: &ZoneId) -> ZoneBaseSnapshot {
+pub(super) fn snapshot(server: &ZoneHostServer, zone: &ZoneId) -> ZoneBaseSnapshot {
     let ZoneRpcPayload::BaseSnapshot { snapshot } = server.export_base_snapshot(zone).unwrap()
     else {
         panic!("Host base")
@@ -107,7 +107,7 @@ fn snapshot(server: &ZoneHostServer, zone: &ZoneId) -> ZoneBaseSnapshot {
     snapshot
 }
 
-fn source_image(db: &PlayerDropPostgresTestDatabase, index: i32) -> Value {
+pub(super) fn source_image(db: &PlayerDropPostgresTestDatabase, index: i32) -> Value {
     let mut client = db.connect();
     let row = client
         .query_one(
@@ -127,7 +127,7 @@ fn source_image(db: &PlayerDropPostgresTestDatabase, index: i32) -> Value {
         "ledger": ledger, "outbox": outbox })
 }
 
-fn world(server: &ZoneHostServer, zone: &ZoneId) -> ZoneManager {
+pub(super) fn world(server: &ZoneHostServer, zone: &ZoneId) -> ZoneManager {
     let factory = server.runtime_factory.lock().unwrap().clone();
     let bytes = factory.zone_checkpoint_bytes(zone).unwrap();
     let checkpoint: Value = serde_json::from_slice(&bytes).unwrap();
@@ -158,7 +158,7 @@ fn assert_one_live_effect(server: &ZoneHostServer, zone: &ZoneId, effect: &str, 
     assert_eq!(live[0].1.quantity, amount);
 }
 
-fn promoted(
+pub(super) fn promoted(
     server: &ZoneHostServer,
     authority: &PostgresZoneOwnerLeaseAuthority,
     zone: &ZoneId,
@@ -303,9 +303,11 @@ fn canonical_recovery_host_post_commit_gap_recovers_source_world_and_reset_witho
         Some(WireWorldCommand::CanonicalZoneRecovery { .. })
     ));
     assert!(execute(&source, &source_lease, WorldCommand::Tick).is_err());
-    assert!(source_authority
-        .validate_owner_lease(&source_lease)
-        .is_err());
+    assert!(
+        source_authority
+            .validate_owner_lease(&source_lease)
+            .is_err()
+    );
     execute(&target, &successor, WorldCommand::Tick).unwrap();
     let session = target
         .sessions

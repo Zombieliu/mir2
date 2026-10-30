@@ -126,7 +126,9 @@ impl SharedInProcessZoneSessionRuntime {
             return Ok(None);
         }
         if !self.player_drop_journal_capture_configured {
-            return Err("durable player drop requires an ordered Zone Host journal publisher".into());
+            return Err(
+                "durable player drop requires an ordered Zone Host journal publisher".into(),
+            );
         }
         let preview = match self.inner.preview_shared_player_drop(&request) {
             Ok(preview) => preview,
@@ -211,15 +213,20 @@ impl SharedInProcessZoneSessionRuntime {
             Ok(committed) => committed,
             Err(PreparedPlayerDropPublicationFailure::Rejected(_)) => {
                 if let Some(reservation) = &reservation {
-                    if let Ok(mut state) = self.zone_state.lock() {
-                        let _ = state
+                    let released = self.zone_state.lock().ok().and_then(|mut state| {
+                        state
                             .zone_manager
-                            .release_player_drop_placement_for_key(&zone, reservation);
+                            .release_player_drop_placement_for_key(&zone, reservation)
+                            .ok()
+                    });
+                    if released != Some(true) {
+                        return Err(self.freeze_player_drop(binding));
                     }
                 }
-                // The original durable Prepared may remain. Resolve it with an
-                // audited successor operation before admitting another writer.
-                return Err(self.freeze_player_drop(binding));
+                // The service contract requires acknowledged resolution before
+                // returning a known refusal. No Prepared operation is released.
+                self.pending_player_drop_binding = None;
+                return Ok(Some(rejected_packets(&request)));
             }
             Err(PreparedPlayerDropPublicationFailure::OutcomeUnknown(_)) => {
                 return Err(self.freeze_player_drop(binding));

@@ -81,6 +81,9 @@ mod canonical_recovery_replay_tests;
 #[cfg(test)]
 #[path = "zone_rpc/canonical_recovery_pg_tests.rs"]
 mod canonical_recovery_pg_tests;
+#[cfg(test)]
+#[path = "zone_rpc/admission_recovery_pg_tests.rs"]
+mod admission_recovery_pg_tests;
 mod canonical_recovery;
 #[cfg(test)]
 #[path = "zone_rpc/zone_save_operation_tests.rs"]
@@ -6463,7 +6466,7 @@ fn zone_replication_build_id() -> String {
     // schema, even when deployment supplied only a reusable version label.
     // Bound the identifier without truncating the source build identity.
     format!(
-        "mir2-zone/v4-canonical-recovery-reset/{}",
+        "mir2-zone/v5-durable-drop-admission/{}",
         hex_lower_bytes(&Sha256::digest(source_build.as_bytes()))
     )
 }

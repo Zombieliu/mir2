@@ -431,7 +431,7 @@ fn successful_host_drop_replaces_procedure_with_exact_frozen_result() {
         panic!("journal must contain the frozen result")
     };
     assert_eq!(serde_json::to_value(result).unwrap(), expected);
-    assert!(zone_replication_build_id().starts_with("mir2-zone/v4-canonical-recovery-reset/"));
+    assert!(zone_replication_build_id().starts_with("mir2-zone/v5-durable-drop-admission/"));
     drop(journal);
     assert_eq!(calls.acknowledge.load(Ordering::Acquire), 1);
     assert!(hosted(&server, &lease)
