@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized] target(s) in 0.33s
+
+running 12 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+test zone_rpc::native_attack_tests::absent_typed_result_after_dispatch_is_unknown_instead_of_nonlaunch ... ok
+test zone_rpc::native_attack_tests::incomplete_or_corrupt_wire_results_never_default_to_nonlaunch ... ok
+test zone_rpc::native_attack_tests::invalid_production_requests_fail_before_contacting_the_endpoint ... ok
+test zone_rpc::native_attack_tests::lost_reply_never_contacts_another_endpoint_or_replays_generic_attack ... ok
+test zone_rpc::native_attack_tests::old_host_is_probed_but_receives_no_attack_or_generic_execute ... ok
+test zone_rpc::native_attack_tests::real_host_promotion_and_sequence_gates_cover_dedicated_attack ... ok
+test zone_rpc::native_attack_tests::real_host_rejects_stale_owner_before_entering_runtime ... ok
+test zone_rpc::native_attack_tests::real_host_rejects_unauthenticated_and_mismatched_world_before_runtime_or_journal ... ok
+test zone_rpc::native_attack_tests::real_standby_rejects_dedicated_attack_before_session_creation ... ok
+test zone_rpc::native_attack_tests::retrying_rpc_helper_cannot_send_the_dedicated_mutation ... ok
+test zone_rpc::native_attack_tests::typed_errors_keep_unsupported_preflight_and_unknown_distinct ... ok
+test zone_rpc::native_attack_tests::typed_launch_and_nonlaunch_survive_json_and_messagepack_without_packet_inference ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 1448 filtered out; finished in 0.10s

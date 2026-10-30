@@ -121,6 +121,9 @@ pub(super) fn classify_commit_error(_error: postgres::Error) -> String {
 impl SimulationConfig {
     pub fn with_zone_save_fence(mut self, fence: ZoneSaveFence) -> Result<Self, String> {
         self.validate_zone_save_fence_binding()?;
+        if self.zone_save_operation.as_ref().is_some_and(|operation| operation.fence() != &fence) {
+            return Err(REJECTED.to_string());
+        }
         self.zone_save_fence = Some(fence);
         Ok(self)
     }
@@ -151,6 +154,7 @@ impl SimulationConfig {
 
     pub(super) fn bind_zone_save_fence_to_plan(&self, plan: &mut AccountStoreMutationPlan) {
         plan.zone_save_fence = self.zone_save_fence.clone();
+        plan.zone_save_operation = self.zone_save_operation.clone();
         #[cfg(test)]
         if plan.zone_save_fence.is_some() {
             plan.zone_save_fence_test_fault = self

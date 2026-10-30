@@ -6,8 +6,39 @@ use mir2_simulation::{
     GameShopPurchaseOutcome, NativeAttackAdmission, NativeGameShopPurchaseRequest, WorldCommand,
     WorldCommandKind, WorldCommandOutcome,
 };
+use sha2::{Digest, Sha256};
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::Mutex;
+
+const SESSION: &str = "stable-save-session";
+
+// Scripted boundary receipts: these tests do not assert a real database commit.
+fn save_receipt(status: &str, binding: &ZoneSaveOperationBinding) -> ZoneSaveOperationReceipt {
+    let config = crate::GatewayConfig::default();
+    let index = config.default_character.index;
+    let frozen = config.account_store.lock().unwrap().accounts["demo"].saves[&index].clone();
+    let mut expected = frozen.clone();
+    expected.revision += 1;
+    let frozen = serde_json::to_value(frozen).unwrap();
+    let expected = serde_json::to_value(expected).unwrap();
+    let digest = |value: &serde_json::Value| {
+        Sha256::digest(serde_json::to_vec(value).unwrap())
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>()
+    };
+    ZoneSaveOperationReceipt::from_json_checked(serde_json::json!({
+        "operation": { "binding": binding.to_json().unwrap(), "accountId": "demo",
+            "frozenCheckpoint": frozen, "expectedSavedCheckpoint": expected,
+            "checkpointDigest": digest(&frozen), "expectedDigest": digest(&expected),
+            "lastAccessBinaryDatetime": null },
+        "status": status,
+        "savedCheckpoint": if status == "Prepared" { None } else { Some(expected) },
+        "accountStoreVersion": if status == "Prepared" { None } else { Some(4) },
+        "characterSaveVersion": if status == "Prepared" { None } else { Some(3) }
+    }))
+    .unwrap()
+}
 
 #[derive(Debug)]
 struct Observer {
@@ -45,6 +76,11 @@ struct FakeTransport {
     mutation_error: Mutex<Option<String>>,
     flip_during_read: AtomicBool,
     flip_during_capability: AtomicBool,
+    save_capability: AtomicBool,
+    save_empty: AtomicBool,
+    save_publish_on_error: AtomicBool,
+    save_receipt: Mutex<Option<ZoneSaveOperationReceipt>>,
+    save_bindings: Mutex<Vec<ZoneSaveOperationBinding>>,
 }
 
 impl FakeTransport {
@@ -87,6 +123,89 @@ fn execution() -> WorldCommandExecution {
 }
 
 impl ZoneOwnerRpcTransport for FakeTransport {
+    fn supports_zone_save_operations(&self) -> bool {
+        self.capability("save_capability") && self.save_capability.load(Ordering::SeqCst)
+    }
+
+    fn prepare_zone_save_operation(
+        &self,
+        lease: &ZoneOwnerLease,
+        operation_id: &str,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        let binding = ZoneSaveOperationBinding::new(
+            operation_id.into(),
+            SESSION.into(),
+            ZoneSaveFence::new(
+                lease.zone_id().as_str().into(),
+                lease.owner_id().into(),
+                lease.fencing_token(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        self.save_bindings.lock().unwrap().push(binding.clone());
+        let result = self.mutate("save_prepare");
+        if !self.save_empty.load(Ordering::SeqCst)
+            && (result.is_ok() || self.save_publish_on_error.load(Ordering::SeqCst))
+        {
+            *self.save_receipt.lock().unwrap() = Some(save_receipt("Prepared", &binding));
+        }
+        result?;
+        self.save_receipt
+            .lock()
+            .unwrap()
+            .as_ref()
+            .map(PreparedZoneTeardown::from_remote_operation)
+            .transpose()
+    }
+
+    fn persist_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.save_bindings.lock().unwrap().push(binding.clone());
+        let result = self.mutate("save_persist");
+        if result.is_ok() || self.save_publish_on_error.load(Ordering::SeqCst) {
+            *self.save_receipt.lock().unwrap() = Some(save_receipt("Committed", binding));
+        }
+        result?;
+        Ok(self.save_receipt.lock().unwrap().clone().unwrap())
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        self.record("save_query");
+        let receipt = self.save_receipt.lock().unwrap().clone();
+        if receipt
+            .as_ref()
+            .is_some_and(|r| r.operation().operation_id() != binding.operation_id())
+        {
+            return Ok(None);
+        }
+        if receipt
+            .as_ref()
+            .is_some_and(|r| r.operation().binding() != binding)
+        {
+            return Err(SAVE_RECOVERY.into());
+        }
+        Ok(receipt)
+    }
+
+    fn release_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.save_bindings.lock().unwrap().push(binding.clone());
+        let result = self.mutate("save_release");
+        if result.is_ok() || self.save_publish_on_error.load(Ordering::SeqCst) {
+            *self.save_receipt.lock().unwrap() = Some(save_receipt("Released", binding));
+        }
+        result?;
+        Ok(self.save_receipt.lock().unwrap().clone().unwrap())
+    }
+
     fn execute_production_attack_requiring_typed_outcome(
         &self,
         _: ZoneOwnerCommandRequest,
@@ -237,6 +356,11 @@ impl Fixture {
                 mutation_error: Mutex::new(None),
                 flip_during_read: AtomicBool::new(false),
                 flip_during_capability: AtomicBool::new(false),
+                save_capability: AtomicBool::new(false),
+                save_empty: AtomicBool::new(true),
+                save_publish_on_error: AtomicBool::new(false),
+                save_receipt: Mutex::new(None),
+                save_bindings: Mutex::new(vec![]),
             }),
             observer,
             now,
@@ -252,6 +376,7 @@ impl Fixture {
         StableZoneOwnerRpcTransport::from_transport(
             self.resolver.clone(),
             pin,
+            SESSION.into(),
             self.inner.clone(),
             || {
                 self.inner.probe_calls.fetch_add(1, Ordering::SeqCst);
@@ -297,6 +422,7 @@ fn an_epoch_change_during_the_initial_health_probe_rejects_the_binding() {
     let result = StableZoneOwnerRpcTransport::from_transport(
         fixture.resolver.clone(),
         pin,
+        SESSION.into(),
         fixture.inner.clone(),
         || {
             fixture.observer.put("host-a", 8, 500);
@@ -480,6 +606,7 @@ fn capabilities_and_specialized_native_methods_are_forwarded() {
 #[test]
 fn lifecycle_and_read_methods_keep_the_inner_behavior() {
     let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
     let transport = fixture.transport("host-a").unwrap();
     assert!(transport.on_connect().unwrap().is_empty());
     assert_eq!(transport.world_snapshot().unwrap_err(), "snapshot sentinel");
@@ -512,9 +639,17 @@ fn lifecycle_and_read_methods_keep_the_inner_behavior() {
             "identity",
             "checkpoint",
             "handoff",
-            "teardown",
-            "release",
-            "save",
+            "save_capability",
+            "save_capability",
+            "save_query",
+            "save_capability",
+            "save_prepare",
+            "save_capability",
+            "save_capability",
+            "save_capability",
+            "save_query",
+            "save_capability",
+            "save_prepare",
             "mail",
             "close",
             "live_outbound"
@@ -609,6 +744,7 @@ fn a_different_endpoint_cannot_reuse_an_existing_pin_or_probe_the_new_host() {
     let result = StableZoneOwnerRpcTransport::from_transport(
         changed_resolver,
         pin,
+        SESSION.into(),
         fixture.inner.clone(),
         || panic!("an endpoint change must be rejected before health or mutation"),
     );
@@ -662,4 +798,357 @@ fn confirmed_typed_economic_success_is_not_relabelled_when_the_epoch_changes() {
         ResolveError::RequiresRebind.code()
     );
     assert_eq!(fixture.inner.mutation_calls.load(Ordering::SeqCst), 1);
+}
+
+#[test]
+fn legacy_save_lifecycle_requires_the_new_capability_without_any_fallback() {
+    let fixture = Fixture::new();
+    let transport = fixture.transport("host-a").unwrap();
+    assert!(!transport.supports_zone_save_operations());
+    assert_eq!(
+        transport
+            .prepare_teardown_checkpoint(&fixture.lease)
+            .unwrap_err(),
+        "zone_save_operations_unsupported"
+    );
+    assert_eq!(
+        transport.save_active_character().unwrap_err(),
+        "zone_save_operations_unsupported"
+    );
+    assert_eq!(
+        transport.release_teardown_fence().unwrap_err(),
+        "zone_save_operations_unsupported"
+    );
+    assert_eq!(fixture.inner.mutation_calls.load(Ordering::SeqCst), 0);
+    assert!(transport.pending_save.lock().unwrap().is_none());
+    assert!(fixture
+        .inner
+        .calls
+        .lock()
+        .unwrap()
+        .iter()
+        .all(|call| *call == "save_capability"));
+}
+
+#[test]
+fn legacy_save_completes_only_through_one_immutable_receipt_binding() {
+    let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
+    fixture.inner.save_empty.store(false, Ordering::SeqCst);
+    let transport = fixture.transport("host-a").unwrap();
+    transport.save_active_character().unwrap();
+    assert!(transport.pending_save.lock().unwrap().is_none());
+    let first = fixture.inner.save_bindings.lock().unwrap().clone();
+    assert_eq!(first.len(), 3);
+    assert!(first.iter().all(|binding| binding == &first[0]));
+    assert_eq!(first[0].rpc_session_id(), SESSION);
+    assert_eq!(first[0].fence().fencing_token(), 7);
+    assert_eq!(
+        fixture
+            .inner
+            .save_receipt
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .status(),
+        ZoneSaveOperationStatus::Released
+    );
+    transport.save_active_character().unwrap();
+    let all = fixture.inner.save_bindings.lock().unwrap();
+    assert_eq!(all.len(), 6);
+    assert_ne!(all[0].operation_id(), all[3].operation_id());
+    assert!(all[3..].iter().all(|binding| binding == &all[3]));
+    assert!(fixture
+        .inner
+        .calls
+        .lock()
+        .unwrap()
+        .iter()
+        .all(|call| !matches!(*call, "save" | "teardown" | "release")));
+}
+
+#[test]
+fn lost_prepare_reply_keeps_the_same_id_and_requires_readonly_reconciliation() {
+    let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
+    fixture.inner.save_empty.store(false, Ordering::SeqCst);
+    let transport = fixture.transport("host-a").unwrap();
+    *fixture.inner.mutation_error.lock().unwrap() =
+        Some("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: prepare reply lost".into());
+    assert!(transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    let original = transport
+        .pending_save
+        .lock()
+        .unwrap()
+        .as_ref()
+        .unwrap()
+        .binding
+        .clone();
+    *fixture.inner.mutation_error.lock().unwrap() = None;
+    assert!(transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    assert_eq!(fixture.inner.save_bindings.lock().unwrap().len(), 1);
+    assert_eq!(
+        transport
+            .prepare_zone_save_operation(&fixture.lease, "different-operation")
+            .unwrap_err(),
+        "zone_save_operation_pending"
+    );
+    assert_eq!(
+        transport
+            .pending_save
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .binding,
+        original
+    );
+    *fixture.inner.save_receipt.lock().unwrap() = Some(save_receipt("Prepared", &original));
+    let prepared = transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap()
+        .unwrap();
+    assert_eq!(prepared.remote_operation_binding(), Some(&original));
+    transport.persist_teardown_checkpoint(&prepared).unwrap();
+    assert_eq!(fixture.inner.save_bindings.lock().unwrap().len(), 2);
+    assert!(fixture
+        .inner
+        .save_bindings
+        .lock()
+        .unwrap()
+        .iter()
+        .all(|b| b == &original));
+}
+
+#[test]
+fn committed_old_epoch_receipt_resolves_unknown_without_replay_or_rebinding() {
+    let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
+    fixture.inner.save_empty.store(false, Ordering::SeqCst);
+    let transport = fixture.transport("host-a").unwrap();
+    let prepared = transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap()
+        .unwrap();
+    let binding = prepared.remote_operation_binding().unwrap().clone();
+    fixture
+        .inner
+        .save_publish_on_error
+        .store(true, Ordering::SeqCst);
+    *fixture.inner.mutation_error.lock().unwrap() =
+        Some("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: persist reply lost".into());
+    *fixture.inner.after_mutation.lock().unwrap() = Some(("host-b", 8));
+    assert!(transport
+        .persist_teardown_checkpoint(&prepared)
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    let mutations = fixture.inner.mutation_calls.load(Ordering::SeqCst);
+    // The receipt query precedes observer/lease admission, including an outage.
+    fixture.observer.fail.store(true, Ordering::SeqCst);
+    transport.persist_teardown_checkpoint(&prepared).unwrap();
+    assert_eq!(
+        transport
+            .query_zone_save_operation(&binding)
+            .unwrap()
+            .unwrap()
+            .status(),
+        ZoneSaveOperationStatus::Committed
+    );
+    assert_eq!(
+        transport
+            .prepare_teardown_checkpoint(&fixture.lease)
+            .unwrap()
+            .unwrap()
+            .remote_operation_binding(),
+        Some(&binding)
+    );
+    assert_eq!(
+        transport.release_teardown_fence().unwrap_err(),
+        ResolveError::ObserverUnavailable.code()
+    );
+    assert_eq!(
+        fixture.inner.mutation_calls.load(Ordering::SeqCst),
+        mutations
+    );
+    assert_eq!(transport.pin.lease(), &fixture.lease);
+    assert_eq!(
+        transport
+            .pending_save
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .binding,
+        binding
+    );
+}
+
+#[test]
+fn lost_persist_reply_with_only_prepared_receipt_never_reissues_a_mutation() {
+    let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
+    fixture.inner.save_empty.store(false, Ordering::SeqCst);
+    let transport = fixture.transport("host-a").unwrap();
+    let prepared = transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap()
+        .unwrap();
+    *fixture.inner.mutation_error.lock().unwrap() =
+        Some("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: persist response absent".into());
+    assert!(transport
+        .persist_teardown_checkpoint(&prepared)
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    *fixture.inner.mutation_error.lock().unwrap() = None;
+    let mutations = fixture.inner.mutation_calls.load(Ordering::SeqCst);
+    assert!(transport
+        .persist_teardown_checkpoint(&prepared)
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    assert!(transport
+        .save_active_character()
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    assert_eq!(
+        fixture.inner.mutation_calls.load(Ordering::SeqCst),
+        mutations
+    );
+    assert!(transport.pending_save.lock().unwrap().is_some());
+}
+
+#[test]
+fn released_receipt_requires_live_host_release_confirmation_before_clearing_pending() {
+    let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
+    fixture.inner.save_empty.store(false, Ordering::SeqCst);
+    let transport = fixture.transport("host-a").unwrap();
+    let prepared = transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap()
+        .unwrap();
+    let binding = prepared.remote_operation_binding().unwrap().clone();
+    transport.persist_teardown_checkpoint(&prepared).unwrap();
+    fixture
+        .inner
+        .save_publish_on_error
+        .store(true, Ordering::SeqCst);
+    *fixture.inner.mutation_error.lock().unwrap() =
+        Some("ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: release reply lost".into());
+    *fixture.inner.after_mutation.lock().unwrap() = Some(("host-b", 8));
+    assert!(transport
+        .release_teardown_fence()
+        .unwrap_err()
+        .contains("COMMIT_OUTCOME_UNKNOWN"));
+    assert!(transport.pending_save.lock().unwrap().is_some());
+    let mutations = fixture.inner.mutation_calls.load(Ordering::SeqCst);
+    assert_eq!(
+        transport.release_teardown_fence().unwrap_err(),
+        ResolveError::RequiresRebind.code()
+    );
+    assert!(transport.pending_save.lock().unwrap().is_some());
+    assert_eq!(
+        transport
+            .query_zone_save_operation(&binding)
+            .unwrap()
+            .unwrap()
+            .status(),
+        ZoneSaveOperationStatus::Released
+    );
+    assert_eq!(
+        fixture.inner.mutation_calls.load(Ordering::SeqCst),
+        mutations
+    );
+    // A read-only Released row cannot authorize the old Host while ownership
+    // differs. Returning to this same pinned epoch permits explicit same-ID
+    // Host confirmation; a frozen Host may still refuse it.
+    fixture.observer.put("host-a", 7, 500);
+    *fixture.inner.mutation_error.lock().unwrap() =
+        Some("zone_save_operation_requires_recovery".into());
+    assert_eq!(
+        transport.release_teardown_fence().unwrap_err(),
+        SAVE_RECOVERY
+    );
+    assert!(transport.pending_save.lock().unwrap().is_some());
+    *fixture.inner.mutation_error.lock().unwrap() = None;
+    transport.release_teardown_fence().unwrap();
+    assert!(transport.pending_save.lock().unwrap().is_none());
+    assert_eq!(
+        fixture.inner.mutation_calls.load(Ordering::SeqCst),
+        mutations + 2
+    );
+    assert!(fixture
+        .inner
+        .save_bindings
+        .lock()
+        .unwrap()
+        .iter()
+        .all(|b| b == &binding));
+}
+
+#[test]
+fn pending_binding_cannot_switch_operation_session_owner_zone_or_epoch() {
+    let fixture = Fixture::new();
+    fixture.inner.save_capability.store(true, Ordering::SeqCst);
+    fixture.inner.save_empty.store(false, Ordering::SeqCst);
+    let transport = fixture.transport("host-a").unwrap();
+    let prepared = transport
+        .prepare_teardown_checkpoint(&fixture.lease)
+        .unwrap()
+        .unwrap();
+    let original = prepared.remote_operation_binding().unwrap();
+    let calls = fixture.inner.calls.lock().unwrap().len();
+    for binding in [
+        ZoneSaveOperationBinding::new(
+            "foreign-operation".into(),
+            SESSION.into(),
+            original.fence().clone(),
+        )
+        .unwrap(),
+        ZoneSaveOperationBinding::new(
+            original.operation_id().into(),
+            "foreign-session".into(),
+            original.fence().clone(),
+        )
+        .unwrap(),
+        ZoneSaveOperationBinding::new(
+            original.operation_id().into(),
+            SESSION.into(),
+            ZoneSaveFence::new("map:1".into(), "host-a".into(), 7).unwrap(),
+        )
+        .unwrap(),
+        ZoneSaveOperationBinding::new(
+            original.operation_id().into(),
+            SESSION.into(),
+            ZoneSaveFence::new("map:0".into(), "host-b".into(), 7).unwrap(),
+        )
+        .unwrap(),
+        ZoneSaveOperationBinding::new(
+            original.operation_id().into(),
+            SESSION.into(),
+            ZoneSaveFence::new("map:0".into(), "host-a".into(), 8).unwrap(),
+        )
+        .unwrap(),
+    ] {
+        assert!(transport.persist_zone_save_operation(&binding).is_err());
+        assert!(transport.query_zone_save_operation(&binding).is_err());
+        assert!(transport.release_zone_save_operation(&binding).is_err());
+    }
+    assert_eq!(fixture.inner.calls.lock().unwrap().len(), calls);
+    assert_eq!(
+        transport
+            .pending_save
+            .lock()
+            .unwrap()
+            .as_ref()
+            .unwrap()
+            .binding,
+        *original
+    );
 }

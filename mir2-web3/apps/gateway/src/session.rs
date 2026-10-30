@@ -1136,11 +1136,16 @@ impl GatewaySession {
             .ok_or_else(|| "teardown save requires a prepared checkpoint".to_string())?
             .owner_lease()
             .clone();
-        self.validate_zone_owner_lease(&owner_lease)?;
         let prepared = self
             .teardown_checkpoint
             .as_ref()
             .ok_or_else(|| "teardown save requires a prepared checkpoint".to_string())?;
+        // A durable remote receipt can prove an earlier COMMIT after takeover.
+        // The stable transport validates the pinned lease before any new write;
+        // a read-only reconciliation must not require the old lease to be live.
+        if prepared.remote_operation_binding().is_none() {
+            self.validate_zone_owner_lease(&owner_lease)?;
+        }
         self.zone_owner_command_client
             .persist_teardown_checkpoint(&mut self.runtime, prepared)
             .map_err(|error| format!("zone owner teardown checkpoint save failed: {error}"))
@@ -1158,6 +1163,15 @@ impl GatewaySession {
             .as_ref()
             .map(|routing| routing.config.clone())
             .ok_or_else(|| "teardown journal requires a configured routing context".to_string())?;
+        if let Some(binding) = prepared.remote_operation_binding() {
+            return save_recovery::journal_remote_checkpoint(
+                &config,
+                &prepared.identity().account_id,
+                prepared.identity().character_index,
+                prepared.checkpoint(),
+                binding,
+            );
+        }
         save_recovery::journal_checkpoint(
             &config,
             &prepared.identity().account_id,

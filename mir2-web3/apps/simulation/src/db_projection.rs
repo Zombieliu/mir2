@@ -103,6 +103,10 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0019_sui_usdc_billing_authority",
         include_str!("../../../infra/postgres/migrations/0019_sui_usdc_billing_authority.sql"),
     ),
+    (
+        "0020_zone_character_save_operations",
+        include_str!("../../../infra/postgres/migrations/0020_zone_character_save_operations.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

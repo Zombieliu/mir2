@@ -768,6 +768,7 @@ fn durable_mutation_classification_blocks_generic_tcp_fallback_before_any_endpoi
         outbound_generation: Arc::new(AtomicU64::new(0)),
         outbound_stream_id: Arc::new(Mutex::new(None)),
         owner_route_guard: None,
+        explicit_zone_save_endpoint: false,
     };
     assert!(!NpcPurchaseOwnerAction::Quote {
         request: fixture.request

@@ -14,15 +14,31 @@ use mir2_protocol::ServerPacket;
 use mir2_simulation::{
     ActiveSessionIdentity, CharacterHandoffCheckpoint, CharacterHandoffCommitment,
     CharacterSaveRecord, NativeAttackError, NativeAttackExecution, NpcPurchaseDurableError,
-    NpcPurchaseOwnerAction, WorldCommandExecution, WorldSnapshot,
+    NpcPurchaseOwnerAction, WorldCommandExecution, WorldSnapshot, ZoneSaveFence,
+    ZoneSaveOperationBinding, ZoneSaveOperationReceipt, ZoneSaveOperationStatus,
 };
-use std::sync::Arc;
+use rand::RngCore;
+use std::sync::{Arc, Mutex};
+
+const SAVE_RECOVERY: &str = "zone_save_operation_requires_recovery";
+const SAVE_UNKNOWN: &str =
+    "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: pending owner save requires receipt reconciliation";
+
+#[derive(Debug)]
+struct PendingSaveOperation {
+    binding: ZoneSaveOperationBinding,
+    prepare_unknown: bool,
+    persist_unknown: bool,
+    release_unknown: bool,
+}
 
 #[derive(Debug)]
 pub struct StableZoneOwnerRpcTransport {
     resolver: Arc<StableZoneOwnerResolver>,
     pin: ResolvedZoneOwner,
     inner: SharedZoneOwnerRpcTransport,
+    session_id: String,
+    pending_save: Mutex<Option<PendingSaveOperation>>,
 }
 
 impl StableZoneOwnerRpcTransport {
@@ -46,7 +62,7 @@ impl StableZoneOwnerRpcTransport {
         let inner = TcpZoneOwnerRpcTransport::with_explicit_options(
             pin.endpoint(),
             pin.lease().zone_id().clone(),
-            session_id,
+            session_id.clone(),
             token,
             limits,
         )
@@ -57,7 +73,7 @@ impl StableZoneOwnerRpcTransport {
                 .map_err(|error| error.to_string())
         }));
         let health_transport = inner.clone();
-        Self::from_transport(resolver, pin, Arc::new(inner), move || {
+        Self::from_transport(resolver, pin, session_id, Arc::new(inner), move || {
             health_transport.health().map(|health| health.host_id)
         })
     }
@@ -65,13 +81,25 @@ impl StableZoneOwnerRpcTransport {
     fn from_transport(
         resolver: Arc<StableZoneOwnerResolver>,
         pin: ResolvedZoneOwner,
+        session_id: String,
         inner: SharedZoneOwnerRpcTransport,
         health_host_id: impl FnOnce() -> Result<String, String>,
     ) -> Result<Self, String> {
+        ZoneSaveOperationBinding::new(
+            "validate-session".into(),
+            session_id.clone(),
+            ZoneSaveFence::new(
+                pin.lease().zone_id().as_str().into(),
+                pin.lease().owner_id().into(),
+                pin.lease().fencing_token(),
+            )?,
+        )?;
         let transport = Self {
             resolver,
             pin,
             inner,
+            session_id,
+            pending_save: Mutex::new(None),
         };
         transport.validate_pin()?;
         if health_host_id()? != transport.pin.lease().owner_id() {
@@ -110,9 +138,233 @@ impl StableZoneOwnerRpcTransport {
     fn capability(&self, operation: impl FnOnce(&dyn ZoneOwnerRpcTransport) -> bool) -> bool {
         self.validate_pin().is_ok() && operation(self.inner.as_ref()) && self.validate_pin().is_ok()
     }
+
+    fn validate_save_binding(&self, binding: &ZoneSaveOperationBinding) -> Result<(), String> {
+        let lease = self.pin.lease();
+        if binding.rpc_session_id() != self.session_id
+            || binding.fence().zone_id() != lease.zone_id().as_str()
+            || binding.fence().owner_id() != lease.owner_id()
+            || binding.fence().fencing_token() != lease.fencing_token()
+        {
+            return Err(ResolveError::RequiresRebind.to_string());
+        }
+        Ok(())
+    }
+
+    fn require_save_capability(&self) -> Result<(), String> {
+        self.validate_pin()?;
+        if !self.inner.supports_zone_save_operations() {
+            return Err("zone_save_operations_unsupported".into());
+        }
+        self.validate_pin()
+    }
+
+    /// Receipt reconciliation targets the original pinned Host and original
+    /// session even after expiry/takeover. It never authorizes a new mutation.
+    fn query_save_receipt(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        self.validate_save_binding(binding)?;
+        if !self.inner.supports_zone_save_operations() {
+            return Err("zone_save_operations_unsupported".into());
+        }
+        let receipt = self.inner.query_zone_save_operation(binding)?;
+        if receipt
+            .as_ref()
+            .is_some_and(|r| r.operation().binding() != binding)
+        {
+            return Err(SAVE_UNKNOWN.into());
+        }
+        Ok(receipt)
+    }
+
+    fn new_save_operation_id() -> String {
+        let mut bytes = [0u8; 24];
+        rand::rngs::OsRng.fill_bytes(&mut bytes);
+        let suffix = bytes
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>();
+        format!("zone-save-{suffix}")
+    }
 }
 
 impl ZoneOwnerRpcTransport for StableZoneOwnerRpcTransport {
+    fn supports_zone_save_operations(&self) -> bool {
+        self.capability(|inner| inner.supports_zone_save_operations())
+    }
+
+    fn prepare_zone_save_operation(
+        &self,
+        lease: &ZoneOwnerLease,
+        operation_id: &str,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        let binding = ZoneSaveOperationBinding::new(
+            operation_id.into(),
+            self.session_id.clone(),
+            ZoneSaveFence::new(
+                lease.zone_id().as_str().into(),
+                lease.owner_id().into(),
+                lease.fencing_token(),
+            )?,
+        )?;
+        self.validate_save_binding(&binding)?;
+        let mut pending = self.pending_save.lock().map_err(|_| SAVE_RECOVERY)?;
+        if let Some(local) = pending.as_ref() {
+            if local.binding != binding {
+                return Err("zone_save_operation_pending".into());
+            }
+        } else {
+            self.validate_request_lease(lease)?;
+            self.require_save_capability()?;
+            // Publish the immutable ID before any Prepare can reach the Host.
+            *pending = Some(PendingSaveOperation {
+                binding: binding.clone(),
+                prepare_unknown: false,
+                persist_unknown: false,
+                release_unknown: false,
+            });
+        }
+        if let Some(receipt) = self.query_save_receipt(&binding)? {
+            if receipt.status() == ZoneSaveOperationStatus::Prepared {
+                self.validate_request_lease(lease)?;
+                pending.as_mut().ok_or(SAVE_RECOVERY)?.prepare_unknown = false;
+            }
+            return PreparedZoneTeardown::from_remote_operation(&receipt).map(Some);
+        }
+        let local = pending.as_mut().ok_or(SAVE_RECOVERY)?;
+        if local.prepare_unknown || local.persist_unknown || local.release_unknown {
+            return Err(SAVE_UNKNOWN.into());
+        }
+        self.validate_request_lease(lease)?;
+        self.require_save_capability()?;
+        match self.inner.prepare_zone_save_operation(lease, operation_id) {
+            Ok(Some(prepared)) => {
+                if prepared.remote_operation_binding() != Some(&binding) {
+                    local.prepare_unknown = true;
+                    return Err(SAVE_UNKNOWN.into());
+                }
+                Ok(Some(prepared))
+            }
+            Ok(None) => {
+                *pending = None;
+                Ok(None)
+            }
+            Err(error) => {
+                local.prepare_unknown = error.contains("COMMIT_OUTCOME_UNKNOWN");
+                Err(error)
+            }
+        }
+    }
+
+    fn persist_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.validate_save_binding(binding)?;
+        let mut pending = self.pending_save.lock().map_err(|_| SAVE_RECOVERY)?;
+        if pending
+            .as_ref()
+            .is_some_and(|local| &local.binding != binding)
+        {
+            return Err(SAVE_RECOVERY.into());
+        }
+        let receipt = self.query_save_receipt(binding)?.ok_or(SAVE_UNKNOWN)?;
+        if receipt.status() != ZoneSaveOperationStatus::Prepared {
+            return Ok(receipt);
+        }
+        let local = pending.as_mut().ok_or(SAVE_RECOVERY)?;
+        if local.persist_unknown {
+            return Err(SAVE_UNKNOWN.into());
+        }
+        self.require_save_capability()?;
+        match self.inner.persist_zone_save_operation(binding) {
+            Ok(receipt) => {
+                if receipt.operation().binding() != binding
+                    || receipt.status() == ZoneSaveOperationStatus::Prepared
+                {
+                    local.persist_unknown = true;
+                    return Err(SAVE_UNKNOWN.into());
+                }
+                Ok(receipt)
+            }
+            Err(error) => {
+                local.persist_unknown = error.contains("COMMIT_OUTCOME_UNKNOWN");
+                Err(error)
+            }
+        }
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        let pending = self.pending_save.lock().map_err(|_| SAVE_RECOVERY)?;
+        if pending
+            .as_ref()
+            .is_some_and(|local| &local.binding != binding)
+        {
+            return Err(SAVE_RECOVERY.into());
+        }
+        self.query_save_receipt(binding)
+    }
+
+    fn release_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.validate_save_binding(binding)?;
+        let mut pending = self.pending_save.lock().map_err(|_| SAVE_RECOVERY)?;
+        if pending
+            .as_ref()
+            .is_some_and(|local| &local.binding != binding)
+        {
+            return Err(SAVE_RECOVERY.into());
+        }
+        let receipt = self.query_save_receipt(binding)?.ok_or(SAVE_UNKNOWN)?;
+        if receipt.status() == ZoneSaveOperationStatus::Prepared {
+            return Err(SAVE_UNKNOWN.into());
+        }
+        // Released is durable DB evidence, not proof that this Host also
+        // released its in-memory shared teardown fence. Confirm on the same
+        // live pinned Host before publishing success or forgetting this ID.
+        if pending.as_ref().is_some_and(|local| local.release_unknown)
+            && receipt.status() != ZoneSaveOperationStatus::Released
+        {
+            return Err(SAVE_UNKNOWN.into());
+        }
+        self.require_save_capability()?;
+        if pending.is_none() {
+            if receipt.status() != ZoneSaveOperationStatus::Released {
+                return Err(SAVE_RECOVERY.into());
+            }
+            *pending = Some(PendingSaveOperation {
+                binding: binding.clone(),
+                prepare_unknown: false,
+                persist_unknown: false,
+                release_unknown: false,
+            });
+        }
+        let local = pending.as_mut().ok_or(SAVE_RECOVERY)?;
+        match self.inner.release_zone_save_operation(binding) {
+            Ok(receipt) => {
+                if receipt.operation().binding() != binding
+                    || receipt.status() != ZoneSaveOperationStatus::Released
+                {
+                    local.release_unknown = true;
+                    return Err(SAVE_UNKNOWN.into());
+                }
+                *pending = None;
+                Ok(receipt)
+            }
+            Err(error) => {
+                local.release_unknown = error.contains("COMMIT_OUTCOME_UNKNOWN");
+                Err(error)
+            }
+        }
+    }
+
     fn execute_production_attack_requiring_typed_outcome(
         &self,
         request: ZoneOwnerCommandRequest,
@@ -209,23 +461,44 @@ impl ZoneOwnerRpcTransport for StableZoneOwnerRpcTransport {
         &self,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<Option<PreparedZoneTeardown>, String> {
-        self.validate_request_lease(owner_lease)?;
-        self.inner.prepare_teardown_checkpoint(owner_lease)
+        let operation_id = self
+            .pending_save
+            .lock()
+            .map_err(|_| SAVE_RECOVERY)?
+            .as_ref()
+            .map(|local| local.binding.operation_id().to_owned())
+            .unwrap_or_else(Self::new_save_operation_id);
+        self.prepare_zone_save_operation(owner_lease, &operation_id)
     }
 
     fn persist_teardown_checkpoint(&self, prepared: &PreparedZoneTeardown) -> Result<(), String> {
-        self.validate_request_lease(prepared.owner_lease())?;
-        self.inner.persist_teardown_checkpoint(prepared)
+        let binding = prepared.remote_operation_binding().ok_or(SAVE_RECOVERY)?;
+        if prepared.owner_lease() != self.pin.lease() {
+            return Err(ResolveError::RequiresRebind.to_string());
+        }
+        self.persist_zone_save_operation(binding).map(|_| ())
     }
 
     fn release_teardown_fence(&self) -> Result<(), String> {
-        self.validate_pin()?;
-        self.inner.release_teardown_fence()
+        let binding = self
+            .pending_save
+            .lock()
+            .map_err(|_| SAVE_RECOVERY)?
+            .as_ref()
+            .map(|local| local.binding.clone());
+        if let Some(binding) = binding {
+            self.release_zone_save_operation(&binding).map(|_| ())
+        } else {
+            self.require_save_capability()
+        }
     }
 
     fn save_active_character(&self) -> Result<(), String> {
-        self.validate_pin()?;
-        self.inner.save_active_character()
+        if let Some(prepared) = self.prepare_teardown_checkpoint(self.pin.lease())? {
+            self.persist_teardown_checkpoint(&prepared)?;
+            self.release_teardown_fence()?;
+        }
+        Ok(())
     }
 
     fn refresh_active_external_mail(&self) -> Result<bool, String> {

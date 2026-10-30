@@ -189,6 +189,8 @@ impl CharacterRecord {
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
 #[path = "config/zone_save_fence.rs"]
 pub mod zone_save_fence;
+#[path = "config/zone_save_operation.rs"]
+pub mod zone_save_operation;
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 pub use prepared_kill::{
@@ -771,6 +773,7 @@ fn validate_account_store_transaction_scope(
 #[derive(Debug, Clone)]
 struct AccountStoreMutationPlan {
     zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
+    zone_save_operation: Option<zone_save_operation::ZoneSaveOperation>,
     #[cfg(test)]
     zone_save_fence_test_fault: Option<zone_save_fence::TestFault>,
     stones: Option<stone_authority::StoneMutation>,
@@ -994,6 +997,7 @@ fn build_account_store_mutation_plan(
 
     AccountStoreMutationPlan {
         zone_save_fence: None,
+        zone_save_operation: None,
         #[cfg(test)]
         zone_save_fence_test_fault: None,
         stones: stone_authority::build(original, desired),
@@ -4166,6 +4170,7 @@ pub struct SimulationConfig {
     pub save_recovery_dir: Option<PathBuf>,
     save_recovery_mac_key: Option<SaveRecoveryMacKey>,
     zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
+    zone_save_operation: Option<zone_save_operation::ZoneSaveOperation>,
     #[cfg(test)]
     zone_save_fence_test_fault: Arc<Mutex<Option<zone_save_fence::TestFault>>>,
     pub content_profile: Option<ContentProfileRuntime>,
@@ -4271,6 +4276,7 @@ impl SimulationConfig {
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
         fork.zone_save_fence = None;
+        fork.zone_save_operation = None;
         fork.replica_bootstrap_authority =
             Some(ReplicaBootstrapAuthority(Arc::clone(&fork.account_store)));
         Ok(fork)
@@ -4405,6 +4411,7 @@ impl SimulationConfig {
             save_recovery_dir: None,
             save_recovery_mac_key: None,
             zone_save_fence: None,
+            zone_save_operation: None,
             #[cfg(test)]
             zone_save_fence_test_fault: Arc::new(Mutex::new(None)),
             content_profile: None,
@@ -4812,6 +4819,7 @@ impl SimulationConfig {
                 if self.zone_save_fence.is_some() {
                     self.validate_zone_save_fence_binding()?;
                 }
+                self.validate_zone_save_operation_binding()?;
                 Ok(())
             }
             AccountStoreWriteState::Frozen { reason } => Err(format!(
@@ -5862,7 +5870,9 @@ impl SimulationConfig {
             return Err("postgres account source is unavailable".to_string());
         };
         self.refresh_account_store_account_with_loader(account_id, || {
-            load_account_from_postgres(database_url.to_string(), account_id.to_string())
+            load_account_from_postgres(
+                database_url.to_string(), account_id.to_string(), self.zone_save_fence.is_none(),
+            )
         })
     }
 
@@ -6175,11 +6185,14 @@ fn load_account_store_from_postgres(
 fn load_account_from_postgres(
     database_url: String,
     account_id: String,
+    allow_migrate: bool,
 ) -> Result<Option<(AccountRecord, AccountStoreSourceVersions)>, String> {
     let pool = postgres_account_store_pool(&database_url);
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
-        pool.ensure_migrated(&mut client)?;
+        if allow_migrate {
+            pool.ensure_migrated(&mut client)?;
+        }
         let Some(row) = client
             .query_opt(
                 "SELECT raw_json, store_version FROM accounts WHERE account_id = $1",
@@ -6522,6 +6535,9 @@ fn write_account_store_mutation_plan_in_transaction(
     if let Some(fence) = plan.zone_save_fence.as_ref() {
         fence.lock_and_validate(transaction, mode)?;
     }
+    if let Some(operation) = plan.zone_save_operation.as_ref() {
+        operation.lock_prepared_for_commit(transaction, plan, mode)?;
+    }
     let clock_version = plan
         .clock
         .as_ref()
@@ -6594,6 +6610,9 @@ fn write_account_store_mutation_plan_in_transaction(
     source_versions.guilds = guild_versions;
     source_versions.conquests = conquest_versions;
     source_versions.heroes = hero_versions;
+    if let Some(operation) = plan.zone_save_operation.as_ref() {
+        operation.write_committed_receipt(transaction, &source_versions)?;
+    }
     Ok(source_versions)
 }
 

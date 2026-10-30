@@ -86,7 +86,15 @@ use crate::GatewayConfig;
 use mir2_simulation::{
     NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution,
     NpcPurchaseOwnerReply, NpcPurchaseProducer,
+    ZoneSaveOperation, ZoneSaveOperationBinding, ZoneSaveOperationReceipt,
+    ZoneSaveOperationStatus,
 };
+
+#[path = "routing/zone_save_operation.rs"]
+mod zone_save_operation;
+#[cfg(test)]
+#[path = "routing/zone_save_operation_pg_tests.rs"]
+mod zone_save_operation_pg_tests;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -170,6 +178,7 @@ pub struct PreparedZoneTeardown {
     pub(crate) owner_lease: ZoneOwnerLease,
     pub(crate) identity: ActiveSessionIdentity,
     pub(crate) checkpoint: CharacterSaveRecord,
+    remote_operation: Option<ZoneSaveOperationBinding>,
 }
 
 impl PreparedZoneTeardown {
@@ -182,6 +191,7 @@ impl PreparedZoneTeardown {
             owner_lease,
             identity,
             checkpoint,
+            remote_operation: None,
         }
     }
 
@@ -195,6 +205,27 @@ impl PreparedZoneTeardown {
 
     pub fn checkpoint(&self) -> &CharacterSaveRecord {
         &self.checkpoint
+    }
+
+    pub fn remote_operation_binding(&self) -> Option<&ZoneSaveOperationBinding> {
+        self.remote_operation.as_ref()
+    }
+
+    pub(crate) fn from_remote_operation(receipt: &ZoneSaveOperationReceipt) -> Result<Self, String> {
+        let operation = receipt.operation();
+        let fence = operation.fence();
+        let identity = ActiveSessionIdentity {
+            account_id: operation.account_id().to_owned(),
+            character_index: operation.character_index(),
+            character_name: operation.frozen_checkpoint().character.name.clone(),
+        };
+        let mut prepared = Self::new(
+            ZoneOwnerLease::new(ZoneId::new(fence.zone_id()), fence.owner_id(), fence.fencing_token()),
+            identity, operation.frozen_checkpoint().clone(),
+        );
+        prepared.remote_operation = Some(operation.binding().clone());
+        prepared.validate_identity_checkpoint()?;
+        Ok(prepared)
     }
 
     pub(crate) fn validate_identity_checkpoint(&self) -> Result<(), String> {
@@ -567,6 +598,32 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
 
 pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
+    fn supports_zone_save_operations(&self) -> bool { false }
+
+    fn prepare_zone_save_operation(
+        &self, _lease: &ZoneOwnerLease, _operation_id: &str,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
+    fn persist_zone_save_operation(
+        &self, _binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
+    fn query_zone_save_operation(
+        &self, _binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
+    fn release_zone_save_operation(
+        &self, _binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
     fn execute_production_attack_requiring_typed_outcome(
         &self,
         _request: ZoneOwnerCommandRequest,
@@ -1422,6 +1479,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
 pub struct HostedZoneOwnerCommandClient {
     runtime: Mutex<Option<ZoneRuntimeHandle>>,
     owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+    remote_save_operation: Mutex<Option<zone_save_operation::HostedSaveOperation>>,
 }
 
 impl fmt::Debug for HostedZoneOwnerCommandClient {
@@ -1460,6 +1518,8 @@ impl HostedZoneOwnerCommandClient {
                 "zone owner hosted runtime was already handed off".into(),
             )
         })?;
+        self.reject_pending_remote_save()
+            .map_err(NativeAttackError::BeforeExecution)?;
         bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())
             .map_err(NativeAttackError::BeforeExecution)?;
         execute_typed_native_attack_runtime(runtime, request)
@@ -1499,6 +1559,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex poisoned")?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .ok_or("zone owner hosted runtime was handed off")?
@@ -1568,6 +1629,8 @@ impl HostedZoneOwnerCommandClient {
                                 "zone owner hosted runtime was handed off",
                             )
                         })?;
+                        self.reject_pending_remote_save()
+                            .map_err(crate::npc_purchase_owner_route::before)?;
                         bind_runtime_zone_save_fence(runtime, Some(authority), lease)
                             .map_err(crate::npc_purchase_owner_route::before)?;
                         execute_durable_npc_owner_held(
@@ -1611,6 +1674,7 @@ impl HostedZoneOwnerCommandClient {
         Self {
             runtime: Mutex::new(Some(runtime)),
             owner_lease_authority: None,
+            remote_save_operation: Mutex::new(None),
         }
     }
 
@@ -1621,6 +1685,7 @@ impl HostedZoneOwnerCommandClient {
         Self {
             runtime: Mutex::new(Some(runtime)),
             owner_lease_authority: Some(owner_lease_authority),
+            remote_save_operation: Mutex::new(None),
         }
     }
 
@@ -1636,10 +1701,11 @@ impl HostedZoneOwnerCommandClient {
     }
 
     pub fn take_runtime_for_handoff(&self) -> Result<ZoneRuntimeHandle, String> {
-        self.runtime
+        let mut runtime = self.runtime
             .lock()
-            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?
-            .take()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
+        runtime.take()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
     }
 
@@ -1695,6 +1761,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?
@@ -1710,6 +1777,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .ok_or("zone owner hosted runtime was already handed off")?
@@ -1729,6 +1797,7 @@ impl HostedZoneOwnerCommandClient {
                 .lock()
                 .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
             let runtime = slot.as_mut().ok_or("zone owner hosted runtime was already handed off")?;
+            self.reject_pending_remote_save()?;
             bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
             runtime.prepare_character_handoff()
         })
@@ -1748,6 +1817,7 @@ impl HostedZoneOwnerCommandClient {
                 .runtime
                 .lock()
                 .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+            self.reject_pending_remote_save()?;
             bind_runtime_zone_save_fence(runtime.as_mut().ok_or("zone owner hosted runtime was already handed off")?, Some(authority), lease)?;
             let was_prepared = runtime
                 .as_ref()
@@ -1769,10 +1839,11 @@ impl HostedZoneOwnerCommandClient {
         &self,
         checkpoint: &CharacterHandoffCheckpoint,
     ) -> Result<(), String> {
-        self.runtime
+        let mut runtime = self.runtime
             .lock()
-            .map_err(|_| "zone owner hosted runtime mutex was poisoned")?
-            .as_mut()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+        self.reject_pending_remote_save()?;
+        runtime.as_mut()
             .ok_or("zone owner hosted runtime was already handed off")?
             .apply_character_handoff_replica(checkpoint)
     }
@@ -1791,6 +1862,7 @@ impl HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
         bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), owner_lease)?;
         prepare_zone_teardown_checkpoint(runtime, owner_lease)
     }
@@ -1809,6 +1881,7 @@ impl HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
         bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), prepared.owner_lease())?;
         persist_zone_teardown_checkpoint(runtime, prepared)
     }
@@ -1836,6 +1909,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
@@ -1916,6 +1990,7 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
+        self.reject_pending_remote_save()?;
         if external_commit_authorized {
             bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), &partition_lease)?;
         }
@@ -2095,6 +2170,7 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
         release_zone_teardown_fence(runtime)
     }
 
@@ -2107,6 +2183,7 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
         validate_bound_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref())?;
+        self.reject_pending_remote_save()?;
         runtime.save_active_character()
     }
 
@@ -2118,6 +2195,7 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .map(|runtime| runtime.refresh_active_external_mail())
@@ -2232,6 +2310,7 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
         release_zone_teardown_fence(runtime)
     }
 
@@ -2244,6 +2323,7 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
         validate_bound_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref())?;
+        self.reject_pending_remote_save()?;
         runtime.save_active_character()
     }
 
@@ -2252,6 +2332,7 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .map(|runtime| runtime.refresh_active_external_mail())
@@ -18611,6 +18692,30 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn prepare_zone_save_operation(
+        &mut self, binding: ZoneSaveOperationBinding, checkpoint: &CharacterSaveRecord,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.inner.prepare_zone_save_operation(binding, checkpoint)
+    }
+
+    fn persist_zone_save_operation(
+        &mut self, operation: &ZoneSaveOperation,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.inner.persist_zone_save_operation(operation)
+    }
+
+    fn query_zone_save_operation(
+        &self, binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        self.inner.query_zone_save_operation(binding)
+    }
+
+    fn release_zone_save_operation(
+        &mut self, binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.inner.release_zone_save_operation(binding)
+    }
+
     fn supports_zone_save_fence(&self) -> bool {
         self.inner.supports_zone_save_fence()
     }

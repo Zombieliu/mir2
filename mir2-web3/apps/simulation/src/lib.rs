@@ -20,6 +20,10 @@ pub use npc_purchase_owner::{
 pub mod user_item_uid;
 mod world_runtime;
 pub use config::zone_save_fence::ZoneSaveFence;
+pub use config::zone_save_operation::{
+    OperationStatus as ZoneSaveOperationStatus, ZoneSaveOperation,
+    ZoneSaveOperationBinding, ZoneSaveOperationReceipt,
+};
 pub use runtime::zone::ManagerAdmissionReceipt;
 pub use runtime::zone::{
     EffectEnvelope, EffectReplayReceipt, EntityLifeRef, LogicalWorldId, PayloadDigest,

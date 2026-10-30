@@ -19,6 +19,10 @@ use crate::config::{
     ItemContainer, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
     CRYSTAL_MAX_INVENTORY_CAPACITY,
 };
+use crate::config::zone_save_operation::{
+    OperationStatus, ZoneSaveOperation, ZoneSaveOperationBinding, ZoneSaveOperationReceipt,
+    REJECTED as ZONE_SAVE_OPERATION_REJECTED,
+};
 
 use super::buffs::BuffState;
 use super::components::{
@@ -617,6 +621,117 @@ impl SimulationSession {
             .cloned()
     }
 
+    /// The authoritative host supplies the final frozen checkpoint and its RPC
+    /// binding. Preparing stores an immutable operation, never a live save CAS.
+    pub fn prepare_zone_save_operation(
+        &mut self,
+        binding: ZoneSaveOperationBinding,
+        frozen_checkpoint: &CharacterSaveRecord,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        let config = zone_save_operation_config(self.app.world(), &binding)?;
+        let account_id = validate_zone_save_operation_identity(self.app.world(), frozen_checkpoint)?;
+        // A lost Prepare response must recover the original fixed logout date
+        // and merge image, rather than manufacture another operation payload.
+        if let Some(receipt) = config.query_zone_save_operation(&binding)? {
+            if receipt.operation().account_id() != account_id
+                || !same_character_save(receipt.operation().frozen_checkpoint(), frozen_checkpoint)? {
+                return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+            }
+            return Ok(receipt);
+        }
+        config.refresh_account_store_account(&account_id)?;
+        let store = config.account_store.lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?.clone();
+        let operation = stage_zone_save_operation(
+            self.app.world(), binding, frozen_checkpoint, store,
+            Some(current_crystal_logout_binary_datetime()),
+        )?;
+        config.prepare_zone_save_operation(&operation)
+    }
+
+    /// Commit only the operation already frozen by Prepare. The capability is
+    /// scoped to a local config clone, including unwinding/error paths; the live
+    /// runtime configuration never retains operation authority.
+    pub fn persist_zone_save_operation(
+        &mut self,
+        operation: &ZoneSaveOperation,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        let config = zone_save_operation_config(self.app.world(), operation.binding())?
+            .with_zone_save_operation(operation.clone())?;
+        let account_id = validate_zone_save_operation_identity(
+            self.app.world(), operation.frozen_checkpoint(),
+        )?;
+        if account_id != operation.account_id() {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+        }
+        let receipt = config.query_zone_save_operation(operation.binding())?
+            .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+        if !same_zone_save_operation(receipt.operation(), operation)? {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+        }
+        if receipt.status() != OperationStatus::Prepared {
+            // Reconciliation does not replay source work, restore a checkpoint,
+            // promote a runtime revision or clear a shared Unknown write freeze.
+            return Ok(receipt);
+        }
+        // A visible Prepared row alone does not resolve an earlier uncertain
+        // COMMIT. Honor the shared write freeze before even restoring World.
+        config.ensure_account_store_writable()?;
+        validate_zone_save_operation_revision(self.app.world(), operation.frozen_checkpoint())?;
+        self.restore_active_character_checkpoint(operation.frozen_checkpoint())?;
+        let expected_revision = operation.frozen_checkpoint().revision;
+        let committed_revision = persist_character_save_inner_with_config(
+            self.app.world(), &config, operation.account_id(),
+            operation.frozen_checkpoint().clone(), operation.last_access_binary_datetime(),
+            |store, result| {
+                let PersistCharacterSaveResult::Full(revision) = result else {
+                    return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+                };
+                let saved = store.accounts.get(operation.account_id())
+                    .and_then(|account| account.saves.get(&operation.character_index()))
+                    .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+                if !same_character_save(saved, operation.expected_saved_checkpoint())? {
+                    return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+                }
+                Ok(revision)
+            },
+        )?;
+        if !self.app.world().resource::<SessionResource>()
+            .advance_active_save_revision(expected_revision, committed_revision) {
+            return Err("active character revision changed while completing zone save CAS".into());
+        }
+        // The receipt was written atomically with the ordinary full-save path.
+        // Failure to read it leaves the host unresolved and never retries a CAS.
+        let receipt = config.query_zone_save_operation(operation.binding())?
+            .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+        if receipt.status() == OperationStatus::Prepared
+            || !same_zone_save_operation(receipt.operation(), operation)? {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+        }
+        Ok(receipt)
+    }
+
+    /// Read-only reconciliation deliberately remains available after Unknown.
+    pub fn query_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        zone_save_operation_config(self.app.world(), binding)?.query_zone_save_operation(binding)
+    }
+
+    /// The repository accepts release only for a committed receipt and the
+    /// current lease. Releasing never changes the runtime's source image.
+    pub fn release_zone_save_operation(
+        &mut self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        let config = zone_save_operation_config(self.app.world(), binding)?;
+        // A Released readback proves the ledger transition, but does not repair
+        // an Unknown source publication or authorize resuming this live World.
+        config.ensure_account_store_writable()?;
+        config.release_zone_save_operation(binding)
+    }
+
     /// Capture the exact durable private state for the active character without
     /// mutating the configured account store.
     pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
@@ -710,6 +825,81 @@ impl SimulationSession {
     }
 }
 
+fn zone_save_operation_config(
+    world: &World,
+    binding: &ZoneSaveOperationBinding,
+) -> Result<SimulationConfig, String> {
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    if config.zone_save_fence() != Some(binding.fence()) {
+        return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+    }
+    // Preserve the exact existing authority; this also rejects configurations
+    // that were downgraded to Memory/File/Mirror after the original binding.
+    config.with_zone_save_fence(binding.fence().clone())
+}
+
+fn validate_zone_save_operation_identity(
+    world: &World,
+    checkpoint: &CharacterSaveRecord,
+) -> Result<String, String> {
+    let session = world.resource::<SessionResource>();
+    let account_id = active_session_mutating_account_id(session)
+        .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+    if session.selected_character.as_ref()
+        .is_none_or(|character| !exact_character_identity_matches(character, &checkpoint.character))
+        || !has_frozen_skill_clocks(&checkpoint.skill_states_json)? {
+        return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+    }
+    validate_character_save_record(checkpoint)?;
+    Ok(account_id)
+}
+
+fn validate_zone_save_operation_revision(
+    world: &World,
+    checkpoint: &CharacterSaveRecord,
+) -> Result<(), String> {
+    if world.resource::<SessionResource>().active_save_revision() != Some(checkpoint.revision) {
+        return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+    }
+    Ok(())
+}
+
+fn same_character_save(left: &CharacterSaveRecord, right: &CharacterSaveRecord) -> Result<bool, String> {
+    Ok(serde_json::to_value(left).map_err(|error| error.to_string())?
+        == serde_json::to_value(right).map_err(|error| error.to_string())?)
+}
+
+fn same_zone_save_operation(left: &ZoneSaveOperation, right: &ZoneSaveOperation) -> Result<bool, String> {
+    Ok(left == right)
+}
+
+fn stage_zone_save_operation(
+    world: &World,
+    binding: ZoneSaveOperationBinding,
+    frozen_checkpoint: &CharacterSaveRecord,
+    mut store: crate::config::AccountStore,
+    last_access_binary_datetime: Option<i64>,
+) -> Result<ZoneSaveOperation, String> {
+    let account_id = validate_zone_save_operation_identity(world, frozen_checkpoint)?;
+    validate_zone_save_operation_revision(world, frozen_checkpoint)?;
+    let active_character = world.resource::<SessionResource>().selected_character.clone()
+        .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+    let mut staged = frozen_checkpoint.clone();
+    migrate_legacy_candidate_save_record(&mut staged)?;
+    validate_character_save_record(&staged)?;
+    match apply_full_character_save_mutation(
+        &mut store, &account_id, &active_character, staged, last_access_binary_datetime,
+    )? {
+        PersistCharacterSaveResult::Full(_) => {}
+        PersistCharacterSaveResult::StaleMailStatusOnly => return Err(ZONE_SAVE_OPERATION_REJECTED.into()),
+    }
+    let expected_saved = store.accounts.get(&account_id)
+        .and_then(|account| account.saves.get(&active_character.index))
+        .ok_or(ZONE_SAVE_OPERATION_REJECTED)?.clone();
+    ZoneSaveOperation::new(binding, account_id, frozen_checkpoint.clone(), expected_saved,
+        last_access_binary_datetime)
+}
+
 #[path = "character_handoff.rs"]
 mod character_handoff;
 
@@ -786,6 +976,10 @@ mod skill_cooldown_restore_tests;
 #[cfg(test)]
 #[path = "zone_save_fence_tests.rs"]
 mod zone_save_fence_tests;
+
+#[cfg(test)]
+#[path = "zone_save_operation_tests.rs"]
+mod zone_save_operation_tests;
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
     let (config, account_id, selected_character) = {
@@ -1167,7 +1361,7 @@ fn persist_character_save_inner(
 fn persist_character_save_inner_with<T, F>(
     world: &World,
     account_id: &str,
-    mut save: CharacterSaveRecord,
+    save: CharacterSaveRecord,
     last_access_binary_datetime: Option<i64>,
     capture: F,
 ) -> Result<T, String>
@@ -1175,6 +1369,22 @@ where
     F: FnOnce(&crate::config::AccountStore, PersistCharacterSaveResult) -> Result<T, String>,
 {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
+    persist_character_save_inner_with_config(
+        world, &config, account_id, save, last_access_binary_datetime, capture,
+    )
+}
+
+fn persist_character_save_inner_with_config<T, F>(
+    world: &World,
+    config: &SimulationConfig,
+    account_id: &str,
+    mut save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
+    capture: F,
+) -> Result<T, String>
+where
+    F: FnOnce(&crate::config::AccountStore, PersistCharacterSaveResult) -> Result<T, String>,
+{
     let active_character = {
         let session = world.resource::<SessionResource>();
         let active_account_id = active_session_mutating_account_id(session).ok_or_else(|| {
@@ -1202,7 +1412,7 @@ where
     let account_id = account_id.to_string();
     let touched_accounts = vec![account_id.clone()];
 
-    super::shared_guild_experience::commit_source(world, &config, &touched_accounts, move |store| {
+    super::shared_guild_experience::commit_source(world, config, &touched_accounts, move |store| {
         let result = apply_full_character_save_mutation(
             store,
             &account_id,

@@ -1,0 +1,50 @@
+    Finished `test` profile [unoptimized] target(s) in 48.48s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 37 tests
+test config::zone_save_fence::tests::zone_save_fence_binding_requires_explicit_postgres_source_and_rechecks_on_write ... ok
+test config::zone_save_fence::tests::zone_save_fence_constructor_rejects_invalid_server_capabilities ... ok
+test config::zone_save_fence::tests::zone_save_fence_mixed_domain_unknown_freezes_independently_of_domain_prefix ... ok
+test config::zone_save_fence::tests::zone_save_fence_pg_fixture_url_cannot_target_default_or_shared_database ... ok
+
+thread '<unnamed>' panicked at apps\simulation\src\config.rs:6523:63:
+ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test config::zone_save_fence::tests::zone_save_fence_postgres_after_commit_faults_freeze_no_replay_and_no_live_publish ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_expiry_is_read_after_waiting_for_the_lease_lock ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_killed_lock_and_save_connections_rollback_every_write ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_matching_stale_owner_token_expiry_missing_and_malformed ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_missing_table_and_bounded_lock_wait_fail_closed ... ok
+test config::zone_save_fence::tests::zone_save_fence_postgres_takeover_waits_for_account_transaction_commit ... ok
+test config::zone_save_fence::tests::zone_save_fence_prepared_source_cannot_cross_fence_bindings ... ok
+test config::zone_save_fence::tests::zone_save_fence_snapshot_plans_carry_fence_and_unknown_freezes_shared_writers ... ok
+test config::zone_save_operation::tests::zone_save_operation_binding_constructor_and_exact_expected_snapshot_are_bounded ... ok
+test config::zone_save_operation::tests::zone_save_operation_config_and_plan_reject_fence_revision_payload_and_last_access_changes ... ok
+test config::zone_save_operation::tests::zone_save_operation_fixture_rejects_shared_default_or_nonlocal_database ... ok
+test config::zone_save_operation::tests::zone_save_operation_postgres_failed_commit_preserves_prepared_receipt_and_all_account_cas ... ok
+test config::zone_save_operation::tests::zone_save_operation_postgres_missing_ledger_fails_closed_without_migration ... ok
+test config::zone_save_operation::tests::zone_save_operation_postgres_old_owner_receipt_is_readable_after_takeover_without_write_authority ... ok
+test config::zone_save_operation::tests::zone_save_operation_postgres_prepare_is_idempotent_and_rejects_all_binding_or_payload_mismatch ... ok
+test config::zone_save_operation::tests::zone_save_operation_postgres_receipt_rolls_back_and_commits_atomically_and_duplicate_never_republishes ... ok
+
+thread '<unnamed>' panicked at apps\simulation\src\config.rs:6523:63:
+ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT
+test config::zone_save_operation::tests::zone_save_operation_postgres_unknown_ack_freezes_live_cas_but_receipt_reconciles_without_replay ... ok
+test config::zone_save_operation::tests::zone_save_operation_readonly_wire_roundtrip_rejects_tampered_digest_revision_status_and_cas ... ok
+test runtime::save::zone_save_fence_tests::world_runtime_zone_save_fence_is_bound_to_each_runtime_config ... ok
+test runtime::save::zone_save_fence_tests::world_runtime_zone_save_fence_rejects_memory_file_and_mirror_configs ... ok
+test runtime::save::zone_save_fence_tests::zone_save_fence_checkpoint_restore_cannot_replace_or_remove_trusted_binding ... ok
+test runtime::save::zone_save_fence_tests::zone_save_fence_full_logout_frozen_and_prepared_saves_use_bound_runtime_config ... ok
+test runtime::save::zone_save_fence_tests::zone_save_fence_legacy_runtime_defaults_remain_unsupported ... ok
+test runtime::save::zone_save_fence_tests::zone_save_fence_rejected_rebind_retains_previous_authority ... ok
+test runtime::save::zone_save_fence_tests::zone_save_fence_replica_shadow_cannot_inherit_source_authority ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_legacy_runtime_fails_closed_for_every_lifecycle_operation ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_payload_comparison_includes_fixed_date_and_complete_expected_image ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_prepare_rejects_legacy_skill_clock_before_database_io ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_release_refuses_shared_unknown_freeze_before_database_io ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_runtime_requires_its_existing_exact_fence_for_all_seams ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_stage_captures_durable_mail_and_protected_journals_in_exact_expected_image ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_stage_preserves_frozen_bytes_and_never_publishes_live_cas ... ok
+test runtime::save::zone_save_operation_tests::zone_save_operation_stage_rejects_revision_or_character_change_without_mutation ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 3056 filtered out; finished in 24.59s

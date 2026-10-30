@@ -425,6 +425,37 @@ pub trait WorldRuntime: Send + Sync {
         None
     }
 
+    /// Trusted host-only lifecycle operations. Legacy runtimes must explicitly
+    /// implement this capability before a durable teardown can use them.
+    fn prepare_zone_save_operation(
+        &mut self,
+        _binding: crate::config::zone_save_operation::ZoneSaveOperationBinding,
+        _frozen_checkpoint: &CharacterSaveRecord,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
+    fn persist_zone_save_operation(
+        &mut self,
+        _operation: &crate::config::zone_save_operation::ZoneSaveOperation,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        _binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<Option<crate::config::zone_save_operation::ZoneSaveOperationReceipt>, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
+    fn release_zone_save_operation(
+        &mut self,
+        _binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
 
@@ -1464,6 +1495,35 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
         self.session.bound_zone_save_fence()
+    }
+
+    fn prepare_zone_save_operation(
+        &mut self,
+        binding: crate::config::zone_save_operation::ZoneSaveOperationBinding,
+        frozen_checkpoint: &CharacterSaveRecord,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        self.session.prepare_zone_save_operation(binding, frozen_checkpoint)
+    }
+
+    fn persist_zone_save_operation(
+        &mut self,
+        operation: &crate::config::zone_save_operation::ZoneSaveOperation,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        self.session.persist_zone_save_operation(operation)
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<Option<crate::config::zone_save_operation::ZoneSaveOperationReceipt>, String> {
+        self.session.query_zone_save_operation(binding)
+    }
+
+    fn release_zone_save_operation(
+        &mut self,
+        binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        self.session.release_zone_save_operation(binding)
     }
 
     fn on_connect(&self) -> Vec<ServerPacket> {

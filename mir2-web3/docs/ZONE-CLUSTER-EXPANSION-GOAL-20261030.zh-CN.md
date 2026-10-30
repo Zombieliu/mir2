@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 同一 account-store 事务的 lease 行锁、数据库时间校验、Unknown 写冻结及可信 runtime 绑定已实现；25 项新增与相邻回归共211通过、1既有忽略。完整显式 lease RPC save/teardown capability、故障对账及外部共享 inventory 接点尚未完成；旧 NPC 的另一连接 callback guard 不能当作原子屏障 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 已接同事务保存 fence、Host 冻结快照与持久回执、显式 lease RPC、只读恢复及 Execute Unknown promotion freeze；本片与相邻回归293通过、1既有忽略。外部 economy 普通提交/bootstrap/trade 的同事务 fence，以及 Prepared/Unknown 的受控恢复仍未完成；旧 NPC 的另一连接 callback guard 不能当作原子屏障 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -87,3 +87,21 @@ G2 的最小安全方案已定位到 simulation 的 account-store mutation trans
 fenced COMMIT 的所有错误以及提交 worker panic 都保守以 `ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN` 和共享 account-store unknown 标记冻结写入；不能仅因 driver 返回数据库错误就宣称安全未提交。共享配置克隆也拒绝后续写，不发布新的内存 CAS/余额。不会按超时自动回滚或重复提交。真实 PG 连接终止验证的是事务锁和源写的实际回滚；after-COMMIT panic/丢回执使用明确标记的测试 hook，不冒称原生网络 COMMIT 回执丢失。另用真实 deferred UNIQUE 的 COMMIT 错误验证保守冻结：该次 PG 事务实际回滚，但应用仍等待明确对账，不自动解除共享冻结。
 
 **G2 仍未整体完成。** 老 RPC Save 请求尚无调用方显式 lease，TCP teardown prepare/persist/release 尚缺专用 wire/capability；后续必须加入 Host 所有的冻结快照/回执绑定、Unknown 查询恢复及禁止旧协议回落。外部 shared inventory service、普通 Execute 的 Unknown promotion freeze 也须继续审核。当前未知提交冻结可能影响共享 config 的其他账号，解除必须有持久化证据，不提供无审计解冻入口。不能混跑绕过本屏障的旧 writer，不能发布本片为自动扩容版本；测试服与公网更新未变。验收记录集中在同一 evidence 主题。
+
+## G2 第二片：远端保存回执与只读恢复
+
+本片基线 `953c341feb6f8a5b1a3df4411100b6ee6bea354c`。新增47项保存/RPC/恢复/固定连接用例，与保存 fence、会话、NPC、攻击、交接、租约及原恢复日志回归合计 **293通过、1项既有忽略**，Gateway bins 编译通过；40个源码文件的哈希在13组接受记录中一致。包括6项新增真实 PG store 用例、5项真实 PG + Shared Hosted 用例，其中1项跑实际 TCP → Host →共享运行时→数据库，并在停止旧 Host 后验证新 Host 查询回执不创建 Session。不是两台物理机或容量压测。具体命令、失败中间轮与证据边界集中在 [本主题记录](evidence/zone-cluster-expansion-20261030/README.md#g2-durable-save-operation-rpc-checkpoint)。
+
+Host 先同步共享 Zone 最终位置和生命状态，冻结入场，再持久化不可变的操作编号、RPC Session、Zone/owner/epoch、账号角色、原始完整快照、服务端计算的预期保存快照及固定保存时间。Prepare 只登记，Persist 沿原保存合并/Guild/CAS 路径执行；只有同一源事务中写入完整账号和角色后，才把回执从 Prepared 改为 Committed。重复 Persist 返回原回执，不能重复发布旧内存 CAS。Query 是只读事务，可在换主、进程重启和 Unknown 写冻结后读取原编号，不产生新 Session 或新保存权限。
+
+新增 `zoneSaveOperationsV1` capability；仅显式单 endpoint 连接可使用，稳定路由的普通保存和退出均走该协议，不回落旧 Save。要求事务 fence 的 Host 在入场前拒绝旧 Save RPC。写请求只带操作绑定，不接受 Gateway 提交的角色快照；JSON/MessagePack 断回包都是单次发送，不换 Host 重试。未知结果保留同一编号；Prepared 不能证明先前未知提交安全未发生。普通 Execute 的 Unknown 会冻结对应 Zone 的 promotion。
+
+Release 除数据库回执外，还必须验证当前 lease、原 Host 内存中的操作记录、已确认的活跃角色 revision 和共享写状态，再解除共享世界入场冻结。数据库 Released 不证明内存解冻已完成，客户端必须取得当前 Host 的确认。重启后仅查询旧回执不能恢复写入或冒充完成解冻；本片没有自动解除共享 Unknown 冻结。
+
+Gateway 的恢复日志新增可选、版本化的 remote operation 绑定，仍由原 HMAC/hash 和持久化目录机制保护；旧 v1 日志的序列化字节不变。远端日志在创建 SimulationSession 之前先查原回执：Committed/Released 且完整原快照/身份匹配才只读确认；Prepared、缺失或查询失败则保留日志并阻止登录。禁止旧恢复路径再按快照补写一次。Prepare/Persist/Release 及绑定后的账号刷新不在操作期间迁移 schema。
+
+数据库迁移为 `0020_zone_character_save_operations.sql`：新增公共持久账本、绑定索引及不可变/单向状态触发器，在部署准备阶段执行。正常客户端没有该表写权限；Host 仍是可信源写入者。账本与角色源库必须处于同一数据库/账号命名空间。回退前须关闭新流量并逐项查询、保存和处理未决操作；不要删除 Prepared/Unknown、快照或日志，不要让旧 writer 绕开 fence。可以保留新增表后回退未启用实验入口的代码；不能把删除账本作为线上回退步骤。终态账本的容量、压缩及审计保留规则尚待验证，不提前清理。
+
+真实 deferred COMMIT 拒绝验证的是实际回滚后的保守 Unknown；实际提交后丢确认使用 store 测试 hook，TCP 丢回包使用脚本对端，两者不冒称原生数据库网络故障。完整源快照/CAS、只读换主查询及重复提交在真实 PG 验证；没有验证整张战斗地图迁移或5000人吞吐。测试集群核对二进制/PID/数据目录后干净停止，仅保留已有 reader 权限反例 schema，未动远程测试服、公网更新或 Docker。
+
+**下一片仍属 G2。** 只读审计确认 `apps/gateway/src/economy.rs::PostgresEconomyStore::transact_with_source(None)` 的普通余额/物品提交与 trade，以及 `bootstrap_character`，尚未在同一事务锁定完整 owner/epoch。context 的 generation 和提交前路由验证不能替代该锁。prepared-kill 的 complete-source participant 已接原保存 fence，但更早的 bootstrap 和普通 ledger COMMIT 仍有缺口；稍后保存 projection 的 fence 也不能补保护已发生的 ledger COMMIT。下一步先补服务端可信 fence capability、生产 bootstrap/transact/trade 的同事务锁、旧回执只读查询和故障用例，再做 Prepared/Unknown 受控恢复，随后进入 G3。
