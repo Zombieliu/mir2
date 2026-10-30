@@ -1,0 +1,21 @@
+{
+  "results": [
+    {
+      "viewport": "desktop",
+      "passed": true,
+      "realWalletSignature": false
+    },
+    {
+      "viewport": "mobile",
+      "passed": true,
+      "realWalletSignature": false
+    },
+    {
+      "configuration": "missing",
+      "noFakeQr": true,
+      "passed": true
+    }
+  ],
+  "fixturesOnly": true,
+  "realPayment": false
+}

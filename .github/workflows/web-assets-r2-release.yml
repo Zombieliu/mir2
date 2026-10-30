@@ -314,8 +314,12 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_SHA" = '${{ inputs.backend_source_sha }}'
+          (cd apps/gateway && npm ci --ignore-scripts && npm run build:wallet && npm run test:wallet)
+          git diff --exit-code -- apps/gateway/src/sui_usdc_dubhe_wallet.bundle.js apps/gateway/src/sui_usdc_dubhe_wallet.bundle.json
+          (cd onchain/usdc-recharge && npm ci --ignore-scripts && npm test)
           rustup toolchain install 1.95.0 --profile minimal
           cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib sui_usdc -- --test-threads=1
           cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance
           mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
           cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/

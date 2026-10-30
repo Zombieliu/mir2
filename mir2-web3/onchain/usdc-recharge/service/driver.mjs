@@ -162,11 +162,11 @@ export async function observeInvoiceWithClient(client,c,p){
 export async function observeInvoice(c,p,env=process.env,providedClient){
   exactKeys(p,['invoiceId','order']);const{client}=await load(c,providedClient);return observeInvoiceWithClient(client,c,p);
 }
-export async function buildPay(c,p,env=process.env,providedClient){
+async function payTransaction(c,p,providedClient){
   exactKeys(p,['invoiceId','order']);const o=validateOrder(p.order,c),l=await load(c,providedClient);
   const observed=await observeInvoiceWithClient(l.client,c,p);if(observed.state!=='unpaid')throw Error('usdcInvoiceNotPayable');
   const inv=shared(await getObject(l.client,p.invoiceId),'Invoice',c);
-  assertTerms(decodeInvoice(inv.content),o,c);
+  const invoice=assertTerms(decodeInvoice(inv.content),o,c);
   let coins=[],cursor=null,total=0n;
   for(let page=0;page<8&&total<integer(o.amountMicros);page++){
     const response=await l.client.core.listCoins({owner:o.payer,coinType:c.coinType,limit:50,cursor});
@@ -189,9 +189,50 @@ export async function buildPay(c,p,env=process.env,providedClient){
     tx.sharedObjectRef({objectId:c.configId,initialSharedVersion:l.configObject.owner.Shared.initialSharedVersion,mutable:false}),
     tx.sharedObjectRef({objectId:p.invoiceId,initialSharedVersion:inv.owner.Shared.initialSharedVersion,mutable:true}),payment,tx.object('0x6')]});
   tx.transferObjects([refs[0]],tx.pure.address(o.payer));
+  return {tx,order:o,loaded:l,invoice};
+}
+export async function buildPay(c,p,env=process.env,providedClient){
+  const {tx,order:o}=await payTransaction(c,p,providedClient);
   // No issuer gas owner, no signature and no execution. Wallet displays and
   // authorizes the complete exact USDC transfer, and supplies its own SUI gas.
   return {transactionJson:await tx.toJSON(),invoiceId:p.invoiceId,payer:o.payer,gasPayer:'wallet'};
+}
+async function validatePayGas(client,data,o,c){
+  if(data.sender!==o.payer||data.gasData?.owner!==o.payer||data.gasData.budget!==c.gasBudgetMist
+    ||integer(data.gasData.price)===0n||!Array.isArray(data.gasData.payment))throw Error('usdcPayBytesDomainMismatch');
+  const budget=integer(c.gasBudgetMist),payments=data.gasData.payment;
+  if(payments.length===0){
+    const result=await client.core.getBalance({owner:o.payer,coinType:'0x2::sui::SUI'});
+    if(integer(result.balance.addressBalance)<budget)throw Error('usdcInsufficientGasBalance');
+    return;
+  }
+  let balance=0n;const seen=new Set();
+  for(const ref of payments){
+    address(ref.objectId);if(seen.has(ref.objectId)||integer(ref.version)===0n)throw Error('usdcPayGasObjectInvalid');seen.add(ref.objectId);
+    const coin=await getObject(client,ref.objectId);
+    if(!coin||coin.objectId!==ref.objectId||coin.version!==ref.version||coin.digest!==ref.digest
+      ||coin.owner?.$kind!=='AddressOwner'||coin.owner.AddressOwner!==o.payer
+      ||coin.type?.replace(/0x0{1,63}2::/g,'0x2::')!=='0x2::coin::Coin<0x2::sui::SUI>')throw Error('usdcPayGasOwnershipMismatch');
+    const reader=new Reader(coin.content??[]);if(reader.address()!==ref.objectId)throw Error('usdcPayGasObjectInvalid');
+    balance+=integer(reader.u64());reader.done();
+  }
+  if(balance<budget)throw Error('usdcInsufficientGasBalance');
+}
+export async function buildPayBytes(c,p,env=process.env,providedClient){
+  const {tx,order:o,loaded:l,invoice}=await payTransaction(c,p,providedClient);
+  if(invoice.paid||BigInt(Date.now())>=integer(o.expiresAtMs))throw Error('usdcInvoiceNotPayable');
+  // Only the already-bound payer supplies gas. This operation never loads an
+  // issuer key, signs, sponsors or submits a transaction.
+  tx.setGasOwner(o.payer);
+  const raw=Buffer.from(await tx.build({client:l.client}));
+  if(raw.length===0||raw.length>65536)throw Error('usdcPayBytesTooLarge');
+  const {Transaction}=await import('@mysten/sui/transactions'),parsed=Transaction.from(raw);
+  if(!raw.equals(Buffer.from(await parsed.build())))throw Error('usdcPayBytesNonCanonical');
+  await validatePayGas(l.client,parsed.getData(),o,c);
+  const observed=await observeInvoiceWithClient(l.client,c,p);
+  if(observed.state!=='unpaid'||BigInt(Date.now())>=integer(o.expiresAtMs))throw Error('usdcInvoiceNotPayable');
+  const transactionBytesB64=raw.toString('base64'),transactionDigest=await parsed.getDigest();digest(transactionDigest);
+  return {transactionBytesB64,transactionDigest,invoiceId:p.invoiceId,payer:o.payer,gasPayer:'wallet'};
 }
 export async function verifyWalletProof(p){
   exactKeys(p,['message','signature','address']);address(p.address);
@@ -205,7 +246,7 @@ export async function dispatch(request,env=process.env){
   if(request.operation==='verifyWalletProof'){validateConfig(request.config);return verifyWalletProof(request.params);}
   validateConfig(request.config);
   if(request.operation==='configureValidate'){exactKeys(request.params,[]);validateGasEnvironment(env);const l=await load(request.config);return {validated:true,network:'testnet',networkHash:NETWORK_HASH,publishingEnabled:l.config.publishingEnabled};}
-  const operations={prepareInvoice,submitPrepared,observeCreate,buildPay,observeInvoice};
+  const operations={prepareInvoice,submitPrepared,observeCreate,buildPay,buildPayBytes,observeInvoice};
   if(!Object.hasOwn(operations,request.operation))throw Error('usdcOperationInvalid');
   return operations[request.operation](request.config,request.params,env);
 }

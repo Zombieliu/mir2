@@ -1,0 +1,75 @@
+{
+  "schema": "mir2.dubhe-qr-checkout-local-candidate.v1",
+  "observedAtUtc": "2026-10-30T15:31:46.155483+00:00",
+  "parentSourceSha": "6cd229c6b338f2e8e283e497e728259ade424afe",
+  "testsOnUncommittedSnapshot": true,
+  "sourceHashes": {
+    "apps/gateway/src/web_sui_usdc.rs": "f157ab24999067cddea8b7f689e3f7ea4d5c8751bb51e1c80728b086a9803302",
+    "apps/gateway/src/sui_usdc_billing.rs": "dd0d7a09c87dcd3d7ae1a39c888ed18cc8438a0433fb9111e528a0408ebab0ec",
+    "apps/gateway/src/sui_usdc_checkout.js": "a87bc1654353c753e351b50278179e2c2f58e241b17b1e48399adbbdc08e48c5",
+    "apps/gateway/src/sui_usdc_checkout.html": "b651a72a32c44550f7cd86c8bd0bb7480b35b1b14fa4705327bb209ed1c7e6c0",
+    "apps/gateway/src/sui_usdc_dubhe_wallet.js": "851990cf2c4bb572454bfd9eb5cb0ad71a9ee83d3ca8af078134ffab3d4efa20",
+    "apps/gateway/src/sui_usdc_dubhe_wallet.bundle.js": "7f9ec3e5da07babffbedd842b33bcc0fe3255273d4fa1dccb839a73460fc38b1",
+    "onchain/usdc-recharge/service/driver.mjs": "7c7d6b70ce46ef45bef81f4084c8ad2879e1bb59313dee6fd48d6a7baa7541c9",
+    "onchain/usdc-recharge/test/driver.test.mjs": "27d02b63a3ead468537a1832e1fd6283e83606ab41f50fb67b68a4e717e7166f",
+    "scripts/test-sui-usdc-dubhe-wallet.mjs": "273b9954f20563cdb2fcca85ee6edafa4fb707218f3871c0e8d98a7287bdc445",
+    "scripts/test-sui-usdc-checkout-ui.mjs": "831822be7c5850a3e8b5813e820e82145cfa1dc4d22ff14450cc561e527b387b"
+  },
+  "rustFocused": {
+    "passed": 19,
+    "failed": 0,
+    "ignored": 0,
+    "toolchain": "1.89.0-windows-msvc",
+    "logSha256": "95ab25132f3435d9e6485076716ad8ee2ea8979f7bdadd78d712384e9ae3cb22"
+  },
+  "nodeDriver": {
+    "passed": 29,
+    "realSdkBcs": true,
+    "originalTestsRetained": 23
+  },
+  "adapterAndController": {
+    "passed": 30,
+    "adapter": 16,
+    "controller": 14,
+    "networkMocked": true
+  },
+  "browser": {
+    "results": [
+      {
+        "viewport": "desktop",
+        "passed": true,
+        "realWalletSignature": false
+      },
+      {
+        "viewport": "mobile",
+        "passed": true,
+        "realWalletSignature": false
+      },
+      {
+        "configuration": "missing",
+        "noFakeQr": true,
+        "passed": true
+      }
+    ],
+    "fixturesOnly": true,
+    "realPayment": false
+  },
+  "bundle": {
+    "schema": "mir2.checkout-wallet-bundle.v1",
+    "bundleSha256": "7f9ec3e5da07babffbedd842b33bcc0fe3255273d4fa1dccb839a73460fc38b1",
+    "bytes": 487235,
+    "lockSha256": "f2c4cf0fdafe7bba4331dc51da15433a69ab8243f3278118aae088ec2a784273",
+    "inputs": 745,
+    "externalImports": []
+  },
+  "npmProductionAuditReportedVulnerabilities": 0,
+  "projectConfigurationVerified": false,
+  "realMobilePairing": false,
+  "realSignature": false,
+  "realPayment": false,
+  "linuxReleaseBuildDispatched": false,
+  "remoteDeploymentPerformed": false,
+  "walletRepositoryChanged": false,
+  "dockerStarted": false,
+  "updaterPublished": false
+}

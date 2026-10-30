@@ -5,6 +5,7 @@ use mir2_simulation::sui_usdc_billing::UsdcRechargeOrder;
 
 const HTML: &str = include_str!("sui_usdc_checkout.html");
 const SCRIPT: &str = include_str!("sui_usdc_checkout.js");
+const DUBHE_SCRIPT: &str = include_str!("sui_usdc_dubhe_wallet.bundle.js");
 #[derive(Deserialize)]
 #[serde(tag = "operation", rename_all = "camelCase", deny_unknown_fields)]
 enum CheckoutOperation {
@@ -12,6 +13,7 @@ enum CheckoutOperation {
     Challenge { payer: String },
     BindPayer { payer: String, signature: String },
     BuildPay {},
+    BuildPayBytes {},
     Submitted { digest: String },
 }
 pub(super) fn router() -> Router<WebState> {
@@ -19,6 +21,7 @@ pub(super) fn router() -> Router<WebState> {
         .route("/v1/billing/sui-usdc/checkout", post(checkout))
         .route("/v1/billing/sui-usdc/pay", get(page))
         .route("/v1/billing/sui-usdc/pay.js", get(script))
+        .route("/v1/billing/sui-usdc/dubhe-wallet.js", get(dubhe_script))
         .route("/v1/billing/sui-usdc/session", post(operation))
 }
 fn safe_response(status: StatusCode, value: Value) -> Response {
@@ -34,13 +37,28 @@ fn safe_response(status: StatusCode, value: Value) -> Response {
         .into_response()
 }
 fn asset(body: &'static str, content: &'static str) -> Response {
-    (StatusCode::OK,[("content-type",content),("cache-control","no-store"),("referrer-policy","no-referrer"),("x-content-type-options","nosniff"),("content-security-policy","default-src 'none'; script-src 'self'; connect-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" )],body).into_response()
+    (StatusCode::OK,[("content-type",content),("cache-control","no-store"),("referrer-policy","no-referrer"),("x-content-type-options","nosniff"),("content-security-policy","default-src 'none'; script-src 'self'; connect-src 'self' wss://relay.walletconnect.com https://relay.walletconnect.com; img-src 'self' data:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" )],body).into_response()
 }
 async fn page() -> Response {
     asset(HTML, "text/html; charset=utf-8")
 }
 async fn script() -> Response {
     asset(SCRIPT, "text/javascript; charset=utf-8")
+}
+async fn dubhe_script() -> Response {
+    asset(DUBHE_SCRIPT, "text/javascript; charset=utf-8")
+}
+
+fn wallet_connect_project(value: Option<&str>) -> Option<&str> {
+    value.filter(|value| {
+        value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
+    })
+}
+
+fn dubhe_wallet_config() -> Value {
+    let configured = std::env::var("MIR2_SUI_USDC_WALLETCONNECT_PROJECT_ID").ok();
+    let project = wallet_connect_project(configured.as_deref());
+    json!({"available":project.is_some(),"projectId":project,"chain":"sui:testnet"})
 }
 fn error(error: String) -> Response {
     let code = match error.as_str() {
@@ -123,7 +141,7 @@ fn authorize(
     Ok((account, order, actual))
 }
 fn browser_state(o: &UsdcRechargeOrder) -> Value {
-    json!({"order":usdc::public_order(o),"payer":o.payer,"merchant":o.domain.merchant,"coinType":o.domain.coin_type,"chain":"sui:testnet","decimals":6,"testPayment":true,"gasPayer":"wallet","invoiceId":o.invoice.as_ref().map(|i|i.invoice_id.as_str()),"chainConfirmed":o.receipt.is_some(),"gameDelivered":o.applied.is_some(),"payExpired":usdc::now()>o.expires_at_ms})
+    json!({"order":usdc::public_order(o),"payer":o.payer,"merchant":o.domain.merchant,"coinType":o.domain.coin_type,"chain":"sui:testnet","decimals":6,"testPayment":true,"gasPayer":"wallet","invoiceId":o.invoice.as_ref().map(|i|i.invoice_id.as_str()),"chainConfirmed":o.receipt.is_some(),"gameDelivered":o.applied.is_some(),"payExpired":usdc::now()>o.expires_at_ms,"dubheWallet":dubhe_wallet_config()})
 }
 async fn checkout(
     State(state): State<WebState>,
@@ -217,13 +235,15 @@ async fn operation(
                 let bound=config.bind_usdc_recharge_payer(&account,&order.id,&payer,&cap_hash,usdc::now())?;
                 Ok(browser_state(&bound))
             }
-            CheckoutOperation::BuildPay{}=>{
+            operation @ (CheckoutOperation::BuildPay{}|CheckoutOperation::BuildPayBytes{})=>{
                 if usdc::now()>order.expires_at_ms{return Err("usdcCheckoutExpired".into());}
                 if order.payment_hint.is_some()||order.receipt.is_some(){return Err("usdcPaymentAlreadySubmitted".into());}
                 let invoice=order.invoice.as_ref().ok_or("usdcInvoiceNotReady")?;
-                let built=provider.driver.call("buildPay",json!({"invoiceId":invoice.invoice_id,"order":usdc::chain_order(&order)?}))?;
-                if built["invoiceId"]!=invoice.invoice_id||built["payer"]!=order.payer.as_deref().unwrap_or("")||built["gasPayer"]!="wallet"||built["transactionJson"].as_str().is_none_or(|s|s.len()>256*1024){return Err("usdcDriverReplyInvalid".into());}
-                Ok(json!({"transactionJson":built["transactionJson"],"state":browser_state(&order)}))
+                let bytes=matches!(operation,CheckoutOperation::BuildPayBytes{});
+                let built=provider.driver.call(if bytes{"buildPayBytes"}else{"buildPay"},json!({"invoiceId":invoice.invoice_id,"order":usdc::chain_order(&order)?}))?;
+                let field=if bytes{"transactionBytesB64"}else{"transactionJson"};
+                if built["invoiceId"]!=invoice.invoice_id||built["payer"]!=order.payer.as_deref().unwrap_or("")||built["gasPayer"]!="wallet"||built[field].as_str().is_none_or(|s|s.is_empty()||s.len()>256*1024){return Err("usdcDriverReplyInvalid".into());}
+                Ok(json!({(field):built[field],"state":browser_state(&order)}))
             }
             CheckoutOperation::Submitted{digest}=>{
                 let submitted=config.submit_usdc_payment_hint(&account,&order.id,&cap_hash,&digest,usdc::now())?;
@@ -269,9 +289,20 @@ mod tests {
             json!({"operation":"submitted","digest":"anything","paid":true}),
             json!({"operation":"bindPayer","payer":"0x1","signature":"sig","credits":100000}),
             json!({"operation":"buildPay","amountMicros":"1"}),
+            json!({"operation":"buildPayBytes","payer":"0x1"}),
         ] {
             assert!(serde_json::from_value::<CheckoutOperation>(v).is_err());
         }
+    }
+    #[test]
+    fn qr_project_configuration_is_public_but_never_a_url_or_secret() {
+        assert!(wallet_connect_project(None).is_none());
+        assert_eq!(wallet_connect_project(Some("0123456789abcdef0123456789abcdef")),Some("0123456789abcdef0123456789abcdef"));
+        for invalid in ["", "https://evil.invalid", " short ", "0123456789abcdef0123456789abcdef?", "g123456789abcdef0123456789abcdef"] {
+            assert!(wallet_connect_project(Some(invalid)).is_none());
+        }
+        assert!(serde_json::from_value::<CheckoutOperation>(json!({"operation":"buildPayBytes"})).is_ok());
+        assert!(DUBHE_SCRIPT.contains("sui_signAndExecuteTransaction"));
     }
     #[test]
     fn checkout_page_uses_no_game_bearer_or_remote_scripts() {

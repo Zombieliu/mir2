@@ -7,8 +7,9 @@ import {tmpdir} from 'node:os';
 import {join,resolve,sep} from 'node:path';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
+import { SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
 import { COIN_TYPE,GENESIS_DIGEST,NETWORK_HASH,validateConfig,validateOrder,decodeInvoice,decodeEvent,integer } from '../service/model.mjs';
-import { buildPay,observeCreateWithClient,observeInvoiceWithClient,reserveIssuerGas,submitPrepared,validateGasEnvironment,validatePrepared,verifyWalletProof } from '../service/driver.mjs';
+import { buildPay,buildPayBytes,observeCreateWithClient,observeInvoiceWithClient,reserveIssuerGas,submitPrepared,validateGasEnvironment,validatePrepared,verifyWalletProof } from '../service/driver.mjs';
 
 const h=n=>'0x'+n.repeat(64),d='11111111111111111111111111111111';
 const key=Ed25519Keypair.fromSecretKey(new Uint8Array(32).fill(42));
@@ -142,6 +143,98 @@ test('coin selection fails closed for insufficient or foreign owned USDC',async(
   await assert.rejects(()=>buildPay(c,{invoiceId,order},{},f.client),/usdcInsufficientBalance/);
   const other=buildFixture();other.client.core.listCoins=async()=>({objects:[{balance:'2000000',type:'fake',owner:{$kind:'AddressOwner',AddressOwner:order.payer}}],hasNextPage:false});
   await assert.rejects(()=>buildPay(c,{invoiceId,order},{},other.client),/usdcCoinOwnershipMismatch/);
+});
+function payBytesFixture(t,{addressBalance='0',gasBalance='100000000',gasOwner=order.payer}={}){
+  t.mock.method(Date,'now',()=>10000);
+  const f=buildFixture(),calls=[];
+  // Use the SDK's real core resolution plugin, with only its read-only RPC
+  // data supplied locally. Never replace Transaction.build or its BCS codec.
+  const sdk=new SuiJsonRpcClient({network:'testnet',transport:{request:async()=>{throw Error('unexpected live RPC');}}});
+  f.client.core.resolveTransactionPlugin=()=>sdk.core.resolveTransactionPlugin();
+  const clockId='0x'+'0'.repeat(63)+'6',gas={objectId:h('a'),version:'3',digest:d,
+    type:'0x2::coin::Coin<0x2::sui::SUI>',owner:{$kind:'AddressOwner',AddressOwner:gasOwner},
+    content:Buffer.concat([addr(h('a')),scalar(gasBalance)])};
+  const clock={objectId:clockId,version:'1',digest:d,type:'0x2::clock::Clock',owner:{$kind:'Shared',Shared:{initialSharedVersion:'1'}}};
+  const get=f.client.core.getObject,list=f.client.core.listCoins;
+  f.client.core.getObject=async q=>{calls.push(['getObject',q.objectId]);return q.objectId===gas.objectId?{object:gas}:q.objectId===clockId?{object:clock}:get(q);};
+  f.client.core.getObjects=async q=>({objects:await Promise.all(q.objectIds.map(async objectId=>(await f.client.core.getObject({objectId})).object))});
+  f.client.core.listCoins=async q=>{
+    calls.push(['listCoins',q.owner,q.coinType]);assert.equal(q.owner,order.payer);
+    return q.coinType.replace(/0x0{1,63}2::/g,'0x2::')==='0x2::sui::SUI'?{objects:[{...gas,balance:gasBalance}],hasNextPage:false,cursor:null}:list(q);
+  };
+  f.client.core.getBalance=async q=>{calls.push(['getBalance',q.owner]);assert.equal(q.owner,order.payer);return {balance:{addressBalance}};};
+  f.client.core.getCurrentSystemState=async()=>({systemState:{epoch:'100',referenceGasPrice:'1000'}});
+  const parameter=(typeName,reference=null)=>({reference,body:{$kind:'datatype',datatype:{typeName,typeParameters:[]}}});
+  f.client.core.getMoveFunction=async q=>{
+    assert.deepEqual(q,{packageId:c.packageId,moduleName:'recharge',name:'pay'});
+    return {function:{parameters:[parameter(c.packageId+'::recharge::Config','immutable'),parameter(c.packageId+'::recharge::Invoice','mutable'),
+      parameter('0x2::coin::Coin'),parameter('0x2::clock::Clock','immutable')]}};
+  };
+  f.client.core.executeTransaction=async()=>{throw Error('payment build attempted broadcast');};
+  return {...f,calls,gas,clock};
+}
+test('phone payment bytes use real SDK BCS resolution with exact payer, gas, USDC invoice and change',async t=>{
+  const f=payBytesFixture(t),env=new Proxy({},{get(){throw Error('payment build attempted to read signing authority');}});
+  const result=await buildPayBytes(c,{invoiceId,order},env,f.client),raw=Buffer.from(result.transactionBytesB64,'base64');
+  assert.deepEqual(Object.keys(result).sort(),['transactionBytesB64','transactionDigest','invoiceId','payer','gasPayer'].sort());
+  assert.ok(raw.length>0&&raw.length<=65536);assert.equal(raw.toString('base64'),result.transactionBytesB64);
+  const tx=Transaction.from(raw),data=tx.getData();assert.deepEqual(Buffer.from(await tx.build()),raw);
+  assert.equal(await tx.getDigest(),result.transactionDigest);assert.equal(result.gasPayer,'wallet');assert.equal(result.payer,order.payer);assert.equal(result.invoiceId,invoiceId);
+  assert.equal(data.sender,order.payer);assert.equal(data.gasData.owner,order.payer);assert.equal(data.gasData.budget,c.gasBudgetMist);
+  assert.deepEqual(data.gasData.payment,[{objectId:f.gas.objectId,version:f.gas.version,digest:f.gas.digest}]);
+  const split=data.commands[0].SplitCoins,call=data.commands[1].MoveCall,change=data.commands[2].TransferObjects;
+  assert.equal(data.commands.length,3);assert.equal(call.package,c.packageId);assert.equal(call.module,'recharge');assert.equal(call.function,'pay');assert.deepEqual(call.typeArguments,[COIN_TYPE]);
+  assert.equal(data.inputs[call.arguments[0].Input].Object.SharedObject.objectId,c.configId);
+  assert.equal(data.inputs[call.arguments[1].Input].Object.SharedObject.objectId,invoiceId);
+  assert.equal(data.inputs[call.arguments[3].Input].Object.SharedObject.objectId,f.clock.objectId);
+  assert.equal(Buffer.from(data.inputs[split.amounts[0].Input].Pure.bytes,'base64').readBigUInt64LE(),BigInt(order.amountMicros));
+  assert.equal(data.inputs[change.address.Input].Pure.bytes,addr(order.payer).toString('base64'));
+  assert.ok(f.calls.some(v=>v[0]==='listCoins'&&v[2].replace(/0x0{1,63}2::/g,'0x2::')==='0x2::sui::SUI'));
+});
+test('phone bytes support sufficient payer address-balance gas without issuer sponsorship',async t=>{
+  const f=payBytesFixture(t,{addressBalance:c.gasBudgetMist}),result=await buildPayBytes(c,{invoiceId,order},{},f.client);
+  const data=Transaction.from(Buffer.from(result.transactionBytesB64,'base64')).getData();
+  assert.deepEqual(data.gasData.payment,[]);assert.equal(data.gasData.owner,order.payer);assert.equal(data.expiration.ValidDuring.chain,GENESIS_DIGEST);
+  assert.equal(data.expiration.ValidDuring.minEpoch,'100');assert.ok(f.calls.filter(v=>v[0]==='getBalance').length>=2);
+});
+test('phone bytes reject a different chain and insufficient payer USDC or SUI',async t=>{
+  const wrong=payBytesFixture(t);wrong.client.core.getChainIdentifier=async()=>({chainIdentifier:'wrong-network'});
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},wrong.client),/usdcWrongNetwork/);
+  const usdc=payBytesFixture(t);usdc.client.core.listCoins=async()=>({objects:[],hasNextPage:false,cursor:null});
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},usdc.client),/usdcInsufficientBalance/);
+  const gas=payBytesFixture(t,{gasBalance:'1'});
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},gas.client),/usdcInsufficientGasBalance/);
+});
+test('phone bytes reject foreign gas objects and changed resolved gas owner or budget',async t=>{
+  const foreign=payBytesFixture(t,{gasOwner:c.issuerAddress});
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},foreign.client),/usdcPayGasOwnershipMismatch/);
+  for(const field of ['owner','budget']){
+    const f=payBytesFixture(t),resolve=f.client.core.resolveTransactionPlugin();
+    f.client.core.resolveTransactionPlugin=()=>(data,options,next)=>resolve(data,options,async()=>{
+      data.gasData[field]=field==='owner'?c.issuerAddress:'1';await next();
+    });
+    await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},f.client),/usdcPayBytesDomainMismatch/);
+  }
+});
+test('phone bytes refuse paid/expired invoices including changes while SDK build is resolving',async t=>{
+  const expired=payBytesFixture(t);t.mock.method(Date,'now',()=>20000);
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},expired.client),/usdcInvoiceNotPayable/);
+  const paid=payBytesFixture(t),observed=fixture(true);Object.assign(paid.object,observed.object);Object.assign(paid.tx,observed.tx);
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},paid.client),/usdcInvoiceNotPayable/);
+  const late=payBytesFixture(t);let now=10000;t.mock.method(Date,'now',()=>now);
+  late.client.core.getCurrentSystemState=async()=>{now=20000;return {systemState:{epoch:'100',referenceGasPrice:'1000'}};};
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},late.client),/usdcInvoiceNotPayable/);
+  const raced=payBytesFixture(t);raced.client.core.getCurrentSystemState=async()=>{
+    Object.assign(raced.object,observed.object);Object.assign(raced.tx,observed.tx);return {systemState:{epoch:'100',referenceGasPrice:'1000'}};
+  };
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},raced.client),/usdcInvoiceNotPayable/);
+});
+test('phone bytes cap full BCS size before returning a wallet execution payload',async t=>{
+  const f=payBytesFixture(t),resolve=f.client.core.resolveTransactionPlugin();
+  f.client.core.resolveTransactionPlugin=()=>(data,options,next)=>resolve(data,options,async()=>{
+    data.inputs.push({$kind:'Pure',Pure:{bytes:Buffer.alloc(65536).toString('base64')}});await next();
+  });
+  await assert.rejects(()=>buildPayBytes(c,{invoiceId,order},{},f.client),/usdcPayBytesTooLarge/);
 });
 test('CLI returns bounded JSON only and does not expose arbitrary errors or secrets',()=>{
   const cli=new URL('../service/cli.mjs',import.meta.url);

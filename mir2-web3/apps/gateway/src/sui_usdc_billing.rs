@@ -151,6 +151,7 @@ impl UsdcDriver for NodeDriver {
                 | "submitPrepared"
                 | "observeCreate"
                 | "buildPay"
+                | "buildPayBytes"
                 | "observeInvoice"
                 | "verifyWalletProof"
         ) {

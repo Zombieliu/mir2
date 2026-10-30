@@ -1,0 +1,16 @@
+{
+  "name": "@mir2/gateway-checkout-wallet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build:wallet": "node ../../scripts/build-sui-usdc-wallet.mjs",
+    "test:wallet": "node --test ../../scripts/test-sui-usdc-dubhe-wallet.mjs ../../scripts/test-sui-usdc-checkout-ui.mjs"
+  },
+  "dependencies": {
+    "@walletconnect/sign-client": "2.26.0",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": { "esbuild": "0.28.2" }
+}
