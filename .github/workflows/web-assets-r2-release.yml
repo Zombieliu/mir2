@@ -85,9 +85,14 @@ jobs:
             // Read only public routing/build metadata; never export environment values.
             const id = process.env.RELEASE_DEPLOYMENT_ID;
             if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
-            const deployment = await api(`/v13/deployments/${id}`);
-            if (deployment.projectId !== project) throw Error('Historical deployment belongs to another project');
-            console.log(JSON.stringify({historicalDeployment:{id:deployment.id,url:deployment.url,
+            let deployment;
+            try { deployment = await api(`/v13/deployments/${id}`); }
+            catch (error) {
+              if (error.message !== 'Vercel GET request failed: HTTP 404') throw error;
+              console.log(JSON.stringify({historicalDeployment:{id,notFound:true}}));
+            }
+            if (deployment && deployment.projectId !== project) throw Error('Historical deployment belongs to another project');
+            if (deployment) console.log(JSON.stringify({historicalDeployment:{id:deployment.id,url:deployment.url,
               readyState:deployment.readyState,alias:deployment.alias,
               rootDirectory:deployment.projectSettings?.rootDirectory,
               sourceSha:deployment.meta?.githubCommitSha,sourceRef:deployment.meta?.githubCommitRef}},null,2));
