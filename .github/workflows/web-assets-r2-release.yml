@@ -1,1044 +1,384 @@
-name: Mir2 Web Assets R2 Release
+name: Promotion Website Release
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
-      native_delivery_operation:
-        description: Native delivery operation; off preserves the Web release workflow
-        required: false
-        default: 'off'
+      operation:
+        description: Inspect, stage without aliases, or promote an accepted website deployment
+        required: true
+        default: context
         type: choice
-        options:
-          - 'off'
-          - probe
-          - verify
-          - stage
-          - promote
-      native_stage_run_id:
-        description: Successful stage run in this workflow; required only for promote
+        options: [context, discover-main-site, inspect-main-source, stage, promote, unified-context, unified-stage, unified-promote, realtime-context, realtime-stage, realtime-promote, windows-context, windows-config, windows-stage, windows-promote, backend-build]
+      deployment_id:
+        description: Exact accepted production candidate; required only for promote
         required: false
         type: string
-      native_updater_sequence:
-        description: Fixed signed native publication; 13/14 R17, 15 R19, 16 R20, 17 R22, 18 R23, 19 R24, 20 R25
-        required: false
-        default: '13'
-        type: choice
-        options:
-          - '13'
-          - '14'
-          - '15'
-          - '16'
-          - '17'
-          - '18'
-          - '19'
-          - '20'
-      native_stage_sha256:
-        description: Exact SHA256 of the retained stage receipt; required only for promote
+      backend_source_sha:
+        description: Reviewed immutable backend source commit; required only for backend-build
         required: false
         type: string
-      run_id:
-        description: Optional generated release id
+      main_deployment_id:
+        description: Exact marketing candidate paired with deployment_id for unified-promote
         required: false
         type: string
-      asset_base_url:
-        description: Public R2/CDN base URL, may include {version}
+      unified_source_sha:
+        description: Reviewed immutable source of both existing candidates; promote only, defaults to workflow commit
         required: false
         type: string
-      object_prefix:
-        description: R2 object prefix, may include {version}
-        required: false
-        default: mir2/v/{version}
-        type: string
-      publish_r2:
-        description: Upload staged assets to Cloudflare R2
-        required: false
-        default: false
-        type: boolean
-      resume_existing_assets:
-        description: Verify an already uploaded immutable prefix and publish only release manifests
-        required: false
-        default: false
-        type: boolean
-      use_existing_release:
-        description: Use an existing R2 remote-asset-release.json instead of uploading a new release
-        required: false
-        default: false
-        type: boolean
-      remote_release_manifest_url:
-        description: Existing remote-asset-release.json URL; defaults to asset_base_url/remote-asset-release.json
-        required: false
-        type: string
-      upload_driver:
-        description: Upload driver for R2 publish (wrangler, api, worker, r2-s3)
-        required: false
-        default: worker
-        type: string
-      deploy_upload_worker:
-        description: Deploy the authenticated R2 upload Worker before publishing
-        required: false
-        default: false
-        type: boolean
-      require_full_crystal_pack:
-        description: Require an existing release to contain the verified full Crystal pack
-        required: false
-        default: false
-        type: boolean
-      deploy_worker:
-        description: Deploy mir2.obelisk.build Worker proxy after R2 verification
-        required: false
-        default: false
-        type: boolean
-      deploy_vercel:
-        description: Deploy Player Web to Vercel only after R2 verification
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: read
 
+concurrency:
+  group: promotion-website-${{ inputs.operation == 'backend-build' && 'backend-build' || 'production-release' }}
+  cancel-in-progress: false
+
 jobs:
-  push-release-workflow-gate:
-    if: ${{ github.event_name != 'workflow_dispatch' }}
-    runs-on: ubuntu-latest
+  website:
+    if: inputs.operation != 'backend-build'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
     steps:
-      - name: Confirm release workflow is manual-only
-        run: |
-          echo "R2 asset release is manual-only."
-          echo "Use workflow_dispatch with publish_r2/deploy_worker/deploy_vercel inputs to run the release chain."
-
-  native-download-authority-probe:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'probe' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - name: Checkout probe source without persisted credentials
-        uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        if: startsWith(inputs.operation, 'unified-') || startsWith(inputs.operation, 'realtime-') || startsWith(inputs.operation, 'windows-')
         with:
           persist-credentials: false
-
-      - name: Probe existing authority with read-only requests
-        working-directory: mir2-web3
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          install -d -m 700 "$RUNNER_TEMP/mir2-native-authority"
-          python3 -B scripts/cloudflare_read_authority_probe.py --receipt "$RUNNER_TEMP/mir2-native-authority/receipt.json"
-
-      - name: Retain safe authority receipt
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-download-authority-${{ github.run_id }}
-          path: ${{ runner.temp }}/mir2-native-authority/receipt.json
-          if-no-files-found: error
-          retention-days: 7
-
-  native-download-tooling-check:
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == 'verify' || inputs.native_delivery_operation == 'stage' || inputs.native_delivery_operation == 'promote') }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout native tooling without persisted credentials
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Use Python 3.13 for the bounded offline checks
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Use the root-verified Node version for native Worker checks
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.18.0'
-
-      - name: Check immutable imports, stream cancellation and pointer CAS
-        working-directory: mir2-web3
-        run: node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs
-
-      - name: Check fixed routes, stream bounds, receipts and POSIX permissions
-        working-directory: mir2-web3
-        run: python3 -B scripts/test_native_r17_r2_delivery.py
-
-      - name: Check SIGINT termination retains uncertain write receipts
-        working-directory: mir2-web3
-        run: python3 -B scripts/test_native_r17_interrupt.py
-
-      - name: Check the separate signed14 fixed table and transport policies
-        working-directory: mir2-web3
-        run: |
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-s14-publication.test.mjs
-          python3 -B scripts/test_native_r17_s14_r2_delivery.py
-          python3 -B scripts/test_native_r17_s14_interrupt.py
-
-      - name: Check signed15 R19 admission, bounded transport and cancellation
-        working-directory: mir2-web3
-        run: |
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r19-s15-publication.test.mjs
-          python3 -B scripts/test_native_r19_s15_r2_delivery.py
-          python3 -B scripts/test_native_r19_s15_interrupt.py
-
-      - name: Check signed16 R20 admission, unchanged s15 engine and bounded transport
-        if: ${{ inputs.native_updater_sequence == '16' || inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
-        working-directory: mir2-web3
-        run: |
-          python3 -B scripts/test_prepare_native_r20_s16_fixed.py
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r20-s16-publication.test.mjs
-          python3 -B scripts/test_native_r20_s16_r2_delivery.py
-          python3 -B scripts/test_native_r20_s16_interrupt.py
-
-      - name: Check signed17 R22 admission and original immutable predecessor
-        if: ${{ inputs.native_updater_sequence == '17' || inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
-        working-directory: mir2-web3
-        run: |
-          python3 -B scripts/test_prepare_native_r22_s17_offline.py
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r22-s17-publication.test.mjs
-          python3 -B scripts/test_native_r22_s17_r2_delivery.py
-          python3 -B scripts/test_native_r22_s17_interrupt.py
-
-      - name: Check signed18 R23 admission and original immutable predecessor
-        if: ${{ inputs.native_updater_sequence == '18' || inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
-        working-directory: mir2-web3
-        run: |
-          python3 -B scripts/test_prepare_native_r23_s18_offline.py
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r23-s18-publication.test.mjs
-          python3 -B scripts/test_native_r23_s18_r2_delivery.py
-          python3 -B scripts/test_native_r23_s18_interrupt.py
-
-      - name: Check signed19 R24 admission and original immutable predecessor
-        if: ${{ inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20' }}
-        working-directory: mir2-web3
-        run: |
-          python3 -B scripts/test_prepare_native_r24_s19_offline.py
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r24-s19-publication.test.mjs
-          python3 -B scripts/test_native_r24_s19_r2_delivery.py
-          python3 -B scripts/test_native_r24_s19_interrupt.py
-
-      - name: Check signed20 R25 admission and original immutable predecessor
-        if: ${{ inputs.native_updater_sequence == '20' }}
-        working-directory: mir2-web3
-        run: |
-          python3 -B scripts/test_prepare_native_r25_s20_offline.py
-          node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r25-s20-publication.test.mjs
-          python3 -B scripts/test_native_r25_s20_r2_delivery.py
-          python3 -B scripts/test_native_r25_s20_interrupt.py
-
-      - name: Retain raw offline checks
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-r17-tooling-${{ github.run_id }}
-          path: |
-            mir2-web3/evidence/
-            mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/
-            mir2-web3/scripts/fixtures/native-r20-s16/qa-runs/
-            mir2-web3/scripts/fixtures/native-r22-s17/qa-runs/
-            mir2-web3/scripts/fixtures/native-r23-s18/qa-runs/
-            mir2-web3/scripts/fixtures/native-r24-s19/qa-runs/
-            mir2-web3/scripts/fixtures/native-r25-s20/qa-runs/
-          if-no-files-found: error
-          retention-days: 7
-
-  native-download-stage:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'stage' }}
-    needs: native-download-tooling-check
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-      - name: Checkout fixed native publication source
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Use the verified Node version for authenticated upload Worker deployment
-        if: ${{ (inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20') && inputs.deploy_upload_worker }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.18.0'
-
-      - name: Deploy the reviewed signed19 or signed20 upload route after offline gates
-        if: ${{ (inputs.native_updater_sequence == '19' || inputs.native_updater_sequence == '20') && inputs.deploy_upload_worker }}
-        working-directory: mir2-web3
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          test -n "${CLOUDFLARE_API_TOKEN:-}"
-          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
-          npx --yes wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-bulk-upload/wrangler.jsonc
-
-      - name: Stage immutable objects and verify complete public bytes
-        working-directory: mir2-web3
-        timeout-minutes: 345
-        env:
-          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
-          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
-        run: |
-          set -euo pipefail
-          install -d -m 700 "$RUNNER_TEMP/mir2-native-r17-stage"
-          # Whole-stage budget is separate from per-object budgets. Interrupt
-          # first so Python can retain unknown outcomes before the hard cap.
-          case "$MIR2_NATIVE_SEQUENCE" in
-            13) native_driver=scripts/native_r17_r2_delivery.py ;;
-            14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
-            15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
-            16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
-            17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
-            18) native_driver=scripts/native_r23_s18_r2_delivery.py ;;
-            19) native_driver=scripts/native_r24_s19_r2_delivery.py ;;
-            20) native_driver=scripts/native_r25_s20_r2_delivery.py ;;
-            *) exit 1 ;;
-          esac
-          timeout --signal=INT --kill-after=30s 330m python3 -B "$native_driver" --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
-          sha256sum "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json" > "$RUNNER_TEMP/mir2-native-r17-stage/receipt.sha256"
-
-      - name: Retain the stage receipt including failures
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-r17-stage-${{ github.run_id }}
-          path: ${{ runner.temp }}/mir2-native-r17-stage/
-          if-no-files-found: error
-          retention-days: 7
-
-  native-download-promote:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'promote' }}
-    needs: native-download-tooling-check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - name: Validate the separate successful stage run
-        env:
-          GH_TOKEN: ${{ github.token }}
-          MIR2_NATIVE_STAGE_RUN: ${{ inputs.native_stage_run_id }}
-          MIR2_NATIVE_STAGE_SHA: ${{ inputs.native_stage_sha256 }}
-          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
-        run: |
-          set -euo pipefail
-          [[ "$MIR2_NATIVE_STAGE_RUN" =~ ^[1-9][0-9]{0,19}$ ]]
-          [[ "$MIR2_NATIVE_STAGE_SHA" =~ ^[0-9a-f]{64}$ ]]
-          install -d -m 700 "$RUNNER_TEMP/mir2-native-r17-promote"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$MIR2_NATIVE_STAGE_RUN" --jq '{workflow_id,event,conclusion,head_branch,head_sha}' > "$RUNNER_TEMP/mir2-native-r17-promote/stage-run.json"
-          python3 - <<'PY'
-          import json, os
-          from pathlib import Path
-          value = json.loads((Path(os.environ['RUNNER_TEMP']) / 'mir2-native-r17-promote/stage-run.json').read_bytes())
-          assert value['workflow_id'] == 284517107
-          assert value['event'] == 'workflow_dispatch' and value['conclusion'] == 'success'
-          assert value['head_branch'] == os.environ['GITHUB_REF_NAME']
-          if os.environ['MIR2_NATIVE_SEQUENCE'] in ('15', '16', '17', '18', '19', '20'):
-              assert value['head_sha'] == os.environ['GITHUB_SHA']
-          PY
-
-      - name: Download the retained stage artifact from this repository
-        uses: actions/download-artifact@v4
-        with:
-          name: native-r17-stage-${{ inputs.native_stage_run_id }}
-          path: ${{ runner.temp }}/mir2-native-r17-promote/stage
-          run-id: ${{ inputs.native_stage_run_id }}
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-
-      - name: Checkout fixed native publication source
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Promote the verified stage once and check public aliases
-        working-directory: mir2-web3
-        timeout-minutes: 9
-        env:
-          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
-          MIR2_NATIVE_STAGE_SHA: ${{ inputs.native_stage_sha256 }}
-          MIR2_NATIVE_SEQUENCE: ${{ inputs.native_updater_sequence }}
-        run: |
-          set -euo pipefail
-          chmod 600 "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json"
-          case "$MIR2_NATIVE_SEQUENCE" in
-            13) native_driver=scripts/native_r17_r2_delivery.py ;;
-            14) native_driver=scripts/native_r17_s14_r2_delivery.py ;;
-            15) native_driver=scripts/native_r19_s15_r2_delivery.py ;;
-            16) native_driver=scripts/native_r20_s16_r2_delivery.py ;;
-            17) native_driver=scripts/native_r22_s17_r2_delivery.py ;;
-            18) native_driver=scripts/native_r23_s18_r2_delivery.py ;;
-            19) native_driver=scripts/native_r24_s19_r2_delivery.py ;;
-            20) native_driver=scripts/native_r25_s20_r2_delivery.py ;;
-            *) exit 1 ;;
-          esac
-          timeout --signal=INT --kill-after=30s 8m python3 -B "$native_driver" --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"
-
-      - name: Retain promotion and unknown-outcome receipts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-r17-promote-${{ github.run_id }}
-          path: ${{ runner.temp }}/mir2-native-r17-promote/
-          if-no-files-found: error
-          retention-days: 7
-
-  build-web-assets:
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == '' || inputs.native_delivery_operation == 'off') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: mir2-web3/apps/web/package-lock.json
-
-      - name: Install Rust 1.89
-        if: ${{ inputs.publish_r2 }}
-        run: rustup toolchain install 1.89.0 --profile minimal
-
-      - name: Install wasm target
-        if: ${{ inputs.publish_r2 }}
-        run: rustup target add wasm32-unknown-unknown --toolchain 1.89.0
-
-      - name: Install wasm-bindgen CLI
-        if: ${{ inputs.publish_r2 }}
-        working-directory: mir2-web3/apps/game-client/runtime
-        run: |
-          set -euo pipefail
-          wasm_bindgen_version="$(
-            awk '
-              $0 == "name = \"wasm-bindgen\"" { found = 1; next }
-              found && $1 == "version" {
-                gsub(/"/, "", $3)
-                print $3
-                exit
-              }
-            ' Cargo.lock
-          )"
-          if [ -z "$wasm_bindgen_version" ]; then
-            echo "Unable to resolve wasm-bindgen version from Cargo.lock" >&2
-            exit 1
-          fi
-          cargo install wasm-bindgen-cli --version "$wasm_bindgen_version" --locked
-
-      - name: Install Web dependencies
-        working-directory: mir2-web3/apps/web
-        run: npm ci
-
-      - name: Verify quest item icon closure
-        working-directory: mir2-web3/apps/web
-        run: npm run test:quest-item-icons
-
-      - name: Resolve deterministic asset version
-        env:
-          INPUT_RUN_ID: ${{ inputs.run_id }}
-          INPUT_ASSET_BASE_URL: ${{ inputs.asset_base_url }}
-          SECRET_ASSET_BASE_URL: ${{ secrets.MIR2_PUBLIC_R2_ASSET_BASE_URL }}
-          INPUT_OBJECT_PREFIX: ${{ inputs.object_prefix }}
-        run: |
-          set -euo pipefail
-          asset_version="$INPUT_RUN_ID"
-          if [ -z "$asset_version" ]; then
-            asset_version="${GITHUB_SHA::12}"
-          fi
-
-          asset_base_template="$INPUT_ASSET_BASE_URL"
-          if [ -z "$asset_base_template" ]; then
-            asset_base_template="${SECRET_ASSET_BASE_URL:-https://assets.mir2.obelisk.build/mir2/v/{version}}"
-          fi
-          if [[ "$asset_base_template" != *"{version}"* && "$asset_base_template" != *"$asset_version"* ]]; then
-            echo "asset_base_url must include {version} or the resolved asset version $asset_version" >&2
-            exit 1
-          fi
-
-          version_placeholder="{version}"
-          object_prefix_template="${INPUT_OBJECT_PREFIX:-mir2/v/$version_placeholder}"
-          asset_base="${asset_base_template//$version_placeholder/$asset_version}"
-          object_prefix="${object_prefix_template//$version_placeholder/$asset_version}"
-
-          {
-            echo "MIR2_ASSET_VERSION=$asset_version"
-            echo "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$asset_base"
-            echo "MIR2_ASSET_OBJECT_PREFIX=$object_prefix"
-            echo "MIR2_FALLBACK_OBJECT_PREFIX="
-            echo "MIR2_REMOTE_ASSET_RELEASE_MANIFEST=$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json"
-          } >> "$GITHUB_ENV"
-
-          echo "asset_version=$asset_version"
-          echo "asset_base=$asset_base"
-          echo "object_prefix=$object_prefix"
-
-      - name: Validate release intent ordering
-        run: |
-          set -euo pipefail
-          publish_r2="${{ inputs.publish_r2 }}"
-          use_existing_release="${{ inputs.use_existing_release }}"
-          require_full_crystal_pack="${{ inputs.require_full_crystal_pack }}"
-          deploy_worker="${{ inputs.deploy_worker }}"
-          deploy_vercel="${{ inputs.deploy_vercel }}"
-
-          if [ "$publish_r2" = "true" ] && [ "$use_existing_release" = "true" ]; then
-            echo "publish_r2 and use_existing_release are mutually exclusive." >&2
-            exit 1
-          fi
-          if [ "$require_full_crystal_pack" = "true" ] && [ "$publish_r2" = "true" ]; then
-            echo "The hosted workflow does not contain the ignored 10GB full pack. Publish it locally with the verified r2-s3 path, then rerun with use_existing_release=true." >&2
-            exit 1
-          fi
-          if [ "$require_full_crystal_pack" = "true" ] && [ "$use_existing_release" != "true" ]; then
-            echo "require_full_crystal_pack requires use_existing_release=true in this hosted workflow." >&2
-            exit 1
-          fi
-          if [ "$deploy_worker" = "true" ] && [ "$publish_r2" != "true" ] && [ "$use_existing_release" != "true" ]; then
-            echo "deploy_worker requires publish_r2 or use_existing_release first." >&2
-            exit 1
-          fi
-          if [ "$deploy_vercel" = "true" ] && [ "$publish_r2" != "true" ] && [ "$use_existing_release" != "true" ]; then
-            echo "deploy_vercel requires publish_r2 or use_existing_release first." >&2
-            exit 1
-          fi
-          if [ "$deploy_vercel" = "true" ] && [ "$deploy_worker" != "true" ]; then
-            echo "deploy_vercel will verify the currently deployed same-origin Worker before publishing Player Web."
-          fi
-
-      - name: Validate existing remote asset release
-        if: ${{ inputs.use_existing_release }}
-        env:
-          INPUT_REMOTE_RELEASE_MANIFEST_URL: ${{ inputs.remote_release_manifest_url }}
-          REQUIRE_FULL_CRYSTAL_PACK: ${{ inputs.require_full_crystal_pack }}
-          EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
-        run: |
-          set -euo pipefail
-          remote_release_url="${INPUT_REMOTE_RELEASE_MANIFEST_URL:-${NEXT_PUBLIC_MIR2_ASSET_BASE_URL%/}/remote-asset-release.json}"
-          export MIR2_ORIGINAL_ASSET_REMOTE_RELEASE="$remote_release_url"
-          echo "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE=$remote_release_url" >> "$GITHUB_ENV"
-          node - <<'NODE'
-          (async () => {
-            const remoteReleaseUrl = process.env.MIR2_ORIGINAL_ASSET_REMOTE_RELEASE;
-            const expectedObjectPrefix = String(process.env.MIR2_ASSET_OBJECT_PREFIX ?? "").replace(/^\/+|\/+$/g, "");
-            const expectedAssetBaseUrl = String(process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL ?? "").replace(/\/+$/g, "");
-            const response = await fetch(remoteReleaseUrl, { cache: "no-store" });
-            if (!response.ok) {
-              throw new Error(`remote asset release fetch failed: HTTP ${response.status} ${remoteReleaseUrl}`);
-            }
-            const release = await response.json();
-            const fs = await import("node:fs/promises");
-            const releaseObjectPrefix = String(release.objectPrefix ?? "").replace(/^\/+|\/+$/g, "");
-            const releaseAssetBaseUrl = String(release.assetBaseUrl ?? release.baseUrl ?? "").replace(/\/+$/g, "");
-            if (releaseObjectPrefix !== expectedObjectPrefix) {
-              throw new Error(`remote release objectPrefix mismatch: expected ${expectedObjectPrefix}, got ${releaseObjectPrefix}`);
-            }
-            if (releaseAssetBaseUrl !== expectedAssetBaseUrl) {
-              throw new Error(`remote release assetBaseUrl mismatch: expected ${expectedAssetBaseUrl}, got ${releaseAssetBaseUrl}`);
-            }
-            const fallbackObjectPrefix = String(release.fallbackObjectPrefix ?? "").replace(/^\/+|\/+$/g, "");
-            if (
-              fallbackObjectPrefix &&
-              (!fallbackObjectPrefix.startsWith("mir2/v/") || fallbackObjectPrefix === release.objectPrefix)
-            ) {
-              throw new Error(`invalid remote release fallbackObjectPrefix: ${fallbackObjectPrefix}`);
-            }
-            if (Number(release.stats?.missingCount ?? 0) !== 0) {
-              throw new Error(`remote release missingCount is not zero: ${release.stats?.missingCount}`);
-            }
-            const files = Array.isArray(release.files) ? release.files : [];
-            const hasPath = (needle) => files.some((file) => {
-              const value = String(file.p ?? file.relativePath ?? file.path ?? file.objectKey ?? "");
-              return value.replace(/^\/+/, "") === needle;
-            });
-            const required = [
-              "original-map/WemadeMir2/Objects/5240.png",
-              "original-map/WemadeMir2/Objects21/1504.png",
-              "original-map/WemadeMir2/Tiles/1000.png",
-              "original-ui/Sound/Login2.wav",
-              "generated/map-atlas/manifest.json",
-            ];
-            const mapAtlasPaths = files
-              .map((file) => String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""))
-              .filter((value) => value.startsWith("generated/map-atlas/"));
-            if (!mapAtlasPaths.some((value) => value.endsWith(".png"))) {
-              throw new Error("remote release has no map-atlas PNG page");
-            }
-            if (String(process.env.REQUIRE_FULL_CRYSTAL_PACK).toLowerCase() === "true") {
-              required.push("generated/crystal-packs/full/index.json");
-              if (release.fullCrystalPack?.enabled !== true || release.fullCrystalPack?.verified !== true) {
-                throw new Error("remote release does not declare a verified full Crystal pack");
-              }
-              const fullFiles = files.filter((file) =>
-                String(file.p ?? file.relativePath ?? file.path ?? "")
-                  .replace(/^\/+/, "")
-                  .startsWith("generated/crystal-packs/full/"),
-              );
-              const fullPaths = fullFiles.map((file) =>
-                String(file.p ?? file.relativePath ?? file.path ?? "").replace(/^\/+/, ""),
-              );
-              if (fullPaths.length !== Number(release.fullCrystalPack.fileCount ?? 0)) {
-                throw new Error(
-                  `remote release full-pack file count mismatch: declared ${release.fullCrystalPack.fileCount}, found ${fullPaths.length}`,
-                );
-              }
-              if (!fullPaths.some((value) => value.includes("/libraries/") && value.endsWith(".json"))) {
-                throw new Error("remote release has no full-pack library shard");
-              }
-              if (!fullPaths.some((value) => value.includes("/pages/") && value.endsWith(".png"))) {
-                throw new Error("remote release has no full-pack page");
-              }
-              const fullJsonFiles = fullFiles.filter((file) =>
-                String(file.p ?? file.relativePath ?? file.path ?? "").toLowerCase().endsWith(".json"),
-              );
-              const encodedJsonFiles = fullJsonFiles.filter((file) => {
-                const encoding = String(file.e ?? file.contentEncoding ?? "").toLowerCase();
-                const encodedSize = Number(file.es ?? file.encodedSize ?? 0);
-                const encodedSha256 = String(file.eh ?? file.encodedSha256 ?? "").toLowerCase();
-                return encoding === "gzip" && encodedSize > 0 && /^[a-f0-9]{64}$/.test(encodedSha256);
-              });
-              if (
-                release.fullCrystalPack.jsonContentEncoding !== "gzip" ||
-                encodedJsonFiles.length !== fullJsonFiles.length
-              ) {
-                throw new Error(
-                  `remote release full-pack JSON is not fully gzip encoded: ${encodedJsonFiles.length}/${fullJsonFiles.length}`,
-                );
-              }
-              const storageBytes = Number(release.stats?.storageBytes ?? 0);
-              if (!storageBytes || storageBytes >= 10_000_000_000) {
-                throw new Error(`remote release storageBytes must stay below 10GB: ${storageBytes}`);
-              }
-            }
-            const missing = required.filter((path) => !hasPath(path));
-            if (missing.length > 0) {
-              throw new Error(`remote release is missing required full-crystal paths: ${missing.join(", ")}`);
-            }
-            await fs.writeFile(
-              process.env.EXISTING_RELEASE_MANIFEST_PATH,
-              `${JSON.stringify(release)}\n`,
-              "utf8",
-            );
-            await fs.appendFile(
-              process.env.GITHUB_ENV,
-              `MIR2_FALLBACK_OBJECT_PREFIX=${fallbackObjectPrefix}\n`,
-              "utf8",
-            );
-            console.log(JSON.stringify({
-              ok: true,
-              version: release.version,
-              objectPrefix: releaseObjectPrefix,
-              fileCount: files.length,
-              missingCount: release.stats?.missingCount ?? null,
-              fallbackObjectPrefix: fallbackObjectPrefix || null,
-              remoteReleaseUrl,
-            }, null, 2));
-          })().catch((error) => {
-            console.error(error?.message || String(error));
-            process.exit(1);
-          });
-          NODE
-      - name: Build Web for asset manifest staging
-        if: ${{ inputs.publish_r2 }}
-        working-directory: mir2-web3/apps/web
-        env:
-          MIR2_USE_PREBUILT_BEVY_RUNTIME: "0"
-          # This is the bootstrap build for a brand-new immutable R2 prefix.
-          # The remote release manifest does not exist until the later upload
-          # step, so generating it from NEXT_PUBLIC_MIR2_ASSET_BASE_URL here
-          # would introduce a circular dependency and fail with HTTP 404.
-          MIR2_ORIGINAL_ASSET_MANIFEST_MODE: "filesystem"
-        run: npm run build
-
-      - name: Stage remote asset release
-        if: ${{ inputs.publish_r2 }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          set -euo pipefail
-
-          npm run start -- --hostname 127.0.0.1 --port 13020 > /tmp/mir2-web-assets-next.log 2>&1 &
-          server_pid="$!"
-          trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
-
-          for attempt in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:13020/api/asset-manifest >/dev/null; then
-              break
-            fi
-            if ! kill -0 "$server_pid" >/dev/null 2>&1; then
-              cat /tmp/mir2-web-assets-next.log >&2
-              exit 1
-            fi
-            sleep 2
-          done
-
-          curl -fsS http://127.0.0.1:13020/api/asset-manifest >/dev/null
-          args=(
-            --baseUrl http://127.0.0.1:13020
-            --objectPrefix "$MIR2_ASSET_OBJECT_PREFIX"
-            --runId "$MIR2_ASSET_VERSION"
-          )
-          if [ -n "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL:-}" ]; then
-            args+=(--assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL")
-          fi
-          npm run assets:remote:build -- "${args[@]}"
-
-      - name: Dry run R2 upload plan
-        if: ${{ inputs.publish_r2 }}
-        working-directory: mir2-web3/apps/web
-        run: npm run assets:r2:dry-run
-
-      - name: Deploy authenticated R2 upload Worker
-        if: ${{ inputs.deploy_upload_worker && (inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel))) && (inputs.upload_driver == 'worker' || inputs.upload_driver == '') }}
-        working-directory: mir2-web3
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "R2 upload Worker deploy requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID." >&2
-            exit 1
-          fi
-          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-bulk-upload/wrangler.jsonc
-
-      - name: Publish Web assets to R2
-        if: ${{ inputs.publish_r2 }}
-        working-directory: mir2-web3/apps/web
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
-          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
-          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'worker' }}
-          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
-          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
-          MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
-          MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
-          MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
-          MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
-          MIR2_R2_VERIFY_ORIGINAL_ASSETS: "1"
-          MIR2_R2_RESUME_EXISTING_ASSETS: ${{ inputs.resume_existing_assets }}
-        run: |
-          set -euo pipefail
-          bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
-          if [ -z "$bucket" ]; then
-            echo "R2 publish requested but MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET is missing." >&2
-            exit 1
-          fi
-          MIR2_R2_BUCKET="$bucket" npm run assets:r2:upload
-
-      - name: Prepare pinned Bevy runtime for an existing overlay release
-        if: ${{ inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel) }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          set -euo pipefail
-          runtime_base_url="$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
-          if [ -n "${MIR2_FALLBACK_OBJECT_PREFIX:-}" ]; then
-            runtime_base_url="$(
-              node -e '
-                const current = new URL(process.argv[1]);
-                const fallbackPrefix = process.argv[2].replace(/^\/+|\/+$/g, "");
-                process.stdout.write(`${current.origin}/${fallbackPrefix}`);
-              ' "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL" "$MIR2_FALLBACK_OBJECT_PREFIX"
-            )"
-          fi
-          MIR2_BEVY_RUNTIME_BASE_URL="$runtime_base_url" npm run runtime:fetch:prebuilt
-
-      - name: Stage immutable Bevy runtime release
-        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          set -euo pipefail
-          runtime_manifest="$RUNNER_TEMP/mir2-bevy-runtime-r2-release.json"
-          npm run runtime:r2:build -- \
-            --assetVersion "$MIR2_ASSET_VERSION" \
-            --objectPrefix "$MIR2_ASSET_OBJECT_PREFIX" \
-            --assetBaseUrl "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL" \
-            --output "$runtime_manifest"
-          echo "MIR2_BEVY_RUNTIME_RELEASE_MANIFEST=$runtime_manifest" >> "$GITHUB_ENV"
-
-      - name: Dry run immutable Bevy runtime upload
-        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
-            npm run assets:r2:dry-run
-
-      - name: Publish immutable Bevy runtime to R2
-        if: ${{ inputs.publish_r2 || (inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel)) }}
-        working-directory: mir2-web3/apps/web
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          MIR2_R2_ASSET_BUCKET: ${{ secrets.MIR2_R2_ASSET_BUCKET }}
-          MIR2_R2_BUCKET: ${{ secrets.MIR2_R2_BUCKET }}
-          MIR2_R2_UPLOAD_DRIVER: ${{ inputs.upload_driver || 'worker' }}
-          MIR2_R2_UPLOAD_WORKER_URL: ${{ secrets.MIR2_R2_UPLOAD_WORKER_URL }}
-          MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
-          MIR2_R2_S3_ENDPOINT: ${{ secrets.MIR2_R2_S3_ENDPOINT }}
-          MIR2_R2_ACCESS_KEY_ID: ${{ secrets.MIR2_R2_ACCESS_KEY_ID }}
-          MIR2_R2_SECRET_ACCESS_KEY: ${{ secrets.MIR2_R2_SECRET_ACCESS_KEY }}
-          MIR2_R2_SESSION_TOKEN: ${{ secrets.MIR2_R2_SESSION_TOKEN }}
-          MIR2_R2_VERIFY_ORIGINAL_ASSETS: "0"
-          MIR2_R2_UPLOAD_CONCURRENCY: "1"
-          MIR2_R2_UPLOAD_ATTEMPTS: "6"
-        run: |
-          set -euo pipefail
-          bucket="${MIR2_R2_ASSET_BUCKET:-${MIR2_R2_BUCKET:-}}"
-          if [ -z "$bucket" ]; then
-            echo "Bevy runtime publish requires MIR2_R2_ASSET_BUCKET/MIR2_R2_BUCKET." >&2
-            exit 1
-          fi
-          MIR2_REMOTE_ASSET_RELEASE_MANIFEST="$MIR2_BEVY_RUNTIME_RELEASE_MANIFEST" \
-            MIR2_R2_BUCKET="$bucket" \
-            npm run assets:r2:upload
-
-      - name: "Release doctor: manifest + R2 asset checks"
-        if: ${{ inputs.publish_r2 }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          set -euo pipefail
-          if [ -z "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL:-}" ]; then
-            echo "NEXT_PUBLIC_MIR2_ASSET_BASE_URL is required for R2 asset checks." >&2
-            exit 1
-          fi
-          npm run release:doctor -- \
-            --manifest "$GITHUB_WORKSPACE/mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json" \
-            --checkManifest true \
-            --checkR2 true \
-            --checkWorker false \
-            --checkBevyRuntime false \
-            --requireFullCrystalPack "${{ inputs.require_full_crystal_pack }}" \
-            --assetBaseUrl "${NEXT_PUBLIC_MIR2_ASSET_BASE_URL}"
-
-      - name: Deploy public asset CDN Worker
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
-        working-directory: mir2-web3
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
-            exit 1
-          fi
-          node - <<'NODE'
-          const fs = require("node:fs");
-          const configPath = "infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc";
-          const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-          config.vars = {
-            ...(config.vars ?? {}),
-            MIR2_OVERLAY_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
-          };
-          if (process.env.MIR2_FALLBACK_OBJECT_PREFIX) {
-            config.vars.MIR2_FALLBACK_OBJECT_PREFIX = process.env.MIR2_FALLBACK_OBJECT_PREFIX;
-          } else {
-            delete config.vars.MIR2_FALLBACK_OBJECT_PREFIX;
-          }
-          fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
-          NODE
-          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-r2-asset-cache/wrangler.jsonc
-
-      - name: Deploy same-origin asset Worker proxy
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_worker }}
-        working-directory: mir2-web3
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "Worker deploy requested but CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is missing." >&2
-            exit 1
-          fi
-          node - <<'NODE'
-          const fs = require("node:fs");
-          const { MIR2_ASSET_VERSION, MIR2_ASSET_OBJECT_PREFIX, NEXT_PUBLIC_MIR2_ASSET_BASE_URL } = process.env;
-          if (!MIR2_ASSET_VERSION || !MIR2_ASSET_OBJECT_PREFIX || !NEXT_PUBLIC_MIR2_ASSET_BASE_URL) {
-            console.error("deploy_worker requires MIR2_ASSET_VERSION, MIR2_ASSET_OBJECT_PREFIX, and NEXT_PUBLIC_MIR2_ASSET_BASE_URL");
-            process.exit(1);
-          }
-          const configPath = "infra/cloudflare/mir2-domain-proxy/wrangler.jsonc";
-          const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-          const runtime = JSON.parse(
-            fs.readFileSync("apps/web/lib/generated/bevy_runtime_version.json", "utf8"),
-          );
-          if (!/^bevy-[a-f0-9]{16}$/i.test(runtime.version ?? "")) {
-            console.error("deploy_worker could not resolve a valid Bevy runtime version");
-            process.exit(1);
-          }
-          config.vars = {
-            ...(config.vars ?? {}),
-            ASSET_ORIGIN_URL: process.env.NEXT_PUBLIC_MIR2_ASSET_BASE_URL,
-            MIR2_ASSET_OBJECT_PREFIX: process.env.MIR2_ASSET_OBJECT_PREFIX,
-            MIR2_ASSET_VERSION: process.env.MIR2_ASSET_VERSION,
-            MIR2_BEVY_RUNTIME_VERSION: runtime.version,
-          };
-          if (process.env.MIR2_FALLBACK_OBJECT_PREFIX) {
-            config.vars.MIR2_FALLBACK_OBJECT_PREFIX = process.env.MIR2_FALLBACK_OBJECT_PREFIX;
-          } else {
-            delete config.vars.MIR2_FALLBACK_OBJECT_PREFIX;
-          }
-          fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
-          NODE
-          npx wrangler@4.112.0 deploy --config infra/cloudflare/mir2-domain-proxy/wrangler.jsonc
-
-      - name: Smoke current same-origin original assets
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && (inputs.deploy_worker || inputs.deploy_vercel) }}
-        run: |
-          set -euo pipefail
-          npm run --prefix mir2-web3/apps/web smoke:production-original-assets -- \
-            --targets web \
-            --webBaseUrl "https://mir2.obelisk.build"
-
-      - name: Verify full-pack closure through same-origin Worker
-        if: ${{ inputs.use_existing_release && (inputs.deploy_worker || inputs.deploy_vercel) && inputs.require_full_crystal_pack }}
-        working-directory: mir2-web3/apps/web
-        env:
-          EXISTING_RELEASE_MANIFEST_PATH: ${{ runner.temp }}/mir2-existing-remote-asset-release.json
-        run: |
-          npm run release:doctor -- \
-            --manifest "$EXISTING_RELEASE_MANIFEST_PATH" \
-            --checkManifest true \
-            --checkR2 false \
-            --checkWorker true \
-            --checkBevyRuntime false \
-            --requireFullCrystalPack true \
-            --probeConcurrency 32 \
-            --webBaseUrl "https://mir2.obelisk.build"
-
-      - name: Deploy Player Web to Vercel
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
-        working-directory: mir2-web3/apps/web
+      - name: Stage or promote the two existing websites from one immutable source
+        if: startsWith(inputs.operation, 'unified-')
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          NEXT_PUBLIC_MIR2_GATEWAY_WS_URL_SECRET: ${{ secrets.NEXT_PUBLIC_MIR2_GATEWAY_WS_URL }}
-          MIR2_USE_PREBUILT_BEVY_RUNTIME: "1"
-        run: |
-          set -euo pipefail
-          if [ -z "${VERCEL_TOKEN:-}" ] || [ -z "${VERCEL_ORG_ID:-}" ] || [ -z "${VERCEL_PROJECT_ID:-}" ]; then
-            echo "Vercel deploy requested but VERCEL_TOKEN, VERCEL_ORG_ID, or VERCEL_PROJECT_ID is missing." >&2
-            exit 1
-          fi
-          export NEXT_PUBLIC_MIR2_GATEWAY_WS_URL="${NEXT_PUBLIC_MIR2_GATEWAY_WS_URL_SECRET:-wss://mir2.obelisk.build/ws}"
-          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
-            export MIR2_ORIGINAL_ASSET_MANIFEST_MODE="remote-release"
-            export MIR2_ORIGINAL_ASSET_REMOTE_RELEASE="${MIR2_ORIGINAL_ASSET_REMOTE_RELEASE:-${NEXT_PUBLIC_MIR2_ASSET_BASE_URL%/}/remote-asset-release.json}"
-          fi
-          npm run generate:original-asset-manifest
-          if [ "${{ inputs.use_existing_release }}" = "true" ]; then
-            vercel_env_args=(
-              --build-env "MIR2_USE_PREBUILT_BEVY_RUNTIME=1"
-              --build-env "MIR2_ASSET_VERSION=$MIR2_ASSET_VERSION"
-              --build-env "MIR2_ASSET_OBJECT_PREFIX=$MIR2_ASSET_OBJECT_PREFIX"
-              --build-env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
-              --build-env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
-              --build-env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE=$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
-              --build-env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE=$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
-              --build-env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST=1"
-              --env "MIR2_ASSET_VERSION=$MIR2_ASSET_VERSION"
-              --env "MIR2_ASSET_OBJECT_PREFIX=$MIR2_ASSET_OBJECT_PREFIX"
-              --env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL=$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
-              --env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL=$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
-            )
-            (
-              cd "$GITHUB_WORKSPACE"
-              npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
-              sync_vercel_production_env() {
-                npx vercel@56.4.1 env add "$1" production \
-                  --force \
-                  --yes \
-                  --no-sensitive \
-                  --value "$2" \
-                  --token "$VERCEL_TOKEN"
-              }
-              # Vercel's remote builder resolves project-level production
-              # variables after accepting deploy-time --build-env values. Keep
-              # the project environment pinned to the release before starting
-              # the build so a successful deploy cannot silently reuse the
-              # previous asset version.
-              sync_vercel_production_env "MIR2_USE_PREBUILT_BEVY_RUNTIME" "1"
-              sync_vercel_production_env "MIR2_ASSET_VERSION" "$MIR2_ASSET_VERSION"
-              sync_vercel_production_env "MIR2_ASSET_OBJECT_PREFIX" "$MIR2_ASSET_OBJECT_PREFIX"
-              sync_vercel_production_env "MIR2_FALLBACK_OBJECT_PREFIX" "$MIR2_FALLBACK_OBJECT_PREFIX"
-              sync_vercel_production_env "NEXT_PUBLIC_MIR2_ASSET_BASE_URL" "$NEXT_PUBLIC_MIR2_ASSET_BASE_URL"
-              sync_vercel_production_env "NEXT_PUBLIC_MIR2_GATEWAY_WS_URL" "$NEXT_PUBLIC_MIR2_GATEWAY_WS_URL"
-              sync_vercel_production_env "MIR2_ORIGINAL_ASSET_MANIFEST_MODE" "$MIR2_ORIGINAL_ASSET_MANIFEST_MODE"
-              sync_vercel_production_env "MIR2_ORIGINAL_ASSET_REMOTE_RELEASE" "$MIR2_ORIGINAL_ASSET_REMOTE_RELEASE"
-              sync_vercel_production_env "MIR2_REUSE_ORIGINAL_ASSET_MANIFEST" "1"
-              # Refresh the local Vercel snapshot created by the first pull;
-              # otherwise the uploaded archive still contains the previous
-              # production values even though the project environment changed.
-              npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
-              npx vercel@56.4.1 deploy . --prod --force --archive=tgz --yes --token "$VERCEL_TOKEN" "${vercel_env_args[@]}"
-            )
-            exit 0
-          fi
-          npx vercel@56.4.1 pull --yes --environment=production --token "$VERCEL_TOKEN"
-          npx vercel@56.4.1 build --prod --yes --token "$VERCEL_TOKEN"
-          npm run vercel:prune-output
-          npx vercel@56.4.1 deploy --prebuilt --prod --archive=tgz --yes --token "$VERCEL_TOKEN"
-
-      - name: Smoke app manifest after deploy
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          set -euo pipefail
-          if [ -z "${MIR2_ASSET_VERSION:-}" ]; then
-            echo "MIR2_ASSET_VERSION is required for app manifest smoke." >&2
-            exit 1
-          fi
-          node - <<'NODE'
-          (async () => {
-            const manifestUrl = "https://mir2.obelisk.build/api/asset-manifest";
-            const response = await fetch(manifestUrl, { cache: "no-store" });
-            if (!response.ok) {
-              throw new Error(`asset manifest request failed: HTTP ${response.status}`);
-            }
-            const manifest = await response.json();
-            if (manifest.version !== process.env.MIR2_ASSET_VERSION) {
-              throw new Error(`asset manifest version mismatch: expected ${process.env.MIR2_ASSET_VERSION}, got ${manifest.version}`);
-            }
-            if (!Array.isArray(manifest.resourcePacks) || manifest.resourcePacks.length === 0) {
-              throw new Error("asset manifest missing resourcePacks");
-            }
-            console.log(`asset manifest smoke ok version=${manifest.version}`);
-          })().catch((error) => {
-            console.error(error?.message || String(error));
-            process.exit(1);
-          });
-          NODE
-
-      - name: Warm canonical first-playable scenes after deploy
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
-        working-directory: mir2-web3/apps/web
-        run: |
-          npm run warm:production-scenes -- \
-            --webBaseUrl "https://mir2.obelisk.build" \
-            --timeoutMs 180000
-
-      - name: Smoke browser Bevy runtime assets on immutable R2 origin
-        if: ${{ (inputs.publish_r2 || inputs.use_existing_release) && inputs.deploy_vercel }}
-        run: |
-          npm run --prefix mir2-web3/apps/web smoke:production-bevy-runtime -- \
-            --assetBaseUrl "https://assets.mir2.obelisk.build/mir2/v/$MIR2_ASSET_VERSION" \
-            --requireR2 true
-
-      - name: Upload remote asset release manifest
-        if: ${{ inputs.publish_r2 }}
-        uses: actions/upload-artifact@v4
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_MAIN_DEPLOYMENT_ID: ${{ inputs.main_deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/unified-website-release.mjs
+      - name: Save paired immutable candidate identities
+        if: inputs.operation == 'unified-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: mir2-web-remote-assets
-          path: |
-            mir2-web3/docs/generated/remote-assets/latest-remote-asset-release.json
-            mir2-web3/docs/generated/remote-assets/**/remote-asset-release.json
+          name: unified-website-release
+          path: unified-release.json
           if-no-files-found: error
+          retention-days: 14
+      - name: Inspect, stage or promote only the existing promotion game website
+        if: startsWith(inputs.operation, 'realtime-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/promotion-realtime-release.mjs
+      - name: Save the immutable promotion game website candidate identity
+        if: inputs.operation == 'realtime-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-realtime-release
+          path: promotion-realtime-release.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Configure, stage or promote the original Windows promotion bridge
+        if: startsWith(inputs.operation, 'windows-')
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          MIR2_PROMOTION_WINDOWS_SESSION_SECRET: ${{ secrets.MIR2_PROMOTION_WINDOWS_SESSION_SECRET }}
+          MIR2_PROMOTION_WINDOWS_WALLET_AUTH_SECRET: ${{ secrets.MIR2_PROMOTION_WINDOWS_WALLET_AUTH_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          RELEASE_SOURCE_SHA: ${{ inputs.unified_source_sha }}
+        run: node .github/scripts/promotion-windows-release.mjs
+      - name: Save the immutable Windows promotion website candidate identity
+        if: inputs.operation == 'windows-stage'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-windows-release
+          path: promotion-windows-release.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Verify original project and perform the requested bounded operation
+        if: ${{ !startsWith(inputs.operation, 'unified-') && !startsWith(inputs.operation, 'realtime-') && !startsWith(inputs.operation, 'windows-') }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          MIR2_PROMOTION_WALLET_AUTH_SECRET: ${{ secrets.MIR2_PROMOTION_WALLET_AUTH_SECRET }}
+          MIR2_PROMOTION_SESSION_SECRET: ${{ secrets.MIR2_PROMOTION_SESSION_SECRET }}
+          RELEASE_OPERATION: ${{ inputs.operation }}
+          RELEASE_DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const team = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
+          const project = 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz';
+          const baseline = 'dpl_Hmab1y6vYULtdHJZ4Zy6fsWwMbzm';
+          if (process.env.GITHUB_REF !== 'refs/heads/codex/promotion-vercel-20261029') throw Error('Unexpected release branch');
+          if (!process.env.VERCEL_TOKEN) throw Error('Missing existing Vercel CI credential');
+          if (process.env.VERCEL_ORG_ID !== team || process.env.VERCEL_PROJECT_ID !== project) {
+            throw Error('Existing CI credentials do not identify the original website project');
+          }
+          const response = await fetch(`https://api.vercel.com/v9/projects/${project}?teamId=${team}`, {
+            headers: {Authorization: `Bearer ${process.env.VERCEL_TOKEN}`}
+          });
+          if (!response.ok) throw Error(`Project inspection failed: HTTP ${response.status}`);
+          const value = await response.json();
+          if (value.id !== project || value.accountId !== team || value.name !== 'mir2-web3-web') {
+            throw Error('Project identity mismatch');
+          }
+          console.log(JSON.stringify({
+            id: value.id, name: value.name, accountId: value.accountId,
+            rootDirectory: value.rootDirectory, buildCommand: value.buildCommand,
+            installCommand: value.installCommand, framework: value.framework,
+            nodeVersion: value.nodeVersion, outputDirectory: value.outputDirectory,
+            sourceFilesOutsideRootDirectory: value.sourceFilesOutsideRootDirectory,
+            commandForIgnoringBuildStep: value.commandForIgnoringBuildStep,
+            git: value.link ? {type:value.link.type, repo:value.link.repo, productionBranch:value.link.productionBranch}:null,
+            environmentKeys: (value.env || []).map(entry => entry.key).sort()
+          }, null, 2));
+          const operation = process.env.RELEASE_OPERATION;
+          if (operation === 'context') process.exit(0);
+          async function api(path, method = 'GET', body) {
+            const result = await fetch(`https://api.vercel.com${path}${path.includes('?')?'&':'?'}teamId=${team}`, {
+              method, headers:{Authorization:`Bearer ${process.env.VERCEL_TOKEN}`, 'Content-Type':'application/json'},
+              ...(body === undefined ? {} : {body:JSON.stringify(body)})
+            });
+            if (!result.ok) throw Error(`Vercel ${method} request failed: HTTP ${result.status}`);
+            const responseBody = await result.text();
+            return responseBody.length === 0 ? {} : JSON.parse(responseBody);
+          }
+          if (operation === 'inspect-main-source') {
+            const mainProject = 'prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA';
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (id !== 'dpl_4uHMwZobvDW1tUwszUdbq14z8eMj') throw Error('Reviewed main-site deployment required');
+            const deployment = await api(`/v13/deployments/${id}`);
+            if (deployment.projectId !== mainProject) throw Error('Main-site project mismatch');
+            const tree = await api(`/v6/deployments/${id}/files`);
+            const files = [];
+            function visit(entries, prefix = '') {
+              for (const entry of entries) {
+                const path = prefix + entry.name;
+                if (entry.children) visit(entry.children, path + '/');
+                else files.push({path,uid:entry.uid,type:entry.type,size:entry.size});
+              }
+            }
+            visit(tree);
+            const fs = await import('node:fs/promises');
+            const path = await import('node:path');
+            const {createHash} = await import('node:crypto');
+            const recovered = [];
+            const sourceFiles = files.filter(file => file.type === 'file' && file.path.startsWith('src/') && !file.path.endsWith('.tsbuildinfo'));
+            if (sourceFiles.length < 20 || sourceFiles.length > 150) throw Error('Unexpected main-site source inventory');
+            for (const file of sourceFiles) {
+              const relative = file.path.slice(4);
+              if (!/^(?:app\/|lib\/|public\/|scripts\/|AGENTS\.md$|CLAUDE\.md$|README\.md$|package(?:-lock)?\.json$|next-env\.d\.ts$|next\.config\.mjs$|tsconfig\.json$|vercel\.json$)/.test(relative) || relative.split('/').some(part => part === '..' || part.startsWith('.'))) throw Error('Unapproved source path');
+              if (!/^[a-f0-9]{40}$/.test(file.uid)) throw Error('Expected immutable source file ID');
+              const content = await api(`/v8/deployments/${id}/files/${file.uid}`);
+              const encoded = typeof content === 'string' ? content : content.data;
+              if (typeof encoded !== 'string') throw Error(`Unexpected source response shape: ${Object.keys(content).join(',')}`);
+              const bytes = Buffer.from(encoded,'base64');
+              if (bytes.length > 25*1024*1024 || createHash('sha1').update(bytes).digest('hex') !== file.uid) throw Error('Recovered source content digest mismatch');
+              const destination = path.join('recovered-main-website',relative);
+              await fs.mkdir(path.dirname(destination),{recursive:true});
+              await fs.writeFile(destination,bytes,{flag:'wx'});
+              recovered.push({path:relative,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});
+            }
+            await fs.writeFile('recovered-main-website/RECOVERY-MANIFEST.json',JSON.stringify({deploymentId:id,projectId:mainProject,recovered},null,2)+'\n',{flag:'wx'});
+            console.log(JSON.stringify({mainSiteSource:{id:deployment.id,url:deployment.url,
+              readyState:deployment.readyState,createdAt:deployment.createdAt,
+              source:deployment.source,rootDirectory:deployment.projectSettings?.rootDirectory,
+              sourceSha:deployment.meta?.githubCommitSha,sourceRef:deployment.meta?.githubCommitRef,
+              fileCount:files.length,files:files.slice(0,180)}},null,2));
+            process.exit(0);
+          }
+          if (operation === 'discover-main-site') {
+            // Read only public routing/build metadata; never export environment values.
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
+            let deployment;
+            try { deployment = await api(`/v13/deployments/${id}`); }
+            catch (error) {
+              if (error.message !== 'Vercel GET request failed: HTTP 404') throw error;
+              console.log(JSON.stringify({historicalDeployment:{id,notFound:true}}));
+            }
+            if (deployment && deployment.projectId !== project) throw Error('Historical deployment belongs to another project');
+            if (deployment) console.log(JSON.stringify({historicalDeployment:{id:deployment.id,url:deployment.url,
+              readyState:deployment.readyState,alias:deployment.alias,
+              rootDirectory:deployment.projectSettings?.rootDirectory,
+              sourceSha:deployment.meta?.githubCommitSha,sourceRef:deployment.meta?.githubCommitRef}},null,2));
+            const projects = await api('/v9/projects?limit=100');
+            const candidates = (projects.projects || []).filter(entry => /mir2|numeron|website/i.test(entry.name));
+            for (const candidate of candidates) {
+              const details = await api(`/v9/projects/${candidate.id}`);
+              const domains = await api(`/v9/projects/${candidate.id}/domains`);
+              console.log(JSON.stringify({websiteCandidate:{id:details.id,name:details.name,
+                rootDirectory:details.rootDirectory,
+                git:details.link?{repo:details.link.repo,productionBranch:details.link.productionBranch}:null,
+                production:details.targets?.production?{id:details.targets.production.id,url:details.targets.production.url}:null,
+                domains:(domains.domains||[]).map(domain=>({name:domain.name,redirect:domain.redirect}))}},null,2));
+            }
+            process.exit(0);
+          }
+          const current = value.targets?.production?.id || value.targets?.production?.deploymentId;
+          if (current !== baseline) throw Error('Production changed since inspection; inspect and rebase before continuing');
+          if (operation === 'stage') {
+            const wallet = process.env.MIR2_PROMOTION_WALLET_AUTH_SECRET?.trim();
+            const session = process.env.MIR2_PROMOTION_SESSION_SECRET?.trim();
+            if (!wallet || !session || wallet.length < 32 || session.length < 32 || wallet === session) throw Error('Dedicated promotion secrets missing');
+            const config = {
+              MIR2_PROMOTION_GATEWAY_HTTP_URL:'https://promotion-playtest.165.154.65.136.sslip.io',
+              MIR2_PROMOTION_GATEWAY_ALLOWED_ORIGINS:'https://promotion-playtest.165.154.65.136.sslip.io',
+              MIR2_PROMOTION_PUBLIC_ORIGIN:'https://mir2.obelisk.build',
+              MIR2_PROMOTION_ALLOWED_ORIGINS:'https://mir2.obelisk.build',
+              MIR2_PROMOTION_DUBHE_CONNECT_NETWORK:'testnet',
+              MIR2_PROMOTION_DUBHE_CONNECT_RELAY_URL:'https://dubhe-connect-relay.zombiesliu.workers.dev',
+              MIR2_PROMOTION_DUBHE_WALLET_ORIGIN:'https://wallet.dubhe.obelisk.build',
+              MIR2_PROMOTION_CAMPAIGN_ID:'numeron-playtest-20261029',
+              MIR2_PROMOTION_WALLET_AUTH_SECRET:wallet,
+              MIR2_PROMOTION_SESSION_SECRET:session
+            };
+            const environmentResult = await api(`/v10/projects/${project}/env?upsert=true`, 'POST', Object.entries(config).map(([key,value]) => ({
+              key,value,type:key.endsWith('_SECRET')?'sensitive':'plain',target:['production'],
+              comment:'Isolated test promotion deployment; preserves existing game configuration'
+            })));
+            if (!Array.isArray(environmentResult.failed) || environmentResult.failed.length !== 0) {
+              throw Error('Dedicated environment update was incomplete; no deployment created');
+            }
+            const configuredProject = await api(`/v9/projects/${project}`);
+            for (const key of Object.keys(config)) {
+              const entries = (configuredProject.env || []).filter(entry => entry.key === key && entry.target?.includes('production'));
+              if (entries.length !== 1 || (key.endsWith('_SECRET') ?
+                  entries[0].type !== 'sensitive' && entries[0].visibility !== 'secret' :
+                  entries[0].type !== 'plain' && entries[0].visibility !== 'config')) {
+                throw Error(`Dedicated environment metadata mismatch for ${key}`);
+              }
+            }
+            console.log(`Verified ${Object.keys(config).length} dedicated production environment keys and types`);
+            const deployment = await api('/v13/deployments', 'POST', {
+              name:value.name,project,target:'production',autoAssignCustomDomains:false,
+              gitSource:{type:'github',repoId:value.link.repoId,ref:'codex/promotion-vercel-20261029',sha:process.env.GITHUB_SHA},
+              meta:{promotionRelease:'20261029',promotionBaseline:baseline,promotionSourceSha:process.env.GITHUB_SHA}
+            });
+            console.log(JSON.stringify({operation,id:deployment.id,url:deployment.url,readyState:deployment.readyState,
+              target:deployment.target,alias:deployment.alias,autoAssignCustomDomains:false,sourceSha:process.env.GITHUB_SHA},null,2));
+          } else if (operation === 'promote') {
+            const id = process.env.RELEASE_DEPLOYMENT_ID;
+            if (!/^dpl_[A-Za-z0-9]+$/.test(id || '')) throw Error('Exact deployment ID required');
+            const deployment = await api(`/v13/deployments/${id}`);
+            if (deployment.projectId !== project || deployment.target !== 'production' || deployment.readyState !== 'READY' ||
+                deployment.meta?.promotionSourceSha !== process.env.GITHUB_SHA || deployment.meta?.promotionBaseline !== baseline) {
+              throw Error('Deployment does not match the reviewed, ready production candidate');
+            }
+            await api(`/v10/projects/${project}/promote/${id}`, 'POST', {});
+            console.log(JSON.stringify({operation,id,url:deployment.url,sourceSha:process.env.GITHUB_SHA},null,2));
+          } else throw Error('Unsupported release operation');
+          NODE
+      - name: Preserve verified current main-site source
+        if: inputs.operation == 'inspect-main-source'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: recovered-main-website
+          path: recovered-main-website/
+          if-no-files-found: error
+          retention-days: 7
+  backend:
+    if: inputs.operation == 'backend-build'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Validate immutable backend input
+        env:
+          BACKEND_SOURCE_SHA: ${{ inputs.backend_source_sha }}
+        run: |
+          [[ "$BACKEND_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ inputs.backend_source_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Build the original Windows realm with the promotion bridge
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_RELEASE_STRIP: symbols
+        run: |
+          set -euo pipefail
+          test "$GITHUB_SHA" = '${{ inputs.backend_source_sha }}'
+          rustup toolchain install 1.95.0 --profile minimal
+          cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway
+          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance
+          mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
+          cp target/release/mir2-gateway target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/
+          cp config/promotion-windows-playtest-20261030.test.json ../promotion-backend-release/
+          cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json onchain/usdc-recharge/.npmrc ../promotion-backend-release/usdc-recharge/
+          cp onchain/usdc-recharge/service/cli.mjs onchain/usdc-recharge/service/driver.mjs onchain/usdc-recharge/service/model.mjs ../promotion-backend-release/usdc-recharge/service/
+          cp "$(command -v node)" ../promotion-backend-release/runtime/node
+          node -p 'JSON.stringify({node:process.version,platform:process.platform,arch:process.arch})' > ../promotion-backend-release/runtime/RUNTIME.json
+          (cd ../promotion-backend-release/usdc-recharge && npm ci --omit=dev --ignore-scripts)
+          ../promotion-backend-release/runtime/node --check ../promotion-backend-release/usdc-recharge/service/cli.mjs
+          git rev-parse HEAD > ../promotion-backend-release/SOURCE-SHA.txt
+          node -e 'require("fs").writeFileSync("../promotion-backend-release/SOURCE-SHA.json", JSON.stringify({sourceSha:process.env.GITHUB_SHA}))'
+          cd ../promotion-backend-release
+          find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          ldd mir2-gateway
+          ldd runtime/node
+      - name: Run native PostgreSQL promotion and billing regressions
+        working-directory: mir2-web3
+        env:
+          CARGO_BUILD_JOBS: '2'
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+          CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+          CARGO_PROFILE_RELEASE_LTO: 'false'
+          CARGO_PROFILE_RELEASE_DEBUG: '0'
+          MIR2_RUN_PROMOTION_PG_TESTS: '1'
+          MIR2_PROMOTION_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_promotion_windows_ci
+        run: |
+          set -euo pipefail
+          PG_BIN="$(pg_config --bindir)"
+          PG_DATA="$RUNNER_TEMP/windows-promotion-pg"
+          "$PG_BIN/initdb" -D "$PG_DATA" --auth=trust --username=postgres > "$RUNNER_TEMP/windows-promotion-pg-init.log"
+          "$PG_BIN/pg_ctl" -D "$PG_DATA" -l "$RUNNER_TEMP/windows-promotion-pg.log" -o '-h 127.0.0.1 -p 55483' start
+          trap '"$PG_BIN/pg_ctl" -D "$PG_DATA" -m fast stop' EXIT
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_promotion_windows_ci
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment -- --test-threads=1 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance -- --test-threads=1 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib web::promotions::tests -- --test-threads=1 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const files=['NATIVE-PG-TESTS.log','CLONE-CLI-TESTS.log','WALLET-IDENTITY-TESTS.log'];
+          const logs=Object.fromEntries(files.map(file=>{
+            const bytes=readFileSync('../promotion-backend-release/'+file);
+            const results=[...bytes.toString().matchAll(/test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;/g)];
+            if(!results.length||results.some(row=>Number(row[2])||Number(row[3])))throw Error('Native acceptance suite missing or skipped');
+            const testsExecuted=results.reduce((sum,row)=>sum+Number(row[1]),0);
+            if(testsExecuted<=0)throw Error('Native acceptance suite was empty');
+            return [file,{passed:true,testsExecuted,logSha256:createHash('sha256').update(bytes).digest('hex')}];
+          }));
+          writeFileSync('../promotion-backend-release/CI-ACCEPTANCE.json',JSON.stringify({
+            schema:'mir2.windows-promotion-native-pg.v1',sourceSha:process.env.GITHUB_SHA,
+            workflowRunId:process.env.GITHUB_RUN_ID,jobName:'backend',stepName:'Run native PostgreSQL promotion and billing regressions',
+            environment:'test',postgresBackend:'native',docker:false,passed:true,
+            testsExecuted:Object.values(logs).reduce((sum,value)=>sum+value.testsExecuted,0),skipped:0,
+            checks:{idempotentPaymentAttribution:logs['NATIVE-PG-TESTS.log'],noHistoricalRevenueInferred:logs['NATIVE-PG-TESTS.log'],
+              walletIdentityRegression:logs['WALLET-IDENTITY-TESTS.log'],cloneAudit:logs['CLONE-CLI-TESTS.log']},logs,
+            realMobileSignature:false
+          },null,2));
+          NODE
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: promotion-backend-${{ inputs.backend_source_sha }}
+          path: promotion-backend-release/
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: true

@@ -88,6 +88,8 @@ type SharedWebSocketSender = Arc<transport::SocketSender<WebSocketSender>>;
 mod activities;
 #[path = "web_billing.rs"]
 mod billing;
+#[path = "web_promotions.rs"]
+mod promotions;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
 #[path = "web_procurement.rs"]
@@ -3137,6 +3139,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
         .merge(monthly_card::router())
         .merge(billing::router())
+        .merge(promotions::router())
         .merge(activities::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);

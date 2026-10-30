@@ -96,6 +96,11 @@ pub struct BillingLedger {
     pub orders: BTreeMap<String, RechargeOrder>,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub sui_usdc_orders: BTreeMap<String, crate::sui_usdc_billing::UsdcRechargeOrder>,
+    #[serde(
+        default,
+        skip_serializing_if = "crate::billing_provenance::CreditProvenance::is_empty"
+    )]
+    pub provenance: crate::billing_provenance::CreditProvenance,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -150,6 +155,8 @@ fn new_order_id() -> Result<String, String> {
 impl BillingLedger {
     pub fn validate(&self) -> Result<(), String> {
         crate::sui_usdc_billing::validate_ledger(self)?;
+        self.provenance
+            .validate(&self.orders, &self.sui_usdc_orders)?;
         if self.orders.len() > MAX_ORDERS_PER_ACCOUNT {
             return Err("billingLedgerFull".into());
         }
@@ -472,12 +479,12 @@ pub(crate) fn apply_pending_to_save(
         .revision
         .checked_add(1)
         .ok_or("billingCharacterRevisionExhausted")?;
-    let ledger = account
-        .billing
-        .as_mut()
-        .expect("pending entries require a ledger");
     let mut before = save.credit;
     for id in &applicable {
+        let ledger = account
+            .billing
+            .as_ref()
+            .expect("pending entries require a ledger");
         let credits = ledger
             .orders
             .get(id)
@@ -486,6 +493,18 @@ pub(crate) fn apply_pending_to_save(
         let after = before
             .checked_add(credits)
             .expect("preflight checked the batch");
+        crate::billing_provenance::apply_paid_credit_lot(
+            account,
+            save.character.index,
+            before,
+            id,
+            credits,
+            now_ms,
+        )?;
+        let ledger = account
+            .billing
+            .as_mut()
+            .expect("pending entries require a ledger");
         let receipt = RechargeAppliedReceipt {
             character_index: save.character.index,
             credits,

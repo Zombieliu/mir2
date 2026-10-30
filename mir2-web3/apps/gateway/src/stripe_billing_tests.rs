@@ -150,7 +150,7 @@ async fn stripe_store_policy_requires_durable_wallet_price_and_live_source_of_tr
 fn session(order: &RechargeOrder) -> Value {
     json!({"id":"cs_test_fixture","object":"checkout.session","mode":"payment","client_reference_id":order.id,
         "metadata":{"mir2_account_id":"demo","mir2_character_index":order.character_index.to_string(),"mir2_order_id":order.id},
-        "amount_total":500,"currency":"usd","livemode":false,"payment_status":"paid","payment_intent":"pi_fixture",
+        "amount_total":500,"total_details":{"amount_tax":0,"amount_discount":0},"currency":"usd","livemode":false,"payment_status":"paid","payment_intent":"pi_fixture",
         "url":"https://checkout.stripe.com/c/pay/cs_test_fixture#opaque"})
 }
 fn event(kind: &str, id: &str, object: Value) -> Vec<u8> {
@@ -356,7 +356,7 @@ async fn stripe_http_refund_after_monthly_card_purchase_preserves_spent_wallet_a
         .unwrap();
     {
         let mut responses = m.fixture.responses.lock().unwrap();
-        responses.insert("/v1/charges/ch_fixture".into(),json!({"object":"charge","id":"ch_fixture","payment_intent":"pi_fixture","livemode":false,"currency":"usd","amount":500}));
+        responses.insert("/v1/charges/ch_fixture".into(),json!({"object":"charge","id":"ch_fixture","payment_intent":"pi_fixture","livemode":false,"currency":"usd","amount":500,"amount_refunded":250}));
         responses.insert("/v1/payment_intents/pi_fixture".into(),json!({"object":"payment_intent","id":"pi_fixture","livemode":false,"amount":500,"currency":"usd","metadata":session(&o)["metadata"]}));
     }
     let adverse = event(

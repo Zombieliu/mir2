@@ -121,6 +121,9 @@ impl SimulationSession {
                 permit.clone(),
                 award.mentor_bank.clone(),
             ));
+        self.app
+            .world_mut()
+            .insert_resource(SharedKillOccurredAt(award.killed_at_ms));
         let receipt = self.commit_shared_monster_kill_award_transaction_impl(
             award.monster_object_id,
             &award.monster_name,
@@ -131,6 +134,14 @@ impl SimulationSession {
                 .map(|selection| selection.final_amount),
         );
         if receipt.committed {
+            record_promotion_game_fact(
+                self.app.world_mut(),
+                crate::promotion::game_events::CapturedGameplayFact::combat_kill(
+                    award.killed_at_ms,
+                    key,
+                    &hash,
+                ),
+            );
             self.app
                 .world()
                 .resource::<GuildExperienceResource>()
@@ -167,6 +178,9 @@ impl SimulationSession {
         self.app
             .world_mut()
             .remove_resource::<SharedKillExperiencePermit>();
+        self.app
+            .world_mut()
+            .remove_resource::<SharedKillOccurredAt>();
         let source = match preparation {
             Ok(source) => source,
             Err(error) => {

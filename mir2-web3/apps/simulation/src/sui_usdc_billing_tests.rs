@@ -440,6 +440,7 @@ fn usdc_receipt_cannot_be_replayed_into_a_different_account_or_order() {
     a.billing = Some(BillingLedger {
         orders: Default::default(),
         sui_usdc_orders: [(copied.id.clone(), copied)].into_iter().collect(),
+        ..Default::default()
     });
     c.account_store
         .lock()

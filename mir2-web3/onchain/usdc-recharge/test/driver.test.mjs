@@ -26,7 +26,7 @@ function fixture(paid=true){
   const object={objectId:invoiceId,type:c.packageId+'::recharge::Invoice',version:'4',digest:d,previousTransaction:digest,
     owner:{$kind:'Shared',Shared:{initialSharedVersion:'2'}},content:invoiceBytes(paid)};
   const event={eventType:c.packageId+'::recharge::'+(paid?'PaymentReceived':'InvoiceCreated'),packageId:c.packageId,module:'recharge',sender:paid?order.payer:c.issuerAddress,contents:{value:eventBytes(paid)}};
-  const tx={digest,checkpoint:12n,transaction:{sender:event.sender},effects:{status:{success:true},changedObjects:[{objectId:invoiceId,objectType:object.type,outputState:2,idOperation:paid?0:2,outputVersion:4n,outputDigest:d}]},events:{events:[event]}};
+  const tx={balanceChanges:paid?[{address:order.payer,coinType:c.coinType,amount:'-'+order.amountMicros},{address:order.merchant,coinType:c.coinType,amount:order.amountMicros}]:[],digest,checkpoint:12n,transaction:{sender:event.sender},effects:{status:{success:true},changedObjects:[{objectId:invoiceId,objectType:object.type,outputState:2,idOperation:paid?0:2,outputVersion:4n,outputDigest:d}]},events:{events:[event]}};
   const client={core:{getObject:async()=>({object})},ledgerService:{getTransaction:async()=>({response:{transaction:tx}})}};
   return {object,event,tx,client};
 }
@@ -208,4 +208,11 @@ test('unknown issuer submission retains its full reservation before exact replay
   const other=await prepared(order,tx=>tx.setGasPrice(1001));
   await assert.rejects(()=>submitPrepared(c,{prepared:other,order},f.env,mock.client),/usdcGasLifetimeBudgetExceeded/);
   assert.equal(calls,2);
+});
+
+
+test('paid invoice requires exact ledger native-USDC payer debit and merchant credit',async()=>{
+  for(const change of [f=>{f.tx.balanceChanges=[];},f=>{f.tx.balanceChanges[0].address=h('a');},f=>{f.tx.balanceChanges[1].amount='1';},f=>{f.tx.balanceChanges[1].coinType='0x2::sui::SUI';},f=>{f.tx.balanceChanges[0].amount='01';},f=>{f.tx.balanceChanges.push({address:h('b'),coinType:c.coinType,amount:'1'});}]){
+    const f=fixture();change(f);await assert.rejects(()=>observeInvoiceWithClient(f.client,c,{invoiceId,order}));
+  }
 });

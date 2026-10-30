@@ -1,10 +1,10 @@
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,openSync,closeSync,fsyncSync,renameSync,unlinkSync} from 'node:fs';
 import {isAbsolute} from 'node:path';
-import { address,assertTerms,decodeConfig,decodeInvoice,digest,exactKeys,finalized,GENESIS_DIGEST,hash32,integer,matchingEvent,NETWORK_HASH,objectEffect,Reader,validateConfig,validateOrder } from './model.mjs';
+import { address,assertPaymentBalanceChanges,assertTerms,decodeConfig,decodeInvoice,digest,exactKeys,finalized,GENESIS_DIGEST,hash32,integer,matchingEvent,NETWORK_HASH,objectEffect,Reader,validateConfig,validateOrder } from './model.mjs';
 
 const unknown=()=>({state:'unknown'});
-const txMask=['digest','checkpoint','effects','events','transaction','timestamp'];
+const txMask=['digest','checkpoint','effects','events','transaction','timestamp','balance_changes'];
 const id=v=>`0x${String(v).replace(/^0x/,'').padStart(64,'0').toLowerCase()}`;
 function isMissing(e){return ['NOT_FOUND','UNAVAILABLE','DEADLINE_EXCEEDED'].includes(e?.code);}
 async function getTx(client,d){digest(d);try{const{response}=await client.ledgerService.getTransaction({digest:d,readMask:{paths:txMask}});return response.transaction??null;}catch(e){if(isMissing(e))return null;throw e;}}
@@ -152,7 +152,7 @@ export async function observeInvoiceWithClient(client,c,p){
   const effect=objectEffect(tx,c,p.invoiceId,!invoice.paid);
   if(String(effect.outputVersion)!==first.version||effect.outputDigest!==first.digest)throw Error('usdcInvoiceEffectsMismatch');
   let event;
-  if(invoice.paid){event=matchingEvent(tx,c,'paid',o,p.invoiceId);if(event.paidAtMs!==invoice.paidAtMs)throw Error('usdcPaidTimeMismatch');}
+  if(invoice.paid){event=matchingEvent(tx,c,'paid',o,p.invoiceId);if(event.paidAtMs!==invoice.paidAtMs)throw Error('usdcPaidTimeMismatch');assertPaymentBalanceChanges(tx,o,c);}
   else matchingEvent(tx,c,'created',o,p.invoiceId);
   const second=await getObject(client,p.invoiceId);if(!sameObject(first,second))return unknown();
   if(!invoice.paid)return {state:'unpaid',invoiceId:p.invoiceId,expiresAtMs:o.expiresAtMs,checkpoint:String(tx.checkpoint)};

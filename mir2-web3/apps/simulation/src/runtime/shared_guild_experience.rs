@@ -14,6 +14,8 @@ pub(super) struct SharedKillExperiencePermit(
     pub GuildExperienceCommitPermit,
     pub Option<super::zone::ZoneMentorBankAttribution>,
 );
+#[derive(Debug, Resource)]
+pub(super) struct SharedKillOccurredAt(pub u64);
 pub(super) fn has_validated_selected_gain(world: &World, amount: i64) -> bool {
     let Some(permit) = world.get_resource::<SharedKillExperiencePermit>() else {
         return false;
@@ -85,6 +87,59 @@ pub(super) fn snapshot(world: &World) -> GuildExperienceJournal {
                 .clone()
         })
         .unwrap_or_default()
+}
+
+/// Capture actual authoritative event time in the existing private checkpoint
+/// journal. No write/HTTP occurs here, and checkpoint restoration rolls it back.
+pub(super) fn record_promotion_game_fact(
+    world: &mut World,
+    fact: crate::promotion::game_events::CapturedGameplayFact,
+) {
+    let Some(config) = world.get_resource::<RuntimeConfigResource>() else {
+        return;
+    };
+    if !world
+        .get_resource::<SessionResource>()
+        .is_some_and(|session| {
+            session.account_id.as_ref().is_some_and(|id| !id.is_empty())
+                && session.selected_character.is_some()
+        })
+    {
+        return;
+    }
+    if config.config.account_store_database_url.is_none()
+        || config.config.account_store_database_mode
+            != crate::AccountStoreDatabaseMode::SourceOfTruth
+        || !std::env::var("MIR2_PROMOTION_ENVIRONMENT")
+            .ok()
+            .is_some_and(|value| matches!(value.as_str(), "development" | "test" | "production"))
+    {
+        return;
+    }
+    if !world.contains_resource::<GuildExperienceResource>() {
+        world.insert_resource(GuildExperienceResource::default());
+    }
+    if let Ok(key) = fact.journal_key() {
+        world
+            .resource::<GuildExperienceResource>()
+            .0
+            .lock()
+            .expect("promotion source journal poisoned")
+            .promotion_game_facts
+            .entry(key)
+            .or_insert(fact);
+    }
+}
+
+pub(super) fn promotion_level_event_time(world: &World, fallback: u64) -> u64 {
+    if let Some(captured) = world.get_resource::<SharedKillOccurredAt>() {
+        return captured.0;
+    }
+    world
+        .get_resource::<SharedKillExperiencePermit>()
+        .and_then(|permit| permit.0.selection.as_ref())
+        .map(|selection| selection.killed_at_ms)
+        .unwrap_or(fallback)
 }
 pub(super) fn restore(world: &mut World, journal: &GuildExperienceJournal) {
     world.insert_resource(GuildExperienceResource(
@@ -355,6 +410,15 @@ fn has_uncommitted(world: &World) -> Result<bool, String> {
             _ => {}
         }
     }
+    for (key, fact) in &current.promotion_game_facts {
+        match durable.promotion_game_facts.get(key) {
+            Some(previous) if previous != fact => {
+                return Err("promotion gameplay source payload mismatch".into())
+            }
+            None => return Ok(true),
+            _ => {}
+        }
+    }
     if let Some(resource) = world.get_resource::<GuildExperienceResource>() {
         let mut journal = resource.0.lock().map_err(|_| "guild XP journal poisoned")?;
         journal
@@ -363,6 +427,9 @@ fn has_uncommitted(world: &World) -> Result<bool, String> {
         journal
             .event_payloads
             .extend(durable.event_payloads.clone());
+        journal
+            .promotion_game_facts
+            .extend(durable.promotion_game_facts.clone());
     }
     Ok(false)
 }
@@ -650,5 +717,65 @@ impl SimulationSession {
             }
         }
         Ok(packets)
+    }
+}
+
+#[cfg(test)]
+mod promotion_source_producer_tests {
+    use super::*;
+
+    #[test]
+    fn promotion_game_source_runtime_normal_quest_is_captured_and_restored_with_checkpoint() {
+        if std::env::var("MIR2_RUN_PROMOTION_PG_TESTS").as_deref() != Ok("1") {
+            eprintln!(
+                "SKIPPED production-style promotion capture: explicit source opt-in required"
+            );
+            return;
+        }
+        assert_eq!(
+            std::env::var("MIR2_PROMOTION_ENVIRONMENT").as_deref(),
+            Ok("test")
+        );
+        let mut config = crate::SimulationConfig::default();
+        config.account_store_database_url =
+            Some("postgresql://127.0.0.1/promotion-producer-unit".into());
+        config.account_store_database_mode = crate::AccountStoreDatabaseMode::SourceOfTruth;
+        let mut session = SessionResource::new(&config);
+        session.account_id = Some("runtime-source-fixture".into());
+        session.selected_character = Some(config.default_character.clone());
+        let mut world = World::new();
+        world.insert_resource(RuntimeConfigResource::new(&config));
+        world.insert_resource(session);
+        restore(&mut world, &GuildExperienceJournal::default());
+        let before = snapshot(&world);
+        // A nonrecurring ordinary quest must be captured before the cadence
+        // early return. No SQL, browser telemetry or online timer is involved.
+        let at = 1_800_000_000_123;
+        super::super::quests::quest_recurrence::record_quest_completion_at(
+            &mut world,
+            i32::MAX,
+            at,
+        );
+        let captured = snapshot(&world);
+        assert_eq!(captured.promotion_game_facts.len(), 1);
+        let event = captured.promotion_game_facts.values().next().unwrap();
+        assert_eq!(event.kind, "questCompleted");
+        assert_eq!(event.occurred_at_ms, at);
+        restore(&mut world, &before);
+        assert!(snapshot(&world).promotion_game_facts.is_empty());
+        restore(&mut world, &captured);
+        assert_eq!(
+            snapshot(&world).promotion_game_facts,
+            captured.promotion_game_facts
+        );
+        world.resource_mut::<SessionResource>().account_id = None;
+        record_promotion_game_fact(
+            &mut world,
+            crate::promotion::game_events::CapturedGameplayFact::quest_completed(
+                at + 86_400_000,
+                41,
+            ),
+        );
+        assert_eq!(snapshot(&world).promotion_game_facts.len(), 1);
     }
 }

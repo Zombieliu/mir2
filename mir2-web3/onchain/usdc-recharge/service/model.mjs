@@ -94,3 +94,21 @@ export function objectEffect(tx,c,id,created=false) {
     &&v.outputState===2&&(!created||v.idOperation===2));
   if(hits.length!==1)throw Error('usdcInvoiceEffectMissing');return hits[0];
 }
+
+
+// Ledger balance changes independently corroborate the exact native-coin
+// transfer. Missing index data is pending, never permission to mint credits.
+export function assertPaymentBalanceChanges(tx,o,c) {
+  if(!Array.isArray(tx.balanceChanges)||!tx.balanceChanges.length)throw Error('usdcBalanceChangesUnavailable');
+  let payer=0n,merchant=0n,seenPayer=false,seenMerchant=false;
+  for(const change of tx.balanceChanges){
+    if(canonicalType(change.coinType)!==c.coinType)continue;
+    address(change.address);
+    if(typeof change.amount!=='string'||! /^-?(0|[1-9][0-9]{0,19})$/.test(change.amount)||change.amount==='-0')throw Error('usdcBalanceChangeInvalid');
+    const amount=BigInt(change.amount);if(amount>U64_MAX||amount< -U64_MAX)throw Error('usdcBalanceChangeInvalid');
+    if(change.address===o.payer){payer+=amount;seenPayer=true;}
+    else if(change.address===o.merchant){merchant+=amount;seenMerchant=true;}
+    else if(amount!==0n)throw Error('usdcPaymentBalanceMismatch');
+  }
+  if(!seenPayer||!seenMerchant||payer!==-integer(o.amountMicros)||merchant!==integer(o.amountMicros))throw Error('usdcPaymentBalanceMismatch');
+}
