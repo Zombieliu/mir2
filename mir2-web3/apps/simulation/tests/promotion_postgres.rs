@@ -13,6 +13,10 @@ use mir2_simulation::monthly_card::{
 use mir2_simulation::promotion::{
     CampaignDraft, PromotionRules, PromotionStore, SandboxMonthlyRevenue, TrustedGameFact,
 };
+use mir2_simulation::sui_usdc_billing::{
+    UsdcOrderState, UsdcPaymentMode, UsdcRechargeOrder, VerifiedNativeUsdcTransferReceipt,
+    VerifiedUsdcReceipt, TESTNET_GENESIS_DIGEST, TESTNET_USDC_COIN_TYPE,
+};
 use mir2_simulation::{
     apply_migrations, with_account_store_postgres_client, AccountRecord, CharacterRecord,
 };
@@ -1012,4 +1016,247 @@ fn isolated_native_postgres_promotion_invariants() {
     // The isolated schema is retained for inspection; no production/shared data
     // is deleted, no transaction is signed and no real payable debt is created.
     eprintln!("promotion native PG fixture passed; isolated schema {schema}; actual Stripe/phone/testnet transfer not exercised");
+}
+
+fn seed_attribution_usdc_fixture(
+    client: &mut Client,
+    account: &str,
+    marker: char,
+    native: bool,
+    paid: bool,
+) {
+    // Begin at the trusted already-verified receipt boundary. This fixture
+    // exercises the real typed ledger and SQL authority guards, not a mocked
+    // chain RPC or a claim that a synthetic transaction occurred on Testnet.
+    let payer = format!("0x{}", marker.to_string().repeat(64));
+    let account_ref = format!(
+        "0x{}",
+        Sha256::digest(account.as_bytes())
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect::<String>()
+    );
+    let mut order: UsdcRechargeOrder = serde_json::from_value(json!({
+        "id":format!("usdc_{}",marker.to_string().repeat(64)),
+        "requestId":format!("paid-gate-{account}"),"characterIndex":1,
+        "offer":{"id":"test-usdc-1","label":"Synthetic paid-gate fixture","currency":"usd","amountMinor":100,"credits":100},
+        "domain":{"chainIdentifier":"4c78adac","packageId":format!("0x{}","1".repeat(64)),
+            "configId":format!("0x{}","2".repeat(64)),"merchant":format!("0x{}","3".repeat(64)),
+            "coinType":TESTNET_USDC_COIN_TYPE,"ruleVersion":1},
+        "creditOrigin":"test","accountRef":account_ref,
+        "amountMicro":1_000_000,"createdAtMs":START+2000,"expiresAtMs":START+1_200_000,
+        "capabilityHash":"c".repeat(64),"capabilityExpiresAtMs":START+1_800_000,
+        "payer":payer,"state":"payerBound","preparedTx":null,"invoice":null,
+        "paymentHint":null,"receipt":null,"applied":null,"jobLease":null,"reviewReason":null
+    }))
+    .unwrap();
+    if native {
+        order.payment_mode = UsdcPaymentMode::DirectTransfer;
+        client.execute("INSERT INTO identity_credentials(credential_id,account_id,credential_kind,credential_subject,created_at_ms) VALUES($1,$2,'sui_wallet',$3,$4)",
+            &[&format!("paid-gate-{account}"),&account,&payer,&((START+1000) as i64)]).unwrap();
+    } else {
+        order.state = UsdcOrderState::InvoiceBound;
+        order.prepared_tx = Some(
+            serde_json::from_value(json!({
+                "bytesBase64":"AQ==","signatureBase64":"AQ==","digest":marker.to_string().repeat(44)
+            }))
+            .unwrap(),
+        );
+        order.invoice = Some(
+            serde_json::from_value(json!({
+                "invoiceId":format!("0x{}",marker.to_string().repeat(64)),
+                "createDigest":marker.to_string().repeat(44),"checkpoint":100
+            }))
+            .unwrap(),
+        );
+    }
+    if paid {
+        order.state = UsdcOrderState::PaidPending;
+        if native {
+            order.transfer_receipt = Some(VerifiedNativeUsdcTransferReceipt {
+                chain_identifier: order.domain.chain_identifier.clone(),
+                genesis_digest: TESTNET_GENESIS_DIGEST.into(),
+                order_id: order.id.clone(),
+                account_ref: order.account_ref.clone(),
+                payer: payer.clone(),
+                merchant: order.domain.merchant.clone(),
+                coin_type: order.domain.coin_type.clone(),
+                amount_micro: order.amount_micro,
+                frozen_hash: order.frozen_hash().unwrap(),
+                digest: format!("{marker}{}", "Z".repeat(43)),
+                checkpoint: 101,
+                confirmed_at_ms: START + 3000,
+                observed_at_ms: START + 3100,
+            });
+            assert!(order.receipt.is_none());
+        } else {
+            order.receipt = Some(VerifiedUsdcReceipt {
+                chain_identifier: order.domain.chain_identifier.clone(),
+                package_id: order.domain.package_id.clone(),
+                config_id: order.domain.config_id.clone(),
+                invoice_id: order.invoice.as_ref().unwrap().invoice_id.clone(),
+                order_id: order.id.clone(),
+                account_ref: order.account_ref.clone(),
+                payer: payer.clone(),
+                merchant: order.domain.merchant.clone(),
+                coin_type: order.domain.coin_type.clone(),
+                amount_micro: order.amount_micro,
+                frozen_hash: order.frozen_hash().unwrap(),
+                digest: format!("{marker}{}", "Z".repeat(43)),
+                event_seq: 0,
+                checkpoint: 101,
+                confirmed_at_ms: START + 3000,
+            });
+            assert!(order.transfer_receipt.is_none());
+        }
+    }
+    order.validate().unwrap();
+    assert_eq!(order.has_payment_receipt(), paid);
+    let raw: Value = client
+        .query_one(
+            "SELECT raw_json FROM accounts WHERE account_id=$1",
+            &[&account],
+        )
+        .unwrap()
+        .get(0);
+    let mut saved: AccountRecord = serde_json::from_value(raw).unwrap();
+    saved.billing = Some(BillingLedger {
+        sui_usdc_orders: BTreeMap::from([(order.id.clone(), order)]),
+        ..Default::default()
+    });
+    client
+        .execute(
+            "UPDATE accounts SET raw_json=$2 WHERE account_id=$1",
+            &[&account, &serde_json::to_value(saved).unwrap()],
+        )
+        .unwrap();
+}
+
+#[test]
+fn native_postgres_attribution_rejects_both_paid_usdc_modes_and_preserves_unpaid_admission() {
+    if std::env::var("MIR2_RUN_PROMOTION_PG_TESTS").as_deref() != Ok("1") {
+        eprintln!(
+            "SKIPPED paid-attribution PG integration: explicit isolated native PG opt-in required"
+        );
+        return;
+    }
+    let url =
+        std::env::var("MIR2_PROMOTION_TEST_DATABASE_URL").expect("isolated native PG URI required");
+    let config: Config = url.parse().unwrap();
+    assert!(config.get_dbname().unwrap_or("").contains("promotion"));
+    assert!(config.get_hosts().iter().all(
+        |h| matches!(h, postgres::config::Host::Tcp(host) if host=="127.0.0.1"||host=="localhost")
+    ));
+    assert!(config.get_options().is_none());
+    let nonce = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let schema = format!("promotion_paid_gate_{}_{}", std::process::id(), nonce);
+    let mut base = Client::connect(&url, NoTls).unwrap();
+    base.batch_execute(&format!("CREATE SCHEMA {schema}"))
+        .unwrap();
+    let scoped = format!("{url}{}options=-csearch_path%3D{schema}%20-clock_timeout%3D5000%20-cstatement_timeout%3D15000", if url.contains('?') {'&'} else {'?'});
+    let mut client = Client::connect(&scoped, NoTls).unwrap();
+    apply_migrations(&mut client).unwrap();
+    apply_migrations(&mut client).unwrap();
+    for account in [
+        "operator",
+        "finance1",
+        "risk",
+        "leader",
+        "native-paid",
+        "invoice-paid",
+        "stripe-paid",
+        "native-unpaid",
+        "invoice-unpaid",
+    ] {
+        insert_account(&mut client, account, 30, START + 1000);
+    }
+    for (account, role) in [
+        ("operator", "operations"),
+        ("finance1", "finance"),
+        ("risk", "risk"),
+    ] {
+        grant(&mut client, account, role);
+    }
+    for (account, marker, native, paid) in [
+        ("native-paid", 'a', true, true),
+        ("invoice-paid", 'b', false, true),
+        ("native-unpaid", 'c', true, false),
+        ("invoice-unpaid", 'd', false, false),
+    ] {
+        seed_attribution_usdc_fixture(&mut client, account, marker, native, paid);
+    }
+    seed_paid_monthly(&mut client, "stripe-paid");
+    assert_eq!(
+        client
+            .query_one("SELECT count(*) FROM sui_usdc_transaction_claims", &[])
+            .unwrap()
+            .get::<_, i64>(0),
+        2
+    );
+    let store = PromotionStore::new(scoped, "test").unwrap();
+    configure(&store, "paid-gate", 1_000_000_000, 10);
+    let code = invite_code(&store, "paid-gate");
+    let mut expected_reserve = 0u64;
+    for (account, paid) in [
+        ("native-paid", true),
+        ("invoice-paid", true),
+        ("stripe-paid", true),
+        ("native-unpaid", false),
+        ("invoice-unpaid", false),
+    ] {
+        let candidate = store
+            .create_candidate(
+                "paid-gate",
+                &code,
+                account,
+                "manual_code",
+                &format!("candidate-{account}"),
+                START + 4000,
+            )
+            .unwrap();
+        let before: Value = client
+            .query_one(
+                "SELECT raw_json FROM accounts WHERE account_id=$1",
+                &[&account],
+            )
+            .unwrap()
+            .get(0);
+        let result = store.confirm(
+            "paid-gate",
+            account,
+            candidate["candidateId"].as_str().unwrap(),
+            TERMS,
+            &format!("confirm-{account}"),
+            START + 4500,
+        );
+        if paid {
+            assert_eq!(result.unwrap_err(), "promotionAlreadyPaid", "{account}");
+        } else {
+            let bound = result.unwrap();
+            assert_eq!(bound["status"], "bound", "{account}");
+            expected_reserve += bound["reservedMicroUsd"]
+                .as_str()
+                .unwrap()
+                .parse::<u64>()
+                .unwrap();
+        }
+        assert_eq!(client.query_one("SELECT count(*) FROM promotion_attributions WHERE environment='test' AND campaign_id='paid-gate' AND account_id=$1", &[&account]).unwrap().get::<_,i64>(0), if paid {0} else {1});
+        assert_eq!(client.query_one("SELECT reserved_micro_usd FROM promotion_campaigns WHERE environment='test' AND campaign_id='paid-gate'", &[]).unwrap().get::<_,i64>(0) as u64, expected_reserve);
+        let after: Value = client
+            .query_one(
+                "SELECT raw_json FROM accounts WHERE account_id=$1",
+                &[&account],
+            )
+            .unwrap()
+            .get(0);
+        assert_eq!(
+            after, before,
+            "attribution must not rewrite {account}'s billing or other account fields"
+        );
+    }
+    assert!(expected_reserve > 0);
+    eprintln!("paid-attribution native PG fixture passed in isolated schema {schema}; no chain RPC or payment performed");
 }

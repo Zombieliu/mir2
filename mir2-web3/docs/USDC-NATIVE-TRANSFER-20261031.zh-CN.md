@@ -103,3 +103,5 @@ r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文�
 源码还明确：页面的 `estimatedCommissionMicroUsd` 是按已激活月卡服务期与赛季的交集折算的赛季预估，不能表述为截至当前时刻的纯现金或已履约实收。`formatPromotionUsd` 保留最多 6 位 micro 小数，并非固定两位把已有微额佣金显示成 0；本单当前确实没有佣金条目。
 
 诊断另记录待修校验缺口：`promotion/store.rs` 普通确认邀请的“已付款”检查只查看旧 USDC invoice `receipt`，尚未覆盖新 `transfer_receipt`。后续真实收入检查仍会把付款早于归属确认的来源置为 `payment_precedes_attribution` review，因此不能用充值后补绑定来使本单自动合法返佣。该缺口不是本单未消费月卡及缺少成员归属的成因；本次只读诊断没有改动它，也不把它作为建议的测试路径。
+
+本地修复补记：已将该门禁统一为 `has_payment_receipt()`，保留 Stripe 判断及原有注册、确认窗口、自邀、已有归属等检查顺序。独立原生 PostgreSQL 先复现直转已付款仍可绑定，再验证修复后的完整归属模块 2 项通过；新增 5 场景覆盖直转 / invoice / Stripe 已付款拒绝、两种 USDC 未付款仍可绑定，并校验拒绝不产生归属或预算预留、不改账号原始账本。见[本地回归证据](evidence/usdc-native-transfer-20261031/PAID-ATTRIBUTION-GATE-LOCAL.json)。此补记仅证明本地修复、尚未部署，记录形成时尚未取得本补丁的精确 CI 与发布收据；未接触远服、链 RPC、签名或真实付款，未启动 Docker。

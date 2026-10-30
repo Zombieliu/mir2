@@ -681,7 +681,7 @@ impl PromotionStore {
             if registered<positive(row.get(2))||registered>=positive(row.get(3)) { return Err("promotionExistingAccountExcluded".into()); }
             if now_ms<registered||now_ms>registered.saturating_add(rules.confirmation_window_ms) { return Err("promotionConfirmationExpired".into()); }
             let saved:AccountRecord=serde_json::from_value(acc.get(0)).map_err(|_|"promotionAccountUnavailable")?;
-            if saved.billing.as_ref().is_some_and(|l|l.orders.values().any(|o|o.paid_at_ms.is_some())||l.sui_usdc_orders.values().any(|o|o.receipt.is_some())) { return Err("promotionAlreadyPaid".into()); }
+            if saved.billing.as_ref().is_some_and(|l|l.orders.values().any(|o|o.paid_at_ms.is_some())||l.sui_usdc_orders.values().any(|o|o.has_payment_receipt())) { return Err("promotionAlreadyPaid".into()); }
             let cand=db(tx.query_opt("SELECT leader_id,first_clicked_at_ms,expires_at_ms,source FROM promotion_candidates WHERE environment=$1 AND campaign_id=$2 AND candidate_id=$3 AND account_id=$4",&[&self.environment,&campaign_id,&candidate_id,&account_id]))?.ok_or("promotionCandidateMissing")?;
             if now_ms>=positive(cand.get(2)) { return Err("promotionCandidateExpired".into()); }
             let clicked=positive(cand.get(1));
