@@ -6,7 +6,7 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "build:wallet": "node ../../scripts/build-sui-usdc-wallet.mjs",
-    "test:wallet": "node --test ../../scripts/test-sui-usdc-dubhe-wallet.mjs ../../scripts/test-sui-usdc-checkout-ui.mjs"
+    "test:wallet": "node --test ../../scripts/test-sui-usdc-dubhe-wallet.mjs ../../scripts/test-sui-usdc-checkout-ui.mjs ../../scripts/test-sui-usdc-direct-card.mjs"
   },
   "dependencies": {
     "@walletconnect/sign-client": "2.26.0",

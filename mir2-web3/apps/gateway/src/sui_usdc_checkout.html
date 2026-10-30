@@ -1,8 +1,37 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>MIR2 · Sui USDC 充值</title>
-<style>body{font:16px system-ui,sans-serif;margin:40px auto;padding:0 20px;max-width:760px;background:#14191d;color:#edf1f5}h1{font-size:26px}section{background:#202930;border:1px solid #47505a;border-radius:10px;padding:22px;margin:20px 0}pre{white-space:pre-wrap;word-break:break-all;font:14px ui-monospace,monospace;line-height:1.7}button,select{font:inherit;padding:12px;margin:5px;border-radius:6px;max-width:100%}button{background:#cda957;color:#151515;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:default}.notice{color:#ffd281;line-height:1.7}#result{min-height:50px;line-height:1.8}#dubhe-qr{display:block;max-width:100%;height:auto;background:white;margin:18px auto}#dubhe-panel[hidden]{display:none}#dubhe-panel{text-align:center}#accounts{max-width:100%;word-break:break-all}@media(max-width:500px){body{margin:20px auto;padding:0 12px}section{padding:16px}button,select{margin:5px 0}}</style>
+<style>
+body{font:16px system-ui,sans-serif;margin:40px auto;padding:0 20px;max-width:900px;background:#14191d;color:#edf1f5;line-height:1.6}
+h1{font-size:26px}h2{font-size:21px;margin-top:0}section{background:#202930;border:1px solid #47505a;border-radius:10px;padding:22px;margin:20px 0}
+pre{white-space:pre-wrap;word-break:break-all;font:14px ui-monospace,monospace;line-height:1.7}
+button,select,input{font:inherit;padding:12px;border-radius:6px;max-width:100%;box-sizing:border-box}button,select{margin:5px}button{background:#cda957;color:#151515;border:0;cursor:pointer}button:disabled{opacity:.5;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #ffe3a1;outline-offset:3px}
+.notice{color:#ffd281;line-height:1.7}.muted{color:#bac2c9}#result{min-height:50px;line-height:1.8}#dubhe-qr{display:block;max-width:100%;height:auto;background:white;margin:18px auto}#dubhe-panel[hidden]{display:none}#dubhe-panel{text-align:center}#accounts{max-width:100%;word-break:break-all}
+#direct-transfer-panel{border-color:#9d8248;background:#22251f}#direct-transfer-status{padding:12px 14px;border:1px solid #77643c;border-radius:6px;background:#191c17;margin-bottom:20px}
+.direct-transfer-layout{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:24px;align-items:start}.direct-transfer-code{display:flex;min-height:280px;align-items:center;justify-content:center;border:1px solid #61583f;border-radius:8px;background:#171a17;padding:12px;box-sizing:border-box}
+#direct-transfer-qr{display:block;width:256px;max-width:100%;height:auto;background:white;border-radius:4px}#direct-transfer-qr[hidden],#direct-transfer-placeholder[hidden]{display:none}#direct-transfer-placeholder{max-width:210px;text-align:center;color:#d5c293;line-height:1.8}
+.direct-transfer-details{min-width:0}.direct-transfer-details dl{display:grid;grid-template-columns:80px minmax(0,1fr);gap:10px 14px;margin:0 0 18px}.direct-transfer-details dt{color:#bac2c9}.direct-transfer-details dd{margin:0;overflow-wrap:anywhere}#direct-transfer-amount{font-weight:700;color:#ffe3a1}#direct-transfer-payer{font:14px ui-monospace,monospace}
+.direct-transfer-address-row{display:flex;gap:10px;align-items:stretch;margin-top:8px}#direct-transfer-address{flex:1;min-width:0;width:100%;background:#141914;border:1px solid #726242;color:#edf1f5;font:14px ui-monospace,monospace}#direct-transfer-address::placeholder{color:#b9b8ad}#copy-direct-address{flex:none;margin:0}#direct-transfer-copy-status{min-height:26px;margin:8px 0;color:#ffd281;font-size:14px}
+@media(max-width:620px){body{margin:20px auto;padding:0 12px}section{padding:16px}button,select{margin:5px 0}.direct-transfer-layout{grid-template-columns:minmax(0,1fr);gap:20px}.direct-transfer-code{min-height:220px;max-width:304px;width:100%;justify-self:center}.direct-transfer-address-row{flex-direction:column}#copy-direct-address{width:100%}}
+</style>
 </head><body><h1>Sui 原生 USDC 充值点券</h1><p class="notice">隔离测试 · 仅 Sui Testnet 测试 USDC，不是真实收入。装备交易仍使用游戏金币。</p>
 <section><h2>本次充值</h2><pre id="details">正在读取订单…</pre><p>付款交易需要钱包内少量测试 SUI 作为 Gas，Gas 不计入 USDC 充值款。钱包将单独请求确认付款；连接钱包不会自动转账。</p></section>
-<section><h2>Dubhe Wallet 手机扫码支付</h2><p>先用手机 Dubhe Wallet 扫码连接，在手机确认付款钱包。核对订单后，点击付款并在手机中确认这笔测试 USDC 交易。</p><label for="wallets">付款方式</label><select id="wallets"></select><button id="connect">用 Dubhe Wallet 扫码连接</button><br><label for="accounts">付款钱包</label><select id="accounts" disabled></select><button id="pay" disabled>确认使用 USDC 付款</button><button id="refresh">刷新到账状态</button><p id="result" role="status" aria-live="polite">正在读取扫码支付配置…</p><div id="dubhe-panel" hidden><h3>请用 Dubhe Wallet 扫描</h3><img id="dubhe-qr" width="320" height="320" alt="Dubhe Wallet 连接二维码"><p id="dubhe-expiry" class="notice"></p><p>连接及确认钱包不会扣款。付款仍需在手机单独确认。</p><button id="dubhe-cancel">取消扫码连接</button></div></section>
+<section id="direct-transfer-panel" aria-labelledby="direct-transfer-heading">
+<h2 id="direct-transfer-heading">扫码转账 / 复制地址</h2>
+<p id="direct-transfer-status" class="notice" aria-live="polite">直转自动到账接入中，请勿付款</p>
+<div class="direct-transfer-layout">
+<div class="direct-transfer-code">
+<img id="direct-transfer-qr" width="256" height="256" alt="本次充值的 USDC 转账二维码" hidden>
+<div id="direct-transfer-placeholder">直转二维码暂未开放<br><span class="muted">服务开启后将在此显示</span></div>
+</div>
+<div class="direct-transfer-details">
+<dl><dt>网络</dt><dd>Sui Testnet</dd><dt>币种</dt><dd>USDC</dd><dt>充值金额</dt><dd><output id="direct-transfer-amount">—</output></dd><dt>绑定钱包</dt><dd><output id="direct-transfer-payer">尚未绑定</output></dd></dl>
+<label for="direct-transfer-address">本次充值收款地址</label>
+<div class="direct-transfer-address-row"><input id="direct-transfer-address" type="text" readonly autocomplete="off" spellcheck="false" placeholder="直转服务尚未开放"><button id="copy-direct-address" type="button" disabled>复制收款地址</button></div>
+<p id="direct-transfer-copy-status" role="status" aria-live="polite"></p>
+<p class="muted">仅在直转服务开启并显示有效收款信息后付款。请核对网络、币种、金额及绑定钱包；本区不使用下方钱包连接付款的账单地址。</p>
+</div>
+</div>
+</section>
+<section><h2>钱包连接付款（兼容入口）</h2><p>此入口通过钱包连接确认订单付款。使用手机时，先用 Dubhe Wallet 扫码连接，再在手机中单独确认交易。</p><label for="wallets">付款方式</label><select id="wallets"></select><button id="connect">用 Dubhe Wallet 扫码连接</button><br><label for="accounts">付款钱包</label><select id="accounts" disabled></select><button id="pay" disabled>确认使用 USDC 付款</button><button id="refresh">刷新到账状态</button><p id="result" role="status" aria-live="polite">正在读取扫码支付配置…</p><div id="dubhe-panel" hidden><h3>请用 Dubhe Wallet 扫描</h3><img id="dubhe-qr" width="320" height="320" alt="Dubhe Wallet 连接二维码"><p id="dubhe-expiry" class="notice"></p><p>连接及确认钱包不会扣款。付款仍需在手机单独确认。</p><button id="dubhe-cancel">取消扫码连接</button></div></section>
 <p>“链上付款确认”和“游戏点券到账”是两个阶段。关闭页面后服务器会继续核对已创建账单；遇到未知结果请刷新查询，勿重复付款。请回游戏充值订单页查看最终点券余额。</p>
 <script src="/v1/billing/sui-usdc/dubhe-wallet.js" defer></script><script src="/v1/billing/sui-usdc/pay.js" defer></script></body></html>

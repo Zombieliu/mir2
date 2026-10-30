@@ -1,8 +1,8 @@
 {
   "schema": "mir2.checkout-wallet-bundle.v1",
-  "bundleSha256": "7f9ec3e5da07babffbedd842b33bcc0fe3255273d4fa1dccb839a73460fc38b1",
-  "bytes": 487235,
+  "bundleSha256": "09dff44b9c46b53258550328391657e46be1365213ba85735e896bc0407b454a",
+  "bytes": 492776,
   "lockSha256": "f2c4cf0fdafe7bba4331dc51da15433a69ab8243f3278118aae088ec2a784273",
-  "inputs": 745,
+  "inputs": 746,
   "externalImports": []
 }

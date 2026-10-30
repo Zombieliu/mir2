@@ -10,6 +10,10 @@
   let current, wallet, account, attempted = false, busy = false, validState = false;
   let walletGeneration = 0, offWalletChange;
   let phoneAdapter, qrGeneration = 0, qrTimer;
+  const directCard = window.Mir2DirectTransferCard?.create({
+    document, clipboard: globalThis.navigator?.clipboard,
+    renderQr: (url) => window.Mir2DubheQr.toPaymentDataURL(url), now: Date.now,
+  });
   const USDC_TYPE = '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC';
   function changedWallet(message) {
     walletGeneration++; account = undefined;
@@ -86,38 +90,44 @@
     return data;
   }
   function canPay(s) {
-    return Boolean(s?.invoiceId && !s.payExpired && !s.chainConfirmed && !s.gameDelivered &&
+    return Boolean(s?.paymentMode !== 'direct_transfer' && s?.invoiceId && !s.payExpired && !s.chainConfirmed && !s.gameDelivered &&
       s.order?.state !== 'paymentSubmitted' && Number.isSafeInteger(s.order?.expiresAtMs) && Date.now() < s.order.expiresAtMs);
   }
   function show(s) {
     const o = s?.order;
     if (!o || s.chain !== 'sui:testnet' || o.network !== 'testnet' || s.coinType !== USDC_TYPE || !/^0x[0-9a-f]{64}$/.test(s.merchant || '') || s.decimals !== 6 || s.testPayment !== true || s.gasPayer !== 'wallet' || !/^[1-9][0-9]*$/.test(o.amountMicros)) {
       validState = false; current = undefined; account = undefined;
+      directCard?.show(null);
       byId('connect').disabled = true; byId('pay').disabled = true;
       throw Error('充值网络或付款规则不匹配，已停止。');
     }
     current = s; validState = true;
+    directCard?.show(s);
     const n = BigInt(o.amountMicros);
     byId('details').textContent = `订单：${o.id}\n网络：Sui Testnet\n测试 USDC：${n / 1000000n}.${(n % 1000000n).toString().padStart(6, '0')}\n到账点券：${o.credits}\n收款方：${s.merchant}\n原生 USDC 类型：${s.coinType}\n付款钱包：${s.payer || '尚未确认'}\n付款截止：${new Date(o.expiresAtMs).toLocaleString()}\n订单状态：${o.state}${o.transactionDigest ? `\n交易：${o.transactionDigest}` : ''}`;
     byId('pay').disabled = busy || attempted || !canPay(s) || !account || account.address !== s.payer;
-    byId('connect').disabled = busy || s.chainConfirmed || s.payExpired;
+    byId('connect').disabled = busy || s.chainConfirmed || s.payExpired || s.paymentMode === 'direct_transfer';
     if (s.chainConfirmed || s.payExpired) hideQr();
     if (s.gameDelivered) result('点券已到账。请回游戏查看余额；无需再次付款。');
     else if (s.chainConfirmed) result('链上付款已确认，游戏点券正在到账。请回游戏刷新或重新登录。');
     else if (attempted || o.state === 'paymentSubmitted') result('付款结果待核实。请刷新查询；不要再次付款。');
     else if (s.payExpired) result('付款期限已过。已提交的交易仍由服务器核对，不要再付款。');
+    else if (s.paymentMode === 'direct_transfer') result('请查看上方扫码转账区；点券到账以服务器核验为准。');
     else if (s.invoiceId) result('链上账单已就绪，请核对金额、收款方和钱包后确认付款。');
     else if (s.payer) result('钱包已确认，服务器正在创建链上账单。');
     else if (byId('wallets').value === 'dubhe-qr' && s.dubheWallet?.available !== true) result('Dubhe Wallet 扫码付款尚未配置完成。此订单尚未付款。');
     else result('请扫码连接，在手机确认付款钱包；此步骤不会扣款。');
   }
-  async function refresh() { show(await request('status')); }
+  async function refresh() {
+    try { show(await request('status')); }
+    catch (error) { directCard?.show(null); throw error; }
+  }
   byId('refresh').onclick = () => refresh().catch((e) => result(e.message));
   byId('accounts').onchange = () => changedWallet('账户已改变，请重新确认充值钱包。');
   byId('wallets').onchange = () => { offWalletChange?.(); offWalletChange = undefined; wallet = undefined; void disconnectPhone(); changedWallet('钱包已改变，请重新确认充值钱包。'); redrawWallets(); };
   byId('dubhe-cancel').onclick = () => { void disconnectPhone(); changedWallet('已取消扫码连接，尚未付款。'); };
   byId('connect').onclick = async () => {
-    if (busy || !validState) return; busy = true;
+    if (busy || !validState || current?.paymentMode === 'direct_transfer') return; busy = true;
     let failure;
     try {
       const selection = byId('wallets').value;
@@ -174,7 +184,7 @@
     } catch (e) { failure = attempted ? '付款结果待核实，请刷新查询，不要重复付款。' : (e.message || '未能准备付款，请刷新查询。'); }
     finally { busy = false; if (current) show(current); if (failure) result(failure); }
   };
-  window.addEventListener('pagehide', () => { void disconnectPhone(); });
+  window.addEventListener('pagehide', () => { directCard?.dispose(); void disconnectPhone(); });
   if (!validCapability) { result('充值链接无效，请从游戏充值界面打开。'); byId('connect').disabled = true; }
   else { refresh().catch((e) => result(e.message)); setInterval(() => { if (!busy) refresh().catch((e) => result(e.message)); }, 5000); }
 })();
