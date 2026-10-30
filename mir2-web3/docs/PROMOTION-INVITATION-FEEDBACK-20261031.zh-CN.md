@@ -11,4 +11,8 @@
 
 本地验证：18 项前端实源与交易链路测试、36 项刷新/金额/赛季/代理相邻测试、22 项发布护栏测试均通过，TypeScript 检查通过。包含后台读取不清写入错误、两种 401 可见路径、查询不冒充确认，以及账号/凭据/活动/邀请码变化后旧状态清理；这些使用隔离测试数据，没有产生真实绑定或付款。
 
-发布沿用原 `mir2-web3-web` Vercel 项目，先创建不分配正式域名的候选，再验证并提升。只读配置检查 [41111807209](https://github.com/Zombieliu/mir2/actions/runs/41111807209) 已通过，发布护栏的基线已更新为当前 Windows 网页部署 `dpl_2ekBnauSAihEAWLFguLcHKrs7kx3`，宣传站基线仍为 `dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97`。宣传主站、Cloudflare、Windows 客户端及游戏数据库不在本次网页发布的改动范围内。发布结果将在实际完成后补充。
+发布沿用原 `mir2-web3-web` Vercel 项目，先创建不分配正式域名的候选，再验证并提升。只读配置检查 [41111807209](https://github.com/Zombieliu/mir2/actions/runs/41111807209) 已通过，发布护栏的基线已更新为当前 Windows 网页部署 `dpl_2ekBnauSAihEAWLFguLcHKrs7kx3`，宣传站基线仍为 `dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97`。宣传主站、Cloudflare、Windows 客户端及游戏数据库不在本次网页发布的改动范围内。
+
+2026-10-31 03:18 UTC+8 已完成[候选创建](https://github.com/Zombieliu/mir2/actions/runs/41113525300)及[提升验证](https://github.com/Zombieliu/mir2/actions/runs/41113991681)：源提交 `3d8f81752fc21400622808a5d00a871b47047ed5`，部署 `dpl_9yLef9wXkWDovACg9atHU1W1uBSx`。受保护候选与正式域名均通过当前/历史赛季分流、财务开关、游戏、主站导航及 13 项静态资源检查；两个游戏域名均已指向候选，宣传站部署不变，见[候选收据](evidence/promotion-invitation-feedback-20261031/STAGED-CANDIDATE.json)与[域名收据](evidence/promotion-invitation-feedback-20261031/ALIASES.json)。
+
+随后使用普通公网 GET 独立复验 `/version` 精确匹配源提交、匿名 Windows 活动仍计佣开启/付款关闭，并读取 10 个 JS 资源，确认简中步骤、错误提示及“查询尚未确认”文案已在公网实际返回，见[公网验证](evidence/promotion-invitation-feedback-20261031/PUBLIC-VERIFICATION.json)。未使用用户 cookie、提交邀请或操作钱包；这不替代用户手机签名及最终目视 Accepted。
