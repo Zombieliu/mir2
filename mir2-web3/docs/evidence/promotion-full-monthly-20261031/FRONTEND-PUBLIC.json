@@ -1,0 +1,56 @@
+{
+  "schema": "mir2.full-monthly.website-promotion-readonly-receipt.v1",
+  "observedAtUtc": "2026-10-30T22:16:27.144Z",
+  "sourceSha": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+  "ci": {
+    "id": 41136625743,
+    "url": "https://github.com/Zombieliu/mir2/actions/runs/41136625743",
+    "status": "completed",
+    "conclusion": "success",
+    "headSha": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+    "headBranch": "codex/promotion-vercel-20261029",
+    "operation": "windows-promote",
+    "deploymentId": "dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S"
+  },
+  "aliases": [
+    {
+      "alias": "mir2.obelisk.build",
+      "projectId": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "deploymentId": "dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S"
+    },
+    {
+      "alias": "mir2-web3-web.vercel.app",
+      "projectId": "prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz",
+      "deploymentId": "dpl_F1ZwKtAph1YVBVYHdVfKVWhfBZ9S"
+    }
+  ],
+  "marketing": {
+    "alias": "numeron-legend-of-rebirth.vercel.app",
+    "projectId": "prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA",
+    "deploymentId": "dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97"
+  },
+  "publicVerificationReceipt": "PUBLIC-AFTER-PROMOTION.json",
+  "publicVerification": {
+    "unauthenticatedGets": 22,
+    "actualJsCssAssets": 13,
+    "functionMarkers": 7,
+    "preservedLegacyCampaigns": 3,
+    "bothPublicVersionsMatch": true,
+    "defaultCampaign": "numeron-windows-playtest-20261030",
+    "defaultPayoutEnabled": false,
+    "defaultRevenueRecognition": null
+  },
+  "accessLimitations": {
+    "nativeNodeFetch": "Connection timeout to the direct Vercel alias; switched to curl.exe which honors the existing network proxy.",
+    "connectorCustomDomainBootstrap": "Controlled Vercel fetch appended an access query rejected by the strict BFF as invalid_promotion_query. Direct unauthenticated GET returned 200 and was used for all final public checks.",
+    "secretsObtainedOrPersisted": false
+  },
+  "workerMutations": {
+    "promote": false,
+    "deploy": false,
+    "sourceOrPush": false,
+    "environmentDns": false,
+    "payout": false
+  },
+  "pending": "Backend full-monthly policy activation and authenticated real commission verification are still owned by root."
+}
