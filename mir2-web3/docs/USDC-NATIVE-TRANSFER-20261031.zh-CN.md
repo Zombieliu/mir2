@@ -105,3 +105,11 @@ r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文�
 诊断另记录待修校验缺口：`promotion/store.rs` 普通确认邀请的“已付款”检查只查看旧 USDC invoice `receipt`，尚未覆盖新 `transfer_receipt`。后续真实收入检查仍会把付款早于归属确认的来源置为 `payment_precedes_attribution` review，因此不能用充值后补绑定来使本单自动合法返佣。该缺口不是本单未消费月卡及缺少成员归属的成因；本次只读诊断没有改动它，也不把它作为建议的测试路径。
 
 本地修复补记：已将该门禁统一为 `has_payment_receipt()`，保留 Stripe 判断及原有注册、确认窗口、自邀、已有归属等检查顺序。独立原生 PostgreSQL 先复现直转已付款仍可绑定，再验证修复后的完整归属模块 2 项通过；新增 5 场景覆盖直转 / invoice / Stripe 已付款拒绝、两种 USDC 未付款仍可绑定，并校验拒绝不产生归属或预算预留、不改账号原始账本。见[本地回归证据](evidence/usdc-native-transfer-20261031/PAID-ATTRIBUTION-GATE-LOCAL.json)。此补记仅证明本地修复、尚未部署，记录形成时尚未取得本补丁的精确 CI 与发布收据；未接触远服、链 RPC、签名或真实付款，未启动 Docker。
+
+## 推荐码与有效游玩日：只读归因
+
+18:57:42 UTC 的[只读快照](evidence/usdc-native-transfer-20261031/REFERRAL-PLAYDAY-C7FE-READONLY.json)显示角色 36 等级 2、saveVersion 33，最近一次保存为 18:23:51 UTC。已保存的真实击杀 / 完成任务日志、源事件、投递和有效日事实均为 0，不能归因为后台投递积压。角色仍在线；快照不能证明在线内存中是否刚发生了新行为，需要玩家正常完成真实事件并正常退出保存后再核对。有效日按 UTC 日期去重，一次真实击杀或完成并提交任务即可构成 1 日，无需在线满 24 小时；登录、移动、充值或等级本身均不构成该日。
+
+用户随后提供 `inv_baa…455ae` 的完整旧链接。[19:14:52 UTC 码归因](evidence/usdc-native-transfer-20261031/EXACT-INVITE-BAA9-READONLY.json)确认它在 `numeron-playtest-20261029` 属于 approved 团长钱包 `0x8ced5e…ef2f02`，旧公开邀请接口仍返回 200；当前 Windows 活动 `numeron-windows-playtest-20261030` 中同码数量为 0。不能只修改 URL 的活动参数来转码。当前 Windows 账号仍无候选或最终归属，且已有付款；正常后续测试应由团长提供当前活动的新链接，由新成员在首次付款前确认归属。本轮没有提交候选 / 确认、迁移归属、生成游戏事实、追溯分配充值或中断服务。
+
+本补丁已推送为 `d1d2d82bd99a019e3fd1c739a2cff9114d7959d6`，精确 [CI 41113336591](https://github.com/Zombieliu/mir2/actions/runs/41113336591) 已派发，记录时尚在运行，不能把本地 PG 通过写成新 Linux 工件或原服验收。原服仍为 `868ef2d2…`；后续须核验工件、自然空闲、正常保存及新备份后才能切换 GW/worker。本补丁没有迁移、旧单恢复或 operator 需求，不能重复执行前述旧恢复流程。
