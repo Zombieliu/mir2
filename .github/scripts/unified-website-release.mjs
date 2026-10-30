@@ -1,4 +1,5 @@
 import { writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 
 const TEAM = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
 const BRANCH = 'codex/promotion-vercel-20261029';
@@ -44,8 +45,31 @@ function candidateGuard(key, candidate, snapshot) {
   const site = SITES[key];
   if (candidate.projectId !== site.project || candidate.target !== 'production' || candidate.readyState !== 'READY' ||
       candidate.meta?.unifiedSourceSha !== sha || candidate.meta?.unifiedMainBaseline !== SITES.main.baseline ||
-      candidate.meta?.unifiedGameBaseline !== SITES.game.baseline || snapshot?.projectSettings?.rootDirectory !== site.root ||
+      candidate.meta?.unifiedGameBaseline !== SITES.game.baseline ||
+      (snapshot?.projectSettings?.rootDirectory != null && snapshot.projectSettings.rootDirectory !== site.root) ||
       candidate.gitSource?.sha !== sha) throw Error(`${key} candidate identity, source, root or readiness mismatch`);
+}
+function candidateResponse(candidate, path) {
+  if (!/^[a-z0-9][a-z0-9-]*\.vercel\.app$/.test(candidate.url || '')) throw Error('Unexpected candidate hostname');
+  try {
+    return execFileSync('npx', ['--yes', 'vercel@56.4.1', 'curl', `https://${candidate.url}${path}`, '--',
+      '--fail', '--silent', '--show-error', '--max-time', '30'], {
+      encoding: 'utf8', timeout: 180000, maxBuffer: 8 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch { throw Error(`Authenticated candidate check failed for ${candidate.id} ${path}`); }
+}
+function verifyCandidatePages(reviewed) {
+  const main = candidateResponse(reviewed.main, '/zh-CN');
+  if (!main.includes('/marketing-assets/_next/static/') || !main.includes('navigation_promotions') ||
+      !main.includes('footer_promotions') || !main.includes('promotions?lang=zh-CN')) throw Error('Marketing candidate navigation/assets mismatch');
+  if (!candidateResponse(reviewed.main, '/zh-CN/download').includes('https://mir2.obelisk.build/game')) throw Error('Marketing candidate game link mismatch');
+  const manifest = JSON.parse(candidateResponse(reviewed.game, '/manifest.webmanifest'));
+  const version = JSON.parse(candidateResponse(reviewed.game, '/version'));
+  if (manifest.start_url !== '/game' || manifest.scope !== '/' || version.revision !== sha) throw Error('Game candidate manifest or revision mismatch');
+  const game = candidateResponse(reviewed.game, '/game');
+  if (!game.includes('/_next/static/') || game.includes('navigation_promotions')) throw Error('Game candidate application mismatch');
+  console.log(JSON.stringify({ candidatePages: 'passed', sourceSha: sha, main: reviewed.main.id, game: reviewed.game.id }));
 }
 async function deploymentSnapshot(key, id) {
   let until;
@@ -69,7 +93,7 @@ async function candidates() {
     if (result[key].id !== id) throw Error('Candidate deployment ID mismatch');
     const snapshot = await deploymentSnapshot(key, id);
     candidateGuard(key, result[key], snapshot);
-    result[key] = { ...result[key], verifiedRoot: snapshot.projectSettings.rootDirectory };
+    result[key] = { ...result[key], verifiedRoot: snapshot.projectSettings?.rootDirectory };
   }
   return result;
 }
@@ -125,20 +149,7 @@ if (operation === 'unified-context') {
     const candidate = await api(`/v13/deployments/${id}?withGitRepoInfo=true`);
     if (candidate.projectId !== SITES[key].project) throw Error('Candidate project mismatch');
     const snapshot = await deploymentSnapshot(key, id);
-    const tree = await api(`/v6/deployments/${id}/files`);
-    const artifacts = [];
-    function collect(entries, prefix = '') {
-      for (const entry of entries) {
-        const path = prefix + entry.name;
-        if (entry.children) collect(entry.children, path + '/');
-        else if (path.startsWith('out/') && /zh-CN|(?:^|\/)game(?:\.|\/|$)|manifest|package\.json/.test(path)) artifacts.push({ path, type: entry.type });
-      }
-    }
-    collect(tree);
-    console.log(JSON.stringify({ candidate: summary(key, { ...candidate, verifiedRoot: snapshot.projectSettings?.rootDirectory }), errorCode: candidate.errorCode,
-      snapshotKeys: Object.keys(snapshot), snapshotSettings: snapshot.projectSettings,
-      builds: (candidate.builds || []).map(build => ({ src: build.src, use: build.use, configKeys: Object.keys(build.config || {}), rootDirectory: build.config?.rootDirectory })),
-      configKeys: Object.keys(candidate.config || {}), configRoot: candidate.config?.rootDirectory, artifacts: artifacts.slice(0,25) }));
+    console.log(JSON.stringify({ candidate: summary(key, { ...candidate, verifiedRoot: snapshot.projectSettings?.rootDirectory }), errorCode: candidate.errorCode }));
   }
 } else if (operation === 'unified-stage') {
   baselineGuard(initial);
@@ -164,6 +175,9 @@ if (operation === 'unified-context') {
 } else if (operation === 'unified-promote') {
   baselineGuard(initial);
   const reviewed = await candidates();
+  // New Git deployments omit rootDirectory and downloadable source files.
+  // Verify the actual protected application responses before either alias changes.
+  verifyCandidatePages(reviewed);
   const touched = [];
   try {
     // Main first: the game project will proxy only to the already upgraded public marketing alias.

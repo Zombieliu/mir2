@@ -13,16 +13,18 @@ const sites = {
   game: { project: 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz', name: 'mir2-web3-web', baseline: 'dpl_GuricEhcXbVub8u3u3HSt2VR5wGe', root: 'mir2-web3/apps/web', candidate: 'dpl_gamecandidate' },
 };
 const source = readFileSync(new URL('./unified-website-release.mjs', import.meta.url), 'utf8');
-const executable = source.replace(/^import\s+\{\s*writeFile\s*\}\s+from\s+['"]node:fs\/promises['"];?\r?\n/, '');
-assert.notEqual(executable, source, 'only filesystem import is replaced with an in-memory writer');
+const withoutFilesystem = source.replace(/^import\s+\{\s*writeFile\s*\}\s+from\s+['"]node:fs\/promises['"];?\r?\n/, '');
+const executable = withoutFilesystem.replace(/^import\s+\{\s*execFileSync\s*\}\s+from\s+['"]node:child_process['"];?\r?\n/m, '');
+assert.notEqual(withoutFilesystem, source, 'filesystem import is replaced with an in-memory writer');
+assert.notEqual(executable, withoutFilesystem, 'child process import is replaced with a closed CLI mock');
 
 function fixture(operation = 'unified-promote') {
-  const projects = {}, candidates = {}, snapshots = {}, calls = [], logs = [], files = new Map();
+  const projects = {}, candidates = {}, snapshots = {}, calls = [], cliCalls = [], logs = [], files = new Map();
   for (const [key, site] of Object.entries(sites)) {
     projects[key] = { id: site.project, accountId: TEAM, name: site.name, rootDirectory: site.root,
       targets: { production: { id: site.baseline } }, link: { type: 'github', repo: 'mir2', repoId: 123456 },
       env: [{ key: 'MIR2_PROMOTION_SESSION_SECRET', value: SECRET, target: ['production'] }] };
-    candidates[key] = { id: site.candidate, url: `${key}-candidate.protected.vercel.app`, projectId: site.project,
+    candidates[key] = { id: site.candidate, url: `${key}-candidate.vercel.app`, projectId: site.project,
       readyState: 'READY', target: 'production', gitSource: { sha: SHA },
       meta: { unifiedSourceSha: SHA, unifiedMainBaseline: sites.main.baseline, unifiedGameBaseline: sites.game.baseline } };
     snapshots[key] = [{ uid: site.candidate, projectId: site.project, projectSettings: { rootDirectory: site.root } }];
@@ -30,9 +32,38 @@ function fixture(operation = 'unified-promote') {
   const env = { GITHUB_REF: `refs/heads/${BRANCH}`, GITHUB_SHA: SHA, RELEASE_OPERATION: operation,
     VERCEL_TOKEN: TOKEN, VERCEL_ORG_ID: TEAM, VERCEL_PROJECT_ID: sites.game.project,
     RELEASE_MAIN_DEPLOYMENT_ID: sites.main.candidate, RELEASE_DEPLOYMENT_ID: sites.game.candidate };
-  const state = { projects, candidates, snapshots, env, calls, logs, files, onRequest: undefined };
+  const candidatePages = {
+    main: {
+      '/zh-CN': '<html data-track="navigation_promotions" data-footer="footer_promotions"><a href="/promotions?lang=zh-CN">Referral</a><script src="/marketing-assets/_next/static/chunks/site.js"></script></html>',
+      '/zh-CN/download': '<a href="https://mir2.obelisk.build/game">Play</a>',
+    },
+    game: {
+      '/manifest.webmanifest': JSON.stringify({ id: '/', start_url: '/game', scope: '/' }),
+      '/version': JSON.stringify({ revision: SHA }),
+      '/game': '<html><script src="/_next/static/chunks/game.js"></script></html>',
+    },
+  };
+  const state = { projects, candidates, snapshots, candidatePages, env, calls, cliCalls, logs, files, onRequest: undefined, onCandidateResponse: undefined };
   const projectKey = id => Object.keys(sites).find(key => sites[key].project === id);
   const json = value => Response.json(JSON.parse(JSON.stringify(value)));
+  const execFileSync = (command, args, options) => {
+    assert.equal(command, 'npx');
+    assert.deepEqual(Array.from(args).slice(0, 3), ['--yes', 'vercel@56.4.1', 'curl']);
+    assert.equal(args[4], '--');
+    assert.ok(args.includes('--fail')); assert.ok(args.includes('--silent')); assert.ok(args.includes('--max-time'));
+    assert.ok(!args.some(value => String(value).includes(TOKEN) || String(value).includes(SECRET) || value === '--token'));
+    assert.equal(options.env, undefined, 'only the official CLI inherits its existing CI environment');
+    assert.deepEqual(Array.from(options.stdio), ['ignore', 'pipe', 'pipe']);
+    const url = new URL(args[3]); assert.equal(url.protocol, 'https:');
+    const key = Object.keys(candidates).find(value => candidates[value].url === url.hostname);
+    assert.ok(key, 'CLI host must be one of the exact mocked candidate hosts');
+    const request = { command, args: Array.from(args), options, key, path: url.pathname, writesAtCheck: calls.filter(call => call.method !== 'GET').length };
+    cliCalls.push(request);
+    const overridden = state.onCandidateResponse?.(request, state);
+    if (overridden !== undefined) return overridden;
+    assert.ok(request.path in candidatePages[key], 'candidate path must be explicitly mocked');
+    return candidatePages[key][request.path];
+  };
   const fetch = async (input, init = {}) => {
     const url = new URL(input);
     const request = { origin: url.origin, path: url.pathname, query: url.searchParams, method: init.method || 'GET', headers: init.headers || {}, body: init.body ? JSON.parse(init.body) : undefined };
@@ -94,7 +125,7 @@ function fixture(operation = 'unified-promote') {
     try {
       await vm.runInNewContext(`(async () => {\n${executable}\n})()`, {
         process: { env }, fetch, AbortSignal, URL, JSON, console: { log: (...args) => logs.push(args.join(' ')) },
-        writeFile: async (name, value) => files.set(name, value), setTimeout: callback => { callback(); return 0; },
+        writeFile: async (name, value) => files.set(name, value), execFileSync, setTimeout: callback => { callback(); return 0; },
       }, { timeout: 2000, filename: 'mocked-unified-website-release.mjs' });
     } catch (value) { error = value; }
     return { error, ...state };
@@ -202,13 +233,64 @@ test('missing single-deployment root is accepted only with the exact verified de
   assert.equal(promoted.find(value => value.promoted.site === 'game').promoted.root, sites.game.root);
 });
 
-test('a forged single-deployment root cannot bypass a wrong or missing snapshot root', async () => {
-  for (const key of ['main', 'game']) for (const missing of [false, true]) {
+test('a forged single-deployment root cannot bypass an explicitly wrong snapshot root', async () => {
+  for (const key of ['main', 'game']) {
     const f = fixture(); f.candidates[key].projectSettings = { rootDirectory: sites[key].root };
-    if (missing) delete f.snapshots[key][0].projectSettings;
-    else f.snapshots[key][0].projectSettings.rootDirectory = 'unreviewed/root';
+    f.snapshots[key][0].projectSettings.rootDirectory = 'unreviewed/root';
     const result = await f.run(); assertFailed(result, /candidate identity/); assert.equal(writes(result).length, 0);
   }
+});
+
+test('missing optional snapshot root requires successful authenticated application checks before promotion', async () => {
+  for (const omitSettings of [false, true]) {
+    const f = fixture();
+    for (const key of ['main', 'game']) {
+      if (omitSettings) delete f.snapshots[key][0].projectSettings;
+      else f.snapshots[key][0].projectSettings = { commandForIgnoringBuildStep: null };
+    }
+    const result = await f.run(); assert.equal(result.error, undefined);
+    assert.equal(result.cliCalls.length, 5);
+    assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
+    assert.ok(result.logs.some(value => value.includes('"candidatePages":"passed"')));
+    assert.equal(writes(result).length, 2);
+  }
+});
+
+test('wrong protected candidate content, game links, manifest or version rejects before changing any alias', async () => {
+  const cases = [
+    { key: 'main', path: '/zh-CN', body: '<html>wrong application</html>', message: /Marketing candidate navigation\/assets mismatch/ },
+    { key: 'main', path: '/zh-CN/download', body: '<a href="https://mir2.obelisk.build">wrong game link</a>', message: /Marketing candidate game link mismatch/ },
+    { key: 'game', path: '/manifest.webmanifest', body: JSON.stringify({ start_url: '/', scope: '/' }), message: /Game candidate manifest or revision mismatch/ },
+    { key: 'game', path: '/manifest.webmanifest', body: JSON.stringify({ start_url: '/game', scope: '/game' }), message: /Game candidate manifest or revision mismatch/ },
+    { key: 'game', path: '/version', body: JSON.stringify({ revision: 'b'.repeat(40) }), message: /Game candidate manifest or revision mismatch/ },
+    { key: 'game', path: '/game', body: '<html>navigation_promotions<script src="/_next/static/chunks/site.js"></script></html>', message: /Game candidate application mismatch/ },
+    { key: 'game', path: '/game', body: '<html>No game chunks</html>', message: /Game candidate application mismatch/ },
+  ];
+  for (const value of cases) {
+    const f = fixture();
+    for (const snapshot of Object.values(f.snapshots)) snapshot[0].projectSettings = { commandForIgnoringBuildStep: null };
+    f.candidatePages[value.key][value.path] = value.body;
+    const result = await f.run(); assertFailed(result, value.message);
+    assert.equal(writes(result).length, 0);
+    assert.equal(f.projects.main.targets.production.id, sites.main.baseline);
+    assert.equal(f.projects.game.targets.production.id, sites.game.baseline);
+  }
+});
+
+test('candidate CLI checks cannot accept arbitrary hosts or leak inherited CI credentials', async () => {
+  for (const host of ['main-candidate.vercel.app.evil.test', 'https://main-candidate.vercel.app', 'main-candidate.vercel.app/path', 'main-candidate.vercel.app?token=bad']) {
+    const f = fixture(); f.candidates.main.url = host;
+    const result = await f.run(); assertFailed(result, /Unexpected candidate hostname/);
+    assert.equal(result.cliCalls.length, 0); assert.equal(writes(result).length, 0);
+  }
+  const f = fixture();
+  f.state.onCandidateResponse = () => {
+    const error = Error(`CLI failure ${TOKEN}`); error.stdout = TOKEN; error.stderr = SECRET; throw error;
+  };
+  const result = await f.run(); assertFailed(result, /Authenticated candidate check failed/);
+  assert.equal(writes(result).length, 0);
+  assert.ok(!String(result.error).includes(TOKEN)); assert.ok(!String(result.error).includes(SECRET));
+  assert.ok(!result.logs.join('\n').includes(TOKEN)); assert.ok(!result.logs.join('\n').includes(SECRET));
 });
 
 test('a neighboring snapshot UID or a snapshot from another project cannot authorize a candidate', async () => {
@@ -256,14 +338,15 @@ test('promotion rejects a deployment response whose ID differs from the exact re
   }
 });
 
-test('promotion changes main then game, smoke-checks the public alias, and never accesses protected candidate URLs', async () => {
+test('promotion verifies protected apps before main then game promotion and public-alias smoke', async () => {
   const result = await fixture().run(); assert.equal(result.error, undefined);
   assert.deepEqual(writes(result).map(call => call.path), [
     `/v10/projects/${sites.main.project}/promote/${sites.main.candidate}`,
     `/v10/projects/${sites.game.project}/promote/${sites.game.candidate}`,
   ]);
   assert.ok(result.calls.some(call => call.origin === 'https://mir2.obelisk.build' && call.path === '/api/promotions/bootstrap'));
-  assert.ok(result.calls.every(call => !call.origin.includes('protected.vercel.app')));
+  assert.ok(result.calls.every(call => ['https://api.vercel.com', 'https://mir2.obelisk.build'].includes(call.origin)));
+  assert.equal(result.cliCalls.length, 5); assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
   assert.ok(result.logs.some(value => value.includes('"publicSmoke":"passed"')));
 });
 

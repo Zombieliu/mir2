@@ -26,7 +26,14 @@ a checksum list for the modified application.
 The `Promotion Website Release` workflow provides `unified-context`,
 `unified-stage` and `unified-promote`. Staging creates two production candidates
 without assigning public aliases. Promotion requires both candidates to be
-ready with the same exact commit, roots and reviewed production baselines. The
+ready with the same exact commit and reviewed production baselines. Explicit
+deployment root metadata, when present, must match; modern Git deployments may
+omit it. Before either alias changes, the official Vercel CLI authenticates
+with the existing CI identity to verify the actual candidate home, navigation,
+footer, download link, game page, PWA manifest and game revision. The CLI uses
+Vercel's automation bypass mechanism while deployment protection remains enabled.
+An explicit `unified_source_sha` lets a corrected release tool promote the same
+already reviewed candidates without rebuilding their unchanged applications. The
 marketing alias is promoted first because unique deployment URLs are protected.
 Public route and asset checks follow the game switch; a failure restores only
 projects still pointing at this release's candidates. No project environment
