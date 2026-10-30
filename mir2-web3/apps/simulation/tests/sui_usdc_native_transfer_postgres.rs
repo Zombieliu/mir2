@@ -53,15 +53,13 @@ impl Fixture {
             .unwrap();
         let scoped = format!("{base}{}options=-csearch_path%3D{schema}%20-clock_timeout%3D5000%20-cstatement_timeout%3D15000", if base.contains('?') {"&"} else {"?"});
         let mut db = Client::connect(&scoped, NoTls).unwrap();
-        assert_eq!(
-            MIGRATIONS.last().unwrap().0,
-            "0024_sui_usdc_native_transfer_authority"
-        );
+        let native_transfer_migration = MIGRATIONS.iter().position(|(id, _)|
+            *id == "0024_sui_usdc_native_transfer_authority").unwrap();
         // Model the previous deployed migration runner, including its durable
         // history. Without it, opening SimulationConfig would rerun old SQL.
         let mut migration = db.transaction().unwrap();
         migration.batch_execute("CREATE TABLE schema_migrations(version TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())").unwrap();
-        for (version, sql) in &MIGRATIONS[..MIGRATIONS.len() - 1] {
+        for (version, sql) in &MIGRATIONS[..native_transfer_migration] {
             migration.batch_execute(sql).unwrap();
             migration
                 .execute(
@@ -175,7 +173,9 @@ fn native_transfer_migration_preserves_legacy_json_and_refuses_ambiguous_digest_
     {
         let mut tx = f.db.transaction().unwrap();
         tx.batch_execute("INSERT INTO sui_usdc_payment_receipts SELECT chain_identifier,transaction_digest,event_seq+1,invoice_id||'-collision',account_id||'-collision',order_id||'-collision',receipt_json FROM sui_usdc_payment_receipts").unwrap();
-        let error = tx.batch_execute(MIGRATIONS.last().unwrap().1).unwrap_err();
+        let native_transfer_sql = MIGRATIONS.iter().find(|(id, _)|
+            *id == "0024_sui_usdc_native_transfer_authority").unwrap().1;
+        let error = tx.batch_execute(native_transfer_sql).unwrap_err();
         assert!(error
             .as_db_error()
             .unwrap()

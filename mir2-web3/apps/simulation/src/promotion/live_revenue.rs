@@ -172,11 +172,17 @@ impl PromotionStore {
                     {
                         continue;
                     }
-                    let early_payment = source.parts.iter().any(|p| {
-                        p.paid_at_ms > 0
-                            && p.paid_at_ms < confirmed
-                            && p.reason_code != "payment_environment_mismatch"
-                    });
+                    let mut early_payment = false;
+                    for part in &source.parts {
+                        if part.paid_at_ms > 0 && part.paid_at_ms < confirmed &&
+                            part.reason_code != "payment_environment_mismatch" &&
+                            !super::attribution_migration::permits_preconfirmation_payment(
+                                &mut tx,&self.environment,campaign_id,account_id,
+                                &part.source_order_id,part.paid_at_ms,confirmed)? {
+                            early_payment = true;
+                            break;
+                        }
+                    }
                     let future = source.entitlement_at_ms > now_ms
                         || source.paid_at_ms > now_ms
                         || source.source_observed_at_ms > now_ms;

@@ -337,7 +337,7 @@ fn original_v13_usdc_reader_rejects_new_transfer_authority_instead_of_dropping_i
 }
 #[test]
 fn migration_union_keeps_original_nineteen_and_never_repeats_usdc_backfill() {
-    assert_eq!(MIGRATIONS.len(), 27);
+    assert_eq!(MIGRATIONS.len(), 28);
     assert!(MIGRATIONS[..19]
         .iter()
         .all(|(id, _)| !id.contains("promotion")));
@@ -346,6 +346,7 @@ fn migration_union_keeps_original_nineteen_and_never_repeats_usdc_backfill() {
         .iter()
         .all(|(id, _)| id.contains("promotion")));
     assert_eq!(MIGRATIONS[26].0, "0024_sui_usdc_native_transfer_authority");
+    assert_eq!(MIGRATIONS[27].0, "0025_promotion_attribution_migration");
     assert!(MIGRATIONS
         .iter()
         .all(|(id, _)| *id != "0024_sui_usdc_billing_authority"));

@@ -297,7 +297,7 @@ fn require_actor(actor: &PromotionAdminActor, role: PromotionAdminRole) -> Resul
     }
     Ok(())
 }
-fn campaign<T: GenericClient>(
+pub(super) fn campaign<T: GenericClient>(
     client: &mut T,
     env: &str,
     id: &str,
@@ -313,7 +313,7 @@ fn campaign<T: GenericClient>(
     };
     db(client.query_opt(sql, &[&env, &id]))?.ok_or_else(|| "promotionCampaignMissing".into())
 }
-fn rules(row: &postgres::Row) -> Result<PromotionRules, String> {
+pub(super) fn rules(row: &postgres::Row) -> Result<PromotionRules, String> {
     serde_json::from_value(row.get(4)).map_err(|_| "promotionRulesInvalid".into())
 }
 fn configured_commission<T: GenericClient>(
@@ -365,16 +365,16 @@ pub(super) fn settlement_payable_micro_usd<T: GenericClient>(
             .ok_or_else(|| "promotionAmountOverflow".into())
     }
 }
-fn terms(row: &postgres::Row, version: &str) -> Result<(), String> {
+pub(super) fn terms(row: &postgres::Row, version: &str) -> Result<(), String> {
     if row.get::<_, String>(0) != version {
         return Err("promotionTermsChanged".into());
     }
     Ok(())
 }
-fn active(row: &postgres::Row, now: u64) -> bool {
+pub(super) fn active(row: &postgres::Row, now: u64) -> bool {
     row.get::<_, String>(1) == "active" && now >= positive(row.get(2)) && now < positive(row.get(3))
 }
-fn account<T: GenericClient>(
+pub(super) fn account<T: GenericClient>(
     client: &mut T,
     id: &str,
     lock: bool,
@@ -451,7 +451,7 @@ impl PromotionStore {
         }
     }
 
-    fn mutation(
+    pub(super) fn mutation(
         &self,
         account: &str,
         key: &str,
@@ -674,6 +674,9 @@ impl PromotionStore {
         now_ms: u64,
     ) -> Result<Value, String> {
         self.mutation(account_id,idempotency,"attribution.confirm",json!([campaign_id,candidate_id,terms_version]),now_ms,|tx| {
+            if let Some(result)=super::attribution_migration::try_confirm(tx,&self.environment,campaign_id,account_id,candidate_id,terms_version,now_ms)? {
+                return Ok(result);
+            }
             // Campaign row serializes every reservation, even across leaders.
             let row=campaign(tx,&self.environment,campaign_id,true)?; terms(&row,terms_version)?;
             if !active(&row,now_ms)||!row.get::<_,bool>(5)||!row.get::<_,bool>(6) { return Err("promotionRecruitmentClosed".into()); }
@@ -715,7 +718,9 @@ impl PromotionStore {
             let operators=db(client.query("SELECT role FROM promotion_operator_roles WHERE environment=$1 AND account_id=$2 AND revoked_at_ms IS NULL ORDER BY role",&[&self.environment,&account_id]))?.iter().map(|r|r.get::<_,String>(0)).collect::<Vec<_>>();
             let leader=db(client.query_opt("SELECT leader_id,status,display_name,display_character_index,invite_code FROM promotion_leaders WHERE environment=$1 AND campaign_id=$2 AND account_id=$3",&[&self.environment,&campaign_id,&account_id]))?;
             let leader_json=leader.as_ref().map(|r|json!({"id":r.get::<_,String>(0),"status":r.get::<_,String>(1),"displayName":r.get::<_,String>(2),"characterIndex":r.get::<_,i32>(3),"inviteCode":if r.get::<_,String>(1)=="approved"{Some(r.get::<_,String>(4))}else{None}}));
-            let attribution=db(client.query_opt("SELECT leader_id,confirmed_at_ms,status,reason_code,qualified_at_ms FROM promotion_attributions WHERE environment=$1 AND campaign_id=$2 AND account_id=$3",&[&self.environment,&campaign_id,&account_id]))?.map(|r|json!({"leaderId":r.get::<_,String>(0),"confirmedAtMs":positive(r.get(1)),"status":r.get::<_,String>(2),"reasonCode":r.get::<_,String>(3),"qualifiedAtMs":r.get::<_,Option<i64>>(4).map(positive)}));
+            let mut attribution=db(client.query_opt("SELECT leader_id,confirmed_at_ms,status,reason_code,qualified_at_ms FROM promotion_attributions WHERE environment=$1 AND campaign_id=$2 AND account_id=$3",&[&self.environment,&campaign_id,&account_id]))?.map(|r|json!({"leaderId":r.get::<_,String>(0),"confirmedAtMs":positive(r.get(1)),"status":r.get::<_,String>(2),"reasonCode":r.get::<_,String>(3),"qualifiedAtMs":r.get::<_,Option<i64>>(4).map(positive)}));
+            let (migration_candidate,migration)=super::attribution_migration::account_view(client,&self.environment,campaign_id,account_id,now_ms)?;
+            if let (Some(attribution),Some(migration))=(attribution.as_mut(),migration) { attribution["migration"]=migration; }
             let max_level = characters
                 .iter()
                 .filter_map(|c| c["level"].as_u64())
@@ -744,7 +749,7 @@ impl PromotionStore {
             let settlements = list_settlements(client, &self.environment, campaign_id, account_id)?;
             let appeals=db(client.query("SELECT appeal_id,category,status,created_at_ms FROM promotion_appeals WHERE environment=$1 AND campaign_id=$2 AND account_id=$3 ORDER BY created_at_ms DESC LIMIT 25",&[&self.environment,&campaign_id,&account_id]))?.iter().map(|r|json!({"id":r.get::<_,String>(0),"category":r.get::<_,String>(1),"status":r.get::<_,String>(2),"createdAtMs":positive(r.get(3))})).collect::<Vec<_>>();
             Ok(
-                json!({"environment":self.environment,"campaignId":campaign_id,"account":{"id":account_id,"registeredAtMs":positive(acc.get(1)),"banned":false},"characters":characters,"leader":leader_json,"dashboard":dashboard,"attribution":attribution,"qualification":{"levelReached":max_level>=u64::from(minimum),"activeUtcDays":active_days,"status":attribution.as_ref().and_then(|a|a["status"].as_str()).unwrap_or("not_bound"),"qualifiedAtMs":attribution.as_ref().and_then(|a|a.get("qualifiedAtMs"))},"sourceGaps":super::production_gate::gaps(client,&self.environment,campaign_id)?,"settlements":settlements,"payoutSettings":payout,"appeals":appeals,"permissions":{"isLeader":leader.is_some(),"isAdmin":!operators.is_empty(),"roles":operators},"dataMode":self.data_mode(),"payoutExecutionEnabled":campaign_payout_enabled(client,&self.environment,campaign_id)?}),
+                json!({"environment":self.environment,"campaignId":campaign_id,"account":{"id":account_id,"registeredAtMs":positive(acc.get(1)),"banned":false},"characters":characters,"leader":leader_json,"dashboard":dashboard,"attribution":attribution,"migrationCandidate":migration_candidate,"qualification":{"levelReached":max_level>=u64::from(minimum),"activeUtcDays":active_days,"status":attribution.as_ref().and_then(|a|a["status"].as_str()).unwrap_or("not_bound"),"qualifiedAtMs":attribution.as_ref().and_then(|a|a.get("qualifiedAtMs"))},"sourceGaps":super::production_gate::gaps(client,&self.environment,campaign_id)?,"settlements":settlements,"payoutSettings":payout,"appeals":appeals,"permissions":{"isLeader":leader.is_some(),"isAdmin":!operators.is_empty(),"roles":operators},"dataMode":self.data_mode(),"payoutExecutionEnabled":campaign_payout_enabled(client,&self.environment,campaign_id)?}),
             )
         })
     }
@@ -1706,7 +1711,7 @@ fn work_campaigns(
             let settlement=event.value["settlementId"].as_str().ok_or("promotionWorkSourceMissing")?;
             db(tx.query("SELECT campaign_id FROM promotion_settlements WHERE environment=$1 AND settlement_id=$2",&[&env,&settlement]))?
         },
-        "attribution.confirmed"|"qualification.updated"|"admin.command"|"admin.read"|"source.revenue_observation"=>{
+        "attribution.confirmed"|"qualification.updated"|"admin.command"|"admin.read"|"source.revenue_observation"|"migration.prepared"|"migration.confirmed"=>{
             if let Some(campaign)=event.value["campaignId"].as_str() {
                 db(tx.query("SELECT campaign_id FROM promotion_campaigns WHERE environment=$1 AND campaign_id=$2",&[&env,&campaign]))?
             } else if event.event_type=="attribution.confirmed" {
@@ -1738,11 +1743,11 @@ fn work_campaigns(
     Ok(unique.into_iter().collect())
 }
 
-struct AdmissionCapacity {
-    available: bool,
-    reason: &'static str,
-    reserve_micro_usd: u64,
-    total_reserved_micro_usd: u64,
+pub(super) struct AdmissionCapacity {
+    pub(super) available: bool,
+    pub(super) reason: &'static str,
+    pub(super) reserve_micro_usd: u64,
+    pub(super) total_reserved_micro_usd: u64,
 }
 fn worst_case_reserve(cap: u64) -> Result<u64, String> {
     cap.checked_mul(3000)
@@ -1751,7 +1756,7 @@ fn worst_case_reserve(cap: u64) -> Result<u64, String> {
         .checked_mul(10_000)
         .ok_or("promotionAmountOverflow".into())
 }
-fn admission_capacity<T: GenericClient>(
+pub(super) fn admission_capacity<T: GenericClient>(
     client: &mut T,
     env: &str,
     campaign_id: &str,

@@ -322,9 +322,9 @@ jobs:
           cargo +1.95.0 test --locked --release -p mir2-gateway --lib sui_usdc -- --test-threads=1
           cargo +1.95.0 test --locked --release -p mir2-simulation --lib sui_usdc -- --test-threads=1
           cargo +1.95.0 test --locked --release -p mir2-simulation --lib billing_provenance -- --test-threads=1
-          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance
+          cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance --example promotion_attribution_migration
           mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
-          cp target/release/mir2-gateway target/release/usdc_native_transfer_reconcile target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance ../promotion-backend-release/
+          cp target/release/mir2-gateway target/release/usdc_native_transfer_reconcile target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance target/release/examples/promotion_attribution_migration ../promotion-backend-release/
           cp config/promotion-windows-playtest-20261030.test.json ../promotion-backend-release/
           cp onchain/usdc-recharge/package.json onchain/usdc-recharge/package-lock.json onchain/usdc-recharge/.npmrc ../promotion-backend-release/usdc-recharge/
           cp onchain/usdc-recharge/service/cli.mjs onchain/usdc-recharge/service/driver.mjs onchain/usdc-recharge/service/model.mjs ../promotion-backend-release/usdc-recharge/service/
@@ -360,8 +360,8 @@ jobs:
           WINDOWS_CLONE_DB="mir2_promotion_windows_acceptance_${GITHUB_SHA:0:12}"
           "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres "$WINDOWS_CLONE_DB"
           export MIR2_PROMOTION_WINDOWS_TEST_DATABASE_URL="postgresql://postgres@127.0.0.1:55483/$WINDOWS_CLONE_DB"
-          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test sui_usdc_native_transfer_postgres --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment -- --test-threads=1 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
-          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance -- --test-threads=1 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test sui_usdc_native_transfer_postgres --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment --test promotion_attribution_migration -- --test-threads=1 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_attribution_migration -- --test-threads=1 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
           cargo +1.95.0 test --locked --release -p mir2-gateway --lib promotion_ -- --test-threads=1 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
