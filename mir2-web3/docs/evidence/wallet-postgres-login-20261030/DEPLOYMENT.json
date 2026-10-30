@@ -85,7 +85,13 @@
     "sha256": "55374ab511e1705c3ba00f84c093bb02473dd6cb92a6c28e963d1ec10c698c23"
   },
   "deployment": "promoted",
-  "humanPhoneAndCharacterSelectionAcceptance": "pending",
+  "humanPhoneAndCharacterSelectionAcceptance": "confirmed_by_user",
+  "humanWalletLoginAcceptance": {
+    "source": "human reply in the current chat",
+    "reportedResult": "已进入选角／创建角色界面",
+    "scope": "Windows Dubhe Wallet QR login to character selection or creation screen",
+    "passed": true
+  },
   "dockerStarted": false,
   "windowsClientPublished": false
 }

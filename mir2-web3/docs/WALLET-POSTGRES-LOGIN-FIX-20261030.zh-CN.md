@@ -43,7 +43,7 @@ CI 实际通过：wallet 23、passkey 8、password 21、账号创建失败回滚
 17:51（UTC+8）独立公网检查：测试网关 HTTP 200 且 revision 正确，PostgreSQL 持久化与 Redis 健康；独立钱包登录服务 HTTP 200、ready，仍为 `600444277…`；正确原生 Origin 的 WSS 101 握手通过并立即关闭，没有发送登录或写入账号。
 证明见 [PUBLIC-SMOKE.json](evidence/wallet-postgres-login-20261030/PUBLIC-SMOKE.json)。
 
-人工验收尚待玩家在当前 Windows 客户端按 F8，重新扫码并签署新的登录请求，确认进入选角/创建角色界面。服务端自动测试不代替该步骤，客户端无需重新下载安装。
+人工验收通过：玩家在本会话回复“已进入选角／创建角色界面”，确认当前 Windows 客户端重新扫码签名后完成远程测试服钱包登录。客户端无需重新下载安装；本次验收范围为钱包登录至选角/创建角色界面。
 
 ## 回滚边界
 
