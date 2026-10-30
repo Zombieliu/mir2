@@ -64,7 +64,7 @@
     "menuClick": "actual main navigation link opened /promotions?lang=zh-CN",
     "promotion": "title 团长推广计划 · Numeron; selected 简体中文; current test campaign numeron-playtest-20261029",
     "returnLink": "clicked 游戏官网 and verified Chinese main page with all three referral anchors",
-    "screenshot": "PUBLIC-MAIN-NAV.png",
+    "screenshot": "PUBLIC-MAIN-NAV.jpg",
     "temporaryViewportReset": true,
     "temporaryPreviewServerStopped": true
   },
