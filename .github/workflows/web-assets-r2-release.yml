@@ -340,6 +340,7 @@ jobs:
           CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
           CARGO_PROFILE_RELEASE_LTO: 'false'
           CARGO_PROFILE_RELEASE_DEBUG: '0'
+          CARGO_PROFILE_RELEASE_STRIP: symbols
           MIR2_RUN_PROMOTION_PG_TESTS: '1'
           MIR2_PROMOTION_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_promotion_windows_ci
         run: |
@@ -347,12 +348,15 @@ jobs:
           PG_BIN="$(pg_config --bindir)"
           PG_DATA="$RUNNER_TEMP/windows-promotion-pg"
           "$PG_BIN/initdb" -D "$PG_DATA" --auth=trust --username=postgres > "$RUNNER_TEMP/windows-promotion-pg-init.log"
-          "$PG_BIN/pg_ctl" -D "$PG_DATA" -l "$RUNNER_TEMP/windows-promotion-pg.log" -o '-h 127.0.0.1 -p 55483' start
+          "$PG_BIN/pg_ctl" -D "$PG_DATA" -l "$RUNNER_TEMP/windows-promotion-pg.log" -o "-h 127.0.0.1 -p 55483 -k $PG_DATA" start || { tail -n 40 "$RUNNER_TEMP/windows-promotion-pg.log"; exit 1; }
           trap '"$PG_BIN/pg_ctl" -D "$PG_DATA" -m fast stop' EXIT
           "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_promotion_windows_ci
+          WINDOWS_CLONE_DB="mir2_promotion_windows_acceptance_${GITHUB_SHA:0:12}"
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres "$WINDOWS_CLONE_DB"
+          export MIR2_PROMOTION_WINDOWS_TEST_DATABASE_URL="postgresql://postgres@127.0.0.1:55483/$WINDOWS_CLONE_DB"
           cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment -- --test-threads=1 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
           cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance -- --test-threads=1 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
-          cargo +1.95.0 test --locked --release -p mir2-gateway --lib web::promotions::tests -- --test-threads=1 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib promotion_ -- --test-threads=1 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
