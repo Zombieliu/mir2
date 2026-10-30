@@ -211,6 +211,33 @@ fn ledger_index(state: &Stage5SystemsState) -> Result<Option<usize>, String> {
     Ok(Some(index))
 }
 
+/// Only this validated private receipt can retain historical Gift item UIDs.
+/// Ordinary mail text and native shop receipts without instance UIDs are not
+/// JSON carriers for the allocator, regardless of their body contents.
+pub(in crate::runtime) fn visit_historical_monthly_card_uids(
+    account_id: &str,
+    character_index: i32,
+    state: &Stage5SystemsState,
+    visitor: &mut dyn FnMut(u64),
+) -> Result<(), String> {
+    if account_id.is_empty() || character_index < 0 {
+        return Err("gameShopGiftLedgerOwnerMismatch".into());
+    }
+    let Some(index) = ledger_index(state)? else {
+        return Ok(());
+    };
+    let ledger = decode_ledger(&state.mail[index])?;
+    if ledger.account_id != account_id || ledger.character_index != character_index {
+        return Err("gameShopGiftLedgerOwnerMismatch".into());
+    }
+    for entry in &ledger.entries {
+        for uid in &entry.monthly_card_uids {
+            visitor(*uid);
+        }
+    }
+    Ok(())
+}
+
 fn existing_outcome(
     state: &Stage5SystemsState,
     request: &NativeGameShopGiftRequest,
@@ -1079,6 +1106,92 @@ mod tests {
             record_entry(&mut state, "Sender", entry).unwrap();
         }
         state.mail.pop().unwrap()
+    }
+
+    fn monthly_history_entry(key: u8) -> GiftEntry {
+        let mut entry = entry(key);
+        entry.purchase.g_index = BILLING_MONTHLY_CARD_GAME_SHOP_INDEX;
+        entry.purchase.quantity = 2;
+        entry.outcome.g_index = BILLING_MONTHLY_CARD_GAME_SHOP_INDEX;
+        entry.outcome.quantity = 2;
+        entry.charged_credit = entry.unit_credit_price * 2;
+        let recipient = entry.recipient.as_ref().unwrap();
+        let request = format!("gameshop-gift-{}", entry.purchase.server_idempotency_key);
+        entry.monthly_card_uids = (0..2)
+            .map(|ordinal| {
+                crate::monthly_card::monthly_card_item_identity(
+                    &recipient.account_id,
+                    recipient.character.index,
+                    &request,
+                    ordinal,
+                )
+                .1
+            })
+            .collect();
+        entry
+    }
+
+    #[test]
+    fn gift_history_visitor_retains_retired_monthly_uids_and_ignores_all_ordinary_mail_bodies() {
+        let historical = monthly_history_entry(31);
+        let expected = historical.monthly_card_uids.clone();
+        let ledger = ledger_mail(vec![historical, entry(32)]);
+        // This sender receipt survives after the recipient and its physical
+        // card mail retire. No present recipient save is needed to retain IDs.
+        assert!(ledger.deleted && ledger.claimed);
+        let mut state = Stage5SystemsState::default();
+        state.mail.push(ledger.clone());
+        for body in [
+            "{\"unique_id\":18446744073709551615}".to_owned(),
+            "{\"item_uid\":\"invalid\"}".to_owned(),
+            format!("{}0{}", "[".repeat(80), "]".repeat(80)),
+        ] {
+            let mut ordinary = ledger.clone();
+            ordinary.delivery_nonce = crate::config::new_stage5_mail_delivery_nonce();
+            ordinary.from = "Friend".into();
+            ordinary.subject = "Ordinary text".into();
+            ordinary.body = body;
+            ordinary.deleted = false;
+            ordinary.claimed = false;
+            ordinary.locked = false;
+            ordinary.opened = false;
+            state.mail.push(ordinary);
+        }
+        let mut native = ledger;
+        native.from = "Mir2.Internal".into();
+        native.subject = "NativeGameShopLedgerV2".into();
+        native.delivery_nonce = "native-gameshop-ledger-v2".into();
+        native.body = "{\"unique_id\":18446744073709551615}".into();
+        state.mail.push(native);
+        let mut ids = Vec::new();
+        visit_historical_monthly_card_uids("payer", 1, &state, &mut |uid| ids.push(uid)).unwrap();
+        assert_eq!(ids, expected);
+        assert!(!ids.contains(&u64::MAX));
+    }
+
+    #[test]
+    fn gift_history_visitor_rejects_wrong_owner_or_invalid_monthly_binding_before_visiting() {
+        let ledger = ledger_mail(vec![monthly_history_entry(33)]);
+        let mut state = Stage5SystemsState::default();
+        state.mail.push(ledger);
+        for (account, index) in [("other", 1), ("payer", 2)] {
+            let mut ids = Vec::new();
+            assert!(
+                visit_historical_monthly_card_uids(account, index, &state, &mut |uid| ids
+                    .push(uid))
+                .is_err()
+            );
+            assert!(ids.is_empty());
+        }
+        let mut decoded = decode_ledger(&state.mail[0]).unwrap();
+        decoded.entries[0].monthly_card_uids[0] = u64::MAX;
+        state.mail[0].body = serde_json::to_string(&decoded).unwrap();
+        let mut ids = Vec::new();
+        assert!(
+            visit_historical_monthly_card_uids("payer", 1, &state, &mut |uid| ids.push(uid))
+                .is_err()
+        );
+        assert!(ids.is_empty());
     }
 
     #[test]

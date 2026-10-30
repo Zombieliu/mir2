@@ -443,6 +443,128 @@ fn player_drop_shared_uid_pg_public_system_mail_claim_commits_once_and_old_owner
 
 #[test]
 #[ignore = "requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority"]
+fn player_drop_shared_uid_pg_player_mail_text_cannot_poison_floor_or_block_fresh_delivery() {
+    use mir2_protocol::{ClientPacket, ServerPacket};
+    use mir2_simulation::{
+        deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
+        WorldRuntime,
+    };
+    let db = Database::new();
+    let config = initialized(&db, 4_000_000);
+    let allocator = config.server_item_uid_allocator().unwrap();
+    let account = "shared-uid-text-safety";
+    let name = "UidTextSafety";
+    let mut runtime =
+        crate::economy::start_test_runtime_with_config(config.clone(), account, name).unwrap();
+    let identity = runtime.active_identity().unwrap();
+    let before = shared_uid_stored_character(&db, account, identity.character_index);
+    let before_ids = shared_uid_owned_character_ids(&before);
+    let before_floor = allocator.issued_through().unwrap();
+    let texts = [
+        r#"{"unique_id":18446744073709551615,"issuedThrough":18446744073709551615}"#.to_string(),
+        r#"{"unique_id":"bogus","uid":-1}"#.to_string(),
+        r#"{"uniqueId":"0002","high_watermark":18446744073709551615}"#.to_string(),
+        format!("{}1{}", "[".repeat(80), "]".repeat(80)),
+    ];
+    for text in &texts {
+        let sent = runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::SendMail {
+                name: name.into(),
+                message: text.clone(),
+                gold: 0,
+                items_idx: [0; 5],
+                stamped: false,
+            }))
+            .unwrap();
+        assert!(sent.contains(&ServerPacket::MailSent { result: 1 }));
+        let canonical = shared_uid_stored_character(&db, account, identity.character_index);
+        let systems: mir2_simulation::Stage5SystemsState =
+            serde_json::from_str(canonical.stage5_systems_json.as_deref().unwrap()).unwrap();
+        assert!(systems.mail.iter().any(|mail| &mail.body == text));
+        assert_eq!(
+            canonical.gold, before.gold,
+            "empty player mail is uncharged"
+        );
+        assert_eq!(allocator.issued_through().unwrap(), before_floor);
+    }
+    runtime.save_active_character().unwrap();
+    drop(runtime);
+    // An independent trusted binding rescans the same canonical source cache;
+    // the new runtime then restores the character through actual PG reads.
+    let mut fresh_config = db.config("owner-a", 7);
+    fresh_config.account_store = config.account_store.clone();
+    let fresh_config = fresh_config.with_postgres_item_uid_allocator().unwrap();
+    assert_eq!(allocator.issued_through().unwrap(), before_floor);
+    let mut runtime = shared_uid_relogin(fresh_config.clone(), account, identity.character_index);
+    assert_eq!(allocator.issued_through().unwrap(), before_floor);
+    let helmet = mir2_game_data::crystal_item_by_name("BronzeHelmet").unwrap();
+    let receipt = deliver_stage5_system_mail(
+        &fresh_config,
+        Stage5MailDelivery {
+            target_kind: Stage5MailTargetKind::Character,
+            target_id: name.into(),
+            from: "Owned PG fixture".into(),
+            subject: "Fresh after untrusted player text".into(),
+            body: "The previous bodies are ordinary text".into(),
+            gold: 7,
+            items: vec![format!("crystal-item-{}", helmet.item_index)],
+        },
+    )
+    .unwrap();
+    assert_eq!(receipt.delivered_count, 1);
+    assert!(runtime.refresh_active_external_mail());
+    let mail_id = receipt.mail_ids[0];
+    let claimed = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }))
+        .unwrap();
+    assert!(claimed.contains(&ServerPacket::ParcelCollected { result: 1 }));
+    assert!(claimed.contains(&ServerPacket::GainedGold { gold: 7 }));
+    let fresh_ids: BTreeSet<_> = claimed
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::GainedItem { item } if item.item_index == helmet.item_index => {
+                Some(item.unique_id)
+            }
+            _ => None,
+        })
+        .collect();
+    assert_eq!(fresh_ids, [before_floor + 1].into_iter().collect());
+    assert_eq!(allocator.issued_through().unwrap(), before_floor + 1);
+    let committed = shared_uid_stored_character(&db, account, identity.character_index);
+    let after_ids = shared_uid_owned_character_ids(&committed);
+    assert_eq!(
+        after_ids
+            .difference(&before_ids)
+            .copied()
+            .collect::<BTreeSet<_>>(),
+        fresh_ids
+    );
+    assert_eq!(committed.gold, before.gold.checked_add(7).unwrap());
+    let systems: mir2_simulation::Stage5SystemsState =
+        serde_json::from_str(committed.stage5_systems_json.as_deref().unwrap()).unwrap();
+    for text in texts {
+        assert!(
+            systems.mail.iter().any(|mail| mail.body == text),
+            "text is preserved verbatim"
+        );
+    }
+    let repeat = runtime
+        .execute(WorldCommand::ClientPacket(ClientPacket::CollectParcel {
+            mail_id: u64::from(mail_id),
+        }))
+        .unwrap();
+    assert!(!repeat.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainedItem { .. } | ServerPacket::GainedGold { .. }
+    )));
+    assert_eq!(allocator.issued_through().unwrap(), before_floor + 1);
+    assert_eq!(counts(&db), (1, 1, 0, 0));
+}
+
+#[test]
+#[ignore = "requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority"]
 fn player_drop_shared_uid_pg_independent_issuers_drop_batches_and_restart_share_one_floor() {
     let db = Database::new();
     let first_config = initialized(&db, 10_000);

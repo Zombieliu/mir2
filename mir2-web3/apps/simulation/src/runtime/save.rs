@@ -2407,7 +2407,7 @@ pub(super) fn add_character_to_account(
     // takes its persist/account locks. The closure may assign the character
     // index, but must never call a live UID authority while those locks are held.
     let mut save = crystal_new_character_save(config, character);
-    starter_uid_planning::prepare_new_character(config, &mut save)?;
+    starter_uid_planning::prepare_new_character(config, account_id, &mut save)?;
     validate_character_save_record(&save)?;
     let account_id = account_id.to_string();
     let touched_accounts = vec![account_id.clone()];
@@ -2487,7 +2487,7 @@ pub(super) fn character_save_for_start(
         save.clone()
     };
     let expected = save.clone();
-    let changed = starter_uid_planning::prepare_character_start(config, &mut save)?;
+    let changed = starter_uid_planning::prepare_character_start(config, account_id, &mut save)?;
     if !changed {
         return Ok(Some(save));
     }
@@ -3405,15 +3405,25 @@ fn apply_character_save_with_timing(
     } else {
         starter_uid_planning::validate_inventory_identities(&restored_inventory)?;
     }
-    restored_inventory
-        .item_uid_issuance
-        .raise_serialized_floor(save)
-        .map_err(|error| {
-            super::item_uid_issuance::handle_item_uid_failure(
-                &world.resource::<RuntimeConfigResource>().config,
-                error,
-            )
-        })?;
+    if matches!(
+        &restored_inventory.item_uid_issuance,
+        super::item_uid_issuance::ItemUidIssuance::Durable(_)
+    ) {
+        let account_id = active_session_mutating_account_id(world.resource::<SessionResource>())
+            .ok_or("durable item UID restore requires an authenticated account")?;
+        restored_inventory
+            .item_uid_issuance
+            .raise_history_floor(super::item_uid_issuance::UidHistoryRoot::Save {
+                account_id: &account_id,
+                save,
+            })
+            .map_err(|error| {
+                super::item_uid_issuance::handle_item_uid_failure(
+                    &world.resource::<RuntimeConfigResource>().config,
+                    error,
+                )
+            })?;
+    }
     {
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());

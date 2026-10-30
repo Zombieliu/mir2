@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+
+running 5 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test runtime::items::craft_uid_transaction_tests::craft_output_batch_second_issue_failure_burns_first_without_partial_source_publication ... ok
+test runtime::items::craft_uid_transaction_tests::craft_uid_failure_preserves_recipe_materials_gold_and_tool_durability ... ok
+test runtime::items::craft_uid_transaction_tests::craft_uid_missed_chance_keeps_original_attempt_cost_and_never_calls_issuer ... ok
+test runtime::items::craft_uid_transaction_tests::craft_uid_success_uses_new_identity_and_publishes_original_costs_once ... ok
+test runtime::items::craft_uid_transaction_tests::craft_uid_unknown_burns_mock_identity_but_keeps_assets_and_freezes_source_clones ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 3251 filtered out; finished in 1.96s

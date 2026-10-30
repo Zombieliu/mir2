@@ -21,7 +21,7 @@ use super::crystal_compat::{
     DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
 };
 use super::item_uid_issuance::{
-    issue_for_staged_inventory, refresh_world_history_floor, ItemUidIssuance,
+    issue_for_staged_inventory, refresh_world_history_floor, ItemUidIssuance, UidHistoryRoot,
 };
 use super::items::{
     crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
@@ -2684,7 +2684,7 @@ pub(super) fn add_exact_ground_drop_items(
         // Its retired ID must still remain above the shared authority floor.
         plan.inventory
             .item_uid_issuance
-            .raise_serialized_floor(&payload.item)
+            .raise_history_floor(UidHistoryRoot::WireItem(&payload.item))
             .ok()?;
     }
     // Temporary planning IDs are not issued history. Only the actual original

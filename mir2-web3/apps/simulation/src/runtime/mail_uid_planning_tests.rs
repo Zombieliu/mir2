@@ -822,6 +822,70 @@ fn mail_uid_synthetic_keyed_attachment_is_legacy_only_and_never_enters_durable_i
 }
 
 #[test]
+fn mail_uid_public_send_mail_json_text_never_controls_floor_or_blocks_fresh_grant_claim() {
+    let bodies = [
+        "{\"unique_id\":18446744073709551615,\"monthlyCardUids\":[18446744073709551615]}"
+            .to_owned(),
+        "{\"item_uid\":\"not-a-uid\",\"carrier_uid\":-1,\"unique_id\":null}".to_owned(),
+        format!("{}0{}", "[".repeat(80), "]".repeat(80)),
+    ];
+    for body in bodies {
+        let mut fixture = Fixture::new("mail-json-text", vec![mail(1, vec![nested()], 5)]);
+        let previous = fixture.store.high.load(Ordering::SeqCst);
+        let sent = fixture.session.handle_packet(ClientPacket::SendMail {
+            name: "Scout".into(),
+            message: body.clone(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        assert!(sent
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+        assert_eq!(fixture.store.high.load(Ordering::SeqCst), previous);
+        assert!(fixture.store.ids().is_empty());
+        assert!(fixture.config.ensure_account_store_writable().is_ok());
+        let packets = fixture
+            .session
+            .handle_packet(ClientPacket::CollectParcel { mail_id: 1 });
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ParcelCollected { result: 1 })));
+        let issued = fixture.store.ids();
+        assert_eq!(issued.len(), 2);
+        assert!(issued[0] > previous && issued[1] > issued[0] && issued[1] < u64::MAX);
+        assert_eq!(fixture.store.high.load(Ordering::SeqCst), issued[1]);
+        assert_eq!(fixture.session.world_snapshot().gold, 105);
+        assert!(fixture
+            .session
+            .world_snapshot()
+            .stage5_systems
+            .mail
+            .iter()
+            .any(|mail| {
+                mail.from == "Scout"
+                    && mail.body == body
+                    && !mail.claimed
+                    && mail.item_states_json.is_empty()
+            }));
+        fixture.session.save_active_character().unwrap();
+        let durable: AccountStore =
+            serde_json::from_slice(&fs::read(&fixture.path).unwrap()).unwrap();
+        assert!(systems(&durable.accounts["demo"].saves[&0])
+            .unwrap()
+            .mail
+            .iter()
+            .any(|mail| mail.body == body));
+        assert!(fixture
+            .session
+            .handle_packet(ClientPacket::CollectParcel { mail_id: 1 })
+            .is_empty());
+        assert_eq!(fixture.store.ids(), issued);
+        assert_eq!(fixture.store.high.load(Ordering::SeqCst), issued[1]);
+    }
+}
+
+#[test]
 fn mail_uid_sidecarless_same_template_sockets_keep_positions_and_all_live_fields() {
     let original = sidecarless_socket_tree();
     let mut fixture = Fixture::new("sidecarless", vec![mail(1, vec![original.clone()], 5)]);

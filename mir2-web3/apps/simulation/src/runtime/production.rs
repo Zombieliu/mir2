@@ -151,6 +151,37 @@ pub(super) fn validate_checkpoint(save: &CharacterSaveRecord) -> Result<(), Stri
     }
     Ok(())
 }
+
+/// Only the declared, validated ledger carries production UID history. Request
+/// strings and other serialized text are never item identities. Keep retired
+/// debit identities in every job status so a later issuer cannot recycle them.
+pub(in crate::runtime) fn visit_historical_item_uids(
+    account_id: &str,
+    save: &CharacterSaveRecord,
+    visitor: &mut dyn FnMut(u64),
+) -> Result<(), String> {
+    let Some(state) = &save.personal_production else {
+        return Ok(());
+    };
+    let owner = owner_for(account_id, save)?;
+    if state.owner != owner {
+        return Err("production history account or actor binding mismatch".into());
+    }
+    validate_checkpoint(save)?;
+    let ledger = state.ledger()?;
+    for job in ledger.jobs_for(&owner) {
+        for debit in &job.debits {
+            let item: ItemState = serde_json::from_str(&debit.custody)
+                .map_err(|_| "invalid production debit custody history")?;
+            visitor(debit.uid);
+            super::item_uid_issuance::visit_historical_item_uids(
+                super::item_uid_issuance::UidHistoryRoot::Item(&item),
+                visitor,
+            )?;
+        }
+    }
+    Ok(())
+}
 pub(super) fn protect_checkpoint(
     save: &mut CharacterSaveRecord,
     durable: &CharacterSaveRecord,
@@ -450,6 +481,7 @@ fn now_ms() -> Result<u64, String> {
 fn reserve_production_output_uids(
     config: &crate::SimulationConfig,
     allocator: &UserItemUidAllocator,
+    account_id: &str,
     active: &CharacterSaveRecord,
     plan: &mut InventoryPlan,
 ) -> Result<Option<u64>, String> {
@@ -464,14 +496,15 @@ fn reserve_production_output_uids(
             .lock()
             .map_err(|_| "production source lock poisoned")?;
         super::item_uid_issuance::historical_uid_floor(
-            &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
-            0,
+            super::item_uid_issuance::UidHistoryRoot::Store(&store),
         )?
     };
     let floor = store_floor
         .max(super::item_uid_issuance::historical_uid_floor(
-            &serde_json::to_value(active).map_err(|error| error.to_string())?,
-            0,
+            super::item_uid_issuance::UidHistoryRoot::Save {
+                account_id,
+                save: active,
+            },
         )?)
         .max(super::inventory::inventory_max_unique_id(&plan.inventory));
     allocator
@@ -503,8 +536,7 @@ fn validate_production_uid_history(
 ) -> Result<(), String> {
     if let Some(floor) = reserved_history_floor {
         let current = super::item_uid_issuance::historical_uid_floor(
-            &serde_json::to_value(store).map_err(|error| error.to_string())?,
-            0,
+            super::item_uid_issuance::UidHistoryRoot::Store(store),
         )?;
         if current > floor {
             return Err(
@@ -709,6 +741,7 @@ impl SimulationSession {
                 let reserved_history_floor = reserve_production_output_uids(
                     &config,
                     &cfg.global_uid_allocator,
+                    &account,
                     &active,
                     &mut plan,
                 )?;

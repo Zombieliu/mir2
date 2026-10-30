@@ -1,5 +1,6 @@
 //! Mail claims plan the entire batch before contacting any real UID issuer.
 //! Temporary Legacy identities exist only in the private capacity plan.
+use super::super::item_uid_issuance::UidHistoryRoot;
 use super::super::items::{try_item_state_from_user_item, try_user_item_from_item_state};
 use super::super::save::{
     active_session_mutating_account_id, encode_state_vec, merge_external_stage5_mail,
@@ -435,9 +436,10 @@ fn temporary_fresh_tree(
     planning_floor: u64,
 ) -> Result<ItemState, Stage5MailClaimError> {
     let mut raw = complete_item_tree(&item)?;
+    // The complete validated carrier is still the original tree here. No
+    // private planning identity may enter this historical read or real issuer.
     let incoming =
-        item_uid_issuance::historical_uid_floor(&serde_json::to_value(&item).map_err(failure)?, 0)
-            .map_err(failure)?;
+        item_uid_issuance::historical_uid_floor(UidHistoryRoot::WireItem(&raw)).map_err(failure)?;
     let mut previous = planning_floor
         .max(incoming)
         .max(super::super::inventory::inventory_max_unique_id(inventory));
@@ -687,11 +689,21 @@ fn prepare_claims_with_authority(
     inventory.item_uid_issuance = item_uid_issuance::ItemUidIssuance::Legacy;
     // Keep private planning identities above every incoming attachment, so a
     // later existing-custody delivery cannot alias an earlier temporary tree.
-    let planning_floor = item_uid_issuance::historical_uid_floor(
-        &serde_json::to_value(&world.resource::<Stage5SystemsResource>().stage5_systems)
-            .map_err(failure)?,
-        0,
-    )
+    let session = authority
+        .get_resource::<SessionResource>()
+        .ok_or(Stage5MailClaimError::AuthorityUnavailable)?;
+    let account_id = active_session_mutating_account_id(session)
+        .ok_or(Stage5MailClaimError::AuthorityUnavailable)?;
+    let character_index = session
+        .selected_character
+        .as_ref()
+        .ok_or(Stage5MailClaimError::AuthorityUnavailable)?
+        .index;
+    let planning_floor = item_uid_issuance::historical_uid_floor(UidHistoryRoot::Systems {
+        account_id: &account_id,
+        character_index,
+        systems: &world.resource::<Stage5SystemsResource>().stage5_systems,
+    })
     .map_err(failure)?;
     let mut staged = World::new();
     staged.insert_resource(inventory);
@@ -1063,7 +1075,7 @@ pub(in crate::runtime) fn commit_claims(
                 );
             }
             if item_uid_issuance::historical_uid_conflicts(
-                &serde_json::to_value(&*store).map_err(|e| e.to_string())?,
+                UidHistoryRoot::Store(store),
                 &plan.issued,
             )? {
                 return Err("mail claim reserved UID conflicts with newer source history".into());

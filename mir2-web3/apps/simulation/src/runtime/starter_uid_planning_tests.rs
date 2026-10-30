@@ -279,7 +279,7 @@ fn starter_uid_planning_nested_fresh_tree_and_equipment_preserve_attributes() {
     let old_uid = equipment.user_item_unique_id;
     let mut save = crystal_new_character_save(&config, character("NestedEquippedStarter"));
     save.equipment_items_json = encode_state_vec(&[equipment]);
-    prepare_new_character(&config, &mut save).unwrap();
+    prepare_new_character(&config, "starter-a", &mut save).unwrap();
     let equipped = decode_saved_equipment_states("equipment", &save.equipment_items_json).unwrap();
     assert_ne!(equipped[0].user_item_unique_id, old_uid);
     assert_eq!(equipped[0].shape, Some(999));
@@ -352,7 +352,7 @@ fn starter_uid_planning_keeps_class_gender_equipment_loadouts() {
             let mut save = crystal_new_character_save(&config, person);
             let before =
                 decode_saved_equipment_states("equipment", &save.equipment_items_json).unwrap();
-            prepare_new_character(&config, &mut save).unwrap();
+            prepare_new_character(&config, "starter-a", &mut save).unwrap();
             let after =
                 decode_saved_equipment_states("equipment", &save.equipment_items_json).unwrap();
             assert_eq!(before.len(), after.len());
@@ -401,7 +401,7 @@ fn starter_uid_planning_mixed_zero_parent_with_assigned_child_is_rejected() {
     root.socket_slots = 2;
     root.socketed.push(child);
     save.inventory_items_json = encode_state_vec(&[root]);
-    assert!(prepare_character_start(&config, &mut save)
+    assert!(prepare_character_start(&config, "starter-a", &mut save)
         .unwrap_err()
         .contains("already assigned/exact child"));
     assert_eq!(probe.issued.load(Ordering::SeqCst), 0);
@@ -419,7 +419,7 @@ fn starter_uid_planning_exact_zero_is_not_reidentified_by_controlled_legacy_star
     wire.unique_id = 0;
     let exact = try_item_state_from_user_item(plain, &wire).unwrap();
     save.inventory_items_json = encode_state_vec(&[exact]);
-    assert!(prepare_character_start(&config, &mut save).is_err());
+    assert!(prepare_character_start(&config, "starter-a", &mut save).is_err());
     assert_eq!(probe.issued.load(Ordering::SeqCst), 0);
 }
 
@@ -429,8 +429,8 @@ fn starter_uid_planning_unavailable_and_fenced_cannot_create_or_repair() {
         let mut config = SimulationConfig::default();
         config.item_uid_issuance = policy;
         let mut save = crystal_new_character_save(&config, character("NoMintStarter"));
-        assert!(prepare_new_character(&config, &mut save).is_err());
-        assert!(prepare_character_start(&config, &mut save).is_err());
+        assert!(prepare_new_character(&config, "starter-a", &mut save).is_err());
+        assert!(prepare_character_start(&config, "starter-a", &mut save).is_err());
     }
 }
 
@@ -467,7 +467,7 @@ fn starter_uid_planning_duplicate_max_history_rejected_without_real_floor_update
     duplicate.slot = 1;
     save.inventory_items_json = encode_state_vec(&[first, duplicate]);
     let before = serde_json::to_value(&save).unwrap();
-    assert!(prepare_character_start(&config, &mut save).is_err());
+    assert!(prepare_character_start(&config, "starter-a", &mut save).is_err());
     assert_eq!(before, serde_json::to_value(&save).unwrap());
     assert_no_allocator_writes(&probe);
 }
@@ -481,7 +481,7 @@ fn starter_uid_planning_invalid_max_template_rejected_without_real_floor_update(
     invalid.unique_id = u64::MAX;
     invalid.key = "unknown-starter-template".into();
     save.inventory_items_json = encode_state_vec(&[invalid]);
-    assert!(prepare_character_start(&config, &mut save).is_err());
+    assert!(prepare_character_start(&config, "starter-a", &mut save).is_err());
     assert_no_allocator_writes(&probe);
 }
 
@@ -498,7 +498,7 @@ fn starter_uid_planning_late_invalid_fresh_tree_prevents_all_real_reservations()
     let child = embedded_item_state_from_template(&child_template, ItemContainer::Bag1, 2);
     second.socketed.push(child); // a later fresh root has an out-of-width child
     save.inventory_items_json = encode_state_vec(&[first, second]);
-    assert!(prepare_character_start(&config, &mut save).is_err());
+    assert!(prepare_character_start(&config, "starter-a", &mut save).is_err());
     assert_no_allocator_writes(&probe);
 }
 
@@ -511,6 +511,153 @@ fn starter_uid_planning_private_preflight_never_installs_or_issues_temporary_ids
     assert_eq!(fresh.equipment.len(), save.equipment_items_json.len());
     assert_eq!(original, serde_json::to_value(&save).unwrap());
     assert_no_allocator_writes(&probe);
+}
+
+#[test]
+fn starter_uid_planning_opaque_max_mail_cannot_raise_store_or_candidate_floor() {
+    let (config, probe) = mock(None, false);
+    let mut old = crystal_new_character_save(&config, character("OpaqueMailStarter"));
+    let template = crystal_item_by_name("BronzeHelmet").unwrap();
+    let mut retained = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+    retained.unique_id = 925_000;
+    old.inventory_items_json = encode_state_vec(&[retained]);
+    let text = format!(
+        "{{\"unique_id\":{},\"nested\":\"{{\\\"issuedThrough\\\":{}}}\"}}",
+        u64::MAX,
+        u64::MAX
+    );
+    let mut systems = crate::Stage5SystemsState::default();
+    systems.mail.push(crate::Stage5MailMessage {
+        id: 1,
+        delivery_nonce: "".into(),
+        from: "ordinary-player".into(),
+        to: old.character.name.clone(),
+        subject: text.clone(),
+        body: text.clone(),
+        gold: 0,
+        items: Vec::new(),
+        item_states_json: Vec::new(),
+        attachment_origin: crate::Stage5MailAttachmentOrigin::LegacyUnknown,
+        opened: false,
+        locked: false,
+        claimed: false,
+        deleted: false,
+    });
+    old.stage5_systems_json = Some(serde_json::to_string(&systems).unwrap());
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let account = store.accounts.get_mut("starter-a").unwrap();
+        account.characters.push(old.character.clone());
+        account.saves.insert(0, old);
+    }
+    // New-character planning scans the existing Store; controlled Start also
+    // scans the candidate Save containing the same opaque text.
+    add_character_to_account(&config, "starter-b", character("AfterOpaqueMail")).unwrap();
+    let started = character_save_for_start(&config, "starter-a", 0)
+        .unwrap()
+        .unwrap();
+    let decoded = decode_and_validate_character_save(&started).unwrap();
+    assert_eq!(decoded.inventory_items[0].unique_id, 925_000);
+    assert_eq!(decoded.stage5_systems.mail[0].body, text);
+    assert!(probe.issued.load(Ordering::SeqCst) > 0);
+    let high = probe.floor.load(Ordering::SeqCst);
+    assert!(high > 925_000 && high < 926_000);
+    assert_eq!(
+        high,
+        historical_uid_floor(UidHistoryRoot::Store(&config.account_store.lock().unwrap())).unwrap()
+    );
+    assert!(same_character_save(
+        &started,
+        &character_save_for_start(&config, "starter-a", 0)
+            .unwrap()
+            .unwrap(),
+    )
+    .unwrap());
+    assert_eq!(probe.floor.load(Ordering::SeqCst), high);
+}
+
+#[test]
+fn starter_uid_planning_fresh_candidate_counts_original_ids_without_provisional_ids() {
+    let (config, _) = mock(None, false);
+    let mut save = empty_owned_save(&config, "FreshHistoryOnly");
+    let template = crystal_item_by_name("BronzeHelmet").unwrap();
+    let child_template = crystal_item_by_name("BronzeBell").unwrap();
+    let mut root = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+    root.socket_slots = 2;
+    for slot in 0..2 {
+        root.socketed.push(embedded_item_state_from_template(
+            &child_template,
+            ItemContainer::Bag1,
+            slot,
+        ));
+    }
+    save.inventory_items_json = encode_state_vec(&[root.clone()]);
+    let fresh = preflight_roots(&save, FreshRoots::all(&save), false).unwrap();
+    assert_eq!(
+        candidate_history_floor("starter-a", &save, &fresh).unwrap(),
+        0
+    );
+    root.socketed[1].unique_id = 999_999;
+    save.inventory_items_json = encode_state_vec(&[root]);
+    let fresh = preflight_roots(&save, FreshRoots::all(&save), false).unwrap();
+    assert_eq!(
+        candidate_history_floor("starter-a", &save, &fresh).unwrap(),
+        999_999
+    );
+}
+
+#[test]
+fn starter_uid_planning_fresh_removed_child_reference_is_retired_before_real_issuance() {
+    for equipped in [false, true] {
+        let (config, probe) = mock(None, false);
+        let mut save = empty_owned_save(&config, "RemovedSocketStarter");
+        let template = crystal_item_by_name("BronzeHelmet").unwrap();
+        let child_template = crystal_item_by_name("BronzeBell").unwrap();
+        let mut root = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+        root.unique_id = 100;
+        root.socket_slots = 1;
+        let mut child = embedded_item_state_from_template(&child_template, ItemContainer::Bag1, 0);
+        child.unique_id = 990_001;
+        let mut wire = try_user_item_from_item_state(&root).unwrap();
+        wire.slots[0] = Some(try_user_item_from_item_state(&child).unwrap());
+        let mut root = try_item_state_from_user_item(root, &wire).unwrap();
+        root.socketed.clear();
+        assert_eq!(
+            root.user_item_metadata
+                .as_ref()
+                .unwrap()
+                .captured_socket_positions
+                .as_ref()
+                .unwrap()[0]
+                .unwrap()
+                .unique_id,
+            990_001
+        );
+        validate_committed_item_state_carrier(&root).unwrap();
+        if equipped {
+            let equipment = super::super::super::equipment::equipment_state_from_item_state(
+                &root,
+                crate::EquipmentSlot::Helmet,
+            );
+            save.equipment_items_json = encode_state_vec(&[equipment]);
+        } else {
+            save.inventory_items_json = encode_state_vec(&[root]);
+        }
+        let before = serde_json::to_value(&save).unwrap();
+        let fresh = preflight_roots(&save, FreshRoots::all(&save), false).unwrap();
+        assert_eq!(
+            candidate_history_floor("starter-a", &save, &fresh).unwrap(),
+            990_001
+        );
+        assert_eq!(serde_json::to_value(&save).unwrap(), before);
+        assert_no_allocator_writes(&probe);
+        // The candidate is absent from the Store: its retained map alone must
+        // raise the real source floor before fresh rehydration clears that map.
+        prepare_new_character(&config, "starter-a", &mut save).unwrap();
+        assert_eq!(ids(&save), BTreeSet::from([990_002]));
+        assert_eq!(probe.issued.load(Ordering::SeqCst), 1);
+        assert_eq!(probe.floor.load(Ordering::SeqCst), 990_002);
+    }
 }
 
 fn exact_parent_with_legacy_child_and_grandchild() -> ItemState {
@@ -615,7 +762,7 @@ fn starter_uid_planning_exact_parent_hidden_grandchild_conflict_rejects_before_r
     other.unique_id = 300;
     let mut save = empty_owned_save(&config, "HiddenGrandchildConflict");
     save.inventory_items_json = encode_state_vec(&[root, other]);
-    assert!(prepare_character_start(&config, &mut save)
+    assert!(prepare_character_start(&config, "starter-a", &mut save)
         .unwrap_err()
         .contains("duplicate item UID"));
     assert_no_allocator_writes(&probe);

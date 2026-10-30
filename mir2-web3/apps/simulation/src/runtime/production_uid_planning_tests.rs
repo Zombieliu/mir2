@@ -428,3 +428,139 @@ fn production_uid_failed_capacity_plan_does_not_mint_and_postcommit_replay_never
     assert_eq!(fixture.store.issued_ids(), after);
     assert_eq!(fs::read(&fixture.path).unwrap(), bytes);
 }
+
+#[test]
+fn production_uid_history_preserves_running_collected_and_cancelled_debits() {
+    for status in [
+        JobStatus::Running,
+        JobStatus::Collected,
+        JobStatus::Cancelled,
+    ] {
+        let mut fixture = Fixture::new("typed-retired-history");
+        let collect = fixture.start_job();
+        if status != JobStatus::Running {
+            let terminal = if status == JobStatus::Cancelled {
+                let ProductionAction::Collect { job } = collect.action else {
+                    unreachable!()
+                };
+                ProductionCommand {
+                    request_id: "cancel-1".into(),
+                    facility_id: collect.facility_id,
+                    action: ProductionAction::Cancel { job },
+                }
+            } else {
+                collect
+            };
+            fixture
+                .session
+                .run_personal_production(
+                    terminal,
+                    if status == JobStatus::Cancelled {
+                        1001
+                    } else {
+                        61_000
+                    },
+                    |_| Ok(()),
+                )
+                .unwrap();
+        }
+        let mut save = fixture.durable();
+        assert_eq!(
+            save.personal_production
+                .as_ref()
+                .unwrap()
+                .ledger()
+                .unwrap()
+                .jobs_for(&owner_for("demo", &save).unwrap())
+                .next()
+                .unwrap()
+                .status,
+            status
+        );
+        // This history-only copy has no live owner for the spent input. Its
+        // persisted ledger must still protect the original debit identity.
+        save.inventory_items_json.clear();
+        save.belt_items_json.clear();
+        save.storage_items_json.clear();
+        save.equipment_items_json.clear();
+        save.equipment_items_explicit_empty = true;
+        let before = fixture.store.issued_ids();
+        let mut ids = Vec::new();
+        visit_historical_item_uids("demo", &save, &mut |uid| ids.push(uid)).unwrap();
+        assert!(!ids.is_empty());
+        assert!(ids.iter().all(|uid| *uid == 700_001));
+        assert_eq!(
+            super::super::item_uid_issuance::historical_uid_floor(
+                super::super::item_uid_issuance::UidHistoryRoot::Save {
+                    account_id: "demo",
+                    save: &save,
+                }
+            )
+            .unwrap(),
+            700_001
+        );
+        assert_eq!(fixture.store.issued_ids(), before);
+    }
+}
+
+#[test]
+fn production_uid_history_requires_actual_owner_and_valid_ledger_before_visiting() {
+    let mut fixture = Fixture::new("typed-history-binding");
+    fixture.start_job();
+    let save = fixture.durable();
+    let mut ids = Vec::new();
+    assert!(
+        visit_historical_item_uids("another-account", &save, &mut |uid| ids.push(uid)).is_err()
+    );
+    assert!(ids.is_empty());
+    let mut invalid = save.clone();
+    let state = invalid.personal_production.as_mut().unwrap();
+    let mut checkpoint: serde_json::Value = serde_json::from_str(&state.ledger_json).unwrap();
+    for job in checkpoint["jobs"].as_object_mut().unwrap().values_mut() {
+        job["catalog_version"] = serde_json::json!("unsupported-production-version");
+    }
+    state.ledger_json = serde_json::to_string(&checkpoint).unwrap();
+    assert!(visit_historical_item_uids("demo", &invalid, &mut |uid| ids.push(uid)).is_err());
+    assert!(ids.is_empty());
+    let mut absent = save;
+    absent.personal_production = None;
+    visit_historical_item_uids("another-account", &absent, &mut |uid| ids.push(uid)).unwrap();
+    assert!(ids.is_empty(), "an absent ledger cannot synthesize history");
+}
+
+#[test]
+fn production_uid_opaque_json_mail_does_not_exhaust_output_authority() {
+    let mut fixture = Fixture::new("typed-opaque-text");
+    let mut collect = fixture.start_job();
+    let active = fixture.durable();
+    crate::deliver_stage5_system_mail(
+        &fixture.config,
+        crate::Stage5MailDelivery {
+            target_kind: crate::Stage5MailTargetKind::Character,
+            target_id: active.character.name,
+            from: "ordinary-text-fixture".into(),
+            subject: format!("{{\"uid\":{}}}", u64::MAX),
+            body: format!(
+                "{{\"unique_id\":{},\"issuedThrough\":{}}}",
+                u64::MAX,
+                u64::MAX
+            ),
+            gold: 0,
+            items: Vec::new(),
+        },
+    )
+    .unwrap();
+    let before = fixture.store.issued_ids();
+    let high = fixture.store.high.load(Ordering::SeqCst);
+    collect.request_id = u64::MAX.to_string();
+    let execution = fixture
+        .session
+        .run_personal_production(collect, 61_000, |_| Ok(()))
+        .unwrap();
+    assert_eq!(fixture.store.issued_ids().len(), before.len() + 1);
+    assert!(gained_uid(&execution) > high);
+    assert!(gained_uid(&execution) < u64::MAX);
+    let systems: crate::Stage5SystemsState =
+        serde_json::from_str(fixture.durable().stage5_systems_json.as_deref().unwrap()).unwrap();
+    assert!(systems.mail[0].body.contains(&u64::MAX.to_string()));
+}

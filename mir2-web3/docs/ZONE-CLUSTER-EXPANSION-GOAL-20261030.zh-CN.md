@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 第八片已接整批通用/Craft/采矿/邮件/起始物品及来源 CAS；454次选定执行和Gateway/admin bins、simulation test targets编译通过，含显式重跑10个共享UID与2个Host PG函数。仍缺 typed 历史扫描安全修复、PG已有实例邮件的持久归属/收据、其他issuer/完整census切换、租赁原子托管、冻结对账及耗材动作耦合；不能据此启动完整迁移或宣称容量/成本 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 第九片修复文本污染水位，统一typed历史读取、保留removed socket与fresh候选引用，并修复采矿磨损UID；681次选定执行和Gateway/admin bins、simulation test targets编译通过，含显式11个共享UID与2个Host PG函数。仍缺PG已有实例邮件持久归属/收据、其他issuer/完整census切换、租赁原子托管、冻结对账及耗材动作耦合；不能据此启动完整迁移或宣称容量/成本 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -265,3 +265,21 @@ PG当前库不能证明外部历史不存在。操作员必须提供同一UID域
 租赁开始也尚无双账号原子来源，不能只修改归还：需要 RentalStart 固定双方身份、费用、完整树和到期；死亡/到期归还对同一 loan 做互斥 CAS，将借方原实例移至贷方邮件并提交收据。不能使用可变名称作为归属证明。完整 census、所有 issuer/writer 切换、冻结进程对账及耗材动作耦合仍在 G2 队列中；G3–G7目标保持不变。
 
 无新增 DDL。本片增加的来源 JSON 字段须保留；回退先关闭新请求、保留所有未决投递/编号/收据并对账，不混跑会抹掉来源字段的旧 writer。未修改远程 TEST、公网更新、Docker、真实收费或硬件成本假设。
+
+## G2 第九片：物品历史扫描的类型与信任边界
+
+本片基线为 `0dd7d15170ccfa9a4c783ffaf7d2c940aaf63a3c`。最终19组通过：**681次选定测试执行、Gateway/admin bins、simulation test targets编译及68个共同选定源文件哈希核对**；其中显式重跑11个共享UID PG函数和2个Host PG函数，其余25个ignored PG函数未在本轮显式重跑。过滤器有重叠，不是唯一覆盖数或玩家数。结果集中在[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-typed-item-uid-history-and-opaque-player-text)。第八片文本扫描缺陷已修复并按本片范围验证；公开PG issuer仍关闭，G2和3000–5000人全战斗容量仍未完成。
+
+删除任意`Serialize`/`Value`/字符串递归扫描入口，改用封闭的AccountStore、带实际账号的Save、带实际账号和角色的Systems、ItemState与UserItem五种根。只在明确声明的资产JSON字段解码；玩家邮件正文、姓名、描述、NPC保存值、请求编号和商品选择器始终按其原类型处理。共享源与活动存档全部纯校验后，才一次推进真实水位；声明资产损坏、账本版本或实际owner不符时，不先写入发行器。
+
+遍历保留原始非零UID及完整live/socket/metadata树，不经旧转换器生成网格fallback。已移除子物品的`captured_socket_positions`仍属于保留历史，不能因live子树消失而漏掉；镜像和历史重复引用不等于重复物理归属。起始物品先完整预检，新树只读取原始编号并从严格保留存档中分离，私有临时验证编号不会进入真实floor。旧trade/refine/rental已有引用值仍保守保留，不能凭小数字猜测并删除可能真实的编号；这不证明所有旧引用都曾由全局发行器签发，仍须完整census认证。
+
+NPC journal在实际账号/角色/revision校验后，只读取Committed的`incoming_unique_id`，包括已被堆叠吸收的编号；Rejected和原始`request.item_index`不构成发行历史。生产账本验证实际incarnation和版本后，读取所有状态任务的真实Debit与custody。月卡回执、求购锁/交付（包括released/claimed）、共享行会/Hero及Stone Cut保留记录沿各自schema读取，石头serial、邮件ID和求购quote选择器不算普通物品UID。
+
+相邻回归还发现个人采矿磨损包仍固定使用Weapon槽编号；本片改为使用验证过的真实装备UID，并保留合法Legacy缺精确身份时的原fallback。采矿fixture改为完整一致的PickAxe载体，先确认工具与历史预检有效，再单独注入真实File发行器损坏，避免把错误装备造成的拒绝冒充发行故障。NPC的MAX商品选择器实际在可信intent构造前就被目录校验拒绝；相应流程测试不再错误地假定已持久化terminal Rejected。
+
+隐藏Gift账本通过唯一保留nonce、既有结构/版本/结果验证及实际账号/角色绑定，才读取`monthly_card_uids`；普通正文不能自称账本。NativeGameShopLedgerV2不含UserItem UID，不为它扩大正文解析范围。本片不重做月卡、充值或求购经济规则。
+
+验证分为纯typed载体/账本、File与Session、实际PG三个层级。新增PG用例通过公开SendMail提交MAX、非法/非规范UID及80层JSON正文，要求原文落库且水位不变，再经独立可信绑定、实际重登、公开奖励与CollectParcel到账、重复领取及直接PG水位/存档读回核对。独立绑定复用同源cache，不能称为物理进程重启或多机故障试验。原始坏状态不会自动修复，已经烧掉或推进的水位也不能下降。
+
+无新增DDL或持久字段；回退必须保留所有水位、预留、来源和收据，并保持新请求关闭，不能重新启用会解码任意玩家文本的旧writer。完整外部/世界历史census、按UID的持久归属及不可变转移收据、其他issuer切换、租赁原子托管、冻结进程对账及耗材动作耦合仍属G2。当前全cache历史遍历和串行水位成本尚无吞吐资格；后续需随完整切换消除全量扫描依赖，再做G3–G7与3000–5000人全战斗实测。远程TEST、公网更新、Docker和生产收费保持未改。

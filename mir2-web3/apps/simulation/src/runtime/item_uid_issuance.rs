@@ -4,6 +4,12 @@
 use super::resources::InventoryResource;
 use crate::{SimulationConfig, UserItemUidAllocator, UserItemUidError, UserItemUidReason};
 
+#[path = "item_uid_history.rs"]
+mod history;
+pub(in crate::runtime) use history::{
+    historical_uid_conflicts, historical_uid_floor, visit_historical_item_uids, UidHistoryRoot,
+};
+
 pub(crate) const ITEM_UID_COMMIT_OUTCOME_UNKNOWN: &str = "ITEM_UID_COMMIT_OUTCOME_UNKNOWN";
 
 pub(crate) fn item_uid_error(error: UserItemUidError) -> String {
@@ -79,105 +85,12 @@ impl ItemUidIssuance {
         }
     }
 
-    pub(super) fn raise_serialized_floor<T: serde::Serialize>(
-        &self,
-        value: &T,
-    ) -> Result<(), String> {
+    pub(super) fn raise_history_floor(&self, root: UidHistoryRoot<'_>) -> Result<(), String> {
         if matches!(self, Self::Durable(_)) {
-            self.raise_floor(historical_uid_floor(
-                &serde_json::to_value(value).map_err(|error| error.to_string())?,
-                0,
-            )?)?;
+            self.raise_floor(historical_uid_floor(root)?)?;
         }
         Ok(())
     }
-}
-
-/// Conservative scan of a complete account/save image, including JSON-encoded
-/// custody. This is a floor adjustment, not a complete deployment census.
-pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> Result<u64, String> {
-    let mut floor = 0;
-    visit_historical_uids(value, depth, &mut |uid| floor = floor.max(uid))?;
-    Ok(floor)
-}
-
-/// Local CAS protection uses the same conservative carriers as the floor scan.
-/// This is not a complete-history census or a physical ownership checker.
-pub(crate) fn historical_uid_conflicts(
-    value: &serde_json::Value,
-    ids: &std::collections::BTreeSet<u64>,
-) -> Result<bool, String> {
-    let mut conflict = false;
-    visit_historical_uids(value, 0, &mut |uid| {
-        conflict |= uid != 0 && ids.contains(&uid)
-    })?;
-    Ok(conflict)
-}
-
-fn visit_historical_uids(
-    value: &serde_json::Value,
-    depth: usize,
-    visitor: &mut impl FnMut(u64),
-) -> Result<(), String> {
-    if depth > 64 {
-        return Err("item UID history scan depth exceeded".into());
-    }
-    match value {
-        serde_json::Value::Object(fields) => {
-            for (key, value) in fields {
-                if matches!(
-                    key.as_str(),
-                    "unique_id"
-                        | "uniqueId"
-                        | "uid"
-                        | "user_item_unique_id"
-                        | "userItemUniqueId"
-                        | "incomingUniqueId"
-                        | "incoming_unique_id"
-                        | "item_uid"
-                        | "itemUid"
-                        | "carrier_uid"
-                        | "carrierUid"
-                        | "consume_carrier_uid"
-                        | "issuedThrough"
-                        | "issued_through"
-                        | "high_watermark"
-                ) && !value.is_null()
-                {
-                    let uid = if let Some(uid) = value.as_u64() {
-                        uid
-                    } else if let Some(text) = value.as_str() {
-                        let uid: u64 = text.parse().map_err(|_| "invalid historical item UID")?;
-                        if text != uid.to_string() {
-                            return Err("noncanonical historical item UID".into());
-                        }
-                        uid
-                    } else {
-                        return Err("invalid historical item UID".into());
-                    };
-                    visitor(uid);
-                }
-                visit_historical_uids(value, depth + 1, visitor)?;
-            }
-        }
-        serde_json::Value::Array(rows) => {
-            for row in rows {
-                visit_historical_uids(row, depth + 1, visitor)?;
-            }
-        }
-        serde_json::Value::String(encoded)
-            if encoded.trim_start().starts_with('{') || encoded.trim_start().starts_with('[') =>
-        {
-            // This helper adjusts a local floor; arbitrary player text can
-            // begin with '[' or '{'. A complete deployment census must decode
-            // its declared carriers strictly instead of using this heuristic.
-            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(encoded) {
-                visit_historical_uids(&parsed, depth + 1, visitor)?;
-            }
-        }
-        _ => {}
-    }
-    Ok(())
 }
 
 pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> Result<(), String> {
@@ -195,26 +108,32 @@ pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> R
     config.item_uid_issuance.require_same(allocator)?;
     config.item_uid_issuance.validate_source_config(config)?;
     config.ensure_account_store_writable()?;
-    let floor = {
+    let mut floor = {
         let store = config
             .account_store
             .lock()
             .map_err(|_| "account store lock poisoned")?;
-        historical_uid_floor(
-            &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
-            0,
-        )?
+        historical_uid_floor(UidHistoryRoot::Store(&store))?
     };
+    // Validate the whole local checkpoint before changing any durable floor.
+    // Its actual authenticated account is context, never a string parsed from
+    // a journal, mail header, or an arbitrary serialized image.
+    if let Some(save) = super::save::snapshot_active_character_save(world) {
+        let session = world
+            .get_resource::<super::resources::SessionResource>()
+            .ok_or("item UID history requires a session")?;
+        let account_id = super::save::active_session_mutating_account_id(session)
+            .ok_or("item UID history requires an authenticated account")?;
+        floor = floor.max(historical_uid_floor(UidHistoryRoot::Save {
+            account_id: &account_id,
+            save: &save,
+        })?);
+    }
     // PostgreSQL issuers take the lease/UID row locks. Never retain the local
     // account mutex while contacting a durable issuer.
     policy
         .raise_floor(floor)
         .map_err(|error| handle_item_uid_failure(config, error))?;
-    if let Some(save) = super::save::snapshot_active_character_save(world) {
-        policy
-            .raise_serialized_floor(&save)
-            .map_err(|error| handle_item_uid_failure(config, error))?;
-    }
     Ok(())
 }
 
@@ -246,10 +165,7 @@ impl SimulationConfig {
                 .account_store
                 .lock()
                 .map_err(|_| "account store lock poisoned")?;
-            historical_uid_floor(
-                &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
-                0,
-            )?
+            historical_uid_floor(UidHistoryRoot::Store(&store))?
         };
         allocator
             .ensure_issued_through_at_least(floor)
@@ -299,10 +215,7 @@ impl SimulationConfig {
                 .account_store
                 .lock()
                 .map_err(|_| "account store lock poisoned")?;
-            historical_uid_floor(
-                &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
-                0,
-            )?
+            historical_uid_floor(UidHistoryRoot::Store(&store))?
         };
         allocator
             .ensure_issued_through_at_least(floor)

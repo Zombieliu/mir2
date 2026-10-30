@@ -1,6 +1,6 @@
 //! Trusted starter/start migration planning. UID reservations happen before the
 //! save transaction; a failed source CAS retires the IDs rather than reminting.
-use super::super::item_uid_issuance::{historical_uid_floor, ItemUidIssuance};
+use super::super::item_uid_issuance::{historical_uid_floor, ItemUidIssuance, UidHistoryRoot};
 use super::super::items::{try_item_state_from_user_item, try_user_item_from_item_state};
 use super::*;
 use crate::{UserItemUidAllocator, UserItemUidReason};
@@ -145,44 +145,66 @@ fn entirely_unassigned_legacy_tree(item: &ItemState) -> bool {
         && item.socketed.iter().all(entirely_unassigned_legacy_tree)
 }
 
-/// Numbers in this set only exclude collisions for a private validation copy.
+fn visit_complete_tree_ids(wire: &mir2_protocol::UserItem, visitor: &mut dyn FnMut(u64)) {
+    visitor(wire.unique_id);
+    for child in wire.slots.iter().flatten() {
+        visit_complete_tree_ids(child, visitor);
+    }
+}
+
+fn visit_original_item_ids(item: &ItemState, visitor: &mut dyn FnMut(u64)) {
+    visitor(item.unique_id);
+    if let Some(metadata) = &item.user_item_metadata {
+        // A removed child may survive only in this original identity map.
+        // Fresh rehydration can clear the map, so retire its real IDs first.
+        if let Some(positions) = &metadata.captured_socket_positions {
+            for identity in positions.iter().flatten() {
+                visitor(identity.unique_id);
+            }
+        }
+        for child in metadata.slots.iter().flatten() {
+            visit_complete_tree_ids(child, visitor);
+        }
+    }
+    for child in &item.socketed {
+        visit_original_item_ids(child, visitor);
+    }
+}
+
+/// These identities only exclude collisions for a private validation copy.
 /// They do not establish a census or advance the actual durable authority.
 fn private_id_exclusions(
-    value: &serde_json::Value,
-    depth: usize,
+    save: &CharacterSaveRecord,
     ids: &mut BTreeSet<u64>,
 ) -> Result<(), String> {
-    if depth > 64 {
-        return Err("starter validation history depth exceeded".into());
+    // Only owned/held identities can collide with provisional validation IDs.
+    // In particular, ordinary mail bodies and other player text stay opaque.
+    for (label, encoded) in [
+        ("inventory", &save.inventory_items_json),
+        ("belt", &save.belt_items_json),
+        ("storage", &save.storage_items_json),
+        ("hero inventory", &save.hero_inventory_items_json),
+        ("hero equipment", &save.hero_equipment_items_json),
+    ] {
+        for item in decode_saved_item_states(label, encoded)? {
+            complete_item_tree(&item)?;
+            visit_original_item_ids(&item, &mut |uid| {
+                ids.insert(uid);
+            });
+        }
     }
-    match value {
-        serde_json::Value::Number(number) => {
-            if let Some(id) = number.as_u64() {
-                ids.insert(id);
-            }
-        }
-        serde_json::Value::String(text) => {
-            if let Ok(id) = text.parse::<u64>() {
-                ids.insert(id);
-            }
-            if text.trim_start().starts_with('{') || text.trim_start().starts_with('[') {
-                if let Ok(encoded) = serde_json::from_str::<serde_json::Value>(text) {
-                    private_id_exclusions(&encoded, depth + 1, ids)?;
-                }
-            }
-        }
-        serde_json::Value::Array(values) => {
-            for value in values {
-                private_id_exclusions(value, depth + 1, ids)?;
-            }
-        }
-        serde_json::Value::Object(values) => {
-            for value in values.values() {
-                private_id_exclusions(value, depth + 1, ids)?;
-            }
-        }
-        _ => {}
+    for item in decode_saved_equipment_states("equipment", &save.equipment_items_json)? {
+        let mut carrier =
+            item_state_from_equipment_state(item.clone(), ItemContainer::Bag1, item.slot as u8);
+        carrier.unique_id = item.user_item_unique_id.unwrap_or(0);
+        complete_item_tree(&carrier)?;
+        visit_original_item_ids(&carrier, &mut |uid| {
+            ids.insert(uid);
+        });
     }
+    ids.extend(super::super::item_custody::reserved_ids(
+        &decode_and_validate_stage5_systems(save)?,
+    )?);
     Ok(())
 }
 
@@ -227,11 +249,7 @@ fn preflight_roots(
 ) -> Result<FreshRoots, String> {
     let mut validation = save.clone();
     let mut excluded = BTreeSet::new();
-    private_id_exclusions(
-        &serde_json::to_value(save).map_err(|e| e.to_string())?,
-        0,
-        &mut excluded,
-    )?;
+    private_id_exclusions(save, &mut excluded)?;
     let mut next = 1;
     for (label, encoded, fresh_indices) in [
         (
@@ -288,8 +306,69 @@ fn preflight_roots(
     Ok(fresh)
 }
 
+fn candidate_history_floor(
+    account_id: &str,
+    save: &CharacterSaveRecord,
+    fresh: &FreshRoots,
+) -> Result<u64, String> {
+    let mut retained = save.clone();
+    let mut fresh_original_floor = 0;
+    // Fresh trees have passed the complete pure preflight, but may still have
+    // ambiguous zero placeholders. They are not committed history. Visit only
+    // their original typed IDs, then let the strict history visitor validate
+    // the retained save; never let private provisional IDs enter the floor.
+    for (label, encoded, fresh_indices) in [
+        (
+            "inventory",
+            &mut retained.inventory_items_json,
+            &fresh.inventory,
+        ),
+        ("belt", &mut retained.belt_items_json, &fresh.belt),
+        ("storage", &mut retained.storage_items_json, &fresh.storage),
+    ] {
+        let mut kept = Vec::new();
+        for (index, item) in decode_saved_item_states(label, encoded)?
+            .into_iter()
+            .enumerate()
+        {
+            if fresh_indices.contains(&index) {
+                visit_original_item_ids(&item, &mut |uid| {
+                    fresh_original_floor = fresh_original_floor.max(uid);
+                });
+            } else {
+                kept.push(item);
+            }
+        }
+        *encoded = encode_state_vec(&kept);
+    }
+    let mut kept = Vec::new();
+    for (index, item) in decode_saved_equipment_states("equipment", &save.equipment_items_json)?
+        .into_iter()
+        .enumerate()
+    {
+        if fresh.equipment.contains(&index) {
+            let mut carrier =
+                item_state_from_equipment_state(item.clone(), ItemContainer::Bag1, item.slot as u8);
+            carrier.unique_id = item.user_item_unique_id.unwrap_or(0);
+            visit_original_item_ids(&carrier, &mut |uid| {
+                fresh_original_floor = fresh_original_floor.max(uid);
+            });
+        } else {
+            kept.push(item);
+        }
+    }
+    retained.equipment_items_json = encode_state_vec(&kept);
+    retained.equipment_items_explicit_empty = true;
+    Ok(historical_uid_floor(UidHistoryRoot::Save {
+        account_id,
+        save: &retained,
+    })?
+    .max(fresh_original_floor))
+}
+
 fn assign_roots(
     config: &SimulationConfig,
+    account_id: &str,
     save: &mut CharacterSaveRecord,
     fresh: FreshRoots,
     legacy_start_migration: bool,
@@ -303,15 +382,9 @@ fn assign_roots(
             .account_store
             .lock()
             .map_err(|_| "account store lock poisoned")?;
-        historical_uid_floor(
-            &serde_json::to_value(&*store).map_err(|e| e.to_string())?,
-            0,
-        )?
+        historical_uid_floor(UidHistoryRoot::Store(&store))?
     }
-    .max(historical_uid_floor(
-        &serde_json::to_value(&*save).map_err(|e| e.to_string())?,
-        0,
-    )?);
+    .max(candidate_history_floor(account_id, save, &fresh)?);
     allocator
         .ensure_issued_through_at_least(floor)
         .map_err(|error| super::super::item_uid_issuance::source_item_uid_error(config, error))?;
@@ -355,14 +428,16 @@ fn assign_roots(
 
 pub(super) fn prepare_new_character(
     config: &SimulationConfig,
+    account_id: &str,
     save: &mut CharacterSaveRecord,
 ) -> Result<(), String> {
     let fresh = FreshRoots::all(save);
-    assign_roots(config, save, fresh, false)
+    assign_roots(config, account_id, save, fresh, false)
 }
 
 pub(super) fn prepare_character_start(
     config: &SimulationConfig,
+    account_id: &str,
     save: &mut CharacterSaveRecord,
 ) -> Result<bool, String> {
     let original = save.clone();
@@ -409,7 +484,7 @@ pub(super) fn prepare_character_start(
     migrate_legacy_candidate_save_record(save)?;
     match &config.item_uid_issuance {
         ItemUidIssuance::Legacy => {}
-        ItemUidIssuance::Durable(_) => assign_roots(config, save, fresh, true)?,
+        ItemUidIssuance::Durable(_) => assign_roots(config, account_id, save, fresh, true)?,
         ItemUidIssuance::Unavailable | ItemUidIssuance::Fenced => {
             if !same_character_save(&original, save)? {
                 return Err(
