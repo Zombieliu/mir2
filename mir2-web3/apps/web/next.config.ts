@@ -299,8 +299,12 @@ const nextConfig: NextConfig = {
         ...(marketingProxyEnabled ? [
           { source: "/", destination: `${marketingOrigin}/zh-CN` },
           {
-            source: `/:locale(${marketingLocales})/:path*`,
-            destination: `${marketingOrigin}/:locale/:path*`,
+            source: `/:locale(${marketingLocales})`,
+            destination: `${marketingOrigin}/:locale`,
+          },
+          {
+            source: `/:locale(${marketingLocales})/:path+`,
+            destination: `${marketingOrigin}/:locale/:path+`,
           },
           {
             source: "/marketing-assets/_next/static/:path*",

@@ -71,6 +71,8 @@ function verifyCandidatePages(reviewed) {
     if (content.length < 20 || content.trimStart().startsWith('<')) throw Error('Marketing candidate static asset returned HTML');
   }
   if (!candidateResponse(reviewed.main, '/zh-CN/download').includes('https://mir2.obelisk.build/game')) throw Error('Marketing candidate game link mismatch');
+  if (!candidateResponse(reviewed.main, '/en').includes('lang="en"') ||
+      !candidateResponse(reviewed.game, '/en').includes('lang="en"')) throw Error('Marketing locale homepage routing mismatch');
   const manifest = JSON.parse(candidateResponse(reviewed.game, '/manifest.webmanifest'));
   const version = JSON.parse(candidateResponse(reviewed.game, '/version'));
   if (manifest.start_url !== '/game' || manifest.scope !== '/' || version.revision !== sha) throw Error('Game candidate manifest or revision mismatch');
@@ -120,7 +122,7 @@ function summary(key, value) {
 async function publicSmoke() {
   async function get(path, text) {
     const response = await fetch(`https://mir2.obelisk.build${path}`, { signal: AbortSignal.timeout(30000), cache: 'no-store', redirect: 'manual' });
-    if (!response.ok) throw Error(`Public route ${path} HTTP ${response.status}`);
+    if (!response.ok) throw Error(`Public route ${path} HTTP ${response.status}${response.status >= 300 && response.status < 400 ? ` redirect ${response.headers.get('location') || '(missing)'}` : ''}`);
     const body = await response.text();
     if (text && !body.includes(text)) throw Error(`Public route ${path} has unexpected content`);
     return body;

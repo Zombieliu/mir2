@@ -37,12 +37,14 @@ function fixture(operation = 'unified-promote') {
       '/zh-CN': '<html data-track="navigation_promotions" data-footer="footer_promotions"><a href="/promotions?lang=zh-CN">Referral</a><link rel="stylesheet" href="/marketing-assets/_next/static/css/site.css?v=one&amp;theme=dark"><script src="/marketing-assets/_next/static/chunks/site.js"></script></html>',
       '/marketing-assets/_next/static/css/site.css': 'body { color: #ededdd; background: #10110d; }',
       '/marketing-assets/_next/static/chunks/site.js': 'window.__numeronMarketingLoaded = true;',
+      '/en': '<html lang="en"><a href="/promotions?lang=en">Referral</a></html>',
       '/zh-CN/download': '<a href="https://mir2.obelisk.build/game">Play</a>',
     },
     game: {
       '/manifest.webmanifest': JSON.stringify({ id: '/', start_url: '/game', scope: '/' }),
       '/version': JSON.stringify({ revision: SHA }),
       '/game': '<html><script src="/_next/static/chunks/game.js"></script></html>',
+      '/en': '<html lang="en"><main>Previously published marketing homepage</main></html>',
     },
   };
   const state = { projects, candidates, snapshots, candidatePages, env, calls, cliCalls, logs, files, onRequest: undefined, onCandidateResponse: undefined };
@@ -253,7 +255,7 @@ test('missing optional snapshot root requires successful authenticated applicati
       else f.snapshots[key][0].projectSettings = { commandForIgnoringBuildStep: null };
     }
     const result = await f.run(); assert.equal(result.error, undefined);
-    assert.equal(result.cliCalls.length, 7);
+    assert.equal(result.cliCalls.length, 9);
     assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
     assert.ok(result.logs.some(value => value.includes('"candidatePages":"passed"')));
     assert.equal(writes(result).length, 2);
@@ -287,6 +289,29 @@ test('candidate CSS and JS are downloaded from the actual prefixed HTML URLs bef
   assert.deepEqual(assets.map(call => call.path), ['/marketing-assets/_next/static/css/site.css', '/marketing-assets/_next/static/chunks/site.js']);
   assert.equal(assets[0].args[3], 'https://main-candidate.vercel.app/marketing-assets/_next/static/css/site.css?v=one&theme=dark');
   assert.ok(assets.every(call => call.writesAtCheck === 0));
+});
+
+test('both candidate English homepages must return English HTML before promotion', async () => {
+  const valid = await fixture().run(); assert.equal(valid.error, undefined);
+  assert.deepEqual(valid.cliCalls.filter(call => call.path === '/en').map(call => call.key), ['main', 'game']);
+  for (const key of ['main', 'game']) for (const body of ['<html lang="zh-CN">Wrong language</html>', '<html>Language missing</html>']) {
+    const f = fixture(); f.candidatePages[key]['/en'] = body;
+    const result = await f.run(); assertFailed(result);
+    assert.equal(writes(result).length, 0);
+  }
+});
+
+test('an English homepage redirect loop in either candidate stops before any alias change', async () => {
+  for (const key of ['main', 'game']) {
+    const f = fixture();
+    f.state.onCandidateResponse = request => {
+      if (request.key === key && request.path === '/en') throw Error('synthetic curl maximum redirects followed');
+    };
+    const result = await f.run(); assertFailed(result, /Authenticated candidate check failed/);
+    assert.equal(writes(result).length, 0);
+    const failed = result.cliCalls.find(call => call.key === key && call.path === '/en');
+    assert.equal(failed.args[failed.args.indexOf('--max-redirs') + 1], '3');
+  }
 });
 
 test('missing CSS or JS, HTML asset responses and short asset bodies cannot change production', async () => {
@@ -386,7 +411,7 @@ test('promotion verifies protected apps before main then game promotion and publ
   ]);
   assert.ok(result.calls.some(call => call.origin === 'https://mir2.obelisk.build' && call.path === '/api/promotions/bootstrap'));
   assert.ok(result.calls.every(call => ['https://api.vercel.com', 'https://mir2.obelisk.build'].includes(call.origin)));
-  assert.equal(result.cliCalls.length, 7); assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
+  assert.equal(result.cliCalls.length, 9); assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
   assert.ok(result.logs.some(value => value.includes('"publicSmoke":"passed"')));
 });
 

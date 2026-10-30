@@ -46,6 +46,13 @@ function rewrite(rules, pathname, query = {}) {
   return null;
 }
 
+function allRewriteDestinations(rules, pathname, query = {}) {
+  return rules.flatMap((rule) => {
+    const params = getPathMatch(rule.source)(pathname);
+    return params ? [prepareDestination({ destination: rule.destination, params, query, appendParamsToQuery: true }).parsedDestination] : [];
+  });
+}
+
 try {
   await test("marketing routes cover all supported pages and public assets without sharing game chunks", async () => {
     const config = await loadConfig();
@@ -73,6 +80,38 @@ try {
     assert.equal(chunkWithQuery.hostname, expectedHost);
     assert.equal(chunkWithQuery.pathname, "/marketing-assets/_next/static/chunks/site.js");
     assert.deepEqual(chunkWithQuery.query, { dpl: "dpl_marketing_release", version: "42", lang: "zh-CN" });
+  });
+
+  await test("localized homepages match exactly one marketing rule without adding a trailing slash", async () => {
+    const routes = await (await loadConfig()).rewrites();
+    const locales = ["zh-CN", "en", "ja", "ko", "zh-TW", "es", "pt-BR", "de", "fr", "ru", "pl", "tr", "th", "vi", "id", "ar"];
+    for (const locale of locales) {
+      for (const suffix of ["", "/"]) {
+        for (const query of [{}, { utm_source: "partner", ref: "invitation-code", lang: locale }]) {
+          const pathname = `/${locale}${suffix}`;
+          const destinations = allRewriteDestinations(routes.beforeFiles, pathname, query).filter((destination) => destination.hostname);
+          assert.equal(destinations.length, 1, `${pathname} must not be shadowed by a zero-segment child rule`);
+          assert.equal(destinations[0].hostname, "numeron-legend-of-rebirth.vercel.app");
+          assert.equal(destinations[0].pathname, `/${locale}`);
+          assert.deepEqual(destinations[0].query, query);
+        }
+      }
+    }
+  });
+
+  await test("localized child pages match one marketing rule and preserve nested paths and query parameters", async () => {
+    const routes = await (await loadConfig()).rewrites();
+    for (const locale of ["zh-CN", "en", "ja", "ko", "zh-TW", "es", "pt-BR", "de", "fr", "ru", "pl", "tr", "th", "vi", "id", "ar"]) {
+      for (const suffix of ["/download", "/play", "/legal/privacy", "/updates/world-launch", "/explore", "/archive/map/bichon-province"]) {
+        const pathname = `/${locale}${suffix}`;
+        const query = { utm_source: "partner", ref: "invitation-code", dpl: "dpl_marketing_release", lang: locale };
+        const destinations = allRewriteDestinations(routes.beforeFiles, pathname, query).filter((destination) => destination.hostname);
+        assert.equal(destinations.length, 1, pathname);
+        assert.equal(destinations[0].hostname, "numeron-legend-of-rebirth.vercel.app");
+        assert.equal(destinations[0].pathname, pathname);
+        assert.deepEqual(destinations[0].query, query);
+      }
+    }
   });
 
   await test("marketing cannot capture game, promotion, authentication, metadata or neighboring APIs", async () => {
