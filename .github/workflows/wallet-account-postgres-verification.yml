@@ -1,0 +1,72 @@
+name: Wallet Account PostgreSQL Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wallet-account-postgres-fix
+  cancel-in-progress: false
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      CARGO_BUILD_JOBS: '2'
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+      CARGO_PROFILE_RELEASE_OPT_LEVEL: '1'
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16'
+      CARGO_PROFILE_RELEASE_LTO: 'false'
+      CARGO_PROFILE_RELEASE_DEBUG: '0'
+      CARGO_PROFILE_RELEASE_STRIP: symbols
+    steps:
+      - name: Require the bounded repair branch
+        run: test "$GITHUB_REF" = refs/heads/codex/wallet-account-postgres-fix-20261030
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install the native Rust toolchain
+        run: rustup toolchain install 1.95.0 --profile minimal
+      - name: Start native PostgreSQL with a dedicated disposable database
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo systemctl start postgresql
+          pg_isready
+          database="mir2_wallet_qa_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}_isolated"
+          sudo -u postgres createuser --no-superuser --no-createdb --no-createrole wallet_qa
+          sudo -u postgres psql -X -v ON_ERROR_STOP=1 -c "ALTER ROLE wallet_qa PASSWORD 'ephemeral-wallet-test-only'"
+          sudo -u postgres createdb --owner=wallet_qa "$database"
+          echo 'MIR2_WALLET_TEST_ISOLATED=1' >> "$GITHUB_ENV"
+          echo "MIR2_WALLET_TEST_DATABASE_URL=postgres://wallet_qa:ephemeral-wallet-test-only@127.0.0.1:5432/$database" >> "$GITHUB_ENV"
+      - name: Check wallet, passkey, password and failure rollback regressions
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.95.0 test --locked -p mir2-simulation --lib wallet
+          cargo +1.95.0 test --locked -p mir2-simulation --lib passkey
+          cargo +1.95.0 test --locked -p mir2-simulation --lib password
+          cargo +1.95.0 test --locked -p mir2-simulation --lib account_creation_persistence_failure
+      - name: Reproduce and repair the real PostgreSQL wallet provisioning failure
+        working-directory: mir2-web3
+        run: cargo +1.95.0 test --locked -p mir2-simulation --test wallet_postgres -- --ignored --nocapture
+      - name: Build only the native test gateway
+        working-directory: mir2-web3
+        run: |
+          set -euo pipefail
+          cargo +1.95.0 build --locked --release -p mir2-gateway --bin mir2-gateway
+          mkdir -p ../wallet-account-release
+          cp target/release/mir2-gateway ../wallet-account-release/
+          git rev-parse HEAD > ../wallet-account-release/SOURCE-SHA.txt
+          (cd ../wallet-account-release && sha256sum mir2-gateway > SHA256SUMS)
+          ldd ../wallet-account-release/mir2-gateway
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: wallet-account-postgres-${{ github.sha }}
+          path: wallet-account-release/
+          if-no-files-found: error
+          retention-days: 14
