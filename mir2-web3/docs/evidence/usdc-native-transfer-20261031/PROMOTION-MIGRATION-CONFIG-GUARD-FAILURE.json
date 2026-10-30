@@ -1,0 +1,7 @@
+{
+  "completed": false,
+  "phase": "idle_promote",
+  "rawPrivateResultSha256": "a357f9475a6cd86e24e0418cd8857a19bfcf0b16f55f96c1a44dc00dc72dc291",
+  "reason": "configured environment/drop-in order changed",
+  "retryOrRollbackPerformed": false
+}

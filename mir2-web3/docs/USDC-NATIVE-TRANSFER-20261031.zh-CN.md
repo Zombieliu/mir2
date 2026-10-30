@@ -139,3 +139,23 @@ r12 launcher 源码 `677e2ab5…` 将 `mir2-client.toml` 列入签名受管文�
 本地新迁移[原生 PostgreSQL 14 项](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-PG-LOCAL.json)通过，0 跳过／忽略／过滤；包含来源审计语义、原始注册／候选一致性、准备无归属或预留、本人确认、既有付款例外、过期重新准备、追加式约束与实际 worker 出箱推进。7 个相关源码执行前后 canonical-LF hash 一致。另有[CLI 5 项及 6 个相邻套件 16 项](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ADJACENT-LOCAL.json)通过；最初发现并修复了两个测试对“最后一条迁移为 0024／总数 27”的陈旧假设，旧失败日志仍保留，修复后重新运行完整相邻组。这些均为本机独立 PG 和明确模拟付款凭据，不代表真实链付款或原服迁移完成。
 
 用户之后在正确 Windows 活动完成报名。[20:12:30 UTC 原服只读复核](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-TARGET-LEADER.json)确认原团长钱包对应的精确目标账号已有 approved 记录，当前条款 `numeron-windows-playtest-20261030-v1` 接受时间为 `1793391026068`，即北京时间 10 月 31 日 04:10:26。该记录由用户真实操作建立，未在后台补建。本段记录实现、验证和前置条件；新源码精确 CI、隔离克隆、同源发布以及团员本人最终确认仍待完成，尚未迁移真实关系。
+
+迁移后端源码已推送为 `173332a004c01312802a67042ff7800a04893134`，[精确 CI 41121641837](https://github.com/Zombieliu/mir2/actions/runs/41121641837) 已派发，记录时 Linux 构建仍在进行。确认页面源码 `80379d6efd2a561ade89ce3d6ac941f6dfd9265d` 已在原官网发布，部署 `dpl_7TbvV2JywL4vmCEYME318oJnjahc`；页面的本机模拟交互、Vercel 构建／受保护路由与额外公网资源证据集中在[前端主题记录](https://github.com/Zombieliu/mir2/blob/codex/promotion-vercel-20261029/mir2-web3/docs/PROMOTION-MIGRATION-UI-20261031.zh-CN.md)，不在此重复测试日志。后台准备实际迁移凭据之前，团员不会看到确认卡片。
+
+专用发布辅助工具的[真实函数本地保护测试 16 项](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-RELEASE-GUARDS-LOCAL.json)通过；只允许同源 Gateway／worker／迁移 CLI 发布，不含旧付款恢复或邀请暂存入口。原先“全部 UnsetEnvironment 为空”的过严假设已通过真实只读诊断纠正：Gateway 保持 revision，worker 保留原来移除 revision 的最小权限策略；原属性摘要、EnvFile 顺序、文件 bytes／owner／mode 与其他有效配置均须保持。worker 的同源依据为真实执行文件路径、认证工件 SHA 和原参数，不能声称它具有被移除的 revision 环境变量。
+
+[20:30:59 UTC 新鲜只读发布前检查](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-PREFLIGHT-READONLY.json)通过：仍为 `868ef2d2…` 的原 GW／worker PID、125 账号／38 角色／38 存档、27 条迁移；六项 current 计数、cache record／routeLease 为 0，原配置及消费者审计通过。该检查没有停服或写库，也没有执行 Redis 实际 owner-prefix SCAN／PTTL；自然空闲与实际 owner fence 必须在最终切换前后重新验证。辅助工具纯测试及只读检查均不替代精确工件、真实隔离克隆、离线新备份和实际发布验收。
+
+## 旧邀请迁移的真实发布与待本人确认
+
+源码 `173332a004c01312802a67042ff7800a04893134` 的精确 CI 已成功，实际执行 74 项、0 跳过：原生 PostgreSQL 组 55、clone CLI 组 11、钱包身份组 8。认证原 ZIP、规范归档、完整 1829 文件清单及四个 ELF 二进制均逐项验 hash，协调者另行复核 ZIP／归档／清单／选定二进制。[工件收据](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-BACKEND-ARTIFACT.json)不单独冒充部署结果。
+
+从原双库只读一致快照创建两个全新隔离库与独立角色后，[真实克隆预览](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-CLONE-PREVIEW.json)核实原团长、团员、原确认时间、当前条款及一笔付款。目标 schema 审计两次，125 账号／38 角色／38 存档及全部旧行保留。[完整克隆验收](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-CLONE-ACCEPTANCE.json)包含错 snapshot 零写入、五张准备表各增 1、精确链接、最终归属／准备金额／确认／付款认领均增 0，以及同幂等键重放零新增。克隆连接、proof 和快照 hash 不被直接用于原服。
+
+原服自然空闲与实际 Redis DB0 owner SCAN／PTTL 检查通过后，正常停止 worker、Gateway SIGINT 保存并新建离线备份。首次切换在[配置顺序护栏](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-CONFIG-GUARD-FAILURE.json)停止，尚未启动新 Gateway 或执行新迁移：`systemctl show` 对多个 EnvironmentFiles 重复输出同名行，辅助脚本的 dict 解析只留最后一行。修复累加解析后，按审阅的原顺序补齐 GW 9／worker 2 个文件，并核对两个保留服务的遗漏文件；Caddy 原 `root:988 / 0640` 权限保持。原基线遗漏部分没有历史 prehash，不冒称已有；补证使用当前 root 普通文件完整 metadata、早于本次 O_EXCL revision 文件的 ctime、已记录原 fragment／drop-in 不变及受限写集。原 STATE 原样归档，另建 root 私有补充配置备份，不覆盖原离线备份。[9 项真实函数本地护栏](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ENV-PARSER-LOCAL.json)及独立源码审阅通过后，从停止点[单次前向续行](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-CONFIG-FORWARD-RESUME.json)，未重跑停止／备份、回退旧二进制或恢复账本。
+
+[原服最终验证](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ROLLOUT-VERIFIED.json)确认 GW／worker 同源 `173332a004c0`、健康、其他服务与原配置保留；27 条旧迁移完整保留，总数 28，新三表在发布验收点为空，全部旧业务行与财务数据保留，仅两张运行时 clock 表允许已验证的 metadata 推进。辅助工具不执行旧充值恢复 operator、邀请最终确认或付款；本次未更新 Node／Caddy、未发布 Windows 客户端，未启动 Docker。
+
+随后使用原服现存的精确 Gateway DSN 与旧活动既有源连接创建全新只读预览。来源连接未被改写，只声明 core repeatable-read／read-only 事务，不声称数据库角色已被物理限制为 SELECT-only。[原服预览](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ORIGINAL-PREVIEW.json)的 snapshot 为 `a322289d…6daa1`，与克隆不同：团员账号 SHA `9a77de96…`、团长 `12691db5…`、旧确认 `1793351088394`、资格锚点 `1793381130814`、当前 v1 条款、一笔独立核验付款均通过独立复核。现有 Operations／Finance 两个互异系统身份及审计证据没有新建或替换。
+
+[原服单次准备](evidence/usdc-native-transfer-20261031/PROMOTION-MIGRATION-ORIGINAL-PENDING.json)已提交并通过保留核验，仅追加准确的候选、不可变证据、审计、出箱及幂等记录。状态为 `pending_member_confirmation`，没有最终归属、付款 claim、点券消费、佣金补发或新链转账。团员钱包 `0xb99297…6cd282` 须本人在当前 Windows 活动刷新总览，核对原团长 `0x8ced5e…ef2f02`，独立勾选当前条款并确认；团长无需重复报名。准备凭据有效期 30 分钟，超时不能自动代签或重放原 stage。只有最终本人确认及后续真实合格月卡条件成立，才可能产生佣金；付款开关保持关闭。

@@ -1,0 +1,22 @@
+{
+  "change": "Exactly one PUBLICATION_SHA assignment changed from the previously verified forward copy; frozen e015 original preserved.",
+  "executedAtUtc": "2026-10-30T21:31:30.997111+00:00",
+  "executedFunction": "run_local_tests",
+  "publicationSha256": "f3898f638e93d217b572b374eb968ef8ecc42e811bb6efb1e943ee2dc932d841",
+  "remoteExecutionPerformed": false,
+  "schema": "mir2.original-invitation-stage-forward.local-verification.v1",
+  "sourceFile": "original-invitation-stage-forward.py",
+  "sourceSha256": "880a2ba244aeab258747565410ab2942d023d90015cfd65c979a1aebc23802b4",
+  "verification": {
+    "actualOriginalExecutionPerformed": false,
+    "chainCalls": 0,
+    "errors": 0,
+    "failures": 0,
+    "linuxNoFollowSystemCallVerified": false,
+    "passed": true,
+    "postgresWrites": 0,
+    "serviceActions": 0,
+    "sshCalls": 0,
+    "testsExecuted": 7
+  }
+}
