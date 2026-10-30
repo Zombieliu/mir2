@@ -4995,7 +4995,23 @@ async fn handle_socket(
     user_agent: String,
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
-    let mut session = new_gateway_session_for_web(&state);
+    let mut session = match new_gateway_session_for_web(&state) {
+        Ok(session) => session,
+        Err(_) => {
+            // No runtime or live admission exists yet. Reject this connection
+            // without panicking a task or falling back to a local world.
+            let mut socket = socket;
+            let _ = tokio::time::timeout(
+                Duration::from_secs(1),
+                socket.send(Message::Close(Some(axum::extract::ws::CloseFrame {
+                    code: 1013,
+                    reason: "World coordination temporarily unavailable".into(),
+                }))),
+            )
+            .await;
+            return;
+        }
+    };
     let session_id = session.session_id().to_owned();
     let _lifecycle = crate::session::GatewayLifecycleStage::start(&session_id, "connection.work");
     let mut active_session_permit: Option<GatewayCapacityPermit> = None;
@@ -6065,19 +6081,19 @@ fn spawn_socket_reader(
     (input_rx, SocketReaderTask { handle }, pending_count)
 }
 
-fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
+fn new_gateway_session_for_web(state: &WebState) -> Result<GatewaySession, String> {
     let mut session = match &state.gameplay_event_sink {
-        Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
+        Some(sink) => GatewaySession::try_new_with_zone_registry_and_event_sink(
             (*state.config).clone(),
             &state.zone_registry,
             Arc::clone(sink),
         ),
         None => {
-            GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry)
+            GatewaySession::try_new_with_zone_registry((*state.config).clone(), &state.zone_registry)
         }
-    };
+    }?;
     session.configure_zone_owner_heartbeat(gateway_zone_owner_heartbeat_interval_ms(), 0);
-    session
+    Ok(session)
 }
 
 fn publish_spectator_frame_if_enabled(

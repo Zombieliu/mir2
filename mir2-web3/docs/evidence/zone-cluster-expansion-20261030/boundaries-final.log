@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 5 tests
+test zone_rpc::lease_failure_tests::both_transport_admission_constructors_return_errors_before_creating_a_world ... ok
+gateway lifecycle session_id=gateway-71352-1793340255861-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-71352-1793340255861-1 stage=session.close phase=end elapsed_ms=0
+test zone_rpc::lease_failure_tests::failed_refresh_preserves_the_previous_session_binding_and_can_recover ... ok
+test zone_rpc::lease_failure_tests::fallible_routing_rejects_missing_authority_before_creating_a_world ... ok
+test zone_rpc::lease_failure_tests::owner_cadence_freezes_on_coordination_loss_and_resumes_without_restarting ... ok
+test zone_rpc::lease_failure_tests::owner_health_reports_coordination_error_without_creating_or_poisoning_a_session ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 1354 filtered out; finished in 0.15s

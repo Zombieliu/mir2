@@ -44,6 +44,9 @@ use mir2_simulation::{
 
 pub const ZONE_RPC_PROTOCOL_VERSION: u16 = 8;
 #[cfg(test)]
+#[path = "zone_rpc/lease_failure_tests.rs"]
+mod lease_failure_tests;
+#[cfg(test)]
 #[path = "zone_rpc/owner_health_sync_tests.rs"]
 mod owner_health_sync_tests;
 pub const ZONE_RPC_TYPED_GAME_SHOP_OUTCOME_V1: &str = "typedGameShopOutcomeV1";
@@ -3049,7 +3052,7 @@ impl ZoneHostServer {
         runtime_factory.configure_mutation_capture(
             Arc::clone(&operation_gate),
             Arc::new(move |zone_id| {
-                let lease = tick_authority.owner_lease(zone_id);
+                let lease = tick_authority.try_owner_lease(zone_id)?;
                 let legacy_in_process_owner =
                     lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
                 if !legacy_in_process_owner && !tick_owner_ids.contains(lease.owner_id()) {
@@ -4219,7 +4222,10 @@ impl ZoneHostServer {
                 change,
             } => {
                 let zone_id = ZoneId::new(&envelope.zone_id);
-                let lease = self.owner_lease_authority.owner_lease(&zone_id);
+                let lease = self
+                    .owner_lease_authority
+                    .try_owner_lease(&zone_id)
+                    .map_err(classify_runtime_error)?;
                 let legacy_owner =
                     lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
                 let blocked = (!legacy_owner && !self.owner_ids.contains(lease.owner_id()))
@@ -4627,7 +4633,10 @@ impl ZoneHostServer {
             }
             ZoneRpcRequest::RestoreActiveCharacterCheckpoint { checkpoint } => {
                 let zone_id = ZoneId::new(zone_id);
-                let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
+                let owner_lease = self
+                    .owner_lease_authority
+                    .try_owner_lease(&zone_id)
+                    .map_err(classify_runtime_error)?;
                 self.owner_lease_authority
                     .validate_owner_lease(&owner_lease)
                     .map_err(classify_runtime_error)?;

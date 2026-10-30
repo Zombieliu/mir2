@@ -277,14 +277,23 @@ impl GatewaySession {
     }
 
     pub fn new_with_zone_registry(config: GatewayConfig, registry: &ZoneRegistry) -> Self {
-        let routed = registry.open_session(config.clone());
-        Self::with_routed_world_runtime_and_owner_authority(
+        Self::try_new_with_zone_registry(config, registry)
+            .expect("Zone session routing should succeed")
+    }
+
+    pub fn try_new_with_zone_registry(
+        config: GatewayConfig,
+        registry: &ZoneRegistry,
+    ) -> Result<Self, String> {
+        let routed = registry
+            .try_open_session_for(config.clone(), SessionRouteRequest::anonymous())?;
+        Ok(Self::with_routed_world_runtime_and_owner_authority(
             routed.zone_id,
             routed.owner_lease,
             Some(routed.owner_lease_authority),
             routed.runtime,
         )
-        .with_routing_context(config, registry.clone())
+        .with_routing_context(config, registry.clone()))
     }
 
     #[cfg(test)]
@@ -417,15 +426,25 @@ impl GatewaySession {
         registry: &ZoneRegistry,
         gameplay_event_sink: SharedGameplayEventSink,
     ) -> Self {
-        let routed = registry.open_session(config.clone());
-        Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
+        Self::try_new_with_zone_registry_and_event_sink(config, registry, gameplay_event_sink)
+            .expect("Zone session routing should succeed")
+    }
+
+    pub fn try_new_with_zone_registry_and_event_sink(
+        config: GatewayConfig,
+        registry: &ZoneRegistry,
+        gameplay_event_sink: SharedGameplayEventSink,
+    ) -> Result<Self, String> {
+        let routed = registry
+            .try_open_session_for(config.clone(), SessionRouteRequest::anonymous())?;
+        Ok(Self::with_routed_world_runtime_and_owner_authority_and_event_sink(
             routed.zone_id,
             routed.owner_lease,
             Some(routed.owner_lease_authority),
             routed.runtime,
             gameplay_event_sink,
         )
-        .with_routing_context(config, registry.clone())
+        .with_routing_context(config, registry.clone()))
     }
 
     fn with_routing_context(mut self, config: GatewayConfig, registry: ZoneRegistry) -> Self {
@@ -460,7 +479,7 @@ impl GatewaySession {
             .zone_owner_lease_authority
             .as_ref()
             .ok_or_else(|| "Zone owner lease authority is not configured".to_string())?;
-        self.zone_owner_lease = authority.refresh_owner_lease(&self.zone_id);
+        self.zone_owner_lease = authority.try_refresh_owner_lease(&self.zone_id)?;
         Ok(&self.zone_owner_lease)
     }
 

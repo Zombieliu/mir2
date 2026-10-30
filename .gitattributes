@@ -39,6 +39,7 @@ mir2-web3/ops/retention/*.conf text eol=lf
 mir2-web3/ops/retention/*.service text eol=lf
 mir2-web3/ops/retention/*.timer text eol=lf
 mir2-web3/docs/evidence/server-retention-20261030/*.py text eol=lf
+mir2-web3/docs/evidence/zone-cluster-expansion-20261030/*.log text eol=lf
 # Signed R19 publication source identities must match on Windows and Linux.
 mir2-web3/scripts/prepare_native_r19_s15_fixed.py -text
 mir2-web3/scripts/native_r19_s15_r2_delivery.py -text

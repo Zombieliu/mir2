@@ -298,6 +298,12 @@ impl ZoneOwnerCommandRequest {
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease;
 
+    /// Fallible acquisition for runtime paths. Durable authorities must report
+    /// unavailable coordination instead of inventing or reusing an old lease.
+    fn try_owner_lease(&self, zone_id: &ZoneId) -> Result<ZoneOwnerLease, String> {
+        Ok(self.owner_lease(zone_id))
+    }
+
     /// Opt-in lease guard for durable NPC transactions. A cached lease or an
     /// unsupported authority must never authorize this commit path.
     fn supports_durable_npc_purchase_lease(&self) -> bool {
@@ -316,8 +322,12 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
         self.owner_lease(zone_id)
     }
 
+    fn try_refresh_owner_lease(&self, zone_id: &ZoneId) -> Result<ZoneOwnerLease, String> {
+        Ok(self.refresh_owner_lease(zone_id))
+    }
+
     fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
-        let current = self.owner_lease(lease.zone_id());
+        let current = self.try_owner_lease(lease.zone_id())?;
         if current == *lease {
             return Ok(());
         }
@@ -327,7 +337,7 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 
     fn renew_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<ZoneOwnerLease, String> {
         self.validate_owner_lease(lease)?;
-        Ok(self.owner_lease(lease.zone_id()))
+        self.try_owner_lease(lease.zone_id())
     }
 
     fn renew_owner_lease_at(
@@ -19418,7 +19428,7 @@ impl ZoneRegistry {
         route_request: SessionRouteRequest,
     ) -> Result<RoutedZoneRuntime, String> {
         let zone_id = self.try_route_session(&route_request)?;
-        let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
+        let owner_lease = self.owner_lease_authority.try_owner_lease(&zone_id)?;
         Ok(RoutedZoneRuntime {
             runtime: self.runtime_factory.create_runtime(config, &zone_id),
             owner_lease,
