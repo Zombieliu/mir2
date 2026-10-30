@@ -53,7 +53,7 @@ function candidateResponse(candidate, path) {
   if (!/^[a-z0-9][a-z0-9-]*\.vercel\.app$/.test(candidate.url || '')) throw Error('Unexpected candidate hostname');
   try {
     return execFileSync('npx', ['--yes', 'vercel@56.4.1', 'curl', `https://${candidate.url}${path}`, '--',
-      '--fail', '--silent', '--show-error', '--max-time', '30'], {
+      '--fail', '--silent', '--show-error', '--location', '--max-redirs', '3', '--max-time', '30'], {
       encoding: 'utf8', timeout: 180000, maxBuffer: 8 * 1024 * 1024,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -63,6 +63,13 @@ function verifyCandidatePages(reviewed) {
   const main = candidateResponse(reviewed.main, '/zh-CN');
   if (!main.includes('/marketing-assets/_next/static/') || !main.includes('navigation_promotions') ||
       !main.includes('footer_promotions') || !main.includes('promotions?lang=zh-CN')) throw Error('Marketing candidate navigation/assets mismatch');
+  const assets = [...main.matchAll(/(?:src|href)="(\/marketing-assets\/_next\/static\/[^"?]+\.(?:css|js)(?:\?[^" ]*)?)"/g)].map(match => match[1].replaceAll('&amp;', '&'));
+  for (const extension of ['css', 'js']) {
+    const asset = assets.find(path => new URL(path, 'https://candidate.invalid').pathname.endsWith(`.${extension}`));
+    if (!asset) throw Error('Marketing candidate CSS/JS asset missing');
+    const content = candidateResponse(reviewed.main, asset);
+    if (content.length < 20 || content.trimStart().startsWith('<')) throw Error('Marketing candidate static asset returned HTML');
+  }
   if (!candidateResponse(reviewed.main, '/zh-CN/download').includes('https://mir2.obelisk.build/game')) throw Error('Marketing candidate game link mismatch');
   const manifest = JSON.parse(candidateResponse(reviewed.game, '/manifest.webmanifest'));
   const version = JSON.parse(candidateResponse(reviewed.game, '/version'));
@@ -112,7 +119,7 @@ function summary(key, value) {
 
 async function publicSmoke() {
   async function get(path, text) {
-    const response = await fetch(`https://mir2.obelisk.build${path}`, { signal: AbortSignal.timeout(30000), cache: 'no-store' });
+    const response = await fetch(`https://mir2.obelisk.build${path}`, { signal: AbortSignal.timeout(30000), cache: 'no-store', redirect: 'manual' });
     if (!response.ok) throw Error(`Public route ${path} HTTP ${response.status}`);
     const body = await response.text();
     if (text && !body.includes(text)) throw Error(`Public route ${path} has unexpected content`);

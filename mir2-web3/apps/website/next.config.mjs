@@ -27,10 +27,6 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/marketing-assets/_next/static/:path*",
-        destination: "/_next/static/:path*",
-      },
-      {
         source: "/:locale(zh-CN|en|ja|ko|zh-TW|es|pt-BR|de|fr|ru|pl|tr|th|vi|id|ar)/explore",
         destination: `${explorerOrigin}/explore/:locale`,
       },

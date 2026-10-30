@@ -34,7 +34,9 @@ function fixture(operation = 'unified-promote') {
     RELEASE_MAIN_DEPLOYMENT_ID: sites.main.candidate, RELEASE_DEPLOYMENT_ID: sites.game.candidate };
   const candidatePages = {
     main: {
-      '/zh-CN': '<html data-track="navigation_promotions" data-footer="footer_promotions"><a href="/promotions?lang=zh-CN">Referral</a><script src="/marketing-assets/_next/static/chunks/site.js"></script></html>',
+      '/zh-CN': '<html data-track="navigation_promotions" data-footer="footer_promotions"><a href="/promotions?lang=zh-CN">Referral</a><link rel="stylesheet" href="/marketing-assets/_next/static/css/site.css?v=one&amp;theme=dark"><script src="/marketing-assets/_next/static/chunks/site.js"></script></html>',
+      '/marketing-assets/_next/static/css/site.css': 'body { color: #ededdd; background: #10110d; }',
+      '/marketing-assets/_next/static/chunks/site.js': 'window.__numeronMarketingLoaded = true;',
       '/zh-CN/download': '<a href="https://mir2.obelisk.build/game">Play</a>',
     },
     game: {
@@ -51,6 +53,7 @@ function fixture(operation = 'unified-promote') {
     assert.deepEqual(Array.from(args).slice(0, 3), ['--yes', 'vercel@56.4.1', 'curl']);
     assert.equal(args[4], '--');
     assert.ok(args.includes('--fail')); assert.ok(args.includes('--silent')); assert.ok(args.includes('--max-time'));
+    assert.ok(args.includes('--location')); assert.equal(args[args.indexOf('--max-redirs') + 1], '3');
     assert.ok(!args.some(value => String(value).includes(TOKEN) || String(value).includes(SECRET) || value === '--token'));
     assert.equal(options.env, undefined, 'only the official CLI inherits its existing CI environment');
     assert.deepEqual(Array.from(options.stdio), ['ignore', 'pipe', 'pipe']);
@@ -73,7 +76,8 @@ function fixture(operation = 'unified-promote') {
     if (url.origin === 'https://mir2.obelisk.build') {
       assert.equal(request.headers.Authorization, undefined, 'CI bearer never reaches the public origin');
       const pages = {
-        '/': '<html data-track="navigation_promotions" data-footer="footer_promotions"><a href="/promotions?lang=zh-CN">Referral</a><script src="/marketing-assets/_next/static/chunks/site.js"></script></html>',
+        '/': '<html data-track="navigation_promotions" data-footer="footer_promotions"><a href="/promotions?lang=zh-CN">Referral</a><link rel="stylesheet" href="/marketing-assets/_next/static/css/site.css?v=one&amp;theme=dark"><script src="/marketing-assets/_next/static/chunks/site.js"></script></html>',
+        '/marketing-assets/_next/static/css/site.css': 'body { color: #ededdd; background: #10110d; }',
         '/marketing-assets/_next/static/chunks/site.js': 'window.marketingReady = true;',
         '/zh-CN/download': '<a href="https://mir2.obelisk.build/game">Play</a>',
         '/en': '<a href="/promotions?lang=en">Referral</a>',
@@ -249,7 +253,7 @@ test('missing optional snapshot root requires successful authenticated applicati
       else f.snapshots[key][0].projectSettings = { commandForIgnoringBuildStep: null };
     }
     const result = await f.run(); assert.equal(result.error, undefined);
-    assert.equal(result.cliCalls.length, 5);
+    assert.equal(result.cliCalls.length, 7);
     assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
     assert.ok(result.logs.some(value => value.includes('"candidatePages":"passed"')));
     assert.equal(writes(result).length, 2);
@@ -274,6 +278,42 @@ test('wrong protected candidate content, game links, manifest or version rejects
     assert.equal(writes(result).length, 0);
     assert.equal(f.projects.main.targets.production.id, sites.main.baseline);
     assert.equal(f.projects.game.targets.production.id, sites.game.baseline);
+  }
+});
+
+test('candidate CSS and JS are downloaded from the actual prefixed HTML URLs before promotion', async () => {
+  const result = await fixture().run(); assert.equal(result.error, undefined);
+  const assets = result.cliCalls.filter(call => call.path.startsWith('/marketing-assets/'));
+  assert.deepEqual(assets.map(call => call.path), ['/marketing-assets/_next/static/css/site.css', '/marketing-assets/_next/static/chunks/site.js']);
+  assert.equal(assets[0].args[3], 'https://main-candidate.vercel.app/marketing-assets/_next/static/css/site.css?v=one&theme=dark');
+  assert.ok(assets.every(call => call.writesAtCheck === 0));
+});
+
+test('missing CSS or JS, HTML asset responses and short asset bodies cannot change production', async () => {
+  for (const extension of ['css', 'js']) {
+    const missing = fixture();
+    missing.candidatePages.main['/zh-CN'] = missing.candidatePages.main['/zh-CN'].replace(extension === 'css' ? /<link[^>]+>/ : /<script[^>]+><\/script>/, '');
+    const absent = await missing.run(); assertFailed(absent, /Marketing candidate CSS\/JS asset missing/); assert.equal(writes(absent).length, 0);
+    const path = extension === 'css' ? '/marketing-assets/_next/static/css/site.css' : '/marketing-assets/_next/static/chunks/site.js';
+    for (const body of ['<!doctype html><html>Authentication or redirect destination</html>', '  <html>Wrong static response with leading whitespace</html>', 'too short']) {
+      const bad = fixture(); bad.candidatePages.main[path] = body;
+      const result = await bad.run(); assertFailed(result, /Marketing candidate static asset returned HTML/);
+      assert.equal(writes(result).length, 0);
+    }
+  }
+});
+
+test('a static-asset redirect loop is bounded by the CLI and fails before alias changes', async () => {
+  for (const extension of ['css', 'js']) {
+    const f = fixture();
+    f.state.onCandidateResponse = request => {
+      if (request.path.endsWith(`.${extension}`)) throw Error('synthetic curl maximum redirects followed');
+    };
+    const result = await f.run(); assertFailed(result, /Authenticated candidate check failed/);
+    assert.equal(writes(result).length, 0);
+    const failed = result.cliCalls.find(call => call.path.endsWith(`.${extension}`));
+    assert.equal(failed.args[failed.args.indexOf('--max-redirs') + 1], '3');
+    assert.ok(failed.args.includes('--location'));
   }
 });
 
@@ -346,7 +386,7 @@ test('promotion verifies protected apps before main then game promotion and publ
   ]);
   assert.ok(result.calls.some(call => call.origin === 'https://mir2.obelisk.build' && call.path === '/api/promotions/bootstrap'));
   assert.ok(result.calls.every(call => ['https://api.vercel.com', 'https://mir2.obelisk.build'].includes(call.origin)));
-  assert.equal(result.cliCalls.length, 5); assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
+  assert.equal(result.cliCalls.length, 7); assert.ok(result.cliCalls.every(call => call.writesAtCheck === 0));
   assert.ok(result.logs.some(value => value.includes('"publicSmoke":"passed"')));
 });
 

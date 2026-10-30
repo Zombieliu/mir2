@@ -68,7 +68,11 @@ try {
     }
     const chunk = rewrite(routes.beforeFiles, "/marketing-assets/_next/static/chunks/site.js");
     assert.equal(chunk.hostname, expectedHost);
-    assert.equal(chunk.pathname, "/_next/static/chunks/site.js");
+    assert.equal(chunk.pathname, "/marketing-assets/_next/static/chunks/site.js");
+    const chunkWithQuery = rewrite(routes.beforeFiles, "/marketing-assets/_next/static/chunks/site.js", { dpl: "dpl_marketing_release", version: "42", lang: "zh-CN" });
+    assert.equal(chunkWithQuery.hostname, expectedHost);
+    assert.equal(chunkWithQuery.pathname, "/marketing-assets/_next/static/chunks/site.js");
+    assert.deepEqual(chunkWithQuery.query, { dpl: "dpl_marketing_release", version: "42", lang: "zh-CN" });
   });
 
   await test("marketing cannot capture game, promotion, authentication, metadata or neighboring APIs", async () => {

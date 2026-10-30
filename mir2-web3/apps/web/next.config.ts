@@ -304,7 +304,7 @@ const nextConfig: NextConfig = {
           },
           {
             source: "/marketing-assets/_next/static/:path*",
-            destination: `${marketingOrigin}/_next/static/:path*`,
+            destination: `${marketingOrigin}/marketing-assets/_next/static/:path*`,
           },
           { source: "/gameplay/:path*", destination: `${marketingOrigin}/gameplay/:path*` },
           { source: "/og.png", destination: `${marketingOrigin}/og.png` },
