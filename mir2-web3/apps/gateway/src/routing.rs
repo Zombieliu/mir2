@@ -296,6 +296,11 @@ impl ZoneOwnerCommandRequest {
 }
 
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
+    /// Durable Hosts require the lease lock inside the actual save transaction.
+    fn requires_transactional_zone_save_fence(&self) -> bool {
+        false
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease;
 
     /// Fallible acquisition for runtime paths. Durable authorities must report
@@ -875,13 +880,63 @@ fn with_character_handoff_lease<T: Send>(
     mut operation: impl FnMut() -> Result<T, String> + Send,
 ) -> Result<T, String> {
     let mut result = None;
-    // Reuse the existing epoch-held repository guard: a second check after a
-    // write cannot retract that write if ownership changed during publication.
-    authority.with_durable_npc_purchase_lease(lease, &mut || {
+    // Durable runtimes lock the epoch inside the source transaction; legacy
+    // authorities retain their existing outer guard. A post-write check alone
+    // cannot retract a publication that crossed an ownership change.
+    with_owner_operation_guard(authority, lease, &mut || {
         result = Some(operation());
     })?;
     result.ok_or_else(|| "handoff owner epoch guard did not execute".to_string())?
 }
+
+fn bind_runtime_zone_save_fence(
+    runtime: &mut ZoneRuntimeHandle,
+    authority: Option<&SharedZoneOwnerLeaseAuthority>,
+    lease: &ZoneOwnerLease,
+) -> Result<(), String> {
+    let Some(authority) = authority.filter(|a| a.requires_transactional_zone_save_fence()) else {
+        return Ok(());
+    };
+    authority.validate_owner_lease(lease)?;
+    let fence = mir2_simulation::ZoneSaveFence::new(
+        lease.zone_id().as_str().to_owned(), lease.owner_id().to_owned(), lease.fencing_token(),
+    )?;
+    runtime.bind_zone_save_fence(fence)
+}
+
+fn with_owner_operation_guard(
+    authority: &SharedZoneOwnerLeaseAuthority,
+    lease: &ZoneOwnerLease,
+    operation: &mut (dyn FnMut() + Send),
+) -> Result<(), String> {
+    if authority.requires_transactional_zone_save_fence() {
+        // The runtime's bound config locks the row in the SAME account-store
+        // transaction. A second connection's outer lock would deadlock it and
+        // would not remain atomic when that lock connection is lost.
+        authority.validate_owner_lease(lease)?;
+        operation();
+        Ok(())
+    } else {
+        authority.with_durable_npc_purchase_lease(lease, operation)
+    }
+}
+
+fn validate_bound_runtime_zone_save_fence(
+    runtime: &ZoneRuntimeHandle,
+    authority: Option<&SharedZoneOwnerLeaseAuthority>,
+) -> Result<(), String> {
+    let Some(authority) = authority.filter(|a| a.requires_transactional_zone_save_fence()) else {
+        return Ok(());
+    };
+    let fence = runtime.bound_zone_save_fence().ok_or("ZONE_SAVE_FENCE_NOT_BOUND")?;
+    authority.validate_owner_lease(&ZoneOwnerLease::new(
+        ZoneId::new(fence.zone_id()), fence.owner_id(), fence.fencing_token(),
+    ))
+}
+
+#[cfg(test)]
+#[path = "routing/zone_save_fence_tests.rs"]
+mod zone_save_fence_tests;
 
 #[derive(Default)]
 pub struct InProcessZoneOwnerCommandClient {
@@ -934,10 +989,12 @@ fn execute_durable_npc_owner_with_guard(
             "durable NPC owner lease guard is unavailable",
         ));
     }
+    bind_runtime_zone_save_fence(runtime, Some(authority), lease)
+        .map_err(crate::npc_purchase_owner_route::before)?;
     let mut result = None;
     let mut known = None;
     let guarded = crate::session::catch_gateway_panic("durable NPC owner epoch guard", || {
-        authority.with_durable_npc_purchase_lease(lease, &mut || {
+        with_owner_operation_guard(authority, lease, &mut || {
             let routed = execute_durable_npc_owner_held(
                 lease,
                 authenticated,
@@ -1088,6 +1145,8 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
                 .validate_owner_lease(request.owner_lease())
                 .map_err(NativeAttackError::BeforeExecution)?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())
+            .map_err(NativeAttackError::BeforeExecution)?;
         execute_typed_native_attack_runtime(runtime, request)
     }
 
@@ -1100,6 +1159,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
             .owner_lease_authority
             .as_ref()
             .ok_or("handoff requires actual owner lease authority")?;
+        bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
         with_character_handoff_lease(authority, lease, || runtime.prepare_character_handoff())
     }
 
@@ -1114,6 +1174,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
             .as_ref()
             .ok_or("handoff requires actual owner lease authority")?;
         with_character_handoff_lease(authority, lease, || {
+            bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
             runtime.resume_character_handoff(checkpoint)
         })
     }
@@ -1278,6 +1339,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(request.owner_lease())?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())?;
         partition_binding::validate_runtime_execution_domain(runtime, request.owner_lease())?;
         let _slow_stage = GatewaySlowStage::start("zone_owner.in_process.execute_request");
         let mode = request.mode();
@@ -1340,6 +1402,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(owner_lease)?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), owner_lease)?;
         prepare_zone_teardown_checkpoint(runtime, owner_lease)
     }
 
@@ -1351,6 +1414,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(prepared.owner_lease())?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), prepared.owner_lease())?;
         persist_zone_teardown_checkpoint(runtime, prepared)
     }
 }
@@ -1396,6 +1460,8 @@ impl HostedZoneOwnerCommandClient {
                 "zone owner hosted runtime was already handed off".into(),
             )
         })?;
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())
+            .map_err(NativeAttackError::BeforeExecution)?;
         execute_typed_native_attack_runtime(runtime, request)
     }
 
@@ -1409,7 +1475,7 @@ impl HostedZoneOwnerCommandClient {
             .ok_or("durable NPC owner lease authority unavailable")?;
         let mut checkpoint = None;
         let mut read_error = None;
-        authority.with_durable_npc_purchase_lease(lease, &mut || match self.runtime.lock() {
+        with_owner_operation_guard(authority, lease, &mut || match self.runtime.lock() {
             Ok(runtime) => {
                 checkpoint = runtime.as_ref().and_then(|runtime| {
                     runtime.npc_purchase_owner_checkpoint(
@@ -1488,7 +1554,7 @@ impl HostedZoneOwnerCommandClient {
         let mut result = None;
         let mut known = None;
         let guarded = crate::session::catch_gateway_panic("hosted durable NPC owner guard", || {
-            authority.with_durable_npc_purchase_lease(lease, &mut || {
+            with_owner_operation_guard(authority, lease, &mut || {
                 let routed = crate::session::catch_gateway_panic(
                     "hosted durable NPC actual runtime",
                     || {
@@ -1502,6 +1568,8 @@ impl HostedZoneOwnerCommandClient {
                                 "zone owner hosted runtime was handed off",
                             )
                         })?;
+                        bind_runtime_zone_save_fence(runtime, Some(authority), lease)
+                            .map_err(crate::npc_purchase_owner_route::before)?;
                         execute_durable_npc_owner_held(
                             lease,
                             authenticated,
@@ -1657,12 +1725,12 @@ impl HostedZoneOwnerCommandClient {
             .as_ref()
             .ok_or("handoff requires actual owner lease authority")?;
         with_character_handoff_lease(authority, lease, || {
-            self.runtime
+            let mut slot = self.runtime
                 .lock()
-                .map_err(|_| "zone owner hosted runtime mutex was poisoned")?
-                .as_mut()
-                .ok_or("zone owner hosted runtime was already handed off")?
-                .prepare_character_handoff()
+                .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+            let runtime = slot.as_mut().ok_or("zone owner hosted runtime was already handed off")?;
+            bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
+            runtime.prepare_character_handoff()
         })
     }
 
@@ -1680,6 +1748,7 @@ impl HostedZoneOwnerCommandClient {
                 .runtime
                 .lock()
                 .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+            bind_runtime_zone_save_fence(runtime.as_mut().ok_or("zone owner hosted runtime was already handed off")?, Some(authority), lease)?;
             let was_prepared = runtime
                 .as_ref()
                 .ok_or("zone owner hosted runtime was already handed off")?
@@ -1722,6 +1791,7 @@ impl HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), owner_lease)?;
         prepare_zone_teardown_checkpoint(runtime, owner_lease)
     }
 
@@ -1739,6 +1809,7 @@ impl HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), prepared.owner_lease())?;
         persist_zone_teardown_checkpoint(runtime, prepared)
     }
 
@@ -1845,6 +1916,9 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
+        if external_commit_authorized {
+            bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), &partition_lease)?;
+        }
         partition_binding::validate_runtime_execution_domain(runtime, &partition_lease)?;
         let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
@@ -2032,6 +2106,7 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        validate_bound_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref())?;
         runtime.save_active_character()
     }
 
@@ -2168,6 +2243,7 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        validate_bound_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref())?;
         runtime.save_active_character()
     }
 
@@ -18535,6 +18611,18 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn supports_zone_save_fence(&self) -> bool {
+        self.inner.supports_zone_save_fence()
+    }
+
+    fn bind_zone_save_fence(&mut self, fence: mir2_simulation::ZoneSaveFence) -> Result<(), String> {
+        self.inner.bind_zone_save_fence(fence)
+    }
+
+    fn bound_zone_save_fence(&self) -> Option<mir2_simulation::ZoneSaveFence> {
+        self.inner.bound_zone_save_fence()
+    }
+
     fn execute_procurement_owner(
         &mut self,
         authenticated: bool,

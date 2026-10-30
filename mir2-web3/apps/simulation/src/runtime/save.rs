@@ -590,6 +590,33 @@ where
 }
 
 impl SimulationSession {
+    /// The authoritative host must validate the lease before calling this
+    /// server-only seam. Store it in this runtime's configuration so ordinary
+    /// saves, Logout, prepared saves and recovery use the same transaction fence.
+    /// Character checkpoints neither grant nor replace this authority.
+    pub fn bind_zone_save_fence(
+        &mut self,
+        fence: crate::config::zone_save_fence::ZoneSaveFence,
+    ) -> Result<(), String> {
+        let mut resource = self
+            .app
+            .world_mut()
+            .resource_mut::<RuntimeConfigResource>();
+        let config = resource.config.clone().with_zone_save_fence(fence)?;
+        resource.config = config;
+        Ok(())
+    }
+
+    /// Local server diagnostics; this authority is never serialized in a save.
+    pub fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .zone_save_fence()
+            .cloned()
+    }
+
     /// Capture the exact durable private state for the active character without
     /// mutating the configured account store.
     pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
@@ -755,6 +782,10 @@ mod save_fail_closed_tests;
 #[cfg(test)]
 #[path = "skill_cooldown_restore_tests.rs"]
 mod skill_cooldown_restore_tests;
+
+#[cfg(test)]
+#[path = "zone_save_fence_tests.rs"]
+mod zone_save_fence_tests;
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
     let (config, account_id, selected_character) = {

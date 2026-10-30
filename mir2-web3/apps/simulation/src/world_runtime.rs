@@ -405,6 +405,26 @@ pub trait WorldRuntime: Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
+    /// Trusted server capability; binding still validates the runtime's own
+    /// PostgreSQL source configuration. This is never a player command.
+    fn supports_zone_save_fence(&self) -> bool {
+        false
+    }
+
+    /// Bind the lease checked by the host to every subsequent private-state
+    /// source transaction. The database rechecks it inside that transaction.
+    fn bind_zone_save_fence(
+        &mut self,
+        _fence: crate::config::zone_save_fence::ZoneSaveFence,
+    ) -> Result<(), String> {
+        Err("world runtime does not support zone save fencing".into())
+    }
+
+    /// Local diagnostics only; checkpoints and client packets carry no fence.
+    fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
+        None
+    }
+
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
 
@@ -1429,6 +1449,21 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn supports_zone_save_fence(&self) -> bool {
+        true
+    }
+
+    fn bind_zone_save_fence(
+        &mut self,
+        fence: crate::config::zone_save_fence::ZoneSaveFence,
+    ) -> Result<(), String> {
+        self.session.bind_zone_save_fence(fence)
+    }
+
+    fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
+        self.session.bound_zone_save_fence()
     }
 
     fn on_connect(&self) -> Vec<ServerPacket> {

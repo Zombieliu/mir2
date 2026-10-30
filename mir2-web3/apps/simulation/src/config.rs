@@ -187,6 +187,8 @@ impl CharacterRecord {
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
+#[path = "config/zone_save_fence.rs"]
+pub mod zone_save_fence;
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
 pub use prepared_kill::{
@@ -768,6 +770,9 @@ fn validate_account_store_transaction_scope(
 
 #[derive(Debug, Clone)]
 struct AccountStoreMutationPlan {
+    zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
+    #[cfg(test)]
+    zone_save_fence_test_fault: Option<zone_save_fence::TestFault>,
     stones: Option<stone_authority::StoneMutation>,
     /// Compensation is fenced by its own committed receipt even for a File
     /// primary's PostgreSQL mirror. Never overwrite a later domain mutation.
@@ -988,6 +993,9 @@ fn build_account_store_mutation_plan(
     };
 
     AccountStoreMutationPlan {
+        zone_save_fence: None,
+        #[cfg(test)]
+        zone_save_fence_test_fault: None,
         stones: stone_authority::build(original, desired),
         force_source_cas: false,
         clock: matches!(scope, AccountStoreMutationScope::FullRestore).then(|| {
@@ -4157,6 +4165,9 @@ pub struct SimulationConfig {
     /// URL is not a filesystem location.
     pub save_recovery_dir: Option<PathBuf>,
     save_recovery_mac_key: Option<SaveRecoveryMacKey>,
+    zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
+    #[cfg(test)]
+    zone_save_fence_test_fault: Arc<Mutex<Option<zone_save_fence::TestFault>>>,
     pub content_profile: Option<ContentProfileRuntime>,
     file_authority: Option<Arc<file_authority::FileAuthority>>,
     replica_bootstrap_authority: Option<ReplicaBootstrapAuthority>,
@@ -4242,6 +4253,7 @@ impl SimulationConfig {
         #[cfg(test)]
         {
             fork.account_store_transaction_fault = Arc::new(Mutex::new(None));
+            fork.zone_save_fence_test_fault = Arc::new(Mutex::new(None));
             fork.account_store_repository_writer_probe = Arc::new(Mutex::new(None));
             fork.account_store_transaction_scope_observations = Arc::new(Mutex::new(Vec::new()));
         }
@@ -4258,6 +4270,7 @@ impl SimulationConfig {
         fork.account_store_database_url = None;
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
+        fork.zone_save_fence = None;
         fork.replica_bootstrap_authority =
             Some(ReplicaBootstrapAuthority(Arc::clone(&fork.account_store)));
         Ok(fork)
@@ -4391,6 +4404,9 @@ impl SimulationConfig {
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
             save_recovery_dir: None,
             save_recovery_mac_key: None,
+            zone_save_fence: None,
+            #[cfg(test)]
+            zone_save_fence_test_fault: Arc::new(Mutex::new(None)),
             content_profile: None,
             file_authority: None,
             replica_bootstrap_authority: None,
@@ -4792,7 +4808,12 @@ impl SimulationConfig {
         })
         .map_err(|_| "account-store write-state mutex poisoned; writes are blocked".to_string())?;
         match &*state {
-            AccountStoreWriteState::Writable => Ok(()),
+            AccountStoreWriteState::Writable => {
+                if self.zone_save_fence.is_some() {
+                    self.validate_zone_save_fence_binding()?;
+                }
+                Ok(())
+            }
             AccountStoreWriteState::Frozen { reason } => Err(format!(
                 "account-store writes are frozen until explicit durable reconciliation: {reason}"
             )),
@@ -4955,7 +4976,9 @@ impl SimulationConfig {
     }
 
     fn map_clock_repository_error(&self, plan: &AccountStoreMutationPlan, error: String) -> String {
-        if (plan.carries_billing_source()
+        if error.starts_with(zone_save_fence::COMMIT_OUTCOME_UNKNOWN)
+            || error.starts_with(ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN)
+            || (plan.carries_billing_source()
             && error.starts_with(crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN))
             || (plan.clock.is_some()
                 && error.starts_with(guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN))
@@ -5052,13 +5075,14 @@ impl SimulationConfig {
         } else {
             AccountStoreMutationScope::AccountsWithGlobal(&account_ids)
         };
-        let mutation_plan = build_account_store_mutation_plan(
+        let mut mutation_plan = build_account_store_mutation_plan(
             &store,
             &store,
             scope,
             self.account_store_database_mode == AccountStoreDatabaseMode::Mirror
                 && scoped_account_id.is_none(),
         );
+        self.bind_zone_save_fence_to_plan(&mut mutation_plan);
 
         let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
         if let Some(path) = self.account_store_path.as_deref() {
@@ -5078,7 +5102,7 @@ impl SimulationConfig {
                 database_url,
                 self.account_store_database_mode,
                 &mutation_plan,
-            )?;
+            ).map_err(|error| self.map_clock_repository_error(&mutation_plan, error))?;
             if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
                 let mut live_store = self
                     .account_store
@@ -5454,8 +5478,9 @@ impl SimulationConfig {
         };
         validate_account_store_transaction_scope(&original_store, &staged_store, scope)
             .map_err(|error| error.to_string())?;
-        let mutation_plan =
+        let mut mutation_plan =
             build_account_store_mutation_plan(&original_store, &staged_store, scope, false);
+        self.bind_zone_save_fence_to_plan(&mut mutation_plan);
 
         #[cfg(any(test, feature = "test-support"))]
         if self.take_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist) {
@@ -5489,12 +5514,13 @@ impl SimulationConfig {
             );
         }
 
-        let rollback_plan = build_account_store_mutation_plan(
+        let mut rollback_plan = build_account_store_mutation_plan(
             &staged_store,
             &original_store,
             scope,
             mutation_plan.global_stock.is_some(),
         );
+        rollback_plan.zone_save_fence = self.zone_save_fence.clone();
         let mut postgres_versions = None;
         let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
 
@@ -6407,6 +6433,7 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     plan: AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    let carries_zone_fence = plan.zone_save_fence.is_some();
     let carries_clock = plan.clock.is_some();
     let carries_guilds = !plan.guilds.is_empty() || plan.carries_guild_experience_source();
     let carries_heroes = !plan.heroes.is_empty() || plan.hero_allocator.is_some();
@@ -6414,13 +6441,20 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     let carries_billing = plan.carries_billing_source();
     let carries_stones = plan.stones.is_some();
     std::thread::spawn(move || {
-        let mut client = pool.connection()?;
-        pool.ensure_migrated(&mut client)?;
+        let mut client = pool.connection().map_err(|error| {
+            if carries_zone_fence { zone_save_fence::UNAVAILABLE.to_string() } else { error }
+        })?;
+        // A fenced save is never a schema-provisioning capability.
+        if !carries_zone_fence {
+            pool.ensure_migrated(&mut client)?;
+        }
         write_account_store_mutation_plan_to_postgres(&mut client, &plan, mode)
     })
     .join()
     .map_err(|_| {
-        if carries_billing {
+        if carries_zone_fence {
+            zone_save_fence::commit_outcome_unknown("transaction worker panicked")
+        } else if carries_billing {
             format!(
                 "{}: postgres billing transaction worker panicked",
                 crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN
@@ -6470,7 +6504,13 @@ fn write_account_store_mutation_plan_to_postgres(
         write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
         .commit()
-        .map_err(|error|if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!("{}: stone commit response unavailable: {error}",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
+        .map_err(|error|if plan.zone_save_fence.is_some(){zone_save_fence::classify_commit_error(error)}else if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!("{}: stone commit response unavailable: {error}",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
+    #[cfg(test)]
+    match plan.zone_save_fence_test_fault {
+        Some(zone_save_fence::TestFault::PanicAfterCommit) => panic!("ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT"),
+        Some(zone_save_fence::TestFault::LoseResponseAfterCommit) => return Err(zone_save_fence::commit_outcome_unknown("test-only response loss after confirmed commit")),
+        None => {}
+    }
     Ok(source_versions)
 }
 
@@ -6479,6 +6519,9 @@ fn write_account_store_mutation_plan_in_transaction(
     plan: &AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    if let Some(fence) = plan.zone_save_fence.as_ref() {
+        fence.lock_and_validate(transaction, mode)?;
+    }
     let clock_version = plan
         .clock
         .as_ref()

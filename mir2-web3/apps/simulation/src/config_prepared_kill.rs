@@ -63,9 +63,12 @@ impl PreparedKillAccountSource {
     pub fn checkpoint(&self) -> &CharacterSaveRecord {
         &self.staged.accounts[self.account_id()].saves[&self.character_index()]
     }
-    /// Take Guild locks only. Gateway takes economy-character advisory locks
-    /// next; account row locks must not be taken before those advisory locks.
+    /// Take the Zone lease first, then Guild locks. Gateway takes economy-character
+    /// advisory locks next; account rows must not precede those advisory locks.
     pub fn lock_postgres_guilds(&self, tx: &mut Transaction<'_>) -> Result<(), String> {
+        if let Some(fence) = self.plan.zone_save_fence.as_ref() {
+            fence.lock_and_validate(tx, self.mode)?;
+        }
         for id in self.plan.guilds.keys() {
             tx.query_one(
                 "SELECT pg_advisory_xact_lock(hashtextextended($1,735891))",
@@ -191,7 +194,8 @@ impl SimulationConfig {
         };
         validate_account_store_transaction_scope(&original, &staged, scope)
             .map_err(|e| e.to_string())?;
-        let plan = build_account_store_mutation_plan(&original, &staged, scope, false);
+        let mut plan = build_account_store_mutation_plan(&original, &staged, scope, false);
+        self.bind_zone_save_fence_to_plan(&mut plan);
         let checkpoint = staged
             .accounts
             .get(&permit.identity.account_id)
@@ -253,6 +257,9 @@ impl SimulationConfig {
         }
         if self.account_store_database_mode != source.mode {
             return Err("prepared source backend changed".to_string().into());
+        }
+        if self.zone_save_fence != source.plan.zone_save_fence {
+            return Err(zone_save_fence::REJECTED.to_string().into());
         }
         let mut live = self
             .account_store

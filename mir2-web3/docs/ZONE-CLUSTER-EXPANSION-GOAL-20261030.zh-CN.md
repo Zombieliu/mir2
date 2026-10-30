@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | G0 租约生命周期 | 释放保留持久 epoch；到期重取递增；旧 owner/缓存拒绝；协调失败传播 Result | 第一片已实现，11 项真实 PG 行为及接入/恢复回归通过；仍有有界 IO、数据库时钟和混合版本上线门槛，不是任意持久提交 fence 完成 |
 | G1 固定地图分配 | 仅观察 PG owner 的 Gateway adapter、固定 ownerId→endpoint、严格配置、明确 rebind | 已接显式 opt-in 的真实低权 PG observer、Gateway admission/跨图入口及固定 RPC/poller；缺失/过期/未知 owner/故障拒绝且不回落。完整迁移重绑和世界时钟拓扑仍待后续门槛；验收见本主题 G1 证据 |
-| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 接管后旧进程、旧快照不能落盘；保留角色 revision CAS 和经济幂等。需把 lease 行锁置入 account-store 自己的同一事务；现有 NPC 的另一连接 callback guard 不能覆盖锁连接中断，不能把普通预先验证当成提交屏障 |
+| G2 持久写 fence | 对保存、退出和经济提交持有正确 owner epoch 的提交屏障 | 同一 account-store 事务的 lease 行锁、数据库时间校验、Unknown 写冻结及可信 runtime 绑定已实现；25 项新增与相邻回归共211通过、1既有忽略。完整显式 lease RPC save/teardown capability、故障对账及外部共享 inventory 接点尚未完成；旧 NPC 的另一连接 callback guard 不能当作原子屏障 |
 | G3 受控迁移 | 每地图持久迁移账本、quiesce、精确快照/增量、readiness、owner CAS、目标晋升及路由切换 | 每一阶段可重启恢复、重复执行；晋升响应未知先对账；不盲目反向 handoff。目标未验证前不接管，旧 Host 不得仅凭过期行恢复旧世界为新 owner |
 | G4 连续战斗与连接 | 在线 handoff 专用恢复、完整技能/仇恨/掉落/经验来源、实时订阅换代 | 保留冷恢复撤销规则；真实攻击/弹道/冷却/毒/五职业 lease 连续；停旧订阅后切换，旧帧不进入新代次，无重复伤害或掉物 |
 | G5 跨入口与故障 | 聊天、重连、共享身份与路由、2 Gateway/2 Host 集成及故障注入 | 先隔离 loopback，再真实跨机；断线保存、PG/网络故障、进程崩溃、旧 owner 回来、取消/未知结果均可恢复。loopback 不冒充两台物理机 |
@@ -73,3 +73,17 @@ reader 应只有目标表 SELECT。审计拒绝管理员/可 SET ROLE 到 writer
 **本实验模式尚不发布。** 普通 save/退出的提交级 fence、RPC teardown capability/Unknown 恢复、完整在线 rebind、跨 Gateway 状态及世界时钟尚未验收。Gateway 的本地 conquest clock 在此模式不启动，不能以此替代未来 Host/单例时钟部署。新增机器目前需要管理员预先放置并持有有效租约；没有自动搬图、自动接管或自动扩缩容。
 
 G2 的最小安全方案已定位到 simulation 的 account-store mutation transaction：同一连接先锁 lease 行并验证 owner/epoch/有效期，再提交完整保存及 revision CAS；租约必须在该事务同一数据库。普通 LogOut、冻结 teardown、normal/guild-permit/guild-post 分支均需覆盖；不能把数据库事务跨 RPC 持有，也不能以第二 DSN 的锁冒充原子提交。COMMIT 响应未知须冻结并对账，不盲目重放。详细 fresh 结果、命令、SHA、限制与回归集中在 [本主题证据](evidence/zone-cluster-expansion-20261030/README.md)。
+
+## G2 第一片：保存事务与可信 runtime 绑定
+
+新增 `ZoneSaveFence`，只能由服务端 Rust API 构造；不接受客户端 JSON、checkpoint 或恢复 journal 提供的 fence。配置绑定要求 PostgreSQL SourceOfTruth 和显式数据库，拒绝 File、Mirror 或缺失 URL；提交时再次检查，不能通过改公开配置字段降级逃逸。与原 account-store 相同的事务先锁 `public.zone_owner_leases`，得到锁后再读取数据库 wall clock，校验 owner/token/expiry/heartbeat，之后执行原有 save/account/guild CAS，最后由同一连接 COMMIT。锁等待 250ms、statement 2s、idle-in-transaction 5s；这些不是原生驱动 IO 的硬取消保证。
+
+绑定配置的全部 mutation plan 携带 fence；普通保存、LogOut、冻结保存、guild-permit/guild-post 使用同一 runtime config。prepared-kill 单独建 plan 的路径也保留 fence，并在 Guild/经济锁之前先锁 lease；prepared source 不允许跨不同 fence 的配置发布。保持完整原始快照、revision CAS、邮件合并和 Guild 授权语义。没有新增数据库字段或迁移，所需租约表沿用现有 0003；fenced mutation worker 不执行 migrations，缺表拒绝。
+
+可信 Host 在已验证的命令、攻击、交接及 teardown 接点绑定 runtime；普通保存只验证已绑定代次，不查当前 owner 后自动采纳新代次。checkpoint restore/account-store rebind 保留接收 runtime 的可信绑定；显式 replica shadow 清除 PG/file/source 权限，不能以旧绑定作为外部写入权限。Shared runtime 仅向其真实 inner runtime 委托，不在 Gateway 创建共享世界。
+
+对要求同事务 fence 的 PG authority，NPC、采购与角色交接不再跨另一连接持有外层租约锁：事务中的行锁承担原子屏障，避免自锁死等。legacy 非 PG authority 保留原 guard；不据此宣称它们已具备新的 PG 保证。
+
+fenced COMMIT 的所有错误以及提交 worker panic 都保守以 `ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN` 和共享 account-store unknown 标记冻结写入；不能仅因 driver 返回数据库错误就宣称安全未提交。共享配置克隆也拒绝后续写，不发布新的内存 CAS/余额。不会按超时自动回滚或重复提交。真实 PG 连接终止验证的是事务锁和源写的实际回滚；after-COMMIT panic/丢回执使用明确标记的测试 hook，不冒称原生网络 COMMIT 回执丢失。另用真实 deferred UNIQUE 的 COMMIT 错误验证保守冻结：该次 PG 事务实际回滚，但应用仍等待明确对账，不自动解除共享冻结。
+
+**G2 仍未整体完成。** 老 RPC Save 请求尚无调用方显式 lease，TCP teardown prepare/persist/release 尚缺专用 wire/capability；后续必须加入 Host 所有的冻结快照/回执绑定、Unknown 查询恢复及禁止旧协议回落。外部 shared inventory service、普通 Execute 的 Unknown promotion freeze 也须继续审核。当前未知提交冻结可能影响共享 config 的其他账号，解除必须有持久化证据，不提供无审计解冻入口。不能混跑绕过本屏障的旧 writer，不能发布本片为自动扩容版本；测试服与公网更新未变。验收记录集中在同一 evidence 主题。

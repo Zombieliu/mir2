@@ -1,0 +1,10 @@
+{
+  "serverVersion": "16.15",
+  "database": "mir2_zone_lease_test_20261030_69f2a7f5",
+  "serverAddress": "127.0.0.1/32",
+  "serverPort": 62169,
+  "leaseRowCount": 0,
+  "otherClientConnections": 0,
+  "leaseTablePresent": true,
+  "temporarySchemas": null
+}

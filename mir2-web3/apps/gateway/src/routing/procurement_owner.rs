@@ -20,10 +20,11 @@ pub(super) fn execute_fenced(
         return Err("procurementOwnerLeaseUnavailable".into());
     }
     authority.validate_owner_lease(lease)?;
+    bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
     partition_binding::validate_runtime_execution_domain(runtime, lease)?;
     let mut result = None;
     let guard = crate::session::catch_gateway_panic("procurement fenced owner", || {
-        authority.with_durable_npc_purchase_lease(lease, &mut || {
+        with_owner_operation_guard(authority, lease, &mut || {
             result = Some(runtime.execute_procurement_owner(authenticated, request, now_ms));
         })
     });

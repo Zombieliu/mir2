@@ -444,6 +444,10 @@ fn configured_owner_id(explicit_owner: Option<String>, instance_id: Option<Strin
 }
 
 impl ZoneOwnerLeaseAuthority for PostgresZoneOwnerLeaseAuthority {
+    fn requires_transactional_zone_save_fence(&self) -> bool {
+        true
+    }
+
     fn supports_durable_npc_purchase_lease(&self) -> bool {
         true
     }
