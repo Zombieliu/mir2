@@ -17,7 +17,7 @@ export type PromotionLeader = { id: string; status: string; displayName: string;
 export type PromotionDashboard = {
   clicks: number; registrations: number; confirmed: number; qualified: number;
   tiers: { rateBps: number; count: number }[]; eligibleRevenueMicroUsd: string;
-  estimatedCommissionMicroUsd: string; commissionEnabled: boolean; status?: string;
+  estimatedCommissionMicroUsd: string; commissionEnabled: boolean; status?: string; asOfMs?: number;
 };
 export type PromotionMember = { memberRef: string; status: string; reasonCode?: string; estimatedCommissionMicroUsd?: string; qualifiedAtMs?: number | null; rank?: number | null; rateBps?: number | null };
 export type PromotionSettlement = { id: string; status: string; totalMicroUsd: string; payableCents: number; payableMicroUsd?: string; paidMicroUsd?: string; reserveMicroUsd: string; reversalMicroUsd: string; payoutId?: string | null; payoutStatus?: string | null; txDigest?: string | null; checkpoint?: string | null; createdAtMs?: number; snapshotSha256: string };
@@ -154,6 +154,12 @@ export function formatPromotionCents(value: number | null | undefined, locale: P
 export function formatPromotionDate(value: number | null | undefined, locale: PromotionLocale): string {
   return typeof value === "number" && Number.isFinite(value) && value > 0 && Number.isFinite(new Date(value).getTime())
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
+    : "—";
+}
+
+export function formatPromotionRefreshTime(value: number | null | undefined, locale: PromotionLocale): string {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 && Number.isFinite(new Date(value).getTime())
+    ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "medium" }).format(new Date(value))
     : "—";
 }
 

@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PROMOTION_ACCOUNT_COPY } from "./promotion-account-copy";
+import { PROMOTION_EARNINGS_COPY } from "./promotion-earnings-copy";
+import { createPromotionRefresh } from "./promotion-refresh";
 import { PROMOTION_COPY, PROMOTION_LANGUAGES, normalizePromotionLocale, type PromotionCopy, type PromotionLocale, type PromotionTextKey } from "./promotion-copy";
-import { canEnrollTestWallet, hasTestWalletEnrollment, testWalletApplication, formatPromotionCents, formatPromotionDate, formatPromotionUsd, promotionRequest, promotionTimezone, PromotionApiError,
+import { canEnrollTestWallet, hasTestWalletEnrollment, testWalletApplication, formatPromotionCents, formatPromotionDate, formatPromotionRefreshTime, formatPromotionUsd, promotionRequest, promotionTimezone, PromotionApiError,
   type InvitationPreview, type PromotionBootstrap, type PromotionCampaign, type PromotionLeader, type PromotionMember, type PromotionSettlement } from "./promotion-model";
 import { PromotionWalletLogin } from "./promotion-wallet-login";
 import { PromotionAdmin } from "./promotion-admin";
@@ -141,16 +143,21 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const [nextMemberOffset, setNextMemberOffset] = useState<number | null>(null);
   const [settlements, setSettlements] = useState<PromotionSettlement[] | null>(null);
   const [listLoading, setListLoading] = useState(false);
+  const [lastUpdatedMs, setLastUpdatedMs] = useState<number | null>(null);
   const [appealCategory, setAppealCategory] = useState("other");
   const [appealMessage, setAppealMessage] = useState("");
   const [invitationLink, setInvitationLink] = useState<string | null>(null);
   const [clickRecorded, setClickRecorded] = useState(false);
   const mutationKeys = useRef(new Map<string, string>());
   const refreshGeneration = useRef(0);
+  const refreshAbort = useRef<AbortController | null>(null);
+  const refreshContext = useRef({ view, memberOffset, bootstrap, loading, busy, walletOpen });
+  refreshContext.current = { view, memberOffset, bootstrap, loading, busy, walletOpen };
   const clickKey = useRef<{ code: string; id: string } | null>(null);
   const app = useRef<HTMLDivElement>(null);
   const existingAccountSection = useRef<HTMLDetailsElement>(null);
   const copy = PROMOTION_COPY[locale];
+  const earningsCopy = PROMOTION_EARNINGS_COPY[locale];
   const homeLocale = locale === "zh-Hans" ? "zh-CN" : locale === "zh-Hant" ? "zh-TW" : locale === "hi" ? "en" : locale;
   const accountCopy = PROMOTION_ACCOUNT_COPY[locale];
   const authenticated = bootstrap?.authenticated === true;
@@ -161,6 +168,9 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const characters = bootstrap?.characters || [];
   const leader = bootstrap?.leader;
   const dashboard = bootstrap?.dashboard;
+  const liveUpdatesEnabled = authenticated && !invitationCode && ["overview", "members", "earnings"].includes(view);
+  const commissionTitle = campaign?.status === "locked" ? earningsCopy.finalizedCommission : earningsCopy.accruedCommission;
+  const settlementNote = campaign?.status === "locked" ? earningsCopy.finalizedNote : earningsCopy.settlementTiming;
   const canAdmin = Array.isArray(bootstrap?.permissions) ? bootstrap.permissions.includes("isAdmin") : bootstrap?.permissions?.isAdmin === true;
   const errorText = error === "session_expired" ? copy.sessionExpired : error && ({
     promotionBudgetFull: copy.inviteClosed, promotionRecruitmentClosed: copy.inviteClosed,
@@ -173,14 +183,39 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     promotionPayoutExecutionDisabled: copy.rules6,
   } as Record<string, string>)[error] || copy.unavailable;
 
-  const refresh = useCallback(async (signal?: AbortSignal) => {
+  const refresh = useCallback(async (signal?: AbortSignal, background = false) => {
     const generation = ++refreshGeneration.current;
-    setLoading(true);
+    refreshAbort.current?.abort();
+    const controller = new AbortController();
+    refreshAbort.current = controller;
+    const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
+    const context = refreshContext.current;
+    if (!background) setLoading(true);
     try {
-      const next = await promotionRequest<PromotionBootstrap>("bootstrap", { signal });
-      if (signal?.aborted || refreshGeneration.current !== generation) return;
+      const next = await promotionRequest<PromotionBootstrap>("bootstrap", { signal: requestSignal });
+      if (requestSignal.aborted || refreshGeneration.current !== generation) return;
       if (typeof next.authenticated !== "boolean" || !Array.isArray(next.characters)) throw new PromotionApiError(502, "invalid_bootstrap");
+      const identityChanged = !next.authenticated || context.bootstrap?.me?.account.id !== next.me?.account.id ||
+        context.bootstrap?.binding?.credentialId !== next.binding?.credentialId;
+      let nextMembers: { items: PromotionMember[]; nextOffset: number | null } | undefined;
+      let nextSettlements = Array.isArray(next.me?.settlements) ? next.me.settlements : undefined;
+      if (next.authenticated && context.view === "members") {
+        nextMembers = await promotionRequest<{ items: PromotionMember[]; nextOffset: number | null }>(`members?offset=${identityChanged ? 0 : context.memberOffset}&limit=20`, { signal: requestSignal });
+        if (!Array.isArray(nextMembers.items)) throw new PromotionApiError(502, "invalid_members_response");
+      } else if (next.authenticated && context.view === "earnings" && !nextSettlements) {
+        const records = await promotionRequest<{ items: PromotionSettlement[] }>("settlements", { signal: requestSignal });
+        if (!Array.isArray(records.items)) throw new PromotionApiError(502, "invalid_settlements_response");
+        nextSettlements = records.items;
+      }
+      if (requestSignal.aborted || refreshGeneration.current !== generation) return;
+      if (identityChanged) {
+        setMembers(null); setSettlements(null); setNextMemberOffset(null); setMemberOffset(0);
+      }
       setBootstrap(next); setError(null);
+      if (nextMembers) { setMembers(nextMembers.items); setNextMemberOffset(nextMembers.nextOffset); }
+      if (nextSettlements) setSettlements(nextSettlements);
+      const asOf = next.dashboard?.asOfMs;
+      setLastUpdatedMs(next.authenticated ? typeof asOf === "number" && Number.isSafeInteger(asOf) && asOf > 0 && Number.isFinite(new Date(asOf).getTime()) ? asOf : Date.now() : null);
       setCharacterIndex(current => next.characters.some(character => character.index === current) ? current : next.characters[0]?.index ?? null);
       if (next.leader?.inviteCode) {
         const invitation = new URL(`/promotions/invite/${encodeURIComponent(next.leader.inviteCode)}`, window.location.origin);
@@ -188,10 +223,13 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
         setInvitationLink(invitation.href);
       } else setInvitationLink(null);
     } catch (cause) {
-      if (signal?.aborted || refreshGeneration.current !== generation) return;
+      if (requestSignal.aborted || refreshGeneration.current !== generation) return;
       if (cause instanceof PromotionApiError && cause.status === 401) { setBootstrap(null); setMembers(null); setSettlements(null); }
       setError(cause instanceof PromotionApiError && cause.status === 401 ? "session_expired" : cause instanceof PromotionApiError ? cause.code : "network_unavailable");
-    } finally { if (!signal?.aborted && refreshGeneration.current === generation) setLoading(false); }
+    } finally {
+      if (refreshGeneration.current === generation) { setLoading(false); setListLoading(false); }
+      if (refreshAbort.current === controller) refreshAbort.current = null;
+    }
   }, []);
 
   useEffect(() => {
@@ -207,8 +245,28 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     if (NAVIGATION.some(item => item.view === hash)) setView(hash as View);
     const controller = new AbortController();
     void refresh(controller.signal);
-    return () => controller.abort();
+    return () => { controller.abort(); refreshAbort.current?.abort(); ++refreshGeneration.current; };
   }, [refresh]);
+
+  useEffect(() => {
+    if (!liveUpdatesEnabled) return;
+    const updates = createPromotionRefresh({
+      refresh: signal => refresh(signal, true),
+      canRefresh: () => {
+        const current = refreshContext.current;
+        return document.visibilityState === "visible" && current.bootstrap?.authenticated === true &&
+          !current.busy && !current.loading && !current.walletOpen && refreshAbort.current === null &&
+          ["overview", "members", "earnings"].includes(current.view);
+      },
+    });
+    window.addEventListener("focus", updates.request);
+    document.addEventListener("visibilitychange", updates.request);
+    return () => {
+      updates.stop();
+      window.removeEventListener("focus", updates.request);
+      document.removeEventListener("visibilitychange", updates.request);
+    };
+  }, [liveUpdatesEnabled, view, bootstrap?.binding?.credentialId, refresh]);
 
   useEffect(() => {
     const previous = { language: document.documentElement.lang, direction: document.documentElement.dir, title: document.title };
@@ -242,14 +300,9 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     if (!authenticated || !["members", "earnings"].includes(view)) return;
     const controller = new AbortController();
     setListLoading(true); setError(null);
-    const read = view === "members" ? promotionRequest<{ items: PromotionMember[]; nextOffset: number | null }>(`members?offset=${memberOffset}&limit=20`, { signal: controller.signal })
-      .then(value => { if (!controller.signal.aborted) { setMembers(value.items); setNextMemberOffset(value.nextOffset); } })
-      : promotionRequest<{ items: PromotionSettlement[] }>("settlements", { signal: controller.signal })
-        .then(value => { if (!controller.signal.aborted) setSettlements(value.items); });
-    void read.catch(cause => { if (!controller.signal.aborted) setError(cause instanceof PromotionApiError ? cause.code : "records_unavailable"); })
-      .finally(() => { if (!controller.signal.aborted) setListLoading(false); });
+    void refresh(controller.signal, true);
     return () => controller.abort();
-  }, [authenticated, view, memberOffset]);
+  }, [authenticated, view, memberOffset, refresh]);
 
   useEffect(() => {
     setAcceptedTerms(false); setCandidate(null);
@@ -257,6 +310,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
 
   async function write(path: string, body: Record<string, unknown>): Promise<Record<string, unknown> | null> {
     if (busy || !bootstrap?.csrfToken) { setError("session_expired"); return null; }
+    cancelRefresh();
     setBusy(true); setError(null); setNotice(null);
     // Retry an uncertain operation with its original key, never with a new payment/ledger intent.
     const intent = `${path}:${JSON.stringify(body)}`;
@@ -275,7 +329,14 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     } finally { setBusy(false); }
   }
 
+  function cancelRefresh() {
+    ++refreshGeneration.current;
+    refreshAbort.current?.abort(); refreshAbort.current = null;
+    setLoading(false); setListLoading(false);
+  }
+
   function changeView(next: View) {
+    if (next !== view) cancelRefresh();
     setView(next); setError(null); setNotice(null);
     history.replaceState(null, "", `#${next}`);
     app.current?.scrollTo({ behavior: "auto", top: 0 });
@@ -308,7 +369,11 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     return <button className={styles.primary} onClick={() => setWalletOpen(true)} disabled={busy}>{label} <span aria-hidden="true">↗</span></button>;
   }
 
-  return <div ref={app} className={styles.app} lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
+  const updateNotice = <p className={styles.muted} style={{ marginTop: 13 }}>
+    {earningsCopy.autoUpdate} · {earningsCopy.updatedAt}: <time dateTime={lastUpdatedMs ? new Date(lastUpdatedMs).toISOString() : undefined}>{formatPromotionRefreshTime(lastUpdatedMs, locale)}</time>
+  </p>;
+
+  return <div ref={app} className={styles.app} lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} data-promotion-live-updates={liveUpdatesEnabled ? "true" : "false"}>
     <header className={styles.header}>
       <a href="/promotions" className={styles.brand}><span className={styles.mark} aria-hidden="true">N</span><span>NUMERON<small>{copy.program}</small></span></a>
       <div className={styles.headerActions}><a href={`/${homeLocale}`} className={styles.home}>{copy.home} ↗</a>
@@ -369,9 +434,10 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
             <section className={styles.section}><div className={styles.sectionHeading}><h2>{copy.overview}</h2>{leader ? <PromotionStatus value={leader.status} copy={copy} /> : null}</div>
               {dashboard ? <div className={styles.cards}>
                 {([[copy.clicks, dashboard.clicks], [copy.registered, dashboard.registrations], [copy.attributed, dashboard.confirmed], [copy.qualifiedMembers, dashboard.qualified]] as const).map(([label, value]) => <div className={styles.card} key={label}><p className={styles.cardTitle}>{label}</p><p className={styles.metric}>{Number.isSafeInteger(value) && value >= 0 ? new Intl.NumberFormat(locale).format(value) : "—"}</p></div>)}
-                <div className={styles.card}><p className={styles.cardTitle}>{copy.estimatedCommission}</p><p className={styles.metric} style={{ fontSize: 25 }}>{formatPromotionUsd(dashboard.estimatedCommissionMicroUsd, locale)}</p></div>
+                <div className={styles.card}><p className={styles.cardTitle}>{commissionTitle}</p><p className={styles.metric} style={{ fontSize: 25 }}>{formatPromotionUsd(dashboard.estimatedCommissionMicroUsd, locale)}</p></div>
               </div> : <p className={styles.empty}>{copy.noDashboard}</p>}
-              <p className={styles.muted} style={{ marginTop: 13 }}>{copy.estimateNote}</p>
+              {updateNotice}
+              <p className={styles.muted} style={{ marginTop: 13 }}>{settlementNote} {copy.estimateNote}</p>
             </section>
             {leader?.status === "approved" && invitationLink ? <section className={styles.panel}><h3>{copy.inviteLink}</h3>
               <div className={styles.linkRow}><input readOnly value={invitationLink} aria-label={copy.inviteLink} onFocus={event => event.currentTarget.select()} /><button className={styles.secondary} onClick={() => void copyLink()}>{copy.copy}</button></div><InvitationQr link={invitationLink} alt={copy.inviteLink} />
@@ -431,9 +497,12 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
           </> : members ? <p className={styles.empty}>{copy.empty}</p> : null}
         </section> : null}
 
-        {view === "earnings" ? <section className={styles.section}><div className={styles.sectionHeading}><div><h2>{copy.earnings}</h2><p>{copy.estimateNote}</p></div></div>
+        {view === "earnings" ? <section className={styles.section}><div className={styles.sectionHeading}><div><h2>{copy.earnings}</h2><p>{settlementNote}</p></div></div>
           {!authenticated ? <p className={styles.empty}>{copy.notAuthenticated}</p> : <>
-            {dashboard ? <div className={styles.card}><p className={styles.cardTitle}>{copy.estimatedCommission}</p><p className={styles.metric}>{formatPromotionUsd(dashboard.estimatedCommissionMicroUsd, locale)}</p></div> : <p className={styles.empty}>{copy.totalsNoData}</p>}
+            {dashboard ? <div className={styles.card}><p className={styles.cardTitle}>{commissionTitle}</p><p className={styles.metric}>{formatPromotionUsd(dashboard.estimatedCommissionMicroUsd, locale)}</p>
+              <p className={styles.muted}>{earningsCopy.seasonEnd}: {formatPromotionDate(campaign?.endsAtMs, locale)}</p></div> : <p className={styles.empty}>{copy.totalsNoData}</p>}
+            {updateNotice}
+            <p className={styles.muted} style={{ marginTop: 13 }}>{copy.estimateNote}</p>
             <div className={styles.sectionHeading} style={{ marginTop: 30 }}><h3>{copy.settlements}</h3></div>
             {listLoading ? <p role="status" className={styles.empty}>{copy.loading}</p> : settlements?.length ? <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>{copy.settlementId}</th><th>{copy.amount}</th><th>{accountCopy.reserve}</th><th>{accountCopy.reversal}</th><th>{accountCopy.payable}</th><th>{copy.status}</th></tr></thead><tbody>
               {settlements.map(row => <tr key={row.id}><td className={styles.code}>{row.id}</td><td>{formatPromotionUsd(row.totalMicroUsd, locale)}</td><td>{formatPromotionUsd(row.reserveMicroUsd, locale)}</td><td>{formatPromotionUsd(row.reversalMicroUsd, locale)}</td><td>{row.payableMicroUsd !== undefined ? formatPromotionUsd(row.payableMicroUsd, locale) : formatPromotionCents(row.payableCents, locale)}{row.paidMicroUsd && row.paidMicroUsd !== "0" ? <p>{copy.confirmed}: {formatPromotionUsd(row.paidMicroUsd, locale)}</p> : null}</td><td><PromotionStatus value={row.payoutStatus || row.status} copy={copy} />{row.txDigest ? <p className={styles.code} dir="ltr">{row.txDigest}{row.checkpoint ? ` · ${row.checkpoint}` : ""}</p> : null}{["unknown", "result_unknown"].includes(row.payoutStatus || "") ? <p className={styles.muted}>{copy.unknownPayment}</p> : null}</td></tr>)}

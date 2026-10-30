@@ -1,0 +1,81 @@
+{
+  "schema": "mir2.promotion-realtime-ui.v1",
+  "verifiedAtUtc": "2026-10-30T10:51:11.200Z",
+  "origin": "http://127.0.0.1:7368",
+  "allPromotionApisFulfilledByLocalFixture": true,
+  "realUserCookiesRead": false,
+  "realBusinessPosts": 0,
+  "results": [
+    {
+      "name": "Chinese earnings remain available while payout execution is off",
+      "passed": true,
+      "elapsedMs": 11,
+      "screenshot": "EARNINGS-DESKTOP.png",
+      "overflow": {
+        "viewport": 1440,
+        "doc": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "one real ten-second poll updates accrued commission and second-level time without clicks",
+      "passed": true,
+      "elapsedMs": 10075,
+      "realWaitMs": 10026,
+      "bootstrapReads": 3
+    },
+    {
+      "name": "same-page manual refresh takes fresh bootstrap me.settlements and finalized label",
+      "passed": true,
+      "elapsedMs": 103
+    },
+    {
+      "name": "members refresh both manually and automatically on the same page",
+      "passed": true,
+      "elapsedMs": 85,
+      "memberReads": 3
+    },
+    {
+      "name": "hidden tab skips polling and visible transition refreshes immediately",
+      "passed": true,
+      "elapsedMs": 146,
+      "simulatedVisibilityEvent": true,
+      "hiddenReadCount": 0
+    },
+    {
+      "name": "navigation cancels a delayed old-view refresh before fetching obsolete members",
+      "passed": true,
+      "elapsedMs": 369
+    },
+    {
+      "name": "logout prevents a delayed authenticated response from restoring private data",
+      "passed": true,
+      "elapsedMs": 354
+    },
+    {
+      "name": "new account and credential reset an existing second-page member view to offset zero",
+      "passed": true,
+      "elapsedMs": 194,
+      "oldOffset": 20,
+      "newIdentityReadOffsets": [
+        0,
+        0,
+        0
+      ],
+      "screenshot": "IDENTITY-PAGINATION-DESKTOP.png"
+    },
+    {
+      "name": "mobile accrued earnings fit the viewport with no horizontal overflow",
+      "passed": true,
+      "elapsedMs": 30,
+      "screenshot": "EARNINGS-MOBILE.png",
+      "overflow": {
+        "viewport": 390,
+        "doc": 390,
+        "body": 390
+      }
+    }
+  ],
+  "failures": [],
+  "passed": true
+}
