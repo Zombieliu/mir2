@@ -34,6 +34,7 @@ const ECONOMY_TRADE_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-trade.v1\0";
 const MAX_ECONOMY_LEGS: usize = 128;
 mod prepared_kill;
 use prepared_kill::{PreparedKillProjection, PreparedKillSource};
+pub mod player_drop;
 mod zone_fence;
 #[cfg(test)]
 mod zone_fence_pg_tests;
@@ -300,6 +301,10 @@ pub struct EconomyOutboxEvent {
     pub receipt_digest: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_checkpoint: Option<PreparedKillProjection>,
+    /// Versioned ordinary-drop source proof. Historical kill receipts keep their
+    /// original representation and digest.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_drop_source: Option<player_drop::PlayerDropSourceProjection>,
 }
 /// Canonical typed materialization instructions held by a trade outbox event.
 /// They are serialized into `EconomyTransactionEnvelope::metadata`, so the
@@ -326,6 +331,8 @@ pub struct GroundDropProjectionIntent {
     drop: mir2_simulation::GroundDropSnapshot,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     claim_idempotency_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    player_drop_effect: Option<mir2_simulation::PlayerDropEffectIdentity>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -415,7 +422,18 @@ fn validate_duplicate_business_effect(
     stored_receipt: &EconomyTransactionReceipt,
     requested: &EconomyTransactionEnvelope,
 ) -> Result<DuplicateBusinessEffect, String> {
-    let prepared = stored_event.source_checkpoint.is_some();
+    let prepared =
+        stored_event.source_checkpoint.is_some() || stored_event.player_drop_source.is_some();
+    if let Some(projection) = &stored_event.player_drop_source {
+        if stored_event.source_checkpoint.is_some() {
+            return Err("economy receipt contains two source proof versions".into());
+        }
+        projection.validate_envelope(&stored_event.envelope)?;
+        if stored_receipt.source_checkpoint_digest.as_deref() != Some(projection.digest()?.as_str())
+        {
+            return Err("player drop source checkpoint integrity mismatch".into());
+        }
+    }
     match (
         &stored_event.source_checkpoint,
         &stored_receipt.source_checkpoint_digest,
@@ -426,6 +444,7 @@ fn validate_duplicate_business_effect(
                 return Err("prepared kill checkpoint integrity mismatch".into());
             }
         }
+        (None, _) if stored_event.player_drop_source.is_some() => (),
         (None, None) => (),
         _ => return Err("prepared kill checkpoint commitment missing".into()),
     }
@@ -458,7 +477,18 @@ fn validate_duplicate_business_effect(
     }
     if stored_business_effect_id == requested_business_effect_id {
         Ok(DuplicateBusinessEffect::Exact)
-    } else if same_ground_drop_effect_except_recipient(&stored_event.envelope, requested) {
+    } else if let Some(effect) =
+        player_drop::duplicate_pickup_effect(&stored_event.envelope, requested)?
+    {
+        Ok(effect)
+    } else if stored_event
+        .envelope
+        .metadata
+        .get("playerDropWorldEffectId")
+        .is_none()
+        && requested.metadata.get("playerDropWorldEffectId").is_none()
+        && same_ground_drop_effect_except_recipient(&stored_event.envelope, requested)
+    {
         Ok(DuplicateBusinessEffect::SettledElsewhere)
     } else {
         Err(format!(
@@ -559,12 +589,22 @@ fn ground_drop_projection_from_envelope(
     }
     let command = SharedAccountInventoryCommandEnvelope {
         identity: intent.identity.clone(),
-        command: match &intent.claim_idempotency_key {
-            Some(claim_idempotency_key) => SharedAccountInventoryCommand::GroundDropClaimPickup {
-                drop: intent.drop.clone(),
-                claim_idempotency_key: claim_idempotency_key.clone(),
-            },
-            None => SharedAccountInventoryCommand::GroundDropPickup(intent.drop.clone()),
+        command: match (&intent.claim_idempotency_key, &intent.player_drop_effect) {
+            (Some(claim_idempotency_key), Some(effect)) => {
+                SharedAccountInventoryCommand::PlayerDropClaimPickup {
+                    drop: intent.drop.clone(),
+                    claim_idempotency_key: claim_idempotency_key.clone(),
+                    effect: effect.clone(),
+                }
+            }
+            (Some(claim_idempotency_key), None) => {
+                SharedAccountInventoryCommand::GroundDropClaimPickup {
+                    drop: intent.drop.clone(),
+                    claim_idempotency_key: claim_idempotency_key.clone(),
+                }
+            }
+            (None, None) => SharedAccountInventoryCommand::GroundDropPickup(intent.drop.clone()),
+            (None, Some(_)) => return Err("player drop effect lacks a stable claim key".into()),
         },
     };
     let context = SharedAccountInventoryExecutionContext {
@@ -895,17 +935,44 @@ impl PostgresEconomyStore {
         source: Option<&dyn PreparedKillSource>,
         permit: Option<&ZoneEconomyWritePermit>,
     ) -> Result<(EconomyTransactionReceipt, Option<PreparedKillProjection>), String> {
+        self.transact_with_sources(envelope, source, permit, None)
+    }
+
+    fn transact_with_sources(
+        &self,
+        envelope: &EconomyTransactionEnvelope,
+        source: Option<&dyn PreparedKillSource>,
+        permit: Option<&ZoneEconomyWritePermit>,
+        drop_source: Option<&player_drop::PlayerDropLedgerSource<'_>>,
+    ) -> Result<(EconomyTransactionReceipt, Option<PreparedKillProjection>), String> {
+        if source.is_some() && drop_source.is_some() {
+            return Err("multiple economy source participants".into());
+        }
+        let has_source = source.is_some() || drop_source.is_some();
         if let Some(source) = source {
             prepared_kill::validate_source(envelope, source)?;
+        } else if let Some(source) = drop_source {
+            source.validate_envelope(envelope)?;
+            if permit.is_none() {
+                return Err("player drop requires a trusted runtime permit".into());
+            }
         } else {
             envelope.validate()?;
-            if envelope.metadata.get("operation").map(String::as_str)
-                == Some("preparedMonsterKillExperience")
+            if envelope
+                .metadata
+                .get("operation")
+                .map(String::as_str)
+                .is_some_and(|value| {
+                    matches!(
+                        value,
+                        "preparedMonsterKillExperience" | "preparedPlayerDrop"
+                    )
+                })
             {
                 return Err("prepared kill requires a trusted source participant".into());
             }
         }
-        let event_id = envelope.event_id_inner(source.is_some())?;
+        let event_id = envelope.event_id_inner(has_source)?;
         let trade_projection_rows = trade_projection_rows_from_envelope(envelope, &event_id)?;
         let ground_drop_projection = ground_drop_projection_from_envelope(envelope, &event_id)?;
         let mut client = self.connect()?;
@@ -942,6 +1009,12 @@ impl PostgresEconomyStore {
             if source.is_some() != event.source_checkpoint.is_some() {
                 return Err("economy source capability mismatch".into());
             }
+            if drop_source.is_some() != event.player_drop_source.is_some() {
+                return Err("economy player drop source capability mismatch".into());
+            }
+            if let Some(source) = drop_source {
+                source.validate_committed(&mut transaction, &event_id)?;
+            }
             return Ok((receipt, event.source_checkpoint));
         }
 
@@ -959,6 +1032,10 @@ impl PostgresEconomyStore {
             }
             source.lock_guilds(&mut transaction)?;
         }
+        if let Some(source) = drop_source {
+            source.lock_prepared_operation(&mut transaction)?;
+            source.source.lock_postgres_source(&mut transaction)?;
+        }
         let mut characters = envelope
             .legs
             .iter()
@@ -970,6 +1047,12 @@ impl PostgresEconomyStore {
                 source.identity().character_index,
             ));
         }
+        if let Some(source) = drop_source {
+            characters.insert((
+                source.source.binding().account_id().to_string(),
+                source.source.binding().character_index(),
+            ));
+        }
         lock_economy_characters(&mut transaction, &characters)?;
         let source_checkpoint = if let Some(source) = source {
             let checkpoint = source.publish_source(&mut transaction)?;
@@ -978,7 +1061,26 @@ impl PostgresEconomyStore {
         } else {
             None
         };
-        let aggregated = aggregate_legs_inner(&envelope.legs, source.is_some())?;
+        let player_drop_source = if let Some(source) = drop_source {
+            let checkpoint = source.source.write_postgres(&mut transaction)?;
+            if serde_json::to_value(&checkpoint).map_err(|e| e.to_string())?
+                != serde_json::to_value(source.source.checkpoint()).map_err(|e| e.to_string())?
+            {
+                return Err("player drop source CAS returned a different checkpoint".into());
+            }
+            Some(source.projection.clone())
+        } else {
+            None
+        };
+        if let Some(projection) = ground_drop_projection.as_ref() {
+            player_drop::consume_effect_in_transaction(
+                &mut transaction,
+                envelope,
+                &event_id,
+                &projection.intent,
+            )?;
+        }
+        let aggregated = aggregate_legs_inner(&envelope.legs, has_source)?;
         let unique_item_ids = aggregated
             .keys()
             .filter(|key| key.asset_kind == "item")
@@ -1013,6 +1115,11 @@ impl PostgresEconomyStore {
             if let Some(source) = source {
                 if source.expected_before().get(&key).copied() != Some(current) {
                     return Err("prepared kill ledger baseline differs from authoritative source; reconciliation required".into());
+                }
+            }
+            if let Some(source) = drop_source {
+                if source.expected_before.get(&key).copied() != Some(current) {
+                    return Err("player drop ledger baseline differs from authoritative source; reconciliation required".into());
                 }
             }
             let after = current
@@ -1079,7 +1186,11 @@ impl PostgresEconomyStore {
             source_checkpoint_digest: source_checkpoint
                 .as_ref()
                 .map(PreparedKillProjection::digest)
-                .transpose()?,
+                .transpose()?
+                .or(player_drop_source
+                    .as_ref()
+                    .map(player_drop::PlayerDropSourceProjection::digest)
+                    .transpose()?),
         };
         let receipt_json = serde_json::to_value(&receipt)
             .map_err(|error| format!("encode economy receipt: {error}"))?;
@@ -1089,6 +1200,7 @@ impl PostgresEconomyStore {
             envelope: envelope.clone(),
             receipt_digest: receipt_integrity_digest(&receipt)?,
             source_checkpoint: source_checkpoint.clone(),
+            player_drop_source,
         };
         let event_json = serde_json::to_value(&event)
             .map_err(|error| format!("encode economy outbox event: {error}"))?;
@@ -1157,6 +1269,9 @@ impl PostgresEconomyStore {
                 .map_err(|error| {
                     format!("economy ground-drop projection insert failed: {error}")
                 })?;
+        }
+        if let Some(source) = drop_source {
+            source.mark_committed(&mut transaction, &event_id, committed_at_ms)?;
         }
         transaction.commit().map_err(|error| {
             if let Some(permit) = permit {
@@ -1922,7 +2037,8 @@ impl PostgresEconomyAccountInventoryService {
                 runtime.commit_shared_inventory_item_drop_transaction(drop)
             }
             SharedAccountInventoryCommand::GroundDropPickup(drop)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
+            | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -1944,7 +2060,8 @@ impl PostgresEconomyAccountInventoryService {
     ) -> SharedAccountInventoryTransactionReceipt {
         let drop = match &envelope.command {
             SharedAccountInventoryCommand::GroundDropPickup(drop)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => drop,
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
+            | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => drop,
             _ => return Self::failed_receipt(&envelope.command),
         };
         match runtime.apply_shared_ground_drop_projection(event_id, drop) {
@@ -2040,6 +2157,7 @@ impl PostgresEconomyAccountInventoryService {
             command,
             SharedAccountInventoryCommand::GroundDropPickup(_)
                 | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. }
         )
     }
 
@@ -2048,14 +2166,21 @@ impl PostgresEconomyAccountInventoryService {
     ) -> SharedAccountInventoryCommandEnvelope {
         SharedAccountInventoryCommandEnvelope {
             identity: intent.identity.clone(),
-            command: match &intent.claim_idempotency_key {
-                Some(claim_idempotency_key) => {
+            command: match (&intent.claim_idempotency_key, &intent.player_drop_effect) {
+                (Some(claim_idempotency_key), Some(effect)) => {
+                    SharedAccountInventoryCommand::PlayerDropClaimPickup {
+                        drop: intent.drop.clone(),
+                        claim_idempotency_key: claim_idempotency_key.clone(),
+                        effect: effect.clone(),
+                    }
+                }
+                (Some(claim_idempotency_key), None) => {
                     SharedAccountInventoryCommand::GroundDropClaimPickup {
                         drop: intent.drop.clone(),
                         claim_idempotency_key: claim_idempotency_key.clone(),
                     }
                 }
-                None => SharedAccountInventoryCommand::GroundDropPickup(intent.drop.clone()),
+                _ => SharedAccountInventoryCommand::GroundDropPickup(intent.drop.clone()),
             },
         }
     }
@@ -2136,6 +2261,34 @@ impl PostgresEconomyAccountInventoryService {
 }
 
 impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
+    fn supports_durable_player_drops(&self) -> bool {
+        self.store.prepared_kill_store().is_some()
+    }
+
+    fn publish_durable_player_drop(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        binding: mir2_simulation::PlayerDropOperationBinding,
+        zone: &mir2_simulation::ZoneKey,
+        position: mir2_protocol::Point,
+        created_at_unix_ms: u64,
+        expires_at_unix_ms: u64,
+        request: mir2_simulation::PlayerDropRequest,
+    ) -> Result<
+        crate::routing::SharedPlayerDropCommit,
+        mir2_simulation::PreparedPlayerDropPublicationFailure,
+    > {
+        self.publish_player_drop(
+            runtime,
+            binding,
+            zone,
+            position,
+            created_at_unix_ms,
+            expires_at_unix_ms,
+            request,
+        )
+    }
+
     fn commit(
         &self,
         _runtime: &mut InProcessWorldRuntime,
@@ -2401,7 +2554,8 @@ fn command_kind(command: &SharedAccountInventoryCommand) -> SharedAccountInvento
             SharedAccountInventoryTransactionKind::InventoryItemDrop
         }
         SharedAccountInventoryCommand::GroundDropPickup(_)
-        | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+        | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. } => {
             SharedAccountInventoryTransactionKind::GroundDropPickup
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -2425,7 +2579,8 @@ fn preflight_projection(
             runtime.can_commit_shared_inventory_item_drop(drop)
         }
         SharedAccountInventoryCommand::GroundDropPickup(drop)
-        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
+        | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => {
             runtime.can_commit_shared_ground_drop_pickup(drop)
         }
         SharedAccountInventoryCommand::MonsterKillAward(_) => runtime.active_identity().is_some(),
@@ -2452,6 +2607,10 @@ fn economy_transaction_for_command(
         SharedAccountInventoryCommand::GroundDropClaimPickup {
             claim_idempotency_key,
             ..
+        }
+        | SharedAccountInventoryCommand::PlayerDropClaimPickup {
+            claim_idempotency_key,
+            ..
         } => claim_idempotency_key.clone(),
         _ => command.stable_idempotency_key(),
     };
@@ -2465,6 +2624,7 @@ fn economy_transaction_for_command(
             identity: identity.clone(),
             drop: drop.clone(),
             claim_idempotency_key: None,
+            player_drop_effect: None,
         }),
         SharedAccountInventoryCommand::GroundDropClaimPickup {
             drop,
@@ -2474,7 +2634,37 @@ fn economy_transaction_for_command(
             identity: identity.clone(),
             drop: drop.clone(),
             claim_idempotency_key: Some(claim_idempotency_key.clone()),
+            player_drop_effect: None,
         }),
+        SharedAccountInventoryCommand::PlayerDropClaimPickup {
+            drop,
+            claim_idempotency_key,
+            effect,
+        } => {
+            if claim_idempotency_key != &format!("player-drop-pickup:{}", effect.world_effect_id())
+            {
+                return None;
+            }
+            metadata.insert(
+                "playerDropWorldEffectId".into(),
+                effect.world_effect_id().into(),
+            );
+            metadata.insert(
+                "playerDropIntentDigest".into(),
+                effect.intent_digest().into(),
+            );
+            metadata.insert(
+                "playerDropExpiresAtUnixMs".into(),
+                effect.expires_at_unix_ms().to_string(),
+            );
+            Some(GroundDropProjectionIntent {
+                version: 1,
+                identity: identity.clone(),
+                drop: drop.clone(),
+                claim_idempotency_key: Some(claim_idempotency_key.clone()),
+                player_drop_effect: Some(effect.clone()),
+            })
+        }
         _ => None,
     };
     if let Some(intent) = ground_drop_projection_intent {
@@ -2519,7 +2709,8 @@ fn economy_transaction_for_command(
             )
         }
         SharedAccountInventoryCommand::GroundDropPickup(drop)
-        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => match &drop.loot {
+        | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
+        | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => match &drop.loot {
             GroundDropLootSnapshot::Gold { amount } => {
                 metadata.insert("operation".to_string(), "groundDropGoldPickup".to_string());
                 metadata.insert("objectId".to_string(), drop.object_id.to_string());
@@ -2615,7 +2806,14 @@ fn economy_transaction_for_command(
         | SharedAccountInventoryCommand::SkillItemConsume { .. } => return None,
     };
     Some(EconomyTransactionEnvelope {
-        idempotency_key: format!("zone:{}:{stable_key}", context.zone_id),
+        idempotency_key: if matches!(
+            command.command,
+            SharedAccountInventoryCommand::PlayerDropClaimPickup { .. }
+        ) {
+            stable_key
+        } else {
+            format!("zone:{}:{stable_key}", context.zone_id)
+        },
         transaction_kind,
         zone_id: context.zone_id.as_str().to_string(),
         fencing_generation: context.fencing_generation,
@@ -3293,6 +3491,7 @@ mod tests {
                 envelope: envelope.clone(),
                 receipt_digest: receipt_integrity_digest(&receipt)?,
                 source_checkpoint: None,
+                player_drop_source: None,
             };
             state.balances = next_balances;
             let delayed_visibility = state.delay_commit_visibility_until_lookup;

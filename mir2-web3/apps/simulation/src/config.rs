@@ -198,6 +198,12 @@ mod prepared_kill;
 pub use prepared_kill::{
     PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure,
 };
+#[path = "config_prepared_player_drop.rs"]
+mod prepared_player_drop;
+pub use prepared_player_drop::{
+    PreparedPlayerDropAccountSource, PreparedPlayerDropPublication,
+    PreparedPlayerDropPublicationFailure,
+};
 #[cfg(test)]
 #[path = "config_item_identity.rs"]
 mod item_identity;

@@ -11,6 +11,16 @@ mod equipment;
 mod experience_rates;
 pub use experience_rates::apply_crystal_experience_rates;
 mod player_weights;
+mod prepared_player_drop;
+pub(crate) fn validate_player_drop_exact_item(item: &mir2_protocol::UserItem) -> Result<(), String> {
+    items::validate_committed_user_item_carrier(item).map_err(|error| error.to_string())
+}
+pub(crate) fn validate_player_drop_recorded_request(
+    request: &crate::PlayerDropRequest,
+    operation: &crate::PlayerDropPreparedOperation,
+) -> Result<(), String> {
+    prepared_player_drop::validate_recorded_request(request, operation)
+}
 mod social_experience;
 pub use social_experience::{
     crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence,
@@ -152,6 +162,8 @@ mod stage5;
 mod stats;
 pub mod zone;
 pub use zone::ZoneMentorBankAttribution;
+pub use zone::{PlayerDropApplyResult, PlayerDropCustodyState, PlayerDropEffectIdentity,
+    PlayerDropPlacementKind, PlayerDropPlacementReservation};
 pub use zone::{ZoneConquestDefenseSample, ZoneConquestMembership, ZoneConquestPlayerSample};
 
 /// Crystal's symmetric object-data/AOI radius around the local player.

@@ -165,6 +165,8 @@ fn abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once() {
         state.queue_zone_ground_drop_claim(
             key.clone(),
             GroundDropClaimTicket {
+                player_drop_effect: None,
+                player_drop_claimant: None,
                 claim_id: 1,
                 object_id: ground_drop.object_id,
                 drop_generation: 1,

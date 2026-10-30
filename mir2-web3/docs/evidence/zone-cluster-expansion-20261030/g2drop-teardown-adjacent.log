@@ -1,0 +1,56 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 11 tests
+test routing::tests::abnormal_teardown_zone_drain_tests::abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::abrupt_teardown_rolls_back_unmatched_debited_trade_before_checkpoint ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::transport_teardown_discards_clock_queued_walk_without_losing_completed_position ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::transport_teardown_epoch_exhaustion_stays_fenced ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::transport_teardown_retires_queued_movement_before_thaw ... ok
+test routing::tests::abnormal_teardown_zone_drain_tests::web_mail_refresh_cannot_overwrite_zone_vitals_before_teardown_drain ... ok
+gateway lifecycle session_id=gateway-93968-1793375098596-1 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375098596-1 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-93968-1793375098596-1 stage=persist.save phase=begin
+gateway lifecycle session_id=gateway-93968-1793375098596-1 stage=persist.save phase=end elapsed_ms=12
+gateway lifecycle session_id=gateway-93968-1793375098596-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-93968-1793375098596-1 stage=session.close phase=end elapsed_ms=0
+test session::abnormal_teardown_persistence_tests::abnormal_teardown_updates_the_next_character_roster_last_access ... ok
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.save phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.save phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.journal phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.journal phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.prepare phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.save phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=persist.save phase=end elapsed_ms=12
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099344-2 stage=session.close phase=end elapsed_ms=0
+test session::abnormal_teardown_persistence_tests::db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint ... ok
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=persist.save phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=persist.save phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=persist.journal phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=persist.journal phase=end elapsed_ms=25
+[save-recovery] status=saved transport=recovery-replay count=1 detail=journal checkpoint committed to account store
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-93968-1793375099666-3 stage=session.close phase=end elapsed_ms=0
+test session::abnormal_teardown_persistence_tests::db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibility ... ok
+gateway lifecycle session_id=gateway-93968-1793375100467-4 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375100467-4 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-93968-1793375100467-4 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-93968-1793375100467-4 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-93968-1793375101459-5 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375101459-5 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-93968-1793375101459-5 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-93968-1793375101459-5 stage=session.close phase=end elapsed_ms=0
+test session::abnormal_teardown_persistence_tests::mismatched_or_switched_prepared_identity_is_rejected_without_persist_journal_or_cleanup ... ok
+gateway lifecycle session_id=gateway-93968-1793375101769-6 stage=persist.prepare phase=begin
+gateway lifecycle session_id=gateway-93968-1793375101769-6 stage=persist.prepare phase=end elapsed_ms=1
+gateway lifecycle session_id=gateway-93968-1793375101769-6 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-93968-1793375101769-6 stage=session.close phase=end elapsed_ms=0
+test session::abnormal_teardown_persistence_tests::owner_lease_handoff_racing_prepare_is_rejected_before_cache_or_persistence ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1496 filtered out; finished in 5.39s

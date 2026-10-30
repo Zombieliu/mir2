@@ -153,6 +153,16 @@ impl ZoneCollision {
         self.is_blocked(point) || self.transfer_source_cells.contains(&(point.x, point.y))
     }
 
+    #[cfg(test)]
+    pub(crate) fn with_transfer_source_cells_for_test(
+        mut self,
+        cells: impl IntoIterator<Item = Point>,
+    ) -> Self {
+        self.transfer_source_cells
+            .extend(cells.into_iter().map(|p| (p.x, p.y)));
+        self
+    }
+
     #[cfg(any(test, feature = "test-support"))]
     pub(crate) fn transfer_source_cells_for_test(&self) -> &BTreeSet<(i32, i32)> {
         &self.transfer_source_cells

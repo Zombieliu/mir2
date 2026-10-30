@@ -293,7 +293,7 @@ fn ground_drop_item_payload_from_resolved(
     })
 }
 
-fn ground_drop_item_payload_from_state(
+pub(super) fn ground_drop_item_payload_from_state(
     state: &super::items::ItemState,
     quantity: u32,
     preserve_uid: bool,

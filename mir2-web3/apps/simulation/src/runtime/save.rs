@@ -807,6 +807,46 @@ impl SimulationSession {
         self.install_active_character_checkpoint(save)
     }
 
+    /// Install a confirmed complete source while retaining same-session clock
+    /// anchors and queued private work. Durable recovery uses the canonical
+    /// save, never the historical drop checkpoint when a newer revision exists.
+    pub(super) fn install_committed_player_drop_checkpoint(
+        &mut self,
+        save: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        if self.app.world().resource::<SessionResource>().active_save_revision()
+            .is_some_and(|revision| revision > save.revision) {
+            return Err("player-drop checkpoint would overwrite newer source".into());
+        }
+        let world = self.app.world();
+        let buffs = world.resource::<BuffResource>().clone();
+        let npc = world.resource::<NpcStateResource>().clone();
+        let queue = world.resource::<RuntimeQueueResource>().clone();
+        let player_dead = world.resource::<PlayerRuntimeResource>().player_dead;
+        let random = world.get_resource::<super::npc_script::CrystalNpcRandomState>().copied();
+        let hero = super::hero_ai::hero_transient::capture(world);
+        let guild_actions = super::npc_shared_guild_actions::capture(world);
+        let pet_progress = super::shared_pet_progress::capture(world);
+        let default_transient = super::default_npc_events::capture_transient(world);
+        let refine = world.resource::<Stage5SystemsResource>().stage5_systems.refine.clone();
+        let dirty_economy = self.dirty_economy_projection_event_ids.clone();
+        self.restore_active_character_checkpoint(save)?;
+        let world = self.app.world_mut();
+        *world.resource_mut::<BuffResource>() = buffs;
+        *world.resource_mut::<NpcStateResource>() = npc;
+        *world.resource_mut::<RuntimeQueueResource>() = queue;
+        world.resource_mut::<PlayerRuntimeResource>().player_dead = player_dead;
+        if let Some(random) = random { world.insert_resource(random); }
+        else { world.remove_resource::<super::npc_script::CrystalNpcRandomState>(); }
+        super::hero_ai::hero_transient::restore(world, &hero)?;
+        super::npc_shared_guild_actions::restore(world, guild_actions);
+        super::shared_pet_progress::restore(world, pet_progress);
+        super::default_npc_events::restore_transient(world, &default_transient);
+        world.resource_mut::<Stage5SystemsResource>().stage5_systems.refine = refine;
+        self.dirty_economy_projection_event_ids = dirty_economy;
+        Ok(())
+    }
+
     fn install_active_character_checkpoint(
         &mut self,
         save: &CharacterSaveRecord,

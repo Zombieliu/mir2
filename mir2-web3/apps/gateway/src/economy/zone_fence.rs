@@ -134,14 +134,14 @@ impl PostgresEconomyAccountInventoryService {
         Ok(Some(permit))
     }
 
-    fn mark_uncertain(&self, key: &str) {
+    pub(in crate::economy) fn mark_uncertain(&self, key: &str) {
         self.uncertain_transactions
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
             .insert(key.to_string());
     }
 
-    fn is_uncertain(&self, key: &str) -> bool {
+    pub(in crate::economy) fn is_uncertain(&self, key: &str) -> bool {
         self.uncertain_transactions
             .lock()
             .map(|keys| keys.contains(key))
@@ -173,6 +173,17 @@ impl PostgresEconomyAccountInventoryService {
         reconciliation_only: bool,
     ) -> SharedAccountInventoryCommitOutcome {
         let failed = || Self::failed_receipt(&envelope.command);
+        if self.store.requires_zone_write_permit()
+            && matches!(
+                envelope.command,
+                SharedAccountInventoryCommand::GoldDrop { .. }
+                    | SharedAccountInventoryCommand::InventoryItemDrop { .. }
+            )
+        {
+            // A permit alone cannot replace the complete source transition and
+            // durable world intent required by ordinary player drops.
+            return SharedAccountInventoryCommitOutcome::Deferred { receipt: failed() };
+        }
         let Some(context) = context else {
             return SharedAccountInventoryCommitOutcome::Deferred { receipt: failed() };
         };

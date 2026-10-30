@@ -1,0 +1,43 @@
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 29 tests
+test economy::player_drop::abort::tests::player_drop_abort_audit_binds_original_operation_successor_and_canonical_evidence ... ok
+test economy::player_drop::abort::tests::player_drop_abort_records_newer_canonical_without_replaying_old_before_or_after ... ok
+test economy::player_drop::pg_tests::player_drop_postgres_abort_unknown_freezes_successor_and_only_queries_original_operation ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_complete_source_ledger_ack_restart_and_terminal_pickup ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_namespace_cannot_adopt_prepared_operation_or_uid_authority ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_service_gold_exact_retry_and_successor_terminal_preserve_newer_canonical ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_service_split_preserves_exact_nested_attributes_and_reserves_uids_once ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_successor_abort_retires_old_prepared_source_without_assets_or_uid_reuse ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_uid_requires_census_idempotent_full_u64_fenced_and_exhaustion ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::pg_tests::player_drop_postgres_unknown_commit_keeps_prepared_and_freezes_absent_receipt_retry ... ignored, requires dedicated disposable loopback PostgreSQL and CREATE DATABASE authority
+test economy::player_drop::tests::player_drop_pickup_logical_identity_survives_presentation_change_and_preserves_recipient ... ok
+test economy::player_drop::tests::player_drop_pickup_rejects_changed_amount_placement_expiry_and_missing_binding ... ok
+test economy::player_drop::tests::player_drop_source_uses_complete_source_delta_and_preserves_historical_kill_projection ... ok
+test routing::player_drop_guard_tests::player_drop_journal_peeks_retain_evidence_until_exact_acknowledgement ... ok
+test routing::player_drop_guard_tests::player_drop_pending_journal_blocks_all_source_save_callbacks_and_handoff ... ok
+test routing::player_drop_guard_tests::player_drop_standalone_durable_runtime_without_journal_rejects_before_debit_or_service ... ok
+gateway lifecycle session_id=gateway-58376-1793375059875-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-58376-1793375059875-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-58376-1793375059874-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-58376-1793375059874-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_in_process_registry_broadcasts_player_drop_gold_spawn ... ok
+test zone_rpc::player_drop_journal_tests::authenticated_digest_verified_batch_applies_frozen_result_without_execute ... ok
+test zone_rpc::player_drop_journal_tests::frozen_checkpoint_replay_dispatch_preserves_per_zone_binding ... ok
+test zone_rpc::player_drop_journal_tests::frozen_player_drop_binds_zone_lease_and_zone_sequence_not_outer_rpc_session ... ok
+test zone_rpc::player_drop_journal_tests::frozen_player_drop_is_rejected_as_client_execute_before_runtime_or_journal ... ok
+test zone_rpc::player_drop_journal_tests::frozen_result_peek_retains_guard_until_exact_publication_acknowledgement ... ok
+test zone_rpc::player_drop_journal_tests::ordinary_journal_entries_keep_legacy_canonical_bytes ... ok
+test zone_rpc::player_drop_journal_tests::post_commit_acknowledgement_failure_is_unknown_and_retains_runtime_guard ... ok
+test zone_rpc::player_drop_journal_tests::post_commit_host_append_failure_is_unknown_and_freezes_zone ... ok
+
+thread 'zone_rpc::player_drop_journal_tests::post_commit_registration_refresh_failure_is_unknown_and_freezes_zone' panicked at apps\gateway\src\zone_rpc\player_drop_journal_tests.rs:628:9:
+fixture registration refresh failure after runtime execution
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test zone_rpc::player_drop_journal_tests::post_commit_registration_refresh_failure_is_unknown_and_freezes_zone ... ok
+test zone_rpc::player_drop_journal_tests::source_of_truth_promotion_requires_canonical_recovery_before_snapshot_or_seed ... ok
+test zone_rpc::player_drop_journal_tests::successful_host_drop_replaces_procedure_with_exact_frozen_result ... ok
+test zone_rpc::player_drop_journal_tests::unknown_zone_freeze_blocks_shared_tick_authorizer_before_world_mutation ... ok
+
+test result: ok. 21 passed; 0 failed; 8 ignored; 0 measured; 1478 filtered out; finished in 8.39s

@@ -30,7 +30,7 @@ fn v8_checkpoint_and_live_fork_continue_the_exact_random_suffix() {
     }
     let bytes = runtime.checkpoint_bytes().unwrap();
     let value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(value["version"], 8);
+    assert_eq!(value["version"], 9);
     assert_eq!(value["combat_random"]["draws"], 7);
     let mut cold = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
     let mut live = runtime.transaction_fork();
@@ -102,7 +102,7 @@ fn every_legacy_version_authenticates_its_original_root_then_mints_a_new_stream(
             );
             let upgraded: serde_json::Value =
                 serde_json::from_slice(&restored.checkpoint_bytes().unwrap()).unwrap();
-            assert_eq!(upgraded["version"], 8);
+            assert_eq!(upgraded["version"], 9);
             assert_eq!(upgraded["combat_random"]["version"], 1);
             let next =
                 ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&upgraded).unwrap()).unwrap();

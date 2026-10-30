@@ -94,6 +94,11 @@ use mir2_simulation::{
 mod zone_save_operation;
 #[path = "routing/zone_economy_guard.rs"]
 mod zone_economy_guard;
+#[path = "routing/player_drop.rs"]
+mod player_drop;
+#[cfg(test)]
+#[path = "routing/player_drop_guard_tests.rs"]
+mod player_drop_guard_tests;
 #[cfg(test)]
 #[path = "routing/zone_save_operation_pg_tests.rs"]
 mod zone_save_operation_pg_tests;
@@ -1931,6 +1936,35 @@ impl HostedZoneOwnerCommandClient {
         Ok(())
     }
 
+    pub(crate) fn take_player_drop_journal_result(
+        &self,
+    ) -> Result<Option<mir2_simulation::PlayerDropJournalResult>, String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "hosted runtime poisoned")?;
+        let runtime = runtime.as_mut().ok_or("hosted runtime already handed off")?;
+        Ok(runtime.take_player_drop_journal_result())
+    }
+
+    pub(crate) fn acknowledge_player_drop_journal_result(
+        &self,
+        operation_key: &str,
+        intent_digest: &str,
+    ) -> Result<(), String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "hosted runtime poisoned")?;
+        self.reject_pending_remote_save()?;
+        let runtime = runtime.as_mut().ok_or("hosted runtime already handed off")?;
+        runtime.acknowledge_player_drop_journal_result(operation_key, intent_digest)
+    }
+
+    pub(crate) fn apply_player_drop_journal_result(
+        &self,
+        result: &mir2_simulation::PlayerDropJournalResult,
+    ) -> Result<Vec<ServerPacket>, String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "hosted runtime poisoned")?;
+        self.reject_pending_remote_save()?;
+        let runtime = runtime.as_mut().ok_or("hosted runtime already handed off")?;
+        runtime.apply_player_drop_journal_result(result)
+    }
+
     pub fn execute_request(
         &self,
         request: ZoneOwnerCommandRequest,
@@ -2624,6 +2658,13 @@ pub enum SharedAccountInventoryCommand {
         drop: GroundDropSnapshot,
         claim_idempotency_key: String,
     },
+    /// Stable world custody remains private to the authoritative ticket. It is
+    /// never added to the client-facing GroundDropSnapshot.
+    PlayerDropClaimPickup {
+        drop: GroundDropSnapshot,
+        claim_idempotency_key: String,
+        effect: mir2_simulation::PlayerDropEffectIdentity,
+    },
     MonsterKillAward(ZoneMonsterKillAward),
     SkillItemConsume {
         spell: Spell,
@@ -2639,6 +2680,32 @@ pub struct SharedAccountInventoryCommandKey(String);
 pub struct SharedAccountInventoryCommandEnvelope {
     pub identity: ActiveSessionIdentity,
     pub command: SharedAccountInventoryCommand,
+}
+
+/// Trusted live publication result. Only the frozen operation and checked
+/// receipt are journal data; the world authority capability stays server-only.
+#[derive(Debug)]
+pub struct SharedPlayerDropCommit {
+    pub operation: mir2_simulation::PlayerDropPreparedOperation,
+    pub receipt: mir2_simulation::PlayerDropCommitReceipt,
+    pub effect: mir2_simulation::PlayerDropCommittedEffect,
+    pub packets: Vec<ServerPacket>,
+}
+
+impl SharedAccountInventoryCommand {
+    fn pickup_for_ticket(ticket: &GroundDropClaimTicket) -> Self {
+        match &ticket.player_drop_effect {
+            Some(effect) => Self::PlayerDropClaimPickup {
+                drop: ticket.drop.clone(),
+                claim_idempotency_key: ticket.idempotency_key.clone(),
+                effect: effect.clone(),
+            },
+            None => Self::GroundDropClaimPickup {
+                drop: ticket.drop.clone(),
+                claim_idempotency_key: ticket.idempotency_key.clone(),
+            },
+        }
+    }
 }
 
 impl SharedAccountInventoryCommandEnvelope {
@@ -2678,6 +2745,22 @@ impl SharedAccountInventoryCommandEnvelope {
                     drop.object_id
                 )
             }
+            SharedAccountInventoryCommand::PlayerDropClaimPickup {
+                claim_idempotency_key,
+                effect,
+                ..
+            } => {
+                if claim_idempotency_key
+                    != &format!("player-drop-pickup:{}", effect.world_effect_id())
+                {
+                    return None;
+                }
+                format!(
+                    "player-drop-claim:{}:{}",
+                    effect.world_effect_id(),
+                    effect.intent_digest()
+                )
+            }
             SharedAccountInventoryCommand::MonsterKillAward(award) => format!(
                 "monster-kill-award:{}:{}:{}:{}",
                 award.monster_object_id, award.killed_at_ms, award.monster_name, award.experience
@@ -2702,6 +2785,26 @@ impl SharedAccountInventoryCommandEnvelope {
 }
 
 pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
+    fn supports_durable_player_drops(&self) -> bool {
+        false
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn publish_durable_player_drop(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        _binding: mir2_simulation::PlayerDropOperationBinding,
+        _zone: &ZoneKey,
+        _position: Point,
+        _created_at_unix_ms: u64,
+        _expires_at_unix_ms: u64,
+        _request: mir2_simulation::PlayerDropRequest,
+    ) -> Result<SharedPlayerDropCommit, mir2_simulation::PreparedPlayerDropPublicationFailure> {
+        Err(mir2_simulation::PreparedPlayerDropPublicationFailure::Rejected(
+            "durable player-drop publication is unavailable".into(),
+        ))
+    }
+
     fn commit(
         &self,
         runtime: &mut InProcessWorldRuntime,
@@ -2976,7 +3079,8 @@ impl InProcessAccountInventoryService {
                 SharedAccountInventoryTransactionKind::InventoryItemDrop
             }
             SharedAccountInventoryCommand::GroundDropPickup(_)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+            | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. } => {
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             }
             SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -3005,7 +3109,8 @@ impl InProcessAccountInventoryService {
                 runtime.commit_shared_inventory_item_drop_transaction(&drop)
             }
             SharedAccountInventoryCommand::GroundDropPickup(drop)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
+            | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(&drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -10139,6 +10244,15 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
             unresolved_economy_command: None,
+            pending_player_drop_binding: None,
+            last_player_drop_journal_result: None,
+            player_drop_journal_capture_configured: self
+                .mutation_capture
+                .lock()
+                .expect("Zone mutation capture mutex should not be poisoned")
+                .is_some(),
+            replaying_player_drop_result: None,
+            applied_player_drop_during_command: false,
             npc_owner_execution_slot: Arc::new(Mutex::new(
                 npc_population_binding::NpcOwnerExecutionSlot::default(),
             )),
@@ -10915,6 +11029,11 @@ struct SharedInProcessZoneSessionRuntime {
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
     unresolved_economy_command: Option<zone_economy_guard::UnresolvedEconomyCommand>,
+    pending_player_drop_binding: Option<mir2_simulation::PlayerDropOperationBinding>,
+    last_player_drop_journal_result: Option<mir2_simulation::PlayerDropJournalResult>,
+    player_drop_journal_capture_configured: bool,
+    replaying_player_drop_result: Option<mir2_simulation::PlayerDropJournalResult>,
+    applied_player_drop_during_command: bool,
     // One process-local accepted execution; not part of world/account images.
     npc_owner_execution_slot: Arc<Mutex<npc_population_binding::NpcOwnerExecutionSlot>>,
     last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
@@ -11391,6 +11510,7 @@ impl SharedInProcessZoneSessionRuntime {
             &envelope.command,
             SharedAccountInventoryCommand::GroundDropPickup(_)
                 | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. }
         );
         let service = Arc::clone(&self.account_inventory_service);
         let context = self.economy_execution_context.clone();
@@ -11566,6 +11686,11 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn execute_shared_gold_drop(&mut self, amount: u32) -> Result<Vec<ServerPacket>, String> {
+        if let Some(packets) = self.try_publish_durable_player_drop(
+            mir2_simulation::PlayerDropRequest::Gold { amount },
+        )? {
+            return Ok(packets);
+        }
         let Some(identity) = self.inner.active_identity() else {
             return Ok(Vec::new());
         };
@@ -11587,6 +11712,11 @@ impl SharedInProcessZoneSessionRuntime {
         count: u16,
         hero_inventory: bool,
     ) -> Result<Option<Vec<ServerPacket>>, String> {
+        if let Some(packets) = self.try_publish_durable_player_drop(
+            mir2_simulation::PlayerDropRequest::Item { unique_id, count, hero_inventory },
+        )? {
+            return Ok(Some(packets));
+        }
         let Some(drop) = self
             .inner
             .shared_inventory_item_drop(unique_id, count, hero_inventory)
@@ -14229,10 +14359,7 @@ impl SharedInProcessZoneSessionRuntime {
                 Some(identity) => {
                     self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                         identity: identity.clone(),
-                        command: SharedAccountInventoryCommand::GroundDropClaimPickup {
-                            drop: drop.clone(),
-                            claim_idempotency_key: ticket.idempotency_key.clone(),
-                        },
+                        command: SharedAccountInventoryCommand::pickup_for_ticket(&ticket),
                     })
                 }
                 None => SharedAccountInventoryCommitOutcome::Confirmed(
@@ -16496,10 +16623,7 @@ impl SharedInProcessZoneSessionRuntime {
             expected_idempotency_key,
             SharedAccountInventoryCommandEnvelope {
                 identity,
-                command: SharedAccountInventoryCommand::GroundDropClaimPickup {
-                    drop: settlement.ticket.drop.clone(),
-                    claim_idempotency_key: settlement.ticket.idempotency_key.clone(),
-                },
+                command: SharedAccountInventoryCommand::pickup_for_ticket(&settlement.ticket),
             },
         );
         let receipt = match outcome {
@@ -17547,10 +17671,7 @@ impl SharedInProcessZoneSessionRuntime {
             Some(identity) => {
                 self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                     identity: identity.clone(),
-                    command: SharedAccountInventoryCommand::GroundDropClaimPickup {
-                        drop: drop.clone(),
-                        claim_idempotency_key: ticket.idempotency_key.clone(),
-                    },
+                    command: SharedAccountInventoryCommand::pickup_for_ticket(&ticket),
                 })
             }
             None => SharedAccountInventoryCommitOutcome::Confirmed(
@@ -17742,6 +17863,7 @@ impl SharedInProcessZoneSessionRuntime {
         mut native_attack_admission: Option<&mut Option<NativeAttackAdmission>>,
     ) -> Result<Vec<ServerPacket>, String> {
         self.ensure_resolved_economy_command()?;
+        self.applied_player_drop_during_command = false;
         if !matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
@@ -18559,7 +18681,9 @@ impl SharedInProcessZoneSessionRuntime {
             self.cancel_pending_shared_rental_offers();
             packets.extend(self.remove_presence());
         }
-        if shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some() {
+        if (shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some())
+            && !self.applied_player_drop_during_command
+        {
             self.remap_player_ground_drop_packets(&mut command_packets);
         }
         if command_packets.is_empty() {
@@ -18727,12 +18851,14 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     fn prepare_zone_save_operation(
         &mut self, binding: ZoneSaveOperationBinding, checkpoint: &CharacterSaveRecord,
     ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.ensure_resolved_economy_command()?;
         self.inner.prepare_zone_save_operation(binding, checkpoint)
     }
 
     fn persist_zone_save_operation(
         &mut self, operation: &ZoneSaveOperation,
     ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.ensure_resolved_economy_command()?;
         self.inner.persist_zone_save_operation(operation)
     }
 
@@ -18745,6 +18871,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     fn release_zone_save_operation(
         &mut self, binding: &ZoneSaveOperationBinding,
     ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.ensure_resolved_economy_command()?;
         self.inner.release_zone_save_operation(binding)
     }
 
@@ -18845,6 +18972,34 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
+    }
+
+    fn take_player_drop_journal_result(&mut self) -> Option<mir2_simulation::PlayerDropJournalResult> {
+        self.last_player_drop_journal_result.clone()
+    }
+
+    fn acknowledge_player_drop_journal_result(
+        &mut self,
+        operation_key: &str,
+        intent_digest: &str,
+    ) -> Result<(), String> {
+        let result = self.last_player_drop_journal_result.as_ref()
+            .ok_or("no player-drop result awaits journal publication")?;
+        if result.operation.binding().operation_key() != operation_key
+            || result.operation.intent().intent_digest() != intent_digest
+        {
+            return Err("player-drop journal acknowledgement identity mismatch".into());
+        }
+        result.validate_integrity()?;
+        self.last_player_drop_journal_result = None;
+        Ok(())
+    }
+
+    fn apply_player_drop_journal_result(
+        &mut self,
+        result: &mir2_simulation::PlayerDropJournalResult,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.replay_player_drop_journal_result(result)
     }
 
     fn on_connect(&self) -> Vec<ServerPacket> {
@@ -23420,7 +23575,8 @@ mod tests {
                     }
                 }
                 SharedAccountInventoryCommand::GroundDropPickup(_)
-                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. } => {
                     *self
                         .ground_drop_calls
                         .lock()
@@ -23841,6 +23997,7 @@ mod tests {
                 &envelope.command,
                 SharedAccountInventoryCommand::GroundDropPickup(_)
                     | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                    | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. }
             ) {
                 return SharedAccountInventoryCommitOutcome::Confirmed(
                     InProcessAccountInventoryService::new().commit(runtime, envelope),
@@ -24955,6 +25112,8 @@ mod tests {
             .current_zone_session_id()
             .expect("active shared Zone session");
         let claim_ticket = GroundDropClaimTicket {
+            player_drop_effect: None,
+            player_drop_claimant: None,
             claim_id: 1,
             object_id: gold_drop.object_id,
             drop_generation: 1,
@@ -25018,6 +25177,8 @@ mod tests {
             .expect("active shared Zone session");
         let drop = shared_gold_drop(9_201, 330, 270, None, None);
         let ticket = GroundDropClaimTicket {
+            player_drop_effect: None,
+            player_drop_claimant: None,
             claim_id: 7,
             object_id: drop.object_id,
             drop_generation: 3,
@@ -35044,6 +35205,11 @@ mod tests {
             npc_world_service,
             economy_execution_context: None,
             unresolved_economy_command: None,
+            pending_player_drop_binding: None,
+            last_player_drop_journal_result: None,
+            player_drop_journal_capture_configured: false,
+            replaying_player_drop_result: None,
+            applied_player_drop_during_command: false,
             npc_owner_execution_slot: Arc::new(Mutex::new(
                 super::npc_population_binding::NpcOwnerExecutionSlot::default(),
             )),

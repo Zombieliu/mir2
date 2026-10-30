@@ -1,0 +1,39 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+
+running 33 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+test runtime::drops::ground_drop_identity_tests::ambiguous_legacy_display_name_fails_closed_without_inventory_mutation ... ok
+test runtime::drops::ground_drop_identity_tests::assigned_ground_drop_stack_merges_when_bag_is_full ... ok
+test runtime::drops::ground_drop_identity_tests::assigned_ground_drop_uid_collision_fails_closed_without_mutation ... ok
+test runtime::drops::ground_drop_identity_tests::assigned_zero_uid_fails_the_same_preflight_used_before_durable_commit ... ok
+test runtime::drops::ground_drop_identity_tests::exact_ground_drop_multi_stack_pickup_emits_each_changed_stack ... ok
+test runtime::drops::ground_drop_identity_tests::exact_ground_drop_schema_round_trips_and_old_json_defaults_to_legacy ... ok
+test runtime::drops::ground_drop_identity_tests::legacy_display_name_key_freezes_and_inserts_as_canonical_exact_item ... ok
+test runtime::drops::ground_drop_identity_tests::legacy_drop_full_bag_partial_stack_preserves_frozen_metadata ... ok
+test runtime::drops::ground_drop_identity_tests::local_pickup_preserves_frozen_identity_without_rerolling_metadata ... ok
+test runtime::drops::ground_drop_identity_tests::malformed_exact_payload_fails_preflight_without_inventory_mutation ... ok
+test runtime::drops::ground_drop_identity_tests::partial_player_drop_roundtrip_reuses_source_stack_without_uid_duplication ... ok
+test runtime::drops::ground_drop_identity_tests::shared_pickup_preserves_frozen_identity_without_rerolling_metadata ... ok
+test runtime::drops::ground_drop_identity_tests::shared_quest_pickup_preserves_exact_identity ... ok
+test runtime::drops::ground_drop_identity_tests::unassigned_exact_stack_merges_when_the_bag_has_no_empty_slot ... ok
+test runtime::drops::ground_drop_identity_tests::whole_player_drop_roundtrip_preserves_assigned_uid_tree ... ok
+test runtime::session::tests::crystal_pickup_packet_collects_ground_drop_on_current_cell ... ok
+test runtime::session::tests::crystal_pickup_packet_ignores_adjacent_ground_drop ... ok
+test runtime::session::tests::ground_drop_expires_after_crystal_item_timeout ... ok
+test runtime::session::tests::pickup_preserves_ground_drop_when_inventory_is_full ... ok
+test runtime::session::tests::shared_ground_drop_pickup_advances_matching_crystal_item_task ... ok
+test runtime::session::tests::shared_ground_drop_pickup_commit_reports_gold_commit_and_cap_reject ... ok
+test runtime::session::tests::shared_ground_drop_projection_persists_marker_and_replays_once ... ok
+test runtime::session::tests::shared_ground_drop_projection_save_failure_rolls_back_and_retries_once ... ok
+test runtime::zone::collision::ground_drop_tests::ground_drop_collision_excludes_transfer_sources_and_walls ... ok
+test runtime::zone::runtime::checkpoint::tests::exact_ground_drop_identity_is_checkpointed_and_state_root_protected ... ok
+test runtime::zone::runtime::checkpoint::tests::ground_drop_authority_allocators_fail_closed_at_u64_exhaustion ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v1_ground_drop_fixture_rebuilds_authority_from_legacy_payload_only ... ok
+test runtime::zone::runtime::checkpoint::tests::legacy_v1_restore_ignores_injected_v2_ground_drop_authority_fields ... ok
+test runtime::zone::runtime::checkpoint::tests::verified_world_checkpoint_keeps_v2_ground_drop_authority_validation ... ok
+test runtime::zone::runtime::ground_drop_placement::tests::native_ground_drops_do_not_spawn_when_every_cell_is_blocked ... ok
+test runtime::zone::runtime::ground_drop_placement::tests::native_ground_drops_skip_static_collision_and_blocking_objects ... ok
+test runtime::zone::runtime::ground_drop_placement::tests::native_ground_drops_spread_before_stacking_and_keep_ownership_payload ... ok
+test runtime::zone::runtime::ground_drop_placement::tests::native_ground_drops_use_least_full_cells_and_enforce_stack_limit ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 3104 filtered out; finished in 4.34s

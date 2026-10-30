@@ -131,3 +131,19 @@ Gateway 的恢复日志新增可选、版本化的 remote operation 绑定，仍
 5. 验证 Prepared、COMMIT后未发布、已发布未ack、已ack未checkpoint、拾取COMMIT后未交付，以及旧快照/新Host/无原Session恢复等崩溃点；Unknown 未决时继续阻断。
 
 这之后仍有技能耗材与已接受世界动作的持久耦合、其他 Unknown 受控恢复，以及 G3–G7 完整迁移、跨入口恢复、调度和真实容量测试；不能把本片的安全拒写当作这些目标完成。
+
+## G2 第四片：普通丢物托管合同与同步日志屏障
+
+本片补上普通玩家丢金币/物品的完整源事务、持久托管记录、稳定拾取身份及冻结结果同步接口，**尚未完成 Host 重启恢复和晋升闭环**。源操作固定原 owner/epoch/source sequence、账号角色、原共享 Session、完整 canonical/working before、after、逻辑地图、服务器选定落点、30分钟绝对到期和完整物品树。操作编号与 `world_effect_id` 不依赖客户端请求、展示 object_id 或 drop generation。已有物品 UID 保留；拆堆必须先从经过显式盘点初始化的 PG 编号权限幂等预留新 UID，禁止从零或进程计数器补位。
+
+新增启动迁移 `0021_zone_player_drop_operations.sql`。`Prepared → Committed → Consumed/Expired` 和 `Prepared → Aborted` 的托管记录按源 namespace 隔离；同事务提交完整 canonical source、ledger debit、typed outbox 和原回执，完整 lease 锁持有到 COMMIT。拾取在同一经济事务把原 effect 置为 Consumed，重复请求不因展示编号、claimant 或代次变化获得第二份资产；其他接收者不能重投影原领取结果。对账枚举保留已 ACK 的存活效果。successor 可在更高 epoch 下审计终止尚未提交的 Prepared，但不退款、不安装旧 before/after、不回收已预留 UID。数据库事务失败仍按 Unknown 冻结，缺失回执不能触发重做。
+
+Zone checkpoint v9 认证稳定托管元数据和 terminal tombstone，兼容旧版读取时剔除旧 JSON 中无法授权的前向字段；真实写入权限不来自 checkpoint。落点 reservation 是临时占位，不推进 durable root，未解决时拒绝导出 checkpoint。冻结结果 journal 同时绑定原请求和已确认 source/intent/receipt，standby 复用原位置和物品，不重复选落点、扣资产或访问 PG。
+
+Host 成功 append 后必须精确确认 operation key/intent digest，之前 runtime 保留结果并阻断保存、交接和下一条命令。append、registration refresh 或确认失败均返回 Unknown；后台 Tick 使用相同 Zone gate 和共享 Unknown 集合。真实 PG 丢物只允许具有该日志发布器的 Host 路径；独立本地 owner 在扣资产前明确拒绝，避免首单成功后丢失发布证据。没有降级到旧的分步扣款流程。
+
+**SourceOfTruth 晋升暂时明确返回 `canonical_recovery_required`。** 原代码会把 replica 的旧角色快照 seed 进权威账号缓存；本片在任何 seed 前阻断这个入口。安全拒绝不是迁移完成，不能据此更新远端测试服或公网频道。
+
+迁移与回退：0021 仅由启动/管理边界执行，worker 不建表；部署前先保留数据库备份并盘点所有账号、离线托管、世界物品和历史 UID。当前尚无生产盘点/初始化工具，不能开放拆堆权限。发生未决托管后不得删表、删回执、降低 epoch、回退到旧 writer 或回用 UID。回退先关闭新请求并保留事务/托管表，只能在有完整对账证据后处理旧数据；本片没有执行线上迁移。
+
+验证及限制集中在[本片证据](evidence/zone-cluster-expansion-20261030/README.md#g2-durable-player-drop-contract-and-journal-checkpoint)，Mock/in-process Host 与真实 PG 服务测试分别列示。下一片必须实现 quiesced Host 协调器：一致性读取 canonical save 和 CAS versions、分页核对所有存活/终态/Prepared、恢复世界并持久观察回执、在新 lease/source/world head 下重新评估 readiness，最后才允许晋升。还须覆盖 COMMIT 到日志之间的崩溃、无原 Session 恢复、较新 canonical 状态、Pre-Prepared Unknown 编号持久化、完整 UID 发号协同和受控解冻。技能耗材动作耦合及 G3–G7 未完成；没有新增 CCU 结论或采购配置承诺。

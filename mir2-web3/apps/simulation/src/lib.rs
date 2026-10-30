@@ -12,6 +12,12 @@ pub mod sui_usdc_billing;
 pub use mir2_production as production;
 pub mod npc_purchase_journal;
 pub mod npc_purchase_owner;
+pub mod player_drop;
+pub use player_drop::{
+    PlayerDropCommitReceipt, PlayerDropCommittedEffect, PlayerDropEffectState,
+    PlayerDropJournalResult, PlayerDropOperationBinding, PlayerDropOutcome, PlayerDropPreparedOperation,
+    PlayerDropRequest, PlayerDropWorldIntent,
+};
 mod runtime;
 pub use npc_purchase_owner::{
     NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution, NpcPurchaseOwnerReply,
@@ -51,7 +57,8 @@ pub use config::{
     GroundDropSnapshot, HeroVitalsSnapshot, HeroWeightsSnapshot, ItemContainer, MapTransferRecord,
     MonsterSpawnSource, NpcDialogLinkSnapshot, NpcDialogSnapshot, NpcGoldTradeCapacity,
     PlayerWeightsSnapshot, PostgresAccountStoreRepository, PreparedKillAccountSource,
-    PreparedKillPublication, PreparedKillPublicationFailure, QuestObjectiveSnapshot, QuestSnapshot,
+    PreparedKillPublication, PreparedKillPublicationFailure, PreparedPlayerDropAccountSource,
+    PreparedPlayerDropPublication, PreparedPlayerDropPublicationFailure, QuestObjectiveSnapshot, QuestSnapshot,
     QuestStage, SafeZoneRecord, SharedGuildBuff, SharedGuildMember, SharedGuildRank,
     SharedGuildRecord, SharedGuildStoredItem, SimulationConfig, SkillSnapshot,
     Stage5AuctionListing, Stage5ConquestState, Stage5FriendIdentity, Stage5GroupState,
@@ -82,6 +89,8 @@ pub use runtime::{
     ProductionDurableError, ProductionDurableExecution, QueuedDefaultNpcEvent,
     RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence,
     RankingInspectRequest, RecoveryCharacterLoadError, SessionId,
+    PlayerDropApplyResult, PlayerDropCustodyState, PlayerDropEffectIdentity,
+    PlayerDropPlacementKind, PlayerDropPlacementReservation,
     SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
     SharedGroundDropPickupCommit, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,

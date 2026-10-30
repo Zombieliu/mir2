@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 3 tests
+gateway lifecycle session_id=gateway-58252-1793375080716-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-58252-1793375080716-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-58252-1793375080716-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-58252-1793375080716-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::zone_economy_adapter_tests::zone_economy_player_trade_uses_runtime_dispatch_and_deferred_offer_rolls_back_once ... ok
+test routing::tests::zone_economy_adapter_tests::zone_economy_trade_retry_keeps_original_context_and_passes_live_runtime_separately ... ok
+test routing::tests::zone_economy_adapter_tests::zone_economy_unknown_debit_fences_candidate_before_shared_drop_publication_and_never_replays ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1504 filtered out; finished in 3.41s

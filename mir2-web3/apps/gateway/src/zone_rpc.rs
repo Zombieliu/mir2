@@ -19,8 +19,8 @@ use mir2_protocol::{
 use mir2_simulation::{
     AccountRecord, ActiveSessionIdentity, CharacterHandoffCheckpoint, CharacterHandoffCommitment,
     CharacterSaveRecord, GameShopPurchaseOutcome, NativeAttackAdmission, NativeAttackError,
-    NativeAttackExecution, NativeGameShopGiftRequest, NativeGameShopPurchaseRequest, WorldCommand,
-    WorldCommandExecution, WorldCommandOutcome, WorldSnapshot, ZoneSaveFence,
+    NativeAttackExecution, NativeGameShopGiftRequest, NativeGameShopPurchaseRequest,
+    PlayerDropJournalResult, WorldCommand, WorldCommandExecution, WorldCommandOutcome, WorldSnapshot, ZoneSaveFence,
     ZoneSaveOperationBinding, ZoneSaveOperationReceipt, ZoneSaveOperationStatus,
 };
 use serde::{Deserialize, Serialize};
@@ -72,6 +72,9 @@ mod native_attack_tests;
 #[cfg(test)]
 #[path = "zone_rpc/unknown_economy_freeze_tests.rs"]
 mod unknown_economy_freeze_tests;
+#[cfg(test)]
+#[path = "zone_rpc/player_drop_journal_tests.rs"]
+mod player_drop_journal_tests;
 #[cfg(test)]
 #[path = "zone_rpc/zone_save_operation_tests.rs"]
 mod zone_save_operation_tests;
@@ -895,6 +898,9 @@ impl ZoneReplicationCatalog {
         entry: &WireHostJournalEntry,
     ) -> Result<(), ZoneRpcFault> {
         let source_sequence = self.next_sequence_for_append(&entry.zone_id)?;
+        if let Some(WireWorldCommand::PlayerDropJournalResult { result }) = &entry.command {
+            entry.validate_player_drop_result(result, source_sequence)?;
+        }
         let cursor = self.cursors.entry(entry.zone_id.clone()).or_default();
         debug_assert_eq!(cursor.next_sequence, source_sequence);
         let next_sequence = source_sequence
@@ -3134,7 +3140,7 @@ pub struct ZoneHostServer {
     promotion_frozen_zones: Mutex<BTreeSet<String>>,
     // Unknown source commits have no TTL and must never share the readiness
     // lifecycle. Only explicit durable recovery can resolve these outcomes.
-    unknown_commit_frozen_zones: Mutex<BTreeSet<String>>,
+    unknown_commit_frozen_zones: Arc<Mutex<BTreeSet<String>>>,
     auth_token: Option<String>,
     limits: ZoneRpcLimits,
     zone_capacity: usize,
@@ -3264,6 +3270,8 @@ impl ZoneHostServer {
             .expect("Zone Host replay baseline account store should be available");
         let operation_gate = Arc::new(SharedZoneMutationGate::default());
         let journal = Arc::new(Mutex::new(ZoneHostJournal::default()));
+        let unknown_commit_frozen_zones = Arc::new(Mutex::new(BTreeSet::<String>::new()));
+        let tick_unknown_commit_frozen_zones = Arc::clone(&unknown_commit_frozen_zones);
         let tick_journal = Arc::clone(&journal);
         let tick_authority = Arc::clone(&owner_lease_authority);
         let tick_host_id = host_id.clone();
@@ -3271,6 +3279,16 @@ impl ZoneHostServer {
         runtime_factory.configure_mutation_capture(
             Arc::clone(&operation_gate),
             Arc::new(move |zone_id| {
+                if tick_unknown_commit_frozen_zones
+                    .lock()
+                    .map_err(|_| "unknown commit freeze mutex poisoned".to_string())?
+                    .contains(zone_id.as_str())
+                {
+                    return Err(
+                        "ZONE_COMMIT_OUTCOME_UNKNOWN: Zone cadence requires explicit durable reconciliation"
+                            .into(),
+                    );
+                }
                 let lease = tick_authority.try_owner_lease(zone_id)?;
                 let legacy_in_process_owner =
                     lease.owner_id() == "in-process" || lease.owner_id().starts_with("in-process:");
@@ -3314,7 +3332,7 @@ impl ZoneHostServer {
             promotion_readiness: Mutex::new(BTreeMap::new()),
             quiesced_zones: Mutex::new(BTreeSet::new()),
             promotion_frozen_zones: Mutex::new(BTreeSet::new()),
-            unknown_commit_frozen_zones: Mutex::new(BTreeSet::new()),
+            unknown_commit_frozen_zones,
             auth_token,
             limits,
             zone_capacity: zone_capacity.max(1),
@@ -4022,6 +4040,16 @@ impl ZoneHostServer {
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host config mutex poisoned"))?
             .clone();
+        if authoritative_config.account_store_database_mode
+            == mir2_simulation::AccountStoreDatabaseMode::SourceOfTruth
+        {
+            // A shadow checkpoint cannot establish current source revisions or
+            // reconcile durable drop custody. Never seed the authoritative cache.
+            return Err(ZoneRpcFault::new(
+                "canonical_recovery_required",
+                "SourceOfTruth promotion requires canonical source and player-drop custody recovery before persistence activation",
+            ));
+        }
         let selected_sessions = self
             .sessions
             .lock()
@@ -5011,6 +5039,25 @@ impl ZoneHostServer {
                     match session.execute_request(request) {
                         Ok(execution) => execution,
                         Err(error) => {
+                            // execute_request also refreshes live registration
+                            // after runtime execution. That later failure must
+                            // not turn an already committed debit into a safe
+                            // rejection or authorize an ordinary gameplay retry.
+                            let committed_drop = session.hosted.take_player_drop_journal_result();
+                            let drop_unknown = match committed_drop {
+                                Ok(Some(_)) => Some(format!(
+                                    "PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: committed drop completed before execution response failed: {}",
+                                    error.message,
+                                )),
+                                Err(detail) => Some(format!(
+                                    "PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: failed execution cannot establish its committed drop result: {detail}; original error: {}",
+                                    error.message,
+                                )),
+                                Ok(None) => None,
+                            };
+                            if let Some(detail) = drop_unknown {
+                                return Err(self.classify_zone_runtime_error(zone_id, detail));
+                            }
                             if error.message.contains("COMMIT_OUTCOME_UNKNOWN") {
                                 return Err(
                                     self.classify_zone_runtime_error(zone_id, error.message)
@@ -5024,10 +5071,40 @@ impl ZoneHostServer {
                     saturating_duration_ns(runtime_started.elapsed()),
                     Ordering::Relaxed,
                 );
+                let player_drop_result = session
+                    .hosted
+                    .take_player_drop_journal_result()
+                    .map_err(|detail| {
+                        self.classify_zone_runtime_error(
+                            zone_id,
+                            format!("PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: executed result is unavailable for journal publication: {detail}"),
+                        )
+                    })?;
+                let player_drop_ack = player_drop_result.as_ref().map(|result| {
+                    (
+                        result.receipt.operation_key().to_string(),
+                        result.receipt.intent_digest().to_string(),
+                    )
+                });
                 let journal_started = Instant::now();
                 {
                     let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_journal");
-                    self.append_journal(journal_entry)?;
+                    self.append_execution_journal(
+                        journal_entry,
+                        source_sequence,
+                        player_drop_result,
+                    )?;
+                }
+                if let Some((operation_key, intent_digest)) = player_drop_ack {
+                    session
+                        .hosted
+                        .acknowledge_player_drop_journal_result(&operation_key, &intent_digest)
+                        .map_err(|detail| {
+                            self.classify_zone_runtime_error(
+                                zone_id,
+                                format!("PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: frozen journal acknowledgement failed: {detail}"),
+                            )
+                        })?;
                 }
                 self.execute_journal_duration_ns_total.fetch_add(
                     saturating_duration_ns(journal_started.elapsed()),
@@ -5415,6 +5492,43 @@ impl ZoneHostServer {
 
     fn append_journal(&self, entry: WireHostJournalEntry) -> Result<(), ZoneRpcFault> {
         append_host_journal(self.journal.as_ref(), entry)
+    }
+
+    fn append_execution_journal(
+        &self,
+        mut entry: WireHostJournalEntry,
+        source_sequence: u64,
+        player_drop_result: Option<PlayerDropJournalResult>,
+    ) -> Result<(), ZoneRpcFault> {
+        let Some(result) = player_drop_result else {
+            return self.append_journal(entry);
+        };
+        let zone_id = entry.zone_id.clone();
+        // A canonical debit already committed. Any failure to bind or publish
+        // its frozen result must block later writes and replica promotion.
+        let publication = (|| {
+            entry.validate_player_drop_result(&result, source_sequence)?;
+            if !entry
+                .command
+                .as_ref()
+                .is_some_and(WireWorldCommand::is_player_drop)
+            {
+                return Err(ZoneRpcFault::new(
+                    "player_drop_journal_binding",
+                    "player-drop result does not replace an ordinary drop command",
+                ));
+            }
+            entry.command = Some(WireWorldCommand::PlayerDropJournalResult {
+                result: Box::new(result),
+            });
+            self.append_journal(entry)
+        })();
+        publication.map_err(|error| {
+            self.classify_zone_runtime_error(
+                &zone_id,
+                format!("PLAYER_DROP_COMMIT_OUTCOME_UNKNOWN: frozen journal publication failed: {}", error.message),
+            )
+        })
     }
 
     fn compact_mutation_journal(
@@ -6015,6 +6129,7 @@ impl ZoneHostServer {
             .fork_for_replica_apply()
             .map_err(classify_runtime_error)?;
         let mut sessions = BTreeMap::<(String, String), Arc<ZoneHostSession>>::new();
+        let mut replay_sequences = BTreeMap::<String, u64>::new();
         for (expected_sequence, entry) in checkpoint.entries.iter().enumerate() {
             if entry.sequence != expected_sequence as u64 {
                 return Err(ZoneRpcFault::new(
@@ -6031,6 +6146,11 @@ impl ZoneHostServer {
                     "zone host checkpoint lease does not match journal zone",
                 ));
             }
+            let zone_sequence = replay_sequences.entry(entry.zone_id.clone()).or_default();
+            let source_sequence = *zone_sequence;
+            *zone_sequence = zone_sequence.checked_add(1).ok_or_else(|| {
+                ZoneRpcFault::new("checkpoint_sequence", "Zone replay sequence exhausted")
+            })?;
             if let Some(now_ms) = entry.zone_tick_ms {
                 if entry.command.is_some() || entry.closed {
                     return Err(ZoneRpcFault::new(
@@ -6060,7 +6180,17 @@ impl ZoneHostServer {
                     self.create_replay_session(&factory, &replay_config, &entry.zone_id)
                 })
                 .clone();
-            entry.replay_session_mutation(&session, entry.sequence, false)?;
+            // Legacy procedural mutations retain their historical replay
+            // context. Frozen drops instead bind the original per-Zone cursor.
+            let replay_sequence = if matches!(
+                &entry.command,
+                Some(WireWorldCommand::PlayerDropJournalResult { .. })
+            ) {
+                source_sequence
+            } else {
+                entry.sequence
+            };
+            entry.replay_session_mutation(&session, replay_sequence, false)?;
         }
 
         let installed_zone_count = factory
@@ -6261,7 +6391,7 @@ fn zone_replication_build_id() -> String {
     // schema, even when deployment supplied only a reusable version label.
     // Bound the identifier without truncating the source build identity.
     format!(
-        "mir2-zone/npc-handoff-account-v2/{}",
+        "mir2-zone/player-drop-journal-v3/{}",
         hex_lower_bytes(&Sha256::digest(source_build.as_bytes()))
     )
 }
@@ -7055,10 +7185,24 @@ enum WireWorldCommand {
     NpcPurchaseOwnerCheckpoint {
         checkpoint: Box<CharacterSaveRecord>,
     },
+    PlayerDropJournalResult {
+        result: Box<PlayerDropJournalResult>,
+    },
     Tick,
 }
 
 impl WireWorldCommand {
+    fn is_player_drop(&self) -> bool {
+        match self {
+            Self::DropItem { .. } => true,
+            Self::ClientPacket { frame } => matches!(
+                decode_client_packet(frame),
+                Ok(ClientPacket::DropGold { .. } | ClientPacket::DropItem { .. })
+            ),
+            _ => false,
+        }
+    }
+
     fn from_world(command: WorldCommand) -> Result<Self, String> {
         Ok(match command {
             WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
@@ -7245,6 +7389,7 @@ impl WireWorldCommand {
             },
             Self::RestoreActiveCharacterCheckpoint { .. }
             | Self::NpcPurchaseOwnerCheckpoint { .. }
+            | Self::PlayerDropJournalResult { .. }
             | Self::ResumeCharacterHandoff { .. } => {
                 return Err(ZoneRpcFault::new(
                     "checkpoint_command",
@@ -7272,6 +7417,33 @@ struct WireHostJournalEntry {
 }
 
 impl WireHostJournalEntry {
+    fn validate_player_drop_result(
+        &self,
+        result: &PlayerDropJournalResult,
+        source_sequence: u64,
+    ) -> Result<(), ZoneRpcFault> {
+        result
+            .validate_integrity()
+            .map_err(|detail| ZoneRpcFault::new("player_drop_journal_binding", detail))?;
+        let binding = result.operation.binding();
+        if self.closed
+            || self.zone_tick_ms.is_some()
+            || self.zone_id != self.owner_lease.zone_id
+            || binding.zone_id() != self.zone_id
+            || binding.owner_id() != self.owner_lease.owner_id
+            || binding.owner_epoch() != self.owner_lease.fencing_token
+            || binding.source_sequence() != source_sequence
+        {
+            return Err(ZoneRpcFault::new(
+                "player_drop_journal_binding",
+                "player-drop result differs from its journal Zone, owner lease or source sequence",
+            ));
+        }
+        // source_rpc_session is the authoritative ZoneManager SessionId. The
+        // outer RPC session id is retained for hosted Session routing only.
+        Ok(())
+    }
+
     fn into_request(self) -> Result<ZoneOwnerCommandRequest, ZoneRpcFault> {
         if self.zone_tick_ms.is_some() {
             return Err(ZoneRpcFault::new(
@@ -7300,6 +7472,14 @@ impl WireHostJournalEntry {
         source_sequence: u64,
         replicated: bool,
     ) -> Result<(), ZoneRpcFault> {
+        if let Some(WireWorldCommand::PlayerDropJournalResult { result }) = self.command.as_ref() {
+            self.validate_player_drop_result(result, source_sequence)?;
+            session
+                .hosted
+                .apply_player_drop_journal_result(result)
+                .map_err(classify_runtime_error)?;
+            return Ok(());
+        }
         if let Some(WireWorldCommand::ResumeCharacterHandoff { checkpoint }) = self.command.as_ref()
         {
             session

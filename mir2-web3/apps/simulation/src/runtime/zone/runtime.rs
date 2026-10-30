@@ -77,6 +77,7 @@ pub(super) mod mining;
 mod monster_movement;
 #[cfg(test)]
 mod owner_health_tests;
+mod player_drop_custody;
 #[cfg(test)]
 mod purification_tests;
 #[cfg(test)]
@@ -405,6 +406,10 @@ pub struct ZoneRuntime {
     pending_native_purifications: Vec<PendingNativePurification>,
     pending_native_summons: Vec<PendingNativeSummon>,
     pending_native_ground_spells: Vec<PendingNativeGroundSpellAction>,
+    // Process-local trusted Host mode; checkpoints never grant replica replay authority.
+    player_drop_replica_mode: bool,
+    player_drop_effects: BTreeMap<String, super::player_drop::PlayerDropEffectRecord>,
+    player_drop_reservations: BTreeMap<String, super::PlayerDropPlacementReservation>,
     ground_drops: BTreeMap<u32, ZoneGroundDrop>,
     claimed_ground_drops: BTreeMap<u32, ZoneGroundDropClaim>,
     next_ground_drop_generation: u64,
@@ -767,6 +772,9 @@ impl ZoneRuntime {
             pending_native_purifications: Vec::new(),
             pending_native_summons: Vec::new(),
             pending_native_ground_spells: Vec::new(),
+            player_drop_replica_mode: false,
+            player_drop_effects: BTreeMap::new(),
+            player_drop_reservations: BTreeMap::new(),
             ground_drops: BTreeMap::new(),
             claimed_ground_drops: BTreeMap::new(),
             online_presence: BTreeMap::new(),
@@ -843,6 +851,9 @@ impl ZoneRuntime {
         fork.pending_native_purifications = self.pending_native_purifications.clone();
         fork.pending_native_summons = self.pending_native_summons.clone();
         fork.pending_native_ground_spells = self.pending_native_ground_spells.clone();
+        fork.player_drop_replica_mode = self.player_drop_replica_mode;
+        fork.player_drop_effects = self.player_drop_effects.clone();
+        fork.player_drop_reservations = self.player_drop_reservations.clone();
         fork.ground_drops = self.ground_drops.clone();
         fork.claimed_ground_drops = self.claimed_ground_drops.clone();
         fork.next_ground_drop_generation = self.next_ground_drop_generation;
@@ -944,15 +955,10 @@ impl ZoneRuntime {
         ticket.object_id == ticket.drop.object_id
             && ticket.owner_object_id == ticket.drop.owner_object_id
             && ticket.drop_generation > 0
+            && self.player_drop_ticket_authority_is_current(ticket)
             && !ticket.payload_digest.is_empty()
             && canonical_ground_drop_payload_digest(&ticket.drop) == ticket.payload_digest
-            && ticket.idempotency_key
-                == canonical_ground_drop_claim_idempotency_key(
-                    &self.key,
-                    ticket.object_id,
-                    ticket.drop_generation,
-                    &ticket.payload_digest,
-                )
+            && ticket.idempotency_key == self.ground_drop_ticket_economic_key(ticket)
     }
 
     pub fn has_detached_ground_drop_claim_ticket(&self, ticket: &GroundDropClaimTicket) -> bool {
@@ -973,6 +979,7 @@ impl ZoneRuntime {
         if !self.has_detached_ground_drop_claim_ticket(ticket) {
             return false;
         }
+        self.mark_player_drop_consumed(ticket);
         self.detached_ground_drop_custody.remove(&ticket.object_id);
         true
     }
@@ -1047,6 +1054,7 @@ impl ZoneRuntime {
     ) -> Option<ZoneGroundDrop> {
         let drop_generation = self.allocate_ground_drop_generation()?;
         Some(ZoneGroundDrop {
+            player_drop_effect: None,
             payload_digest: canonical_ground_drop_payload_digest(&drop),
             drop_generation,
             drop,
@@ -2725,6 +2733,7 @@ impl ZoneRuntime {
         outbounds.extend(self.tick_hazards(now_ms));
         outbounds.extend(self.expire_buffs(now_ms));
         outbounds.extend(self.tick_player_vital_regen(now_ms));
+        outbounds.extend(self.expire_player_drop_effects(now_ms));
         self.expire_ground_drop_ownerships(now_ms);
         outbounds.extend(self.flush_owned_pet_deaths(now_ms));
         outbounds.extend(self.flush_owned_player_colours(now_ms));
@@ -4055,7 +4064,9 @@ impl ZoneRuntime {
             if self
                 .ground_drops
                 .get(&drop.object_id)
-                .is_some_and(|stored| stored.native_owner.is_some())
+                .is_some_and(|stored| {
+                    stored.native_owner.is_some() || stored.player_drop_effect.is_some()
+                })
             {
                 // A projection cannot replace a source-born identity, payload,
                 // absolute owner deadline, or ground-object TTL.
@@ -4087,6 +4098,7 @@ impl ZoneRuntime {
             self.ground_drops.insert(
                 drop.object_id,
                 ZoneGroundDrop {
+                    player_drop_effect: None,
                     drop: drop.clone(),
                     owner_expires_at_ms,
                     drop_generation,
@@ -14578,6 +14590,7 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id).cloned() else {
             return Vec::new();
         };
+        let mut expiry_outbounds = self.expire_player_drop_effects(now_ms);
         self.expire_ground_drop_ownerships(now_ms);
         let requested_object_id = object_id;
         let Some(object_id) = requested_object_id.or_else(|| {
@@ -14586,11 +14599,19 @@ impl ZoneRuntime {
                 .find(|drop| drop.drop.x == target.x && drop.drop.y == target.y)
                 .map(|drop| drop.drop.object_id)
         }) else {
-            return Vec::new();
+            return expiry_outbounds;
         };
         let Some(stored) = self.ground_drops.get(&object_id) else {
-            return Vec::new();
+            return expiry_outbounds;
         };
+        if stored.player_drop_effect.is_some()
+            && self
+                .online_presence
+                .get(session_id)
+                .is_none_or(|presence| !presence.owner.matches_player(&player))
+        {
+            return expiry_outbounds;
+        }
         let drop_location = Point {
             x: stored.drop.x,
             y: stored.drop.y,
@@ -14601,39 +14622,53 @@ impl ZoneRuntime {
             stored.drop.x == target.x && stored.drop.y == target.y
         };
         if !in_pickup_range {
-            return Vec::new();
+            return expiry_outbounds;
         }
         if !self.ground_drop_ownership_allows(&stored.drop, player.object_id, group_members) {
-            return vec![ZoneOutbound::ToSession {
+            expiry_outbounds.push(ZoneOutbound::ToSession {
                 session_id: session_id.clone(),
                 packets: vec![ServerPacket::Chat {
                     message: "server.CannotPickupNotOwner".to_string(),
                     chat_type: ChatType::System,
                 }],
-            }];
+            });
+            return expiry_outbounds;
         }
         let Some(claim_id) = self.allocate_ground_drop_claim_id() else {
-            return Vec::new();
+            return expiry_outbounds;
         };
         let Some(stored) = self.ground_drops.remove(&object_id) else {
-            return Vec::new();
+            return expiry_outbounds;
         };
-        let custody = self.capture_ground_drop_custody(&stored);
+        let mut custody = self.capture_ground_drop_custody(&stored);
         let ticket = GroundDropClaimTicket {
+            player_drop_claimant: stored.player_drop_effect.as_ref().and_then(|_| {
+                self.online_presence
+                    .get(session_id)
+                    .map(|p| p.owner.encoded())
+            }),
+            player_drop_effect: stored.player_drop_effect.clone(),
             claim_id,
             object_id,
             drop_generation: stored.drop_generation,
             payload_digest: stored.payload_digest.clone(),
-            idempotency_key: canonical_ground_drop_claim_idempotency_key(
-                &self.key,
-                object_id,
-                stored.drop_generation,
-                &stored.payload_digest,
-            ),
+            idempotency_key: stored
+                .player_drop_effect
+                .as_ref()
+                .map(|effect| effect.pickup_key())
+                .unwrap_or_else(|| {
+                    canonical_ground_drop_claim_idempotency_key(
+                        &self.key,
+                        object_id,
+                        stored.drop_generation,
+                        &stored.payload_digest,
+                    )
+                }),
             session_id: session_id.clone(),
             owner_object_id: stored.drop.owner_object_id,
             drop: stored.drop.clone(),
         };
+        custody.player_drop_claimant = ticket.player_drop_claimant.clone();
         self.claimed_ground_drops.insert(
             object_id,
             ZoneGroundDropClaim {
@@ -14643,7 +14678,8 @@ impl ZoneRuntime {
                 custody: Some(custody),
             },
         );
-        let mut outbounds = self.remove_ground_drop_object_for_claim(object_id);
+        let mut outbounds = expiry_outbounds;
+        outbounds.extend(self.remove_ground_drop_object_for_claim(object_id));
         outbounds.push(ZoneOutbound::GroundDropClaimedWithTicket {
             session_id: session_id.clone(),
             ticket,
@@ -14666,6 +14702,7 @@ impl ZoneRuntime {
         if max_range < 0 || allowed_object_ids.is_empty() {
             return Vec::new();
         }
+        let mut expiry_outbounds = self.expire_player_drop_effects(now_ms);
         self.expire_ground_drop_ownerships(now_ms);
         let Some((object_id, target)) = self
             .ground_drops
@@ -14698,9 +14735,16 @@ impl ZoneRuntime {
             .min_by_key(|(distance, object_id, _)| (*distance, *object_id))
             .map(|(_, object_id, target)| (object_id, target))
         else {
-            return Vec::new();
+            return expiry_outbounds;
         };
-        self.claim_ground_drop(session_id, Some(object_id), &target, group_members, now_ms)
+        expiry_outbounds.extend(self.claim_ground_drop(
+            session_id,
+            Some(object_id),
+            &target,
+            group_members,
+            now_ms,
+        ));
+        expiry_outbounds
     }
 
     fn ground_drop_claim_ticket_matches(
@@ -14716,15 +14760,10 @@ impl ZoneRuntime {
             && ticket.object_id == ticket.drop.object_id
             && ticket.owner_object_id == ticket.drop.owner_object_id
             && ticket.drop_generation > 0
+            && self.player_drop_ticket_authority_is_current(ticket)
             && !ticket.payload_digest.is_empty()
             && canonical_ground_drop_payload_digest(&ticket.drop) == ticket.payload_digest
-            && ticket.idempotency_key
-                == canonical_ground_drop_claim_idempotency_key(
-                    &self.key,
-                    ticket.object_id,
-                    ticket.drop_generation,
-                    &ticket.payload_digest,
-                )
+            && ticket.idempotency_key == self.ground_drop_ticket_economic_key(ticket)
     }
 
     fn commit_ground_drop_claim(
@@ -14738,6 +14777,7 @@ impl ZoneRuntime {
         if !self.ground_drop_claim_ticket_matches(claim, session_id, ticket) {
             return Vec::new();
         }
+        self.mark_player_drop_consumed(ticket);
         self.claimed_ground_drops.remove(&ticket.object_id);
         self.removed_object_ids.insert(ticket.object_id);
         Vec::new()
@@ -15432,6 +15472,7 @@ impl ZoneRuntime {
                 self.native_monsters.remove(&object_id);
                 self.native_monster_respawns.remove(&object_id);
             }
+            self.mark_player_drop_expired_object(object_id);
             self.ground_drops.remove(&object_id);
             self.claimed_ground_drops.remove(&object_id);
             self.dead_object_ids.remove(&object_id);

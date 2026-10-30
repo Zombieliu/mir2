@@ -14,7 +14,10 @@ pub(super) struct UnresolvedEconomyCommand {
 
 impl SharedInProcessZoneSessionRuntime {
     pub(super) fn ensure_resolved_economy_command(&self) -> Result<(), String> {
-        if self.unresolved_economy_command.is_some() {
+        if self.unresolved_economy_command.is_some()
+            || self.pending_player_drop_binding.is_some()
+            || self.last_player_drop_journal_result.is_some()
+        {
             return Err(UNKNOWN.into());
         }
         Ok(())

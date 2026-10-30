@@ -37,8 +37,9 @@ const LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v
 const LEGACY_V5_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
 const LEGACY_V6_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v6\0";
 const LEGACY_V7_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v7\0";
-const CANONICAL_ZONE_STATE_VERSION: u32 = 8;
-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v8\0";
+const LEGACY_V8_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v8\0";
+const CANONICAL_ZONE_STATE_VERSION: u32 = 9;
+const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v9\0";
 const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
 const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
 const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
@@ -46,7 +47,8 @@ const LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
 const LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
 const LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 6;
 const LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 7;
-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 8;
+const LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 8;
+const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 9;
 
 fn legacy_v2_ground_drop_claim_idempotency_key(
     key: &ZoneKey,
@@ -106,6 +108,8 @@ struct CanonicalZoneState<'a> {
 
 #[derive(Serialize)]
 struct CanonicalZoneStateV4<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    player_drop_custody: Option<PlayerDropCustodyRoot<'a>>,
     version: u32,
     key: &'a ZoneKey,
     collision: &'a ZoneCollision,
@@ -200,7 +204,20 @@ struct LegacyZoneGroundDropClaim<'a> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PlayerDropCustodyCheckpoint {
+    effects: BTreeMap<String, crate::runtime::zone::player_drop::PlayerDropEffectRecord>,
+}
+#[derive(Serialize)]
+struct PlayerDropCustodyRoot<'a> {
+    effects: &'a BTreeMap<String, crate::runtime::zone::player_drop::PlayerDropEffectRecord>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct ZoneRuntimeCheckpoint {
+    // Kept opaque until schema selection; pre-v9 roots confer no authority.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    player_drop_custody: Option<serde_json::Value>,
     version: u32,
     state_root: String,
     // Legacy schemas did not authenticate this field. Keep it opaque until the
@@ -322,7 +339,7 @@ impl ZoneRuntime {
         pending_native_hits: &[PendingNativeMonsterHit],
     ) -> Result<String, String> {
         let mut monsters = native_monsters.clone();
-        let (ground_drops, claimed_ground_drops) = if version < 6 {
+        let (mut ground_drops, mut claimed_ground_drops) = if version < 6 {
             for monster in monsters.values_mut() {
                 if let Some(owner) = monster.experience_owner.as_mut() {
                     owner.online_owner = None;
@@ -332,12 +349,34 @@ impl ZoneRuntime {
         } else {
             (self.ground_drops.clone(), self.claimed_ground_drops.clone())
         };
+        let mut detached_custody = self.detached_ground_drop_custody.clone();
+        if version < 9 {
+            for stored in ground_drops.values_mut() {
+                stored.player_drop_effect = None;
+            }
+            for claim in claimed_ground_drops.values_mut() {
+                if let Some(ticket) = claim.ticket.as_mut() {
+                    ticket.player_drop_effect = None;
+                    ticket.player_drop_claimant = None;
+                }
+                if let Some(custody) = claim.custody.as_mut() {
+                    custody.player_drop_effect = None;
+                    custody.player_drop_claimant = None;
+                }
+            }
+            for custody in detached_custody.values_mut() {
+                custody.player_drop_effect = None;
+                custody.player_drop_claimant = None;
+            }
+        }
         let state = CanonicalZoneStateV4 {
+            player_drop_custody: (version >= 9).then_some(PlayerDropCustodyRoot {
+                effects: &self.player_drop_effects,
+            }),
             combat_random: (version >= 8).then_some(&self.combat_random),
             mining: (version >= 7).then_some(&self.mining),
             online_presence: (version >= 6).then_some(&self.online_presence),
-            detached_ground_drop_custody: (version >= 6)
-                .then_some(&self.detached_ground_drop_custody),
+            detached_ground_drop_custody: (version >= 6).then_some(&detached_custody),
             issued_native_monster_awards: (version >= 6)
                 .then_some(&self.issued_native_monster_awards),
             intelligent_creatures: &self.intelligent_creatures,
@@ -426,9 +465,14 @@ impl ZoneRuntime {
         let mut drops = self.ground_drops.clone();
         let mut claims = self.claimed_ground_drops.clone();
         for stored in drops.values_mut() {
+            stored.player_drop_effect = None;
             stored.native_owner = None;
         }
         for claim in claims.values_mut() {
+            if let Some(ticket) = claim.ticket.as_mut() {
+                ticket.player_drop_effect = None;
+                ticket.player_drop_claimant = None;
+            }
             claim.custody = None;
         }
         (drops, claims)
@@ -626,6 +670,8 @@ impl ZoneRuntime {
                 .ok_or_else(|| "legacy ground drop claim-id space exhausted".to_string())?;
             let payload_digest = canonical_ground_drop_payload_digest(&claim.drop);
             claim.ticket = Some(GroundDropClaimTicket {
+                player_drop_claimant: None,
+                player_drop_effect: None,
                 claim_id,
                 object_id: *object_id,
                 drop_generation,
@@ -759,7 +805,22 @@ impl ZoneRuntime {
     }
 
     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
+        // A slot is a call-local capacity hold, never durable world custody.
+        // The outer Zone operation gate must finish or reject publication first;
+        // an unresolved source outcome keeps the Host frozen and unexportable.
+        if !self.player_drop_reservations.is_empty() {
+            return Err(
+                "cannot export Zone checkpoint with unresolved player-drop placement reservations"
+                    .into(),
+            );
+        }
         let checkpoint = ZoneRuntimeCheckpoint {
+            player_drop_custody: Some(
+                serde_json::to_value(PlayerDropCustodyRoot {
+                    effects: &self.player_drop_effects,
+                })
+                .map_err(|error| error.to_string())?,
+            ),
             combat_random: Some(
                 serde_json::to_value(&self.combat_random)
                     .map_err(|error| format!("failed to encode combat random state: {error}"))?,
@@ -831,7 +892,16 @@ impl ZoneRuntime {
         bytes: &[u8],
         state_root_policy: StateRootPolicy,
     ) -> Result<Self, String> {
-        let checkpoint: ZoneRuntimeCheckpoint = serde_json::from_slice(bytes)
+        let mut raw: serde_json::Value = serde_json::from_slice(bytes)
+            .map_err(|error| format!("failed to decode zone runtime checkpoint: {error}"))?;
+        if raw
+            .get("version")
+            .and_then(serde_json::Value::as_u64)
+            .is_some_and(|v| v < 9)
+        {
+            strip_legacy_player_drop_metadata(&mut raw);
+        }
+        let checkpoint: ZoneRuntimeCheckpoint = serde_json::from_value(raw)
             .map_err(|error| format!("failed to decode zone runtime checkpoint: {error}"))?;
         if checkpoint.version != LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION
@@ -840,10 +910,11 @@ impl ZoneRuntime {
             && checkpoint.version != LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION
+            && checkpoint.version != LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
         {
             return Err(format!(
-                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, {}, {}, or {}",
+                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, {}, {}, {}, or {}",
                 checkpoint.version,
                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
@@ -852,6 +923,7 @@ impl ZoneRuntime {
                 LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 ZONE_RUNTIME_CHECKPOINT_VERSION
             ));
         }
@@ -875,7 +947,7 @@ impl ZoneRuntime {
             }
         }
 
-        let combat_random = if checkpoint_version >= ZONE_RUNTIME_CHECKPOINT_VERSION {
+        let combat_random = if checkpoint_version >= LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION {
             serde_json::from_value(checkpoint.combat_random.ok_or_else(|| {
                 "zone runtime v8 checkpoint is missing combat random state".to_string()
             })?)
@@ -942,6 +1014,15 @@ impl ZoneRuntime {
         runtime.pending_native_player_heals = checkpoint.pending_native_player_heals;
         runtime.pending_native_summons = checkpoint.pending_native_summons;
         runtime.pending_native_ground_spells = checkpoint.pending_native_ground_spells;
+        if checkpoint_version >= 9 {
+            let custody: PlayerDropCustodyCheckpoint = serde_json::from_value(
+                checkpoint
+                    .player_drop_custody
+                    .ok_or("zone runtime v9 checkpoint missing player-drop custody")?,
+            )
+            .map_err(|error| format!("invalid player-drop custody: {error}"))?;
+            runtime.player_drop_effects = custody.effects;
+        }
         runtime.ground_drops = checkpoint.ground_drops;
         runtime.claimed_ground_drops = checkpoint.claimed_ground_drops;
         runtime.online_presence = checkpoint.online_presence.unwrap_or_default();
@@ -1016,6 +1097,12 @@ impl ZoneRuntime {
             LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.legacy_v7_canonical_state_root()?
             }
+            LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root_for_schema(
+                8,
+                LEGACY_V8_CANONICAL_ZONE_STATE_DOMAIN,
+                &runtime.native_monsters,
+                &runtime.pending_native_hits,
+            )?,
             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
             _ => unreachable!("checkpoint version was validated above"),
         };
@@ -1025,7 +1112,7 @@ impl ZoneRuntime {
                 expected_state_root
             ));
         }
-        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
+        if checkpoint_version < LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION {
             // No pre-v8 checkpoint carried a replayable business-random stream.
             // Authenticate its original schema first; never adopt forward data
             // which that schema's root did not bind.
@@ -1060,16 +1147,47 @@ impl ZoneRuntime {
             }
             LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION
             | LEGACY_V7_ZONE_RUNTIME_CHECKPOINT_VERSION
+            | LEGACY_V8_ZONE_RUNTIME_CHECKPOINT_VERSION
             | ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
             _ => unreachable!("checkpoint version was validated above"),
         }
+        runtime.validate_player_drop_custody()?;
         runtime.validate_intelligent_creature_checkpoint()?;
         // Public deserialization is cold recovery, never an online Node mint.
         // Retained live-runtime resume does not deserialize these bytes.
         runtime.clear_online_authority();
         Ok(runtime)
+    }
+}
+
+fn strip_legacy_player_drop_metadata(raw: &mut serde_json::Value) {
+    if let Some(root) = raw.as_object_mut() {
+        root.remove("player_drop_custody");
+    }
+    for map in [
+        "ground_drops",
+        "claimed_ground_drops",
+        "detached_ground_drop_custody",
+    ] {
+        if let Some(entries) = raw.get_mut(map).and_then(serde_json::Value::as_object_mut) {
+            for value in entries.values_mut() {
+                if let Some(object) = value.as_object_mut() {
+                    object.remove("player_drop_effect");
+                    object.remove("player_drop_claimant");
+                    for nested in ["ticket", "custody"] {
+                        if let Some(object) = object
+                            .get_mut(nested)
+                            .and_then(serde_json::Value::as_object_mut)
+                        {
+                            object.remove("player_drop_effect");
+                            object.remove("player_drop_claimant");
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -1452,6 +1570,8 @@ mod tests {
             .expect("ground-drop claim id");
         let claim_session_id = SessionId::new("drop-identity-claim");
         let ticket = GroundDropClaimTicket {
+            player_drop_claimant: None,
+            player_drop_effect: None,
             claim_id,
             object_id: claimed_snapshot.object_id,
             drop_generation: claimed_stored.drop_generation,
@@ -1528,6 +1648,8 @@ mod tests {
             .expect("ground-drop claim id");
         let session_id = SessionId::new("legacy-v2-claimer");
         let legacy_ticket = GroundDropClaimTicket {
+            player_drop_claimant: None,
+            player_drop_effect: None,
             claim_id,
             object_id: claimed_snapshot.object_id,
             drop_generation: stored.drop_generation,
@@ -1917,6 +2039,8 @@ mod tests {
         fixture["ground_drops"]["101"]["payload_digest"] = serde_json::json!("forged-active");
         fixture["claimed_ground_drops"]["102"]["ticket"] =
             serde_json::to_value(GroundDropClaimTicket {
+                player_drop_claimant: None,
+                player_drop_effect: None,
                 claim_id: 555,
                 object_id: 102,
                 drop_generation: 666,
@@ -2160,3 +2284,6 @@ mod tests {
 fn checkpoint_counter_is_zero(value: &u64) -> bool {
     *value == 0
 }
+#[cfg(test)]
+#[path = "player_drop_checkpoint_tests.rs"]
+mod player_drop_checkpoint_tests;
