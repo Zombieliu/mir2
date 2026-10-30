@@ -8,6 +8,47 @@ impl SuiCheckoutOrigin {
     pub(crate) fn from_gateway(gateway: &str) -> Self {
         Self(trusted_checkout_origin(gateway))
     }
+
+    pub(crate) fn from_configuration(
+        gateway: &str,
+        explicit_origin: Option<&str>,
+    ) -> Result<Self, String> {
+        match explicit_origin {
+            Some(origin) => {
+                validate_billing_http_origin(origin)?;
+                Ok(Self(Some(origin.to_owned())))
+            }
+            None => Ok(Self::from_gateway(gateway)),
+        }
+    }
+}
+
+/// A locally pinned payment origin, never a URL supplied by a billing response.
+pub(crate) fn validate_billing_http_origin(origin: &str) -> Result<(), String> {
+    let invalid = || {
+        "billing HTTP origin must be a normalized HTTPS origin without credentials, path, query or fragment".to_owned()
+    };
+    if origin.len() > 2048
+        || !origin.bytes().all(|byte| {
+            byte.is_ascii_alphanumeric() || matches!(byte, b':' | b'/' | b'.' | b'-' | b'[' | b']')
+        })
+    {
+        return Err(invalid());
+    }
+    let parsed = url::Url::parse(origin).map_err(|_| invalid())?;
+    if parsed.scheme() != "https"
+        || !parsed.has_host()
+        || !parsed.username().is_empty()
+        || parsed.password().is_some()
+        || parsed.port() == Some(0)
+        || parsed.path() != "/"
+        || parsed.query().is_some()
+        || parsed.fragment().is_some()
+        || parsed.origin().ascii_serialization() != origin
+    {
+        return Err(invalid());
+    }
+    Ok(())
 }
 
 /// Trust comes from local endpoint configuration, never the server's status payload.
@@ -149,6 +190,86 @@ fn open_validated(_url: &str) -> Result<(), &'static str> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn explicit_billing_origin_overrides_only_the_local_gateway_default() {
+        let gateway = "wss://play.example/playtest/ws";
+        let configured =
+            SuiCheckoutOrigin::from_configuration(gateway, Some("https://billing.example"))
+                .unwrap();
+        assert_eq!(configured.0.as_deref(), Some("https://billing.example"));
+        assert_eq!(
+            SuiCheckoutOrigin::from_configuration(gateway, None)
+                .unwrap()
+                .0
+                .as_deref(),
+            Some("https://play.example")
+        );
+        assert_eq!(
+            SuiCheckoutOrigin::from_configuration("ws://127.0.0.1:17830/ws", None)
+                .unwrap()
+                .0
+                .as_deref(),
+            Some("http://127.0.0.1:17830")
+        );
+        assert!(
+            SuiCheckoutOrigin::from_configuration(gateway, Some("http://billing.example")).is_err()
+        );
+
+        let capability = format!("usdc_{}.{}", "a".repeat(64), "A".repeat(43));
+        let payment = format!("https://billing.example/v1/billing/sui-usdc/pay#{capability}");
+        assert!(valid_usdc_checkout_url(&payment, configured.0.as_deref()));
+        assert!(!valid_usdc_checkout_url(
+            &payment.replace("billing.example", "play.example"),
+            configured.0.as_deref()
+        ));
+        assert!(!valid_checkout_url(&payment));
+        for suffix in ["/", "?account=alice", "/../pay", "/other"] {
+            assert!(!valid_usdc_checkout_url(
+                &format!("https://billing.example/v1/billing/sui-usdc/pay{suffix}#{capability}"),
+                configured.0.as_deref()
+            ));
+        }
+    }
+
+    #[test]
+    fn explicit_billing_origin_is_canonical_https_and_cannot_carry_a_url_capability() {
+        for origin in [
+            "https://billing.example",
+            "https://billing.example:8443",
+            "https://127.0.0.1",
+            "https://[::1]:8443",
+        ] {
+            assert!(validate_billing_http_origin(origin).is_ok(), "{origin}");
+        }
+        for origin in [
+            "",
+            " ",
+            "http://billing.example",
+            "http://127.0.0.1:17830",
+            "wss://billing.example",
+            "https://billing.example/",
+            "https://billing.example/path",
+            "https://billing.example:443",
+            "https://billing.example:0",
+            "https://billing.example:99999",
+            "https://BILLING.example",
+            "https://user@billing.example",
+            "https://user:password@billing.example",
+            "https://billing.example?account=alice",
+            "https://billing.example#capability",
+            "https://billing.example%2f.evil.invalid",
+            "https://billing.example\\@evil.invalid",
+            " https://billing.example",
+            "https://billing.example\n",
+            "https://billing.example\0",
+            "https://billing.example\"argument",
+            "https://billing.example`argument",
+        ] {
+            assert!(validate_billing_http_origin(origin).is_err(), "{origin:?}");
+        }
+    }
+
     #[test]
     fn usdc_origin_comes_only_from_explicit_gateway_configuration() {
         assert_eq!(

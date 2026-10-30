@@ -42,6 +42,19 @@ function Resolve-CandidateAuthHttpUrl {
     return ([Uri]$Value).GetLeftPart([UriPartial]::Authority)
 }
 
+function Resolve-CandidateBillingHttpOrigin {
+    param([string]$Value)
+    # Accept only a locally selected canonical origin. Never copy a checkout URL
+    # or server-advertised origin into the client's payment allowlist.
+    if ($Value -cnotmatch '\Ahttps://(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])(?::[0-9]{1,5})?\z') {
+        throw 'BillingHttpOrigin must be a canonical remote HTTPS origin without credentials, path, query, fragment or escapes'
+    }
+    Resolve-CandidateGatewayWsUrl -Value (($Value -creplace '^https:', 'wss:') + '/') | Out-Null
+    $origin = ([Uri]$Value).GetLeftPart([UriPartial]::Authority)
+    if ($origin -cne $Value) { throw 'BillingHttpOrigin must use a canonical HTTPS origin' }
+    return $origin
+}
+
 function Resolve-CandidateAllowedClasses {
     param([string[]]$Value)
     $known = @('Warrior','Wizard','Taoist','Assassin','Archer')
@@ -54,17 +67,18 @@ function Resolve-CandidateAllowedClasses {
 }
 
 function New-CandidateClientConfiguration {
-    param([string]$GatewayWsUrl, [string]$AuthHttpUrl = '', [string[]]$AllowedClasses = $null, [string]$QuestGuidance = 'newcomer-v2', [bool]$ForceDaylight = $true)
+    param([string]$GatewayWsUrl, [string]$AuthHttpUrl = '', [string[]]$AllowedClasses = $null, [string]$QuestGuidance = 'newcomer-v2', [bool]$ForceDaylight = $true, [string]$BillingHttpOrigin = '')
     $endpoint = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
     if (@('crystal', 'newcomer-v1', 'newcomer-v2') -cnotcontains $QuestGuidance) { throw 'unsupported Candidate quest guidance profile' }
     $daylight = if ($ForceDaylight) { 'true' } else { 'false' }
     $auth = if ([string]::IsNullOrWhiteSpace($AuthHttpUrl)) { '' } else { 'auth_http_url = "' + (Resolve-CandidateAuthHttpUrl -Value $AuthHttpUrl) + "`"`n" }
+    $billing = if ($BillingHttpOrigin -ceq '') { '' } else { 'billing_http_origin = "' + (Resolve-CandidateBillingHttpOrigin -Value $BillingHttpOrigin) + "`"`n" }
     $classes = ''
     if ($null -ne $AllowedClasses) {
         $names = @(Resolve-CandidateAllowedClasses -Value $AllowedClasses)
         $classes = 'allowed_classes = [' + (($names | ForEach-Object { '"' + $_ + '"' }) -join ', ') + "]`n"
     }
-    return "# Candidate client configuration; credentials are forbidden.`n[server]`ngateway_ws_url = `"$endpoint`"`n${auth}${classes}[display]`nwidth = 1024`nheight = 768`nforce_daylight = $daylight`n[gameplay]`nquest_guidance = `"$QuestGuidance`"`n"
+    return "# Candidate client configuration; credentials are forbidden.`n[server]`ngateway_ws_url = `"$endpoint`"`n${auth}${billing}${classes}[display]`nwidth = 1024`nheight = 768`nforce_daylight = $daylight`n[gameplay]`nquest_guidance = `"$QuestGuidance`"`n"
 }
 
 function Assert-CandidateClientConfiguration {
@@ -82,6 +96,7 @@ function Assert-CandidateClientConfiguration {
     }
     $expected = @('server.gateway_ws_url', 'display.width', 'display.height', 'display.force_daylight', 'gameplay.quest_guidance')
     if ($values.ContainsKey('server.auth_http_url')) { $expected += 'server.auth_http_url' }
+    if ($values.ContainsKey('server.billing_http_origin')) { $expected += 'server.billing_http_origin' }
     if ($values.ContainsKey('server.allowed_classes')) { $expected += 'server.allowed_classes' }
     if ($values.Count -ne $expected.Count) { throw 'Candidate client configuration contains missing or unexpected keys' }
     foreach ($key in $expected) { if (-not $values.ContainsKey($key)) { throw "Candidate client configuration missing $key" } }
@@ -91,6 +106,11 @@ function Assert-CandidateClientConfiguration {
     if ($values.ContainsKey('server.auth_http_url')) {
         if ($values['server.auth_http_url'] -cnotmatch '^"([^"]+)"$') { throw 'Candidate auth must be a quoted HTTPS origin' }
         $authHttpUrl = Resolve-CandidateAuthHttpUrl -Value $Matches[1]
+    }
+    $billingHttpOrigin = $null
+    if ($values.ContainsKey('server.billing_http_origin')) {
+        if ($values['server.billing_http_origin'] -cnotmatch '^"([^"]+)"$') { throw 'Candidate billing origin must be a quoted HTTPS origin' }
+        $billingHttpOrigin = Resolve-CandidateBillingHttpOrigin -Value $Matches[1]
     }
     $allowedClasses = $null
     if ($values.ContainsKey('server.allowed_classes')) {
@@ -104,7 +124,7 @@ function Assert-CandidateClientConfiguration {
     if ($values['display.width'] -cne '1024' -or $values['display.height'] -cne '768' -or $values['display.force_daylight'] -cnotmatch '^(true|false)$') {
         throw 'Candidate display configuration must use 1024x768 and an explicit daylight boolean'
     }
-    return [pscustomobject]@{ gatewayWsUrl = $endpoint; authHttpUrl = $authHttpUrl; allowedClasses = $allowedClasses; questGuidance = $profile; forceDaylight = ($values['display.force_daylight'] -ceq 'true') }
+    return [pscustomobject]@{ gatewayWsUrl = $endpoint; authHttpUrl = $authHttpUrl; billingHttpOrigin = $billingHttpOrigin; allowedClasses = $allowedClasses; questGuidance = $profile; forceDaylight = ($values['display.force_daylight'] -ceq 'true') }
 }
 
 function Get-CandidateRequiredMapNames {
@@ -434,6 +454,21 @@ function Test-CandidateReleaseConfiguration {
     $walletParsed = Assert-CandidateClientConfiguration -Text $walletConfiguration
     if ($walletParsed.authHttpUrl -cne $authEndpoint -or $walletParsed.gatewayWsUrl -cne $endpoint) { throw 'Candidate wallet configuration roundtrip failed' }
     if ($null -ne $walletParsed.allowedClasses) { throw 'Legacy configuration must retain the client default class policy' }
+    if ($null -ne $walletParsed.billingHttpOrigin) { throw 'Legacy configuration must retain gateway-derived billing origin' }
+    $billingOrigin = 'https://billing-playtest.165.154.65.136.sslip.io'
+    $billingConfiguration = New-CandidateClientConfiguration -GatewayWsUrl $endpoint -AuthHttpUrl $authEndpoint -BillingHttpOrigin $billingOrigin
+    $billingParsed = Assert-CandidateClientConfiguration -Text $billingConfiguration
+    if ($billingParsed.billingHttpOrigin -cne $billingOrigin -or $billingParsed.gatewayWsUrl -cne $endpoint -or $billingParsed.authHttpUrl -cne $authEndpoint) { throw 'Candidate billing configuration roundtrip failed' }
+    foreach ($badBilling in @('', ' ', 'http://billing-playtest.165.154.65.136.sslip.io', 'https://127.0.0.1', 'https://localhost', 'https://[::1]', 'https://example.com', ($billingOrigin + '/'), ($billingOrigin + '/v1/billing/sui-usdc/pay'), ($billingOrigin + '?order=private'), ($billingOrigin + '#private'), ($billingOrigin + ':443'), ($billingOrigin + ':0'), ($billingOrigin + ':99999'), $billingOrigin.Replace('billing-playtest', 'BILLING-PLAYTEST'), $billingOrigin.Replace('https://', 'https://user:secret@'), ($billingOrigin + '%2f'), ($billingOrigin + '"'), ($billingOrigin + "`n[credentials]"))) {
+        $rejected = $false
+        try { Resolve-CandidateBillingHttpOrigin -Value $badBilling | Out-Null } catch { $rejected = $true }
+        if (-not $rejected) { throw 'Candidate accepted a forbidden billing origin test vector' }
+    }
+    foreach ($badBillingText in @($billingConfiguration.Replace('[display]', ('billing_http_origin = "' + $billingOrigin + "`"`n[display]")), $billingConfiguration.Replace('billing_http_origin = "' + $billingOrigin + '"', 'billing_http_origin = " "'))) {
+        $rejected = $false
+        try { Assert-CandidateClientConfiguration -Text $badBillingText | Out-Null } catch { $rejected = $true }
+        if (-not $rejected) { throw 'Candidate accepted duplicate or invalid billing origin configuration' }
+    }
     $classicClasses = @('Warrior','Wizard','Taoist')
     $classicConfiguration = New-CandidateClientConfiguration -GatewayWsUrl $endpoint -AuthHttpUrl $authEndpoint -AllowedClasses $classicClasses
     $classicParsed = Assert-CandidateClientConfiguration -Text $classicConfiguration
