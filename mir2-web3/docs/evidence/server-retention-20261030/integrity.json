@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "f0965bbb331625859e6e78c296c3e3bf0659996d",
+  "sourceSha256": {
+    "scripts/server_retention_cleanup.py": "f5d1f5b9991e117b48e117e9417ed7cc1e4620a35df188dba8af6c0db383f646",
+    "scripts/test_server_retention_cleanup.py": "185c3d97899cc45553d9f2dd63a34509b9e23e2aa7a807cc88bb04811873f59f",
+    "ops/retention/daily_audit.py": "e8eb795a690a82f1babf062e1c01b51c629bdec296f24e701fbf0a44ad1217f0",
+    "ops/retention/test_daily_audit.py": "7b4fd0439a7dba9a99e89265aed8a39ff380cb46fb9fc2aca378abb55015e4a2",
+    "ops/retention/journald.conf": "de5369fc8000cc692adb3b06b2434e6637a7775438a463e3aa7a13f05f74dcbe",
+    "ops/retention/policy.json": "44ec939ed94252d9601dfe502630b79ce62beb348d520df33ffd5a59b6785029",
+    "ops/retention/mir2-retention-audit.service": "4184d5d81c8173751f51a57d9f4f127439244f584c4d993c3dcfb7f7d45e3dad",
+    "ops/retention/mir2-retention-audit.timer": "ea99096b22d5e1983c8b96a12014c4b3d5a690510e0adca76f8aec99a6fb68c4",
+    "ops/retention/README.md": "3a01fe2eb431bf93567450a35259cd35b497b286b20aef3a2e472ee2ab4c01cb"
+  },
+  "evidenceSha256": {
+    "audit-installation.json": "3e3eff7a85ef688709594883d6950e8ee63927a426a5298aec009278d9a0f87e",
+    "cleanup-result.json": "56657f5fa0f20e2d50cb41eb72fff8a8b8d037bad74af09769ab7ed8d6e6b81f",
+    "execution-check.json": "eb812142f59a1e0b61a71fe7ed9ab674e49df26b82f184dcc4ca5694a2a89a63",
+    "execution-plan.json": "a92859ebe38529ec3d2610f2d63877ea9eece3dd8f1ed54b4ef2f3ed831438f7",
+    "final-verification.json": "565b0cdbcb6ff7617d04e11588176806398aea95862813131e12f1424e2ff1fe",
+    "inspected-candidates.json": "ba100cbf93f8b382884b4ed41065fbf46159185a81d4419cac50af4fecb445fa",
+    "journal-deployment.json": "b6cf5e94c70fc1ccc9bddb04ee4beb45b4e236dee9a72fa9749c9232f3cc0b41",
+    "linux-cleanup-tests.json": "16200ed620b97d9ab9475e24e4eb9068c32fc18d60a130197c312b05fa91b474",
+    "public-channels-post.json": "edd2054501d8bfdc2f16b42af101265cc9b661f8dfb43f61340d46677bd0f191",
+    "README.md": "d61aa854daccc43a354bde728b5eb2bc3ac89d2997ecccd430aba6541e5f5272",
+    "reference-audit.py": "e624fc14821ee6cd4b6c8f3c087fb3ebf4a471045011b141bb3b75c34c27c441",
+    "reference-before-execution.json": "33f3ccc39c26912ff28e1523a7583133acf610061d2274899a219319ccec1a7f",
+    "runbook-update.json": "7924eb1c55f9cc4298694d11f0fbdad1fe6f5c6928c4337a3173903c66cbf759"
+  },
+  "validation": {
+    "cleanupLinux": {
+      "total": 31,
+      "passed": 31,
+      "skipped": 0
+    },
+    "dailyAuditLinux": {
+      "total": 31,
+      "passed": 31,
+      "skipped": 0
+    },
+    "gameBuildRequired": false,
+    "newCombatCapacityQualified": false
+  }
+}

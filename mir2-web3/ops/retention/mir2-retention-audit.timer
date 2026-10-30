@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Mir2 metadata audit daily at 03:20 UTC
+
+[Timer]
+OnCalendar=*-*-* 03:20:00 UTC
+RandomizedDelaySec=5m
+Persistent=true
+Unit=mir2-retention-audit.service
+
+[Install]
+WantedBy=timers.target
