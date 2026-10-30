@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 const TEAM = 'team_pXY7oaLtibSTlKSmKXMXzrQR';
 const BRANCH = 'codex/promotion-vercel-20261029';
 const WEB = { project: 'prj_Bl3ttB4PzcdCpJMYLRhzQjkdXyTz', name: 'mir2-web3-web',
-  baseline: 'dpl_2yXeENZ4qrg69FhcThRW7o7H9KkB', root: 'mir2-web3/apps/web' };
+  baseline: 'dpl_2ekBnauSAihEAWLFguLcHKrs7kx3', root: 'mir2-web3/apps/web' };
 const MAIN = { project: 'prj_Q14gZuvjxkfqOCExhqOrYiR2UbxA', name: 'numeron-legend-of-rebirth',
   baseline: 'dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97' };
 const CAMPAIGN = 'numeron-windows-playtest-20261030';

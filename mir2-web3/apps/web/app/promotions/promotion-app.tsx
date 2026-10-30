@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PROMOTION_ACCOUNT_COPY } from "./promotion-account-copy";
+import { PROMOTION_ACCOUNT_COPY, promotionInvitationError } from "./promotion-account-copy";
 import { PROMOTION_EARNINGS_COPY } from "./promotion-earnings-copy";
 import { createPromotionRefresh } from "./promotion-refresh";
 import { PROMOTION_COPY, PROMOTION_LANGUAGES, normalizePromotionLocale, type PromotionCopy, type PromotionLocale, type PromotionTextKey } from "./promotion-copy";
@@ -130,6 +130,9 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Invitation writes have their own feedback: a successful background read
+  // must not dismiss a rejected or uncertain attribution request.
+  const [invitationError, setInvitationError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [walletOpen, setWalletOpen] = useState(false);
   const [characterIndex, setCharacterIndex] = useState<number | null>(null);
@@ -173,7 +176,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   const commissionTitle = campaign?.status === "locked" ? earningsCopy.finalizedCommission : earningsCopy.accruedCommission;
   const settlementNote = campaign?.status === "locked" ? earningsCopy.finalizedNote : earningsCopy.settlementTiming;
   const canAdmin = Array.isArray(bootstrap?.permissions) ? bootstrap.permissions.includes("isAdmin") : bootstrap?.permissions?.isAdmin === true;
-  const errorText = error === "session_expired" ? copy.sessionExpired : error && ({
+  const errorMessage = (code: string | null) => code === "session_expired" ? copy.sessionExpired : code && (promotionInvitationError(code, locale) || ({
     promotionBudgetFull: copy.inviteClosed, promotionRecruitmentClosed: copy.inviteClosed,
     promotionConfirmationExpired: copy.expired, promotionCandidateExpired: copy.expired,
     promotionSelfReferral: copy.rules3, promotionExistingAccountExcluded: copy.rules3,
@@ -182,7 +185,8 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
     promotionTermsUnapproved: copy.awaitingApproval, promotionTermsChanged: copy.awaitingApproval,
     promotionDistinctReviewerRequired: copy.adminBody, promotionPermissionDenied: copy.unavailableAction,
     promotionPayoutExecutionDisabled: copy.rules6,
-  } as Record<string, string>)[error] || copy.unavailable;
+  } as Record<string, string>)[code]) || copy.unavailable;
+  const errorText = errorMessage(error);
 
   const refresh = useCallback(async (signal?: AbortSignal, background = false) => {
     const generation = ++refreshGeneration.current;
@@ -198,6 +202,8 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
       if (typeof next.authenticated !== "boolean" || !Array.isArray(next.characters)) throw new PromotionApiError(502, "invalid_bootstrap");
       const identityChanged = !next.authenticated || context.bootstrap?.me?.account.id !== next.me?.account.id ||
         context.bootstrap?.binding?.credentialId !== next.binding?.credentialId;
+      const invitationContextChanged = identityChanged || context.bootstrap?.campaign?.campaignId !== next.campaign?.campaignId ||
+        context.bootstrap?.campaign?.termsVersion !== next.campaign?.termsVersion;
       let nextMembers: { items: PromotionMember[]; nextOffset: number | null } | undefined;
       let nextSettlements = Array.isArray(next.me?.settlements) ? next.me.settlements : undefined;
       if (next.authenticated && context.view === "members") {
@@ -212,6 +218,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
       if (identityChanged) {
         setMembers(null); setSettlements(null); setNextMemberOffset(null); setMemberOffset(0);
       }
+      if (invitationContextChanged) { setInvitationError(null); setCandidate(null); setAcceptedTerms(false); setNotice(null); }
       setBootstrap(next); setError(null);
       if (nextMembers) { setMembers(nextMembers.items); setNextMemberOffset(nextMembers.nextOffset); }
       if (nextSettlements) setSettlements(nextSettlements);
@@ -285,6 +292,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   useEffect(() => {
     if (!invitationCode) return;
     setClickRecorded(false); setInviteCode(invitationCode); setCandidate(null); setPreview(null);
+    setAcceptedTerms(false); setInvitationError(null); setNotice(null);
     const controller = new AbortController();
     if (clickKey.current?.code !== invitationCode) clickKey.current = { code: invitationCode, id: crypto.randomUUID() };
     void promotionRequest<InvitationPreview>(`invite?code=${encodeURIComponent(invitationCode)}`, { signal: controller.signal })
@@ -294,7 +302,10 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
         await promotionRequest("click", { body: { code: invitationCode }, signal: controller.signal, idempotencyKey: clickKey.current!.id });
         if (!controller.signal.aborted) setClickRecorded(true);
       })
-      .catch(cause => { if (!controller.signal.aborted) setError(cause instanceof PromotionApiError ? cause.code : "invitation_unavailable"); });
+      .catch(cause => { if (!controller.signal.aborted) {
+        const code = cause instanceof PromotionApiError ? cause.code : "invitation_unavailable";
+        setError(code); setInvitationError(code);
+      } });
     return () => controller.abort();
   }, [invitationCode]);
 
@@ -307,13 +318,18 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
   }, [authenticated, view, memberOffset, refresh]);
 
   useEffect(() => {
-    setAcceptedTerms(false); setCandidate(null);
-  }, [campaign?.termsVersion, authenticated]);
+    setAcceptedTerms(false); setCandidate(null); setInvitationError(null); setNotice(null);
+  }, [bootstrap?.me?.account.id, bootstrap?.binding?.credentialId, campaign?.campaignId, campaign?.termsVersion, authenticated]);
 
   async function write(path: string, body: Record<string, unknown>): Promise<Record<string, unknown> | null> {
-    if (busy || !bootstrap?.csrfToken) { setError("session_expired"); return null; }
+    const invitationWrite = path === "candidate" || path === "confirm";
+    if (busy) return null;
+    if (!bootstrap?.csrfToken) {
+      (invitationWrite ? setInvitationError : setError)("session_expired"); return null;
+    }
     cancelRefresh();
     setBusy(true); setError(null); setNotice(null);
+    if (invitationWrite) setInvitationError(null);
     // Retry an uncertain operation with its original key, never with a new payment/ledger intent.
     const intent = `${path}:${JSON.stringify(body)}`;
     const key = mutationKeys.current.get(intent) || crypto.randomUUID();
@@ -322,11 +338,12 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
       const result = await promotionRequest<Record<string, unknown>>(path, { body, csrfToken: bootstrap.csrfToken, idempotencyKey: key });
       mutationKeys.current.delete(intent);
       const id = result.appealId || result.leaderId || result.settlementId || result.id;
-      setNotice(typeof id === "string" ? id : typeof result.status === "string" ? result.status : "recorded");
+      if (path === "confirm") setNotice("invitation_confirmed");
+      else if (!invitationWrite) setNotice(typeof id === "string" ? id : typeof result.status === "string" ? result.status : "recorded");
       return result;
     } catch (cause) {
-      if (cause instanceof PromotionApiError && cause.status === 401) { setBootstrap(null); setMembers(null); setSettlements(null); }
-      setError(cause instanceof PromotionApiError && cause.status === 401 ? "session_expired" : cause instanceof PromotionApiError ? cause.code : "network_unavailable");
+      if (cause instanceof PromotionApiError && cause.status === 401) { setBootstrap(null); setMembers(null); setSettlements(null); setError("session_expired"); }
+      (invitationWrite ? setInvitationError : setError)(cause instanceof PromotionApiError && cause.status === 401 ? "session_expired" : cause instanceof PromotionApiError ? cause.code : "network_unavailable");
       return null;
     } finally { setBusy(false); }
   }
@@ -401,7 +418,7 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
           <button className={styles.secondary} disabled={loading || busy} onClick={() => void refresh()}>{loading ? copy.loading : copy.refresh}</button>
         </div></div>
         {error ? <div className={`${styles.notice} ${styles.error}`} role="alert"><strong>{error === "clipboard_unavailable" ? copy.copyFailed : errorText}</strong></div> : null}
-        {notice ? <div className={`${styles.notice} ${styles.success}`} role="status">{notice === "copied" ? copy.copied : STATUS_KEYS[notice] ? copy[STATUS_KEYS[notice]] : <>{copy.resultId}: <code>{notice === "recorded" ? copy.confirmed : notice}</code></>}</div> : null}
+        {notice ? <div className={`${styles.notice} ${styles.success}`} role="status">{notice === "invitation_confirmed" ? accountCopy.attributionConfirmed : notice === "copied" ? copy.copied : STATUS_KEYS[notice] ? copy[STATUS_KEYS[notice]] : <>{copy.resultId}: <code>{notice === "recorded" ? copy.confirmed : notice}</code></>}</div> : null}
 
         {view === "overview" ? <>
           <section className={styles.hero}><div><h1>{copy.heroTitle}</h1><p>{testWalletEnrollment ? copy.testEnrollmentBody : copy.heroBody}</p><div className={styles.heroActions}>
@@ -451,17 +468,20 @@ export function PromotionApp({ invitationCode }: { invitationCode?: string }) {
               <button className={styles.secondary} disabled={busy || !account.trim() || !password}>{busy ? copy.loading : accountCopy.verifyAccount}</button>
             </form>
           </details>}
-          {authenticated && !me?.attribution ? <section className={styles.panel}><h3>{copy.inviteTitle}</h3><p className={styles.muted}>{copy.inviteDisclosure}</p>
+          {authenticated && !me?.attribution ? <section className={styles.panel} aria-label={copy.invitationCode}><h3>{copy.inviteTitle}</h3><p className={styles.muted}>{copy.inviteDisclosure}</p>
+            <p className={styles.muted} id="promotion-invitation-steps">{accountCopy.invitationSteps}</p>
             <form className={styles.form} onSubmit={event => { event.preventDefault(); void (async () => {
               const result = await write("candidate", { code: inviteCode.trim(), source: invitationCode && inviteCode.trim() === invitationCode ? "invite_link" : "manual_code" });
               if (result && typeof result.candidateId === "string" && typeof result.leaderDisplayName === "string" && typeof result.expiresAtMs === "number") {
                 setCandidate({ candidateId: result.candidateId, leaderDisplayName: result.leaderDisplayName, expiresAtMs: result.expiresAtMs }); setAcceptedTerms(false);
-              }
+              } else if (result) setInvitationError("invalid_response");
             })(); }}>
-              <label className={styles.field}>{copy.invitationCode}<input value={inviteCode} onChange={event => { setInviteCode(event.target.value); setCandidate(null); }} maxLength={128} autoComplete="off" required disabled={busy} /></label>
-              <button className={styles.secondary} disabled={busy || !bound || !inviteCode.trim() || Boolean(invitationCode && inviteCode.trim() === invitationCode && !clickRecorded)}>{copy.submit}</button>
+              <label className={styles.field}>{copy.invitationCode}<input value={inviteCode} onChange={event => { setInviteCode(event.target.value); setCandidate(null); setAcceptedTerms(false); setInvitationError(null); setNotice(null); }} aria-describedby={invitationError ? "promotion-invitation-steps promotion-invitation-error" : "promotion-invitation-steps"} aria-invalid={!!invitationError} maxLength={128} autoComplete="off" required disabled={busy} /></label>
+              <button className={styles.secondary} disabled={busy || !bound || !inviteCode.trim() || Boolean(invitationCode && inviteCode.trim() === invitationCode && !clickRecorded)}>{busy ? copy.loading : accountCopy.findLeader}</button>
             </form>
-            {candidate ? <div className={styles.notice}><strong>{candidate.leaderDisplayName}</strong>{accountCopy.finalAttributionBody}<p className={styles.muted}>{copy.end}: {formatPromotionDate(candidate.expiresAtMs, locale)}</p>
+            {!bound ? <p className={styles.muted}>{accountCopy.bindingBody}</p> : null}
+            {invitationError ? <div id="promotion-invitation-error" className={`${styles.notice} ${styles.error}`} role="alert">{errorMessage(invitationError)}</div> : null}
+            {candidate ? <div className={styles.notice}><p role="status">{accountCopy.candidatePending}</p><strong>{candidate.leaderDisplayName}</strong>{accountCopy.finalAttributionBody}<p className={styles.muted}>{copy.end}: {formatPromotionDate(candidate.expiresAtMs, locale)}</p>
               <label className={styles.check} style={{ marginTop: 12 }}><input type="checkbox" checked={acceptedTerms} onChange={event => setAcceptedTerms(event.target.checked)} />{copy.acceptTerms} ({campaign?.termsVersion || copy.notConfigured})</label>
               <button className={styles.primary} style={{ marginTop: 14 }} disabled={busy || !acceptedTerms || !bound || !campaign?.recruitmentEnabled || !campaign?.termsVersion} onClick={() => void confirmCandidate()}>{copy.confirmAttribution}</button>
             </div> : null}
