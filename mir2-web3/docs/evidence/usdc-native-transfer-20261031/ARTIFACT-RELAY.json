@@ -1,0 +1,38 @@
+{
+  "schema": "mir2.exact-artifact-scratch-relay.v1",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "workflowRunId": "41093332871",
+  "artifactId": 12997201110,
+  "githubDigest": "sha256:587dbe96b513090ca60dfb07ce85862493231501e9d5e2acf3f123a1b24c63b8",
+  "zipSha256": "587dbe96b513090ca60dfb07ce85862493231501e9d5e2acf3f123a1b24c63b8",
+  "zipBytes": 89220634,
+  "tarPath": "/home/ubuntu/.cache/mir2-usdc-native-f7c3bf07b225016d4d1151349488872d/backend.tar.gz",
+  "tarSha256": "da496f2f6c4d1e3ee0d81b57ef40562e8cd04cf70a018157edeae00963fda5da",
+  "tarBytes": 85599928,
+  "packerSourceSha256": "6559b5d3cb9fefdd693e6322099e179d825898b4c85f0ae17e710012b3fcf487",
+  "packerDefinitionsSha256": "3e43f9c23e51f38689d73fdd5a7a5d4190d326fa1eefb1bebd1d7f454156834a",
+  "files": 1828,
+  "testsExecuted": 54,
+  "smallFiles": {
+    "artifact-contract.partial.json": {
+      "path": "/home/ubuntu/.cache/mir2-usdc-native-f7c3bf07b225016d4d1151349488872d/normalized/artifact-contract.partial.json",
+      "sha256": "84ddbc76f9ab787ade02cc9f03d68ee25856fbe09fce97755dc973367898a050",
+      "bytes": 264321
+    },
+    "LOCAL-ARTIFACT-VALIDATION.json": {
+      "path": "/home/ubuntu/.cache/mir2-usdc-native-f7c3bf07b225016d4d1151349488872d/normalized/LOCAL-ARTIFACT-VALIDATION.json",
+      "sha256": "86f44b8f6cefb6fb12b555662434abeb4613e9f34e027b8e5538551f83666297",
+      "bytes": 1240
+    },
+    "CI-ACCEPTANCE.json": {
+      "path": "/home/ubuntu/.cache/mir2-usdc-native-f7c3bf07b225016d4d1151349488872d/normalized/CI-ACCEPTANCE.json",
+      "sha256": "0f36314a5c2a74757997b88d5a3aa4871c91acb2503ce9e7737fd2d5943be381",
+      "bytes": 1653
+    }
+  },
+  "artifactCodeExecuted": false,
+  "dbOrServiceAccessed": false,
+  "githubTokenTransferred": false,
+  "scratch": "/home/ubuntu/.cache/mir2-usdc-native-f7c3bf07b225016d4d1151349488872d",
+  "observedAtUtc": "2026-10-30T17:21:53.620353+00:00"
+}

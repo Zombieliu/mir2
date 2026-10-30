@@ -1,0 +1,44 @@
+{
+  "schema": "mir2.native-transfer-phase.local.v1",
+  "phase": "operator_original",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "contractSha256": "8a886c2d7af5aedab162508de4ded434ef9dcbd993c694b157b1ea9d1312681c",
+  "remoteHelperSha256": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+  "ci": {
+    "runId": "41093332871",
+    "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+    "conclusion": "success",
+    "branch": "codex/windows-promotion-bridge-20261030"
+  },
+  "remote": {
+    "ok": true,
+    "phase": "operator_original",
+    "result": {
+      "accountSha256": "37ea4b0bd1bff5cab281e28d8f72b79b3f8cbe89db965b61adafbc277b901b97",
+      "broadcastPerformed": false,
+      "deliveryStatus": "applied",
+      "digest": "8iAt98ntbmNrikLeAh5nV7QES6r3UngBuADPpF85mguu",
+      "guard": {
+        "credits": 100,
+        "exactCreditDelta": true,
+        "existingFieldsPreserved": true,
+        "immutableOrderTermsPreserved": true
+      },
+      "issuerSecretInherited": false,
+      "normalizedProjectionGuard": {
+        "creditDelta": 100,
+        "emptyDerivedBusinessViewsPreserved": true,
+        "itemsBusinessAndUnknownFieldsPreserved": true,
+        "itemsCount": 4,
+        "sameTransactionTimesMonotonic": true,
+        "saveVersionDelta": 3,
+        "saveVersionMatchesAuthoritative": true,
+        "stateCreditMatchesAuthoritative": true
+      },
+      "orderId": "usdc_5ab9455a207912f81ad8923300f2cc33a76a307e2be39be293deeb8ace05d198",
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "targetAfterSha256": "a326e65cd752bf0d4a85c3dc4581f06d8a1d849399ba19485073cd26e37c7c25",
+      "targetBeforeSha256": "b88cd1433f9d3b872f9ed7a08bda3fce056659ef8be920be55a2561182a430c5"
+    }
+  }
+}

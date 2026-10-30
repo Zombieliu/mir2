@@ -1,0 +1,13 @@
+{
+  "artifactId": 12997201110,
+  "artifactName": "promotion-backend-868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "workflowRunId": "41093332871",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "branch": "codex/windows-promotion-bridge-20261030",
+  "conclusion": "success",
+  "githubDigest": "sha256:587dbe96b513090ca60dfb07ce85862493231501e9d5e2acf3f123a1b24c63b8",
+  "bytes": 89220634,
+  "repository": "Zombieliu/mir2",
+  "workflowPath": ".github/workflows/web-assets-r2-release.yml",
+  "zipSha256": "587dbe96b513090ca60dfb07ce85862493231501e9d5e2acf3f123a1b24c63b8"
+}

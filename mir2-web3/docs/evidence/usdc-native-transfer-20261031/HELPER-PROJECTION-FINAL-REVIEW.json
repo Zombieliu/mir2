@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.native-recovery-guard-review.v1",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "ciRunId": "41093332871",
+  "fileHashes": {
+    "direct-transfer-remote-phases.py": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+    "direct-transfer-coordinate.py": "7cf3f84d95b14cad9bef128180efcf5587f41ed04cbd1e9b409489eb86b69ea5",
+    "forward-clone-replay-20261031.py": "ef4724875e0481c9e359cdbf6b0a189a0a33140fe1584e82fa3122a1fc63fc3b",
+    "test-direct-transfer-deploy.py": "3870565c707b5da5637eaf2d4348e26e4593f7aa284f2bfad4fa9387c11c800a",
+    "test-native-normalized-projection-guard.py": "4c84d0bf75b1a384ff78b6011995e124759eac4ac6ce2c83d56df880488da365",
+    "DIAGNOSTIC-BEFORE-CLONE-PROOF-20261031.json": "e55ed5141a7e2e08ef5bd0c6c49e27019b3c3d767484d2b48ef26beb80fdb5eb"
+  },
+  "localTests": {
+    "existing": 33,
+    "normalizedProjection": 12,
+    "total": 45,
+    "passed": true
+  },
+  "diagnosticRealPostgresPassed": true,
+  "cloneFirstDeliveryCredits": 100,
+  "cloneForwardReplayExecuted": false,
+  "originalPromoteOrRecoveryExecuted": false,
+  "originalCapacityReceipt": "FRESH-ORIGINAL-CAPACITY-20261030T174816Z.json",
+  "originalWsActiveReconnectAllZero": true,
+  "oldFailedEvidencePreserved": true,
+  "reviewedAtUtc": "2026-10-30T17:50:44.381309+00:00"
+}

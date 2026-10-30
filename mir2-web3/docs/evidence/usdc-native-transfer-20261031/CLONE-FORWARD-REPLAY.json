@@ -1,0 +1,48 @@
+{
+  "status": "clone-recovery-passed",
+  "proof": {
+    "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+    "database": "mir2_promotion_windows_acceptance_868ef2d2b24d",
+    "passed": true,
+    "originalBackupSha256": "b501df69eaf6273b0488f8ea8023300ddb5d1c455cd4d4b4585e4f638a4c16b1",
+    "operatorBinarySha256": "91200f940b429a932f1ba77253b53f799dd52b4a5a03921e6e75b7651dc1136a",
+    "syntheticMobileSignature": false,
+    "realMobileSignature": false,
+    "broadcastOperationsAllowed": [],
+    "nodeOperationAllowlist": [
+      "observeDirectTransfer"
+    ],
+    "issuerSecretInherited": false,
+    "gatewayStarted": false,
+    "oneDigestClaim": true,
+    "idempotentReplay": true,
+    "replayGranted": 0,
+    "nonTargetRowsPreserved": true,
+    "guard": {
+      "immutableOrderTermsPreserved": true,
+      "existingFieldsPreserved": true,
+      "exactCreditDelta": true,
+      "credits": 100
+    },
+    "normalizedProjectionGuard": {
+      "stateCreditMatchesAuthoritative": true,
+      "saveVersionMatchesAuthoritative": true,
+      "creditDelta": 100,
+      "saveVersionDelta": 3,
+      "itemsCount": 4,
+      "itemsBusinessAndUnknownFieldsPreserved": true,
+      "sameTransactionTimesMonotonic": true,
+      "emptyDerivedBusinessViewsPreserved": true
+    },
+    "beforeTargetSha256": "b88cd1433f9d3b872f9ed7a08bda3fce056659ef8be920be55a2561182a430c5",
+    "afterTargetSha256": "e1cdcf7b51155c98998620a392367d09fae90b0fd0eb9d612f6df1bce9f89239",
+    "nonTargetSha256": "59d1cc9e676d8b90b8a1f9810e2e8c9140213e987a32dc52295a7a58f4bba034",
+    "forwardResume": true,
+    "firstGrantRepeated": false,
+    "operatorInvocationsThisResume": 1,
+    "diagnosticProofObjectSha256": "cebf95262d3c23f59a3338a5bb76b74a701526a2c17e2b9c87d060efc23028e4",
+    "fullCloneRetentionUnchangedByReplay": true,
+    "priorFailedPhaseEvidencePreserved": true,
+    "originalRealmChanged": false
+  }
+}

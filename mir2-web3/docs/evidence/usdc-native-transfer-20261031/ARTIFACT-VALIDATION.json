@@ -1,0 +1,39 @@
+{
+  "localOnly": true,
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "workflowRunId": "41093332871",
+  "artifactId": 12997201110,
+  "sourceZipSha256": "587dbe96b513090ca60dfb07ce85862493231501e9d5e2acf3f123a1b24c63b8",
+  "artifactSha256": "da496f2f6c4d1e3ee0d81b57ef40562e8cd04cf70a018157edeae00963fda5da",
+  "files": 1828,
+  "testsExecuted": 54,
+  "logs": {
+    "NATIVE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 40,
+      "logSha256": "e08444c133458dff9f673fffb0f8eec82d3551e8e5b44f737ec187d2fad6d062"
+    },
+    "CLONE-CLI-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 6,
+      "logSha256": "6178d9f9dbb4b18495af9747655ccd1cb4d3ff9eb092bb169175cf62ab74e2c3"
+    },
+    "WALLET-IDENTITY-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 8,
+      "logSha256": "67b7a6d9b744ef338960dd2adcbb8eccd991a12dacb3cafa873f771a7a56b1d2"
+    }
+  },
+  "droppedNpmLauncherShims": [
+    "usdc-recharge/node_modules/.bin/gql-tada",
+    "usdc-recharge/node_modules/.bin/gql.tada"
+  ],
+  "bytes": 85599928,
+  "requiresCoordinatorTerms": [
+    "publicDriverConfigSha256",
+    "recoveryRequestObjectSha256",
+    "recoveryExpectedAmountMicro",
+    "recoveryExpectedCredits",
+    "clone.redisPort"
+  ]
+}

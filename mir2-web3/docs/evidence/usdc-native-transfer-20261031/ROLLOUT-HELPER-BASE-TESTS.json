@@ -1,0 +1,17 @@
+{
+  "schema": "mir2.native-usdc-helper-local-tests.v5",
+  "observedAtUtc": "2026-10-30T17:30:00.158455+00:00",
+  "passed": true,
+  "testsExecuted": 33,
+  "remoteExecutionPerformed": false,
+  "sshUsed": false,
+  "docker": false,
+  "files": {
+    "direct-transfer-remote-phases.py": "317608ef01f7422f32115004e15619a51f622aa9a8557bc4a66becdabd456894",
+    "direct-transfer-deploy.py": "c47934b57d1ea7dfd8138737f494a632a394e7bacd01ed50f5bd897f8e4c42c1",
+    "direct-transfer-coordinate.py": "e65fc34913b8727fa801215f658972b38fd5878a8b7634afaa4c11db64f7493d",
+    "test-direct-transfer-deploy.py": "3870565c707b5da5637eaf2d4348e26e4593f7aa284f2bfad4fa9387c11c800a"
+  },
+  "logSha256": "2853f4058b1db9f00e0f7a04fd0a22929c4cec70ff7bf23689e365ef4413608c",
+  "scope": "real helper local guards; omit-empty allowed for Caddy but Gateway/worker explicit nonempty config required"
+}

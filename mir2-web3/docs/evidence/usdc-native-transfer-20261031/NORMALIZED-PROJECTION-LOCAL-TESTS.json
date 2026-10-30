@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.native-normalized-projection-local-tests.v1",
+  "localOnly": true,
+  "testedActualSourceFunctions": [
+    "SafeError",
+    "digest",
+    "normalized_projection",
+    "normalized_projection_guard",
+    "quoted",
+    "require",
+    "rows_except_target"
+  ],
+  "sourceSha256": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+  "testsExecuted": 12,
+  "passed": true,
+  "failures": 0,
+  "errors": 0,
+  "sshExecuted": false,
+  "sqlExecuted": false,
+  "remoteMutation": false
+}

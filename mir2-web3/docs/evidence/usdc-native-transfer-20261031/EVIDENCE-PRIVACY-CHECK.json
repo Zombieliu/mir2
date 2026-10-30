@@ -1,0 +1,30 @@
+{
+  "schema": "mir2.usdc-native.public-evidence-privacy-check.v1",
+  "observedAtUtc": "2026-10-30T18:05:32.9113480Z",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "scope": "one topic Markdown and its JSON receipts; only explicitly approved public receipt files copied",
+  "jsonParsed": 17,
+  "topicLocalLinksChecked": 16,
+  "missingLinks": 0,
+  "findings": [],
+  "checks": [
+    "private-key and API-token literals",
+    "JWT strings",
+    "password-bearing PostgreSQL/Redis URLs",
+    "signed URL query credentials",
+    "raw wallet-derived account aliases",
+    "populated raw account/credential/secret/session/cookie/authorization JSON fields"
+  ],
+  "allowedPublicFacts": [
+    "chain transaction/genesis digests, public payer/merchant/coin type and opaque order ID",
+    "account SHA256 only",
+    "row-set counts and SHA256 digests",
+    "boolean noninheritance and no-auth statements",
+    "public/static source and artifact hashes"
+  ],
+  "privateOperatorInputCopied": false,
+  "envOrConnectionCredentialsCopied": false,
+  "rawAccountRowsCopied": false,
+  "newMobileHumanAcceptanceClaimed": false,
+  "originalOperatorReplayClaimed": false
+}
