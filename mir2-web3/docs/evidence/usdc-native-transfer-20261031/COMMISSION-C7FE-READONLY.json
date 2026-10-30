@@ -1,0 +1,104 @@
+{
+  "schema": "mir2.promotion-commission-order-readonly.v1",
+  "observedAtUtc": "2026-10-30T18:29:47.427948+00:00",
+  "database": "original-windows-realm",
+  "gatewayRevision": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "accountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+  "registeredAtMs": 1793354071614,
+  "order": {
+    "state": "applied",
+    "characterIndex": 36,
+    "amountMicro": 1000000,
+    "createdAtMs": 1793384580156,
+    "expiresAtMs": 1793385780156,
+    "paymentMode": "direct_transfer",
+    "orderId": "usdc_c7fe28d1a3a8f3ee865c30bc7798b00b59649f5a9cd77a0d5273c9d2882ca34c",
+    "digestMatchesProvided": true,
+    "payerMasked": "0xb99297\u20266cd282",
+    "domain": {
+      "chainIdentifier": "4c78adac",
+      "network": null,
+      "environmentTag": null
+    },
+    "offer": {
+      "id": "usdc-test-usd1",
+      "credits": 100,
+      "amountMinor": 100,
+      "currency": "usd"
+    },
+    "applied": {
+      "credits": 100,
+      "atMs": 1793384631148
+    }
+  },
+  "targetPaidCreditLots": [
+    {
+      "characterIndex": 36,
+      "lotId": "credit:36:1",
+      "kind": "paid",
+      "originalCredits": 100,
+      "consumedCredits": 0,
+      "acquiredAtMs": 1793384631148
+    }
+  ],
+  "targetOrderMonthlyPurchaseAllocations": [],
+  "monthlyCard": {
+    "expiresAtMs": null,
+    "activeNow": false,
+    "itemReceiptCount": 0,
+    "redeemedItemReceiptCount": 0,
+    "itemReceipts": [],
+    "legacyCodeCount": 0
+  },
+  "campaigns": [
+    {
+      "status": "active",
+      "ends_at_ms": 1793824538449,
+      "rules_json": {
+        "reserveBps": 0,
+        "minimumLevel": 1,
+        "activeUtcDays": 1,
+        "candidateTtlMs": 604800000,
+        "walletCooldownMs": 259200000,
+        "maximumCoverageMs": 604800000,
+        "confirmationWindowMs": 86400000,
+        "testWalletEnrollment": true
+      },
+      "campaign_id": "numeron-windows-playtest-20261030",
+      "environment": "test",
+      "funding_mode": "revenue_share",
+      "starts_at_ms": 1793219738449,
+      "payout_enabled": false,
+      "rules_approved": true,
+      "commission_enabled": true,
+      "input_watermark_ms": null,
+      "recruitment_enabled": true
+    }
+  ],
+  "attributions": [],
+  "ownLeaderRecords": [
+    {
+      "status": "approved",
+      "campaign_id": "numeron-windows-playtest-20261030",
+      "environment": "test",
+      "applied_at_ms": 1793384559489
+    }
+  ],
+  "characters": [
+    {
+      "level": 2,
+      "character_index": 36
+    }
+  ],
+  "gameFacts": [],
+  "monthlySourceObservations": [],
+  "revenueAllocations": [],
+  "revenueHolds": [],
+  "commissionEntries": [],
+  "leaderCommissionRunCounts": [],
+  "relatedOutbox": [],
+  "browserCampaignOrCookieRead": false,
+  "chainRPCPerformed": false,
+  "financialOrServiceMutation": false,
+  "dockerStarted": false
+}
