@@ -1,0 +1,65 @@
+{
+  "schema": "mir2.promotion-migration.public-source.v1",
+  "observedAtUtc": "2026-10-30T20:24:58.108Z",
+  "origin": "https://mir2.obelisk.build",
+  "revision": "80379d6efd2a561ade89ce3d6ac941f6dfd9265d",
+  "stageRunId": "41121760224",
+  "promoteRunId": "41122523111",
+  "deploymentId": "dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+  "routeStatus": 200,
+  "javascriptAssetsLoaded": 10,
+  "migrationMarkersPresent": true,
+  "assets": [
+    {
+      "path": "/_next/static/chunks/webpack-36cb6c1fc4869431.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "3f11bb26711b2256795827c88b0a1ce15c071534d82f337457e090d16e24051f"
+    },
+    {
+      "path": "/_next/static/chunks/4bd1b696-c2f6e0877b6c10aa.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "c44812d818aed0a5034941164dcad78b5bb7d8a00daed7a33efe3ebc6ccfb492"
+    },
+    {
+      "path": "/_next/static/chunks/3794-88e9e28e6c5dde29.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "07a3fea2f78f05d0257b143d60ea9e7eddcc8b9e164622793889482553315cb7"
+    },
+    {
+      "path": "/_next/static/chunks/main-app-328ef8029036f00a.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "7435151efd0fa890ffdf4ad89bbf6f52a5ee68cb8c2f1757d5222fabe0f1429e"
+    },
+    {
+      "path": "/_next/static/chunks/9028-7172eda64ce94c2f.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "6fc87918b974773d0d3d42807f69fb0d741af31edd8df05befd7082c635c9e8c"
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-6701f0e96e6e8c58.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "e31802cdf5011efdb7a80a9008d1ddeff948f2c4e6f64a054e7929fd06814763"
+    },
+    {
+      "path": "/_next/static/chunks/5024-e37421197ab33604.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "e646628bf1dfdba4177c3e3d9fa6cfdf86426c8313a2bc48e19d09b70c498280"
+    },
+    {
+      "path": "/_next/static/chunks/7325-f1570b3c7957181a.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "ec0cdc375e632b45ee091deec4bd818a4d424aee3d1dc7772cc5d44857f4a000"
+    },
+    {
+      "path": "/_next/static/chunks/app/promotions/page-6af261f696798363.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "55e5a5a23791dfe2ae9026dd6e51208decec036e029e56d40806ed9a9f022eb1"
+    },
+    {
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7TbvV2JywL4vmCEYME318oJnjahc",
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+    }
+  ],
+  "currentCampaign": {
+    "gameClient": "windows",
+    "id": "numeron-windows-playtest-20261030",
+    "environment": "test",
+    "recruitmentEnabled": true,
+    "commissionEnabled": true,
+    "payoutEnabled": false
+  },
+  "browserIdentityUsed": false,
+  "writesPerformed": false,
+  "realMigrationStaged": false
+}

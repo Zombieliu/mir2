@@ -14,4 +14,10 @@
 
 模拟截图带有醒目标记：[桌面待确认](evidence/promotion-migration-ui-20261031/migration-pending-desktop.png)、[桌面完成](evidence/promotion-migration-ui-20261031/migration-completed-desktop.png)、[手机待确认](evidence/promotion-migration-ui-20261031/migration-pending-mobile.png)。模拟数据均非真实邀请、付款或迁移。
 
-发布仍采用原 Vercel 项目，先构建无域名分配的 production 候选、检查精确源码及受保护路由，再提升同一工件。游戏官网基线为 `dpl_9yLef9wXkWDovACg9atHU1W1uBSx`，宣传站基线保持 `dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97`。记录时新候选尚未发布，真实迁移未准备；不打开付款开关，不启动 Docker，不发布 Windows 客户端。
+## 原官网发布
+
+已采用原 Vercel 项目，先构建无域名分配的 production 候选，再检查精确源码、受保护路由和资源后提升同一工件。源码为 `80379d6efd2a561ade89ce3d6ac941f6dfd9265d`，候选／正式部署为 `dpl_7TbvV2JywL4vmCEYME318oJnjahc`；[stage 41121760224](https://github.com/Zombieliu/mir2/actions/runs/41121760224) 与 [promote 41122523111](https://github.com/Zombieliu/mir2/actions/runs/41122523111) 均成功。见[不可变候选收据](evidence/promotion-migration-ui-20261031/STAGED-CANDIDATE.json)。
+
+认证 Vercel [别名读取](evidence/promotion-migration-ui-20261031/ALIASES.json)确认 `mir2.obelisk.build` 与 `mir2-web3-web.vercel.app` 均指向该部署。[额外公网只读检查](evidence/promotion-migration-ui-20261031/PUBLIC-VERIFICATION.json)确认 `/version` 为上述源码，10 个实际加载 JS 均可获取且包含迁移的待确认／确认／完成组件标记，默认活动仍为 Windows Testnet、付款关闭。发布守卫还检查三个旧 web 活动、宣传首页及游戏路由，宣传站仍为 `dpl_7krVTQSx5Wj9Ht8Sd5KF5o9d3F97`。
+
+远程 Next 构建和路由／静态资源已验收，前述本机开发服务故障仍保留；这不等同于真实登录后的迁移端到端验收。记录时后台新迁移工件仍在构建，真实迁移未准备，页面只有收到后台迁移凭据后才出现确认卡片。本次不打开付款开关，不启动 Docker，不发布 Windows 客户端。
