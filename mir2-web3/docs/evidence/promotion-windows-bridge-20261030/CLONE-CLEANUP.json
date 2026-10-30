@@ -1,0 +1,291 @@
+{
+  "cloneAcceptanceSha256": "5a59c9fa694d8d3f2306d39aaad5950c023cefc8c0c040c3cb7101432a04742f",
+  "cloneBefore": {
+    "mir2-bridge-050950f5b977-gateway.service": {
+      "active": "active",
+      "binarySha256": "de996bb177e9ed1a5fddb31a19de1346c0ff24aa6a004bce29de9acd583e3ae6",
+      "configurationSha256": "c47b6a455e69b4fce5ed491f8d97de25d848b13e89e3d4c6d11239a05942fc7c",
+      "exe": "/opt/mir2-playtest/releases/050950f5b9773a36901861a1a95c18b8058793a5/mir2-gateway",
+      "pid": 1133668,
+      "subState": "running",
+      "unit": "mir2-bridge-050950f5b977-gateway.service"
+    },
+    "mir2-bridge-050950f5b977-redis.service": {
+      "active": "active",
+      "binarySha256": "1b2950213684d355e0e49fe6702c7bfb9d40b78f0da9ce289fc0e8f2a295e540",
+      "configurationSha256": "c7f39d34ec71d1e4fa0e705b57625a771f11592e68e7e5db689c1d0f6f692d16",
+      "exe": "/usr/bin/redis-check-rdb",
+      "pid": 1132642,
+      "subState": "running",
+      "unit": "mir2-bridge-050950f5b977-redis.service"
+    }
+  },
+  "cloneDatabaseAndRolePreserved": true,
+  "cloneFilesAndRecoveryPreserved": true,
+  "complete": true,
+  "completedAtUtc": "2026-10-30T14:31:17.091964+00:00",
+  "databaseDeleted": false,
+  "dockerStarted": false,
+  "filesDeleted": false,
+  "guardsPassed": true,
+  "mainStateSha256": "e3a650f17ad3bb0eba45fa6e99d253e047635c72cc6caeb2bc840ee8677da40a",
+  "mainStateUnchanged": true,
+  "mainStateWritten": false,
+  "observedAtUtc": "2026-10-30T14:31:12.539891+00:00",
+  "otherServicesStopped": false,
+  "protectedAfter": {
+    "additionalConfigSha256": {
+      "/etc/caddy/Caddyfile": "0f0f794f4059be3e8e7624ba572211dc29b411324a8fcab244945830e8353591",
+      "/etc/caddy/mir2-windows-promotion-api-050950f5b9773a36901861a1a95c18b8058793a5.caddy": "7c1ef55db679d83b1e6c32528dc80128860293ccb25e03bef5a335eb30225605",
+      "/var/backups/mir2-windows-promotion-bridge-20261030/050950f5b9773a36901861a1a95c18b8058793a5/publication/STATE.json": "163924dfdf3ac8f6eb92e620bdc44065ff4adb456fc9e88e7636f8ee5b2c4ef7"
+    },
+    "caddy.service": {
+      "active": "active",
+      "binarySha256": "9681d054b6e5137d53f6d027188b349e0603fd12ea6334bd0d49da6755432f1b",
+      "configurationSha256": "94411855cde4a34b9926d4ef8e6a4017a42ea8ab0451fddc714df81485a974dd",
+      "exe": "/usr/bin/caddy",
+      "pid": 2107428,
+      "subState": "running",
+      "unit": "caddy.service"
+    },
+    "legacyHealth": {
+      "channelIdentityDurable": true,
+      "identityBackend": "postgres",
+      "ok": true,
+      "revision": "4151a63d57c76c6e7f663f91470941db283a6419",
+      "sessionCacheHealthy": true
+    },
+    "mir2-playtest-redis.service": {
+      "active": "active",
+      "binarySha256": "1b2950213684d355e0e49fe6702c7bfb9d40b78f0da9ce289fc0e8f2a295e540",
+      "configurationSha256": "46cee5ebcf3fb2fe6c73df0282c629646ddacf79d29a3b2e2733f222b58ce447",
+      "exe": "/usr/bin/redis-check-rdb",
+      "pid": 2150365,
+      "subState": "running",
+      "unit": "mir2-playtest-redis.service"
+    },
+    "mir2-playtest-wallet-login.service": {
+      "active": "active",
+      "binarySha256": "94efd062ed066c1a0b332e18249859c905e920eeada5df55d24c99b919629a90",
+      "configurationSha256": "631c7ae773e9e5bdf2d1f68fa040e76115d944b82630ab72336b9bf131e43bcc",
+      "exe": "/opt/mir2-playtest-wallet/releases/00ca0f93f0c7e367afec495711e0e04334f4deb8/runtime/node",
+      "pid": 958517,
+      "subState": "running",
+      "unit": "mir2-playtest-wallet-login.service"
+    },
+    "mir2-playtest.service": {
+      "active": "active",
+      "binarySha256": "de996bb177e9ed1a5fddb31a19de1346c0ff24aa6a004bce29de9acd583e3ae6",
+      "configurationSha256": "e9f6409ccdf2b4a355d8bb44fdd97de917e50fe40950916aa0700630d99effe3",
+      "exe": "/opt/mir2-playtest/releases/050950f5b9773a36901861a1a95c18b8058793a5/mir2-gateway",
+      "pid": 1134705,
+      "subState": "running",
+      "unit": "mir2-playtest.service"
+    },
+    "mir2-promotion-playtest-worker.service": {
+      "active": "active",
+      "binarySha256": "227a0d56cdbd3b869a1c0ec21d9467ea5f136375ed6fdf3357b51a0e0367c4c8",
+      "configurationSha256": "8db1a4294ea1165300d361fab7601e1250814a24bd12631ecf7d0aad50633e60",
+      "exe": "/opt/mir2-promotion-playtest/releases/4151a63d57c76c6e7f663f91470941db283a6419/promotion_worker",
+      "pid": 852641,
+      "subState": "running",
+      "unit": "mir2-promotion-playtest-worker.service"
+    },
+    "mir2-promotion-playtest.service": {
+      "active": "active",
+      "binarySha256": "f2f39934fa831d2b12d97ef4b14b0a3c7bd149a20143b97ee273e510506d1ed3",
+      "configurationSha256": "5e3dbe33a8d45dc4835bc64f5033829f91c5b9911ce1fefa8bf570c61f998505",
+      "exe": "/opt/mir2-promotion-playtest/releases/4151a63d57c76c6e7f663f91470941db283a6419/mir2-gateway",
+      "pid": 855802,
+      "subState": "running",
+      "unit": "mir2-promotion-playtest.service"
+    },
+    "mir2-windows-promotion-worker.service": {
+      "active": "active",
+      "binarySha256": "55894249f4f3408b3c8bc60fac48f4e32bb0844f43640c5ff09a5ee6bb7b96f6",
+      "configurationSha256": "f40dc3a21d42523c71b23137a997c099f7844e4085138e683a130694d8352a0f",
+      "exe": "/opt/mir2-playtest/releases/050950f5b9773a36901861a1a95c18b8058793a5/promotion_worker",
+      "pid": 1135433,
+      "subState": "running",
+      "unit": "mir2-windows-promotion-worker.service"
+    },
+    "originalHealth": {
+      "channelIdentityDurable": true,
+      "identityBackend": "postgres",
+      "ok": true,
+      "revision": "050950f5b9773a36901861a1a95c18b8058793a5",
+      "sessionCacheHealthy": true
+    }
+  },
+  "protectedBefore": {
+    "additionalConfigSha256": {
+      "/etc/caddy/Caddyfile": "0f0f794f4059be3e8e7624ba572211dc29b411324a8fcab244945830e8353591",
+      "/etc/caddy/mir2-windows-promotion-api-050950f5b9773a36901861a1a95c18b8058793a5.caddy": "7c1ef55db679d83b1e6c32528dc80128860293ccb25e03bef5a335eb30225605",
+      "/var/backups/mir2-windows-promotion-bridge-20261030/050950f5b9773a36901861a1a95c18b8058793a5/publication/STATE.json": "163924dfdf3ac8f6eb92e620bdc44065ff4adb456fc9e88e7636f8ee5b2c4ef7"
+    },
+    "caddy.service": {
+      "active": "active",
+      "binarySha256": "9681d054b6e5137d53f6d027188b349e0603fd12ea6334bd0d49da6755432f1b",
+      "configurationSha256": "94411855cde4a34b9926d4ef8e6a4017a42ea8ab0451fddc714df81485a974dd",
+      "exe": "/usr/bin/caddy",
+      "pid": 2107428,
+      "subState": "running",
+      "unit": "caddy.service"
+    },
+    "legacyHealth": {
+      "channelIdentityDurable": true,
+      "identityBackend": "postgres",
+      "ok": true,
+      "revision": "4151a63d57c76c6e7f663f91470941db283a6419",
+      "sessionCacheHealthy": true
+    },
+    "mir2-playtest-redis.service": {
+      "active": "active",
+      "binarySha256": "1b2950213684d355e0e49fe6702c7bfb9d40b78f0da9ce289fc0e8f2a295e540",
+      "configurationSha256": "46cee5ebcf3fb2fe6c73df0282c629646ddacf79d29a3b2e2733f222b58ce447",
+      "exe": "/usr/bin/redis-check-rdb",
+      "pid": 2150365,
+      "subState": "running",
+      "unit": "mir2-playtest-redis.service"
+    },
+    "mir2-playtest-wallet-login.service": {
+      "active": "active",
+      "binarySha256": "94efd062ed066c1a0b332e18249859c905e920eeada5df55d24c99b919629a90",
+      "configurationSha256": "631c7ae773e9e5bdf2d1f68fa040e76115d944b82630ab72336b9bf131e43bcc",
+      "exe": "/opt/mir2-playtest-wallet/releases/00ca0f93f0c7e367afec495711e0e04334f4deb8/runtime/node",
+      "pid": 958517,
+      "subState": "running",
+      "unit": "mir2-playtest-wallet-login.service"
+    },
+    "mir2-playtest.service": {
+      "active": "active",
+      "binarySha256": "de996bb177e9ed1a5fddb31a19de1346c0ff24aa6a004bce29de9acd583e3ae6",
+      "configurationSha256": "e9f6409ccdf2b4a355d8bb44fdd97de917e50fe40950916aa0700630d99effe3",
+      "exe": "/opt/mir2-playtest/releases/050950f5b9773a36901861a1a95c18b8058793a5/mir2-gateway",
+      "pid": 1134705,
+      "subState": "running",
+      "unit": "mir2-playtest.service"
+    },
+    "mir2-promotion-playtest-worker.service": {
+      "active": "active",
+      "binarySha256": "227a0d56cdbd3b869a1c0ec21d9467ea5f136375ed6fdf3357b51a0e0367c4c8",
+      "configurationSha256": "8db1a4294ea1165300d361fab7601e1250814a24bd12631ecf7d0aad50633e60",
+      "exe": "/opt/mir2-promotion-playtest/releases/4151a63d57c76c6e7f663f91470941db283a6419/promotion_worker",
+      "pid": 852641,
+      "subState": "running",
+      "unit": "mir2-promotion-playtest-worker.service"
+    },
+    "mir2-promotion-playtest.service": {
+      "active": "active",
+      "binarySha256": "f2f39934fa831d2b12d97ef4b14b0a3c7bd149a20143b97ee273e510506d1ed3",
+      "configurationSha256": "5e3dbe33a8d45dc4835bc64f5033829f91c5b9911ce1fefa8bf570c61f998505",
+      "exe": "/opt/mir2-promotion-playtest/releases/4151a63d57c76c6e7f663f91470941db283a6419/mir2-gateway",
+      "pid": 855802,
+      "subState": "running",
+      "unit": "mir2-promotion-playtest.service"
+    },
+    "mir2-windows-promotion-worker.service": {
+      "active": "active",
+      "binarySha256": "55894249f4f3408b3c8bc60fac48f4e32bb0844f43640c5ff09a5ee6bb7b96f6",
+      "configurationSha256": "f40dc3a21d42523c71b23137a997c099f7844e4085138e683a130694d8352a0f",
+      "exe": "/opt/mir2-playtest/releases/050950f5b9773a36901861a1a95c18b8058793a5/promotion_worker",
+      "pid": 1135433,
+      "subState": "running",
+      "unit": "mir2-windows-promotion-worker.service"
+    },
+    "originalHealth": {
+      "channelIdentityDurable": true,
+      "identityBackend": "postgres",
+      "ok": true,
+      "revision": "050950f5b9773a36901861a1a95c18b8058793a5",
+      "sessionCacheHealthy": true
+    }
+  },
+  "protectedReceiptPath": "/var/backups/mir2-windows-promotion-bridge-20261030/050950f5b9773a36901861a1a95c18b8058793a5/CLONE-CLEANUP.json",
+  "protectedReceiptSha256": "6ffbbe6b8c4188e562e229d3c14bcd7b785e8dcb0c2f02794b02854811fe99a2",
+  "retainedOriginalAfter": {
+    "accounts": 122,
+    "billing": {
+      "count": 4,
+      "sha256": "7ccfa7d0bb50d33ffa23712df2970b55fd7b0a496bbaed55d2650f3dda081434"
+    },
+    "characterItems": {
+      "count": 215,
+      "sha256": "bd21f358a5d2912852709582088ade4145adb5e4b8fdece88d4367912a0e8fe7"
+    },
+    "characterMail": {
+      "count": 8,
+      "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+    },
+    "characterSaves": {
+      "count": 36,
+      "sha256": "c2a193678ec0f8b5aeaecb6bab2ebcac14b4f1bc381b8ccf6d179c60ebb7ca41"
+    },
+    "characters": {
+      "count": 36,
+      "sha256": "97a912df6931f7c70bfb3bdd934ff05c15ff641998421563a09f5e71c25956e8"
+    },
+    "historicalOrders": {
+      "count": 13,
+      "sha256": "2813af44df26cfc33cbe731f1204f258aef2b410a037af6f828b4c83b5793033"
+    },
+    "originalAccounts": {
+      "count": 120,
+      "sha256": "6e36e8bd8a41bd2d507543f38019eef3bad6ad16c6ff058a18fa2078fddcdbac"
+    },
+    "systemActors": 2
+  },
+  "retainedOriginalBefore": {
+    "accounts": 122,
+    "billing": {
+      "count": 4,
+      "sha256": "7ccfa7d0bb50d33ffa23712df2970b55fd7b0a496bbaed55d2650f3dda081434"
+    },
+    "characterItems": {
+      "count": 215,
+      "sha256": "bd21f358a5d2912852709582088ade4145adb5e4b8fdece88d4367912a0e8fe7"
+    },
+    "characterMail": {
+      "count": 8,
+      "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+    },
+    "characterSaves": {
+      "count": 36,
+      "sha256": "c2a193678ec0f8b5aeaecb6bab2ebcac14b4f1bc381b8ccf6d179c60ebb7ca41"
+    },
+    "characters": {
+      "count": 36,
+      "sha256": "97a912df6931f7c70bfb3bdd934ff05c15ff641998421563a09f5e71c25956e8"
+    },
+    "historicalOrders": {
+      "count": 13,
+      "sha256": "2813af44df26cfc33cbe731f1204f258aef2b410a037af6f828b4c83b5793033"
+    },
+    "originalAccounts": {
+      "count": 120,
+      "sha256": "6e36e8bd8a41bd2d507543f38019eef3bad6ad16c6ff058a18fa2078fddcdbac"
+    },
+    "systemActors": 2
+  },
+  "roleDeleted": false,
+  "schema": "mir2.exact-clone-cleanup.v1",
+  "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+  "stopResults": [
+    {
+      "active": "inactive",
+      "pid": 0,
+      "signalContract": "SIGINT; SendSIGKILL=no",
+      "stopped": true,
+      "subState": "dead",
+      "unit": "mir2-bridge-050950f5b977-gateway.service"
+    },
+    {
+      "active": "inactive",
+      "pid": 0,
+      "signalContract": "SIGINT; SendSIGKILL=no",
+      "stopped": true,
+      "subState": "dead",
+      "unit": "mir2-bridge-050950f5b977-redis.service"
+    }
+  ]
+}

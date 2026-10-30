@@ -1,0 +1,26 @@
+{
+  "schema": "mir2-windows-local-validation-reference-v1",
+  "recorded_at_utc": "2026-10-30T12:49:13.889469Z",
+  "native_patch_commit": "5022a2423ddb0aaf9bb3b5370c68c1862ce31853",
+  "reference_path": "E:/mir2-player-journey/.codex/tmp/native-billing-origin-20261030/candidate/LOCAL-VALIDATION.json",
+  "reference_sha256": "4fde2a3f87d65e09aa8a33dc4d1dd054f7234128599bed38c90c202f9570c43a",
+  "candidate_executable_sha256": "67a1662d9e3b687ed37185c5bc4b1d40f2dd5ba23d7b79ea8a615a4dc5f36dcc",
+  "binary_digest_verified_present_in_reference": true,
+  "frozen_source_hashes_match": true,
+  "build": {
+    "elapsedSeconds": 27.888107,
+    "compiler": "rustc1.95.0",
+    "cachedDependenciesReadOnly": true,
+    "exitCode": 0,
+    "finishedAtUtc": "2026-10-30T12:31:00.193305Z",
+    "noPdb": true,
+    "fullMainCompiled": true,
+    "debugAssertions": true
+  },
+  "source_scope": "Current real platform-windows main and modules plus original unified cached dependency rlibs",
+  "cached_dependency_limitation": "Current HEAD updater engine_maintenance.rs differs from unified11 cache; this candidate retains original cached updater library, no updater build or release",
+  "candidate_launched": false,
+  "publication": false,
+  "updater_or_installer_changed": false,
+  "status": "LOCAL_BUILD_VALIDATION_ONLY_NOT_UPDATER_RELEASE"
+}
