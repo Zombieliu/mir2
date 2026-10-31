@@ -17,9 +17,6 @@
 *.xml text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
-# Compiler input identity must not change with Windows core.autocrlf defaults.
-**/Cargo.lock text eol=lf
-**/numeron.rc text eol=lf
 
 *.bat text eol=crlf
 *.cmd text eol=crlf

@@ -38,10 +38,52 @@ impl Database {
     fn scalar(&self, sql: &str) -> i64 {
         self.connect().query_one(sql, &[]).unwrap().get(0)
     }
+    fn provision_runtime_lease(&self, context: &SharedAccountInventoryExecutionContext) {
+        let mut admin = Client::connect(&self.url, NoTls).unwrap();
+        admin
+            .batch_execute(include_str!(
+                "../../../../../infra/postgres/migrations/0003_zone_owner_leases.sql"
+            ))
+            .unwrap();
+        admin.execute(
+            "INSERT INTO public.zone_owner_leases(zone_id,owner_id,fencing_token,expires_at_ms,heartbeat_at_ms) \
+             VALUES($1,'test-owner',7,floor(extract(epoch FROM clock_timestamp())*1000)::bigint+120000,1)",
+            &[&context.zone_id.as_str()],
+        ).unwrap();
+    }
+    fn source_and_ledger_image(&self) -> BTreeMap<String, serde_json::Value> {
+        let mut client = self.connect();
+        [
+            "accounts", "characters", "character_saves", "shared_guilds",
+            "game_economy_balances", "game_economy_bootstraps",
+            "game_economy_transactions", "game_economy_outbox",
+            "promotion_game_source_events", "promotion_game_facts",
+        ].into_iter().map(|table| {
+            let row = client.query_one(&format!(
+                "SELECT COALESCE(jsonb_agg(to_jsonb(r) ORDER BY to_jsonb(r)::text),'[]'::jsonb) FROM {table} r"
+            ), &[]).unwrap();
+            (table.into(), row.get(0))
+        }).collect()
+    }
 }
 impl Drop for Database {
     fn drop(&mut self) {
         if let Ok(mut client) = Client::connect(&self.url, NoTls) {
+            if client
+                .query_one(
+                    "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL",
+                    &[],
+                )
+                .unwrap()
+                .get::<_, bool>(0)
+            {
+                client
+                    .execute(
+                        "DELETE FROM public.zone_owner_leases WHERE zone_id=$1",
+                        &[&runtime_context(self).zone_id.as_str()],
+                    )
+                    .unwrap();
+            }
             let _ = client.batch_execute(&format!("DROP SCHEMA {} CASCADE", self.schema));
         }
     }
@@ -368,9 +410,9 @@ fn prepared_kill_postgres_commit_error_is_never_a_definite_retry_receipt() {
     // outcome. This isolated layer deliberately does not guess or auto-retry.
 }
 
-fn runtime_context() -> SharedAccountInventoryExecutionContext {
+fn runtime_context(db: &Database) -> SharedAccountInventoryExecutionContext {
     SharedAccountInventoryExecutionContext {
-        zone_id: crate::ZoneId::new("test-zone"),
+        zone_id: crate::ZoneId::new(format!("{}:runtime", db.schema)),
         fencing_generation: 7,
         source_sequence: 1,
         created_at_ms: 1,
@@ -398,7 +440,7 @@ fn runtime_award(runtime: &InProcessWorldRuntime) -> SharedAccountInventoryComma
 
 #[test]
 #[ignore = "requires dedicated MIR2_GUILD_TEST_DATABASE_URL"]
-fn prepared_kill_postgres_actual_runtime_source_and_ledger_retry_relogin() {
+fn prepared_kill_postgres_mirror_runtime_defers_without_source_ledger_or_fact_changes() {
     actual_runtime_source(false);
 }
 
@@ -410,12 +452,27 @@ fn prepared_kill_postgres_source_of_truth_runtime_and_ledger_retry_relogin() {
 
 fn actual_runtime_source(source_of_truth: bool) {
     let db = Database::new();
+    let context = runtime_context(&db);
     let config = if source_of_truth {
+        assert_eq!(
+            std::env::var("MIR2_PROMOTION_ENVIRONMENT").as_deref(),
+            Ok("test")
+        );
+        db.provision_runtime_lease(&context);
         // with_account_store_database_url intentionally selects Mirror. Use
         // the production SourceOfTruth constructor so the private runtime and
         // durable source writer both exercise authoritative PG transactions.
         crate::GatewayConfig::default()
             .with_postgres_account_store(&db.scoped)
+            .unwrap()
+            .with_zone_save_fence(
+                mir2_simulation::ZoneSaveFence::new(
+                    context.zone_id.as_str().into(),
+                    "test-owner".into(),
+                    7,
+                )
+                .unwrap(),
+            )
             .unwrap()
     } else {
         crate::GatewayConfig::default().with_account_store_database_url(&db.scoped)
@@ -435,12 +492,38 @@ fn actual_runtime_source(source_of_truth: bool) {
     )
     .unwrap();
     let envelope = runtime_award(&runtime);
-    let context = runtime_context();
     let before = runtime.world_snapshot().player_experience;
     let promotion_capture_enabled =
         source_of_truth && std::env::var("MIR2_PROMOTION_ENVIRONMENT").as_deref() == Ok("test");
     let promotion_before = db.scalar("SELECT count(*) FROM promotion_game_source_events");
     let service = PostgresEconomyAccountInventoryService::new(&db.scoped);
+    if !source_of_truth {
+        // The production PostgreSQL service requires a SourceOfTruth runtime
+        // with a server-bound Zone fence. A Mirror cannot grant that authority.
+        assert!(runtime.zone_economy_write_permit().is_err());
+        let source_before = db.source_and_ledger_image();
+        let runtime_before =
+            serde_json::to_value(runtime.active_character_checkpoint().unwrap()).unwrap();
+        let outcome = service.commit_fenced(&mut runtime, Some(&context), envelope);
+        assert!(
+            matches!(
+                outcome,
+                SharedAccountInventoryCommitOutcome::Deferred { .. }
+            ),
+            "{outcome:?}"
+        );
+        assert_eq!(db.source_and_ledger_image(), source_before);
+        assert_eq!(
+            serde_json::to_value(runtime.active_character_checkpoint().unwrap()).unwrap(),
+            runtime_before
+        );
+        return;
+    }
+    let permit = runtime.zone_economy_write_permit().unwrap();
+    permit.validate_target_database(&db.scoped).unwrap();
+    permit
+        .validate_context(context.zone_id.as_str(), 7)
+        .unwrap();
     db.connect().batch_execute("CREATE FUNCTION reject_actual_source() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'source failure'; END $$; CREATE TRIGGER reject_actual_source BEFORE UPDATE ON accounts FOR EACH ROW EXECUTE FUNCTION reject_actual_source()").unwrap();
     assert!(
         !service
@@ -570,7 +653,7 @@ fn actual_runtime_source(source_of_truth: bool) {
 
 #[test]
 #[ignore = "requires dedicated MIR2_GUILD_TEST_DATABASE_URL"]
-fn prepared_kill_postgres_mirror_file_failure_keeps_committed_ledger_and_durable_fence() {
+fn prepared_kill_postgres_mirror_file_fault_cannot_bypass_zone_permit_or_freeze_local_play() {
     let db = Database::new();
     let dir = std::env::temp_dir().join(format!("mir2-prepared-mirror-{}", db.schema));
     let path = dir.join("accounts.json");
@@ -584,29 +667,76 @@ fn prepared_kill_postgres_mirror_file_failure_keeps_committed_ledger_and_durable
     )
     .unwrap();
     let envelope = runtime_award(&runtime);
+    let identity = runtime.active_identity().unwrap();
     let before = std::fs::read(&path).unwrap();
+    let source_before = db.source_and_ledger_image();
+    let runtime_before =
+        serde_json::to_value(runtime.active_character_checkpoint().unwrap()).unwrap();
     config.inject_account_store_transaction_fault(
         mir2_simulation::AccountStoreTransactionFault::BeforeFileRename,
     );
     let service = PostgresEconomyAccountInventoryService::new(&db.scoped);
-    let outcome = service.commit_fenced(&mut runtime, Some(&runtime_context()), envelope);
+    assert!(runtime.zone_economy_write_permit().is_err());
+    let outcome = service.commit_fenced(&mut runtime, Some(&runtime_context(&db)), envelope);
     assert!(
         matches!(
             outcome,
-            SharedAccountInventoryCommitOutcome::OutcomeUnknown { .. }
+            SharedAccountInventoryCommitOutcome::Deferred { .. }
         ),
         "{outcome:?}"
     );
     assert_eq!(
         db.scalar("SELECT count(*) FROM game_economy_transactions"),
-        1
+        0
     );
-    assert!(config.save_account_store().is_err());
+    assert_eq!(db.source_and_ledger_image(), source_before);
+    assert_eq!(
+        serde_json::to_value(runtime.active_character_checkpoint().unwrap()).unwrap(),
+        runtime_before
+    );
     assert_eq!(std::fs::read(&path).unwrap(), before);
     drop(runtime);
     drop(config);
     let reopened = crate::GatewayConfig::default().with_account_store_path(&path);
-    assert!(reopened.save_account_store().is_err());
-    drop(reopened);
+    // Rejection happened before any PostgreSQL/source publication or injected
+    // file fault. Ordinary File play uses the local service and remains writable.
+    reopened.save_account_store().unwrap();
+    let mut local = InProcessWorldRuntime::new(reopened);
+    let login = local
+        .execute(mir2_simulation::WorldCommand::ClientPacket(
+            mir2_protocol::ClientPacket::Login {
+                account_id: identity.account_id.clone(),
+                password: identity.account_id.clone(),
+            },
+        ))
+        .unwrap();
+    assert!(
+        login
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })),
+        "{login:?}"
+    );
+    let start = local
+        .execute(mir2_simulation::WorldCommand::ClientPacket(
+            mir2_protocol::ClientPacket::StartGame {
+                character_index: identity.character_index,
+            },
+        ))
+        .unwrap();
+    assert!(
+        start
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })),
+        "{start:?}"
+    );
+    let local_before = local.world_snapshot().player_experience;
+    let award = runtime_award(&local);
+    assert!(
+        crate::routing::InProcessAccountInventoryService::new()
+            .commit(&mut local, award)
+            .committed
+    );
+    assert!(local.world_snapshot().player_experience > local_before);
+    drop(local);
     std::fs::remove_dir_all(dir).unwrap();
 }
