@@ -188,6 +188,74 @@ fn gameplay_credit_stays_non_cash_even_when_reward_and_purchase_net_to_zero() {
 }
 
 #[test]
+fn game_shop_net_zero_credit_spend_does_not_reuse_paid_lots_for_monthly_card() {
+    use crate::SimulationSession;
+    use mir2_protocol::{ClientPacket, ServerPacket};
+
+    // Catalogue product 31 costs 110 Credit. Exercise both real shop ingress
+    // paths without calling the provenance consumption helper from the test.
+    for legacy in [false, true] {
+        let c = config(110);
+        pay(&c, 110, 1100, Some(0), "usd", false, "shop-net-zero");
+        let mut session = SimulationSession::new(c.clone());
+        assert!(matches!(
+            session.passkey_login("demo").as_slice(),
+            [ServerPacket::LoginSuccess { .. }]
+        ));
+        assert!(session
+            .handle_packet(ClientPacket::StartGame { character_index: 0 })
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        assert_eq!(session.world_snapshot().credit, 110);
+
+        // Stage the same private-runtime balance change as an unsaved gameplay
+        // award. The durable balance stays 110 until the actual shop commits.
+        let mut checkpoint = session.active_character_checkpoint().unwrap();
+        checkpoint.credit += 110;
+        session
+            .restore_active_character_checkpoint(&checkpoint)
+            .unwrap();
+        assert_eq!(session.world_snapshot().credit, 220);
+        assert_eq!(snapshot(&c).saves[&0].credit, 110);
+
+        let packets = if legacy {
+            session.stage5_command("gameShop.buyCredit", vec!["31".into(), "1".into()])
+        } else {
+            session.handle_packet(ClientPacket::GameShopBuy {
+                g_index: 31,
+                quantity: 1,
+                price_type: 0,
+            })
+        };
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 110 })));
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::ReceiveMail { mail } if !mail.is_empty())));
+        assert_eq!(session.world_snapshot().credit, 110);
+        let committed = snapshot(&c);
+        assert_eq!(committed.saves[&0].credit, 110);
+        let wallet = &committed.billing.as_ref().unwrap().provenance.wallets[&0];
+        assert_eq!(wallet.balance().unwrap(), 110);
+        assert_eq!(wallet.lots[0].kind, CreditFundingKind::Paid);
+        assert_eq!(wallet.lots[0].consumed_credits, 110);
+        assert_eq!(wallet.lots[1].kind, CreditFundingKind::Gift);
+        assert_eq!(wallet.lots[1].original_credits, 110);
+        assert_eq!(wallet.lots[1].consumed_credits, 0);
+
+        session.handle_packet(ClientPacket::LogOut);
+        card(&c, "monthly-after-shop", AT + 10);
+        let revenue = monthly_revenue_sources(&snapshot(&c), "demo", false)
+            .unwrap()
+            .remove(0);
+        assert_eq!(revenue.eligible_micro_usd, 0);
+        assert_eq!(revenue.gift_credits, 110);
+        assert_eq!(revenue.funding_status, "excluded");
+    }
+}
+
+#[test]
 fn tax_fx_and_environment_are_proven_instead_of_inferred_from_amount() {
     for (currency, tax, live, query, reason) in [
         ("usd", None, false, false, "payment_tax_unverified"),

@@ -4527,8 +4527,13 @@ impl SimulationSession {
                 match price_type {
                     GameShopPriceType::Credit => {
                         crate::billing_provenance::consume_ordinary_credit(
-                            store.accounts.get_mut(&account_id).expect("validated game-shop account"),
-                            active_character.index, staged_save.credit, total_price,
+                            store
+                                .accounts
+                                .get_mut(&account_id)
+                                .expect("validated game-shop account"),
+                            active_character.index,
+                            staged_save.credit,
+                            total_price,
                             crate::monthly_card::monthly_card_now_ms(),
                         )?;
                         staged_save.credit = staged_save

@@ -343,7 +343,10 @@ fn migration_union_keeps_original_nineteen_and_never_repeats_usdc_backfill() {
         .all(|(id, _)| !id.contains("promotion")));
     assert_eq!(MIGRATIONS[18].0, "0019_sui_usdc_billing_authority");
     assert_eq!(
-        MIGRATIONS[19..26].iter().map(|(id, _)| *id).collect::<Vec<_>>(),
+        MIGRATIONS[19..26]
+            .iter()
+            .map(|(id, _)| *id)
+            .collect::<Vec<_>>(),
         [
             "0017_promotion_program",
             "0018_promotion_payment_provenance",
@@ -357,7 +360,10 @@ fn migration_union_keeps_original_nineteen_and_never_repeats_usdc_backfill() {
     assert_eq!(MIGRATIONS[26].0, "0024_sui_usdc_native_transfer_authority");
     assert_eq!(MIGRATIONS[27].0, "0025_promotion_attribution_migration");
     assert_eq!(
-        MIGRATIONS[28..].iter().map(|(id, _)| *id).collect::<Vec<_>>(),
+        MIGRATIONS[28..]
+            .iter()
+            .map(|(id, _)| *id)
+            .collect::<Vec<_>>(),
         [
             "0020_zone_character_save_operations",
             "0021_zone_player_drop_operations",
