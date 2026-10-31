@@ -1,6 +1,9 @@
 //! Launcher copy follows SUPPORTED_LOCALES; Simplified Chinese stays at index 9.
 pub(super) fn strings(key: &str) -> Option<[&'static str; crate::SUPPORTED_LOCALES.len()]> {
     Some(match key {
+        "installed-build" => ["Installed build", "目前安裝版本", "Compilação instalada", "Установленная сборка", "इंस्टॉल बिल्ड", "Build terpasang", "Bản đã cài đặt", "บิลด์ที่ติดตั้ง", "الإصدار المثبّت", "当前安装版本"],
+        "release-notes" => ["Release notes ↗", "更新說明 ↗", "Notas da atualização ↗", "История обновлений ↗", "अपडेट विवरण ↗", "Catatan pembaruan ↗", "Nội dung cập nhật ↗", "รายละเอียดอัปเดต ↗", "ملاحظات التحديث ↗", "更新说明 ↗"],
+        "release-notes-open-failed" => ["The release notes could not be opened. Check your default browser and try again.", "無法開啟更新說明，請檢查預設瀏覽器後重試。", "Não foi possível abrir as notas. Verifique o navegador padrão e tente novamente.", "Не удалось открыть историю обновлений. Проверьте браузер по умолчанию и повторите попытку.", "अपडेट विवरण नहीं खुल सका। डिफ़ॉल्ट ब्राउज़र जाँचें और फिर कोशिश करें।", "Catatan pembaruan tidak dapat dibuka. Periksa browser default lalu coba lagi.", "Không thể mở nội dung cập nhật. Hãy kiểm tra trình duyệt mặc định và thử lại.", "เปิดรายละเอียดอัปเดตไม่ได้ โปรดตรวจสอบเบราว์เซอร์เริ่มต้นแล้วลองอีกครั้ง", "تعذر فتح ملاحظات التحديث. تحقق من المتصفح الافتراضي وحاول مجددًا.", "无法打开更新说明，请检查默认浏览器后重试。"],
         "hero-title" => ["A legend.\nReborn.", "傳奇，再度覺醒。", "Uma lenda.\nRenascida.", "Легенда.\nВозрождение.", "एक किंवदंती।\nफिर जन्मी।", "Legenda.\nTerlahir kembali.", "Huyền thoại.\nTái sinh.", "ตำนาน\nถือกำเนิดอีกครั้ง", "أسطورة.\nتولد من جديد.",
             "传奇，再度觉醒。",
         ],

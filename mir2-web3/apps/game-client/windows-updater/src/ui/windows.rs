@@ -19,7 +19,7 @@ use windows_sys::Win32::{
     },
     System::{
         LibraryLoader::GetModuleHandleW,
-        SystemServices::{SS_ENDELLIPSIS, SS_ICON, SS_NOPREFIX},
+        SystemServices::{SS_ICON, SS_NOPREFIX, SS_NOTIFY},
     },
     UI::{
         Controls::{
@@ -49,10 +49,16 @@ const RETRY_ID: usize = 110;
 const VERSION_ID: usize = 111;
 const VERSION_LABEL_ID: usize = 112;
 const MINIMIZE_ID: usize = 113;
+const RELEASE_NOTES_ID: usize = 114;
+const BUILD_ID: usize = 115;
 const CLASS: *const u16 = windows_sys::core::w!("NumeronMir2LauncherV2");
 const STYLE: u32 = WS_POPUP | WS_SYSMENU | WS_MINIMIZEBOX | WS_CLIPCHILDREN;
 const WIDTH: i32 = 1120;
 const HEIGHT: i32 = 680;
+
+#[cfg(test)]
+static OPENED_RELEASE_NOTES: std::sync::Mutex<Vec<(usize, String)>> =
+    std::sync::Mutex::new(Vec::new());
 
 fn wide(text: &str) -> Vec<u16> {
     text.chars()
@@ -113,8 +119,11 @@ struct State {
     heading_font: Cell<HFONT>,
     detail_font: Cell<HFONT>,
     small_font: Cell<HFONT>,
+    build_font: Cell<HFONT>,
     version_label: Cell<HWND>,
     version_value: Cell<HWND>,
+    build_id: Cell<HWND>,
+    release_notes: Cell<HWND>,
     minimize: Cell<HWND>,
     skin: RefCell<Skin>,
     percent: Cell<u32>,
@@ -139,6 +148,7 @@ impl Drop for State {
             self.heading_font.get(),
             self.detail_font.get(),
             self.small_font.get(),
+            self.build_font.get(),
         ] {
             if !font.is_null() {
                 unsafe {
@@ -152,6 +162,39 @@ impl Drop for State {
 unsafe fn text(control: HWND, value: &str) {
     unsafe {
         SetWindowTextW(control, wide(value).as_ptr());
+    }
+}
+
+unsafe fn open_release_notes(hwnd: HWND, state: &State) {
+    let destination = version_info::release_notes_url(&state.version.borrow());
+    #[cfg(test)]
+    {
+        // Native tests exercise the click without opening the user's browser.
+        OPENED_RELEASE_NOTES
+            .lock()
+            .unwrap()
+            .push((hwnd as usize, destination));
+    }
+    #[cfg(not(test))]
+    unsafe {
+        // The operation, HTTPS base, argument list and working directory are
+        // fixed here. Signed metadata supplies only a validated fragment ID.
+        let result = windows_sys::Win32::UI::Shell::ShellExecuteW(
+            hwnd,
+            windows_sys::core::w!("open"),
+            wide(&destination).as_ptr(),
+            ptr::null(),
+            ptr::null(),
+            SW_SHOWNORMAL,
+        ) as isize;
+        if result <= 32 {
+            MessageBoxW(
+                hwnd,
+                wide(&stage(&state.locale, "release-notes-open-failed")).as_ptr(),
+                wide(&stage(&state.locale, "release-notes")).as_ptr(),
+                MB_OK | MB_ICONERROR,
+            );
+        }
     }
 }
 
@@ -177,7 +220,14 @@ unsafe fn set_progress(state: &State, percent: u32, indefinite: bool) {
 unsafe fn refresh_metrics(state: &State) {
     let now = state.started.elapsed();
     unsafe {
-        text(state.version_value.get(), &state.version.borrow());
+        text(
+            state.version_value.get(),
+            &version_info::summary(&state.locale, &state.version.borrow()),
+        );
+        text(
+            state.build_id.get(),
+            &version_info::full_identity(&state.version.borrow()),
+        );
         text(
             state.elapsed.get(),
             &if state.busy.get() {
@@ -447,6 +497,21 @@ unsafe extern "system" fn window_proc(
             }
             0
         }
+        WM_COMMAND if matches!(wparam & 0xffff, VERSION_ID | BUILD_ID | RELEASE_NOTES_ID) => {
+            unsafe { open_release_notes(hwnd, state) };
+            0
+        }
+        WM_SETCURSOR
+            if matches!(
+                unsafe { GetDlgCtrlID(wparam as HWND) } as usize,
+                VERSION_ID | BUILD_ID | RELEASE_NOTES_ID
+            ) =>
+        {
+            unsafe {
+                SetCursor(LoadCursorW(ptr::null_mut(), IDC_HAND));
+            }
+            1
+        }
         WM_COMMAND if wparam & 0xffff == ACTION_ID => {
             if !state.busy.get()
                 && unsafe {
@@ -553,7 +618,7 @@ unsafe extern "system" fn window_proc(
             let id = GetDlgCtrlID(lparam as HWND) as usize;
             SetTextColor(
                 wparam as HDC,
-                if id == DETAIL_ID || id == ELAPSED_ID || id == VERSION_LABEL_ID {
+                if id == DETAIL_ID || id == ELAPSED_ID || id == VERSION_LABEL_ID || id == BUILD_ID {
                     0x00B9B7B3
                 } else if id == SUBTITLE_ID {
                     0x0087B5D7
@@ -618,7 +683,7 @@ fn px(logical: i32, dpi: u32) -> i32 {
     ((i64::from(logical) * i64::from(dpi.max(96)) + 48) / 96) as i32
 }
 
-unsafe fn new_font(size: i32, weight: i32, dpi: u32) -> HFONT {
+unsafe fn new_font(size: i32, weight: i32, dpi: u32, face: *const u16) -> HFONT {
     unsafe {
         CreateFontW(
             -px(size, dpi),
@@ -634,17 +699,18 @@ unsafe fn new_font(size: i32, weight: i32, dpi: u32) -> HFONT {
             CLIP_DEFAULT_PRECIS as u32,
             CLEARTYPE_QUALITY as u32,
             DEFAULT_PITCH as u32,
-            windows_sys::core::w!("Segoe UI"),
+            face,
         )
     }
 }
 
 unsafe fn set_font(state: &State) {
-    for (slot, size, weight, controls) in [
+    for (slot, size, weight, face, controls) in [
         (
             &state.font,
             16,
             400,
+            windows_sys::core::w!("Segoe UI"),
             vec![
                 state.status.get(),
                 state.action.get(),
@@ -656,13 +722,28 @@ unsafe fn set_font(state: &State) {
             &state.heading_font,
             24,
             700,
+            windows_sys::core::w!("Segoe UI"),
             vec![state.heading.get(), state.version_value.get()],
         ),
-        (&state.detail_font, 14, 400, vec![state.detail.get()]),
+        (
+            &state.detail_font,
+            14,
+            400,
+            windows_sys::core::w!("Segoe UI"),
+            vec![state.detail.get(), state.release_notes.get()],
+        ),
+        (
+            &state.build_font,
+            13,
+            400,
+            windows_sys::core::w!("Consolas"),
+            vec![state.build_id.get()],
+        ),
         (
             &state.small_font,
             12,
             400,
+            windows_sys::core::w!("Segoe UI"),
             vec![
                 state.subtitle.get(),
                 state.elapsed.get(),
@@ -670,7 +751,7 @@ unsafe fn set_font(state: &State) {
             ],
         ),
     ] {
-        let font = unsafe { new_font(size, weight, state.dpi.get()) };
+        let font = unsafe { new_font(size, weight, state.dpi.get(), face) };
         if !font.is_null() {
             let old = slot.replace(font);
             for control in controls {
@@ -695,16 +776,18 @@ unsafe fn layout(hwnd: HWND, state: &State) {
         (state.icon.get(), 28, 23, 32, 32),
         (state.heading.get(), 72, 14, 380, 32),
         (state.subtitle.get(), 73, 48, 400, 20),
-        (state.version_label.get(), 768, 87, 320, 20),
-        (state.version_value.get(), 768, 114, 320, 37),
-        (state.status.get(), 788, 243, 280, 54),
-        (state.detail.get(), 788, 307, 280, 94),
-        (state.elapsed.get(), 768, 432, 320, 22),
-        (state.progress.get(), 768, 468, 320, 4),
+        (state.version_label.get(), 768, 77, 320, 21),
+        (state.version_value.get(), 768, 99, 320, 33),
+        (state.build_id.get(), 768, 133, 320, 48),
+        (state.release_notes.get(), 768, 183, 320, 30),
+        (state.status.get(), 788, 275, 280, 54),
+        (state.detail.get(), 788, 339, 280, 94),
+        (state.elapsed.get(), 768, 452, 320, 22),
+        (state.progress.get(), 768, 486, 320, 4),
         (state.cancel.get(), 1076, 16, 28, 26),
         (state.minimize.get(), 1036, 16, 28, 26),
-        (state.action.get(), 768, 504, 320, 58),
-        (state.retry.get(), 768, 574, 320, 40),
+        (state.action.get(), 768, 515, 320, 58),
+        (state.retry.get(), 768, 588, 320, 40),
     ] {
         if !control.is_null() {
             unsafe {
@@ -786,8 +869,11 @@ unsafe fn run_window(
         heading_font: Cell::new(ptr::null_mut()),
         detail_font: Cell::new(ptr::null_mut()),
         small_font: Cell::new(ptr::null_mut()),
+        build_font: Cell::new(ptr::null_mut()),
         version_label: Cell::new(ptr::null_mut()),
         version_value: Cell::new(ptr::null_mut()),
+        build_id: Cell::new(ptr::null_mut()),
+        release_notes: Cell::new(ptr::null_mut()),
         minimize: Cell::new(ptr::null_mut()),
         skin: RefCell::new(skin),
         percent: Cell::new(0),
@@ -932,7 +1018,21 @@ unsafe fn run_window(
             VERSION_ID,
             windows_sys::core::w!("STATIC"),
             "—".into(),
-            static_style | SS_ENDELLIPSIS,
+            static_style | SS_NOTIFY,
+        ),
+        (
+            &state.build_id,
+            BUILD_ID,
+            windows_sys::core::w!("STATIC"),
+            String::new(),
+            static_style | SS_NOTIFY,
+        ),
+        (
+            &state.release_notes,
+            RELEASE_NOTES_ID,
+            windows_sys::core::w!("BUTTON"),
+            stage(&locale, "release-notes"),
+            WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_OWNERDRAW as u32,
         ),
         (
             &state.minimize,
@@ -944,7 +1044,11 @@ unsafe fn run_window(
     ] {
         let child = unsafe {
             CreateWindowExW(
-                ex_style,
+                if matches!(id, VERSION_ID | BUILD_ID) {
+                    ex_style & !WS_EX_RTLREADING
+                } else {
+                    ex_style
+                },
                 class,
                 wide(&caption).as_ptr(),
                 style,
@@ -1330,6 +1434,167 @@ mod native_tests {
 
     fn control_text(window: &ProgressWindow, id: usize) -> String {
         window_text(unsafe { GetDlgItem(window.hwnd as HWND, id as i32) })
+    }
+
+    #[test]
+    fn version_and_notes_clicks_open_only_the_fixed_page_without_consuming_play() {
+        let window = ProgressWindow::spawn_impl("zh-CN", false);
+        let candidate = "WN-CANDIDATE-20261029-unified-11";
+        let (response, receiver) = mpsc::sync_channel(1);
+        window.send(Command::Home {
+            version: candidate.into(),
+            can_play: true,
+            response,
+        });
+        flush(&window, STATUS_MESSAGE, 0, 0);
+        OPENED_RELEASE_NOTES
+            .lock()
+            .unwrap()
+            .retain(|(hwnd, _)| *hwnd != window.hwnd);
+        for id in [VERSION_ID, BUILD_ID, RELEASE_NOTES_ID] {
+            flush(&window, WM_COMMAND, id, 0);
+        }
+        let opened: Vec<_> = OPENED_RELEASE_NOTES
+            .lock()
+            .unwrap()
+            .iter()
+            .filter(|(hwnd, _)| *hwnd == window.hwnd)
+            .map(|(_, url)| url.clone())
+            .collect();
+        assert_eq!(opened, vec![version_info::release_notes_url(candidate); 3]);
+        assert!(matches!(
+            receiver.try_recv(),
+            Err(mpsc::TryRecvError::Empty)
+        ));
+        assert!(!window.cancelled());
+        assert_ne!(
+            unsafe { IsWindowEnabled(GetDlgItem(window.hwnd as HWND, ACTION_ID as i32)) },
+            0
+        );
+        flush(&window, WM_COMMAND, ACTION_ID, 0);
+        assert_eq!(
+            receiver.recv_timeout(Duration::from_secs(1)).unwrap(),
+            LauncherAction::PlayInstalled
+        );
+        window.close();
+        flush(&window, STATUS_MESSAGE, 0, 0);
+    }
+
+    #[test]
+    fn full_version_and_release_notes_fit_ten_locales_at_all_supported_dpis() {
+        let longest = format!("WN-CANDIDATE-{}", "M".repeat(86));
+        let unicode = "版".repeat(33);
+        for locale in crate::SUPPORTED_LOCALES {
+            let window = ProgressWindow::spawn_impl(locale, false);
+            assert_ne!(window.hwnd, 0);
+            for dpi in [96_u32, 144, 192] {
+                let mut suggested = RECT {
+                    left: 0,
+                    top: 0,
+                    right: px(WIDTH, dpi),
+                    bottom: px(HEIGHT, dpi),
+                };
+                flush(
+                    &window,
+                    WM_DPICHANGED,
+                    ((dpi << 16) | dpi) as usize,
+                    (&mut suggested as *mut RECT) as isize,
+                );
+                for identity in [
+                    "WN-CANDIDATE-20261029-unified-11",
+                    longest.as_str(),
+                    unicode.as_str(),
+                ] {
+                    window.send(Command::Version(identity.into()));
+                    flush(&window, STATUS_MESSAGE, 0, 0);
+                    assert_eq!(
+                        control_text(&window, BUILD_ID).replace(['\n', '\r'], ""),
+                        identity
+                    );
+                    for id in [VERSION_LABEL_ID, VERSION_ID, BUILD_ID, RELEASE_NOTES_ID] {
+                        let control = unsafe { GetDlgItem(window.hwnd as HWND, id as i32) };
+                        let style = unsafe { GetWindowLongPtrW(control, GWL_STYLE) } as u32;
+                        assert_eq!(
+                            style & windows_sys::Win32::System::SystemServices::SS_ENDELLIPSIS,
+                            0
+                        );
+                        if matches!(id, VERSION_ID | BUILD_ID) {
+                            assert_eq!(
+                                unsafe { GetWindowLongPtrW(control, GWL_EXSTYLE) } as u32
+                                    & WS_EX_RTLREADING,
+                                0
+                            );
+                        }
+                        let mut client = RECT::default();
+                        assert_ne!(unsafe { GetClientRect(control, &mut client) }, 0);
+                        if id == RELEASE_NOTES_ID {
+                            // Match the actual link painter's two-pixel inset.
+                            client.right -= px(4, dpi);
+                            client.bottom -= px(4, dpi);
+                        }
+                        let dc = unsafe { GetDC(control) };
+                        let font = unsafe { SendMessageW(control, WM_GETFONT, 0, 0) } as _;
+                        let previous = unsafe { SelectObject(dc, font) };
+                        let value = wide(&window_text(control));
+                        let mut measured = RECT {
+                            left: 0,
+                            top: 0,
+                            right: client.right,
+                            bottom: 0,
+                        };
+                        let flags = if id == BUILD_ID {
+                            DT_WORDBREAK
+                        } else {
+                            windows_sys::Win32::Graphics::Gdi::DT_SINGLELINE
+                        };
+                        unsafe {
+                            DrawTextW(
+                                dc,
+                                value.as_ptr(),
+                                value.len() as i32 - 1,
+                                &mut measured,
+                                DT_CALCRECT | DT_NOPREFIX | flags,
+                            );
+                            SelectObject(dc, previous);
+                            ReleaseDC(control, dc);
+                        }
+                        assert!(
+                            measured.bottom > 0 && measured.bottom <= client.bottom,
+                            "{locale}/{dpi}/control {id}: height {} > {}",
+                            measured.bottom,
+                            client.bottom
+                        );
+                        assert!(
+                            measured.right <= client.right,
+                            "{locale}/{dpi}/control {id}: width {} > {}",
+                            measured.right,
+                            client.right
+                        );
+                    }
+                }
+                let mut build = RECT::default();
+                let mut notes = RECT::default();
+                let mut status = RECT::default();
+                unsafe {
+                    GetWindowRect(GetDlgItem(window.hwnd as HWND, BUILD_ID as i32), &mut build);
+                    GetWindowRect(
+                        GetDlgItem(window.hwnd as HWND, RELEASE_NOTES_ID as i32),
+                        &mut notes,
+                    );
+                    GetWindowRect(
+                        GetDlgItem(window.hwnd as HWND, STATUS_ID as i32),
+                        &mut status,
+                    );
+                }
+                assert!(
+                    build.bottom <= notes.top && notes.bottom < status.top,
+                    "version/notes/status overlap at {locale}/{dpi}"
+                );
+                eprintln!("version-layout {locale} {dpi}dpi: complete current and 99-byte build IDs, notes and RTL checks passed");
+            }
+            window.close();
+            flush(&window, STATUS_MESSAGE, 0, 0);
+        }
     }
 
     #[test]

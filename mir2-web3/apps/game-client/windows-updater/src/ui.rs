@@ -7,6 +7,7 @@ use std::sync::{
 
 mod launcher_copy;
 mod transfer;
+mod version_info;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LauncherAction {
@@ -345,6 +346,9 @@ mod tests {
                 "hero-caption",
                 "status-label",
                 "current-version",
+                "installed-build",
+                "release-notes",
+                "release-notes-open-failed",
                 "home-ready",
                 "home-repair",
                 "checking-optional",

@@ -11,7 +11,8 @@ use windows_sys::Win32::{
             DRAWITEMSTRUCT, ODS_DISABLED, ODS_FOCUS, ODS_HOTLIGHT, ODS_NOFOCUSRECT, ODS_SELECTED,
         },
         WindowsAndMessaging::{
-            DrawIconEx, GetClientRect, GetWindowTextW, LoadIconW, DI_NORMAL, HICON,
+            DrawIconEx, GetClientRect, GetWindowLongPtrW, GetWindowTextW, LoadIconW, SendMessageW,
+            DI_NORMAL, GWL_EXSTYLE, HICON, WM_GETFONT, WS_EX_RTLREADING,
         },
     },
 };
@@ -448,21 +449,21 @@ impl Skin {
                 DT_LEFT | DT_SINGLELINE,
             );
 
-            fill(dc, &rect(768, 164, 1088, 165, dpi), rgb(57, 53, 45));
-            let card = rect(768, 188, 1088, 408, dpi);
+            fill(dc, &rect(768, 216, 1088, 217, dpi), rgb(57, 53, 45));
+            let card = rect(768, 232, 1088, 440, dpi);
             FillRect(dc, &card, self.card);
             frame(dc, &card, rgb(52, 51, 47));
-            fill(dc, &rect(768, 188, 804, 190, dpi), rgb(137, 113, 70));
-            let mut status_label_area = rect(788, 209, 1068, 230, dpi);
+            fill(dc, &rect(768, 232, 804, 234, dpi), rgb(137, 113, 70));
+            let mut status_label_area = rect(788, 249, 1068, 270, dpi);
             if can_play && !busy {
                 let label = stage(locale, "ready-label");
                 let width = (text_width(dc, self.fonts.footer, &label) + px(16, dpi))
                     .clamp(px(48, dpi), px(128, dpi));
                 let badge = RECT {
                     left: px(1068, dpi) - width,
-                    top: px(205, dpi),
+                    top: px(245, dpi),
                     right: px(1068, dpi),
-                    bottom: px(230, dpi),
+                    bottom: px(270, dpi),
                 };
                 status_label_area.right = badge.left - px(12, dpi);
                 fill(dc, &badge, rgb(32, 39, 30));
@@ -485,7 +486,7 @@ impl Skin {
                 DT_LEFT | DT_SINGLELINE | DT_END_ELLIPSIS,
             );
 
-            fill(dc, &rect(768, 468, 1088, 472, dpi), rgb(44, 43, 40));
+            fill(dc, &rect(768, 486, 1088, 490, dpi), rgb(44, 43, 40));
             let progress = if busy {
                 percent.min(100)
             } else if can_play {
@@ -497,7 +498,7 @@ impl Skin {
                 let right = 768 + (320 * progress as i32) / 100;
                 gradient(
                     dc,
-                    rect(768, 468, right, 472, dpi),
+                    rect(768, 486, right, 490, dpi),
                     rgb(191, 151, 75),
                     rgb(231, 206, 147),
                     false,
@@ -527,6 +528,38 @@ impl Skin {
             let pressed = item.itemState & ODS_SELECTED != 0;
             let hot = item.itemState & ODS_HOTLIGHT != 0;
             let focus = item.itemState & ODS_FOCUS != 0;
+            if item.CtlID == 114 {
+                fill(dc, &area, PANEL);
+                let mut caption = vec![0u16; 512];
+                let length =
+                    GetWindowTextW(item.hwndItem, caption.as_mut_ptr(), caption.len() as i32);
+                caption.truncate(length.max(0) as usize);
+                let font = SendMessageW(item.hwndItem, WM_GETFONT, 0, 0) as HFONT;
+                let rtl =
+                    GetWindowLongPtrW(item.hwndItem, GWL_EXSTYLE) as u32 & WS_EX_RTLREADING != 0;
+                draw_wide(
+                    dc,
+                    font,
+                    &caption,
+                    inset(area, px(2, dpi)),
+                    if pressed || hot || focus {
+                        WARM_WHITE
+                    } else {
+                        GOLD
+                    },
+                    DT_VCENTER
+                        | DT_SINGLELINE
+                        | if rtl {
+                            DT_RIGHT | DT_RTLREADING
+                        } else {
+                            DT_LEFT
+                        },
+                );
+                if focus && item.itemState & ODS_NOFOCUSRECT == 0 {
+                    frame(dc, &inset(area, px(1, dpi)), GOLD);
+                }
+                return;
+            }
             if matches!(item.CtlID, 101 | 113) {
                 fill(
                     dc,
