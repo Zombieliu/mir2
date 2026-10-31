@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+## Windows 两分支统一交付（2026-10-30，北京时间）
+
+钱包/资源包与简体/求购/充值历史已保留合并，Game1875/Engine77 干净构建、新完整安装器及真实 Windows
+导航显示通过；同资源清单的33包已实际挂载并经生产库就绪/健康确认。证据及版本边界见
+[统一集成](UNIFIED-WALLET-RECHARGE-20261029.zh-CN.md)。既有语言页脚点击穿透 P2 未解决，
+手机签名、人工 Accepted、生产收费和公网迁移未通过；不提升整体 Candidate/Accepted 或容量资格。
+
 ## 普通用药 Tick 唤醒（2026-10-27，北京时间）
 
 普通用药短 Tick 唤醒已通过32项 Rust 回归、828项工具检查及新 Release 构建；真实准备取得190.544ms内扣药与精确HP恢复。第四次准备仍因回村寻路失败停在prepared4/100，无新容量通过；500CCU目标保留，P0未通过、P2未启动，详见[本轮证据](generated/cell-p0-p1-completion-20261024/capacity-ordinary-economic-v1/README.md)。

@@ -1,0 +1,15 @@
+    Finished `test` profile [unoptimized] target(s) in 0.37s
+
+running 8 tests
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+test zone_rpc::stable_owner_poll_tests::cloned_poll_discards_old_frames_when_pin_changes_during_readonly_response ... ok
+test zone_rpc::stable_owner_poll_tests::cloned_poll_guard_rejects_before_any_tcp_connection ... ok
+test zone_rpc::stable_owner_poll_tests::explicit_options_pin_one_json_endpoint_without_legacy_shard_standby_or_pool_settings ... ok
+zone RPC live outbound requires snapshot resync: zone_owner_requires_rebind
+test zone_rpc::stable_owner_poll_tests::live_poll_clone_cancels_registration_and_invalidates_queued_frames_after_epoch_loss ... ok
+test zone_rpc::stable_owner_poll_tests::postgres_reader_to_real_tcp_host_stays_pinned_until_explicit_rebind ... ok
+test zone_rpc::stable_owner_poll_tests::stable_constructor_matches_real_host_health_and_owner_change_never_contacts_new_host ... ok
+test zone_rpc::stable_owner_poll_tests::stable_constructor_rejects_mismatched_real_host_after_health_only ... ok
+test zone_rpc::stable_owner_poll_tests::stable_constructor_rejects_owner_change_during_health_without_new_host_requests ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 1417 filtered out; finished in 0.13s

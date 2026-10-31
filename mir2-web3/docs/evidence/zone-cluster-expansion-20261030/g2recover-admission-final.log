@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized] target(s) in 0.27s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 4 tests
+test runtime::zone::manager::reconstructed_admission_tests::manager_transaction_fork_retains_live_pet_and_monster_state_and_remains_isolated ... ok
+test runtime::zone::manager::reconstructed_admission_tests::reconstructed_admission_is_fresh_idempotent_and_preserves_retained_world_and_custody ... ok
+test runtime::zone::manager::reconstructed_admission_tests::reconstructed_admission_never_turns_serialized_online_identity_into_authority ... ok
+test runtime::zone::manager::reconstructed_admission_tests::reconstructed_admission_rejects_private_route_object_and_retained_name_mismatches_atomically ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 3157 filtered out; finished in 0.33s

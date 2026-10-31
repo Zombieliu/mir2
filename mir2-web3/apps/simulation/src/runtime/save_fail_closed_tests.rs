@@ -186,6 +186,7 @@ fn fixture_mail(
     gold: u32,
 ) -> Stage5MailMessage {
     Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id,
         delivery_nonce: delivery_nonce.to_string(),
         from: "Postmaster".to_string(),

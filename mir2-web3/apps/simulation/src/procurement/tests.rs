@@ -1143,6 +1143,124 @@ fn procurement_disabled_config_keeps_recovery_domain_and_rejects_partial_config(
     );
     assert!(!ProcurementConfig::from_values(|_| None).unwrap().enabled);
 }
+fn procurement_runtime_vars() -> BTreeMap<&'static str, String> {
+    BTreeMap::from([
+        ("MIR2_PROCUREMENT_ENABLED", "1".into()),
+        ("MIR2_PROCUREMENT_TEST_CREDITS", "1".into()),
+        (
+            "MIR2_PROCUREMENT_NETWORK_HASH",
+            wire::encode_hex(&digest(b"4c78adac")),
+        ),
+        ("MIR2_PROCUREMENT_PACKAGE_ID", wire::encode_hex(&[2; 32])),
+        (
+            "MIR2_PROCUREMENT_DAPP_STORAGE_ID",
+            wire::encode_hex(&[3; 32]),
+        ),
+        ("MIR2_PROCUREMENT_ORACLE_KEY_ID", "1".into()),
+    ])
+}
+#[test]
+fn procurement_playtest_gate_normalizes_all_three_markers_and_never_allows_production() {
+    for flag in [None, Some("0"), Some("false"), Some("1"), Some("true")] {
+        for alias in [
+            "staging",
+            "stage",
+            "preprod",
+            "preproduction",
+            "production",
+            "prod",
+        ] {
+            for marker in ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"] {
+                let mut vars = procurement_runtime_vars();
+                vars.insert(marker, format!(" \t{}  ", alias.to_ascii_uppercase()));
+                if let Some(flag) = flag {
+                    vars.insert("MIR2_PLAYTEST_TESTNET", flag.into());
+                }
+                let result = ProcurementConfig::from_values(|key| vars.get(key).cloned());
+                let expected =
+                    matches!(flag, Some("1" | "true")) && !matches!(alias, "production" | "prod");
+                assert_eq!(result.is_ok(), expected, "{marker}={alias}, flag {flag:?}");
+                if let Ok(config) = result {
+                    assert!(config.allow_test_credits);
+                    assert!(!config.production_charging_enabled);
+                }
+            }
+        }
+    }
+}
+#[test]
+fn procurement_playtest_flag_rejects_implicit_or_unreadable_opt_in() {
+    for flag in ["", "yes", "TRUE", "FALSE", " 1", "true ", "2"] {
+        let mut vars = procurement_runtime_vars();
+        vars.insert("MIR2_PLAYTEST_TESTNET", flag.into());
+        assert_eq!(
+            ProcurementConfig::from_values(|key| vars.get(key).cloned()).unwrap_err(),
+            "procurementPlaytestFlagInvalid"
+        );
+    }
+    let vars = procurement_runtime_vars();
+    assert!(ProcurementConfig::from_values_with_runtime(
+        |key| vars.get(key).cloned(),
+        [Ok(None), Ok(None), Ok(None)],
+        Err(())
+    )
+    .is_err());
+    for slot in 0..3 {
+        let mut markers = [Ok(Some("staging".into())), Ok(None), Ok(None)];
+        markers[slot] = Err(());
+        assert!(ProcurementConfig::from_values_with_runtime(
+            |key| vars.get(key).cloned(),
+            markers,
+            Ok(Some("true".into()))
+        )
+        .is_err());
+    }
+}
+#[test]
+fn procurement_playtest_gate_rejects_conflicting_production_even_without_free_credits() {
+    let mut vars = procurement_runtime_vars();
+    vars.insert("MIR2_PROCUREMENT_TEST_CREDITS", "0".into());
+    vars.insert("MIR2_PLAYTEST_TESTNET", "1".into());
+    vars.insert("MIR2_RUNTIME_ENV", "test".into());
+    vars.insert("MIR2_DEPLOYMENT_ENV", "staging".into());
+    vars.insert("MIR2_ENV", "  PrOd  ".into());
+    assert!(ProcurementConfig::from_values(|key| vars.get(key).cloned()).is_err());
+}
+#[test]
+fn procurement_playtest_opt_in_requires_the_real_testnet_network_domain() {
+    let mut vars = procurement_runtime_vars();
+    vars.insert("MIR2_ENV", "unknown".into());
+    vars.insert("MIR2_PLAYTEST_TESTNET", "true".into());
+    assert!(ProcurementConfig::from_values(|key| vars.get(key).cloned()).is_ok());
+    for network in ["35834a8a", "localnet", "unknown"] {
+        vars.insert(
+            "MIR2_PROCUREMENT_NETWORK_HASH",
+            wire::encode_hex(&digest(network.as_bytes())),
+        );
+        assert_eq!(
+            ProcurementConfig::from_values(|key| vars.get(key).cloned()).unwrap_err(),
+            "procurementPlaytestTestnetRequired"
+        );
+    }
+    // Local isolated fixtures retain their existing explicit domain without
+    // acquiring public staging permission from an absent flag.
+    vars.remove("MIR2_PLAYTEST_TESTNET");
+    assert!(ProcurementConfig::from_values(|key| vars.get(key).cloned()).is_ok());
+}
+#[test]
+fn procurement_disabled_playtest_recovery_preserves_domain_and_never_enables_charging() {
+    let mut vars = procurement_runtime_vars();
+    vars.insert("MIR2_PROCUREMENT_ENABLED", "0".into());
+    vars.insert("MIR2_PROCUREMENT_TEST_CREDITS", "0".into());
+    vars.insert("MIR2_PLAYTEST_TESTNET", "1".into());
+    vars.insert("MIR2_ENV", "  StAgInG ".into());
+    let config = ProcurementConfig::from_values(|key| vars.get(key).cloned()).unwrap();
+    assert!(!config.enabled);
+    assert!(!config.allow_test_credits);
+    assert!(!config.production_charging_enabled);
+    assert_eq!(config.domain.network_hash, digest(b"4c78adac"));
+    assert_eq!(config.domain.package_id, [2; 32]);
+}
 #[test]
 fn procurement_absent_phase_one_refunds_only_with_expired_finality_proof() {
     let (config, c, k) = durable_fixture("absence");

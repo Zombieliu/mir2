@@ -27,6 +27,7 @@ impl ZoneRuntime {
                         .values()
                         .filter(|stored| stored.drop.x == point.x && stored.drop.y == point.y)
                         .count();
+                    let count = count + self.player_drop_reserved_cell_count(&point);
                     if count >= CRYSTAL_DROP_STACK_SIZE {
                         continue;
                     }

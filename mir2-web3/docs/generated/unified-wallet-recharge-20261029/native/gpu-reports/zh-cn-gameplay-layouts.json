@@ -1,0 +1,651 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "native-gpu-sc-gameplay/zh-cn-gameplay-layouts.json",
+    "bytes": 14981,
+    "sha256": "0435908958c7b1218a5e96d2eef0fb9fef9204af040d2941ecf75019e05ee370"
+  },
+  "producerReport": {
+    "captures": [
+      {
+        "case": "npc-opaque-name",
+        "expected": [
+          "你好，龍城{Gold}",
+          "管理员"
+        ],
+        "image": "zh-CN-npc-opaque-name-1024x768.png",
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 23,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              239.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              18.0,
+              31.0,
+              390.0,
+              17.0
+            ],
+            "text": "你好，龍城{Gold}，你是这个游戏的新手吗？"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              18.0,
+              48.0,
+              390.0,
+              17.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              18.0,
+              7.0,
+              390.0,
+              18.0
+            ],
+            "text": "管理员"
+          }
+        ]
+      },
+      {
+        "case": "quest-diary-detail",
+        "expected": [
+          "首套巡逻装备",
+          "推荐",
+          "列表：1/20"
+        ],
+        "image": "zh-CN-quest-diary-detail-1024x768.png",
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              15.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              367.0,
+              75.0,
+              20.0
+            ],
+            "text": "100"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 9,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              63.0,
+              10.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              225.0,
+              115.0,
+              185.0,
+              15.0
+            ],
+            "text": "1级 首套巡逻装备"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              22.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              210.0,
+              69.0,
+              103.0,
+              17.0
+            ],
+            "text": "任务"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              44.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              550.0,
+              69.0,
+              263.0,
+              17.0
+            ],
+            "text": "任务详情"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              20.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              395.0,
+              503.0,
+              62.0,
+              12.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              20.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              575.0,
+              503.0,
+              70.0,
+              12.0
+            ],
+            "text": "分享"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 7,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              41.0,
+              10.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              402.0,
+              67.0,
+              76.0,
+              15.0
+            ],
+            "text": "列表：1/20"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              168.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              115.0,
+              280.0,
+              20.0
+            ],
+            "text": "前往比奇省边境村，向助理简（284,606）"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 19,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              171.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              270.0,
+              280.0,
+              20.0
+            ],
+            "text": "回城卷回到最近经过的安全区；地图禁用卷"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              40.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              557.0,
+              160.0,
+              260.0,
+              20.0
+            ],
+            "text": "回城补给"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 10,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              90.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              130.0,
+              280.0,
+              20.0
+            ],
+            "text": "报告，领取巡逻装备。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              16.0,
+              10.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              225.0,
+              100.0,
+              250.0,
+              15.0
+            ],
+            "text": "推荐"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              20.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              735.0,
+              503.0,
+              70.0,
+              12.0
+            ],
+            "text": "放弃"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 19,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              171.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              180.0,
+              280.0,
+              20.0
+            ],
+            "text": "本阶段建议购买小型药水；在任务卡点“补"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 23,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              177.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              240.0,
+              280.0,
+              20.0
+            ],
+            "text": "比奇城杂货商·布尔（374,296）：回城卷、"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 23,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              177.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              210.0,
+              280.0,
+              20.0
+            ],
+            "text": "比奇城药剂师·塞缪尔（324,291）：红药和"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 14,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              126.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              195.0,
+              280.0,
+              20.0
+            ],
+            "text": "给检查”查看库存和商店路线。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              27.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              225.0,
+              280.0,
+              20.0
+            ],
+            "text": "蓝药。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 19,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              171.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              285.0,
+              280.0,
+              20.0
+            ],
+            "text": "轴时，可按入口路线步行返回。购买前检查"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              10.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              410.0,
+              115.0,
+              65.0,
+              15.0
+            ],
+            "text": "进行中"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              55.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              557.0,
+              433.0,
+              68.0,
+              16.0
+            ],
+            "text": "选择一项："
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              54.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              300.0,
+              280.0,
+              20.0
+            ],
+            "text": "金币和负重。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 14,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              126.0,
+              11.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              542.0,
+              255.0,
+              280.0,
+              20.0
+            ],
+            "text": "随机卷、地牢逃脱卷和护身符。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              557.0,
+              95.0,
+              260.0,
+              20.0
+            ],
+            "text": "首套巡逻装备"
+          }
+        ]
+      },
+      {
+        "case": "bag-item-tooltip",
+        "expected": [
+          "铁剑"
+        ],
+        "image": "zh-CN-bag-item-tooltip-1024x768.png",
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              31.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              560.0,
+              292.0,
+              111.0,
+              14.0
+            ],
+            "text": "10,000"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              12.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              788.0,
+              292.0,
+              26.0,
+              14.0
+            ],
+            "text": "39"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              40.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              682.0,
+              93.0,
+              40.0,
+              12.0
+            ],
+            "text": "任务物品"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              30.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              547.0,
+              93.0,
+              30.0,
+              12.0
+            ],
+            "text": "背包一"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              30.0,
+              12.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              617.0,
+              93.0,
+              30.0,
+              12.0
+            ],
+            "text": "背包二"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              22.0,
+              13.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              123.0,
+              123.0,
+              304.0,
+              13.0
+            ],
+            "text": "铁剑"
+          }
+        ]
+      }
+    ],
+    "evidenceKind": "offline-native-production-renderer",
+    "height": 768,
+    "liveAcceptance": false,
+    "locale": "zh-CN",
+    "missingGlyphs": 0,
+    "opaquePlayerName": "龍城{Gold}",
+    "outsideViewportNodes": 0,
+    "overflowingTextNodes": 0,
+    "passed": true,
+    "systemFonts": false,
+    "width": 1024
+  },
+  "phase": "initial offline fixture report; screenshot paths identify producer BASE, not installed runtime",
+  "humanAccepted": false
+}

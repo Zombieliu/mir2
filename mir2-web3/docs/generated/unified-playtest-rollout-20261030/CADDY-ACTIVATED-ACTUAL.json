@@ -1,0 +1,1 @@
+{"schema": "mir2.unified.caddy-activation.v1", "passed": true, "caddyPidPreserved": true, "configSha256": "aa5c0eb8d5fafa9d0353729ab642c3cc3a5263cad1416d882809c29e3bd7c7b1", "existingOperatorEnvironmentPreserved": true, "billingHostname": "billing-playtest.165.154.65.136.sslip.io", "allowlistedPaths": 4, "realPaymentTested": false}

@@ -90,10 +90,10 @@ mod activities;
 mod billing;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
-#[path = "web_procurement.rs"]
-mod procurement;
 #[path = "web_packet_batch.rs"]
 mod packet_batch;
+#[path = "web_procurement.rs"]
+mod procurement;
 #[path = "web_transport.rs"]
 mod transport;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
@@ -4995,7 +4995,28 @@ async fn handle_socket(
     user_agent: String,
 ) {
     let realm_info = realm_info_event(state.config.as_ref());
-    let mut session = new_gateway_session_for_web(&state);
+    let admission_state = state.clone();
+    let admission =
+        tokio::task::spawn_blocking(move || new_gateway_session_for_web(&admission_state))
+            .await
+            .unwrap_or_else(|_| Err("zone owner admission task failed".into()));
+    let mut session = match admission {
+        Ok(session) => session,
+        Err(_) => {
+            // No runtime or live admission exists yet. Reject this connection
+            // without panicking a task or falling back to a local world.
+            let mut socket = socket;
+            let _ = tokio::time::timeout(
+                Duration::from_secs(1),
+                socket.send(Message::Close(Some(axum::extract::ws::CloseFrame {
+                    code: 1013,
+                    reason: "World coordination temporarily unavailable".into(),
+                }))),
+            )
+            .await;
+            return;
+        }
+    };
     let session_id = session.session_id().to_owned();
     let _lifecycle = crate::session::GatewayLifecycleStage::start(&session_id, "connection.work");
     let mut active_session_permit: Option<GatewayCapacityPermit> = None;
@@ -5652,9 +5673,10 @@ fn spawn_zone_outbound_sender_with_clock(
                     failure_signal.send_replace(registration_id);
                     return;
                 }
-                // Health may have waited through a death/revival while this read
-                // gate was blocked. Validate its server-only stamp at final send.
-                let packet = if outbound.owner_health().is_some() {
+                // Both health proofs and stable owner pins can become stale
+                // while a frame waits behind the final send gate. Their IO
+                // validation belongs off the async network executor.
+                let packet = if outbound.requires_send_validation() {
                     let health_span = block_trace
                         .as_ref()
                         .map(|trace| (trace.context, Instant::now()));
@@ -6065,19 +6087,20 @@ fn spawn_socket_reader(
     (input_rx, SocketReaderTask { handle }, pending_count)
 }
 
-fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
+fn new_gateway_session_for_web(state: &WebState) -> Result<GatewaySession, String> {
     let mut session = match &state.gameplay_event_sink {
-        Some(sink) => GatewaySession::new_with_zone_registry_and_event_sink(
+        Some(sink) => GatewaySession::try_new_with_zone_registry_and_event_sink(
             (*state.config).clone(),
             &state.zone_registry,
             Arc::clone(sink),
         ),
-        None => {
-            GatewaySession::new_with_zone_registry((*state.config).clone(), &state.zone_registry)
-        }
-    };
+        None => GatewaySession::try_new_with_zone_registry(
+            (*state.config).clone(),
+            &state.zone_registry,
+        ),
+    }?;
     session.configure_zone_owner_heartbeat(gateway_zone_owner_heartbeat_interval_ms(), 0);
-    session
+    Ok(session)
 }
 
 fn publish_spectator_frame_if_enabled(
@@ -9976,9 +9999,9 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::BillingCheckout(request) => {
             Ok(SessionAction::Billing(billing::Request::Checkout(request)))
         }
-        BrowserCommand::BillingUsdcCheckout(request) => {
-            Ok(SessionAction::Billing(billing::Request::UsdcCheckout(request)))
-        }
+        BrowserCommand::BillingUsdcCheckout(request) => Ok(SessionAction::Billing(
+            billing::Request::UsdcCheckout(request),
+        )),
         BrowserCommand::BillingBuyMonthlyCard(request) => {
             Ok(SessionAction::Billing(billing::Request::Buy(request)))
         }
@@ -17214,6 +17237,7 @@ mod tests {
         let mut full_systems = Stage5SystemsState::default();
         full_systems.mail = (1..=100)
             .map(|id| Stage5MailMessage {
+                attachment_origin: mir2_simulation::Stage5MailAttachmentOrigin::LegacyUnknown,
                 id,
                 delivery_nonce: format!("native-shop-full-{id}"),
                 from: "System".to_string(),

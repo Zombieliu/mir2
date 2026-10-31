@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T16:49:21.727157+00:00",
+  "producerReceipt": {
+    "filename": "unified-updater-verification.json",
+    "bytes": 592,
+    "sha256": "3af0bfaf18b871f8bffa2b44fbc0df46fb7e9e6cec6295eb1aeb33da55af429b"
+  },
+  "producerReport": {
+    "passed": true,
+    "schema": "mir2.windows.updater-bundle-verification.v1",
+    "sourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+    "gameCandidate": "WN-CANDIDATE-20261029-unified-11",
+    "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "files": 9,
+    "engineSha256": "C7B2A2091222563780C11DBF31544FD889491F5E15DD0C702820BCECBEE7CEDB",
+    "launcherSha256": "E6442339EC5786F4350F694FA058C0E9D4363D0E3D50BDB27F2C3AE65FCA6D96",
+    "signingKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "publicAuthenticode": "NotSigned"
+  },
+  "phase": "Real Engine77 local TEST-CMS bundle/archive pipeline; complete Game producer postmove gate remains separate pending",
+  "gameSourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+  "engineSourceRevision": "77a2007a449d1f437a8d411bfa41f105be992fcf",
+  "producerPackageOverallPassed": false,
+  "installationOrPublicationAllowed": false
+}

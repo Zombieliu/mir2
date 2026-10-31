@@ -115,8 +115,8 @@ impl PostgresEconomyStore {
         hash: &str,
     ) -> Result<Option<(EconomyTransactionReceipt, PreparedKillProjection)>, String> {
         let mut client = self.connect()?;
-        mir2_simulation::apply_migrations(&mut client)?;
         let mut tx = client.transaction().map_err(|e| e.to_string())?;
+        crate::economy::zone_fence::bound_transaction(&mut tx)?;
         tx.query_one(
             "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
             &[&key],
@@ -142,23 +142,49 @@ impl PostgresEconomyStore {
         identity: &ActiveSessionIdentity,
         key: &str,
         award: &ZoneMonsterKillAward,
+        reconciliation_only: bool,
     ) -> Result<(EconomyTransactionReceipt, Vec<ServerPacket>), PreparedKillPublicationFailure>
     {
         if runtime.active_identity().as_ref() != Some(identity) {
             return Err("prepared kill runtime identity mismatch".to_string().into());
         }
+        let permit = runtime.zone_economy_write_permit()?;
+        permit.validate_target_database(&self.database_url)?;
         let hash = hex_lower(&Sha256::digest(
             serde_json::to_vec(award).map_err(|e| e.to_string())?,
         ));
         if let Some((receipt, _)) = self.lookup_kill_identity(key, identity, &hash)? {
-            runtime.reconcile_shared_monster_kill_receipt(key, &hash)?;
+            runtime
+                .reconcile_shared_monster_kill_receipt(key, &hash)
+                .map_err(|error| match error {
+                    PreparedKillPublicationFailure::Rejected(detail)
+                        if detail.contains("COMMIT_OUTCOME_UNKNOWN") =>
+                    {
+                        PreparedKillPublicationFailure::OutcomeUnknown(detail)
+                    }
+                    error => error,
+                })?;
             return Ok((receipt, vec![]));
+        }
+        if reconciliation_only {
+            return Err(PreparedKillPublicationFailure::OutcomeUnknown(
+                "ZONE_SAVE_COMMIT_OUTCOME_UNKNOWN: prepared kill receipt remains absent".into(),
+            ));
         }
         if !context.external_commit_authorized {
             return Err("standby cannot publish a new kill source"
                 .to_string()
                 .into());
         }
+        permit.validate_context(context.zone_id.as_str(), context.fencing_generation)?;
+        self.bootstrap_character_fenced(&permit, context, identity, &runtime.world_snapshot())
+            .map_err(|error| {
+                if error.contains("COMMIT_OUTCOME_UNKNOWN") {
+                    PreparedKillPublicationFailure::OutcomeUnknown(error)
+                } else {
+                    PreparedKillPublicationFailure::Rejected(error)
+                }
+            })?;
         runtime.commit_shared_monster_kill_via_postgres(key, award, |source| {
             if source.database_url() != self.database_url {
                 return Err(
@@ -208,12 +234,12 @@ impl PostgresEconomyStore {
                     ),
                 ]),
             };
-            match self.transact_prepared_kill(&envelope, &participant) {
+            match self.transact_prepared_kill_fenced(&permit, &envelope, &participant) {
                 Ok((receipt, _)) if receipt.duplicate => {
                     Ok(PreparedKillPublication::AlreadyCommitted(receipt))
                 }
                 Ok((receipt, _)) => Ok(PreparedKillPublication::Written(receipt)),
-                Err(error) if error.starts_with("PREPARED_KILL_COMMIT_OUTCOME_UNKNOWN:") => {
+                Err(error) if error.contains("COMMIT_OUTCOME_UNKNOWN") => {
                     Err(PreparedKillPublicationFailure::OutcomeUnknown(error))
                 }
                 Err(error) => Err(PreparedKillPublicationFailure::Rejected(error)),

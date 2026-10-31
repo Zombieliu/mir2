@@ -109,17 +109,114 @@ fn history_refresh_keeps_legacy_worlds_and_rejects_missing_or_mismatched_durable
 }
 
 #[test]
-fn uid_history_floor_includes_equipment_custody_sockets_and_receipt_only_merged_id() {
-    let image = serde_json::json!({
-        "equipment": " \n [{\"user_item_unique_id\":8000}]",
-        "custody": " {\"unique_id\":9000,\"slots\":[{\"uniqueId\":10000}]}",
-        "receipt": {"incomingUniqueId": "18446744073709551614"},
-        "retired": {"incoming_unique_id": 20000}
+fn typed_uid_history_player_send_mail_json_cannot_poison_file_authority() {
+    let (allocator, _) = authority("mail-body-no-authority", 5_000_000);
+    let config = SimulationConfig::default()
+        .with_item_uid_allocator(allocator.clone())
+        .unwrap();
+    let mut session = SimulationSession::new(config.clone());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".into(),
+        password: "demo".into(),
     });
-    assert_eq!(historical_uid_floor(&image, 0).unwrap(), u64::MAX - 1);
-    assert!(historical_uid_floor(&serde_json::json!({"uniqueId":"0002"}), 0).is_err());
-    assert!(historical_uid_floor(&serde_json::json!({"uniqueId":-1}), 0).is_err());
-    assert!(historical_uid_floor(&image, 65).is_err());
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let recipient = config.default_character.name.clone();
+    let message = r#"{"unique_id":18446744073709551615}"#;
+    let before = allocator.issued_through().unwrap();
+    let packets = session.handle_packet(ClientPacket::SendMail {
+        name: recipient,
+        message: message.into(),
+        gold: 0,
+        items_idx: [0; 5],
+        stamped: false,
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
+    let canonical = config.account_store.lock().unwrap();
+    let systems: crate::Stage5SystemsState = serde_json::from_str(
+        canonical.accounts["demo"].saves[&0]
+            .stage5_systems_json
+            .as_ref()
+            .unwrap(),
+    )
+    .unwrap();
+    assert!(systems.mail.iter().any(|mail| mail.body == message));
+    drop(canonical);
+    refresh_world_history_floor(session.app.world()).unwrap();
+    assert_eq!(allocator.issued_through().unwrap(), before);
+    let next = issue_for_staged_inventory(
+        session.app.world().resource::<InventoryResource>(),
+        UserItemUidReason::NpcTradePurchase,
+        ItemContainer::Bag1,
+        0,
+    )
+    .unwrap();
+    assert_eq!(next, before + 1);
+}
+
+#[test]
+fn typed_uid_history_invalid_declared_carrier_rejects_binding_without_raising_floor() {
+    let (allocator, _) = authority("binding-preflight", 100);
+    let config = SimulationConfig::default();
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .unwrap()
+            .saves
+            .get_mut(&0)
+            .unwrap();
+        let template = mir2_game_data::crystal_item_by_name("BronzeHelmet").unwrap();
+        let mut high = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+        high.unique_id = 9_000_000;
+        save.inventory_items_json
+            .push(serde_json::to_string(&high).unwrap());
+        save.storage_items_json
+            .push("{broken declared ItemState".into());
+    }
+    assert!(config.with_item_uid_allocator(allocator.clone()).is_err());
+    assert_eq!(allocator.issued_through().unwrap(), 100);
+}
+
+#[test]
+fn typed_uid_history_refresh_preflights_active_save_before_publishing_store_floor() {
+    let (allocator, _) = authority("refresh-preflight", 5_000_000);
+    let config = SimulationConfig::default()
+        .with_item_uid_allocator(allocator.clone())
+        .unwrap();
+    let mut session = SimulationSession::new(config.clone());
+    session.handle_packet(ClientPacket::Login {
+        account_id: "demo".into(),
+        password: "demo".into(),
+    });
+    session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    let before = allocator.issued_through().unwrap();
+    {
+        let mut store = config.account_store.lock().unwrap();
+        let save = store
+            .accounts
+            .get_mut("demo")
+            .unwrap()
+            .saves
+            .get_mut(&0)
+            .unwrap();
+        let template = mir2_game_data::crystal_item_by_name("BronzeHelmet").unwrap();
+        let mut high = embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+        high.unique_id = before + 10_000;
+        save.storage_items_json
+            .push(serde_json::to_string(&high).unwrap());
+    }
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::super::resources::Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .oven_item_state_json = Some("{broken declared oven carrier".into());
+    assert!(refresh_world_history_floor(session.app.world()).is_err());
+    assert_eq!(allocator.issued_through().unwrap(), before);
 }
 
 #[test]

@@ -12,6 +12,8 @@ mod shared_conquest;
 mod shared_creatures;
 #[path = "shared_experience_profiles.rs"]
 mod shared_experience_profiles;
+#[path = "routing/replica_restore.rs"]
+mod replica_restore;
 #[path = "shared_groups.rs"]
 mod shared_groups;
 #[path = "shared_guilds.rs"]
@@ -86,7 +88,26 @@ use crate::GatewayConfig;
 use mir2_simulation::{
     NpcPurchaseDurableError, NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution,
     NpcPurchaseOwnerReply, NpcPurchaseProducer,
+    ZoneSaveOperation, ZoneSaveOperationBinding, ZoneSaveOperationReceipt,
+    ZoneSaveOperationStatus,
 };
+
+#[path = "routing/zone_save_operation.rs"]
+mod zone_save_operation;
+#[path = "routing/zone_economy_guard.rs"]
+mod zone_economy_guard;
+#[path = "routing/player_drop.rs"]
+mod player_drop;
+#[cfg(test)]
+#[path = "routing/player_drop_guard_tests.rs"]
+mod player_drop_guard_tests;
+#[path = "routing/player_drop_recovery.rs"]
+mod player_drop_recovery;
+#[path = "routing/canonical_source_recovery.rs"]
+mod canonical_source_recovery;
+#[cfg(test)]
+#[path = "routing/zone_save_operation_pg_tests.rs"]
+mod zone_save_operation_pg_tests;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -170,6 +191,7 @@ pub struct PreparedZoneTeardown {
     pub(crate) owner_lease: ZoneOwnerLease,
     pub(crate) identity: ActiveSessionIdentity,
     pub(crate) checkpoint: CharacterSaveRecord,
+    remote_operation: Option<ZoneSaveOperationBinding>,
 }
 
 impl PreparedZoneTeardown {
@@ -182,6 +204,7 @@ impl PreparedZoneTeardown {
             owner_lease,
             identity,
             checkpoint,
+            remote_operation: None,
         }
     }
 
@@ -195,6 +218,27 @@ impl PreparedZoneTeardown {
 
     pub fn checkpoint(&self) -> &CharacterSaveRecord {
         &self.checkpoint
+    }
+
+    pub fn remote_operation_binding(&self) -> Option<&ZoneSaveOperationBinding> {
+        self.remote_operation.as_ref()
+    }
+
+    pub(crate) fn from_remote_operation(receipt: &ZoneSaveOperationReceipt) -> Result<Self, String> {
+        let operation = receipt.operation();
+        let fence = operation.fence();
+        let identity = ActiveSessionIdentity {
+            account_id: operation.account_id().to_owned(),
+            character_index: operation.character_index(),
+            character_name: operation.frozen_checkpoint().character.name.clone(),
+        };
+        let mut prepared = Self::new(
+            ZoneOwnerLease::new(ZoneId::new(fence.zone_id()), fence.owner_id(), fence.fencing_token()),
+            identity, operation.frozen_checkpoint().clone(),
+        );
+        prepared.remote_operation = Some(operation.binding().clone());
+        prepared.validate_identity_checkpoint()?;
+        Ok(prepared)
     }
 
     pub(crate) fn validate_identity_checkpoint(&self) -> Result<(), String> {
@@ -296,7 +340,18 @@ impl ZoneOwnerCommandRequest {
 }
 
 pub trait ZoneOwnerLeaseAuthority: Send + Sync {
+    /// Durable Hosts require the lease lock inside the actual save transaction.
+    fn requires_transactional_zone_save_fence(&self) -> bool {
+        false
+    }
+
     fn owner_lease(&self, zone_id: &ZoneId) -> ZoneOwnerLease;
+
+    /// Fallible acquisition for runtime paths. Durable authorities must report
+    /// unavailable coordination instead of inventing or reusing an old lease.
+    fn try_owner_lease(&self, zone_id: &ZoneId) -> Result<ZoneOwnerLease, String> {
+        Ok(self.owner_lease(zone_id))
+    }
 
     /// Opt-in lease guard for durable NPC transactions. A cached lease or an
     /// unsupported authority must never authorize this commit path.
@@ -316,8 +371,12 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
         self.owner_lease(zone_id)
     }
 
+    fn try_refresh_owner_lease(&self, zone_id: &ZoneId) -> Result<ZoneOwnerLease, String> {
+        Ok(self.refresh_owner_lease(zone_id))
+    }
+
     fn validate_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<(), String> {
-        let current = self.owner_lease(lease.zone_id());
+        let current = self.try_owner_lease(lease.zone_id())?;
         if current == *lease {
             return Ok(());
         }
@@ -327,7 +386,7 @@ pub trait ZoneOwnerLeaseAuthority: Send + Sync {
 
     fn renew_owner_lease(&self, lease: &ZoneOwnerLease) -> Result<ZoneOwnerLease, String> {
         self.validate_owner_lease(lease)?;
-        Ok(self.owner_lease(lease.zone_id()))
+        self.try_owner_lease(lease.zone_id())
     }
 
     fn renew_owner_lease_at(
@@ -552,6 +611,32 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
 pub type SharedZoneOwnerCommandClient = Arc<dyn ZoneOwnerCommandClient>;
 
 pub trait ZoneOwnerRpcTransport: fmt::Debug + Send + Sync {
+    fn supports_zone_save_operations(&self) -> bool { false }
+
+    fn prepare_zone_save_operation(
+        &self, _lease: &ZoneOwnerLease, _operation_id: &str,
+    ) -> Result<Option<PreparedZoneTeardown>, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
+    fn persist_zone_save_operation(
+        &self, _binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
+    fn query_zone_save_operation(
+        &self, _binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
+    fn release_zone_save_operation(
+        &self, _binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        Err("zone_save_operations_unsupported".into())
+    }
+
     fn execute_production_attack_requiring_typed_outcome(
         &self,
         _request: ZoneOwnerCommandRequest,
@@ -865,13 +950,63 @@ fn with_character_handoff_lease<T: Send>(
     mut operation: impl FnMut() -> Result<T, String> + Send,
 ) -> Result<T, String> {
     let mut result = None;
-    // Reuse the existing epoch-held repository guard: a second check after a
-    // write cannot retract that write if ownership changed during publication.
-    authority.with_durable_npc_purchase_lease(lease, &mut || {
+    // Durable runtimes lock the epoch inside the source transaction; legacy
+    // authorities retain their existing outer guard. A post-write check alone
+    // cannot retract a publication that crossed an ownership change.
+    with_owner_operation_guard(authority, lease, &mut || {
         result = Some(operation());
     })?;
     result.ok_or_else(|| "handoff owner epoch guard did not execute".to_string())?
 }
+
+fn bind_runtime_zone_save_fence(
+    runtime: &mut ZoneRuntimeHandle,
+    authority: Option<&SharedZoneOwnerLeaseAuthority>,
+    lease: &ZoneOwnerLease,
+) -> Result<(), String> {
+    let Some(authority) = authority.filter(|a| a.requires_transactional_zone_save_fence()) else {
+        return Ok(());
+    };
+    authority.validate_owner_lease(lease)?;
+    let fence = mir2_simulation::ZoneSaveFence::new(
+        lease.zone_id().as_str().to_owned(), lease.owner_id().to_owned(), lease.fencing_token(),
+    )?;
+    runtime.bind_zone_save_fence(fence)
+}
+
+fn with_owner_operation_guard(
+    authority: &SharedZoneOwnerLeaseAuthority,
+    lease: &ZoneOwnerLease,
+    operation: &mut (dyn FnMut() + Send),
+) -> Result<(), String> {
+    if authority.requires_transactional_zone_save_fence() {
+        // The runtime's bound config locks the row in the SAME account-store
+        // transaction. A second connection's outer lock would deadlock it and
+        // would not remain atomic when that lock connection is lost.
+        authority.validate_owner_lease(lease)?;
+        operation();
+        Ok(())
+    } else {
+        authority.with_durable_npc_purchase_lease(lease, operation)
+    }
+}
+
+fn validate_bound_runtime_zone_save_fence(
+    runtime: &ZoneRuntimeHandle,
+    authority: Option<&SharedZoneOwnerLeaseAuthority>,
+) -> Result<(), String> {
+    let Some(authority) = authority.filter(|a| a.requires_transactional_zone_save_fence()) else {
+        return Ok(());
+    };
+    let fence = runtime.bound_zone_save_fence().ok_or("ZONE_SAVE_FENCE_NOT_BOUND")?;
+    authority.validate_owner_lease(&ZoneOwnerLease::new(
+        ZoneId::new(fence.zone_id()), fence.owner_id(), fence.fencing_token(),
+    ))
+}
+
+#[cfg(test)]
+#[path = "routing/zone_save_fence_tests.rs"]
+mod zone_save_fence_tests;
 
 #[derive(Default)]
 pub struct InProcessZoneOwnerCommandClient {
@@ -924,10 +1059,12 @@ fn execute_durable_npc_owner_with_guard(
             "durable NPC owner lease guard is unavailable",
         ));
     }
+    bind_runtime_zone_save_fence(runtime, Some(authority), lease)
+        .map_err(crate::npc_purchase_owner_route::before)?;
     let mut result = None;
     let mut known = None;
     let guarded = crate::session::catch_gateway_panic("durable NPC owner epoch guard", || {
-        authority.with_durable_npc_purchase_lease(lease, &mut || {
+        with_owner_operation_guard(authority, lease, &mut || {
             let routed = execute_durable_npc_owner_held(
                 lease,
                 authenticated,
@@ -1078,6 +1215,8 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
                 .validate_owner_lease(request.owner_lease())
                 .map_err(NativeAttackError::BeforeExecution)?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())
+            .map_err(NativeAttackError::BeforeExecution)?;
         execute_typed_native_attack_runtime(runtime, request)
     }
 
@@ -1090,6 +1229,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
             .owner_lease_authority
             .as_ref()
             .ok_or("handoff requires actual owner lease authority")?;
+        bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
         with_character_handoff_lease(authority, lease, || runtime.prepare_character_handoff())
     }
 
@@ -1104,6 +1244,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
             .as_ref()
             .ok_or("handoff requires actual owner lease authority")?;
         with_character_handoff_lease(authority, lease, || {
+            bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
             runtime.resume_character_handoff(checkpoint)
         })
     }
@@ -1268,6 +1409,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(request.owner_lease())?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())?;
         partition_binding::validate_runtime_execution_domain(runtime, request.owner_lease())?;
         let _slow_stage = GatewaySlowStage::start("zone_owner.in_process.execute_request");
         let mode = request.mode();
@@ -1330,6 +1472,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(owner_lease)?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), owner_lease)?;
         prepare_zone_teardown_checkpoint(runtime, owner_lease)
     }
 
@@ -1341,6 +1484,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
         if let Some(authority) = &self.owner_lease_authority {
             authority.validate_owner_lease(prepared.owner_lease())?;
         }
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), prepared.owner_lease())?;
         persist_zone_teardown_checkpoint(runtime, prepared)
     }
 }
@@ -1348,6 +1492,7 @@ impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
 pub struct HostedZoneOwnerCommandClient {
     runtime: Mutex<Option<ZoneRuntimeHandle>>,
     owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
+    remote_save_operation: Mutex<Option<zone_save_operation::HostedSaveOperation>>,
 }
 
 impl fmt::Debug for HostedZoneOwnerCommandClient {
@@ -1386,6 +1531,10 @@ impl HostedZoneOwnerCommandClient {
                 "zone owner hosted runtime was already handed off".into(),
             )
         })?;
+        self.reject_pending_remote_save()
+            .map_err(NativeAttackError::BeforeExecution)?;
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), request.owner_lease())
+            .map_err(NativeAttackError::BeforeExecution)?;
         execute_typed_native_attack_runtime(runtime, request)
     }
 
@@ -1399,7 +1548,7 @@ impl HostedZoneOwnerCommandClient {
             .ok_or("durable NPC owner lease authority unavailable")?;
         let mut checkpoint = None;
         let mut read_error = None;
-        authority.with_durable_npc_purchase_lease(lease, &mut || match self.runtime.lock() {
+        with_owner_operation_guard(authority, lease, &mut || match self.runtime.lock() {
             Ok(runtime) => {
                 checkpoint = runtime.as_ref().and_then(|runtime| {
                     runtime.npc_purchase_owner_checkpoint(
@@ -1423,6 +1572,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex poisoned")?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .ok_or("zone owner hosted runtime was handed off")?
@@ -1478,7 +1628,7 @@ impl HostedZoneOwnerCommandClient {
         let mut result = None;
         let mut known = None;
         let guarded = crate::session::catch_gateway_panic("hosted durable NPC owner guard", || {
-            authority.with_durable_npc_purchase_lease(lease, &mut || {
+            with_owner_operation_guard(authority, lease, &mut || {
                 let routed = crate::session::catch_gateway_panic(
                     "hosted durable NPC actual runtime",
                     || {
@@ -1492,6 +1642,10 @@ impl HostedZoneOwnerCommandClient {
                                 "zone owner hosted runtime was handed off",
                             )
                         })?;
+                        self.reject_pending_remote_save()
+                            .map_err(crate::npc_purchase_owner_route::before)?;
+                        bind_runtime_zone_save_fence(runtime, Some(authority), lease)
+                            .map_err(crate::npc_purchase_owner_route::before)?;
                         execute_durable_npc_owner_held(
                             lease,
                             authenticated,
@@ -1533,6 +1687,7 @@ impl HostedZoneOwnerCommandClient {
         Self {
             runtime: Mutex::new(Some(runtime)),
             owner_lease_authority: None,
+            remote_save_operation: Mutex::new(None),
         }
     }
 
@@ -1543,6 +1698,7 @@ impl HostedZoneOwnerCommandClient {
         Self {
             runtime: Mutex::new(Some(runtime)),
             owner_lease_authority: Some(owner_lease_authority),
+            remote_save_operation: Mutex::new(None),
         }
     }
 
@@ -1558,10 +1714,11 @@ impl HostedZoneOwnerCommandClient {
     }
 
     pub fn take_runtime_for_handoff(&self) -> Result<ZoneRuntimeHandle, String> {
-        self.runtime
+        let mut runtime = self.runtime
             .lock()
-            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?
-            .take()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
+        runtime.take()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())
     }
 
@@ -1617,6 +1774,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?
@@ -1632,6 +1790,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .ok_or("zone owner hosted runtime was already handed off")?
@@ -1647,12 +1806,13 @@ impl HostedZoneOwnerCommandClient {
             .as_ref()
             .ok_or("handoff requires actual owner lease authority")?;
         with_character_handoff_lease(authority, lease, || {
-            self.runtime
+            let mut slot = self.runtime
                 .lock()
-                .map_err(|_| "zone owner hosted runtime mutex was poisoned")?
-                .as_mut()
-                .ok_or("zone owner hosted runtime was already handed off")?
-                .prepare_character_handoff()
+                .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+            let runtime = slot.as_mut().ok_or("zone owner hosted runtime was already handed off")?;
+            self.reject_pending_remote_save()?;
+            bind_runtime_zone_save_fence(runtime, Some(authority), lease)?;
+            runtime.prepare_character_handoff()
         })
     }
 
@@ -1670,6 +1830,8 @@ impl HostedZoneOwnerCommandClient {
                 .runtime
                 .lock()
                 .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+            self.reject_pending_remote_save()?;
+            bind_runtime_zone_save_fence(runtime.as_mut().ok_or("zone owner hosted runtime was already handed off")?, Some(authority), lease)?;
             let was_prepared = runtime
                 .as_ref()
                 .ok_or("zone owner hosted runtime was already handed off")?
@@ -1690,10 +1852,11 @@ impl HostedZoneOwnerCommandClient {
         &self,
         checkpoint: &CharacterHandoffCheckpoint,
     ) -> Result<(), String> {
-        self.runtime
+        let mut runtime = self.runtime
             .lock()
-            .map_err(|_| "zone owner hosted runtime mutex was poisoned")?
-            .as_mut()
+            .map_err(|_| "zone owner hosted runtime mutex was poisoned")?;
+        self.reject_pending_remote_save()?;
+        runtime.as_mut()
             .ok_or("zone owner hosted runtime was already handed off")?
             .apply_character_handoff_replica(checkpoint)
     }
@@ -1712,6 +1875,8 @@ impl HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), owner_lease)?;
         prepare_zone_teardown_checkpoint(runtime, owner_lease)
     }
 
@@ -1729,6 +1894,8 @@ impl HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
+        bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), prepared.owner_lease())?;
         persist_zone_teardown_checkpoint(runtime, prepared)
     }
 
@@ -1755,6 +1922,7 @@ impl HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
@@ -1772,6 +1940,35 @@ impl HostedZoneOwnerCommandClient {
             runtime.rebind_account_store(authoritative);
         }
         Ok(())
+    }
+
+    pub(crate) fn take_player_drop_journal_result(
+        &self,
+    ) -> Result<Option<mir2_simulation::PlayerDropJournalResult>, String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "hosted runtime poisoned")?;
+        let runtime = runtime.as_mut().ok_or("hosted runtime already handed off")?;
+        Ok(runtime.take_player_drop_journal_result())
+    }
+
+    pub(crate) fn acknowledge_player_drop_journal_result(
+        &self,
+        operation_key: &str,
+        intent_digest: &str,
+    ) -> Result<(), String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "hosted runtime poisoned")?;
+        self.reject_pending_remote_save()?;
+        let runtime = runtime.as_mut().ok_or("hosted runtime already handed off")?;
+        runtime.acknowledge_player_drop_journal_result(operation_key, intent_digest)
+    }
+
+    pub(crate) fn apply_player_drop_journal_result(
+        &self,
+        result: &mir2_simulation::PlayerDropJournalResult,
+    ) -> Result<Vec<ServerPacket>, String> {
+        let mut runtime = self.runtime.lock().map_err(|_| "hosted runtime poisoned")?;
+        self.reject_pending_remote_save()?;
+        let runtime = runtime.as_mut().ok_or("hosted runtime already handed off")?;
+        runtime.apply_player_drop_journal_result(result)
     }
 
     pub fn execute_request(
@@ -1835,6 +2032,10 @@ impl HostedZoneOwnerCommandClient {
         let Some(runtime) = runtime.as_mut() else {
             return Err("zone owner hosted runtime was already handed off".to_string());
         };
+        self.reject_pending_remote_save()?;
+        if external_commit_authorized {
+            bind_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref(), &partition_lease)?;
+        }
         partition_binding::validate_runtime_execution_domain(runtime, &partition_lease)?;
         let _npc_execution_scope = if let Some(runtime) = runtime
             .as_mut()
@@ -2011,6 +2212,7 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
         release_zone_teardown_fence(runtime)
     }
 
@@ -2022,6 +2224,8 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        validate_bound_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref())?;
+        self.reject_pending_remote_save()?;
         runtime.save_active_character()
     }
 
@@ -2033,6 +2237,7 @@ impl ZoneOwnerCommandClient for HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .map(|runtime| runtime.refresh_active_external_mail())
@@ -2147,6 +2352,7 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        self.reject_pending_remote_save()?;
         release_zone_teardown_fence(runtime)
     }
 
@@ -2158,6 +2364,8 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
         let runtime = runtime
             .as_mut()
             .ok_or_else(|| "zone owner hosted runtime was already handed off".to_string())?;
+        validate_bound_runtime_zone_save_fence(runtime, self.owner_lease_authority.as_ref())?;
+        self.reject_pending_remote_save()?;
         runtime.save_active_character()
     }
 
@@ -2166,6 +2374,7 @@ impl ZoneOwnerRpcTransport for HostedZoneOwnerCommandClient {
             .runtime
             .lock()
             .map_err(|_| "zone owner hosted runtime mutex was poisoned".to_string())?;
+        self.reject_pending_remote_save()?;
         runtime
             .as_mut()
             .map(|runtime| runtime.refresh_active_external_mail())
@@ -2455,6 +2664,13 @@ pub enum SharedAccountInventoryCommand {
         drop: GroundDropSnapshot,
         claim_idempotency_key: String,
     },
+    /// Stable world custody remains private to the authoritative ticket. It is
+    /// never added to the client-facing GroundDropSnapshot.
+    PlayerDropClaimPickup {
+        drop: GroundDropSnapshot,
+        claim_idempotency_key: String,
+        effect: mir2_simulation::PlayerDropEffectIdentity,
+    },
     MonsterKillAward(ZoneMonsterKillAward),
     SkillItemConsume {
         spell: Spell,
@@ -2470,6 +2686,32 @@ pub struct SharedAccountInventoryCommandKey(String);
 pub struct SharedAccountInventoryCommandEnvelope {
     pub identity: ActiveSessionIdentity,
     pub command: SharedAccountInventoryCommand,
+}
+
+/// Trusted live publication result. Only the frozen operation and checked
+/// receipt are journal data; the world authority capability stays server-only.
+#[derive(Debug)]
+pub struct SharedPlayerDropCommit {
+    pub operation: mir2_simulation::PlayerDropPreparedOperation,
+    pub receipt: mir2_simulation::PlayerDropCommitReceipt,
+    pub effect: mir2_simulation::PlayerDropCommittedEffect,
+    pub packets: Vec<ServerPacket>,
+}
+
+impl SharedAccountInventoryCommand {
+    fn pickup_for_ticket(ticket: &GroundDropClaimTicket) -> Self {
+        match &ticket.player_drop_effect {
+            Some(effect) => Self::PlayerDropClaimPickup {
+                drop: ticket.drop.clone(),
+                claim_idempotency_key: ticket.idempotency_key.clone(),
+                effect: effect.clone(),
+            },
+            None => Self::GroundDropClaimPickup {
+                drop: ticket.drop.clone(),
+                claim_idempotency_key: ticket.idempotency_key.clone(),
+            },
+        }
+    }
 }
 
 impl SharedAccountInventoryCommandEnvelope {
@@ -2509,6 +2751,22 @@ impl SharedAccountInventoryCommandEnvelope {
                     drop.object_id
                 )
             }
+            SharedAccountInventoryCommand::PlayerDropClaimPickup {
+                claim_idempotency_key,
+                effect,
+                ..
+            } => {
+                if claim_idempotency_key
+                    != &format!("player-drop-pickup:{}", effect.world_effect_id())
+                {
+                    return None;
+                }
+                format!(
+                    "player-drop-claim:{}:{}",
+                    effect.world_effect_id(),
+                    effect.intent_digest()
+                )
+            }
             SharedAccountInventoryCommand::MonsterKillAward(award) => format!(
                 "monster-kill-award:{}:{}:{}:{}",
                 award.monster_object_id, award.killed_at_ms, award.monster_name, award.experience
@@ -2533,6 +2791,29 @@ impl SharedAccountInventoryCommandEnvelope {
 }
 
 pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
+    fn supports_durable_player_drops(&self) -> bool {
+        false
+    }
+
+    /// Rejected guarantees no pending source debit: a created admission has
+    /// an acknowledged terminal rejection. Prepared/Linked or ambiguous
+    /// outcomes must return OutcomeUnknown and retain the original identity.
+    #[allow(clippy::too_many_arguments)]
+    fn publish_durable_player_drop(
+        &self,
+        _runtime: &mut InProcessWorldRuntime,
+        _binding: mir2_simulation::PlayerDropOperationBinding,
+        _zone: &ZoneKey,
+        _position: Point,
+        _created_at_unix_ms: u64,
+        _expires_at_unix_ms: u64,
+        _request: mir2_simulation::PlayerDropRequest,
+    ) -> Result<SharedPlayerDropCommit, mir2_simulation::PreparedPlayerDropPublicationFailure> {
+        Err(mir2_simulation::PreparedPlayerDropPublicationFailure::Rejected(
+            "durable player-drop publication is unavailable".into(),
+        ))
+    }
+
     fn commit(
         &self,
         runtime: &mut InProcessWorldRuntime,
@@ -2590,6 +2871,18 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         SharedTradeSettlementOutcome::Committed
     }
 
+    /// A durable service derives its write permit from the authoritative
+    /// runtime, never from the serializable recovery/execution context.
+    fn settle_trade_with_runtime(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.settle_trade_fenced(context, first, second)
+    }
+
     /// Retry a previously uncertain durable trade under its checkpointed
     /// context and key. See `retry_commit_fenced`.
     fn retry_trade_fenced(
@@ -2600,6 +2893,17 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
         self.settle_trade_fenced(context, first, second)
+    }
+
+    fn retry_trade_with_runtime(
+        &self,
+        _runtime: &InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        expected_idempotency_key: &str,
+        first: &SharedTradeOffer,
+        second: &SharedTradeOffer,
+    ) -> SharedTradeSettlementOutcome {
+        self.retry_trade_fenced(context, expected_idempotency_key, first, second)
     }
 
     fn reconcile_ground_drop_projections_fenced(
@@ -2784,7 +3088,8 @@ impl InProcessAccountInventoryService {
                 SharedAccountInventoryTransactionKind::InventoryItemDrop
             }
             SharedAccountInventoryCommand::GroundDropPickup(_)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+            | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. } => {
                 SharedAccountInventoryTransactionKind::GroundDropPickup
             }
             SharedAccountInventoryCommand::MonsterKillAward(_) => {
@@ -2813,7 +3118,8 @@ impl InProcessAccountInventoryService {
                 runtime.commit_shared_inventory_item_drop_transaction(&drop)
             }
             SharedAccountInventoryCommand::GroundDropPickup(drop)
-            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. } => {
+            | SharedAccountInventoryCommand::GroundDropClaimPickup { drop, .. }
+            | SharedAccountInventoryCommand::PlayerDropClaimPickup { drop, .. } => {
                 runtime.commit_shared_ground_drop_pickup_transaction(&drop)
             }
             SharedAccountInventoryCommand::MonsterKillAward(award) => runtime
@@ -3274,13 +3580,25 @@ fn zone_delivery_trace_enabled_for(recipient_zone_object_id: u32) -> bool {
 }
 
 #[doc(hidden)]
-#[derive(Debug)]
 pub struct SharedZoneLiveOutbound {
     registration_id: u64,
     packet: ServerPacket,
     overloaded: Option<Arc<AtomicBool>>,
     owner_health: Option<OwnerHealthDelivery>,
     delivery_trace: Option<ZoneDeliveryTrace>,
+    owner_route_guard: Option<Arc<dyn Fn() -> Result<(), String> + Send + Sync>>,
+}
+
+impl fmt::Debug for SharedZoneLiveOutbound {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.debug_struct("SharedZoneLiveOutbound")
+            .field("registration_id", &self.registration_id)
+            .field("packet", &self.packet)
+            .field("overloaded", &self.overloaded)
+            .field("owner_health", &self.owner_health)
+            .field("owner_route_guard", &self.owner_route_guard.is_some())
+            .finish_non_exhaustive()
+    }
 }
 
 impl SharedZoneLiveOutbound {
@@ -3291,6 +3609,7 @@ impl SharedZoneLiveOutbound {
             overloaded: None,
             owner_health: None,
             delivery_trace: None,
+            owner_route_guard: None,
         }
     }
 
@@ -3337,9 +3656,25 @@ impl SharedZoneLiveOutbound {
         self.overloaded = Some(flag);
     }
 
+    pub(crate) fn with_owner_route_guard(
+        &mut self,
+        guard: Option<Arc<dyn Fn() -> Result<(), String> + Send + Sync>>,
+    ) {
+        self.owner_route_guard = guard;
+    }
+
+    pub(crate) fn requires_send_validation(&self) -> bool {
+        self.owner_health.is_some() || self.owner_route_guard.is_some()
+    }
+
     pub(crate) fn claim_for_send(self) -> Result<Option<ServerPacket>, String> {
         if self.is_overloaded() {
             return Err("shared Zone presentation requires snapshot resync".into());
+        }
+        // Poll-time validation alone cannot protect a frame that waited in a
+        // bounded output queue across a lease/epoch change.
+        if let Some(guard) = &self.owner_route_guard {
+            guard()?;
         }
         if let Some(delivery) = &self.owner_health {
             if !matches!(&self.packet, ServerPacket::HealthChanged { hp, mp }
@@ -3410,6 +3745,7 @@ impl SharedZoneLiveOutboundSender {
             overloaded: Some(overloaded),
             owner_health: None,
             delivery_trace: None,
+            owner_route_guard: None,
         });
     }
 
@@ -5357,6 +5693,7 @@ impl SharedInProcessZoneState {
             overloaded: Some(overloaded),
             owner_health: None,
             delivery_trace,
+            owner_route_guard: None,
         };
         let created_player = match &outbound.packet {
             ServerPacket::ObjectPlayer { info } => Some(info.object_id),
@@ -8014,6 +8351,14 @@ impl SharedInProcessZoneRuntimeFactory {
     }
 
     pub(crate) fn promote_zone_from_replica(&self, zone_id: &ZoneId) -> Result<(), String> {
+        self.promote_zone_from_replica_before(zone_id, None)
+    }
+
+    pub(crate) fn promote_zone_from_replica_before(
+        &self,
+        zone_id: &ZoneId,
+        valid_until: Option<std::time::Instant>,
+    ) -> Result<(), String> {
         // Keep the same replicas -> Zones lock order as mark/restore.
         let mut replica_zone_ids = self
             .replica_zone_ids
@@ -8030,6 +8375,24 @@ impl SharedInProcessZoneRuntimeFactory {
             .get(zone_id)
             .cloned()
             .ok_or_else(|| format!("Zone {zone_id} has no installed replica state"))?;
+        {
+            let mut state = resources.zone_state.lock()
+                .map_err(|_| "recovered Zone state mutex poisoned")?;
+            // Check after all potentially blocking world locks. The deadline
+            // is conservative monotonic time derived from the DB receipt TTL.
+            if valid_until.is_some_and(|deadline| std::time::Instant::now() >= deadline) {
+                return Err("canonical recovery receipt expired before activation".into());
+            }
+            for key in state.zone_manager.zone_keys() {
+                state.zone_manager.set_player_drop_replica_mode_for_key(&key, false);
+            }
+            if valid_until.is_some_and(|deadline| std::time::Instant::now() >= deadline) {
+                for key in state.zone_manager.zone_keys() {
+                    state.zone_manager.set_player_drop_replica_mode_for_key(&key, true);
+                }
+                return Err("canonical recovery receipt expired before activation".into());
+            }
+        }
         replica_zone_ids.remove(zone_id);
         resources
             .autonomous_ticks_enabled
@@ -9915,6 +10278,16 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             inventory_zone_id: zone_id.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
+            unresolved_economy_command: None,
+            pending_player_drop_binding: None,
+            last_player_drop_journal_result: None,
+            player_drop_journal_capture_configured: self
+                .mutation_capture
+                .lock()
+                .expect("Zone mutation capture mutex should not be poisoned")
+                .is_some(),
+            replaying_player_drop_result: None,
+            applied_player_drop_during_command: false,
             npc_owner_execution_slot: Arc::new(Mutex::new(
                 npc_population_binding::NpcOwnerExecutionSlot::default(),
             )),
@@ -10690,6 +11063,12 @@ struct SharedInProcessZoneSessionRuntime {
     inventory_zone_id: ZoneId,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
+    unresolved_economy_command: Option<zone_economy_guard::UnresolvedEconomyCommand>,
+    pending_player_drop_binding: Option<mir2_simulation::PlayerDropOperationBinding>,
+    last_player_drop_journal_result: Option<mir2_simulation::PlayerDropJournalResult>,
+    player_drop_journal_capture_configured: bool,
+    replaying_player_drop_result: Option<mir2_simulation::PlayerDropJournalResult>,
+    applied_player_drop_during_command: bool,
     // One process-local accepted execution; not part of world/account images.
     npc_owner_execution_slot: Arc<Mutex<npc_population_binding::NpcOwnerExecutionSlot>>,
     last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
@@ -11166,6 +11545,7 @@ impl SharedInProcessZoneSessionRuntime {
             &envelope.command,
             SharedAccountInventoryCommand::GroundDropPickup(_)
                 | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. }
         );
         let service = Arc::clone(&self.account_inventory_service);
         let context = self.economy_execution_context.clone();
@@ -11211,14 +11591,6 @@ impl SharedInProcessZoneSessionRuntime {
         outcome
     }
 
-    fn commit_account_inventory(
-        &mut self,
-        envelope: SharedAccountInventoryCommandEnvelope,
-    ) -> SharedAccountInventoryTransactionReceipt {
-        self.commit_account_inventory_outcome(envelope)
-            .into_receipt()
-    }
-
     fn bootstrap_account_inventory(&self) -> bool {
         self.account_inventory_service
             .bootstrap_fenced(&self.inner, self.economy_execution_context.as_ref())
@@ -11229,7 +11601,8 @@ impl SharedInProcessZoneSessionRuntime {
         first: &SharedTradeOffer,
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
-        self.account_inventory_service.settle_trade_fenced(
+        self.account_inventory_service.settle_trade_with_runtime(
+            &self.inner,
             self.economy_execution_context.as_ref(),
             first,
             second,
@@ -11243,7 +11616,8 @@ impl SharedInProcessZoneSessionRuntime {
         first: &SharedTradeOffer,
         second: &SharedTradeOffer,
     ) -> SharedTradeSettlementOutcome {
-        self.account_inventory_service.retry_trade_fenced(
+        self.account_inventory_service.retry_trade_with_runtime(
+            &self.inner,
             Some(recovery_context),
             expected_idempotency_key,
             first,
@@ -11313,16 +11687,26 @@ impl SharedInProcessZoneSessionRuntime {
             .collect::<Vec<_>>();
         let key = ZonePresenceKey::from_identity(&identity);
         let last_seen_move_seq = {
-            let zone_state = self
+            let mut zone_state = self
                 .zone_state
                 .lock()
                 .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
-            let Some(session_id) = zone_state.zone_sessions.get(&key) else {
+            let Some(session_id) = zone_state.zone_sessions.get(&key).cloned() else {
                 return Ok(());
             };
+            let player = zone_state.players.get(&key)
+                .ok_or("restored Session lacks its shared presence")?;
+            if player.map_file_name != map_file_name {
+                return Err("restored Session shared map mismatch".into());
+            }
+            let mut join = self.inner.active_zone_join_snapshot(session_id.as_str())
+                .ok_or("restored Session lacks its trusted join identity")?;
+            join.object_id = player.zone_object_id;
+            zone_state.zone_manager.readmit_restored_player(&identity, &join)?;
+            zone_state.experience_authority = self.inner.shared_mentor_config();
             zone_state
                 .zone_manager
-                .player_last_seen_move_seq(session_id)
+                .player_last_seen_move_seq(&session_id)
                 .unwrap_or_default()
         };
         let mut movement = self
@@ -11346,20 +11730,25 @@ impl SharedInProcessZoneSessionRuntime {
             .expect("shared zone request sequence exhausted")
     }
 
-    fn execute_shared_gold_drop(&mut self, amount: u32) -> Vec<ServerPacket> {
+    fn execute_shared_gold_drop(&mut self, amount: u32) -> Result<Vec<ServerPacket>, String> {
+        if let Some(packets) = self.try_publish_durable_player_drop(
+            mir2_simulation::PlayerDropRequest::Gold { amount },
+        )? {
+            return Ok(packets);
+        }
         let Some(identity) = self.inner.active_identity() else {
-            return Vec::new();
+            return Ok(Vec::new());
         };
         let request_id = self.next_shared_economy_request_id();
         let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
             identity,
             command: SharedAccountInventoryCommand::GoldDrop { amount, request_id },
-        });
+        })?;
         debug_assert_eq!(
             receipt.kind,
             SharedAccountInventoryTransactionKind::GoldDrop
         );
-        receipt.packets
+        Ok(receipt.packets)
     }
 
     fn execute_shared_inventory_item_drop(
@@ -11367,21 +11756,31 @@ impl SharedInProcessZoneSessionRuntime {
         unique_id: u64,
         count: u16,
         hero_inventory: bool,
-    ) -> Option<Vec<ServerPacket>> {
-        let drop = self
+    ) -> Result<Option<Vec<ServerPacket>>, String> {
+        if let Some(packets) = self.try_publish_durable_player_drop(
+            mir2_simulation::PlayerDropRequest::Item { unique_id, count, hero_inventory },
+        )? {
+            return Ok(Some(packets));
+        }
+        let Some(drop) = self
             .inner
-            .shared_inventory_item_drop(unique_id, count, hero_inventory)?;
-        let identity = self.inner.active_identity()?;
+            .shared_inventory_item_drop(unique_id, count, hero_inventory)
+        else {
+            return Ok(None);
+        };
+        let Some(identity) = self.inner.active_identity() else {
+            return Ok(None);
+        };
         let request_id = self.next_shared_economy_request_id();
         let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
             identity,
             command: SharedAccountInventoryCommand::InventoryItemDrop { drop, request_id },
-        });
+        })?;
         debug_assert_eq!(
             receipt.kind,
             SharedAccountInventoryTransactionKind::InventoryItemDrop
         );
-        Some(receipt.packets)
+        Ok(Some(receipt.packets))
     }
 
     fn filter_stale_owner_dead_entity_packets(&mut self, packets: &mut Vec<ServerPacket>) {
@@ -12714,6 +13113,7 @@ impl SharedInProcessZoneSessionRuntime {
         &mut self,
         owner_lease: &ZoneOwnerLease,
     ) -> Result<Option<PreparedZoneTeardown>, String> {
+        self.ensure_resolved_economy_command()?;
         let Some(identity) = self.inner.active_identity() else {
             return Ok(None);
         };
@@ -12893,6 +13293,7 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn release_teardown_fence(&mut self) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         let Some(key) = self.current_presence_key() else {
             return Ok(());
         };
@@ -14003,10 +14404,7 @@ impl SharedInProcessZoneSessionRuntime {
                 Some(identity) => {
                     self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                         identity: identity.clone(),
-                        command: SharedAccountInventoryCommand::GroundDropClaimPickup {
-                            drop: drop.clone(),
-                            claim_idempotency_key: ticket.idempotency_key.clone(),
-                        },
+                        command: SharedAccountInventoryCommand::pickup_for_ticket(&ticket),
                     })
                 }
                 None => SharedAccountInventoryCommitOutcome::Confirmed(
@@ -15157,12 +15555,15 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
+    // Successful legacy fixtures unwrap the same fallible dispatcher. Live
+    // commands call the observing dispatcher and propagate Unknown unchanged.
+    #[cfg(test)]
     fn execute_zone_native_player_attack(
         &mut self,
         attack: ZoneNativePlayerAttack,
     ) -> Vec<ServerPacket> {
         self.execute_zone_native_player_attack_observing(attack, None)
-            .expect("legacy native attack dispatch retains its infallible packet contract")
+            .expect("test native attack fixture must have a resolved execution")
     }
 
     fn execute_zone_native_player_attack_observing(
@@ -15297,7 +15698,7 @@ impl SharedInProcessZoneSessionRuntime {
                             request_id,
                             components,
                         },
-                    });
+                    })?;
                 if !receipt.committed {
                     return Ok(Vec::new());
                 }
@@ -16267,10 +16668,7 @@ impl SharedInProcessZoneSessionRuntime {
             expected_idempotency_key,
             SharedAccountInventoryCommandEnvelope {
                 identity,
-                command: SharedAccountInventoryCommand::GroundDropClaimPickup {
-                    drop: settlement.ticket.drop.clone(),
-                    claim_idempotency_key: settlement.ticket.idempotency_key.clone(),
-                },
+                command: SharedAccountInventoryCommand::pickup_for_ticket(&settlement.ticket),
             },
         );
         let receipt = match outcome {
@@ -17318,10 +17716,7 @@ impl SharedInProcessZoneSessionRuntime {
             Some(identity) => {
                 self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                     identity: identity.clone(),
-                    command: SharedAccountInventoryCommand::GroundDropClaimPickup {
-                        drop: drop.clone(),
-                        claim_idempotency_key: ticket.idempotency_key.clone(),
-                    },
+                    command: SharedAccountInventoryCommand::pickup_for_ticket(&ticket),
                 })
             }
             None => SharedAccountInventoryCommitOutcome::Confirmed(
@@ -17512,6 +17907,8 @@ impl SharedInProcessZoneSessionRuntime {
         mut npc_gold_buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
         mut native_attack_admission: Option<&mut Option<NativeAttackAdmission>>,
     ) -> Result<Vec<ServerPacket>, String> {
+        self.ensure_resolved_economy_command()?;
+        self.applied_player_drop_during_command = false;
         if !matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect)
@@ -18117,9 +18514,9 @@ impl SharedInProcessZoneSessionRuntime {
         } else if let Some(partner_name) = shared_rental_partner {
             self.execute_shared_item_rental_request(partner_name)
         } else if let Some(amount) = shared_gold_drop_amount {
-            self.execute_shared_gold_drop(amount)
+            self.execute_shared_gold_drop(amount)?
         } else if let Some((unique_id, count, hero_inventory)) = shared_inventory_item_drop {
-            match self.execute_shared_inventory_item_drop(unique_id, count, hero_inventory) {
+            match self.execute_shared_inventory_item_drop(unique_id, count, hero_inventory)? {
                 Some(packets) => packets,
                 None => self.execute_personal_command(command)?,
             }
@@ -18141,7 +18538,7 @@ impl SharedInProcessZoneSessionRuntime {
                     native_attack_admission.as_deref_mut(),
                 )?
             } else {
-                self.execute_zone_native_player_attack(attack)
+                self.execute_zone_native_player_attack_observing(attack, None)?
             }
         } else if let Some(direction) = zone_mining_direction {
             self.execute_zone_native_mining(direction)
@@ -18329,7 +18726,9 @@ impl SharedInProcessZoneSessionRuntime {
             self.cancel_pending_shared_rental_offers();
             packets.extend(self.remove_presence());
         }
-        if shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some() {
+        if (shared_gold_drop_amount.is_some() || shared_inventory_item_drop.is_some())
+            && !self.applied_player_drop_during_command
+        {
             self.remap_player_ground_drop_packets(&mut command_packets);
         }
         if command_packets.is_empty() {
@@ -18494,6 +18893,45 @@ impl SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn prepare_zone_save_operation(
+        &mut self, binding: ZoneSaveOperationBinding, checkpoint: &CharacterSaveRecord,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.ensure_resolved_economy_command()?;
+        self.inner.prepare_zone_save_operation(binding, checkpoint)
+    }
+
+    fn persist_zone_save_operation(
+        &mut self, operation: &ZoneSaveOperation,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.ensure_resolved_economy_command()?;
+        self.inner.persist_zone_save_operation(operation)
+    }
+
+    fn query_zone_save_operation(
+        &self, binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        self.inner.query_zone_save_operation(binding)
+    }
+
+    fn release_zone_save_operation(
+        &mut self, binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        self.ensure_resolved_economy_command()?;
+        self.inner.release_zone_save_operation(binding)
+    }
+
+    fn supports_zone_save_fence(&self) -> bool {
+        self.inner.supports_zone_save_fence()
+    }
+
+    fn bind_zone_save_fence(&mut self, fence: mir2_simulation::ZoneSaveFence) -> Result<(), String> {
+        self.inner.bind_zone_save_fence(fence)
+    }
+
+    fn bound_zone_save_fence(&self) -> Option<mir2_simulation::ZoneSaveFence> {
+        self.inner.bound_zone_save_fence()
+    }
+
     fn execute_procurement_owner(
         &mut self,
         authenticated: bool,
@@ -18512,6 +18950,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn prepare_character_handoff(&mut self) -> Result<CharacterHandoffCheckpoint, String> {
+        self.ensure_resolved_economy_command()?;
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.prepare_character_handoff()
@@ -18521,6 +18960,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         &mut self,
         checkpoint: &CharacterHandoffCheckpoint,
     ) -> Result<CharacterHandoffCommitment, String> {
+        self.ensure_resolved_economy_command()?;
         let was_prepared = self.inner.active_identity().is_none();
         let result = (|| {
             self.inner.resume_character_handoff(checkpoint)?;
@@ -18577,6 +19017,34 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
+    }
+
+    fn take_player_drop_journal_result(&mut self) -> Option<mir2_simulation::PlayerDropJournalResult> {
+        self.last_player_drop_journal_result.clone()
+    }
+
+    fn acknowledge_player_drop_journal_result(
+        &mut self,
+        operation_key: &str,
+        intent_digest: &str,
+    ) -> Result<(), String> {
+        let result = self.last_player_drop_journal_result.as_ref()
+            .ok_or("no player-drop result awaits journal publication")?;
+        if result.operation.binding().operation_key() != operation_key
+            || result.operation.intent().intent_digest() != intent_digest
+        {
+            return Err("player-drop journal acknowledgement identity mismatch".into());
+        }
+        result.validate_integrity()?;
+        self.last_player_drop_journal_result = None;
+        Ok(())
+    }
+
+    fn apply_player_drop_journal_result(
+        &mut self,
+        result: &mir2_simulation::PlayerDropJournalResult,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.replay_player_drop_journal_result(result)
     }
 
     fn on_connect(&self) -> Vec<ServerPacket> {
@@ -19040,16 +19508,19 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         &mut self,
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         self.inner.restore_active_character_checkpoint(checkpoint)
     }
 
     fn save_active_character(&mut self) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character()
     }
 
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         self.sync_pending_zone_movement_transform()?;
         self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character_for_logout()
@@ -19059,6 +19530,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         &mut self,
         checkpoint: &CharacterSaveRecord,
     ) -> Result<(), String> {
+        self.ensure_resolved_economy_command()?;
         let key = self
             .current_presence_key()
             .ok_or("frozen shared teardown requires its prepared presence")?;
@@ -19418,7 +19890,7 @@ impl ZoneRegistry {
         route_request: SessionRouteRequest,
     ) -> Result<RoutedZoneRuntime, String> {
         let zone_id = self.try_route_session(&route_request)?;
-        let owner_lease = self.owner_lease_authority.owner_lease(&zone_id);
+        let owner_lease = self.owner_lease_authority.try_owner_lease(&zone_id)?;
         Ok(RoutedZoneRuntime {
             runtime: self.runtime_factory.create_runtime(config, &zone_id),
             owner_lease,
@@ -19470,6 +19942,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "zone_economy_adapter_tests.rs"]
+    mod zone_economy_adapter_tests;
     #[path = "cadence_map_transfer_tests.rs"]
     mod cadence_map_transfer_tests;
     #[path = "creature_authority_tests.rs"]
@@ -23146,7 +23620,8 @@ mod tests {
                     }
                 }
                 SharedAccountInventoryCommand::GroundDropPickup(_)
-                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. } => {
+                | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. } => {
                     *self
                         .ground_drop_calls
                         .lock()
@@ -23567,6 +24042,7 @@ mod tests {
                 &envelope.command,
                 SharedAccountInventoryCommand::GroundDropPickup(_)
                     | SharedAccountInventoryCommand::GroundDropClaimPickup { .. }
+                    | SharedAccountInventoryCommand::PlayerDropClaimPickup { .. }
             ) {
                 return SharedAccountInventoryCommitOutcome::Confirmed(
                     InProcessAccountInventoryService::new().commit(runtime, envelope),
@@ -24681,6 +25157,8 @@ mod tests {
             .current_zone_session_id()
             .expect("active shared Zone session");
         let claim_ticket = GroundDropClaimTicket {
+            player_drop_effect: None,
+            player_drop_claimant: None,
             claim_id: 1,
             object_id: gold_drop.object_id,
             drop_generation: 1,
@@ -24744,6 +25222,8 @@ mod tests {
             .expect("active shared Zone session");
         let drop = shared_gold_drop(9_201, 330, 270, None, None);
         let ticket = GroundDropClaimTicket {
+            player_drop_effect: None,
+            player_drop_claimant: None,
             claim_id: 7,
             object_id: drop.object_id,
             drop_generation: 3,
@@ -34769,6 +35249,12 @@ mod tests {
             inventory_zone_id: ZoneId::new("test-shared-zone"),
             npc_world_service,
             economy_execution_context: None,
+            unresolved_economy_command: None,
+            pending_player_drop_binding: None,
+            last_player_drop_journal_result: None,
+            player_drop_journal_capture_configured: false,
+            replaying_player_drop_result: None,
+            applied_player_drop_during_command: false,
             npc_owner_execution_slot: Arc::new(Mutex::new(
                 super::npc_population_binding::NpcOwnerExecutionSlot::default(),
             )),

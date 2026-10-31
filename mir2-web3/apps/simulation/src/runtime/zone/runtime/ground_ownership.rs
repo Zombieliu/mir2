@@ -112,6 +112,8 @@ impl ZoneRuntime {
         stored: &ZoneGroundDrop,
     ) -> ZoneGroundDropCustody {
         ZoneGroundDropCustody {
+            player_drop_claimant: None,
+            player_drop_effect: stored.player_drop_effect.clone(),
             source: self.key.clone(),
             object_id: stored.drop.object_id,
             drop_generation: stored.drop_generation,
@@ -131,11 +133,23 @@ impl ZoneRuntime {
         custody: Option<ZoneGroundDropCustody>,
         now_ms: u64,
     ) -> Option<Vec<ZoneOutbound>> {
+        if !self.player_drop_ticket_authority_is_current(ticket) {
+            return None;
+        }
         if custody
             .as_ref()
             .is_some_and(|c| !c.matches(&self.key, ticket))
         {
             return None;
+        }
+        if ticket
+            .player_drop_effect
+            .as_ref()
+            .is_some_and(|effect| now_ms >= effect.expires_at_unix_ms())
+        {
+            self.mark_player_drop_expired_object(ticket.object_id);
+            self.removed_object_ids.insert(ticket.object_id);
+            return Some(Vec::new());
         }
         if custody
             .as_ref()
@@ -143,6 +157,7 @@ impl ZoneRuntime {
         {
             // The held item keeps its original TTL. A rejected claim cannot
             // resurrect a ground object that would already have despawned.
+            self.mark_player_drop_expired_object(ticket.object_id);
             self.removed_object_ids.insert(ticket.object_id);
             return Some(Vec::new());
         }
@@ -159,6 +174,7 @@ impl ZoneRuntime {
         self.ground_drops.insert(
             ticket.object_id,
             ZoneGroundDrop {
+                player_drop_effect: ticket.player_drop_effect.clone(),
                 drop: drop.clone(),
                 drop_generation: ticket.drop_generation,
                 payload_digest: ticket.payload_digest.clone(),
@@ -166,7 +182,12 @@ impl ZoneRuntime {
                 native_owner,
             },
         );
-        self.apply_zone_object_packets(&[ground_drop_spawn_packet(&drop)], now_ms);
+        let packet = if ticket.player_drop_effect.is_some() {
+            super::player_drop_custody::committed_player_drop_spawn_packet(&drop)
+        } else {
+            ground_drop_spawn_packet(&drop)
+        };
+        self.apply_zone_object_packets(&[packet], now_ms);
         if let Some(custody) = custody {
             if let Some(object) = self.objects.get_mut(&ticket.object_id) {
                 object.expires_at_ms = custody.object_expires_at_ms;

@@ -1,0 +1,3190 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T15:53:22.464335+00:00",
+  "producerReceipt": {
+    "filename": "procurement-sc-gpu/procurement-native-gpu.json",
+    "bytes": 79606,
+    "sha256": "7cae9d73b224ac364a9e1e8edb51de2af577678fc1d8cd5c5d7d759c8d9c135e"
+  },
+  "producerReport": {
+    "complete": true,
+    "evidenceKind": "offline-native-production-renderer",
+    "height": 768,
+    "humanAccepted": false,
+    "layoutChecks": [
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 56,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              438.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              270.0,
+              610.0,
+              24.0
+            ],
+            "text": "0x44444444…444444 · 井中月245 · 500000金币 · 到期 1793374158952"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              236.0,
+              88.0,
+              22.0
+            ],
+            "text": "上一页"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              679.0,
+              236.0,
+              88.0,
+              22.0
+            ],
+            "text": "下一页"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 10,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              70.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              727.0,
+              275.0,
+              193.0,
+              22.0
+            ],
+            "text": "交货 UID 777"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 40,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              418.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              602.0,
+              825.0,
+              25.0
+            ],
+            "text": "交货报价将展示原始 UID、强化、耐久和附加属性；以服务端所有权与锁定核验为准。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 12,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              94.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              303.0,
+              236.0,
+              238.0,
+              22.0
+            ],
+            "text": "切换装备 UID 777"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金币 1000000 / 托管金币 500000 · 测试额度 10 / 付费额度 0 / 预留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 8,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              80.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              236.0,
+              168.0,
+              22.0
+            ],
+            "text": "筛选：模板245"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 41,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              361.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              294.0,
+              610.0,
+              32.0
+            ],
+            "text": "链上 公开中 / 游戏 金币托管中 · 当前耐久≥0；最大耐久≥0；附加属性 []"
+          }
+        ],
+        "page": "public"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 36,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              468.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              517.0,
+              825.0,
+              40.0
+            ],
+            "text": "下一步仅请求报价；需核对金币托管、到期、服务费和授权内容后再次明确确认。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              284.0,
+              138.0,
+              22.0
+            ],
+            "text": "修改金额"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              352.0,
+              138.0,
+              22.0
+            ],
+            "text": "切换有效期"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金币 1000000 / 托管金币 500000 · 测试额度 10 / 付费额度 0 / 预留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 21,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              235.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              378.0,
+              620.0,
+              60.0
+            ],
+            "text": "当前耐久≥0；最大耐久≥0；附加属性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 9,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              103.0,
+              17.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              331.0,
+              600.0,
+              30.0
+            ],
+            "text": "有效期：24 小时"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 43,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              518.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              457.0,
+              825.0,
+              50.0
+            ],
+            "text": "服务规则 1：成功公开后消费 1 次发布额度，失败不消费。当前使用明确标记的测试额度。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 11,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              134.0,
+              20.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              282.0,
+              610.0,
+              30.0
+            ],
+            "text": "求购金币：500000"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              318.0,
+              138.0,
+              22.0
+            ],
+            "text": "清空"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 43,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              500.0,
+              18.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              237.0,
+              825.0,
+              30.0
+            ],
+            "text": "目标：井中月 / DragonSword（真实模板 245）· 单件装备、单次完整成交"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              392.0,
+              138.0,
+              22.0
+            ],
+            "text": "耐久条件"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              586.0,
+              188.0,
+              22.0
+            ],
+            "text": "获取发布报价"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          }
+        ],
+        "page": "publish"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 37,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              304.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              242.0,
+              610.0,
+              25.0
+            ],
+            "text": "0x44444444…444444 · 500000金币 · 链上 公开中"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "上一页"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              679.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "下一页"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金币 1000000 / 托管金币 500000 · 测试额度 10 / 付费额度 0 / 预留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 17,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              177.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              268.0,
+              610.0,
+              25.0
+            ],
+            "text": "游戏到账：金币托管中 · 成交 无"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              741.0,
+              247.0,
+              173.0,
+              22.0
+            ],
+            "text": "申请取消报价"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          }
+        ],
+        "page": "mine"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              336.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              457.0,
+              825.0,
+              27.0
+            ],
+            "text": "0x44444444…444444 · test / 1次 / 0点券 / consumed / 规则1"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 42,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              490.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              417.0,
+              825.0,
+              32.0
+            ],
+            "text": "以下为持久化收费明细（测试/充值/赠送来源分开）；参考美元价格尚未批准，不承诺盈利。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金币 1000000 / 托管金币 500000 · 测试额度 10 / 付费额度 0 / 预留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              562.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              237.0,
+              825.0,
+              42.0
+            ],
+            "text": "基础月卡不含无限求购。发布服务按次；点券是服务收费凭证，官方独立 Gas 预算承担链上成本。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 55,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              426.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              282.0,
+              825.0,
+              35.0
+            ],
+            "text": "测试模式 true / 生产收费 false · 规则 1 · 取消退款 false / 到期退款 false"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              244.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              327.0,
+              610.0,
+              30.0
+            ],
+            "text": "測試釋出額度包：10 次 / 0 点券 / 来源 test"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              332.0,
+              158.0,
+              22.0
+            ],
+            "text": "获取套餐确认"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          }
+        ],
+        "page": "service"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 53,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              387.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              293.0,
+              615.0,
+              43.0
+            ],
+            "text": "UID 777 · 模板 245 · 龍城{Gold}：屠龍 +3 耐久28000/34000 · 待领取"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              567.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "上一页"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 3,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              36.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              679.0,
+              592.0,
+              88.0,
+              22.0
+            ],
+            "text": "下一页"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 52,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              423.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              30.0
+            ],
+            "text": "可用金币 1000000 / 托管金币 500000 · 测试额度 10 / 付费额度 0 / 预留 0"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 37,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              455.0,
+              16.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              237.0,
+              825.0,
+              45.0
+            ],
+            "text": "背包满或脱机时保留原始实例。领取只转移同一 UID，不按模板重新生成装备。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              744.0,
+              298.0,
+              158.0,
+              22.0
+            ],
+            "text": "领取原始装备"
+          }
+        ],
+        "page": "claims"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 71,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              433.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              403.0,
+              825.0,
+              22.0
+            ],
+            "text": "Dapp 0x3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 41,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              389.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              469.0,
+              825.0,
+              22.0
+            ],
+            "text": "主动取消退发布费：false；到期未成交退发布费：false；额度到期：按当前规则"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              315.0,
+              825.0,
+              22.0
+            ],
+            "text": "买家 0x5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 30,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              282.0,
+              20.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              25.0
+            ],
+            "text": "二次确认：publish / 报价 quote-fixture"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              337.0,
+              825.0,
+              22.0
+            ],
+            "text": "卖家 0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 39,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              429.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              491.0,
+              825.0,
+              22.0
+            ],
+            "text": "发布费覆盖后续成交、取消、到期与技术重试；卖家交货不另收费；本版无金币成交税。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              381.0,
+              825.0,
+              22.0
+            ],
+            "text": "合约 0x2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 21,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              199.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              249.0,
+              825.0,
+              22.0
+            ],
+            "text": "当前耐久≥0；最大耐久≥0；附加属性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              293.0,
+              825.0,
+              22.0
+            ],
+            "text": "成交 0x0000000000000000000000000000000000000000000000000000000000000000"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              727.0,
+              592.0,
+              178.0,
+              22.0
+            ],
+            "text": "明确确认"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 24,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              191.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              447.0,
+              825.0,
+              22.0
+            ],
+            "text": "服务：1 次，来源 test，点券 0，规则 1"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              552.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              544.0,
+              825.0,
+              40.0
+            ],
+            "text": "本窗口使用内存短期求购用途密钥。明确确认后只签署以上操作；登录或绑定钱包不等于任意交易授权。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 48,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              328.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              227.0,
+              825.0,
+              22.0
+            ],
+            "text": "目标：井中月 / DragonSword · 模板 245 · 数量 1 · 金币 500000"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              359.0,
+              825.0,
+              22.0
+            ],
+            "text": "网络 0x1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              271.0,
+              825.0,
+              22.0
+            ],
+            "text": "订单 0x4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              315.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              425.0,
+              825.0,
+              22.0
+            ],
+            "text": "订单到期 1793374158952 · 授权到期 1793288358952 · 规则 1"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              592.0,
+              158.0,
+              22.0
+            ],
+            "text": "返回，不签名"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          }
+        ],
+        "page": "publish-confirm"
+      },
+      {
+        "layouts": [
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 71,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              433.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              403.0,
+              825.0,
+              22.0
+            ],
+            "text": "Dapp 0x3333333333333333333333333333333333333333333333333333333333333333"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 20,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              283.0,
+              27.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              49.0,
+              790.0,
+              28.0
+            ],
+            "text": "个人智能求购 · Dubhe / Sui"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 41,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              389.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              491.0,
+              825.0,
+              22.0
+            ],
+            "text": "主动取消退发布费：false；到期未成交退发布费：false；额度到期：按当前规则"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              239.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "主动对账"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              315.0,
+              825.0,
+              22.0
+            ],
+            "text": "买家 0x0303030303030303030303030303030303030303030303030303030303030303"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 35,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              315.0,
+              20.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              192.0,
+              825.0,
+              25.0
+            ],
+            "text": "二次确认：deliver / 报价 delivery-q…ixture"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              368.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              447.0,
+              825.0,
+              22.0
+            ],
+            "text": "交付原始装备 UID 777：強化+3 耐久28000/34000 附加攻擊+2（原始例項）"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "公开求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 2,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              24.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              839.0,
+              157.0,
+              83.0,
+              22.0
+            ],
+            "text": "关闭"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 29,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              319.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              520.0,
+              694.0,
+              400.0,
+              35.0
+            ],
+            "text": "关闭窗口不会撤销订单或解锁资产。结果未知时不会因超时退款。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              697.0,
+              108.0,
+              22.0
+            ],
+            "text": "刷新状态"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              337.0,
+              825.0,
+              22.0
+            ],
+            "text": "卖家 0x5555555555555555555555555555555555555555555555555555555555555555"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              371.0,
+              697.0,
+              128.0,
+              22.0
+            ],
+            "text": "原请求重试"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              247.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "发布求购"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 39,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              429.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              513.0,
+              825.0,
+              22.0
+            ],
+            "text": "发布费覆盖后续成交、取消、到期与技术重试；卖家交货不另收费；本版无金币成交税。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              381.0,
+              825.0,
+              22.0
+            ],
+            "text": "合约 0x2222222222222222222222222222222222222222222222222222222222222222"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 21,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              199.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              249.0,
+              825.0,
+              22.0
+            ],
+            "text": "当前耐久≥0；最大耐久≥0；附加属性 []"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              667.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "待领取区"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              293.0,
+              825.0,
+              22.0
+            ],
+            "text": "成交 0x0808080808080808080808080808080808080808080808080808080808080808"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              387.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "我的订单"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 4,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              48.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              727.0,
+              592.0,
+              178.0,
+              22.0
+            ],
+            "text": "明确确认"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 5,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              60.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              527.0,
+              157.0,
+              120.0,
+              22.0
+            ],
+            "text": "服务与明细"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 24,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              198.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              469.0,
+              825.0,
+              22.0
+            ],
+            "text": "服务：0 次，来源 none，点券 0，规则 1"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              552.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              544.0,
+              825.0,
+              40.0
+            ],
+            "text": "本窗口使用内存短期求购用途密钥。明确确认后只签署以上操作；登录或绑定钱包不等于任意交易授权。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 38,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              431.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              117.0,
+              825.0,
+              28.0
+            ],
+            "text": "独立于基础月卡；无需另买 SUI。生产收费预设关闭，测试额度不代表现金收入。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 48,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              328.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              227.0,
+              825.0,
+              22.0
+            ],
+            "text": "目标：井中月 / DragonSword · 模板 245 · 数量 1 · 金币 500000"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 22,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              264.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              629.0,
+              825.0,
+              53.0
+            ],
+            "text": "离线界面测试；未连接服务器、未产生链上交易。"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              359.0,
+              825.0,
+              22.0
+            ],
+            "text": "网络 0x1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 69,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              427.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              271.0,
+              825.0,
+              22.0
+            ],
+            "text": "订单 0x4444444444444444444444444444444444444444444444444444444444444444"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 46,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              315.0,
+              14.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              425.0,
+              825.0,
+              22.0
+            ],
+            "text": "订单到期 1793374158952 · 授权到期 1793288358952 · 规则 1"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 6,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              72.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              107.0,
+              592.0,
+              158.0,
+              22.0
+            ],
+            "text": "返回，不签名"
+          },
+          {
+            "font": "Family(\"Noto Sans CJK SC\")",
+            "glyphs": 45,
+            "layoutExceedsNode": false,
+            "layoutSize": [
+              540.0,
+              15.0
+            ],
+            "missingGlyphs": 0,
+            "nodeOutsideViewport": false,
+            "rect": [
+              100.0,
+              84.0,
+              825.0,
+              34.0
+            ],
+            "text": "金币与原始装备由游戏服务器可信托管、核验和交付；链上不能独立核验背包或强迫脱机服务器交货。"
+          }
+        ],
+        "page": "delivery-confirm"
+      }
+    ],
+    "locale": "zh-CN",
+    "missingGlyphs": 0,
+    "modelAndSignatureTestsAreSeparate": true,
+    "outsideViewportNodes": 0,
+    "overflowingTextNodes": 0,
+    "passed": true,
+    "scenario": "five-pages-and-confirmations",
+    "screenshots": [
+      "procurement-public-1024x768.png",
+      "procurement-publish-1024x768.png",
+      "procurement-mine-1024x768.png",
+      "procurement-service-1024x768.png",
+      "procurement-claims-1024x768.png",
+      "procurement-publish-confirm-1024x768.png",
+      "procurement-delivery-confirm-1024x768.png"
+    ],
+    "serverConnected": false,
+    "testnetTransactions": 0,
+    "usesProductionRenderer": true,
+    "width": 1024
+  },
+  "phase": "fresh Simplified Chinese offline fixture",
+  "humanAccepted": false,
+  "liveAcceptance": false
+}

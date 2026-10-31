@@ -2,7 +2,34 @@
 //! not enable this binding until every remaining grant path has migrated.
 //! A snapshot contains item identities, never an allocator or a mint cursor.
 use super::resources::InventoryResource;
-use crate::{SimulationConfig, UserItemUidAllocator, UserItemUidReason};
+use crate::{SimulationConfig, UserItemUidAllocator, UserItemUidError, UserItemUidReason};
+
+#[path = "item_uid_history.rs"]
+mod history;
+pub(in crate::runtime) use history::{
+    historical_uid_conflicts, historical_uid_floor, visit_historical_item_uids, UidHistoryRoot,
+};
+
+pub(crate) const ITEM_UID_COMMIT_OUTCOME_UNKNOWN: &str = "ITEM_UID_COMMIT_OUTCOME_UNKNOWN";
+
+pub(crate) fn item_uid_error(error: UserItemUidError) -> String {
+    match error {
+        UserItemUidError::CommitOutcomeUnknown { .. }
+        | UserItemUidError::DatabaseCommitOutcomeUnknown => ITEM_UID_COMMIT_OUTCOME_UNKNOWN.into(),
+        other => other.to_string(),
+    }
+}
+
+pub(crate) fn handle_item_uid_failure(config: &SimulationConfig, error: String) -> String {
+    if error == ITEM_UID_COMMIT_OUTCOME_UNKNOWN {
+        config.freeze_unknown_item_uid_publication();
+    }
+    error
+}
+
+pub(crate) fn source_item_uid_error(config: &SimulationConfig, error: UserItemUidError) -> String {
+    handle_item_uid_failure(config, item_uid_error(error))
+}
 
 #[derive(Debug, Clone, Default)]
 pub(crate) enum ItemUidIssuance {
@@ -37,82 +64,33 @@ impl ItemUidIssuance {
         }
     }
 
+    pub(crate) fn validate_source_config(&self, config: &SimulationConfig) -> Result<(), String> {
+        if let Self::Durable(allocator) = self {
+            if allocator.requires_postgres_source() || config.account_store_database_url.is_some() {
+                allocator
+                    .validate_postgres_source(config)
+                    .map_err(|error| error.to_string())?;
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn raise_floor(&self, floor: u64) -> Result<(), String> {
         match self {
             Self::Durable(allocator) => allocator
                 .ensure_issued_through_at_least(floor)
                 .map(|_| ())
-                .map_err(|error| error.to_string()),
+                .map_err(item_uid_error),
             Self::Legacy | Self::Unavailable | Self::Fenced => Ok(()),
         }
     }
 
-    pub(super) fn raise_serialized_floor<T: serde::Serialize>(
-        &self,
-        value: &T,
-    ) -> Result<(), String> {
+    pub(super) fn raise_history_floor(&self, root: UidHistoryRoot<'_>) -> Result<(), String> {
         if matches!(self, Self::Durable(_)) {
-            self.raise_floor(historical_uid_floor(
-                &serde_json::to_value(value).map_err(|error| error.to_string())?,
-                0,
-            )?)?;
+            self.raise_floor(historical_uid_floor(root)?)?;
         }
         Ok(())
     }
-}
-
-/// Conservative scan of a complete account/save image, including JSON-encoded
-/// custody. This is a floor adjustment, not a complete deployment census.
-pub(crate) fn historical_uid_floor(value: &serde_json::Value, depth: usize) -> Result<u64, String> {
-    if depth > 64 {
-        return Err("item UID history scan depth exceeded".into());
-    }
-    let mut floor = 0;
-    match value {
-        serde_json::Value::Object(fields) => {
-            for (key, value) in fields {
-                if matches!(
-                    key.as_str(),
-                    "unique_id"
-                        | "uniqueId"
-                        | "uid"
-                        | "user_item_unique_id"
-                        | "userItemUniqueId"
-                        | "incomingUniqueId"
-                        | "incoming_unique_id"
-                ) && !value.is_null()
-                {
-                    let uid = if let Some(uid) = value.as_u64() {
-                        uid
-                    } else if let Some(text) = value.as_str() {
-                        let uid: u64 = text.parse().map_err(|_| "invalid historical item UID")?;
-                        if text != uid.to_string() {
-                            return Err("noncanonical historical item UID".into());
-                        }
-                        uid
-                    } else {
-                        return Err("invalid historical item UID".into());
-                    };
-                    floor = floor.max(uid);
-                }
-                floor = floor.max(historical_uid_floor(value, depth + 1)?);
-            }
-        }
-        serde_json::Value::Array(rows) => {
-            for row in rows {
-                floor = floor.max(historical_uid_floor(row, depth + 1)?);
-            }
-        }
-        serde_json::Value::String(encoded)
-            if encoded.trim_start().starts_with('{') || encoded.trim_start().starts_with('[') =>
-        {
-            if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(encoded) {
-                floor = floor.max(historical_uid_floor(&parsed, depth + 1)?);
-            }
-        }
-        _ => {}
-    }
-    Ok(floor)
 }
 
 pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> Result<(), String> {
@@ -128,20 +106,84 @@ pub(super) fn refresh_world_history_floor(world: &bevy_ecs::prelude::World) -> R
         .ok_or("server item UID configuration unavailable")?
         .config;
     config.item_uid_issuance.require_same(allocator)?;
+    config.item_uid_issuance.validate_source_config(config)?;
     config.ensure_account_store_writable()?;
-    let store = config
-        .account_store
-        .lock()
-        .map_err(|_| "account store lock poisoned")?;
-    policy.raise_serialized_floor(&*store)?;
-    drop(store);
+    let mut floor = {
+        let store = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store lock poisoned")?;
+        historical_uid_floor(UidHistoryRoot::Store(&store))?
+    };
+    // Validate the whole local checkpoint before changing any durable floor.
+    // Its actual authenticated account is context, never a string parsed from
+    // a journal, mail header, or an arbitrary serialized image.
     if let Some(save) = super::save::snapshot_active_character_save(world) {
-        policy.raise_serialized_floor(&save)?;
+        let session = world
+            .get_resource::<super::resources::SessionResource>()
+            .ok_or("item UID history requires a session")?;
+        let account_id = super::save::active_session_mutating_account_id(session)
+            .ok_or("item UID history requires an authenticated account")?;
+        floor = floor.max(historical_uid_floor(UidHistoryRoot::Save {
+            account_id: &account_id,
+            save: &save,
+        })?);
     }
+    // PostgreSQL issuers take the lease/UID row locks. Never retain the local
+    // account mutex while contacting a durable issuer.
+    policy
+        .raise_floor(floor)
+        .map_err(|error| handle_item_uid_failure(config, error))?;
     Ok(())
 }
 
 impl SimulationConfig {
+    /// Explicit trusted integration only. A complete-history census must have
+    /// initialized the existing shared PG floor before this is called. This
+    /// binding does not migrate remaining grant paths or enable a public route.
+    pub fn with_postgres_item_uid_allocator(mut self) -> Result<Self, String> {
+        if !matches!(self.item_uid_issuance, ItemUidIssuance::Legacy) {
+            return Err("cannot replace a live or unavailable item UID authority".into());
+        }
+        self.ensure_account_store_writable()?;
+        let permit = self.zone_economy_write_permit()?;
+        let database_url = self
+            .account_store_database_url
+            .as_deref()
+            .ok_or("PostgreSQL item UID source unavailable")?;
+        let authority = crate::user_item_uid_postgres::PostgresUserItemUidAuthority::open_existing(
+            database_url,
+            permit,
+        )
+        .map_err(|error| error.to_string())?;
+        let allocator = UserItemUidAllocator::from_store(std::sync::Arc::new(authority));
+        allocator
+            .validate_postgres_source(&self)
+            .map_err(|error| error.to_string())?;
+        let floor = {
+            let store = self
+                .account_store
+                .lock()
+                .map_err(|_| "account store lock poisoned")?;
+            historical_uid_floor(UidHistoryRoot::Store(&store))?
+        };
+        allocator
+            .ensure_issued_through_at_least(floor)
+            .map_err(|error| source_item_uid_error(&self, error))?;
+        self.item_uid_issuance = ItemUidIssuance::Durable(allocator);
+        Ok(self)
+    }
+
+    /// Server-only handle for staged NPC/production integration. Returning a
+    /// clone does not admit SQL writes; each issuance rechecks its own permit.
+    pub fn server_item_uid_allocator(&self) -> Result<UserItemUidAllocator, String> {
+        self.item_uid_issuance.validate_source_config(self)?;
+        match &self.item_uid_issuance {
+            ItemUidIssuance::Durable(allocator) => Ok(allocator.clone()),
+            _ => Err("server item UID authority unavailable".into()),
+        }
+    }
+
     /// Trusted integration only. Reuse ONE allocator handle across sessions and
     /// production. Initialize its sidecar separately during exclusive migration
     /// after scanning all external/world history; missing state is never rebuilt.
@@ -151,7 +193,7 @@ impl SimulationConfig {
         mut self,
         allocator: UserItemUidAllocator,
     ) -> Result<Self, String> {
-        if self.account_store_database_url.is_some() {
+        if allocator.requires_postgres_source() || self.account_store_database_url.is_some() {
             return Err(
                 "File item UID binding cannot bypass a configured PostgreSQL source".into(),
             );
@@ -173,14 +215,11 @@ impl SimulationConfig {
                 .account_store
                 .lock()
                 .map_err(|_| "account store lock poisoned")?;
-            historical_uid_floor(
-                &serde_json::to_value(&*store).map_err(|error| error.to_string())?,
-                0,
-            )?
+            historical_uid_floor(UidHistoryRoot::Store(&store))?
         };
         allocator
             .ensure_issued_through_at_least(floor)
-            .map_err(|error| error.to_string())?;
+            .map_err(|error| source_item_uid_error(&self, error))?;
         self.item_uid_issuance = ItemUidIssuance::Durable(allocator);
         Ok(self)
     }
@@ -207,11 +246,11 @@ pub(super) fn issue_for_staged_inventory(
                 .ensure_issued_through_at_least(super::inventory::inventory_max_unique_id(
                     resources,
                 ))
-                .map_err(|error| error.to_string())?;
+                .map_err(item_uid_error)?;
             allocator
                 .issue(reason)
                 .map(|uid| uid.get())
-                .map_err(|error| error.to_string())
+                .map_err(item_uid_error)
         }
     }
 }

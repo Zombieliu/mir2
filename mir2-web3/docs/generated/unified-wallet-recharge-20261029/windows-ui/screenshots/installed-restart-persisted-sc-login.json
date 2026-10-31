@@ -1,0 +1,20 @@
+{
+  "name": "installed-restart-persisted-sc-login",
+  "capturedAtUtc": "2026-10-29T17:31:29.207Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 19597766,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-restart-persisted-sc-login-0.jpg",
+      "sha256": "7f49872e44d7ba0952c996c5d017609014e04b770286e2b50dd92d80ebd01356",
+      "bytes": 318137,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

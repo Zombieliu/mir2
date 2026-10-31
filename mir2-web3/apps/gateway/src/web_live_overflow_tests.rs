@@ -164,6 +164,80 @@ async fn owner_health_web_validation_failure_cancels_the_whole_current_transport
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn owner_route_web_final_gate_rejects_dequeued_non_health_frame_and_cancels_transport() {
+    let mut socket = OutboundBatchSocket::new().await;
+    let valid = Arc::new(AtomicBool::new(true));
+    let guard_calls = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let guard_valid = valid.clone();
+    let observed_calls = guard_calls.clone();
+    let mut outbound = SharedZoneLiveOutbound::new(42, ServerPacket::KeepAlive { time: 901 });
+    assert!(outbound.owner_health().is_none());
+    outbound.with_owner_route_guard(Some(Arc::new(move || {
+        observed_calls.fetch_add(1, Ordering::AcqRel);
+        if guard_valid.load(Ordering::Acquire) {
+            Ok(())
+        } else {
+            Err("zone_owner_requires_rebind".to_owned())
+        }
+    })));
+    socket
+        .normal
+        .as_ref()
+        .unwrap()
+        .send(outbound)
+        .await
+        .unwrap();
+    // Capacity proves dequeue while bootstrap still owns the execution gate.
+    // The owner changes after dequeue and before final Web serialization.
+    outbound_batch_wait_until(|| socket.normal.as_ref().unwrap().capacity() == 128).await;
+    assert_eq!(guard_calls.load(Ordering::Acquire), 0);
+    assert_eq!(*socket.failure.borrow(), 0);
+    socket.enqueue(42, 902).await;
+    let cancelled = tokio::spawn(run_until_transport_end(
+        std::future::pending::<()>(),
+        socket.failure.clone(),
+        socket.active.clone(),
+        socket.terminal.clone(),
+    ));
+    valid.store(false, Ordering::Release);
+    drop(socket.bootstrap.take());
+    outbound_batch_wait_until(|| socket.writer.handle.is_finished()).await;
+    let outcome = tokio::time::timeout(Duration::from_secs(2), cancelled)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(outcome, Err(transport::TransportEnd::ZoneOverload(42)));
+    assert_eq!(
+        socket.terminal.reason(),
+        Some(transport::TransportEnd::ZoneOverload(42))
+    );
+    assert_eq!(*socket.failure.borrow(), 42);
+    assert!(
+        guard_calls.load(Ordering::Acquire) > 0,
+        "a non-health frame must run its owner guard at the final Web send gate"
+    );
+    // The writer is finished, so neither the stale guarded packet nor the
+    // following ordinary packet can arrive later. A transport Close is fine;
+    // an application Text/Binary frame would prove the final gate was bypassed.
+    if let Ok(Some(Ok(message))) =
+        tokio::time::timeout(Duration::from_millis(20), socket.client.next()).await
+    {
+        assert!(
+            !matches!(
+                message,
+                tokio_tungstenite::tungstenite::Message::Text(_)
+                    | tokio_tungstenite::tungstenite::Message::Binary(_)
+            ),
+            "stale or subsequent application packet reached the actual WebSocket"
+        );
+    }
+    assert!(
+        socket.gate.try_write().is_ok(),
+        "failed final validation must release the execution gate"
+    );
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
 async fn owner_ack_order_web_sender_waits_for_prepared_registration_activation() {
     let (done_tx, done_rx) = oneshot::channel();
     let done = Arc::new(Mutex::new(Some(done_rx)));

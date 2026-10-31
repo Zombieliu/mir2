@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized] target(s) in 51.37s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 2 tests
+test user_item_uid_postgres::tests::database_diagnostics_contain_only_static_labels ... ok
+test user_item_uid_postgres::tests::ordinary_batches_are_checked_before_any_floor_write ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 3167 filtered out; finished in 0.00s

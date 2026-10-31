@@ -11,6 +11,7 @@ use hmac::{Hmac, KeyInit, Mac};
 use mir2_protocol::{MirDirection, Point};
 use mir2_simulation::{
     CharacterSaveRecord, RecoveryCharacterLoadError, SimulationConfig, SimulationSession,
+    ZoneSaveOperationBinding, ZoneSaveOperationReceipt, ZoneSaveOperationStatus,
 };
 use rand::{rngs::OsRng, RngCore};
 use serde::{Deserialize, Serialize};
@@ -21,6 +22,7 @@ type HmacSha256 = Hmac<Sha256>;
 const JOURNAL_SCHEMA: &str = "mir2.character-recovery-journal";
 const JOURNAL_VERSION: u16 = 1;
 const CHECKPOINT_SCHEMA_VERSION: u16 = 1;
+const REMOTE_OPERATION_BINDING_VERSION: u16 = 1;
 const HASH_ALGORITHM: &str = "sha256";
 const MAC_ALGORITHM: &str = "hmac-sha256";
 const JOURNAL_DIRECTORY: &str = ".mir2-save-recovery-v1";
@@ -106,6 +108,32 @@ struct RecoveryPayload {
     character_index: i32,
     authoritative_transform: RecoveryTransform,
     checkpoint: CharacterSaveRecord,
+    // Optional v1 extension. Omitting it preserves the exact original v1
+    // canonical payload bytes, hashes and MACs. A remote record may only query
+    // this original operation; it must never enter legacy checkpoint replay.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    remote_zone_save_operation: Option<RemoteRecoveryOperation>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct RemoteRecoveryOperation {
+    version: u16,
+    binding: serde_json::Value,
+}
+
+impl RemoteRecoveryOperation {
+    fn from_binding(binding: &ZoneSaveOperationBinding) -> Result<Self, String> {
+        Ok(Self { version: REMOTE_OPERATION_BINDING_VERSION, binding: binding.to_json()? })
+    }
+
+    fn checked_binding(&self) -> Result<ZoneSaveOperationBinding, String> {
+        if self.version != REMOTE_OPERATION_BINDING_VERSION {
+            return Err("unsupported remote recovery operation binding version".into());
+        }
+        ZoneSaveOperationBinding::from_json_checked(self.binding.clone())
+            .map_err(|_| "invalid remote recovery operation binding".into())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -235,13 +263,40 @@ pub(crate) fn journal_checkpoint(
     character_index: i32,
     checkpoint: &CharacterSaveRecord,
 ) -> Result<JournalReceipt, String> {
+    journal_checkpoint_with_binding(config, account_id, character_index, checkpoint, None)
+}
+
+/// Record the original Host operation for read-only Unknown reconciliation.
+/// The checkpoint and binding are authenticated together by the existing MAC.
+pub(crate) fn journal_remote_checkpoint(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+    checkpoint: &CharacterSaveRecord,
+    binding: &ZoneSaveOperationBinding,
+) -> Result<JournalReceipt, String> {
+    journal_checkpoint_with_binding(config, account_id, character_index, checkpoint, Some(binding))
+}
+
+fn journal_checkpoint_with_binding(
+    config: &SimulationConfig,
+    account_id: &str,
+    character_index: i32,
+    checkpoint: &CharacterSaveRecord,
+    binding: Option<&ZoneSaveOperationBinding>,
+) -> Result<JournalReceipt, String> {
     let _guard = journal_guard()?;
     let journal = RecoveryJournal::from_config(config)?.ok_or_else(|| {
         "recovery journal requires an explicit recovery directory or file account-store path"
             .to_string()
     })?;
     journal.ensure_layout()?;
-    journal.store(account_id, character_index, checkpoint)
+    match binding {
+        Some(binding) => journal.store_with_remote_binding(
+            account_id, character_index, checkpoint, Some(binding), |_path| {},
+        ),
+        None => journal.store(account_id, character_index, checkpoint),
+    }
 }
 
 pub(crate) fn replay_startup(config: &SimulationConfig) -> Result<ReplaySummary, String> {
@@ -445,13 +500,29 @@ impl RecoveryJournal {
         account_id: &str,
         character_index: i32,
         checkpoint: &CharacterSaveRecord,
+        after_publish: F,
+    ) -> Result<JournalReceipt, String>
+    where
+        F: FnMut(&Path),
+    {
+        self.store_with_remote_binding(account_id, character_index, checkpoint, None, after_publish)
+    }
+
+    fn store_with_remote_binding<F>(
+        &self,
+        account_id: &str,
+        character_index: i32,
+        checkpoint: &CharacterSaveRecord,
+        binding: Option<&ZoneSaveOperationBinding>,
         mut after_publish: F,
     ) -> Result<JournalReceipt, String>
     where
         F: FnMut(&Path),
     {
         self.verify_directory_trust()?;
-        let payload = RecoveryPayload::new(account_id, character_index, checkpoint)?;
+        let mut payload = RecoveryPayload::new(account_id, character_index, checkpoint)?;
+        payload.remote_zone_save_operation = binding.map(RemoteRecoveryOperation::from_binding).transpose()?;
+        payload.validate()?;
         let payload_bytes = canonical_payload_bytes(&payload)?;
         let payload_hash = sha256_hex(&payload_bytes);
         let key_hash = character_key_hash(account_id, character_index);
@@ -1110,12 +1181,16 @@ impl RecoveryPayload {
                 direction: checkpoint.direction,
             },
             checkpoint: checkpoint.clone(),
+            remote_zone_save_operation: None,
         };
         payload.validate()?;
         Ok(payload)
     }
 
     fn validate(&self) -> Result<(), String> {
+        if let Some(remote) = &self.remote_zone_save_operation {
+            remote.checked_binding()?;
+        }
         if self.account_id.trim().is_empty() {
             return Err("recovery journal account id is empty".to_string());
         }
@@ -1137,6 +1212,15 @@ fn replay_envelope(
     envelope: &RecoveryEnvelope,
 ) -> Result<ReplayDecision, String> {
     let payload = &envelope.payload;
+    if let Some(remote) = &payload.remote_zone_save_operation {
+        let binding = remote.checked_binding().map_err(replay_conflict)?;
+        // This branch precedes creation/restoration of a personal Session.
+        // A missing, pending or unreadable Host receipt must retain the journal
+        // and block login, without retrying source work under a new operation.
+        return replay_remote_checkpoint_with_query(payload, &binding, |binding| {
+            config.query_zone_save_operation(binding)
+        });
+    }
     let mut session = SimulationSession::new(config.clone());
     session
         .bind_account_for_recovery(&payload.account_id)
@@ -1172,6 +1256,36 @@ fn replay_envelope(
         );
     }
     Ok(ReplayDecision::Replayed)
+}
+
+fn replay_remote_checkpoint_with_query<F>(
+    payload: &RecoveryPayload,
+    binding: &ZoneSaveOperationBinding,
+    query: F,
+) -> Result<ReplayDecision, String>
+where
+    F: FnOnce(&ZoneSaveOperationBinding) -> Result<Option<ZoneSaveOperationReceipt>, String>,
+{
+    let receipt = query(binding).map_err(|error| {
+        if error == "ZONE_SAVE_OPERATION_REJECTED" {
+            replay_conflict("remote operation binding differs from durable ledger".into())
+        } else {
+            format!("remote recovery receipt unavailable; journal retained and login blocked: {error}")
+        }
+    })?.ok_or_else(|| "remote recovery operation is absent; journal retained and login blocked".to_string())?;
+    let operation = receipt.operation();
+    if operation.binding() != binding
+        || operation.account_id() != payload.account_id.as_str()
+        || operation.character_index() != payload.character_index
+        || serde_json::to_value(operation.frozen_checkpoint()).map_err(|e| e.to_string())?
+            != serde_json::to_value(&payload.checkpoint).map_err(|e| e.to_string())? {
+        return Err(replay_conflict("remote receipt binding/identity/frozen checkpoint mismatch".into()));
+    }
+    match receipt.status() {
+        ZoneSaveOperationStatus::Committed | ZoneSaveOperationStatus::Released => Ok(ReplayDecision::AlreadyCommitted),
+        ZoneSaveOperationStatus::Prepared => Err(
+            "remote recovery operation remains Prepared; journal retained and login blocked".into()),
+    }
 }
 
 fn recovery_load_error(error: RecoveryCharacterLoadError) -> String {
@@ -2446,3 +2560,7 @@ fn now_millis() -> u128 {
 #[cfg(test)]
 #[path = "save_recovery_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "save_recovery/zone_save_operation_tests.rs"]
+mod zone_save_operation_tests;

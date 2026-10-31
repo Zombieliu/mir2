@@ -1,0 +1,12 @@
+{
+  "atUtc": "2026-10-30T14:38:03.932945Z",
+  "database": "mir2_zone_lease_test_20261030_69f2a7f5",
+  "version": "PostgreSQL 16.15, compiled by Visual C++ build 1944, 64-bit",
+  "leaseRows": 0,
+  "saveOperationRows": 0,
+  "otherClients": 0,
+  "nonSystemSchemas": [
+    "observer_owned",
+    "public"
+  ]
+}

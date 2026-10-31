@@ -58918,6 +58918,7 @@ fn game_shop_balance_mail_capacity_and_world_phase_rejections_are_atomic() {
         .stage5_systems
         .mail = (1..=100)
         .map(|id| Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id,
             delivery_nonce: format!("mail-capacity-{id}"),
             from: "System".to_string(),
@@ -64105,6 +64106,7 @@ fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
     let local_attachment = strict_mail_attachment_json("bronze-helmet", 91);
     let external_attachment = strict_mail_attachment_json("dagger", 92);
     let mut local_mail = vec![Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 1,
         delivery_nonce: "local-delivery".to_string(),
         from: "Gameshop".to_string(),
@@ -64120,6 +64122,7 @@ fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
         deleted: false,
     }];
     let external = Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 1,
         delivery_nonce: "external-delivery".to_string(),
         from: "Scout".to_string(),
@@ -64168,6 +64171,7 @@ fn same_mail_id_with_different_content_rekeys_local_and_preserves_both() {
 #[test]
 fn identical_mail_content_with_distinct_delivery_nonces_is_never_deduplicated() {
     let first = Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 1,
         delivery_nonce: "delivery-a".to_string(),
         from: "Scout".to_string(),
@@ -64226,6 +64230,7 @@ fn legacy_same_header_claimed_external_consumes_local_and_silently_prevents_seco
         .expect("starter dagger should exist")
         .clone();
     let local_legacy = Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 41,
         delivery_nonce: String::new(),
         from: "Legacy Sender".to_string(),
@@ -64304,6 +64309,7 @@ fn legacy_same_header_claimed_external_consumes_local_and_silently_prevents_seco
 #[test]
 fn legacy_identical_headers_with_different_ids_remain_distinct() {
     let first = Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id: 1,
         delivery_nonce: String::new(),
         from: "Legacy Sender".to_string(),
@@ -66342,9 +66348,17 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
 
     // Starter potions occupy belt 0/1 and RepairOil occupies belt 2, so
     // Crystal cancel returns to the first free array cell, belt slot 3.
-    assert!(cancel_packets.iter().any(|packet| matches!(packet,
-        ServerPacket::RetrieveRefineItem { from: 0, to: 3, success: true })),
-        "cancel must return the exact ore to the first free cell: {cancel_packets:?}");
+    assert!(
+        cancel_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::RetrieveRefineItem {
+                from: 0,
+                to: 3,
+                success: true
+            }
+        )),
+        "cancel must return the exact ore to the first free cell: {cancel_packets:?}"
+    );
     // Re-deposit an ingredient so a refine attempt can run.
     let redeposit = session.handle_packet(ClientPacket::DepositRefineItem { from: 3, to: 0 });
     assert!(redeposit.iter().any(|packet| matches!(

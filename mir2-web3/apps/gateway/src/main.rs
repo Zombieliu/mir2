@@ -22,6 +22,13 @@ fn main() -> std::io::Result<()> {
 }
 
 async fn async_main() -> std::io::Result<()> {
+    // Complete the synchronous read-only audit before competing routing modes
+    // initialize or any player is admitted.
+    let stable_owner_runtime = tokio::task::spawn_blocking(
+        mir2_gateway::zone_owner_resolver::runtime::init_global_from_env,
+    ).await
+        .map_err(|_| io::Error::other("zone owner resolver startup task failed"))?
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     mir2_gateway::gate15::initialize_from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::Other, error))?;
     let tcp_addr =
@@ -99,24 +106,51 @@ async fn async_main() -> std::io::Result<()> {
     // back to disabled defaults while old custody still requires recovery.
     config.procurement_config = mir2_simulation::procurement::ProcurementConfig::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let _procurement_worker = mir2_gateway::procurement_worker::ProcurementWorker::start(config.clone())
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let _usdc_worker = mir2_gateway::sui_usdc_billing::SuiUsdcWorker::start(config.clone())
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    // Recovery preflight reads PostgreSQL even when new sales are disabled.
+    // Keep synchronous postgres connect/query/drop outside the async runtime;
+    // the returned worker guards contain only their stop signals.
+    let recovery_config = config.clone();
+    let (_procurement_worker, _usdc_worker) = tokio::task::spawn_blocking(move || {
+        let procurement =
+            mir2_gateway::procurement_worker::ProcurementWorker::start(recovery_config.clone())?;
+        let usdc = mir2_gateway::sui_usdc_billing::SuiUsdcWorker::start(recovery_config)?;
+        Ok::<_, String>((procurement, usdc))
+    })
+    .await
+    .map_err(|error| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("recovery worker startup task failed: {error}"),
+        )
+    })?
+    .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let topology = mir2_gateway::ZoneTopology::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let factory = topology.runtime_factory();
+    let owner_authority = match &stable_owner_runtime {
+        Some(runtime) => runtime.owner_lease_authority(),
+        None => mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),
+    };
+    let local_factory = topology.runtime_factory();
+    let factory: mir2_gateway::SharedZoneRuntimeFactory = match &stable_owner_runtime {
+        Some(runtime) => runtime.session_runtime_factory(),
+        None => local_factory.clone(),
+    };
     let registry = Arc::new(
         mir2_gateway::ZoneRegistry::with_router_and_owner_lease_authority(
             topology.default_zone_id().clone(),
             factory.clone(),
             topology.router(),
-            mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),
+            owner_authority,
         ),
     );
-    let _conquest_clock =
-        mir2_gateway::conquest_clock::ConquestClockService::start(config.clone(), factory)?;
+    // Stable mode has no authoritative Gateway Zone. Its world clocks must be
+    // hosted and verified on the owner topology before this opt-in is released.
+    let _conquest_clock = if stable_owner_runtime.is_some() {
+        None
+    } else {
+        Some(mir2_gateway::conquest_clock::ConquestClockService::start(config.clone(), local_factory)?)
+    };
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 

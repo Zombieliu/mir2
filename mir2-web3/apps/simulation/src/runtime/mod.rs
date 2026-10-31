@@ -11,6 +11,22 @@ mod equipment;
 mod experience_rates;
 pub use experience_rates::apply_crystal_experience_rates;
 mod player_weights;
+mod prepared_player_drop;
+mod zone_source_recovery;
+pub(crate) fn validate_zone_source_recovery_checkpoint(
+    save: &crate::CharacterSaveRecord,
+) -> Result<(), String> {
+    save::validate_character_save_record(save)
+}
+pub(crate) fn validate_player_drop_exact_item(item: &mir2_protocol::UserItem) -> Result<(), String> {
+    items::validate_committed_user_item_carrier(item).map_err(|error| error.to_string())
+}
+pub(crate) fn validate_player_drop_recorded_request(
+    request: &crate::PlayerDropRequest,
+    operation: &crate::PlayerDropPreparedOperation,
+) -> Result<(), String> {
+    prepared_player_drop::validate_recorded_request(request, operation)
+}
 mod social_experience;
 pub use social_experience::{
     crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence,
@@ -34,6 +50,14 @@ mod item_grants;
 mod item_sets;
 pub(crate) mod item_uid_issuance;
 mod items;
+#[path = "../config/mail_transfer_items.rs"]
+pub(crate) mod mail_transfer_items;
+
+/// Pure catalogue lookup shared by durable player-drop admission validation.
+/// Reuses the same legacy aliases as runtime item selection; grants no authority.
+pub fn player_drop_item_template_index(key: &str) -> Option<i32> {
+    items::crystal_item_template_for_item_key(key).map(|template| template.item_index)
+}
 mod leveling;
 mod map;
 mod map_events;
@@ -152,6 +176,8 @@ mod stage5;
 mod stats;
 pub mod zone;
 pub use zone::ZoneMentorBankAttribution;
+pub use zone::{PlayerDropApplyResult, PlayerDropCustodyState, PlayerDropEffectIdentity,
+    PlayerDropPlacementKind, PlayerDropPlacementReservation};
 pub use zone::{ZoneConquestDefenseSample, ZoneConquestMembership, ZoneConquestPlayerSample};
 
 /// Crystal's symmetric object-data/AOI radius around the local player.

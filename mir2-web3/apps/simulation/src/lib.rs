@@ -12,13 +12,26 @@ pub mod sui_usdc_billing;
 pub use mir2_production as production;
 pub mod npc_purchase_journal;
 pub mod npc_purchase_owner;
+pub mod player_drop;
+pub use player_drop::{
+    PlayerDropCommitReceipt, PlayerDropCommittedEffect, PlayerDropEffectState,
+    PlayerDropJournalResult, PlayerDropOperationBinding, PlayerDropOutcome,
+    PlayerDropPreparedOperation, PlayerDropRequest, PlayerDropWorldIntent,
+};
 mod runtime;
 pub use npc_purchase_owner::{
     NpcPurchaseOwnerAction, NpcPurchaseOwnerExecution, NpcPurchaseOwnerReply,
     NPC_PURCHASE_OWNER_PROTOCOL_VERSION,
 };
 pub mod user_item_uid;
+pub mod user_item_uid_postgres;
 mod world_runtime;
+pub use config::zone_economy_fence::ZoneEconomyWritePermit;
+pub use config::zone_save_fence::ZoneSaveFence;
+pub use config::zone_save_operation::{
+    OperationStatus as ZoneSaveOperationStatus, ZoneSaveOperation, ZoneSaveOperationBinding,
+    ZoneSaveOperationReceipt,
+};
 pub use runtime::zone::ManagerAdmissionReceipt;
 pub use runtime::zone::{
     EffectEnvelope, EffectReplayReceipt, EntityLifeRef, LogicalWorldId, PayloadDigest,
@@ -45,16 +58,18 @@ pub use config::{
     GroundDropSnapshot, HeroVitalsSnapshot, HeroWeightsSnapshot, ItemContainer, MapTransferRecord,
     MonsterSpawnSource, NpcDialogLinkSnapshot, NpcDialogSnapshot, NpcGoldTradeCapacity,
     PlayerWeightsSnapshot, PostgresAccountStoreRepository, PreparedKillAccountSource,
-    PreparedKillPublication, PreparedKillPublicationFailure, QuestObjectiveSnapshot, QuestSnapshot,
-    QuestStage, SafeZoneRecord, SharedGuildBuff, SharedGuildMember, SharedGuildRank,
-    SharedGuildRecord, SharedGuildStoredItem, SimulationConfig, SkillSnapshot,
-    Stage5AuctionListing, Stage5ConquestState, Stage5FriendIdentity, Stage5GroupState,
-    Stage5GuildState, Stage5HeroState, Stage5MailDelivery, Stage5MailDeliveryReceipt,
-    Stage5MailMessage, Stage5MailTargetKind, Stage5MentorState, Stage5ProfessionState,
-    Stage5RefineState, Stage5SocialState, Stage5SystemsState, Stage5TradeState,
-    VisibleMonsterRecord, VisibleNpcRecord, VisiblePlayerRecord, WorldEntityDisposition,
-    WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldItemSnapshot,
-    WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
+    PreparedKillPublication, PreparedKillPublicationFailure, PreparedPlayerDropAccountSource,
+    PreparedPlayerDropPublication, PreparedPlayerDropPublicationFailure,
+    PreparedZoneSourceRecovery, QuestObjectiveSnapshot, QuestSnapshot, QuestStage, SafeZoneRecord,
+    SharedGuildBuff, SharedGuildMember, SharedGuildRank, SharedGuildRecord, SharedGuildStoredItem,
+    SimulationConfig, SkillSnapshot, Stage5AuctionListing, Stage5ConquestState,
+    Stage5FriendIdentity, Stage5GroupState, Stage5GuildState, Stage5HeroState,
+    Stage5MailAttachmentOrigin, Stage5MailDelivery, Stage5MailDeliveryReceipt, Stage5MailMessage,
+    Stage5MailTargetKind, Stage5MentorState, Stage5ProfessionState, Stage5RefineState,
+    Stage5SocialState, Stage5SystemsState, Stage5TradeState, VisibleMonsterRecord,
+    VisibleNpcRecord, VisiblePlayerRecord, WorldEntityDisposition, WorldEntityKind,
+    WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldItemSnapshot, WorldItemTooltipSource,
+    WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
     crystal_world_respawn_spawns, gate5_demo_scenario, intelligent_creature_allows_ground_drop,
@@ -72,19 +87,20 @@ pub use runtime::{
     NpcPurchaseProcessingExecution, NpcPurchaseProcessingOutcome, NpcPurchaseProducer,
     NpcPurchaseReceipt, NpcPurchaseRejection, NpcPurchaseRequest, NpcPurchaseSource, PartitionId,
     PartitionKey, PartitionLocation, PasskeyRecoveryPreflight, PersonalProductionConfig,
-    PersonalProductionFacility, PersonalProductionState, PlayerId, PreparedChatPacket,
-    ProductionDurableError, ProductionDurableExecution, QueuedDefaultNpcEvent,
-    RankingInspectIdentity, RankingInspectOnlineProjection, RankingInspectPresence,
-    RankingInspectRequest, RecoveryCharacterLoadError, SessionId,
-    SharedAccountInventoryTransactionKind, SharedAccountInventoryTransactionReceipt,
-    SharedGroundDropPickupCommit, SharedInventoryItemDrop, SharedItemRentalAgreement,
-    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
-    SharedMarriageMutation, SharedMarriageProfile, SharedMentorAccountingReceipt,
-    SharedMentorBreakReason, SharedMentorMutation, SharedMentorProfile,
-    SharedMonsterKillCommitFailure, SharedNpcSavedValue, SharedSkillItemConsumptionComponent,
-    SharedTradeOffer, SharedTradeOfferItem, SimulationSession, StoneWorkshopError,
-    TopologyRevision, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
-    ZoneCollision, ZoneCommand, ZoneConquestDefenseSample, ZoneConquestMembership,
+    PersonalProductionFacility, PersonalProductionState, PlayerDropApplyResult,
+    PlayerDropCustodyState, PlayerDropEffectIdentity, PlayerDropPlacementKind,
+    PlayerDropPlacementReservation, PlayerId, PreparedChatPacket, ProductionDurableError,
+    ProductionDurableExecution, QueuedDefaultNpcEvent, RankingInspectIdentity,
+    RankingInspectOnlineProjection, RankingInspectPresence, RankingInspectRequest,
+    RecoveryCharacterLoadError, SessionId, SharedAccountInventoryTransactionKind,
+    SharedAccountInventoryTransactionReceipt, SharedGroundDropPickupCommit,
+    SharedInventoryItemDrop, SharedItemRentalAgreement, SharedItemRentalDelivery,
+    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedMarriageMutation,
+    SharedMarriageProfile, SharedMentorAccountingReceipt, SharedMentorBreakReason,
+    SharedMentorMutation, SharedMentorProfile, SharedMonsterKillCommitFailure, SharedNpcSavedValue,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
+    StoneWorkshopError, TopologyRevision, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem,
+    ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneConquestDefenseSample, ZoneConquestMembership,
     ZoneConquestPlayerSample, ZoneExperiencePartner, ZoneExperienceProfile, ZoneExperienceRateBuff,
     ZoneExperienceRateSource, ZoneExperienceRateStat, ZoneExperienceSelection,
     ZoneFiveClassPracticeReceipt, ZoneFiveClassPracticeSpell, ZoneGuildExperienceMembership,
@@ -111,5 +127,6 @@ pub use world_runtime::{
 
 pub use runtime::apply_crystal_experience_rates;
 pub use runtime::{
-    crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence,
+    crystal_social_experience_peer_eligible, player_drop_item_template_index, ExperienceCharacter,
+    ExperiencePresence,
 };

@@ -1,0 +1,27 @@
+    Finished `test` profile [unoptimized] target(s) in 0.30s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 21 tests
+test runtime::stage5::mail_uid_planning::tests::mail_uid_changed_touched_delivery_rejects_without_publishing_reserved_assets ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_commit_merges_unrelated_new_mail_and_advances_private_revision ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_committed_source_with_failed_private_revision_publication_freezes_without_retry ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_direct_stage5_claim_uses_the_same_issuer_and_unavailable_never_falls_back ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_existing_custody_rejects_live_reserved_and_other_source_child_owners ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_existing_custody_rejects_zero_duplicate_and_key_only_instances_without_mint ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_existing_custody_transfers_complete_identity_without_issuer_or_receipt_conflict ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_initially_stale_claim_uses_canonical_assets_and_retains_stale_revision_gate ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_keyed_fresh_grant_never_merges_into_bound_or_cursed_stack ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_legacy_mount_bells_resolved_protocol_position_outranks_local_and_captured_zero ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_maximum_private_planning_floor_rejects_before_issuer_without_escaping ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_mixed_ledger_card_and_fresh_tree_batch_preserves_card_carrier_and_consumes_once ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_monthly_card_authorization_keeps_deterministic_identity_without_ordinary_mint ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_partial_reservation_failure_discards_batch_then_retry_uses_new_complete_tree ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_sidecarless_ambiguous_socket_positions_reject_before_real_issuer ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_sidecarless_child_reservation_failure_preserves_unclaimed_complete_tree ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_sidecarless_same_template_sockets_keep_positions_and_all_live_fields ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_synthetic_keyed_attachment_is_legacy_only_and_never_enters_durable_issuer ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_unknown_freezes_source_clones_and_never_reissues_or_publishes_plan ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_unknown_origin_and_live_forged_origin_never_authorize_durable_attachments ... ok
+test runtime::stage5::mail_uid_planning::tests::mail_uid_whole_batch_rejects_bad_later_exact_json_before_real_issuance ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 3207 filtered out; finished in 11.26s

@@ -1203,6 +1203,8 @@ pub(crate) struct ZoneObject {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneGroundDrop {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_drop_effect: Option<super::PlayerDropEffectIdentity>,
     pub drop: GroundDropSnapshot,
     pub owner_expires_at_ms: Option<u64>,
     #[serde(default)]
@@ -1233,6 +1235,10 @@ pub(crate) struct NativeGroundOwner {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneGroundDropCustody {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_drop_claimant: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_drop_effect: Option<super::PlayerDropEffectIdentity>,
     pub source: ZoneKey,
     pub object_id: u32,
     pub drop_generation: u64,
@@ -1247,6 +1253,8 @@ impl ZoneGroundDropCustody {
             && self.object_id == ticket.object_id
             && self.drop_generation == ticket.drop_generation
             && self.payload_digest == ticket.payload_digest
+            && self.player_drop_effect == ticket.player_drop_effect
+            && self.player_drop_claimant == ticket.player_drop_claimant
     }
 }
 
@@ -1254,6 +1262,12 @@ impl ZoneGroundDropCustody {
 /// intentionally not exported through the client snapshot or packet layers.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GroundDropClaimTicket {
+    /// Player-effect claimant incarnation, distinct from the stable economic key.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_drop_claimant: Option<String>,
+    /// Internal immutable economic identity; never copied into GroundDropSnapshot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub player_drop_effect: Option<super::PlayerDropEffectIdentity>,
     pub claim_id: u64,
     pub object_id: u32,
     pub drop_generation: u64,

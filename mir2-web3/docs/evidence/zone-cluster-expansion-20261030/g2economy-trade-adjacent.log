@@ -1,0 +1,21 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 3 tests
+gateway lifecycle session_id=gateway-96028-1793370904278-2 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-96028-1793370904278-2 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-96028-1793370904277-1 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-96028-1793370904277-1 stage=session.close phase=end elapsed_ms=0
+test routing::tests::shared_trade_repeat_request_cannot_replace_debited_unmatched_offer ... ok
+gateway lifecycle session_id=gateway-96028-1793370906748-4 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-96028-1793370906748-4 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-96028-1793370906748-3 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-96028-1793370906748-3 stage=session.close phase=end elapsed_ms=0
+test routing::tests::trade_item_edit_tests::shared_trade_move_and_merge_refresh_only_partner_and_preserve_quantity ... ok
+gateway lifecycle session_id=gateway-96028-1793370909091-6 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-96028-1793370909091-6 stage=session.close phase=end elapsed_ms=0
+gateway lifecycle session_id=gateway-96028-1793370909091-5 stage=session.close phase=begin
+gateway lifecycle session_id=gateway-96028-1793370909091-5 stage=session.close phase=end elapsed_ms=0
+test routing::tests::trade_item_edit_tests::shared_trade_peer_preparation_rejects_move_and_merge_with_exact_ack ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 1476 filtered out; finished in 7.16s

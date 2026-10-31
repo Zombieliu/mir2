@@ -341,6 +341,7 @@ fn push_rental_return_mail(
         .unwrap_or(0)
         .saturating_add(1);
     systems.mail.push(Stage5MailMessage {
+        attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
         id,
         delivery_nonce: new_stage5_mail_delivery_nonce(),
         from: borrower_name.to_string(),

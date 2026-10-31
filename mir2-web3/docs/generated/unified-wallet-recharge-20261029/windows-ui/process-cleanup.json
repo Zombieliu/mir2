@@ -1,0 +1,27 @@
+{
+  "schema": "mir2.unified.evidence.phase.v1",
+  "passed": true,
+  "curatedAtUtc": "2026-10-29T17:42:03.239406+00:00",
+  "producerReceipt": {
+    "filename": "unified-qa-process-cleanup.json",
+    "bytes": 403,
+    "sha256": "087cb034ff31906dde89cb86f4964d903731ecd13170d11c95f1dbe6591d908b"
+  },
+  "producerReport": {
+    "schema": "mir2.unified.qa-process-cleanup.v1",
+    "passed": true,
+    "ownedGatewayPid": 58680,
+    "ownedGatewayStopped": true,
+    "loopbackPorts": [
+      17931,
+      17921
+    ],
+    "listenersRemaining": 0,
+    "testGameWindowsClosed": true,
+    "dockerTouched": false,
+    "publicServicesTouched": false,
+    "privateEvidenceRetained": true,
+    "completedUtc": "2026-10-29T17:35:52.5420745+00:00"
+  },
+  "scope": "Root final bounded preservation/owned process cleanup; no wholeDtree audit or production cleanup inferred"
+}

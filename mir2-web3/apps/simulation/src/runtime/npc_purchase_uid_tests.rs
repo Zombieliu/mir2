@@ -191,12 +191,73 @@ fn global_uid_merged_purchase_retains_retired_incoming_identity_in_history_floor
         .iter()
         .chain(inv.inventory_items.iter())
         .all(|i| i.unique_id != second_id));
+    let store = fixture.store_from_file();
     let floor = super::super::super::item_uid_issuance::historical_uid_floor(
-        &serde_json::to_value(fixture.store_from_file()).unwrap(),
-        0,
+        super::super::super::item_uid_issuance::UidHistoryRoot::Store(&store),
     )
     .unwrap();
     assert!(floor >= second_id);
     assert_eq!(allocator.issued_through().unwrap(), second_id);
+    fixture.assert_checkpoint();
+}
+
+#[test]
+fn global_uid_unavailable_maximum_selector_rejects_before_issuance_and_valid_purchase_survives() {
+    let mut fixture = Fixture::new(
+        "global-untrusted-request",
+        "BUYSELL",
+        NpcPurchaseSource::Trade,
+    );
+    let (allocator, _) = bind(&mut fixture);
+    let original_request = fixture.request;
+    let before = allocator.issued_through().unwrap();
+    fixture.request.item_index = u64::MAX;
+    fixture.session.begin_npc_purchase_producer().unwrap();
+    // An unknown selector cannot acquire a trusted catalog intent. It is not
+    // a terminal rejected trade. The separate typed-journal test covers old
+    // retained Rejected request values without treating them as item UIDs.
+    let refused = fixture.session.npc_purchase_intent(fixture.request);
+    assert!(matches!(
+        refused,
+        Err(NpcPurchaseDurableError::BeforeExecution { detail })
+            if detail == "NPC purchase catalog identity is unavailable"
+    ));
+    assert!(fixture
+        .save_from_file()
+        .npc_purchase_journal
+        .unwrap()
+        .entries
+        .is_empty());
+    assert_eq!(allocator.issued_through().unwrap(), before);
+    let store = fixture.store_from_file();
+    let floor = super::super::super::item_uid_issuance::historical_uid_floor(
+        super::super::super::item_uid_issuance::UidHistoryRoot::Store(&store),
+    )
+    .unwrap();
+    assert!(
+        floor <= before,
+        "a rejected selector is player input, not custody"
+    );
+    fixture.config = fixture
+        .config
+        .clone()
+        .with_item_uid_allocator(allocator.clone())
+        .unwrap();
+    assert_eq!(allocator.issued_through().unwrap(), before);
+    fixture.session.rebind_account_store(&fixture.config);
+    fixture.request = original_request;
+    let valid_operation = fixture.operation(1);
+    let committed = fixture
+        .session
+        .try_durable_npc_purchase(valid_operation)
+        .unwrap();
+    let NpcPurchaseProcessingOutcome::Committed {
+        incoming_unique_id, ..
+    } = committed.receipt.entry.outcome
+    else {
+        panic!("an ordinary purchase must still succeed after the rejected request")
+    };
+    assert_eq!(incoming_unique_id, before + 1);
+    assert_eq!(allocator.issued_through().unwrap(), incoming_unique_id);
     fixture.assert_checkpoint();
 }

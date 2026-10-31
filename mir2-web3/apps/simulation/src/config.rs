@@ -187,11 +187,31 @@ impl CharacterRecord {
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
+#[path = "config/mail_transfer.rs"]
+mod mail_transfer;
+#[cfg(test)]
+#[path = "config/mail_transfer_source_tests.rs"]
+mod mail_transfer_source_tests;
 #[path = "config_prepared_kill.rs"]
 mod prepared_kill;
+#[path = "config/zone_economy_fence.rs"]
+pub mod zone_economy_fence;
+#[path = "config/zone_save_fence.rs"]
+pub mod zone_save_fence;
+#[path = "config/zone_save_operation.rs"]
+pub mod zone_save_operation;
 pub use prepared_kill::{
     PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure,
 };
+#[path = "config_prepared_player_drop.rs"]
+mod prepared_player_drop;
+pub use prepared_player_drop::{
+    PreparedPlayerDropAccountSource, PreparedPlayerDropPublication,
+    PreparedPlayerDropPublicationFailure,
+};
+#[path = "config_zone_source_recovery.rs"]
+mod zone_source_recovery;
+pub use zone_source_recovery::PreparedZoneSourceRecovery;
 #[cfg(test)]
 #[path = "config_item_identity.rs"]
 mod item_identity;
@@ -768,6 +788,10 @@ fn validate_account_store_transaction_scope(
 
 #[derive(Debug, Clone)]
 struct AccountStoreMutationPlan {
+    zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
+    zone_save_operation: Option<zone_save_operation::ZoneSaveOperation>,
+    #[cfg(test)]
+    zone_save_fence_test_fault: Option<zone_save_fence::TestFault>,
     stones: Option<stone_authority::StoneMutation>,
     /// Compensation is fenced by its own committed receipt even for a File
     /// primary's PostgreSQL mirror. Never overwrite a later domain mutation.
@@ -988,6 +1012,10 @@ fn build_account_store_mutation_plan(
     };
 
     AccountStoreMutationPlan {
+        zone_save_fence: None,
+        zone_save_operation: None,
+        #[cfg(test)]
+        zone_save_fence_test_fault: None,
         stones: stone_authority::build(original, desired),
         force_source_cas: false,
         clock: matches!(scope, AccountStoreMutationScope::FullRestore).then(|| {
@@ -3051,6 +3079,7 @@ mod tests {
         let mut systems = Stage5SystemsState::default();
         systems.guild.name = "Crimson".to_string();
         systems.mail.push(Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 9,
             delivery_nonce: "fixture-mail-9".to_string(),
             from: "GM".to_string(),
@@ -4157,6 +4186,10 @@ pub struct SimulationConfig {
     /// URL is not a filesystem location.
     pub save_recovery_dir: Option<PathBuf>,
     save_recovery_mac_key: Option<SaveRecoveryMacKey>,
+    zone_save_fence: Option<zone_save_fence::ZoneSaveFence>,
+    zone_save_operation: Option<zone_save_operation::ZoneSaveOperation>,
+    #[cfg(test)]
+    zone_save_fence_test_fault: Arc<Mutex<Option<zone_save_fence::TestFault>>>,
     pub content_profile: Option<ContentProfileRuntime>,
     file_authority: Option<Arc<file_authority::FileAuthority>>,
     replica_bootstrap_authority: Option<ReplicaBootstrapAuthority>,
@@ -4242,6 +4275,7 @@ impl SimulationConfig {
         #[cfg(test)]
         {
             fork.account_store_transaction_fault = Arc::new(Mutex::new(None));
+            fork.zone_save_fence_test_fault = Arc::new(Mutex::new(None));
             fork.account_store_repository_writer_probe = Arc::new(Mutex::new(None));
             fork.account_store_transaction_scope_observations = Arc::new(Mutex::new(Vec::new()));
         }
@@ -4253,11 +4287,16 @@ impl SimulationConfig {
     /// into the active file/PostgreSQL account repository.
     pub fn fork_for_replica_apply(&self) -> Result<Self, String> {
         let mut fork = self.fork_with_isolated_account_store()?;
+        // A shadow uses only its seeded image. Leaving SourceOfTruth here
+        // makes account reads try to refresh through the deliberately absent DSN.
+        fork.account_store_database_mode = AccountStoreDatabaseMode::Mirror;
         fork.account_store_path = None;
         fork.file_authority = None;
         fork.account_store_database_url = None;
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
+        fork.zone_save_fence = None;
+        fork.zone_save_operation = None;
         fork.replica_bootstrap_authority =
             Some(ReplicaBootstrapAuthority(Arc::clone(&fork.account_store)));
         Ok(fork)
@@ -4391,6 +4430,10 @@ impl SimulationConfig {
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
             save_recovery_dir: None,
             save_recovery_mac_key: None,
+            zone_save_fence: None,
+            zone_save_operation: None,
+            #[cfg(test)]
+            zone_save_fence_test_fault: Arc::new(Mutex::new(None)),
             content_profile: None,
             file_authority: None,
             replica_bootstrap_authority: None,
@@ -4792,7 +4835,13 @@ impl SimulationConfig {
         })
         .map_err(|_| "account-store write-state mutex poisoned; writes are blocked".to_string())?;
         match &*state {
-            AccountStoreWriteState::Writable => Ok(()),
+            AccountStoreWriteState::Writable => {
+                if self.zone_save_fence.is_some() {
+                    self.validate_zone_save_fence_binding()?;
+                }
+                self.validate_zone_save_operation_binding()?;
+                Ok(())
+            }
             AccountStoreWriteState::Frozen { reason } => Err(format!(
                 "account-store writes are frozen until explicit durable reconciliation: {reason}"
             )),
@@ -4955,8 +5004,10 @@ impl SimulationConfig {
     }
 
     fn map_clock_repository_error(&self, plan: &AccountStoreMutationPlan, error: String) -> String {
-        if (plan.carries_billing_source()
-            && error.starts_with(crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN))
+        if error.starts_with(zone_save_fence::COMMIT_OUTCOME_UNKNOWN)
+            || error.starts_with(ACCOUNT_STORE_COMMIT_OUTCOME_UNKNOWN)
+            || (plan.carries_billing_source()
+                && error.starts_with(crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN))
             || (plan.clock.is_some()
                 && error.starts_with(guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN))
             || ((!plan.guilds.is_empty() || plan.carries_guild_experience_source())
@@ -4965,6 +5016,7 @@ impl SimulationConfig {
                 && error.starts_with(hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN))
             || (plan.stones.is_some() && error.starts_with(stone_authority::COMMIT_UNKNOWN))
             || (!plan.conquests.is_empty() && error.starts_with("CONQUEST_COMMIT_OUTCOME_UNKNOWN"))
+            || error.starts_with("MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN")
         {
             self.freeze_account_store_writes(error)
         } else {
@@ -5052,13 +5104,14 @@ impl SimulationConfig {
         } else {
             AccountStoreMutationScope::AccountsWithGlobal(&account_ids)
         };
-        let mutation_plan = build_account_store_mutation_plan(
+        let mut mutation_plan = build_account_store_mutation_plan(
             &store,
             &store,
             scope,
             self.account_store_database_mode == AccountStoreDatabaseMode::Mirror
                 && scoped_account_id.is_none(),
         );
+        self.bind_zone_save_fence_to_plan(&mut mutation_plan);
 
         let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
         if let Some(path) = self.account_store_path.as_deref() {
@@ -5078,7 +5131,8 @@ impl SimulationConfig {
                 database_url,
                 self.account_store_database_mode,
                 &mutation_plan,
-            )?;
+            )
+            .map_err(|error| self.map_clock_repository_error(&mutation_plan, error))?;
             if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
                 let mut live_store = self
                     .account_store
@@ -5454,8 +5508,9 @@ impl SimulationConfig {
         };
         validate_account_store_transaction_scope(&original_store, &staged_store, scope)
             .map_err(|error| error.to_string())?;
-        let mutation_plan =
+        let mut mutation_plan =
             build_account_store_mutation_plan(&original_store, &staged_store, scope, false);
+        self.bind_zone_save_fence_to_plan(&mut mutation_plan);
 
         #[cfg(any(test, feature = "test-support"))]
         if self.take_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist) {
@@ -5489,12 +5544,13 @@ impl SimulationConfig {
             );
         }
 
-        let rollback_plan = build_account_store_mutation_plan(
+        let mut rollback_plan = build_account_store_mutation_plan(
             &staged_store,
             &original_store,
             scope,
             mutation_plan.global_stock.is_some(),
         );
+        rollback_plan.zone_save_fence = self.zone_save_fence.clone();
         let mut postgres_versions = None;
         let publication = self.begin_file_publication_with_diagnostics(Some(&diagnostics))?;
 
@@ -5836,7 +5892,11 @@ impl SimulationConfig {
             return Err("postgres account source is unavailable".to_string());
         };
         self.refresh_account_store_account_with_loader(account_id, || {
-            load_account_from_postgres(database_url.to_string(), account_id.to_string())
+            load_account_from_postgres(
+                database_url.to_string(),
+                account_id.to_string(),
+                self.zone_save_fence.is_none(),
+            )
         })
     }
 
@@ -6149,11 +6209,14 @@ fn load_account_store_from_postgres(
 fn load_account_from_postgres(
     database_url: String,
     account_id: String,
+    allow_migrate: bool,
 ) -> Result<Option<(AccountRecord, AccountStoreSourceVersions)>, String> {
     let pool = postgres_account_store_pool(&database_url);
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
-        pool.ensure_migrated(&mut client)?;
+        if allow_migrate {
+            pool.ensure_migrated(&mut client)?;
+        }
         let Some(row) = client
             .query_opt(
                 "SELECT raw_json, store_version FROM accounts WHERE account_id = $1",
@@ -6407,20 +6470,36 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     plan: AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    let carries_zone_fence = plan.zone_save_fence.is_some();
     let carries_clock = plan.clock.is_some();
     let carries_guilds = !plan.guilds.is_empty() || plan.carries_guild_experience_source();
     let carries_heroes = !plan.heroes.is_empty() || plan.hero_allocator.is_some();
     let carries_conquests = !plan.conquests.is_empty();
     let carries_billing = plan.carries_billing_source();
     let carries_stones = plan.stones.is_some();
+    let carries_mail =
+        mode == AccountStoreDatabaseMode::SourceOfTruth && mail_transfer::carries_source(&plan);
     std::thread::spawn(move || {
-        let mut client = pool.connection()?;
-        pool.ensure_migrated(&mut client)?;
+        let mut client = pool.connection().map_err(|error| {
+            if carries_zone_fence {
+                zone_save_fence::UNAVAILABLE.to_string()
+            } else {
+                error
+            }
+        })?;
+        // A fenced save is never a schema-provisioning capability.
+        if !carries_zone_fence {
+            pool.ensure_migrated(&mut client)?;
+        }
         write_account_store_mutation_plan_to_postgres(&mut client, &plan, mode)
     })
     .join()
     .map_err(|_| {
-        if carries_billing {
+        if carries_zone_fence {
+            zone_save_fence::commit_outcome_unknown("transaction worker panicked")
+        } else if carries_mail {
+            "MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN: postgres mail worker panicked".into()
+        } else if carries_billing {
             format!(
                 "{}: postgres billing transaction worker panicked",
                 crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN
@@ -6470,7 +6549,47 @@ fn write_account_store_mutation_plan_to_postgres(
         write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
         .commit()
-        .map_err(|error|if plan.carries_billing_source() && error.as_db_error().is_none(){format!("{}: postgres billing commit response unavailable: {error}",crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)}else if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if plan.stones.is_some() && error.as_db_error().is_none(){format!("{}: stone commit response unavailable: {error}",stone_authority::COMMIT_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else if !plan.conquests.is_empty() && error.as_db_error().is_none(){format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")}else{format!("postgres account-store commit failed: {error}")})?;
+        .map_err(|error| {
+            if plan.zone_save_fence.is_some() {
+                zone_save_fence::classify_commit_error(error)
+            } else if mode == AccountStoreDatabaseMode::SourceOfTruth
+                && mail_transfer::carries_source(plan)
+            {
+                // SQLSTATE 40003/08007 can be DbError too. No failed COMMIT
+                // response is sufficient proof that a transfer did not commit.
+                "MAIL_ITEM_TRANSFER_COMMIT_OUTCOME_UNKNOWN: commit outcome unavailable".into()
+            } else if plan.carries_billing_source() && error.as_db_error().is_none() {
+                format!("{}: postgres billing commit response unavailable: {error}", crate::billing::BILLING_COMMIT_OUTCOME_UNKNOWN)
+            } else if plan.clock.is_some() {
+                guild_clock::classify_commit_error(error).to_string()
+            } else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source())
+                && error.as_db_error().is_none()
+            {
+                format!("{}: postgres guild commit response unavailable: {error}", guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)
+            } else if plan.stones.is_some() && error.as_db_error().is_none() {
+                format!("{}: stone commit response unavailable: {error}", stone_authority::COMMIT_UNKNOWN)
+            } else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some())
+                && error.as_db_error().is_none()
+            {
+                format!("{}: postgres Hero commit response unavailable: {error}", hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)
+            } else if !plan.conquests.is_empty() && error.as_db_error().is_none() {
+                format!("CONQUEST_COMMIT_OUTCOME_UNKNOWN: postgres siege commit response unavailable: {error}")
+            } else {
+                format!("postgres account-store commit failed: {error}")
+            }
+        })?;
+    #[cfg(test)]
+    match plan.zone_save_fence_test_fault {
+        Some(zone_save_fence::TestFault::PanicAfterCommit) => {
+            panic!("ZONE_SAVE_FENCE_TEST_PANIC_AFTER_COMMIT")
+        }
+        Some(zone_save_fence::TestFault::LoseResponseAfterCommit) => {
+            return Err(zone_save_fence::commit_outcome_unknown(
+                "test-only response loss after confirmed commit",
+            ))
+        }
+        None => {}
+    }
     Ok(source_versions)
 }
 
@@ -6479,6 +6598,12 @@ fn write_account_store_mutation_plan_in_transaction(
     plan: &AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    if let Some(fence) = plan.zone_save_fence.as_ref() {
+        fence.lock_and_validate(transaction, mode)?;
+    }
+    if let Some(operation) = plan.zone_save_operation.as_ref() {
+        operation.lock_prepared_for_commit(transaction, plan, mode)?;
+    }
     let clock_version = plan
         .clock
         .as_ref()
@@ -6517,6 +6642,10 @@ fn write_account_store_mutation_plan_in_transaction(
             plan,
         )?)
     };
+    // Exact player-mail withdrawals and their immutable provenance share the
+    // source transaction. Later account/save CAS failures roll back both.
+    // This is not the global current-holder index required to enable PG claims.
+    mail_transfer::write(transaction, plan, mode)?;
     let mut source_versions =
         execute_account_store_mutation_plan(plan, |operation| match operation {
             AccountStoreMutationOperation::GlobalStock(mutation) => {
@@ -6551,6 +6680,9 @@ fn write_account_store_mutation_plan_in_transaction(
     source_versions.guilds = guild_versions;
     source_versions.conquests = conquest_versions;
     source_versions.heroes = hero_versions;
+    if let Some(operation) = plan.zone_save_operation.as_ref() {
+        operation.write_committed_receipt(transaction, &source_versions)?;
+    }
     Ok(source_versions)
 }
 
@@ -8049,6 +8181,24 @@ impl Default for Stage5MentorState {
     }
 }
 
+/// Attachment provenance is trusted only when committed by its canonical
+/// server source. Sender names, subjects and other player-visible text must
+/// never be used to infer an origin for an older delivery.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Stage5MailAttachmentOrigin {
+    #[default]
+    LegacyUnknown,
+    FreshGrant,
+    ExistingCustody,
+}
+
+impl Stage5MailAttachmentOrigin {
+    pub fn is_legacy_unknown(&self) -> bool {
+        matches!(self, Self::LegacyUnknown)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5MailMessage {
@@ -8064,12 +8214,66 @@ pub struct Stage5MailMessage {
     pub items: Vec<String>,
     #[serde(default)]
     pub item_states_json: Vec<String>,
+    /// All attachments in this delivery have one canonical origin. Mixed-origin
+    /// batches require separate deliveries; absent historical evidence remains
+    /// unknown until explicitly reconciled by a trusted migration.
+    #[serde(
+        default,
+        skip_serializing_if = "Stage5MailAttachmentOrigin::is_legacy_unknown"
+    )]
+    pub attachment_origin: Stage5MailAttachmentOrigin,
     #[serde(default)]
     pub opened: bool,
     #[serde(default)]
     pub locked: bool,
     pub claimed: bool,
     pub deleted: bool,
+}
+
+#[cfg(test)]
+mod stage5_mail_attachment_origin_tests {
+    use super::{Stage5MailAttachmentOrigin, Stage5MailMessage};
+
+    fn legacy_delivery() -> serde_json::Value {
+        serde_json::json!({
+            "id": 1,
+            "from": "Gameshop",
+            "to": "Owner",
+            "subject": "Rental item returned",
+            "body": "Player-visible text is not provenance",
+            "gold": 0,
+            "claimed": false,
+            "deleted": false
+        })
+    }
+
+    #[test]
+    fn stage5_mail_attachment_origin_legacy_text_does_not_authorize_a_grant_or_transfer() {
+        let mail: Stage5MailMessage = serde_json::from_value(legacy_delivery()).unwrap();
+        assert_eq!(
+            mail.attachment_origin,
+            Stage5MailAttachmentOrigin::LegacyUnknown
+        );
+        let encoded = serde_json::to_value(mail).unwrap();
+        assert!(encoded.get("attachmentOrigin").is_none());
+    }
+
+    #[test]
+    fn stage5_mail_attachment_origin_explicit_canonical_kinds_round_trip() {
+        for origin in [
+            Stage5MailAttachmentOrigin::FreshGrant,
+            Stage5MailAttachmentOrigin::ExistingCustody,
+        ] {
+            let mut mail: Stage5MailMessage = serde_json::from_value(legacy_delivery()).unwrap();
+            mail.attachment_origin = origin;
+            let encoded = serde_json::to_value(&mail).unwrap();
+            assert!(encoded.get("attachmentOrigin").is_some());
+            assert_eq!(
+                serde_json::from_value::<Stage5MailMessage>(encoded).unwrap(),
+                mail
+            );
+        }
+    }
 }
 
 /// Generate an opaque, persistent identity for one logical mail delivery.
@@ -8179,6 +8383,7 @@ pub fn deliver_stage5_system_mail(
                 .unwrap_or(0)
                 .saturating_add(1);
             systems.mail.push(Stage5MailMessage {
+                attachment_origin: Stage5MailAttachmentOrigin::FreshGrant,
                 id,
                 delivery_nonce: new_stage5_mail_delivery_nonce(),
                 from: delivery.from.clone(),

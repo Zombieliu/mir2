@@ -1,0 +1,31 @@
+[Unit]
+Description=Mir2 read-only daily metadata and disk audit
+After=local-fs.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /usr/local/lib/mir2-retention/daily_audit.py
+StateDirectory=mir2-retention-audit
+StateDirectoryMode=0700
+UMask=0077
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=45
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/mir2-retention-audit
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+RestrictAddressFamilies=AF_UNIX
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mir2-retention-audit

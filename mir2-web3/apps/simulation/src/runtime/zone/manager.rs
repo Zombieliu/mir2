@@ -33,6 +33,9 @@ use admission::ManagerMapRandomMaster;
 #[cfg(test)]
 #[path = "manager_presence_publication_tests.rs"]
 mod presence_publication_tests;
+#[cfg(test)]
+#[path = "manager_reconstructed_admission_tests.rs"]
+mod reconstructed_admission_tests;
 
 // Not `Clone`/`Default`-derived: it holds `ZoneRuntime`s which own a
 // non-cloneable `bevy_ecs::World`, and nothing cloned/defaulted the manager.
@@ -125,11 +128,17 @@ impl ZoneManager {
     /// execution strategies can compare full outputs and committed state.
     #[cfg(any(test, feature = "test-support"))]
     pub fn fork_for_deterministic_reference(&self) -> Self {
+        self.transaction_fork()
+    }
+
+    /// Stage an in-process transaction without cold-restoring serialized world
+    /// bytes. Live online, monster and pet authority remain in the same epoch.
+    pub fn transaction_fork(&self) -> Self {
         Self {
             zones: self
                 .zones
                 .iter()
-                .map(|(key, runtime)| (key.clone(), runtime.fork_for_deterministic_reference()))
+                .map(|(key, runtime)| (key.clone(), runtime.transaction_fork()))
                 .collect(),
             session_zones: self.session_zones.clone(),
             online_identities: self.online_identities.clone(),
@@ -347,6 +356,47 @@ impl ZoneManager {
     pub fn online_owner_proof_for_session(&self, session_id: &SessionId) -> Option<String> {
         Some(self.online_identities.owner(session_id)?.encoded())
     }
+
+    /// The trusted Host calls this only after reconstructing an actual private
+    /// Session. A cold checkpoint itself never grants a live online identity.
+    /// This issues a fresh admission without replaying Join or resetting world,
+    /// movement, life, combat, pets, or player-drop custody.
+    pub fn readmit_restored_player(
+        &mut self,
+        identity: &crate::ActiveSessionIdentity,
+        join: &ZoneJoin,
+    ) -> Result<(), String> {
+        if identity.account_id.is_empty() || identity.character_index < 0
+            || identity.character_name.is_empty() || join.session_id.as_str().is_empty()
+            || join.object_id == 0 || join.account_id != identity.account_id
+            || join.character_index != identity.character_index || join.name != identity.character_name {
+            return Err("restored online admission private identity mismatch".into());
+        }
+        let key = self.session_zones.get(&join.session_id)
+            .ok_or("restored online admission has no retained session route")?;
+        if crate::runtime::map::normalize_map_file_name(&key.map_file_name)
+            != crate::runtime::map::normalize_map_file_name(&join.map_file_name) {
+            return Err("restored online admission retained map mismatch".into());
+        }
+        let zone = self.zones.get(key).ok_or("restored online admission retained Zone missing")?;
+        if zone.player_identity(&join.session_id)
+            != Some((join.session_id.clone(), identity.account_id.clone(), identity.character_index))
+            || zone.player_object_id(&join.session_id).map(|id| id.0) != Some(join.object_id) {
+            return Err("restored online admission retained player identity mismatch".into());
+        }
+        // Validate name through the existing exact player projection. Mint in a
+        // private candidate first so failed validation cannot advance the book.
+        let mut admitted = self.online_identities.clone();
+        admitted.admit(join, true).ok_or("restored online admission epoch exhausted")?;
+        let presence = zone.online_player_snapshot(&admitted);
+        if presence.get(&join.session_id).is_none_or(|player|
+            player.name != identity.character_name || &player.key != key) {
+            return Err("restored online admission retained character mismatch".into());
+        }
+        self.online_identities = admitted;
+        self.refresh_online_presence();
+        Ok(())
+    }
     pub fn owner_health_cursor(
         &self,
         session_id: &SessionId,
@@ -433,6 +483,194 @@ impl ZoneManager {
         if let Some(zone) = self.zones.get_mut(source) {
             zone.acknowledge_issued_monster_award(session_id, award);
         }
+    }
+    pub fn reserve_player_drop_placement_for_key(
+        &mut self,
+        key: &ZoneKey,
+        session: &SessionId,
+        world_effect_id: &str,
+        kind: super::PlayerDropPlacementKind,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropPlacementReservation, String> {
+        if self.session_zones.get(session) != Some(key) {
+            return Err("player-drop reservation Zone mismatch".into());
+        }
+        // Reserve enough durable admission capacity without publishing a
+        // transient placement decision as a committed world action.
+        self.ensure_admission_capacity(1)?;
+        self.zones
+            .get_mut(key)
+            .ok_or("player-drop Zone missing")?
+            .reserve_player_drop_placement(session, world_effect_id, kind, now_ms)
+    }
+    pub fn release_player_drop_placement_for_key(
+        &mut self,
+        key: &ZoneKey,
+        reservation: &super::PlayerDropPlacementReservation,
+    ) -> Result<bool, String> {
+        if reservation.zone() != key {
+            return Err("player-drop release Zone mismatch".into());
+        }
+
+        Ok(self
+            .zones
+            .get_mut(key)
+            .is_some_and(|zone| zone.release_player_drop_placement(reservation)))
+    }
+    pub fn apply_committed_player_drop_for_key(
+        &mut self,
+        key: &ZoneKey,
+        proof: &crate::player_drop::PlayerDropCommittedEffect,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropApplyResult, String> {
+        if proof.intent().zone() != key {
+            return Err("committed player-drop Zone mismatch".into());
+        }
+        self.admit_special(
+            std::slice::from_ref(key),
+            "apply_committed_player_drop",
+            &(proof.intent(), proof.state(), now_ms),
+        )?;
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| {
+                ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key))
+            })
+            .apply_committed_player_drop(proof, now_ms)
+    }
+    pub fn reconcile_committed_player_drops_for_key(
+        &mut self,
+        key: &ZoneKey,
+        proofs: &[crate::player_drop::PlayerDropCommittedEffect],
+        now_ms: u64,
+    ) -> Result<Vec<ZoneOutbound>, String> {
+        if proofs.iter().any(|proof| proof.intent().zone() != key) {
+            return Err("player-drop recovery Zone mismatch".into());
+        }
+        let evidence: Vec<_> = proofs
+            .iter()
+            .map(|proof| (proof.intent(), proof.state()))
+            .collect();
+        self.admit_special(
+            std::slice::from_ref(key),
+            "reconcile_committed_player_drops",
+            &(evidence, now_ms),
+        )?;
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| {
+                ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key))
+            })
+            .reconcile_committed_player_drops(proofs, now_ms)
+    }
+    /// Trusted Host lifecycle hook. This process-local gate is never restored
+    /// from checkpoint bytes and has no ZoneCommand/client counterpart.
+    pub fn set_player_drop_replica_mode_for_key(&mut self, key: &ZoneKey, replica: bool) {
+        self.zones
+            .entry(key.clone())
+            .or_insert_with(|| {
+                ZoneRuntime::new_with_combat_seed(key.clone(), self.map_random_master.seed_for(key))
+            })
+            .set_player_drop_replica_mode(replica);
+    }
+    /// Install the authenticated source decision without selecting a new tile.
+    /// Reservations are transient. Only the following committed apply is admitted.
+    pub fn install_player_drop_replica_reservation_for_key(
+        &mut self,
+        key: &ZoneKey,
+        slot: &super::PlayerDropPlacementReservation,
+    ) -> Result<(), String> {
+        if slot.zone() != key
+            || self
+                .zones
+                .get(key)
+                .is_none_or(|zone| !zone.is_player_drop_replica_mode())
+        {
+            return Err("frozen placement replay requires replica Zone".into());
+        }
+
+        self.zones
+            .get_mut(key)
+            .ok_or("replica player-drop Zone missing")?
+            .install_frozen_player_drop_reservation(slot)
+    }
+    /// The caller has already authenticated the Host's frozen-result journal.
+    /// Shadow replay validates immutable source/receipt evidence without PG or a
+    /// write permit; active Zones cannot use this route to mint world assets.
+    pub fn apply_player_drop_replica_result_for_key(
+        &mut self,
+        key: &ZoneKey,
+        operation: &crate::player_drop::PlayerDropPreparedOperation,
+        receipt: &crate::player_drop::PlayerDropCommitReceipt,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropApplyResult, String> {
+        if self
+            .zones
+            .get(key)
+            .is_none_or(|zone| !zone.is_player_drop_replica_mode())
+        {
+            return Err("player-drop journal replay requires replica Zone".into());
+        }
+        let proof = crate::player_drop::PlayerDropCommittedEffect::from_replica_evidence(
+            operation.clone(),
+            receipt.clone(),
+        )?;
+        if proof.intent().zone() != key {
+            return Err("replica player-drop Zone mismatch".into());
+        }
+        self.admit_special(
+            std::slice::from_ref(key),
+            "apply_committed_player_drop",
+            &(proof.intent(), proof.state(), now_ms),
+        )?;
+        self.zones
+            .get_mut(key)
+            .ok_or("replica player-drop Zone missing")?
+            .apply_committed_player_drop(&proof, now_ms)
+    }
+    pub fn zone_keys(&self) -> Vec<ZoneKey> {
+        self.zones.keys().cloned().collect()
+    }
+
+    pub fn query_player_drop_effect_for_key(
+        &self,
+        key: &ZoneKey,
+        world_effect_id: &str,
+        intent_digest: &str,
+    ) -> Result<Option<super::PlayerDropCustodyState>, String> {
+        match self.zones.get(key) {
+            Some(zone) => zone.query_player_drop_effect(world_effect_id, intent_digest),
+            None => Ok(None),
+        }
+    }
+    pub fn retire_committed_player_drop_for_key(
+        &mut self,
+        key: &ZoneKey,
+        proof: &crate::player_drop::PlayerDropCommittedEffect,
+        now_ms: u64,
+    ) -> Result<super::PlayerDropApplyResult, String> {
+        if proof.state() == crate::player_drop::PlayerDropEffectState::Live {
+            return Err("player-drop retirement requires terminal committed evidence".into());
+        }
+        self.apply_committed_player_drop_for_key(key, proof, now_ms)
+    }
+    pub fn player_drop_effect_state_for_key(
+        &self,
+        key: &ZoneKey,
+        world_effect_id: &str,
+    ) -> Option<super::PlayerDropCustodyState> {
+        self.zones
+            .get(key)?
+            .player_drop_effect_state(world_effect_id)
+    }
+    pub fn player_drop_custody_states_for_key(
+        &self,
+        key: &ZoneKey,
+    ) -> Vec<(String, super::PlayerDropCustodyState)> {
+        self.zones
+            .get(key)
+            .map(|zone| zone.player_drop_custody_states())
+            .unwrap_or_default()
     }
     pub fn ground_drop_snapshot_for_key(
         &self,

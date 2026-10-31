@@ -138,6 +138,15 @@ pub enum UserItemUidError {
         issued_through: u64,
         generation: u64,
     },
+    /// Database errors intentionally retain only a fixed operation label, never
+    /// a driver error, connection string, credential or configured namespace.
+    DatabaseAuthorityUnavailable {
+        operation: &'static str,
+    },
+    DatabaseAuthorityRejected {
+        reason: &'static str,
+    },
+    DatabaseCommitOutcomeUnknown,
 }
 
 impl fmt::Display for UserItemUidError {
@@ -211,6 +220,19 @@ impl fmt::Display for UserItemUidError {
                 formatter,
                 "UID authority exhausted at issuedThrough={issued_through}, generation={generation}"
             ),
+            Self::DatabaseAuthorityUnavailable { operation } => {
+                write!(
+                    formatter,
+                    "PostgreSQL UID authority unavailable: {operation}"
+                )
+            }
+            Self::DatabaseAuthorityRejected { reason } => {
+                write!(formatter, "PostgreSQL UID authority rejected: {reason}")
+            }
+            Self::DatabaseCommitOutcomeUnknown => write!(
+                formatter,
+                "PostgreSQL UID commit outcome unknown; source writes are frozen"
+            ),
         }
     }
 }
@@ -227,6 +249,12 @@ impl Error for UserItemUidError {
 }
 
 pub trait UserItemUidStore: Send + Sync {
+    /// PostgreSQL authorities must retain their source binding even when a
+    /// caller removes the database URL from a cloned configuration.
+    fn requires_postgres_source(&self) -> bool {
+        false
+    }
+
     fn issue_one(&self, reason: UserItemUidReason) -> Result<UserItemUid, UserItemUidError>;
 
     fn issued_through(&self) -> Result<u64, UserItemUidError>;
@@ -234,6 +262,24 @@ pub trait UserItemUidStore: Send + Sync {
     /// Raises the durable high-water mark for migration/recovery and never
     /// lowers it. A lower or equal floor is a locked, persistence-free no-op.
     fn ensure_issued_through_at_least(&self, floor: u64) -> Result<u64, UserItemUidError>;
+
+    /// Server-internal binding validation. A file or arbitrary store cannot
+    /// masquerade as the PostgreSQL source authority by merely being durable.
+    fn validate_postgres_source(
+        &self,
+        _config: &crate::SimulationConfig,
+    ) -> Result<(), UserItemUidError> {
+        Err(UserItemUidError::DatabaseAuthorityRejected {
+            reason: "store is not bound to the PostgreSQL source configuration",
+        })
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    fn lose_next_postgres_commit_acknowledgement_for_test(&self) -> Result<(), UserItemUidError> {
+        Err(UserItemUidError::DatabaseAuthorityRejected {
+            reason: "store does not support PostgreSQL acknowledgement fault injection",
+        })
+    }
 }
 
 #[derive(Clone)]
@@ -250,6 +296,29 @@ impl fmt::Debug for UserItemUidAllocator {
 }
 
 impl UserItemUidAllocator {
+    pub(crate) fn from_store(inner: Arc<dyn UserItemUidStore>) -> Self {
+        Self { inner }
+    }
+
+    pub(crate) fn requires_postgres_source(&self) -> bool {
+        self.inner.requires_postgres_source()
+    }
+
+    pub(crate) fn validate_postgres_source(
+        &self,
+        config: &crate::SimulationConfig,
+    ) -> Result<(), UserItemUidError> {
+        self.inner.validate_postgres_source(config)
+    }
+
+    #[cfg(any(test, feature = "test-support"))]
+    pub fn lose_next_postgres_commit_acknowledgement_for_test(
+        &self,
+    ) -> Result<(), UserItemUidError> {
+        self.inner
+            .lose_next_postgres_commit_acknowledgement_for_test()
+    }
+
     pub fn initialize_file(
         state_path: impl AsRef<Path>,
         initial_issued_through: u64,

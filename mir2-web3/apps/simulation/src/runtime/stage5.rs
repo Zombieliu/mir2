@@ -34,11 +34,10 @@ use super::equipment::{
     equipment_uses_durability, EquipmentState,
 };
 use super::inventory::{
-    add_minutes_to_binary_datetime, add_or_increment_item,
-    additional_slots_needed_for_item_quantity, allocate_item_unique_id, binary_datetime_ticks,
-    can_gain_item_quantity, crystal_duration_label_from_seconds, crystal_npc_storage_open_packets,
-    current_binary_datetime, find_empty_inventory_item_slot, free_bag_slots,
-    future_binary_datetime_minutes, item_heal_values_for_key, normalize_fresh_item_tree_unique_ids,
+    add_minutes_to_binary_datetime, add_or_increment_item, allocate_item_unique_id,
+    binary_datetime_ticks, can_gain_item_quantity, crystal_duration_label_from_seconds,
+    crystal_npc_storage_open_packets, current_binary_datetime, find_empty_inventory_item_slot,
+    free_bag_slots, future_binary_datetime_minutes, item_heal_values_for_key,
 };
 use super::items::{
     crystal_equipment_slot_for_item_key, crystal_item_key_for_template, crystal_item_stat_value,
@@ -87,7 +86,11 @@ pub(super) enum Stage5MailClaimError {
     InvalidExactItemState,
     Capacity,
     BalanceOverflow,
+    AuthorityUnavailable,
 }
+
+#[path = "mail_uid_planning.rs"]
+pub(super) mod mail_uid_planning;
 
 #[derive(Debug, Clone)]
 pub(super) struct Stage5MailClaimOutcome {
@@ -213,6 +216,7 @@ mod stage5_item_carrier_validation_tests {
 
     fn mail_with_attachment(encoded: String) -> Stage5MailMessage {
         Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 1,
             delivery_nonce: "stage5-carrier-test".to_string(),
             from: "System".to_string(),
@@ -618,147 +622,46 @@ pub(super) fn stage5_claim_mail_authoritative(
     world: &mut World,
     mail_id: u32,
 ) -> Result<Stage5MailClaimOutcome, Stage5MailClaimError> {
-    let (mail_index, gold, keyed_items, item_states_json) = {
-        let stage5 = world.resource::<Stage5SystemsResource>();
-        let Some(mail_index) = stage5
-            .stage5_systems
-            .mail
-            .iter()
-            .position(|mail| mail.id == mail_id && !mail.deleted)
-        else {
-            return Err(Stage5MailClaimError::NotFound);
-        };
-        let mail = &stage5.stage5_systems.mail[mail_index];
-        if mail.claimed {
-            return Err(Stage5MailClaimError::AlreadyClaimed);
+    let durable = matches!(
+        &world.resource::<InventoryResource>().item_uid_issuance,
+        super::item_uid_issuance::ItemUidIssuance::Durable(_)
+    ) || world
+        .get_resource::<RuntimeConfigResource>()
+        .is_some_and(|resource| {
+            matches!(
+                &resource.config.item_uid_issuance,
+                super::item_uid_issuance::ItemUidIssuance::Durable(_)
+            )
+        });
+    if durable {
+        if world.get_resource::<RuntimeConfigResource>().is_none() {
+            return Err(Stage5MailClaimError::AuthorityUnavailable);
         }
-        (
-            mail_index,
-            mail.gold,
-            mail.items.clone(),
-            mail.item_states_json.clone(),
-        )
-    };
-
-    // Exact attachment state is authoritative. Once present, it must parse and
-    // validate as one complete batch; corruption must never fall back to the
-    // lossy legacy key list.
-    let has_exact_item_states = !item_states_json.is_empty();
-    let item_states = if has_exact_item_states {
-        let parsed = item_states_json
-            .iter()
-            .map(|state| serde_json::from_str::<ItemState>(state))
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|_| Stage5MailClaimError::InvalidExactItemState)?;
-        if parsed
-            .iter()
-            .any(|item| validate_exact_stage5_item_state(item).is_err())
-        {
-            return Err(Stage5MailClaimError::InvalidExactItemState);
+        return mail_uid_planning::commit_claims(world, &[mail_id])
+            .map(|plan| plan.claim)
+            .map_err(|error| {
+                if world
+                    .resource::<RuntimeConfigResource>()
+                    .config
+                    .ensure_account_store_writable()
+                    .is_err()
+                {
+                    super::shared_guild_experience::reject_source(world, error);
+                }
+                Stage5MailClaimError::AuthorityUnavailable
+            });
+    }
+    let plan = mail_uid_planning::prepare_claims(world, &[mail_id]).map_err(|error| {
+        if let Some(config) = world.get_resource::<RuntimeConfigResource>() {
+            if let Err(unknown) = config.config.ensure_account_store_writable() {
+                super::shared_guild_experience::reject_source(world, unknown);
+            }
         }
-        parsed
-    } else {
-        Vec::new()
-    };
-    let keyed_items = if has_exact_item_states {
-        Vec::new()
-    } else {
-        keyed_items
-    };
-    if keyed_items
-        .iter()
-        .any(|key| super::billing_monthly_card::is_card_key(key))
-    {
-        return Err(Stage5MailClaimError::InvalidExactItemState);
-    }
-
-    super::billing_monthly_card::validate_claim_items(world, &item_states)
-        .map_err(|_| Stage5MailClaimError::InvalidExactItemState)?;
-
-    let exact_item_slots = {
-        let resources = world.resource::<InventoryResource>();
-        let slots = stage5_mail_exact_item_slots(
-            &resources.inventory_items,
-            &item_states,
-            resources.inventory_capacity,
-        )
-        .ok_or(Stage5MailClaimError::Capacity)?;
-        let mut keyed_quantities = BTreeMap::<&str, u32>::new();
-        for key in &keyed_items {
-            *keyed_quantities.entry(key.as_str()).or_default() += 1;
-        }
-        let needed_legacy_slots = keyed_quantities
-            .into_iter()
-            .try_fold(0u32, |needed, (key, quantity)| {
-                needed.checked_add(additional_slots_needed_for_item_quantity(
-                    resources,
-                    ItemContainer::Bag1,
-                    key,
-                    quantity,
-                ))
-            })
-            .ok_or(Stage5MailClaimError::Capacity)?;
-        if needed_legacy_slots > u32::from(free_bag_slots(resources)) {
-            return Err(Stage5MailClaimError::Capacity);
-        }
-        slots
-    };
-
-    let next_gold = world
-        .resource::<PlayerRuntimeResource>()
-        .gold
-        .checked_add(gold)
-        .ok_or(Stage5MailClaimError::BalanceOverflow)?;
-
-    // No fallible validation remains after this point. Commit currency,
-    // inventory, and mailbox state as one authoritative transaction.
-    if gold > 0 {
-        world.resource_mut::<PlayerRuntimeResource>().gold = next_gold;
-    }
-    let mut gained_items = Vec::with_capacity(item_states.len() + keyed_items.len());
-    for (mut item, (container, slot)) in item_states.into_iter().zip(exact_item_slots) {
-        item.container = container;
-        item.slot = slot;
-        if !super::billing_monthly_card::is_card(&item) {
-            normalize_fresh_item_tree_unique_ids(
-                world.resource::<InventoryResource>(),
-                &mut item,
-                &[],
-            );
-        }
-        gained_items.push(item.clone());
-        world
-            .resource_mut::<InventoryResource>()
-            .inventory_items
-            .push(item);
-    }
-    for key in keyed_items {
-        gained_items.push(add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &key,
-            &stage5_item_name(&key),
-            "Stage 5 mail attachment.",
-            20,
-            1,
-            1,
-        ));
-    }
-    {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        let mail = &mut stage5.stage5_systems.mail[mail_index];
-        mail.claimed = true;
-        mail.gold = 0;
-        mail.items.clear();
-        mail.item_states_json.clear();
-    }
-
-    Ok(Stage5MailClaimOutcome {
-        gold,
-        items: gained_items,
-    })
+        error
+    })?;
+    mail_uid_planning::publish_claim(world, &plan);
+    Ok(plan.claim)
 }
-
 pub(super) fn push_unique(values: &mut Vec<String>, value: String) {
     if !values
         .iter()
@@ -1296,6 +1199,7 @@ fn record_native_game_shop_ledger_outcome(
                 .checked_add(1)
                 .ok_or_else(|| "native GameShop ledger mail id exhausted".to_string())?;
             systems.mail.push(Stage5MailMessage {
+                attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
                 id,
                 delivery_nonce,
                 from: NATIVE_GAME_SHOP_LEDGER_FROM.to_string(),
@@ -1629,6 +1533,7 @@ mod game_shop_validation_tests {
             entries,
         };
         let mail = Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 1,
             delivery_nonce: super::NATIVE_GAME_SHOP_LEDGER_DELIVERY_NONCE.to_string(),
             from: super::NATIVE_GAME_SHOP_LEDGER_FROM.to_string(),
@@ -1697,6 +1602,7 @@ mod game_shop_validation_tests {
 
     fn test_mail(id: u32) -> Stage5MailMessage {
         Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id,
             delivery_nonce: format!("game-shop-outcome-test-{id}"),
             from: "System".to_string(),
@@ -3672,6 +3578,7 @@ impl SimulationSession {
             .unwrap_or(0)
             + 1;
         stage5.stage5_systems.mail.push(Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id,
             delivery_nonce: new_stage5_mail_delivery_nonce(),
             from,
@@ -3718,7 +3625,9 @@ impl SimulationSession {
                     "server.YouCannotCarryAnymore",
                 ))]
             }
-            Err(Stage5MailClaimError::BalanceOverflow) => {
+            Err(
+                Stage5MailClaimError::BalanceOverflow | Stage5MailClaimError::AuthorityUnavailable,
+            ) => {
                 vec![system_message(&format_localized_text(
                     language,
                     "server.InvalidPacketReceived",
@@ -4076,6 +3985,7 @@ impl SimulationSession {
                 .unwrap_or(0)
                 + 1;
             stage5.stage5_systems.mail.push(Stage5MailMessage {
+                attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
                 id: mail_id,
                 delivery_nonce: new_stage5_mail_delivery_nonce(),
                 from: "Gameshop".to_string(),
@@ -4407,6 +4317,7 @@ impl SimulationSession {
         let purchase_quantity = details.purchase_quantity;
         let attachment_count = details.attachment_states_json.len();
         let mut pending_mail = Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 0,
             delivery_nonce: new_stage5_mail_delivery_nonce(),
             from: "Gameshop".to_string(),
@@ -4632,6 +4543,9 @@ impl SimulationSession {
                 serde_json::to_string(&systems)
                     .map_err(|error| format!("failed to encode game-shop systems: {error}"))?,
             );
+            // This source transaction creates the purchase entitlement and
+            // charges it once; no existing inventory instance is transferred.
+            pending_mail.attachment_origin = crate::config::Stage5MailAttachmentOrigin::FreshGrant;
             let mail = stage5_append_mail_to_save(&mut staged_save, &player_name, pending_mail)?;
             let inventory_items = decode_state_vec::<ItemState>(&staged_save.inventory_items_json)
                 .ok_or_else(|| "failed to decode committed game-shop inventory".to_string())?;

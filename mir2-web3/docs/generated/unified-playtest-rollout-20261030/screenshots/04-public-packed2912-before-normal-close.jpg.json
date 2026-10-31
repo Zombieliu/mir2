@@ -1,0 +1,12 @@
+{
+  "source": "sky.get_window_state",
+  "stateReturnedAtUtc": "2026-10-29T19:52:36.146Z",
+  "storedAtUtc": "2026-10-29T19:52:36.147Z",
+  "window": {
+    "app": "process:C:\\mir2-build\\unified-rollout-20261030\\migration-qa\\wallet28-c824-isolated\\generations\\9dfbd083b6b92972539bc01816645ed6131297bb7ca4dedec659438987a74186\\mir2-platform-windows.exe",
+    "id": 14422756,
+    "title": "numeron-legend of rebirth"
+  },
+  "sha256": "a1a4ede9dc9a0f004476643ef386456f077bbca65653cbcf6c28637718fb738d",
+  "altered": false
+}

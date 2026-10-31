@@ -405,6 +405,57 @@ pub trait WorldRuntime: Send + Sync {
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 
+    /// Trusted server capability; binding still validates the runtime's own
+    /// PostgreSQL source configuration. This is never a player command.
+    fn supports_zone_save_fence(&self) -> bool {
+        false
+    }
+
+    /// Bind the lease checked by the host to every subsequent private-state
+    /// source transaction. The database rechecks it inside that transaction.
+    fn bind_zone_save_fence(
+        &mut self,
+        _fence: crate::config::zone_save_fence::ZoneSaveFence,
+    ) -> Result<(), String> {
+        Err("world runtime does not support zone save fencing".into())
+    }
+
+    /// Local diagnostics only; checkpoints and client packets carry no fence.
+    fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
+        None
+    }
+
+    /// Trusted host-only lifecycle operations. Legacy runtimes must explicitly
+    /// implement this capability before a durable teardown can use them.
+    fn prepare_zone_save_operation(
+        &mut self,
+        _binding: crate::config::zone_save_operation::ZoneSaveOperationBinding,
+        _frozen_checkpoint: &CharacterSaveRecord,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
+    fn persist_zone_save_operation(
+        &mut self,
+        _operation: &crate::config::zone_save_operation::ZoneSaveOperation,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        _binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<Option<crate::config::zone_save_operation::ZoneSaveOperationReceipt>, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
+    fn release_zone_save_operation(
+        &mut self,
+        _binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        Err("world runtime does not support durable zone save operations".into())
+    }
+
     fn on_connect(&self) -> Vec<ServerPacket>;
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String>;
 
@@ -554,6 +605,25 @@ pub trait WorldRuntime: Send + Sync {
     fn active_character_teardown_checkpoint(&self) -> Option<CharacterSaveRecord> {
         self.active_character_checkpoint()
     }
+    /// Internal authenticated journal transport; never a player command.
+    /// A supported runtime retains the result and blocks new writes until the
+    /// journal publisher acknowledges its exact immutable identity.
+    fn take_player_drop_journal_result(&mut self) -> Option<crate::PlayerDropJournalResult> {
+        None
+    }
+    fn acknowledge_player_drop_journal_result(
+        &mut self,
+        _operation_key: &str,
+        _intent_digest: &str,
+    ) -> Result<(), String> {
+        Err("world runtime does not support player-drop journal acknowledgement".into())
+    }
+    fn apply_player_drop_journal_result(
+        &mut self,
+        _result: &crate::PlayerDropJournalResult,
+    ) -> Result<Vec<ServerPacket>, String> {
+        Err("world runtime does not support frozen player-drop journal replay".into())
+    }
     fn restore_active_character_checkpoint(
         &mut self,
         _checkpoint: &CharacterSaveRecord,
@@ -624,6 +694,49 @@ impl InProcessWorldRuntime {
         }
     }
 
+    /// Trusted server capability for the external ledger's own transaction.
+    pub fn zone_economy_write_permit(&self) -> Result<crate::ZoneEconomyWritePermit, String> {
+        self.session.zone_economy_write_permit()
+    }
+
+    pub fn preview_shared_player_drop(&self, request: &crate::PlayerDropRequest) -> Result<crate::PlayerDropOutcome, String> {
+        self.session.preview_shared_player_drop(request)
+    }
+
+    pub fn apply_player_drop_replica_source(
+        &mut self,
+        operation: &crate::PlayerDropPreparedOperation,
+        receipt: &crate::PlayerDropCommitReceipt,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session.apply_player_drop_replica_source(operation, receipt)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn commit_shared_player_drop_via_postgres<T, F>(&mut self, binding: crate::PlayerDropOperationBinding,
+        zone: &crate::ZoneKey, frozen_position: mir2_protocol::Point, created_at_unix_ms: u64,
+        expires_at_unix_ms: u64, request: crate::PlayerDropRequest, publish: F)
+        -> Result<(T, Vec<ServerPacket>), crate::PreparedPlayerDropPublicationFailure>
+    where F: FnOnce(&crate::PreparedPlayerDropAccountSource) -> Result<crate::PreparedPlayerDropPublication<T>, crate::PreparedPlayerDropPublicationFailure> {
+        self.session.commit_shared_player_drop_via_postgres(binding, zone, frozen_position,
+            created_at_unix_ms, expires_at_unix_ms, request, publish)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn commit_shared_player_drop_with_resolved_item_via_postgres<T, F>(&mut self,
+        binding: crate::PlayerDropOperationBinding, zone: &crate::ZoneKey,
+        frozen_position: mir2_protocol::Point, created_at_unix_ms: u64, expires_at_unix_ms: u64,
+        request: crate::PlayerDropRequest, resolved_item: Option<crate::GroundDropItemPayload>, publish: F)
+        -> Result<(T, Vec<ServerPacket>), crate::PreparedPlayerDropPublicationFailure>
+    where F: FnOnce(&crate::PreparedPlayerDropAccountSource) -> Result<crate::PreparedPlayerDropPublication<T>, crate::PreparedPlayerDropPublicationFailure> {
+        self.session.commit_shared_player_drop_with_resolved_item_via_postgres(binding, zone, frozen_position,
+            created_at_unix_ms, expires_at_unix_ms, request, resolved_item, publish)
+    }
+
+    pub fn reconcile_shared_player_drop_receipt(&mut self, operation: &crate::PlayerDropPreparedOperation)
+        -> Result<(), crate::PreparedPlayerDropPublicationFailure> {
+        self.session.reconcile_shared_player_drop_receipt(operation)
+    }
+
     pub fn character_handoff_commitment(
         &self,
         checkpoint: &CharacterHandoffCheckpoint,
@@ -633,6 +746,15 @@ impl InProcessWorldRuntime {
 
     pub fn rebind_account_store(&mut self, authoritative: &SimulationConfig) {
         self.session.rebind_account_store(authoritative);
+    }
+
+    pub fn install_zone_source_recovery(
+        &mut self,
+        source: &crate::PreparedZoneSourceRecovery,
+        authoritative: &SimulationConfig,
+    ) -> Result<(), String> {
+        self.session
+            .install_zone_source_recovery(source, authoritative)
     }
 
     pub fn shared_social_message(&self, key: &str, args: &[String]) -> ServerPacket {
@@ -1429,6 +1551,50 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn supports_zone_save_fence(&self) -> bool {
+        true
+    }
+
+    fn bind_zone_save_fence(
+        &mut self,
+        fence: crate::config::zone_save_fence::ZoneSaveFence,
+    ) -> Result<(), String> {
+        self.session.bind_zone_save_fence(fence)
+    }
+
+    fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
+        self.session.bound_zone_save_fence()
+    }
+
+    fn prepare_zone_save_operation(
+        &mut self,
+        binding: crate::config::zone_save_operation::ZoneSaveOperationBinding,
+        frozen_checkpoint: &CharacterSaveRecord,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        self.session.prepare_zone_save_operation(binding, frozen_checkpoint)
+    }
+
+    fn persist_zone_save_operation(
+        &mut self,
+        operation: &crate::config::zone_save_operation::ZoneSaveOperation,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        self.session.persist_zone_save_operation(operation)
+    }
+
+    fn query_zone_save_operation(
+        &self,
+        binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<Option<crate::config::zone_save_operation::ZoneSaveOperationReceipt>, String> {
+        self.session.query_zone_save_operation(binding)
+    }
+
+    fn release_zone_save_operation(
+        &mut self,
+        binding: &crate::config::zone_save_operation::ZoneSaveOperationBinding,
+    ) -> Result<crate::config::zone_save_operation::ZoneSaveOperationReceipt, String> {
+        self.session.release_zone_save_operation(binding)
     }
 
     fn on_connect(&self) -> Vec<ServerPacket> {

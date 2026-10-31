@@ -1,0 +1,20 @@
+{
+  "name": "installed-sc-fiat-recharge",
+  "capturedAtUtc": "2026-10-29T17:12:23.011Z",
+  "window": {
+    "app": "process:F:\\mir2-build\\unified-20261029\\installed-validation\\game\\mir2-platform-windows.exe",
+    "id": 4788964,
+    "title": "numeron-legend of rebirth"
+  },
+  "files": [
+    {
+      "path": "C:/mir2-build/unified-20261029/windows-live/screenshots/installed-sc-fiat-recharge-0.jpg",
+      "sha256": "ced74e54871da5dcd0cf9d4844357ce1ce65372c3832e9a41b06ea6b4b394fcc",
+      "bytes": 85890,
+      "width": 1026,
+      "height": 800,
+      "screenshotId": "screenshot-0",
+      "unmodified": true
+    }
+  ]
+}

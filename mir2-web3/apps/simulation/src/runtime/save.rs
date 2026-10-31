@@ -12,6 +12,10 @@ use mir2_game_data::{crystal_item_by_name, format_localized_text, localized_text
 use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
+use crate::config::zone_save_operation::{
+    OperationStatus, ZoneSaveOperation, ZoneSaveOperationBinding, ZoneSaveOperationReceipt,
+    REJECTED as ZONE_SAVE_OPERATION_REJECTED,
+};
 use crate::config::{
     apply_crystal_map_metadata, crystal_bag_slot_capacity, crystal_base_vitals,
     is_valid_crystal_inventory_capacity, new_stage5_mail_delivery_nonce, AccountBanStatus,
@@ -228,6 +232,28 @@ fn rebased_durable_cooldown_ticks(
         .saturating_sub(now_ms.saturating_sub(clock.saved_at_unix_ms))
         .div_ceil(1_000)
         .min(u64::from(cooldown_ticks))
+}
+
+pub(super) fn canonical_recovery_skill_states(
+    save: &CharacterSaveRecord,
+    tick: u64,
+) -> Result<Vec<SkillState>, String> {
+    let now_ms = unix_now_ms();
+    decode_durable_skill_states(&save.skill_states_json)
+        .ok_or_else(|| "canonical recovery skill clock invalid".to_string())?
+        .into_iter()
+        .map(|(mut skill, clock)| {
+            skill.cooldown_ends_at = tick
+                .checked_add(rebased_durable_cooldown_ticks(
+                    skill.cooldown_ticks,
+                    clock,
+                    now_ms,
+                ))
+                .ok_or("canonical recovery skill deadline overflow")?;
+            skill.cast_time_ms = 0;
+            Ok(skill)
+        })
+        .collect()
 }
 
 pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
@@ -590,6 +616,170 @@ where
 }
 
 impl SimulationSession {
+    /// The authoritative host must validate the lease before calling this
+    /// server-only seam. Store it in this runtime's configuration so ordinary
+    /// saves, Logout, prepared saves and recovery use the same transaction fence.
+    /// Character checkpoints neither grant nor replace this authority.
+    pub fn bind_zone_save_fence(
+        &mut self,
+        fence: crate::config::zone_save_fence::ZoneSaveFence,
+    ) -> Result<(), String> {
+        let mut resource = self.app.world_mut().resource_mut::<RuntimeConfigResource>();
+        let config = resource.config.clone().with_zone_save_fence(fence)?;
+        resource.config = config;
+        Ok(())
+    }
+
+    /// Local server diagnostics; this authority is never serialized in a save.
+    pub fn bound_zone_save_fence(&self) -> Option<crate::config::zone_save_fence::ZoneSaveFence> {
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .zone_save_fence()
+            .cloned()
+    }
+
+    /// Trusted external-ledger authority from this runtime's existing source
+    /// binding. Checkpoints and client packets cannot provide or replace it.
+    pub fn zone_economy_write_permit(&self) -> Result<crate::ZoneEconomyWritePermit, String> {
+        self.app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .zone_economy_write_permit()
+    }
+
+    /// The authoritative host supplies the final frozen checkpoint and its RPC
+    /// binding. Preparing stores an immutable operation, never a live save CAS.
+    pub fn prepare_zone_save_operation(
+        &mut self,
+        binding: ZoneSaveOperationBinding,
+        frozen_checkpoint: &CharacterSaveRecord,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        let config = zone_save_operation_config(self.app.world(), &binding)?;
+        let account_id =
+            validate_zone_save_operation_identity(self.app.world(), frozen_checkpoint)?;
+        // A lost Prepare response must recover the original fixed logout date
+        // and merge image, rather than manufacture another operation payload.
+        if let Some(receipt) = config.query_zone_save_operation(&binding)? {
+            if receipt.operation().account_id() != account_id
+                || !same_character_save(receipt.operation().frozen_checkpoint(), frozen_checkpoint)?
+            {
+                return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+            }
+            return Ok(receipt);
+        }
+        config.refresh_account_store_account(&account_id)?;
+        let store = config
+            .account_store
+            .lock()
+            .map_err(|_| "account store mutex poisoned".to_string())?
+            .clone();
+        let operation = stage_zone_save_operation(
+            self.app.world(),
+            binding,
+            frozen_checkpoint,
+            store,
+            Some(current_crystal_logout_binary_datetime()),
+        )?;
+        config.prepare_zone_save_operation(&operation)
+    }
+
+    /// Commit only the operation already frozen by Prepare. The capability is
+    /// scoped to a local config clone, including unwinding/error paths; the live
+    /// runtime configuration never retains operation authority.
+    pub fn persist_zone_save_operation(
+        &mut self,
+        operation: &ZoneSaveOperation,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        let config = zone_save_operation_config(self.app.world(), operation.binding())?
+            .with_zone_save_operation(operation.clone())?;
+        let account_id =
+            validate_zone_save_operation_identity(self.app.world(), operation.frozen_checkpoint())?;
+        if account_id != operation.account_id() {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+        }
+        let receipt = config
+            .query_zone_save_operation(operation.binding())?
+            .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+        if !same_zone_save_operation(receipt.operation(), operation)? {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+        }
+        if receipt.status() != OperationStatus::Prepared {
+            // Reconciliation does not replay source work, restore a checkpoint,
+            // promote a runtime revision or clear a shared Unknown write freeze.
+            return Ok(receipt);
+        }
+        // A visible Prepared row alone does not resolve an earlier uncertain
+        // COMMIT. Honor the shared write freeze before even restoring World.
+        config.ensure_account_store_writable()?;
+        validate_zone_save_operation_revision(self.app.world(), operation.frozen_checkpoint())?;
+        self.restore_active_character_checkpoint(operation.frozen_checkpoint())?;
+        let expected_revision = operation.frozen_checkpoint().revision;
+        let committed_revision = persist_character_save_inner_with_config(
+            self.app.world(),
+            &config,
+            operation.account_id(),
+            operation.frozen_checkpoint().clone(),
+            operation.last_access_binary_datetime(),
+            |store, result| {
+                let PersistCharacterSaveResult::Full(revision) = result else {
+                    return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+                };
+                let saved = store
+                    .accounts
+                    .get(operation.account_id())
+                    .and_then(|account| account.saves.get(&operation.character_index()))
+                    .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+                if !same_character_save(saved, operation.expected_saved_checkpoint())? {
+                    return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+                }
+                Ok(revision)
+            },
+        )?;
+        if !self
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .advance_active_save_revision(expected_revision, committed_revision)
+        {
+            return Err("active character revision changed while completing zone save CAS".into());
+        }
+        // The receipt was written atomically with the ordinary full-save path.
+        // Failure to read it leaves the host unresolved and never retries a CAS.
+        let receipt = config
+            .query_zone_save_operation(operation.binding())?
+            .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+        if receipt.status() == OperationStatus::Prepared
+            || !same_zone_save_operation(receipt.operation(), operation)?
+        {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+        }
+        Ok(receipt)
+    }
+
+    /// Read-only reconciliation deliberately remains available after Unknown.
+    pub fn query_zone_save_operation(
+        &self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<Option<ZoneSaveOperationReceipt>, String> {
+        zone_save_operation_config(self.app.world(), binding)?.query_zone_save_operation(binding)
+    }
+
+    /// The repository accepts release only for a committed receipt and the
+    /// current lease. Releasing never changes the runtime's source image.
+    pub fn release_zone_save_operation(
+        &mut self,
+        binding: &ZoneSaveOperationBinding,
+    ) -> Result<ZoneSaveOperationReceipt, String> {
+        let config = zone_save_operation_config(self.app.world(), binding)?;
+        // A Released readback proves the ledger transition, but does not repair
+        // an Unknown source publication or authorize resuming this live World.
+        config.ensure_account_store_writable()?;
+        config.release_zone_save_operation(binding)
+    }
+
     /// Capture the exact durable private state for the active character without
     /// mutating the configured account store.
     pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
@@ -655,6 +845,63 @@ impl SimulationSession {
         self.install_active_character_checkpoint(save)
     }
 
+    /// Install a confirmed complete source while retaining same-session clock
+    /// anchors and queued private work. Durable recovery uses the canonical
+    /// save, never the historical drop checkpoint when a newer revision exists.
+    pub(super) fn install_committed_player_drop_checkpoint(
+        &mut self,
+        save: &CharacterSaveRecord,
+    ) -> Result<(), String> {
+        if self
+            .app
+            .world()
+            .resource::<SessionResource>()
+            .active_save_revision()
+            .is_some_and(|revision| revision > save.revision)
+        {
+            return Err("player-drop checkpoint would overwrite newer source".into());
+        }
+        let world = self.app.world();
+        let buffs = world.resource::<BuffResource>().clone();
+        let npc = world.resource::<NpcStateResource>().clone();
+        let queue = world.resource::<RuntimeQueueResource>().clone();
+        let player_dead = world.resource::<PlayerRuntimeResource>().player_dead;
+        let random = world
+            .get_resource::<super::npc_script::CrystalNpcRandomState>()
+            .copied();
+        let hero = super::hero_ai::hero_transient::capture(world);
+        let guild_actions = super::npc_shared_guild_actions::capture(world);
+        let pet_progress = super::shared_pet_progress::capture(world);
+        let default_transient = super::default_npc_events::capture_transient(world);
+        let refine = world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .refine
+            .clone();
+        let dirty_economy = self.dirty_economy_projection_event_ids.clone();
+        self.restore_active_character_checkpoint(save)?;
+        let world = self.app.world_mut();
+        *world.resource_mut::<BuffResource>() = buffs;
+        *world.resource_mut::<NpcStateResource>() = npc;
+        *world.resource_mut::<RuntimeQueueResource>() = queue;
+        world.resource_mut::<PlayerRuntimeResource>().player_dead = player_dead;
+        if let Some(random) = random {
+            world.insert_resource(random);
+        } else {
+            world.remove_resource::<super::npc_script::CrystalNpcRandomState>();
+        }
+        super::hero_ai::hero_transient::restore(world, &hero)?;
+        super::npc_shared_guild_actions::restore(world, guild_actions);
+        super::shared_pet_progress::restore(world, pet_progress);
+        super::default_npc_events::restore_transient(world, &default_transient);
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .refine = refine;
+        self.dirty_economy_projection_event_ids = dirty_economy;
+        Ok(())
+    }
+
     fn install_active_character_checkpoint(
         &mut self,
         save: &CharacterSaveRecord,
@@ -681,6 +928,109 @@ impl SimulationSession {
         set_runtime_tick(self.app.world_mut(), replay_tick);
         Ok(())
     }
+}
+
+fn zone_save_operation_config(
+    world: &World,
+    binding: &ZoneSaveOperationBinding,
+) -> Result<SimulationConfig, String> {
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    if config.zone_save_fence() != Some(binding.fence()) {
+        return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+    }
+    // Preserve the exact existing authority; this also rejects configurations
+    // that were downgraded to Memory/File/Mirror after the original binding.
+    config.with_zone_save_fence(binding.fence().clone())
+}
+
+fn validate_zone_save_operation_identity(
+    world: &World,
+    checkpoint: &CharacterSaveRecord,
+) -> Result<String, String> {
+    let session = world.resource::<SessionResource>();
+    let account_id =
+        active_session_mutating_account_id(session).ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+    if session
+        .selected_character
+        .as_ref()
+        .is_none_or(|character| !exact_character_identity_matches(character, &checkpoint.character))
+        || !has_frozen_skill_clocks(&checkpoint.skill_states_json)?
+    {
+        return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+    }
+    validate_character_save_record(checkpoint)?;
+    Ok(account_id)
+}
+
+fn validate_zone_save_operation_revision(
+    world: &World,
+    checkpoint: &CharacterSaveRecord,
+) -> Result<(), String> {
+    if world.resource::<SessionResource>().active_save_revision() != Some(checkpoint.revision) {
+        return Err(ZONE_SAVE_OPERATION_REJECTED.into());
+    }
+    Ok(())
+}
+
+fn same_character_save(
+    left: &CharacterSaveRecord,
+    right: &CharacterSaveRecord,
+) -> Result<bool, String> {
+    Ok(
+        serde_json::to_value(left).map_err(|error| error.to_string())?
+            == serde_json::to_value(right).map_err(|error| error.to_string())?,
+    )
+}
+
+fn same_zone_save_operation(
+    left: &ZoneSaveOperation,
+    right: &ZoneSaveOperation,
+) -> Result<bool, String> {
+    Ok(left == right)
+}
+
+fn stage_zone_save_operation(
+    world: &World,
+    binding: ZoneSaveOperationBinding,
+    frozen_checkpoint: &CharacterSaveRecord,
+    mut store: crate::config::AccountStore,
+    last_access_binary_datetime: Option<i64>,
+) -> Result<ZoneSaveOperation, String> {
+    let account_id = validate_zone_save_operation_identity(world, frozen_checkpoint)?;
+    validate_zone_save_operation_revision(world, frozen_checkpoint)?;
+    let active_character = world
+        .resource::<SessionResource>()
+        .selected_character
+        .clone()
+        .ok_or(ZONE_SAVE_OPERATION_REJECTED)?;
+    let mut staged = frozen_checkpoint.clone();
+    migrate_legacy_candidate_save_record(&mut staged)?;
+    validate_character_save_record(&staged)?;
+    match apply_full_character_save_mutation(
+        &mut store,
+        &account_id,
+        &active_character,
+        staged,
+        last_access_binary_datetime,
+    )? {
+        PersistCharacterSaveResult::Full(_) => {}
+        PersistCharacterSaveResult::StaleMailStatusOnly => {
+            return Err(ZONE_SAVE_OPERATION_REJECTED.into())
+        }
+    }
+    let expected_saved = store
+        .accounts
+        .get(&account_id)
+        .and_then(|account| account.saves.get(&active_character.index))
+        .ok_or(ZONE_SAVE_OPERATION_REJECTED)?
+        .clone();
+    ZoneSaveOperation::new(
+        binding,
+        account_id,
+        frozen_checkpoint.clone(),
+        expected_saved,
+        last_access_binary_datetime,
+    )
 }
 
 #[path = "character_handoff.rs"]
@@ -755,6 +1105,14 @@ mod save_fail_closed_tests;
 #[cfg(test)]
 #[path = "skill_cooldown_restore_tests.rs"]
 mod skill_cooldown_restore_tests;
+
+#[cfg(test)]
+#[path = "zone_save_fence_tests.rs"]
+mod zone_save_fence_tests;
+
+#[cfg(test)]
+#[path = "zone_save_operation_tests.rs"]
+mod zone_save_operation_tests;
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
     let (config, account_id, selected_character) = {
@@ -859,6 +1217,9 @@ fn merge_external_stage5_mail_staged(
             .position(|local| stage5_mail_same_delivery(local, &external))
         {
             let local = &mut local_mail[local_index];
+            if local.attachment_origin != external.attachment_origin {
+                return Err("mail delivery origin differs for the same canonical nonce".into());
+            }
             if let Some(ledger_changed) = merge_native_game_shop_ledger_mail(local, &external)? {
                 changed |= ledger_changed;
                 continue;
@@ -884,6 +1245,7 @@ fn merge_external_stage5_mail_staged(
             // so the active local value wins when a live snapshot is merged
             // for refresh or save.
             let merged = Stage5MailMessage {
+                attachment_origin: external.attachment_origin,
                 id: local.id,
                 opened: local.opened || external.opened,
                 locked: local.locked,
@@ -1057,6 +1419,7 @@ mod stale_mail_status_merge_tests {
         });
         let mut systems = Stage5SystemsState::default();
         systems.mail.push(Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 7,
             delivery_nonce: "00112233445566778899aabbccddeeff".to_string(),
             from: "Sender".to_string(),
@@ -1108,6 +1471,56 @@ mod stale_mail_status_merge_tests {
         assert!(systems.mail[0].locked);
         assert!(!systems.mail[0].deleted);
     }
+
+    #[test]
+    fn same_nonce_mail_merge_rejects_every_origin_change_without_publication() {
+        use crate::config::Stage5MailAttachmentOrigin::{
+            ExistingCustody, FreshGrant, LegacyUnknown,
+        };
+        let state: Stage5SystemsState = serde_json::from_str(
+            save_with_mail(false, false)
+                .stage5_systems_json
+                .as_deref()
+                .unwrap(),
+        )
+        .unwrap();
+        for original in [LegacyUnknown, FreshGrant, ExistingCustody] {
+            for changed in [LegacyUnknown, FreshGrant, ExistingCustody] {
+                if original == changed {
+                    continue;
+                }
+                let mut local = state.mail.clone();
+                local[0].attachment_origin = original;
+                let before = local.clone();
+                let mut external = local.clone();
+                external[0].attachment_origin = changed;
+                external[0].opened = true;
+                assert!(merge_external_stage5_mail(&mut local, external).is_err());
+                assert_eq!(local, before);
+            }
+        }
+    }
+
+    #[test]
+    fn status_only_mail_merge_preserves_canonical_custody_origin() {
+        let state: Stage5SystemsState = serde_json::from_str(
+            save_with_mail(false, false)
+                .stage5_systems_json
+                .as_deref()
+                .unwrap(),
+        )
+        .unwrap();
+        let mut local = state.mail;
+        local[0].attachment_origin = crate::config::Stage5MailAttachmentOrigin::ExistingCustody;
+        let mut external = local.clone();
+        external[0].opened = true;
+        assert!(merge_external_stage5_mail(&mut local, external).unwrap());
+        assert!(local[0].opened);
+        assert_eq!(
+            local[0].attachment_origin,
+            crate::config::Stage5MailAttachmentOrigin::ExistingCustody
+        );
+    }
 }
 
 pub(super) fn persist_character_save(
@@ -1136,7 +1549,7 @@ fn persist_character_save_inner(
 fn persist_character_save_inner_with<T, F>(
     world: &World,
     account_id: &str,
-    mut save: CharacterSaveRecord,
+    save: CharacterSaveRecord,
     last_access_binary_datetime: Option<i64>,
     capture: F,
 ) -> Result<T, String>
@@ -1144,6 +1557,27 @@ where
     F: FnOnce(&crate::config::AccountStore, PersistCharacterSaveResult) -> Result<T, String>,
 {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
+    persist_character_save_inner_with_config(
+        world,
+        &config,
+        account_id,
+        save,
+        last_access_binary_datetime,
+        capture,
+    )
+}
+
+fn persist_character_save_inner_with_config<T, F>(
+    world: &World,
+    config: &SimulationConfig,
+    account_id: &str,
+    mut save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
+    capture: F,
+) -> Result<T, String>
+where
+    F: FnOnce(&crate::config::AccountStore, PersistCharacterSaveResult) -> Result<T, String>,
+{
     let active_character = {
         let session = world.resource::<SessionResource>();
         let active_account_id = active_session_mutating_account_id(session).ok_or_else(|| {
@@ -1171,7 +1605,7 @@ where
     let account_id = account_id.to_string();
     let touched_accounts = vec![account_id.clone()];
 
-    super::shared_guild_experience::commit_source(world, &config, &touched_accounts, move |store| {
+    super::shared_guild_experience::commit_source(world, config, &touched_accounts, move |store| {
         let result = apply_full_character_save_mutation(
             store,
             &account_id,
@@ -1967,14 +2401,20 @@ pub fn validate_commercial_identity_credentials(
 pub(super) fn add_character_to_account(
     config: &SimulationConfig,
     account_id: &str,
-    mut character: CharacterRecord,
+    character: CharacterRecord,
 ) -> Result<CharacterRecord, String> {
+    // Build and retire every fresh identity before the account transaction
+    // takes its persist/account locks. The closure may assign the character
+    // index, but must never call a live UID authority while those locks are held.
+    let mut save = crystal_new_character_save(config, character);
+    starter_uid_planning::prepare_new_character(config, account_id, &mut save)?;
+    validate_character_save_record(&save)?;
     let account_id = account_id.to_string();
     let touched_accounts = vec![account_id.clone()];
     config.commit_account_store_transaction(&touched_accounts, move |store| {
-        character.index = store.allocate_character_index();
-        let save = crystal_new_character_save(config, character.clone());
+        save.character.index = store.allocate_character_index();
         validate_character_save_record(&save)?;
+        let character = save.character.clone();
         let account = store
             .accounts
             .get_mut(&account_id)
@@ -2046,13 +2486,8 @@ pub(super) fn character_save_for_start(
         }
         save.clone()
     };
-    let mut changed = false;
-    changed |= normalize_legacy_default_vitals(&mut save);
-    changed |= normalize_legacy_synthetic_starter_equipment(&mut save);
-    changed |= normalize_legacy_default_account_demo_seed_state(&mut save);
-    changed |= normalize_legacy_crystal_new_character_seed_state(&mut save);
-    changed |= normalize_legacy_crystal_level_one_empty_equipment(&mut save);
-    changed |= migrate_legacy_candidate_save_record(&mut save)?;
+    let expected = save.clone();
+    let changed = starter_uid_planning::prepare_character_start(config, account_id, &mut save)?;
     if !changed {
         return Ok(Some(save));
     }
@@ -2080,13 +2515,13 @@ pub(super) fn character_save_for_start(
             {
                 return Err("character start save identity changed".to_string());
             }
-            normalize_legacy_default_vitals(persisted_save);
-            normalize_legacy_synthetic_starter_equipment(persisted_save);
-            normalize_legacy_default_account_demo_seed_state(persisted_save);
-            normalize_legacy_crystal_new_character_seed_state(persisted_save);
-            normalize_legacy_crystal_level_one_empty_equipment(persisted_save);
-            migrate_legacy_candidate_save_record(persisted_save)?;
-            validate_character_save_record(persisted_save)?;
+            if !same_character_save(persisted_save, &expected)? {
+                return Err(
+                    "character start save changed after UID planning; retry from source".into(),
+                );
+            }
+            validate_character_save_record(&save)?;
+            *persisted_save = save;
             Ok(persisted_save.clone())
         })
         .map(Some)
@@ -2128,6 +2563,9 @@ pub(super) fn crystal_new_character_save(
     );
     save
 }
+
+#[path = "starter_uid_planning.rs"]
+mod starter_uid_planning;
 
 pub(super) fn normalize_legacy_default_vitals(save: &mut CharacterSaveRecord) -> bool {
     if save.hp != 120 || save.max_hp != 120 || save.mp != 45 {
@@ -2945,9 +3383,6 @@ fn apply_character_save_with_timing(
         .config
         .item_uid_issuance
         .clone();
-    restored_inventory
-        .item_uid_issuance
-        .raise_serialized_floor(save)?;
     restored_inventory.reserved_item_unique_ids.clear();
     restored_inventory.inventory_capacity = save.inventory_capacity;
     restored_inventory.inventory_items = inventory_items;
@@ -2962,7 +3397,33 @@ fn apply_character_save_with_timing(
     }
     restored_inventory.reserved_item_unique_ids = custody_ids;
     normalize_inventory_known_item_metadata(&mut restored_inventory);
-    normalize_inventory_unique_ids(&mut restored_inventory);
+    if matches!(
+        restored_inventory.item_uid_issuance,
+        super::item_uid_issuance::ItemUidIssuance::Legacy
+    ) {
+        normalize_inventory_unique_ids(&mut restored_inventory);
+    } else {
+        starter_uid_planning::validate_inventory_identities(&restored_inventory)?;
+    }
+    if matches!(
+        &restored_inventory.item_uid_issuance,
+        super::item_uid_issuance::ItemUidIssuance::Durable(_)
+    ) {
+        let account_id = active_session_mutating_account_id(world.resource::<SessionResource>())
+            .ok_or("durable item UID restore requires an authenticated account")?;
+        restored_inventory
+            .item_uid_issuance
+            .raise_history_floor(super::item_uid_issuance::UidHistoryRoot::Save {
+                account_id: &account_id,
+                save,
+            })
+            .map_err(|error| {
+                super::item_uid_issuance::handle_item_uid_failure(
+                    &world.resource::<RuntimeConfigResource>().config,
+                    error,
+                )
+            })?;
+    }
     {
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());
@@ -3720,6 +4181,7 @@ mod character_save_item_validation_tests {
             .stage5_systems
             .mail
             .push(Stage5MailMessage {
+                attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
                 id: 91,
                 delivery_nonce: "save-preflight-overbudget".to_string(),
                 from: "System".to_string(),
@@ -3851,6 +4313,7 @@ mod character_save_item_validation_tests {
         let mut systems = Stage5SystemsState::default();
         let mail_item = legacy_alias_state("training-manual", 73_001, 1);
         systems.mail.push(Stage5MailMessage {
+            attachment_origin: crate::config::Stage5MailAttachmentOrigin::LegacyUnknown,
             id: 1,
             delivery_nonce: "legacy-item-migration".to_string(),
             from: "System".to_string(),

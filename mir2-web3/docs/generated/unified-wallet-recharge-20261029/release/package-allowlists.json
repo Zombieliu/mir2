@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "producerResult": {
+    "passed": true,
+    "productionScripts": 2,
+    "checks": 74,
+    "entryPointsExecuted": false,
+    "resourceGatesBypassed": false,
+    "scope": "Actual extracted allowlist functions only; not full package selftest or artifact acceptance"
+  },
+  "externalLogReceipt": {
+    "filename": "release-package-legal-contract-v1.log",
+    "bytes": 243,
+    "sha256": "d50814513e81805918c3afa38c68ecf6760d3959d12a69192262e21ca584791d",
+    "rawLogIncluded": false
+  },
+  "actualNewArtifactVerified": false
+}

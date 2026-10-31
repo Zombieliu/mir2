@@ -19,9 +19,9 @@ use mir2_protocol::{ChatType, MirDirection, Point, ServerPacket};
 
 use super::components::{current_player_object_id, entity_position, player_entity};
 use super::crystal_compat::CRYSTAL_ITEM_TYPE_ORE;
-use super::equipment::equipment_slot_unique_id;
+use super::equipment::user_item_from_equipment_state;
 use super::inventory::can_gain_item_quantity;
-use super::item_grants::{FreshItemGrant, publish_world_grants};
+use super::item_grants::{publish_world_grants, FreshItemGrant};
 use super::items::{crystal_item_key_for_template, crystal_item_template_for_item_key};
 use super::monsters::deterministic_roll;
 use super::movement::offset_point;
@@ -221,7 +221,7 @@ fn equipped_pickaxe(world: &World) -> Option<EquippedPickaxe> {
         return None;
     }
     Some(EquippedPickaxe {
-        unique_id: equipment_slot_unique_id(EquipmentSlot::Weapon).unwrap_or_default(),
+        unique_id: user_item_from_equipment_state(&weapon)?.unique_id,
     })
 }
 
@@ -277,11 +277,14 @@ pub(super) fn try_mine(world: &mut World, direction: MirDirection) -> Option<Vec
         if hit && roll(tick, object_id, &target, 0x20, 100) < u64::from(set.drop_rate) {
             match give_mine_payout(world, &set, tick, object_id, &target) {
                 Ok(Some(item_packet)) => packets.push(item_packet),
-                Ok(None) => {}, // Ordinary no-drop/full-bag keeps Crystal's swing cost.
-                Err(_) => return Some(vec![ServerPacket::Chat {
-                    message: "Item delivery is temporarily unavailable. Please try again.".into(),
-                    chat_type: ChatType::System,
-                }]), // Failed issuance consumes neither node stone nor pickaxe dura.
+                Ok(None) => {} // Ordinary no-drop/full-bag keeps Crystal's swing cost.
+                Err(_) => {
+                    return Some(vec![ServerPacket::Chat {
+                        message: "Item delivery is temporarily unavailable. Please try again."
+                            .into(),
+                        chat_type: ChatType::System,
+                    }])
+                } // Failed issuance consumes neither node stone nor pickaxe dura.
             }
         }
         if let Some(spot) = world
@@ -375,7 +378,9 @@ fn give_mine_payout(
             continue;
         }
         // Crystal skips drops whose item is not present in the item table.
-        let Some(template) = crystal_item_by_name(drop.item_name) else { return Ok(None); };
+        let Some(template) = crystal_item_by_name(drop.item_name) else {
+            return Ok(None);
+        };
 
         // Ore durability is the mined quantity: (MinDura + rand) * 1000, with a
         // bonus chance. Non-ore payouts keep the item's template durability

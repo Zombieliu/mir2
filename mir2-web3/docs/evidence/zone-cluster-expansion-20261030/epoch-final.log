@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized] target(s) in 0.34s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_gateway-2a9a3f29c94c0482.exe)
+
+running 22 tests
+test zone_lease::tests::acquire_renew_and_fence_on_steal ... ok
+test zone_lease::tests::bigint_epoch_exhaustion_refuses_reacquisition_and_handoff_without_row_changes ... ok
+test zone_lease::tests::concurrent_independent_acquisitions_choose_one_live_owner_and_one_epoch ... ok
+test zone_lease::tests::expired_same_owner_reacquisition_starts_a_new_epoch_at_the_expiry_boundary ... ok
+test zone_lease::tests::explicit_lease_owner_is_independent_from_process_instance_id ... ok
+test zone_lease::tests::fallible_getters_and_validation_return_errors_when_postgres_is_unreachable ... ok
+test zone_lease::tests::independent_authorities_reject_previous_live_owner_and_refresh_peer_observations ... ok
+test zone_lease::tests::invalid_epoch_and_time_fail_before_connecting_to_postgres ... ok
+test zone_lease::tests::invalid_stored_epoch_is_not_repaired_or_rewritten_by_acquisition ... ok
+test zone_lease::tests::lifecycle_postgres_closes_actual_zone_authority_cache ... ignored, requires isolated MIR2_GATEWAY_LIFECYCLE_TEST_DATABASE_URL
+test zone_lease::tests::postgres_fencing_values_reject_implicit_integer_wrapping ... ok
+test zone_lease::tests::postgres_lease_times_reject_expiry_and_timestamp_overflow ... ok
+test zone_lease::tests::release_and_reacquire_same_owner_advance_epoch_and_stale_release_is_harmless ... ok
+test zone_lease::tests::release_lets_peer_take_over_immediately ... ok
+test zone_lease::tests::release_refuses_another_authority_and_preserves_the_exact_row ... ok
+test zone_lease::tests::sync_postgres_resource_drops_a_real_runtime_before_returning ... ok
+test zone_lease::tests::sync_postgres_resource_handles_async_initialization_error ... ok
+test zone_lease::tests::sync_postgres_resource_handles_concurrent_last_arc_and_cancelled_task ... ok
+test zone_lease::tests::trait_owner_lease_acquires_and_renews_same_token ... ok
+test zone_lease::tests::trusted_rpc_authority_adopts_and_fences_allowed_owner ... ok
+test zone_lease::tests::trusted_rpc_authority_rejects_unlisted_owner ... ok
+test zone_lease::tests::validation_is_read_only_and_cannot_register_or_resurrect_a_lease ... ok
+
+test result: ok. 21 passed; 0 failed; 1 ignored; 0 measured; 1337 filtered out; finished in 2.53s

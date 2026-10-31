@@ -22,11 +22,16 @@ mod five_class_receipts;
 mod movement;
 mod packets;
 mod partition;
+mod player_drop;
 mod replay;
 mod replication;
 mod runtime;
 mod types;
 pub use five_class_receipts::{ZoneFiveClassPracticeReceipt, ZoneFiveClassPracticeSpell};
+pub use player_drop::{
+    PlayerDropApplyResult, PlayerDropCustodyState, PlayerDropEffectIdentity,
+    PlayerDropPlacementKind, PlayerDropPlacementReservation,
+};
 mod intelligent_creatures;
 pub use intelligent_creatures::{CreatureOperation, CreatureOwner, CreaturePickupIntent};
 

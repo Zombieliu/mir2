@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "sourceSha256": {
+    "apps/gateway/src/zone_lease.rs": "8b4d64772b588b8647f90a0a3a9a204ddf35d4377c57182568fad1c874deaea9",
+    "apps/gateway/src/session.rs": "61513d66ef35f08245bb80927e47bfc6f6754e307b54c6aa07769d57eefc1980",
+    "apps/gateway/src/lib.rs": "bf18270408d3bee0135358006a8c18bc854f34d8f4b68bbf3ffa72acbf9ebd1f",
+    "apps/gateway/src/zone_owner_resolver.rs": "dbc24d3eb3be1dce95158d9617240f38990e5fc771b574ed2bf6179dae5b7058",
+    "apps/gateway/src/zone_rpc.rs": "5ac7ed75232643ec80eb9877063481f868dd9dfc682b6ce3abc8d191a56ed43f",
+    "apps/gateway/src/routing.rs": "2aaabd567dc42e92dc043c2313dd1501e29635a8ad2533e5289f26da8f297767",
+    "apps/gateway/src/web.rs": "69fd56efb08eb0e485ba14cf73f87cc68f7feedb4fc7e6d5805237aa5c46dbda",
+    "apps/gateway/src/zone_rpc/lease_failure_tests.rs": "b810bee32d6ea1e744a0ffa8d7a3526bca88a094eb26a8141c84f967b1f2a476",
+    "apps/gateway/src/tcp.rs": "7c41423461e57c784c1dc2b52f176225f7e6ffb2eb480ec2a8645015cf1f4850"
+  },
+  "evidenceSha256": {
+    "boundaries-final-result.json": "0c45b84d5ff6edf0d05de12bd8d911991e48175c871fa028a47af379bc8c3284",
+    "boundaries-final.log": "72ef2c214446924d0ff6db5a9483d9e45b3ca56727eb0dae0cc569c683a0f503",
+    "epoch-final-result.json": "fec1dea4f7886379f60da98faecb7e1f7e4563059a0c2d4c639a5cbf2d2030e6",
+    "epoch-final.log": "4d27b3cc8f27b66ed1dedace72e4c442dac1a9e3e582a8643a184a2e76979dfe",
+    "fixture-start.json": "7156a319e86ce8f39515e676f480706095dcf2789c5642358249ca21e7635621",
+    "fixture-stop.json": "de2f6d1746579e2606f0d16b6adf0862c066c24dec7bb17b984fcb6b90bb696d",
+    "postgres-final.json": "19231622d99a93ad4f0f22c58fb6a0c64f06fed9ee1e4a4c32e938f100248807",
+    "README.md": "21cdf3873b7778a063b1ceda2521ee3f74f335a1f207843deb5a6b88d459d734",
+    "rpc-attack-adjacent-result.json": "784d6a3d5313588e59b957cbc3999d5c420e40661cf7ee7246cfc5366f0d20ef",
+    "rpc-attack-adjacent.log": "0e7c8fa8bcc13579fa51afbe4e2ac2734cfbb51d2996acfa8e565c828bd85492",
+    "rpc-handoff-adjacent-result.json": "aaca3e7bb3357149d8ca4d69b636faca6d668b71803941dc6a4395b5e0f93f79",
+    "rpc-handoff-adjacent.log": "63ed46b1be02a6bbec27f302bd91596c8357323ea0b8cf927354ea40e294ba01",
+    "rpc-health-adjacent-result.json": "79dd8199a655b4976bbf06a02418d6a80b4a717f257765d130522500561969aa",
+    "rpc-health-adjacent.log": "f97930aed75969b414a336386841c99e37df49a0c73edbef7a0b9e937cddc33a",
+    "session-adjacent-result.json": "d2ad04d637076e56d18dc6b7e43836645a380bb29468d8ba294de4cdf71c2a5d",
+    "session-adjacent.log": "8b777e385c3df12d852f589c7df1988324bd879b1ed155ed2d22a35f259cc426",
+    "stable-resolver-result.json": "f5327362d2e80989cee71d4cd2e45121ec85b68e2f6111265a952fdc126b6ad4",
+    "stable-resolver.log": "0fc731b775e84b02eb7dc8ca137c1bc223577eecb76a27468da57052833ededb",
+    "verification.json": "d4d8c272b94023ecbda6b4db90812cfe56f2e0bb58733879b62f31100b3f2d20"
+  }
+}

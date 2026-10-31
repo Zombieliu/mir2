@@ -1,0 +1,49 @@
+    Finished `test` profile [unoptimized] target(s) in 0.28s
+     Running unittests src\lib.rs (E:\mir2-capacity-goal-20261030/target\debug\deps\mir2_simulation-bf869c08515da9c3.exe)
+
+running 33 tests
+test runtime::save::save_fail_closed_tests::account_creation_persistence_failure_returns_crystal_failure_and_rolls_back_live_store ... ok
+test runtime::save::save_fail_closed_tests::active_snapshot_without_account_identity_is_rejected ... ok
+test runtime::save::save_fail_closed_tests::canonical_account_switch_with_colliding_index_cannot_refresh_foreign_mail ... ok
+test runtime::save::save_fail_closed_tests::canonical_cross_account_send_mail_commits_sender_and_exact_target ... ok
+test runtime::save::save_fail_closed_tests::canonical_identity_still_commits_mail_transaction_and_full_save ... ok
+test runtime::save::save_fail_closed_tests::canonical_select_missing_character_returns_crystal_result_two_without_mutation ... ok
+test runtime::save::save_fail_closed_tests::delete_character_persistence_failure_keeps_character ... ok
+test runtime::save::save_fail_closed_tests::delete_character_without_account_identity_is_rejected_and_does_not_mutate_account_store ... ok
+simulation packet execution rejected; details suppressed
+test runtime::save::save_fail_closed_tests::disconnect_persistence_failure_still_clears_gm_permissions ... ok
+test runtime::save::save_fail_closed_tests::existing_only_passkey_login_does_not_provision_missing_account ... ok
+test runtime::save::save_fail_closed_tests::first_time_passkey_provision_is_durable_and_locked ... ok
+mail status transaction rejected: active character durable save identity mismatch before transaction
+mail status transaction rejected: active character durable save identity mismatch before transaction
+mail status transaction rejected: active character durable save identity mismatch before transaction
+test runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_all_private_mail_transactions ... ok
+test runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_normal_revision_full_save ... ok
+test runtime::save::save_fail_closed_tests::forged_roster_durable_identity_collision_rejects_stale_revision_full_save ... ok
+test runtime::save::save_fail_closed_tests::gm_password_binding_login_switch_and_successful_disconnect_clear_permissions ... ok
+test runtime::save::save_fail_closed_tests::in_game_character_lifecycle_requests_are_silent_and_leave_world_and_store_unchanged ... ok
+test runtime::save::save_fail_closed_tests::legacy_password_migration_persistence_failure_rejects_login_and_keeps_live_password ... ok
+test runtime::save::save_fail_closed_tests::legal_gm_and_ranking_paths_sync_exact_authorized_levels ... ok
+test runtime::save::save_fail_closed_tests::local_missing_account_start_returns_none_without_recreating_account ... ok
+test runtime::save::save_fail_closed_tests::malformed_empty_and_switched_identities_cannot_reuse_gm_or_leak_private_packets ... ok
+test runtime::save::save_fail_closed_tests::new_character_persistence_failure_returns_crystal_failure_and_keeps_roster ... ok
+test runtime::save::save_fail_closed_tests::new_character_without_account_identity_is_rejected_and_does_not_mutate_account_store ... ok
+test runtime::save::save_fail_closed_tests::noncanonical_bound_identity_cannot_alias_or_mutate_either_account ... ok
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+mail status transaction rejected: active character transaction requires an account identity
+test runtime::save::save_fail_closed_tests::noncanonical_live_identity_cannot_read_merge_or_mutate_either_mailbox ... ok
+test runtime::save::save_fail_closed_tests::passkey_provision_persistence_failure_rolls_back_live_account ... ok
+test runtime::save::save_fail_closed_tests::password_change_persistence_failure_returns_crystal_failure_and_keeps_old_hash ... ok
+test runtime::save::save_fail_closed_tests::recovery_password_reset_persistence_failure_keeps_old_hash ... ok
+test runtime::save::save_fail_closed_tests::send_mail_target_durable_identity_mismatch_is_silent_and_atomic ... ok
+test runtime::save::save_fail_closed_tests::source_of_truth_start_requires_authoritative_refresh_and_does_not_recreate_account ... ok
+test runtime::save::save_fail_closed_tests::standard_and_passkey_recovery_preflight_fail_closed_for_source_states ... ok
+test runtime::save::save_fail_closed_tests::start_game_without_account_identity_is_rejected_and_does_not_mutate_account_store ... ok
+test runtime::save::save_fail_closed_tests::start_normalization_persistence_failure_returns_crystal_failure_and_keeps_live_save ... ok
+test runtime::save::save_fail_closed_tests::trusted_select_account_for_recovery_still_starts_game ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 3248 filtered out; finished in 6.98s

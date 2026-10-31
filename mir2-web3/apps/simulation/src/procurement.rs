@@ -256,9 +256,30 @@ impl Default for ProcurementConfig {
 }
 impl ProcurementConfig {
     pub fn from_env() -> Result<Self, String> {
-        Self::from_values(|key| std::env::var(key).ok())
+        let runtime_value = |key| match std::env::var(key) {
+            Ok(value) => Ok(Some(value)),
+            Err(std::env::VarError::NotPresent) => Ok(None),
+            Err(std::env::VarError::NotUnicode(_)) => Err(()),
+        };
+        Self::from_values_with_runtime(
+            |key| std::env::var(key).ok(),
+            ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"].map(runtime_value),
+            runtime_value("MIR2_PLAYTEST_TESTNET"),
+        )
     }
+    #[cfg(test)]
     fn from_values(lookup: impl Fn(&str) -> Option<String>) -> Result<Self, String> {
+        let markers =
+            ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV", "MIR2_ENV"].map(|key| Ok(lookup(key)));
+        let playtest_testnet = Ok(lookup("MIR2_PLAYTEST_TESTNET"));
+        Self::from_values_with_runtime(lookup, markers, playtest_testnet)
+    }
+    fn from_values_with_runtime(
+        lookup: impl Fn(&str) -> Option<String>,
+        markers: impl IntoIterator<Item = Result<Option<String>, ()>>,
+        playtest_testnet: Result<Option<String>, ()>,
+    ) -> Result<Self, String> {
+        let playtest_testnet = procurement_playtest_testnet_flag(playtest_testnet)?;
         let mut c = Self::default();
         c.enabled = match lookup("MIR2_PROCUREMENT_ENABLED").as_deref() {
             None | Some("0") | Some("false") | Some("") => false,
@@ -310,18 +331,42 @@ impl ProcurementConfig {
             return Err("procurementDomainInvalid".into());
         }
         c.allow_test_credits = lookup("MIR2_PROCUREMENT_TEST_CREDITS").as_deref() == Some("1");
-        if c.allow_test_credits
-            && ["MIR2_RUNTIME_ENV", "MIR2_DEPLOYMENT_ENV"]
-                .iter()
-                .any(|key| {
-                    lookup(key)
-                        .is_some_and(|v| matches!(v.as_str(), "production" | "prod" | "staging"))
-                })
-        {
-            return Err("procurementTestCreditsForbiddenInProduction".into());
+        if c.allow_test_credits || playtest_testnet {
+            validate_procurement_testnet_runtime(markers, playtest_testnet)?;
+        }
+        // Public playtest activation cannot reuse a localnet or arbitrary
+        // network domain. The pinned Node driver also verifies the real chain.
+        if playtest_testnet && c.domain.network_hash != digest(b"4c78adac") {
+            return Err("procurementPlaytestTestnetRequired".into());
         }
         Ok(c)
     }
+}
+fn procurement_playtest_testnet_flag(value: Result<Option<String>, ()>) -> Result<bool, String> {
+    match value
+        .map_err(|_| "procurementPlaytestFlagInvalid")?
+        .as_deref()
+    {
+        None | Some("0" | "false") => Ok(false),
+        Some("1" | "true") => Ok(true),
+        _ => Err("procurementPlaytestFlagInvalid".into()),
+    }
+}
+fn validate_procurement_testnet_runtime(
+    markers: impl IntoIterator<Item = Result<Option<String>, ()>>,
+    playtest_testnet: bool,
+) -> Result<(), String> {
+    for marker in markers {
+        let value = marker.map_err(|_| "procurementTestCreditsForbiddenInProduction")?;
+        if value.is_some_and(|value| match value.trim().to_ascii_lowercase().as_str() {
+            "production" | "prod" => true,
+            "staging" | "stage" | "preprod" | "preproduction" => !playtest_testnet,
+            _ => false,
+        }) {
+            return Err("procurementTestCreditsForbiddenInProduction".into());
+        }
+    }
+    Ok(())
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CreditSource {
