@@ -441,6 +441,25 @@ test("display and appinstalled events during consumer absence use root callbacks
   app.document.fullscreenElement = null; app.document.dispatch("fullscreenchange"); app.hooks.flush();
   app.click("mir-pwa-action install"); assert.equal(app.promptCalls, 0); assert.ok(app.class("mir-pwa-guide"));
 });
+test("game aliases retain one capture while marketing and promotion routes stay outside the PWA shell", () => {
+  const app = new App();
+  const timers = app.clock.log.filter(row => row[0] === "set").length;
+  for (const pathname of ["/game", "/game/", "/"]) {
+    app.route(pathname);
+    assert.equal(app.listeners(), 7, pathname);
+    assert.ok(app.class("mir-pwa-actions"), pathname);
+  }
+  assert.equal(app.clock.log.filter(row => row[0] === "set").length, timers);
+  for (const pathname of ["/zh-CN", "/en/download", "/promotions", "/promotions/play"]) {
+    app.route(pathname);
+    assert.equal(app.listeners(), 0, pathname);
+    assert.equal(app.tree, null, pathname);
+  }
+  app.route("/game");
+  assert.equal(app.listeners(), 7);
+  assert.ok(app.class("mir-pwa-actions"));
+});
+
 test("route gate detaches original seven listeners; retains state and reattaches once", async () => {
   const app = new App(), held = app.installEvent();
   app.route("/other"); assert.equal(app.listeners(), 0); assert.equal(app.tree, null);

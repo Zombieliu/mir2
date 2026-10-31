@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { test } from "node:test";
 import { createRequire } from "node:module";
@@ -9,32 +9,37 @@ import vm from "node:vm";
 import ts from "typescript";
 const require = createRequire(import.meta.url);
 
-function load(name, overrides = {}) {
-  const source = readFileSync(new URL(`../app/promotions/${name}.ts`, import.meta.url), "utf8");
-  const compiled = ts.transpileModule(source, {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
-  }).outputText;
-  const module = { exports: {} };
-  vm.runInNewContext(compiled, { module, exports: module.exports, Intl, URL, AbortSignal, crypto, TextEncoder, Blob, ...overrides });
-  return module.exports;
-}
-
-function loadViews() {
-  const source = readFileSync(new URL("../app/promotions/promotion-app.tsx", import.meta.url), "utf8");
+function loadSource(file, overrides = {}, modules = new Map()) {
+  const url = new URL(file, import.meta.url);
+  if (modules.has(url.href)) return modules.get(url.href);
+  const source = readFileSync(url, "utf8");
   const compiled = ts.transpileModule(source, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   const module = { exports: {} };
-  vm.runInNewContext(compiled, { module, exports: module.exports, require: name => {
-    if (name.endsWith(".module.css")) return { default: new Proxy({}, { get: (_, key) => String(key) }) };
-    if (["./promotion-copy", "./promotion-account-copy", "./promotion-model"].includes(name)) return load(name.slice(2));
-    if (["./promotion-wallet-login", "./promotion-admin"].includes(name)) return {};
-    return require(name);
-  } });
+  modules.set(url.href, module.exports);
+  const sourceRequire = specifier => {
+    if (specifier.endsWith(".module.css")) return { default: new Proxy({}, { get: (_, key) => String(key) }) };
+    if (specifier.startsWith(".")) {
+      const reference = new URL(specifier, url);
+      const candidates = [reference, new URL(reference.href + ".ts"), new URL(reference.href + ".tsx")];
+      const target = candidates.find(candidate => existsSync(candidate));
+      if (target) return loadSource(target, overrides, modules);
+    }
+    return require(specifier);
+  };
+  vm.runInNewContext(compiled, { module, exports: module.exports, Intl, URL, AbortSignal, crypto,
+    TextEncoder, Blob, require: sourceRequire, ...overrides });
   return module.exports;
 }
+function load(name, overrides = {}) {
+  return loadSource(new URL(`../app/promotions/${name}.ts`, import.meta.url), overrides);
+}
+function loadViews() {
+  return loadSource(new URL("../app/promotions/promotion-app.tsx", import.meta.url));
+}
 
-test("all nine locales disclose testnet value and current revenue-share terms", () => {
+test("all supported locales disclose testnet value and current revenue-share terms", () => {
   const { PROMOTION_COPY: copy, PROMOTION_LANGUAGES: languages } = load("promotion-copy");
   const { PromotionDisclosure } = loadViews();
   for (const [locale] of languages) {
@@ -72,7 +77,7 @@ test("wallet-only enrollment requires explicit test flag, approved open terms an
   assert.equal(visible({ ...campaign, environment: "production" }), false, "A production campaign cannot expose the test bypass");
 });
 
-test("all nine locales render wallet test signup without fabricated characters or balances", () => {
+test("all supported locales render wallet test signup without fabricated characters or balances", () => {
   const { PROMOTION_COPY: copy, PROMOTION_LANGUAGES: languages } = load("promotion-copy"), { PromotionTestWalletEnrollment: Form } = loadViews();
   const now = Date.now(), campaign = { campaignId: "isolated-trial", environment: "test", rules: { testWalletEnrollment: true }, termsVersion: "test-v1", termsStatus: "approved", recruitmentEnabled: true, startsAtMs: now - 1000, endsAtMs: now + 7 * 86400000 };
   for (const [locale] of languages) {
@@ -92,7 +97,7 @@ test("all nine locales render wallet test signup without fabricated characters o
   }
 });
 
-test("receiving-wallet UI follows campaign payment flag and manifest asset for all nine locales", () => {
+test("receiving-wallet UI follows campaign payment flag and manifest asset for all supported locales", () => {
   const { PROMOTION_COPY: copy, PROMOTION_LANGUAGES: languages } = load("promotion-copy");
   const { PromotionReceivingWallet } = loadViews();
   for (const [locale] of languages) {
@@ -127,11 +132,11 @@ test("receiving-wallet UI follows campaign payment flag and manifest asset for a
   }
 });
 
-test("all nine website locales have complete, independent promotion and approval copy", () => {
+test("all supported website locales have complete, independent promotion and approval copy", () => {
   const { PROMOTION_COPY: dictionaries, PROMOTION_LANGUAGES: languages } = load("promotion-copy");
   const { PROMOTION_ACCOUNT_COPY: accounts } = load("promotion-account-copy");
   const { PROMOTION_ADMIN_COPY: administration } = load("promotion-admin-copy");
-  assert.equal(languages.length, 9);
+  assert.equal(languages.length, 10);
   const keys = Object.keys(dictionaries.en).sort();
   for (const [locale] of languages) {
     assert.deepEqual(Object.keys(dictionaries[locale]).sort(), keys);
@@ -151,7 +156,7 @@ test("all nine website locales have complete, independent promotion and approval
 
 test("language preference follows the existing Numeron website convention", () => {
   const { normalizePromotionLocale: normalize } = load("promotion-copy");
-  assert.equal(normalize("zh-CN"), "zh-Hant");
+  assert.equal(normalize("zh-CN"), "zh-Hans");
   assert.equal(normalize("zh-TW"), "zh-Hant");
   assert.equal(normalize("pt-PT"), "pt-BR");
   assert.equal(normalize("ar-SA"), "ar");

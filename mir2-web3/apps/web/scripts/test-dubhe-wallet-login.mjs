@@ -236,6 +236,8 @@ function pageHarness() {
   };
   const context = vm.createContext({
     ...state, AbortController, Object,
+    window: { location: { pathname: "/game" } },
+    isPromotionGamePath: () => false,
     requestDubheWalletLoginToken: (options) => {
       const pending = deferred();
       state.requests.push({ ...pending, options });

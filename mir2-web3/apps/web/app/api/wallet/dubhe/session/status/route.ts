@@ -2,4 +2,6 @@ import { readDubheConnectLogin } from "../../../../../../lib/server/dubhe-connec
 
 export const runtime = "nodejs";
 
-export const POST = readDubheConnectLogin;
+export function POST(request: Request) {
+  return readDubheConnectLogin(request);
+}

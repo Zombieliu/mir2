@@ -24,8 +24,8 @@ jobs:
       CARGO_PROFILE_RELEASE_DEBUG: '0'
       CARGO_PROFILE_RELEASE_STRIP: symbols
     steps:
-      - name: Require the bounded repair branch
-        run: test "$GITHUB_REF" = refs/heads/codex/wallet-account-postgres-fix-20261030
+      - name: Require the maintained integrated source branch
+        run: test "$GITHUB_REF" = refs/heads/codex/windows-player-journey
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false

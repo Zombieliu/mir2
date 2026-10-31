@@ -2,4 +2,7 @@ import { createDubheConnectLogin } from "../../../../../lib/server/dubhe-connect
 
 export const runtime = "nodejs";
 
-export const POST = createDubheConnectLogin;
+export function POST(request: Request) {
+  // Next's route context must never become a server-created auth configuration.
+  return createDubheConnectLogin(request);
+}

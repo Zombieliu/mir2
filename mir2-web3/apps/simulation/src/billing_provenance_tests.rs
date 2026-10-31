@@ -230,9 +230,9 @@ fn game_shop_net_zero_credit_spend_does_not_reuse_paid_lots_for_monthly_card() {
         assert!(packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseCredit { credit: 110 })));
-        assert!(packets
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::ReceiveMail { mail } if !mail.is_empty())));
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::ReceiveMail { mail } if !mail.is_empty())
+        ));
         assert_eq!(session.world_snapshot().credit, 110);
         let committed = snapshot(&c);
         assert_eq!(committed.saves[&0].credit, 110);

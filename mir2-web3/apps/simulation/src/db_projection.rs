@@ -133,7 +133,9 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
     ),
     (
         "0024_sui_usdc_native_transfer_authority",
-        include_str!("../../../infra/postgres/migrations/0024_sui_usdc_native_transfer_authority.sql"),
+        include_str!(
+            "../../../infra/postgres/migrations/0024_sui_usdc_native_transfer_authority.sql"
+        ),
     ),
     (
         "0025_promotion_attribution_migration",

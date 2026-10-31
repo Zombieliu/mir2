@@ -63,6 +63,13 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 # Repository-local recovery and diagnostic worktrees
 /tmp/
 /mir2-web3/tmp/
+# Historical build copies are retained on disk, never a second source tree.
+/work/
+/.codex/tmp/
+/mir2-web3/apps/web/.mir2-thin-*/
+/mir2-web3/apps/web/tsconfig.mir2-*.json
+/mir2-web3/apps/web/(\{url*
+*.writer.lock
 # Retain deliberately linked/malformed publication test outputs locally.
 /mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/fixtures/
 /mir2-web3/scripts/fixtures/native-r19-s15/qa-runs/interrupt-fixtures/

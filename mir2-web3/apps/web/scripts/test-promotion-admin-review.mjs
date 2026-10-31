@@ -71,9 +71,9 @@ test("authorized three-month season dates are represented in UTC without local-t
   assert.equal(Date.parse(season.endsAt+"Z"),Date.parse("2027-02-01T00:00:00+08:00"));
 });
 
-test("all nine administrator locales contain independent launch and payment review copy",()=>{
+test("all supported administrator locales contain independent launch and payment review copy",()=>{
   const dictionaries=load("promotion-admin-copy").PROMOTION_LAUNCH_COPY;
-  assert.equal(Object.keys(dictionaries).length,9);
+  assert.equal(Object.keys(dictionaries).length,10);
   const keys=Object.keys(dictionaries.en).sort();
   for(const [locale,copy] of Object.entries(dictionaries)){
     assert.deepEqual(Object.keys(copy).sort(),keys);
@@ -81,7 +81,7 @@ test("all nine administrator locales contain independent launch and payment revi
     if(locale!=="en") assert.notEqual(copy.executionPolicy,dictionaries.en.executionPolicy);
   }
   const funding=load("promotion-admin-copy").PROMOTION_FUNDING_COPY;
-  assert.equal(Object.keys(funding).length,9);
+  assert.equal(Object.keys(funding).length,10);
   for(const [locale,copy] of Object.entries(funding)){
     assert.equal(Object.keys(copy).length,6);
     for(const value of Object.values(copy))assert.ok(value.trim());
@@ -102,6 +102,7 @@ test("administrator review displays server switch state, configuration and exact
     vm.runInNewContext(output,{module,exports:module.exports,TextEncoder,require:specifier=>{
       if(specifier.endsWith(".module.css")) return {__esModule:true,default:new Proxy({},{get:(_target,key)=>String(key)})};
       if(specifier.startsWith("./")) return componentModule(specifier.slice(2));
+      if(specifier==="../../lib/promotion-season-context") return load(specifier);
       return require(specifier);
     }});
     cache.set(name,module.exports);return module.exports;

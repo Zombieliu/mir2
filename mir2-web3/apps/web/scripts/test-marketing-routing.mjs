@@ -12,13 +12,26 @@ const { prepareDestination } = require("next/dist/shared/lib/router/utils/prepar
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const sourcePath = path.join(webRoot, "next.config.ts");
 const temporaryModule = path.join(webRoot, `.marketing-routing-${process.pid}-${Date.now()}.mjs`);
+const temporaryTracingModule = path.join(webRoot, `.marketing-tracing-${process.pid}-${Date.now()}.mjs`);
 const compiled = ts.transpileModule(readFileSync(sourcePath, "utf8"), {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
   fileName: sourcePath,
   reportDiagnostics: true,
 });
 assert.deepEqual((compiled.diagnostics ?? []).filter((value) => value.category === ts.DiagnosticCategory.Error), []);
-writeFileSync(temporaryModule, compiled.outputText);
+// The current config also imports the actual standalone trace hook. Compile it
+// beside the config so this routing test needs no TypeScript loader or build.
+const tracePath = path.join(webRoot, "lib/standalone-full-pack-tracing.ts");
+const traceCompiled = ts.transpileModule(readFileSync(tracePath, "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+  fileName: tracePath,
+  reportDiagnostics: true,
+});
+assert.deepEqual((traceCompiled.diagnostics ?? []).filter((value) => value.category === ts.DiagnosticCategory.Error), []);
+writeFileSync(temporaryTracingModule, traceCompiled.outputText);
+writeFileSync(temporaryModule, compiled.outputText.replace(
+  '"./lib/standalone-full-pack-tracing"', JSON.stringify(`./${path.basename(temporaryTracingModule)}`),
+));
 let sequence = 0;
 
 async function loadConfig(origin, hosted = false, standalone = false) {
@@ -121,11 +134,11 @@ try {
     }
   });
 
-  await test("existing immutable runtime and same-origin asset fallback routes remain intact", async () => {
+  await test("runtime validation stays in proxy while same-origin asset fallbacks remain intact", async () => {
     const routes = await (await loadConfig()).rewrites();
-    const runtime = rewrite(routes.beforeFiles, "/bevy-runtime/v/build-123/pkg-webgl2/mir2_bevy_runtime.js");
-    assert.equal(runtime.pathname, "/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js");
-    assert.ok(!runtime.hostname);
+    // Only proxy.ts can rewrite a runtime URL after validating the current bundle.
+    assert.equal(rewrite(routes.beforeFiles, "/bevy-runtime/v/build-123/pkg-webgl2/mir2_bevy_runtime.js"), null);
+    assert.equal(rewrite(routes.beforeFiles, "/client-core/stale/runtime.wasm"), null);
     for (const prefix of ["original-map", "original-ui", "generated", "bevy-entity-atlases", "Sound"]) {
       const destination = rewrite(routes.fallback, `/${prefix}/folder/asset.png`);
       assert.equal(destination.pathname, `/api/r2-proxy/${prefix}/folder/asset.png`);
@@ -148,11 +161,11 @@ try {
     const config = await loadConfig("https://mir2.obelisk.build", false, true);
     assert.equal(config.output, "standalone");
     const routes = await config.rewrites();
-    assert.equal(routes.beforeFiles.length, 1);
+    assert.equal(routes.beforeFiles.length, 0);
     for (const pathname of ["/", "/game", "/en", "/zh-CN/download", "/marketing-assets/_next/static/chunks/site.js", "/gameplay/shared-world.png", "/api/attribution", "/api/game-status", "/robots.txt", "/icon", "/promotions"]) {
       assert.equal(rewrite(routes.beforeFiles, pathname), null, pathname);
     }
-    assert.equal(rewrite(routes.beforeFiles, "/bevy-runtime/v/build-123/pkg-webgl2/runtime.js").pathname, "/bevy-runtime/pkg-webgl2/runtime.js");
+    assert.equal(rewrite(routes.beforeFiles, "/bevy-runtime/v/build-123/pkg-webgl2/runtime.js"), null);
     assert.equal(rewrite(routes.fallback, "/original-map/region/tile.png").pathname, "/api/r2-proxy/original-map/region/tile.png");
   });
 
@@ -164,4 +177,5 @@ try {
   });
 } finally {
   rmSync(temporaryModule, { force: true });
+  rmSync(temporaryTracingModule, { force: true });
 }

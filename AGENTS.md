@@ -3,6 +3,20 @@
 Primary project: `mir2-web3`, resolved relative to this repository root on
 Windows, macOS, and Linux. Never assume a drive letter or absolute checkout path.
 
+## Canonical code line
+
+- The maintained branch is `codex/windows-player-journey`. Run
+  `python mir2-web3/scripts/verify_unified_codeline.py` before continuing work.
+  Its pinned integration parents and current evidence are described in
+  `mir2-web3/docs/UNIFIED-CODELINE-20261101.zh-CN.md`.
+- Old wallet, promotion, capacity and Windows release worktrees are historical
+  inputs or frozen build snapshots, not independent current development lines.
+  Start new work from the canonical branch. If an isolated task branch is needed,
+  integrate it back before calling the task delivered; do not publish from a
+  stale historical branch. Preserve pinned old artifacts and their source trees.
+- Code integration, fresh local validation, packaged artifacts and public service
+  deployment are separate facts. Report their exact revisions separately.
+
 ## Task scope and startup
 
 - The current user request defines the scope. Finish that request without

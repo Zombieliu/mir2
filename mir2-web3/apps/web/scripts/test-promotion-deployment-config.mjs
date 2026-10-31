@@ -63,6 +63,35 @@ function request(origin, token, extra = {}) { return new Request(`${origin}/api/
 function hmacValid(token, secret) { const [payload, signature] = token.split("."); return createHmac("sha256", secret).update(payload).digest("base64url") === signature; }
 function intentHmacValid(token, secret) { const [payload, signature] = token.split("."); return createHmac("sha256", secret).update(`mir2-dubhe-connect-intent-v1\0${payload}`).digest("base64url") === signature; }
 
+test("ordinary game route wrappers ignore the framework context and keep normal signing defaults", async () => {
+  const f = fixture();
+  function route(suffix) {
+    const file = new URL("../app/api/wallet/dubhe/session/" + suffix + "route.ts", import.meta.url);
+    const compiled = ts.transpileModule(readFileSync(file, "utf8"), {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+    }).outputText;
+    const module = { exports: {} };
+    vm.runInNewContext(compiled, { module, exports: module.exports,
+      require: spec => { assert.ok(spec.endsWith("/dubhe-connect-auth")); return f.dubhe; } });
+    return module.exports.POST;
+  }
+  const frameworkContext = { params: Promise.resolve({}), ...f.context.promotionWalletContext() };
+  const challengeResponse = await route("")(request(GAME.origin), frameworkContext);
+  assert.equal(challengeResponse.status, 200);
+  const challenge = await challengeResponse.json();
+  assert.ok(intentHmacValid(challenge.intentToken, GAME.secret));
+  assert.ok(!intentHmacValid(challenge.intentToken, PROMO.secret));
+  assert.equal(f.calls[0].url, GAME.relay + "/sessions");
+  assert.equal(JSON.parse(f.calls[0].init.body).network, GAME.network);
+  await f.approveAll();
+  const approvalResponse = await route("status/")(request(GAME.origin, challenge.intentToken), frameworkContext);
+  assert.equal(approvalResponse.status, 200);
+  const approval = await approvalResponse.json();
+  assert.equal(approval.status, "approved");
+  assert.ok(hmacValid(approval.login.token, GAME.secret));
+  assert.ok(!hmacValid(approval.login.token, PROMO.secret));
+});
+
 test("promotion configuration is immutable and separate from the existing game defaults", () => {
   const f = fixture(), context = f.context.promotionWalletContext();
   assert.ok(Object.isFrozen(context)); assert.ok(Object.isFrozen(context.allowedOrigins));
