@@ -1,0 +1,60 @@
+{
+  "schema": "mir2.original-invitation.helper-local-verification.v1",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "startedAtUtc": "2026-10-30T21:04:46.065195+00:00",
+  "finishedAtUtc": "2026-10-30T21:04:46.116960+00:00",
+  "helperSha256": "e0155b8ad7b560d16c3c35788af08698c17c1258337d8fde05aa27b7d491134b",
+  "helperSourceUnchangedDuringRun": true,
+  "reviewedDependencies": {
+    "publicationSha256": "6fec1a9d2a3ded09fa70f013e5433a41789c788543d11811e645c3181820b36c",
+    "cloneSha256": "7c2ab9ce4e55a3b1a67c03415183d408f568c141ab4f6764fb254408aaf9153d"
+  },
+  "actualExecutedTests": {
+    "passed": true,
+    "testsExecuted": 7,
+    "failures": 0,
+    "errors": 0,
+    "actualOriginalExecutionPerformed": false,
+    "postgresWrites": 0,
+    "serviceActions": 0,
+    "sshCalls": 0,
+    "chainCalls": 0,
+    "linuxNoFollowSystemCallVerified": false
+  },
+  "testEntry": "run_local_tests() in exact helper, real functions with fixed local I/O spies",
+  "independentReadOnlyReview": {
+    "reviewer": "login_public_probes",
+    "result": "passed",
+    "matchingHelperSha256": "e0155b8ad7b560d16c3c35788af08698c17c1258337d8fde05aa27b7d491134b",
+    "reviewedAreas": [
+      "exact activated Gateway/worker and artifact gate",
+      "unchanged source/target connection strings and server-enforced read-only verification",
+      "independent preview/snapshot/actor review",
+      "single pending-only CLI mutation and retained attempt",
+      "strict adjacent worker batch causality and typed clocks",
+      "concurrency inconclusive without automatic replay or rollback"
+    ],
+    "reviewPerformedRemoteExecution": false
+  },
+  "executionState": "prepared_and_reviewed_only; no original preview or stage executed",
+  "executionConditions": [
+    "Existing source service key and expected connection/binary hashes must first be established by authorized read-only probes.",
+    "Peer public namespace is an independent realm check; no physical SELECT-only source role is claimed.",
+    "Concrete evidenceRef must meet the existing CLI ASCII alphabet [-_.:@/] and length <=256, and be independently reviewed.",
+    "Original preview manifest and snapshot require separate coordinator review before any pending-only stage."
+  ],
+  "sourcePhysicalSelectOnlyRoleVerified": false,
+  "memberConfirmationPerformed": false,
+  "realPaymentPerformed": false,
+  "dockerUsed": false,
+  "cargoExecuted": false,
+  "sshCalls": 0,
+  "postgresWrites": 0,
+  "serviceActions": 0,
+  "privacy": {
+    "containsWalletAddress": false,
+    "containsDatabaseUrl": false,
+    "containsPersonalActorIdentifier": false,
+    "containsPrivateKeyOrToken": false
+  }
+}

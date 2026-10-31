@@ -1,0 +1,461 @@
+{
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "phases": [
+    {
+      "schema": "mir2.native-transfer-phase.local.v1",
+      "phase": "idle_promote",
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "contractSha256": "8a886c2d7af5aedab162508de4ded434ef9dcbd993c694b157b1ea9d1312681c",
+      "remoteHelperSha256": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+      "ci": {
+        "runId": "41093332871",
+        "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+        "conclusion": "success",
+        "branch": "codex/windows-promotion-bridge-20261030"
+      },
+      "remote": {
+        "ok": true,
+        "phase": "idle_promote",
+        "result": {
+          "gatewayPid": 1177999,
+          "oldBinaryRollbackForbidden": true,
+          "operatorRecoveryPerformed": false,
+          "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+          "status": "promoted-awaiting-verification",
+          "workerPid": 1178052
+        }
+      }
+    },
+    {
+      "schema": "mir2.native-transfer-phase.local.v1",
+      "phase": "verify",
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "contractSha256": "8a886c2d7af5aedab162508de4ded434ef9dcbd993c694b157b1ea9d1312681c",
+      "remoteHelperSha256": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+      "ci": {
+        "runId": "41093332871",
+        "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+        "conclusion": "success",
+        "branch": "codex/windows-promotion-bridge-20261030"
+      },
+      "remote": {
+        "ok": true,
+        "phase": "verify",
+        "result": {
+          "gatewayPid": 1177999,
+          "observedAtUtc": "2026-10-30T17:55:27.263017+00:00",
+          "oldBinaryRollbackForbidden": true,
+          "preservedServicesUnchanged": true,
+          "retention": {
+            "_billing": {
+              "count": 6,
+              "sha256": "be89910625bb32c10766b1fb8d05f3bbff319d5c0761ba5eb5a8586a450383ab"
+            },
+            "_stripeOrders": {
+              "count": 13,
+              "sha256": "2813af44df26cfc33cbe731f1204f258aef2b410a037af6f828b4c83b5793033"
+            },
+            "_usdcOrders": {
+              "count": 2,
+              "sha256": "a5383c939e349aff6a0e73f285a992df36e08020d72148523ced32446eb2a846"
+            },
+            "accounts": {
+              "count": 125,
+              "sha256": "24151975702ca2bfb10ba8bd123f2b7751455da47ef41d1d6d62b93df20b6a68"
+            },
+            "admin_activities": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_approvals": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_audit_records": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_commands": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_daily_report_deliveries": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_daily_report_events": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_daily_report_runs": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_daily_reports": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_market_price_feeds": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_operators": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_outbox": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_system_mail_receipts": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_trade_graph_edges": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "admin_zone_runtime_records": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "auction_listings": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "character_items": {
+              "count": 223,
+              "sha256": "e7445b814868d14c882a74aebcb2736cd9ea053bb5494949bccafacb59dc4ae1"
+            },
+            "character_mail": {
+              "count": 8,
+              "sha256": "037e8f8719e42f3815175438523c3aa6eb9ac44bd2c22766aace2b01dcb7bbea"
+            },
+            "character_npc_state": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "character_saves": {
+              "count": 38,
+              "sha256": "dcef2cb03bb54acd898826479f421ff57417b86f079eacef91c636cae1792552"
+            },
+            "character_state": {
+              "count": 38,
+              "sha256": "65806b908f16b743263740e01bda8a595f0e500c5f0cc8b139d41b628bed4cd4"
+            },
+            "characters": {
+              "count": 38,
+              "sha256": "af0361f96092c6c02559903bc11e5f9c9ae7ce5267d79c9cc98bd34078c872c2"
+            },
+            "game_economy_balances": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_bootstraps": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_ground_drop_projections": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_inbox": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_outbox": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_reconciliation_runs": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_trade_projections": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_economy_transactions": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "game_shop_global_stock": {
+              "count": 1,
+              "sha256": "d45268ad93aa25e5ef963df7d08637d3696422884553f6ed9d7254f1ef1b0ca4"
+            },
+            "identity_audit_events": {
+              "count": 469,
+              "sha256": "2a5c91e09db1059021eef1668880367b7070381fb661faa0287d165d542e5c90"
+            },
+            "identity_credentials": {
+              "count": 36,
+              "sha256": "1f90e4a0bce17c84bf5ce2ac60b5f371e453119c22602bf93759ace300a5d367"
+            },
+            "identity_recovery_codes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "identity_sessions": {
+              "count": 421,
+              "sha256": "7ae44855c9b415af1c3d1298b1b713845a492b50b4712d5fb147207a5f562bf7"
+            },
+            "mir2_channel_identity_bindings": {
+              "count": 4,
+              "sha256": "6e6d6360d1d011473e7fd3325ff954aa8b4f239d4d6d7f746f7d89bb3b259c8f"
+            },
+            "mir2_player_identity_accounts": {
+              "count": 4,
+              "sha256": "b03550bbda2c001bcb5c0d044199539529d3caaee769a738573820e416faf432"
+            },
+            "promotion_appeals": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_attributions": {
+              "count": 1,
+              "sha256": "59eae172098ccc1bd78d14e70111e389d0d0e7e135dbd16e838dc32b16c534e3"
+            },
+            "promotion_audit_log": {
+              "count": 105,
+              "sha256": "6375906a895727b82d937bd269800b0f07140a07efdd793d8b25d4022fef6c72"
+            },
+            "promotion_campaigns": {
+              "count": 1,
+              "sha256": "c2865d110968242ec65e8a239239f675df6d680d209648c724c149010ed00614"
+            },
+            "promotion_candidates": {
+              "count": 1,
+              "sha256": "f966897332934eaecce9300951d7684626dc7a45fd58778ce39b9f694958d1e8"
+            },
+            "promotion_commission_entries": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_commission_runs": {
+              "count": 2,
+              "sha256": "ca8898fecf5b113dee94a70e3c4b96d3d11c2297b6e345b809bab7579cbc831c"
+            },
+            "promotion_credit_lot_allocations": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_game_facts": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_game_source_deliveries": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_game_source_events": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_idempotency": {
+              "count": 12,
+              "sha256": "b0ed4770dd7efa3cb75cac8877297138482ed120d4ceaea3b71779285c5793f7"
+            },
+            "promotion_invitation_clicks": {
+              "count": 1,
+              "sha256": "cca3eb72f69c4c51ef3ab59a7ddb3526001b4ed84e5e8b47a0cfd4c059ffb395"
+            },
+            "promotion_leaders": {
+              "count": 1,
+              "sha256": "a238b1224d9c7d83e1493a6a52373bf38d63a8bc51de5089e13a0c1dc591fd73"
+            },
+            "promotion_monthly_source_observations": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_operator_roles": {
+              "count": 2,
+              "sha256": "13969c73b4862b2d6b392e8cc4b53c4eb1e1c7923f4ee1af90bc4be3bade6a4a"
+            },
+            "promotion_outbox": {
+              "count": 11,
+              "sha256": "4c459d714364e3ab38ee773b39f2483c896eae8d547c338c6e554dc332231bd3"
+            },
+            "promotion_payout_addresses": {
+              "count": 3,
+              "sha256": "eeaf86086f8616f1282fc4749591433f644903062fc14c5f3a496be21ea9714f"
+            },
+            "promotion_payout_attempts": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_payout_chain_observations": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_payout_intents": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_payouts": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_pending_reversals": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_production_approvals": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_revenue_adjustments": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_revenue_allocations": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_revenue_source_holds": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "promotion_settlements": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "schema_migrations": {
+              "count": 27,
+              "sha256": "27910f4f7945158c3a4d50feb68f3ab8abeeb2b79437e11394a139392332590d"
+            },
+            "sealed_stone_authority": {
+              "count": 1,
+              "sha256": "2cf1aec68c9b2185268a88a2ca876aeb6c8a2653d42bcc9a46df21bde52b5432"
+            },
+            "shared_conquests": {
+              "count": 1,
+              "sha256": "3dfddad215cab137584233f0ffb55c5898d4dca95d7dc823e09c68444f67b267"
+            },
+            "shared_guild_clock": {
+              "count": 1,
+              "sha256": "9972f0f78fd5369e0991dfcb8f4c7161118ec4c9240e9e5170816b99ada43ac7"
+            },
+            "shared_guild_members": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "shared_guilds": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "shared_hero_allocator": {
+              "count": 1,
+              "sha256": "1db333d0161a3b41ce0c5c6bfc095cc194fb057414cd9de84125894d55b253f2"
+            },
+            "shared_heroes": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "sui_usdc_active_creation": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "sui_usdc_invoice_receipts": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "sui_usdc_payer_windows": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "sui_usdc_payment_receipts": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "sui_usdc_transaction_claims": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "world_director_audit": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "world_director_control_state": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            "zone_owner_leases": {
+              "count": 0,
+              "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            }
+          },
+          "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+          "workerPid": 1178052
+        }
+      }
+    },
+    {
+      "schema": "mir2.native-transfer-phase.local.v1",
+      "phase": "caddy_exact_asset",
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "contractSha256": "8a886c2d7af5aedab162508de4ded434ef9dcbd993c694b157b1ea9d1312681c",
+      "remoteHelperSha256": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+      "ci": {
+        "runId": "41093332871",
+        "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+        "conclusion": "success",
+        "branch": "codex/windows-promotion-bridge-20261030"
+      },
+      "remote": {
+        "ok": true,
+        "phase": "caddy_exact_asset",
+        "result": {
+          "caddyPid": 2107428,
+          "exactMatcherAdded": "/v1/billing/sui-usdc/dubhe-wallet.js",
+          "otherAdaptedConfigurationPreserved": true,
+          "status": "published-exact-static-path"
+        }
+      }
+    },
+    {
+      "schema": "mir2.native-transfer-phase.local.v1",
+      "phase": "operator_original",
+      "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+      "contractSha256": "8a886c2d7af5aedab162508de4ded434ef9dcbd993c694b157b1ea9d1312681c",
+      "remoteHelperSha256": "c4ef93c6ed5f103762659830e976ef81c90819ee466f417d8f38e571fdc04354",
+      "ci": {
+        "runId": "41093332871",
+        "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+        "conclusion": "success",
+        "branch": "codex/windows-promotion-bridge-20261030"
+      },
+      "remote": {
+        "ok": true,
+        "phase": "operator_original",
+        "result": {
+          "accountSha256": "37ea4b0bd1bff5cab281e28d8f72b79b3f8cbe89db965b61adafbc277b901b97",
+          "broadcastPerformed": false,
+          "deliveryStatus": "applied",
+          "digest": "8iAt98ntbmNrikLeAh5nV7QES6r3UngBuADPpF85mguu",
+          "guard": {
+            "credits": 100,
+            "exactCreditDelta": true,
+            "existingFieldsPreserved": true,
+            "immutableOrderTermsPreserved": true
+          },
+          "issuerSecretInherited": false,
+          "normalizedProjectionGuard": {
+            "creditDelta": 100,
+            "emptyDerivedBusinessViewsPreserved": true,
+            "itemsBusinessAndUnknownFieldsPreserved": true,
+            "itemsCount": 4,
+            "sameTransactionTimesMonotonic": true,
+            "saveVersionDelta": 3,
+            "saveVersionMatchesAuthoritative": true,
+            "stateCreditMatchesAuthoritative": true
+          },
+          "orderId": "usdc_5ab9455a207912f81ad8923300f2cc33a76a307e2be39be293deeb8ace05d198",
+          "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+          "targetAfterSha256": "a326e65cd752bf0d4a85c3dc4581f06d8a1d849399ba19485073cd26e37c7c25",
+          "targetBeforeSha256": "b88cd1433f9d3b872f9ed7a08bda3fce056659ef8be920be55a2561182a430c5"
+        }
+      }
+    }
+  ],
+  "allPassed": true
+}

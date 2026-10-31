@@ -339,6 +339,10 @@ pub(super) fn issue_credit_purchase(
             .credit
             .checked_sub(total)
             .ok_or("insufficient game-shop credit at commit")?;
+        crate::billing_provenance::allocate_monthly_purchase(
+            account, account_id, character, save.credit,
+            &items.iter().map(item_unique_id).collect::<Vec<_>>(), price, now_ms,
+        )?;
         account.monthly_card = staged_account.monthly_card;
         save.credit = remaining;
     }

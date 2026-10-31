@@ -9,6 +9,9 @@ use serde_json::{json, Value};
 use sha2::Sha256;
 use std::{sync::Arc, time::Duration};
 
+#[path = "stripe_billing_provenance.rs"]
+mod provenance;
+
 pub const STRIPE_API_VERSION: &str = "2026-09-30.endive";
 const MAX_PROVIDER_BYTES: usize = 256 * 1024;
 const MAX_WEBHOOK_BYTES: usize = 64 * 1024;
@@ -404,6 +407,14 @@ impl StripeBilling {
             return Err("billingWebhookInvalid".into());
         }
         let kind = field(&event, "type")?;
+        // Use the signed source event's time for revenue ordering, not callback
+        // arrival. Older internal fixtures omit created and remain test-only.
+        let occurred_at_ms = match event["created"].as_u64() {
+            Some(seconds) => seconds.checked_mul(1000).ok_or("billingWebhookInvalid")?,
+            None if !self.livemode => now_ms,
+            None => return Err("billingWebhookInvalid".into()),
+        };
+        if occurred_at_ms > now_ms { return Err("billingWebhookInvalid".into()); }
         if matches!(
             kind,
             "checkout.session.completed" | "checkout.session.async_payment_succeeded"
@@ -437,12 +448,15 @@ impl StripeBilling {
                 session_id: field(&session, "id")?.into(),
                 payment_intent_id: payment_intent.into(),
                 amount_minor: order.offer.amount_minor,
-                currency: order.offer.currency,
+                currency: order.offer.currency.clone(),
                 livemode: self.livemode,
             };
+            let observed_at_ms=mir2_simulation::monthly_card::monthly_card_now_ms().max(now_ms);
+            let revenue = provenance::payment(&session, &order, field(&event,"id")?, occurred_at_ms, observed_at_ms)?;
             let config = config.clone();
             tokio::task::spawn_blocking(move || {
-                config.confirm_recharge_payment(&account, &id, &payment, now_ms)
+                config.confirm_recharge_payment(&account, &id, &payment, now_ms)?;
+                config.record_verified_payment_revenue(&account, &revenue)
             })
             .await
             .map_err(|_| "billingResultUnconfirmed")??;
@@ -502,13 +516,23 @@ impl StripeBilling {
             {
                 return Err("billingPaymentMismatch".into());
             }
+            let dispute = if kind.starts_with("charge.dispute.") {
+                let dispute_id = field(object,"id")?;
+                if !provider_id(dispute_id,"du_") { return Err("billingWebhookInvalid".into()); }
+                let current=Self::response(self.request(reqwest::Method::GET,&format!("/disputes/{dispute_id}"))).await?;
+                if current["id"].as_str()!=Some(dispute_id) { return Err("billingPaymentMismatch".into()); }
+                Some(current)
+            } else { None };
+            let observed_at_ms=mir2_simulation::monthly_card::monthly_card_now_ms().max(now_ms);
+            let adverse = provenance::adverse(&charge, dispute.as_ref(), &order, field(&event,"id")?, occurred_at_ms, observed_at_ms)?;
             // An adverse event is retained for operator review. Never roll back
             // a whole save, erase purchased items or silently subtract spent points.
             let config = config.clone();
             let kind = kind.to_owned();
             let event_id = field(&event, "id")?.to_owned();
             tokio::task::spawn_blocking(move || {
-                config.mark_recharge_review(&account, &id, &kind, &event_id, now_ms)
+                config.mark_recharge_review(&account, &id, &kind, &event_id, now_ms)?;
+                config.record_verified_payment_adverse_event(&account, &adverse)
             })
             .await
             .map_err(|_| "billingResultUnconfirmed")??;

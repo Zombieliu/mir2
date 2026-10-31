@@ -204,6 +204,7 @@ impl Fixture {
     }
     fn provider(&self, driver: Arc<dyn UsdcDriver>) -> UsdcBilling {
         UsdcBilling {
+            direct_enabled: false,
             enabled: true,
             domain: self.order.domain.clone(),
             offers: vec![self.order.offer.clone()],
@@ -220,6 +221,133 @@ impl Drop for Fixture {
     fn drop(&mut self) {
         let _ = std::fs::remove_file(&self.path);
     }
+}
+fn native_fixture(label: &str) -> Fixture {
+    let mut fixture = Fixture::new(label);
+    fixture.order.payment_mode = UsdcPaymentMode::DirectTransfer;
+    fixture.order.validate().unwrap();
+    let mut store = fixture.disk();
+    store
+        .accounts
+        .get_mut("demo")
+        .unwrap()
+        .billing
+        .as_mut()
+        .unwrap()
+        .sui_usdc_orders
+        .insert(fixture.order.id.clone(), fixture.order.clone());
+    // Explicit test fixture only: production direct creation uses the PG
+    // credential check; the real File transaction/credit authority is exercised.
+    *fixture.config.account_store.lock().unwrap() = store;
+    fixture.config.save_account_store().unwrap();
+    fixture
+}
+struct NativeMock {
+    terms: Value,
+    receipt: Value,
+    calls: Mutex<Vec<String>>,
+    unknown: AtomicBool,
+    pay: bool,
+}
+impl NativeMock {
+    fn new(f: &Fixture, pay: bool) -> Self {
+        Self {
+            terms: native_chain_order(&f.order).unwrap(),
+            receipt: json!({"genesisDigest":"69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD","transactionDigest":"5".repeat(44),
+                "checkpoint":"20","paidAtMs":f.at.to_string(),"payer":f.order.payer,"merchant":f.order.domain.merchant,
+                "coinType":f.order.domain.coin_type,"amountMicros":f.order.amount_micro.to_string()}),
+            calls: Mutex::new(vec![]),
+            unknown: AtomicBool::new(false),
+            pay,
+        }
+    }
+}
+impl UsdcDriver for NativeMock {
+    fn call(&self, operation: &str, params: Value) -> Result<Value, String> {
+        self.calls.lock().unwrap().push(operation.into());
+        assert_eq!(params["order"], self.terms);
+        match operation {
+            "discoverDirectTransfers" => Ok(
+                json!({"state":"scanned","digests":["5".repeat(44)],"cursor":"{\"fixture\":1}","windowComplete":false,"scanComplete":true}),
+            ),
+            "observeDirectTransfer" => {
+                if self.unknown.swap(false, Ordering::SeqCst) {
+                    return Ok(json!({"state":"unknown"}));
+                }
+                if self.pay {
+                    Ok(json!({"state":"paid","receipt":self.receipt}))
+                } else {
+                    Ok(json!({"state":"unpaid"}))
+                }
+            }
+            _ => panic!("Native worker may never prepare/sign/submit an invoice: {operation}"),
+        }
+    }
+}
+#[test]
+fn native_transfer_worker_confirms_real_receipt_path_and_delivers_once_without_issuer_calls() {
+    let f = native_fixture("native-worker");
+    let driver = Arc::new(NativeMock::new(&f, true));
+    let provider = f.provider(driver.clone());
+    run_order(&f.config, &provider, "demo", &f.order.id, "native-worker").unwrap();
+    let stored = f.disk();
+    let order = &stored.accounts["demo"]
+        .billing
+        .as_ref()
+        .unwrap()
+        .sui_usdc_orders[&f.order.id];
+    assert_eq!(order.state, UsdcOrderState::PaidPending);
+    assert!(order.receipt.is_none());
+    assert!(order.invoice.is_none());
+    assert_eq!(
+        order.transfer_receipt.as_ref().unwrap().digest,
+        "5".repeat(44)
+    );
+    let delivered = f
+        .config
+        .consume_inactive_pending_recharge_credits("demo", f.order.character_index, now())
+        .unwrap();
+    assert_eq!(delivered.granted, 100);
+    run_order(&f.config, &provider, "demo", &f.order.id, "native-worker").unwrap();
+    assert_eq!(
+        f.config
+            .consume_inactive_pending_recharge_credits("demo", f.order.character_index, now())
+            .unwrap()
+            .granted,
+        0
+    );
+    assert_eq!(
+        *driver.calls.lock().unwrap(),
+        vec!["discoverDirectTransfers", "observeDirectTransfer"]
+    );
+}
+#[test]
+fn native_discovery_does_not_advance_cursor_over_unknown_candidate_and_resumes_after_retry() {
+    let f = native_fixture("native-cursor");
+    let driver = Arc::new(NativeMock::new(&f, false));
+    driver.unknown.store(true, Ordering::SeqCst);
+    let provider = f.provider(driver);
+    assert_eq!(
+        run_order(&f.config, &provider, "demo", &f.order.id, "native-worker").unwrap_err(),
+        "usdcResultUnknown"
+    );
+    assert!(f.disk().accounts["demo"]
+        .billing
+        .as_ref()
+        .unwrap()
+        .sui_usdc_orders[&f.order.id]
+        .direct_scan_cursor
+        .is_none());
+    run_order(&f.config, &provider, "demo", &f.order.id, "native-worker").unwrap();
+    let order = f.disk().accounts["demo"]
+        .billing
+        .as_ref()
+        .unwrap()
+        .sui_usdc_orders[&f.order.id]
+        .clone();
+    assert_eq!(order.direct_scan_cursor.as_deref(), Some("{\"fixture\":1}"));
+    assert!(!order.direct_scan_complete);
+    assert!(!order.has_payment_receipt());
 }
 struct Mock {
     config: SimulationConfig,

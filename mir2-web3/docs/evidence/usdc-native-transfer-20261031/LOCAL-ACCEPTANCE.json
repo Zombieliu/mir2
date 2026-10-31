@@ -1,0 +1,33 @@
+{
+  "schema": "mir2.usdc-native.local-acceptance.v1",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "docker": false,
+  "gatewayUsdc": 23,
+  "simulationUsdc": 30,
+  "billingProvenance": 15,
+  "nativePgAdjacentIntegration": 40,
+  "node": 52,
+  "walletUi": 40,
+  "chromeMock": 7,
+  "operatorCargoCheck": true,
+  "originalServerModified": false,
+  "humanMobileQrPayment": false,
+  "logs": [
+    {
+      "name": "gateway-focused.log",
+      "sha256": "a1ca9f3804e139ae2bcfe54ff09817fbb04cea9eaf2f3ba0dbaf8c6634210978"
+    },
+    {
+      "name": "operator-check.log",
+      "sha256": "7f1f2812ad1539cd6e8d5a6dfbe30befd33fb9d9dba061b703cd6af64444baa6"
+    },
+    {
+      "name": "adjacent-native-pg.log",
+      "sha256": "caf233bad761175457841b8403d5fbe9dd3bb68993814aeb9985ce62b436ce54"
+    },
+    {
+      "name": "wallet-ui.log",
+      "sha256": "f6bfa9ed21b7a9d61628f87a540b764184a5c80c63c198e0f876a96359d5f1eb"
+    }
+  ]
+}

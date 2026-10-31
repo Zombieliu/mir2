@@ -1,0 +1,291 @@
+{
+  "schema": "mir2.direct-transfer.public-auto-discovery.v1",
+  "sourceSha": "868ef2d2b24de2ab2c577bbe2f3b1667829c9bc3",
+  "observedAtUtc": "2026-10-30T16:56:35.511Z",
+  "readOnly": true,
+  "startedFromNullCursor": true,
+  "digestHintSupplied": false,
+  "originalWindow": {
+    "createdAtMs": "1793375207307",
+    "expiresAtMs": "1793376407307"
+  },
+  "expectedAmountMicros": "1000000",
+  "orderId": "usdc_5ab9455a207912f81ad8923300f2cc33a76a307e2be39be293deeb8ace05d198",
+  "accountSha256": "37ea4b0bd1bff5cab281e28d8f72b79b3f8cbe89db965b61adafbc277b901b97",
+  "driverSha256": "af77ed2cfb6654aa827b3a53e1fd832dc5a55e3f95f9e0816543e6d2647863fd",
+  "calls": [
+    {
+      "number": 1,
+      "state": "scanned",
+      "digests": [],
+      "scanComplete": false,
+      "windowComplete": false,
+      "phase": "seek",
+      "cursorProgress": true,
+      "indexedThroughCheckpoint": "400959562",
+      "indexedThroughMs": "1793379366984"
+    },
+    {
+      "number": 2,
+      "state": "scanned",
+      "digests": [],
+      "scanComplete": false,
+      "windowComplete": false,
+      "phase": "seek",
+      "cursorProgress": true,
+      "indexedThroughCheckpoint": "400959562",
+      "indexedThroughMs": "1793379366984"
+    },
+    {
+      "number": 3,
+      "state": "scanned",
+      "digests": [],
+      "scanComplete": false,
+      "windowComplete": false,
+      "phase": "seek",
+      "cursorProgress": true,
+      "indexedThroughCheckpoint": "400959562",
+      "indexedThroughMs": "1793379366984"
+    },
+    {
+      "number": 4,
+      "state": "scanned",
+      "digests": [
+        "8iAt98ntbmNrikLeAh5nV7QES6r3UngBuADPpF85mguu"
+      ],
+      "scanComplete": true,
+      "windowComplete": true,
+      "phase": "scan",
+      "cursorProgress": true,
+      "indexedThroughCheckpoint": "400959562",
+      "indexedThroughMs": "1793379366984"
+    }
+  ],
+  "queries": [
+    {
+      "kind": "DirectIndex",
+      "startedAfterMs": 2520,
+      "httpStatus": 200,
+      "durationMs": 926
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 3447,
+      "httpStatus": 200,
+      "durationMs": 786
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 4233,
+      "httpStatus": 200,
+      "durationMs": 354
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 4587,
+      "httpStatus": 200,
+      "durationMs": 325
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 4912,
+      "httpStatus": 200,
+      "durationMs": 339
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 5252,
+      "httpStatus": 200,
+      "durationMs": 334
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 5586,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 5924,
+      "httpStatus": 200,
+      "durationMs": 586
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 6510,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectIndex",
+      "startedAfterMs": 9044,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 9382,
+      "httpStatus": 200,
+      "durationMs": 322
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 9704,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 10042,
+      "httpStatus": 200,
+      "durationMs": 321
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 10363,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 10701,
+      "httpStatus": 200,
+      "durationMs": 324
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 11025,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 11363,
+      "httpStatus": 200,
+      "durationMs": 327
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 11690,
+      "httpStatus": 200,
+      "durationMs": 336
+    },
+    {
+      "kind": "DirectIndex",
+      "startedAfterMs": 15470,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 15808,
+      "httpStatus": 200,
+      "durationMs": 807
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 16616,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 16954,
+      "httpStatus": 200,
+      "durationMs": 347
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 17301,
+      "httpStatus": 200,
+      "durationMs": 337
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 17638,
+      "httpStatus": 200,
+      "durationMs": 345
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 17983,
+      "httpStatus": 200,
+      "durationMs": 338
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 18321,
+      "httpStatus": 200,
+      "durationMs": 346
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 18667,
+      "httpStatus": 200,
+      "durationMs": 339
+    },
+    {
+      "kind": "DirectIndex",
+      "startedAfterMs": 23102,
+      "httpStatus": 200,
+      "durationMs": 1216
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 24318,
+      "httpStatus": 200,
+      "durationMs": 958
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 25277,
+      "httpStatus": 200,
+      "durationMs": 654
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 25931,
+      "httpStatus": 200,
+      "durationMs": 393
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 26324,
+      "httpStatus": 200,
+      "durationMs": 647
+    },
+    {
+      "kind": "DirectCheckpoint",
+      "startedAfterMs": 26971,
+      "httpStatus": 200,
+      "durationMs": 396
+    },
+    {
+      "kind": "DirectTransfers",
+      "startedAfterMs": 27367,
+      "httpStatus": 200,
+      "durationMs": 400
+    }
+  ],
+  "found": true,
+  "observation": {
+    "state": "paid",
+    "receipt": {
+      "genesisDigest": "69WiPg3DAQiwdxfncX6wYQ2siKwAe6L9BZthQea3JNMD",
+      "transactionDigest": "8iAt98ntbmNrikLeAh5nV7QES6r3UngBuADPpF85mguu",
+      "checkpoint": "400944504",
+      "paidAtMs": "1793375685597",
+      "payer": "0x072543b6d3e7e672701b4267487c83422280b416aa1dd502d60c520d053c24ab",
+      "merchant": "0x98d549368a71c12ac7dcab5e9dcdb6d5610267dc566a60423ad45c279c7917f1",
+      "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+      "amountMicros": "1000000"
+    }
+  },
+  "stopReason": "target-discovered",
+  "elapsedMs": 30473,
+  "accountWrites": false,
+  "remoteLedgerWrites": false,
+  "cursorPersisted": false,
+  "signatureRequested": false,
+  "broadcastPerformed": false
+}

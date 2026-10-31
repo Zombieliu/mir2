@@ -516,7 +516,7 @@ async fn local_http(state: WebState) -> LocalHttp {
         .await
         .expect("isolated HTTP listener");
     let address = listener.local_addr().unwrap();
-    let app = router().with_state(state);
+    let app = router().merge(crate::web::promotions::router()).with_state(state);
     let server = tokio::spawn(async move {
         axum::serve(listener, app)
             .await
@@ -1264,3 +1264,6 @@ async fn ordinary_websocket_billing_recovers_expired_entry_and_replays_offline_a
     drop(local);
     drop(state);
 }
+
+#[path = "web_billing_http_operations_tests.rs"]
+mod offline_http;

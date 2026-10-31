@@ -104,6 +104,42 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         include_str!("../../../infra/postgres/migrations/0019_sui_usdc_billing_authority.sql"),
     ),
     (
+        "0017_promotion_program",
+        include_str!("../../../infra/postgres/migrations/0017_promotion_program.sql"),
+    ),
+    (
+        "0018_promotion_payment_provenance",
+        include_str!("../../../infra/postgres/migrations/0018_promotion_payment_provenance.sql"),
+    ),
+    (
+        "0019_promotion_game_sources",
+        include_str!("../../../infra/postgres/migrations/0019_promotion_game_sources.sql"),
+    ),
+    (
+        "0020_promotion_payout_execution",
+        include_str!("../../../infra/postgres/migrations/0020_promotion_payout_execution.sql"),
+    ),
+    (
+        "0021_promotion_live_readiness",
+        include_str!("../../../infra/postgres/migrations/0021_promotion_live_readiness.sql"),
+    ),
+    (
+        "0022_promotion_production_approval",
+        include_str!("../../../infra/postgres/migrations/0022_promotion_production_approval.sql"),
+    ),
+    (
+        "0023_promotion_revenue_share",
+        include_str!("../../../infra/postgres/migrations/0023_promotion_revenue_share.sql"),
+    ),
+    (
+        "0024_sui_usdc_native_transfer_authority",
+        include_str!("../../../infra/postgres/migrations/0024_sui_usdc_native_transfer_authority.sql"),
+    ),
+    (
+        "0025_promotion_attribution_migration",
+        include_str!("../../../infra/postgres/migrations/0025_promotion_attribution_migration.sql"),
+    ),
+    (
         "0020_zone_character_save_operations",
         include_str!("../../../infra/postgres/migrations/0020_zone_character_save_operations.sql"),
     ),
@@ -792,6 +828,11 @@ mod tests {
             position("0018_procurement_authority_guard")
                 < position("0019_sui_usdc_billing_authority")
         );
+        assert!(position("0019_sui_usdc_billing_authority") < position("0024_sui_usdc_native_transfer_authority"));
+        assert!(position("0023_promotion_revenue_share") < position("0024_sui_usdc_native_transfer_authority"));
+        let transfer = MIGRATIONS[position("0024_sui_usdc_native_transfer_authority")].1;
+        assert!(!transfer.contains("UPDATE accounts"), "V14 migration must preserve historical account rows");
+        assert!(transfer.contains("FROM sui_usdc_payment_receipts ON CONFLICT DO NOTHING"));
     }
 
     fn sample_save() -> CharacterSaveRecord {

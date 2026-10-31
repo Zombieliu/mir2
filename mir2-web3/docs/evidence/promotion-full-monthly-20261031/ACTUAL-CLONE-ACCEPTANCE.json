@@ -1,0 +1,75 @@
+{
+  "schema": "mir2.full-monthly.clone-acceptance.v1",
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "artifactSha256": "3c130ae24707908278ea4fccbc27f354c1bf47896b81ff393b8bb7a3ecaf812b",
+  "binarySha256": {
+    "mir2-gateway": "7343ad2c6efb82b06d69a29ca87797fdf28e191f683df89a6730308dc20847e8",
+    "promotion_worker": "4bd750ecaff0e4d89cc28ac5e648321d32c4eb588e685236dfc855fc0230491d",
+    "promotion_recalculate": "4418023759d63e07dab97906dc362a77060e54b96ade2182b856c014dea7892f",
+    "promotion_full_monthly_policy": "6a165845357c3b77fbfa4ea4bd2b46a475090ac442ddb17c2b59f2ab1cf8d743"
+  },
+  "authenticatedArtifactEvidenceSha256": "445f4743894b6a785f9bd64d11dc75b1348b5a76cecca45239d3d9341a69491b",
+  "passed": true,
+  "docker": false,
+  "noOriginalWrites": true,
+  "noPaymentOperations": true,
+  "migrationRowsUnchanged": true,
+  "oldBusinessRowsPreserved": true,
+  "policyBefore": "service_period_prorated",
+  "policyAfter": "monthly_purchase_full",
+  "policyApplyAudited": true,
+  "commissionBeforeMicroUsd": "164839",
+  "commissionAfterMicroUsd": "1000000",
+  "replayNoChanges": true,
+  "lockedSettlementGuardPassed": true,
+  "syntheticLockedFixture": {
+    "synthetic": true,
+    "status": "review",
+    "settlementIdSha256": "47c4d356decab00584280b3daebc217e2d6373f6cac6e649d65c0a4c731caaf9",
+    "noFinancialApproval": true
+  },
+  "sourceSnapshotRowsSha256": "dd00bb164efa7d26e2583a221f03c84ee1eae95eaabcfa9aa8d74fa339239678",
+  "clonePreservation": {
+    "allOriginalNonPolicyRowsPreserved": true,
+    "oldAuditAndRunsPreserved": true,
+    "qualificationTimeAndTermsPreserved": true,
+    "originalSettlementsPreserved": true,
+    "sourceAllocationPaymentAccountCharacterRowsPreserved": true,
+    "appendedAuditRows": 3,
+    "appendedCommissionRuns": 3,
+    "appendedInternalQualificationEvents": 2
+  },
+  "backupSha256": "078a41526f5af51a7f0f4d661e6a58b285e00fb3445911de66130756c820d630",
+  "cloneDatabase": "mir2_full_monthly_99a1e9646c3f",
+  "guardDatabase": "mir2_full_monthly_f43022dbef3e",
+  "rulesSha256": "f14689c96d15bfd3046d1cfa1c5e20b253783691aac10d4a0b705012d4ccb1d2",
+  "previewSha256": "6f47e4f09867d983504967dd47a6b1a33ed53fd263d9a04655b0501b2b7e669b",
+  "appliedSha256": "ec8e3e49d43f62a8abc3aab80602e23aedad3d0c693883745716c88d56f6c8ff",
+  "replaySha256": "ee05a591b69e9701ef20353eb859e772132b8188908c78b2af08a580a790efb1",
+  "newRulesSha256": "2e972bff554047de7d02cef499535f92094a3bd09f00c0e971caea27378dc21f",
+  "afterPreviewSha256": "2c54f6af4da851b0725597679e0bdeb101ca5f9fc9eb47907355d9ccb434b39e",
+  "attributionIdAndOriginalConfirmationPreserved": true,
+  "oldAndNewOfflineRecalculationVerified": true,
+  "offlineRecalculation": {
+    "old": {
+      "verified": true,
+      "algorithmVersion": "numeron-segmented-v2",
+      "commissionMicroUsd": "164839",
+      "snapshotSha256": "1c4717325adda748a419dfcad42757826f6a014730c864720e34977ab8ee2c17",
+      "originalRunSha256": "942981b180d81997c0f5d60eea440e62c0e8adcdbbbb3910c9fdee445f958971",
+      "exportFileSha256": "c2f2495bc38ff57a95e2c358f90a7d93dc282824b68b89093b08301acafabf23",
+      "binarySha256": "4418023759d63e07dab97906dc362a77060e54b96ade2182b856c014dea7892f",
+      "noSettlementCreated": true
+    },
+    "new": {
+      "verified": true,
+      "algorithmVersion": "numeron-segmented-full-monthly-v3",
+      "commissionMicroUsd": "1000000",
+      "snapshotSha256": "a2cabf99143b595764f04e7f2baa6b76a6df628ecb2b41a924d3ec4182b01fb5",
+      "originalRunSha256": "44e9495ffc4061ba79d2fb808d0691cdb00a4952f599594c5a422a4bd315759c",
+      "exportFileSha256": "31e5b691e8da6ee3fa627acf0625b2b022e9798d1dd94ee0398fad92b61fcb4c",
+      "binarySha256": "4418023759d63e07dab97906dc362a77060e54b96ade2182b856c014dea7892f",
+      "noSettlementCreated": true
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "nativePg": true,
+  "docker": false,
+  "logs": {
+    "LOCAL-CLI-TESTS.log": {
+      "sha256": "fa75ff88967766556b5d121576fda05428a0413947337b0149ce8813c535fd8b",
+      "results": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ]
+    },
+    "LOCAL-NATIVE-PG-TESTS-GREEN.log": {
+      "sha256": "dbbda0e7472b96b6be96bdf3ddb1a73d3769fa21ccd79b5fa7c8aeced9aa89f1",
+      "results": [
+        [
+          3,
+          0,
+          0
+        ],
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0
+        ]
+      ]
+    }
+  }
+}

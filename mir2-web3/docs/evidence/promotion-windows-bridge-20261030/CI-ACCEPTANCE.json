@@ -1,0 +1,53 @@
+{
+  "schema": "mir2.windows-promotion-native-pg.v1",
+  "sourceSha": "050950f5b9773a36901861a1a95c18b8058793a5",
+  "workflowRunId": "41059751540",
+  "jobName": "backend",
+  "stepName": "Run native PostgreSQL promotion and billing regressions",
+  "environment": "test",
+  "postgresBackend": "native",
+  "docker": false,
+  "passed": true,
+  "testsExecuted": 49,
+  "skipped": 0,
+  "checks": {
+    "idempotentPaymentAttribution": {
+      "passed": true,
+      "testsExecuted": 35,
+      "logSha256": "02af4a0ca264dade831c877b188af86d41b8eb6ad777f13b23c89c0ff50147af"
+    },
+    "noHistoricalRevenueInferred": {
+      "passed": true,
+      "testsExecuted": 35,
+      "logSha256": "02af4a0ca264dade831c877b188af86d41b8eb6ad777f13b23c89c0ff50147af"
+    },
+    "walletIdentityRegression": {
+      "passed": true,
+      "testsExecuted": 8,
+      "logSha256": "00fe73cba8dcf5f7e44b08cc0d158ead1b5f62bb4968391ba33265a291a172cc"
+    },
+    "cloneAudit": {
+      "passed": true,
+      "testsExecuted": 6,
+      "logSha256": "82cbd5a246f7465bdabfc23b607e231bd5e1f5c06c84ea42173aa197d1265a58"
+    }
+  },
+  "logs": {
+    "NATIVE-PG-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 35,
+      "logSha256": "02af4a0ca264dade831c877b188af86d41b8eb6ad777f13b23c89c0ff50147af"
+    },
+    "CLONE-CLI-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 6,
+      "logSha256": "82cbd5a246f7465bdabfc23b607e231bd5e1f5c06c84ea42173aa197d1265a58"
+    },
+    "WALLET-IDENTITY-TESTS.log": {
+      "passed": true,
+      "testsExecuted": 8,
+      "logSha256": "00fe73cba8dcf5f7e44b08cc0d158ead1b5f62bb4968391ba33265a291a172cc"
+    }
+  },
+  "realMobileSignature": false
+}

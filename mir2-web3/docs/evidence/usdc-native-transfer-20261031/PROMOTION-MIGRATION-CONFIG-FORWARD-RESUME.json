@@ -1,0 +1,52 @@
+{
+  "approvedPayloadSha256": "7da87470a944f0e9764aa081379d33c8251abd5786a2621b892aff685b358a79",
+  "docker": false,
+  "helperSha256": "f3898f638e93d217b572b374eb968ef8ecc42e811bb6efb1e943ee2dc932d841",
+  "observedAtUtc": "2026-10-30T21:32:59.301672+00:00",
+  "originalInvitationStageExecuted": false,
+  "paymentOperations": false,
+  "rawResultSha256": "518457690529246d9f340ec8942700a40fea02f4a7e98c88a9217c8036031227",
+  "result": {
+    "environmentParserCorrection": {
+      "basis": "parser-reconstructed-before-first-new-start",
+      "originalStateArchive": "/var/backups/mir2-promotion-attribution-migration-20261031/173332a004c01312802a67042ff7800a04893134/STATE.before-env-parser-correction.json",
+      "originalStateSha256": "66370d408b824a1df25cb5e9df808acae9596bb8fab85c03d06d6108de867ff6",
+      "proofPath": "/var/backups/mir2-promotion-attribution-migration-20261031/173332a004c01312802a67042ff7800a04893134/ENV-PARSER-CORRECTION.json",
+      "proofSha256": "f367ce7ae6b2e4028e3deb89e1856a2c1272f2cb7e534d5ee7f0f16b2b49e009"
+    },
+    "migrationStaged": false,
+    "newOfflineBackupCreated": false,
+    "oldBinaryRollbackForbidden": true,
+    "operatorInvoked": false,
+    "preservation": {
+      "clockProofs": {
+        "shared_conquests": {
+          "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+          "count": 1,
+          "metadataOnly": true,
+          "table": "shared_conquests"
+        },
+        "shared_guild_clock": {
+          "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+          "count": 1,
+          "metadataOnly": true,
+          "table": "shared_guild_clock"
+        }
+      },
+      "financialWritePerformed": false,
+      "migrationCount": 28,
+      "newTablesEmpty": [
+        "promotion_attribution_migration_evidence",
+        "promotion_attribution_migration_confirmations",
+        "promotion_attribution_migration_payment_claims"
+      ],
+      "oldBusinessRowsPreserved": true,
+      "oldMigrationRowsPreserved": 27
+    },
+    "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+    "status": "promoted-awaiting-verify"
+  },
+  "schema": "mir2.migration.forward-resume-execution.v1",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "verifyExecuted": false
+}

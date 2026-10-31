@@ -411,6 +411,17 @@ impl AccountStore {
     }
 
     fn migrate_to_current_schema(mut self) -> Self {
+        let impossible_native_usdc_transfer = self.schema_version < 14
+            && self.accounts.values().any(|a| {
+                a.billing.as_ref().is_some_and(|b| {
+                    b.sui_usdc_orders.values().any(|o| {
+                        !o.payment_mode.is_invoice()
+                            || o.transfer_receipt.is_some()
+                            || o.direct_scan_cursor.is_some()
+                            || o.direct_scan_complete
+                    })
+                })
+            });
         let impossible_usdc = self.schema_version < 13
             && self.accounts.values().any(|a| {
                 a.billing
@@ -468,6 +479,7 @@ impl AccountStore {
             && !impossible_procurement
             && !impossible_procurement_quota
             && !impossible_usdc
+            && !impossible_native_usdc_transfer
         {
             self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
         }
@@ -5439,10 +5451,24 @@ impl SimulationConfig {
         post(&mut staged_store)?;
         // Preserve campaign progress alongside the authoritative account/save
         // commit. HTTP claims touch only this ledger, never an active save.
-        if !matches!(scope, AccountStoreMutationScope::FullRestore) {
+        if matches!(scope, AccountStoreMutationScope::FullRestore) {
+            // A world backup cannot roll back externally committed money.
+            for (account_id, original) in &original_store.accounts {
+                if original.billing.as_ref().is_some_and(|v| !v.provenance.is_empty() || !v.sui_usdc_orders.is_empty()) {
+                    let restored=staged_store.accounts.get(account_id).ok_or("billingFinancialRestoreRequiresReconciliation")?;
+                    let money_unchanged=serde_json::to_value(&original.billing).ok()==serde_json::to_value(&restored.billing).ok()
+                        && serde_json::to_value(&original.monthly_card).ok()==serde_json::to_value(&restored.monthly_card).ok()
+                        && original.saves.iter().map(|(i,s)|(*i,s.credit)).collect::<BTreeMap<_,_>>() == restored.saves.iter().map(|(i,s)|(*i,s.credit)).collect::<BTreeMap<_,_>>();
+                    if !money_unchanged {return Err("billingFinancialRestoreRequiresReconciliation".into());}
+                }
+            }
+        } else {
             let activity_now = crate::monthly_card::monthly_card_now_ms();
             for account_id in xp_accounts {
                 if let Some(account) = staged_store.accounts.get_mut(account_id) {
+                    crate::billing_provenance::observe_account_commit(
+                        original_store.accounts.get(account_id), account, activity_now,
+                    )?;
                     crate::activities::observe_account(
                         account,
                         &self.activity_policy,
@@ -7095,6 +7121,9 @@ fn upsert_character_save_record(
     mode: AccountStoreDatabaseMode,
     expected_version: Option<i64>,
 ) -> Result<i64, String> {
+    let promotion_capture = crate::promotion::game_events::capture_character_source(
+        client, account_id, character_index, mode,
+    )?;
     let snapshot_json = to_json(save)?;
     let should_increment_version = mode == AccountStoreDatabaseMode::SourceOfTruth;
     let stage5_systems_json = save
@@ -7186,6 +7215,11 @@ fn upsert_character_save_record(
         postgres_now_ms(),
     );
     crate::db_projection::write_character_projection(client, &projection)?;
+
+    crate::promotion::game_events::append_character_source(
+        client, promotion_capture, account_id, character_index, save, save_version,
+        postgres_now_ms().try_into().map_err(|_| "promotion source clock invalid")?,
+    )?;
 
     Ok(save_version)
 }

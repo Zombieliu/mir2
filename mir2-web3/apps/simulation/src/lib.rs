@@ -1,5 +1,7 @@
 pub mod activities;
 pub mod billing;
+pub mod billing_provenance;
+pub mod promotion;
 mod config;
 mod config_account_store_diagnostics;
 pub mod conquest;

@@ -2886,6 +2886,7 @@ fn wallet_namespace_detection_and_locked_password_sentinel() {
     use crate::runtime::save::{
         account_password_matches, is_wallet_namespaced_account, LOCKED_ACCOUNT_PASSWORD,
     };
+    use argon2::password_hash::PasswordHash;
 
     // The reserved namespace requires the `sui:` prefix (colon included) and is
     // ASCII-case-insensitive; classic ids that merely start with "sui" are not
@@ -2904,6 +2905,106 @@ fn wallet_namespace_detection_and_locked_password_sentinel() {
     ));
     assert!(!account_password_matches(LOCKED_ACCOUNT_PASSWORD, "demo"));
     assert!(!account_password_matches(LOCKED_ACCOUNT_PASSWORD, ""));
+    assert!(!LOCKED_ACCOUNT_PASSWORD.contains('\0'));
+    // Older binaries must take the fail-closed PHC branch, never their legacy
+    // plaintext comparator, when reading a marker created by this version.
+    assert!(LOCKED_ACCOUNT_PASSWORD.starts_with("$argon2id$"));
+    assert!(PasswordHash::new(LOCKED_ACCOUNT_PASSWORD).is_err());
+    for candidate in ["\u{0}wallet-locked", LOCKED_ACCOUNT_PASSWORD, "demo", ""] {
+        assert!(!account_password_matches("\u{0}wallet-locked", candidate));
+    }
+}
+
+#[test]
+fn bound_wallet_login_preserves_existing_argon2_password() {
+    let config = SimulationConfig::default();
+    let mut classic = SimulationSession::new(config.clone());
+    let created = classic.handle_packet(ClientPacket::NewAccount {
+        account_id: "bound-player".into(),
+        password: "Tracepass1".into(),
+        birth_date_binary: 630_822_816_000_000_000,
+        user_name: "Bound".into(),
+        secret_question: "q".into(),
+        secret_answer: "a".into(),
+        email_address: "bound@example.test".into(),
+    });
+    assert!(matches!(
+        created.as_slice(),
+        [ServerPacket::NewAccount { result: 8 }]
+    ));
+    let original_hash = config.account_store.lock().unwrap().accounts["bound-player"]
+        .password
+        .clone();
+    assert!(original_hash.starts_with("$argon2id$"));
+    let mut wallet = SimulationSession::new(config.clone());
+    assert!(matches!(
+        wallet.passkey_login("bound-player").as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
+    assert_eq!(
+        config.account_store.lock().unwrap().accounts["bound-player"].password,
+        original_hash
+    );
+    let login = classic.handle_packet(ClientPacket::Login {
+        account_id: "bound-player".into(),
+        password: "Tracepass1".into(),
+    });
+    assert!(matches!(
+        login.as_slice(),
+        [ServerPacket::LoginSuccess { .. }]
+    ));
+}
+
+#[test]
+fn legacy_locked_wallet_password_stays_locked_and_heals_on_wallet_login() {
+    use crate::runtime::save::LOCKED_ACCOUNT_PASSWORD;
+
+    let config = SimulationConfig::default();
+    // A classic-shaped id exercises the password comparator, independently of
+    // the reserved wallet namespace and commercial account-length checks.
+    let account_id = "legacy-wallet-lock";
+    let mut account = crate::AccountRecord::empty();
+    account.password = "\u{0}wallet-locked".into();
+    config
+        .account_store
+        .lock()
+        .unwrap()
+        .accounts
+        .insert(account_id.into(), account);
+    let mut classic = SimulationSession::new(config.clone());
+    let rejected = classic.handle_packet(ClientPacket::Login {
+        account_id: account_id.into(),
+        password: "\u{0}wallet-locked".into(),
+    });
+    assert!(matches!(
+        rejected.as_slice(),
+        [ServerPacket::Login { result: 4 }]
+    ));
+
+    let mut wallet = SimulationSession::new(config.clone());
+    assert!(matches!(
+        wallet.passkey_login(account_id).as_slice(),
+        [ServerPacket::LoginSuccess { characters }] if characters.is_empty()
+    ));
+    assert_eq!(
+        config.account_store.lock().unwrap().accounts[account_id].password,
+        LOCKED_ACCOUNT_PASSWORD
+    );
+    for password in [LOCKED_ACCOUNT_PASSWORD, "\u{0}wallet-locked"] {
+        let changed = classic.handle_packet(ClientPacket::ChangePassword {
+            account_id: account_id.into(),
+            current_password: password.into(),
+            new_password: "NoWalletPassword123".into(),
+        });
+        assert!(matches!(
+            changed.as_slice(),
+            [ServerPacket::ChangePassword { result: 5 }]
+        ));
+    }
+    assert_eq!(
+        config.account_store.lock().unwrap().accounts[account_id].password,
+        LOCKED_ACCOUNT_PASSWORD
+    );
 }
 
 #[test]

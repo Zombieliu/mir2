@@ -1,0 +1,35 @@
+{
+  "noStageOrMemberConfirmationPerformed": true,
+  "preview": {
+    "eligibilityAnchorMs": 1793381130814,
+    "leaderDisplayName": "Wallet 0x8ced5e\u20262f02",
+    "movesAccountsOrMoney": false,
+    "policy": "numeron-legacy-windows-invitation-test-v1",
+    "requiresMemberConfirmation": true,
+    "snapshotSha256": "a322289d5158f7cc6ce42c6cfc089b80431bd84d428fd3ce3df44dee4b06daa1",
+    "sourceCampaignId": "numeron-playtest-20261029",
+    "sourceConfirmedAtMs": 1793351088394,
+    "status": "ready_for_member_confirmation_preparation",
+    "targetCampaignId": "numeron-windows-playtest-20261030",
+    "targetLeaderAccountSha256": "12691db5723c0d8a153c2e1a8b766d3870ba635d42da6b4b692ef20667554100",
+    "targetMemberAccountSha256": "9a77de96eec3fd17b4d3462623fb2dfda485b65916545affea781b757654cd85",
+    "targetTermsVersion": "numeron-windows-playtest-20261030-v1",
+    "verifiedPaymentCount": 1
+  },
+  "schema": "mir2.original-invitation.preview.v1",
+  "scopeSha256": "b4386e3ff730f4901d036ba40074e9509593483d122703367a9610192a76ee4b",
+  "sourceConnectionSha256": "ca8758245028f10446acbcb0a5bf3218b275326ad2129cafba2f85d535bbfa47",
+  "sourceNamespaceSha256": "37afcfa7db1f1ca2bd1930bb5e74573b22c6bdd4fb1d6084931d56128cba5773",
+  "sourcePhysicalSelectOnlyRoleVerified": false,
+  "sourceReadOnlyBoundary": "core RepeatableRead read_only transactions; independent peer RO verification",
+  "sourceSha": "173332a004c01312802a67042ff7800a04893134",
+  "status": "awaiting_independent_review",
+  "targetConnectionSha256": "85c9e83980bb5a222837daa06b567f803899376c5799505b1650a68d6d3950f7",
+  "originalManifestSha256": "1dad19e18e4be7a5c1cbdbd97afb8c322e83cba94baf3a913403334779b35ec4",
+  "stageParameters": {
+    "actorSha256": "d8b2dad3c4a89ae79526e9874554e52b0fbb7d5503be2dfbf12535dfd92a72e8",
+    "reviewerSha256": "503812a8676c228eb5ee1e0d4b324a59212f37fcfecd99ad06886494348bf723",
+    "evidenceRef": "legacy-final-attribution:numeron-playtest-20261029:to:numeron-windows-playtest-20261030:review173332a004c0",
+    "idempotencyKeySha256": "6321ac38968d40677ab6b808de107c0eb9dcfd99ff554738ef7536739973a53c"
+  }
+}
