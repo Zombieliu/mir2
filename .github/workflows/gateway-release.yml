@@ -22,6 +22,13 @@ permissions:
   contents: read
 
 jobs:
+  build-playtest-promotion-backend:
+    if: ${{ inputs.playtest_wallet_no_docker }}
+    uses: ./.github/workflows/promotion-website-release.yml
+    with:
+      operation: backend-build
+      backend_source_sha: ${{ github.sha }}
+
   activities-acceptance:
     if: ${{ !inputs.playtest_wallet_no_docker }}
     uses: ./.github/workflows/activities-acceptance.yml

@@ -1,6 +1,14 @@
 name: Promotion Website Release
 
 on:
+  workflow_call:
+    inputs:
+      operation:
+        required: true
+        type: string
+      backend_source_sha:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       operation:
