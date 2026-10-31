@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "installerSha256": "3B926D5EB5DD8EE1FC46B6D39FBA3EDA3EB538BA257405733ABE1DEFAE840172",
+  "installerBytes": 1026815762,
+  "destination": "/srv/mir2-client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172",
+  "alreadyPresent": false,
+  "files": [
+    {
+      "name": "Mir2Setup.exe",
+      "bytes": 1026815762,
+      "sha256": "3B926D5EB5DD8EE1FC46B6D39FBA3EDA3EB538BA257405733ABE1DEFAE840172"
+    },
+    {
+      "name": "release.json",
+      "bytes": 2556,
+      "sha256": "1C83B417423710AAD71E1B50316B452E45A99B4C67EA11C31054F086333760EF"
+    },
+    {
+      "name": "release.p7s",
+      "bytes": 1614,
+      "sha256": "43265B21CCDE2F460DBB9E4DB79606913C6915663BAD0BF10ED8BA89037AAB3A"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 80,
+      "sha256": "A2780B9D3F6E426E3F56D2A28145997CAE91724897E48DEB937601086E08B3BA"
+    },
+    {
+      "name": "README.zh-CN.txt",
+      "bytes": 945,
+      "sha256": "533EC2B0EDA19A15811E32E2C9CCCF23A9EB90204BC5829A88499B4C36A9AB37"
+    }
+  ],
+  "caddyUnchanged": true,
+  "feedsWritten": false,
+  "servicesRestarted": false,
+  "gameDataWritten": false
+}

@@ -17,6 +17,9 @@
 *.xml text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
+# Compiler input identity must not change with Windows core.autocrlf defaults.
+**/Cargo.lock text eol=lf
+**/numeron.rc text eol=lf
 
 *.bat text eol=crlf
 *.cmd text eol=crlf
@@ -94,3 +97,8 @@ mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-2026
 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-fixture-repair01.json -text -diff
 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-next-actual02.stdout.txt -text -diff
 mir2-web3/docs/generated/player-qa/client-core-20260930/web-windows-catchup-20261006/web-source78-node-first-failure01.stdout.txt -text -diff
+
+# Archived launcher receipts preserve their measured original bytes.
+mir2-web3/docs/evidence/windows-launcher-20261030/** -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol
+mir2-web3/docs/evidence/windows-launcher-v2-20261030/** -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol
+mir2-web3/docs/evidence/windows-launcher-delivery-20261030/** -text whitespace=-blank-at-eof,blank-at-eol,space-before-tab,cr-at-eol

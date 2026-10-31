@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "observedAtUtc": "2026-10-30T10:55:39.000400+00:00",
+  "url": "https://165.154.65.136.sslip.io/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/Mir2Setup.exe",
+  "tlsCertificateValidation": true,
+  "head": {
+    "status": 200,
+    "bytes": 1026815762,
+    "contentType": "application/x-msdownload",
+    "acceptRanges": "bytes"
+  },
+  "ranges": [
+    {
+      "start": 0,
+      "end": 65535,
+      "status": 206,
+      "matchesLocalInstaller": true,
+      "sha256": "EEB7B3D6FC2230025906161302A5B77B6F41265BFE78FB11377062F7C4D5397C"
+    },
+    {
+      "start": 1026750226,
+      "end": 1026815761,
+      "status": 206,
+      "matchesLocalInstaller": true,
+      "sha256": "6E89C8732928B51CB818A2D8A72CE8845D60A786BFDD0315E6774652D64A190F"
+    }
+  ],
+  "companionFiles": [
+    {
+      "name": "release.json",
+      "status": 200,
+      "bytes": 2556,
+      "sha256": "1C83B417423710AAD71E1B50316B452E45A99B4C67EA11C31054F086333760EF"
+    },
+    {
+      "name": "release.p7s",
+      "status": 200,
+      "bytes": 1614,
+      "sha256": "43265B21CCDE2F460DBB9E4DB79606913C6915663BAD0BF10ED8BA89037AAB3A"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "status": 200,
+      "bytes": 80,
+      "sha256": "A2780B9D3F6E426E3F56D2A28145997CAE91724897E48DEB937601086E08B3BA"
+    },
+    {
+      "name": "README.zh-CN.txt",
+      "status": 200,
+      "bytes": 945,
+      "sha256": "533EC2B0EDA19A15811E32E2C9CCCF23A9EB90204BC5829A88499B4C36A9AB37"
+    }
+  ],
+  "feeds": [
+    {
+      "channel": "legacy",
+      "sequence": 33,
+      "sha256": "a0b33137248ff3a509e008b2ae58bc1c62c56e6e2b01f7071d1345f97e052527",
+      "unchanged": true
+    },
+    {
+      "channel": "five-class",
+      "sequence": 32,
+      "sha256": "7c3468924dac9477a013bdb90e2688e5f88dd1977770cb3607bb8f4f2ec69e07",
+      "unchanged": true
+    },
+    {
+      "channel": "packed",
+      "sequence": 2026102912,
+      "sha256": "6d2c2fb0f01155047d56ba42157658d49def40c8c23b33ab9f34725c416a204c",
+      "unchanged": true
+    }
+  ],
+  "originFullInstallerHashVerifiedBeforeAtomicPublication": true,
+  "fullInstallerRedownloaded": false
+}

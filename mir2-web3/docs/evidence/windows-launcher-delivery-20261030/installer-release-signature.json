@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "schema": "mir2.windows.installer-release-signature.v1",
+  "descriptorSha256": "1C83B417423710AAD71E1B50316B452E45A99B4C67EA11C31054F086333760EF",
+  "signatureSha256": "43265B21CCDE2F460DBB9E4DB79606913C6915663BAD0BF10ED8BA89037AAB3A",
+  "detached": true,
+  "exactlyOneSha256Signer": true,
+  "rsaDerPublicKeySha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+  "publicAuthenticode": "NotSigned",
+  "privateKeyExported": false
+}
