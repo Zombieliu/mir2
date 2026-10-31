@@ -12,6 +12,7 @@ pub const PASSWORD_ENV: &str = "MIR2_NATIVE_PASSWORD";
 pub const CHARACTER_INDEX_ENV: &str = "MIR2_NATIVE_CHARACTER_INDEX";
 pub const GATEWAY_URL_ENV: &str = "MIR2_GATEWAY_WS_URL";
 pub const AUTH_HTTP_URL_ENV: &str = "MIR2_NATIVE_AUTH_HTTP_URL";
+pub const BILLING_HTTP_ORIGIN_ENV: &str = "MIR2_NATIVE_BILLING_HTTP_ORIGIN";
 pub const CONFIG_FILE_NAME: &str = "mir2-client.toml";
 pub const DEFAULT_WINDOW_WIDTH: u32 = 1024;
 pub const DEFAULT_WINDOW_HEIGHT: u32 = 768;
@@ -131,6 +132,8 @@ pub struct NativeSessionConfig {
     pub gateway_url: String,
     /// Explicit web authentication origin. No gateway/website guessing is allowed.
     pub wallet_auth: Option<NativeWalletAuthConfig>,
+    /// Optional local payment-origin pin; status replies cannot add trusted origins.
+    pub billing_http_origin: Option<String>,
     pub character_creation_classes: CharacterCreationClasses,
     pub quest_guidance: Option<String>,
     /// Explicit development convenience only. Normal players enter credentials
@@ -148,6 +151,7 @@ pub struct NativeSessionConfig {
 struct ClientFileConfig {
     gateway_ws_url: Option<String>,
     auth_http_url: Option<String>,
+    billing_http_origin: Option<String>,
     allowed_classes: Option<CharacterCreationClasses>,
     quest_guidance: Option<String>,
     window_width: Option<u32>,
@@ -173,6 +177,18 @@ impl NativeSessionConfig {
             std::env::var(AUTH_HTTP_URL_ENV).ok(),
             file.as_ref()
                 .and_then(|config| config.auth_http_url.clone()),
+        )?;
+        let billing_environment = match std::env::var(BILLING_HTTP_ORIGIN_ENV) {
+            Ok(value) => Some(value),
+            Err(std::env::VarError::NotPresent) => None,
+            Err(std::env::VarError::NotUnicode(_)) => {
+                return Err(format!("{BILLING_HTTP_ORIGIN_ENV} must be valid Unicode"));
+            }
+        };
+        config.billing_http_origin = select_billing_http_origin(
+            billing_environment,
+            file.as_ref()
+                .and_then(|config| config.billing_http_origin.clone()),
         )?;
         config.reconnect = NativeReconnectConfig::from_env()?;
         if let Some(file) = file {
@@ -251,6 +267,7 @@ impl NativeSessionConfig {
         Ok(Self {
             gateway_url,
             wallet_auth: None,
+            billing_http_origin: None,
             character_creation_classes: CharacterCreationClasses::default(),
             quest_guidance: None,
             auto_login,
@@ -318,6 +335,13 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                             let origin = parse_toml_string(server_value, "server.auth_http_url")?;
                             NativeWalletAuthConfig::from_origin(&origin)?;
                             config.auth_http_url = Some(origin);
+                        }
+                        "billing_http_origin" => {
+                            let origin = server_value.as_str().ok_or_else(|| {
+                                format!("{CONFIG_FILE_NAME} server.billing_http_origin must be a string")
+                            })?;
+                            crate::billing_browser::validate_billing_http_origin(origin)?;
+                            config.billing_http_origin = Some(origin.to_owned());
                         }
                         "allowed_classes" => {
                             let values = server_value.as_array().ok_or_else(|| {
@@ -408,6 +432,19 @@ fn select_wallet_auth(
     optional_non_empty(environment, AUTH_HTTP_URL_ENV)?
         .or(file)
         .map(|origin| NativeWalletAuthConfig::from_origin(&origin))
+        .transpose()
+}
+
+fn select_billing_http_origin(
+    environment: Option<String>,
+    file: Option<String>,
+) -> Result<Option<String>, String> {
+    environment
+        .or(file)
+        .map(|origin| {
+            crate::billing_browser::validate_billing_http_origin(&origin)?;
+            Ok(origin)
+        })
         .transpose()
 }
 
@@ -572,6 +609,7 @@ mod tests {
     #[test]
     fn native_entry_loads_invited_wss_and_keeps_explicit_local_overrides() {
         const FIXTURE_ENV: &str = "MIR2_NATIVE_CONFIG_TEST_EXPECTED_GATEWAY";
+        const EXPECTED_BILLING_ENV: &str = "MIR2_NATIVE_CONFIG_TEST_EXPECTED_BILLING";
         const TEST_NAME: &str =
             "session_config::tests::native_entry_loads_invited_wss_and_keeps_explicit_local_overrides";
         if let Ok(expected_gateway) = std::env::var(FIXTURE_ENV) {
@@ -579,6 +617,10 @@ mod tests {
                 .expect("the normal native entry must load without credentials");
             assert_eq!(config.gateway_url, expected_gateway);
             assert_eq!(config.auto_login, None);
+            assert_eq!(
+                config.billing_http_origin,
+                std::env::var(EXPECTED_BILLING_ENV).ok()
+            );
             return;
         }
 
@@ -609,7 +651,9 @@ mod tests {
         fs::hard_link(&source_exe, &test_exe)
             .or_else(|_| fs::copy(&source_exe, &test_exe).map(|_| ()))
             .unwrap();
-        let file_config = |url: &str| format!("[server]\ngateway_ws_url = '{url}'\n");
+        let file_config = |url: &str| {
+            format!("[server]\ngateway_ws_url = '{url}'\nbilling_http_origin = 'https://file-billing.example'\n")
+        };
 
         for (scenario, expected_gateway, environment_gateway) in [
             ("default", "wss://165.154.65.136.sslip.io/playtest/ws", None),
@@ -645,6 +689,8 @@ mod tests {
                 CHARACTER_INDEX_ENV,
                 GATEWAY_URL_ENV,
                 AUTH_HTTP_URL_ENV,
+                BILLING_HTTP_ORIGIN_ENV,
+                EXPECTED_BILLING_ENV,
                 RESUME_DEADLINE_MS_ENV,
                 RESUME_INITIAL_BACKOFF_MS_ENV,
                 RESUME_MAX_BACKOFF_MS_ENV,
@@ -655,6 +701,13 @@ mod tests {
             }
             if let Some(url) = environment_gateway {
                 command.env(GATEWAY_URL_ENV, url);
+                command.env(
+                    BILLING_HTTP_ORIGIN_ENV,
+                    "https://environment-billing.example",
+                );
+                command.env(EXPECTED_BILLING_ENV, "https://environment-billing.example");
+            } else if scenario != "default" {
+                command.env(EXPECTED_BILLING_ENV, "https://file-billing.example");
             }
             let output = command.output().expect("isolated config test process");
             assert!(
@@ -898,5 +951,57 @@ id = "player"
                 .expect_err("wallet login secrets must remain memory-only");
             assert!(error.contains("credentials"));
         }
+    }
+
+    #[test]
+    fn billing_origin_is_optional_and_explicit_environment_wins_without_silent_fallback() {
+        assert_eq!(select_billing_http_origin(None, None).unwrap(), None);
+        let file = parse_client_toml("[server]\nbilling_http_origin = 'https://billing.example'")
+            .expect("a pinned payment origin is public configuration");
+        assert_eq!(
+            select_billing_http_origin(None, file.billing_http_origin.clone())
+                .unwrap()
+                .as_deref(),
+            Some("https://billing.example")
+        );
+        assert_eq!(
+            select_billing_http_origin(
+                Some("https://other-billing.example:8443".into()),
+                file.billing_http_origin.clone(),
+            )
+            .unwrap()
+            .as_deref(),
+            Some("https://other-billing.example:8443")
+        );
+        for invalid in [
+            "",
+            " ",
+            "http://billing.example",
+            "https://billing.example/path",
+        ] {
+            assert!(select_billing_http_origin(
+                Some(invalid.into()),
+                file.billing_http_origin.clone()
+            )
+            .is_err());
+        }
+        for value in [
+            "''",
+            "' https://billing.example'",
+            "'https://billing.example/'",
+            "'https://billing.example?token=private'",
+            "'https://billing.example#private'",
+            "'http://billing.example'",
+            "42",
+            "false",
+        ] {
+            assert!(
+                parse_client_toml(&format!("[server]\nbilling_http_origin = {value}")).is_err()
+            );
+        }
+        assert!(parse_client_toml(
+            "[server]\nbilling_http_origin = 'https://billing.example'\nbilling_http_origin = 'https://other.example'"
+        )
+        .is_err());
     }
 }
