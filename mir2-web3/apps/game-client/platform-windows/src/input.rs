@@ -14,6 +14,7 @@ use bevy::prelude::{
 };
 use bevy::ui::UiGlobalTransform;
 use bevy::winit::RawWinitWindowEvent;
+use mir2_client_bevy::crystal_ui::chat::CrystalChatRoot;
 use mir2_client_bevy::crystal_ui::hud::CrystalHudAction;
 use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::{
@@ -47,6 +48,9 @@ use crate::native_protocol::NativeOutboundCommand;
 
 #[path = "big_map_input.rs"]
 mod big_map_input;
+#[cfg(test)]
+#[path = "chat_pointer_input_tests.rs"]
+mod chat_pointer_input_tests;
 #[path = "minimap_input.rs"]
 mod minimap_input;
 #[path = "mining_input.rs"]
@@ -1223,10 +1227,10 @@ fn cursor_over_native_hud_button(window: &Window, minimap_expanded: bool) -> boo
         .any(|rect| rect.contains(x, y))
 }
 
-/// Read the previous completed Bevy UI layout before the current press can
-/// reach the world sender. UI `Interaction` is updated later in the frame.
-/// The tracker is a transparent 320x520 positioning root, so only its painted
-/// descendants (the journey card, text and controls) capture world input.
+/// Read the visible Bevy UI layout before a press can reach the world sender.
+/// UI `Interaction` is updated later in the frame. Both the quest tracker and
+/// chat use transparent positioning roots: only their painted descendants
+/// (including chat filters, Trade, resize and scroll controls) capture input.
 #[derive(bevy::ecs::system::SystemParam)]
 pub(crate) struct NativeQuestPointerUi<'w, 's> {
     panels: Query<
@@ -1239,6 +1243,7 @@ pub(crate) struct NativeQuestPointerUi<'w, 's> {
             &'static UiGlobalTransform,
             Option<&'static InheritedVisibility>,
             Option<&'static QuestTrackerPanel>,
+            Option<&'static CrystalChatRoot>,
             Option<&'static Children>,
         ),
         Or<(
@@ -1248,6 +1253,7 @@ pub(crate) struct NativeQuestPointerUi<'w, 's> {
             With<NpcDialogPanel>,
             With<NpcQuestListPanel>,
             With<QuestConfirmationPanel>,
+            With<CrystalChatRoot>,
         )>,
     >,
     nodes: Query<
@@ -1268,19 +1274,19 @@ pub(crate) struct NativeQuestPointerUi<'w, 's> {
 }
 
 impl NativeQuestPointerUi<'_, '_> {
-    fn contains_cursor(&self, window: &Window) -> bool {
+    pub(crate) fn contains_cursor(&self, window: &Window) -> bool {
         let Some(point) = window.physical_cursor_position() else {
             return false;
         };
         self.panels.iter().any(
-            |(_, node, computed, transform, visible, tracker, children)| {
+            |(_, node, computed, transform, visible, tracker, chat, children)| {
                 if node.display == Display::None
                     || !visible.is_some_and(|visibility| visibility.get())
                     || !computed.contains_point(*transform, point)
                 {
                     return false;
                 }
-                if tracker.is_none() {
+                if tracker.is_none() && chat.is_none() {
                     return true;
                 }
                 children.is_some_and(|children| {
@@ -8588,7 +8594,7 @@ mod tests {
         window
     }
 
-    fn quest_pointer_test_app(
+    pub(super) fn quest_pointer_test_app(
         cursor: bevy::prelude::Vec2,
     ) -> (
         bevy::prelude::App,
@@ -8669,7 +8675,10 @@ mod tests {
         ));
     }
 
-    fn ordered_pointer_motion(app: &mut bevy::prelude::App, position: bevy::prelude::Vec2) {
+    pub(super) fn ordered_pointer_motion(
+        app: &mut bevy::prelude::App,
+        position: bevy::prelude::Vec2,
+    ) {
         let world = app.world_mut();
         let (entity, mut window) = world
             .query::<(Entity, &mut Window)>()
@@ -8685,7 +8694,11 @@ mod tests {
         ));
     }
 
-    fn ordered_pointer_button(app: &mut bevy::prelude::App, button: MouseButton, pressed: bool) {
+    pub(super) fn ordered_pointer_button(
+        app: &mut bevy::prelude::App,
+        button: MouseButton,
+        pressed: bool,
+    ) {
         let world = app.world_mut();
         let window = world
             .query_filtered::<Entity, With<Window>>()
@@ -8710,7 +8723,7 @@ mod tests {
         ));
     }
 
-    fn ordered_pointer_fixture() -> (
+    pub(super) fn ordered_pointer_fixture() -> (
         bevy::prelude::App,
         std::sync::mpsc::Receiver<GatewayCommand>,
     ) {

@@ -16,11 +16,11 @@
     "conquest": 50,
     "wallet": 22,
     "procurement": 110,
-    "embeddedVocabulary": 88,
-    "totalKeys": 9901
+    "embeddedVocabulary": 89,
+    "totalKeys": 9902
   },
   "methods": {
-    "OpenCC-1.4.2-tw2sp": 7429,
+    "OpenCC-1.4.2-tw2sp": 7430,
     "authored-procurement-zh-CN": 110,
     "existing-shared-zh-CN": 2362
   },
@@ -89,7 +89,7 @@
     "packages/game-data/data/native-i18n/conquest.json": "1006ae4929e762440828d0b447defe3d763ff0436bb186ed540c5d6bf9f2549c",
     "packages/game-data/data/native-i18n/wallet.json": "ac7bb305751c7cd82b5b14909b2c0cd4071c10e4925bfae1c8219254c236ec64",
     "packages/game-data/data/native-i18n/procurement.json": "ca954bb3f3a210c66371901a696c07212a310a3f19ef66f7a1466012cd5ad878",
-    "native_i18n.rs::BILLING_TRANSLATIONS(key,en,zh-TW)": "ffc04446cd660f1a042e3ded37f5cfae5b494e9d06e180bc79ea14045c408641",
+    "native_i18n.rs::BILLING_TRANSLATIONS(key,en,zh-TW)": "1be2fdce700ac2e5da4080d4d31ff8c22e2f19fe730aaa9ebab855223e8735b8",
     "packages/game-data/data/generated/localization_bundle.json": "cca64cebcb5566cb777ac56fa32e3a471020b78a3db64da017a23324c87efec6",
     "packages/game-data/data/native-i18n/extra/zh-CN-editorial-overrides.json": "c1b13220eaa954df8c255a4a2c446776557666cfbfd089c09b073cb96d1a2d17",
     "apps/game-client/client-core/src/item_names.rs": "43e8479124e6ab6adfbaada3b214a088710de7b2f49d8d369a8b2e2eda2ad330",
@@ -183,7 +183,7 @@
     "humanAccepted": false
   },
   "productTerminology": "Credits uses 点券; guild buff points remain 点数. 账号/账单/到账, 行会 and system labels use consistent Simplified copy. No rates, prices, identity or gameplay data change.",
-  "overlaySha256": "258912c2376484cc145965dd1bca550897d7ea6e53e20a5e71a0ecb208fe5f6c",
+  "overlaySha256": "7682c61e0305e4d263b1554912bd376834b3d34fb9c9117fb4bd034fd64048c9",
   "scope": "All native base, item/monster/quest/NPC/help, periodic/conquest and embedded system-role/group/shop/mail/billing keys. Known system templates only; opaque player arguments, names, chat, notices and mail bodies are never converted at runtime.",
   "acceptance": "Offline coverage and placeholder/number/command preservation; native layout/glyph tests and human linguistic acceptance are separate."
 }

@@ -52,6 +52,18 @@ pub fn npc_gold_buy_model_authority(
     shop.selected_id = None;
     shop.selected_bag_slot_for_sell = None;
     shop.selected_bag_slot_for_repair = None;
+    // NPCGoods -> NPCSell is one BUYSELL service. The last packet records
+    // Sell while its same-turn complete owner catalog records Buy. The two
+    // explicit capabilities, not that packet-order label, describe authority.
+    if shop.supports_buy
+        && shop.supports_sell
+        && matches!(
+            shop.service_mode,
+            crate::shop::NpcShopServiceMode::Buy | crate::shop::NpcShopServiceMode::Sell
+        )
+    {
+        shop.service_mode = crate::shop::NpcShopServiceMode::Buy;
+    }
     let mut inventory = inventory.clone();
     inventory.npc_gold_trade_capacity = None;
     let value = serde_json::to_string(&(shop, inventory)).ok()?;
@@ -413,6 +425,80 @@ mod tests {
             connection: 1
         }));
         gate
+    }
+    #[test]
+    fn npc_gold_buysell_packet_order_and_complete_owner_have_one_model_key() {
+        let (mut source, inventory) = models();
+        source.supports_buy = true;
+        source.supports_sell = true;
+        let mut actual = source.clone();
+        assert!(
+            actual.apply_service_signal(crate::shop::NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Sell,
+                repair_rate: None,
+            })
+        );
+        assert_eq!(source.service_mode, NpcShopServiceMode::Buy);
+        assert_eq!(actual.service_mode, NpcShopServiceMode::Sell);
+        let expected = npc_gold_buy_model_authority(&source, &inventory).unwrap();
+        assert_eq!(
+            npc_gold_buy_model_authority(&actual, &inventory),
+            Some(expected.clone())
+        );
+        let gate = connected_gate();
+        assert!(gate.observe("actual-same-owner", 1, &expected, true));
+        // A service packet clears the local selection. As in the real window,
+        // the player selects the received row before attempting to buy it.
+        assert!(actual.selected_id.is_none());
+        actual.selected_id = Some(actual.goods[0].unique_id);
+        assert!(gate.reserve(&actual, &inventory, 1).is_some());
+        // Canonicalization is a read-only comparison, not a service transition.
+        assert_eq!(actual.service_mode, NpcShopServiceMode::Sell);
+    }
+
+    #[test]
+    fn npc_gold_buysell_canonical_key_keeps_capabilities_prices_uids_and_inventory_strict() {
+        let (mut source, inventory) = models();
+        source.supports_buy = true;
+        source.supports_sell = true;
+        let expected = npc_gold_buy_model_authority(&source, &inventory).unwrap();
+        for mode in [
+            NpcShopServiceMode::Sell,
+            NpcShopServiceMode::Repair,
+            NpcShopServiceMode::Closed,
+        ] {
+            let mut other = source.clone();
+            other.apply_service_signal(crate::shop::NpcShopServiceSignal {
+                mode,
+                repair_rate: matches!(mode, NpcShopServiceMode::Repair).then_some(1.0),
+            });
+            if mode == NpcShopServiceMode::Sell {
+                other.supports_buy = false;
+            }
+            assert_ne!(
+                npc_gold_buy_model_authority(&other, &inventory),
+                Some(expected.clone())
+            );
+        }
+        let mut missing_cap = source.clone();
+        missing_cap.supports_sell = false;
+        assert_ne!(
+            npc_gold_buy_model_authority(&missing_cap, &inventory),
+            Some(expected.clone())
+        );
+        for change in 0..3 {
+            let mut other = source.clone();
+            let mut inventory = inventory.clone();
+            match change {
+                0 => other.goods[0].price += 1,
+                1 => other.goods[0].unique_id += 1,
+                _ => inventory.gold += 1,
+            }
+            assert_ne!(
+                npc_gold_buy_model_authority(&other, &inventory),
+                Some(expected.clone())
+            );
+        }
     }
     fn ticket(token: NpcGoldBuyAttemptToken, revision: u64) -> NpcGoldBuyTicket {
         NpcGoldBuyTicket {

@@ -9780,6 +9780,9 @@ mod effect_mask_shadow_tests {
 mod native_data_path_tests {
     use super::*;
 
+    #[cfg(feature = "native-npc-economy")]
+    mod npc_shop_ingest_sequence_tests;
+
     #[cfg(test)]
     mod guild_rank_ingest_tests;
 

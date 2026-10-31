@@ -1223,6 +1223,13 @@ struct NativeNpcShopSource {
     gate: crate::npc_gold_buy_attempt::NpcGoldBuyGate,
 }
 
+/// A local exit from the visible syncing shell, never a purchase control.
+#[derive(Component)]
+struct NativeNpcShopWaitingClose;
+
+#[derive(Component)]
+struct NativeNpcShopWaitingPanel;
+
 fn native_npc_shop_context(
     state: &NativePlayerUiState,
     shop: &ShopModel,
@@ -4267,6 +4274,7 @@ struct OverlayButtonControls<'w, 's> {
             &'static OverlayButton,
             Option<&'static crate::npc_shop_ui::NpcShopUiStamp>,
             Option<&'static NativeNpcShopSource>,
+            Option<&'static NativeNpcShopWaitingClose>,
         ),
         Changed<Interaction>,
     >,
@@ -9374,7 +9382,7 @@ fn process_overlay_buttons(
     let game_shop_modal_was_open = state.game_shop_dialog.modal();
     let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
     let parcel_gold_modal_was_open = state.parcel_gold_prompt.is_some();
-    for (interaction, button, shop_stamp, shop_source) in buttons.iter() {
+    for (interaction, button, shop_stamp, shop_source, waiting_close) in buttons.iter() {
         if state.hero.modal() {
             continue;
         }
@@ -9681,6 +9689,16 @@ fn process_overlay_buttons(
             let context = native_npc_shop_context(&state, &shop, &shop_gate);
             let ordinary = crate::npc_shop_ui::ordinary_gold_surface(&shop, context.show_buy);
             if ordinary || shop_stamp.is_some() || shop_source.is_some() {
+                // A missing source stamp disables commerce, not the window's
+                // local exit. Retain the exact Gate and reject this old shell
+                // as soon as a current stamped shop has replaced it.
+                let local_waiting_close = action == OverlayButton::CloseShop
+                    && waiting_close.is_some()
+                    && ordinary
+                    && context.open
+                    && context.input_enabled
+                    && shop_ui.common.stamp().is_none()
+                    && shop_source.is_some_and(|source| source.gate == shop_gate);
                 // Every common control, including Close/Select/Sell, proves
                 // ownership before it can cancel or change the current owner.
                 let valid = ordinary
@@ -9688,20 +9706,22 @@ fn process_overlay_buttons(
                     && context.input_enabled
                     && shop_source.is_some_and(|source| source.gate == shop_gate)
                     && shop_stamp.is_some_and(|stamp| Some(*stamp) == shop_ui.common.stamp());
-                if !valid {
+                if !valid && !local_waiting_close {
                     continue;
                 }
-                let effect = apply_native_npc_shop_action(
-                    shop_action,
-                    context,
-                    &mut state,
-                    &mut shop_ui,
-                    &mut shop,
-                    &inventory,
-                    &mut intents,
-                );
-                if !effect.close && !effect.handoff_sell {
-                    continue;
+                if !local_waiting_close {
+                    let effect = apply_native_npc_shop_action(
+                        shop_action,
+                        context,
+                        &mut state,
+                        &mut shop_ui,
+                        &mut shop,
+                        &inventory,
+                        &mut intents,
+                    );
+                    if !effect.close && !effect.handoff_sell {
+                        continue;
+                    }
                 }
                 // Validated Close/Sell retain the existing full service cleanup.
             }
@@ -17283,6 +17303,10 @@ fn render_shop(
         if let Some(gate) = &shop_ui.common_gate {
             let context = native_npc_shop_context(state, shop, gate);
             let view = shop_ui.common.view(context, shop, inventory, attempt);
+            if view.stamp.is_none() {
+                render_npc_shop_waiting(parent, asset_server, shop, Some(gate));
+                return;
+            }
             crate::crystal_ui::shop_paint::paint_npc_gold_shop(
                 parent,
                 asset_server,
@@ -17297,6 +17321,8 @@ fn render_shop(
                     )
                 },
             );
+        } else {
+            render_npc_shop_waiting(parent, asset_server, shop, state.npc_gold_buy_gate.as_ref());
         }
         return;
     }
@@ -17491,6 +17517,111 @@ fn render_shop(
         );
     }
 }
+
+/// Keep the NPC's original frame and received goods visible while the actual
+/// source is unavailable. No selection, quantity or purchase action is emitted.
+fn render_npc_shop_waiting(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    shop: &ShopModel,
+    gate: Option<&crate::npc_gold_buy_attempt::NpcGoldBuyGate>,
+) {
+    parent
+        .spawn((
+            NativeNpcShopWaitingPanel,
+            Node {
+                position_type: PositionType::Absolute,
+                width: Val::Px(NPC_GOODS_PANEL_SIZE.width as f32),
+                height: Val::Px(NPC_GOODS_PANEL_SIZE.height as f32),
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.035, 0.025, 0.015)),
+            FocusPolicy::Block,
+        ))
+        .with_children(|parent| {
+            if let Some(assets) = asset_server {
+                spawn_overlay_frame(
+                    parent,
+                    assets,
+                    "original-ui/Prguse/1000.png",
+                    NPC_GOODS_PANEL_SIZE.width as f32,
+                    NPC_GOODS_PANEL_SIZE.height as f32,
+                );
+                let spec = CrystalButtonSpec::new(
+                    "Prguse2",
+                    360,
+                    361,
+                    362,
+                    CrystalRect::new(217.0, 3.0, 24.0, 21.0),
+                    24.0,
+                    21.0,
+                );
+                if let Some(gate) = gate {
+                    spawn_crystal_image_button(
+                        parent,
+                        assets,
+                        spec,
+                        CrystalButtonAssetSet::from_spec(spec),
+                        (
+                            OverlayButton::CloseShop,
+                            NativeNpcShopSource { gate: gate.clone() },
+                            NativeNpcShopWaitingClose,
+                        ),
+                        false,
+                        true,
+                    );
+                } else {
+                    spawn_crystal_image_button(
+                        parent,
+                        assets,
+                        spec,
+                        CrystalButtonAssetSet::from_spec(spec),
+                        OverlayButton::CloseShop,
+                        false,
+                        false,
+                    );
+                }
+            } else if let Some(gate) = gate {
+                parent.spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(217.0),
+                        top: Val::Px(3.0),
+                        width: Val::Px(24.0),
+                        height: Val::Px(21.0),
+                        ..default()
+                    },
+                    Button,
+                    OverlayButton::CloseShop,
+                    NativeNpcShopWaitingClose,
+                    NativeNpcShopSource { gate: gate.clone() },
+                    FocusPolicy::Block,
+                    BackgroundColor(Color::srgba(0.5, 0.1, 0.1, 0.9)),
+                ));
+            }
+            for (row, good) in shop.goods.iter().take(8).enumerate() {
+                let rect = crystal_npc_goods_cell_rect(row);
+                overlay_text_at(
+                    parent,
+                    &crate::player_text::name(&good.name),
+                    CrystalRect::new(rect.left + 40.0, rect.top + 4.0, 155.0, 18.0),
+                    10.0,
+                    TEXT,
+                );
+            }
+            overlay_text_at(
+                parent,
+                &crate::native_i18n::key("npc.shop.synchronizing", "Synchronizing shop data..."),
+                CrystalRect::new(10.0, 307.0, 220.0, 20.0),
+                10.0,
+                GOLD,
+            );
+        });
+}
+
+#[cfg(test)]
+#[path = "npc_shop_visibility_tests.rs"]
+mod npc_shop_visibility_tests;
 
 fn native_skill_page_count(item_count: usize) -> usize {
     item_count

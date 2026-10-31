@@ -82,6 +82,7 @@ pub(crate) fn sync_native_crystal_cursor(
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     quest: Option<Res<QuestUiState>>,
+    pointer_ui: crate::input::NativeQuestPointerUi,
     dialog: Option<Res<NpcDialogModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
@@ -101,6 +102,7 @@ pub(crate) fn sync_native_crystal_cursor(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let world_cursor_enabled = window.focused
+        && !pointer_ui.contains_cursor(window)
         && shell
             .as_deref()
             .is_some_and(|shell| shell.screen == NativeShellScreen::InGame)

@@ -19742,3 +19742,7 @@ mod native_mail_stream_tests {
 #[cfg(test)]
 #[path = "npc_gold_buy_transport_tests.rs"]
 mod npc_gold_buy_transport_tests;
+
+#[cfg(test)]
+#[path = "npc_shop_activation_tests.rs"]
+mod npc_shop_activation_tests;

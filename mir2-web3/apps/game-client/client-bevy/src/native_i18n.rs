@@ -409,6 +409,7 @@ fn catalog() -> &'static Catalog {
 const MONTHLY_CARD_ITEM_NAME: &str = "MonthlyCard30Days";
 const MONTHLY_CARD_ITEM_TOOLTIP: &str = "Adds 30 days of account-wide game access when used. Active access is extended from its current expiry. Offline time counts. Single use.";
 const BILLING_TRANSLATIONS: &[(&str, [&str; BASE_LOCALE_COUNT])] = &[
+    ("npc.shop.synchronizing", ["Synchronizing shop data...", "正在同步商店資料……", "Sincronizando a loja...", "Синхронизация магазина...", "दुकान का डेटा सिंक हो रहा है...", "Menyinkronkan data toko...", "Đang đồng bộ cửa hàng...", "กำลังซิงค์ข้อมูลร้านค้า...", "تتم مزامنة بيانات المتجر..."]),
     ("game.npc.role.administrator", ["Administrator", "管理員", "Administrador", "Администратор", "प्रशासक", "Administrator", "Quản trị viên", "ผู้ดูแลระบบ", "المسؤول"]),
     ("game.quest.group.recommended", ["Recommended", "推薦", "Recomendadas", "Рекомендуемые", "अनुशंसित", "Rekomendasi", "Đề xuất", "แนะนำ", "الموصى بها"]),
     ("game.mail.dateUnknown", ["Not recorded", "未記錄", "Não registrada", "Не указана", "दर्ज नहीं", "Tidak tercatat", "Chưa ghi nhận", "ไม่ได้บันทึก", "غير مسجل"]),

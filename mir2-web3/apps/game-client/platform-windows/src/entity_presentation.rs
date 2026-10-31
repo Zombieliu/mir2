@@ -1701,6 +1701,7 @@ pub fn tick_native_entity_presentation(
     player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
     quest: Option<Res<mir2_client_bevy::quest_ui::QuestUiState>>,
+    pointer_ui: crate::input::NativeQuestPointerUi,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let motion_now_ms = native_motion_clock_ms();
@@ -1728,7 +1729,13 @@ pub fn tick_native_entity_presentation(
         shell.as_deref(),
         player_ui.as_deref(),
         quest.as_deref(),
-    );
+    )
+    .filter(|_| {
+        !windows
+            .iter()
+            .next()
+            .is_some_and(|window| pointer_ui.contains_cursor(window))
+    });
     presentation.set_hover_presentation(hover_cursor_stage, highlight_target);
     let Some(state) = presentation.render_state_if_changed_at_clocks(
         animation_now_ms,
