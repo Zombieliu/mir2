@@ -12,10 +12,28 @@ pub enum Scope {
     Root,
     FiveClass,
     Unified,
+    UnifiedRelease,
 }
 impl Scope {
-    fn feed_urls(self) -> (&'static str, &'static str) {
-        match self {
+    fn feed_urls(self, baseline: &str) -> Result<(String, String)> {
+        self.feed_urls_with_pin(
+            baseline,
+            option_env!("MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256S"),
+        )
+    }
+    fn feed_urls_with_pin(self, baseline: &str, pins: Option<&str>) -> Result<(String, String)> {
+        if self == Self::UnifiedRelease {
+            ensure!(
+                release_baseline_is_compiled(baseline, pins),
+                "missing compiled release baseline"
+            );
+            let pin = baseline;
+            return Ok((
+                format!("https://assets.mir2.obelisk.build/client-updates/unified/baselines/{pin}/latest.json"),
+                format!("https://165.154.65.136.sslip.io/client-updates/unified/baselines/{pin}/latest.json"),
+            ));
+        }
+        let (primary, fallback) = match self {
             Self::Root => (
                 "https://assets.mir2.obelisk.build/client-updates/latest.json",
                 "https://165.154.65.136.sslip.io/client-updates/latest.json",
@@ -28,18 +46,46 @@ impl Scope {
                 "https://assets.mir2.obelisk.build/client-updates/unified/latest.json",
                 "https://165.154.65.136.sslip.io/client-updates/unified/latest.json",
             ),
-        }
+            Self::UnifiedRelease => unreachable!(),
+        };
+        Ok((primary.into(), fallback.into()))
     }
 }
 fn scope_for_version(digest: &str) -> Option<Scope> {
+    scope_for_version_with_pin(
+        digest,
+        option_env!("MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256S"),
+    )
+}
+fn scope_for_version_with_pin(digest: &str, pin: Option<&str>) -> Option<Scope> {
     match digest {
         "481DA3F3EE5AFAB88A9B20F2DEB5A70E359B859C53671D9099B6213E5748FBAB" => Some(Scope::Root),
         "C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F" => {
             Some(Scope::FiveClass)
         }
         "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A" => Some(Scope::Unified),
+        _ if release_baseline_is_compiled(digest, pin) => Some(Scope::UnifiedRelease),
         _ => None,
     }
+}
+// Every entry is supplied by the trusted release build, never runtime config.
+// Keep prior installed baselines in later engines so their receipts/channels
+// remain usable after a legitimate engine handoff.
+fn release_baseline_is_compiled(digest: &str, pins: Option<&str>) -> bool {
+    let Some(pins) = pins else {
+        return false;
+    };
+    let entries: Vec<_> = pins.split(',').collect();
+    !entries.is_empty()
+        && entries.len() <= 64
+        && entries.iter().all(|pin| valid_hash(pin))
+        && entries
+            .iter()
+            .copied()
+            .collect::<std::collections::BTreeSet<_>>()
+            .len()
+            == entries.len()
+        && entries.contains(&digest)
 }
 // Construct a source only after an exact authenticated baseline match. This
 // boundary performs no requests and cannot create a source for an unknown hash.
@@ -47,10 +93,10 @@ fn source_for_version(digest: &str) -> Result<Option<HttpsSource>> {
     let Some(scope) = scope_for_version(digest) else {
         return Ok(None);
     };
-    let (primary, fallback) = scope.feed_urls();
+    let (primary, fallback) = scope.feed_urls(digest)?;
     Ok(Some(HttpsSource {
-        base: HttpsSource::pinned_base(primary)?,
-        legacy_base: HttpsSource::pinned_base(fallback)?,
+        base: HttpsSource::pinned_base(&primary)?,
+        legacy_base: HttpsSource::pinned_base(&fallback)?,
         agent: ureq::AgentBuilder::new()
             .redirects(0)
             .timeout_connect(Duration::from_secs(8))
@@ -522,11 +568,11 @@ mod tests {
             ),
         ] {
             let source = source_for_version(digest).unwrap().unwrap();
-            let (primary, fallback) = expected_scope.feed_urls();
-            assert_eq!(source.base, HttpsSource::pinned_base(primary).unwrap());
+            let (primary, fallback) = expected_scope.feed_urls(digest).unwrap();
+            assert_eq!(source.base, HttpsSource::pinned_base(&primary).unwrap());
             assert_eq!(
                 source.legacy_base,
-                HttpsSource::pinned_base(fallback).unwrap()
+                HttpsSource::pinned_base(&fallback).unwrap()
             );
         }
     }
@@ -540,10 +586,10 @@ mod tests {
             (Scope::FiveClass, "/client-updates/five-class/latest.json"),
             (Scope::Unified, "/client-updates/unified/latest.json"),
         ] {
-            let (primary, fallback) = scope.feed_urls();
+            let (primary, fallback) = scope.feed_urls("").unwrap();
             for (raw, host) in [
-                (primary, "assets.mir2.obelisk.build"),
-                (fallback, "165.154.65.136.sslip.io"),
+                (&primary, "assets.mir2.obelisk.build"),
+                (&fallback, "165.154.65.136.sslip.io"),
             ] {
                 let parsed = url::Url::parse(raw).unwrap();
                 assert_eq!(parsed.scheme(), "https");
@@ -570,5 +616,96 @@ mod tests {
             assert_eq!(serde_json::from_str::<Scope>(encoded).unwrap(), scope);
         }
         assert!(serde_json::from_str::<Scope>("\"UNIFIED\"").is_err());
+    }
+
+    #[test]
+    fn release_baseline_requires_one_exact_compiled_pin_without_reassigning_history() {
+        let pin = "9C".repeat(32);
+        assert_eq!(scope_for_version_with_pin(&pin, None), None);
+        assert_eq!(
+            scope_for_version_with_pin(&pin, Some(&pin)),
+            Some(Scope::UnifiedRelease)
+        );
+        for other in [
+            "9D".repeat(32),
+            pin.to_lowercase(),
+            format!("{pin}/"),
+            String::new(),
+        ] {
+            assert_eq!(scope_for_version_with_pin(&other, Some(&pin)), None);
+            assert_eq!(scope_for_version_with_pin(&pin, Some(&other)), None);
+        }
+        let historical = "51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A";
+        assert_eq!(
+            scope_for_version_with_pin(historical, Some(historical)),
+            Some(Scope::Unified)
+        );
+        assert_eq!(
+            scope_for_version_with_pin(historical, Some(&pin)),
+            Some(Scope::Unified)
+        );
+    }
+
+    #[test]
+    fn release_baseline_channel_is_separate_and_cannot_inject_a_host_or_path() {
+        let pin = "9C".repeat(32);
+        let (primary, fallback) = Scope::UnifiedRelease
+            .feed_urls_with_pin(&pin, Some(&pin))
+            .unwrap();
+        for (raw, host) in [
+            (&primary, "assets.mir2.obelisk.build"),
+            (&fallback, "165.154.65.136.sslip.io"),
+        ] {
+            let url = HttpsSource::pinned_base(raw).unwrap();
+            assert_eq!(url.host_str(), Some(host));
+            assert_eq!(
+                url.path(),
+                format!("/client-updates/unified/baselines/{pin}/")
+            );
+            assert!(url.query().is_none());
+            assert!(url.fragment().is_none());
+        }
+        for bad in [
+            String::new(),
+            pin.to_lowercase(),
+            format!("{pin}/../latest.json"),
+            format!("{pin}?host=evil.test"),
+        ] {
+            assert!(Scope::UnifiedRelease
+                .feed_urls_with_pin(&pin, Some(&bad))
+                .is_err());
+        }
+        assert!(Scope::UnifiedRelease
+            .feed_urls_with_pin(&pin, None)
+            .is_err());
+        assert_ne!(Scope::Unified.feed_urls("").unwrap(), (primary, fallback));
+    }
+    #[test]
+    fn later_engine_retains_each_installed_baseline_and_its_distinct_channel() {
+        let previous = "9C".repeat(32);
+        let current = "9D".repeat(32);
+        let pins = format!("{current},{previous}");
+        for digest in [&previous, &current] {
+            assert_eq!(
+                scope_for_version_with_pin(digest, Some(&pins)),
+                Some(Scope::UnifiedRelease)
+            );
+            let (primary, _) = Scope::UnifiedRelease
+                .feed_urls_with_pin(digest, Some(&pins))
+                .unwrap();
+            assert!(primary.contains(&format!("/baselines/{digest}/")));
+        }
+        assert!(!release_baseline_is_compiled(
+            &previous,
+            Some(&format!("{previous},{previous}"))
+        ));
+        assert!(!release_baseline_is_compiled(
+            &previous,
+            Some(&format!("{previous},bad"))
+        ));
+        assert!(!release_baseline_is_compiled(
+            &previous,
+            Some(&vec![previous.as_str(); 65].join(","))
+        ));
     }
 }

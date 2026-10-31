@@ -6,7 +6,9 @@ param(
     [Parameter(Mandatory)][ValidatePattern('^[0-9a-fA-F]{40}$')][string]$SourceRevision,
     [Parameter(Mandatory)][ValidatePattern('^[0-9A-Fa-f]{40}$')][string]$SignerThumbprint,
     [Parameter(Mandatory)][ValidateRange(1,9007199254740991)][long]$Sequence,
-    [string]$TargetDir
+    [string]$TargetDir,
+    [string]$UnifiedBaselineVersionSha256,
+    [string[]]$RetainedCandidateRoots = @()
 )
 $ErrorActionPreference='Stop'
 $project=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))
@@ -102,19 +104,55 @@ if(!$certificate.HasPrivateKey -or (Get-Date)-lt$certificate.NotBefore -or (Get-
 $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($certificate)
 if(!$rsa -or (Sha $rsa.ExportRSAPublicKey())-cne$pin){throw 'Signing key does not match launcher trust'}
 $CandidateRoot=[IO.Path]::GetFullPath($CandidateRoot);NoLinks $CandidateRoot
+if($UnifiedBaselineVersionSha256){
+    if($UnifiedBaselineVersionSha256-cnotmatch'^[0-9A-F]{64}$' -or
+       $UnifiedBaselineVersionSha256-cne(FileSha (Join-Path $CandidateRoot 'VERSION.json'))){
+        throw 'Unified release maintenance must bind the exact Candidate VERSION.json SHA256'
+    }
+    if($UnifiedBaselineVersionSha256-cin@('481DA3F3EE5AFAB88A9B20F2DEB5A70E359B859C53671D9099B6213E5748FBAB','C54DC2C9D8301E1793B8316AFE6CAB554DF19FC62468D6005F41C7897DBC802F','51AFE182412B0CD7DABEB23228F3CCE354D82DB9694062FA40FAB1166397308A')){
+        throw 'Historical maintenance scopes must retain their original channels'
+    }
+}
+$maintenancePins=@()
+if($UnifiedBaselineVersionSha256){$maintenancePins+=,$UnifiedBaselineVersionSha256}
+if($RetainedCandidateRoots.Count -gt 0 -and !$UnifiedBaselineVersionSha256){throw 'Retained maintenance baselines require the current exact Candidate pin'}
+foreach($retainedRoot in $RetainedCandidateRoots){
+    $retainedRoot=[IO.Path]::GetFullPath($retainedRoot);NoLinks $retainedRoot
+    foreach($name in @('VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')){
+        $file=Join-Path $retainedRoot $name;NoLinks $file
+        if((Get-Item -LiteralPath $file).Length -gt 32768){throw 'Retained baseline metadata is oversized'}
+    }
+    $retainedStatementBytes=[IO.File]::ReadAllBytes((Join-Path $retainedRoot 'RELEASE-STATEMENT.json'))
+    CheckCms $retainedStatementBytes ([IO.File]::ReadAllBytes((Join-Path $retainedRoot 'RELEASE-STATEMENT.p7s')))
+    $retainedStatement=[Text.Encoding]::UTF8.GetString($retainedStatementBytes) | ConvertFrom-Json
+    $retainedVersion=Get-Content -LiteralPath (Join-Path $retainedRoot 'VERSION.json') -Raw | ConvertFrom-Json
+    $retainedHash=FileSha (Join-Path $retainedRoot 'VERSION.json')
+    if($retainedHash-cne$retainedStatement.versionSha256 -or $retainedVersion.clientOnly-ne$true -or
+       $retainedVersion.worktreeDirty-ne$false -or $retainedVersion.candidate-cne$retainedStatement.candidate -or
+       $retainedVersion.gitRevision-cnotmatch'^[0-9a-f]{40}$' -or
+       $retainedVersion.gitRevision-cne$retainedStatement.gitRevision -or $retainedStatement.worktreeDirty-ne$false){throw 'Retained baseline signature binding mismatch'}
+    if($maintenancePins-ccontains$retainedHash){throw 'Duplicate maintenance baseline'}
+    $maintenancePins+=,$retainedHash
+}
+if($maintenancePins.Count-gt64){throw 'Too many retained maintenance baselines'}
 $OutputRoot=[IO.Path]::GetFullPath($OutputRoot);NoLinks $OutputRoot
 if(Test-Path -LiteralPath $OutputRoot){throw 'Fresh release output directory required'}
 if(!$TargetDir){$TargetDir=Join-Path $crate 'target'}
 $TargetDir=[IO.Path]::GetFullPath($TargetDir);NoLinks $TargetDir
 & {
-    foreach($name in @('RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER')){
+    foreach($name in @('RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER','MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256','MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256S')){
         if([Environment]::GetEnvironmentVariable($name)){throw "Uncontrolled compiler environment: $name"}
     }
     try {
+        if($maintenancePins.Count-gt0){$env:MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256S=$maintenancePins -join ','}
         $env:RUSTFLAGS="--remap-path-prefix=$project=mir2-source"
         & cargo +1.95.0 build --locked --release --manifest-path (Join-Path $crate 'Cargo.toml') --target x86_64-pc-windows-msvc --target-dir $TargetDir
         if($LASTEXITCODE-ne0){throw 'Updater release build failed'}
-    } finally {Remove-Item Env:RUSTFLAGS -ErrorAction SilentlyContinue}
+    } finally {
+        Remove-Item Env:RUSTFLAGS -ErrorAction SilentlyContinue
+        Remove-Item Env:MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256 -ErrorAction SilentlyContinue
+        Remove-Item Env:MIR2_UPDATER_UNIFIED_BASELINE_VERSION_SHA256S -ErrorAction SilentlyContinue
+    }
 }
 $release=Join-Path $TargetDir 'x86_64-pc-windows-msvc/release'
 $launcher=[IO.File]::ReadAllBytes((Join-Path $release 'Mir2Launcher.exe'))
@@ -143,6 +181,7 @@ $statement=[Text.Encoding]::UTF8.GetString($statementBytes) | ConvertFrom-Json
 if($statement.versionSha256-cne(FileSha (Join-Path $CandidateRoot 'VERSION.json')) -or
    $statement.packageManifestSha256-cne(FileSha (Join-Path $CandidateRoot 'PACKAGE-MANIFEST.json')) -or
    $version.worktreeDirty-ne$false -or $version.clientOnly-ne$true){throw 'Invalid game Candidate bindings'}
+if($UnifiedBaselineVersionSha256 -and $statement.versionSha256-cne$UnifiedBaselineVersionSha256){throw 'Candidate changed after maintenance baseline compilation'}
 $gameDirectory='releases/game-'+$version.candidate
 $engineDirectory='releases/updater-'+$engineHash.Substring(0,16)+'-s'+$Sequence
 $feed=[ordered]@{
@@ -180,6 +219,8 @@ Put (Join-Path $OutputRoot 'source-map.json') (JsonBytes $sourceMap)
 $receipt=[ordered]@{schema='mir2.windows.updater-build.v1';sourceRevision=$SourceRevision;sourceClean=$true
     engineSha256=$engineHash;launcherSha256=Sha $launcher;gameCandidate=$version.candidate
     gameSourceRevision=$version.gitRevision;sequence=$Sequence;builtUnix=$now
+    unifiedMaintenanceBaselineVersionSha256=$UnifiedBaselineVersionSha256
+    compiledUnifiedMaintenanceBaselines=$maintenancePins
     command='cargo +1.95.0 build --locked --release --target x86_64-pc-windows-msvc'
     publicAuthenticode='not provided by detached CMS; public publisher signing remains separate'}
 Put (Join-Path $OutputRoot 'BUILD-UPDATER.json') (JsonBytes $receipt)

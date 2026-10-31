@@ -655,3 +655,58 @@ test("packed large body is returned before its stream finishes without buffering
     assert.equal(await response.text(), "firstsecond");
   } finally { clearTimeout(timeout); }
 });
+
+test("release baseline aliases use their own atomic pointer and never cache mutable bytes", async () => {
+  const f = setup(), hash = "9C".repeat(32), prefix = `unified/baselines/${hash}/`;
+  const one = pointer(1), two = pointer(2);
+  f.bucket.put(prefix + "channels/invited.json", JSON.stringify(one));
+  for (const p of [one, two]) {
+    f.bucket.put(prefix + feedDirectory(p) + "latest.json", "release-" + p.sequence, { customMetadata: { sha256: p.feedSha256 } });
+  }
+  f.bucket.put("unified/channels/invited.json", "old unified data must not be read");
+  f.bucket.afterSnapshot = key => {
+    if (key === OBJECT_PREFIX + prefix + "channels/invited.json") {
+      f.bucket.put(prefix + "channels/invited.json", JSON.stringify(two));
+    }
+  };
+  const url = PUBLIC_BASE + prefix + "latest.json";
+  const first = await handle(new Request(url), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(first.status, 200);
+  assert.equal(await first.text(), "release-1");
+  assert.equal(first.headers.get("cache-control"), "no-store");
+  const next = await handle(new Request(url), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(await next.text(), "release-2");
+  assert.equal(next.headers.get("x-mir2-sequence"), "2");
+  assert.equal(f.cache.matches.length, 0);
+  assert.equal(f.cache.puts.length, 0);
+  assert.ok(f.bucket.calls.every(([, key]) => key.startsWith(OBJECT_PREFIX + prefix)));
+});
+
+test("release baselines reject malformed identities and scope escapes before storage", async () => {
+  const hash = "9C".repeat(32), f = setup();
+  for (const path of [
+    `unified/baselines/${hash.toLowerCase()}/latest.json`, `unified/baselines/${hash.slice(1)}/latest.json`,
+    `unified/baselines/${hash}%2flatest.json`, `unified/baselines/%39${hash.slice(1)}/latest.json`,
+    `unified/baselines/${hash}/channels/invited.json`, `unified/baselines/${hash}/baselines/${hash}/latest.json`,
+    `five-class/baselines/${hash}/latest.json`, `baselines/${hash}/latest.json`,
+    `unified/baselines/${hash}/latest.json?fallback=root`,
+  ]) {
+    assert.equal((await f.fetch(path)).status, 404, path);
+  }
+  assert.equal(f.bucket.calls.length, 0);
+});
+
+test("immutable release baseline objects keep separate canonical cache namespaces", async () => {
+  const f = setup();
+  for (const hash of ["9C".repeat(32), "9D".repeat(32)]) {
+    const path = `unified/baselines/${hash}/releases/r1/data.gz`;
+    f.bucket.put(path, hash);
+    const response = await f.fetch(path);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), hash);
+    assert.match(response.headers.get("cache-control"), /31536000, immutable/);
+  }
+  await f.done();
+  assert.equal(f.cache.puts.length, 2);
+  assert.notEqual(f.cache.puts[0], f.cache.puts[1]);
+});

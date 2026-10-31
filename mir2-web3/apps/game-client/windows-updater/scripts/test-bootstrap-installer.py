@@ -8,6 +8,7 @@ required by build-bootstrap-installer.ps1 before it calls the helper.
 
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import re
@@ -18,6 +19,7 @@ import sys
 import tempfile
 import time
 import unittest
+from contextlib import redirect_stdout
 
 sys.dont_write_bytecode = True
 SCRIPT_ROOT = Path(__file__).absolute().parent
@@ -26,6 +28,11 @@ bootstrap = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = bootstrap
 SPEC.loader.exec_module(bootstrap)
 archive = bootstrap.archive
+FULL_SPEC = importlib.util.spec_from_file_location(
+    "mir2_full_installer_input_tests",
+    SCRIPT_ROOT.parents[1] / "platform-windows/scripts/invited-installer/prepare-installer-input.py")
+full_installer = importlib.util.module_from_spec(FULL_SPEC)
+FULL_SPEC.loader.exec_module(full_installer)
 REVISION = "a" * 40
 CANDIDATE = "WN-CANDIDATE-bootstrap-contract-fixture"
 POWERSHELL = os.environ.get("MIR2_BOOTSTRAP_TEST_PWSH") or shutil.which("pwsh")
@@ -886,6 +893,127 @@ $verified=InvokeBootstrapGameVerification @params
         self.assertEqual(result["copyCalls"], 1)
         self.assertIn("platinum_176", result["args"])
         self.assertNotIn("-RequireCurrentSource", result["args"])
+
+class FullInstallerCandidateTests(unittest.TestCase):
+    """Supplementary full-payload checks; fixture CMS bytes are never authentic."""
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="mir2-full-installer-")
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.output = self.root / "out"
+        self.output.mkdir()
+        original_base = full_installer.BASE
+        full_installer.BASE = self.output
+        self.addCleanup(setattr, full_installer, "BASE", original_base)
+        self.candidate = self.make_candidate("game", full_installer.CANDIDATE)
+        self.new_candidate = "WN-CANDIDATE-20261101-unified-15"
+
+    def make_candidate(self, directory, identity, release_identity=None):
+        root = candidate_fixture(self.root / directory)
+        version = json.loads((root / "VERSION.json").read_bytes())
+        version["candidate"] = identity
+        version_bytes = dumped(version)
+        put(root, "VERSION.json", version_bytes)
+        release = json.loads((root / "RELEASE-STATEMENT.json").read_bytes())
+        release.update(candidate=release_identity or identity,
+                       versionSha256=archive.sha256(version_bytes))
+        put(root, "RELEASE-STATEMENT.json", dumped(release))
+        return root
+
+    def prepare(self, root=None, expected_revision=REVISION, expected_candidate=None):
+        args = [root or self.candidate, expected_revision]
+        if expected_candidate is not None:
+            args.append(expected_candidate)
+        with redirect_stdout(io.StringIO()):
+            full_installer.prepare(*args)
+        return json.loads((self.output / "installer-input-verification.json").read_text())
+
+    def assert_no_outputs(self):
+        for name in ("verified-payload-files.iss", "installer-input-verification.json"):
+            self.assertFalse((self.output / name).exists(), name)
+
+    def test_original_two_argument_call_retains_candidate11(self):
+        report = self.prepare()
+        self.assertEqual(report["candidate"], "WN-CANDIDATE-20261029-unified-11")
+        self.assertEqual(report["sourceRevision"], REVISION)
+        self.assertIn("required separately", report["cmsVerification"])
+        self.assertFalse(report["runtimeLogsIncluded"])
+
+    def test_explicit_candidate_is_bound_into_verified_literal_inputs(self):
+        root = self.make_candidate("new-game", self.new_candidate)
+        report = self.prepare(root, expected_candidate=self.new_candidate)
+        self.assertEqual(report["candidate"], self.new_candidate)
+        self.assertEqual(report["extraFiles"], [])
+        lines = (self.output / "verified-payload-files.iss").read_text(encoding="utf-8-sig")
+        self.assertIn(str(root / "mir2-platform-windows.exe"), lines)
+
+    def test_new_candidate_never_silently_changes_the_default(self):
+        root = self.make_candidate("new-game", self.new_candidate)
+        with self.assertRaisesRegex(ValueError, "candidate must be"):
+            self.prepare(root)
+        self.assert_no_outputs()
+
+    def test_version_and_release_each_require_the_exact_expected_candidate(self):
+        with self.assertRaisesRegex(ValueError, "candidate must be"):
+            self.prepare(expected_candidate=self.new_candidate)
+        root = self.make_candidate("new-game", self.new_candidate, full_installer.CANDIDATE)
+        with self.assertRaisesRegex(ValueError, "release candidate mismatch"):
+            self.prepare(root, expected_candidate=self.new_candidate)
+        self.assert_no_outputs()
+
+    def test_candidate_arguments_reject_unsafe_or_noncanonical_values(self):
+        for identity in ("", None, "WN-CANDIDATE-other",
+                         "../WN-CANDIDATE-20261101-unified-15",
+                         "WN-CANDIDATE-20261101-unified-15/extra",
+                         "WN-CANDIDATE-20261101-unified-15;run",
+                         'WN-CANDIDATE-20261101-unified-15"quoted',
+                         "WN-CANDIDATE-20261101-unified-15{app}",
+                         "WN-CANDIDATE-20261101-unified-15\n[Files]",
+                         "WN-CANDIDATE-20261101-unified-15 ",
+                         "WN-CANDIDATE-20261101-unified-00015",
+                         "WN-CANDIDATE-20261101-unified-99999"):
+            with self.subTest(identity=identity):
+                with self.assertRaises(full_installer.argparse.ArgumentTypeError):
+                    full_installer.candidate_argument(identity)
+                with self.assertRaisesRegex(ValueError, "invalid expected_candidate"):
+                    full_installer.prepare(self.candidate, REVISION, identity)
+        self.assert_no_outputs()
+
+    def test_source_and_byte_closure_checks_remain_required_with_new_candidate(self):
+        root = self.make_candidate("new-game", self.new_candidate)
+        with self.assertRaisesRegex(ValueError, "exact source revision mismatch"):
+            self.prepare(root, expected_revision="b" * 40, expected_candidate=self.new_candidate)
+        put(root, "mir2-assets/fixture/data.txt", b"corrupt payload")
+        with self.assertRaisesRegex(ValueError, "payload size/hash mismatch"):
+            self.prepare(root, expected_candidate=self.new_candidate)
+        other = self.make_candidate("extra-game", self.new_candidate)
+        put(other, "extra.bin", b"unmanifested")
+        with self.assertRaisesRegex(ValueError, "file closure mismatch"):
+            self.prepare(other, expected_candidate=self.new_candidate)
+        self.assert_no_outputs()
+
+    def test_verbatim_staged_cli_accepts_explicit_candidate_without_source_rewrite(self):
+        root = self.make_candidate("new-game", self.new_candidate)
+        staged = self.output / "prepare-installer-input.py"
+        shutil.copyfile(full_installer.__file__, staged)
+        self.assertEqual(staged.read_bytes(), Path(full_installer.__file__).read_bytes())
+        result = subprocess.run([sys.executable, "-B", str(staged), str(root), REVISION,
+                                 "--expected-candidate", self.new_candidate],
+                                capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["candidate"], self.new_candidate)
+
+    def test_cli_rejects_unsafe_candidate_before_creating_outputs(self):
+        staged = self.output / "prepare-installer-input.py"
+        shutil.copyfile(full_installer.__file__, staged)
+        result = subprocess.run([sys.executable, "-B", str(staged), str(self.candidate), REVISION,
+                                 "--expected-candidate", self.new_candidate + "\n[Files]"],
+                                capture_output=True, text=True, timeout=20)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("expected_candidate", result.stderr)
+        self.assert_no_outputs()
+
 
 if __name__ == "__main__":
     unittest.main()

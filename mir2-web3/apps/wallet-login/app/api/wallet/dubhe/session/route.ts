@@ -2,4 +2,7 @@ import { createDubheConnectLogin } from "../../../../../../web/lib/server/dubhe-
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const POST = createDubheConnectLogin;
+export function POST(request: Request) {
+  // Framework route context is not a server-created signing configuration.
+  return createDubheConnectLogin(request);
+}

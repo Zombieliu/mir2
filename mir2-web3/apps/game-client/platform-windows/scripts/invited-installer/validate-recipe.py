@@ -44,6 +44,21 @@ def sha(path):
 def validate_static(readme):
     """Validate recipe closure only; this cannot certify compiler translations."""
     recipe = (BASE / "Mir2-Invite.iss").read_text(encoding="utf-8-sig")
+    for name, default in {
+        "AppVersion": "2026.10.29.11",
+        "Mir2ReleaseBaseName": "Numeron-Legend-of-Rebirth-20261029-unified-r11",
+        "Mir2ValidationAppGuid": "57CF8E63-1E57-49E9-882B-EC858C59C0F9",
+    }.items():
+        require(re.search(r"#ifndef " + name + r'\s+#define ' + name +
+                          r' "' + re.escape(default) + r'"\s+#endif', recipe) is not None,
+                "trusted release override must preserve its original default: " + name)
+    require("VersionInfoVersion={#AppVersion}" in recipe, "installer file version must follow AppVersion")
+    require("OutputBaseFilename={#Mir2ReleaseBaseName}-Setup" in recipe and
+            "OutputBaseFilename={#Mir2ReleaseBaseName}-LocalValidation-Setup" in recipe,
+            "release filenames must retain their fixed setup suffixes")
+    require("AppId={{{#Mir2ValidationAppGuid}}" in recipe and
+            "AppId={{DC4E7701-25AD-4E48-9970-5C1983CBC77F}" in recipe,
+            "QA identity must be configurable without changing the official identity")
     section = recipe.split("[Languages]", 1)[1].split("[CustomMessages]", 1)[0]
     entries = re.findall(r'Name: "([a-z]+)"; MessagesFile: "([^"]+)"; InfoBeforeFile: "([^"]+)"', section)
     require(len(entries) == 10 and {row[0] for row in entries} == set(LANGUAGES), "ten unique installer languages required")

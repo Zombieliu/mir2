@@ -334,7 +334,6 @@ jobs:
           cargo +1.95.0 test --locked --release -p mir2-gateway --lib sui_usdc -- --test-threads=1
           cargo +1.95.0 test --locked --release -p mir2-simulation --lib sui_usdc -- --test-threads=1
           cargo +1.95.0 test --locked --release -p mir2-simulation --lib billing_provenance -- --test-threads=1
-          cargo +1.95.0 test --locked --release -p mir2-simulation --lib promotion:: -- --test-threads=1
           cargo +1.95.0 build --locked --release -p mir2-simulation --example promotion_worker --example promotion_playtest --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_recalculate --example promotion_chain_acceptance --example promotion_attribution_migration --example promotion_full_monthly_policy
           mkdir -p ../promotion-backend-release/runtime ../promotion-backend-release/usdc-recharge/service
           cp target/release/mir2-gateway target/release/usdc_native_transfer_reconcile target/release/examples/promotion_worker target/release/examples/promotion_playtest target/release/examples/promotion_windows_playtest target/release/examples/promotion_windows_acceptance target/release/examples/promotion_recalculate target/release/examples/promotion_chain_acceptance target/release/examples/promotion_attribution_migration target/release/examples/promotion_full_monthly_policy ../promotion-backend-release/
@@ -361,7 +360,13 @@ jobs:
           CARGO_PROFILE_RELEASE_DEBUG: '0'
           CARGO_PROFILE_RELEASE_STRIP: symbols
           MIR2_RUN_PROMOTION_PG_TESTS: '1'
+          MIR2_PROMOTION_ENVIRONMENT: test
           MIR2_PROMOTION_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_promotion_windows_ci
+          MIR2_WALLET_TEST_ISOLATED: '1'
+          MIR2_WALLET_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_wallet_qa_backend_release_ci
+          MIR2_TEST_ZONE_SAVE_FENCE_URL: postgresql://postgres@127.0.0.1:55483/mir2_zone_lease_test_backend_ci
+          MIR2_TEST_ZONE_SAVE_OPERATION_URL: postgresql://postgres@127.0.0.1:55483/mir2_zone_lease_test_backend_ci
+          MIR2_GUILD_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:55483/mir2_guild_backend_release_ci
         run: |
           set -euo pipefail
           PG_BIN="$(pg_config --bindir)"
@@ -370,23 +375,49 @@ jobs:
           "$PG_BIN/pg_ctl" -D "$PG_DATA" -l "$RUNNER_TEMP/windows-promotion-pg.log" -o "-h 127.0.0.1 -p 55483 -k $PG_DATA" start || { tail -n 40 "$RUNNER_TEMP/windows-promotion-pg.log"; exit 1; }
           trap '"$PG_BIN/pg_ctl" -D "$PG_DATA" -m fast stop' EXIT
           "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_promotion_windows_ci
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_wallet_qa_backend_release_ci
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_zone_lease_test_backend_ci
+          "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres mir2_guild_backend_release_ci
+          # The authority owns this public table; private fixture schemas must not shadow it.
+          "$PG_BIN/psql" -X -v ON_ERROR_STOP=1 -h 127.0.0.1 -p 55483 -U postgres -d mir2_zone_lease_test_backend_ci -f infra/postgres/migrations/0003_zone_owner_leases.sql
           WINDOWS_CLONE_DB="mir2_promotion_windows_acceptance_${GITHUB_SHA:0:12}"
           "$PG_BIN/createdb" -h 127.0.0.1 -p 55483 -U postgres "$WINDOWS_CLONE_DB"
           export MIR2_PROMOTION_WINDOWS_TEST_DATABASE_URL="postgresql://postgres@127.0.0.1:55483/$WINDOWS_CLONE_DB"
-          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test sui_usdc_native_transfer_postgres --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment --test promotion_attribution_migration --test promotion_full_monthly_policy -- --test-threads=1 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
-          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_attribution_migration --example promotion_full_monthly_policy -- --test-threads=1 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
-          cargo +1.95.0 test --locked --release -p mir2-gateway --lib promotion_ -- --test-threads=1 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test billing_recharge --test promotion_backend_compat --test sui_usdc_provenance --test sui_usdc_native_transfer_postgres --test promotion_live_revenue --test promotion_postgres --test promotion_revenue_share --test promotion_wallet_enrollment --test promotion_attribution_migration --test promotion_full_monthly_policy -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/NATIVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --example promotion_windows_playtest --example promotion_windows_acceptance --example promotion_attribution_migration --example promotion_full_monthly_policy -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/CLONE-CLI-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib promotion_ -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/WALLET-IDENTITY-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --lib promotion -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/PROMOTION-GAME-SOURCE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --test wallet_postgres -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/WALLET-POSTGRES-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-simulation --lib zone_save_ -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/SIMULATION-ZONE-SAVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib zone_save_ -- --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/GATEWAY-ZONE-SAVE-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib player_drop_mail_transfer_pg_ -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/MAIL-TRANSFER-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib player_drop_shared_uid_pg_ -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/SHARED-UID-PG-TESTS.log
+          cargo +1.95.0 test --locked --release -p mir2-gateway --lib prepared_kill_postgres_ -- --ignored --test-threads=1 --nocapture 2>&1 | tee ../promotion-backend-release/PREPARED-KILL-PG-TESTS.log
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
-          const files=['NATIVE-PG-TESTS.log','CLONE-CLI-TESTS.log','WALLET-IDENTITY-TESTS.log'];
-          const logs=Object.fromEntries(files.map(file=>{
+          const groups=[
+            {file:'NATIVE-PG-TESTS.log',binaries:10,includesUnitTests:true},
+            {file:'CLONE-CLI-TESTS.log',binaries:4,includesUnitTests:true},
+            {file:'WALLET-IDENTITY-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'PROMOTION-GAME-SOURCE-PG-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'WALLET-POSTGRES-TESTS.log',binaries:1,expectedPassed:1},
+            {file:'SIMULATION-ZONE-SAVE-PG-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'GATEWAY-ZONE-SAVE-PG-TESTS.log',binaries:1,includesUnitTests:true},
+            {file:'MAIL-TRANSFER-PG-TESTS.log',binaries:1,expectedPassed:4},
+            {file:'SHARED-UID-PG-TESTS.log',binaries:1,expectedPassed:11},
+            {file:'PREPARED-KILL-PG-TESTS.log',binaries:1,expectedPassed:7},
+          ];
+          const logs=Object.fromEntries(groups.map(({file,binaries,expectedPassed,includesUnitTests=false})=>{
             const bytes=readFileSync('../promotion-backend-release/'+file);
-            const results=[...bytes.toString().matchAll(/test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored;/g)];
-            if(!results.length||results.some(row=>Number(row[2])||Number(row[3])))throw Error('Native acceptance suite missing or skipped');
+            const output=bytes.toString();
+            if(/\bSKIPPED\b/i.test(output))throw Error(file+': PostgreSQL opt-in was skipped');
+            const results=[...output.matchAll(/test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;/g)];
+            if(results.length!==binaries||results.some(row=>Number(row[1])<=0||Number(row[2])||Number(row[3])))throw Error(file+': acceptance suite missing, empty, failed or ignored');
             const testsExecuted=results.reduce((sum,row)=>sum+Number(row[1]),0);
-            if(testsExecuted<=0)throw Error('Native acceptance suite was empty');
-            return [file,{passed:true,testsExecuted,logSha256:createHash('sha256').update(bytes).digest('hex')}];
+            if(expectedPassed!==undefined&&testsExecuted!==expectedPassed)throw Error(file+': exact PostgreSQL group count changed');
+            const filteredOut=results.reduce((sum,row)=>sum+Number(row[5]),0);
+            return [file,{passed:true,testsExecuted,failed:0,ignored:0,filteredOut,includesUnitTests,testBinaries:results.length,logSha256:createHash('sha256').update(bytes).digest('hex')}];
           }));
           writeFileSync('../promotion-backend-release/CI-ACCEPTANCE.json',JSON.stringify({
             schema:'mir2.windows-promotion-native-pg.v1',sourceSha:process.env.GITHUB_SHA,
@@ -394,10 +425,15 @@ jobs:
             environment:'test',postgresBackend:'native',docker:false,passed:true,
             testsExecuted:Object.values(logs).reduce((sum,value)=>sum+value.testsExecuted,0),skipped:0,
             checks:{idempotentPaymentAttribution:logs['NATIVE-PG-TESTS.log'],noHistoricalRevenueInferred:logs['NATIVE-PG-TESTS.log'],
-              walletIdentityRegression:logs['WALLET-IDENTITY-TESTS.log'],cloneAudit:logs['CLONE-CLI-TESTS.log']},logs,
+              walletIdentityRegression:logs['WALLET-IDENTITY-TESTS.log'],cloneAudit:logs['CLONE-CLI-TESTS.log'],
+              promotionGameSource:logs['PROMOTION-GAME-SOURCE-PG-TESTS.log'],walletPostgres:logs['WALLET-POSTGRES-TESTS.log'],
+              simulationZoneSave:logs['SIMULATION-ZONE-SAVE-PG-TESTS.log'],gatewayZoneSave:logs['GATEWAY-ZONE-SAVE-PG-TESTS.log'],
+              mailTransfer:logs['MAIL-TRANSFER-PG-TESTS.log'],sharedUid:logs['SHARED-UID-PG-TESTS.log'],preparedKill:logs['PREPARED-KILL-PG-TESTS.log']},logs,
             realMobileSignature:false
           },null,2));
           NODE
+          # Bind the final logs and acceptance receipt, which were created after packaging.
+          (cd ../promotion-backend-release && find -L . -type f ! -name SHA256SUMS ! -name SOURCE-SHA.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: promotion-backend-${{ inputs.backend_source_sha }}

@@ -2,4 +2,6 @@ import { readDubheConnectLogin } from "../../../../../../../web/lib/server/dubhe
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const POST = readDubheConnectLogin;
+export function POST(request: Request) {
+  return readDubheConnectLogin(request);
+}

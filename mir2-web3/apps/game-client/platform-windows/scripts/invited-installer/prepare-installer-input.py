@@ -15,6 +15,7 @@ import stat
 
 BASE = pathlib.Path(__file__).resolve().parent
 CANDIDATE = "WN-CANDIDATE-20261029-unified-11"
+CANDIDATE_PATTERN = r"WN-CANDIDATE-[0-9]{8}-unified-[1-9][0-9]{0,3}"
 METADATA = {"PACKAGE-MANIFEST.json", "VERSION.json", "RELEASE-STATEMENT.json",
             "RELEASE-STATEMENT.p7s"}
 
@@ -28,6 +29,13 @@ def revision_argument(value):
     if not re.fullmatch(r"[0-9a-fA-F]{40}", value):
         raise argparse.ArgumentTypeError("expected_source_revision must be the full 40-hex commit")
     return value.lower()
+
+
+def candidate_argument(value):
+    if not isinstance(value, str) or not re.fullmatch(CANDIDATE_PATTERN, value):
+        raise argparse.ArgumentTypeError(
+            "expected_candidate must match WN-CANDIDATE-YYYYMMDD-unified-N")
+    return value
 
 
 def digest(data):
@@ -54,7 +62,10 @@ def safe_relative(relative):
     return path
 
 
-def prepare(package_root, expected_revision):
+def prepare(package_root, expected_revision, expected_candidate=CANDIDATE):
+    require(isinstance(expected_candidate, str) and
+            re.fullmatch(CANDIDATE_PATTERN, expected_candidate) is not None,
+            "invalid expected_candidate")
     unresolved = pathlib.Path(os.path.abspath(package_root))
     for path in (unresolved, *unresolved.parents):
         reject_link(path)
@@ -68,7 +79,8 @@ def prepare(package_root, expected_revision):
 
     version_bytes = (root / "VERSION.json").read_bytes()
     version = json.loads(version_bytes.decode("utf-8-sig"))
-    require(version.get("candidate") == CANDIDATE, "candidate must be " + CANDIDATE)
+    require(version.get("candidate") == expected_candidate,
+            "candidate must be " + expected_candidate)
     require(version.get("gitRevision") == expected_revision, "exact source revision mismatch")
     require(version.get("worktreeDirty") is False, "dirty Candidate is forbidden")
     require(version.get("clientOnly") is True, "installer requires a client-only package")
@@ -78,7 +90,7 @@ def prepare(package_root, expected_revision):
     release = json.loads((root / "RELEASE-STATEMENT.json").read_text(encoding="utf-8-sig"))
     attestation_bytes = (root / "BUILD-ATTESTATION.json").read_bytes()
     attestation = json.loads(attestation_bytes.decode("utf-8-sig"))
-    require(release.get("candidate") == CANDIDATE, "release candidate mismatch")
+    require(release.get("candidate") == expected_candidate, "release candidate mismatch")
     for item in (release, attestation):
         require(item.get("gitRevision") == expected_revision and
                 item.get("worktreeDirty") is False, "source provenance mismatch")
@@ -140,7 +152,7 @@ def prepare(package_root, expected_revision):
             release["exeSha256"].upper() == attestation["exeSha256"].upper(),
             "executable provenance hash mismatch")
     report = {
-        "passed": True, "candidate": CANDIDATE, "sourceRevision": expected_revision,
+        "passed": True, "candidate": expected_candidate, "sourceRevision": expected_revision,
         "files": len(expected), "bytes": total, "extraFiles": [], "runtimeLogsIncluded": False,
         "metadataSha256": metadata_hashes, "exeSha256": version["exeSha256"],
         "manifestSha256": digest(manifest_bytes),
@@ -159,9 +171,11 @@ def main():
     parser.add_argument("package_root", help="immutable unified package already passing the strict CMS verifier")
     parser.add_argument("expected_source_revision", type=revision_argument,
                         help="required exact 40-hex source commit; no default")
+    parser.add_argument("--expected-candidate", type=candidate_argument, default=CANDIDATE,
+                        help="exact trusted release Candidate identity; defaults to " + CANDIDATE)
     args = parser.parse_args()
     try:
-        prepare(args.package_root, args.expected_source_revision)
+        prepare(args.package_root, args.expected_source_revision, args.expected_candidate)
     except (OSError, ValueError, KeyError, TypeError) as error:
         parser.exit(1, "installer input rejected: " + str(error) + "\n")
 

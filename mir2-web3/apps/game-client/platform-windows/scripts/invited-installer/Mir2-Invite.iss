@@ -1,5 +1,13 @@
 ﻿#define AppName "Numeron - Legend of Rebirth"
-#define AppVersion "2026.10.29.11"
+#ifndef AppVersion
+  #define AppVersion "2026.10.29.11"
+#endif
+#ifndef Mir2ReleaseBaseName
+  #define Mir2ReleaseBaseName "Numeron-Legend-of-Rebirth-20261029-unified-r11"
+#endif
+#ifndef Mir2ValidationAppGuid
+  #define Mir2ValidationAppGuid "57CF8E63-1E57-49E9-882B-EC858C59C0F9"
+#endif
 #define AppExe "mir2-platform-windows.exe"
 #define LauncherExe "Mir2Launcher.exe"
 #ifndef Mir2IconFile
@@ -15,15 +23,15 @@
     #error Mir2ValidationInstall cannot be a public release
   #endif
 ; Isolated acceptance identity: never replace the player's installed game or locale.
-AppId={{57CF8E63-1E57-49E9-882B-EC858C59C0F9}
+AppId={{{#Mir2ValidationAppGuid}}
 DefaultDirName={localappdata}\Programs\Mir2InviteValidation
 DefaultGroupName={#AppName} - Local Validation
-OutputBaseFilename=Numeron-Legend-of-Rebirth-20261029-unified-r11-LocalValidation-Setup
+OutputBaseFilename={#Mir2ReleaseBaseName}-LocalValidation-Setup
 #else
 AppId={{DC4E7701-25AD-4E48-9970-5C1983CBC77F}
 DefaultDirName={localappdata}\Programs\Mir2Invite
 DefaultGroupName={#AppName}
-OutputBaseFilename=Numeron-Legend-of-Rebirth-20261029-unified-r11-Setup
+OutputBaseFilename={#Mir2ReleaseBaseName}-Setup
 #endif
 AppName={#AppName}
 AppVersion={#AppVersion}
@@ -36,7 +44,7 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 OutputDir=..
-VersionInfoVersion=2026.10.29.11
+VersionInfoVersion={#AppVersion}
 VersionInfoDescription=Numeron - Legend of Rebirth multilingual playtest installer
 SetupIconFile={#Mir2IconFile}
 UninstallDisplayName={#AppName}

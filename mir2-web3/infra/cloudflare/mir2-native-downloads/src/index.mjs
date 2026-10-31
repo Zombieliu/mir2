@@ -60,6 +60,9 @@ export function channelPath(url) {
   if (packed) raw = raw.slice("packed/".length);
   const unified = !packed && raw.startsWith("unified/");
   if (unified) raw = raw.slice("unified/".length);
+  const baseline = unified ? /^baselines\/([A-F0-9]{64})\/(.*)$/.exec(raw) : null;
+  const baselinePrefix = baseline ? `baselines/${baseline[1]}/` : "";
+  if (baseline) raw = baseline[2];
   const fiveClass = !packed && !unified && raw.startsWith("five-class/");
   if (fiveClass) raw = raw.slice("five-class/".length);
   // Separators must be literal. Decode exactly once; any residual '%' is invalid.
@@ -82,9 +85,9 @@ export function channelPath(url) {
   if (!ALIASES.has(path) && !/^(releases|feeds|installers)\/[^/]/.test(path)) return null;
   return {
     path,
-    publicBase: unified ? UNIFIED_PUBLIC_BASE : fiveClass ? FIVE_CLASS_PUBLIC_BASE : PUBLIC_BASE,
-    objectPrefix: unified ? UNIFIED_OBJECT_PREFIX : fiveClass ? FIVE_CLASS_OBJECT_PREFIX : OBJECT_PREFIX,
-    pointerKey: unified ? UNIFIED_POINTER_KEY : fiveClass ? FIVE_CLASS_POINTER_KEY : POINTER_KEY,
+    publicBase: unified ? UNIFIED_PUBLIC_BASE + baselinePrefix : fiveClass ? FIVE_CLASS_PUBLIC_BASE : PUBLIC_BASE,
+    objectPrefix: unified ? UNIFIED_OBJECT_PREFIX + baselinePrefix : fiveClass ? FIVE_CLASS_OBJECT_PREFIX : OBJECT_PREFIX,
+    pointerKey: unified ? UNIFIED_OBJECT_PREFIX + baselinePrefix + "channels/invited.json" : fiveClass ? FIVE_CLASS_POINTER_KEY : POINTER_KEY,
     metadataMaximum: scoped ? MAX_FIVE_CLASS_METADATA : MAX_METADATA,
   };
 }
