@@ -72,5 +72,35 @@ runtime 通过 Windows manifest 的 `-p mir2-bevy-runtime` 和现有 `--locked`
 核对原库存与金币；X/Esc 可关闭并重开；点击交易、频道与尺寸按钮不改变人物
 坐标，地图点击和方向键仍能移动。真人前端最终 Accepted 保持开放。
 
-独立 Release/Candidate 的确切提交、EXE 摘要与包验证记录由本专题后续交付
-记录固定；本修复不包含安装覆盖或公网发布。
+## 已生成的独立测试版
+
+`WN-CANDIDATE-20261101-ui-14` 已从干净提交
+`1e06de683a2a6aa8779a464bcf08e35d4508bbde` 完成 Rust 1.95.0 Release 构建，
+包含 209 张地图和 255,079 个文件。EXE 为 133,762,560 字节，SHA256：
+`A288FF34D6B68BAE291C1D69CFAA294F19C1E6B98BB4C6632EAEB2795F720A28`。
+
+打包器自身的完整 v4 校验通过，`failures=[]`、`detachedSignatureValid=true`、
+`currentSourceValidated=true`；校验发生在暂存目录，随后由原脚本在同一父目录
+整体改名交付，原报告未改写。另有最终目录的 EXE/清单/构建证明与版本绑定
+检查，没有再运行第二轮全量资源哈希。
+[成品摘要](generated/native-ui-shop-pointer-20261101/delivery.json)与
+[构建、资源补齐和校验原始记录](generated/native-ui-shop-pointer-20261101/release-checks.zip)
+固定了这一区别。使用既有内部 CMS 签名，非生产发布者 Authenticode。
+
+首轮打包缺少独立 Git 工作树未带上的生成图集而失败。确认五个资源目录的
+版本定义与原 `4300c7aef` 一致后，从保留的 r13 构建树核对 204,131 个输入：
+保留 104,479 个一致文件，补齐 99,652 个缺失文件（298,038,879 字节），
+逐文件散列一致、工作树保持干净；复用原 Release EXE 后再次出包通过。
+失败记录保留，未放宽资源或签名检查。
+
+实际可执行文件：
+`C:/m2ui1101/mir2-web3/dist/mir2-windows-candidate/WN-CANDIDATE-20261101-ui-14/mir2-platform-windows.exe`。
+电脑控制已启动该文件，真实简体登录画面与 Dubhe Wallet F8 入口可见。
+窗口从屏幕边缘移至完整可见的显示器，客户端仍为 1024×768；未登录或发起
+购买。[原始启动范围记录](generated/native-ui-shop-pointer-20261101/native-startup.json)
+与下图只证明原生启动，不替代前述实账号验收。
+
+![修复版真实 Windows 登录画面](generated/native-ui-shop-pointer-20261101/native-login-01.jpg)
+
+直接运行以上独立测试版；桌面旧快捷方式和公网更新频道仍指向旧版本。
+后端、现有安装与账号数据没有更新，本次不包含安装覆盖或公网发布。
