@@ -1,0 +1,19 @@
+{
+  "readOnly": true,
+  "noPolicyApply": true,
+  "rows": 1,
+  "changedFields": [
+    "updated_at_ms"
+  ],
+  "sameBusinessFields": {
+    "active": false,
+    "campaign_id": "numeron-windows-playtest-20261030",
+    "environment": "test",
+    "reason_code": "payment_source_verified",
+    "reversal_occurred_at_ms": 1793397275018,
+    "target_reversal_micro_usd": 0
+  },
+  "updatedAtBefore": 1793417253986,
+  "updatedAtAfter": 1793417264029,
+  "samePaymentAndIdentityProof": true
+}

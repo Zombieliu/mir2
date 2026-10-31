@@ -1,0 +1,18 @@
+{
+  "schema": "mir2.full-monthly.original-helper-v2-local-tests.v1",
+  "testsExecuted": 25,
+  "passed": 25,
+  "errors": 0,
+  "failures": 0,
+  "skipped": 0,
+  "actualFunctionFixtures": true,
+  "externalIoMocked": true,
+  "remoteActions": false,
+  "docker": false,
+  "sourceSha256": "97ee198a1357af2218a4c2e7cd6de9abcabd523a31706a3a6e3fa2aa9aa6807a",
+  "testSourceSha256": "cd71fe65eb37dd3f4a4a21baf2b67c139d42c3894e460a35e0897d54f8800d57",
+  "frozenV1Sha256": "e3bc42bafedbe2e22ce24d9de8ccad75a79805d2561acc01c588178477fd49c6",
+  "log": "local root-private test log, SHA256 retained",
+  "logSha256": "c482adbd2ed00a336291a3aff331df269db146e6efbf98d9b1f9760687da14f9",
+  "independentDeltaReview": "No blocking P1/P2; independent23 fixtures before 2 additional apply-path fixtures; root final25/25 passed."
+}

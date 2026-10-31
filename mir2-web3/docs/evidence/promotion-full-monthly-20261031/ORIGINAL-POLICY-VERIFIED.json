@@ -1,0 +1,113 @@
+{
+  "schema": "mir2.full-monthly.original-apply.v2",
+  "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+  "campaignId": "numeron-windows-playtest-20261030",
+  "status": "verified",
+  "policyAttempted": true,
+  "preservation": {
+    "allOriginalNonPolicyRowsPreserved": true,
+    "oldAuditAndRunsPreserved": true,
+    "qualificationTimeAndTermsPreserved": true,
+    "originalSettlementsPreserved": true,
+    "sourceAllocationPaymentAccountCharacterRowsPreserved": true,
+    "appendedAuditRows": 3,
+    "appendedCommissionRuns": 3,
+    "appendedInternalQualificationEvents": 2,
+    "clockProofs": {
+      "shared_conquests": {
+        "table": "shared_conquests",
+        "count": 1,
+        "businessSha256": "317a82b60d5a9cfb669a8b12425700ce783fa286127bbbe76fa6ae38b86bcef4",
+        "metadataOnly": true
+      },
+      "shared_guild_clock": {
+        "table": "shared_guild_clock",
+        "count": 1,
+        "businessSha256": "9fcb13424dabca924c9e31dd5a64987c0a5ff3d5dc67cb95d468328e7b43d584",
+        "metadataOnly": true
+      }
+    },
+    "finalPreviewSha256": "2c54f6af4da851b0725597679e0bdeb101ca5f9fc9eb47907355d9ccb434b39e",
+    "beforeRowsSha256": "53d57962fcb7cc8c5899b950dd430bb8d5a859d4c0ca645800cc2e1e7acc0885",
+    "afterRowsSha256": "b991cee635ec2a2000a9bc079f7c767a12b6efc752652be80a39255b597f546f",
+    "wholeDatabaseStaticClaim": false,
+    "gatewayNotRestarted": true
+  },
+  "worker": {
+    "sameSourceRestored": true,
+    "sourceSha": "13fc2e9f60203e65df152792d9ee63fb059065db",
+    "pid": 1287234
+  },
+  "failure": null,
+  "beforeApplyBackup": {
+    "sha256": "7819f593cd9afd3aada20524cb481786279aa97c2797ea350006967e8244507b",
+    "bytes": 774779,
+    "sameSnapshotRowsSha256": "53d57962fcb7cc8c5899b950dd430bb8d5a859d4c0ca645800cc2e1e7acc0885",
+    "readOnlyHotBackup": true,
+    "gatewayStayedRunning": true
+  },
+  "crossPreviewSourceHoldMetadataProof": {
+    "schema": "mir2.full-monthly.source-hold-observation-metadata.v1",
+    "table": "promotion_revenue_source_holds",
+    "metadataOnly": true,
+    "rowCount": 1,
+    "changedObservationTimestamps": 1,
+    "primaryKeysSha256": "704e1e252ef165f71c6a68e14672ff0e2eb307829667e0704fad60b6850dce42",
+    "allBusinessAndUnknownFieldsSha256": "6f4d830cae4f97758b4ed738e0ed8dbe8b57c70a0caff36460fe348aa5891af2",
+    "beforeFullRowHashesSha256": "4ca067db8be241403664e3ec6ca5b4f773c5e17b08fde9c6ef10bef80165d0cf",
+    "afterFullRowHashesSha256": "2cd8d96287031e3d98c4c35393118718c4f7ee2f71df3e1a59c7c3bfd42f70f7",
+    "permittedField": "updated_at_ms",
+    "monotonicNondecreasing": true,
+    "changedRowScope": "test/current_campaign/inactive/payment_source_verified/zero_target_reversal"
+  },
+  "reviewedPreviewSha256": "0ecd82bdf4c657f5eb844b1a3a58313e437a5f01bfb1d48b43c2df4b01b6bd0f",
+  "cloneReceiptSha256": "04545454a487c30abe60183593b28cc7457f66f33c19ffb24199c0c71338e592",
+  "publicationReceiptSha256": "88af5b226402788d661185ad289c02b7cd043cf7f42c9900728bee77506d5c5c",
+  "noPaymentOperations": true,
+  "docker": false,
+  "gatewayRestarted": false,
+  "automaticReplay": false,
+  "automaticRollback": false,
+  "wholeDatabaseStaticClaim": false,
+  "completedAtMs": 1793417491353,
+  "policy": {
+    "policyId": "dc67cd56e25e869342d09be779e73f67d077f660e761b83e635661be8e675783",
+    "status": "applied",
+    "rulesSha256": "f14689c96d15bfd3046d1cfa1c5e20b253783691aac10d4a0b705012d4ccb1d2",
+    "newRulesSha256": "2e972bff554047de7d02cef499535f92094a3bd09f00c0e971caea27378dc21f",
+    "newRecognition": "monthly_purchase_full",
+    "payoutEnabled": false,
+    "projection": {
+      "budgetVerified": true,
+      "commissionEnabled": true,
+      "insertedRuns": 3,
+      "leaderCount": 3,
+      "memberCount": 2,
+      "payoutExecutionEnabled": false,
+      "reservedMicroUsd": "0"
+    }
+  },
+  "rawPolicyResultCanonicalSha256": "ec8e3e49d43f62a8abc3aab80602e23aedad3d0c693883745716c88d56f6c8ff",
+  "leaderIdSha256": "563e8ea32f97c57647bde333f6f96832842c1c2dab82bece4f7063b763502c7c",
+  "actualTargetLeader": {
+    "before": {
+      "algorithmVersion": "numeron-segmented-v2",
+      "commissionMicroUsd": 164839,
+      "eligibleRevenueMicroUsd": 1648392,
+      "payableCents": 16,
+      "reserveMicroUsd": 0,
+      "totalCents": 16
+    },
+    "after": {
+      "algorithmVersion": "numeron-segmented-full-monthly-v3",
+      "commissionMicroUsd": 1000000,
+      "eligibleRevenueMicroUsd": 10000000,
+      "payableCents": 100,
+      "reserveMicroUsd": 0,
+      "totalCents": 100
+    },
+    "rateBps": 1000,
+    "qualificationTimeMs": 1793397275018
+  },
+  "operatorLibrarySha256": "97ee198a1357af2218a4c2e7cd6de9abcabd523a31706a3a6e3fa2aa9aa6807a"
+}

@@ -1,0 +1,79 @@
+{
+  "authenticated": false,
+  "csrfToken": null,
+  "gameClient": "windows",
+  "campaign": {
+    "campaignId": "numeron-windows-playtest-20261030",
+    "commissionEnabled": true,
+    "dataMode": "sandbox",
+    "disclosure": "Direct referrals only. Unpaid registration and activity do not create redeemable rewards.",
+    "endsAtMs": 1793824538449,
+    "environment": "test",
+    "fundingMode": "revenue_share",
+    "gameClient": "windows",
+    "payoutEnabled": false,
+    "payoutPolicy": null,
+    "recruitmentEnabled": true,
+    "rules": {
+      "activeUtcDays": 1,
+      "candidateTtlMs": 604800000,
+      "confirmationWindowMs": 86400000,
+      "maximumCoverageMs": 604800000,
+      "minimumLevel": 1,
+      "reserveBps": 0,
+      "revenueRecognition": "monthly_purchase_full",
+      "testWalletEnrollment": true,
+      "walletCooldownMs": 259200000
+    },
+    "sourceGaps": [
+      "production_acceptance_and_launch_approval_required"
+    ],
+    "startsAtMs": 1793219738449,
+    "status": "active",
+    "termsStatus": "approved",
+    "termsVersion": "numeron-windows-playtest-20261030-v1"
+  },
+  "campaignStatus": "active",
+  "characters": [],
+  "leader": null,
+  "dashboard": null,
+  "sourceGaps": [
+    "production_acceptance_and_launch_approval_required"
+  ],
+  "permissions": [],
+  "binding": {
+    "status": "pending",
+    "reason": "wallet_login_required"
+  },
+  "public": {
+    "campaignId": "numeron-windows-playtest-20261030",
+    "commissionEnabled": true,
+    "dataMode": "sandbox",
+    "disclosure": "Direct referrals only. Unpaid registration and activity do not create redeemable rewards.",
+    "endsAtMs": 1793824538449,
+    "environment": "test",
+    "fundingMode": "revenue_share",
+    "gameClient": "windows",
+    "payoutEnabled": false,
+    "payoutPolicy": null,
+    "recruitmentEnabled": true,
+    "rules": {
+      "activeUtcDays": 1,
+      "candidateTtlMs": 604800000,
+      "confirmationWindowMs": 86400000,
+      "maximumCoverageMs": 604800000,
+      "minimumLevel": 1,
+      "reserveBps": 0,
+      "revenueRecognition": "monthly_purchase_full",
+      "testWalletEnrollment": true,
+      "walletCooldownMs": 259200000
+    },
+    "sourceGaps": [
+      "production_acceptance_and_launch_approval_required"
+    ],
+    "startsAtMs": 1793219738449,
+    "status": "active",
+    "termsStatus": "approved",
+    "termsVersion": "numeron-windows-playtest-20261030-v1"
+  }
+}
