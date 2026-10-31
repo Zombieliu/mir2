@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { handle, OBJECT_PREFIX, POINTER_KEY, PUBLIC_BASE, MAX_ARTIFACT, MAX_METADATA, MAX_FIVE_CLASS_METADATA, FIVE_CLASS_OBJECT_PREFIX, FIVE_CLASS_POINTER_KEY, FIVE_CLASS_PUBLIC_BASE, MAX_POINTER, feedDirectory,
-  PACKED_OBJECT_PREFIX, PACKED_POINTER_KEY, PACKED_PUBLIC_BASE, MAX_PACKED_CATALOG, MAX_PACKED_OBJECT, MAX_PACKED_MANIFEST, MAX_PACKED_SMALL } from "../src/index.mjs";
+  PACKED_OBJECT_PREFIX, PACKED_POINTER_KEY, PACKED_PUBLIC_BASE, MAX_PACKED_CATALOG, MAX_PACKED_OBJECT, MAX_PACKED_MANIFEST, MAX_PACKED_SMALL,
+  UNIFIED_OBJECT_PREFIX, UNIFIED_POINTER_KEY, UNIFIED_PUBLIC_BASE } from "../src/index.mjs";
 
 const bytes = (text) => new TextEncoder().encode(text);
 const pointer = (sequence = 1) => ({
@@ -424,6 +425,67 @@ test("five-class space allowance still rejects Windows normalization and encoded
     const response = await handle(new Request(FIVE_CLASS_PUBLIC_BASE + path), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
     assert.equal(response.status, 404, path);
     assert.equal(f.bucket.calls.length, 0, path);
+  }
+});
+
+test("unified maintenance discovery uses its own atomic pointer and never another channel", async () => {
+  const f = setup();
+  const p = pointer(5);
+  f.bucket.put("channels/invited.json", JSON.stringify(pointer(1)));
+  f.bucket.put("five-class/channels/invited.json", JSON.stringify(pointer(2)));
+  f.bucket.put("packed/channels/invited.json", JSON.stringify(pointer(3)));
+  f.bucket.put("unified/channels/invited.json", JSON.stringify(p));
+  for (const [name, sha, body] of [["latest.json", p.feedSha256, "unified-feed"], ["latest.p7s", p.signatureSha256, "unified-signature"]]) {
+    f.bucket.put("unified/" + feedDirectory(p) + name, body, { customMetadata: { sha256: sha } });
+    const response = await handle(new Request(UNIFIED_PUBLIC_BASE + name), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.equal(response.headers.get("x-mir2-sequence"), "5");
+    assert.equal(await response.text(), body);
+  }
+  assert.equal(f.bucket.calls.filter(([op, key]) => op === "get" && key === UNIFIED_POINTER_KEY).length, 2);
+  assert.ok(f.bucket.calls.every(([, key]) => key.startsWith(UNIFIED_OBJECT_PREFIX)));
+  assert.equal(f.cache.matches.length, 0);
+  assert.equal(f.cache.puts.length, 0);
+});
+
+test("unified engine objects retain independent immutable cache Range and HEAD semantics", async () => {
+  const f = setup();
+  const path = "releases/updater-r13/Mir2Updater.exe";
+  f.bucket.put(path, "legacy-engine");
+  f.bucket.put("unified/" + path, "0123456789");
+  for (let pass = 0; pass < 2; pass++) {
+    const response = await handle(new Request(UNIFIED_PUBLIC_BASE + path), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("cache-control"), /31536000, immutable/);
+    assert.equal(response.headers.get("x-mir2-native-cache"), pass === 0 ? "MISS" : "HIT");
+    assert.equal(await response.text(), "0123456789");
+    await f.done();
+  }
+  const range = await handle(new Request(UNIFIED_PUBLIC_BASE + path, { headers: { Range: "bytes=2-5" } }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(range.status, 206);
+  assert.equal(range.headers.get("content-range"), "bytes 2-5/10");
+  assert.equal(await range.text(), "2345");
+  const head = await handle(new Request(UNIFIED_PUBLIC_BASE + path, { method: "HEAD" }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(head.status, 200);
+  assert.equal(await head.text(), "");
+  assert.deepEqual(f.cache.puts, [UNIFIED_PUBLIC_BASE + path]);
+});
+
+test("unified missing or invalid discovery fails closed and encoded scope changes are refused", async () => {
+  const f = setup();
+  f.bucket.put("channels/invited.json", JSON.stringify(pointer(1)));
+  let response = await handle(new Request(UNIFIED_PUBLIC_BASE + "latest.json"), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(response.status, 503);
+  f.bucket.put("unified/channels/invited.json", "invalid");
+  response = await handle(new Request(UNIFIED_PUBLIC_BASE + "latest.p7s"), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
+  assert.equal(response.status, 502);
+  assert.ok(!f.bucket.calls.some(([, key]) => key === POINTER_KEY));
+  for (const path of ["unif%69ed/latest.json", "unified%2flatest.json", "unified/%5clatest.json", "unified/five-class/latest.json", "unified/channels/invited.json", "unified/latest.json?scope=packed"]) {
+    const invalid = setup();
+    response = await invalid.fetch(path);
+    assert.equal(response.status, 404, path);
+    assert.equal(invalid.bucket.calls.length, 0, path);
   }
 });
 

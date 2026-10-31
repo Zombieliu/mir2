@@ -5,6 +5,9 @@ export const POINTER_KEY = OBJECT_PREFIX + "channels/invited.json";
 export const FIVE_CLASS_PUBLIC_BASE = PUBLIC_BASE + "five-class/";
 export const FIVE_CLASS_OBJECT_PREFIX = OBJECT_PREFIX + "five-class/";
 export const FIVE_CLASS_POINTER_KEY = FIVE_CLASS_OBJECT_PREFIX + "channels/invited.json";
+export const UNIFIED_PUBLIC_BASE = PUBLIC_BASE + "unified/";
+export const UNIFIED_OBJECT_PREFIX = OBJECT_PREFIX + "unified/";
+export const UNIFIED_POINTER_KEY = UNIFIED_OBJECT_PREFIX + "channels/invited.json";
 export const PACKED_PUBLIC_BASE = PUBLIC_BASE + "packed/";
 export const PACKED_OBJECT_PREFIX = OBJECT_PREFIX + "packed/";
 export const PACKED_POINTER_KEY = PACKED_OBJECT_PREFIX + "channels/invited.json";
@@ -55,16 +58,19 @@ export function channelPath(url) {
   let raw = url.pathname.slice("/client-updates/".length);
   const packed = raw.startsWith("packed/");
   if (packed) raw = raw.slice("packed/".length);
-  const fiveClass = !packed && raw.startsWith("five-class/");
+  const unified = !packed && raw.startsWith("unified/");
+  if (unified) raw = raw.slice("unified/".length);
+  const fiveClass = !packed && !unified && raw.startsWith("five-class/");
   if (fiveClass) raw = raw.slice("five-class/".length);
   // Separators must be literal. Decode exactly once; any residual '%' is invalid.
   if (/%(?:2f|5c)/i.test(raw)) return null;
   let path;
   try { path = decodeURIComponent(raw); } catch { return null; }
-  const safeCharacters = fiveClass ? /^[A-Za-z0-9._ /-]+$/ : /^[A-Za-z0-9._/-]+$/;
+  const scoped = fiveClass || unified;
+  const safeCharacters = scoped ? /^[A-Za-z0-9._ /-]+$/ : /^[A-Za-z0-9._/-]+$/;
   if (!path || !safeCharacters.test(path) ||
       path.split("/").some((s) => !s || s === "." || s === ".." || s.startsWith(".") ||
-        (fiveClass && (s.endsWith(" ") || s.endsWith("."))))) return null;
+        (scoped && (s.endsWith(" ") || s.endsWith("."))))) return null;
   if (packed) {
     const objectMaximum = packedObjectLimit(path);
     if (objectMaximum === null) return null;
@@ -76,10 +82,10 @@ export function channelPath(url) {
   if (!ALIASES.has(path) && !/^(releases|feeds|installers)\/[^/]/.test(path)) return null;
   return {
     path,
-    publicBase: fiveClass ? FIVE_CLASS_PUBLIC_BASE : PUBLIC_BASE,
-    objectPrefix: fiveClass ? FIVE_CLASS_OBJECT_PREFIX : OBJECT_PREFIX,
-    pointerKey: fiveClass ? FIVE_CLASS_POINTER_KEY : POINTER_KEY,
-    metadataMaximum: fiveClass ? MAX_FIVE_CLASS_METADATA : MAX_METADATA,
+    publicBase: unified ? UNIFIED_PUBLIC_BASE : fiveClass ? FIVE_CLASS_PUBLIC_BASE : PUBLIC_BASE,
+    objectPrefix: unified ? UNIFIED_OBJECT_PREFIX : fiveClass ? FIVE_CLASS_OBJECT_PREFIX : OBJECT_PREFIX,
+    pointerKey: unified ? UNIFIED_POINTER_KEY : fiveClass ? FIVE_CLASS_POINTER_KEY : POINTER_KEY,
+    metadataMaximum: scoped ? MAX_FIVE_CLASS_METADATA : MAX_METADATA,
   };
 }
 

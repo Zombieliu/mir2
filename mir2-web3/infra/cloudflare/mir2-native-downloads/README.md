@@ -46,6 +46,15 @@ The linked proof includes real native Windows `ureq2.12.1` TLS, production
 discovery, pinned Windows CMS, engine SHA and range checks. Whole-game
 installer execution and affected-laptop timing remain separate acceptance.
 
+## Unified launcher maintenance
+
+`/client-updates/unified/` has its own `mir2/native/windows-invited/unified/`
+namespace and atomic signed-feed pointer. It serves the engine-only maintenance
+feed already selected by the authenticated unified-11 baseline in the Windows
+launcher. Its metadata bound matches the five-class channel; aliases remain
+`no-store`, immutable engine payloads retain Range/ETag/cache behavior, and a
+missing or invalid pointer never falls back to a different channel.
+
 ## Packed generations
 
 The packed channel uses `/client-updates/packed/` and the independent R2
