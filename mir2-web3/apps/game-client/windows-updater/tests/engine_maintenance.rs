@@ -42,6 +42,24 @@ impl Status for Quiet {
         false
     }
 }
+struct Deny<'a> {
+    source: &'a Files,
+    prompts: Mutex<Vec<(String, u64)>>,
+}
+impl Status for Deny<'_> {
+    fn set(&self, _: &str, _: u32) {}
+    fn cancelled(&self) -> bool {
+        false
+    }
+    fn confirm_update(&self, version: &str, bytes: u64) -> Result<()> {
+        assert!(
+            self.source.downloads.lock().unwrap().is_empty(),
+            "engine payload preceded consent"
+        );
+        self.prompts.lock().unwrap().push((version.into(), bytes));
+        anyhow::bail!("update cancelled by player")
+    }
+}
 struct Cancel(Arc<AtomicBool>);
 impl Status for Cancel {
     fn set(&self, _: &str, _: u32) {}
@@ -256,6 +274,39 @@ fn signed_engine_only_patch_keeps_game_and_selector_and_os_failure_restores_only
     let source = Files::new(&f.engine_maintenance_root)?;
     let signed_feed = source.actual_feed()?;
     let (old_engine, _) = update::active_engine(&root)?;
+    let optional =
+        maintenance::probe(&root, &source, &Quiet)?.context("authenticated engine notification")?;
+    assert!(optional.update_available);
+    assert!(source.downloads.lock().unwrap().is_empty());
+    assert!(!root.join("state/engine-maintenance-highest.txt").exists());
+    assert_eq!(engine_pointer(&root)?, old_pointer);
+    assert_eq!(
+        fs::read(root.join("state/active-generation.json"))?,
+        selector
+    );
+    assert_eq!(witness(&root)?, original);
+    let bad_log_before = fs::read(root.join(".update/last-run.jsonl")).ok();
+    assert!(maintenance::probe(&root, &bad, &Quiet).is_err());
+    assert_eq!(
+        fs::read(root.join(".update/last-run.jsonl")).ok(),
+        bad_log_before
+    );
+    let denied = Deny {
+        source: &source,
+        prompts: Mutex::new(vec![]),
+    };
+    let rejected = maintenance::check(&root, &source, &denied);
+    assert!(rejected.is_err_and(|error| error.to_string().contains("cancelled")));
+    assert_eq!(denied.prompts.lock().unwrap().len(), 1);
+    assert!(denied.prompts.lock().unwrap()[0].1 > 0);
+    assert!(source.downloads.lock().unwrap().is_empty());
+    assert_eq!(engine_pointer(&root)?, old_pointer);
+    assert_eq!(witness(&root)?, original);
+    assert_eq!(
+        fs::read(root.join("state/active-generation.json"))?,
+        selector
+    );
+    generation::verify_current_selection(&root)?;
     let handoff = maintenance::check(&root, &source, &Quiet)?.context("signed engine patch")?;
     assert_eq!(handoff.sequence, signed_feed.sequence);
     assert_ne!(engine_pointer(&root)?, old_pointer);
@@ -271,6 +322,14 @@ fn signed_engine_only_patch_keeps_game_and_selector_and_os_failure_restores_only
         fs::read(root.join("state/active-generation.json"))?,
         selector
     );
+    let same = Files::new(&f.engine_maintenance_root)?;
+    let no_consent = Deny {
+        source: &same,
+        prompts: Mutex::new(vec![]),
+    };
+    assert!(maintenance::check(&root, &same, &no_consent)?.is_none());
+    assert!(no_consent.prompts.lock().unwrap().is_empty());
+    assert!(same.downloads.lock().unwrap().is_empty());
     let unchanged = generation::check_update(&root, &pack, &Quiet)?
         .context("current pack under compatible newer engine")?;
     assert!(!unchanged.activated && unchanged.downloaded_packs == 0);

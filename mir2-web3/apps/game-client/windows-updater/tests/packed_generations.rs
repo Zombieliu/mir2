@@ -32,6 +32,38 @@ impl Status for Quiet {
         false
     }
 }
+struct Consent<'a> {
+    source: &'a Files,
+    before: usize,
+    reject: bool,
+    prompts: Mutex<Vec<(String, u64)>>,
+}
+impl<'a> Consent<'a> {
+    fn new(source: &'a Files, reject: bool) -> Self {
+        Self {
+            source,
+            before: source.downloads.lock().unwrap().len(),
+            reject,
+            prompts: Mutex::new(vec![]),
+        }
+    }
+}
+impl Status for Consent<'_> {
+    fn set(&self, _: &str, _: u32) {}
+    fn cancelled(&self) -> bool {
+        false
+    }
+    fn confirm_update(&self, version: &str, bytes: u64) -> Result<()> {
+        assert_eq!(
+            self.source.downloads.lock().unwrap().len(),
+            self.before,
+            "payload preceded consent"
+        );
+        self.prompts.lock().unwrap().push((version.into(), bytes));
+        ensure!(!self.reject, "update cancelled by player");
+        Ok(())
+    }
+}
 struct Files {
     root: PathBuf,
     downloads: Mutex<Vec<String>>,
@@ -179,7 +211,43 @@ fn signed_generation_write_failure_retry_pending_and_interrupted_launch_rollback
     let root = installation(&fixture, "selector-write-failure")?;
     let original_version = fs::read(root.join("game/VERSION.json"))?;
     let source = Files::new(&fixture.packed_root)?;
+    let old_engine_pointer = fs::read(root.join("updater/active.txt"))?;
+    assert!(!root.join("state").exists());
+    assert!(!root.join(".update").exists());
+    let notification = generation::probe_update(&root, &source, &Quiet)?
+        .context("authenticated optional-update notification")?;
+    assert!(notification.update_available);
+    assert!(source.downloads.lock().unwrap().is_empty());
+    assert_eq!(
+        source.gets.lock().unwrap().len(),
+        4,
+        "discovery and signed manifest only"
+    );
+    assert!(
+        !root.join("state").exists(),
+        "probe wrote a selector/receipt"
+    );
+    assert!(!root.join(".update").exists(), "probe wrote scratch/logs");
+    assert_eq!(
+        fs::read(root.join("updater/active.txt"))?,
+        old_engine_pointer
+    );
+    assert_eq!(
+        update::verify_installed(&root)?,
+        update::verify_launch(&root)?
+    );
+    witnesses(&root, &original_version)?;
     let _lease = GameLease::acquire(&root)?;
+
+    let denied = Consent::new(&source, true);
+    let rejected = generation::check_update(&root, &source, &denied).unwrap_err();
+    assert!(rejected.to_string().contains("cancelled"));
+    assert_eq!(denied.prompts.lock().unwrap().len(), 1);
+    assert!(denied.prompts.lock().unwrap()[0].1 > 0);
+    assert!(source.downloads.lock().unwrap().is_empty());
+    assert!(generation::active_record(&root)?.is_none());
+    update::verify_launch(&root)?;
+    witnesses(&root, &original_version)?;
 
     // A real failed atomic-write precondition after authenticated pack download
     // leaves the complete old selection. This is not a cryptographic bypass.
@@ -195,7 +263,15 @@ fn signed_generation_write_failure_retry_pending_and_interrupted_launch_rollback
     );
     fs::remove_dir(root.join("state/active-generation.tmp"))?;
 
-    let outcome = generation::check_update(&root, &source, &Quiet)?.context("packed outcome")?;
+    let cached_consent = Consent::new(&source, false);
+    let outcome =
+        generation::check_update(&root, &source, &cached_consent)?.context("packed outcome")?;
+    assert_eq!(cached_consent.prompts.lock().unwrap().len(), 1);
+    assert_eq!(
+        cached_consent.prompts.lock().unwrap()[0].1,
+        0,
+        "cached activation still needs consent but no download"
+    );
     assert!(outcome.activated && outcome.downloaded_packs == 0);
     assert_eq!(
         source.downloads.lock().unwrap().len(),
@@ -311,8 +387,13 @@ fn signed_generation_write_failure_retry_pending_and_interrupted_launch_rollback
         );
         signed_replay_variants += 1;
     }
-    let unchanged = generation::check_update(&healthy_root, &source, &Quiet)?
+    let no_consent = Consent::new(&source, true);
+    let unchanged = generation::check_update(&healthy_root, &source, &no_consent)?
         .context("same signed active target")?;
+    assert!(
+        no_consent.prompts.lock().unwrap().is_empty(),
+        "unchanged target must not request an update click"
+    );
     assert!(!unchanged.activated && unchanged.downloaded_packs == 0);
     assert_eq!(fs::read(highest_path)?, highest_bytes);
     assert_eq!(

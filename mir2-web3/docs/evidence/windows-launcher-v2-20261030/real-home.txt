@@ -1,0 +1,13 @@
+Window: "Numeron - Legend of Rebirth · Game launcher", App: local-launcher-83A6CD7ED9C9DB478DE15FA3DFBD35AC86BAAD40396EACD2095C36C5E2D8E934.exe.
+	0 窗口 Numeron - Legend of Rebirth · Game launcher Secondary Actions: Raise
+		1 文本 Ready to play Secondary Actions: Raise ID: 103
+		2 文本 Optional update r2026102912 is available. You can start the installed version now. Secondary Actions: Raise ID: 106
+		3 文本 Secondary Actions: Raise ID: 107
+		4 按钮 Exit Secondary Actions: Raise ID: 101
+		5 按钮 Start game Secondary Actions: Raise ID: 105
+		9 按钮 View update Secondary Actions: Raise ID: 110
+		6 文本 INSTALLED VERSION Secondary Actions: Raise ID: 112
+		7 文本 WN-CANDIDATE-20261029-unified-11 Secondary Actions: Raise ID: 111
+		8 按钮 Minimize Secondary Actions: Raise ID: 113
+
+The focused UI element is 5 按钮 Start game Secondary Actions: Raise ID: 105.

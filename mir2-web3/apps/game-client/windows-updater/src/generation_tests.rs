@@ -1,6 +1,147 @@
 use super::*;
 use std::{collections::BTreeMap, sync::atomic::AtomicUsize};
 
+struct MetadataProbeSource {
+    pair: Option<(Vec<u8>, Vec<u8>)>,
+    calls: AtomicUsize,
+}
+impl Source for MetadataProbeSource {
+    fn get(&self, _: &str, _: u64, _: &mut dyn FnMut(u64) -> Result<()>) -> Result<Vec<u8>> {
+        anyhow::bail!("probe must authenticate discovery before fetching any object")
+    }
+    fn download(
+        &self,
+        _: &str,
+        _: &FileEntry,
+        _: &Path,
+        _: &mut dyn FnMut(u64) -> Result<()>,
+    ) -> Result<()> {
+        panic!("an optional probe cannot download a payload")
+    }
+}
+impl PackSource for MetadataProbeSource {
+    fn packed_pair(
+        &self,
+        progress: &mut dyn FnMut(u64) -> Result<()>,
+    ) -> Result<Option<(Vec<u8>, Vec<u8>)>> {
+        self.calls.fetch_add(1, Ordering::SeqCst);
+        if let Some((bytes, sig)) = &self.pair {
+            progress((bytes.len() + sig.len()) as u64)?;
+        }
+        Ok(self.pair.clone())
+    }
+}
+
+#[test]
+fn optional_probe_has_no_writes_or_payload_for_missing_and_unauthenticated_channels() {
+    let root = tempfile::tempdir().unwrap();
+    let witness = root.path().join("personal-witness.txt");
+    fs::write(&witness, b"untouched").unwrap();
+    let source = MetadataProbeSource {
+        pair: None,
+        calls: AtomicUsize::new(0),
+    };
+    assert!(probe_update(root.path(), &source, &TestStatus)
+        .unwrap()
+        .is_none());
+    assert_eq!(source.calls.load(Ordering::SeqCst), 1);
+    let source = MetadataProbeSource {
+        pair: Some((
+            serde_json::to_vec(&feed(&manifest())).unwrap(),
+            b"not-CMS".to_vec(),
+        )),
+        calls: AtomicUsize::new(0),
+    };
+    assert!(probe_update(root.path(), &source, &TestStatus).is_err());
+    assert_eq!(source.calls.load(Ordering::SeqCst), 1);
+    assert_eq!(fs::read_dir(root.path()).unwrap().count(), 1);
+    assert_eq!(fs::read(&witness).unwrap(), b"untouched");
+}
+
+#[cfg(windows)]
+#[test]
+fn waiting_optional_probe_does_not_own_install_or_game_locks() {
+    use std::{io::Write, net::TcpListener};
+    struct Waiting {
+        url: String,
+    }
+    impl Source for Waiting {
+        fn get(&self, _: &str, _: u64, _: &mut dyn FnMut(u64) -> Result<()>) -> Result<Vec<u8>> {
+            panic!("no object requested")
+        }
+        fn download(
+            &self,
+            _: &str,
+            _: &FileEntry,
+            _: &Path,
+            _: &mut dyn FnMut(u64) -> Result<()>,
+        ) -> Result<()> {
+            panic!("no payload requested")
+        }
+    }
+    impl PackSource for Waiting {
+        fn packed_pair(
+            &self,
+            _: &mut dyn FnMut(u64) -> Result<()>,
+        ) -> Result<Option<(Vec<u8>, Vec<u8>)>> {
+            let mut response = ureq::get(&self.url)
+                .timeout(Duration::from_secs(5))
+                .call()?
+                .into_reader();
+            let mut body = Vec::new();
+            response.read_to_end(&mut body)?;
+            ensure!(body == b"x", "bounded absent-channel fixture body");
+            Ok(None)
+        }
+    }
+    let root = tempfile::tempdir().unwrap();
+    let (entered, entered_rx) = mpsc::sync_channel(1);
+    let (release_tx, release) = mpsc::channel();
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    listener.set_nonblocking(true).unwrap();
+    let source = Waiting {
+        url: format!("http://{}/latest.json", listener.local_addr().unwrap()),
+    };
+    std::thread::scope(|scope| {
+        let server = scope.spawn(move || {
+            let deadline = Instant::now() + Duration::from_secs(5);
+            let (mut socket, _) = loop {
+                match listener.accept() {
+                    Ok(socket) => break socket,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        assert!(Instant::now() < deadline, "probe never requested metadata");
+                        std::thread::sleep(Duration::from_millis(5));
+                    }
+                    Err(error) => panic!("loopback accept: {error}"),
+                }
+            };
+            socket
+                .set_read_timeout(Some(Duration::from_secs(5)))
+                .unwrap();
+            let mut request = [0u8; 2048];
+            assert!(socket.read(&mut request).unwrap() > 0);
+            socket
+                .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 1\r\nConnection: close\r\n\r\n")
+                .unwrap();
+            socket.flush().unwrap();
+            entered.send(()).unwrap();
+            release.recv_timeout(Duration::from_secs(5)).unwrap();
+            socket.write_all(b"x").unwrap();
+        });
+        let worker = scope.spawn(|| probe_update(root.path(), &source, &TestStatus));
+        entered_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        let lock = crate::platform::InstallLock::acquire(root.path());
+        let game = crate::generation_runtime::GameLease::acquire(root.path());
+        // Unblock before assertions so an unexpected lock failure cannot strand
+        // the worker or turn this into a timeout-only regression.
+        release_tx.send(()).unwrap();
+        assert!(lock.is_ok(), "background discovery held the install lock");
+        assert!(game.is_ok(), "background discovery held the game lease");
+        assert!(worker.join().unwrap().unwrap().is_none());
+        server.join().unwrap();
+    });
+}
+
 fn entry(path: &str, bytes: &[u8]) -> FileEntry {
     FileEntry {
         path: path.into(),
@@ -435,4 +576,140 @@ fn failed_parallel_pack_download_joins_all_writers_and_keeps_active_and_personal
         fs::read(root.path().join("game/logs/personal.log")).unwrap(),
         b"witness"
     );
+}
+
+#[test]
+fn generation_plan_requires_consent_for_missing_objects_and_cached_new_activation() {
+    struct Consent {
+        reject: bool,
+        prompts: std::cell::RefCell<Vec<(String, u64)>>,
+    }
+    impl Status for Consent {
+        fn set(&self, _: &str, _: u32) {}
+        fn cancelled(&self) -> bool {
+            false
+        }
+        fn confirm_update(&self, version: &str, bytes: u64) -> Result<()> {
+            self.prompts.borrow_mut().push((version.into(), bytes));
+            ensure!(!self.reject, "update cancelled by player");
+            Ok(())
+        }
+    }
+    let root = tempfile::tempdir().unwrap();
+    let generation = root.path().join("generations/target");
+    let m = manifest();
+    let consent = Consent {
+        reject: true,
+        prompts: Default::default(),
+    };
+    // These policy inputs stand for the already authenticated manifest; real
+    // CMS integration checks that unauthenticated input cannot reach this gate.
+    assert!(confirm_generation_update(root.path(), &generation, &m, true, &consent).is_err());
+    let expected = m.exe.size + m.signed_config.size + m.catalog.size + m.packs[0].size;
+    assert_eq!(*consent.prompts.borrow(), [("r100".into(), expected)]);
+    assert!(!generation.exists() && !root.path().join(SELECTOR).exists());
+
+    for (entry, bytes) in [
+        (&m.exe, &b"exe"[..]),
+        (&m.signed_config, &b"config"[..]),
+        (&m.catalog, &b"{}"[..]),
+    ] {
+        safe::write_new(&generation.join(&entry.path), bytes).unwrap();
+    }
+    safe::write_new(&root.path().join(&m.packs[0].path), b"pack").unwrap();
+    consent.prompts.borrow_mut().clear();
+    confirm_generation_update(root.path(), &generation, &m, true, &consent).unwrap();
+    assert!(
+        consent.prompts.borrow().is_empty(),
+        "unchanged installed generation needs no update click"
+    );
+    assert!(confirm_generation_update(root.path(), &generation, &m, false, &consent).is_err());
+    assert_eq!(*consent.prompts.borrow(), [("r100".into(), 0)]);
+    assert!(!root.path().join(SELECTOR).exists());
+    assert_eq!(
+        fs::read(root.path().join(&m.packs[0].path)).unwrap(),
+        b"pack"
+    );
+}
+
+#[test]
+fn parallel_pack_stage_reports_live_bytes_before_first_pack_finishes_and_excludes_cache() {
+    use std::sync::Arc;
+    struct Streaming {
+        bytes: Vec<u8>,
+        observed: Arc<AtomicBool>,
+    }
+    impl Source for Streaming {
+        fn get(&self, _: &str, _: u64, _: &mut dyn FnMut(u64) -> Result<()>) -> Result<Vec<u8>> {
+            anyhow::bail!("no metadata")
+        }
+        fn download(
+            &self,
+            _: &str,
+            _: &FileEntry,
+            target: &Path,
+            cb: &mut dyn FnMut(u64) -> Result<()>,
+        ) -> Result<()> {
+            cb((self.bytes.len() / 2) as u64)?;
+            let deadline = Instant::now() + Duration::from_secs(2);
+            while !self.observed.load(Ordering::SeqCst) {
+                ensure!(
+                    Instant::now() < deadline,
+                    "caller never observed the in-flight pack"
+                );
+                std::thread::sleep(Duration::from_millis(5));
+            }
+            cb(self.bytes.len() as u64)?;
+            safe::write_new(target, &self.bytes)
+        }
+    }
+    impl PackSource for Streaming {
+        fn packed_pair(
+            &self,
+            _: &mut dyn FnMut(u64) -> Result<()>,
+        ) -> Result<Option<(Vec<u8>, Vec<u8>)>> {
+            anyhow::bail!("no discovery")
+        }
+    }
+    struct Observe {
+        observed: Arc<AtomicBool>,
+        rows: std::cell::RefCell<Vec<(u64, u64)>>,
+    }
+    impl Status for Observe {
+        fn set(&self, _: &str, _: u32) {}
+        fn cancelled(&self) -> bool {
+            false
+        }
+        fn transfer(&self, received: u64, total: u64) {
+            self.rows.borrow_mut().push((received, total));
+            if received > 0 && received < total {
+                self.observed.store(true, Ordering::SeqCst);
+            }
+        }
+    }
+    let root = tempfile::tempdir().unwrap();
+    let mut m = manifest();
+    let bytes = b"one streamed pack with intermediate progress".to_vec();
+    m.packs.push(entry("objects/packs/stream.m2p", &bytes));
+    safe::write_new(&root.path().join(&m.packs[0].path), b"pack").unwrap();
+    let observed = Arc::new(AtomicBool::new(false));
+    let source = Streaming {
+        bytes: bytes.clone(),
+        observed: observed.clone(),
+    };
+    let status = Observe {
+        observed,
+        rows: Default::default(),
+    };
+    let wire = AtomicU64::new(123);
+    assert_eq!(
+        download_packs(&source, &m, root.path(), &status, &wire).unwrap(),
+        1
+    );
+    assert_eq!(status.rows.borrow()[0], (0, bytes.len() as u64));
+    assert_eq!(
+        status.rows.borrow().last(),
+        Some(&(bytes.len() as u64, bytes.len() as u64))
+    );
+    assert_eq!(wire.load(Ordering::SeqCst), 123 + bytes.len() as u64);
 }

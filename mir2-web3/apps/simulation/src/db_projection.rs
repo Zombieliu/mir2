@@ -91,6 +91,34 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0016_shared_conquest_authority",
         include_str!("../../../infra/postgres/migrations/0016_shared_conquest_authority.sql"),
     ),
+    (
+        "0017_promotion_program",
+        include_str!("../../../infra/postgres/migrations/0017_promotion_program.sql"),
+    ),
+    (
+        "0018_promotion_payment_provenance",
+        include_str!("../../../infra/postgres/migrations/0018_promotion_payment_provenance.sql"),
+    ),
+    (
+        "0019_promotion_game_sources",
+        include_str!("../../../infra/postgres/migrations/0019_promotion_game_sources.sql"),
+    ),
+    (
+        "0020_promotion_payout_execution",
+        include_str!("../../../infra/postgres/migrations/0020_promotion_payout_execution.sql"),
+    ),
+    (
+        "0021_promotion_live_readiness",
+        include_str!("../../../infra/postgres/migrations/0021_promotion_live_readiness.sql"),
+    ),
+    (
+        "0022_promotion_production_approval",
+        include_str!("../../../infra/postgres/migrations/0022_promotion_production_approval.sql"),
+    ),
+    (
+        "0023_promotion_revenue_share",
+        include_str!("../../../infra/postgres/migrations/0023_promotion_revenue_share.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.

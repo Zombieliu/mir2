@@ -20,6 +20,14 @@ compiler and runtime publisher signatures. The pinned runtime used here is
 14.51.36247.0, SHA256
 `843068991DAAA1F73AD9F6239BCE4D0F6A07A51F18C37EA2A867E9BECA71295C`.
 
+The setup uses the game's existing multi-resolution Numeron icon from
+`platform-windows/resources/numeron.ico`. When copying the recipe outside the
+source tree, also copy that exact file to the staging directory and compile
+with `/DMir2IconFile=numeron.ico` (or supply its absolute path). A missing icon
+stops compilation. The desktop/start-menu shortcuts use the embedded launcher
+icon, and the uninstall entry uses its selected launcher/game EXE icon. No loose
+icon is added to the signed payload.
+
 After `verify-windows-candidate.ps1` passes on the untouched Candidate:
 
 Build the separate updater from clean committed source using
@@ -31,7 +39,7 @@ the installer's game inputs and the authenticated update seed.
 
 ```text
 python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-commit>
-ISCC.exe /Qp Mir2-Invite.iss
+ISCC.exe /Qp /DMir2IconFile=numeron.ico Mir2-Invite.iss
 ```
 
 The preparation tool requires `WN-CANDIDATE-20261001-invited-08`, exact clean

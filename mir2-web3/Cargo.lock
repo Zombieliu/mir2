@@ -4731,6 +4731,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir2-client-core"
+version = "0.1.0"
+
+[[package]]
+name = "mir2-client-wire"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "mir2-game-data"
 version = "0.1.0"
 dependencies = [
@@ -4786,18 +4798,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "mir2-client-core"
-version = "0.1.0"
-
-[[package]]
-name = "mir2-client-wire"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
 ]
 
 [[package]]

@@ -5,6 +5,14 @@ import { fileURLToPath } from "node:url";
 import { rewriteStandaloneFullPackTrace } from "./lib/standalone-full-pack-tracing";
 
 const isDevelopment = process.env.NODE_ENV === "development";
+// Only the explicitly configured promotion preview host may load dev assets
+// through its HTTPS tunnel. Production and unrelated local services stay unchanged.
+const promotionPreviewHosts: string[] = [];
+if (isDevelopment && process.env.MIR2_PROMOTION_PUBLIC_ORIGIN) {
+  const preview = new URL(process.env.MIR2_PROMOTION_PUBLIC_ORIGIN);
+  if (preview.protocol === "https:" && preview.origin === process.env.MIR2_PROMOTION_PUBLIC_ORIGIN &&
+      !preview.username && !preview.password) promotionPreviewHosts.push(preview.hostname);
+}
 const isStandaloneProduction = process.env.MIR2_NEXT_STANDALONE === "1" && !isDevelopment;
 const isVercelProduction =
   process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
@@ -121,7 +129,7 @@ const nextConfig: NextConfig = {
   ...(buildTsconfigPath === undefined ? {} : { typescript: { tsconfigPath: buildTsconfigPath } }),
   reactStrictMode: true,
   devIndicators: false,
-  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  allowedDevOrigins: ["127.0.0.1", "localhost", ...promotionPreviewHosts],
   // `env` is intentionally build-time and public. A Git revision is not a
   // secret, and capturing it here keeps /version trustworthy even when a host
   // does not expose its system variables to server functions at runtime.

@@ -1,0 +1,18 @@
+test_dirty_untracked_and_ignored_compiler_sources (__main__.PackedPreparationTests.test_dirty_untracked_and_ignored_compiler_sources) ... ok
+test_fresh_outputs_and_copy_no_overwrite (__main__.PackedPreparationTests.test_fresh_outputs_and_copy_no_overwrite) ... ok
+test_hardlinked_control_rejected (__main__.PackedPreparationTests.test_hardlinked_control_rejected) ... ok
+test_invalid_config_and_mutated_original_after_snapshot (__main__.PackedPreparationTests.test_invalid_config_and_mutated_original_after_snapshot) ... ok
+test_launcher_resource_compiler_inputs_are_committed_and_hashed (__main__.PackedPreparationTests.test_launcher_resource_compiler_inputs_are_committed_and_hashed) ... ok
+test_limits_unknown_fields_and_byteproof_never_claims_cms (__main__.PackedPreparationTests.test_limits_unknown_fields_and_byteproof_never_claims_cms) ... ok
+test_missing_resource_and_extra_resource_cannot_pass (__main__.PackedPreparationTests.test_missing_resource_and_extra_resource_cannot_pass) ... ok
+test_pack_and_catalog_mutations_rejected (__main__.PackedPreparationTests.test_pack_and_catalog_mutations_rejected) ... ok
+test_pack_self_consistent_digest_still_checks_content (__main__.PackedPreparationTests.test_pack_self_consistent_digest_still_checks_content) ... ok
+test_repeatable_complete_inventory_and_separate_provenance (__main__.PackedPreparationTests.test_repeatable_complete_inventory_and_separate_provenance) ... ok
+test_self_consistent_bad_index_rejected (__main__.PackedPreparationTests.test_self_consistent_bad_index_rejected) ... ok
+test_wrong_report_pin_or_inexact_coverage_rejected (__main__.PackedPreparationTests.test_wrong_report_pin_or_inexact_coverage_rejected) ... ok
+test_wrong_revision_and_non_native_exe (__main__.PackedPreparationTests.test_wrong_revision_and_non_native_exe) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 11.989s
+
+OK

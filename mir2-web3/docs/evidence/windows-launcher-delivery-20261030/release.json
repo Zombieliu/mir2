@@ -1,0 +1,67 @@
+{
+  "schema": "mir2.windows.full-installer-release.v1",
+  "product": "Numeron - Legend of Rebirth",
+  "channel": "playtest",
+  "installerVersion": "2026.10.30.12",
+  "createdAtUtc": "2026-10-30T10:51:47.352950+00:00",
+  "sourceRevision": "677e2ab56704660c4e93c14a1d29945f82b55f3e",
+  "installer": {
+    "name": "Mir2Setup.exe",
+    "bytes": 1026815762,
+    "sha256": "3B926D5EB5DD8EE1FC46B6D39FBA3EDA3EB538BA257405733ABE1DEFAE840172",
+    "url": "https://165.154.65.136.sslip.io/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/Mir2Setup.exe",
+    "publicAuthenticode": "NotSigned"
+  },
+  "game": {
+    "candidate": "WN-CANDIDATE-20261029-unified-11",
+    "sourceRevision": "1875c6c20e1285ffefc45ef6c21eab33e26fc536",
+    "exeSha256": "85879BFEB1B44D4C759E6A338338BB58A383B7701F886D1090A96B6267F00C6F",
+    "manifestSha256": "820BE88B998E414ACB23F713EBBAB0A5ABDA87B54FC4BF0870595C09DC5D812B",
+    "includesFullGameResources": true,
+    "detachedCmsVerified": true
+  },
+  "launcher": {
+    "engineSequence": 2026103001,
+    "engineSha256": "604B046F90E6BCEA2EF2576A7BFA8BCECE57F0E383A2BC415EDC3A088A477CDE",
+    "launcherSha256": "40076D70079C36F3B8388B906B704110289270976D3E56FA4B8DBA91507125A3",
+    "languages": 10,
+    "desktopIconSizes": [
+      16,
+      24,
+      32,
+      48,
+      64,
+      256
+    ],
+    "automaticVersionCheck": true,
+    "downloadRequiresExplicitUpdateClick": true,
+    "verifiedInstalledGameCanLaunchWithoutUpdate": true
+  },
+  "verification": {
+    "nativeTestsPassed": 157,
+    "nativeTestsIgnored": 12,
+    "bootstrapInstallerTestsPassed": 80,
+    "packedPreparationTestsPassed": 13,
+    "unifiedCompatibilityTestsPassed": 3,
+    "fullGameManifestVerified": true,
+    "bundleClosureVerified": true,
+    "realInstallerUpgradePassed": true,
+    "previousDirectoryAndLanguagePreserved": true,
+    "personalFilesPreserved": true,
+    "busyInstallRejected": true,
+    "installedNativeVerifyOnlyPassed": true,
+    "humanFrontendAccepted": false
+  },
+  "integrity": {
+    "descriptorSignature": "release.p7s",
+    "format": "CMS detached SHA-256",
+    "publicKeyRsaDerSha256": "6C70C777B27D50949370D494B4B25798200FBDD5C171BAEEAA94D7E289900F3E",
+    "publicPublisherAuthenticodeAvailable": false
+  },
+  "instructions": "https://165.154.65.136.sslip.io/client-updates/installers/3b926d5eb5dd8ee1fc46b6d39fba3eda3eb538ba257405733abe1defae840172/README.zh-CN.txt",
+  "deployment": {
+    "newImmutableInstallerOnly": true,
+    "updateFeedsChanged": false,
+    "servicesRestarted": false
+  }
+}

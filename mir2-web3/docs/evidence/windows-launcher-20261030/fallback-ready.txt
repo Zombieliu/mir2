@@ -1,0 +1,20 @@
+Window: "Numeron - Legend of Rebirth · 遊戲啟動器", App: launcher-preview.exe.
+	0 窗口 Numeron - Legend of Rebirth · 遊戲啟動器 Secondary Actions: Raise
+		1 图像 ID: 109
+		2 文本 NUMERON ID: 102
+		3 文本 Legend of Rebirth · 遊戲啟動器 ID: 108
+		4 文本 更新未能完成，可以嘗試啟動已驗證的安裝版本。 ID: 103
+		5 文本 版本：UI PREVIEW · r42 按「開始遊戲」進入登入畫面。 ID: 106
+		6 文本 已用時間：1:44 ID: 107
+		7 进度栏 已用時間：1:44 Value: 100 ID: 104
+		8 按钮 離開 ID: 101
+		9 按钮 開始遊戲 ID: 105
+		17 按钮 重試 ID: 110
+		10 标题栏 (settable, string) Value: Numeron - Legend of Rebirth · 遊戲啟動器
+			11 菜单栏 系统 ID: MenuBar
+				16 菜单项 系统
+			13 按钮 最小化
+			14 按钮 (disabled) 最大化
+			15 按钮 关闭
+
+The focused UI element is 9 按钮 開始遊戲 ID: 105.

@@ -813,6 +813,11 @@ impl SimulationSession {
                     return Err("gameShopGiftItemReceiptMissingOutcome".into());
                 }
                 card_uids = items.iter().map(|item| item.unique_id).collect();
+                crate::billing_provenance::record_gift_monthly_units(
+                    store.accounts.get_mut(&target.account_id).ok_or("gameShopGiftRecipientMissing")?,
+                    &target.account_id, &request.purchase.account_id, target.character.index,
+                    &card_uids, product.item.credit_price, now_ms,
+                )?;
                 attachments = items
                     .iter()
                     .map(serde_json::to_string)
@@ -867,6 +872,10 @@ impl SimulationSession {
                 }
                 Some(game_shop_stock_level(stock, next))
             };
+            crate::billing_provenance::consume_ordinary_credit(
+                store.accounts.get_mut(&request.purchase.account_id).ok_or("gameShopGiftAccountMissing")?,
+                sender_save.character.index, sender_save.credit, product.total, now_ms,
+            )?;
             sender_save.credit = remaining;
             let outcome = GameShopPurchaseOutcome {
                 success: true,

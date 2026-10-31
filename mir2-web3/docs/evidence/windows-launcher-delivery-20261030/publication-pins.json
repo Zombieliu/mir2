@@ -1,0 +1,33 @@
+{
+  "controlSha256": "31FAB96196918BE96BADDA3A5A0EEAD59F8B4466119823783187BC6C44068BE4",
+  "helperSha256": "68509BC8A73C657BE87C326BB34D31E27832C63DBA367F9A41E49F6F330FB7A7",
+  "uploadDirectory": "/home/ubuntu/mir2-launcher-delivery-20261030-4c832d59d31e",
+  "pythonInvocation": "/usr/bin/python3 -I -S -c",
+  "files": [
+    {
+      "name": "Mir2Setup.exe",
+      "bytes": 1026815762,
+      "sha256": "3B926D5EB5DD8EE1FC46B6D39FBA3EDA3EB538BA257405733ABE1DEFAE840172"
+    },
+    {
+      "name": "release.json",
+      "bytes": 2556,
+      "sha256": "1C83B417423710AAD71E1B50316B452E45A99B4C67EA11C31054F086333760EF"
+    },
+    {
+      "name": "release.p7s",
+      "bytes": 1614,
+      "sha256": "43265B21CCDE2F460DBB9E4DB79606913C6915663BAD0BF10ED8BA89037AAB3A"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 80,
+      "sha256": "A2780B9D3F6E426E3F56D2A28145997CAE91724897E48DEB937601086E08B3BA"
+    },
+    {
+      "name": "README.zh-CN.txt",
+      "bytes": 945,
+      "sha256": "533EC2B0EDA19A15811E32E2C9CCCF23A9EB90204BC5829A88499B4C36A9AB37"
+    }
+  ]
+}

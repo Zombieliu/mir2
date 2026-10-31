@@ -101,6 +101,7 @@ pub(in crate::config) fn settle_authorized_sources(
                     || !journal.event_payloads.is_empty()
                     || !journal.applied_kill_receipts.is_empty()
                     || !journal.kill_outcomes.is_empty()
+                    || !journal.promotion_game_facts.is_empty()
                 {
                     return Err("new character cannot import guild XP receipts".into());
                 }
@@ -135,6 +136,26 @@ pub(in crate::config) fn settle_authorized_sources(
     }
     let mut changed = BTreeSet::new();
     for (identity, source_revision, previous, mut journal) in work {
+        for (key, event) in &journal.promotion_game_facts {
+            if event.journal_key()? != *key {
+                return Err("promotion gameplay source key invalid".into());
+            }
+            if previous
+                .promotion_game_facts
+                .get(key)
+                .is_some_and(|old| old != event)
+            {
+                return Err("promotion gameplay source cannot be rewritten".into());
+            }
+            if let (Some(receipt), Some(hash)) = (&event.receipt_key, &event.receipt_sha256) {
+                if journal.applied_kill_receipts.get(receipt) != Some(hash) {
+                    return Err("promotion gameplay source has no matching kill receipt".into());
+                }
+            }
+        }
+        journal
+            .promotion_game_facts
+            .extend(previous.promotion_game_facts.clone());
         merge_receipts(&previous.event_payloads, &mut journal.event_payloads, false)?;
         for (key, outcome) in &journal.kill_outcomes {
             if previous.kill_outcomes.get(key) != Some(outcome) {

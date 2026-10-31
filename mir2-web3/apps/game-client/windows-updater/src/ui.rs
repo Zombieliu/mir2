@@ -1,9 +1,20 @@
-//! Thread-owned, DPI-aware native progress window. No console or elevated shell.
+//! Thread-owned, DPI-aware native launcher with explicit download and play actions.
 
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
+
+mod launcher_copy;
+mod transfer;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LauncherAction {
+    Proceed,
+    PlayInstalled,
+    Retry,
+    Exit,
+}
 
 fn locale_index(locale: &str) -> usize {
     let locale = locale.replace('_', "-").to_ascii_lowercase();
@@ -22,6 +33,9 @@ fn locale_index(locale: &str) -> usize {
 
 /// These small native strings are independent of the game catalog version.
 pub fn stage(locale: &str, key: &str) -> String {
+    if let Some(strings) = launcher_copy::strings(key) {
+        return strings[locale_index(locale)].into();
+    }
     if let Some((phase, counts)) = key.split_once(':') {
         if let Some((done, total)) = counts.split_once('/') {
             if let (Ok(done), Ok(total)) = (done.parse::<usize>(), total.parse::<usize>()) {
@@ -235,649 +249,24 @@ pub fn stage(locale: &str, key: &str) -> String {
     strings[locale_index(locale)].into()
 }
 
-#[cfg(windows)]
-mod windows {
-    use super::*;
-    use std::{cell::Cell, mem::size_of, ptr, sync::mpsc, thread, time::Duration};
-    use windows_sys::Win32::{
-        Foundation::{GetLastError, HWND, LPARAM, LRESULT, RECT, WPARAM},
-        Graphics::Gdi::{
-            CreateFontW, DeleteObject, CLEARTYPE_QUALITY, CLIP_DEFAULT_PRECIS, COLOR_WINDOW,
-            DEFAULT_CHARSET, DEFAULT_PITCH, HFONT, OUT_DEFAULT_PRECIS,
-        },
-        System::LibraryLoader::GetModuleHandleW,
-        UI::{
-            Controls::{
-                InitCommonControlsEx, ICC_PROGRESS_CLASS, INITCOMMONCONTROLSEX, PBM_SETPOS,
-                PBM_SETRANGE32, PROGRESS_CLASSW,
-            },
-            HiDpi::{
-                AdjustWindowRectExForDpi, GetDpiForSystem, GetDpiForWindow,
-                SetThreadDpiAwarenessContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2,
-            },
-            WindowsAndMessaging::*,
-        },
-    };
-
-    const STATUS_MESSAGE: u32 = WM_APP + 10;
-    const CANCEL_ID: usize = 101;
-    const HEADING_ID: usize = 102;
-    const STATUS_ID: usize = 103;
-    const PROGRESS_ID: usize = 104;
-    const CLASS: *const u16 = windows_sys::core::w!("NumeronMir2UpdaterProgressV1");
-    const STYLE: u32 = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-
-    fn wide(text: &str) -> Vec<u16> {
-        // Server diagnostics cannot introduce embedded NULs to native controls.
-        text.chars()
-            .map(|c| if c == '\0' { '�' } else { c })
-            .collect::<String>()
-            .encode_utf16()
-            .chain(Some(0))
-            .collect()
+fn render(locale: &str, key: &str, values: &[(&str, String)]) -> String {
+    let mut result = stage(locale, key);
+    for (name, value) in values {
+        result = result.replace(&format!("{{{name}}}"), value);
     }
-
-    enum Command {
-        Update(String, u32),
-        Close,
-    }
-
-    struct State {
-        receiver: mpsc::Receiver<Command>,
-        cancelled: Arc<AtomicBool>,
-        heading: Cell<HWND>,
-        status: Cell<HWND>,
-        progress: Cell<HWND>,
-        cancel: Cell<HWND>,
-        font: Cell<HFONT>,
-        dpi: Cell<u32>,
-    }
-    impl Drop for State {
-        fn drop(&mut self) {
-            if !self.font.get().is_null() {
-                unsafe {
-                    DeleteObject(self.font.get());
-                }
-            }
-        }
-    }
-
-    /// Only the UI thread reads or mutates State. Its Box outlives the window.
-    unsafe extern "system" fn window_proc(
-        hwnd: HWND,
-        message: u32,
-        wparam: WPARAM,
-        lparam: LPARAM,
-    ) -> LRESULT {
-        if message == WM_NCCREATE {
-            let create = unsafe { &*(lparam as *const CREATESTRUCTW) };
-            unsafe {
-                SetWindowLongPtrW(hwnd, GWLP_USERDATA, create.lpCreateParams as isize);
-            }
-        }
-        let state_pointer = unsafe { GetWindowLongPtrW(hwnd, GWLP_USERDATA) } as *const State;
-        if state_pointer.is_null() {
-            return unsafe { DefWindowProcW(hwnd, message, wparam, lparam) };
-        }
-        // Shared access plus Cells permits synchronous Win32 message reentry
-        // (DestroyWindow, SetWindowPos, WM_SETFONT) without aliasing &mut State.
-        let state = unsafe { &*state_pointer };
-        match message {
-            STATUS_MESSAGE => {
-                while let Ok(command) = state.receiver.try_recv() {
-                    match command {
-                        Command::Update(text, percentage) => {
-                            let text = wide(&text);
-                            unsafe {
-                                SetWindowTextW(state.status.get(), text.as_ptr());
-                                SendMessageW(
-                                    state.progress.get(),
-                                    PBM_SETPOS,
-                                    percentage.min(100) as WPARAM,
-                                    0,
-                                );
-                            }
-                        }
-                        Command::Close => {
-                            unsafe {
-                                DestroyWindow(hwnd);
-                            }
-                            return 0;
-                        }
-                    }
-                }
-                0
-            }
-            WM_COMMAND if wparam & 0xffff == CANCEL_ID => {
-                state.cancelled.store(true, Ordering::Release);
-                unsafe {
-                    DestroyWindow(hwnd);
-                }
-                0
-            }
-            WM_CLOSE => {
-                state.cancelled.store(true, Ordering::Release);
-                unsafe {
-                    DestroyWindow(hwnd);
-                }
-                0
-            }
-            WM_SIZE => {
-                unsafe {
-                    layout(hwnd, state);
-                }
-                0
-            }
-            WM_DPICHANGED => {
-                state.dpi.set((wparam & 0xffff) as u32);
-                if lparam != 0 {
-                    let suggested = unsafe { &*(lparam as *const RECT) };
-                    unsafe {
-                        SetWindowPos(
-                            hwnd,
-                            ptr::null_mut(),
-                            suggested.left,
-                            suggested.top,
-                            suggested.right - suggested.left,
-                            suggested.bottom - suggested.top,
-                            SWP_NOZORDER | SWP_NOACTIVATE,
-                        );
-                    }
-                }
-                unsafe {
-                    set_font(state);
-                    layout(hwnd, state);
-                }
-                0
-            }
-            WM_DESTROY => {
-                unsafe {
-                    PostQuitMessage(0);
-                }
-                0
-            }
-            WM_NCDESTROY => unsafe {
-                SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
-                DefWindowProcW(hwnd, message, wparam, lparam)
-            },
-            _ => unsafe { DefWindowProcW(hwnd, message, wparam, lparam) },
-        }
-    }
-
-    fn px(logical: i32, dpi: u32) -> i32 {
-        ((i64::from(logical) * i64::from(dpi.max(96)) + 48) / 96) as i32
-    }
-
-    unsafe fn set_font(state: &State) {
-        let font = unsafe {
-            CreateFontW(
-                -px(15, state.dpi.get()),
-                0,
-                0,
-                0,
-                400,
-                0,
-                0,
-                0,
-                DEFAULT_CHARSET as u32,
-                OUT_DEFAULT_PRECIS as u32,
-                CLIP_DEFAULT_PRECIS as u32,
-                CLEARTYPE_QUALITY as u32,
-                DEFAULT_PITCH as u32,
-                windows_sys::core::w!("Segoe UI"),
-            )
-        };
-        if font.is_null() {
-            return;
-        }
-        let old_font = state.font.replace(font);
-        for control in [state.heading.get(), state.status.get(), state.cancel.get()] {
-            if !control.is_null() {
-                unsafe {
-                    SendMessageW(control, WM_SETFONT, font as WPARAM, 1);
-                }
-            }
-        }
-        if !old_font.is_null() {
-            unsafe {
-                DeleteObject(old_font);
-            }
-        }
-    }
-
-    unsafe fn layout(hwnd: HWND, state: &State) {
-        let mut bounds = RECT::default();
-        if unsafe { GetClientRect(hwnd, &mut bounds) } == 0 {
-            return;
-        }
-        let margin = px(24, state.dpi.get());
-        let width = (bounds.right - margin * 2).max(px(100, state.dpi.get()));
-        let dpi = state.dpi.get();
-        for (control, x, y, width, height) in [
-            (state.heading.get(), margin, px(18, dpi), width, px(26, dpi)),
-            (state.status.get(), margin, px(58, dpi), width, px(86, dpi)),
-            (
-                state.progress.get(),
-                margin,
-                px(155, dpi),
-                width,
-                px(20, dpi),
-            ),
-            (
-                state.cancel.get(),
-                bounds.right - margin - px(118, dpi),
-                px(196, dpi),
-                px(118, dpi),
-                px(32, dpi),
-            ),
-        ] {
-            if !control.is_null() {
-                unsafe {
-                    MoveWindow(control, x, y, width, height, 1);
-                }
-            }
-        }
-    }
-
-    unsafe fn run_window(
-        locale: String,
-        receiver: mpsc::Receiver<Command>,
-        cancelled: Arc<AtomicBool>,
-        ready: mpsc::SyncSender<usize>,
-        visible: bool,
-    ) {
-        unsafe {
-            SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-        }
-        let instance = unsafe { GetModuleHandleW(ptr::null()) };
-        let class = WNDCLASSW {
-            lpfnWndProc: Some(window_proc),
-            hInstance: instance,
-            hCursor: unsafe { LoadCursorW(ptr::null_mut(), IDC_ARROW) },
-            hbrBackground: (COLOR_WINDOW + 1) as _,
-            lpszClassName: CLASS,
-            ..Default::default()
-        };
-        if unsafe { RegisterClassW(&class) } == 0 && unsafe { GetLastError() } != 1410 {
-            let _ = ready.send(0);
-            return;
-        }
-        let common_controls = INITCOMMONCONTROLSEX {
-            dwSize: size_of::<INITCOMMONCONTROLSEX>() as u32,
-            dwICC: ICC_PROGRESS_CLASS,
-        };
-        if unsafe { InitCommonControlsEx(&common_controls) } == 0 {
-            let _ = ready.send(0);
-            return;
-        }
-        let state = Box::new(State {
-            receiver,
-            cancelled,
-            heading: Cell::new(ptr::null_mut()),
-            status: Cell::new(ptr::null_mut()),
-            progress: Cell::new(ptr::null_mut()),
-            cancel: Cell::new(ptr::null_mut()),
-            font: Cell::new(ptr::null_mut()),
-            dpi: Cell::new(unsafe { GetDpiForSystem() }.max(96)),
-        });
-        let title = wide(&format!(
-            "Numeron - Legend of Rebirth · {}",
-            stage(&locale, "title")
-        ));
-        let ex_style = if locale_index(&locale) == 8 {
-            WS_EX_LAYOUTRTL | WS_EX_RTLREADING
-        } else {
-            0
-        };
-        let mut bounds = RECT {
-            left: 0,
-            top: 0,
-            right: px(580, state.dpi.get()),
-            bottom: px(252, state.dpi.get()),
-        };
-        unsafe {
-            AdjustWindowRectExForDpi(&mut bounds, STYLE, 0, ex_style, state.dpi.get());
-        }
-        let hwnd = unsafe {
-            CreateWindowExW(
-                ex_style,
-                CLASS,
-                title.as_ptr(),
-                STYLE,
-                CW_USEDEFAULT,
-                CW_USEDEFAULT,
-                bounds.right - bounds.left,
-                bounds.bottom - bounds.top,
-                ptr::null_mut(),
-                ptr::null_mut(),
-                instance,
-                (&*state as *const State).cast(),
-            )
-        };
-        if hwnd.is_null() {
-            let _ = ready.send(0);
-            return;
-        }
-        let heading = wide(&stage(&locale, "title"));
-        let status = wide(&stage(&locale, "checking"));
-        let cancel = wide(&stage(&locale, "cancel"));
-        let child_style = WS_CHILD | WS_VISIBLE;
-        unsafe {
-            state.heading.set(CreateWindowExW(
-                ex_style,
-                windows_sys::core::w!("STATIC"),
-                heading.as_ptr(),
-                child_style,
-                0,
-                0,
-                0,
-                0,
-                hwnd,
-                HEADING_ID as _,
-                instance,
-                ptr::null(),
-            ));
-            state.status.set(CreateWindowExW(
-                ex_style,
-                windows_sys::core::w!("STATIC"),
-                status.as_ptr(),
-                child_style,
-                0,
-                0,
-                0,
-                0,
-                hwnd,
-                STATUS_ID as _,
-                instance,
-                ptr::null(),
-            ));
-            state.progress.set(CreateWindowExW(
-                0,
-                PROGRESS_CLASSW,
-                ptr::null(),
-                child_style,
-                0,
-                0,
-                0,
-                0,
-                hwnd,
-                PROGRESS_ID as _,
-                instance,
-                ptr::null(),
-            ));
-            state.cancel.set(CreateWindowExW(
-                ex_style,
-                windows_sys::core::w!("BUTTON"),
-                cancel.as_ptr(),
-                child_style | WS_TABSTOP | BS_PUSHBUTTON as u32,
-                0,
-                0,
-                0,
-                0,
-                hwnd,
-                CANCEL_ID as _,
-                instance,
-                ptr::null(),
-            ));
-        }
-        if [
-            state.heading.get(),
-            state.status.get(),
-            state.progress.get(),
-            state.cancel.get(),
-        ]
-        .iter()
-        .any(|handle| handle.is_null())
-        {
-            unsafe {
-                DestroyWindow(hwnd);
-            }
-            let _ = ready.send(0);
-            return;
-        }
-        state.dpi.set(unsafe { GetDpiForWindow(hwnd) }.max(96));
-        // CreateWindow's initial monitor can have a different DPI from the system.
-        let mut bounds = RECT {
-            left: 0,
-            top: 0,
-            right: px(580, state.dpi.get()),
-            bottom: px(252, state.dpi.get()),
-        };
-        unsafe {
-            AdjustWindowRectExForDpi(&mut bounds, STYLE, 0, ex_style, state.dpi.get());
-            SetWindowPos(
-                hwnd,
-                ptr::null_mut(),
-                0,
-                0,
-                bounds.right - bounds.left,
-                bounds.bottom - bounds.top,
-                SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE,
-            );
-            set_font(&state);
-            layout(hwnd, &state);
-            SendMessageW(state.progress.get(), PBM_SETRANGE32, 0, 100);
-            if visible {
-                ShowWindow(hwnd, SW_SHOWNORMAL);
-            }
-        }
-        if ready.send(hwnd as usize).is_err() {
-            unsafe {
-                DestroyWindow(hwnd);
-            }
-            return;
-        }
-        let mut message = MSG::default();
-        loop {
-            let result = unsafe { GetMessageW(&mut message, ptr::null_mut(), 0, 0) };
-            if result <= 0 {
-                break;
-            }
-            if unsafe { IsDialogMessageW(hwnd, &message) } == 0 {
-                unsafe {
-                    TranslateMessage(&message);
-                    DispatchMessageW(&message);
-                }
-            }
-        }
-        if unsafe { IsWindow(hwnd) } != 0 {
-            unsafe {
-                DestroyWindow(hwnd);
-            }
-        }
-        // State/its font are dropped only after the owned window is destroyed.
-    }
-
-    pub struct ProgressWindow {
-        sender: mpsc::Sender<Command>,
-        hwnd: usize,
-        cancelled: Arc<AtomicBool>,
-    }
-    impl ProgressWindow {
-        pub fn spawn(locale: &str) -> Self {
-            Self::spawn_impl(locale, true)
-        }
-        fn spawn_impl(locale: &str, visible: bool) -> Self {
-            let (sender, receiver) = mpsc::channel();
-            let (ready_sender, ready_receiver) = mpsc::sync_channel(1);
-            let cancelled = Arc::new(AtomicBool::new(false));
-            let locale = locale.to_owned();
-            let thread_cancelled = Arc::clone(&cancelled);
-            let spawned =
-                thread::Builder::new()
-                    .name("mir2-updater-ui".into())
-                    .spawn(move || unsafe {
-                        run_window(locale, receiver, thread_cancelled, ready_sender, visible);
-                    });
-            let hwnd = if spawned.is_ok() {
-                ready_receiver
-                    .recv_timeout(Duration::from_secs(5))
-                    .unwrap_or(0)
-            } else {
-                0
-            };
-            Self {
-                sender,
-                hwnd,
-                cancelled,
-            }
-        }
-        pub fn update(&self, message: &str, percent: u32) {
-            if self.hwnd != 0
-                && self
-                    .sender
-                    .send(Command::Update(message.into(), percent))
-                    .is_ok()
-            {
-                unsafe {
-                    PostMessageW(self.hwnd as HWND, STATUS_MESSAGE, 0, 0);
-                }
-            }
-        }
-        pub fn close(&self) {
-            if self.hwnd != 0 && self.sender.send(Command::Close).is_ok() {
-                unsafe {
-                    PostMessageW(self.hwnd as HWND, STATUS_MESSAGE, 0, 0);
-                }
-            }
-        }
-        pub fn cancelled(&self) -> bool {
-            self.cancelled.load(Ordering::Acquire)
-        }
-    }
-    impl Drop for ProgressWindow {
-        fn drop(&mut self) {
-            self.close();
-        }
-    }
-
-    pub fn show_error(locale: &str, message: &str) {
-        let caption = wide(&stage(locale, "failed"));
-        let message = wide(message);
-        let flags = MB_OK
-            | MB_ICONERROR
-            | MB_SETFOREGROUND
-            | if locale_index(locale) == 8 {
-                MB_RTLREADING | MB_RIGHT
-            } else {
-                0
-            };
-        unsafe {
-            MessageBoxW(ptr::null_mut(), message.as_ptr(), caption.as_ptr(), flags);
-        }
-    }
-
-    #[cfg(test)]
-    mod native_tests {
-        use super::*;
-        use windows_sys::Win32::Graphics::Gdi::{
-            DrawTextW, GetDC, ReleaseDC, SelectObject, DT_CALCRECT, DT_NOPREFIX, DT_WORDBREAK,
-        };
-
-        fn flush(window: &ProgressWindow, message: u32, wparam: usize, lparam: isize) {
-            let mut result = 0;
-            let sent = unsafe {
-                SendMessageTimeoutW(
-                    window.hwnd as HWND,
-                    message,
-                    wparam,
-                    lparam,
-                    SMTO_ABORTIFHUNG,
-                    2000,
-                    &mut result,
-                )
-            };
-            assert_ne!(sent, 0, "native UI did not process the test message");
-        }
-
-        #[test]
-        fn native_window_updates_and_distinguishes_programmatic_close_from_cancel() {
-            let window = ProgressWindow::spawn_impl("zh-TW", false);
-            assert_ne!(window.hwnd, 0);
-            window.update("Native updater smoke", 61);
-            flush(&window, STATUS_MESSAGE, 0, 0);
-            let progress = unsafe { GetDlgItem(window.hwnd as HWND, PROGRESS_ID as i32) };
-            assert_eq!(
-                unsafe {
-                    SendMessageW(progress, windows_sys::Win32::UI::Controls::PBM_GETPOS, 0, 0)
-                },
-                61
-            );
-            window.close();
-            flush(&window, STATUS_MESSAGE, 0, 0);
-            assert!(!window.cancelled());
-
-            let cancelled = ProgressWindow::spawn_impl("ar", false);
-            assert_ne!(cancelled.hwnd, 0);
-            flush(&cancelled, WM_CLOSE, 0, 0);
-            assert!(cancelled.cancelled());
-        }
-
-        #[test]
-        fn nine_locale_offline_copy_fits_native_status_at_100_150_and_200_percent_layouts() {
-            for locale in ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] {
-                let window = ProgressWindow::spawn_impl(locale, false);
-                assert_ne!(window.hwnd, 0);
-                let text = stage(locale, "offline");
-                window.update(&text, 5);
-                flush(&window, STATUS_MESSAGE, 0, 0);
-                for dpi in [96_u32, 144, 192] {
-                    let mut suggested = RECT {
-                        left: 0,
-                        top: 0,
-                        right: px(600, dpi),
-                        bottom: px(300, dpi),
-                    };
-                    flush(
-                        &window,
-                        WM_DPICHANGED,
-                        ((dpi << 16) | dpi) as usize,
-                        (&mut suggested as *mut RECT) as isize,
-                    );
-                    let status = unsafe { GetDlgItem(window.hwnd as HWND, STATUS_ID as i32) };
-                    let mut client = RECT::default();
-                    assert_ne!(unsafe { GetClientRect(status, &mut client) }, 0);
-                    let dc = unsafe { GetDC(status) };
-                    assert!(!dc.is_null());
-                    let font = unsafe { SendMessageW(status, WM_GETFONT, 0, 0) } as _;
-                    let old = unsafe { SelectObject(dc, font) };
-                    let text = wide(&text);
-                    let mut measured = RECT {
-                        left: 0,
-                        top: 0,
-                        right: client.right,
-                        bottom: 0,
-                    };
-                    let height = unsafe {
-                        DrawTextW(
-                            dc,
-                            text.as_ptr(),
-                            text.len() as i32 - 1,
-                            &mut measured,
-                            DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX,
-                        )
-                    };
-                    unsafe {
-                        SelectObject(dc, old);
-                        ReleaseDC(status, dc);
-                    }
-                    assert!(
-                        height > 0 && height <= client.bottom,
-                        "{locale} at {dpi} DPI needs {height} px but status has {}",
-                        client.bottom
-                    );
-                }
-                window.close();
-                flush(&window, STATUS_MESSAGE, 0, 0);
-            }
-        }
-    }
+    result
 }
+
+#[cfg(windows)]
+mod skin;
+#[cfg(windows)]
+mod windows;
 
 #[cfg(windows)]
 pub use windows::{show_error, ProgressWindow};
 
 #[cfg(not(windows))]
+#[derive(Clone)]
 pub struct ProgressWindow {
     cancelled: Arc<AtomicBool>,
 }
@@ -889,9 +278,34 @@ impl ProgressWindow {
         }
     }
     pub fn update(&self, _: &str, _: u32) {}
+    pub fn home(&self, _: &str, _: &str, _: bool) -> LauncherAction {
+        LauncherAction::Exit
+    }
+    pub fn probe_result(&self, _: &str, _: Option<&str>, _: bool) {}
+    pub fn installed_available(&self, _: bool) {}
+    pub fn confirm_update_choice(&self, _: &str, _: &str, _: u64, _: bool) -> LauncherAction {
+        LauncherAction::Exit
+    }
+    pub fn set_stage(&self, _: &str, _: u32) {}
+    pub fn transfer(&self, _: u64, _: u64) {}
+    pub fn confirm_update(&self, _: &str, _: &str, _: u64) -> bool {
+        false
+    }
+    pub fn ready(&self, _: &str, _: &str, _: bool) -> LauncherAction {
+        LauncherAction::Exit
+    }
+    pub fn retry(&self, _: &str, _: &str) -> bool {
+        false
+    }
     pub fn close(&self) {}
     pub fn cancelled(&self) -> bool {
         self.cancelled.load(Ordering::Acquire)
+    }
+    pub fn is_open(&self) -> bool {
+        false
+    }
+    pub fn begin_launch(&self) -> bool {
+        false
     }
 }
 #[cfg(not(windows))]
@@ -904,6 +318,22 @@ mod tests {
     fn every_supported_locale_has_every_native_update_stage() {
         for locale in ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"] {
             for key in [
+                "hero-title",
+                "hero-caption",
+                "status-label",
+                "current-version",
+                "home-ready",
+                "home-repair",
+                "checking-optional",
+                "optional-found",
+                "probe-failed",
+                "up-to-date",
+                "play-without-update",
+                "repair-hint",
+                "review-update",
+                "play-current",
+                "ready-label",
+                "minimize",
                 "checking",
                 "downloading",
                 "verifying",
@@ -916,6 +346,24 @@ mod tests {
                 "failed",
                 "cancel",
                 "title",
+                "update-available",
+                "update",
+                "play",
+                "retry",
+                "exit",
+                "working",
+                "ready",
+                "offline-ready",
+                "checking-hint",
+                "ready-hint",
+                "retry-hint",
+                "target-version",
+                "download-size",
+                "elapsed",
+                "current-download",
+                "estimating",
+                "download-speed",
+                "download-waiting",
             ] {
                 let translated = stage(locale, key);
                 assert!(!translated.is_empty());

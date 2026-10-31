@@ -1,11 +1,13 @@
 pub mod activities;
 pub mod billing;
+pub mod billing_provenance;
 mod config;
 pub mod conquest;
 pub mod crystal_health;
 pub mod db_projection;
 pub use mir2_production as production;
 pub mod monthly_card;
+pub mod promotion;
 pub mod npc_purchase_journal;
 pub mod npc_purchase_owner;
 mod runtime;

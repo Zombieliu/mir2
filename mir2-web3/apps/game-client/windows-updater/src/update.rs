@@ -341,6 +341,16 @@ impl Source for HttpsSource {
 pub trait Status {
     fn set(&self, key: &str, percent: u32);
     fn cancelled(&self) -> bool;
+    /// Called after authentication/planning, before payloads or installation.
+    /// Bytes are the planned full signed payload size, before caches/resume and
+    /// optional delivery accelerators. Failed transport retries are not included.
+    fn confirm_update(&self, _version: &str, _download_bytes: u64) -> Result<()> {
+        Ok(())
+    }
+    /// Newly received response-body bytes in the current download stage. Disk
+    /// cache hits and retained range prefixes are excluded. A new stage resets
+    /// received to zero; total can be a conservative signed size upper bound.
+    fn transfer(&self, _received: u64, _total: u64) {}
     /// Phase boundaries/final counts must be visible even inside the UI cadence.
     fn set_final(&self, key: &str, percent: u32) {
         self.set(key, percent);
@@ -391,6 +401,12 @@ impl<T: Status> Status for ThrottledStatus<'_, T> {
     }
     fn cancelled(&self) -> bool {
         self.inner.cancelled()
+    }
+    fn confirm_update(&self, version: &str, download_bytes: u64) -> Result<()> {
+        self.inner.confirm_update(version, download_bytes)
+    }
+    fn transfer(&self, received: u64, total: u64) {
+        self.inner.transfer(received, total);
     }
 }
 
@@ -514,7 +530,16 @@ fn fresh_discovery(
     status: &impl Status,
     transfers: &mut Transfers,
 ) -> Result<(Feed, Vec<u8>, Vec<u8>)> {
+    fresh_discovery_inner(Some(root), source, status, transfers)
+}
+fn fresh_discovery_inner(
+    log_root: Option<&Path>,
+    source: &impl Source,
+    status: &impl Status,
+    transfers: &mut Transfers,
+) -> Result<(Feed, Vec<u8>, Vec<u8>)> {
     for attempt in 1..=3 {
+        ensure!(!status.cancelled(), "update cancelled");
         let mut pair_bytes = 0u64;
         let (bytes, signature) = source.discovery_pair(&mut |additional| {
             pair_bytes = pair_bytes
@@ -542,11 +567,13 @@ fn fresh_discovery(
         ) {
             Ok(()) => return Ok((feed, bytes, signature)),
             Err(error) => {
-                log(
-                    root,
-                    "discovery-pair-auth-failure",
-                    serde_json::json!({"attempt":attempt,"reason":error,"wireBytes":transfers.wire_bytes}),
-                );
+                if let Some(root) = log_root {
+                    log(
+                        root,
+                        "discovery-pair-auth-failure",
+                        serde_json::json!({"attempt":attempt,"reason":error,"wireBytes":transfers.wire_bytes}),
+                    );
+                }
                 ensure!(
                     attempt < 3,
                     "discovery CMS authentication failed after three fresh pairs: {error}"
@@ -629,6 +656,94 @@ pub fn verify_launch(root: &Path) -> Result<String> {
 pub fn launch_executable_entry(root: &Path) -> Result<FileEntry> {
     let (manifest, _) = local_game(root)?;
     Ok((*manifest.map()["mir2-platform-windows.exe"]).clone())
+}
+
+/// Verify only the installed selection. This has no source, network, recovery,
+/// pointer writes or update lock; callers recover transactions under their short
+/// local lock before presenting Home, then verify again before process creation.
+pub fn verify_installed(root: &Path) -> Result<String> {
+    match crate::generation::active_record(root)? {
+        Some(_) => {
+            let record = crate::generation::verify_current_selection(root)?;
+            match record.active {
+                crate::generation::Selection::Generation { sequence, .. } => {
+                    Ok(format!("r{sequence}"))
+                }
+                crate::generation::Selection::LegacyV4 { candidate, .. } => Ok(candidate),
+            }
+        }
+        None => verify_launch(root),
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct Probe {
+    pub version: String,
+    pub update_available: bool,
+}
+
+/// Authenticate the legacy channel for an optional Home notification. This is
+/// deliberately read-only, including failed CMS retries: no journal, receipts,
+/// cache, executable download, selector or engine activation. No write/game lock
+/// is needed, so a slow or unavailable origin cannot hold up local game start.
+pub fn probe_update(root: &Path, source: &impl Source, status: &impl Status) -> Result<Probe> {
+    let (_, old_meta) = local_game(root)?;
+    let (old_engine, _) = active_engine(root)?;
+    let previous = read_previous(root)?;
+    let mut transfers = Transfers::default();
+    let (feed, bytes, _) = fresh_discovery_inner(None, source, status, &mut transfers)?;
+    feed.check_advance(
+        &bytes,
+        previous
+            .as_ref()
+            .map(|(feed, bytes)| (feed, bytes.as_slice())),
+    )?;
+    let failed = safe::target(root, ".update/failed-release.txt")?;
+    if failed.exists() {
+        ensure!(
+            safe::read_bounded(&failed, 64)? != hash(&bytes).as_bytes(),
+            "release quarantined after unsuccessful first launch"
+        );
+    }
+    let engine_meta = remote_meta(source, &feed.engine, status, &mut transfers)?;
+    let engine = Engine::parse(&engine_meta["ENGINE.json"])?;
+    crate::platform::verify_cms_at(
+        &engine_meta["ENGINE.json"],
+        &engine_meta["ENGINE.p7s"],
+        crate::SIGNING_KEY,
+        engine.built_unix,
+    )
+    .map_err(anyhow::Error::msg)?;
+    ensure!(
+        engine.version >= old_engine.version && engine.version.to_string() == feed.engine.identity,
+        "engine downgrade/identity mismatch"
+    );
+    ensure!(
+        engine.version <= crate::ENGINE_VERSION || engine.exe_sha256 != old_engine.exe_sha256,
+        "engine version mismatch"
+    );
+    let game_same = feed.game.metadata.iter().all(|entry| {
+        old_meta
+            .get(&entry.path)
+            .is_some_and(|bytes| bytes.len() as u64 == entry.size && hash(bytes) == entry.sha256)
+    });
+    if !game_same {
+        let metadata = remote_meta(source, &feed.game, status, &mut transfers)?;
+        cms(
+            &metadata["RELEASE-STATEMENT.json"],
+            &metadata["RELEASE-STATEMENT.p7s"],
+        )?;
+        bind_game(&metadata)?;
+        let version: serde_json::Value = serde_json::from_slice(&metadata["VERSION.json"])?;
+        ensure!(
+            version["candidate"].as_str() == Some(&feed.game.identity),
+            "candidate/feed mismatch"
+        );
+    }
+    Ok(Probe {
+        version: feed.game.identity,
+        update_available: !game_same || engine.exe_sha256 != old_engine.exe_sha256,
+    })
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum ReceiptSource {
@@ -769,6 +884,7 @@ fn fetched_bytes(
     status: &impl Status,
     transfers: &mut Transfers,
 ) -> Result<Vec<u8>> {
+    ensure!(!status.cancelled(), "update cancelled");
     let mut received = 0;
     let result = source.get(path, limit, &mut |bytes| {
         ensure!(
@@ -828,6 +944,7 @@ pub(super) fn cached_payload(
     let mut received = 0;
     let mut prefix = None;
     transfers.downloaded_files += 1;
+    status.transfer(0, entry.size);
     let result = source.download_resuming(path, entry, &part, &mut |p| {
         ensure!(
             p.reused <= resume_limit,
@@ -851,6 +968,7 @@ pub(super) fn cached_payload(
             bytes <= entry.size.saturating_sub(p.reused),
             "source payload exceeds bound"
         );
+        status.transfer(received, entry.size - p.reused);
         progress(
             status,
             "downloading",
@@ -892,6 +1010,7 @@ pub(super) fn cached_payload(
     let remaining = entry.size.saturating_sub(reused).saturating_sub(received);
     transfers.downloaded_bytes += remaining;
     transfers.wire_bytes += remaining;
+    status.transfer(entry.size - reused, entry.size - reused);
     crate::platform::replace_file(&part, &cache)?;
     if reused != 0 {
         log(
@@ -1170,21 +1289,6 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
             removed.push((*path).to_owned());
         }
     }
-    // Existing v1 releases have no accelerator, and zero-payload checks do not
-    // request a potentially large optional descriptor.
-    let mut delivery = if pending.is_empty() {
-        None
-    } else {
-        optional_delivery(
-            root,
-            source,
-            &feed.game,
-            (&metadata, &new),
-            status,
-            &mut transfers,
-            &mut outcome.delivery,
-        )?
-    };
     let engine_needed = engine.exe_sha256 != old_engine.exe_sha256;
     let total = pending.iter().map(|f| f.size).sum::<u64>()
         + if engine_needed { engine.exe_size } else { 0 };
@@ -1211,6 +1315,26 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
         total <= MAX_TOTAL && available > required,
         "insufficient update and rollback space"
     );
+    if !game_same || !pending.is_empty() || !removed.is_empty() || engine_needed {
+        status.confirm_update(&feed.game.identity, total)?;
+        ensure!(!status.cancelled(), "update cancelled before download");
+    }
+    // Optional delivery descriptors may be large. The authenticated raw-file
+    // plan is sufficient for consent; fetch accelerators only after approval.
+    // Existing v1 releases and zero-payload checks need no such descriptor.
+    let mut delivery = if pending.is_empty() {
+        None
+    } else {
+        optional_delivery(
+            root,
+            source,
+            &feed.game,
+            (&metadata, &new),
+            status,
+            &mut transfers,
+            &mut outcome.delivery,
+        )?
+    };
     if delivery.as_ref().is_some_and(|descriptor| {
         available <= required.saturating_add(descriptor.extra_cache_bytes())
     }) {
@@ -1379,3 +1503,107 @@ mod progress_trace_tests;
 #[cfg(test)]
 #[path = "resume_tests.rs"]
 mod resume_tests;
+
+#[cfg(test)]
+mod optional_probe_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    struct Quiet;
+    impl Status for Quiet {
+        fn set(&self, _: &str, _: u32) {}
+        fn cancelled(&self) -> bool {
+            false
+        }
+    }
+    struct InvalidCmsPair {
+        bytes: Vec<u8>,
+        calls: AtomicUsize,
+    }
+    impl Source for InvalidCmsPair {
+        fn discovery_pair(
+            &self,
+            progress: &mut dyn FnMut(u64) -> Result<()>,
+        ) -> Result<(Vec<u8>, Vec<u8>)> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            progress(self.bytes.len() as u64 + 7)?;
+            Ok((self.bytes.clone(), b"not-CMS".to_vec()))
+        }
+        fn get(&self, _: &str, _: u64, _: &mut dyn FnMut(u64) -> Result<()>) -> Result<Vec<u8>> {
+            panic!("unsigned feed cannot authorize metadata")
+        }
+        fn download(
+            &self,
+            _: &str,
+            _: &FileEntry,
+            _: &Path,
+            _: &mut dyn FnMut(u64) -> Result<()>,
+        ) -> Result<()> {
+            panic!("optional check cannot download payload")
+        }
+    }
+    #[test]
+    fn read_only_discovery_cms_retries_cannot_write_a_run_log() {
+        let entry = |name: &str| FileEntry {
+            path: name.into(),
+            size: 1,
+            sha256: hash(b"x"),
+        };
+        let feed = Feed {
+            schema: "mir2.windows.update-feed.v1".into(),
+            channel: "invited".into(),
+            platform: "windows-x64".into(),
+            sequence: 2,
+            created_unix: now() - 1,
+            expires_unix: now() + 3600,
+            min_bootstrap: 1,
+            protocol: "crystal-mir2-v1".into(),
+            content: "mir2.windows.package-manifest.v4".into(),
+            game: Component {
+                directory: "releases/game".into(),
+                identity: "candidate-r2".into(),
+                metadata: META.iter().map(|name| entry(name)).collect(),
+            },
+            engine: Component {
+                directory: "releases/engine".into(),
+                identity: "2".into(),
+                metadata: ["ENGINE.json", "ENGINE.p7s"]
+                    .into_iter()
+                    .map(entry)
+                    .collect(),
+            },
+        };
+        let source = InvalidCmsPair {
+            bytes: serde_json::to_vec(&feed).unwrap(),
+            calls: AtomicUsize::new(0),
+        };
+        let mut transfers = Transfers::default();
+        let error = fresh_discovery_inner(None, &source, &Quiet, &mut transfers).unwrap_err();
+        assert!(error.to_string().contains("three fresh pairs"));
+        assert_eq!(source.calls.load(Ordering::SeqCst), 3);
+        assert_eq!(transfers.wire_bytes, 3 * (source.bytes.len() as u64 + 7));
+    }
+    #[test]
+    fn invalid_installed_selector_cannot_fall_back_to_a_bare_executable() {
+        let root = tempfile::tempdir().unwrap();
+        fs::create_dir(root.path().join("game")).unwrap();
+        fs::create_dir(root.path().join("state")).unwrap();
+        fs::write(
+            root.path().join("game/mir2-platform-windows.exe"),
+            b"unsigned",
+        )
+        .unwrap();
+        fs::write(
+            root.path().join("state/active-generation.json"),
+            br#"{"schema":"bad"}"#,
+        )
+        .unwrap();
+        let pointer = fs::read(root.path().join("state/active-generation.json")).unwrap();
+        assert!(verify_installed(root.path()).is_err());
+        assert_eq!(
+            fs::read(root.path().join("state/active-generation.json")).unwrap(),
+            pointer
+        );
+        assert!(!root.path().join(".update").exists());
+    }
+}

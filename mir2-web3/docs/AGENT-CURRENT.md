@@ -1,6 +1,6 @@
 # Agent Current Context
 
-Short routing summary, updated 2026-10-28 (Asia/Shanghai).
+Short routing summary, updated 2026-10-29 (Asia/Shanghai).
 This indexes recorded decisions and open work; it does not revalidate today's
 working tree, services, release packages, source snapshots or parity percentages.
 
@@ -18,6 +18,7 @@ working tree, services, release packages, source snapshots or parity percentages
 
 | Topic | Recorded state and next scope | Detailed reference |
 | --- | --- | --- |
+| Numeron promotion website (2026-10-29) | Original Vercel web `78fac20b3` and independent native backend `4151a63d5` have a real Testnet end-to-end pass: invitation, saved level 2 gameplay, 10 test USDC recharge, paid 30-day card, real-clock short-season reconciliation and 0.000005 test USDC payout. Chain and PG are confirmed; exact recipient delta is 5 atomic units, one broadcast per payment, no synthetic facts. Original 119 accounts/35 characters/35 saves and PIDs preserved; no Docker or Windows publication. Seven-day payout stays off and November–February season stays draft. Phone transaction signing, Stripe, mainnet and human frontend acceptance remain separate. | [Full-chain evidence](PROMOTION-PROGRAM-IMPLEMENTATION-20261029.zh-CN.md#真实充值到测试网返利闭环2026-10-29) |
 | Windows wallet / branch integration (2026-10-28) | Native Dubhe QR login follows the existing nine-language preference. Full-history integration preserves local gameplay and durable authority domains. Test Gateway and isolated wallet login deployed at `00ca0f93f`; 119 accounts/35 characters and original data digests retained, no Docker started. Phone signing and frontend acceptance remain open. | [Integration](BRANCH-INTEGRATION-20261028.zh-CN.md), [wallet flow](DUBHE-WALLET-WINDOWS-LOGIN.zh-CN.md), [test rollout](DUBHE-WALLET-PLAYTEST-ROLLOUT-20261028.zh-CN.md) |
 | Overall parity | Candidate100 remains false in the latest summarized records; final human acceptance remains open. Do not invent an overall percentage. | [Roadmap](CRYSTAL-1TO1-ROADMAP.md), relevant topic section |
 | Level 100 / SLG (2026-10-19) | User direction is a level-100 cap with new SLG after max level. Resource audit/planning is recorded; runtime cap, level 71-100 content, balancing, ordinary acquisition and server entry gates still require implementation/verification. Keep custom rules separate from Crystal's original baseline. | [Growth rules](LEVEL100-SLG-PROGRESSION.zh-CN.md), [equipment audit](EQUIPMENT-LEVEL100-SLG-AUDIT-20261019.zh-CN.md), [queue](AGENT-TASK-QUEUE.md) topic heading |

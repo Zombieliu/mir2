@@ -1,0 +1,40 @@
+{
+  "status": "draft",
+  "environment": "test",
+  "timeZone": "Asia/Shanghai",
+  "draft": {
+    "campaignId": "numeron-20261101-testnet",
+    "fundingMode": "revenue_share",
+    "termsVersion": "numeron-20261101-v1-draft",
+    "startsAtMs": 1793462400000,
+    "endsAtMs": 1801411200000,
+    "rules": {
+      "minimumLevel": 30,
+      "activeUtcDays": 3,
+      "candidateTtlMs": 604800000,
+      "confirmationWindowMs": 86400000,
+      "maximumCoverageMs": 7948800000,
+      "reserveBps": 0,
+      "walletCooldownMs": 259200000
+    },
+    "budgetMicroUsd": 0,
+    "memberLimit": 0,
+    "leaderLimit": 0,
+    "perLeaderMemberLimit": 0,
+    "perMemberRevenueCapMicroUsd": 0
+  },
+  "payoutPreferences": {
+    "accountingCurrency": "USD",
+    "asset": "USDC",
+    "network": "sui:testnet",
+    "coinType": "0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC",
+    "coinDecimals": 6,
+    "destinationSource": "verified_current_login_wallet",
+    "minimumPayoutMicroUsd": null,
+    "gasFeePolicy": null,
+    "identityTaxPolicyRef": null,
+    "regions": [],
+    "termsUrl": null
+  },
+  "authorization": "User confirmed dates, revenue share without fixed budget, zero retention, USD accounting, USDC on Sui testnet and payout to the login wallet. Unconfigured policy fields stay null; no approval or funding is implied."
+}

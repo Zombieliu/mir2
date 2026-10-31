@@ -90,6 +90,8 @@ mod activities;
 mod billing;
 #[path = "web_monthly_card.rs"]
 mod monthly_card;
+#[path = "web_promotions.rs"]
+mod promotions;
 #[path = "web_packet_batch.rs"]
 mod packet_batch;
 #[path = "web_transport.rs"]
@@ -2826,6 +2828,7 @@ pub async fn serve_web_gateway_with_zone_registry(
         .merge(monthly_card::router())
         .merge(billing::router())
         .merge(activities::router())
+        .merge(promotions::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 

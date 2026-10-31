@@ -131,6 +131,13 @@ def git(root, *args, data=None):
     return result.stdout
 
 
+def compiler_source(name):
+    return (name.endswith(".rs") or Path(name).name in ("Cargo.toml", "Cargo.lock") or
+            ("/" + name).endswith(("/apps/game-client/windows-updater/assets/numeron.rc",
+                                  "/apps/game-client/windows-updater/assets/launcher-hero-v2.png",
+                                  "/apps/game-client/platform-windows/resources/numeron.ico")))
+
+
 def source_snapshot(root, expected):
     root = a.absolute_directory(str(root))
     expected = revision(expected)
@@ -146,7 +153,7 @@ def source_snapshot(root, expected):
             prefix, name = record.split(b"\t", 1)
             mode, kind, oid = prefix.split()
             name = name.decode("utf-8")
-            if not (name.endswith(".rs") or Path(name).name in ("Cargo.toml", "Cargo.lock")):
+            if not compiler_source(name):
                 continue
             require(kind == b"blob" and mode in (b"100644", b"100755"), "plain committed source files required")
             require("\n" not in name and "\r" not in name, "unsafe source filename")
@@ -159,8 +166,8 @@ def source_snapshot(root, expected):
         for name in dirs:
             a._plain(Path(directory) / name, directory=True)
         for name in files:
-            if name.endswith(".rs") or name in ("Cargo.toml", "Cargo.lock"):
-                path = Path(directory) / name
+            path = Path(directory) / name
+            if compiler_source(path.relative_to(root).as_posix()):
                 a._plain(path, directory=False)
                 require(path.relative_to(root).as_posix() in tracked, "uncommitted or ignored compiler source")
     names = sorted(tracked)

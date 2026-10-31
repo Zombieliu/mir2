@@ -9,6 +9,8 @@
     "audit:native-ui-assets": "node ./scripts/audit-native-ui-assets.mjs",
     "test:storage-transfers": "node --no-global-search-paths --test ./scripts/test-storage-gateway-adapter.mjs ./scripts/test-storage-page-gate.mjs",
     "test:dubhe-wallet": "node --test ./scripts/test-dubhe-connect-auth.mjs ./scripts/test-dubhe-wallet-login.mjs",
+    "test:promotions": "node --test ./scripts/test-promotion-bff.mjs ./scripts/test-promotion-ui.mjs ./scripts/test-promotion-admin-review.mjs ./scripts/test-promotion-payout.mjs ./scripts/test-promotion-payout-sign.mjs ./scripts/test-dubhe-connect-auth.mjs",
+    "dev:promotions": "next dev",
     "test:storage-ui": "node --no-global-search-paths --test ./scripts/test-bevy-storage-ui.mjs ./scripts/test-storage-surface-integration.mjs",
     "export:crystal-sounds": "node ./scripts/export-crystal-sounds.mjs",
     "export:crystal-magic-effects": "node ./scripts/export-crystal-magic-effects.mjs",

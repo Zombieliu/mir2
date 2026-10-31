@@ -3419,8 +3419,10 @@ name = "mir2-windows-updater"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "embed-resource",
  "flate2",
  "mir2-resource-pack",
+ "png",
  "serde",
  "serde_json",
  "sha2",

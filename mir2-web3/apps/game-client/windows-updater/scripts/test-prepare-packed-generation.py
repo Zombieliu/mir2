@@ -220,6 +220,34 @@ class PackedPreparationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "MZ"):
             self.f.prepare()
 
+    def test_launcher_resource_compiler_inputs_are_committed_and_hashed(self):
+        names = ("apps/game-client/windows-updater/assets/numeron.rc",
+                 "apps/game-client/windows-updater/assets/launcher-hero-v2.png",
+                 "apps/game-client/platform-windows/resources/numeron.ico")
+        ignore = self.f.source / ".gitignore"
+        ignore.write_text(ignore.read_text() + "*.rc\n*.ico\n*.png\n")
+        self.f.git("add", ".gitignore")
+        self.f.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                   "commit", "--quiet", "-m", "ignore synthetic resource fixtures")
+        revision = self.f.git("rev-parse", "HEAD").decode().strip()
+        before = p.source_snapshot(self.f.source, revision)
+        for name in names:
+            path = self.f.source / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"synthetic compiler resource")
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "ignored compiler source"):
+                p.source_snapshot(self.f.source, revision)
+        self.f.git("add", "--force", *names)
+        self.f.git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid",
+                   "commit", "--quiet", "-m", "commit synthetic resource fixtures")
+        revision = self.f.git("rev-parse", "HEAD").decode().strip()
+        snapshot = p.source_snapshot(self.f.source, revision)
+        self.assertEqual(snapshot["sourceFilesChecked"], before["sourceFilesChecked"] + len(names))
+        self.f.git("update-index", "--assume-unchanged", names[1])
+        (self.f.source / names[1]).write_bytes(b"hidden icon mutation")
+        with self.assertRaisesRegex(ValueError, "committed blobs"):
+            p.source_snapshot(self.f.source, revision)
+
     def test_invalid_config_and_mutated_original_after_snapshot(self):
         self.f.config.write_bytes(b"broken [")
         with self.assertRaises(ValueError): self.f.prepare()

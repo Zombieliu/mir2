@@ -22,6 +22,24 @@ impl Status for Quiet {
         false
     }
 }
+struct Deny<'a> {
+    source: &'a Files,
+    prompts: Mutex<Vec<(String, u64)>>,
+}
+impl Status for Deny<'_> {
+    fn set(&self, _: &str, _: u32) {}
+    fn cancelled(&self) -> bool {
+        false
+    }
+    fn confirm_update(&self, version: &str, bytes: u64) -> Result<()> {
+        assert!(
+            self.source.requests.lock().unwrap().is_empty(),
+            "game payload preceded consent"
+        );
+        self.prompts.lock().unwrap().push((version.into(), bytes));
+        anyhow::bail!("update cancelled by player")
+    }
+}
 struct Files {
     root: PathBuf,
     game_dir: String,
@@ -118,6 +136,56 @@ fn real_package_delta_preserves_personal_files_and_first_launch_rollback() {
         requests: Mutex::new(vec![]),
     };
     let old_engine_hash = update::active_engine(&root).unwrap().0.exe_sha256;
+    let highest_before = fs::read(root.join(".update/highest.txt")).ok();
+    let transaction_before = fs::read(root.join(".update/transaction.json")).ok();
+    let log_before = fs::read(root.join(".update/last-run.jsonl")).ok();
+    let optional = update::probe_update(&root, &files, &Quiet).unwrap();
+    assert!(optional.update_available);
+    assert!(files.requests.lock().unwrap().is_empty());
+    assert_eq!(
+        fs::read(root.join(".update/highest.txt")).ok(),
+        highest_before
+    );
+    assert_eq!(
+        fs::read(root.join(".update/transaction.json")).ok(),
+        transaction_before
+    );
+    assert_eq!(
+        fs::read(root.join(".update/last-run.jsonl")).ok(),
+        log_before
+    );
+    assert_eq!(
+        update::active_engine(&root).unwrap().0.exe_sha256,
+        old_engine_hash
+    );
+    assert_eq!(
+        update::verify_installed(&root).unwrap(),
+        config["expectedOldCandidate"].as_str().unwrap()
+    );
+    let denied = Deny {
+        source: &files,
+        prompts: Mutex::new(vec![]),
+    };
+    let original_version = fs::read(root.join("game/VERSION.json")).unwrap();
+    assert!(update::check_update(&root, &files, &denied)
+        .unwrap_err()
+        .to_string()
+        .contains("cancelled"));
+    assert_eq!(denied.prompts.lock().unwrap().len(), 1);
+    assert!(files.requests.lock().unwrap().is_empty());
+    assert_eq!(
+        fs::read(root.join("game/VERSION.json")).unwrap(),
+        original_version
+    );
+    assert_eq!(
+        update::active_engine(&root).unwrap().0.exe_sha256,
+        old_engine_hash
+    );
+    assert!(!transaction::pending_activation(&root).unwrap());
+    assert_eq!(
+        update::verify_launch(&root).unwrap(),
+        config["expectedOldCandidate"].as_str().unwrap()
+    );
     let result = update::check_update(&root, &files, &Quiet).unwrap();
     let expected: Vec<_> = config["expectedChangedPayload"]
         .as_array()
