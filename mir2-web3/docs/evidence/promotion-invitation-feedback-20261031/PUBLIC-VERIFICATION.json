@@ -1,0 +1,81 @@
+{
+  "schema": "mir2.promotion-invitation-feedback.public-get.v1",
+  "observedAtUtc": "2026-10-30T19:19:40.816Z",
+  "sourceSha": "3d8f81752fc21400622808a5d00a871b47047ed5",
+  "deploymentId": "dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+  "origin": "https://mir2.obelisk.build",
+  "versionStatus": 200,
+  "promotionStatus": 200,
+  "anonymousBootstrap": {
+    "authenticated": false,
+    "gameClient": "windows",
+    "campaignId": "numeron-windows-playtest-20261030",
+    "commissionEnabled": true,
+    "payoutEnabled": false
+  },
+  "checks": {
+    "invitationInlineError": true,
+    "candidatePending": true,
+    "explicitSteps": true,
+    "chineseSteps": true,
+    "activityCodeError": true,
+    "firstPaymentError": true
+  },
+  "javaScriptAssets": [
+    {
+      "path": "/_next/static/chunks/webpack-36cb6c1fc4869431.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "ac3a57f8916658d1cc4a995f27c68d731b4d8a3b349681740f5fa9e24a34fbdd"
+    },
+    {
+      "path": "/_next/static/chunks/4bd1b696-c2f6e0877b6c10aa.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "c44812d818aed0a5034941164dcad78b5bb7d8a00daed7a33efe3ebc6ccfb492"
+    },
+    {
+      "path": "/_next/static/chunks/3794-16ac01492fdfabed.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "d7f3f986d8705e297ad712d4c81224e7fd10ba75d889ab70e9696aab0484c105"
+    },
+    {
+      "path": "/_next/static/chunks/main-app-328ef8029036f00a.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "7435151efd0fa890ffdf4ad89bbf6f52a5ee68cb8c2f1757d5222fabe0f1429e"
+    },
+    {
+      "path": "/_next/static/chunks/9028-7172eda64ce94c2f.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "6fc87918b974773d0d3d42807f69fb0d741af31edd8df05befd7082c635c9e8c"
+    },
+    {
+      "path": "/_next/static/chunks/app/layout-6701f0e96e6e8c58.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "e31802cdf5011efdb7a80a9008d1ddeff948f2c4e6f64a054e7929fd06814763"
+    },
+    {
+      "path": "/_next/static/chunks/5024-e37421197ab33604.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "e646628bf1dfdba4177c3e3d9fa6cfdf86426c8313a2bc48e19d09b70c498280"
+    },
+    {
+      "path": "/_next/static/chunks/7325-653a8d78208e7258.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "4b7d74be82efb20cdd92b345109760fe530521adfbbaeb954c13df62efbcdcb8"
+    },
+    {
+      "path": "/_next/static/chunks/app/promotions/page-6af261f696798363.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "55e5a5a23791dfe2ae9026dd6e51208decec036e029e56d40806ed9a9f022eb1"
+    },
+    {
+      "path": "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_9yLef9wXkWDovACg9atHU1W1uBSx",
+      "status": 200,
+      "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683"
+    }
+  ],
+  "requests": "GET only; no cookies or authorization headers",
+  "candidateOrConfirmPosted": false,
+  "financialOrGameDataMutation": false,
+  "humanFrontendAccepted": false,
+  "dockerStarted": false
+}

@@ -85,6 +85,34 @@ const buildRevision =
   process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
   "";
 
+// The public site shares this origin with the game, while keeping its own build
+// and static-chunk namespace. This is server configuration, never request input.
+// Downloadable standalone clients retain their local root game entry.
+const marketingProxyEnabled = process.env.MIR2_NEXT_STANDALONE !== "1";
+const marketingOriginUrl = new URL(
+  (marketingProxyEnabled ? process.env.MIR2_MARKETING_ORIGIN?.trim() : undefined) ||
+    "https://numeron-legend-of-rebirth.vercel.app",
+);
+const localMarketingOrigin =
+  process.env.VERCEL !== "1" &&
+  marketingOriginUrl.protocol === "http:" &&
+  ["127.0.0.1", "localhost"].includes(marketingOriginUrl.hostname);
+// Next's destination compiler treats IPv6 literal colons as route parameters.
+if (
+  marketingOriginUrl.username ||
+  marketingOriginUrl.password ||
+  marketingOriginUrl.pathname !== "/" ||
+  marketingOriginUrl.search ||
+  marketingOriginUrl.hash ||
+  marketingOriginUrl.hostname.includes(":") ||
+  (marketingOriginUrl.protocol !== "https:" && !localMarketingOrigin) ||
+  marketingOriginUrl.hostname === "mir2.obelisk.build"
+) {
+  throw new Error("MIR2_MARKETING_ORIGIN must be a separate HTTPS origin (loopback HTTP is allowed locally)");
+}
+const marketingOrigin = marketingOriginUrl.origin;
+const marketingLocales = "zh-CN|en|ja|ko|zh-TW|es|pt-BR|de|fr|ru|pl|tr|th|vi|id|ar";
+
 // Heavy static game media (PNG/WAV/WASM/cursor) is served by Vercel static
 // output and the Cloudflare Worker + R2 origin; these server functions only read
 // small JSON/meta at runtime, never the media itself. Excluding the media from
@@ -315,8 +343,31 @@ const nextConfig: NextConfig = {
     // hotlink protection then 403s it. The handler does its own server-side fetch
     // (Node fetch sends no Referer) so R2 returns 200.
     return {
-      // proxy.ts validates the current version and declared package before rewrite.
-      beforeFiles: [],
+      // proxy.ts validates immutable runtime requests before any local rewrite.
+      beforeFiles: [
+        ...(marketingProxyEnabled ? [
+          { source: "/", destination: `${marketingOrigin}/zh-CN` },
+          {
+            source: `/:locale(${marketingLocales})`,
+            destination: `${marketingOrigin}/:locale`,
+          },
+          {
+            source: `/:locale(${marketingLocales})/:path+`,
+            destination: `${marketingOrigin}/:locale/:path+`,
+          },
+          {
+            source: "/marketing-assets/_next/static/:path*",
+            destination: `${marketingOrigin}/marketing-assets/_next/static/:path*`,
+          },
+          { source: "/gameplay/:path*", destination: `${marketingOrigin}/gameplay/:path*` },
+          { source: "/og.png", destination: `${marketingOrigin}/og.png` },
+          { source: "/explore/:path*", destination: `${marketingOrigin}/explore/:path*` },
+          ...["/api/attribution", "/api/founder-interest", "/api/game-status", "/robots.txt", "/sitemap.xml", "/icon"].map((source) => ({
+            source,
+            destination: `${marketingOrigin}${source}`,
+          })),
+        ] : []),
+      ],
       fallback: assetPrefixes.map((prefix) => ({
         source: `/${prefix}/:path*`,
         destination: `/api/r2-proxy/${prefix}/:path*`,

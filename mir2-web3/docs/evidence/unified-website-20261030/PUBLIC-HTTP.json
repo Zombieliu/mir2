@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-30T07:54:21.731Z",
+  "routes": [
+    {
+      "path": "/",
+      "status": 200
+    },
+    {
+      "path": "/en",
+      "status": 200
+    },
+    {
+      "path": "/game",
+      "status": 200
+    },
+    {
+      "path": "/promotions?lang=zh-CN",
+      "status": 200
+    },
+    {
+      "path": "/version",
+      "status": 200,
+      "revision": "427f1d11d9612e04a7c243cf41f9a1f77fa4dd3a"
+    },
+    {
+      "path": "/api/promotions/bootstrap",
+      "status": 200,
+      "campaignId": "numeron-playtest-20261029",
+      "environment": "test"
+    }
+  ]
+}

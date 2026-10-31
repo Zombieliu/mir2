@@ -1,0 +1,89 @@
+{
+  "schema": "mir2.promotion-realtime-public-browser.v1",
+  "verifiedAtUtc": "2026-10-30T11:05:47.366Z",
+  "origin": "https://mir2.obelisk.build",
+  "expectedSourceSha": "d10e5a98647f88aca6b7dc9f4fada3c247dbf0b5",
+  "expectedSourceShaAuthority": "root verified deployment metadata; browser verifies rendered behavior",
+  "anonymousIsolatedContext": true,
+  "fixtureResponses": 0,
+  "userCookiesRead": false,
+  "realBusinessPosts": 0,
+  "observations": {
+    "websiteRevision": {
+      "status": 200,
+      "revision": "d10e5a98647f88aca6b7dc9f4fada3c247dbf0b5",
+      "cache": {
+        "cache-control": "no-store",
+        "age": "0",
+        "x-vercel-cache": "MISS",
+        "cf-cache-status": "DYNAMIC"
+      }
+    },
+    "anonymousEarnings": {
+      "status": 200,
+      "initialApiReadCount": 1,
+      "additionalApiReads": 0,
+      "realObservationMs": 11324,
+      "desktopOverflow": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      },
+      "mobileOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "authenticatedControls": false,
+      "paymentTimingCopyVisible": true
+    },
+    "mainNavigation": {
+      "status": 200,
+      "headerPromotionLinks": 2,
+      "footerPromotionLinks": 1,
+      "mobilePromotionVisible": true,
+      "desktopOverflow": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      },
+      "mobileOverflow": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      },
+      "promotionHref": "https://mir2.obelisk.build/promotions?lang=zh-CN"
+    },
+    "gameEntry": {
+      "status": 200,
+      "url": "https://mir2.obelisk.build/game",
+      "title": "Legend of Mir 2",
+      "canvasCount": 3,
+      "inputCount": 4,
+      "loginOrGameSurfaceVisible": true
+    }
+  },
+  "errors": [
+    {
+      "page": "promotions",
+      "type": "pageerror",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    }
+  ],
+  "blockedWrites": [],
+  "promotionReads": [
+    {
+      "page": "promotions",
+      "method": "GET",
+      "path": "/api/promotions/bootstrap",
+      "atMs": 1793358315701
+    }
+  ],
+  "failures": [
+    {
+      "name": "readOnlyAndConsole",
+      "message": "Browser console/page errors must be investigated\n+ actual - expected\n\n+ [\n+   {\n+     message: 'Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.',\n+     page: 'promotions',\n+     type: 'pageerror'\n+   }\n+ ]\n- []\n"
+    }
+  ],
+  "passed": false
+}

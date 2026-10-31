@@ -1,4 +1,5 @@
 "use client";
+import { isPromotionGamePath, PROMOTION_GAME_WS, requestPromotionGameLogin } from "../lib/promotion-game-realm";
 
 import { PwaGameShell } from "./components/pwa-game-shell";
 
@@ -1541,6 +1542,7 @@ function isAiLiveAudioEnabled() {
 
 function resolveGatewayWebSocketUrl() {
   if (typeof window === "undefined") return CONFIGURED_GATEWAY_WS_URL || LOCAL_GATEWAY_WS_URL;
+  if (isPromotionGamePath(window.location.pathname)) return PROMOTION_GAME_WS;
   const onLocalHost = isLocalWebHost(window.location.hostname);
   // The `gatewayWs` query override is a local-development convenience only.
   // Honoring it on a hosted origin would let a crafted link silently redirect a
@@ -7130,7 +7132,7 @@ export default function HomePage() {
     if (!auth.accountId.trim()) {
       return null;
     }
-    if (auth.kind === "sui" && auth.expiresAt <= Date.now() + 5000) {
+    if (auth.kind === "sui" && auth.expiresAt <= Date.now() + 5000 && !isPromotionGamePath(window.location.pathname)) {
       return null;
     }
 
@@ -7148,6 +7150,25 @@ export default function HomePage() {
   }
 
   function sendGatewayReconnectSequence(snapshot: ReconnectSnapshot) {
+    if (isPromotionGamePath(window.location.pathname) && snapshot.auth.kind === "sui") {
+      const lease = captureIdentityIntent();
+      const expectedAccount = snapshot.auth.accountId;
+      void requestPromotionGameLogin().then(login => {
+        // A refresh cannot authenticate a replaced socket, identity or reconnect attempt.
+        if (!identityIntentCurrent(lease) || reconnectSnapshotRef.current !== snapshot ||
+          lease.socket?.readyState !== WebSocket.OPEN || !gatewayProtocolReadyRef.current) return;
+        if (login.accountId !== expectedAccount) { failGatewayReconnect(); return; }
+        snapshot.auth = { kind: "sui", accountId: login.accountId, token: login.token, expiresAt: login.expiresAt };
+        activeReconnectAuthRef.current = snapshot.auth;
+        const command = Object.freeze({ type: "passkeyLogin", accountId: login.accountId, token: login.token });
+        if (sendPreauthAttempt({ epoch: lease.epoch, kind: "login", command, reconnect: true })) {
+          send({ type: "startGame", characterIndex: snapshot.characterIndex }, { quiet: true });
+        }
+      }).catch(() => {
+        if (identityIntentCurrent(lease) && reconnectSnapshotRef.current === snapshot) failGatewayReconnect();
+      });
+      return;
+    }
     const command = snapshot.auth.kind === "sui"
       ? { type: "passkeyLogin", accountId: snapshot.auth.accountId, token: snapshot.auth.token }
       : { type: "login", accountId: snapshot.auth.accountId, password: snapshot.auth.password };
@@ -7725,7 +7746,8 @@ export default function HomePage() {
     setLoginBusy(true);
     setLoginErrorKey(null);
     try {
-      const login = await requestSuiLoginToken(kind, walletId);
+      const login = isPromotionGamePath(window.location.pathname)
+        ? await requestPromotionGameLogin() : await requestSuiLoginToken(kind, walletId);
       if (intent !== oauthIntentRef.current || !identityIntentCurrent(lease) || !authSurfaceCurrent(epoch, "login")) return;
       setLoginBusy(false);
       submitIdentitySession(login, kind);
@@ -7748,6 +7770,7 @@ export default function HomePage() {
   }
 
   async function submitDubheQrLogin() {
+    if (isPromotionGamePath(window.location.pathname)) { await submitSuiLogin("wallet"); return; }
     const epoch = loginAuthRef.current.epoch;
     if (!authSurfaceCurrent(epoch, "login") || (loginBusyRef.current && !dubheQrAbortRef.current)) return;
     dubheQrAbortRef.current?.abort();
@@ -7802,6 +7825,7 @@ export default function HomePage() {
   }
 
   function toggleWalletPicker() {
+    if (isPromotionGamePath(window.location.pathname)) { void submitSuiLogin("wallet"); return; }
     setSuiWallets(getSuiWalletSummaries());
     setWalletPickerOpen((current) => !current);
   }

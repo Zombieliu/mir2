@@ -8,6 +8,7 @@ import {
   issueGatewayPasskeyToken,
   passkeyGatewaySecret,
   passkeyRequestOriginAllowed,
+  type PasskeyAuthContext,
 } from "./passkey-auth";
 
 // Dubhe Connect v2 contract, pinned to upstream c318c458490bd0115f4df35827d6c418d7c1227b:
@@ -21,6 +22,12 @@ const MAX_INTENT_LENGTH = 12_000;
 const APP_NAME = "Mir2 Web3";
 const STATEMENT = "Sign in to Mir2 Web3 with Dubhe Wallet.";
 const NO_STORE = { "Cache-Control": "no-store", Pragma: "no-cache" };
+
+export type DubheAuthContext = PasskeyAuthContext & Readonly<{
+  relayOrigin: string;
+  walletOrigin: string;
+  network: "testnet" | "mainnet";
+}>;
 
 type ConnectRequest = {
   appName: string;
@@ -92,7 +99,12 @@ function secureOrigin(value: unknown): string {
   return url.origin;
 }
 
-function config() {
+function config(context?: DubheAuthContext) {
+  if (context) {
+    const relayOrigin = secureOrigin(context.relayOrigin), walletOrigin = secureOrigin(context.walletOrigin);
+    if (context.network !== "testnet" && context.network !== "mainnet") fail(503);
+    return { relayOrigin, walletOrigin, network: context.network };
+  }
   const relayOrigin = secureOrigin(
     process.env.MIR2_DUBHE_CONNECT_RELAY_URL?.trim() ||
       "https://dubhe-connect-relay.zombiesliu.workers.dev",
@@ -156,23 +168,23 @@ function sessionStatus(value: unknown): ConnectSession["status"] {
   return value;
 }
 
-function signIntent(intent: ConnectIntent): string {
+function signIntent(intent: ConnectIntent, context?: DubheAuthContext): string {
   const payload = Buffer.from(JSON.stringify(intent)).toString("base64url");
-  const mac = createHmac("sha256", passkeyGatewaySecret())
+  const mac = createHmac("sha256", passkeyGatewaySecret(context))
     .update(`${INTENT_AUTH}\0${payload}`).digest("base64url");
   return `${payload}.${mac}`;
 }
 
-function verifyIntent(token: string, origin: string): ConnectIntent {
+function verifyIntent(token: string, origin: string, context?: DubheAuthContext): ConnectIntent {
   if (token.length > MAX_INTENT_LENGTH || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)) fail();
   const [payload, mac] = token.split(".");
   const actual = Buffer.from(mac, "base64url");
-  const expected = createHmac("sha256", passkeyGatewaySecret())
+  const expected = createHmac("sha256", passkeyGatewaySecret(context))
     .update(`${INTENT_AUTH}\0${payload}`).digest();
   if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) fail();
   const intent = object(JSON.parse(Buffer.from(payload, "base64url").toString("utf8")));
   const trusted = envelope(intent.session);
-  const { relayOrigin, walletOrigin, network } = config();
+  const { relayOrigin, walletOrigin, network } = config(context);
   const iatMs = intent.iatMs;
   const expMs = intent.expMs;
   if (
@@ -220,9 +232,9 @@ async function relayJson(url: string, init?: RequestInit) {
   return boundedJson(response, MAX_RELAY_BYTES);
 }
 
-async function allowedOrigin(request: Request): Promise<string> {
+async function allowedOrigin(request: Request, context?: DubheAuthContext): Promise<string> {
   const origin = request.headers.get("origin");
-  if (!origin || !passkeyRequestOriginAllowed(origin, request.url)) fail(403);
+  if (!origin || !passkeyRequestOriginAllowed(origin, request.url, context)) fail(403);
   secureOrigin(origin);
   // These endpoints accept no client-selected relay, session, network or proof.
   if (request.body) {
@@ -247,12 +259,12 @@ function errorResponse(error: unknown) {
     error instanceof LoginError ? error.status : 503);
 }
 
-export async function createDubheConnectLogin(request: Request): Promise<Response> {
+export async function createDubheConnectLogin(request: Request, context?: DubheAuthContext): Promise<Response> {
   try {
-    const origin = await allowedOrigin(request);
-    const { relayOrigin, walletOrigin, network } = config();
+    const origin = await allowedOrigin(request, context);
+    const { relayOrigin, walletOrigin, network } = config(context);
     // Fail closed before creating a public relay session if login signing is unconfigured.
-    passkeyGatewaySecret();
+    passkeyGatewaySecret(context);
     const iatMs = Date.now();
     const created = object(await relayJson(`${relayOrigin}/sessions`, {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -276,7 +288,7 @@ export async function createDubheConnectLogin(request: Request): Promise<Respons
     const intentIssuedAt = Math.max(iatMs, requestedAt);
     const intentToken = signIntent({
       auth: INTENT_AUTH, iatMs: intentIssuedAt, expMs: expiresAt, session: trusted,
-    });
+    }, context);
     return response({ sessionId: trusted.id, approvalUrl: trusted.approvalUrl, expiresAt, intentToken });
   } catch (error) {
     return errorResponse(error);
@@ -294,12 +306,12 @@ export function buildDubheConnectLoginMessage(session: ConnectEnvelope): string 
   ].join("\n");
 }
 
-export async function readDubheConnectLogin(request: Request): Promise<Response> {
+export async function readDubheConnectLogin(request: Request, context?: DubheAuthContext): Promise<Response> {
   try {
-    const origin = await allowedOrigin(request);
+    const origin = await allowedOrigin(request, context);
     const authorization = request.headers.get("authorization") ?? "";
     if (!authorization.startsWith("Bearer ")) fail();
-    const intent = verifyIntent(authorization.slice(7), origin);
+    const intent = verifyIntent(authorization.slice(7), origin, context);
     if (intent.expMs <= Date.now()) return response({ status: "expired" });
     // Never fetch a poll URL or relay supplied by a browser or callback query string.
     const value = object(await relayJson(`${intent.session.relayOrigin}/sessions/${intent.session.id}`));
@@ -329,7 +341,7 @@ export async function readDubheConnectLogin(request: Request): Promise<Response>
     // channel exchange atomically consumes this deterministic jti exactly once in its
     // shared cache. Fixed expiry prevents reissuing a longer-lived proof after that
     // cache entry expires; no Next process-memory replay store is needed.
-    const token = issueGatewayPasskeyToken(accountId, `dubhe-connect:${trusted.id}`, intent.expMs, "wallet");
+    const token = issueGatewayPasskeyToken(accountId, `dubhe-connect:${trusted.id}`, intent.expMs, "wallet", context);
     return response({ status: "approved", login: {
       accountId, provider: "suiWallet", token, expiresAt: intent.expMs,
     } });

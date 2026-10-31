@@ -82,6 +82,7 @@ const COPY_BY_LANGUAGE: Record<Mir2Language, PwaCopy> = {
 
 export function PwaGameShellCapture({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const isGamePath = pathname === "/" || pathname === "/game" || pathname === "/game/";
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [mobileBrowser, setMobileBrowser] = useState(false);
   const [standalone, setStandalone] = useState(false);
@@ -102,7 +103,7 @@ export function PwaGameShellCapture({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (pathname !== "/") return;
+    if (!isGamePath) return;
 
     const detectedIos = isIosDevice();
     const coarsePointer = window.matchMedia("(pointer: coarse)");
@@ -159,7 +160,7 @@ export function PwaGameShellCapture({ children }: { children: ReactNode }) {
       standaloneQuery.removeEventListener("change", refreshDisplayMode);
       fullscreenQuery.removeEventListener("change", refreshDisplayMode);
     };
-  }, [pathname, refreshDisplayMode]);
+  }, [isGamePath, refreshDisplayMode]);
 
   const install = useCallback(async () => {
     setStatus(null);
@@ -219,7 +220,8 @@ export function PwaGameShell({ language }: { language: Mir2Language }) {
   } = state;
   const copy = COPY_BY_LANGUAGE[language];
 
-  if (pathname !== "/" || !mobileBrowser || standalone || fullscreenActive) return null;
+  const isGamePath = pathname === "/" || pathname === "/game" || pathname === "/game/";
+  if (!isGamePath || !mobileBrowser || standalone || fullscreenActive) return null;
 
   return (
     <aside className="mir-pwa-shell" data-ios={ios ? "true" : "false"} data-ui-interactive="true">

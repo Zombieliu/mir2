@@ -1,0 +1,31 @@
+{
+  "sourceSha": "6dd53209d507dcab57b7de0ddba820b28da5800a",
+  "deploymentId": "dpl_GuricEhcXbVub8u3u3HSt2VR5wGe",
+  "website": "https://mir2.obelisk.build/promotions",
+  "contextRun": 41009289406,
+  "stageRun": 41009490727,
+  "promoteRun": 41009733755,
+  "localeCheck": {
+    "passed": true,
+    "locales": 10,
+    "mainKeys": 161,
+    "normalizerCases": 22,
+    "existingLocalesPreserved": true,
+    "templateVariablesPreserved": true
+  },
+  "supplementalStrings": 81,
+  "adjacentRegressionPassed": 27,
+  "fullTypecheckExitCode": 0,
+  "publicHttpStatus": 200,
+  "browserVerified": [
+    "Simplified selected automatically for the existing Chinese browser preference",
+    "Manual switch to Traditional preserves its original copy",
+    "Manual switch to Simplified renders the complete page",
+    "Reload preserves the Simplified selection"
+  ],
+  "screenshot": "PUBLIC-SIMPLIFIED.png",
+  "screenshotSha256": "be1924532ddb562869c277a4531d483a17f180a9541d2e26b2be954c38b6b3ae",
+  "dockerStarted": false,
+  "backendChanged": false,
+  "paymentControlsChanged": false
+}
