@@ -1,0 +1,57 @@
+{
+  "schema": "mir2.unified.canonical-checkout.v1",
+  "recordedAtUtc": "2026-10-31T21:48:21.386971+00:00",
+  "canonicalDirectory": "E:\\mir2-player-journey",
+  "verification": {
+    "schema": "mir2.unified-codeline-verification.v1",
+    "branch": "codex/windows-player-journey",
+    "head": "7ca5712beeafcec6875691ca120a3e71ee862871",
+    "requiredAncestors": {
+      "windowsUiAndLauncher": "21c744ea1dd8dad51cd2b19b586b5080e5af32ec",
+      "capacityAuthority": "48abee4711930715f81447314d328b1c4cf8b8bc",
+      "walletUsdcPromotionBackend": "964825606dbbdc2ed1b0de599bc4f0ca6c297c67",
+      "websiteAndPromotionUi": "3a52daef5c3fe92e1e738d6656b9fdbf54de56c3",
+      "originalUncommittedWorkCheckpoint": "e4fab71b44e1da5045b75eb5cabce96cbc68c358"
+    },
+    "passed": true,
+    "errors": []
+  },
+  "rawInputs": {
+    "schema": "mir2.unified.canonical-source-proof.v1",
+    "root": "E:\\mir2-player-journey",
+    "head": "7ca5712beeafcec6875691ca120a3e71ee862871",
+    "nativeWitnessFiles": 465,
+    "nativeRawByteDifferences": [],
+    "webWitnessFiles": 27,
+    "webRawByteDifferences": [],
+    "eolAlignedFiles": [
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/equipment_creature_host.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_tests.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_buff_dialog.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_defaults.json",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/leave_game_dialog.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/status_hud_source.json",
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/map.rs",
+      "mir2-web3/apps/game-client/client-bevy/src/skill_binding_persistence.rs",
+      "mir2-web3/apps/game-client/client-wire/Cargo.lock",
+      "mir2-web3/apps/game-client/platform-windows/src/frame_sets.rs",
+      "mir2-web3/apps/game-client/resource-pack/Cargo.lock",
+      "mir2-web3/apps/game-client/runtime/Cargo.lock"
+    ],
+    "indexTreeUnchanged": true,
+    "passed": true,
+    "verifiedAtUtc": "2026-10-31T21:47:07.551688+00:00"
+  },
+  "preservation": {
+    "originalSourceCheckpoint": "e4fab71b44e1da5045b75eb5cabce96cbc68c358",
+    "backedUpFiles": 226,
+    "archivedUntrackedSourceFiles": 166,
+    "allArchivedSourceHashesVerified": true,
+    "generatedTreesMoved": false,
+    "recursiveDeleteUsed": false,
+    "forcedGitUpdateUsed": false
+  },
+  "remotePush": "Pending next step; this receipt does not claim publication",
+  "publicDeployment": "No release operation performed"
+}
