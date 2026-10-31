@@ -67,7 +67,9 @@ mir2-web3/docs/generated/player-qa/movement-jitter/
 /work/
 /.codex/tmp/
 /mir2-web3/apps/web/.mir2-thin-*/
-/mir2-web3/apps/web/tsconfig.mir2-*.json
+/mir2-web3/apps/web/tsconfig.native-wallet-test.*.json
+/mir2-web3/apps/web/tsconfig.promotion-preview-*.json
+/mir2-web3/apps/web/tsconfig.source*-build*.json
 /mir2-web3/apps/web/(\{url*
 *.writer.lock
 # Retain deliberately linked/malformed publication test outputs locally.

@@ -29,6 +29,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: Verify integrated source histories
+        run: python3 mir2-web3/scripts/verify_unified_codeline.py --require-clean
       - name: Install the native Rust toolchain
         run: rustup toolchain install 1.95.0 --profile minimal
       - name: Start native PostgreSQL with a dedicated disposable database

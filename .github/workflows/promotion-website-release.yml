@@ -34,7 +34,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify all integrated histories before any release operation
+        run: python3 mir2-web3/scripts/verify_unified_codeline.py --require-clean
   website:
+    needs: source
     if: inputs.operation != 'backend-build'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
@@ -286,6 +297,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
   backend:
+    needs: source
     if: inputs.operation == 'backend-build'
     runs-on: ubuntu-24.04
     timeout-minutes: 40

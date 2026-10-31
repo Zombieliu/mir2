@@ -300,15 +300,50 @@ impl Database {
             .batch_execute(&format!("CREATE SCHEMA {schema}"))
             .unwrap_or_else(|_| panic!("fixture schema creation failed"));
         let mut client = db.connect();
-        // The public lease relation must already be provisioned by the test
-        // harness. Account fixtures deliberately never run its migration.
-        for (version, sql) in crate::db_projection::MIGRATIONS {
-            if *version != "0003_zone_owner_leases" {
-                client
-                    .batch_execute(sql)
-                    .unwrap_or_else(|_| panic!("fixture account schema migration failed"));
-            }
+        assert_eq!(
+            client
+                .query_one("SELECT current_schema()", &[])
+                .unwrap()
+                .get::<_, String>(0),
+            schema
+        );
+        // The harness owns the public lease relation. Record its separate
+        // provisioning before using the real runner, so opening the source
+        // never recreates promotion triggers or a private-schema lease shadow.
+        assert!(client
+            .query_one(
+                "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL \
+             AND to_regclass('zone_owner_leases') IS NULL",
+                &[]
+            )
+            .unwrap()
+            .get::<_, bool>(0));
+        client
+            .batch_execute(
+                "CREATE TABLE schema_migrations (version TEXT PRIMARY KEY, \
+             applied_at TIMESTAMPTZ NOT NULL DEFAULT now()); \
+             INSERT INTO schema_migrations(version) VALUES('0003_zone_owner_leases')",
+            )
+            .unwrap();
+        for _ in 0..2 {
+            crate::db_projection::apply_migrations(&mut client)
+                .unwrap_or_else(|_| panic!("fixture account schema migration failed"));
         }
+        assert_eq!(
+            client
+                .query_one("SELECT count(*) FROM schema_migrations", &[])
+                .unwrap()
+                .get::<_, i64>(0),
+            crate::db_projection::MIGRATIONS.len() as i64
+        );
+        assert!(client
+            .query_one(
+                "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL \
+             AND to_regclass('zone_owner_leases') IS NULL",
+                &[]
+            )
+            .unwrap()
+            .get::<_, bool>(0));
         db.put("owner-a", 7, 120_000, 1);
         Some(db)
     }
@@ -518,6 +553,20 @@ fn zone_save_fence_postgres_missing_table_and_bounded_lock_wait_fail_closed() {
         .query_one("SHOW statement_timeout", &[])
         .unwrap()
         .get(0);
+    // A matching private-schema impostor must not authorize a save when the
+    // real public lease is unavailable. Only this fixture's own row is copied.
+    client
+        .batch_execute(
+            "CREATE TABLE zone_owner_leases (LIKE public.zone_owner_leases INCLUDING ALL)",
+        )
+        .unwrap();
+    assert_eq!(
+        client.execute(
+            "INSERT INTO zone_owner_leases SELECT * FROM public.zone_owner_leases WHERE zone_id=$1",
+            &[&db.zone],
+        ).unwrap(),
+        1
+    );
     // Transactional rename makes the required public relation absent only for
     // this transaction, then rollback restores it without migration/creation.
     let mut tx = client.transaction().unwrap();

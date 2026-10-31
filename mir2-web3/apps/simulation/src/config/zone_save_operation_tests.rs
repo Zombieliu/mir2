@@ -318,11 +318,49 @@ impl Database {
             ))
             .unwrap();
         let mut client = db.connect();
-        for (version, sql) in crate::db_projection::MIGRATIONS {
-            if *version != "0003_zone_owner_leases" {
-                client.batch_execute(sql).unwrap();
-            }
+        assert_eq!(
+            client
+                .query_one("SELECT current_schema()", &[])
+                .unwrap()
+                .get::<_, String>(0),
+            schema
+        );
+        // The public lease was provisioned separately above. Keep a private
+        // migration ledger and let the real runner record all remaining work,
+        // including promotion triggers that cannot be blindly executed twice.
+        assert!(client
+            .query_one(
+                "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL \
+             AND to_regclass('zone_owner_leases') IS NULL",
+                &[]
+            )
+            .unwrap()
+            .get::<_, bool>(0));
+        client
+            .batch_execute(
+                "CREATE TABLE schema_migrations (version TEXT PRIMARY KEY, \
+             applied_at TIMESTAMPTZ NOT NULL DEFAULT now()); \
+             INSERT INTO schema_migrations(version) VALUES('0003_zone_owner_leases')",
+            )
+            .unwrap();
+        for _ in 0..2 {
+            crate::db_projection::apply_migrations(&mut client).unwrap();
         }
+        assert_eq!(
+            client
+                .query_one("SELECT count(*) FROM schema_migrations", &[])
+                .unwrap()
+                .get::<_, i64>(0),
+            crate::db_projection::MIGRATIONS.len() as i64
+        );
+        assert!(client
+            .query_one(
+                "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL \
+             AND to_regclass('zone_owner_leases') IS NULL",
+                &[]
+            )
+            .unwrap()
+            .get::<_, bool>(0));
         db.put("owner-a", 7, 120_000);
         Some(db)
     }

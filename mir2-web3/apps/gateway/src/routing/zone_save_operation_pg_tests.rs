@@ -175,11 +175,49 @@ impl Database {
             .batch_execute(&format!("CREATE SCHEMA {schema}"))
             .unwrap();
         let mut source = db.connect();
-        for (version, sql) in mir2_simulation::MIGRATIONS {
-            if *version != "0003_zone_owner_leases" {
-                source.batch_execute(sql).unwrap();
-            }
+        assert_eq!(
+            source
+                .query_one("SELECT current_schema()", &[])
+                .unwrap()
+                .get::<_, String>(0),
+            schema
+        );
+        // The authority already provisioned the public lease. Record that fact
+        // in this private ledger so the real runner cannot create a shadow
+        // lease table or rerun non-repeatable promotion triggers on first save.
+        assert!(source
+            .query_one(
+                "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL \
+             AND to_regclass('zone_owner_leases') IS NULL",
+                &[]
+            )
+            .unwrap()
+            .get::<_, bool>(0));
+        source
+            .batch_execute(
+                "CREATE TABLE schema_migrations (version TEXT PRIMARY KEY, \
+             applied_at TIMESTAMPTZ NOT NULL DEFAULT now()); \
+             INSERT INTO schema_migrations(version) VALUES('0003_zone_owner_leases')",
+            )
+            .unwrap();
+        for _ in 0..2 {
+            mir2_simulation::apply_migrations(&mut source).unwrap();
         }
+        assert_eq!(
+            source
+                .query_one("SELECT count(*) FROM schema_migrations", &[])
+                .unwrap()
+                .get::<_, i64>(0),
+            mir2_simulation::MIGRATIONS.len() as i64
+        );
+        assert!(source
+            .query_one(
+                "SELECT to_regclass('public.zone_owner_leases') IS NOT NULL \
+             AND to_regclass('zone_owner_leases') IS NULL",
+                &[]
+            )
+            .unwrap()
+            .get::<_, bool>(0));
         Some(db)
     }
     fn admin(&self) -> Client {
