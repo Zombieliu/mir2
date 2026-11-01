@@ -31,6 +31,8 @@ const GENERATION_CONTROLS = new Map([
 
 function packedObjectLimit(path) {
   if (ALIASES.has(path)) return MAX_PACKED_SMALL;
+  const feed = /^feeds\/s([1-9][0-9]*)-[0-9a-f]{64}\/latest\.(json|p7s)$/.exec(path);
+  if (feed) return Number.isSafeInteger(Number(feed[1])) ? MAX_PACKED_SMALL : null;
   const generation = /^generations\/[0-9a-f]{64}\/([^/]+)$/.exec(path);
   if (generation) return GENERATION_CONTROLS.get(generation[1]) ?? null;
   return /^objects\/packs\/[0-9a-f]{64}\.m2p$/.test(path) ? MAX_PACKED_OBJECT : null;
@@ -75,6 +77,8 @@ export function channelPath(url) {
       path.split("/").some((s) => !s || s === "." || s === ".." || s.startsWith(".") ||
         (scoped && (s.endsWith(" ") || s.endsWith("."))))) return null;
   if (packed) {
+    // Pinned signed feeds have one literal public spelling; do not admit encoded aliases.
+    if (path.startsWith("feeds/") && raw !== path) return null;
     const objectMaximum = packedObjectLimit(path);
     if (objectMaximum === null) return null;
     return {

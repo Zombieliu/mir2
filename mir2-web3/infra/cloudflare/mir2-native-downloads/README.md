@@ -68,6 +68,11 @@ discovery fallback for this reader.
 
 The only public immutable packed objects are:
 
+- `feeds/s<sequence>-<lowercase SHA256>/latest.json` and `latest.p7s`
+  (up to 32 KiB each), for anonymous verification of a pinned signed feed before
+  channel promotion. The sequence is a positive JavaScript safe integer in
+  decimal without leading zeros. These paths must be literal: encoded aliases,
+  repeated separators, queries and fragments are refused before R2 access.
 - `generations/<lowercase SHA256>/GENERATION.json` (up to 4 MiB).
 - `generations/<lowercase SHA256>/GENERATION.p7s` (up to 32 KiB).
 - `generations/<lowercase SHA256>/catalog.json` (up to 128 MiB).
@@ -78,7 +83,10 @@ The only public immutable packed objects are:
 Packed discovery objects are limited to 32 KiB each. `PACK-FEED.*` are local
 updater receipts, not public download objects. Extra files, provenance,
 directory listing, internal pointers and internal feed paths are refused
-before R2 access. Existing root and five-class path and size limits are
+before R2 access, except for the exact immutable signed feed pair listed above.
+Other files below `feeds/` remain private. This does not select or promote a
+channel, and the client must still verify CMS and the signed generation binding.
+Existing root and five-class path and size limits are
 unchanged. The existing streaming R2 body, GET/HEAD, ETag, Range and immutable
 Cache API behavior also applies to these exact packed paths; no origin fetch
 or redirect is added. The current

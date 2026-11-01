@@ -497,6 +497,93 @@ function fetchPacked(f, path, headers = {}, method = "GET") {
   return handle(new Request(PACKED_PUBLIC_BASE + path, { method, headers }), { MIR2_ASSETS: f.bucket }, f.ctx, f.cache);
 }
 
+test("packed pinned feeds expose only canonical pairs without reading a channel pointer", async () => {
+  for (const sequence of ["1", "2026110104", String(Number.MAX_SAFE_INTEGER)]) {
+    for (const [name, type] of [["latest.json", "application/json"], ["latest.p7s", "application/pkcs7-signature"]]) {
+      const f = setup(), path = `feeds/s${sequence}-${"a".repeat(64)}/${name}`;
+      putPacked(f, path, "signed-pair");
+      const head = await fetchPacked(f, path, {}, "HEAD");
+      assert.equal(head.status, 200, path);
+      assert.equal(head.headers.get("content-length"), "11");
+      assert.equal(head.headers.get("content-type"), type);
+      assert.equal(await head.text(), "");
+      assert.ok(f.bucket.calls.every(([op]) => op === "head"));
+      const get = await fetchPacked(f, path);
+      assert.equal(get.status, 200);
+      assert.equal(get.headers.get("location"), null);
+      assert.equal(get.headers.get("content-encoding"), null);
+      assert.match(get.headers.get("cache-control"), /31536000, immutable/);
+      assert.equal(get.headers.get("x-mir2-sequence"), null);
+      assert.equal(await get.text(), "signed-pair");
+      await f.done();
+      const hit = await fetchPacked(f, path, {}, "HEAD");
+      assert.equal(hit.headers.get("x-mir2-native-cache"), "HIT");
+      assert.equal(await hit.text(), "");
+      assert.deepEqual(f.cache.puts, [PACKED_PUBLIC_BASE + path]);
+      assert.ok(f.bucket.calls.every(([, key]) => key === PACKED_OBJECT_PREFIX + path));
+    }
+  }
+});
+
+test("packed pinned feeds retain Range If-Range ETag and bodyless HEAD semantics", async () => {
+  for (const name of ["latest.json", "latest.p7s"]) {
+    const f = setup(), path = feedDirectory(pointer(3)) + name;
+    putPacked(f, path, "0123456789");
+    const head = await fetchPacked(f, path, { Range: "bytes=2-4" }, "HEAD");
+    assert.equal(head.status, 200);
+    assert.equal(head.headers.get("content-length"), "10");
+    assert.equal(head.headers.get("content-range"), null);
+    assert.equal(await head.text(), "");
+    const etag = head.headers.get("etag");
+    const partial = await fetchPacked(f, path, { Range: "bytes=2-4", "If-Range": etag });
+    assert.equal(partial.status, 206);
+    assert.equal(partial.headers.get("content-range"), "bytes 2-4/10");
+    assert.equal(await partial.text(), "234");
+    const stale = await fetchPacked(f, path, { Range: "bytes=2-4", "If-Range": '"stale"' });
+    assert.equal(stale.status, 200);
+    assert.equal(await stale.text(), "0123456789");
+    const unchanged = await fetchPacked(f, path, { "If-None-Match": etag });
+    assert.equal(unchanged.status, 304);
+    assert.equal(await unchanged.text(), "");
+    assert.equal(f.cache.puts.length, 0);
+  }
+});
+
+test("packed pinned feeds enforce their own 32 KiB bound before fetching a body", async () => {
+  for (const name of ["latest.json", "latest.p7s"]) {
+    const path = feedDirectory(pointer(3)) + name, f = setup();
+    putPacked(f, path, "", { declaredSize: MAX_PACKED_SMALL });
+    const head = await fetchPacked(f, path, {}, "HEAD");
+    assert.equal(head.status, 200);
+    assert.equal(head.headers.get("content-length"), "32768");
+    f.bucket.rows.get(PACKED_OBJECT_PREFIX + path).declaredSize++;
+    for (const method of ["HEAD", "GET"]) assert.equal((await fetchPacked(f, path, {}, method)).status, 502);
+    assert.ok(f.bucket.calls.every(([op]) => op === "head"));
+    assert.equal(f.cache.puts.length, 0);
+  }
+});
+
+test("packed pinned feeds reject noncanonical identities aliases and extra files before storage", async () => {
+  const hash = "a".repeat(64), prefix = `feeds/s1-${hash}/`;
+  const denied = [
+    ...["0", "01", "-1", "1.0", "1e3", "9007199254740992", "999999999999999999999999999999999999"].map(n => `feeds/s${n}-${hash}/latest.json`),
+    `feeds/s1-${hash.toUpperCase()}/latest.json`, `feeds/s1-${hash.slice(1)}/latest.json`,
+    "feeds", "feeds/", prefix, prefix + "channels/invited.json", prefix + "provenance.json",
+    ...["latest.JSON", "latest.p7s/child", "latest.json.", "extra.txt", "PACK-FEED.json"].map(name => prefix + name),
+    prefix.replace("feeds", "%66eeds") + "latest.json", prefix.replace("s1-", "s%31-") + "latest.json",
+    prefix.replace(hash, "%61" + hash.slice(1)) + "latest.json", prefix + "latest%2ejson",
+    prefix + "%6catest.p7s", prefix + "latest.json?", prefix + "latest.json?cache=1", prefix + "latest.json#x",
+    prefix.replace("feeds/", "feeds//") + "latest.json", prefix + "/latest.json", prefix + "latest%2fjson",
+  ];
+  for (const path of denied) {
+    const f = setup();
+    const response = await fetchPacked(f, path);
+    assert.equal(response.status, 404, path);
+    assert.equal(f.bucket.calls.length, 0, path);
+    assert.equal(f.cache.matches.length, 0, path);
+  }
+});
+
 test("packed aliases use only their own atomic pointer and never cache discovery", async () => {
   const f = setup();
   const p1 = pointer(3), p2 = pointer(4);
