@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GameplayProof } from "@/app/components/gameplay-proof";
+import { DocumentationEntry } from "@/app/components/documentation-entry";
 import { MotionController } from "@/app/components/motion-controller";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { getProductCopy } from "@/lib/product-copy";
@@ -77,6 +78,7 @@ export default async function HomePage({ params }: HomePageProps) {
         <a className="scroll-cue" href="#world" aria-label={copy.hero.secondary}><span />{productCopy.ui.scroll}</a>
       </section>
 
+      <DocumentationEntry locale={locale} />
       <GameplayProof locale={locale} copy={productCopy.proof} />
 
       <section className="atlas-preview section" id="atlas">

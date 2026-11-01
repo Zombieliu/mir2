@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -p 3080",
     "typecheck": "next typegen && tsc --noEmit --pretty false",
-    "i18n:check": "node scripts/check-i18n.mjs"
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "docs:check": "node scripts/check-documentation.mjs",
+    "docs:example:test": "node --test scripts/test-documentation-example.mjs"
   },
   "dependencies": {
     "next": "16.3.3",

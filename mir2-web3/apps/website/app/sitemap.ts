@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getProductCopy, legalDocuments, productSections } from "@/lib/product-copy";
 import { locales } from "@/lib/site-copy";
+import { documentation } from "@/lib/documentation";
+import { documentationUpdated } from "@/lib/documentation-types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mir2.obelisk.build").replace(/\/$/, "");
@@ -42,5 +44,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     alternates: { languages: { ...Object.fromEntries(locales.map((item) => [item, `${siteUrl}/${item}${path}`])), "x-default": `${siteUrl}/en${path}` } },
   })));
 
-  return [...localized, ...explorerPaths];
+  const documentationPaths = (["guide", "developers"] as const).flatMap((area) => [
+    `/${area}`,
+    ...documentation[area].articles.map(({ slug }) => `/${area}/${slug}`),
+  ]).map((path) => ({
+    url: `${siteUrl}/zh-CN${path}`,
+    lastModified: new Date(`${documentationUpdated}T00:00:00.000Z`),
+    changeFrequency: "weekly" as const,
+    priority: 0.75,
+    alternates: { languages: { "zh-CN": `${siteUrl}/zh-CN${path}` } },
+  }));
+  return [...localized, ...explorerPaths, ...documentationPaths];
 }

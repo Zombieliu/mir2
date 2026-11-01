@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDownloadCopy } from "@/lib/download-copy";
 import { getProductCopy } from "@/lib/product-copy";
 import { getPromotionLink } from "@/lib/promotion-links";
+import { getDocumentationLabels } from "@/lib/documentation-labels";
 import { getCopy, getLocaleMeta, locales, type Locale, type SiteCopy } from "@/lib/site-copy";
 
 type SiteChromeProps = {
@@ -49,6 +50,7 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
   const productCopy = getProductCopy(locale);
   const downloadCopy = getDownloadCopy(locale);
   const promotion = getPromotionLink(locale);
+  const documentation = getDocumentationLabels(locale);
 
   return (
     <>
@@ -86,6 +88,14 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
       <a className="nav-direct" href={explorerUrl}>
         {copy.nav.atlas}<span aria-hidden="true">↗</span>
       </a>
+
+      <details className="nav-group">
+        <summary>{documentation.docs}</summary>
+        <div className="nav-dropdown">
+          <Link href={`/${locale}/guide`}><span>01</span>{documentation.guide}</Link>
+          <Link href={`/${locale}/developers`}><span>02</span>{documentation.developers}</Link>
+        </div>
+      </details>
     </>
   );
 }
@@ -128,11 +138,13 @@ export function SiteFooter({ locale, copy, gameUrl, explorerUrl, currentPage = "
   const productCopy = getProductCopy(locale);
   const downloadCopy = getDownloadCopy(locale);
   const promotion = getPromotionLink(locale);
+  const documentation = getDocumentationLabels(locale);
   const groups = [
     {
       title: copy.footer.game,
       links: [
         { label: copy.nav.home, href: home },
+        { label: documentation.guide, href: `/${locale}/guide` },
         { label: copy.nav.token, href: membership },
         { label: downloadCopy.nav, href: download },
         { ...promotion, hardNavigation: true },
@@ -145,6 +157,7 @@ export function SiteFooter({ locale, copy, gameUrl, explorerUrl, currentPage = "
       title: copy.footer.data,
       links: [
         { label: copy.nav.atlas, href: explorerUrl },
+        { label: documentation.developers, href: `/${locale}/developers` },
         { label: copy.footer.worldPulse, href: `${home}#atlas` },
         { label: copy.nav.global, href: `${home}#global` },
       ],
@@ -198,7 +211,7 @@ export function SiteFooter({ locale, copy, gameUrl, explorerUrl, currentPage = "
             <h2>{group.title}</h2>
             {group.links.map((link) => "hardNavigation" in link && link.hardNavigation
               ? <a key={`${group.title}-${link.href}`} href={link.href} data-track="footer_promotions">{link.label}</a>
-              : <Link key={`${group.title}-${link.href}`} href={link.href}>{link.label}</Link>)}
+              : <Link key={`${group.title}-${link.href}`} href={link.href} prefetch={link.href === explorerUrl ? false : undefined}>{link.label}</Link>)}
           </section>
         ))}
       </nav>

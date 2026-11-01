@@ -75,7 +75,7 @@ try {
     assert.equal(rewrite(routes.beforeFiles, "/", { utm_source: "invited", ref: "public-code" }).query.utm_source, "invited");
     const locales = ["zh-CN", "en", "ja", "ko", "zh-TW", "es", "pt-BR", "de", "fr", "ru", "pl", "tr", "th", "vi", "id", "ar"];
     for (const locale of locales) {
-      for (const suffix of ["", "/", "/download", "/play", "/membership", "/legal/privacy", "/updates/world-launch", "/explore", "/archive/map/bichon-province"]) {
+      for (const suffix of ["", "/", "/download", "/play", "/membership", "/guide", "/guide/payments", "/developers", "/developers/quickstart", "/docs-examples/read-status.mjs", "/legal/privacy", "/updates/world-launch", "/explore", "/archive/map/bichon-province"]) {
         const destination = rewrite(routes.beforeFiles, `/${locale}${suffix}`);
         assert.equal(destination?.hostname, expectedHost, `${locale}${suffix}`);
         assert.equal(destination.pathname.replace(/\/$/, ""), `/${locale}${suffix}`.replace(/\/$/, ""));

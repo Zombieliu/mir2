@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AttributionCapture } from "@/app/components/attribution-capture";
 import { getCopy, getLocaleMeta, getLocalizedAlternates, isLocale, locales } from "@/lib/site-copy";
 import "../globals.css";
+import "../documentation.css";
 
 type LocaleLayoutProps = {
   children: ReactNode;
