@@ -325,7 +325,25 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/playtest-wallet-release/evidence
+          # Install the native prerequisite before build.log's tee. A quiet apt
+          # update after packaging must not occupy the whole job timeout.
+          echo 'BEGIN: native Redis prerequisite'
+          if ! command -v redis-server >/dev/null 2>&1; then
+            redis_install_log=dist/playtest-wallet-release/evidence/native-redis-install.log
+            echo 'BEGIN: bounded native Redis apt update/install'
+            sudo -n timeout --signal=TERM --kill-after=15s 180s apt-get \
+              -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 \
+              update -q >"$redis_install_log" 2>&1
+            sudo -n timeout --signal=TERM --kill-after=15s 180s env DEBIAN_FRONTEND=noninteractive apt-get \
+              -o Acquire::Retries=2 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 \
+              -o Dpkg::Lock::Timeout=30 install --no-install-recommends -y redis-server >>"$redis_install_log" 2>&1
+            echo 'END: bounded native Redis apt update/install'
+          fi
+          command -v redis-server >/dev/null
+          echo 'END: native Redis prerequisite ready'
+          echo 'BEGIN: unchanged isolated PG, security, package, async startup and map gates'
           bash scripts/build-playtest-wallet-release.sh 2>&1 | tee dist/playtest-wallet-release/evidence/build.log
+          echo 'END: isolated playtest release gates'
 
       - name: Upload verified playtest Gateway and maps
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

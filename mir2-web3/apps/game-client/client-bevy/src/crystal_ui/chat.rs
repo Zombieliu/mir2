@@ -344,13 +344,14 @@ impl Plugin for Mir2CrystalChatPlugin {
                     handle_chat_settings_keys,
                     handle_chat_scroll_keys,
                     handle_chat_pointer_scroll,
+                    // Capture presses before a changed snapshot rebuilds their entities.
+                    consume_chat_button_interactions,
                     consume_chat_actions,
                     crate::chat_settings_effects::consume_chat_settings_effects,
                     auto_scroll_on_new_message,
                     render_crystal_chat,
                     sync_chat_button_visuals,
                     sync_chat_settings_button_visuals,
-                    consume_chat_button_interactions,
                 )
                     .chain()
                     .after(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate),
@@ -2202,6 +2203,181 @@ mod tests {
                 .iter(app.world())
                 .count(),
             0
+        );
+    }
+
+    fn rendered_chat_plugin_app() -> App {
+        let settings_path = std::env::temp_dir().join(format!(
+            "mir2-chat-pressed-{}-{}.json",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .expect("test clock")
+                .as_nanos()
+        ));
+        assert!(!settings_path.exists());
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<bevy::input::mouse::MouseWheel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .insert_resource(
+                crate::chat_settings_effects::ChatSettingsRuntime::with_config_path(settings_path),
+            )
+            // Exercise the production registration order, not a test-only chain.
+            .add_plugins(Mir2CrystalChatPlugin);
+        app.update();
+        app
+    }
+
+    fn press_rendered_chat_action(app: &mut App, action: CrystalChatAction) -> Entity {
+        let world = app.world_mut();
+        let entity = world
+            .query_filtered::<(Entity, &CrystalChatAction), With<Button>>()
+            .iter(world)
+            .find_map(|(entity, candidate)| (*candidate == action).then_some(entity))
+            .expect("production-rendered chat button");
+        *world
+            .get_mut::<Interaction>(entity)
+            .expect("button interaction") = Interaction::Pressed;
+        entity
+    }
+
+    fn mark_chat_snapshot_changed(app: &mut App) {
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .set_changed();
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .set_changed();
+        app.world_mut().resource_mut::<ChatModel>().set_changed();
+        app.world_mut()
+            .resource_mut::<CrystalChatState>()
+            .set_changed();
+    }
+
+    #[test]
+    fn rendered_chat_pressed_size_survives_same_frame_snapshot_rebuild() {
+        let mut app = rendered_chat_plugin_app();
+        for (expected, top) in [
+            (CrystalChatWindowSize::Medium, 609.0),
+            (CrystalChatWindowSize::Large, 561.0),
+            (CrystalChatWindowSize::Small, 657.0),
+        ] {
+            let previous = press_rendered_chat_action(&mut app, CrystalChatAction::Resize);
+            mark_chat_snapshot_changed(&mut app);
+            app.update();
+            assert_eq!(
+                app.world().resource::<CrystalChatState>().window_size,
+                expected
+            );
+            assert!(
+                app.world().get_entity(previous).is_err(),
+                "snapshot rebuild replaced the pressed button"
+            );
+            let world = app.world_mut();
+            let (_, node) = world
+                .query::<(&CrystalChatAction, &Node)>()
+                .iter(world)
+                .find(|(action, _)| **action == CrystalChatAction::Resize)
+                .expect("rebuilt size button");
+            assert_eq!(node.top, Val::Px(top));
+            assert!(world.resource::<CrystalChatActionQueue>().is_empty());
+            app.update();
+            assert_eq!(
+                app.world().resource::<CrystalChatState>().window_size,
+                expected,
+                "no repeated action without another press"
+            );
+        }
+    }
+
+    #[test]
+    fn rendered_chat_pressed_guild_filters_rebuilt_text() {
+        let mut app = rendered_chat_plugin_app();
+        for (text, channel) in [("normal-sentinel", "normal"), ("guild-sentinel", "guild")] {
+            app.world_mut().resource_mut::<ChatModel>().push(ChatLine {
+                text: text.into(),
+                channel: channel.into(),
+            });
+        }
+        app.update();
+        let previous = press_rendered_chat_action(&mut app, CrystalChatAction::FilterGuild);
+        mark_chat_snapshot_changed(&mut app);
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().filter,
+            CrystalChatFilter::Guild
+        );
+        assert!(app.world().get_entity(previous).is_err());
+        let world = app.world_mut();
+        let texts = world
+            .query::<&Text>()
+            .iter(world)
+            .map(|text| text.0.clone())
+            .collect::<Vec<_>>();
+        assert!(texts.iter().any(|text| text == "guild-sentinel"));
+        assert!(!texts.iter().any(|text| text == "normal-sentinel"));
+    }
+
+    #[test]
+    fn rendered_chat_pressed_trade_emits_once_before_rebuild() {
+        let mut app = rendered_chat_plugin_app();
+        let previous = press_rendered_chat_action(&mut app, CrystalChatAction::TradeRequest);
+        mark_chat_snapshot_changed(&mut app);
+        app.update();
+        assert!(app.world().get_entity(previous).is_err());
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::TradeRequest]
+        );
+        assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+    }
+
+    #[test]
+    fn rendered_chat_modal_press_is_not_replayed_after_close() {
+        let mut app = rendered_chat_plugin_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .trade_dialog
+            .input_consumed = true;
+        press_rendered_chat_action(&mut app, CrystalChatAction::Resize);
+        mark_chat_snapshot_changed(&mut app);
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().window_size,
+            CrystalChatWindowSize::Small
+        );
+        assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .trade_dialog
+            .input_consumed = false;
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().window_size,
+            CrystalChatWindowSize::Small
+        );
+        assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+        press_rendered_chat_action(&mut app, CrystalChatAction::Resize);
+        mark_chat_snapshot_changed(&mut app);
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().window_size,
+            CrystalChatWindowSize::Medium
         );
     }
 

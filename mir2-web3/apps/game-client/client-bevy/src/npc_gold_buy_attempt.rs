@@ -1,14 +1,17 @@
 //! Host-neutral local attempt gate for ordinary NPC gold purchases.
 //! Transport progress is not a Crystal purchase acknowledgement.
+use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 
 use crate::inventory::InventoryModel;
 use crate::npc_shop_buy::{plan_npc_gold_buy, NpcGoldBuyCommand};
 use crate::shop::ShopModel;
-use mir2_client_core::npc_gold_buy_attempt::NpcGoldBuyAttemptSlot;
 pub use mir2_client_core::npc_gold_buy_attempt::{
     NpcGoldBuyAttemptOutcome, NpcGoldBuyAttemptPhase, NpcGoldBuyAttemptToken,
     NpcGoldBuyConnectionEpoch,
+};
+use mir2_client_core::npc_gold_buy_attempt::{
+    NpcGoldBuyAttemptSlot, NPC_GOLD_BUY_ATTEMPT_HISTORY_LIMIT,
 };
 
 /// Native transport identity only; never added to BuyItem's four wire fields.
@@ -77,6 +80,8 @@ struct GateState {
     source_revision: u64,
     command: Option<(NpcGoldBuyAttemptToken, NpcGoldBuyCommand, String)>,
     waiter: Option<(NpcGoldBuyTicket, std::task::Waker)>,
+    /// Presentation evidence only, recorded after Core's exact durable settlement.
+    durably_settled_tokens: VecDeque<NpcGoldBuyAttemptToken>,
 }
 
 impl GateState {
@@ -338,7 +343,14 @@ impl NpcGoldBuyGate {
         {
             return false;
         }
-        state.attempts.retire_durably_settled(token, &ticket)
+        if !state.attempts.retire_durably_settled(token, &ticket) {
+            return false;
+        }
+        if state.durably_settled_tokens.len() == NPC_GOLD_BUY_ATTEMPT_HISTORY_LIMIT {
+            state.durably_settled_tokens.pop_front();
+        }
+        state.durably_settled_tokens.push_back(token);
+        true
     }
     /// Monotonic Core observation clock for rejecting stale painted controls.
     /// This read-only value grants no purchase or transport authority.
@@ -355,7 +367,15 @@ impl NpcGoldBuyGate {
         let phase = state
             .attempts
             .flight()
-            .or_else(|| state.attempts.history().back())
+            .or_else(|| {
+                // Keep the latest-attempt semantics: do not resurrect an older
+                // unsent/unknown message after the latest result was reconciled.
+                state
+                    .attempts
+                    .history()
+                    .back()
+                    .filter(|attempt| !state.durably_settled_tokens.contains(&attempt.token))
+            })
             .map(|attempt| attempt.phase);
         NpcGoldBuyFeedback {
             phase,
@@ -365,7 +385,10 @@ impl NpcGoldBuyGate {
                 .attempts
                 .history()
                 .iter()
-                .filter(|attempt| attempt.phase == NpcGoldBuyAttemptPhase::Unknown)
+                .filter(|attempt| {
+                    attempt.phase == NpcGoldBuyAttemptPhase::Unknown
+                        && !state.durably_settled_tokens.contains(&attempt.token)
+                })
                 .count(),
         }
     }
@@ -575,6 +598,12 @@ mod tests {
         assert!(gate.reserve(&shop, &inventory, 1).is_none());
         assert!(gate.reserve(&shop, &fresh_inventory, 1).is_none());
         assert!(gate.settle_durable(original, &command));
+        assert!(!gate.feedback().pending);
+        assert_eq!(
+            gate.feedback().phase,
+            None,
+            "reconciled transport history is not a pending result"
+        );
         assert!(!gate.settle_durable(original, &command));
         let (next, _) = gate.reserve(&shop, &fresh_inventory, 1).unwrap();
         assert!(next.value() > token.value());
@@ -583,6 +612,184 @@ mod tests {
         assert_eq!(gate.commit(fresh, || ()), Some(()));
         assert!(!gate.settle_durable(original, &command));
         assert!(gate.feedback().pending);
+    }
+
+    fn entered_feedback_fixture(
+        outcome: NpcGoldBuyAttemptOutcome,
+    ) -> (NpcGoldBuyGate, NpcGoldBuyTicket, NpcGoldBuyCommand) {
+        let (shop, inventory) = models();
+        let gate = connected_gate();
+        assert!(gate.observe(
+            "owner",
+            1,
+            &npc_gold_buy_model_authority(&shop, &inventory).unwrap(),
+            true
+        ));
+        let (token, command) = gate.reserve(&shop, &inventory, 1).unwrap();
+        let original = ticket(token, 1);
+        assert!(gate.bind(token, original));
+        assert_eq!(gate.commit(original, || ()), Some(()));
+        assert!(gate.receipt(original, outcome));
+        (gate, original, command)
+    }
+
+    #[test]
+    fn npc_gold_durable_feedback_clears_only_exact_reconciled_flushed_or_unknown() {
+        for outcome in [
+            NpcGoldBuyAttemptOutcome::Flushed,
+            NpcGoldBuyAttemptOutcome::Unknown,
+        ] {
+            let (gate, original, command) = entered_feedback_fixture(outcome);
+            let before = gate.feedback();
+            assert!(before.pending && !before.can_reserve);
+            gate.withdraw();
+            assert_eq!(gate.feedback().phase, before.phase);
+            assert!(!gate.settle_durable(
+                NpcGoldBuyTicket {
+                    sequence: original.sequence + 1,
+                    ..original
+                },
+                &command
+            ));
+            assert!(gate.feedback().pending);
+            // Trusted-host capability fixture: only the existing Core-settled call
+            // is simulated here, never inferred from timeout, gold or inventory.
+            assert!(gate.settle_durable(original, &command));
+            assert!(!gate.feedback().pending);
+            assert_eq!(gate.feedback().phase, None);
+            assert_eq!(gate.feedback().previous_unknown, 0);
+            assert!(!gate.settle_durable(original, &command));
+            assert_eq!(gate.feedback().phase, None);
+        }
+    }
+
+    #[test]
+    fn npc_gold_durable_feedback_keeps_unresolved_connection_history_and_unsent() {
+        let (gate, original, command) = entered_feedback_fixture(NpcGoldBuyAttemptOutcome::Flushed);
+        assert!(gate.observe_connection(NpcGoldBuyConnectionEpoch {
+            run: 1,
+            connection: 2
+        }));
+        let unresolved = gate.feedback();
+        assert!(!unresolved.pending && !unresolved.can_reserve);
+        assert_eq!(unresolved.phase, Some(NpcGoldBuyAttemptPhase::Unknown));
+        assert_eq!(unresolved.previous_unknown, 1);
+        assert!(!gate.settle_durable(original, &command));
+        assert_eq!(gate.feedback().phase, Some(NpcGoldBuyAttemptPhase::Unknown));
+        let (shop, inventory) = models();
+        assert!(gate.observe(
+            "owner",
+            2,
+            &npc_gold_buy_model_authority(&shop, &inventory).unwrap(),
+            true
+        ));
+        assert!(
+            gate.feedback().can_reserve,
+            "preserve the existing connection-boundary semantics"
+        );
+        let (token, _) = gate.reserve(&shop, &inventory, 1).unwrap();
+        assert!(gate.reject_unpublished(token));
+        assert_eq!(
+            gate.feedback().phase,
+            Some(NpcGoldBuyAttemptPhase::DefinitelyUnsent)
+        );
+        assert!(!gate.feedback().pending);
+        assert_eq!(gate.feedback().previous_unknown, 1);
+    }
+
+    #[test]
+    fn npc_gold_durable_feedback_repeated_settlement_stays_bounded_and_does_not_clear_next_flight()
+    {
+        let (shop, inventory) = models();
+        let gate = connected_gate();
+        assert!(gate.observe(
+            "owner",
+            1,
+            &npc_gold_buy_model_authority(&shop, &inventory).unwrap(),
+            true
+        ));
+        for _ in 0..40 {
+            let (token, command) = gate.reserve(&shop, &inventory, 1).unwrap();
+            let original = ticket(token, 1);
+            assert!(gate.bind(token, original));
+            assert_eq!(gate.commit(original, || ()), Some(()));
+            assert!(gate.receipt(original, NpcGoldBuyAttemptOutcome::Unknown));
+            assert!(gate.settle_durable(original, &command));
+            assert!(!gate.settle_durable(original, &command));
+            assert_eq!(gate.feedback().phase, None);
+            assert_eq!(gate.feedback().previous_unknown, 0);
+        }
+        {
+            let state = gate.0.lock().unwrap();
+            assert_eq!(
+                state.attempts.history().len(),
+                NPC_GOLD_BUY_ATTEMPT_HISTORY_LIMIT
+            );
+            assert_eq!(
+                state.durably_settled_tokens.len(),
+                NPC_GOLD_BUY_ATTEMPT_HISTORY_LIMIT
+            );
+            assert_eq!(
+                state.durably_settled_tokens.front().unwrap().value(),
+                9,
+                "duplicate settlement cannot evict evidence"
+            );
+            assert!(state
+                .attempts
+                .history()
+                .iter()
+                .all(|attempt| state.durably_settled_tokens.contains(&attempt.token)));
+        }
+        let (token, command) = gate.reserve(&shop, &inventory, 1).unwrap();
+        let current = ticket(token, 1);
+        assert!(gate.bind(token, current));
+        assert_eq!(gate.commit(current, || ()), Some(()));
+        assert!(gate.receipt(current, NpcGoldBuyAttemptOutcome::Unknown));
+        assert!(gate.feedback().pending && !gate.feedback().can_reserve);
+        assert_eq!(gate.feedback().phase, Some(NpcGoldBuyAttemptPhase::Unknown));
+        assert!(!gate.settle_durable(
+            NpcGoldBuyTicket {
+                local_attempt_token: token.value() - 1,
+                ..current
+            },
+            &command
+        ));
+        assert!(gate.feedback().pending);
+    }
+    #[test]
+    fn npc_gold_durable_feedback_late_transport_cannot_restore_settled_or_older_failure_text() {
+        let (shop, inventory) = models();
+        let gate = connected_gate();
+        assert!(gate.observe(
+            "owner",
+            1,
+            &npc_gold_buy_model_authority(&shop, &inventory).unwrap(),
+            true
+        ));
+        let (unsent, _) = gate.reserve(&shop, &inventory, 1).unwrap();
+        assert!(gate.reject_unpublished(unsent));
+        assert_eq!(
+            gate.feedback().phase,
+            Some(NpcGoldBuyAttemptPhase::DefinitelyUnsent)
+        );
+        for late in [
+            NpcGoldBuyAttemptOutcome::Flushed,
+            NpcGoldBuyAttemptOutcome::Unknown,
+        ] {
+            let (token, command) = gate.reserve(&shop, &inventory, 1).unwrap();
+            let original = ticket(token, 1);
+            assert!(gate.bind(token, original));
+            assert_eq!(gate.commit(original, || ()), Some(()));
+            assert!(gate.feedback().pending);
+            // A correlated Core receipt+applied snapshot may win the transport
+            // flush callback. This fixture never interprets it as purchase success.
+            assert!(gate.settle_durable(original, &command));
+            assert_eq!(gate.feedback().phase, None);
+            assert!(gate.receipt(original, late));
+            assert!(!gate.feedback().pending);
+            assert_eq!(gate.feedback().phase, None);
+            assert_eq!(gate.feedback().previous_unknown, 0);
+        }
     }
     #[test]
     fn npc_gold_gate_preserves_entered_on_close_and_exact_old_unsent() {
