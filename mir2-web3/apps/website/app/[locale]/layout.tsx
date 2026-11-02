@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AttributionCapture } from "@/app/components/attribution-capture";
-import { getCopy, getLocaleMeta, getLocalizedAlternates, isLocale, locales } from "@/lib/site-copy";
+import { getCopy, getLocaleMeta, getLocalizedAlternates, isLocale, locales, publicSiteUrl } from "@/lib/site-copy";
 import { releaseFacts } from "@/lib/release-facts";
 import "../globals.css";
 import "../documentation.css";
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
   const { locale } = await params;
   if (!isLocale(locale)) return {};
   const copy = getCopy(locale);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://numeron.obelisk.build";
+  const siteUrl = publicSiteUrl;
   const pageTitle = locale === "zh-CN"
     ? "Numeron · The Legend of Rebirth"
     : `${copy.hero.titleTop} ${copy.hero.titleBottom}`;
@@ -68,7 +68,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://numeron.obelisk.build";
+  const siteUrl = publicSiteUrl;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [

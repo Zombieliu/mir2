@@ -242,7 +242,7 @@ export function applyProductFacts(locale: Locale, copy: ProductCopy): ProductCop
   return {
     ...copy, pages,
     proof: { ...copy.proof, eyebrow: "INTERNAL DEVELOPMENT", title: f.internal, copy: f.currentValidation, verified: f.temporaryScreenshot, action: f.learn, items: copy.proof.items.map((item,index) => ({ ...item, title: /Mir|Bichon|Sabuk|比奇|沙巴克|비천|미르|ミル/iu.test(item.title) ? `${f.internal} ${index+1}` : item.title, copy: f.temporaryScreenshot })) },
-    play: { ...copy.play, title: f.learn, copy: `${f.state} ${f.currentValidation}`, launch: f.internal, browserCopy: f.state, desktopCopy: f.state, candidate: f.internal, candidateCopy: f.state, requirementItems: copy.play.requirementItems.map(item => /\bMir\b|ミル|미르/iu.test(item) ? f.state : item) },
+    play: { ...copy.play, title: f.learn, copy: `${f.state} ${f.currentValidation} ${f.temporaryScreenshot}`, launch: f.internal, browserCopy: f.state, desktopCopy: f.state, candidate: f.internal, candidateCopy: f.state, requirementItems: copy.play.requirementItems.map(item => /\bMir\b|ミル|미르/iu.test(item) ? f.state : item) },
     membership: { ...copy.membership, founderCopy: `${f.planned} ${f.business}`, examples: copy.membership.examples.map(item => ({ ...item, copy: f.planned })), rollover: f.pending, cancellation: f.pending, refund: f.business },
     watch: { ...copy.watch, archiveCopy: f.currentValidation, still: f.temporaryScreenshot },
     account: { ...copy.account, copy: `${f.prototype} ${f.planned}`, preview: f.prototype },

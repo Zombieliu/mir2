@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { publicSiteUrl } from "@/lib/site-copy";
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://numeron.obelisk.build";
+  const siteUrl = publicSiteUrl;
 
   return {
     rules: { userAgent: "*", allow: "/" },

@@ -1,6 +1,9 @@
 import { additionalLocales, createMarketSiteCopies, localeMeta as getAdditionalLocaleMeta } from "@/lib/market-copy";
 import { applySiteFacts } from "@/lib/release-facts";
 
+// Public SEO URLs are product identity, not a deployment-specific origin.
+export const publicSiteUrl = "https://numeron.obelisk.build";
+
 export const locales = ["zh-CN", "en", "ja", "ko", ...additionalLocales] as const;
 
 export type Locale = (typeof locales)[number];
@@ -595,7 +598,7 @@ export function getCopy(locale: Locale): SiteCopy {
 
 export function getLocalizedAlternates(locale: Locale, path = "") {
   return {
-    canonical: `/${locale}${path}`,
-    languages: { ...Object.fromEntries(locales.map((item) => [item, `/${item}${path}`])), "x-default": `/en${path}` },
+    canonical: `${publicSiteUrl}/${locale}${path}`,
+    languages: { ...Object.fromEntries(locales.map((item) => [item, `${publicSiteUrl}/${item}${path}`])), "x-default": `${publicSiteUrl}/en${path}` },
   };
 }

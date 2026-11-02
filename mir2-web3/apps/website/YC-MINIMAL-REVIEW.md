@@ -47,7 +47,7 @@
 
 | 图片 | 图内可见旧品牌或测试内容 | 处理 |
 | --- | --- | --- |
-| `public/gameplay/character-select.png` | `Legend of Mir 2`；测试角色、等级与 `Last Online 5/18/2026` 等 UI 信息 | 首页/实机卡片注明内部截图与 Crystal 临时素材；不把图中日期当作当前内部验证完成时间。 |
+| `public/gameplay/character-select.png` | `Legend of Mir 2`；测试角色、等级与 `Last Online 5/18/2026` 等 UI 信息 | 首页、实机卡片及 Play 图旁的可见说明注明内部截图与 Crystal 临时素材；不把图中日期当作当前内部验证完成时间。 |
 | `public/gameplay/shared-world.png` | `Bichon Province`、`Legend of Mir 2 Server`、`On-chain Mine(testnet)` | 卡片、相册、Watch fallback 旁的可见说明和下载页 hero intro 均注明临时内部素材；移除公开说明中的旧世界观名称。 |
 | `public/gameplay/skills-and-inventory.png` | 旧 Bichon 地图、Crystal 测试 UI、测试角色内容 | 同上。 |
 | `public/og.png` | `NUMERON`、`Legend of Rebirth`、`传奇重生`；未见旧 Mir 品牌 | 保留原分享图。 |
@@ -105,3 +105,17 @@
 5. 临时 Crystal/Mir 图何时替换为原创正式素材；目前仍可看见图内旧品牌，并有旁注。
 6. 独立 Atlas 原型及其旧路径内容由旧包保留，本轮没有替换代理或声称其数据已经真实接入。
 7. 本地没有部署环境配置的官方社区频道需要与真实部署环境核对，不以本地缺省状态推断其不存在。
+
+## 生产 SEO 根域名修正（305c011cb 之后）
+
+主任务发布后复核发现，Git 生产构建读取历史 `NEXT_PUBLIC_SITE_URL`，导致 canonical、hreflang 与分享图片根域名指向 `numeron-legend-of-rebirth.vercel.app`。这是部署特定 URL 配置残留，不是当前产品入口。
+
+本次只修公开 SEO 链接来源：`lib/site-copy.ts` 明确导出 `publicSiteUrl = https://numeron.obelisk.build`，`getLocalizedAlternates` 直接生成完整公开地址；`app/[locale]/layout.tsx` 的 metadataBase 和 JSON-LD、`app/sitemap.ts`、`app/robots.ts` 统一使用该常量。未读取或修改部署密钥，原游戏、支付、登录及 Atlas 代理地址和行为均未改动，UI 无变更。
+
+新增 guard 在导入前注入旧 `NEXT_PUBLIC_SITE_URL` 与 `VERCEL_URL` 值，检查 canonical/hreflang 仍使用已确认公开域名；最终 HTML 另检查每页 canonical、hreflang、Open Graph/Twitter 图片域名，并检查 sitemap/robots 的公开根地址。构建使用同样的旧 URL 环境值验证该回归，不能由旧环境值覆盖公开规范地址。
+
+最后图片引用复核另发现 Play 图旁的可见介绍仍缺少临时素材说明，已仅在 `lib/release-facts.ts` 的 `play.copy` 追加本地化 Crystal 临时素材说明；`gameUrl`、按钮和逻辑均未改动。guard 同时检查全部 16 语言字典以及最终 Play 页 `launch-copy` 区域中的可见说明。
+
+本轮增量共 7 文件：`lib/site-copy.ts`、`lib/release-facts.ts`、`app/[locale]/layout.tsx`、`app/sitemap.ts`、`app/robots.ts`、`scripts/check-minimal-content.mjs`、本报告。没有修改既有 Git 历史；后续提交和生产发布仍由主任务统一进行。
+
+本轮最终结果：`npm run typecheck`、带旧公开 URL 环境变量的 `npm run build -- --webpack`、16 语言与全部 641 页 guard（含 16 个 Play 图旁可见说明）、`npm run i18n:check`、`git diff --check` 均通过。最终合并 SEO/Play 说明修复构建 `BUILD_ID = gpfCzU1nfwldXdzdld3AU`；按主任务要求不再重开本地预览，最终截图由主任务在线上完成。未提交、推送或部署本轮修复。
