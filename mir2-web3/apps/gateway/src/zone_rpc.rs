@@ -14,11 +14,11 @@ use flate2::write::GzEncoder;
 use flate2::{Compression, GzBuilder};
 use mir2_protocol::{
     decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet,
-    ClientPacket, Point, ServerPacket,
+    ClientPacket, MirGridType, Point, ServerPacket,
 };
 use mir2_simulation::{
-    AccountRecord, ActiveSessionIdentity, CharacterSaveRecord, WorldCommand, WorldCommandExecution,
-    WorldCommandOutcome, WorldSnapshot,
+    AccountRecord, ActiveSessionIdentity, CharacterSaveRecord, Stage5SystemsState, WorldCommand,
+    WorldCommandExecution, WorldCommandOutcome, WorldSnapshot,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -2508,6 +2508,73 @@ impl ZoneHostServer {
         }
     }
 
+    /// Replace oversized in-memory mutation journals with complete v5 base
+    /// snapshots while preserving each Zone's replication head.
+    ///
+    /// The caller is expected to run this periodically. Each candidate is
+    /// rechecked while its Zone mutation gate is held so the generated base
+    /// snapshot and the compacted journal prefix describe the same state.
+    pub fn compact_active_journals_over_limit(
+        &self,
+        retained_entry_limit: usize,
+    ) -> Result<usize, String> {
+        if retained_entry_limit == 0 {
+            return Err("Zone journal compaction entry limit must be positive".to_string());
+        }
+        let candidates = self
+            .journal
+            .lock()
+            .map_err(|_| "zone host journal mutex poisoned".to_string())?
+            .replication
+            .cursors
+            .iter()
+            .filter(|(_, cursor)| cursor.host_entry_indexes.len() >= retained_entry_limit)
+            .map(|(zone_id, _)| ZoneId::new(zone_id))
+            .collect::<Vec<_>>();
+
+        let mut compacted_total = 0usize;
+        for zone_id in candidates {
+            // A base snapshot commits the journal head, every private Session
+            // image, and the shared Zone image as one consistency point. The
+            // per-Zone lane does not fence low-latency personal Session work;
+            // use the host-wide checkpoint fence so in-flight work drains once
+            // and the subsequent snapshots do not contend on Session locks.
+            let _operation = self
+                .operation_gate
+                .lock()
+                .map_err(|_| "zone host operation mutex poisoned".to_string())?;
+            let retained_entries = self
+                .journal
+                .lock()
+                .map_err(|_| "zone host journal mutex poisoned".to_string())?
+                .replication
+                .cursors
+                .get(zone_id.as_str())
+                .map(|cursor| cursor.host_entry_indexes.len())
+                .unwrap_or_default();
+            if retained_entries < retained_entry_limit {
+                continue;
+            }
+            let snapshot = match self
+                .export_base_snapshot(&zone_id)
+                .map_err(|error| format!("Zone {}: {}", zone_id.as_str(), error.message))?
+            {
+                ZoneRpcPayload::BaseSnapshot { snapshot } => snapshot,
+                _ => {
+                    return Err(format!(
+                        "Zone {} base snapshot export returned an unexpected payload",
+                        zone_id.as_str()
+                    ))
+                }
+            };
+            let compacted = self
+                .compact_mutation_journal(zone_id.as_str(), &snapshot)
+                .map_err(|error| format!("Zone {}: {}", zone_id.as_str(), error.message))?;
+            compacted_total = compacted_total.saturating_add(compacted);
+        }
+        Ok(compacted_total)
+    }
+
     pub fn replication_head(&self, zone_id: &ZoneId) -> Result<ZoneReplicationHead, String> {
         let mut head = self
             .journal
@@ -3248,20 +3315,43 @@ impl ZoneHostServer {
         }
         let zone_id = ZoneId::new(&envelope.zone_id);
         let gate_wait_started = Instant::now();
-        let _operation = if matches!(
-            &request,
-            ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. }
-        ) {
-            self.operation_gate.lock()
+        let request_label = zone_rpc_request_label(&request);
+        let _operation = if zone_rpc_request_can_bypass_operation_gate(&request) {
+            None
+        } else if zone_rpc_request_uses_parallel_session_gate(&request) {
+            Some(self.operation_gate.lock_parallel_session().map_err(|_| {
+                ZoneRpcFault::new("internal", "zone host operation scope was poisoned")
+            })?)
         } else {
-            self.operation_gate.lock_zone(&zone_id)
-        }
-        .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
+            Some(
+                if matches!(
+                    &request,
+                    ZoneRpcRequest::ExportHostCheckpoint
+                        | ZoneRpcRequest::InstallHostCheckpoint { .. }
+                ) {
+                    self.operation_gate.lock()
+                } else {
+                    self.operation_gate.lock_zone(&zone_id)
+                }
+                .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?,
+            )
+        };
         let gate_wait_duration_ns = saturating_duration_ns(gate_wait_started.elapsed());
-        self.zone_gate_wait_duration_ns_total
-            .fetch_add(gate_wait_duration_ns, Ordering::Relaxed);
-        self.zone_gate_wait_duration_ns_max
-            .fetch_max(gate_wait_duration_ns, Ordering::Relaxed);
+        if _operation.is_some() {
+            self.zone_gate_wait_duration_ns_total
+                .fetch_add(gate_wait_duration_ns, Ordering::Relaxed);
+            self.zone_gate_wait_duration_ns_max
+                .fetch_max(gate_wait_duration_ns, Ordering::Relaxed);
+            if gate_wait_duration_ns >= 1_000_000_000 {
+                eprintln!(
+                    "zone host slow operation-gate wait zone={} session={} request={} wait_ms={}",
+                    envelope.zone_id,
+                    envelope.session_id,
+                    request_label,
+                    gate_wait_duration_ns / 1_000_000
+                );
+            }
+        }
         self.prune_expired_promotion_readiness(unix_now_ms())?;
         let replica_is_read_only = zone_rpc_request_requires_active_session(&request)
             && self
@@ -3481,10 +3571,16 @@ impl ZoneHostServer {
                 .with_source_sequence(source_sequence);
                 let runtime_started = Instant::now();
                 let execution = session.execute_request(request)?;
-                self.execute_runtime_duration_ns_total.fetch_add(
-                    saturating_duration_ns(runtime_started.elapsed()),
-                    Ordering::Relaxed,
-                );
+                let runtime_duration_ns = saturating_duration_ns(runtime_started.elapsed());
+                self.execute_runtime_duration_ns_total
+                    .fetch_add(runtime_duration_ns, Ordering::Relaxed);
+                if runtime_duration_ns >= 1_000_000_000 {
+                    eprintln!(
+                        "zone host slow execute zone={zone_id} session={session_id} command={:?} runtime_ms={}",
+                        execution.outcome.command_kind,
+                        runtime_duration_ns / 1_000_000
+                    );
+                }
                 let journal_started = Instant::now();
                 self.append_journal(journal_entry)?;
                 self.execute_journal_duration_ns_total.fetch_add(
@@ -3751,37 +3847,7 @@ impl ZoneHostServer {
             .sessions
             .lock()
             .map_err(|_| ZoneRpcFault::new("internal", "zone host session mutex poisoned"))?;
-        let mut commitments = Vec::with_capacity(sessions.len());
-        for ((session_id, zone_id), session) in sessions.iter() {
-            let snapshot = session
-                .hosted
-                .world_snapshot()
-                .map_err(classify_runtime_error)?;
-            let durable_snapshot = durable_session_snapshot(snapshot);
-            let active_character_bytes = session
-                .hosted
-                .active_character_checkpoint()
-                .map_err(classify_runtime_error)?
-                .map(|checkpoint| serde_json::to_vec(&checkpoint))
-                .transpose()
-                .map_err(|error| {
-                    ZoneRpcFault::new(
-                        "checkpoint_encode",
-                        format!("active character checkpoint encode failed: {error}"),
-                    )
-                })?;
-            commitments.push(WireSessionCommitment {
-                session_id: session_id.clone(),
-                zone_id: zone_id.clone(),
-                snapshot_digest: snapshot_digest(&durable_snapshot)?,
-                durable_snapshot: Box::new(durable_snapshot),
-                active_character_bytes,
-                active_identity: session
-                    .hosted
-                    .active_identity()
-                    .map_err(classify_runtime_error)?,
-            });
-        }
+        let commitments = session_commitments(&sessions)?;
         let factory = self
             .runtime_factory
             .lock()
@@ -4869,6 +4935,31 @@ enum WireWorldCommand {
 }
 
 impl WireWorldCommand {
+    fn uses_parallel_session_gate(&self) -> bool {
+        match self {
+            Self::Tick => true,
+            Self::ClientPacket { frame } => {
+                decode_client_packet(frame).ok().is_some_and(|packet| {
+                    matches!(
+                        packet,
+                        ClientPacket::ClientVersion { .. }
+                            | ClientPacket::Login { .. }
+                            | ClientPacket::KeepAlive { .. }
+                            | ClientPacket::Chat { .. }
+                            | ClientPacket::Turn { .. }
+                            | ClientPacket::Walk { .. }
+                            | ClientPacket::Run { .. }
+                            | ClientPacket::MoveItem {
+                                grid: MirGridType::Inventory,
+                                ..
+                            }
+                    )
+                })
+            }
+            _ => false,
+        }
+    }
+
     fn from_world(command: WorldCommand) -> Result<Self, String> {
         Ok(match command {
             WorldCommand::ClientPacket(packet) => Self::ClientPacket {
@@ -5668,38 +5759,60 @@ fn next_outbound_stream_id() -> String {
 fn session_commitments(
     sessions: &BTreeMap<(String, String), Arc<ZoneHostSession>>,
 ) -> Result<Vec<WireSessionCommitment>, ZoneRpcFault> {
-    let mut commitments = Vec::with_capacity(sessions.len());
-    for ((session_id, zone_id), session) in sessions {
-        let snapshot = session
-            .hosted
-            .world_snapshot()
-            .map_err(classify_runtime_error)?;
-        let durable_snapshot = durable_session_snapshot(snapshot);
-        let active_character_bytes = session
-            .hosted
-            .active_character_checkpoint()
-            .map_err(classify_runtime_error)?
-            .map(|checkpoint| serde_json::to_vec(&checkpoint))
-            .transpose()
-            .map_err(|error| {
-                ZoneRpcFault::new(
-                    "checkpoint_encode",
-                    format!("active character checkpoint encode failed: {error}"),
-                )
-            })?;
-        commitments.push(WireSessionCommitment {
-            session_id: session_id.clone(),
-            zone_id: zone_id.clone(),
-            snapshot_digest: snapshot_digest(&durable_snapshot)?,
-            durable_snapshot: Box::new(durable_snapshot),
-            active_character_bytes,
-            active_identity: session
-                .hosted
-                .active_identity()
-                .map_err(classify_runtime_error)?,
-        });
+    // The complete private character image lives in active_character_bytes and
+    // the authoritative shared world lives in zone_state_bytes. The legacy
+    // WorldSnapshot field is commitment metadata only and is never restored.
+    // Build its canonical template once instead of materializing the complete
+    // world independently for every Session while the Zone gate is held.
+    if sessions.is_empty() {
+        return Ok(Vec::new());
     }
-    Ok(commitments)
+    let durable_snapshot_template = durable_session_snapshot();
+    let durable_snapshot_digest = snapshot_digest(&durable_snapshot_template)?;
+    sessions
+        .iter()
+        .map(|((session_id, zone_id), session)| {
+            session_commitment(
+                session_id,
+                zone_id,
+                session,
+                &durable_snapshot_template,
+                &durable_snapshot_digest,
+            )
+        })
+        .collect()
+}
+
+fn session_commitment(
+    session_id: &str,
+    zone_id: &str,
+    session: &Arc<ZoneHostSession>,
+    durable_snapshot_template: &WorldSnapshot,
+    durable_snapshot_digest: &str,
+) -> Result<WireSessionCommitment, ZoneRpcFault> {
+    let active_character_bytes = session
+        .hosted
+        .active_character_checkpoint()
+        .map_err(classify_runtime_error)?
+        .map(|checkpoint| serde_json::to_vec(&checkpoint))
+        .transpose()
+        .map_err(|error| {
+            ZoneRpcFault::new(
+                "checkpoint_encode",
+                format!("active character checkpoint encode failed: {error}"),
+            )
+        })?;
+    Ok(WireSessionCommitment {
+        session_id: session_id.to_string(),
+        zone_id: zone_id.to_string(),
+        snapshot_digest: durable_snapshot_digest.to_string(),
+        durable_snapshot: Box::new(durable_snapshot_template.clone()),
+        active_character_bytes,
+        active_identity: session
+            .hosted
+            .active_identity()
+            .map_err(classify_runtime_error)?,
+    })
 }
 
 fn snapshot_digest(durable_snapshot: &WorldSnapshot) -> Result<String, ZoneRpcFault> {
@@ -5767,40 +5880,56 @@ fn commitment_mismatch_details(
     "commitment ordering differs".to_string()
 }
 
-fn durable_session_snapshot(mut snapshot: WorldSnapshot) -> WorldSnapshot {
-    snapshot.tick = 0;
-    snapshot.map_title = None;
-    snapshot.light_setting = 0;
-    snapshot.player_object_id = None;
-    // The complete Zone image owns live player vitals. Do not commit them a
-    // second time from a session snapshot taken on the other side of an
-    // autonomous Zone tick; private persisted vitals are independently
-    // committed by `active_character_bytes`.
-    snapshot.player_hp = None;
-    snapshot.player_max_hp = None;
-    snapshot.player_mp = None;
-    snapshot.player_max_mp = None;
-    snapshot
-        .entities
-        .retain(|entity| entity.kind == mir2_simulation::WorldEntityKind::SelfPlayer);
-    for entity in &mut snapshot.entities {
-        entity.object_id = 0;
-        // Checkpoint v4 makes the shared Zone state authoritative for the
-        // player's transform. The per-session commitment must not duplicate
-        // that transform: journal replay can allocate a different shared
-        // presence before the exact Zone image is installed.
-        entity.x = 0;
-        entity.y = 0;
-        entity.direction = mir2_protocol::MirDirection::Up;
-        entity.hp = None;
-        entity.max_hp = None;
-        entity.dead = false;
+fn durable_session_snapshot() -> WorldSnapshot {
+    // This legacy commitment field is metadata only. The private character
+    // image is committed by active_character_bytes and the authoritative
+    // shared world by zone_state_bytes, so reading and then clearing a live
+    // WorldSnapshot only adds an O(world) pause to checkpoint/compaction.
+    WorldSnapshot {
+        tick: 0,
+        map_title: None,
+        map_file_name: None,
+        in_safe_zone: false,
+        light_setting: 0,
+        player_object_id: None,
+        player_hp: None,
+        player_max_hp: None,
+        player_mp: None,
+        player_max_mp: None,
+        player_experience: 0,
+        player_max_experience: 0,
+        gold: 0,
+        credit: 0,
+        city_currencies: BTreeMap::new(),
+        current_weight: 0,
+        max_weight: 0,
+        free_bag_slots: 0,
+        max_bag_slots: 0,
+        storage_size: 0,
+        has_expanded_storage: false,
+        has_storage_password: false,
+        require_storage_password: false,
+        storage_password_last_set_binary_datetime: 0,
+        expanded_storage_expiry_time_binary_datetime: 0,
+        scene_view: None,
+        terrain_patches: Vec::new(),
+        decor_objects: Vec::new(),
+        entities: Vec::new(),
+        ground_drops: Vec::new(),
+        belt_items: Vec::new(),
+        inventory_items: Vec::new(),
+        hero_inventory_items: Vec::new(),
+        storage_items: Vec::new(),
+        equipment_items: Vec::new(),
+        quest_log: Vec::new(),
+        active_npc_dialog: None,
+        npc_script_diagnostics: Vec::new(),
+        known_skills: Vec::new(),
+        active_buffs: Vec::new(),
+        stage5_systems: Stage5SystemsState::default(),
+        map_transfers: Vec::new(),
+        interaction_hints: Vec::new(),
     }
-    // Shared map actors, player transforms, and ground drops are committed by
-    // the separate Zone state image. Keep this digest scoped to the private
-    // durable player/session projection.
-    snapshot.ground_drops.clear();
-    snapshot
 }
 
 fn zone_base_snapshot_checksum(snapshot: &ZoneBaseSnapshot) -> Result<String, String> {
@@ -6091,6 +6220,54 @@ fn zone_rpc_request_requires_active_mutation(request: &ZoneRpcRequest) -> bool {
     )
 }
 
+fn zone_rpc_request_can_bypass_operation_gate(request: &ZoneRpcRequest) -> bool {
+    matches!(
+        request,
+        ZoneRpcRequest::OnConnect
+            | ZoneRpcRequest::WorldSnapshot
+            | ZoneRpcRequest::ActiveIdentity
+            | ZoneRpcRequest::ActiveCharacterCheckpoint
+    )
+}
+
+fn zone_rpc_request_uses_parallel_session_gate(request: &ZoneRpcRequest) -> bool {
+    match request {
+        ZoneRpcRequest::Execute { command, .. } => command.uses_parallel_session_gate(),
+        ZoneRpcRequest::SaveActiveCharacter | ZoneRpcRequest::RefreshActiveExternalMail => true,
+        _ => false,
+    }
+}
+
+fn zone_rpc_request_label(request: &ZoneRpcRequest) -> &'static str {
+    match request {
+        ZoneRpcRequest::Health => "health",
+        ZoneRpcRequest::ReplicationHead => "replication_head",
+        ZoneRpcRequest::ExportMutationBatch { .. } => "export_mutation_batch",
+        ZoneRpcRequest::ExportBaseSnapshot => "export_base_snapshot",
+        ZoneRpcRequest::InstallBaseSnapshot { .. } => "install_base_snapshot",
+        ZoneRpcRequest::CompactMutationJournal { .. } => "compact_mutation_journal",
+        ZoneRpcRequest::ApplyMutationBatch { .. } => "apply_mutation_batch",
+        ZoneRpcRequest::AssessPromotionReadiness { .. } => "assess_promotion_readiness",
+        ZoneRpcRequest::PromoteReplica { .. } => "promote_replica",
+        ZoneRpcRequest::QuiesceForPromotion { .. } => "quiesce_for_promotion",
+        ZoneRpcRequest::ResumeAfterQuiesce { .. } => "resume_after_quiesce",
+        ZoneRpcRequest::OnConnect => "on_connect",
+        ZoneRpcRequest::Execute { .. } => "execute",
+        ZoneRpcRequest::PollOutbounds { .. } => "poll_outbounds",
+        ZoneRpcRequest::WorldSnapshot => "world_snapshot",
+        ZoneRpcRequest::ActiveIdentity => "active_identity",
+        ZoneRpcRequest::ActiveCharacterCheckpoint => "active_character_checkpoint",
+        ZoneRpcRequest::RestoreActiveCharacterCheckpoint { .. } => {
+            "restore_active_character_checkpoint"
+        }
+        ZoneRpcRequest::SaveActiveCharacter => "save_active_character",
+        ZoneRpcRequest::RefreshActiveExternalMail => "refresh_active_external_mail",
+        ZoneRpcRequest::CloseSession { .. } => "close_session",
+        ZoneRpcRequest::ExportHostCheckpoint => "export_host_checkpoint",
+        ZoneRpcRequest::InstallHostCheckpoint { .. } => "install_host_checkpoint",
+    }
+}
+
 fn zone_rpc_request_requires_active_session(request: &ZoneRpcRequest) -> bool {
     matches!(
         request,
@@ -6165,6 +6342,48 @@ mod zone_rpc_authorization_tests {
                 }
             );
         }
+    }
+
+    #[test]
+    fn only_independent_low_latency_commands_use_the_parallel_session_gate() {
+        let wire_packet = |packet| WireWorldCommand::ClientPacket {
+            frame: encode_client_packet(&packet).unwrap(),
+        };
+
+        assert!(WireWorldCommand::Tick.uses_parallel_session_gate());
+        assert!(wire_packet(ClientPacket::ClientVersion {
+            version_hash: vec![1, 2, 3],
+        })
+        .uses_parallel_session_gate());
+        assert!(wire_packet(ClientPacket::Login {
+            account_id: "parallel-account".to_string(),
+            password: "parallel-password".to_string(),
+        })
+        .uses_parallel_session_gate());
+        assert!(wire_packet(ClientPacket::KeepAlive { time: 123 }).uses_parallel_session_gate());
+        assert!(wire_packet(ClientPacket::Chat {
+            message: "parallel chat".to_string(),
+            linked_items: Vec::new(),
+        })
+        .uses_parallel_session_gate());
+        assert!(wire_packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 0,
+            to: 1,
+        })
+        .uses_parallel_session_gate());
+        assert!(!wire_packet(ClientPacket::StartGame { character_index: 0 })
+            .uses_parallel_session_gate());
+        assert!(!wire_packet(ClientPacket::DropGold { amount: 1 }).uses_parallel_session_gate());
+        assert!(zone_rpc_request_uses_parallel_session_gate(
+            &ZoneRpcRequest::SaveActiveCharacter
+        ));
+        assert!(zone_rpc_request_uses_parallel_session_gate(
+            &ZoneRpcRequest::RefreshActiveExternalMail
+        ));
+        assert!(!zone_rpc_request_uses_parallel_session_gate(
+            &ZoneRpcRequest::Health
+        ));
     }
 }
 

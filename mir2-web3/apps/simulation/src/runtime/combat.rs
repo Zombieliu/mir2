@@ -43,9 +43,10 @@ use super::packets::{
     visible_object_bundle_for_entity,
 };
 use super::resources::{
-    is_in_world, runtime_tick, BuffResource, ElementalResource, GmRuntimeResource,
-    MapRuntimeResource, PlayerRuntimeResource, RuntimeClockResource, RuntimeConfigResource,
-    RuntimeQueueResource, SessionResource, SkillResource,
+    crystal_packet_action_ready, crystal_packet_attack_delay_ticks, is_in_world,
+    mark_crystal_packet_action, runtime_tick, BuffResource, ElementalResource, GmRuntimeResource,
+    MapRuntimeResource, PlayerActionKind, PlayerRuntimeResource, RuntimeClockResource,
+    RuntimeConfigResource, RuntimeQueueResource, SessionResource, SkillResource,
 };
 use super::session::SimulationSession;
 use super::skills::{
@@ -3224,6 +3225,55 @@ impl SimulationSession {
         };
 
         self.attack_impl_with_spell(object_id, requested_spell)
+    }
+
+    /// Resolve an attack-direction packet after the authoritative shared Zone
+    /// has established that no combat target occupies the attacked cells.
+    /// This preserves Crystal's cooldown, facing, correction, and mining
+    /// behavior without scanning or advancing the Session's private monsters.
+    pub fn attack_empty_direction_with_spell(
+        &mut self,
+        direction: MirDirection,
+        requested_spell: Spell,
+    ) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        if current_player_is_dead(self.app.world())
+            || crystal_player_attack_blocked_by_status(self.app.world())
+        {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
+        if !crystal_packet_action_ready(self.app.world(), PlayerActionKind::Attack) {
+            return vec![ServerPacket::UserLocation {
+                location: current_location(self.app.world()),
+            }];
+        }
+        let delay_ticks = crystal_packet_attack_delay_ticks()
+            + if crystal_player_slowed_by_status(self.app.world()) {
+                1
+            } else {
+                0
+            };
+        mark_crystal_packet_action(self.app.world_mut(), PlayerActionKind::Attack, delay_ticks);
+        if let Some(player) = player_entity(self.app.world()) {
+            self.app
+                .world_mut()
+                .entity_mut(player)
+                .insert(Facing(direction));
+        }
+        let mut packets = vec![ServerPacket::UserLocation {
+            location: current_location(self.app.world()),
+        }];
+        if requested_spell == Spell::None {
+            if let Some(mut mine_packets) = super::mining::try_mine(self.app.world_mut(), direction)
+            {
+                packets.append(&mut mine_packets);
+            }
+        }
+        packets
     }
 
     pub(super) fn range_attack_impl(

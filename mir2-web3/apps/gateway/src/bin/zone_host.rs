@@ -3,7 +3,7 @@ use std::io;
 use std::net::{SocketAddr, TcpListener};
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env;
 use mir2_gateway::{
@@ -16,6 +16,7 @@ use mir2_gateway::{
 
 const DEFAULT_ZONE_HOST_ADDR: &str = "127.0.0.1:7020";
 const DEFAULT_ACCOUNT_STORE_PATH: &str = ".mir2-data/accounts.json";
+const DEFAULT_JOURNAL_COMPACTION_INTERVAL_MS: u64 = 60_000;
 
 fn main() -> io::Result<()> {
     mir2_gateway::gate15::initialize_from_env()
@@ -72,6 +73,30 @@ fn main() -> io::Result<()> {
         Arc::clone(&runtime_factory),
     ));
     server.configure_zone_map_catalog(topology.zone_map_catalog(), topology.all_maps_zone_ids());
+    if let Some((entry_limit, interval)) = journal_compaction_config_from_env()? {
+        let compactor = Arc::clone(&server);
+        eprintln!(
+            "zone host journal compactor enabled retained_entry_limit={entry_limit} interval_ms={}",
+            interval.as_millis()
+        );
+        std::thread::Builder::new()
+            .name("mir2-zone-journal-compactor".to_string())
+            .spawn(move || loop {
+                std::thread::sleep(interval);
+                let started = Instant::now();
+                match compactor.compact_active_journals_over_limit(entry_limit) {
+                    Ok(0) => {}
+                    Ok(compacted_entries) => eprintln!(
+                        "zone host journal compaction completed compacted_entries={compacted_entries} duration_ms={}",
+                        started.elapsed().as_millis()
+                    ),
+                    Err(error) => eprintln!(
+                        "zone host journal compaction failed duration_ms={} error={error}",
+                        started.elapsed().as_millis()
+                    ),
+                }
+            })?;
+    }
     let operator_config = ZoneHostOperatorConfig::from_env(bound_address, &server.health().host_id)
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let world_director = world_director_from_env(runtime_factory, topology)?;
@@ -190,6 +215,47 @@ fn world_director_tick_interval_from_env() -> io::Result<Duration> {
         ));
     }
     Ok(Duration::from_millis(tick_ms))
+}
+
+fn journal_compaction_config_from_env() -> io::Result<Option<(usize, Duration)>> {
+    let Some(entry_limit) = env::var("MIR2_ZONE_HOST_JOURNAL_COMPACT_ENTRIES")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+    else {
+        return Ok(None);
+    };
+    let entry_limit = entry_limit.trim().parse::<usize>().map_err(|_| {
+        io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "MIR2_ZONE_HOST_JOURNAL_COMPACT_ENTRIES must be a positive integer",
+        )
+    })?;
+    if entry_limit == 0 {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "MIR2_ZONE_HOST_JOURNAL_COMPACT_ENTRIES must be a positive integer",
+        ));
+    }
+    let interval_ms = env::var("MIR2_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS")
+        .ok()
+        .filter(|value| !value.trim().is_empty())
+        .map(|value| {
+            value.trim().parse::<u64>().map_err(|_| {
+                io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "MIR2_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS must be an integer",
+                )
+            })
+        })
+        .transpose()?
+        .unwrap_or(DEFAULT_JOURNAL_COMPACTION_INTERVAL_MS);
+    if !(1_000..=3_600_000).contains(&interval_ms) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "MIR2_ZONE_HOST_JOURNAL_COMPACT_INTERVAL_MS must be within 1000..=3600000",
+        ));
+    }
+    Ok(Some((entry_limit, Duration::from_millis(interval_ms))))
 }
 
 fn now_ms() -> u64 {

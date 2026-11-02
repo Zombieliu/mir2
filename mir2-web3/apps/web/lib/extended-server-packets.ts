@@ -116,6 +116,62 @@ export function removeItemByUniqueId<
   return changed ? next : items;
 }
 
+type BagLocation = {
+  container: "bag1" | "bag2";
+  slot: number;
+};
+
+function bagLocationForProtocolIndex(index: number): BagLocation | null {
+  if (!Number.isInteger(index) || index < 0 || index >= 80) {
+    return null;
+  }
+  return index < 40
+    ? { container: "bag1", slot: index }
+    : { container: "bag2", slot: index - 40 };
+}
+
+/**
+ * Applies a successful `S.MoveItem` inventory acknowledgement without waiting
+ * for a full world snapshot. Protocol inventory indices 0..39 address bag1 and
+ * 40..79 address bag2; an occupied destination swaps back into the source slot.
+ */
+export function moveInventoryItemsBySlot<
+  T extends { slot: number; container: string },
+>(items: T[], from: number, to: number): T[] {
+  const source = bagLocationForProtocolIndex(from);
+  const destination = bagLocationForProtocolIndex(to);
+  if (!source || !destination || from === to) {
+    return items;
+  }
+  const sourceIndex = items.findIndex(
+    (item) => item.container === source.container && item.slot === source.slot,
+  );
+  if (sourceIndex < 0) {
+    return items;
+  }
+  const destinationIndex = items.findIndex(
+    (item) =>
+      item.container === destination.container && item.slot === destination.slot,
+  );
+  return items.map((item, index) => {
+    if (index === sourceIndex) {
+      return {
+        ...item,
+        container: destination.container,
+        slot: destination.slot,
+      };
+    }
+    if (index === destinationIndex) {
+      return {
+        ...item,
+        container: source.container,
+        slot: source.slot,
+      };
+    }
+    return item;
+  });
+}
+
 /** Normalised friend record for the social panel. */
 export type NormalizedFriend = {
   index: number;

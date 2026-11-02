@@ -44,6 +44,7 @@ const {
   packetString,
   packetBool,
   normalizeUserItem,
+  moveInventoryItemsBySlot,
   patchItemsByUniqueId,
   removeItemByUniqueId,
   normalizeFriendList,
@@ -215,6 +216,41 @@ check("removeItemByUniqueId only affects the first match and keeps reference whe
   // No match -> same reference.
   const noMatch = removeItemByUniqueId(items, 42, 1);
   assert.equal(noMatch, items);
+});
+
+// ---------------------------------------------------------------------------
+// moveInventoryItemsBySlot
+// ---------------------------------------------------------------------------
+
+check("moveInventoryItemsBySlot moves between bag1 and bag2 protocol slots", () => {
+  const items = [
+    { uniqueId: 1, slot: 2, container: "bag1" },
+    { uniqueId: 2, slot: 5, container: "bag2" },
+  ];
+  const next = moveInventoryItemsBySlot(items, 2, 47);
+  assert.notEqual(next, items);
+  assert.deepEqual(next[0], { uniqueId: 1, slot: 7, container: "bag2" });
+  assert.equal(next[1], items[1], "untouched destination keeps identity");
+});
+
+check("moveInventoryItemsBySlot swaps an occupied destination", () => {
+  const items = [
+    { uniqueId: 1, slot: 2, container: "bag1" },
+    { uniqueId: 2, slot: 7, container: "bag2" },
+  ];
+  const next = moveInventoryItemsBySlot(items, 2, 47);
+  assert.deepEqual(next, [
+    { uniqueId: 1, slot: 7, container: "bag2" },
+    { uniqueId: 2, slot: 2, container: "bag1" },
+  ]);
+});
+
+check("moveInventoryItemsBySlot keeps reference for invalid or missing sources", () => {
+  const items = [{ uniqueId: 1, slot: 2, container: "bag1" }];
+  assert.equal(moveInventoryItemsBySlot(items, -1, 3), items);
+  assert.equal(moveInventoryItemsBySlot(items, 2, 80), items);
+  assert.equal(moveInventoryItemsBySlot(items, 9, 10), items);
+  assert.equal(moveInventoryItemsBySlot(items, 2, 2), items);
 });
 
 // ---------------------------------------------------------------------------

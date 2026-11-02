@@ -589,6 +589,14 @@ pub(super) fn update_special_monster_state(
 }
 
 pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
+    advance_world_with_monster_ai(world, true)
+}
+
+pub(super) fn advance_personal_world(world: &mut World) -> Vec<ServerPacket> {
+    advance_world_with_monster_ai(world, false)
+}
+
+fn advance_world_with_monster_ai(world: &mut World, include_monster_ai: bool) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
@@ -618,6 +626,9 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
     tick_monster_poisons(world, tick, &mut packets);
     emit_due_trainer_average_chats(world, tick, &mut packets);
     resolve_pending_monster_spawns(world, tick);
+    if !include_monster_ai {
+        return packets;
+    }
     // On-demand monster pool (CrystalWorld): materialise monsters as the player
     // approaches and despawn ones left far behind, so the AI pass below only
     // iterates the live set around the player rather than the whole map roster.
@@ -2685,6 +2696,30 @@ pub(super) fn advance_world(world: &mut World) -> Vec<ServerPacket> {
 
 impl SimulationSession {
     pub fn tick(&mut self) -> Vec<ServerPacket> {
+        self.tick_with_monster_ai(true)
+    }
+
+    pub(crate) fn tick_personal_world(&mut self) -> Vec<ServerPacket> {
+        self.tick_with_monster_ai(false)
+    }
+
+    fn finalize_tick_packets(
+        &mut self,
+        packets: Vec<ServerPacket>,
+        include_monster_ai: bool,
+    ) -> Vec<ServerPacket> {
+        if include_monster_ai {
+            self.finalize_packets(packets)
+        } else {
+            // A shared Zone owns object visibility and already emits the
+            // authoritative AOI deltas. collect_visible_objects() scans and
+            // clones the private ECS world, so doing it once per Session tick
+            // multiplies identical O(world) work by the player count.
+            packets
+        }
+    }
+
+    fn tick_with_monster_ai(&mut self, include_monster_ai: bool) -> Vec<ServerPacket> {
         if let Some(command) = take_crystal_movement_retry_if_ready(self.app.world_mut()) {
             mark_crystal_packet_action(
                 self.app.world_mut(),
@@ -2692,7 +2727,7 @@ impl SimulationSession {
                 crystal_packet_move_delay_ticks(command.running),
             );
             let packets = self.move_player_by_direction(command.direction, command.running);
-            return self.finalize_packets(packets);
+            return self.finalize_tick_packets(packets, include_monster_ai);
         }
         if crystal_movement_retry_pending(self.app.world()) {
             advance_runtime_tick(self.app.world_mut());
@@ -2703,11 +2738,15 @@ impl SimulationSession {
                     crystal_packet_move_delay_ticks(command.running),
                 );
                 let packets = self.move_player_by_direction(command.direction, command.running);
-                return self.finalize_packets(packets);
+                return self.finalize_tick_packets(packets, include_monster_ai);
             }
-            return self.finalize_packets(Vec::new());
+            return self.finalize_tick_packets(Vec::new(), include_monster_ai);
         }
-        let packets = advance_world(self.app.world_mut());
-        self.finalize_packets(packets)
+        let packets = if include_monster_ai {
+            advance_world(self.app.world_mut())
+        } else {
+            advance_personal_world(self.app.world_mut())
+        };
+        self.finalize_tick_packets(packets, include_monster_ai)
     }
 }

@@ -827,6 +827,32 @@ impl GatewaySession {
             publisher.publish(&execution.outcome);
         }
     }
+
+    fn close_zone_owner_session(&mut self) -> Result<(), String> {
+        match self
+            .zone_owner_command_client
+            .close_session(&mut self.runtime, &self.zone_owner_lease)
+        {
+            Ok(()) => Ok(()),
+            Err(initial_error) => {
+                let refreshed_lease = match self.refresh_zone_owner_lease() {
+                    Ok(lease) => lease.clone(),
+                    Err(refresh_error) => {
+                        return Err(format!(
+                            "{initial_error}; refreshing Zone owner lease before close failed: {refresh_error}"
+                        ));
+                    }
+                };
+                self.zone_owner_command_client
+                    .close_session(&mut self.runtime, &refreshed_lease)
+                    .map_err(|retry_error| {
+                        format!(
+                            "{initial_error}; close retry with refreshed Zone owner lease failed: {retry_error}"
+                        )
+                    })
+            }
+        }
+    }
 }
 
 impl Drop for GatewaySession {
@@ -834,9 +860,12 @@ impl Drop for GatewaySession {
         if let Some(bus) = self.global_message_bus.as_ref() {
             bus.unregister_session(&self.session_id);
         }
-        let _ = self
-            .zone_owner_command_client
-            .close_session(&mut self.runtime, &self.zone_owner_lease);
+        if let Err(error) = self.close_zone_owner_session() {
+            eprintln!(
+                "gateway session {} failed to close Zone owner session for {}: {error}",
+                self.session_id, self.zone_id
+            );
+        }
         if let (Some(routing), Some(route_request)) = (
             self.routing_context.as_ref(),
             self.current_route_request.as_ref(),
@@ -1033,6 +1062,42 @@ mod tests {
         }
     }
 
+    #[derive(Debug)]
+    struct FencedCloseZoneOwnerCommandClient {
+        accepted_lease: ZoneOwnerLease,
+        close_calls: Mutex<Vec<ZoneOwnerLease>>,
+    }
+
+    impl ZoneOwnerCommandClient for FencedCloseZoneOwnerCommandClient {
+        fn execute(
+            &self,
+            runtime: &mut ZoneRuntimeHandle,
+            request: ZoneOwnerCommandRequest,
+        ) -> Result<WorldCommandExecution, String> {
+            ZoneOwnerCommandClient::execute(
+                &InProcessZoneOwnerCommandClient::new(),
+                runtime,
+                request,
+            )
+        }
+
+        fn close_session(
+            &self,
+            _runtime: &mut ZoneRuntimeHandle,
+            owner_lease: &ZoneOwnerLease,
+        ) -> Result<(), String> {
+            self.close_calls
+                .lock()
+                .expect("fenced close call mutex should not be poisoned")
+                .push(owner_lease.clone());
+            if owner_lease == &self.accepted_lease {
+                Ok(())
+            } else {
+                Err("stale test Zone owner lease".to_string())
+            }
+        }
+    }
+
     #[test]
     fn gateway_panic_boundary_returns_operation_error() {
         let result = super::catch_gateway_panic("unit-test", || panic!("boom"));
@@ -1136,6 +1201,39 @@ mod tests {
                     authenticated: true
                 }
             )]
+        );
+    }
+
+    #[test]
+    fn gateway_session_close_retries_with_refreshed_zone_owner_lease() {
+        let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+        let zone_id = ZoneId::primary();
+        let stale_lease = authority.owner_lease(&zone_id);
+        let current_lease = authority.handoff_zone_owner(&zone_id, "zone-owner:next");
+        let runtime =
+            InProcessZoneRuntimeFactory.create_runtime(GatewayConfig::default(), &zone_id);
+        let client = Arc::new(FencedCloseZoneOwnerCommandClient {
+            accepted_lease: current_lease.clone(),
+            close_calls: Mutex::new(Vec::new()),
+        });
+        let mut session = GatewaySession::with_routed_world_runtime_and_owner_authority(
+            zone_id,
+            stale_lease.clone(),
+            Some(authority as SharedZoneOwnerLeaseAuthority),
+            runtime,
+        );
+        session.zone_owner_command_client = client.clone() as SharedZoneOwnerCommandClient;
+
+        session
+            .close_zone_owner_session()
+            .expect("close should retry with the current fenced owner lease");
+
+        assert_eq!(
+            *client
+                .close_calls
+                .lock()
+                .expect("fenced close call mutex should not be poisoned"),
+            vec![stale_lease, current_lease]
         );
     }
 

@@ -3916,6 +3916,11 @@ fn crystal_world_respawn_spawns_place_full_group_roster() {
     for (slot_index, _, _) in &spawns {
         assert!(*slot_index < usize::from(group.count));
     }
+    assert_eq!(
+        crystal_world_respawn_spawns("0", group),
+        spawns,
+        "cached Crystal respawn placement must remain deterministic",
+    );
 }
 
 #[test]
@@ -26810,10 +26815,10 @@ fn crystal_npc_stage5_conquest_and_guild_territory_commands_have_stateful_baseli
     ));
 
     let resolved = super::resolve_crystal_npc_runtime_tokens(
-            session.app.world(),
-            "<$CONQUESTRATE(1)> <$CONQUESTGUARD(1,2)> <$CONQUESTWALL(1,3)> <$CONQUESTGATE(1,1)> <$GUILDGTRENTALDAYSLEFT>",
-            &CrystalNpcExecutionState::default(),
-        );
+        session.app.world(),
+        "<$CONQUESTRATE(1)> <$CONQUESTGUARD(1,2)> <$CONQUESTWALL(1,3)> <$CONQUESTGATE(1,1)> <$GUILDGTRENTALDAYSLEFT>",
+        &CrystalNpcExecutionState::default(),
+    );
     assert_eq!(resolved, "15 Alive Repaired Open 14");
 }
 

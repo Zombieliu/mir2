@@ -310,3 +310,23 @@ Original prompt: Continue autonomous Crystal/Mir2 1:1 parity work until the curr
   development, but make production packaging a measured thin-client boundary: only the two
   same-origin Bevy runtimes plus explicit bootstrap/generated packs may ship; R2-backed original
   UI/map media must be excluded and fetched through the existing versioned Service Worker cache.
+
+2026-08-01 Dubhe Zone Host single-machine optimization goal (in progress):
+
+- Goal: sustain 100 real active players for 30 minutes with errors below 0.1%, CPU below 75%, no
+  monotonic memory growth, and interaction P95 below 150 ms; then probe 150 and 200 players.
+- Deployed inventory-only MoveItem fast path, incremental browser inventory reducer, staggered load
+  cadence, shared Session parallel gate, Zone-native combat direct return, authoritative Zone index
+  lookups for attack preparation, and no-visibility-diff shared Session ticks.
+- Root performance bug: `WorldRuntime::execute_with_outcome` rebuilt a complete `WorldSnapshot`
+  after incremental commands only to populate telemetry `snapshot_tick`. Added outcome snapshot
+  bypass for login/version, keepalive, chat, inventory movement, movement, combat, skill and Tick.
+- Verification: Gateway full suite 421 passed / 0 failed / 1 ignored; Simulation 1,132 unit tests,
+  154 shared-Zone tests, and eight vertical-slice tests passed; 20 snapshot-focused tests passed.
+- Production release: Zone `20260801T1838CST-b6e0b21e-outcome-fast-241f2b4e`, Gateway
+  `20260801T1838CST-b6e0b21e-outcome-fast-75be8f5c`; both healthy with zero restarts after deploy.
+- Production 10-player mixed smoke (60 actions each): ready 10/10, errors 0, 600/600 KeepAlive
+  replies, steady P95 115 ms, max 140 ms, 508 combat commands including 23 targeted attacks, and
+  20 inventory moves. Evidence: `work/ucloud-outcome-fast-staggered-smoke10.json`.
+- Next: short 100-player admission/steady-load stair step, then the required 100-player 30-minute
+  soak with host CPU/RSS/journal sampling before 150/200 capacity probes.

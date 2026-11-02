@@ -1615,16 +1615,22 @@ pub fn crystal_npc_command_summary() -> CrystalNpcCommandSummary {
         .clone()
 }
 
-pub fn crystal_monster_manifest() -> CrystalMonsterManifest {
+/// Borrow the process-wide monster manifest without cloning it. Hot-path
+/// lookups (combat, AI and drop resolution) must use this and clone only the
+/// matched template; the owned [`crystal_monster_manifest`] API is retained
+/// for callers that intentionally need a mutable copy of the whole manifest.
+pub fn crystal_monster_manifest_ref() -> &'static CrystalMonsterManifest {
     static CRYSTAL_MONSTER_MANIFEST: OnceLock<CrystalMonsterManifest> = OnceLock::new();
-    CRYSTAL_MONSTER_MANIFEST
-        .get_or_init(|| {
-            serde_json::from_str(include_str!(
-                "../data/generated/crystal_monster_manifest.json"
-            ))
-            .expect("crystal monster manifest json should be valid")
-        })
-        .clone()
+    CRYSTAL_MONSTER_MANIFEST.get_or_init(|| {
+        serde_json::from_str(include_str!(
+            "../data/generated/crystal_monster_manifest.json"
+        ))
+        .expect("crystal monster manifest json should be valid")
+    })
+}
+
+pub fn crystal_monster_manifest() -> CrystalMonsterManifest {
+    crystal_monster_manifest_ref().clone()
 }
 
 pub fn crystal_monster_ai_summary() -> CrystalMonsterAiSummary {
@@ -1720,17 +1726,19 @@ pub fn crystal_npc_info_by_script_key(script_key: &str) -> Option<CrystalNpcInfo
 }
 
 pub fn crystal_monster_by_name(name: &str) -> Option<CrystalMonsterTemplate> {
-    crystal_monster_manifest()
+    crystal_monster_manifest_ref()
         .monsters
-        .into_iter()
+        .iter()
         .find(|monster| monster.name.eq_ignore_ascii_case(name))
+        .cloned()
 }
 
 pub fn crystal_monster_by_index(monster_index: i32) -> Option<CrystalMonsterTemplate> {
-    crystal_monster_manifest()
+    crystal_monster_manifest_ref()
         .monsters
-        .into_iter()
+        .iter()
         .find(|monster| monster.monster_index == monster_index)
+        .cloned()
 }
 
 /// Borrow the respawn record for `file_name` from the process-wide manifest

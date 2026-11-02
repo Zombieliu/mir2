@@ -21,12 +21,13 @@ use mir2_protocol::{
     UserItem, UserItemStat,
 };
 use mir2_simulation::{
-    deliver_stage5_system_mail, Stage5MailDelivery, Stage5MailTargetKind, WorldCommand,
+    deliver_stage5_system_mail, ActiveSessionIdentity, Stage5MailDelivery, Stage5MailTargetKind,
+    WorldCommand,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::net::TcpListener;
-use tokio::sync::{mpsc, Mutex as AsyncMutex, RwLock as AsyncRwLock};
+use tokio::sync::{mpsc, Mutex as AsyncMutex, RwLock as AsyncRwLock, Semaphore};
 use tokio::task::JoinHandle;
 use tokio::time::MissedTickBehavior;
 
@@ -227,6 +228,8 @@ struct GatewayCapacityState {
     max_login_in_flight: Option<usize>,
     max_new_character_in_flight: Option<usize>,
     max_start_game_in_flight: Option<usize>,
+    start_game_concurrency_limit: Option<usize>,
+    start_game_execution: Option<Arc<Semaphore>>,
     current_ws_connections: AtomicUsize,
     current_active_sessions: AtomicUsize,
     current_reconnect_leases: AtomicUsize,
@@ -244,6 +247,8 @@ struct GatewayCapacityStatus {
     max_login_in_flight: Option<usize>,
     max_new_character_in_flight: Option<usize>,
     max_start_game_in_flight: Option<usize>,
+    start_game_concurrency_limit: Option<usize>,
+    current_start_game_executing: usize,
     current_ws_connections: usize,
     current_active_sessions: usize,
     current_reconnect_leases: usize,
@@ -270,6 +275,8 @@ struct GatewayCapacityPermit {
 
 impl GatewayCapacityState {
     fn from_env() -> Self {
+        let start_game_concurrency_limit =
+            positive_usize_env("MIR2_GATEWAY_START_GAME_CONCURRENCY");
         Self {
             max_ws_connections: positive_usize_env("MIR2_GATEWAY_MAX_WS_CONNECTIONS"),
             max_active_sessions: positive_usize_env("MIR2_GATEWAY_MAX_ACTIVE_SESSIONS"),
@@ -279,6 +286,9 @@ impl GatewayCapacityState {
                 "MIR2_GATEWAY_MAX_NEW_CHARACTER_IN_FLIGHT",
             ),
             max_start_game_in_flight: positive_usize_env("MIR2_GATEWAY_MAX_START_GAME_IN_FLIGHT"),
+            start_game_concurrency_limit,
+            start_game_execution: start_game_concurrency_limit
+                .map(|limit| Arc::new(Semaphore::new(limit))),
             current_ws_connections: AtomicUsize::new(0),
             current_active_sessions: AtomicUsize::new(0),
             current_reconnect_leases: AtomicUsize::new(0),
@@ -297,6 +307,8 @@ impl GatewayCapacityState {
             max_login_in_flight: None,
             max_new_character_in_flight: None,
             max_start_game_in_flight: None,
+            start_game_concurrency_limit: None,
+            start_game_execution: None,
             current_ws_connections: AtomicUsize::new(0),
             current_active_sessions: AtomicUsize::new(0),
             current_reconnect_leases: AtomicUsize::new(0),
@@ -319,6 +331,8 @@ impl GatewayCapacityState {
             max_login_in_flight: None,
             max_new_character_in_flight: None,
             max_start_game_in_flight: None,
+            start_game_concurrency_limit: None,
+            start_game_execution: None,
             current_ws_connections: AtomicUsize::new(0),
             current_active_sessions: AtomicUsize::new(0),
             current_reconnect_leases: AtomicUsize::new(0),
@@ -341,6 +355,8 @@ impl GatewayCapacityState {
             max_login_in_flight,
             max_new_character_in_flight,
             max_start_game_in_flight,
+            start_game_concurrency_limit: None,
+            start_game_execution: None,
             current_ws_connections: AtomicUsize::new(0),
             current_active_sessions: AtomicUsize::new(0),
             current_reconnect_leases: AtomicUsize::new(0),
@@ -348,6 +364,14 @@ impl GatewayCapacityState {
             current_new_character_in_flight: AtomicUsize::new(0),
             current_start_game_in_flight: AtomicUsize::new(0),
         }
+    }
+
+    #[cfg(test)]
+    fn with_start_game_concurrency(limit: usize) -> Self {
+        let mut state = Self::unlimited();
+        state.start_game_concurrency_limit = Some(limit);
+        state.start_game_execution = Some(Arc::new(Semaphore::new(limit)));
+        state
     }
 
     fn status(&self) -> GatewayCapacityStatus {
@@ -358,6 +382,16 @@ impl GatewayCapacityState {
             max_login_in_flight: self.max_login_in_flight,
             max_new_character_in_flight: self.max_new_character_in_flight,
             max_start_game_in_flight: self.max_start_game_in_flight,
+            start_game_concurrency_limit: self.start_game_concurrency_limit,
+            current_start_game_executing: self
+                .start_game_execution
+                .as_ref()
+                .map(|semaphore| {
+                    self.start_game_concurrency_limit
+                        .unwrap_or_default()
+                        .saturating_sub(semaphore.available_permits())
+                })
+                .unwrap_or_default(),
             current_ws_connections: self.current_ws_connections.load(Ordering::Acquire),
             current_active_sessions: self.current_active_sessions.load(Ordering::Acquire),
             current_reconnect_leases: self.current_reconnect_leases.load(Ordering::Acquire),
@@ -392,6 +426,19 @@ impl GatewayCapacityState {
                 | GatewayCapacityKind::StartGame
         ));
         self.try_acquire(kind)
+    }
+
+    async fn acquire_start_game_execution(
+        &self,
+    ) -> Result<Option<tokio::sync::OwnedSemaphorePermit>, String> {
+        let Some(semaphore) = self.start_game_execution.as_ref() else {
+            return Ok(None);
+        };
+        Arc::clone(semaphore)
+            .acquire_owned()
+            .await
+            .map(Some)
+            .map_err(|_| "gateway StartGame execution queue is closed".to_string())
     }
 
     fn try_acquire(
@@ -689,7 +736,7 @@ impl ReconnectSessionStore {
             .sessions
             .lock()
             .expect("gateway reconnect session store mutex should not be poisoned");
-        Self::purge_expired_locked(&mut sessions);
+        let expired = Self::remove_expired_locked(&mut sessions);
         sessions.insert(
             key,
             ReconnectSessionLease {
@@ -699,6 +746,8 @@ impl ReconnectSessionStore {
                 expires_at,
             },
         );
+        drop(sessions);
+        drop(expired);
     }
 
     fn take(&self, key: &GatewaySessionCacheKey) -> Option<ReconnectSessionRestore> {
@@ -706,11 +755,11 @@ impl ReconnectSessionStore {
             .sessions
             .lock()
             .expect("gateway reconnect session store mutex should not be poisoned");
-        Self::purge_expired_locked(&mut sessions);
-        let lease = sessions.remove(key)?;
-        if lease.expires_at <= Instant::now() {
-            return None;
-        }
+        let expired = Self::remove_expired_locked(&mut sessions);
+        let lease = sessions.remove(key);
+        drop(sessions);
+        drop(expired);
+        let lease = lease?;
         Some(ReconnectSessionRestore {
             session: lease.session,
             active_session_permit: lease.active_session_permit,
@@ -722,7 +771,9 @@ impl ReconnectSessionStore {
             .sessions
             .lock()
             .expect("gateway reconnect session store mutex should not be poisoned");
-        Self::purge_expired_locked(&mut sessions);
+        let expired = Self::remove_expired_locked(&mut sessions);
+        drop(sessions);
+        drop(expired);
     }
 
     #[cfg(test)]
@@ -731,13 +782,25 @@ impl ReconnectSessionStore {
             .sessions
             .lock()
             .expect("gateway reconnect session store mutex should not be poisoned");
-        Self::purge_expired_locked(&mut sessions);
-        sessions.len()
+        let expired = Self::remove_expired_locked(&mut sessions);
+        let len = sessions.len();
+        drop(sessions);
+        drop(expired);
+        len
     }
 
-    fn purge_expired_locked(sessions: &mut HashMap<GatewaySessionCacheKey, ReconnectSessionLease>) {
+    fn remove_expired_locked(
+        sessions: &mut HashMap<GatewaySessionCacheKey, ReconnectSessionLease>,
+    ) -> Vec<ReconnectSessionLease> {
         let now = Instant::now();
-        sessions.retain(|_, lease| lease.expires_at > now);
+        let expired_keys = sessions
+            .iter()
+            .filter_map(|(key, lease)| (lease.expires_at <= now).then(|| key.clone()))
+            .collect::<Vec<_>>();
+        expired_keys
+            .into_iter()
+            .filter_map(|key| sessions.remove(&key))
+            .collect()
     }
 }
 
@@ -3288,6 +3351,17 @@ async fn handle_socket_inner(
                     &action,
                     SessionAction::Packet(ClientPacket::StartGame { .. })
                 );
+                let _start_game_execution_permit = if starts_game {
+                    match capacity.acquire_start_game_execution().await {
+                        Ok(permit) => permit,
+                        Err(error) => {
+                            let _ = send_error_message(&sender, &error).await;
+                            continue;
+                        }
+                    }
+                } else {
+                    None
+                };
                 let leaves_world = matches!(
                     &action,
                     SessionAction::Packet(ClientPacket::Disconnect | ClientPacket::LogOut)
@@ -3320,6 +3394,19 @@ async fn handle_socket_inner(
                     };
                     if let Some(restored) = reconnect_sessions.take(&key) {
                         let restored_session_id = restored.session.session_id().to_string();
+                        // Stop the temporary pre-login session's outbound poller before
+                        // dropping that session. Otherwise an in-flight PollOutbounds can
+                        // recreate its lazily hosted Zone RPC session immediately after
+                        // GatewaySession::drop successfully closes it.
+                        active_zone_outbound_registration_id.store(0, Ordering::Release);
+                        _zone_live_outbound_registration = None;
+                        *movement_ingress
+                            .write()
+                            .expect("zone movement ingress slot should not be poisoned") = None;
+                        *background_route_refresh_record
+                            .lock()
+                            .expect("background route refresh record mutex should not be poisoned") =
+                            None;
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
                         eprintln!(
@@ -3395,7 +3482,6 @@ async fn handle_socket_inner(
                 };
                 let mut pending_active_session_permit = None;
                 if start_game_character_index.is_some()
-                    && tokio::task::block_in_place(|| session.active_identity()).is_none()
                     && active_session_permit.is_none()
                 {
                     match capacity.try_acquire_active_session() {
@@ -3411,9 +3497,9 @@ async fn handle_socket_inner(
                         }
                     }
                 }
-                let responses = match catch_gateway_panic("web session action", || {
+                let execution = match catch_gateway_panic("web session action", || {
                     tokio::task::block_in_place(|| {
-                        execute_session_action(
+                        execute_session_action_with_identity(
                             session,
                             action,
                             authenticated,
@@ -3441,8 +3527,8 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
-                let active_identity =
-                    tokio::task::block_in_place(|| session.active_identity());
+                let responses = execution.packets;
+                let active_identity = execution.active_identity;
                 if leaves_world || active_identity.is_none() {
                     chat_presence = None;
                 }
@@ -3642,14 +3728,22 @@ async fn handle_socket_inner(
             }
             _ = runtime_tick.tick() => {
                 let now = Instant::now();
+                // A socket exists before Login/StartGame completes, but the Zone runtime
+                // does not need ticks until this socket owns an active world session. Sending
+                // pre-login ticks can repeatedly win the per-session runtime lock and starve
+                // the Login command when Zone read-only RPCs bypass the shared FIFO gate.
+                if !should_run_runtime_tick(
+                    active_session_permit.is_some(),
+                    now,
+                    runtime_tick_deferred_until,
+                ) {
+                    continue;
+                }
                 if let Err(error) = catch_gateway_panic("web zone owner heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 }).and_then(|result| result.map(|_| ())) {
                     let _ = send_error_message(&sender, &error).await;
                     return;
-                }
-                if now < runtime_tick_deferred_until {
-                    continue;
                 }
                 let responses = match catch_gateway_panic("web session tick", || {
                     tokio::task::block_in_place(|| {
@@ -3920,6 +4014,14 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
     }
 }
 
+fn should_run_runtime_tick(
+    active_session_established: bool,
+    now: Instant,
+    deferred_until: Instant,
+) -> bool {
+    active_session_established && now >= deferred_until
+}
+
 fn positive_usize_env(name: &str) -> Option<usize> {
     env::var(name)
         .ok()
@@ -4050,6 +4152,27 @@ fn should_queue_save_for_action(action: &SessionAction) -> bool {
     )
 }
 
+struct ExecutedSessionAction {
+    packets: Vec<ServerPacket>,
+    active_identity: Option<ActiveSessionIdentity>,
+}
+
+fn execute_session_action_with_identity(
+    session: &mut GatewaySession,
+    action: SessionAction,
+    authenticated: bool,
+    enforce_player_command_safety: bool,
+) -> Result<ExecutedSessionAction, String> {
+    if enforce_player_command_safety {
+        return execute_production_session_action_with_identity(session, action, authenticated);
+    }
+    let packets = execute_session_action(session, action, authenticated, false)?;
+    Ok(ExecutedSessionAction {
+        packets,
+        active_identity: session.active_identity(),
+    })
+}
+
 fn execute_session_action(
     session: &mut GatewaySession,
     action: SessionAction,
@@ -4102,6 +4225,35 @@ fn execute_production_session_action(
     authenticated: bool,
     move_log: Option<String>,
 ) -> Result<Vec<ServerPacket>, String> {
+    execute_production_session_action_with_identity_and_move_log(
+        session,
+        action,
+        authenticated,
+        move_log,
+    )
+    .map(|execution| execution.packets)
+}
+
+fn execute_production_session_action_with_identity(
+    session: &mut GatewaySession,
+    action: SessionAction,
+    authenticated: bool,
+) -> Result<ExecutedSessionAction, String> {
+    let move_log = move_log_for_action(&action);
+    execute_production_session_action_with_identity_and_move_log(
+        session,
+        action,
+        authenticated,
+        move_log,
+    )
+}
+
+fn execute_production_session_action_with_identity_and_move_log(
+    session: &mut GatewaySession,
+    action: SessionAction,
+    authenticated: bool,
+    move_log: Option<String>,
+) -> Result<ExecutedSessionAction, String> {
     let zone_owner_lease = session.zone_owner_lease().clone();
     let execution = match action {
         SessionAction::Packet(packet) => session
@@ -4112,7 +4264,11 @@ fn execute_production_session_action(
             )?,
         SessionAction::PasskeyLogin { account_id, token } => {
             verify_passkey_gateway_token(&account_id, &token)?;
-            return Ok(session.passkey_login(&account_id));
+            let packets = session.passkey_login(&account_id);
+            return Ok(ExecutedSessionAction {
+                packets,
+                active_identity: session.active_identity(),
+            });
         }
         SessionAction::MoveTo { x, y, running } => session
             .execute_production_player_command_with_zone_owner_lease(
@@ -4184,7 +4340,11 @@ fn execute_production_session_action(
                 WorldCommand::Stage5Command { action, args },
             )?,
         SessionAction::QaControl { token, action } => {
-            return execute_qa_control_action(session, &token, action);
+            let packets = execute_qa_control_action(session, &token, action)?;
+            return Ok(ExecutedSessionAction {
+                packets,
+                active_identity: session.active_identity(),
+            });
         }
         SessionAction::SetLanguage { language } => session
             .execute_production_player_command_with_zone_owner_lease(
@@ -4199,7 +4359,10 @@ fn execute_production_session_action(
         )?,
     };
     log_move_action(move_log, &execution.packets);
-    Ok(execution.packets)
+    Ok(ExecutedSessionAction {
+        packets: execution.packets,
+        active_identity: execution.outcome.active_identity,
+    })
 }
 
 fn execute_qa_control_action(
@@ -5073,9 +5236,18 @@ fn should_send_world_snapshot_for_action(action: &SessionAction) -> bool {
     !matches!(
         action,
         SessionAction::MoveTo { .. }
+            | SessionAction::Attack { .. }
             | SessionAction::Packet(ClientPacket::Turn { .. })
             | SessionAction::Packet(ClientPacket::Walk { .. })
             | SessionAction::Packet(ClientPacket::Run { .. })
+            | SessionAction::Packet(ClientPacket::Attack { .. })
+            | SessionAction::Packet(ClientPacket::RangeAttack { .. })
+            | SessionAction::Packet(ClientPacket::Magic { .. })
+            | SessionAction::Packet(ClientPacket::Harvest { .. })
+            | SessionAction::Packet(ClientPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                ..
+            })
             | SessionAction::Packet(ClientPacket::Chat { .. })
             | SessionAction::Packet(ClientPacket::KeepAlive { .. })
             | SessionAction::Tick
@@ -5102,8 +5274,6 @@ fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
             ServerPacket::StartGame { .. }
                 | ServerPacket::MapInformation { .. }
                 | ServerPacket::UserInformation { .. }
-                | ServerPacket::UserLocation { .. }
-                | ServerPacket::ObjectHealth { .. }
                 | ServerPacket::ObjectHide { .. }
                 | ServerPacket::ObjectShow { .. }
         )
@@ -8113,6 +8283,8 @@ mod tests {
                 max_login_in_flight: None,
                 max_new_character_in_flight: None,
                 max_start_game_in_flight: None,
+                start_game_concurrency_limit: None,
+                current_start_game_executing: 0,
                 current_ws_connections: 0,
                 current_active_sessions: 0,
                 current_reconnect_leases: 0,
@@ -10310,10 +10482,23 @@ mod tests {
     }
 
     #[test]
+    fn runtime_tick_requires_an_active_world_session_and_elapsed_defer_window() {
+        let now = std::time::Instant::now();
+
+        assert!(!super::should_run_runtime_tick(false, now, now));
+        assert!(!super::should_run_runtime_tick(
+            true,
+            now,
+            now + std::time::Duration::from_millis(1),
+        ));
+        assert!(super::should_run_runtime_tick(true, now, now));
+    }
+
+    #[test]
     fn production_web_path_allows_start_game_after_login_success() {
         let mut session = crate::GatewaySession::new(SimulationConfig::default());
 
-        let login_packets = super::execute_session_action(
+        let login_execution = super::execute_session_action_with_identity(
             &mut session,
             SessionAction::Packet(ClientPacket::Login {
                 account_id: "demo".to_string(),
@@ -10323,10 +10508,11 @@ mod tests {
             true,
         )
         .expect("login should execute on production web path");
-        let authenticated = super::update_authenticated_state(false, &login_packets);
+        let authenticated = super::update_authenticated_state(false, &login_execution.packets);
         assert!(authenticated);
+        assert!(login_execution.active_identity.is_none());
 
-        let start_packets = super::execute_session_action(
+        let start_execution = super::execute_session_action_with_identity(
             &mut session,
             SessionAction::Packet(ClientPacket::StartGame { character_index: 0 }),
             authenticated,
@@ -10334,9 +10520,11 @@ mod tests {
         )
         .expect("authenticated StartGame should execute");
 
-        assert!(start_packets
+        assert!(start_execution
+            .packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::StartGame { .. })));
+        assert!(start_execution.active_identity.is_some());
     }
 
     #[test]
@@ -10424,6 +10612,36 @@ mod tests {
         assert_eq!(capacity.status().current_login_in_flight, 0);
         assert_eq!(capacity.status().current_new_character_in_flight, 0);
         assert_eq!(capacity.status().current_start_game_in_flight, 0);
+    }
+
+    #[tokio::test]
+    async fn start_game_execution_queue_waits_instead_of_rejecting_bursts() {
+        let capacity = Arc::new(super::GatewayCapacityState::with_start_game_concurrency(1));
+        let first = capacity
+            .acquire_start_game_execution()
+            .await
+            .expect("first StartGame execution should acquire")
+            .expect("configured queue should return a permit");
+        assert_eq!(capacity.status().current_start_game_executing, 1);
+
+        let waiting_capacity = Arc::clone(&capacity);
+        let waiting = tokio::spawn(async move {
+            waiting_capacity
+                .acquire_start_game_execution()
+                .await
+                .expect("waiting StartGame execution should acquire")
+        });
+        tokio::task::yield_now().await;
+        assert!(!waiting.is_finished());
+
+        drop(first);
+        let second = waiting
+            .await
+            .expect("waiting StartGame task should finish")
+            .expect("configured queue should return a permit");
+        assert_eq!(capacity.status().current_start_game_executing, 1);
+        drop(second);
+        assert_eq!(capacity.status().current_start_game_executing, 0);
     }
 
     #[test]
@@ -11047,6 +11265,48 @@ mod tests {
         });
 
         assert!(!should_send_world_snapshot_for_action(&action));
+    }
+
+    #[test]
+    fn combat_actions_and_incremental_state_packets_skip_full_snapshot() {
+        let action = SessionAction::Attack { object_id: 42 };
+        let responses = vec![
+            ServerPacket::UserLocation {
+                location: UserLocation {
+                    position: Point { x: 335, y: 262 },
+                    direction: MirDirection::UpRight,
+                },
+            },
+            ServerPacket::ObjectHealth {
+                info: mir2_protocol::ObjectHealthInfo {
+                    object_id: 42,
+                    percent: 80,
+                    expire: 0,
+                },
+            },
+        ];
+
+        assert!(!should_send_world_snapshot_for_action(&action));
+        assert!(!responses_require_world_snapshot(&responses));
+    }
+
+    #[test]
+    fn inventory_slot_move_ack_skips_full_snapshot() {
+        let action = SessionAction::Packet(ClientPacket::MoveItem {
+            grid: MirGridType::Inventory,
+            from: 0,
+            to: 1,
+        });
+
+        assert!(!should_send_world_snapshot_for_action(&action));
+        assert!(!responses_require_world_snapshot(&[
+            ServerPacket::MoveItem {
+                grid: MirGridType::Inventory,
+                from: 0,
+                to: 1,
+                success: true,
+            }
+        ]));
     }
 
     #[test]

@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{With, Without, World};
@@ -90,6 +90,7 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     // modes keep the prior behaviour where "0" is the starter slice.
     let collision = if crystal_full_world_zone_collision_enabled() {
         runtime_world_map_collision_data(map_file_name)
+            .map(|collision| collision.as_ref().clone())
             .or_else(|| runtime_map_collision_data(map_file_name))?
     } else {
         runtime_map_collision_data(map_file_name)?
@@ -434,8 +435,9 @@ fn crystal_manifest_movement_destination_is_valid(
     map_file_name: &str,
     destination: &Point,
 ) -> bool {
-    runtime_full_map_collision_data(map_file_name)
-        .map(|collision| full_map_collision_walkable(&collision, destination))
+    with_runtime_full_map_collision_data(map_file_name, |collision| {
+        full_map_collision_walkable(collision, destination)
+    })
         .unwrap_or(true)
 }
 
@@ -1754,32 +1756,45 @@ pub(super) fn read_i32_le(bytes: &[u8], offset: usize) -> Option<i32> {
     Some(i32::from_le_bytes([slice[0], slice[1], slice[2], slice[3]]))
 }
 
-pub(super) fn runtime_full_map_collision_data(
-    map_file_name: &str,
-) -> Option<RuntimeMapCollisionData> {
-    let normalized = normalize_map_file_name(map_file_name);
+fn runtime_full_map_collision_cache(
+) -> &'static Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>> {
     static RUNTIME_FULL_MAP_COLLISION_CACHE: OnceLock<
         Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>>,
     > = OnceLock::new();
-    let cache = RUNTIME_FULL_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
-    if let Some(cached) = cache
-        .lock()
-        .expect("runtime full map collision cache should not be poisoned")
-        .get(&normalized)
-        .cloned()
+    RUNTIME_FULL_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()))
+}
+
+fn with_runtime_full_map_collision_data<T>(
+    map_file_name: &str,
+    use_collision: impl Fn(&RuntimeMapCollisionData) -> T,
+) -> Option<T> {
+    let normalized = normalize_map_file_name(map_file_name);
+    let cache = runtime_full_map_collision_cache();
     {
-        return cached;
+        let cached = cache
+            .lock()
+            .expect("runtime full map collision cache should not be poisoned");
+        if let Some(collision) = cached.get(&normalized) {
+            return collision.as_ref().map(&use_collision);
+        }
     }
 
     let parsed = crystal_map_path(&normalized)
         .and_then(|map_path| fs::read(map_path).ok())
         .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
         .map(runtime_map_collision_from_template);
+    let result = parsed.as_ref().map(use_collision);
     cache
         .lock()
         .expect("runtime full map collision cache should not be poisoned")
-        .insert(normalized, parsed.clone());
-    parsed
+        .insert(normalized, parsed);
+    result
+}
+
+pub(super) fn runtime_full_map_collision_data(
+    map_file_name: &str,
+) -> Option<RuntimeMapCollisionData> {
+    with_runtime_full_map_collision_data(map_file_name, Clone::clone)
 }
 
 /// Full per-map collision for the activated Crystal world. Prefers an
@@ -1791,10 +1806,10 @@ pub(super) fn runtime_full_map_collision_data(
 /// decompressed at most once per map file).
 pub(super) fn runtime_world_map_collision_data(
     map_file_name: &str,
-) -> Option<RuntimeMapCollisionData> {
+) -> Option<Arc<RuntimeMapCollisionData>> {
     let normalized = normalize_map_file_name(map_file_name);
     static RUNTIME_WORLD_MAP_COLLISION_CACHE: OnceLock<
-        Mutex<BTreeMap<String, Option<RuntimeMapCollisionData>>>,
+        Mutex<BTreeMap<String, Option<Arc<RuntimeMapCollisionData>>>>,
     > = OnceLock::new();
     let cache = RUNTIME_WORLD_MAP_COLLISION_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
     if let Some(cached) = cache
@@ -1806,11 +1821,13 @@ pub(super) fn runtime_world_map_collision_data(
         return cached;
     }
 
-    let parsed = runtime_full_map_collision_data(&normalized).or_else(|| {
-        read_crystal_map_pack_bytes(&normalized)
-            .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
-            .map(runtime_map_collision_from_template)
-    });
+    let parsed = runtime_full_map_collision_data(&normalized)
+        .or_else(|| {
+            read_crystal_map_pack_bytes(&normalized)
+                .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
+                .map(runtime_map_collision_from_template)
+        })
+        .map(Arc::new);
     cache
         .lock()
         .expect("runtime world map collision cache should not be poisoned")
@@ -1830,7 +1847,7 @@ pub(super) fn refresh_runtime_map_collision(world: &mut World) {
     let collision = if spawn_source == MonsterSpawnSource::CrystalWorld {
         runtime_world_map_collision_data(&current_map.file_name)
     } else {
-        runtime_active_map_collision_data(&current_map)
+        runtime_active_map_collision_data(&current_map).map(Arc::new)
     }
     .unwrap_or_else(|| {
         let fallback = world
@@ -1838,17 +1855,17 @@ pub(super) fn refresh_runtime_map_collision(world: &mut World) {
             .config
             .map_collision
             .clone();
-        runtime_map_collision_from_template(fallback)
+        Arc::new(runtime_map_collision_from_template(fallback))
     });
 
     let doors = super::resources::DoorRegistry::from_templates(&collision.collision.doors);
     {
         let mut map = world.resource_mut::<MapRuntimeResource>();
         map.map_region_bounds = collision.collision.region_bounds;
-        map.blocked_cells = collision.blocked_set;
-        map.closed_door_cells = collision.closed_door_set;
+        map.blocked_cells = collision.blocked_set.clone();
+        map.closed_door_cells = collision.closed_door_set.clone();
         map.doors = doors;
-        map.fishing_cells = collision.fishing_cells;
+        map.fishing_cells = collision.fishing_cells.clone();
     }
     super::mining::rebuild_mine_spots(world);
     if let Some(mut hazards) = world.get_resource_mut::<super::hazard::MapHazardResource>() {
@@ -1968,12 +1985,9 @@ pub(super) fn full_map_collision_walkable(
             .contains(&super::movement::tile_key(point))
 }
 
-pub(super) fn rebuild_world(world: &mut World) {
-    clear_world_entities(world);
-
+fn spawn_selected_player(world: &mut World) {
     let player_runtime = world.resource::<PlayerRuntimeResource>().clone();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
-    let mut spawn_table = build_spawn_table(&config);
     let selected_character = world
         .resource::<SessionResource>()
         .selected_character
@@ -2006,6 +2020,36 @@ pub(super) fn rebuild_world(world: &mut World) {
         // current class/level/equipment (Crystal `RefreshStats`).
         super::stats::refresh_player_stats(world);
     }
+}
+
+/// Initialize the pre-login runtime without materialising a world the client
+/// cannot yet enter. StartGame rebuilds the authoritative map after selecting
+/// a character, so spawning the full default monster/NPC roster here only
+/// increases connection latency and is immediately discarded.
+pub(super) fn rebuild_lobby_world(world: &mut World) {
+    clear_world_entities(world);
+    world.insert_resource(MonsterSpawnTable { rules: Vec::new() });
+}
+
+/// Rebuild a Crystal-backed player world directly.
+///
+/// The former StartGame path first built the generic world, then removed every
+/// non-player entity, then built the Crystal map. Building the final state
+/// directly is equivalent while avoiding an entire throw-away spawn table,
+/// monster roster, NPC roster, and hero.
+pub(super) fn rebuild_crystal_world(world: &mut World) {
+    clear_world_entities(world);
+    spawn_selected_player(world);
+    spawn_visible_world_for_current_map(world);
+    spawn_config_visible_npcs(world);
+}
+
+pub(super) fn rebuild_world(world: &mut World) {
+    clear_world_entities(world);
+
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let mut spawn_table = build_spawn_table(&config);
+    spawn_selected_player(world);
 
     for record in &config.visible_players {
         world.spawn((

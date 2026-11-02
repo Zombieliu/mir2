@@ -1,9 +1,10 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
-    crystal_map_respawns_by_file_name, crystal_monster_by_name, crystal_starter_region_respawns,
+    crystal_map_respawns_ref, crystal_monster_by_name, crystal_starter_region_respawns,
     starter_server_data, CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
 };
 use mir2_protocol::{
@@ -110,10 +111,10 @@ pub(super) fn build_crystal_current_map_spawn_table(
     map_file_name: &str,
 ) -> MonsterSpawnTable {
     let mut next_object_id = 60_000_u32;
-    let rules = crystal_map_respawns_by_file_name(map_file_name)
-        .map(|map| map.respawns)
+    let rules = crystal_map_respawns_ref(map_file_name)
+        .map(|map| map.respawns.as_slice())
         .unwrap_or_default()
-        .into_iter()
+        .iter()
         .take(96)
         .enumerate()
         .map(|(rule_index, respawn)| {
@@ -141,7 +142,7 @@ pub(super) fn build_crystal_current_map_spawn_table(
                 .collect();
 
             MonsterSpawnRule {
-                name: respawn.monster_name,
+                name: respawn.monster_name.clone(),
                 image: respawn.monster_image,
                 direction: respawn.direction,
                 respawn_schedule: MonsterRespawnSchedule::CrystalMinutes {
@@ -173,8 +174,8 @@ pub(super) fn build_crystal_current_map_visible_spawn_table(
 ) -> MonsterSpawnTable {
     let mut rules = Vec::new();
 
-    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
-        for respawn in map.respawns {
+    if let Some(map) = crystal_map_respawns_ref(map_file_name) {
+        for respawn in &map.respawns {
             let visible_spawns =
                 start_game_visible_respawn_spawns(map_file_name, &respawn, player_position);
             if visible_spawns.is_empty() {
@@ -240,6 +241,28 @@ pub fn crystal_world_respawn_spawns(
         return Vec::new();
     }
 
+    type RespawnLayoutKey = (String, i32, i32, i32, u16, u16);
+    static RESPAWN_LAYOUT_CACHE: OnceLock<
+        Mutex<BTreeMap<RespawnLayoutKey, Arc<Vec<(usize, Point, MirDirection)>>>>,
+    > = OnceLock::new();
+    let cache = RESPAWN_LAYOUT_CACHE.get_or_init(|| Mutex::new(BTreeMap::new()));
+    let cache_key = (
+        super::map::normalize_map_file_name(map_file_name),
+        respawn.respawn_index,
+        respawn.location.x,
+        respawn.location.y,
+        respawn.count,
+        respawn.spread,
+    );
+    if let Some(cached) = cache
+        .lock()
+        .expect("Crystal respawn layout cache should not be poisoned")
+        .get(&cache_key)
+        .cloned()
+    {
+        return cached.as_ref().clone();
+    }
+
     let Some(collision) = runtime_world_map_collision_data(map_file_name) else {
         return Vec::new();
     };
@@ -276,7 +299,12 @@ pub fn crystal_world_respawn_spawns(
         }
     }
 
-    spawns
+    let spawns = Arc::new(spawns);
+    cache
+        .lock()
+        .expect("Crystal respawn layout cache should not be poisoned")
+        .insert(cache_key, Arc::clone(&spawns));
+    spawns.as_ref().clone()
 }
 
 /// Build the spawn table for an *entire* Crystal map (all respawn groups, all
@@ -290,8 +318,8 @@ pub(super) fn build_crystal_current_map_full_spawn_table(
 ) -> MonsterSpawnTable {
     let mut rules = Vec::new();
 
-    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
-        for respawn in map.respawns {
+    if let Some(map) = crystal_map_respawns_ref(map_file_name) {
+        for respawn in &map.respawns {
             let spawns = crystal_world_respawn_spawns(map_file_name, &respawn);
             if spawns.is_empty() {
                 continue;

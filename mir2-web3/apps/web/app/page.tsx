@@ -139,6 +139,7 @@ import {
   groupMembersAfterChange,
   heroCreateResultMessage,
   mailResultMessage,
+  moveInventoryItemsBySlot,
   normalizeFriendList,
   normalizeMailList,
   normalizeUserItem,
@@ -6704,9 +6705,7 @@ export default function HomePage() {
 
   function moveItem(item: ItemMoveRef, toSlot: number) {
     const from =
-      item.container === "bag1" || item.container === "bag2" || item.container === "quest"
-        ? (item.uniqueId ?? (item.container === "bag2" ? 40 + item.slot : item.slot))
-        : item.slot;
+      item.container === "bag2" ? 40 + item.slot : item.slot;
     send({
       type: "moveItem",
       grid:
@@ -9750,8 +9749,32 @@ export default function HomePage() {
         break;
 
       // Item move/equip acknowledgements (server grid indices) -----------------
+      case "MoveItem": {
+        if (payload.success === false) {
+          appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+          break;
+        }
+        const grid = String(payload.grid ?? "").toLowerCase();
+        const from = numberOrUndefined(payload.from);
+        const to = numberOrUndefined(payload.to);
+        if (grid === "inventory" && typeof from === "number" && typeof to === "number") {
+          updateWorld((current) => {
+            const inventoryItems = moveInventoryItemsBySlot(
+              current.inventoryItems,
+              from,
+              to,
+            );
+            if (inventoryItems === current.inventoryItems) {
+              return current;
+            }
+            const nextWorld = { ...current, inventoryItems };
+            worldRef.current = nextWorld;
+            return nextWorld;
+          });
+        }
+        break;
+      }
       case "EquipItem":
-      case "MoveItem":
       case "RemoveItem":
       case "RemoveSlotItem":
       case "StoreItem":

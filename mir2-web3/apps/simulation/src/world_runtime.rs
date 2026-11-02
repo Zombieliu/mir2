@@ -1,5 +1,6 @@
 use std::any::Any;
 
+use crate::config::MapTransferSnapshot;
 use crate::runtime::{
     SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
     SharedItemRentalItemOffer, SharedNpcSavedValue, SharedSkillItemConsumptionComponent,
@@ -192,11 +193,20 @@ impl WorldCommand {
         matches!(
             self,
             Self::ClientPacket(
-                ClientPacket::KeepAlive { .. }
+                ClientPacket::ClientVersion { .. }
+                    | ClientPacket::Login { .. }
+                    | ClientPacket::KeepAlive { .. }
+                    | ClientPacket::Chat { .. }
+                    | ClientPacket::MoveItem { .. }
                     | ClientPacket::Turn { .. }
                     | ClientPacket::Walk { .. }
                     | ClientPacket::Run { .. }
-            ) | Self::Tick
+                    | ClientPacket::Attack { .. }
+                    | ClientPacket::RangeAttack { .. }
+                    | ClientPacket::Magic { .. }
+            ) | Self::Attack { .. }
+                | Self::CastSkill { .. }
+                | Self::Tick
         )
     }
 }
@@ -289,6 +299,23 @@ impl InProcessWorldRuntime {
 
     pub fn into_session(self) -> SimulationSession {
         self.session
+    }
+
+    pub fn current_player_runtime_state(&self) -> Option<(u32, i32, i32)> {
+        self.session.current_player_runtime_state()
+    }
+
+    pub fn intelligent_creature_auto_pickup_active(&self) -> bool {
+        self.session.intelligent_creature_auto_pickup_active()
+    }
+
+    pub fn attack_empty_direction_with_spell(
+        &mut self,
+        direction: mir2_protocol::MirDirection,
+        spell: mir2_protocol::Spell,
+    ) -> Vec<ServerPacket> {
+        self.session
+            .attack_empty_direction_with_spell(direction, spell)
     }
 
     pub fn apply_shared_ground_drop_pickup(
@@ -464,6 +491,34 @@ impl InProcessWorldRuntime {
         self.session.active_zone_join_snapshot(session_id)
     }
 
+    pub fn active_zone_join_snapshot_fast(
+        &self,
+        session_id: impl Into<String>,
+    ) -> Option<crate::ZoneJoin> {
+        self.session.active_zone_join_snapshot_fast(session_id)
+    }
+
+    pub fn active_zone_join_snapshot_from_snapshot(
+        &self,
+        session_id: impl Into<String>,
+        snapshot: &WorldSnapshot,
+    ) -> Option<crate::ZoneJoin> {
+        self.session
+            .active_zone_join_snapshot_from_snapshot(session_id, snapshot)
+    }
+
+    pub fn active_zone_self_entity_snapshot(&self) -> Option<crate::WorldEntitySnapshot> {
+        self.session.active_zone_self_entity_snapshot()
+    }
+
+    pub fn active_zone_map_transfers(&self) -> Vec<MapTransferSnapshot> {
+        self.session.active_zone_map_transfers()
+    }
+
+    pub fn active_zone_free_bag_slots(&self) -> u16 {
+        self.session.active_zone_free_bag_slots()
+    }
+
     pub fn force_authoritative_player_transform(
         &mut self,
         position: Point,
@@ -556,6 +611,10 @@ impl InProcessWorldRuntime {
         key: &str,
     ) -> Vec<ServerPacket> {
         self.session.call_shared_npc_snapshot(npc, key)
+    }
+
+    pub fn tick_personal_world(&mut self) -> Vec<ServerPacket> {
+        self.session.tick_personal_world()
     }
 }
 
@@ -800,6 +859,43 @@ mod tests {
             .packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+    }
+
+    #[test]
+    fn incremental_session_commands_skip_outcome_snapshot() {
+        let incremental = [
+            WorldCommand::ClientPacket(ClientPacket::ClientVersion {
+                version_hash: Vec::new(),
+            }),
+            WorldCommand::ClientPacket(ClientPacket::Login {
+                account_id: "account".to_string(),
+                password: "password".to_string(),
+            }),
+            WorldCommand::ClientPacket(ClientPacket::Chat {
+                message: "hello".to_string(),
+                linked_items: Vec::new(),
+            }),
+            WorldCommand::ClientPacket(ClientPacket::MoveItem {
+                grid: mir2_protocol::MirGridType::Inventory,
+                from: 0,
+                to: 1,
+            }),
+            WorldCommand::ClientPacket(ClientPacket::Attack {
+                direction: MirDirection::Right,
+                spell: mir2_protocol::Spell::None,
+            }),
+            WorldCommand::Attack { object_id: 1 },
+            WorldCommand::CastSkill {
+                key: "basic".to_string(),
+            },
+            WorldCommand::Tick,
+        ];
+
+        assert!(incremental.iter().all(WorldCommand::skips_outcome_snapshot));
+        assert!(
+            !WorldCommand::ClientPacket(ClientPacket::StartGame { character_index: 0 })
+                .skips_outcome_snapshot()
+        );
     }
 
     fn started_runtime() -> InProcessWorldRuntime {

@@ -418,6 +418,24 @@ fn postgres_account_store_pool(database_url: &str) -> Arc<PostgresAccountStoreCo
         .clone()
 }
 
+/// Run a synchronous operation on the same bounded Postgres pool used by the
+/// account store. Gateway-side identity data lives in the same database, so
+/// sharing this pool avoids opening a new TCP/TLS connection for every login
+/// or security-center request. Callers must execute this function from a
+/// blocking thread when used by an async runtime.
+pub fn with_account_store_postgres_client<T>(
+    database_url: &str,
+    action: impl FnOnce(&mut Client) -> Result<T, String>,
+) -> Result<T, String> {
+    if database_url.trim().is_empty() {
+        return Err("postgres account-store URL is empty".to_string());
+    }
+    let pool = postgres_account_store_pool(database_url);
+    let mut client = pool.connection()?;
+    pool.ensure_migrated(&mut client)?;
+    action(&mut client)
+}
+
 impl PostgresAccountStoreConnectionPool {
     fn new(database_url: String, config: PostgresAccountStorePoolConfig) -> Self {
         Self {

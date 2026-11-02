@@ -1,4 +1,5 @@
 use std::collections::BTreeSet;
+use std::time::Instant;
 
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, ClientPacket, MirClass, MirDirection, MirGender, MirGridType,
@@ -53,6 +54,63 @@ fn join_with_profile(
 
 fn zone() -> ZoneRuntime {
     ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded())
+}
+
+#[test]
+#[ignore = "manual performance benchmark; run with --release --ignored --exact"]
+fn benchmark_actor_only_broadcast_scaling() {
+    let players = std::env::var("MIR2_BENCH_ZONE_PLAYERS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(200);
+    let actions = std::env::var("MIR2_BENCH_ZONE_ACTIONS")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(2_000);
+    let mut zone = zone();
+    let mut sessions = Vec::with_capacity(players);
+    for index in 0..players {
+        let session_id = format!("bench-{index}");
+        let object_id = 10_000 + index as u32;
+        let x = 300 + (index % 19) as i32;
+        let y = 300 + ((index / 19) % 19) as i32;
+        sessions.push((session(session_id.as_str()), object_id, x, y));
+        std::hint::black_box(zone.handle(ZoneCommand::Join(join(
+            session_id.as_str(),
+            object_id,
+            session_id.as_str(),
+            x,
+            y,
+        ))));
+    }
+
+    let started = Instant::now();
+    let mut delivered_outbounds = 0usize;
+    for action in 0..actions {
+        let (session_id, object_id, x, y) = &sessions[action % sessions.len()];
+        let outbounds = zone.handle(ZoneCommand::BroadcastPackets {
+            session_id: session_id.clone(),
+            owner_local_object_id: *object_id,
+            packets: vec![ServerPacket::ObjectAttack {
+                info: ObjectAttackInfo {
+                    object_id: *object_id,
+                    location: Point { x: *x, y: *y },
+                    direction: MirDirection::Right,
+                    spell: Spell::None as u8,
+                    level: 0,
+                    attack_type: 0,
+                },
+            }],
+            now_ms: action as u64,
+        });
+        delivered_outbounds += std::hint::black_box(outbounds.len());
+    }
+    let elapsed = started.elapsed();
+    println!(
+        "ZONE_AOI_BENCH players={players} actions={actions} elapsed_ms={:.3} actions_per_sec={:.1} delivered_outbounds={delivered_outbounds}",
+        elapsed.as_secs_f64() * 1_000.0,
+        actions as f64 / elapsed.as_secs_f64(),
+    );
 }
 
 fn monster_spawn_packet(object_id: u32, master_object_id: u32, x: i32, y: i32) -> ServerPacket {
@@ -3801,6 +3859,44 @@ fn zone_native_monster_combat_kill_and_drop_are_authoritative() {
         outbound,
         ZoneOutbound::GroundDropClaimed { session_id, drop }
             if session_id == &first && drop.object_id == 9200
+    )));
+}
+
+#[test]
+fn zone_native_empty_melee_swing_broadcasts_without_creating_a_hit() {
+    let mut zone = zone();
+    let first = session("first");
+    let second = session("second");
+
+    zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+    zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 332, 270)));
+
+    let swing = zone.handle(ZoneCommand::PlayerAttackObject {
+        session_id: first.clone(),
+        object_id: 0,
+        direction: MirDirection::Right,
+        spell: Spell::None as u8,
+        level: 0,
+        attack_type: 0,
+        damage: 7,
+        now_ms: 10,
+    });
+
+    for target in [&first, &second] {
+        assert!(has_packet(&swing, target, |packet| matches!(
+            packet,
+            ServerPacket::ObjectAttack { info }
+                if info.object_id == 101 && info.direction == MirDirection::Right
+        )));
+    }
+    let tick = zone.tick(10);
+    assert!(!tick.iter().any(|outbound| matches!(
+        outbound,
+        ZoneOutbound::ToSession { packets, .. } | ZoneOutbound::ToMany { packets, .. }
+            if packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::ObjectStruck { .. } | ServerPacket::DamageIndicator { .. }
+            ))
     )));
 }
 
@@ -8362,6 +8458,35 @@ fn zone_movement_writes_back_authoritative_transform_to_session() {
     let join = session_runtime
         .active_zone_join_snapshot("first")
         .expect("started session should produce a zone join snapshot");
+    let snapshot = session_runtime.world_snapshot();
+    assert_eq!(
+        session_runtime
+            .active_zone_join_snapshot_from_snapshot("first", &snapshot)
+            .expect("prebuilt snapshot should produce the same zone join"),
+        join
+    );
+    assert_eq!(
+        session_runtime
+            .active_zone_join_snapshot_fast("first")
+            .expect("direct resources should produce the same zone join"),
+        join
+    );
+    assert_eq!(
+        session_runtime
+            .active_zone_self_entity_snapshot()
+            .expect("active self entity should be available"),
+        snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .cloned()
+            .expect("world snapshot should contain self entity")
+    );
+    assert_eq!(session_runtime.active_zone_map_transfers(), snapshot.map_transfers);
+    assert_eq!(
+        session_runtime.active_zone_free_bag_slots(),
+        snapshot.free_bag_slots
+    );
     let session_id = join.session_id.clone();
     let mut zone = ZoneRuntime::new_with_collision(
         ZoneKey::for_map(join.map_file_name.clone()),

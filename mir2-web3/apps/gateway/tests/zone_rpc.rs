@@ -944,6 +944,60 @@ fn zone_replication_head_is_per_zone_bounded_and_survives_v4_restore() {
 }
 
 #[test]
+fn automatic_journal_compaction_bounds_retained_entries_and_preserves_head() {
+    let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
+    let (address, server, stop, handle) = start_server(authority.clone());
+    let zone_id = ZoneId::new("map:compact");
+    let transport = test_transport(address, zone_id.clone(), "compact-session");
+    let lease = authority.owner_lease(&zone_id);
+
+    transport
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease.clone(),
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 1 }),
+        ))
+        .expect("initial mutation should execute");
+    assert_eq!(
+        server
+            .compact_active_journals_over_limit(2)
+            .expect("journal below the configured limit should remain intact"),
+        0
+    );
+
+    let head_before = transport.replication_head().unwrap();
+    assert_eq!(
+        server
+            .compact_active_journals_over_limit(1)
+            .expect("automatic compaction should snapshot and remove retained history"),
+        1
+    );
+    let head_after = transport.replication_head().unwrap();
+    assert_eq!(head_after.next_sequence, head_before.next_sequence);
+    assert_eq!(head_after.latest_digest, head_before.latest_digest);
+    assert_eq!(head_after.base_sequence, head_before.next_sequence);
+    assert!(head_after.base_snapshot_id.is_some());
+    let telemetry = server.telemetry_snapshot();
+    assert_eq!(telemetry.checkpoint.journal_entries, 0);
+    assert_eq!(telemetry.checkpoint.journal_compactions_total, 1);
+    assert_eq!(telemetry.checkpoint.journal_compacted_entries_total, 1);
+
+    transport
+        .execute(ZoneOwnerCommandRequest::direct(
+            lease,
+            WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 2 }),
+        ))
+        .expect("post-base mutation should execute");
+    let delta = transport
+        .export_mutation_batch(head_after.base_sequence, 8, 1024 * 1024)
+        .expect("post-base mutation should remain exportable");
+    assert_eq!(delta.entries.len(), 1);
+    assert_eq!(delta.entries[0].sequence, head_after.base_sequence);
+    assert_eq!(delta.previous_digest, head_after.latest_digest);
+
+    stop_server(address, stop, handle);
+}
+
+#[test]
 fn v5_base_snapshot_restores_active_sessions_without_journal_replay_and_compacts_history() {
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (active_address, active_server, active_stop, active_handle) =

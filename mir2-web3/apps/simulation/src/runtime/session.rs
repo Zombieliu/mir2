@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use super::combat::combat_delay_ticks;
 use super::components::{
-    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, player_entity,
+    Facing, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -34,8 +34,8 @@ use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{
-    CharacterRecord, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
-    WorldSnapshot,
+    CharacterRecord, ItemContainer, MapTransferSnapshot, SimulationConfig, WorldEntityKind,
+    WorldEntitySnapshot, WorldSnapshot,
 };
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterSpawn,
@@ -215,7 +215,7 @@ impl SimulationSession {
         app.insert_resource(RuntimeClockResource::new());
         app.insert_resource(ObjectIdAllocatorResource::new());
         app.insert_resource(CrystalNpcRandomState::new());
-        rebuild_world(app.world_mut());
+        rebuild_lobby_world(app.world_mut());
         Self {
             app,
             visible_objects: BTreeSet::new(),
@@ -397,6 +397,33 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    /// Read the few authoritative-player fields needed by the shared Zone
+    /// bridge without cloning the complete Session world into a snapshot.
+    pub fn current_player_runtime_state(&self) -> Option<(u32, i32, i32)> {
+        let world = self.app.world();
+        let player = player_entity(world)?;
+        let object_id = entity_object_id(world, player)?;
+        let vitals = entity_player_vitals(world, player)?;
+        Some((object_id, vitals.hp, vitals.mp))
+    }
+
+    /// Most characters do not own an active auto-pickup creature. Keep their
+    /// high-frequency Session tick off the snapshot/drop-scan path entirely.
+    pub fn intelligent_creature_auto_pickup_active(&self) -> bool {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .intelligent_creatures
+            .iter()
+            .any(|creature| {
+                creature.pet_mode != 0
+                    && creature.creature_rules.auto_pickup_enabled
+                    && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
+                    && creature.creature_rules.auto_pickup_range > 0
+            })
+    }
+
     pub fn prepare_chat_packet_for_zone(
         &mut self,
         message: String,
@@ -441,13 +468,101 @@ impl SimulationSession {
     }
 
     pub fn active_zone_join_snapshot(&self, session_id: impl Into<String>) -> Option<ZoneJoin> {
+        let snapshot = self.world_snapshot();
+        self.active_zone_join_snapshot_from_snapshot(session_id, &snapshot)
+    }
+
+    pub fn active_zone_join_snapshot_fast(
+        &self,
+        session_id: impl Into<String>,
+    ) -> Option<ZoneJoin> {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return None;
+        }
+        let session = world.resource::<SessionResource>();
+        let account_id = session.account_id.clone()?;
+        let character = session.selected_character.as_ref()?.clone();
+        let player = player_entity(world)?;
+        let object_id = entity_object_id(world, player)?;
+        let entity = world.entity(player);
+        let position = entity.get::<Position>()?.0.clone();
+        let direction = entity.get::<Facing>()?.0;
+        let vitals = entity_player_vitals(world, player)?;
+        let map_file_name = world
+            .resource::<MapRuntimeResource>()
+            .current_map
+            .file_name
+            .clone();
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        let permissions = world.resource::<PlayerPermissionResource>();
+        let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
+            .then(|| stage5.stage5_systems.guild.name.clone());
+        let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
+            .then(|| stage5.stage5_systems.mentor.name.clone());
+        let relationship_name = (!stage5
+            .stage5_systems
+            .relationship
+            .partner_name
+            .trim()
+            .is_empty())
+        .then(|| stage5.stage5_systems.relationship.partner_name.clone());
+        Some(ZoneJoin {
+            session_id: SessionId::new(session_id.into()),
+            account_id,
+            character_index: character.index,
+            object_id,
+            name: character.name,
+            class: character.class,
+            gender: character.gender,
+            level: character.level,
+            hp: vitals.hp,
+            max_hp: vitals.max_hp.max(1),
+            mp: vitals.mp.max(0),
+            map_file_name,
+            position,
+            direction,
+            chat_profile: ZoneChatProfile {
+                group_members: stage5.stage5_systems.group.members.clone(),
+                guild_name,
+                blocked_names: stage5.stage5_systems.social.blocked.clone(),
+                mentor_name,
+                relationship_name,
+                is_gm: false,
+                free_map_shout: permissions.free_map_shout,
+                free_server_shout: permissions.free_server_shout,
+            },
+            combat_stats: self.zone_player_combat_stats(),
+        })
+    }
+
+    pub fn active_zone_self_entity_snapshot(&self) -> Option<WorldEntitySnapshot> {
+        self_player_world_entity_snapshot(self.app.world())
+    }
+
+    pub fn active_zone_map_transfers(&self) -> Vec<MapTransferSnapshot> {
+        let world = self.app.world();
+        collect_map_transfer_snapshots(
+            &world.resource::<RuntimeConfigResource>().config,
+            world.resource::<MapRuntimeResource>(),
+        )
+    }
+
+    pub fn active_zone_free_bag_slots(&self) -> u16 {
+        free_bag_slots(self.app.world().resource::<InventoryResource>())
+    }
+
+    pub fn active_zone_join_snapshot_from_snapshot(
+        &self,
+        session_id: impl Into<String>,
+        snapshot: &crate::WorldSnapshot,
+    ) -> Option<ZoneJoin> {
         if !is_in_world(self.app.world()) {
             return None;
         }
         let session = self.app.world().resource::<SessionResource>();
         let account_id = session.account_id.clone()?;
         let character = session.selected_character.as_ref()?.clone();
-        let snapshot = self.world_snapshot();
         let self_player = snapshot
             .entities
             .iter()
@@ -477,7 +592,7 @@ impl SimulationSession {
             hp: snapshot.player_hp.unwrap_or(1),
             max_hp: snapshot.player_max_hp.unwrap_or(1).max(1),
             mp: snapshot.player_mp.unwrap_or_default().max(0),
-            map_file_name: snapshot.map_file_name.unwrap_or_default(),
+            map_file_name: snapshot.map_file_name.clone().unwrap_or_default(),
             position: Point {
                 x: self_player.x,
                 y: self_player.y,

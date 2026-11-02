@@ -245,7 +245,17 @@ impl ZoneRuntime {
             }
             runtime
                 .player_grid
-                .insert(session_id.clone(), &player.position);
+                .insert(player.object_id, &player.position);
+            if runtime
+                .player_sessions_by_object_id
+                .insert(player.object_id, session_id.clone())
+                .is_some()
+            {
+                return Err(format!(
+                    "zone runtime checkpoint has duplicate player object id {}",
+                    player.object_id
+                ));
+            }
             runtime
                 .ecs
                 .upsert_player(session_id, player.object_id, &player.position);

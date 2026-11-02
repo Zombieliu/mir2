@@ -208,6 +208,20 @@ impl ZoneManager {
         self.zones.get(key)
     }
 
+    pub fn player_melee_target_in_direction(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        include_thrusting_reach: bool,
+    ) -> Option<u32> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_melee_target_in_direction(
+            session_id,
+            direction,
+            include_thrusting_reach,
+        )
+    }
+
     pub fn native_monster_snapshots(&self, key: &ZoneKey) -> Vec<ZoneNativeMonsterSnapshot> {
         self.zones
             .get(key)

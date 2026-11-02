@@ -7,7 +7,7 @@ use bevy_ecs::prelude::World;
 use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
-    crystal_map_respawns_by_file_name, crystal_map_respawns_by_index, crystal_monster_by_index,
+    crystal_map_respawns_by_index, crystal_map_respawns_ref, crystal_monster_by_index,
     crystal_monster_by_name, crystal_npc_info_manifest, crystal_recipe_bootstrap_packets,
     format_localized_text, localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
@@ -5750,7 +5750,7 @@ pub(super) fn start_game_static_visible_object_packets(
         ));
     }
 
-    if let Some(map) = crystal_map_respawns_by_file_name(map_file_name) {
+    if let Some(map) = crystal_map_respawns_ref(map_file_name) {
         for respawn in &map.respawns {
             // In the fully-activated world the whole map is alive, so the
             // on-screen subset is the canonical full placement filtered to the
@@ -5773,7 +5773,7 @@ pub(super) fn start_game_static_visible_object_packets(
                 ));
             }
         }
-        for spell in map.safe_zone_spells {
+        for spell in &map.safe_zone_spells {
             if !point_in_data_range(&spell.location, player_position) {
                 continue;
             }
@@ -5789,7 +5789,7 @@ pub(super) fn start_game_static_visible_object_packets(
                 ServerPacket::ObjectSpell {
                     info: ObjectSpellInfo {
                         object_id: spell.object_id,
-                        location: spell.location,
+                        location: spell.location.clone(),
                         spell: spell_kind,
                         direction: MirDirection::Up,
                         param: false,
@@ -6154,6 +6154,50 @@ pub(super) fn collect_world_entities(
     }
 
     result
+}
+
+pub(super) fn self_player_world_entity_snapshot(world: &World) -> Option<WorldEntitySnapshot> {
+    let player = player_entity(world)?;
+    let entity = world.entity(player);
+    let object_id = entity.get::<ObjectId>()?;
+    let name = entity.get::<DisplayName>()?;
+    let position = entity.get::<Position>()?;
+    let facing = entity.get::<Facing>()?;
+    let body = entity.get::<CharacterBody>();
+    let vitals = entity.get::<PlayerVitals>();
+    let equipment = &world.resource::<InventoryResource>().equipment_items;
+    let mount = world
+        .get_resource::<MountResource>()
+        .filter(|mount| mount.riding_mount)
+        .map(|mount| mount.mount_type);
+    let hair = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .appearance
+        .hair;
+    let language = world.resource::<SessionResource>().language;
+
+    Some(WorldEntitySnapshot {
+        object_id: object_id.0,
+        kind: WorldEntityKind::SelfPlayer,
+        name: name.resolve(language),
+        owner_name: None,
+        ai: None,
+        x: position.0.x,
+        y: position.0.y,
+        direction: facing.0,
+        class: body.map(|body| body.class),
+        gender: body.map(|body| body.gender),
+        level: body.map(|body| body.level),
+        hp: vitals.map(|vitals| vitals.hp),
+        max_hp: vitals.map(|vitals| vitals.max_hp),
+        light: crystal_self_player_light(world, equipment),
+        name_colour_argb: -1,
+        dead: vitals.is_some_and(|vitals| vitals.hp <= 0),
+        disposition: WorldEntityDisposition::Friendly,
+        sprite: entity_sprite_snapshot(body, None, None, Some(equipment), hair, mount),
+        quest_ids: Vec::new(),
+    })
 }
 
 fn crystal_self_player_light(world: &World, equipment: &[EquipmentState]) -> u8 {
