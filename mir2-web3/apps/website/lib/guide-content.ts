@@ -14,7 +14,7 @@ export const guideArticles: DocumentationArticle[] = [
     slug: "getting-started", title: "开始游戏", description: "从官网下载开始，完成登录、创建角色，再踏出第一次冒险。", status: "testing", environment: "Windows 与 Web 测试入口",
     sections: [
       { id: "choose-platform", title: "1. 下载并打开客户端", ordered: true, items: ["打开官网下载页，选择当前提供的 Windows 测试安装包，按安装器提示完成安装。", "从安装后的游戏入口启动，等待更新与必要资源加载，直到出现登录界面。首次下载所需时间取决于网络和设备。", "也可从官网的浏览器入口进入，先查看设备与测试说明。"], note: "本页以 Windows 测试客户端为主；其他平台看下载页。请沿用官方渠道更新，避免混装旧版本。", links: [{ label: "下载 Windows 客户端", href: "download" }, { label: "浏览器游戏入口", href: "play" }] },
-      { id: "login", image: { src: "/zh-CN/guide-media/windows-login-r16.jpg", alt: "Windows 测试登录页，下方为 Dubhe Wallet 扫码登录 F8 按钮", caption: "内部验证截图 · Crystal 临时素材。此图说明 Dubhe Wallet 扫码登录 F8，不代表正式美术或已经开放外部测试。", width: 1026, height: 800 }, title: "2. 登录你的账户", ordered: true, items: ["打开客户端，使用已有账号登录；新用户也可在登录页创建账号。", "使用 Dubhe Wallet 时，点击“扫码登录”或按 F8，用手机钱包扫描新生成的二维码。", "在手机核对登录请求、站点与钱包地址，再确认签名。电脑进入选角界面后，继续下一步。"], note: "登录签名只验证身份。充值或转账需另外核对网络、金额与收款方。" },
+      { id: "login", image: { src: "/zh-CN/guide-media/windows-login-r16.jpg", alt: "Windows 测试登录页，下方为 Dubhe Wallet 扫码登录 F8 按钮", caption: "内部验证截图 · Crystal 临时素材。此图说明 Dubhe Wallet 扫码登录 F8，不代表正式美术或所有功能已经完成验收。", width: 1026, height: 800 }, title: "2. 登录你的账户", ordered: true, items: ["打开客户端，使用已有账号登录；新用户也可在登录页创建账号。", "使用 Dubhe Wallet 时，点击“扫码登录”或按 F8，用手机钱包扫描新生成的二维码。", "在手机核对登录请求、站点与钱包地址，再确认签名。电脑进入选角界面后，继续下一步。"], note: "登录签名只验证身份。充值或转账需另外核对网络、金额与收款方。" },
       { id: "character", title: "3. 创建或选择角色", ordered: true, items: ["首次进入选角界面时，打开创建角色，选择服务器当前提供的职业并填写角色名。名称或数量不符合要求时，按界面提示调整。", "创建成功后，在角色列表中选中你的角色，再进入游戏。已有角色直接选择即可。", "进入地图后，先找到生命、魔力和快捷栏，再打开背包查看随身物品。"], note: "继续旧角色时，请使用原钱包或账号，并核对服务器；看不到角色时查“常见问题”。", links: [{ label: "怎样选择职业", href: "guide/classes-equipment" }] },
       { id: "first-adventure", title: "4. 完成第一次冒险", ordered: true, items: ["先在安全区域练习移动，记住附近的补给地点和返回路线。", "查看装备、背包和已学技能，把常用技能与药品放到快捷栏。详细键位见“基础操作与战斗”。", "有任务提示时，先按提示寻找 NPC 或目标；准备好后再选择附近的低风险怪物，尝试战斗并观察生命与魔力变化。", "准备离开时，使用游戏内正常退出流程，等待回到选角或登录界面。"], links: [{ label: "继续学习移动与战斗", href: "guide/controls" }, { label: "探索、资源与同行者", href: "guide/exploration" }] },
       { id: "qr-expired", title: "遇到问题：二维码过期", collapsible: true, paragraphs: ["二维码仅供本次登录使用。看到过期提示时，按 Enter 或点击刷新，生成新的二维码后再用手机扫描；取消本次操作可按 Esc。下面是过期界面参考，请不要扫描教程截图。"], image: { src: "/zh-CN/guide-media/wallet-qr-expired-r16.jpg", alt: "钱包登录二维码已过期，显示刷新 Enter 与取消 Esc 按钮", caption: "内部验证截图 · Crystal 临时素材。二维码区域已失效并清空，此图仅说明内部测试中的重试步骤。", width: 1026, height: 800 } },
@@ -64,8 +64,9 @@ export const guideArticles: DocumentationArticle[] = [
     ],
   },
   {
-    slug: "playtest", title: "内测阶段与数据规则", description: "区分测试可用、正式上线和仍在规划的内容。", status: "testing", environment: "内部验证说明 / 外部测试尚未开始",
+    slug: "playtest", title: "测试阶段与数据规则", description: "区分测试可用、正式上线和仍在规划的内容。", status: "testing", environment: "已邀请外部玩家参加测试 / 尚未正式上线",
     sections: [
+      { id: "current-testing", title: "当前测试阶段", paragraphs: ["当前 Numeron 已邀请外部玩家参加测试，游戏仍在开发中，尚未正式上线或开始商业运营。测试开放范围以当前公告与收到的测试说明为准，参与测试不代表所有功能已经完成验收。", "内部游戏与充值测试流程已跑通，但完成日期尚未确认。测试资产、游戏金币和测试到账不代表商业收入；玩家规模、成交与留存统计尚未核实。"] },
       { id: "states", title: "怎样读本指南的状态", table: { headers: ["状态", "含义"], rows: [["已上线", "有指定环境的访问证据；不代表其他环境或所有模块都通过验收。"], ["测试中", "正在验证，可能变化、停机或调整数据。"], ["规划中", "当前不可用，没有承诺开放时间。"]] }, paragraphs: ["服务器名包含 TEST、Live 或某个赛季名称，不能据此判断它使用链上主网。网络必须在钱包和具体订单中单独核对。"] },
       { id: "data", title: "会清档吗？", paragraphs: ["后续测试尚未公布统一的清档与永久保留政策。投入大量时间或参与付费测试前，请先查看该轮公告；当前不承诺永不清档。", "此前更新曾保留账号、角色和充值历史，但后续测试是否沿用，需要查看各轮公告。", "清档范围、补偿、保留哪些身份或社交数据，以及测试结束后的处理，将由运营另行公告。"] },
       { id: "test-expectations", title: "参与测试的合理预期", items: ["玩法、数值、入口和兼容性可能调整；记录你使用的平台与版本。", "点券、月卡、活动与测试链上资产都按本轮具体条款处理。", "遇到故障时提供最小必要的信息和脱敏截图，不公开个人凭据。"], links: [{ label: "常见问题与支持", href: "guide/faq" }] },
