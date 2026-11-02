@@ -145,25 +145,25 @@ const zhCN: SiteCopy = {
   },
   hero: {
     eyebrow: "A NUMERON SERIES // WORLD 01",
-    titleTop: "传奇",
+    titleTop: "NUMERON",
     titleBottom: "重生",
     description:
-      "重返玛法大陆。在一个共享、持续演化的世界里，与真实玩家并肩作战、争夺荣耀，写下属于你的下一段传奇。",
-    primary: "进入游戏",
-    secondary: "探索世界",
-    status: "世界服务在线",
+      "灾后的世界，仍有值得探索的未知。与同行者寻找旧时代的踪迹，在生存与重建中，写下属于你的故事。Numeron · The Legend of Rebirth，2D MMORPG 测试中。",
+    primary: "开始游玩",
+    secondary: "了解游戏",
+    status: "开放测试 · 内容持续调整",
   },
   metrics: [
-    { value: "463", label: "张可探索地图" },
-    { value: "03", label: "条经典职业路线" },
-    { value: "01", label: "个共享世界" },
+    { value: "2D", label: "多人角色扮演" },
+    { value: "TEST", label: "当前开放阶段" },
+    { value: "PC", label: "优先体验平台" },
   ],
   atlas: {
     eyebrow: "NUMERON ATLAS // WORLD PULSE",
     title: "世界没有停下，\n它正在留下记录。",
-    copy: "即使没有进入游戏，也能查看公开的角色、公会、装备、市场和世界事件。精确位置、私人资产与敏感数据不会公开。",
-    button: "进入传奇重生天机阁",
-    live: "玛法一号在线",
+    copy: "浏览世界数据的界面原型，了解角色、行会与事件的展示方式。当前示意数据不代表真实在线人数、交易量或已开放的数据接口。",
+    button: "浏览天机阁原型",
+    live: "界面预览 · 非实时统计",
     metrics: [
       { value: "12,684", label: "在线冒险者" },
       { value: "428", label: "活跃区域" },
@@ -172,30 +172,30 @@ const zhCN: SiteCopy = {
   },
   world: {
     eyebrow: "A LIVING WORLD",
-    title: "这里不是副本，\n而是共同生活的世界。",
+    title: "在灾后世界，\n探索重生的可能。",
     copy:
-      "每一次相遇都发生在同一片大陆。城镇、荒野、地下迷宫与沙巴克，共同构成一个持续运行、由玩家推动的世界。",
+      "Numeron 的原创故事围绕灾后世界、探索、生存、旧时代装置与重生秩序展开。当前测试沿用部分既有地图、职业和界面名称，用于验证登录、战斗和角色成长；测试画面与名称不代表原创世界的最终内容。",
     cards: [
-      { number: "01", title: "共享区域", copy: "玩家、怪物与掉落由同一权威世界驱动，每次遭遇都真实发生。" },
-      { number: "02", title: "经典战斗", copy: "走位、方向、技能时机与装备成长，保留经典传奇最纯粹的战斗节奏。" },
-      { number: "03", title: "跨端旅程", copy: "网页、桌面与移动端共享角色进度，让冒险不被设备打断。" },
+      { number: "01", title: "从探索开始", copy: "在当前开放的区域熟悉地图、补给与任务，逐步认识这个世界。" },
+      { number: "02", title: "通过行动成长", copy: "练习走位、攻击与技能配合，了解装备和耗材各自的用途。" },
+      { number: "03", title: "与同行者相遇", copy: "从聊天、组队到行会，体验当前测试环境已开放的多人玩法。" },
     ],
   },
   classes: {
     eyebrow: "CHOOSE YOUR PATH",
-    title: "三种道路，一段传奇",
-    copy: "力量、元素与道术从来不是答案；你如何与世界中的人并肩，才决定最终的名字。",
+    title: "先找到适合你的战斗方式",
+    copy: "以下为当前测试界面的常见职业名称与定位，实际可选项以创角界面为准。原创设定中，人类的战斗能力来自训练、装备、装置与耗材。",
     items: [
       { key: "01", title: "战士", role: "近战 · 生存 · 爆发", copy: "以钢铁与意志踏入敌阵，在最短的距离内决定胜负。" },
-      { key: "02", title: "法师", role: "元素 · 范围 · 控制", copy: "驾驭火焰、雷霆与寒冰，让整个战场成为你的法阵。" },
-      { key: "03", title: "道士", role: "召唤 · 治疗 · 诅咒", copy: "联结生者与灵界，在持续战斗中改变队伍的命运。" },
+      { key: "02", title: "法师", role: "远程 · 范围 · 控制", copy: "当前测试中的远程方向，先熟悉攻击距离、技能范围与资源消耗。" },
+      { key: "03", title: "道士", role: "辅助 · 配合 · 持续战斗", copy: "当前测试中的辅助方向，关注技能配合、补给与队伍的持续作战。" },
     ],
   },
   global: {
     eyebrow: "ONE WORLD · MANY CULTURES",
-    title: "同一个玛法，\n为每个地区重新讲述。",
+    title: "同一个 Numeron，\n从你的语言开始。",
     copy:
-      "语言、字体、配音与地区视觉以独立资源包交付；核心战斗识别保持全球一致，本地文化由当地团队与玩家共同校准。",
+      "官网保留多语言入口；本轮玩家指南与开发者文档先提供中文内容，其他语言正文仍待审核。游戏语言与可用内容以当前客户端版本为准。",
     markets: ["简体中文", "ENGLISH", "日本語", "한국어"],
   },
   chronicles: {
@@ -293,8 +293,8 @@ const zhCN: SiteCopy = {
   finalCta: {
     eyebrow: "THE GATE IS OPEN",
     title: "你的名字，等待被世界记住。",
-    copy: "选择职业，踏入比奇，开始一段由你亲自书写的旅程。",
-    button: "立即进入玛法",
+    copy: "先看新手指南，选择当前测试入口，创建你的第一个角色。",
+    button: "开始游玩",
   },
   footer: { note: "一个由玩家共同塑造的持续世界。", legal: "NUMERON · LEGEND OF REBIRTH", game: "游戏", data: "世界数据", watch: "观看", regions: "地区", enter: "进入游戏", worldPulse: "世界脉搏" },
 };

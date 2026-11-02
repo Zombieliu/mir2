@@ -149,8 +149,8 @@ const zhCN: ProductCopy = {
   },
   proof: {
     eyebrow: "REAL CLIENT · PUBLIC CANDIDATE",
-    title: "不是概念图。\n这是正在运行的游戏。",
-    copy: "以下画面直接来自当前浏览器客户端，展示角色选择、共享地图、背包装备与技能系统。画面会随候选版本继续演进。",
+    title: "先看看，\n你会怎样开始。",
+    copy: "以下为 2026 年 8 月的浏览器测试画面，展示选角、地图、背包与技能界面。当前 Windows 版本的登录步骤请看玩家指南；素材、名称与界面仍会调整。",
     verified: "实机录制 · 2026.08",
     action: "查看进入游戏说明",
     items: [
@@ -161,13 +161,13 @@ const zhCN: ProductCopy = {
   },
   play: {
     eyebrow: "ENTER WORLD 01",
-    title: "先了解当前阶段，\n再进入玛法。",
-    copy: "传奇重生目前提供浏览器候选版本。启动页会先说明服务状态、加载时间、账号方式与设备要求，再把你交给游戏客户端。",
+    title: "选好入口，\n开始你的旅程。",
+    copy: "Numeron 当前提供 Windows 测试安装入口与浏览器测试入口。首次游玩先阅读玩家指南，了解账号、钱包扫码与角色创建流程。",
     launch: "启动浏览器客户端",
     browser: "浏览器版本",
     browserCopy: "无需下载安装。首次进入会缓存地图与角色素材，网络和设备性能会影响首帧时间。",
     desktop: "桌面客户端",
-    desktopCopy: "独立桌面版本正在进行签名、更新与设备验收，开放后会在这里提供官方入口。",
+    desktopCopy: "官网下载页提供当前 Windows 测试安装入口。使用官方安装器更新；资源下载耗时受网络与设备影响。",
     candidate: "PUBLIC CANDIDATE",
     candidateCopy: "当前版本用于公开试玩和候选验收，不代表所有内容、性能和视觉已最终完成。",
     requirements: "建议环境",
@@ -275,6 +275,18 @@ const zhCN: ProductCopy = {
     },
   },
   updates: [
+    {
+      slug: "player-and-developer-guides",
+      date: "2026.11.02",
+      tag: "GUIDES",
+      title: "玩家指南与开发者文档开放",
+      summary: "从登录、创角到基础玩法，以及一个可运行的公开只读示例。首版正文为中文。",
+      sections: [
+        { title: "开始游玩", copy: "玩家指南说明当前测试入口、账户与钱包登录、角色创建、基础操作、充值与月卡，以及测试数据的边界。具体规则仍以所在测试环境与公告为准。" },
+        { title: "参与开发", copy: "开发者文档介绍 Numeron、Dubhe 与 Dubhe Wallet 的分工，并提供公开服务状态读取示例。第三方角色写入和玩法扩展不在当前公开接口范围内。" },
+        { title: "语言与后续更新", copy: "首版正文以中文提供，其他语言仍待审核。页面注明内容更新时间与适用环境，后续会随已核实的能力继续更新。" },
+      ],
+    },
     {
       slug: "shared-world-candidate",
       date: "2026.08.28",

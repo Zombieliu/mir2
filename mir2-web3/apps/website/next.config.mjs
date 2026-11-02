@@ -17,6 +17,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      { source: "/guide", destination: "/zh-CN/guide", permanent: false },
+      { source: "/developers", destination: "/zh-CN/developers", permanent: false },
+      { source: "/game/:path*", destination: "https://mir2.obelisk.build/game/:path*", permanent: false },
+      { source: "/promotions/:path*", destination: "https://mir2.obelisk.build/promotions/:path*", permanent: false },
       {
         source: "/",
         destination: "/zh-CN",

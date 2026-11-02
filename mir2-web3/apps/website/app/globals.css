@@ -94,6 +94,7 @@ body::before {
 [dir="rtl"] .language-options { right: auto; left: 0; }
 
 .hero { position: relative; min-height: 100svh; height: max(780px, 100svh); overflow: hidden; padding: 170px var(--page-pad) 120px; display: flex; align-items: center; background: radial-gradient(circle at 72% 50%, rgba(142,103,44,.18), transparent 31%), linear-gradient(115deg, #0a0a09 0%, #0c0b09 48%, #050505 100%); }
+.hero-numeron h1 > span { font-size: clamp(38px, 5.8vw, 96px); letter-spacing: -.035em; }
 .hero::before { content: ""; position: absolute; top: 103px; bottom: 0; left: 33.33%; width: 1px; background: var(--line-soft); }
 .hero::after { content: "NUMERON / WORLD 01 / 2026"; position: absolute; right: -57px; top: 48%; transform: rotate(90deg); font: 9px/1 monospace; letter-spacing: .24em; color: rgba(236,229,212,.35); }
 .awakening-curtain { position: absolute; z-index: 15; inset: 0; pointer-events: none; overflow: hidden; background: #030302; transform-origin: center; }

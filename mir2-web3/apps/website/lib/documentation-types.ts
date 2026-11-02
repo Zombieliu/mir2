@@ -6,8 +6,10 @@ export type DocumentationSection = {
   paragraphs?: string[];
   items?: string[];
   ordered?: boolean;
+  collapsible?: boolean;
   table?: { headers: string[]; rows: string[][] };
   code?: { language: string; value: string };
+  image?: { src: string; alt: string; caption: string; width: number; height: number };
   note?: string;
   links?: { label: string; href: string }[];
 };

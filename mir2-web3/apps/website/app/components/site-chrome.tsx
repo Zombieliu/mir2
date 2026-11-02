@@ -54,6 +54,9 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
 
   return (
     <>
+      <Link className="nav-direct" href={`/${locale}/guide`} data-track="navigation_guide">{documentation.guide}</Link>
+      <Link className="nav-direct" href={`/${locale}/developers`} data-track="navigation_developers">{documentation.developers}</Link>
+
       <details className="nav-group">
         <summary>{copy.nav.explore}</summary>
         <div className="nav-dropdown">
@@ -70,12 +73,10 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
           <Link href={`${watch}#highlights`}><span>02</span>{copy.nav.highlights}</Link>
           <Link href={`/${locale}/updates`}><span>03</span>{productCopy.chrome.updates}</Link>
           <Link href={`/${locale}/community`}><span>04</span>{productCopy.chrome.community}</Link>
+          <a href={explorerUrl}><span>05</span>{copy.nav.atlas}</a>
+          <Link href={membership} aria-current={currentPage === "membership" ? "page" : undefined}><span>06</span>{copy.nav.token}</Link>
         </div>
       </details>
-
-      <Link className="nav-direct nav-token" href={membership} aria-current={currentPage === "membership" ? "page" : undefined}>
-        {copy.nav.token}<span aria-hidden="true">◆</span>
-      </Link>
 
       <Link className="nav-direct" href={download} aria-current={currentPage === "download" ? "page" : undefined}>
         {downloadCopy.nav}<span aria-hidden="true">↓</span>
@@ -85,17 +86,6 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
         {promotion.label}<span aria-hidden="true">↗</span>
       </a>
 
-      <a className="nav-direct" href={explorerUrl}>
-        {copy.nav.atlas}<span aria-hidden="true">↗</span>
-      </a>
-
-      <details className="nav-group">
-        <summary>{documentation.docs}</summary>
-        <div className="nav-dropdown">
-          <Link href={`/${locale}/guide`}><span>01</span>{documentation.guide}</Link>
-          <Link href={`/${locale}/developers`}><span>02</span>{documentation.developers}</Link>
-        </div>
-      </details>
     </>
   );
 }

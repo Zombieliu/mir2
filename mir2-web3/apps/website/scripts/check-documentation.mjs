@@ -11,6 +11,7 @@ async function contentModule(name) {
 }
 const { guideArticles } = await contentModule("guide-content");
 const { developerArticles } = await contentModule("developer-content");
+const { documentationGroups } = await contentModule("documentation-navigation");
 const collections = { guide: guideArticles, developers: developerArticles };
 const routes = Object.entries(collections).flatMap(([area, articles]) => [`/zh-CN/${area}`, ...articles.map(({ slug }) => `/zh-CN/${area}/${slug}`)]);
 const knownLinks = new Set(["download", "play", "support", "status", "updates"]);
@@ -22,6 +23,9 @@ let links = 0;
 let sections = 0;
 const externalLinks = new Set();
 for (const [area, articles] of Object.entries(collections)) {
+  const groupedSlugs = documentationGroups[area].flatMap((group) => group.slugs);
+  assert.equal(new Set(groupedSlugs).size, groupedSlugs.length, `Duplicate grouped article: ${area}`);
+  assert.deepEqual([...groupedSlugs].sort(), articles.map((article) => article.slug).sort(), `Directory must include every article once: ${area}`);
   assert.equal(new Set(articles.map(({ slug }) => slug)).size, articles.length, `Duplicate slugs: ${area}`);
   for (const article of articles) {
     assert.ok(["live", "testing", "planned"].includes(article.status));
@@ -32,6 +36,11 @@ for (const [area, articles] of Object.entries(collections)) {
       assert.match(section.id, /^[a-z][a-z0-9-]*$/);
       assert.ok(section.paragraphs?.length || section.items?.length || section.table || section.code, `Empty section: ${article.slug}/${section.id}`);
       if (section.table) for (const row of section.table.rows) assert.equal(row.length, section.table.headers.length);
+      if (section.image) {
+        assert.match(section.image.src, /^\/zh-CN\/guide-media\/[a-z0-9-]+\.jpg$/);
+        assert.ok(section.image.alt && section.image.caption && section.image.width > 0 && section.image.height > 0);
+        await readFile(new URL(`public${section.image.src}`, root));
+      }
       for (const { href } of section.links ?? []) {
         links++;
         if (href.startsWith("http")) { externalLinks.add(href); continue; }
@@ -83,6 +92,29 @@ if (originIndex >= 0) {
   }
   const example = await get("/zh-CN/docs-examples/read-status.mjs");
   assert.equal(example, await readFile(new URL("public/zh-CN/docs-examples/read-status.mjs", root), "utf8"));
+  for (const article of guideArticles) for (const section of article.sections) if (section.image) {
+    const response = await fetch(new URL(section.image.src, origin));
+    assert.equal(response.status, 200, `Guide image missing: ${section.image.src}`);
+    assert.match(response.headers.get("content-type") ?? "", /^image\/jpeg/);
+  }
+  const gettingStarted = await get("/zh-CN/guide/getting-started");
+  assert.ok(gettingStarted.includes("Windows 测试版本界面参考"));
+  assert.ok(gettingStarted.indexOf('id="first-adventure"') < gettingStarted.indexOf('id="qr-expired"'), "Troubleshooting must follow the four main steps");
+  assert.match(gettingStarted, /<details id="qr-expired"[^>]*>/);
+  assert.doesNotMatch(gettingStarted, /<details id="qr-expired"[^>]*\bopen(?:=|\s|>)/);
+  assert.match(gettingStarted, /href="\/zh-CN\/guide\/controls"><small>下一篇/);
+  const guideIndex = await get("/zh-CN/guide");
+  const groupPositions = ["start", "play", "help"].map((id) => guideIndex.indexOf(`id="directory-${id}"`));
+  assert.ok(groupPositions[0] >= 0 && groupPositions[1] > groupPositions[0] && groupPositions[2] > groupPositions[1], "Guide directory groups must follow the reading order");
+  for (const [path, destination] of [
+    ["/guide", "/zh-CN/guide"], ["/developers", "/zh-CN/developers"],
+    ["/game?lang=zh-CN", "https://mir2.obelisk.build/game?lang=zh-CN"],
+    ["/promotions/invite/example?campaignId=test", "https://mir2.obelisk.build/promotions/invite/example?campaignId=test"],
+  ]) {
+    const response = await fetch(new URL(path, origin), { redirect: "manual" });
+    assert.equal(response.status, 307, `Expected temporary redirect: ${path}`);
+    assert.equal(new URL(response.headers.get("location"), origin).href, new URL(destination, origin).href);
+  }
   const sitemap = await get("/sitemap.xml");
   for (const path of routes) assert.ok(sitemap.includes(path));
   assert.ok(!sitemap.includes("/en/guide"), "Unreviewed translations must not be advertised in sitemap");

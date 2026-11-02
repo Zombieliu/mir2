@@ -5,7 +5,7 @@ import { documentation } from "@/lib/documentation";
 import { documentationUpdated } from "@/lib/documentation-types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mir2.obelisk.build").replace(/\/$/, "");
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://numeron.obelisk.build").replace(/\/$/, "");
   const localizedPaths = [
     "",
     "/play",

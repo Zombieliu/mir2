@@ -17,6 +17,7 @@ export default async function HomePage({ params }: HomePageProps) {
   if (!isLocale(locale)) notFound();
   const copy = getCopy(locale);
   const productCopy = getProductCopy(locale);
+  const originalEdition = locale === "zh-CN";
   const playUrl = `/${locale}/play`;
   const explorerUrl = process.env.NEXT_PUBLIC_EXPLORER_URL?.replace("{locale}", locale) ?? `/${locale}/explore`;
   const liveNow = Boolean(process.env.NEXT_PUBLIC_LIVE_STREAM_URL);
@@ -26,7 +27,7 @@ export default async function HomePage({ params }: HomePageProps) {
       <MotionController />
       <SiteHeader locale={locale} copy={copy} gameUrl={playUrl} explorerUrl={explorerUrl} liveNow={liveNow} />
 
-      <section className="hero" aria-labelledby="hero-title">
+      <section className={`hero${originalEdition ? " hero-numeron" : ""}`} aria-labelledby="hero-title">
         <div className="awakening-curtain" aria-hidden="true"><i /><i /></div>
         <div className="hero-noise" aria-hidden="true" />
         <div className="hero-orbit hero-orbit-one" aria-hidden="true" />
@@ -92,10 +93,7 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className="eyebrow"><span />{copy.atlas.eyebrow}</div>
           <h2>{copy.atlas.title.split("\n").map((line) => <span key={line}>{line}</span>)}</h2>
           <p>{copy.atlas.copy}</p>
-          <div className="atlas-live"><span className="status-pulse" />{copy.atlas.live}<small>{productCopy.ui.prototypeData}</small></div>
-          <div className="atlas-preview-metrics">
-            {copy.atlas.metrics.map((metric) => <span key={metric.label}><strong>{metric.value}</strong><small>{metric.label}</small></span>)}
-          </div>
+          <div className="atlas-live">{copy.atlas.live}<small>{productCopy.ui.prototypeData}</small></div>
           <a className="button button-primary atlas-button" href={explorerUrl}><span>{copy.atlas.button}</span><i aria-hidden="true">↗</i></a>
         </div>
       </section>
