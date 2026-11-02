@@ -19,7 +19,9 @@ const nextConfig = {
     return [
       { source: "/guide", destination: "/zh-CN/guide", permanent: false },
       { source: "/developers", destination: "/zh-CN/developers", permanent: false },
+      { source: "/game", destination: "https://mir2.obelisk.build/game", permanent: false },
       { source: "/game/:path*", destination: "https://mir2.obelisk.build/game/:path*", permanent: false },
+      { source: "/promotions", destination: "https://mir2.obelisk.build/promotions", permanent: false },
       { source: "/promotions/:path*", destination: "https://mir2.obelisk.build/promotions/:path*", permanent: false },
       {
         source: "/",
