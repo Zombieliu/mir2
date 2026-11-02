@@ -188,7 +188,7 @@
   "dependencies": {
     "@mysten/sui": "^2.16.2",
     "@mysten/wallet-standard": "^0.20.3",
-    "next": "16.2.11",
+    "next": "16.4.4",
     "nipplejs": "^1.0.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -198,7 +198,7 @@
     "@types/node": "25.0.3",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "sharp": "0.35.3",
+    "sharp": "0.35.5",
     "typescript": "5.9.3"
   },
   "engines": {
@@ -206,8 +206,8 @@
   },
   "packageManager": "npm@11.13.0",
   "overrides": {
-    "postcss": "8.5.21",
-    "sharp": "0.35.3",
+    "postcss": "8.5.23",
+    "sharp": "0.35.5",
     "valibot": "1.4.2"
   }
 }

@@ -35,18 +35,13 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Test Crystal pin verification
+        shell: pwsh
+        run: ./mir2-web3/scripts/test-developer-crystal-pin.ps1
+
       - name: Verify pinned Crystal commit
         shell: pwsh
-        run: |
-          $expected = (git ls-tree HEAD Crystal).Split()[2]
-          $actual = (git -C Crystal rev-parse HEAD).Trim()
-          if ($expected -ne $actual) {
-            throw "Crystal mismatch: expected $expected, found $actual"
-          }
-          $remote = git -C Crystal ls-remote origin refs/heads/codex/handoff-parity-tools | Out-String
-          if ($LASTEXITCODE -ne 0 -or $remote -notmatch [regex]::Escape($expected)) {
-            throw "Crystal commit $expected is not reachable from the configured handoff branch"
-          }
+        run: ./mir2-web3/scripts/verify-developer-crystal-pin.ps1
 
       - name: Setup Node 22
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
