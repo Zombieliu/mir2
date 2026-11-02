@@ -33,7 +33,7 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use mir2_protocol::{encode_server_packet, MirClass, MirDirection, MirGender, Point, ServerPacket};
 use mir2_simulation::{
     SessionId, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey, ZoneManager,
-    ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
+    ZoneMonsterSpawn, ZoneOutbound, ZonePlayerCombatStats, ZoneRuntime,
 };
 use serde::Serialize;
 
@@ -119,11 +119,18 @@ struct StepResult {
     logical_packet_deliveries: u64,
     encoded_payload_bytes: u64,
     packet_encode_errors: u64,
+    combat_commands: u64,
     modeled_egress_mbps: f64,
     rss_after_bytes: Option<u64>,
 }
 
-fn run_step(players: usize, ticks: u64, command_interval_ms: u64) -> StepResult {
+fn run_step(
+    players: usize,
+    ticks: u64,
+    command_interval_ms: u64,
+    monsters: usize,
+    attack_every_ticks: u64,
+) -> StepResult {
     let mut zone =
         ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
 
@@ -134,6 +141,19 @@ fn run_step(players: usize, ticks: u64, command_interval_ms: u64) -> StepResult 
     for (i, pos) in positions.iter().enumerate() {
         zone.handle(ZoneCommand::Join(join_at(i, pos.clone())));
     }
+    let monster_object_ids = (0..monsters)
+        .map(|index| 2_000_000 + index as u32)
+        .collect::<Vec<_>>();
+    if let Some(owner_session) = sessions.first() {
+        for (index, object_id) in monster_object_ids.iter().enumerate() {
+            let position = positions[index % positions.len()].clone();
+            let _ = zone.handle(ZoneCommand::SpawnMonster {
+                session_id: owner_session.clone(),
+                monster: load_monster(*object_id, position),
+                now_ms: 0,
+            });
+        }
+    }
 
     // Warm-up tick so first-touch allocations don't skew the first sample.
     let _ = zone.tick(0);
@@ -142,6 +162,7 @@ fn run_step(players: usize, ticks: u64, command_interval_ms: u64) -> StepResult 
     let mut logical_packet_deliveries = 0_u64;
     let mut encoded_payload_bytes = 0_u64;
     let mut packet_encode_errors = 0_u64;
+    let mut combat_commands = 0_u64;
     let mut now_ms: u64 = 1;
     for t in 0..ticks {
         // Every player issues a walk this tick, cycling direction so they keep
@@ -158,6 +179,21 @@ fn run_step(players: usize, ticks: u64, command_interval_ms: u64) -> StepResult 
                 seq: t + 1,
                 now_ms,
             }));
+        }
+        if attack_every_ticks > 0 && t % attack_every_ticks == 0 && !monster_object_ids.is_empty() {
+            for (index, session) in sessions.iter().enumerate() {
+                outbounds.extend(zone.handle(ZoneCommand::PlayerAttackObject {
+                    session_id: session.clone(),
+                    object_id: monster_object_ids[index % monster_object_ids.len()],
+                    direction: dir,
+                    spell: 0,
+                    level: 0,
+                    attack_type: 0,
+                    damage: 1,
+                    now_ms,
+                }));
+                combat_commands += 1;
+            }
         }
 
         outbounds.extend(zone.tick(now_ms));
@@ -185,8 +221,29 @@ fn run_step(players: usize, ticks: u64, command_interval_ms: u64) -> StepResult 
         logical_packet_deliveries,
         encoded_payload_bytes,
         packet_encode_errors,
+        combat_commands,
         modeled_egress_mbps: encoded_payload_bytes as f64 * 8.0 / simulated_seconds / 1_000_000.0,
         rss_after_bytes: process_rss_bytes(),
+    }
+}
+
+fn load_monster(object_id: u32, position: Point) -> ZoneMonsterSpawn {
+    ZoneMonsterSpawn {
+        object_id,
+        name: format!("LoadMob{object_id}"),
+        name_colour_argb: -1,
+        image: 900,
+        // Passive but damageable: player attacks exercise combat resolution
+        // without monster AI killing clients and changing the workload.
+        ai: 1,
+        level: 7,
+        max_hp: 1_000_000_000,
+        hp: 1_000_000_000,
+        experience: 0,
+        position,
+        direction: MirDirection::Down,
+        defense: Default::default(),
+        drops: Vec::new(),
     }
 }
 
@@ -241,8 +298,12 @@ struct MultiZoneResult {
     ticks: u64,
     parallel_mean_ms: f64,
     parallel_p95_ms: f64,
+    parallel_ingest_mean_ms: f64,
+    parallel_tick_mean_ms: f64,
     sequential_mean_ms: f64,
     sequential_p95_ms: f64,
+    sequential_ingest_mean_ms: f64,
+    sequential_tick_mean_ms: f64,
     speedup: f64,
     logical_packet_deliveries: u64,
     encoded_payload_bytes: u64,
@@ -282,10 +343,12 @@ struct Recommendation {
 struct CapacityProfileReport {
     schema_version: u32,
     generated_at_unix_ms: u128,
-    workload: &'static str,
+    workload: String,
     build: &'static str,
     tick_budget_ms: f64,
     command_interval_ms: u64,
+    monsters_per_zone: usize,
+    attack_every_ticks: u64,
     hardware: HardwareProfile,
     recommendation: Recommendation,
     single_zone: Vec<StepResult>,
@@ -298,6 +361,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ticks = env_u64("MIR2_LOAD_TICKS", 120);
     let budget_ms = env_u64("MIR2_LOAD_BUDGET_MS", 100) as f64;
     let command_interval_ms = env_u64("MIR2_LOAD_COMMAND_INTERVAL_MS", 700);
+    let monsters = env_u64("MIR2_LOAD_MONSTERS", 0) as usize;
+    let attack_every_ticks = env_u64("MIR2_LOAD_ATTACK_EVERY_TICKS", 0);
     let network_egress_mbps = env_u64("DUBHE_PROFILE_NETWORK_EGRESS_MBPS", 0) as f64;
     let safety_bps = env_u64("DUBHE_PROFILE_SAFETY_BPS", 7_000).min(10_000);
 
@@ -309,8 +374,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     println!(
-        "Same-map zone load: {} ticks/step, budget {:.0} ms/tick, command interval {} ms, all players walking each tick\n",
-        ticks, budget_ms, command_interval_ms
+        "Same-map zone load: {} ticks/step, budget {:.0} ms/tick, command interval {} ms, \
+         all players walking each tick, {} passive monsters, attacks every {} ticks\n",
+        ticks, budget_ms, command_interval_ms, monsters, attack_every_ticks
     );
     println!(
         "{:>8}  {:>10}  {:>10}  {:>10}  {:>14}  {:>12}",
@@ -320,7 +386,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut knee: Option<usize> = None;
     let mut single_zone = Vec::new();
     for players in steps {
-        let r = run_step(players, ticks, command_interval_ms);
+        let r = run_step(
+            players,
+            ticks,
+            command_interval_ms,
+            monsters,
+            attack_every_ticks,
+        );
         let flag = if r.p95_ms > budget_ms {
             "  <-- over budget"
         } else {
@@ -389,7 +461,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let report = CapacityProfileReport {
         schema_version: 1,
         generated_at_unix_ms: SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis(),
-        workload: "dense-same-map-all-players-walk-plus-multi-zone-tick",
+        workload: if monsters > 0 && attack_every_ticks > 0 {
+            "dense-same-map-all-players-walk-plus-periodic-combat-plus-multi-zone-tick"
+        } else {
+            "dense-same-map-all-players-walk-plus-multi-zone-tick"
+        }
+        .to_string(),
         build: if cfg!(debug_assertions) {
             "debug"
         } else {
@@ -397,6 +474,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         tick_budget_ms: budget_ms,
         command_interval_ms,
+        monsters_per_zone: monsters,
+        attack_every_ticks,
         hardware: HardwareProfile {
             label: env_string("DUBHE_PROFILE_LABEL", "unprofiled"),
             requested_cpu_cores: env_string("DUBHE_PROFILE_CPU_CORES", "unlimited"),
@@ -426,7 +505,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         multi_zone,
         caveats: vec![
             "Encoded payload bytes exclude TCP/IP, TLS, and Zone RPC framing overhead.",
-            "The workload models dense movement and AOI fan-out; monsters, combat, persistence, Gateway CPU, and failover are excluded.",
+            "The single-Zone workload includes combat only when MIR2_LOAD_MONSTERS and MIR2_LOAD_ATTACK_EVERY_TICKS are non-zero; persistence, Gateway CPU, and failover remain excluded.",
+            "The multi-Zone scaling curve remains movement-only so command-ingest and tick scheduling stay comparable with historical profiles.",
             "Disk capacity is recorded as profile metadata because Zone Runtime is in-memory and does not benchmark persistent storage.",
             "The combined recommendation is the largest passing tested step, not an interpolated or extrapolated ceiling.",
         ],
@@ -465,14 +545,24 @@ fn run_multizone_scaling() -> Vec<MultiZoneResult> {
              {cores} cores available (parallel tick_all vs sequential baseline)\n"
         );
         println!(
-            "{:>6}  {:>13}  {:>13}  {:>8}  {:>12}",
-            "zones", "parallel ms", "sequential ms", "speedup", "egress Mbps"
+            "{:>6}  {:>11}  {:>10}  {:>10}  {:>11}  {:>8}  {:>12}",
+            "zones", "parallel ms", "ingest ms", "tick ms", "sequential", "speedup", "egress Mbps"
         );
         for z in &zones {
             let par = time_multizone(*z, players_per_zone, ticks, command_interval_ms, true);
             let seq = time_multizone(*z, players_per_zone, ticks, command_interval_ms, false);
-            let parallel_mean_ms = par.samples.iter().sum::<f64>() / par.samples.len() as f64;
-            let sequential_mean_ms = seq.samples.iter().sum::<f64>() / seq.samples.len() as f64;
+            let parallel_mean_ms =
+                par.total_samples.iter().sum::<f64>() / par.total_samples.len() as f64;
+            let parallel_ingest_mean_ms =
+                par.ingest_samples.iter().sum::<f64>() / par.ingest_samples.len() as f64;
+            let parallel_tick_mean_ms =
+                par.tick_samples.iter().sum::<f64>() / par.tick_samples.len() as f64;
+            let sequential_mean_ms =
+                seq.total_samples.iter().sum::<f64>() / seq.total_samples.len() as f64;
+            let sequential_ingest_mean_ms =
+                seq.ingest_samples.iter().sum::<f64>() / seq.ingest_samples.len() as f64;
+            let sequential_tick_mean_ms =
+                seq.tick_samples.iter().sum::<f64>() / seq.tick_samples.len() as f64;
             let speedup = if parallel_mean_ms > 0.0 {
                 sequential_mean_ms / parallel_mean_ms
             } else {
@@ -482,11 +572,16 @@ fn run_multizone_scaling() -> Vec<MultiZoneResult> {
             let modeled_egress_mbps =
                 par.wire.encoded_payload_bytes as f64 * 8.0 / simulated_seconds / 1_000_000.0;
             println!(
-                "{:>6}  {:>13.2}  {:>13.2}  {speedup:>7.2}x  {:>12.3}",
-                z, parallel_mean_ms, sequential_mean_ms, modeled_egress_mbps
+                "{:>6}  {:>11.2}  {:>10.2}  {:>10.2}  {:>11.2}  {speedup:>7.2}x  {:>12.3}",
+                z,
+                parallel_mean_ms,
+                parallel_ingest_mean_ms,
+                parallel_tick_mean_ms,
+                sequential_mean_ms,
+                modeled_egress_mbps
             );
-            let mut par_sorted = par.samples;
-            let mut seq_sorted = seq.samples;
+            let mut par_sorted = par.total_samples;
+            let mut seq_sorted = seq.total_samples;
             par_sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
             seq_sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
             results.push(MultiZoneResult {
@@ -496,8 +591,12 @@ fn run_multizone_scaling() -> Vec<MultiZoneResult> {
                 ticks,
                 parallel_mean_ms,
                 parallel_p95_ms: percentile(&par_sorted, 95),
+                parallel_ingest_mean_ms,
+                parallel_tick_mean_ms,
                 sequential_mean_ms,
                 sequential_p95_ms: percentile(&seq_sorted, 95),
+                sequential_ingest_mean_ms,
+                sequential_tick_mean_ms,
                 speedup,
                 logical_packet_deliveries: par.wire.logical_packet_deliveries,
                 encoded_payload_bytes: par.wire.encoded_payload_bytes,
@@ -515,7 +614,9 @@ fn run_multizone_scaling() -> Vec<MultiZoneResult> {
 }
 
 struct TimedMultiZone {
-    samples: Vec<f64>,
+    total_samples: Vec<f64>,
+    ingest_samples: Vec<f64>,
+    tick_samples: Vec<f64>,
     wire: WireTotals,
 }
 
@@ -527,18 +628,29 @@ fn time_multizone(
     parallel: bool,
 ) -> TimedMultiZone {
     let mut mgr = ZoneManager::new();
+    let zone_keys = (0..zones)
+        .map(|z| ZoneKey::for_map(format!("loadmap{z}")))
+        .collect::<Vec<_>>();
+    let sessions_by_zone = (0..zones)
+        .map(|z| {
+            (0..players_per_zone)
+                .map(|i| SessionId::new(format!("load-{}", z * players_per_zone + i)))
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
     for z in 0..zones {
-        let map = format!("loadmap{z}");
         let block = dense_block_positions(players_per_zone);
         for (i, pos) in block.iter().enumerate() {
             let mut j = join_at(z * players_per_zone + i, pos.clone());
-            j.map_file_name = map.clone();
+            j.map_file_name = zone_keys[z].map_file_name.clone();
             mgr.join(j);
         }
     }
     let _ = mgr.tick_all(0); // warm-up
 
-    let mut samples = Vec::with_capacity(ticks as usize);
+    let mut total_samples = Vec::with_capacity(ticks as usize);
+    let mut ingest_samples = Vec::with_capacity(ticks as usize);
+    let mut tick_samples = Vec::with_capacity(ticks as usize);
     let mut wire = WireTotals::default();
     let mut now_ms = 1;
     for t in 0..ticks {
@@ -546,13 +658,14 @@ fn time_multizone(
         // see the same dense AOI fan-out as the single-zone curve.
         let dir = DIRECTIONS[(t as usize) % DIRECTIONS.len()];
         let started = Instant::now();
+        let ingest_started = Instant::now();
         let mut outbounds = Vec::new();
         for z in 0..zones {
             for i in 0..players_per_zone {
                 outbounds.extend(mgr.handle_for_key(
-                    ZoneKey::for_map(format!("loadmap{z}")),
+                    zone_keys[z].clone(),
                     ZoneCommand::Walk {
-                        session_id: SessionId::new(format!("load-{}", z * players_per_zone + i)),
+                        session_id: sessions_by_zone[z][i].clone(),
                         direction: dir,
                         seq: t + 1,
                         now_ms,
@@ -560,19 +673,27 @@ fn time_multizone(
                 ));
             }
         }
+        ingest_samples.push(ingest_started.elapsed().as_secs_f64() * 1_000.0);
+        let tick_started = Instant::now();
         if parallel {
             outbounds.extend(mgr.tick_all(now_ms));
         } else {
             outbounds.extend(mgr.tick_all_sequential(now_ms));
         }
-        samples.push(started.elapsed().as_secs_f64() * 1_000.0);
+        tick_samples.push(tick_started.elapsed().as_secs_f64() * 1_000.0);
+        total_samples.push(started.elapsed().as_secs_f64() * 1_000.0);
         let tick_wire = outbound_wire_totals(&outbounds, players_per_zone);
         wire.logical_packet_deliveries += tick_wire.logical_packet_deliveries;
         wire.encoded_payload_bytes += tick_wire.encoded_payload_bytes;
         wire.packet_encode_errors += tick_wire.packet_encode_errors;
         now_ms += command_interval_ms;
     }
-    TimedMultiZone { samples, wire }
+    TimedMultiZone {
+        total_samples,
+        ingest_samples,
+        tick_samples,
+        wire,
+    }
 }
 
 fn read_trimmed(path: &str) -> Option<String> {

@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 mod checkpoint;
 
-use super::aoi::{players_visible, points_visible, AOI_X_RANGE, AOI_Y_RANGE};
+use super::aoi::{points_visible, AOI_X_RANGE, AOI_Y_RANGE};
 use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
 use super::ecs::ZoneEcs;
@@ -80,6 +80,10 @@ pub struct ZoneRuntime {
     key: ZoneKey,
     collision: ZoneCollision,
     players: BTreeMap<SessionId, ZonePlayer>,
+    // Reverse lookup for player object ids. Visibility state stores object ids,
+    // while the authoritative player map is keyed by SessionId; keeping this
+    // index avoids a full player scan on every movement visibility diff.
+    player_sessions_by_object_id: BTreeMap<u32, SessionId>,
     objects: BTreeMap<u32, ZoneObject>,
     dead_object_ids: BTreeMap<u32, ZoneObjectDeadState>,
     revived_object_ids: BTreeSet<u32>,
@@ -105,7 +109,7 @@ pub struct ZoneRuntime {
     // Kept in sync with `players` at every position change (join/leave/move/
     // sync) so visibility diffs scan a local neighborhood instead of all
     // players. See `aoi_grid` and `recompute_player_visibility`.
-    player_grid: AoiGrid<SessionId>,
+    player_grid: AoiGrid<u32>,
     // Spatial index of zone-object positions (NPCs, monsters, generated objects).
     // Native monsters and summons move, so every retained transform update must
     // relocate the corresponding grid member before visibility is diffed.
@@ -288,6 +292,7 @@ impl ZoneRuntime {
             key,
             collision,
             players: BTreeMap::new(),
+            player_sessions_by_object_id: BTreeMap::new(),
             objects: BTreeMap::new(),
             dead_object_ids: BTreeMap::new(),
             revived_object_ids: BTreeSet::new(),
@@ -989,10 +994,11 @@ impl ZoneRuntime {
         let player = ZonePlayer::from_join(join, object_id);
 
         self.occupancy.insert(tile, session_id.clone());
-        self.player_grid
-            .insert(session_id.clone(), &player.position);
+        self.player_grid.insert(object_id, &player.position);
         self.ecs
             .upsert_player(&session_id, object_id, &player.position);
+        self.player_sessions_by_object_id
+            .insert(object_id, session_id.clone());
         self.players.insert(session_id.clone(), player);
         outbounds.extend(self.diff_visibility_for(&session_id));
         outbounds.extend(self.diff_zone_object_visibility_for(&session_id));
@@ -1023,8 +1029,9 @@ impl ZoneRuntime {
         self.pending_native_player_hits
             .retain(|hit| &hit.target_session_id != session_id);
         self.occupancy.remove(&tile_key(&player.position));
-        self.player_grid.remove(session_id);
+        self.player_grid.remove(&player.object_id);
         self.ecs.remove_player(session_id);
+        self.player_sessions_by_object_id.remove(&player.object_id);
 
         let mut observers = Vec::new();
         for (other_session_id, other) in &mut self.players {
@@ -1314,7 +1321,7 @@ impl ZoneRuntime {
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
             let moved_position = player.position.clone();
-            self.player_grid.moved(session_id, &moved_position);
+            self.player_grid.moved(&player.object_id, &moved_position);
             self.ecs.move_player(session_id, &moved_position);
         }
 
@@ -1491,7 +1498,7 @@ impl ZoneRuntime {
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
             let moved_position = player.position.clone();
-            self.player_grid.moved(session_id, &moved_position);
+            self.player_grid.moved(&player.object_id, &moved_position);
             self.ecs.move_player(session_id, &moved_position);
         }
 
@@ -6726,7 +6733,7 @@ impl ZoneRuntime {
             self.occupancy
                 .insert(tile_key(&player.position), session_id.clone());
             let moved_position = player.position.clone();
-            self.player_grid.moved(session_id, &moved_position);
+            self.player_grid.moved(&player.object_id, &moved_position);
             self.ecs.move_player(session_id, &moved_position);
         }
 
@@ -7146,39 +7153,36 @@ impl ZoneRuntime {
     }
 
     fn diff_visibility_for(&mut self, session_id: &SessionId) -> Vec<ZoneOutbound> {
-        let Some(player) = self.players.get(session_id).cloned() else {
+        let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
+        let player_position = player.position.clone();
+        let moved_object_id = player.object_id;
+        let visible_object_ids = player.visible_object_ids.clone();
         // Candidate set = players in the AOI grid neighborhood (a superset of
         // everyone newly/still visible) UNION the players already marked visible
         // (so someone who just left AOI range still gets an ObjectRemove). The
-        // grid bounds this by local density; the exact players_visible test
+        // grid bounds this by local density; the exact points_visible test
         // below preserves identical output to a full scan.
-        let mut candidate_sessions: BTreeSet<SessionId> = self
+        let mut candidate_object_ids: BTreeSet<u32> = self
             .player_grid
-            .neighbors(&player.position)
+            .neighbors(&player_position)
             .into_iter()
             .collect();
-        for (other_session_id, other) in &self.players {
-            if other_session_id != session_id
-                && player.visible_object_ids.contains(&other.object_id)
-            {
-                candidate_sessions.insert(other_session_id.clone());
-            }
-        }
-        candidate_sessions.remove(session_id);
+        candidate_object_ids.extend(visible_object_ids.iter().copied());
+        candidate_object_ids.remove(&moved_object_id);
 
-        let comparisons = candidate_sessions
+        let comparisons = candidate_object_ids
             .into_iter()
-            .filter_map(|other_session_id| {
-                self.players.get(&other_session_id).map(|other| {
-                    (
-                        other_session_id.clone(),
-                        other.object_id,
-                        players_visible(&player, other),
-                        player.visible_object_ids.contains(&other.object_id),
-                    )
-                })
+            .filter_map(|other_object_id| {
+                let other_session_id = self.player_sessions_by_object_id.get(&other_object_id)?;
+                let other = self.players.get(other_session_id)?;
+                Some((
+                    other_session_id.clone(),
+                    other_object_id,
+                    points_visible(&player_position, &other.position),
+                    visible_object_ids.contains(&other_object_id),
+                ))
             })
             .collect::<Vec<_>>();
 
@@ -7187,7 +7191,6 @@ impl ZoneRuntime {
             .get(session_id)
             .map(object_player_packets)
             .expect("visibility player should still exist");
-        let moved_object_id = player.object_id;
         let mut outbounds = Vec::new();
 
         for (other_session_id, other_object_id, visible_now, was_visible) in comparisons {

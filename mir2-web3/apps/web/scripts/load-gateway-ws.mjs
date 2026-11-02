@@ -45,6 +45,12 @@ const REUSE_EXISTING_ACCOUNTS = booleanFromEnv(
   "MIR2_WS_LOAD_REUSE_EXISTING_ACCOUNTS",
   false,
 );
+const RECONNECT_ONCE = booleanFromEnv("MIR2_WS_LOAD_RECONNECT_ONCE", false);
+const RECONNECT_SETTLE_MS = numberFromEnv("MIR2_WS_LOAD_RECONNECT_SETTLE_MS", 250);
+const RECONNECT_HOLD_OPEN_MS = numberFromEnv(
+  "MIR2_WS_LOAD_RECONNECT_HOLD_OPEN_MS",
+  250,
+);
 const ACCOUNT_PREFIX = process.env.MIR2_WS_LOAD_ACCOUNT_PREFIX ?? null;
 const CHARACTER_INDEX = numberFromEnv("MIR2_WS_LOAD_CHARACTER_INDEX", 0);
 
@@ -71,6 +77,9 @@ async function main() {
     sendChat: SEND_CHAT,
     stage5CommandsEnabled: ENABLE_STAGE5_COMMANDS,
     reuseExistingAccounts: REUSE_EXISTING_ACCOUNTS,
+    reconnectOnce: RECONNECT_ONCE,
+    reconnectSettleMs: RECONNECT_SETTLE_MS,
+    reconnectHoldOpenMs: RECONNECT_HOLD_OPEN_MS,
     accountPrefix: ACCOUNT_PREFIX,
     characterIndex: CHARACTER_INDEX,
     startedAt: new Date().toISOString(),
@@ -90,7 +99,18 @@ async function main() {
     movementCommandsSent: 0,
     chatCommandsSent: 0,
     stage5CommandsSent: 0,
+    reconnectAttempts: 0,
+    reconnectSucceeded: 0,
     keepAliveLatenciesMs: [],
+    phaseLatenciesMs: {
+      connect: [],
+      login: [],
+      newCharacter: [],
+      startGame: [],
+      reconnectConnect: [],
+      reconnectLogin: [],
+      reconnectStartGame: [],
+    },
     clientFailures: [],
     capacityRejections: [],
     network: {
@@ -147,6 +167,12 @@ async function main() {
   metrics.finishedAt = new Date().toISOString();
   metrics.durationMs = Date.now() - started;
   metrics.keepAlive = summarize(metrics.keepAliveLatenciesMs);
+  metrics.phaseLatencies = Object.fromEntries(
+    Object.entries(metrics.phaseLatenciesMs).map(([phase, values]) => [
+      phase,
+      summarize(values),
+    ]),
+  );
   metrics.keepAliveAckRatio =
     metrics.keepAliveCommandsSent === 0
       ? 1
@@ -187,6 +213,10 @@ async function main() {
     keepAliveP95MatchesExpectation:
       EXPECT_KEEPALIVE_P95_MAX_MS === null ||
       (metrics.keepAlive.p95 !== null && metrics.keepAlive.p95 <= EXPECT_KEEPALIVE_P95_MAX_MS),
+    reconnectsSucceeded:
+      !RECONNECT_ONCE ||
+      (metrics.reconnectAttempts === metrics.ready &&
+        metrics.reconnectSucceeded === metrics.reconnectAttempts),
   };
   metrics.ok = Object.values(metrics.assertions).every(Boolean);
 
@@ -213,59 +243,14 @@ async function runClient(index, runId, metrics) {
   );
   const password = "load-pass";
   const pendingKeepAlives = new Map();
-  let loginSuccess = false;
-  let userInformation = false;
-  let createdCharacterIndex = null;
-  let capacityRejected = false;
-  let capacityError = null;
-
-  const ws = new RawWebSocketClient(
-    WS_URL,
-    (text) => {
-      metrics.messages += 1;
-      let payload;
-      try {
-        payload = JSON.parse(text);
-      } catch {
-        return;
-      }
-      if (payload.type === "error") {
-        const message = String(payload.message ?? "");
-        if (isCapacityError(message)) {
-          capacityRejected = true;
-          capacityError = message;
-        }
-      }
-      if (payload.packet === "LoginSuccess" && !loginSuccess) {
-        loginSuccess = true;
-        metrics.loginSuccess += 1;
-      }
-      if (payload.packet === "NewCharacterSuccess") {
-        createdCharacterIndex = payload.payload?.character?.index ?? null;
-        metrics.charactersCreated += 1;
-      }
-      if (payload.packet === "UserInformation" && !userInformation) {
-        userInformation = true;
-        metrics.startedGames += 1;
-      }
-      const keepAliveTime = payload.payload?.time;
-      if (payload.packet === "KeepAlive" && pendingKeepAlives.has(keepAliveTime)) {
-        metrics.keepAliveLatenciesMs.push(
-          Date.now() - pendingKeepAlives.get(keepAliveTime),
-        );
-        pendingKeepAlives.delete(keepAliveTime);
-      }
-    },
-    () => {
-      metrics.errors += 1;
-    },
-    () => {
-      metrics.closed += 1;
-    },
-  );
+  const initialState = newClientState();
+  const ws = createLoadSocket(metrics, initialState, pendingKeepAlives, false);
+  let reconnectWs = null;
 
   try {
+    const connectStartedAt = Date.now();
     await ws.connect();
+    metrics.phaseLatenciesMs.connect.push(Date.now() - connectStartedAt);
     metrics.opened += 1;
 
     send(ws, metrics, { type: "clientVersion" });
@@ -281,11 +266,14 @@ async function runClient(index, runId, metrics) {
         emailAddress: "",
       });
     }
+    const loginStartedAt = Date.now();
     send(ws, metrics, { type: "login", accountId, password });
-    await waitFor(() => loginSuccess, READY_TIMEOUT_MS, `login ${index}`);
+    await waitFor(() => initialState.loginSuccess, READY_TIMEOUT_MS, `login ${index}`);
+    metrics.phaseLatenciesMs.login.push(Date.now() - loginStartedAt);
     if (REUSE_EXISTING_ACCOUNTS) {
-      createdCharacterIndex = CHARACTER_INDEX;
+      initialState.createdCharacterIndex = CHARACTER_INDEX;
     } else {
+      const newCharacterStartedAt = Date.now();
       send(ws, metrics, {
         type: "newCharacter",
         name: characterName,
@@ -293,23 +281,29 @@ async function runClient(index, runId, metrics) {
         class: ["Warrior", "Wizard", "Taoist"][index % 3],
       });
       await waitFor(
-        () => createdCharacterIndex !== null,
+        () => initialState.createdCharacterIndex !== null,
         READY_TIMEOUT_MS,
         `newCharacter ${index}`,
       );
+      metrics.phaseLatenciesMs.newCharacter.push(Date.now() - newCharacterStartedAt);
     }
-    send(ws, metrics, { type: "startGame", characterIndex: createdCharacterIndex });
+    const startGameStartedAt = Date.now();
+    send(ws, metrics, {
+      type: "startGame",
+      characterIndex: initialState.createdCharacterIndex,
+    });
     await waitFor(
-      () => userInformation || capacityRejected,
+      () => initialState.userInformation || initialState.capacityRejected,
       READY_TIMEOUT_MS,
       `startGame ${index}`,
     );
-    if (capacityRejected) {
+    metrics.phaseLatenciesMs.startGame.push(Date.now() - startGameStartedAt);
+    if (initialState.capacityRejected) {
       return {
         index,
         ready: false,
         capacityRejected: true,
-        error: capacityError,
+        error: initialState.capacityError,
       };
     }
     if (PRE_PLAY_SETTLE_MS > 0) {
@@ -362,13 +356,131 @@ async function runClient(index, runId, metrics) {
       playStartedAt,
       playEndedAt: Date.now(),
     });
+
+    if (RECONNECT_ONCE) {
+      metrics.reconnectAttempts += 1;
+      ws.close();
+      await waitFor(() => ws.closed, CLOSE_TIMEOUT_MS, `disconnect ${index}`);
+      await delay(RECONNECT_SETTLE_MS);
+
+      const reconnectState = newClientState();
+      reconnectWs = createLoadSocket(metrics, reconnectState, pendingKeepAlives, true);
+      const reconnectConnectStartedAt = Date.now();
+      await reconnectWs.connect();
+      metrics.phaseLatenciesMs.reconnectConnect.push(
+        Date.now() - reconnectConnectStartedAt,
+      );
+      metrics.opened += 1;
+
+      send(reconnectWs, metrics, { type: "clientVersion" });
+      const reconnectLoginStartedAt = Date.now();
+      send(reconnectWs, metrics, { type: "login", accountId, password });
+      await waitFor(
+        () => reconnectState.loginSuccess,
+        READY_TIMEOUT_MS,
+        `reconnect login ${index}`,
+      );
+      metrics.phaseLatenciesMs.reconnectLogin.push(
+        Date.now() - reconnectLoginStartedAt,
+      );
+
+      const reconnectStartGameStartedAt = Date.now();
+      send(reconnectWs, metrics, {
+        type: "startGame",
+        characterIndex: initialState.createdCharacterIndex,
+      });
+      await waitFor(
+        () => reconnectState.userInformation || reconnectState.capacityRejected,
+        READY_TIMEOUT_MS,
+        `reconnect startGame ${index}`,
+      );
+      metrics.phaseLatenciesMs.reconnectStartGame.push(
+        Date.now() - reconnectStartGameStartedAt,
+      );
+      if (reconnectState.capacityRejected) {
+        return {
+          index,
+          ready: false,
+          capacityRejected: true,
+          error: reconnectState.capacityError,
+        };
+      }
+      metrics.reconnectSucceeded += 1;
+      await delay(RECONNECT_HOLD_OPEN_MS);
+    }
+
     return { index, ready: true };
   } finally {
+    if (reconnectWs && !reconnectWs.closed) {
+      reconnectWs.close();
+      await waitFor(
+        () => reconnectWs.closed,
+        CLOSE_TIMEOUT_MS,
+        `reconnect close ${index}`,
+      ).catch(() => {});
+    }
     if (!ws.closed) {
       ws.close();
       await waitFor(() => ws.closed, CLOSE_TIMEOUT_MS, `close ${index}`).catch(() => {});
     }
   }
+}
+
+function newClientState() {
+  return {
+    loginSuccess: false,
+    userInformation: false,
+    createdCharacterIndex: null,
+    capacityRejected: false,
+    capacityError: null,
+  };
+}
+
+function createLoadSocket(metrics, state, pendingKeepAlives, reconnect) {
+  return new RawWebSocketClient(
+    WS_URL,
+    (text) => {
+      metrics.messages += 1;
+      let payload;
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        return;
+      }
+      if (payload.type === "error") {
+        const message = String(payload.message ?? "");
+        if (isCapacityError(message)) {
+          state.capacityRejected = true;
+          state.capacityError = message;
+        }
+      }
+      if (payload.packet === "LoginSuccess" && !state.loginSuccess) {
+        state.loginSuccess = true;
+        if (!reconnect) metrics.loginSuccess += 1;
+      }
+      if (payload.packet === "NewCharacterSuccess") {
+        state.createdCharacterIndex = payload.payload?.character?.index ?? null;
+        if (!reconnect) metrics.charactersCreated += 1;
+      }
+      if (payload.packet === "UserInformation" && !state.userInformation) {
+        state.userInformation = true;
+        if (!reconnect) metrics.startedGames += 1;
+      }
+      const keepAliveTime = payload.payload?.time;
+      if (payload.packet === "KeepAlive" && pendingKeepAlives.has(keepAliveTime)) {
+        metrics.keepAliveLatenciesMs.push(
+          Date.now() - pendingKeepAlives.get(keepAliveTime),
+        );
+        pendingKeepAlives.delete(keepAliveTime);
+      }
+    },
+    () => {
+      metrics.errors += 1;
+    },
+    () => {
+      metrics.closed += 1;
+    },
+  );
 }
 
 function recordClientNetworkMetrics(
