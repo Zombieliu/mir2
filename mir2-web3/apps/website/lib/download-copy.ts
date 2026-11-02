@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/site-copy";
+import { applyDownloadFacts } from "@/lib/release-facts";
 
 type DownloadText = {
   nav: string;
@@ -82,5 +83,5 @@ const copies: Record<Locale, DownloadText> = {
 };
 
 export function getDownloadCopy(locale: Locale): DownloadCopy {
-  return copies[locale];
+  return applyDownloadFacts(locale, copies[locale]);
 }

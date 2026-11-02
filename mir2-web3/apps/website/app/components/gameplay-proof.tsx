@@ -22,9 +22,8 @@ export function GameplayProof({ locale, copy }: { locale: Locale; copy: ProductC
           <article className={`proof-card proof-card-${index + 1}`} key={item.title} data-reveal>
             <div className="proof-media">
               <Image src={proofImages[index].src} alt={`${item.title} · ${copy.verified}`} fill sizes="(max-width: 720px) 100vw, 42vw" style={{ objectPosition: proofImages[index].position }} />
-              <span>{copy.verified}</span>
             </div>
-            <div className="proof-copy"><small>{item.eyebrow}</small><h3>{item.title}</h3><p>{item.copy}</p></div>
+            <div className="proof-copy"><span className="proof-caption">{copy.verified}</span><small>{item.eyebrow}</small><h3>{item.title}</h3><p>{item.copy}</p></div>
           </article>
         ))}
       </div>

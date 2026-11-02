@@ -46,7 +46,7 @@ export default async function PlayPage({ params }: PlayPageProps) {
       </section>
       <section className="launch-options section">
         <article data-reveal><span>01</span><small>{copy.candidate}</small><h2>{copy.browser}</h2><p>{copy.browserCopy}</p><a href={gameUrl} target="_blank" rel="noreferrer" data-track="launch_browser_option">{copy.launch} ↗</a></article>
-        <article data-reveal><span>02</span><small>{copy.desktop} · {getProductCopy(locale).common.unavailable}</small><h2>{copy.desktop}</h2><p>{copy.desktopCopy}</p><b>{copy.candidate}</b></article>
+        <article data-reveal><span>02</span><small>{copy.desktop} · {copy.candidate}</small><h2>{copy.desktop}</h2><p>{copy.desktopCopy}</p><b>{copy.candidate}</b></article>
       </section>
       <section className="launch-requirements section" id="requirements">
         <div data-reveal><div className="eyebrow"><span />{getProductCopy(locale).ui.systemSafety}</div><h2>{copy.requirements}</h2><ul>{copy.requirementItems.map((item) => <li key={item}><i>✓</i>{item}</li>)}</ul></div>

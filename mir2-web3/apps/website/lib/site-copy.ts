@@ -1,4 +1,8 @@
 import { additionalLocales, createMarketSiteCopies, localeMeta as getAdditionalLocaleMeta } from "@/lib/market-copy";
+import { applySiteFacts } from "@/lib/release-facts";
+
+// Public SEO URLs are product identity, not a deployment-specific origin.
+export const publicSiteUrl = "https://numeron.obelisk.build";
 
 export const locales = ["zh-CN", "en", "ja", "ko", ...additionalLocales] as const;
 
@@ -165,9 +169,9 @@ const zhCN: SiteCopy = {
     button: "浏览天机阁原型",
     live: "界面预览 · 非实时统计",
     metrics: [
-      { value: "12,684", label: "在线冒险者" },
-      { value: "428", label: "活跃区域" },
-      { value: "8,912", label: "今日公开事件" },
+      { value: "—", label: "在线冒险者" },
+      { value: "—", label: "活跃区域" },
+      { value: "—", label: "今日公开事件" },
     ],
   },
   world: {
@@ -313,7 +317,7 @@ const en: SiteCopy = {
       status: "World service online",
     },
     metrics: [
-      { value: "463", label: "world maps" },
+      { value: "—", label: "world maps" },
       { value: "03", label: "classic paths" },
       { value: "01", label: "shared world" },
     ],
@@ -324,9 +328,9 @@ const en: SiteCopy = {
       button: "Open the world atlas",
       live: "Mir World 01 online",
       metrics: [
-        { value: "12,684", label: "adventurers online" },
-        { value: "428", label: "active regions" },
-        { value: "8,912", label: "public events today" },
+        { value: "—", label: "adventurers online" },
+        { value: "—", label: "active regions" },
+        { value: "—", label: "public events today" },
       ],
     },
     world: {
@@ -589,12 +593,12 @@ export function isLocale(value: string): value is Locale {
 }
 
 export function getCopy(locale: Locale): SiteCopy {
-  return translations[locale];
+  return applySiteFacts(locale, translations[locale]);
 }
 
 export function getLocalizedAlternates(locale: Locale, path = "") {
   return {
-    canonical: `/${locale}${path}`,
-    languages: { ...Object.fromEntries(locales.map((item) => [item, `/${item}${path}`])), "x-default": `/en${path}` },
+    canonical: `${publicSiteUrl}/${locale}${path}`,
+    languages: { ...Object.fromEntries(locales.map((item) => [item, `${publicSiteUrl}/${item}${path}`])), "x-default": `${publicSiteUrl}/en${path}` },
   };
 }

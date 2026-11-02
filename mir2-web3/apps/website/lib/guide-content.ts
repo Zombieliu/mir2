@@ -3,7 +3,7 @@ import type { DocumentationArticle } from "@/lib/documentation-types";
 // Deliberately public, reviewed-scope content only. Internal evidence lives outside this app.
 export const guideArticles: DocumentationArticle[] = [
   {
-    slug: "world", title: "认识 Numeron", description: "在灾后的世界里，探索、生存，并寻找新的重生秩序。", status: "testing", environment: "原创世界观简介 / 当前试玩内容",
+    slug: "world", title: "认识 Numeron", description: "在灾后的世界里，探索、生存，并寻找新的重生秩序。", status: "testing", environment: "原创世界观简介 / 内部验证内容",
     sections: [
       { id: "a-world-to-discover", title: "一次从废墟开始的旅程", paragraphs: ["《Numeron - The Legend of Rebirth》是 Obelisk Labs 旗下、以原创世界观为方向的 2D MMORPG。灾难过后，人们在遗迹与聚落之间寻找资源、修复旧时代装置，也逐渐建立新的生活与秩序。", "你会从一个具体的角色开始：学习战斗、准备装备、探索地图，与其他玩家合作。世界的来历与重生的真相，留给你在旅途中发现。"] },
       { id: "human-abilities", title: "力量来自准备与选择", paragraphs: ["玩家可控的人类依靠训练、装备、装置与耗材获得战斗能力，没有天生异能，也不会通过生物变异获得力量。当前测试中的职业名称、技能表现和地图，是正在验证的游戏实现，不等于最终世界观的完整呈现。"] },
@@ -14,10 +14,10 @@ export const guideArticles: DocumentationArticle[] = [
     slug: "getting-started", title: "开始游戏", description: "从官网下载开始，完成登录、创建角色，再踏出第一次冒险。", status: "testing", environment: "Windows 与 Web 测试入口",
     sections: [
       { id: "choose-platform", title: "1. 下载并打开客户端", ordered: true, items: ["打开官网下载页，选择当前提供的 Windows 测试安装包，按安装器提示完成安装。", "从安装后的游戏入口启动，等待更新与必要资源加载，直到出现登录界面。首次下载所需时间取决于网络和设备。", "也可从官网的浏览器入口进入，先查看设备与测试说明。"], note: "本页以 Windows 测试客户端为主；其他平台看下载页。请沿用官方渠道更新，避免混装旧版本。", links: [{ label: "下载 Windows 客户端", href: "download" }, { label: "浏览器游戏入口", href: "play" }] },
-      { id: "login", image: { src: "/zh-CN/guide-media/windows-login-r16.jpg", alt: "Windows 测试登录页，下方为 Dubhe Wallet 扫码登录 F8 按钮", caption: "2026-11-01 Windows 测试版本界面参考：在登录页点击 Dubhe Wallet 扫码登录，或按 F8。当前版本外观可能调整。点击图片可查看原图。", width: 1026, height: 800 }, title: "2. 登录你的账户", ordered: true, items: ["打开客户端，使用已有账号登录；新用户也可在登录页创建账号。", "使用 Dubhe Wallet 时，点击“扫码登录”或按 F8，用手机钱包扫描新生成的二维码。", "在手机核对登录请求、站点与钱包地址，再确认签名。电脑进入选角界面后，继续下一步。"], note: "登录签名只验证身份。充值或转账需另外核对网络、金额与收款方。" },
+      { id: "login", image: { src: "/zh-CN/guide-media/windows-login-r16.jpg", alt: "Windows 测试登录页，下方为 Dubhe Wallet 扫码登录 F8 按钮", caption: "内部验证截图 · Crystal 临时素材。此图说明 Dubhe Wallet 扫码登录 F8，不代表正式美术或已经开放外部测试。", width: 1026, height: 800 }, title: "2. 登录你的账户", ordered: true, items: ["打开客户端，使用已有账号登录；新用户也可在登录页创建账号。", "使用 Dubhe Wallet 时，点击“扫码登录”或按 F8，用手机钱包扫描新生成的二维码。", "在手机核对登录请求、站点与钱包地址，再确认签名。电脑进入选角界面后，继续下一步。"], note: "登录签名只验证身份。充值或转账需另外核对网络、金额与收款方。" },
       { id: "character", title: "3. 创建或选择角色", ordered: true, items: ["首次进入选角界面时，打开创建角色，选择服务器当前提供的职业并填写角色名。名称或数量不符合要求时，按界面提示调整。", "创建成功后，在角色列表中选中你的角色，再进入游戏。已有角色直接选择即可。", "进入地图后，先找到生命、魔力和快捷栏，再打开背包查看随身物品。"], note: "继续旧角色时，请使用原钱包或账号，并核对服务器；看不到角色时查“常见问题”。", links: [{ label: "怎样选择职业", href: "guide/classes-equipment" }] },
       { id: "first-adventure", title: "4. 完成第一次冒险", ordered: true, items: ["先在安全区域练习移动，记住附近的补给地点和返回路线。", "查看装备、背包和已学技能，把常用技能与药品放到快捷栏。详细键位见“基础操作与战斗”。", "有任务提示时，先按提示寻找 NPC 或目标；准备好后再选择附近的低风险怪物，尝试战斗并观察生命与魔力变化。", "准备离开时，使用游戏内正常退出流程，等待回到选角或登录界面。"], links: [{ label: "继续学习移动与战斗", href: "guide/controls" }, { label: "探索、资源与同行者", href: "guide/exploration" }] },
-      { id: "qr-expired", title: "遇到问题：二维码过期", collapsible: true, paragraphs: ["二维码仅供本次登录使用。看到过期提示时，按 Enter 或点击刷新，生成新的二维码后再用手机扫描；取消本次操作可按 Esc。下面是过期界面参考，请不要扫描教程截图。"], image: { src: "/zh-CN/guide-media/wallet-qr-expired-r16.jpg", alt: "钱包登录二维码已过期，显示刷新 Enter 与取消 Esc 按钮", caption: "2026-11-01 Windows 测试版本界面参考。二维码区域已失效并清空；此图用于说明重试步骤。", width: 1026, height: 800 } },
+      { id: "qr-expired", title: "遇到问题：二维码过期", collapsible: true, paragraphs: ["二维码仅供本次登录使用。看到过期提示时，按 Enter 或点击刷新，生成新的二维码后再用手机扫描；取消本次操作可按 Esc。下面是过期界面参考，请不要扫描教程截图。"], image: { src: "/zh-CN/guide-media/wallet-qr-expired-r16.jpg", alt: "钱包登录二维码已过期，显示刷新 Enter 与取消 Esc 按钮", caption: "内部验证截图 · Crystal 临时素材。二维码区域已失效并清空，此图仅说明内部测试中的重试步骤。", width: 1026, height: 800 } },
       { id: "help", title: "遇到问题：下载、登录或角色", collapsible: true, table: { headers: ["遇到的情况", "先做什么"], rows: [["下载或加载较慢", "确认使用官网下载入口，记录客户端版本与停留画面。"], ["扫码后没有进入选角", "重新生成二维码，确认手机批准的是本次登录请求。"], ["看不到以前的角色", "核对原钱包或账号，以及当前服务器。"], ["已经进入游戏，不知道做什么", "先查看附近 NPC、任务提示、装备与技能窗口。"]] }, links: [{ label: "查看常见问题与反馈方式", href: "guide/faq" }] },
     ],
   },
@@ -58,13 +58,13 @@ export const guideArticles: DocumentationArticle[] = [
     slug: "payments", title: "免费范围、点券、月卡与支付", description: "先区分充值和消费，再核对到账与月卡状态。", status: "testing", environment: "隔离测试 / Sui Testnet 测试资产",
     sections: [
       { id: "free", title: "先体验已开放的测试内容", paragraphs: ["本指南不要求先购买代币或月卡才能了解游戏。当前哪些功能免费、哪些需要点券或月卡，以你连接的服务器和具体确认页为准。", "官网展示的订阅方案与游戏内月卡不应直接当作同一商品。正式收费范围、价格、退款条款与地区支持，应以对应商品正式批准的页面为准。"] },
-      { id: "credits", title: "充值得到点券，消费才开通商品", ordered: true, items: ["在游戏内打开“点券与月卡”，确认角色、服务器与支付渠道。", "选择充值档位，在官方打开的付款页核对订单、网络、收款地址、金额和有效期。", "完成付款后，等待服务端确认链上交易或支付渠道回执，再检查游戏点券到账。", "购买月卡是另一笔游戏内消费。充值 10 USDC 不等于已经购买 10 美元月卡；还要核对消费记录和月卡状态。"] },
-      { id: "test-usdc", title: "测试 USDC 与 Gas", paragraphs: ["当前已验证的测试档位包含 1 测试 USDC 充值 100 点券（2026-11-01）。下单前仍需核对你所在服务器的档位；这个比例不代表所有环境的商品配置。", "Sui Testnet 测试 SUI 用于支付网络手续费（Gas），与充值的测试 USDC 分开计算。测试资产没有真实货币价值。", "扫码或复制地址直转时，严格按订单说明操作。已付款但未到账，先查原订单和交易摘要，不要为了催单再次付款。"], note: "充值按钮不可用、订单过期或网络不符时先停止操作。签名前核对所有交易内容；游戏与文档页面均不需要你的助记词或恢复密钥。" },
+      { id: "credits", title: "充值得到点券，消费才开通商品", ordered: true, items: ["在游戏内打开“点券与月卡”，确认角色、服务器与支付渠道。", "选择充值档位，在官方打开的付款页核对订单、网络、收款地址、金额和有效期。", "完成付款后，等待服务端确认链上交易或支付渠道回执，再检查游戏点券到账。", "购买月卡是另一笔游戏内消费。内部充值到账不等于已购买月卡，还要核对独立消费记录和月卡状态。"] },
+      { id: "test-usdc", title: "测试 USDC 与 Gas", paragraphs: ["当前已跑通内部测试充值及到账流程，完成日期尚未确认。测试套餐由隔离环境配置，不构成正式收费标准。", "Sui Testnet 测试 SUI 用于支付网络手续费（Gas），与充值的测试 USDC 分开计算。测试资产没有真实货币价值。", "扫码或复制地址直转时，严格按订单说明操作。已付款但未到账，先查原订单和交易摘要，不要为了催单再次付款。"], note: "充值按钮不可用、订单过期或网络不符时先停止操作。签名前核对所有交易内容；游戏与文档页面均不需要你的助记词或恢复密钥。" },
       { id: "fiat-and-rewards", title: "法币与推广收益", paragraphs: ["法币渠道的开放范围和付款条件，请查看当前服务器与商品页面。该渠道尚未在本指南中列为完成完整付款验收的正式收费入口。", "邀请归属、合格成员、月卡收入和佣金结算由活动条款与开关分别管理。充值不会自动让团长钱包实时收到返款；预估佣金也不是已批准的可提现余额。"], links: [{ label: "查看推广活动与当前条款", href: "@promotions" }, { label: "付款与到账问题", href: "guide/faq" }] },
     ],
   },
   {
-    slug: "playtest", title: "内测阶段与数据规则", description: "区分测试可用、正式上线和仍在规划的内容。", status: "testing", environment: "公开测试入口 / 不构成正式商业运营规则",
+    slug: "playtest", title: "内测阶段与数据规则", description: "区分测试可用、正式上线和仍在规划的内容。", status: "testing", environment: "内部验证说明 / 外部测试尚未开始",
     sections: [
       { id: "states", title: "怎样读本指南的状态", table: { headers: ["状态", "含义"], rows: [["已上线", "有指定环境的访问证据；不代表其他环境或所有模块都通过验收。"], ["测试中", "正在验证，可能变化、停机或调整数据。"], ["规划中", "当前不可用，没有承诺开放时间。"]] }, paragraphs: ["服务器名包含 TEST、Live 或某个赛季名称，不能据此判断它使用链上主网。网络必须在钱包和具体订单中单独核对。"] },
       { id: "data", title: "会清档吗？", paragraphs: ["后续测试尚未公布统一的清档与永久保留政策。投入大量时间或参与付费测试前，请先查看该轮公告；当前不承诺永不清档。", "此前更新曾保留账号、角色和充值历史，但后续测试是否沿用，需要查看各轮公告。", "清档范围、补偿、保留哪些身份或社交数据，以及测试结束后的处理，将由运营另行公告。"] },

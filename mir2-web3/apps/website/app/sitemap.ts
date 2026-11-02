@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getProductCopy, legalDocuments, productSections } from "@/lib/product-copy";
-import { locales } from "@/lib/site-copy";
+import { locales, publicSiteUrl } from "@/lib/site-copy";
 import { documentation } from "@/lib/documentation";
 import { documentationUpdated } from "@/lib/documentation-types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://numeron.obelisk.build").replace(/\/$/, "");
+  const siteUrl = publicSiteUrl;
   const localizedPaths = [
     "",
     "/play",

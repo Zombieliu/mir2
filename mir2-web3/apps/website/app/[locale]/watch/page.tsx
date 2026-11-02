@@ -61,7 +61,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
           <h2>{copy.watch.liveTitle}</h2>
           <p>{copy.watch.liveCopy}</p>
           <dl>
-            <div><dt>{copy.nav.pulse}</dt><dd>120 SEC</dd></div>
+            <div><dt>{copy.nav.pulse}</dt><dd>—</dd></div>
             <div><dt>{productCopy.chrome.privacy}</dt><dd>{productCopy.common.draft}</dd></div>
             <div><dt>{copy.nav.watch}</dt><dd>AI</dd></div>
           </dl>
