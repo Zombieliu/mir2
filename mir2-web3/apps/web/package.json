@@ -218,7 +218,7 @@
   "dependencies": {
     "@mysten/sui": "^2.16.2",
     "@mysten/wallet-standard": "^0.20.3",
-    "next": "16.4.1",
+    "next": "16.4.4",
     "nipplejs": "^1.0.3",
     "qrcode": "1.5.4",
     "react": "19.2.3",
@@ -240,6 +240,8 @@
   "overrides": {
     "valibot": "1.4.2",
     "source-map-js": "1.2.2",
-    "baseline-browser-mapping": "2.11.0"
+    "baseline-browser-mapping": "2.11.0",
+    "postcss": "8.5.23",
+    "sharp": "0.35.5"
   }
 }
