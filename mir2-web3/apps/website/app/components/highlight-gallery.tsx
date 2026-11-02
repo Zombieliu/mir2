@@ -37,15 +37,18 @@ export function HighlightGallery({ copy }: { copy: ProductCopy["watch"] }) {
         {filters.map((item) => <button key={item.key} type="button" aria-pressed={filter === item.key} onClick={() => setFilter(item.key)}>{item.label}</button>)}
       </div>
       <div className="highlight-proof-grid">
-        {visible.map((capture) => (
+        {visible.map((capture) => {
+          const title = capture.category === "world" ? copy.world : capture.category === "systems" ? copy.systems : copy.gameplay;
+          return (
           <article id={capture.id} key={capture.id} className="highlight-proof-card">
             <a className="highlight-proof-image" href={capture.image} target="_blank" rel="noreferrer" data-track={`highlight_open_${capture.id}`}>
-              <Image src={capture.image} alt={`${capture.title} · ${copy.still}`} fill sizes="(max-width: 720px) 100vw, 32vw" />
+              <Image src={capture.image} alt={`${title} · ${copy.still}`} fill sizes="(max-width: 720px) 100vw, 32vw" />
               <span>{capture.duration}</span><i>↗</i>
             </a>
-            <div><small>{copy.still}</small><h3>{capture.title}</h3><a href={capture.image} target="_blank" rel="noreferrer">{copy.footage} ↗</a><button type="button" onClick={() => void share(capture.id, capture.title)}>{copied === capture.id ? copy.copied : copy.share}</button></div>
+            <div><small>{copy.still}</small><h3>{title}</h3><a href={capture.image} target="_blank" rel="noreferrer">{copy.footage} ↗</a><button type="button" onClick={() => void share(capture.id, title)}>{copied === capture.id ? copy.copied : copy.share}</button></div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

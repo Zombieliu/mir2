@@ -59,7 +59,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
       id: "windows", title: "WINDOWS", state: windowsUrl ? copy.candidate : copy.unavailable,
       baseline: [[os, "WINDOWS 10 / 11 · X86_64"], [browser, "MICROSOFT EDGE WEBVIEW2 · CURRENT"], [memory, "8 GB RAM"], [graphics, "WEBGL2 / WEBGPU · HW ACCELERATION"], [storage, "≥ 1 GB CACHE · INSTALLER SIZE TBD"], [input, "KEYBOARD / MOUSE"], [display, "≥ 960 × 640"]],
       recommended: [[os, "WINDOWS 11 · X86_64"], [memory, "16 GB RAM"], [graphics, "WEBGPU · STABLE DRIVER"], [storage, "SSD"], [display, "≥ 1920 × 1080"]],
-      unsupported: "SIGNED INSTALLER: N/A · TAURI: CANDIDATE · NATIVE BEVY: ENGINEERING GATE",
+      unsupported: copy.candidate,
     },
     {
       id: "android", title: "ANDROID", state: androidUrl ? copy.candidate : copy.pwa,

@@ -1,5 +1,6 @@
 import type { Locale } from "@/lib/site-copy";
 import { createMarketProductCopies } from "@/lib/market-copy";
+import { applyProductFacts } from "@/lib/release-facts";
 
 export const productSections = ["updates", "roadmap", "community", "press", "support", "status"] as const;
 export type ProductSection = (typeof productSections)[number];
@@ -599,7 +600,7 @@ const ko: ProductCopy = {
 const productTranslations: Record<Locale, ProductCopy> = Object.assign({ "zh-CN": zhCN, en, ja, ko }, createMarketProductCopies(en));
 
 export function getProductCopy(locale: Locale) {
-  return productTranslations[locale];
+  return applyProductFacts(locale, productTranslations[locale]);
 }
 
 export function isProductSection(value: string): value is ProductSection {

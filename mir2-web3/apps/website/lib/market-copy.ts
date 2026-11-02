@@ -213,7 +213,7 @@ export function createMarketSiteCopies(base: SiteCopy): Record<MarketLocale, Sit
       languageName: p.name,
       nav: { explore, world, classes, global: regions, pulse, watch: live, highlights, chronicles: updatesTitle, atlas, token: "TOKEN", locale: language, menu, home },
       hero: { eyebrow: `${world} // ${pulse}`, titleTop: top, titleBottom: bottom, description, primary: enter, secondary: discover, status: online },
-      metrics: [{ value: "463", label: world }, { value: "03", label: classes }, { value: "01", label: pulse }],
+      metrics: [{ value: "—", label: world }, { value: "03", label: classes }, { value: "01", label: pulse }],
       atlas: { ...base.atlas, eyebrow: `${atlas} // ${pulse}`, title: atlasTitle, copy: atlasCopy, button: atlas, live: online, metrics: base.atlas.metrics.map((metric, index) => ({ ...metric, label: [world, regions, pulse][index] })) },
       world: { ...base.world, eyebrow: world, title: worldTitle, copy: worldCopy, cards: base.world.cards.map((card, index) => ({ ...card, title: [world, highlights, regions][index], copy: worldCopy })) },
       classes: { ...base.classes, eyebrow: classes, title: classesTitle, copy: classesCopy, items: base.classes.items.map((item, index) => ({ ...item, title: [warrior, sorcerer, taoist][index], role: [warrior, sorcerer, taoist][index], copy: classesCopy })) },

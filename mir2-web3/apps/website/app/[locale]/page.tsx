@@ -7,6 +7,7 @@ import { MotionController } from "@/app/components/motion-controller";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { getProductCopy } from "@/lib/product-copy";
 import { getCopy, isLocale } from "@/lib/site-copy";
+import { releaseFacts } from "@/lib/release-facts";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -17,6 +18,7 @@ export default async function HomePage({ params }: HomePageProps) {
   if (!isLocale(locale)) notFound();
   const copy = getCopy(locale);
   const productCopy = getProductCopy(locale);
+  const facts = releaseFacts(locale);
   const originalEdition = locale === "zh-CN";
   const playUrl = `/${locale}/play`;
   const explorerUrl = process.env.NEXT_PUBLIC_EXPLORER_URL?.replace("{locale}", locale) ?? `/${locale}/explore`;
@@ -46,7 +48,7 @@ export default async function HomePage({ params }: HomePageProps) {
               sizes="(max-width: 760px) 82vw, 54vw"
             />
           </div>
-          <span className="hero-art-label hero-art-label-top">NUMERON SERIES // 0001</span>
+          <span className="hero-art-label hero-art-label-top">{facts.temporaryScreenshot}</span>
           <span className="hero-art-label hero-art-label-bottom">LEGEND OF REBIRTH // WORLD 01</span>
         </div>
 
