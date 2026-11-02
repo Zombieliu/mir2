@@ -23,7 +23,9 @@ const { currentProduct, releaseFacts } = await import(await moduleUrl("release-f
 assert.equal(currentProduct.started, "2026-05");
 assert.equal(currentProduct.internalValidationCompletedAt, null);
 assert.equal(currentProduct.launched, false);
-assert.equal(currentProduct.externalPlaytestStarted, false);
+assert.equal(currentProduct.externalPlaytestStarted, true);
+assert.equal(currentProduct.externalPlaytestStartedAt, null);
+const retiredTestStates = ["قيد التطوير · الاختبارات الخارجية قيد التحضير", "Dalam pengembangan · Uji eksternal sedang disiapkan", "Đang phát triển · Đang chuẩn bị thử nghiệm bên ngoài", "กำลังพัฒนา · กำลังเตรียมทดสอบภายนอก", "Geliştirme aşamasında · Harici testler hazırlanıyor", "W rozwoju · Przygotowania do testów zewnętrznych", "В разработке · Подготовка внешних тестов", "En développement · Tests externes en préparation", "In Entwicklung · Externe Spieltests in Vorbereitung", "Em desenvolvimento · Testes externos em preparação", "En desarrollo · Pruebas externas próximamente", "開發中 · 外部測試準備中", "개발 중 · 외부 테스트 준비 중", "開発中 · 外部テスト準備中", "In development · Playtesting coming soon", "开发中 · 外部测试准备中"];
 const forbidden=/12K\+|12,684|8,912|testnet\.numeron\.world|\bMir\b|\bBichon\b|\bSabuk\b|比奇|沙巴克|玛法|ミル|미르|비천/iu;
 const problems=[];
 function inspect(value,path){if(typeof value === "string" && forbidden.test(value))problems.push(`${path}: ${value.slice(0,100)}`);else if(Array.isArray(value))value.forEach((item,index)=>inspect(item,`${path}[${index}]`));else if(value && typeof value === "object")for(const [key,item]of Object.entries(value))inspect(item,`${path}.${key}`);}
@@ -35,6 +37,8 @@ for(const locale of locales){
     for(const url of Object.values(alternates.languages))assert.equal(new URL(url).origin,publicSiteUrl);
   }
   inspect({site,product,download},locale);
+  assert.ok(!retiredTestStates.includes(facts.state), `${locale}: retired external-testing state`);
+  for (const retired of retiredTestStates) assert.ok(!JSON.stringify({site,product,download}).includes(retired), `${locale}: retired testing status remains`);
   assert.ok(facts.developmentStart.includes("2026"));
   assert.ok(!/2026|May|五月|5 月/.test(facts.currentValidation),`${locale}: current validation must not inherit the development start date`);
   assert.equal(site.metrics[0].label,facts.startedLabel);
@@ -70,6 +74,7 @@ if(process.argv.includes("--build")){
     const html=await readFile(new URL(path,buildRoot),"utf8");
     const text=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,"").replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,"").replace(/<[^>]*>/g," ");
     assert.ok(!forbidden.test(text),`${path}: retired lore or fake number`);
+    for (const retired of retiredTestStates) assert.ok(!text.includes(retired), `${path}: retired external-testing state`);
     assert.ok(!text.includes("120 SEC"),`${path}: unverified AI interval`);
     if(path.endsWith("/press.html"))assert.ok(html.includes("press-asset-note"),`${path}: missing temporary-image note`);
     if(path.endsWith("/play.html")){
