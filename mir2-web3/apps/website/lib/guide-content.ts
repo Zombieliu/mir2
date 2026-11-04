@@ -11,9 +11,9 @@ export const guideArticles: DocumentationArticle[] = [
     ],
   },
   {
-    slug: "getting-started", title: "开始游戏", description: "从官网下载开始，完成登录、创建角色，再踏出第一次冒险。", status: "testing", environment: "Windows 与 Web 测试入口",
+    slug: "getting-started", updated: "2026-11-05", title: "开始游戏", description: "核对当前开放的平台与测试权限，再完成登录和角色创建。", status: "testing", environment: "Windows 与 Web 测试入口；Android 发行与完整手机体验仍待验收",
     sections: [
-      { id: "choose-platform", title: "1. 下载并打开客户端", ordered: true, items: ["打开官网下载页，选择当前提供的 Windows 测试安装包，按安装器提示完成安装。", "从安装后的游戏入口启动，等待更新与必要资源加载，直到出现登录界面。首次下载所需时间取决于网络和设备。", "也可从官网的浏览器入口进入，先查看设备与测试说明。"], note: "本页以 Windows 测试客户端为主；其他平台看下载页。请沿用官方渠道更新，避免混装旧版本。", links: [{ label: "下载 Windows 客户端", href: "download" }, { label: "浏览器游戏入口", href: "play" }] },
+      { id: "choose-platform", title: "1. 核对平台并打开客户端", ordered: true, items: ["先查看官网下载页的实际状态。仅在页面提供官方 Windows 安装包链接时下载；没有按钮时，不代表已向公众开放。受邀测试玩家请沿用已经提供的官方渠道。", "已经获得 Windows 测试安装包的玩家，可按安装器提示安装并等待更新和必要资源加载，再进入登录界面。所需时间取决于网络和设备。", "Web 为开发中的测试入口，进入前先查看设备与测试说明。Android 发行与完整手机体验尚待验收，浏览器能打开不等于已有正式 Android 客户端。"], note: "本页说明测试流程，不承诺所有平台均已公开发行。请沿用官方渠道更新，避免混装旧版本。", links: [{ label: "查看各平台实际开放状态", href: "download" }, { label: "浏览器测试入口", href: "play" }] },
       { id: "login", image: { src: "/zh-CN/guide-media/windows-login-r16.jpg", alt: "Windows 测试登录页，下方为 Dubhe Wallet 扫码登录 F8 按钮", caption: "内部验证截图 · Crystal 临时素材。此图说明 Dubhe Wallet 扫码登录 F8，不代表正式美术或所有功能已经完成验收。", width: 1026, height: 800 }, title: "2. 登录你的账户", ordered: true, items: ["打开客户端，使用已有账号登录；新用户也可在登录页创建账号。", "使用 Dubhe Wallet 时，点击“扫码登录”或按 F8，用手机钱包扫描新生成的二维码。", "在手机核对登录请求、站点与钱包地址，再确认签名。电脑进入选角界面后，继续下一步。"], note: "登录签名只验证身份。充值或转账需另外核对网络、金额与收款方。" },
       { id: "character", title: "3. 创建或选择角色", ordered: true, items: ["首次进入选角界面时，打开创建角色，选择服务器当前提供的职业并填写角色名。名称或数量不符合要求时，按界面提示调整。", "创建成功后，在角色列表中选中你的角色，再进入游戏。已有角色直接选择即可。", "进入地图后，先找到生命、魔力和快捷栏，再打开背包查看随身物品。"], note: "继续旧角色时，请使用原钱包或账号，并核对服务器；看不到角色时查“常见问题”。", links: [{ label: "怎样选择职业", href: "guide/classes-equipment" }] },
       { id: "first-adventure", title: "4. 完成第一次冒险", ordered: true, items: ["先在安全区域练习移动，记住附近的补给地点和返回路线。", "查看装备、背包和已学技能，把常用技能与药品放到快捷栏。详细键位见“基础操作与战斗”。", "有任务提示时，先按提示寻找 NPC 或目标；准备好后再选择附近的低风险怪物，尝试战斗并观察生命与魔力变化。", "准备离开时，使用游戏内正常退出流程，等待回到选角或登录界面。"], links: [{ label: "继续学习移动与战斗", href: "guide/controls" }, { label: "探索、资源与同行者", href: "guide/exploration" }] },
@@ -55,9 +55,9 @@ export const guideArticles: DocumentationArticle[] = [
     ],
   },
   {
-    slug: "payments", title: "免费范围、点券、月卡与支付", description: "先区分充值和消费，再核对到账与月卡状态。", status: "testing", environment: "隔离测试 / Sui Testnet 测试资产",
+    slug: "payments", updated: "2026-11-05", title: "免费范围、点券、月卡与支付", description: "先区分充值和消费，再核对到账与月卡状态。", status: "testing", environment: "游戏内充值流程仍为隔离测试 / Sui Testnet 测试资产；公开价格不代表已经开放购买",
     sections: [
-      { id: "free", title: "先体验已开放的测试内容", paragraphs: ["本指南不要求先购买代币或月卡才能了解游戏。当前哪些功能免费、哪些需要点券或月卡，以你连接的服务器和具体确认页为准。", "官网展示的订阅方案与游戏内月卡不应直接当作同一商品。正式收费范围、价格、退款条款与地区支持，应以对应商品正式批准的页面为准。"] },
+      { id: "free", title: "先体验已开放的测试内容", paragraphs: ["本指南不要求先购买代币或月卡才能了解游戏。当前哪些功能免费、哪些需要点券或月卡，以你连接的服务器和具体确认页为准。", "游戏点券充值、游戏内月卡和官网规划中的 AI 订阅是三类不同事项。已确认的正式充值档位统一列在点券充值说明页；其他档位未定，公开标价不代表已经开放真实付款。使用范围、税费、有效期、测试清档与退款条件仍需确认。"], links: [{ label: "查看已确认的点券档位与购买状态", href: "recharge" }] },
       { id: "credits", title: "充值得到点券，消费才开通商品", ordered: true, items: ["在游戏内打开“点券与月卡”，确认角色、服务器与支付渠道。", "选择充值档位，在官方打开的付款页核对订单、网络、收款地址、金额和有效期。", "完成付款后，等待服务端确认链上交易或支付渠道回执，再检查游戏点券到账。", "购买月卡是另一笔游戏内消费。内部充值到账不等于已购买月卡，还要核对独立消费记录和月卡状态。"] },
       { id: "test-usdc", title: "测试 USDC 与 Gas", paragraphs: ["当前已跑通内部测试充值及到账流程，完成日期尚未确认。测试套餐由隔离环境配置，不构成正式收费标准。", "Sui Testnet 测试 SUI 用于支付网络手续费（Gas），与充值的测试 USDC 分开计算。测试资产没有真实货币价值。", "扫码或复制地址直转时，严格按订单说明操作。已付款但未到账，先查原订单和交易摘要，不要为了催单再次付款。"], note: "充值按钮不可用、订单过期或网络不符时先停止操作。签名前核对所有交易内容；游戏与文档页面均不需要你的助记词或恢复密钥。" },
       { id: "fiat-and-rewards", title: "法币与推广收益", paragraphs: ["法币渠道的开放范围和付款条件，请查看当前服务器与商品页面。该渠道尚未在本指南中列为完成完整付款验收的正式收费入口。", "推广合作计划正在筹备，参与资格、支持地区、佣金与结算规则仍待审核。本官网当前仅提供筹备说明，不开放推广报名、佣金领取或提现，也不承诺 USDC 或其他付款通道。"], links: [{ label: "推广合作（筹备中）", href: "@promotions" }, { label: "付款与到账问题", href: "guide/faq" }] },

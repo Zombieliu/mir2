@@ -44,8 +44,8 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
 
   const platforms = [
     { id: "web", index: "01", name: "WEB", format: "BROWSER · PWA", status: copy.live, body: copy.webCopy },
-    { id: "windows", index: "02", name: "WINDOWS", format: "X64 · TAURI / BEVY", status: windowsUrl ? copy.candidate : copy.unavailable, body: copy.windowsCopy },
-    { id: "android", index: "03", name: "ANDROID", format: "PWA · CAPACITOR", status: androidUrl ? copy.candidate : copy.pwa, body: copy.androidCopy },
+    { id: "windows", index: "02", name: "WINDOWS", format: "X64 · TEST", status: windowsUrl ? copy.candidate : copy.unavailable, body: copy.windowsCopy },
+    { id: "android", index: "03", name: "ANDROID", format: "ANDROID", status: androidUrl ? copy.candidate : copy.pwa, body: copy.androidCopy },
   ] as const;
 
   const requirements = [
@@ -103,10 +103,10 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
               <a className="download-action" href={gameUrl} target="_blank" rel="noreferrer" data-track="download_web"><span>{copy.openWeb}</span><i>↗</i></a>
             ) : platform.id === "windows" && windowsUrl ? (
               <a className="download-action" href={windowsUrl} rel="noreferrer" data-track="download_windows"><span>{copy.downloadWindows}</span><i>↓</i></a>
-            ) : platform.id === "android" ? (
-              <a className="download-action" href={androidUrl ?? gameUrl} target="_blank" rel="noreferrer" data-track={androidUrl ? "download_android" : "install_android_pwa"}><span>{copy.installAndroid}</span><i>{androidUrl ? "↓" : "↗"}</i></a>
+            ) : platform.id === "android" && androidUrl ? (
+              <a className="download-action" href={androidUrl} target="_blank" rel="noreferrer" data-track="download_android"><span>{copy.installAndroid}</span><i>↓</i></a>
             ) : (
-              <span className="download-action is-disabled" aria-disabled="true"><span>{copy.unavailable}</span><i>—</i></span>
+              <span className="download-action is-disabled" aria-disabled="true"><span>{platform.status}</span><i>—</i></span>
             )}
           </article>
         ))}
@@ -147,7 +147,7 @@ export default async function DownloadPage({ params }: DownloadPageProps) {
           <div className="truth-statuses">
             <span><i className="is-live" />WEB · {copy.live}</span>
             <span><i />WINDOWS · {windowsUrl ? copy.candidate : copy.unavailable}</span>
-            <span><i className={androidUrl ? "" : "is-live"} />ANDROID · {androidUrl ? copy.candidate : copy.pwa}</span>
+            <span><i />ANDROID · {androidUrl ? copy.candidate : copy.pwa}</span>
           </div>
           <Link className="button button-ghost" href={`/${locale}/support`}><span>{copy.support}</span><i>↗</i></Link>
         </div>

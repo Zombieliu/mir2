@@ -1,0 +1,43 @@
+{
+  "deploymentId": "dpl_DMAnDnqHoBzs9jKkuwYBpNZPrFcf",
+  "deploymentUrl": "https://numeron-explorer-ntq15k8bq-obelisk-labs.vercel.app",
+  "source": "CLI deployment; no Git SHA in deployment metadata",
+  "committedReference": "367bd9306b5318af6ad0dc343af503298ddd4374",
+  "reconstruction": true,
+  "publicPresentation": {
+    "url": "https://numeron-explorer.vercel.app/explore/_next/static/immutable/chunks/18220s1rm80-k.js",
+    "sha256": "c6b035bc61264a2d45f412b0f22af31e3937593613bca8c4032b81a8872f8e1d"
+  },
+  "stylesheet": {
+    "url": "https://numeron-explorer.vercel.app/explore/_next/static/immutable/chunks/0bp6chyltzo2m.css",
+    "sha256": "1198c54caa4a59198c667e894b5acb2fdd6066d349b5c736e78b0c84362bd7e9"
+  },
+  "preservation": "The public presentation module and base CSS informed the previous reconstruction. This candidate retains dashboard/search/navigation/archive paths and adds keyed metrics, shared policy links and bounded responsive heading fixes. Exact original source-file equality is not claimed.",
+  "notChanged": [
+    "game logic",
+    "login",
+    "wallet",
+    "payments",
+    "remote deployments"
+  ],
+  "currentRecovery": {
+    "date": "2026-11-05",
+    "sourceWorktree": "E:/mir2-yc-review-20261102/atlas",
+    "sourceScope": "Existing reconstructed presentation imported into current canonical candidate; not exact recovery of original uploaded source",
+    "sourceInventory": "SOURCE-RECOVERY-INVENTORY.json",
+    "modifications": [
+      "Explicitly disconnected prototype state and unavailable metrics",
+      "Named metric fields independent of localization array indexes",
+      "Current external-playtest invitation fact across 16 languages",
+      "Shared localized terms/privacy/refund/support links on every dashboard/archive"
+    ],
+    "notIncluded": [
+      ".env or secret files",
+      "node_modules and build outputs",
+      "user data",
+      "game logic",
+      "login, wallet or payment logic"
+    ]
+  },
+  "historicalRecoveryReason": "Vercel source tree lists the newer uploaded source, but get_deployment_file_contents truncates base64 strings to 2000 characters. The committed reference has only the older Chinese dashboard."
+}

@@ -42,7 +42,7 @@ export function ProductPageShell({ locale, siteCopy, productCopy, currentPath, e
             {cards.map((card, index) => {
               const href = card.href ? card.href.startsWith("http") || card.href.startsWith("/") ? card.href : `/${locale}/${card.href}` : null;
               return (
-                <article className="product-card" key={`${card.title}-${index}`} data-reveal>
+                <article className="product-card" key={card.id ?? `${card.title}-${index}`} data-content-id={card.id} data-reveal>
                   <span>/{String(index + 1).padStart(2, "0")}</span><small>{card.eyebrow}</small><h2>{card.title}</h2><p>{card.copy}</p>
                   {href ? <Link href={href}>{card.label ?? productCopy.common.learnMore}<i>↗</i></Link> : null}
                 </article>

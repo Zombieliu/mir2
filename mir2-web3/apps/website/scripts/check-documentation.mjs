@@ -14,7 +14,7 @@ const { developerArticles } = await contentModule("developer-content");
 const { documentationGroups } = await contentModule("documentation-navigation");
 const collections = { guide: guideArticles, developers: developerArticles };
 const routes = Object.entries(collections).flatMap(([area, articles]) => [`/zh-CN/${area}`, ...articles.map(({ slug }) => `/zh-CN/${area}/${slug}`)]);
-const knownLinks = new Set(["download", "play", "support", "status", "updates"]);
+const knownLinks = new Set(["download", "play", "support", "status", "updates", "recharge"]);
 const publicText = JSON.stringify(collections);
 const privateSignals = /[A-Z]:\\|C:\/Users\/|BEGIN (?:RSA |EC )?PRIVATE KEY|sk-proj-[A-Za-z0-9]|NUMERON_INTERNAL_DOCS_EVIDENCE_20261102|GAME-DESIGN-CODEBASE/;
 assert.ok(!privateSignals.test(publicText), "Internal paths, economic proposals or private source material entered public content");

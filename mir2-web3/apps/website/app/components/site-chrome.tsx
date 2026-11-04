@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDownloadCopy } from "@/lib/download-copy";
 import { getProductCopy } from "@/lib/product-copy";
 import { getPromotionLink } from "@/lib/promotion-links";
+import { getRechargeCopy } from "@/lib/recharge-copy";
 import { getDocumentationLabels } from "@/lib/documentation-labels";
 import { getCopy, getLocaleMeta, locales, type Locale, type SiteCopy } from "@/lib/site-copy";
 
@@ -86,6 +87,8 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
         {promotion.label}<span aria-hidden="true">→</span>
       </Link>
 
+      <Link className="nav-direct nav-recharge" href={`/${locale}/recharge`} data-track="navigation_recharge">{getRechargeCopy(locale).label}</Link>
+
     </>
   );
 }
@@ -135,6 +138,7 @@ export function SiteFooter({ locale, copy, gameUrl, explorerUrl, currentPage = "
       links: [
         { label: copy.nav.home, href: home },
         { label: documentation.guide, href: `/${locale}/guide` },
+        { label: getRechargeCopy(locale).label, href: `/${locale}/recharge` },
         { label: copy.nav.token, href: membership },
         { label: downloadCopy.nav, href: download },
         { ...promotion, hardNavigation: true },

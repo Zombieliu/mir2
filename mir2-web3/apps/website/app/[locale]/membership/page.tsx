@@ -5,6 +5,7 @@ import { MotionController } from "@/app/components/motion-controller";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import { SubscriptionPlans } from "@/app/components/subscription-plans";
 import { getProductCopy } from "@/lib/product-copy";
+import { getRechargeCopy } from "@/lib/recharge-copy";
 import { getCopy, getLocalizedAlternates, isLocale } from "@/lib/site-copy";
 
 type MembershipPageProps = {
@@ -16,9 +17,11 @@ export async function generateMetadata({ params }: MembershipPageProps): Promise
   if (!isLocale(locale)) return {};
   const copy = getCopy(locale);
   return {
-    title: "NUMERON Token",
+    title: getRechargeCopy(locale).aiLabel,
     description: copy.membership.copy,
     alternates: getLocalizedAlternates(locale, "/membership"),
+    openGraph: { title: `${getRechargeCopy(locale).aiLabel} | NUMERON`, description: copy.membership.copy },
+    twitter: { title: `${getRechargeCopy(locale).aiLabel} | NUMERON`, description: copy.membership.copy },
   };
 }
 
@@ -30,7 +33,9 @@ export default async function MembershipPage({ params }: MembershipPageProps) {
   const productCopy = getProductCopy(locale);
   const playUrl = `/${locale}/play`;
   const explorerUrl = process.env.NEXT_PUBLIC_EXPLORER_URL?.replace("{locale}", locale) ?? `/${locale}/explore`;
-  const checkoutUrl = process.env.NEXT_PUBLIC_TOKEN_CHECKOUT_URL;
+  // This planned AI service is outside the game-credit product review.
+  // Keep the reusable checkout component, but do not expose an AI sale.
+  const checkoutUrl = undefined;
 
   return (
     <main className="membership-page">
@@ -41,12 +46,12 @@ export default async function MembershipPage({ params }: MembershipPageProps) {
         <div className="membership-hero-grid" aria-hidden="true" />
         <div className="token-orbit" aria-hidden="true">
           <i /><i /><i />
-          <b><small>NUMERON</small>TOKEN<span>{productCopy.ui.aiService}</span></b>
+          <b><small>NUMERON</small>AI<span>{productCopy.ui.aiService}</span></b>
         </div>
         <div className="membership-hero-copy" data-reveal="hero">
           <div className="eyebrow"><span />{copy.membership.eyebrow}</div>
           <h1 id="membership-title">
-            {copy.membership.title.split("\n").map((line) => <span key={line}>{line}</span>)}
+            {getRechargeCopy(locale).aiLabel}
           </h1>
           <p>{copy.membership.copy}</p>
           <div className="membership-hero-actions">

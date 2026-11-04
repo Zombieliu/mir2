@@ -1,6 +1,8 @@
 import type { Locale, SiteCopy } from "@/lib/site-copy";
 import type { ProductCopy } from "@/lib/product-copy";
 import type { DownloadCopy } from "@/lib/download-copy";
+import { getRechargeCopy } from "@/lib/recharge-copy";
+import { getAccessCopy, getPreviewLabel } from "@/lib/access-copy";
 
 // Founder update, reviewed 2026-11-03: external players have been invited.
 // Their test start date is unknown; this is not a formal launch, commercial
@@ -209,15 +211,17 @@ const timeline: Record<Locale, readonly [startedLabel: string, developmentStart:
 };
 
 export function releaseFacts(locale: Locale) {
-  const [state, , world, planned, prototype, internal, learn, business, relation, pending] = localized[locale];
+  const [state, , world, planned, prototype, internal, learn, , relation, pending] = localized[locale];
   const [startedLabel, developmentStart, currentValidation, temporaryScreenshot] = timeline[locale];
-  return { state, world, planned, prototype, internal, learn, business, relation, pending, startedLabel, developmentStart, currentValidation, temporaryScreenshot };
+  // The owner approved the first public price on Nov 5; it is still not for sale.
+  return { state, world, planned, prototype, internal, learn, business: `${getRechargeCopy(locale).intro} ${currentValidation}`, relation, pending, startedLabel, developmentStart, currentValidation, temporaryScreenshot };
 }
 
 export function applySiteFacts(locale: Locale, copy: SiteCopy): SiteCopy {
   const f = releaseFacts(locale);
   return {
     ...copy,
+    nav: { ...copy.nav, token: getRechargeCopy(locale).aiLabel, watch: getPreviewLabel(locale) },
     hero: { ...copy.hero, description: f.state, primary: f.learn, secondary: copy.nav.world, status: f.state },
     metrics: [{ value: "2026.05", label: f.startedLabel }, { value: "PC / WEB", label: f.pending }, { value: "—", label: f.pending }],
     atlas: { ...copy.atlas, title: "NUMERON ATLAS", copy: f.prototype, live: f.prototype, metrics: [] },
@@ -225,7 +229,7 @@ export function applySiteFacts(locale: Locale, copy: SiteCopy): SiteCopy {
     classes: { ...copy.classes, copy: f.world, items: copy.classes.items.map((item) => ({ ...item, copy: f.internal })) },
     global: { ...copy.global, title: "NUMERON", copy: f.relation },
     chronicles: { ...copy.chronicles, items: copy.chronicles.items.map(item => ({ ...item, copy: f.pending })) },
-    watch: { ...copy.watch, eyebrow: "NUMERON // PLANNED", copy: f.planned, live: f.pending, demo: f.prototype, liveTitle: "NUMERON", liveCopy: `${f.prototype} ${f.temporaryScreenshot}`, highlightsCopy: f.planned, clips: copy.watch.clips.map((clip,index) => ({ ...clip, tag: f.pending, duration: "—", title: `${f.pending} ${index+1}`, copy: f.prototype })), channelsCopy: f.planned },
+    watch: { ...copy.watch, eyebrow: "NUMERON // PLANNED", title: getPreviewLabel(locale), copy: f.planned, live: getPreviewLabel(locale), demo: f.prototype, liveTitle: getPreviewLabel(locale), liveCopy: `${f.prototype} ${f.temporaryScreenshot}`, highlightsEyebrow: "NUMERON // DEMO", highlightsTitle: getPreviewLabel(locale), highlightsCopy: f.planned, clips: copy.watch.clips.map((clip,index) => ({ ...clip, tag: getPreviewLabel(locale), duration: "—", title: `${getPreviewLabel(locale)} ${index+1}`, copy: f.prototype })), channelsCopy: f.planned },
     membership: { ...copy.membership, copy: `${f.planned} ${f.business}`, prototypePrice: f.pending, annualNote: f.pending, recommended: f.pending, plans: copy.membership.plans.map(plan => ({ ...plan, tagline: f.pending, monthlyPrice: "—", annualPrice: "—", features: [f.pending, f.planned] })), usageCopy: f.planned, usage: copy.membership.usage.map(item => ({ ...item, free: "—", token: "—", architect: "—" })), faq: copy.membership.faq.map(item => ({ ...item, answer: f.planned })) },
     finalCta: { ...copy.finalCta, eyebrow: "NUMERON", copy: f.state, button: f.learn },
     footer: { ...copy.footer, note: `${f.relation} ${f.state}`, enter: f.learn },
@@ -238,7 +242,7 @@ export function applyProductFacts(locale: Locale, copy: ProductCopy): ProductCop
   for (const key of ["updates", "roadmap", "community", "press", "status"] as const) {
     const page = copy.pages[key];
     pages[key] = { ...page, copy: key === "press" ? f.relation : f.state,
-      cards: page.cards.map((card,index) => ({ ...card, copy: key === "status" && index === 2 ? f.prototype : key === "status" && index === 0 ? card.copy : f.pending, label: card.label ? f.learn : undefined })),
+      cards: page.cards.map(card => ({ ...card, copy: key === "status" && card.id === "atlas" ? f.prototype : key === "status" && card.id === "game-client" ? f.state : key === "status" && card.id === "website" ? card.copy : f.pending, label: card.label ? f.learn : undefined })),
     };
   }
   return {
@@ -256,5 +260,6 @@ export function applyProductFacts(locale: Locale, copy: ProductCopy): ProductCop
 
 export function applyDownloadFacts(locale: Locale, copy: DownloadCopy): DownloadCopy {
   const f = releaseFacts(locale);
-  return { ...copy, intro: `${f.state} ${f.currentValidation} ${f.temporaryScreenshot}`, live: f.internal, candidate: f.internal, pwa: f.internal, webCopy: f.state, windowsCopy: f.state, androidCopy: f.pending, requirementsCopy: f.internal, truthCopy: f.business };
+  const access = getAccessCopy(locale);
+  return { ...copy, intro: `${f.state} ${f.currentValidation} ${f.temporaryScreenshot}`, live: f.internal, candidate: f.internal, pwa: f.pending, webCopy: f.state, windowsCopy: access.windows, androidCopy: access.android, requirementsCopy: f.internal, truthCopy: `${access.windows} ${access.android}` };
 }
