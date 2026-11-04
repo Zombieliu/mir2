@@ -3,7 +3,7 @@
 // Source API truncation and preservation limits are documented in RECOVERY-PROVENANCE.json.
 import * as a from "react/jsx-runtime";
 import * as i from "react";
-import Link from "next/link";
+import { AtlasLink as Link } from "./atlas-link";
 import { AtlasFooter } from "./atlas-footer";
 import { displayCopy, getDisplayMetrics } from "../../lib/atlas-display.mjs";
 import {

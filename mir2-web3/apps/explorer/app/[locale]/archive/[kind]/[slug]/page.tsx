@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { AtlasLink as Link } from "@/app/components/atlas-link";
 import { notFound } from "next/navigation";
 import { AtlasFooter } from "@/app/components/atlas-footer";
 import {
