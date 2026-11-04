@@ -21,7 +21,13 @@ const nextConfig = {
       { source: "/developers", destination: "/zh-CN/developers", permanent: false },
       { source: "/game", destination: "https://mir2.obelisk.build/game", permanent: false },
       { source: "/game/:path*", destination: "https://mir2.obelisk.build/game/:path*", permanent: false },
-      { source: "/promotions", destination: "https://mir2.obelisk.build/promotions", permanent: false },
+      {
+        source: "/promotions",
+        has: [{ type: "query", key: "lang", value: "(?<promotionLocale>zh-CN|en|ja|ko|zh-TW|es|pt-BR|de|fr|ru|pl|tr|th|vi|id|ar)" }],
+        destination: "/:promotionLocale/promotions",
+        permanent: false,
+      },
+      { source: "/promotions", destination: "/zh-CN/promotions", permanent: false },
       { source: "/promotions/:path*", destination: "https://mir2.obelisk.build/promotions/:path*", permanent: false },
       {
         source: "/",

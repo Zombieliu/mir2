@@ -10,7 +10,7 @@ type SiteChromeProps = {
   copy: SiteCopy;
   gameUrl: string;
   explorerUrl: string;
-  currentPage?: "home" | "watch" | "membership" | "download";
+  currentPage?: "home" | "watch" | "membership" | "download" | "promotions";
   currentPath?: string;
 };
 
@@ -82,9 +82,9 @@ function NavigationLinks({ locale, copy, explorerUrl, currentPage }: Pick<SiteCh
         {downloadCopy.nav}<span aria-hidden="true">↓</span>
       </Link>
 
-      <a className="nav-direct" href={promotion.href} data-track="navigation_promotions">
-        {promotion.label}<span aria-hidden="true">↗</span>
-      </a>
+      <Link className="nav-direct nav-promotion" href={promotion.href} data-track="navigation_promotions" aria-current={currentPage === "promotions" ? "page" : undefined}>
+        {promotion.label}<span aria-hidden="true">→</span>
+      </Link>
 
     </>
   );

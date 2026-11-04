@@ -879,3 +879,13 @@ body::before {
   .hero-art, .hero-content { opacity: 1; transform: translateY(-48%); }
   .hero-content { transform: none; }
 }
+
+/* Keep preparation labels readable in all marketing locales. */
+.primary-nav .nav-promotion { max-width: 150px; white-space: normal; line-height: 1.5; letter-spacing: .06em; }
+.nav-promotion > span { flex-shrink: 0; }
+.promotion-page h1, .promotion-page .legal-sections h2, .promotion-page .legal-sections p { overflow-wrap: anywhere; }
+.promotion-page .legal-shell aside { margin-bottom: 30px; border-left: 0; border-inline-start: 2px solid var(--gold); }
+@media (max-width: 640px) {
+  .promotion-page .legal-shell h1 { font-size: clamp(32px, 9vw, 42px); line-height: 1.12; }
+  .promotion-page .header-play { display: none; }
+}

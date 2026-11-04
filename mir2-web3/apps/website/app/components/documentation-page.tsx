@@ -37,7 +37,7 @@ function SectionContent({ section, locale }: { section: DocumentationSection; lo
       {section.table ? <div className="docs-table-wrap" role="region" aria-label={section.title} tabIndex={0}><table><thead><tr>{section.table.headers.map((header) => <th key={header} scope="col">{header}</th>)}</tr></thead><tbody>{section.table.rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => index === 0 ? <th key={index} scope="row">{cell}</th> : <td key={index}>{cell}</td>)}</tr>)}</tbody></table></div> : null}
       {section.code ? <figure className="docs-code"><figcaption>{section.code.language}</figcaption><pre tabIndex={0}><code>{section.code.value}</code></pre></figure> : null}
       {section.note ? <aside className="docs-note"><strong>请留意</strong><p>{section.note}</p></aside> : null}
-      {section.links ? <ul className="docs-related-links">{section.links.map((link) => <li key={link.href}>{link.href === "@promotions" || link.href.startsWith("http") || link.href.startsWith("/") ? <a href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> ↗</span></a> : <Link href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> →</span></Link>}</li>)}</ul> : null}
+      {section.links ? <ul className="docs-related-links">{section.links.map((link) => <li key={link.href}>{link.href.startsWith("http") || link.href.startsWith("/") ? <a href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> ↗</span></a> : <Link href={documentationHref(locale, link.href)}>{link.label}<span aria-hidden="true"> →</span></Link>}</li>)}</ul> : null}
     </>
   );
 }

@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/watch",
     "/membership",
     "/account",
+    "/promotions",
     ...productSections.map((section) => `/${section}`),
     ...legalDocuments.map((document) => `/legal/${document}`),
     ...getProductCopy("en").updates.map((entry) => `/updates/${entry.slug}`),
@@ -20,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date("2026-08-28T00:00:00.000Z");
   const localized = locales.flatMap((locale) => localizedPaths.map((path) => ({
     url: `${siteUrl}/${locale}${path}`,
-    lastModified,
+    lastModified: path === "/promotions" ? new Date("2026-11-04T00:00:00.000Z") : lastModified,
     changeFrequency: path === "/updates" || path === "/status" || path === "/watch" ? "daily" as const : "weekly" as const,
     priority: path === "" ? locale === "zh-CN" ? 1 : 0.9 : path === "/play" ? 0.9 : 0.72,
     alternates: {
