@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OperationsDisclosure } from "@/app/components/operations-disclosure";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
@@ -51,11 +52,12 @@ export default async function LegalPage({ params }: LegalPageProps) {
             <Link href={`/${locale}/recharge`}>{presentation.rechargeLink}</Link>
           </div>
         </aside>
-        <header><div className="eyebrow"><span />中文原文 · 公开草案 · 尚未完成法律审校</div><h1>{copy.title}</h1><p>{copy.summary}</p><small><time dateTime={legalSourceUpdatedAt}>2026.11.05</time> · 草案</small></header>
+        <header><div className="eyebrow"><span />中文原文 · 公开草案 · 尚未完成法律审校</div><h1>{copy.title}</h1><p>{copy.summary}</p><small><time dateTime={legalSourceUpdatedAt}>{legalSourceUpdatedAt.replaceAll("-", ".")}</time> · 草案</small></header>
         <nav lang={locale} dir={getLocaleMeta(locale).dir} aria-label={productCopy.chrome.legal}>{legalDocuments.map((item) => <Link key={item} href={`/${locale}/legal/${item}`} aria-current={item === document ? "page" : undefined}>{productCopy.chrome[item === "ai-data" ? "aiData" : item]}</Link>)}</nav>
         <div className="legal-sections">{copy.sections.map((section, index) => <section key={section.title}><span>{String(index + 1).padStart(2, "0")}</span><h2>{section.title}</h2><p>{section.copy}</p></section>)}</div>
-        <aside>本页为待核对的中文原文草案，不表示相关商业、退款或数据处理规则已经批准，也不表示素材和代码授权已经核实。</aside>
+        <aside>本页依据已确认业务信息更新，尚未完成法律审校。当前未开放购买，部分运营细节仍须在正式收费前落实；素材和代码权利分别核对。自动退款、固定到账时限及未经验证的数据权利工具不应从本页推定已上线。</aside>
       </article>
+      <OperationsDisclosure locale={locale} />
       <SiteFooter locale={locale} copy={siteCopy} gameUrl={playUrl} explorerUrl={explorerUrl} currentPath={`/legal/${document}`} />
     </main>
   );

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OperationsDisclosure } from "@/app/components/operations-disclosure";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter, SiteHeader } from "@/app/components/site-chrome";
@@ -63,6 +64,7 @@ export default async function RechargePage({ params }: RechargePageProps) {
           <Link href={`/${locale}/support`}>{productCopy.chrome.support}</Link>
         </nav>
       </section>
+      <OperationsDisclosure locale={locale} />
       <SiteFooter locale={locale} copy={siteCopy} gameUrl={playUrl} explorerUrl={explorerUrl} currentPath="/recharge" />
     </main>
   );

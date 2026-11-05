@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AttributionCapture } from "@/app/components/attribution-capture";
 import { getCopy, getLocaleMeta, getLocalizedAlternates, isLocale, locales, publicSiteUrl } from "@/lib/site-copy";
 import { releaseFacts } from "@/lib/release-facts";
+import { operatorLegalName } from "@/lib/operations-copy";
 import "../globals.css";
 import "../documentation.css";
 
@@ -72,7 +73,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "Obelisk Labs", url: "https://obelisk.build" },
+      { "@type": "Organization", "@id": `${siteUrl}/#organization`, name: "Obelisk Labs", legalName: operatorLegalName, url: "https://obelisk.build" },
       { "@type": "WebSite", "@id": `${siteUrl}/#website`, url: siteUrl, name: "NUMERON · Legend of Rebirth", publisher: { "@id": `${siteUrl}/#organization` }, inLanguage: locales },
       { "@type": "VideoGame", name: "Legend of Rebirth", alternateName: "传奇重生", url: `${siteUrl}/${locale}`, applicationCategory: "Game", creativeWorkStatus: "In development", description: releaseFacts(locale).state, about: [{ "@type": "Thing", name: "Development start", description: releaseFacts(locale).developmentStart }, { "@type": "Thing", name: "Current internal validation", description: releaseFacts(locale).currentValidation }], genre: ["MMORPG", "Action RPG"], publisher: { "@id": `${siteUrl}/#organization` } },
     ],

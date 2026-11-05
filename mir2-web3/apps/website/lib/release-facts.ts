@@ -32,7 +32,7 @@ const localized: Record<Locale, FactStrings> = {
     "测试构建",
     "了解开发进度",
     "仅完成内部充值测试，尚未开始商业运营；测试资产与测试到账不代表真实收入。付费范围和价格尚未对外开放。",
-    "Obelisk Labs 开发 Dubhe 基础设施与工具、Dubhe Wallet 钱包，以及开发中的 Numeron 游戏。",
+    "Obelisk Labs, Inc. 开发 Dubhe 基础设施与工具、Dubhe Wallet 钱包，以及开发中的 Numeron 游戏。",
     "规划中",
   ],
   en: [
@@ -44,7 +44,7 @@ const localized: Record<Locale, FactStrings> = {
     "Test build",
     "Development status",
     "Only internal recharge testing has been completed. Commercial operation has not begun; test assets and test credits are not revenue. Public pricing and purchases are not open.",
-    "Obelisk Labs develops Dubhe infrastructure and tools, the Dubhe Wallet product, and the Numeron game currently in development.",
+    "Obelisk Labs, Inc. develops Dubhe infrastructure and tools, the Dubhe Wallet product, and the Numeron game currently in development.",
     "Planned",
   ],
   ja: [
@@ -55,7 +55,7 @@ const localized: Record<Locale, FactStrings> = {
     "画面プロトタイプ · 実際のプレイヤー数・取引・継続率の統計なし",
     "テストビルド", "開発状況を見る",
     "内部チャージテストのみ実施済みです。商用運営は始まっておらず、テスト資産やテスト残高は収益ではありません。一般向け価格と購入は未公開です。",
-    "Obelisk Labs は Dubhe の基盤・ツール、Dubhe Wallet と開発中の Numeron を開発しています。", "計画中",
+    "Obelisk Labs, Inc. は Dubhe の基盤・ツール、Dubhe Wallet と開発中の Numeron を開発しています。", "計画中",
   ],
   ko: [
     "개발 중 · 외부 플레이어를 테스트에 초대함",
@@ -65,7 +65,7 @@ const localized: Record<Locale, FactStrings> = {
     "화면 프로토타입 · 실제 플레이어·거래·유지율 통계 없음",
     "테스트 빌드", "개발 현황",
     "내부 충전 테스트만 완료했습니다. 상용 운영은 시작하지 않았고 테스트 자산과 잔액은 매출이 아닙니다. 일반 가격과 구매는 열리지 않았습니다.",
-    "Obelisk Labs는 Dubhe 인프라와 도구, Dubhe Wallet, 그리고 개발 중인 Numeron 게임을 개발합니다.", "계획 중",
+    "Obelisk Labs, Inc.는 Dubhe 인프라와 도구, Dubhe Wallet, 그리고 개발 중인 Numeron 게임을 개발합니다.", "계획 중",
   ],
   "zh-TW": [
     "開發中 · 已邀請外部玩家測試",
@@ -75,7 +75,7 @@ const localized: Record<Locale, FactStrings> = {
     "介面原型 · 無真實玩家、成交或留存統計",
     "測試版本", "了解開發進度",
     "僅完成內部儲值測試，尚未開始商業營運；測試資產與測試餘額不代表收入。付費範圍與價格尚未對外開放。",
-    "Obelisk Labs 開發 Dubhe 基礎設施與工具、Dubhe Wallet 錢包，以及開發中的 Numeron 遊戲。", "規劃中",
+    "Obelisk Labs, Inc. 開發 Dubhe 基礎設施與工具、Dubhe Wallet 錢包，以及開發中的 Numeron 遊戲。", "規劃中",
   ],
   es: [
     "En desarrollo · Jugadores externos invitados a probar",
@@ -85,7 +85,7 @@ const localized: Record<Locale, FactStrings> = {
     "Prototipo de interfaz · Sin estadísticas reales de jugadores, comercio o retención",
     "Versión de prueba", "Estado del desarrollo",
     "Solo se han realizado pruebas internas de recarga. No hay operación comercial; los activos y créditos de prueba no son ingresos. No hay precios ni compras públicas.",
-    "Obelisk Labs desarrolla la infraestructura y las herramientas Dubhe, Dubhe Wallet y el juego Numeron, en desarrollo.", "Previsto",
+    "Obelisk Labs, Inc. desarrolla la infraestructura y las herramientas Dubhe, Dubhe Wallet y el juego Numeron, en desarrollo.", "Previsto",
   ],
   "pt-BR": [
     "Em desenvolvimento · Jogadores externos convidados para testes",
@@ -95,7 +95,7 @@ const localized: Record<Locale, FactStrings> = {
     "Protótipo de interface · Sem estatísticas reais de jogadores, comércio ou retenção",
     "Versão de teste", "Andamento do desenvolvimento",
     "Somente testes internos de recarga foram concluídos. A operação comercial não começou; ativos e créditos de teste não são receita. Preços e compras públicas não estão abertos.",
-    "A Obelisk Labs desenvolve a infraestrutura e as ferramentas Dubhe, a Dubhe Wallet e o jogo Numeron, ainda em desenvolvimento.", "Planejado",
+    "A Obelisk Labs, Inc. desenvolve a infraestrutura e as ferramentas Dubhe, a Dubhe Wallet e o jogo Numeron, ainda em desenvolvimento.", "Planejado",
   ],
   de: [
     "In Entwicklung · Externe Spieler zu Tests eingeladen",
@@ -105,7 +105,7 @@ const localized: Record<Locale, FactStrings> = {
     "Oberflächenprototyp · Keine echten Spieler-, Handels- oder Bindungsstatistiken",
     "Testbuild", "Entwicklungsstand",
     "Nur interne Aufladetests sind abgeschlossen. Der kommerzielle Betrieb hat nicht begonnen; Testguthaben sind kein Umsatz. Öffentliche Preise und Käufe sind nicht freigeschaltet.",
-    "Obelisk Labs entwickelt Dubhe-Infrastruktur und Werkzeuge, Dubhe Wallet und das noch in Entwicklung befindliche Numeron-Spiel.", "Geplant",
+    "Obelisk Labs, Inc. entwickelt Dubhe-Infrastruktur und Werkzeuge, Dubhe Wallet und das noch in Entwicklung befindliche Numeron-Spiel.", "Geplant",
   ],
   fr: [
     "En développement · Joueurs externes invités à tester",
@@ -115,7 +115,7 @@ const localized: Record<Locale, FactStrings> = {
     "Prototype d’interface · Aucune statistique réelle de joueurs, d’échanges ou de rétention",
     "Version de test", "État du développement",
     "Seuls les tests internes de recharge sont terminés. L’exploitation commerciale n’a pas commencé ; les actifs et crédits de test ne sont pas des revenus. Les prix et achats publics ne sont pas ouverts.",
-    "Obelisk Labs développe l’infrastructure et les outils Dubhe, Dubhe Wallet et le jeu Numeron, encore en développement.", "Prévu",
+    "Obelisk Labs, Inc. développe l’infrastructure et les outils Dubhe, Dubhe Wallet et le jeu Numeron, encore en développement.", "Prévu",
   ],
   ru: [
     "В разработке · Внешние игроки приглашены на тестирование",
@@ -125,7 +125,7 @@ const localized: Record<Locale, FactStrings> = {
     "Прототип интерфейса · Без реальной статистики игроков, торговли и удержания",
     "Тестовая сборка", "Ход разработки",
     "Завершены только внутренние тесты пополнения. Коммерческая работа не началась; тестовые активы и баланс не являются выручкой. Публичные цены и покупки не открыты.",
-    "Obelisk Labs разрабатывает инфраструктуру и инструменты Dubhe, Dubhe Wallet и находящуюся в разработке игру Numeron.", "Запланировано",
+    "Obelisk Labs, Inc. разрабатывает инфраструктуру и инструменты Dubhe, Dubhe Wallet и находящуюся в разработке игру Numeron.", "Запланировано",
   ],
   pl: [
     "W rozwoju · Zewnętrzni gracze zaproszeni do testów",
@@ -135,7 +135,7 @@ const localized: Record<Locale, FactStrings> = {
     "Prototyp interfejsu · Bez rzeczywistych statystyk graczy, handlu i retencji",
     "Wersja testowa", "Postępy prac",
     "Ukończono tylko wewnętrzne testy doładowań. Działalność komercyjna nie ruszyła; aktywa i kredyty testowe nie są przychodem. Publiczne ceny i zakupy nie są dostępne.",
-    "Obelisk Labs rozwija infrastrukturę i narzędzia Dubhe, Dubhe Wallet oraz tworzoną grę Numeron.", "Planowane",
+    "Obelisk Labs, Inc. rozwija infrastrukturę i narzędzia Dubhe, Dubhe Wallet oraz tworzoną grę Numeron.", "Planowane",
   ],
   tr: [
     "Geliştirme aşamasında · Harici oyuncular teste davet edildi",
@@ -145,7 +145,7 @@ const localized: Record<Locale, FactStrings> = {
     "Arayüz prototipi · Gerçek oyuncu, ticaret veya devamlılık istatistiği yok",
     "Test sürümü", "Geliştirme durumu",
     "Yalnızca dahili yükleme testleri tamamlanmıştır. Ticari işletim başlamamıştır; test varlıkları ve bakiyeleri gelir değildir. Genel fiyatlar ve satın alma açık değildir.",
-    "Obelisk Labs, Dubhe altyapısını ve araçlarını, Dubhe Wallet’ı ve geliştirilmekte olan Numeron oyununu geliştirir.", "Planlanıyor",
+    "Obelisk Labs, Inc., Dubhe altyapısını ve araçlarını, Dubhe Wallet’ı ve geliştirilmekte olan Numeron oyununu geliştirir.", "Planlanıyor",
   ],
   th: [
     "อยู่ระหว่างพัฒนา · เชิญผู้เล่นภายนอกร่วมทดสอบแล้ว",
@@ -155,7 +155,7 @@ const localized: Record<Locale, FactStrings> = {
     "ต้นแบบหน้าจอ · ไม่มีสถิติผู้เล่น การซื้อขาย หรือการกลับมาเล่นจริง",
     "รุ่นทดสอบ", "ความคืบหน้าการพัฒนา",
     "เสร็จเฉพาะการทดสอบเติมเงินภายใน ยังไม่ดำเนินงานเชิงพาณิชย์ สินทรัพย์และเครดิตทดสอบไม่ใช่รายได้ ยังไม่เปิดราคาและการซื้อสำหรับบุคคลทั่วไป",
-    "Obelisk Labs พัฒนาโครงสร้างพื้นฐานและเครื่องมือ Dubhe, Dubhe Wallet และเกม Numeron ที่กำลังพัฒนา", "อยู่ในแผน",
+    "Obelisk Labs, Inc. พัฒนาโครงสร้างพื้นฐานและเครื่องมือ Dubhe, Dubhe Wallet และเกม Numeron ที่กำลังพัฒนา", "อยู่ในแผน",
   ],
   vi: [
     "Đang phát triển · Đã mời người chơi bên ngoài thử nghiệm",
@@ -165,7 +165,7 @@ const localized: Record<Locale, FactStrings> = {
     "Nguyên mẫu giao diện · Không có số liệu người chơi, giao dịch hay giữ chân thực tế",
     "Bản thử nghiệm", "Tiến độ phát triển",
     "Chỉ hoàn thành thử nghiệm nạp tiền nội bộ. Chưa vận hành thương mại; tài sản và số dư thử nghiệm không phải doanh thu. Chưa mở giá và mua hàng công khai.",
-    "Obelisk Labs phát triển hạ tầng và công cụ Dubhe, Dubhe Wallet và trò chơi Numeron đang được phát triển.", "Dự kiến",
+    "Obelisk Labs, Inc. phát triển hạ tầng và công cụ Dubhe, Dubhe Wallet và trò chơi Numeron đang được phát triển.", "Dự kiến",
   ],
   id: [
     "Dalam pengembangan · Pemain eksternal diundang untuk menguji",
@@ -175,7 +175,7 @@ const localized: Record<Locale, FactStrings> = {
     "Prototipe antarmuka · Tanpa statistik pemain, perdagangan atau retensi nyata",
     "Build pengujian", "Status pengembangan",
     "Hanya pengujian isi ulang internal yang selesai. Operasi komersial belum dimulai; aset dan kredit uji bukan pendapatan. Harga dan pembelian publik belum dibuka.",
-    "Obelisk Labs mengembangkan infrastruktur dan alat Dubhe, Dubhe Wallet, serta game Numeron yang masih dikembangkan.", "Direncanakan",
+    "Obelisk Labs, Inc. mengembangkan infrastruktur dan alat Dubhe, Dubhe Wallet, serta game Numeron yang masih dikembangkan.", "Direncanakan",
   ],
   ar: [
     "قيد التطوير · تمت دعوة لاعبين خارجيين للاختبار",
@@ -185,7 +185,7 @@ const localized: Record<Locale, FactStrings> = {
     "نموذج واجهة · لا توجد إحصاءات فعلية للاعبين أو التداول أو الاحتفاظ",
     "نسخة اختبار", "حالة التطوير",
     "اكتملت اختبارات الشحن الداخلية فقط. لم يبدأ التشغيل التجاري؛ أصول وأرصدة الاختبار ليست إيرادات. الأسعار والشراء العام غير مفتوحين.",
-    "تطوّر Obelisk Labs بنية وأدوات Dubhe ومحفظة Dubhe Wallet ولعبة Numeron التي لا تزال قيد التطوير.", "مخطط",
+    "تطوّر Obelisk Labs, Inc. بنية وأدوات Dubhe ومحفظة Dubhe Wallet ولعبة Numeron التي لا تزال قيد التطوير.", "مخطط",
   ],
 };
 

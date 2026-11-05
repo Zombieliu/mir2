@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/site-copy";
+import { getOperationsCopy } from "@/lib/operations-copy";
 
 type RechargeCopy = {
   label: string; aiLabel: string; status: string; intro: string;
@@ -485,5 +486,5 @@ const billingLabels: Record<Locale, string> = {
 };
 
 export function getRechargeCopy(locale: Locale): RechargeCopy & { billing: string } {
-  return { ...rechargeCopies[locale], billing: billingLabels[locale] };
+  return { ...rechargeCopies[locale], pricingNote: getOperationsCopy(locale).pricingNote, billing: billingLabels[locale] };
 }
