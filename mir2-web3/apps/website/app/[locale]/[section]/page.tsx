@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { OperationsDisclosure } from "@/app/components/operations-disclosure";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GameStatusPanel } from "@/app/components/game-status-panel";
 import { ProductPageShell } from "@/app/components/product-page-shell";
@@ -36,7 +35,7 @@ export default async function SectionPage({ params }: SectionPageProps) {
       {section === "status" ? <section className="status-live-section"><GameStatusPanel labels={statusLabels} /></section> : null}
       {section === "support" ? <section className="support-contact"><span>{productCopy.ui.official} · {productCopy.chrome.support}</span><h2>{supportEmail}</h2><p>{productCopy.ui.supportWarning}</p><a className="button button-primary" href={`mailto:${supportEmail}`} data-track="support_email"><span>{productCopy.chrome.support}</span><i>↗</i></a></section> : null}
       {section === "community" ? <section className="community-channels section"><div><small>DISCORD</small><strong>{process.env.NEXT_PUBLIC_DISCORD_URL ? productCopy.ui.official : productCopy.common.unavailable}</strong>{process.env.NEXT_PUBLIC_DISCORD_URL ? <a href={process.env.NEXT_PUBLIC_DISCORD_URL} target="_blank" rel="noreferrer">{productCopy.ui.join} ↗</a> : null}</div><div><small>YOUTUBE</small><strong>{process.env.NEXT_PUBLIC_YOUTUBE_URL ? productCopy.ui.official : productCopy.common.unavailable}</strong>{process.env.NEXT_PUBLIC_YOUTUBE_URL ? <a href={process.env.NEXT_PUBLIC_YOUTUBE_URL} target="_blank" rel="noreferrer">{productCopy.ui.watch} ↗</a> : null}</div><div><small>BILIBILI</small><strong>{process.env.NEXT_PUBLIC_BILIBILI_URL ? productCopy.ui.official : productCopy.common.unavailable}</strong>{process.env.NEXT_PUBLIC_BILIBILI_URL ? <a href={process.env.NEXT_PUBLIC_BILIBILI_URL} target="_blank" rel="noreferrer">{productCopy.ui.watch} ↗</a> : null}</div></section> : null}
-      {section === "press" ? <section className="press-downloads section"><p className="press-asset-note">{productCopy.proof.verified}</p><Link href="/og.png" target="_blank">OG / 1200×630 ↗</Link><Link href="/gameplay/character-select.png" target="_blank">CHARACTER SELECT ↗</Link><Link href="/gameplay/shared-world.png" target="_blank">SHARED WORLD ↗</Link><Link href="/gameplay/skills-and-inventory.png" target="_blank">SYSTEMS ↗</Link></section> : null}
+      {section === "press" ? <section className="press-downloads section"><p className="press-asset-note">{productCopy.proof.verified}</p><a href="/og.png" target="_blank" rel="noreferrer">OG / 1200×630 ↗</a><a href="/gameplay/character-select.png" target="_blank" rel="noreferrer">CHARACTER SELECT ↗</a><a href="/gameplay/shared-world.png" target="_blank" rel="noreferrer">SHARED WORLD ↗</a><a href="/gameplay/skills-and-inventory.png" target="_blank" rel="noreferrer">SYSTEMS ↗</a></section> : null}
       {section === "support" || section === "press" ? <OperationsDisclosure locale={locale} /> : null}
     </ProductPageShell>
   );
