@@ -1,0 +1,25 @@
+[Unit]
+Description=Numeron dedicated QA wallet payment receiver
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=mir2-wallet-sandbox
+Group=mir2-wallet-sandbox
+WorkingDirectory=/opt/mir2/wallet-sandbox-payments/current
+EnvironmentFile=/etc/mir2/wallet-sandbox-payments.env
+ExecStart=/opt/mir2/wallet-sandbox-payments/venv/bin/python service.py serve
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+UMask=0077
+LimitNOFILE=256
+TasksMax=32
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target
