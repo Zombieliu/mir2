@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { OperationsDisclosure } from "@/app/components/operations-disclosure";
+import { operationsUpdatedAt } from "@/lib/operations-copy";
 import { notFound } from "next/navigation";
 import { GameStatusPanel } from "@/app/components/game-status-panel";
 import { ProductPageShell } from "@/app/components/product-page-shell";
@@ -22,7 +23,10 @@ export async function generateMetadata({ params }: SectionPageProps): Promise<Me
 export default async function SectionPage({ params }: SectionPageProps) {
   const { locale, section } = await params;
   if (!isLocale(locale) || !isProductSection(section)) notFound();
-  const productCopy = getProductCopy(locale);
+  const baseProductCopy = getProductCopy(locale);
+  const productCopy = section === "support" || section === "press"
+    ? { ...baseProductCopy, common: { ...baseProductCopy.common, updated: operationsUpdatedAt } }
+    : baseProductCopy;
   const page = productCopy.pages[section];
   const cards = section === "updates"
     ? productCopy.updates.map((entry) => ({ eyebrow: `${entry.date} · ${entry.tag}`, title: entry.title, copy: entry.summary, href: `updates/${entry.slug}`, label: productCopy.common.learnMore }))
