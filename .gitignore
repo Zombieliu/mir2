@@ -20,7 +20,15 @@ tools/procmon/
 # Rust / build output
 **/target/
 **/target-build/
+**/target-*/
 /mir2-web3/target-commercial-prod/
+
+# Deterministic native map derivatives are rebuilt at the packaging boundary.
+/mir2-web3/apps/web/public/generated/native-map-keyed/
+
+# Generated load evidence may contain local accounts and password hashes.
+/mir2-web3/docs/generated/load/
+/mir2-web3/docs/generated/**/accounts*.json
 
 # Python bytecode caches
 **/__pycache__/

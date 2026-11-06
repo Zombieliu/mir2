@@ -1,6 +1,11 @@
 {
   "version": 3,
   "count": 1602,
+  "frameSet": {
+    "seek": 3557644,
+    "count": 0,
+    "actions": []
+  },
   "frames": [
     {
       "index": 197,
@@ -322,6 +327,20 @@
       "maskWidth": null,
       "maskHeight": null,
       "path": "/original-ui/Prguse2/368.png",
+      "maskPath": null
+    },
+    {
+      "index": 423,
+      "width": 260,
+      "height": 22,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "path": "/original-ui/Prguse2/423.png",
       "maskPath": null
     },
     {

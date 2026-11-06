@@ -4,7 +4,11 @@
 //! renderer-neutral [`InventoryModel`] so every host shows the same bag. The
 //! panel is presentational: item grants/consumption stay server-authoritative.
 
+#[cfg(not(feature = "native-ui"))]
+use bevy::prelude::Resource;
+#[cfg(feature = "native-ui")]
 use bevy::prelude::*;
+#[cfg(feature = "native-ui")]
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, JustifyContent, Node, PositionType,
     UiRect, Val,
@@ -17,15 +21,65 @@ pub const SLOT_SIZE: f32 = 40.0;
 pub const SLOTS_PER_ROW: u32 = 8;
 
 /// A single carried item in renderer-neutral form.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ItemModel {
+    /// Stable server-side identity of this concrete item stack/instance.
+    /// Template `key` values are not instance identities and may be non-numeric.
+    #[serde(default)]
+    pub unique_id: Option<u64>,
     pub key: String,
     pub name: String,
     pub quantity: u32,
     pub slot: u32,
     /// 0 = inventory bag, 1 = belt, 2 = equipment (client-side grouping).
     pub container: u8,
+    /// Crystal item image index. `0` is intentionally treated as no image: a
+    /// legacy/incomplete snapshot must not cause the native client to guess an
+    /// icon from the item name.
+    #[serde(default)]
+    pub icon: u16,
+    #[serde(default)]
+    pub description: String,
+    #[serde(default)]
+    pub durability_current: Option<u16>,
+    #[serde(default)]
+    pub durability_max: Option<u16>,
+    #[serde(default)]
+    pub sell_value: u32,
+    #[serde(default)]
+    pub equip_slot: Option<String>,
+    #[serde(default)]
+    pub grade: Option<String>,
+    #[serde(default)]
+    pub attack: i32,
+    #[serde(default)]
+    pub defence: i32,
+    #[serde(default)]
+    pub added_attack: i32,
+    #[serde(default)]
+    pub added_defence: i32,
+    #[serde(default)]
+    pub added_luck: i32,
+    #[serde(default)]
+    pub shape: Option<u16>,
+    #[serde(default)]
+    pub socket_slots: u8,
+}
+
+/// Return the canonical exported Crystal icon path, but deliberately do not
+/// manufacture a path for a missing/legacy icon index.
+pub fn item_icon_path(icon: u16) -> Option<String> {
+    (icon != 0).then(|| format!("original-ui/Items/{icon}.png"))
+}
+
+/// Compact durability text for a fixed-size slot. Absence remains absence;
+/// it is not rendered as a misleading `0/0` durability value.
+pub fn item_durability_label(item: &ItemModel) -> Option<String> {
+    match (item.durability_current, item.durability_max) {
+        (Some(current), Some(maximum)) => Some(format!("{current}/{maximum}")),
+        _ => None,
+    }
 }
 
 /// The renderer-neutral inventory read model.
@@ -49,22 +103,27 @@ impl InventoryModel {
 }
 
 /// Marker on the inventory panel root.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct InventoryPanelRoot;
 
 /// Marker on the gold label.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 pub struct GoldLabel;
 
 /// Text rendered inside one bag slot.
+#[cfg(feature = "native-ui")]
 #[derive(Component)]
 struct InventorySlotLabel {
     slot: u32,
 }
 
 /// Build the shared Mir2 inventory panel.
+#[cfg(feature = "native-ui")]
 pub struct Mir2InventoryPlugin;
 
+#[cfg(feature = "native-ui")]
 impl Plugin for Mir2InventoryPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InventoryModel>()
@@ -76,6 +135,7 @@ impl Plugin for Mir2InventoryPlugin {
     }
 }
 
+#[cfg(feature = "native-ui")]
 fn spawn_inventory_panel(mut commands: Commands) {
     commands
         .spawn((
@@ -141,6 +201,7 @@ fn spawn_inventory_panel(mut commands: Commands) {
         });
 }
 
+#[cfg(feature = "native-ui")]
 fn update_inventory_panel(
     model: Res<InventoryModel>,
     golds: Query<&mut Text, With<GoldLabel>>,
@@ -154,6 +215,7 @@ fn update_inventory_panel(
     }
 }
 
+#[cfg(feature = "native-ui")]
 fn bag_slot_label(model: &InventoryModel, slot: u32) -> String {
     model
         .items
@@ -191,11 +253,13 @@ mod tests {
 
     fn item(key: &str, container: u8, slot: u32) -> ItemModel {
         ItemModel {
+            unique_id: None,
             key: key.to_owned(),
             name: key.to_owned(),
             quantity: 1,
             slot,
             container,
+            ..ItemModel::default()
         }
     }
 
@@ -232,17 +296,34 @@ mod tests {
     }
 
     #[test]
+    fn legacy_item_json_without_instance_id_remains_compatible_but_unaddressable() {
+        let item: ItemModel = serde_json::from_value(serde_json::json!({
+            "key": "small-hp-drug",
+            "name": "Small HP Drug",
+            "quantity": 1,
+            "slot": 0,
+            "container": 0
+        }))
+        .expect("legacy item");
+        assert_eq!(item.key, "small-hp-drug");
+        assert_eq!(item.unique_id, None);
+    }
+
+    #[cfg(feature = "native-ui")]
+    #[test]
     fn panel_renders_bag_item_names_and_quantities() {
         let mut app = App::new();
         app.add_plugins(Mir2InventoryPlugin);
         *app.world_mut().resource_mut::<InventoryModel>() = InventoryModel {
             gold: 500,
             items: vec![ItemModel {
+                unique_id: Some(42),
                 key: "potion".to_owned(),
                 name: "Small HP Potion".to_owned(),
                 quantity: 3,
                 slot: 2,
                 container: 0,
+                ..ItemModel::default()
             }],
         };
         app.update();
@@ -254,5 +335,28 @@ mod tests {
             .map(|text| text.0.clone())
             .collect::<Vec<_>>();
         assert!(labels.iter().any(|label| label == "Small HP Potion ×3"));
+    }
+
+    #[test]
+    fn legacy_item_json_and_full_metadata_are_both_compatible() {
+        let legacy: ItemModel = serde_json::from_str(
+            r#"{"key":"potion","name":"Potion","quantity":1,"slot":0,"container":0}"#,
+        )
+        .expect("legacy inventory JSON remains valid");
+        assert_eq!(legacy.icon, 0);
+        assert_eq!(legacy.description, "");
+        assert_eq!(item_icon_path(0), None);
+
+        let full: ItemModel = serde_json::from_str(
+            r#"{"uniqueId":42,"key":"sword","name":"Sword","quantity":1,"slot":2,"container":2,"icon":71,"description":"Sharp","durabilityCurrent":35,"durabilityMax":40,"sellValue":123,"equipSlot":"Weapon","grade":"Rare","attack":7,"defence":2,"addedAttack":3,"addedDefence":4,"addedLuck":1,"shape":9,"socketSlots":2}"#,
+        )
+        .expect("full Crystal item JSON decodes");
+        assert_eq!(
+            item_icon_path(full.icon).as_deref(),
+            Some("original-ui/Items/71.png")
+        );
+        assert_eq!(item_durability_label(&full).as_deref(), Some("35/40"));
+        assert_eq!(full.added_attack, 3);
+        assert_eq!(full.socket_slots, 2);
     }
 }

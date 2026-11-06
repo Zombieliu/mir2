@@ -1,7 +1,9 @@
 use bevy_ecs::prelude::World;
 use mir2_protocol::{ItemRentalInformation, ServerPacket, UserItemRentalInformation};
 
-use crate::config::{CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState};
+use crate::config::{
+    new_stage5_mail_delivery_nonce, CharacterSaveRecord, Stage5MailMessage, Stage5SystemsState,
+};
 
 use super::crystal_compat::{
     CRYSTAL_BIND_DONT_DROP, CRYSTAL_BIND_DONT_SELL, CRYSTAL_BIND_DONT_STORE,
@@ -12,10 +14,11 @@ use super::equipment::{equipment_slot_unique_id, item_state_from_equipment_state
 use super::inventory::{
     add_minutes_to_binary_datetime, binary_datetime_ticks, current_binary_datetime,
     future_binary_datetime, inventory_container_and_slot_for_index,
+    normalize_incoming_item_tree_unique_ids,
 };
 use super::items::{
     crystal_item_has_bind_flag, item_has_rental_bind_flag, item_unique_id,
-    user_item_from_item_state,
+    try_user_item_from_item_state, validate_committed_item_state_carrier,
 };
 use super::resources::{
     ActiveItemRentalState, InventoryResource, ItemRentalRecordState, ItemRentalResource,
@@ -322,6 +325,7 @@ fn push_rental_return_mail(
         .saturating_add(1);
     systems.mail.push(Stage5MailMessage {
         id,
+        delivery_nonce: new_stage5_mail_delivery_nonce(),
         from: borrower_name.to_string(),
         to: owner_name.to_string(),
         subject: "Rental item returned".to_string(),
@@ -349,6 +353,7 @@ pub(super) fn item_rental_request_impl(
     });
     let mut rental = world.resource_mut::<ItemRentalResource>();
     rental.active = Some(ActiveItemRentalState {
+        transaction_nonce: new_stage5_mail_delivery_nonce(),
         partner_name: partner_name.clone(),
         fee: 0,
         days: 1,
@@ -452,9 +457,14 @@ pub(super) fn deposit_rental_item_impl(world: &mut World, from: i32, to: i32) ->
     {
         return failure;
     }
-    if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_UNABLE_TO_RENT) {
+    if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_UNABLE_TO_RENT)
+        || validate_committed_item_state_carrier(&item).is_err()
+    {
         return failure;
     }
+    let Ok(loan_item) = try_user_item_from_item_state(&item) else {
+        return failure;
+    };
 
     let item = world
         .resource_mut::<InventoryResource>()
@@ -474,7 +484,7 @@ pub(super) fn deposit_rental_item_impl(world: &mut World, from: i32, to: i32) ->
         success: true,
     };
     failure.push(ServerPacket::UpdateRentalItem {
-        loan_item: Some(user_item_from_item_state(&item)),
+        loan_item: Some(loan_item),
     });
     failure
 }
@@ -508,25 +518,32 @@ pub(super) fn retrieve_rental_item_impl(
     }
 
     let item = {
-        let mut rental = world.resource_mut::<ItemRentalResource>();
-        let Some(active) = rental.active.as_mut() else {
+        let rental = world.resource::<ItemRentalResource>();
+        let Some(active) = rental.active.as_ref() else {
             return packets;
         };
-        active.deposited_item.take()
+        active.deposited_item.clone()
     };
     let Some(mut item) = item else {
         return packets;
     };
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return packets;
+    }
     item.container = container;
     item.slot = slot;
-    item.unique_id = super::items::default_item_unique_id(container, slot);
+    normalize_incoming_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return packets;
+    }
+    if let Some(active) = world.resource_mut::<ItemRentalResource>().active.as_mut() {
+        active.deposited_item = None;
+        active.deposited_from = None;
+    }
     world
         .resource_mut::<InventoryResource>()
         .inventory_items
         .push(item);
-    if let Some(active) = world.resource_mut::<ItemRentalResource>().active.as_mut() {
-        active.deposited_from = None;
-    }
     packets[0] = ServerPacket::RetrieveRentalItem {
         from,
         to,
@@ -537,11 +554,14 @@ pub(super) fn retrieve_rental_item_impl(
 }
 
 pub(super) fn cancel_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
-    let active = world.resource_mut::<ItemRentalResource>().active.take();
+    let active = world.resource::<ItemRentalResource>().active.clone();
     let Some(active) = active else {
         return Vec::new();
     };
-    if let Some(mut item) = active.deposited_item {
+    let prepared_item = if let Some(mut item) = active.deposited_item.clone() {
+        if validate_committed_item_state_carrier(&item).is_err() {
+            return Vec::new();
+        }
         let destination = active
             .deposited_from
             .and_then(|slot| u8::try_from(slot).ok())
@@ -576,15 +596,30 @@ pub(super) fn cancel_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
                             .flatten()
                     })
             });
-        if let Some((container, slot)) = destination {
-            item.container = container;
-            item.slot = slot;
-            item.unique_id = super::items::default_item_unique_id(container, slot);
-            world
-                .resource_mut::<InventoryResource>()
-                .inventory_items
-                .push(item);
+        let Some((container, slot)) = destination else {
+            return Vec::new();
+        };
+        item.container = container;
+        item.slot = slot;
+        normalize_incoming_item_tree_unique_ids(
+            world.resource::<InventoryResource>(),
+            &mut item,
+            &[],
+        );
+        if validate_committed_item_state_carrier(&item).is_err() {
+            return Vec::new();
         }
+        Some(item)
+    } else {
+        None
+    };
+
+    world.resource_mut::<ItemRentalResource>().active = None;
+    if let Some(item) = prepared_item {
+        world
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .push(item);
     }
     if active.fee > 0 {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
@@ -646,34 +681,33 @@ pub(super) fn item_rental_lock_item_impl(world: &mut World) -> Vec<ServerPacket>
 }
 
 pub(super) fn confirm_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
-    let can_confirm = {
+    let active = {
         let rental = world.resource::<ItemRentalResource>();
         let Some(active) = rental.active.as_ref() else {
             return Vec::new();
         };
-        active.gold_locked
+        if !(active.gold_locked
             && active.item_locked
             && active.fee > 0
             && active.deposited_item.is_some()
             && rental.rented_items.len() < MAX_RENTED_ITEMS
-            && !rental.has_rented_item
+            && !rental.has_rented_item)
+        {
+            return cancel_item_rental_impl(world);
+        }
+        active.clone()
     };
-    if !can_confirm {
-        return cancel_item_rental_impl(world);
-    }
 
-    let active = world
-        .resource_mut::<ItemRentalResource>()
-        .active
-        .take()
-        .expect("active rental should exist");
-    let mut item = active
-        .deposited_item
-        .expect("deposited item should exist after preflight");
+    let Some(mut item) = active.deposited_item.clone() else {
+        return Vec::new();
+    };
+    if validate_committed_item_state_carrier(&item).is_err() {
+        return Vec::new();
+    }
     if crystal_item_has_bind_flag(&item.key, CRYSTAL_BIND_UNABLE_TO_RENT)
         || item_has_rental_bind_flag(&item, CRYSTAL_BIND_UNABLE_TO_RENT)
     {
-        return vec![ServerPacket::CancelItemRental];
+        return cancel_item_rental_impl(world);
     }
 
     item.rental_binding_flags = CRYSTAL_RENTAL_BINDING_FLAGS;
@@ -689,7 +723,9 @@ pub(super) fn confirm_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
     item.rental_locked = false;
     let item_id = item_unique_id(&item);
     let item_name = item.name.clone();
-    let mut loan_item = user_item_from_item_state(&item);
+    let Ok(mut loan_item) = try_user_item_from_item_state(&item) else {
+        return Vec::new();
+    };
     loan_item.rental_information = Some(UserItemRentalInformation {
         owner_name: owner_name.clone(),
         binding_flags: CRYSTAL_RENTAL_BINDING_FLAGS,
@@ -699,6 +735,7 @@ pub(super) fn confirm_item_rental_impl(world: &mut World) -> Vec<ServerPacket> {
 
     {
         let mut rental = world.resource_mut::<ItemRentalResource>();
+        rental.active = None;
         rental.rented_items.push(ItemRentalRecordState {
             item_id,
             item_name: item_name.clone(),

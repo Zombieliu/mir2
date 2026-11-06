@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
@@ -55,10 +55,25 @@ export type MailPanelProps = {
 };
 
 export function MailPanel({ t, mail, onClaim, onDelete, onClose }: MailPanelProps) {
+  const [page, setPage] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const entries = mail.filter((message) => !message.deleted);
-  const visibleEntries = entries.slice(0, 10);
-  const selectedEntry = visibleEntries.find((entry) => entry.id !== undefined) ?? visibleEntries[0] ?? null;
   const pageCount = Math.max(1, Math.ceil(entries.length / 10));
+  const currentPage = Math.min(page, pageCount - 1);
+  const visibleEntries = entries.slice(currentPage * 10, currentPage * 10 + 10);
+  const safeSelectedIndex = Math.min(selectedIndex, Math.max(visibleEntries.length - 1, 0));
+  const selectedEntry = visibleEntries[safeSelectedIndex] ?? null;
+  const canDeleteSelected = selectedEntry?.id !== undefined;
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, pageCount - 1));
+    setSelectedIndex((current) => Math.min(current, Math.max(visibleEntries.length - 1, 0)));
+  }, [pageCount, visibleEntries.length]);
+
+  function changePage(nextPage: number) {
+    setPage(Math.max(0, Math.min(pageCount - 1, nextPage)));
+    setSelectedIndex(0);
+  }
 
   return (
     <section className="mail-panel">
@@ -68,7 +83,7 @@ export function MailPanel({ t, mail, onClaim, onDelete, onClose }: MailPanelProp
         <SpriteButton sprite={ORIGINAL_UI.mail.closeButton} label={t("ui.close")} onClick={onClose} />
       </div>
       <div className="mail-help">
-        <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
+        <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} disabled />
       </div>
       <div className="mail-header type">{t("client.Type", [], "Type")}</div>
       <div className="mail-header sender">{t("client.Sender", [], "Sender")}</div>
@@ -78,36 +93,38 @@ export function MailPanel({ t, mail, onClaim, onDelete, onClose }: MailPanelProp
           key={`mail-row-${entry.id ?? index}`}
           entry={entry}
           index={index}
-          selected={index === 0}
+          selected={index === safeSelectedIndex}
+          onSelect={() => setSelectedIndex(index)}
           onClaim={onClaim}
           onDelete={onDelete}
         />
       ))}
       <div className="mail-page-previous">
-        <SpriteButton sprite={ORIGINAL_UI.mail.previousButton} label={t("ui.previous", [], "Previous")} onClick={() => undefined} />
+        <SpriteButton sprite={ORIGINAL_UI.mail.previousButton} label={t("ui.previous", [], "Previous")} onClick={() => changePage(currentPage - 1)} disabled={currentPage <= 0} />
       </div>
-      <div className="overlay-panel-foot mail-page-label">{`1 / ${pageCount}`}</div>
+      <div className="overlay-panel-foot mail-page-label">{`${currentPage + 1} / ${pageCount}`}</div>
       <div className="mail-page-next">
-        <SpriteButton sprite={ORIGINAL_UI.mail.nextButton} label={t("ui.next", [], "Next")} onClick={() => undefined} />
+        <SpriteButton sprite={ORIGINAL_UI.mail.nextButton} label={t("ui.next", [], "Next")} onClick={() => changePage(currentPage + 1)} disabled={currentPage >= pageCount - 1} />
       </div>
-      <div className="mail-action send"><SpriteButton sprite={ORIGINAL_UI.mail.sendButton} label={t("client.Send", [], "Send")} onClick={() => undefined} /></div>
-      <div className="mail-action reply"><SpriteButton sprite={ORIGINAL_UI.mail.replyButton} label={t("client.Reply", [], "Reply")} onClick={() => undefined} /></div>
+      <div className="mail-action send disabled"><SpriteButton sprite={ORIGINAL_UI.mail.sendButton} label={t("client.Send", [], "Send")} disabled /></div>
+      <div className="mail-action reply disabled"><SpriteButton sprite={ORIGINAL_UI.mail.replyButton} label={t("client.Reply", [], "Reply")} disabled /></div>
       <div className="mail-action read">
         <SpriteButton
           sprite={ORIGINAL_UI.mail.readButton}
           label={t("client.Read", [], "Read")}
-          onClick={() => selectedEntry?.id !== undefined && !selectedEntry.claimed ? onClaim(selectedEntry.id) : undefined}
+          disabled
         />
       </div>
       <div className="mail-action delete">
         <SpriteButton
           sprite={ORIGINAL_UI.mail.deleteButton}
           label={t("client.Delete", [], "Delete")}
-          onClick={() => selectedEntry?.id !== undefined ? onDelete(selectedEntry.id) : undefined}
+          disabled={!canDeleteSelected}
+          onClick={canDeleteSelected ? () => onDelete(selectedEntry!.id!) : undefined}
         />
       </div>
-      <div className="mail-action block disabled"><SpriteButton sprite={ORIGINAL_UI.mail.blockListButton} label={t("client.BlockList", [], "Block List")} onClick={() => undefined} /></div>
-      <div className="mail-action bug disabled"><SpriteButton sprite={ORIGINAL_UI.mail.bugReportButton} label={t("client.ReportBug", [], "Report Bug")} onClick={() => undefined} /></div>
+      <div className="mail-action block disabled"><SpriteButton sprite={ORIGINAL_UI.mail.blockListButton} label={t("client.BlockList", [], "Block List")} disabled /></div>
+      <div className="mail-action bug disabled"><SpriteButton sprite={ORIGINAL_UI.mail.bugReportButton} label={t("client.ReportBug", [], "Report Bug")} disabled /></div>
       <div className="overlay-panel-list mail-legacy-list" hidden>
         {entries.length ? (
           entries.map((entry, index) => (
@@ -155,12 +172,14 @@ function MailListRow({
   entry,
   index,
   selected,
+  onSelect,
   onClaim,
   onDelete,
 }: {
   entry: DisplayMailMessageLike;
   index: number;
   selected: boolean;
+  onSelect: () => void;
   onClaim: (mailId: number) => void;
   onDelete: (mailId: number) => void;
 }) {
@@ -175,6 +194,7 @@ function MailListRow({
       tabIndex={0}
       className="overlay-panel-row mail-row"
       style={{ top: 55 + index * 33 }}
+      onClick={onSelect}
       onDoubleClick={() => entry.id !== undefined && !entry.claimed && onClaim(entry.id)}
       onKeyDown={(event) => {
         if ((event.key === "Enter" || event.key === " ") && entry.id !== undefined && !entry.claimed) {
@@ -334,7 +354,7 @@ export function NpcDialogPanel({
         ) : null}
         <strong>{title}</strong>
         <div className="npc-dialog-actions">
-          <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
+          <SpriteButton sprite={ORIGINAL_UI.mail.helpButton} label={t("ui.help", [], "Help")} disabled />
           <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close")} onClick={onClose} />
         </div>
       </div>

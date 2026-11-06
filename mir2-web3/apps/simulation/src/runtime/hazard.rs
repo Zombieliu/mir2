@@ -4,8 +4,8 @@
 //! strikes a cell: a 1-in-4 chance lands directly on a player, otherwise a
 //! random cell within ±10 tiles. A strike on a player's cell deals
 //! `Random(LightningDamage)` / `Random(FireDamage)` damage. Hazard placement
-//! comes from `SimulationConfig.map_hazards` (Crystal stores the flags in the
-//! Map DB, which is absent here).
+//! comes from `SimulationConfig.map_hazards`, populated from the imported
+//! Crystal `Server.MirDB` map records for Crystal map/world runtimes.
 
 use bevy_ecs::prelude::{Resource, World};
 use mir2_protocol::{MirDirection, ObjectSpellInfo, Point, ServerPacket, Spell};

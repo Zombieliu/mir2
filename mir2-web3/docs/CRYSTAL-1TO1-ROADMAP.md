@@ -1,5 +1,478 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Windows verifiable vertical-slice closeout (2026-08-26; packaged runtime
+> source `b5c0ecb60`): the complete Simulation `vertical_slice` suite passes
+> 8/8, including the original Bichon newcomer quest 1-to-9 route; `shared_zone`
+> passes 195/195. `ordinary_candidate_loop` remains 2/2, Gateway fresh-account
+> persistence 1/1, the ordered Zone restore regression and `zone_rpc` group
+> 21/21, clean-source assets 312/312, Web typecheck, and all 15
+> `platinum_176_combat_milestones` cases also pass. The newcomer route uses
+> authoritative quest/reward identities, natural safe-zone regeneration, and
+> exact ground-drop claim tickets without QA gold, damage multipliers, or
+> direct HP mutation.
+>
+> This round also fixes a deterministic accuracy defect: the former tick
+> coefficient resonated with Scarecrow's agility modulus and could leave one
+> attacker/target pair permanently hitting or permanently missing. The
+> avalanche-mixed roll now serves personal-session and native Zone physical
+> paths; its exact unit regression proves both outcomes over successive ticks.
+> These are bounded evidence gates, not a strict whole-game completion
+> percentage.
+>
+> Runtime source revision `b5c0ecb604946a858bf5d060a2cca306032c0e62`
+> produced the attested Release EXE SHA-256
+> `9E51CBF3E81D50A182F08CE11D02D9829268881A2124BAFC1D963829CC634E8C`
+> (66,665,472 bytes), bound to build-attestation SHA-256
+> `74F7D06336D486C6430263519282AED02C3B0429C6711FE0829DA7BE08311370`.
+> Nonvisual Candidate `WN-CANDIDATE-03-20260826` contains 10,258 files; its
+> manifest SHA-256 is
+> `58F88AD84D1F7F9C9CC1CC44E59932D2A39136FD62FCA1F56CDAB0CF6C861884`
+> and payload aggregate is
+> `6788698E6ED19209D5463B10FF15E5D7972D714C62C6D0093808571C97ABF83A`.
+> Clean-source verification passed with `sourceRepoCheck=checked`; independent
+> copied-artifact verification passed with `sourceRepoCheck=unavailable` after
+> all six root anchors matched. Both were nonvisual with
+> `launchRequested=false`. Candidate-03 supersedes Candidate-02 for current
+> runtime evidence.
+>
+> The detached CMS signer is the internal self-signed certificate
+> `B179E9D6222332C9DB5E960BAECF9990252CFBC7`, not a formal release
+> certificate; the EXE remains Authenticode `NotSigned`. Remaining roadmap
+> gates are pure-UI account-to-quest execution using this same EXE, one
+> continuous authenticated live-WebSocket run, real 125%/150% OS-DPI behavior,
+> a real 30-minute native soak, human visual/gameplay-feel acceptance, and a
+> formal release certificate/signing path. Do not mark global 1:1 parity or
+> strict Candidate 100% from this checkpoint; `accepted=false` and the listed
+> gates remain open.
+
+> 2026-08-26 Crystal map-event E1 checkpoint: the six current `_MAPCOORD`
+> source entries now generate typed threshold/action records and bind
+> one-to-one to their current `Server.MirDB` `NeedMove` rows. The runtime no
+> longer reparses imported script strings on the authority path; malformed,
+> duplicate, missing, or ambiguous data fails generation/runtime closed.
+> Generator 7/7, focused manifest/runtime 3/3, personal/shared integration 3/3,
+> and the Gateway allowed-turn transfer regression 1/1 pass. This is not full
+> map-event parity: all 18 general event files, delayed action ordering,
+> doors/gates/walls, the complete six-gate Gateway matrix, live cross-map packet
+> traces, and RNG remain open.
+
+> 2026-08-26 Crystal map-environment data checkpoint: the generated world
+> manifest now imports `Music`, `Fire`/`FireDamage`,
+> `Lightning`/`LightningDamage`, and `FireWallLimit`/`FireWallCount` from the
+> real `Server.MirDB` `MapInfo` binary layout instead of discarding those
+> fields. The current database contains 464 source records (463 named maps plus
+> one empty source placeholder) and exactly 12 hazard-enabled maps. Crystal
+> map/world configs derive their complete hazard table from that
+> manifest, while `MapInformation` receives the matching fire/lightning flags,
+> music, light, dark-light, and weather values. Exact D2081/D2082 fixtures,
+> all-map config comparison, and the existing personal/shared hazard behavior
+> tests pass. Package/Web manifests are byte-identical, their sync gate passes,
+> and Web typecheck remains green. This closes the DB-to-runtime
+> configuration and packet-data gap
+> only; exact RNG trace parity, ordinary doors, gate/wall script actions, and
+> general Event execution remain open and block full map parity.
+
+> 2026-08-26 Slice D durable ground-drop settlement is closed for the bounded
+> item-identity Candidate slice. PostgreSQL lookup and transact paths share the
+> same per-idempotency-key advisory transaction lock, uncertain database results
+> remain `OutcomeUnknown`, and exact ground-drop projection plus account save is
+> atomic. Detached claims retain their complete ticket, payload, Zone, and stable
+> player identity through world-only checkpoints. Teardown and `Drop` process
+> finalized deliveries only; unresolved outcomes are retried only from an ordered,
+> fenced economy context. StartGame recovers them after Zone join. The fresh
+> factory/new-login regression proves one credit and no KeepAlive duplication.
+>
+> Current evidence: Simulation lib 1472/0, shared_zone 195/0, Gateway 642/0/1
+> ignored out of 643, social_economy 3/0, Web typecheck 0, exact-file Rustfmt 0,
+> Gate18 economy/migration bin check 0, and diff check 0. Independent final audit:
+> GO, P0=0, P1=0, P2=1. The P2 is service-layer defense in depth for missing
+> context; routing already prevents that call during teardown. This closes Slice D
+> only. Independent full-project audits estimate backend Crystal semantics at 49%
+> and Windows Candidate automation at 56%; full Crystal Accepted is not claimed.
+
+> 2026-08-25 GroundDrop identity Slice C complete: authoritative claim tickets
+> now bind Zone key, object id, monotonic generation, claim id, canonical payload
+> digest, session/owner identity, and the complete drop payload. Player and
+> IntelligentCreature pickup both settle through the same account-inventory
+> boundary; success commits the exact ticket and failure cancels/restores it.
+> Legacy object-id-only follow-ups fail closed, reconnect/checkpoint restore
+> validates pending tickets against presence plus the restored Zone claim, v1
+> checkpoints rebuild unsigned authority fields, and exhausted u64 allocators
+> reject instead of reusing ids. Independent P0/P1 review is closed. Locked
+> serial evidence passes Simulation lib 1465/1465, shared_zone 193/193,
+> Gateway lib 609 passed with 1 ignored, Web typecheck, exact-file Rustfmt, and
+> diff checks. Slice D durable post-commit crash recovery remains the final
+> item-identity settlement blocker; this entry does not pre-claim overall 100%.
+> 2026-08-25 GroundDrop identity Slice A/B complete: the complete recursive
+> Crystal `UserItem` now survives drop creation, internal snapshots,
+> checkpoints, Zone RPC, state-root computation, and current local/shared/quest
+> pickup. A shared staged planner keeps preflight and commit atomic, preserves
+> assigned UIDs or retires an absorbed source UID, emits every changed stack,
+> canonicalizes only unique legacy display names, fails closed on ambiguity,
+> and binds pickup idempotency to the exact payload. External Web/spectator
+> projections remain explicitly redacted. Locked serial evidence passes the
+> Simulation library (1461/1461), Gateway library (606 passed, 1 ignored), Web
+> typecheck, exact-file Rustfmt, and `git diff --check`. Authoritative claim
+> generations/ids, stable canonical digests, pet pickup routing, and durable
+> crash recovery remain Slice C/D; this is not an overall 100% parity claim.
+
+> 2026-08-25 clean-checkout Bichon collision correction: an active map `0`
+> whose title is not `Starter Field` now resolves through the world collision
+> loader, which prefers an installed Crystal map and falls back to the tracked
+> gzipped map pack. The previous full-client-only lookup silently fell back to
+> the starter slice on clean Linux CI, shrinking Bichon from `0..699` to
+> `302..358 x 248..313` and removing its fishing cells. The focused active-map
+> regression passes 1/1 and the complete fishing group passes 16/16. This closes
+> the clean-host loader regression, not broader map-content or visual parity.
+
+> 2026-08-25 Zone factory restore safety checkpoint: complete World Director
+> images are now decoded and restored into an isolated Zone resource map before
+> one lock-protected live-map replacement. Replica markers and autonomous-tick
+> flags share a fixed replicas -> Zones lock order across mark, promote, resume,
+> first resource creation, and restore, preventing standby Zones from resuming
+> autonomous writes. Atomic restore gates pass 2/2, replica gates pass 4/4, and
+> the locked Gateway compile passes. Durable checkpoint filesystem publication
+> remains a separate security track and is not claimed by this checkpoint.
+
+> 2026-08-25 spawned-AI checkpoint: AI 41/42 YinDevilNode/YangDevilNode now
+> stay immobile, suppress player chase, detect same-disposition friendly targets within
+> seven tiles, and emit the Crystal delayed support `ObjectAttack`. AI 41 maps to
+> `BlessedArmour/MaxAC`; AI 42 maps to `UltimateEnhancer/MaxDC`; a genuinely
+> player-friendly node uses the authoritative player Buff resource for five seconds.
+> Monster-target Buff ownership is not represented by the personal runtime, so that
+> branch deliberately fails closed instead of forging `AddBuff`. Focused locked tests
+> pass 2/2. This is a bounded support-node advance, not full monster-Buff parity.
+
+> 2026-08-25 map-coordinate runtime checkpoint: the six active Crystal
+> `_MAPCOORD` bindings now execute through authoritative movement in both the
+> personal Simulation session and the shared Zone path. `LEVEL` and
+> `CHECKPKPOINT` conditions use the live player values, denied moves emit the
+> imported `Hint`, and successful `ENTERMAP` actions resolve through the existing
+> map-transfer authority; the Gateway consumes only those authorized transfer
+> rows after Zone movement. Focused end-to-end gates pass 2/2 across all six
+> bindings, including level 49/50 and PK 199/200 boundaries. The bounded
+> importer and fail-closed evaluator remain deliberately limited to this imported
+> subset; arbitrary event scheduling and general script-command parity remain open.
+>
+> 2026-08-25 spell-authority checkpoint: the runtime no longer invents generic
+> damage for an imported Crystal spell whose switch branch has not been
+> implemented. Unsupported dispatch spends MP in Crystal order, returns
+> `cast=false` through both caster packet surfaces, and does not mutate
+> cooldown/progression or queue projectile/damage work. A FireBall neighbor
+> regression proves implemented offensive spells still work. This closes a
+> security/semantic false-positive path; it deliberately exposes unsupported
+> spells as unsupported and does not increase their functional-completeness
+> count.
+>
+> 2026-08-25 spawned-AI checkpoint: AI 50 GreatFoxSpirit recall now evaluates
+> the bounded local equivalent of Crystal `FindAllTargets(30)` in ring/y/x order,
+> filters dead, hidden, same-disposition, near, stale, and non-authoritative
+> candidates, applies MagicResist per candidate, and returns immediately after
+> the first successful teleport. `RemotePlayer` mirrors are never mutated; the
+> authoritative `SelfPlayer` and opposing monster ECS entities are supported.
+> Player MagicResist is real; monster MagicResist remains an explicit zero-stat
+> fallback until monster stat blocks are modeled. Focused locked tests pass 2/2.
+>
+> 2026-08-24 spawned-AI checkpoint: AI 48 GuardianRock now evaluates the
+> authoritative player's Crystal-numeric MagicResist roll before queuing its
+> delayed pull. A resisted attack still emits the range animation after the
+> Crystal 500 ms wind-up but neither moves nor damages the player. The existing
+> real-map lane test proves both outcomes serially. This closes the previously
+> named GuardianRock resistance detail only; GreatFoxSpirit, YinDevilNode,
+> SnowWolfKing and other full-AI gates remain open.
+>
+> 2026-08-24 spawned-AI checkpoint: AI 27 Khazard no longer pulls every
+> aligned target unconditionally. The pull now uses the authoritative
+> Crystal-numeric MagicResist roll; a successful resist preserves the range
+> animation while producing no movement or damage. The real-map behavior test
+> covers both unresisted and resisted branches and passes serially. This closes
+> only the previously named Khazard MagicResist detail; GuardianRock,
+> GreatFoxSpirit, YinDevilNode, SnowWolfKing and other full-AI gates remain open.
+>
+> 2026-08-24 NPC dynamic-visibility checkpoint: the former placeholder that
+> returned false for every `FlagNeeded` or `TimeVisible` NPC is removed.
+> StartGame, AOI object packets, authoritative `worldSnapshot`, and NPC
+> interaction now share persisted character-flag plus server-local schedule
+> evaluation. The implementation preserves Crystal's weekday naming and
+> inclusive-start/exclusive-finish minute boundaries, materializes gated NPCs
+> for later live reconciliation, caches loaded-object metadata off the hot path,
+> and emits `ObjectNpc`/`ObjectRemove` on flag transitions. Focused pure boundary
+> and live AOI/interaction regressions pass; the locked Simulation compile is
+> green. This is one verified semantic closure and does not justify the stale
+> broad “NPC scripting 100%” claim: map-coordinate events, include expansion,
+> and remaining script behavior are still tracked as open.
+>
+> WN-CANDIDATE R12 checkpoint (2026-08-23): the ordinary-player functional
+> slice now closes remote quest mutation, rejected-task pending locks, and
+> saturated pickup-loss gaps. Village Guide open is presentation-only;
+> native accept/finish require explicit current dialog links, nearby authority,
+> valid stage, and the starter proof item. Web quest-log Accept/Complete are
+> enabled only by the exact matching link in the current NPC dialog, which the
+> server revalidates before mutation; its
+> former no-dialog sentinel path is rejected. Crystal/Web `@quest:accept` and
+> `@quest:finish` dialog links remain valid. Native typed quest mutations use monotonic
+> request ids, exact ACK/NACK correlation, one-shot consumption and generation
+> isolation, so delayed old ACKs cannot release replacement submissions and a
+> retained unsent retry receives a new id after reconnect. Its
+> deterministic loop covers nearby-NPC interaction, movement, Field Wasp
+> combat, quest and ground drops, gold plus object-id item pickup, exact
+> rewards, Bichon map identity, and save/relogin restoration,
+> with focused protocol/bridge regressions green. This advances the playable
+> Windows Candidate path but does not close the remaining live Windows UI,
+> deployed WebSocket, Web production regression, Gemini screenshot comparison,
+> or human visual/feel gates.
+>
+> Fresh Web production-build sync (2026-08-22): the complete current-source
+> pipeline passes with both release WASM backends, 9,650 entity frames, 40,808
+> original assets, 58 map-atlas pages, TypeScript and 13/13 static pages. The
+> strict runtime budget passes at WebGPU 27,119,641 raw / 5,902,117 gzip and
+> WebGL2 28,489,677 raw / 6,342,038 gzip (runtime
+> `bevy-1813be587ef98bc1`, BUILD_ID `OXQE2c59Nd1B4bxoWcPQf`). This closes the
+> local Web build P1, not the signed Windows package, Windows native-client
+> soak/deployment, Android-device, or human visual/audio/feel acceptance gates.
+> A separate strict local pre-seeded 64-client/30-minute Gateway soak passed on
+> 2026-08-22 and closes only WN-CANDIDATE Closing 4b.
+>
+> Windows package-chain audit (2026-08-22): v4 packaging/verifier self-tests are
+> green, but no installed CurrentUser certificate has both a private key and
+> Code Signing EKU. The old `dist` tree lacks attestation, v4 manifest and the
+> detached CMS release signature, so it is retained only as an unsigned internal
+> playtest and is not promoted to Candidate.
+>
+> WN-WEB-PARITY-01 final non-visual sync (2026-08-21): the current integrated
+> source is green across Simulation 1,283/1,283, shared Zone 189/189, Gateway
+> 529/0 plus one environment-gated ignored test, ui-core 30/30, runtime 166/166,
+> native-ui 254/254, Windows 237/237 and Android 36/36. Explicit authoritative
+> monster disposition, live native-monster Gateway rehydration, PVP command
+> routing and fresh recursive delivery IDs close the failures found during the
+> aggregate run. Gateway check, Web typecheck and diff-check pass. This is an
+> automated non-visual milestone, not whole-project Candidate. A focused real
+> Axum `/ws` test now passes authenticated native GameShop purchase, dedicated
+> receipt, Gameshop Mail and exact durable parcel claim. A signed self-contained
+> Windows package, live PostgreSQL/remote Zone, soak, Android device and human
+> visual/audio/feel acceptance remain open.
+
+> Native reconnect server Phase 1 P1 rework sync (2026-08-21): opt-in-only
+> `nativeResumeV1` now read-only validates binding/identity, atomically reserves
+> the retained lease without consuming its credential, prepares route renewal
+> and Zone outbound registration, then commits credential-family consumption
+> and lease transfer under one mutex. RAII rollback makes injected route/Zone
+> failures retryable with the exact token and preserves active/reconnect
+> permits; commit replay and concurrent consumers remain single-winner.
+> Credential construction rejects every value except exact 43-character
+> unpadded base64url decoding to 32 bytes. Production has finite defaults for
+> WS/active/reconnect capacity (2,048/512/512), 64 KiB frame/message caps and a
+> 16 MiB semaphore-enforced 256-message input budget. Uniform unavailable,
+> opt-in isolation, LogOut/Disconnect revocation and MapChanged rotation remain
+> covered. Gates pass native resume 14/14, registry 6/6 and Gateway lib 490/0
+> with one existing PostgreSQL integration ignored. Windows Phase 2, real live
+> reconnect, cross-process state and final Candidate acceptance remain open;
+> source connection nonce is metadata and is not claimed as device binding.
+
+> Latest simulation mail closure (2026-08-21): opaque persisted delivery
+> identities prevent equal-content mail loss and make external refresh
+> idempotent across collision re-keying. Active client-visible IDs remain
+> stable; incoming collisions get the unused ID, and active lock/unlock state
+> remains authoritative. GameShop delivery and ordinary CollectParcel now use
+> durable account-store transactions before live mutation or ACK, including
+> exact gold/items, malformed JSON, full bag, injected failure, reload,
+> duplicate and concurrent-claim regressions. Active save without an
+> authenticated account no longer falls back to `demo`. Legacy same-ID/header
+> ambiguity now safely merges independently claimed payload states to prevent
+> duplicate collection. Gates pass Simulation 1,234/1,234, legacy focused 3/3,
+> mail 28/28, social-economy 3/3, security lifecycle 18/18 and
+> simulation check. Live PostgreSQL and distributed mirror 2PC remain outside
+> this workstation's proven boundary.
+
+> Native Windows social P1 sync (2026-08-21): Group/Guild/Trade typed client
+> closure is automated-verified in
+> `docs/generated/player-qa/native-social/WN-SOCIAL-01-REPORT.md` with
+> ui-core 25, client-bevy 243 and platform-windows 195 tests passing. This
+> does not claim live protocol acceptance; TradeGold/TradeConfirm lack a
+> sender-correlated ACK and native guild notice editing still needs a text
+> editor.
+
+> Latest WN-WEB-PARITY-01 SendMail transaction closure (2026-08-21): the
+> cross-character persistence P1 is implemented. Sender currency and exact
+> unique-ID attachments plus recipient mail are staged together, persisted as
+> one File atomic snapshot or one PostgreSQL version-checked transaction, and
+> only then reflected into the live World and success ACK. Self-mail is covered
+> by the same path. Failure injection and reload tests prove zero mutation for
+> fail-before-persist/fail-persist and one-call/one-mail conservation on
+> success, including a stale online recipient save after delivery. Gates pass
+> Simulation lib 1,220/1,220, mail 21/21, related
+> integrations 21/21 and simulation check. PostgreSQL test code compiled but
+> no live DB was reachable on this workstation; File+PostgreSQL mirror mode is
+> compensating dual-write rather than distributed 2PC and remains documented
+> as a crash-only temporary-mirror-divergence boundary.
+
+> WN-WEB-PARITY-01 security correction status (2026-08-21): the simulation
+> SendMail/CollectParcel/save-identity findings are closed by the latest mail
+> transaction pass. The parser, real-peer, qaControl and result-code findings
+> retain separate evidence. A fresh independent review is still required; the
+> older pre-repair counts are not a security sign-off.
+
+> Latest WN-WEB-PARITY-01 truth boundary: 2026-08-21 removes generic
+> `stage5Command` from normal Web React sources and replaces supported Mail,
+> Group-leave and GameShop actions with dedicated packets; actions lacking a
+> real target, item selection, input or authority context remain visibly
+> unavailable instead of sending fixtures. The server now provides atomic
+> GameShop purchase/mail semantics and fail-closed player-command safety.
+> Independent gates pass Simulation 1,206/1,206, Gateway 461 passed / 1 ignored,
+> ordinary loop 1/1, Web typecheck, 68 Stage5 adapter groups and the normal-player
+> source guard. This does not establish Windows-native 100% Candidate: current
+> native P1s are GameShop client closure, reconnect restoration, social/trade,
+> SendMail, AbandonQuest and learned-skill casting. Older 100% notes retain only
+> their named Web/package scope.
+
+> Latest WN-WEB-PARITY-01 non-visual sync: 2026-08-21 closes the World Map
+> configuration/atomicity subgate. `[Game] TeleportToNPCCost` is loaded from
+> runtime-discovered Crystal `Setup.ini` and shared by client setup packets and
+> Zone charging. Invalid configuration disables the feature. Gateway and Zone
+> tests cover checkpoint rollback before dispatch, AOI/occupancy restoration,
+> exact replay rejection, and stale movement-intent clearing. Simulation
+> 1,194/1,194, Gateway 456 passed / 1 ignored, Big Map 7/7 plus 11 internal, and
+> Web typecheck are green. Real teleport content remains disabled; no visual,
+> audible-feel, device, or human acceptance is claimed.
+
+> Latest R3 non-visual sync: 2026-08-21 adds a real native Bevy/WAV backend for
+> Options music/sound settings, packages validated legal fallback WAVs, replaces
+> compile-time World Map source assumptions with runtime authoritative
+> `WorldMap.ini` discovery, and implements the server-owned shared-Zone
+> `TeleportToNpc` transaction. Client input supplies only the NPC object id;
+> destination, exact 3,000-gold fee, eligibility, collision, occupancy, AOI and
+> persistence remain authoritative. Current Crystal data still says
+> `Enabled=False` and contains zero `CanTeleportTo` NPCs, so the live path stays
+> disabled while an explicit enabled fixture proves the legal state machine.
+> Automated non-visual gates are recorded in
+> `docs/generated/player-qa/native-ui-controls/R3-AUDIO-WORLDMAP-ZONE-REPORT.md`;
+> no screenshot, human audible, Android device, or visual acceptance is claimed.
+
+> Latest non-visual UI/backend sync: 2026-08-21 closes WN-UI-CORE-02's
+> Options-consumer, Chat Settings and BM-BE-01 backend slices. Options now
+> applies the Bevy window mode and atomically persists a non-secret allow-list;
+> at R2 time audio remained honestly marked `audible_backend=false` (superseded
+> by R3 above). Chat Settings uses
+> shared staged `ui-core` state as the only authority and applies/persists via
+> bounded typed effects. `RequestMapInfo` now emits Crystal
+> `WorldMapSetup/NewMapInfo`, `SearchMap` is bounded/deterministic, and Gateway
+> exposes strict command mappings. Current authoritative `WorldMap.ini` is
+> disabled with zero eligible teleport NPCs, so `TeleportToNpc` remains a
+> tested no-mutation no-op; the R2 slice did not fabricate shared-Zone teleport
+> (the guarded R3 path above now exists). Gates:
+> ui-core 16, native-ui 178, Windows 164, Android host 7, Simulation 1,186 plus
+> Big Map 7, Gateway 453 passed/1 ignored, Web typecheck. Visual/computer-control
+> work is paused by user direction; native Big Map rendering, lighting,
+> screenshots and human acceptance remain open. See
+> `docs/generated/player-qa/native-ui-controls/R2-INTEGRATION-REPORT.md`.
+
+> Latest native UI-core integration sync: 2026-08-21 delivers real native
+> ChangePassword handling, mandatory exactly-once character deletion,
+> Crystal-style local Safe Key assets/behavior, exhaustive shared UI reducer
+> paths, strict Mail/Shop/Storage ingestion and an Android host-buildable
+> shared-action foundation. Gates: ui-core 12/12, native-ui 167/167, runtime
+> 146/146, Windows 164/164, Android host 7/7 plus all-target check, and Web
+> typecheck. Keep WN-UI-FUNC-01 open: Options runtime effect consumers, the
+> data-driven Big Map, Chat Settings, Android SDK/device evidence and live
+> mouse/human parity evidence remain ordered blockers. See
+> `docs/generated/player-qa/native-ui-controls/R1-INTEGRATION-REPORT.md`.
+
+> Latest Windows-native alternate-class/combat sync: 2026-08-19 extends V6
+> with Web-equivalent Archer alternate body/hair/weapon libraries and Assassin
+> alternate body/hair plus directional dual weapons. The packet adapter now
+> uses `ObjectStruck` for pose and the separate authoritative
+> `DamageIndicator` for bounded animated hit/miss/crit/heal floaters. Native
+> target ranking prevents stale `selectedObjectId` state from defeating nearer
+> live F-key targets. A live Deer moved `10/25 -> 9/25 -> 8/25`; renderer-owned
+> evidence visibly captures red damage `1` with SHA-256
+> `0E24F11B963382F02C82F0DAEEE745F51794A01460175E92523AABE7DCBD49AA`.
+> Windows 104/104, runtime 133/133, Simulation 1183/1183, exact Release build
+> SHA-256 `B6A7078173865DF3415B089DE4119EAA438886EF518AFD9DEC69054B445773D9`
+> and Web typecheck are green. V6 remains open: starter exports have no usable
+> shadow/mask metadata, and spell/projectile effects, lighting, exact text,
+> same-scene Gemini review and final human acceptance are still ordered gates.
+
+> Latest Windows-native entity-composition sync: 2026-08-19 advances V6 from a
+> generic action clock to 697 Crystal per-library frame-set catalogs using exact
+> source range, cadence, skip and reverse metadata. Native actors now compose
+> body, hair, directional front/rear weapon and mount layers; body-library or
+> mount changes replace the animation incarnation. Native labels, dead-state
+> lines and the self HP bar use the authoritative entity payload and track live
+> movement (`288,615 -> 287,613`). Evidence SHA-256 is
+> `343B4B05A9E67EF7B687F0DFA9B5D8D2F34E222A7AD95BC03AD6D1E4569E8DC4`.
+> Windows 98/98, runtime 133/133, exact Release build and Web typecheck are
+> green. V6 is still open for alternate class libraries, shadows/effect masks,
+> combat effects, high-priority interruptions, exact outlined text/overlap,
+> lighting and final same-scene visual/human acceptance.
+
+> Latest Windows-native entity-animation sync: 2026-08-19 adds a persistent
+> main-thread Crystal action clock and monotonic packet hints for walk/run/
+> attack/range/magic/struck/die/revive. Entity atlas rects now advance without a
+> new Gateway snapshot, duplicate hints preserve phase, and a real 254 ms F12
+> pair changes 5,087 world-only pixels. TownRevive and subsequent movement remain
+> authoritative at `18/18 @ 288,616 -> 288,615`. Windows 90/90, runtime 133/133,
+> Release and Web typecheck are green. This is the first V6 subgate, not V6
+> completion: library-specific frameSet metadata, composite actor layers,
+> overlays, interruption policy and final same-scene evidence remain ordered.
+
+> Latest Windows-native world-render sync: 2026-08-19 fixes multi-page entity
+> atlas routing/source offsets, packet-first map-center synchronization, partial
+> viewport atlas-layout invalidation, and self HP/death packet overlays. Visible
+> proof covers black-hole-free movement, persisted transform recovery, an honest
+> `0/18` dead HUD, real TownRevive to `288,616`, and immediate field-damage HUD
+> updates. Windows 83/83, shared runtime 133/133, Release, Web typecheck and
+> package-script syntax are green. Full offline asset staging also passes with
+> 8,325 files / 269.91 MiB and all required sentinels. This advances WN-VIS-006
+> but does not close it: exact `257,594` evidence, full actor action/composite
+> layers, labels,
+> effects/lighting, DPI and packaged-EXE launch, final HUD >=92 and human acceptance
+> remain ordered gates.
+> Clean-checkout generation and repository-independent EXE launch are explicit
+> release blockers; the passing local staging run alone is not release proof.
+
+> Latest Windows-native HUD sync: 2026-08-19 replaces the generic in-game
+> panels with a native-only Crystal MainDialog/ChatDialog/belt/minimap composition.
+> The stable 1024x768 HUD capture uses live Gateway state and its mechanically
+> matched HUD evidence pair is Accepted 88/100 by Antigravity High with
+> `sameScene=true` and no P0/P1, clearing the first-Candidate >=85 gate. Native
+> UI tests pass 90/90, Windows host tests 80/80, Release builds, and Web typecheck
+> remains green. This does not close Windows parity: authoritative EXP/weight
+> presentation, final HUD >=92, same-coordinate world/map/entity/effect evidence,
+> DPI/package verification and final human acceptance remain ordered work.
+
+> Latest Windows-native visual implementation sync: 2026-08-19 closes
+> WN-VIS-003/004/005 and lands the WN-VIS-002 map route described by
+> `docs/NATIVE-WINDOWS-VISUAL-PARITY-PLAN.md`.
+> The native map path now supports the Web-equivalent atlas plus keyed/additive
+> standalone route; the typed Crystal UI layer owns source metrics and a 1024x768
+> stage; and the exact login migration is accepted by structured visual review
+> at 100/100 with `sameScene=true` and no visible issues, up from 46/100. Exact
+> four-slot character select is now independently Accepted 100/100, up from
+> 20/100; occupied-roster evidence covers the 16-frame class/gender preview and
+> a real native Start button reaches authoritative Bichon. The implementation
+> preserves the Gateway/Simulation state machine and changes no Web UI code.
+> Regression gates pass at Windows 80/80, shared Bevy 22/22, native-ui 77/77,
+> Windows Release, Web typecheck, local shared-asset probes, and packaged ChrSel
+> 237/237. This is not a full native-parity close: in-game remains at 12/100,
+> 2,494 native map source references are unavailable, and map animation, exact
+> HUD/entity layers/effects, DPI and final human acceptance remain ordered work.
+
+> Latest Windows-native playable-slice sync: 2026-08-19 adds an actual
+> Bevy/Winit/WGPU desktop client on main instead of treating cross-platform
+> shared code as a complete native frontend. The EXE now exposes visible login,
+> account and character flows, enters Bichon only after authoritative bootstrap,
+> and renders native HUD/NPC/quest/target/inventory state. A fresh-account
+> Gateway smoke completed q1 and q2 in one run with normal movement, 20
+> server-confirmed Scarecrow hits, Crystal's direct-Q GingerTea item delivery,
+> formal TownRevive, turn-in rewards and logout/login persistence. Six 1024x768
+> native evidence frames and an input-to-packet manual checklist are recorded in
+> `docs/NATIVE-WINDOWS-PLAYER-QA.md`. Windows 73/73, shared Bevy 22/22 and
+> native-ui 56/56, both WASM backends, Web typecheck/runtime policy, Windows
+> Release, health and map API 18/18 gates pass. This is a bounded playable
+> Candidate, not a new 100% native visual-parity claim: entity atlas anchoring/
+> action coverage and exact Crystal HUD/chat/shortcut/minimap presentation remain
+> open frontend work before final human Accepted status.
+
 > Latest 4K UI/i18n regression sync: 2026-08-18 fixes the production-capture
 > mismatch where stage-external Account Security and On-chain Mine controls used
 > browser-viewport coordinates while the Crystal client was centered inside a
@@ -2211,7 +2684,9 @@ Last updated: 2026-05-10
 Backend/server tracked-slice status: 100% Accepted under explicit stable-diff packet acceptance
 Active backend/global round: R309
 Completed backend rounds: R82, R83, R84, R85, R86, R87, R88, R89, R90, R91, R92, R93, R94, R95, R96, R97, R98, R99, R100, R101, R102, R103, R104, R105, R106, R107, R108, R109, R110, R111, R112, R113, R114, R115, R116, R117, R118, R119, R120, R121, R122, R123, R124, R125, R126, R127, R128, R129, R130, R131, R132, R133, R134, R135, R136, R137, R138, R139, R140, R141, R142, R143, R144, R145, R146, R147, R148, R149, R150, R151, R152, R153, R154, R155, R156, R157, R158, R159, R160, R161, R162, R163, R164, R165, R166, R167, R168, R169, R170, R171, R172, R173, R174, R175, R176, R177, R178, R179, R180, R181, R182, R183
-Whole-project automation status: 100.0% Candidate
+Historical Web/Stage5 automation baseline: 100.0% Candidate (2026-05-10).
+This is not Windows-native Candidate acceptance and is superseded for current
+release decisions by the 2026-08-22 header/package/soak/human gates.
 Whole-project real accepted 1:1 estimate: roughly 90.0%
 Backend full-suite status: latest locked Simulation regression passed on 2026-05-10 with `mir2-simulation` 836/836 plus Hero AI integration 5/5; latest locked GameData/Protocol/Simulation/Gateway check passed on 2026-05-10, while broader package-specific full-suite evidence remains tracked in the dated sync entries above.
 
@@ -3978,3 +4453,297 @@ visual/feel acceptance.
   through prebuilt atlases with zero live rebuilds, asset gaps, 404s, or console
   errors. Remaining acceptance boundary is R2 upload/deployment followed by
   human combat observation of move, attack, Die, and persistent Dead frames.
+
+## 2026-08-26 Weapon-skill defence regression closure
+
+- Candidate: packet-path melee skills now retain their Crystal defence type
+  while delayed monster damage is scheduled. `FlamingSword` resolves against
+  AC without the ordinary attack's Agility dodge, while `Thrusting` retains its
+  Agility defence type; unrelated queued combat keeps the surrounding cast
+  scope.
+- The Platinum 1.76 milestone certificate now re-arms one-shot melee skills on
+  every measured attempt. This prevents a real miss or zero-damage armour roll
+  from silently converting later attempts into plain swings.
+- The 15-case headless milestone test passed twice with byte-identical case and
+  assertion payloads. The level-45 Warrior/D504 case measured 23 damage to a
+  real ZumaGuardian, 7 MP spent, and 788 HP remaining; both focused
+  FlamingSword/Slaying and Thrusting packet regressions also pass.
+- This closes a deterministic backend certificate failure, not the remaining
+  same-EXE UI/live-WebSocket, real-DPI, 30-minute native soak, human visual/feel,
+  or official release-certificate gates.
+
+## 2026-08-26 Automated Windows functional vertical-slice gate
+
+- Candidate: full Crystal `NewCharacter -> StartGame` now uses the imported
+  `Envir.StartItems` class/gender filter whenever the Crystal current-map world
+  is active, not the legacy demo equipment seed. Warrior/Wizard/Taoist retain
+  `WoodenSword`; Assassin receives `HoaSword`; Archer receives `WoodenBow`;
+  dress, small HP drug, and candle remain source-filtered. The intentionally
+  bounded Platinum 1.76 profile still allows only Warrior/Wizard/Taoist.
+- Candidate: the real Bichon Wizard branch now has an automated q10-q12 journey:
+  Assistant Jane -> MasterMage_Don on map `0115`, ten Oma plus ten RakingCat
+  player-owned deaths, original 48/180/48 EXP and 60/45/60 gold rewards,
+  `OldLoafer` plus the `FireBall` book without auto-learning, MirGuide_Peter
+  completion, logout/save, and new-session reload.
+- Candidate: `test-windows-vertical-slice-gate.ps1` runs seven fixed,
+  fail-closed controls from a clean revision, records per-control logs and
+  SHA-256 values, and writes `SUMMARY.json`. Candidate CI now has a Windows
+  lane plus an aggregate job that requires both Linux and Windows lanes.
+- Clean revision `004549e9f15ca6fa4b7fad119cb305fcad7d3230`
+  passed all seven controls in 692,198 ms: native host 312/312, functional
+  vertical slice 10/10, ordinary loop 2/2, security lifecycle 18/18, shared
+  Zone 195/195, Gateway reload 1/1, and Web typecheck. Summary SHA-256:
+  `0590F2CEA720E69FA8755C34A0D22580A3F631647351BBF3C6F4DC136631753B`.
+- `automatedFunctionalCoveragePercent=100` is scoped only to those seven fixed
+  controls. The evidence keeps `globalParityPercent=null`, `accepted=false`,
+  and `visualAccepted=false`; it does not close same-EXE human UI/live WSS,
+  real 125%/150% DPI, 30-minute native soak, human visual/feel, semantic
+  inventory/denominator completion, or formal publisher certificate gates.
+
+## 2026-08-26 Taoist q13-q15 and clean-runner closure
+
+- Candidate: the original level-four Taoist branch now has a complete automated
+  q13-q15 journey. It enforces the Taoist-only class gate, follows Assistant
+  Jane -> HighPriest Jude -> MirGuide Peter, credits ten real Oma plus ten real
+  RakingCat player-owned deaths, and proves the original 48/180/48 EXP plus
+  60/45/60 gold rewards.
+- Candidate: q14 retains `OldLoafer` and the `Healing` skill book in the bag;
+  the reward does not invent an automatic learned skill. Quest, inventory,
+  gold, level, experience, position, direction, and empty known-skill state are
+  stable after logout and a new session.
+- Candidate: the Windows runner now captures normal native stderr under
+  PowerShell 5.1 without weakening exit-code failure, and the gate generates
+  the ignored map atlas from repository sources before native host tests. This
+  closes both clean-runner failures observed during rollout: Cargo index output
+  becoming `NativeCommandError`, and 42 asset-root-dependent native tests
+  failing when `generated/map-atlas/manifest.json` was absent.
+- Clean revision `23ac6012adfd4132896f01642b96ab210320065b` passed all
+  eight fixed controls in 640,891 ms: map-atlas preparation, native host
+  312/312, functional vertical slice 11/11, ordinary loop 2/2, security 18/18,
+  shared Zone 195/195, Gateway reload 1/1, and Web typecheck. The summary
+  SHA-256 is
+  `23593A5E4CC564DA9D38729ED4FEE36C6EC93C54D7EEB9629377BDCFACE8EE80`.
+- The new 100% value remains scoped to these eight declared automated controls.
+  Whole-game Crystal parity is still unscored, and same-EXE human UI/live WSS,
+  real DPI, 30-minute native soak, human visual/gameplay-feel, complete semantic
+  inventory/denominator, and formal publisher signing remain open.
+
+## 2026-08-26 Gateway ordinary-packet Bichon journey
+
+- Candidate: a fresh account and Warrior now complete the Bichon starter loop
+  through `GatewaySession` using only ordinary `ClientPacket` traffic:
+  `NewAccount`, `Login`, `NewCharacter`, `StartGame`, `Walk`, `CallNpc`,
+  `AcceptQuest`, `Turn`, `Attack`, tile `PickUp`, `FinishQuest`, and `LogOut`.
+  The test does not use runtime movement, NPC, combat, pickup, or QA/admin
+  helpers.
+- Candidate: quest acceptance and completion fail closed without a nearby
+  server-owned active dialog. The accepted path walks to Village Guide, kills a
+  real Field Wasp through Gateway/Zone authority, receives the Wasp Stinger
+  quest proof, picks up the monster's visible gold on its tile, consumes the
+  proof, and receives exactly 300 gold, two `RareCopperOre`, and `CopperRing`.
+  Quest, inventory, equipment, gold, and authoritative transform survive logout
+  and a newly constructed Gateway session.
+- Clean revision `f676a2a81f9fae949d6640df747dedf493d913e9` passed all eight
+  fixed controls from `2026-08-26T07:32:31.5299048Z` through
+  `2026-08-26T07:43:42.0626754Z`: map-atlas preparation, native 312/312,
+  functional journey 11/11, ordinary loop 2/2, security 18/18, shared Zone
+  195/195, expanded Gateway persistence 2/2, and Web typecheck. The summary
+  SHA-256 is
+  `DE942CEB2D105AD039C3758FF00C7160880BC213BAA4FFC99A6AA826B118C0B6`.
+- This is 100% only for the eight declared automated controls. It does not
+  define a whole-game Crystal percentage or close the incomplete semantic
+  inventory, same-EXE UI/live-WSS, real-DPI, 30-minute native-soak, human
+  visual/gameplay-feel, or formal publisher-signing gates.
+
+## 2026-08-26 Assassin q16-q18 source journey
+
+- Candidate: the original level-four Assassin instructor branch is now a
+  complete automated q16-q18 journey. A same-level non-Assassin cannot see q16;
+  the Assassin follows Assistant Jane -> HighAssassin Cloud -> MirGuide Peter
+  on map `0`, with the original prerequisite chain enforced.
+- Candidate: q17 credits ten real Oma plus ten real RakingCat player-owned
+  deaths. The journey proves the exact 48/180/48 EXP and 60/45/60 gold reward
+  sequence, retains `OldLoafer` and the `FatalSword` skill book in inventory,
+  does not invent an automatic learned skill, and preserves class, quests,
+  rewards, equipment, gold, experience, transform, and known-skill state after
+  logout and a newly constructed session.
+- Clean revision `82441f7b1257486d6f2b51206f5cffa4ef20f9b8` passed all eight
+  fixed controls from `2026-08-26T08:04:06.0201767Z` through
+  `2026-08-26T08:17:03.3518161Z`: map-atlas preparation, native 312/312,
+  functional journey 12/12 in 670.046 s, ordinary loop 2/2, security 18/18,
+  shared Zone 195/195, Gateway persistence 2/2, and Web typecheck. The summary
+  SHA-256 is
+  `D1A9ACE4920A834541B5798BBE53F38DEE1D37DD261226DD91394C82AA8BC105`.
+- The result is still 100% only for the eight declared automated controls.
+  Whole-game Crystal parity remains unscored until the semantic inventory and
+  denominator are complete; same-EXE UI/live-WSS, real-DPI, 30-minute native
+  soak, human visual/gameplay-feel, and formal publisher signing remain open.
+
+## 2026-08-26 Archer q19-q21 source journey
+
+- Candidate: the original level-four Archer instructor branch is now a complete
+  automated q19-q21 journey. A same-level non-Archer cannot see q19; the Archer
+  follows Assistant Jane -> Captain Jerald -> MirGuide Peter on map `0`, with
+  the original class mask and prerequisite chain enforced.
+- Candidate: q20 credits ten real Oma plus ten real RakingCat player-owned
+  deaths. The journey proves the exact 48/180/48 EXP and 60/45/60 gold reward
+  sequence, retains `OldLoafer` and the `Focus` skill book, does not invent an
+  automatic learned skill, and preserves class, quests, rewards, equipment,
+  gold, experience, transform, and known-skill state after logout and reload.
+- Clean revision `d01910a1694d45e85dc54eafab6e61c43a063f5f` passed all eight
+  fixed controls from `2026-08-26T08:36:39.4707209Z` through
+  `2026-08-26T08:51:19.8844889Z`: map-atlas preparation, native 312/312,
+  functional journey 13/13 in 773.360 s, ordinary loop 2/2, security 18/18,
+  shared Zone 195/195, Gateway persistence 2/2, and Web typecheck. The summary
+  SHA-256 is
+  `BE47F67645A9DF165635C173CF2F04BB85895B5DC6666F8F8DE3E963BC721197`.
+- The eight declared automated controls remain 100%, but this does not create a
+  whole-game denominator. Semantic inventory completion, same-EXE UI/live-WSS,
+  real-DPI, 30-minute native soak, human visual/gameplay-feel, and formal
+  publisher signing remain open.
+
+## 2026-08-27 Gateway original q1-q4 verifiable journey
+
+- Candidate: a fresh Warrior now completes original Bichon quests 1 through 4
+  through `GatewaySession` using ordinary client packets and the bundled `0.map`
+  collision planner. Q1 transfers and consumes five `CannibalLeaves`; q2 earns
+  `GingerTea` from real player-owned Scarecrow deaths; q3 exposes the original
+  three-item choice and selects/equips `SharpDagger`; q4 reaches the western Deer
+  field, performs adjacent neutral-Deer melee, completes the multi-pass
+  `ObjectHarvest`/`ObjectHarvested` lifecycle, and obtains five real 1/2-roll
+  `DeerMeat` quest items. Exact EXP, gold, potion, jewellery, weapon, quest-item
+  consumption, logout, and fresh-session reload assertions remain strict.
+- Candidate: the shared Gateway action index now treats live Zone-native state
+  and a fresh live-to-dead transition as a new monster incarnation. It clears a
+  stale prior-corpse harvest marker without allowing a duplicate late death
+  packet to reopen an already harvested corpse. Dedicated unit tests cover both
+  invariants; the end-to-end q1-q4 journey retains its hard corpse and quest
+  assertions instead of skipping an unavailable body.
+- Clean implementation revision `e1290bea3de1bdcd1663ee0f823c849c937eff3d`
+  passed all eight controls from `2026-08-26T21:16:58.2471471Z` through
+  `2026-08-26T21:45:46.6861359Z`: map-atlas preparation, native 312/312,
+  functional journey 13/13, ordinary loop 2/2, security 18/18, shared Zone
+  196/196, Gateway persistence 5/5, and Web typecheck. `SUMMARY.json` SHA-256 is
+  `8C942979F9D59178C33BC72D5BAAD0F3986348B76F331EAF6B0C0DF003714849`.
+- The Gateway control records `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10`; this only
+  shortens test movement waits and does not alter combat, random drops,
+  harvesting, rewards, persistence, or establish a native-soak timing claim.
+  Candidate-03's packaged EXE remains unchanged; these are follow-on source and
+  nonvisual gate results.
+- `automatedFunctionalCoveragePercent=100` applies only to the eight declared
+  controls. The evidence retains `globalParityPercent=null`, `accepted=false`,
+  and `visualAccepted=false`; same-EXE UI/live WSS, real 125%/150% DPI, a real
+  30-minute native soak, human original-client visual/gameplay-feel acceptance,
+  the complete semantic denominator, and formal publisher signing remain open.
+
+## 2026-08-27 Web runtime handoff reproducibility
+
+- Candidate: the tracked Web runtime manifest is refreshed from the current
+  branch source to `bevy-5046abca14947f40`. Two identical locked source builds
+  on the same Windows evidence host produced the same manifest SHA-256
+  `4EC8644042F6926D7D724A7E7E500BA7DAFA1476B49780DF7EFAC7AEEC4806C1` and the
+  same four JS/WASM hashes; that result is not promoted to cross-machine byte
+  reproducibility.
+- Candidate: Developer Handoff now attempts the SHA-verified immutable prebuilt
+  package first, then uses the runtime-pinned Rust `1.95.0`, wasm32 target, and
+  wasm-bindgen `0.2.118` source fallback when that object is unavailable. The
+  successful prebuilt path retains the exact tracked four-file content lock. A
+  source fallback instead fails unless its generated manifest matches its own
+  JS/WASM files, both WASM modules validate, both backend budgets pass, and the
+  complete Player Web build succeeds; it then restores the tracked manifest.
+- Candidate: Developer Environment still source-builds the runtime on Windows,
+  Linux, Apple Silicon macOS, and Intel macOS. Every host must pass the same
+  generated-manifest/file integrity, valid-WASM, and dual-backend budget checks,
+  then restore only its generated manifest before the final clean-checkout
+  assertion.
+- Candidate: the first exact-head fallback run exposed a Windows rustup race
+  before the source build: wasm-bindgen installation used pinned Cargo but its
+  child rustc still resolved through the runner's default `stable` proxy.
+  Handoff now pins both `RUSTUP_TOOLCHAIN` and `RUSTC` in that same installation
+  step. The developer image also carries the exact runtime toolchain and
+  wasm-bindgen lock, and both `dev.sh` and `dev.ps1` fall back from a missing
+  immutable object to a current-source build. Fault-injected Bash and Windows
+  wrapper contracts pass; the next exact-head real Linux image/Compose smoke is
+  still required before this PR is merge-ready.
+- Candidate: exact-head Developer Environment run `33023784689` passed source
+  compilation on Windows, Linux, Apple Silicon macOS, and Intel macOS, but the
+  old Windows zero-diff assertion exposed another host-local runtime id:
+  `bevy-efe7c0554bdf9a45` instead of tracked `bevy-5046abca14947f40`; only the
+  WASM hashes differed. Inspection confirms the release WASM contains absolute
+  Cargo-registry source paths, so same-host repeatability cannot establish
+  cross-account byte identity. The corrected gate keeps the immutable prebuilt
+  content lock strict while validating source fallbacks by their active bundle,
+  not by a known-invalid cross-machine byte comparison.
+- Candidate: exact-head Handoff run `33023777224` independently rebuilt the
+  runtime as the same CI-host `bevy-efe7c0554bdf9a45` and completed the full
+  Player Web build; it failed only at the superseded tracked-manifest byte
+  comparison. This confirms a stable host-local result rather than a transient
+  compiler failure and is the direct regression case for the corrected gate.
+- Current dual-backend budget passes at WebGPU 27,468,107 raw / 5,954,427 gzip
+  and WebGL2 28,836,375 raw / 6,399,104 gzip. The complete Player Web production
+  build also passes 9,650 entity frames, 40,763 original assets, the 57-page map
+  atlas budget, TypeScript, and 13/13 static pages; runtime policy passes 5/5
+  and downloader tests pass 4/4.
+- No production R2 object, Worker, or Vercel deployment was changed. The local
+  source fallback closes a clean-checkout CI reproducibility gap only; deployed
+  runtime publication, same-EXE UI/live WSS, real DPI/soak, human acceptance,
+  and formal signing remain open, and the global denominator remains undefined.
+
+## 2026-08-27 Shared-Zone monster-authority recovery
+
+- Candidate source revision `fb7cd29e8a0afdd09cd7f3f3592ed5fa1c6c5dff`
+  removes a second monster/hazard authority from the shared Gateway world tick.
+  The failed hosted run had observed 121 aggregate `ObjectDied` packets but no
+  confirmed player-owned q2 kill because the personal `SimulationSession` tick
+  was independently moving, damaging, and killing objects already owned by the
+  shared `ZoneRuntime`. Shared sessions now advance personal compatibility
+  state only; the Zone remains authoritative for public movement, combat,
+  death, drops, experience, and hazards.
+- Pet maintenance no longer performs private ECS ground-drop pickup in shared
+  sessions, and private movement retries are not replayed. The existing
+  personal spawn table still supplies the Crystal respawn schedule while the
+  Zone owns each public incarnation boundary. Migrating that timer to a
+  Zone-native wall-clock/checkpointed respawn scheduler remains an explicit
+  whole-game architecture gap, not a closed strict-parity item.
+- The q4 Deer search grid is now spaced at 16 tiles, matching the retained AOI
+  and walk-stop bounds; its geometry regression proves every safe western Deer
+  slot is observable. Final-source validation passed Gateway unit 653 passed,
+  0 failed, 1 ignored; focused authority 1/1; Deer geometry 1/1; and the
+  ordinary-packet q1-q4 journey 1/1 in 455.10 s. Q2 completed after three confirmed
+  player-owned kills and q4 after seven confirmed player-owned kills. Windows
+  vertical-slice self-test remains 8/8.
+- The only QA timing override was
+  `MIR2_QA_NATURAL_MOVEMENT_DELAY_MS=10`; no damage, combat, drop, harvest, or
+  reward multiplier was enabled. `automatedFunctionalCoveragePercent=100`
+  remains scoped to the declared controls; `globalParityPercent=null`,
+  `accepted=false`, and `visualAccepted=false` remain unchanged.
+- The previously attested Candidate EXE was built from older source
+  `4c7e60baa5d85e63858a6fd1717af01c5f893f3d` and does not contain this fix. A
+  new exact-head attested build/package is required before promotion. Same-EXE
+  UI/live WSS, real 125%/150% DPI, native 30-minute soak, human
+  original-client visual/gameplay-feel acceptance, the complete semantic
+  denominator, and formal publisher signing remain open.
+
+## 2026-08-27 Exact-head Windows Candidate-04 package
+
+- Clean revision `4074445ccac7c73adcf34c2e6fc775210d6c8a50` was rebuilt as
+  `WN-CANDIDATE-04-20260827`. The attested EXE is 66,665,472 bytes with
+  SHA-256 `60A3C78D401385E6294FB129FABA50BA9E0EE0253F1C1A572FF0B9F2B70C6CB9`;
+  build-attestation SHA-256 is
+  `25643FE5883152FBB7BE7EC6AE68340B5810FF9712A43DB6F579885047429765`.
+- The repaired PowerShell 5.1 path executed `npm.cmd` successfully while
+  regenerating the native keyed map. The final package contains 10,258 files
+  and 325,281,417 bytes. Package-manifest SHA-256 is
+  `043F565024955ED4570D898FB7CE6C20CBEBE02D0993895E80A1E43CBB8ED2E9`;
+  its 10,254-entry aggregate is
+  `3DCEADF75D9EE64607B5322525886C0EF0946F170A40CAB8C105E6F17AC1A325`.
+- Both the packaging preflight and an independent final-directory verification
+  passed with `sourceRepoCheck=checked`, `nonvisual=true`,
+  `launchRequested=false`, valid PE structure, and a valid detached CMS release
+  statement. Verification evidence SHA-256 is
+  `70B8B0753E906F8E205083EF1FE3C660B367C7C3F9E9042E815B92690A4A34A3`.
+- The signer is the documented internal self-signed certificate, not a formal
+  publisher Authenticode certificate; the EXE was not launched. Candidate-04
+  supersedes the older EXE only for exact-head nonvisual internal evidence and
+  leaves every live, UI, DPI, soak, human, semantic-denominator, and formal
+  signing gate open. Its acceptance and visual truth fields remain false.

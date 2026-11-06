@@ -86,7 +86,26 @@ jobs:
         run: npm run prepare:sidecars
 
       - run: cargo +1.89.0 test --manifest-path src-tauri/Cargo.toml
-      - run: npm run tauri build -- --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: Build deb bundle
+        if: runner.os == 'Linux'
+        run: npm run tauri build -- --target ${{ matrix.target }} --bundles deb
+      - name: Build AppImage bundle with bounded retries
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if npm run tauri build -- --target ${{ matrix.target }} --bundles appimage; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "AppImage build failed, retrying (${attempt}/3)..."
+          done
+      - name: Build bundle on non-Linux
+        if: runner.os != 'Linux'
+        run: npm run tauri build -- --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
 
       - name: Upload unsigned CI installers
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

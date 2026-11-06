@@ -11,6 +11,10 @@ apps/admin-web/.next
 apps/web
 apps/admin-web
 apps/game-client
+!apps/game-client/
+apps/game-client/**
+!apps/game-client/ui-core/
+!apps/game-client/ui-core/**
 onchain
 *.log
 .DS_Store

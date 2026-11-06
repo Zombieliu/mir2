@@ -67,6 +67,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "SELECT to_regclass('public.accounts') IS NOT NULL
                     AND to_regclass('public.characters') IS NOT NULL
                     AND to_regclass('public.game_economy_balances') IS NOT NULL
+                    AND to_regclass('public.game_economy_trade_projections') IS NOT NULL
+                    AND to_regclass('public.game_economy_ground_drop_projections') IS NOT NULL
                     AND to_regclass('public.zone_owner_leases') IS NOT NULL",
             &[],
         )?

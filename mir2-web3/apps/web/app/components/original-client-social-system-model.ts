@@ -476,50 +476,19 @@ export function clientCommandForSocialAction(
   action: string,
   rowName: string,
 ): Record<string, unknown> | null {
-  // Prefer real client packets for supported production flows. Returning null
-  // means the caller must not send an invented or partially specified packet.
+  // This system-menu surface intentionally exposes only packets that are fully
+  // described by the selected live state. Returning null disables the action:
+  // the normal player UI must never fill missing values through a generic
+  // Stage5 command, placeholder name, or placeholder auction id.
   const normalized = action.toLowerCase();
   if (panel === "friend" && normalized === "refresh") {
     return { type: "refreshFriends" };
   }
-  if (panel === "friend" && normalized === "add" && rowName !== "No friends") {
-    return { type: "addFriend", name: rowName, blocked: false };
-  }
-  if (panel === "friend" && normalized === "block" && rowName !== "No blocked entries") {
-    return { type: "addFriend", name: rowName, blocked: true };
-  }
-  if (panel === "trade" && normalized === "start") {
-    return { type: "tradeRequest" };
-  }
-  if (panel === "trade" && normalized === "offer 1g") {
-    return { type: "tradeGold", amount: 1 };
-  }
-  if (panel === "trade" && normalized === "accept") {
+  if (panel === "trade" && rowName !== "No active trade" && normalized === "accept") {
     return { type: "tradeConfirm", locked: true };
   }
-  if (panel === "trade" && normalized === "cancel") {
+  if (panel === "trade" && rowName !== "No active trade" && normalized === "cancel") {
     return { type: "tradeCancel" };
-  }
-  if (panel === "hero" && normalized === "create") {
-    return { type: "newHero", name: "Aide", gender: "female", class: "taoist" };
-  }
-  if (panel === "hero" && normalized === "behaviour guard") {
-    return { type: "setHeroBehaviour", behaviour: 2 };
-  }
-  if (panel === "hero" && normalized === "change") {
-    return { type: "changeHero", listIndex: 0 };
-  }
-  if (panel === "itemRental" && normalized === "request") {
-    return { type: "itemRentalRequest" };
-  }
-  if (panel === "itemRental" && normalized === "fee 100") {
-    return { type: "itemRentalFee", amount: 100 };
-  }
-  if (panel === "itemRental" && normalized === "period 7") {
-    return { type: "itemRentalPeriod", days: 7 };
-  }
-  if (panel === "itemRental" && normalized === "cancel") {
-    return { type: "cancelItemRental" };
   }
   if (panel === "itemRental" && normalized === "list") {
     return { type: "getRentedItems" };
@@ -527,17 +496,11 @@ export function clientCommandForSocialAction(
   if (panel === "mentor" && normalized === "allow") {
     return { type: "allowMentor" };
   }
-  if (panel === "mentor" && normalized === "add") {
-    return { type: "addMentor", name: rowName === "No mentor request" ? "Master" : rowName };
-  }
   if (panel === "mentor" && normalized === "cancel") {
     return { type: "cancelMentor" };
   }
   if ((panel === "relationship" || panel === "marriage") && normalized === "allow") {
     return { type: "changeMarriage" };
-  }
-  if ((panel === "relationship" || panel === "marriage") && normalized === "request") {
-    return { type: "marriageRequest" };
   }
   if ((panel === "relationship" || panel === "marriage") && normalized === "divorce") {
     return { type: "divorceRequest" };
@@ -547,58 +510,6 @@ export function clientCommandForSocialAction(
   }
   if (panel === "ranking" && normalized === "refresh") {
     return rankingRequestForSocialTab(tab);
-  }
-  void tab;
-  return null;
-}
-
-export function stage5CommandForSocialAction(
-  panel: SystemMenuSocialPanel,
-  tab: string,
-  action: string,
-  rowName: string,
-): { action: string; args: string[] } | null {
-  // Legacy Stage 5 commands exist for QA-era panels that have no complete wire
-  // packet yet. Production callers must keep these behind their existing gate.
-  const normalized = action.toLowerCase();
-  if (panel === "friend" && normalized === "add" && rowName !== "No friends") {
-    return { action: "social.friend", args: [rowName] };
-  }
-  if (panel === "friend" && normalized === "block" && rowName !== "No blocked entries") {
-    return { action: "social.block", args: [rowName] };
-  }
-  if (panel === "group" && normalized === "create") {
-    return { action: "group.create", args: ["Panel"] };
-  }
-  if (panel === "group" && normalized === "loot") {
-    return { action: "group.loot", args: ["roundRobin"] };
-  }
-  if (panel === "guild" && normalized === "create") {
-    return { action: "guild.create", args: ["PanelGuild"] };
-  }
-  if (panel === "guild" && normalized === "chat") {
-    return { action: "guild.chat", args: ["Guild", "panel"] };
-  }
-  if (panel === "trade" && normalized === "start") {
-    return { action: "trade.start", args: ["Trader"] };
-  }
-  if (panel === "trade" && normalized === "offer 1g") {
-    return { action: "trade.offerGold", args: ["1"] };
-  }
-  if (panel === "trade" && normalized === "accept") {
-    return { action: "trade.accept", args: [] };
-  }
-  if (panel === "trade" && normalized === "cancel") {
-    return { action: "trade.cancel", args: [] };
-  }
-  if (panel === "market" && normalized === "list") {
-    return { action: "auction.list", args: ["panel-listing", "35"] };
-  }
-  if (panel === "market" && normalized === "buy") {
-    return { action: "auction.buy", args: ["1"] };
-  }
-  if (panel === "market" && normalized === "cancel") {
-    return { action: "auction.cancel", args: ["1"] };
   }
   void tab;
   return null;

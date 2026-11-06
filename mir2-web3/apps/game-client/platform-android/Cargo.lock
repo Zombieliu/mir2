@@ -109,6 +109,7 @@ dependencies = [
  "ndk-context",
  "ndk-sys",
  "num_enum",
+ "simd_cesu8",
  "thiserror 2.0.20",
 ]
 
@@ -2915,6 +2916,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "mir2-client-core",
+ "mir2-ui-core",
  "serde",
  "serde_json",
 ]
@@ -2927,7 +2929,20 @@ version = "0.1.0"
 name = "mir2-platform-android"
 version = "0.1.0"
 dependencies = [
+ "bevy",
  "mir2-bevy-runtime",
+ "mir2-client-bevy",
+ "mir2-ui-core",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "mir2-ui-core"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "serde",
 ]
 
 [[package]]

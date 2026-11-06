@@ -1,0 +1,10 @@
+# Local build products; this tool has no vendored binaries.
+**/bin/
+**/obj/
+
+# Self-test or manual smoke outputs must stay local.
+/.test-output/
+/test-output/
+/artifacts/
+*.candidate-test.json
+*.tmp

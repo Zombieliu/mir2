@@ -2187,7 +2187,7 @@ fn runtime_statuses(delivery: &DirectorDelivery) -> Vec<DirectorRuntimeTargetSta
                     error: Some(error.to_string()),
                     runtime: None,
                 })
-                .collect()
+                .collect();
         }
     };
     endpoints

@@ -99,6 +99,7 @@ mod tests {
                 level: 7,
                 name: Some("Hero".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
+                ..default()
             },
         };
         let label = character_panel_label(&model);

@@ -4,11 +4,11 @@ use std::sync::Arc;
 use mir2_protocol::{decode_client_packet, encode_server_packet, ServerPacket};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::{broadcast, mpsc, Semaphore};
 
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
 use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
-use crate::session::catch_gateway_panic;
+use crate::session::{catch_gateway_panic, GatewayTeardownPersistenceOutcome};
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 #[path = "chat_broadcast.rs"]
@@ -17,6 +17,7 @@ pub mod chat_broadcast;
 use chat_broadcast::{recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol};
 
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
+const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
 
 pub async fn run_tcp_gateway(
     addr: &str,
@@ -41,6 +42,23 @@ pub async fn serve_tcp_gateway(
     if config.monster_spawn_source == mir2_simulation::MonsterSpawnSource::CrystalWorld {
         mir2_simulation::set_crystal_full_world_zone_collision(true);
     }
+    let recovery = crate::session::save_recovery::replay_startup(&config).map_err(|error| {
+        crate::session::save_recovery::record_persistence_status(
+            crate::session::save_recovery::PersistenceStatus::Fatal,
+            "tcp-startup",
+            "recovery replay failed",
+        );
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("tcp startup recovery replay failed: {error}"),
+        )
+    })?;
+    if recovery.replayed > 0 || recovery.already_committed > 0 || recovery.quarantined > 0 {
+        eprintln!(
+            "[save-recovery] transport=tcp-startup replayed={} alreadyCommitted={} quarantined={}",
+            recovery.replayed, recovery.already_committed, recovery.quarantined
+        );
+    }
     let addr = listener.local_addr()?;
     let config = Arc::new(config);
     let topology = ZoneTopology::from_env()
@@ -49,17 +67,27 @@ pub async fn serve_tcp_gateway(
         topology.zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
     );
     let gameplay_event_sink = default_gameplay_event_sink_from_env();
+    let persistence_admission = Arc::new(Semaphore::new(tcp_persistence_session_limit_from_env()));
 
     eprintln!("mir2-gateway tcp listening on {addr}");
 
     loop {
         let (stream, peer) = listener.accept().await?;
+        let persistence_permit = match Arc::clone(&persistence_admission).try_acquire_owned() {
+            Ok(permit) => permit,
+            Err(_) => {
+                eprintln!("tcp connection rejected: persistence session capacity reached");
+                drop(stream);
+                continue;
+            }
+        };
         let config = Arc::clone(&config);
         let zone_registry = Arc::clone(&zone_registry);
         let gameplay_event_sink = gameplay_event_sink.clone();
         let chat_hub = chat_hub.clone();
 
         tokio::spawn(async move {
+            let _persistence_permit = persistence_permit;
             if let Err(error) =
                 handle_client(stream, config, zone_registry, gameplay_event_sink, chat_hub).await
             {
@@ -87,12 +115,17 @@ async fn handle_client(
     };
     session.configure_zone_owner_heartbeat(tcp_zone_owner_heartbeat_interval_ms(), 0);
     let result = handle_client_inner(&mut stream, &mut session, peer, &chat_hub).await;
-    let _ = gateway_blocking(|| {
-        catch_gateway_panic("tcp save_active_character", || {
-            session.save_active_character()
-        })
-    });
+    drop(stream);
+    persist_tcp_session_before_teardown(&mut session).await;
     result
+}
+
+fn tcp_persistence_session_limit_from_env() -> usize {
+    std::env::var("MIR2_GATEWAY_MAX_PERSISTENCE_SESSIONS")
+        .ok()
+        .and_then(|value| value.trim().parse::<usize>().ok())
+        .filter(|value| *value > 0)
+        .unwrap_or(DEFAULT_MAX_PERSISTENCE_SESSION_TASKS)
 }
 
 async fn handle_client_inner(
@@ -190,6 +223,13 @@ async fn handle_client_inner(
                     &packet,
                     mir2_protocol::ClientPacket::Disconnect | mir2_protocol::ClientPacket::LogOut
                 );
+                let leave_failure_packet = match &packet {
+                    mir2_protocol::ClientPacket::LogOut => Some(ServerPacket::LogOutFailed),
+                    mir2_protocol::ClientPacket::Disconnect => {
+                        Some(ServerPacket::Disconnect { reason: 1 })
+                    }
+                    _ => None,
+                };
                 if let Some(character_index) = start_game_character_index {
                     let account_id = authenticated_account_id.as_deref().ok_or_else(|| {
                         io::Error::new(
@@ -217,13 +257,21 @@ async fn handle_client_inner(
                     }
                 }
                 let responses = match gateway_blocking(|| {
-                    catch_gateway_panic("tcp handle_packet", || session.handle_packet(packet))
+                    catch_gateway_panic("tcp handle_packet", || session.try_handle_packet(packet))
+                        .and_then(|result| result)
                 }) {
                     Ok(responses) => responses,
                     Err(error) if crate::gate15::health().is_some() => {
                         eprintln!(
                                 "Gate 15 transient Crystal Zone command failure; keeping socket for placement recovery: {error}"
-                            );
+                        );
+                        continue;
+                    }
+                    Err(_error) if leaves_world => {
+                        eprintln!("tcp explicit session leave rejected; retaining active session");
+                        if let Some(packet) = leave_failure_packet.as_ref() {
+                            send_packet(&mut writer, packet).await?;
+                        }
                         continue;
                     }
                     Err(error) => return Err(session_panic_io_error(error)),
@@ -276,6 +324,7 @@ async fn handle_client_inner(
                     catch_gateway_panic("tcp save_active_character", || {
                         session.save_active_character()
                     })
+                    .and_then(|result| result)
                 })
                 .map_err(session_panic_io_error)?;
             }
@@ -284,6 +333,56 @@ async fn handle_client_inner(
                 return Ok(());
             }
         }
+    }
+}
+
+async fn persist_tcp_session_before_teardown(session: &mut GatewaySession) {
+    let mut retry_delay = std::time::Duration::from_millis(100);
+    loop {
+        let persistence = gateway_blocking(|| {
+            catch_gateway_panic("tcp teardown persist immutable checkpoint", || {
+                session.try_persist_teardown_once()
+            })
+        });
+        match persistence {
+            Ok(GatewayTeardownPersistenceOutcome::Saved) => {
+                crate::session::save_recovery::record_persistence_status(
+                    crate::session::save_recovery::PersistenceStatus::Saved,
+                    "tcp-teardown",
+                    "immutable drained checkpoint committed before teardown",
+                );
+                return;
+            }
+            Ok(GatewayTeardownPersistenceOutcome::Journaled { already_durable }) => {
+                crate::session::save_recovery::record_persistence_status(
+                    crate::session::save_recovery::PersistenceStatus::Journaled,
+                    "tcp-teardown",
+                    if already_durable {
+                        "immutable drained checkpoint was already durable in recovery journal"
+                    } else {
+                        "immutable drained checkpoint durably written to recovery journal"
+                    },
+                );
+                return;
+            }
+            Ok(GatewayTeardownPersistenceOutcome::Retry {
+                prepare_error,
+                save_error,
+                journal_error,
+            }) => eprintln!(
+                "tcp teardown persistence retry: prepare={prepare_error:?} save={save_error:?} journal={journal_error:?}"
+            ),
+            Err(error) => eprintln!("tcp teardown persistence panicked: {error}"),
+        }
+        crate::session::save_recovery::record_persistence_status(
+            crate::session::save_recovery::PersistenceStatus::Fatal,
+            "tcp-teardown",
+            "DB save and recovery journal both failed; retaining Zone presence",
+        );
+        tokio::time::sleep(retry_delay).await;
+        retry_delay = retry_delay
+            .saturating_mul(2)
+            .min(std::time::Duration::from_secs(5));
     }
 }
 
@@ -352,6 +451,10 @@ async fn send_packet(
     stream.write_all(&bytes).await?;
     stream.flush().await
 }
+
+#[cfg(test)]
+#[path = "tcp_save_fail_closed_tests.rs"]
+mod tcp_save_fail_closed_tests;
 
 #[cfg(test)]
 mod tests {

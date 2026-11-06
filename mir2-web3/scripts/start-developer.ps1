@@ -13,7 +13,8 @@ param(
 
     [switch]$OpenBrowser,
     [switch]$SkipGatewayBuild,
-    [switch]$ReuseGateway
+    [switch]$ReuseGateway,
+    [switch]$SelfTest
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,10 +30,19 @@ $WebUrl = "http://127.0.0.1:$WebPort/"
 $GatewayProcess = $null
 $StartedGateway = $false
 $PreviousDevPasskeySecret = $env:MIR2_ALLOW_DEV_PASSKEY_SECRET
+$PreviousPrebuilt = $env:MIR2_USE_PREBUILT_BEVY_RUNTIME
+$PreviousGatewayWs = $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL
+$PreviousAssetBase = $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL
+$PreviousWebAddress = $env:MIR2_GATEWAY_WEB_ADDR
+$PreviousTcpAddress = $env:MIR2_GATEWAY_TCP_ADDR
+$PreviousRecoveryMacKey = $env:MIR2_SAVE_RECOVERY_MAC_KEY
+$PreviousRecoveryDirectory = $env:MIR2_SAVE_RECOVERY_DIR
+$SaveRecoveryHelper = Join-Path $PSScriptRoot "Initialize-LocalSaveRecovery.ps1"
 
 # The local Web token issuer and Gateway verifier must use the same opt-in
 # development secret. Production never runs through this developer wrapper.
-$env:MIR2_ALLOW_DEV_PASSKEY_SECRET = "1"
+try {
+    $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = "1"
 
 function Test-HttpOk {
     param([string]$Url)
@@ -49,6 +59,29 @@ function Test-ListeningPort {
     param([int]$Port)
     return $null -ne (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1)
 }
+
+function Invoke-StartDeveloperStructuralCleanupSelfTest {
+    foreach ($Fault in @("prelaunch-exception", "owned-process-cleanup-shape")) {
+        $Before = $env:MIR2_ALLOW_DEV_PASSKEY_SECRET
+        $OwnedGatewayStarted = $false
+        $OwnedGatewayStopped = $false
+        try {
+            $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = "selftest-mutated"
+            if ($Fault -eq "owned-process-cleanup-shape") { $OwnedGatewayStarted = $true }
+            throw "injected-$Fault"
+        }
+        catch { if ($_.Exception.Message -ne "injected-$Fault") { throw } }
+        finally {
+            $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = $Before
+            if ($OwnedGatewayStarted) { $OwnedGatewayStopped = $true }
+        }
+        if ($env:MIR2_ALLOW_DEV_PASSKEY_SECRET -ne $Before) { throw "$Fault did not restore the parent environment." }
+        if ($OwnedGatewayStarted -and -not $OwnedGatewayStopped) { throw "$Fault did not clean up the owned Gateway." }
+    }
+    Write-Output "start-developer structural cleanup selftest (no real Gateway): PASS"
+}
+
+if ($SelfTest) { Invoke-StartDeveloperStructuralCleanupSelfTest; return }
 
 if (-not (Get-Command npm.cmd -ErrorAction SilentlyContinue)) {
     throw "npm.cmd is missing. Run scripts/bootstrap-developer.ps1 first."
@@ -86,13 +119,16 @@ if (-not $GatewayHealthy) {
     }
 
     New-Item -ItemType Directory -Path $LogRoot -Force | Out-Null
+    if (-not (Test-Path -LiteralPath $SaveRecoveryHelper -PathType Leaf)) { throw "Local save-recovery bootstrap helper is missing: $SaveRecoveryHelper" }
+    . $SaveRecoveryHelper
+    $SaveRecovery = Initialize-Mir2LocalSaveRecovery -ProjectRoot $ProjectRoot
     $GatewayOut = Join-Path $LogRoot "gateway.out.log"
     $GatewayErr = Join-Path $LogRoot "gateway.err.log"
-    $PreviousWebAddress = $env:MIR2_GATEWAY_WEB_ADDR
-    $PreviousTcpAddress = $env:MIR2_GATEWAY_TCP_ADDR
     try {
         $env:MIR2_GATEWAY_WEB_ADDR = "127.0.0.1:$GatewayWebPort"
         $env:MIR2_GATEWAY_TCP_ADDR = "127.0.0.1:$GatewayTcpPort"
+        $env:MIR2_SAVE_RECOVERY_MAC_KEY = $SaveRecovery.MacKey
+        $env:MIR2_SAVE_RECOVERY_DIR = $SaveRecovery.RecoveryDirectory
         $GatewayProcess = Start-Process `
             -FilePath $GatewayExe `
             -WorkingDirectory $ProjectRoot `
@@ -105,6 +141,9 @@ if (-not $GatewayHealthy) {
     finally {
         $env:MIR2_GATEWAY_WEB_ADDR = $PreviousWebAddress
         $env:MIR2_GATEWAY_TCP_ADDR = $PreviousTcpAddress
+        $env:MIR2_SAVE_RECOVERY_MAC_KEY = $PreviousRecoveryMacKey
+        $env:MIR2_SAVE_RECOVERY_DIR = $PreviousRecoveryDirectory
+        $SaveRecovery.MacKey = $null
     }
 
     $Ready = $false
@@ -132,10 +171,6 @@ else {
     Write-Host "[start] explicitly reusing healthy Gateway at $GatewayHealthUrl"
 }
 
-$PreviousPrebuilt = $env:MIR2_USE_PREBUILT_BEVY_RUNTIME
-$PreviousGatewayWs = $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL
-$PreviousAssetBase = $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL
-try {
     $env:MIR2_USE_PREBUILT_BEVY_RUNTIME = "1"
     $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL = "ws://127.0.0.1:$GatewayWebPort/ws"
     if ($AssetBaseUrl) {
@@ -176,10 +211,14 @@ finally {
     $env:NEXT_PUBLIC_MIR2_GATEWAY_WS_URL = $PreviousGatewayWs
     $env:NEXT_PUBLIC_MIR2_ASSET_BASE_URL = $PreviousAssetBase
     $env:MIR2_ALLOW_DEV_PASSKEY_SECRET = $PreviousDevPasskeySecret
+    $env:MIR2_GATEWAY_WEB_ADDR = $PreviousWebAddress
+    $env:MIR2_GATEWAY_TCP_ADDR = $PreviousTcpAddress
+    $env:MIR2_SAVE_RECOVERY_MAC_KEY = $PreviousRecoveryMacKey
+    $env:MIR2_SAVE_RECOVERY_DIR = $PreviousRecoveryDirectory
 
     if ($StartedGateway -and $null -ne $GatewayProcess -and -not $GatewayProcess.HasExited) {
         Stop-Process -Id $GatewayProcess.Id -Force
-        $GatewayProcess.WaitForExit()
+        if (-not $GatewayProcess.WaitForExit(15000)) { throw "Owned Gateway PID $($GatewayProcess.Id) did not exit within 15 seconds after termination." }
         Write-Host "[stop] Gateway PID $($GatewayProcess.Id) stopped."
     }
 }

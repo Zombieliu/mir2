@@ -20,7 +20,8 @@ pub use replay::{
 pub use replication::{ZoneReplicaCheckpoint, ZoneStandbyReplica};
 pub use runtime::ZoneRuntime;
 pub use types::{
-    PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile, ZoneCommand, ZoneJoin,
-    ZoneKey, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
+    GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile,
+    ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward,
+    ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination,
     ZoneOutbound, ZonePlayerCombatStats,
 };

@@ -1,0 +1,13 @@
+[package]
+name = "mir2-ui-core"
+version = "0.1.0"
+edition = "2021"
+description = "Platform-agnostic UI state and action core for Mir2 Windows/Android/Web"
+license = "MIT"
+
+[dependencies]
+bevy = { version = "0.19.0", default-features = false, features = ["bevy_asset", "multi_threaded"] }
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"

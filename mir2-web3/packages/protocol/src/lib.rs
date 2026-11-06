@@ -11,7 +11,7 @@ pub use frame::{decode_frame, encode_frame, PacketFrame};
 pub use ids::{ClientPacketId, ServerPacketId};
 pub use packets::{
     decode_client_packet, decode_server_packet, encode_client_packet, encode_server_packet,
-    ClientPacket, ServerPacket,
+    is_valid_request_id, ClientPacket, ServerPacket, REQUEST_ID_MAX_LEN,
 };
 pub use trace::{
     client_packet_name, packet_payload_hex, server_packet_display_name, server_packet_name,

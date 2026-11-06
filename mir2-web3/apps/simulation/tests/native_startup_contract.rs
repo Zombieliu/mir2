@@ -3,9 +3,20 @@ use std::collections::BTreeSet;
 use mir2_protocol::{ClientPacket, ServerPacket};
 use mir2_simulation::{SimulationConfig, SimulationSession};
 
+fn login_demo(session: &mut SimulationSession) {
+    let packets = session.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
+}
+
 #[test]
 fn native_startup_sends_item_info_before_every_equipped_user_item() {
     let mut session = SimulationSession::new(SimulationConfig::default());
+    login_demo(&mut session);
     let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let user_information_index = packets
         .iter()

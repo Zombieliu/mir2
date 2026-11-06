@@ -164,6 +164,8 @@ export type ExtraWindowsProps = {
       | "onShareQuest"
       | "onAcceptQuest"
       | "onFinishQuest"
+      | "canAcceptQuest"
+      | "canFinishQuest"
       | "playerClass"
     >;
 
@@ -342,6 +344,8 @@ function ExtraWindowsInner({
           onShareQuest={questLog.onShareQuest}
           onAcceptQuest={questLog.onAcceptQuest}
           onFinishQuest={questLog.onFinishQuest}
+          canAcceptQuest={questLog.canAcceptQuest}
+          canFinishQuest={questLog.canFinishQuest}
           onClose={questLog.onClose}
         />
       ) : null}

@@ -665,20 +665,27 @@ pub(super) fn resolve_npc_quest_dialog(
         dialog_required,
     )?;
 
-    match stage_before_action {
-        QuestStage::Available => set_quest_stage(world, quest_id, QuestStage::InProgress),
-        QuestStage::ReadyToTurnIn => complete_quest(world, quest_id),
-        QuestStage::InProgress | QuestStage::Completed => {}
-    }
+    let links = match stage_before_action {
+        QuestStage::Available => vec![NpcDialogLinkState {
+            text: "Accept".to_string(),
+            target: format!("@AcceptQuest:{quest_id}"),
+        }],
+        QuestStage::ReadyToTurnIn => vec![NpcDialogLinkState {
+            text: "Complete".to_string(),
+            target: format!("@FinishQuest:{quest_id}"),
+        }],
+        QuestStage::InProgress | QuestStage::Completed => Vec::new(),
+    };
 
     Some(NpcQuestDialog {
-        stage_before_action,
+        stage: stage_before_action,
         current: dialog_current,
         required: dialog_required,
         title,
         body,
         footer,
         object_chat,
+        links,
     })
 }
 
@@ -1040,6 +1047,40 @@ fn take_crystal_quest_task_items(world: &mut World, template: &CrystalQuestPacke
         .resource_mut::<InventoryResource>()
         .inventory_items
         .retain(|item| item.container != ItemContainer::Quest || !keys.contains(&item.key));
+}
+
+pub(super) fn abandon_quest(world: &mut World, quest_id: i32) -> bool {
+    if quest_stage(world, quest_id) != Some(QuestStage::InProgress) {
+        return false;
+    }
+
+    let legacy_quest_item_key =
+        quest_template_by_id(quest_id).map(|template| template.quest_item.key);
+    let crystal_template = crystal_quest_template_by_id(quest_id);
+    {
+        let mut quests = world.resource_mut::<QuestResource>();
+        let Some(quest) = quests
+            .quests
+            .iter_mut()
+            .find(|quest| quest.quest_id == quest_id)
+        else {
+            return false;
+        };
+        quest.stage = QuestStage::Available;
+        quest.current = 0;
+        quest.task_progress.clear();
+    }
+
+    if let Some(key) = legacy_quest_item_key {
+        world
+            .resource_mut::<InventoryResource>()
+            .inventory_items
+            .retain(|item| item.container != ItemContainer::Quest || item.key != key);
+    }
+    if let Some(template) = crystal_template.as_ref() {
+        take_crystal_quest_task_items(world, template);
+    }
+    true
 }
 
 pub(super) fn can_accept_quest(world: &World, quest_id: i32) -> bool {

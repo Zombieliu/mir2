@@ -425,7 +425,7 @@ fn production_random_seed() -> u64 {
     time ^ u64::from(std::process::id()).rotate_left(23)
 }
 
-fn load_line_messages_from_env() -> io::Result<Vec<String>> {
+pub(crate) fn load_line_messages_from_env() -> io::Result<Vec<String>> {
     if let Some(path) = env::var_os(LINE_MESSAGE_PATH_ENV).filter(|path| !path.is_empty()) {
         return load_line_messages(&PathBuf::from(path)).and_then(require_line_messages);
     }
@@ -463,7 +463,7 @@ fn require_line_messages(messages: Vec<String>) -> io::Result<Vec<String>> {
     }
 }
 
-fn default_line_messages() -> Vec<String> {
+pub(crate) fn default_line_messages() -> Vec<String> {
     DEFAULT_LINE_MESSAGES
         .iter()
         .map(|message| (*message).to_string())

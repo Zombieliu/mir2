@@ -17,6 +17,14 @@ const respawnOutputPath = resolve(
   "generated",
   "crystal_respawn_manifest.json",
 );
+const webRespawnOutputPath = resolve(
+  repoRoot,
+  "apps",
+  "web",
+  "lib",
+  "generated",
+  "crystal_respawn_manifest.json",
+);
 const monsterOutputPath = resolve(
   repoRoot,
   "packages",
@@ -98,6 +106,7 @@ function main() {
   const version = reader.readInt32();
   const customVersion = reader.readInt32();
   const settings = readCrystalServerSettings();
+  const respawnOnly = process.env.MIR2_CRYSTAL_RESPAWN_ONLY === "1";
 
   if (version <= 84) {
     throw new Error(`Unsupported Crystal DB version ${version}. This script expects the current v85+ save layout.`);
@@ -150,6 +159,13 @@ function main() {
         light: map.light,
         map_dark_light: map.map_dark_light,
         weather_particles: map.weather_particles,
+        music: map.music,
+        fire: map.fire,
+        fire_damage: map.fire_damage,
+        lightning: map.lightning,
+        lightning_damage: map.lightning_damage,
+        fire_wall_limit: map.fire_wall_limit,
+        fire_wall_count: map.fire_wall_count,
         no_throw_item: map.no_throw_item,
         no_drop_player: map.no_drop_player,
         no_drop_monster: map.no_drop_monster,
@@ -245,61 +261,65 @@ function main() {
     payload_hex: guildBuffPacket.toString("hex"),
   };
 
+  const respawnManifestJson = `${JSON.stringify(respawnManifest, null, 2)}\n`;
   mkdirSync(dirname(respawnOutputPath), { recursive: true });
-  writeFileSync(
-    respawnOutputPath,
-    `${JSON.stringify(respawnManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    monsterOutputPath,
-    `${JSON.stringify(monsterManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    itemOutputPath,
-    `${JSON.stringify(itemManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    npcInfoOutputPath,
-    `${JSON.stringify(npcInfoManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    questPacketOutputPath,
-    `${JSON.stringify(questPacketManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    recipePacketOutputPath,
-    `${JSON.stringify(recipePacketManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    gameShopPacketOutputPath,
-    `${JSON.stringify(gameShopPacketManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    baseStatsPacketOutputPath,
-    `${JSON.stringify(baseStatsPacketManifest, null, 2)}\n`,
-    "utf8",
-  );
-  writeFileSync(
-    guildBuffPacketOutputPath,
-    `${JSON.stringify(guildBuffPacketManifest, null, 2)}\n`,
-    "utf8",
-  );
+  mkdirSync(dirname(webRespawnOutputPath), { recursive: true });
+  writeFileSync(respawnOutputPath, respawnManifestJson, "utf8");
+  writeFileSync(webRespawnOutputPath, respawnManifestJson, "utf8");
+  if (!respawnOnly) {
+    writeFileSync(
+      monsterOutputPath,
+      `${JSON.stringify(monsterManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      itemOutputPath,
+      `${JSON.stringify(itemManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      npcInfoOutputPath,
+      `${JSON.stringify(npcInfoManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      questPacketOutputPath,
+      `${JSON.stringify(questPacketManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      recipePacketOutputPath,
+      `${JSON.stringify(recipePacketManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      gameShopPacketOutputPath,
+      `${JSON.stringify(gameShopPacketManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      baseStatsPacketOutputPath,
+      `${JSON.stringify(baseStatsPacketManifest, null, 2)}\n`,
+      "utf8",
+    );
+    writeFileSync(
+      guildBuffPacketOutputPath,
+      `${JSON.stringify(guildBuffPacketManifest, null, 2)}\n`,
+      "utf8",
+    );
+  }
   console.log(`Wrote Crystal respawn manifest to ${respawnOutputPath}`);
-  console.log(`Wrote Crystal monster manifest to ${monsterOutputPath}`);
-  console.log(`Wrote Crystal item manifest to ${itemOutputPath}`);
-  console.log(`Wrote Crystal NPC info manifest to ${npcInfoOutputPath}`);
-  console.log(`Wrote Crystal quest packet manifest to ${questPacketOutputPath}`);
-  console.log(`Wrote Crystal recipe packet manifest to ${recipePacketOutputPath}`);
-  console.log(`Wrote Crystal game shop packet manifest to ${gameShopPacketOutputPath}`);
-  console.log(`Wrote Crystal base stats packet manifest to ${baseStatsPacketOutputPath}`);
-  console.log(`Wrote Crystal guild buff packet manifest to ${guildBuffPacketOutputPath}`);
+  console.log(`Wrote Crystal Web respawn manifest to ${webRespawnOutputPath}`);
+  if (!respawnOnly) {
+    console.log(`Wrote Crystal monster manifest to ${monsterOutputPath}`);
+    console.log(`Wrote Crystal item manifest to ${itemOutputPath}`);
+    console.log(`Wrote Crystal NPC info manifest to ${npcInfoOutputPath}`);
+    console.log(`Wrote Crystal quest packet manifest to ${questPacketOutputPath}`);
+    console.log(`Wrote Crystal recipe packet manifest to ${recipePacketOutputPath}`);
+    console.log(`Wrote Crystal game shop packet manifest to ${gameShopPacketOutputPath}`);
+    console.log(`Wrote Crystal base stats packet manifest to ${baseStatsPacketOutputPath}`);
+    console.log(`Wrote Crystal guild buff packet manifest to ${guildBuffPacketOutputPath}`);
+  }
 }
 
 function parseMaps(reader) {
@@ -368,10 +388,10 @@ function parseMaps(reader) {
     const no_drop_monster = reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
-    reader.readBoolean();
-    reader.readInt32();
-    reader.readBoolean();
-    reader.readInt32();
+    const fire = reader.readBoolean();
+    const fire_damage = reader.readInt32();
+    const lightning = reader.readBoolean();
+    const lightning_damage = reader.readInt32();
     const map_dark_light = reader.readUInt8();
 
     const mineZoneCount = reader.readInt32();
@@ -386,7 +406,7 @@ function parseMaps(reader) {
     const no_mount = reader.readBoolean();
     const need_bridle = reader.readBoolean();
     reader.readBoolean();
-    reader.readUInt16();
+    const music = reader.readUInt16();
     reader.readBoolean();
     reader.readBoolean();
     const weather_particles = reader.readUInt16();
@@ -399,8 +419,8 @@ function parseMaps(reader) {
     const no_hero = reader.readBoolean();
     reader.readInt32();
     reader.readBoolean();
-    reader.readBoolean();
-    reader.readInt32();
+    const fire_wall_limit = reader.readBoolean();
+    const fire_wall_count = reader.readInt32();
 
     maps.push({
       map_index,
@@ -411,6 +431,13 @@ function parseMaps(reader) {
       light,
       map_dark_light,
       weather_particles,
+      music,
+      fire,
+      fire_damage,
+      lightning,
+      lightning_damage,
+      fire_wall_limit,
+      fire_wall_count,
       no_throw_item,
       no_drop_player,
       no_drop_monster,

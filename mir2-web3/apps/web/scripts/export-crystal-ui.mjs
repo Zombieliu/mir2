@@ -28,7 +28,6 @@ const RESPAWN_MANIFEST_PATH = path.join(
   "generated",
   "crystal_respawn_manifest.json",
 );
-const DEFAULT_DATA_DIR = "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Data";
 const PNG_DEFLATE_LEVEL = clampInt(process.env.MIR2_CRYSTAL_UI_PNG_DEFLATE_LEVEL ?? "1", 0, 9);
 
 main().catch((error) => {
@@ -54,9 +53,12 @@ async function main() {
     args._[0] ??
     process.env.CRYSTAL_CLIENT_DATA_DIR ??
     dataDirFromClientRoot(process.env.CRYSTAL_CLIENT_ROOT) ??
-    (existsSync(LOCAL_CRYSTAL_CLIENT_ROOT) ? path.join(LOCAL_CRYSTAL_CLIENT_ROOT, "Data") : null) ??
-    manifest.dataDir ??
-    DEFAULT_DATA_DIR;
+    (existsSync(LOCAL_CRYSTAL_CLIENT_ROOT) ? path.join(LOCAL_CRYSTAL_CLIENT_ROOT, "Data") : null);
+  if (!dataDir) {
+    throw new Error(
+      "Crystal client Data directory is required; pass --dataDir, set CRYSTAL_CLIENT_DATA_DIR/CRYSTAL_CLIENT_ROOT, or install downloads/crystal-client-full/Data",
+    );
+  }
 
   await mkdir(publicDir, { recursive: true });
 
@@ -65,7 +67,7 @@ async function main() {
     ? await loadJsonIfPresent(summaryPath)
     : null;
   const summary = {
-    dataDir,
+    sourceKind: "external-crystal-client-data",
     exportedAt: new Date().toISOString(),
     libraries: existingSummary?.libraries ?? {},
   };

@@ -6,6 +6,7 @@ use super::{
     ZoneChatProfile, ZoneCommand, ZoneJoin, ZoneKey, ZoneMonsterDefense, ZoneMonsterSpawn,
     ZonePlayerCombatStats, ZoneRuntime,
 };
+use crate::config::WorldEntityDisposition;
 
 const REPLAY_CHECKPOINT_VERSION: u32 = 1;
 const REPLAY_COMMITMENT_DOMAIN: &[u8] = b"obelisk.mir2.zone-replay.v1\0";
@@ -95,6 +96,8 @@ pub enum ZoneReplayCommand {
         name_colour_argb: i32,
         image: u16,
         ai: u8,
+        #[serde(default)]
+        disposition: Option<WorldEntityDisposition>,
         level: u16,
         max_hp: i32,
         hp: i32,
@@ -205,6 +208,7 @@ impl ZoneReplayCommand {
                 name_colour_argb,
                 image,
                 ai,
+                disposition,
                 level,
                 max_hp,
                 hp,
@@ -224,6 +228,7 @@ impl ZoneReplayCommand {
                     name_colour_argb,
                     image,
                     ai,
+                    disposition,
                     level,
                     max_hp,
                     hp,
@@ -603,6 +608,7 @@ pub fn gate5_demo_scenario(tick_count: usize) -> ZoneReplayScenario {
             name_colour_argb: -1,
             image: 0,
             ai: 0,
+            disposition: Some(WorldEntityDisposition::Hostile),
             level: 20,
             max_hp: 1_000_000,
             hp: 1_000_000,
