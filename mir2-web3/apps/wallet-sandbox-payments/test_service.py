@@ -192,6 +192,90 @@ class PostgresTests(unittest.TestCase):
         with self.db() as db:
             self.assertEqual(db.execute("SELECT raw_json FROM accounts WHERE account_id='ordinary_player'").fetchone()["raw_json"], ordinary)
 
+    def chain_consumer(self, owner, **overrides):
+        from chain_checkout import ChainCheckout
+        runtime = self.restricted_receiver()
+        with self.db() as db:
+            db.execute(Path(__file__).with_name("chain_migration.sql").read_text())
+        return ChainCheckout(runtime, **{
+            "origin": "https://service.example", "wallet_origin": "https://wallet.example", "token": "c" * 64,
+            "registry": "0x" + "2" * 64, "payee": "0x" + "3" * 64, "payers": {owner}, **overrides,
+        })
+
+    def test_chain_credit_requires_exact_receipt_and_replays_once_under_runtime_role(self):
+        from chain_checkout import PACKAGE, SKU, USDC
+        owner = "0x" + "9" * 64
+        chain = self.chain_consumer(owner)
+        nonce = str(uuid.uuid4())
+        def respond(path, body=None):
+            self.assertEqual(path, "/v1/orders")
+            return {"order": {**body, "nonce": nonce, "network": "testnet", "registry": chain.registry,
+                              "receiver": chain.payee, "packageId": PACKAGE, "amountAtomic": "1000000",
+                              "asset": USDC, "credits": 100},
+                    "checkoutUrl": chain.wallet_origin + "/checkout#order=" + nonce + "." + "a" * 43}
+        with patch.object(chain, "request", side_effect=respond):
+            order = chain.prepare(owner, "d" * 64)
+            self.assertEqual(chain.prepare(owner, "d" * 64), order)
+            with self.assertRaises(Rejected):
+                chain.prepare("0x" + "8" * 64, "d" * 64)
+        account = order["characterId"].split(":")[0]
+        receipt = {"merchantOrderId": order["merchantOrderId"], "customerRef": chain.receiver.config.server_id + ":" + order["characterId"],
+                   "network": "testnet", "payer": owner, "receiver": chain.payee, "registry": chain.registry, "packageId": PACKAGE,
+                   "asset": USDC, "sku": SKU, "amountAtomic": "1000000", "credits": 100, "nonce": nonce,
+                   "digest": "x1ydyE8rkH1MnjXtCWj74rdPjCKRboGVAGgmN8cFJjU", "checkpoint": "403434014", "status": "confirmed"}
+        for key, value in [("status", "submitted"), ("nonce", str(uuid.uuid4())), ("asset", "USDC"), ("amountAtomic", "2"),
+                           ("registry", "0x" + "4" * 64), ("receiver", owner), ("network", "mainnet")]:
+            with self.subTest(key=key), self.assertRaises(Rejected):
+                chain.grant({**receipt, key: value})
+        self.assertEqual(self.credits(account)["save_credit"], 0)
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            grants = list(pool.map(chain.grant, [receipt] * 5))
+        self.assertEqual(len(set(grants)), 1)
+        state = self.credits(account)
+        self.assertEqual(state["save_credit"], 100)
+        self.assertEqual(state["projection_credit"], 100)
+        self.assertEqual(state["receipts"], 0) # No Stripe receipt was used.
+        with self.db() as db:
+            self.assertEqual(db.execute("SELECT count(*) AS n FROM dubhe_sandbox_chain_receipts").fetchone()["n"], 1)
+
+    @unittest.skipUnless(os.environ.get("DUBHE_LIVE_WALLET_CONFIG"), "Needs explicit disposable Sui Testnet configuration")
+    def test_actual_sui_testnet_order_and_game_credit_after_lost_ack(self):
+        import subprocess
+        from urllib.parse import parse_qs, urlsplit
+
+        options = os.environ
+        cfg = dict(line.strip().split("=", 1) for line in Path(options["DUBHE_LIVE_WALLET_CONFIG"]).read_text().splitlines())
+        payer = cfg["DUBHE_SUI_TEST_PAYERS"]
+        chain = self.chain_consumer(payer, origin="http://127.0.0.1:" + cfg["DUBHE_SUI_PORT"], wallet_origin=cfg["DUBHE_SUI_WALLET_ORIGIN"],
+                                    token=cfg["DUBHE_SUI_MERCHANT_TOKEN"], registry=cfg["DUBHE_SUI_PAYMENT_REGISTRY"],
+                                    payee=cfg["DUBHE_SUI_MERCHANT_RECEIVER"], local=True)
+        order = chain.prepare(payer, uuid.uuid4().hex + uuid.uuid4().hex)
+        account = order["characterId"].split(":")[0]
+        token = parse_qs(urlsplit(order["checkoutUrl"]).fragment)["order"][0]
+        workdir = options["DUBHE_LIVE_WALLET_WORKSPACE"]
+        payer_key = Path(options["DUBHE_LIVE_WALLET_CONFIG"]).with_name("testnet-key")
+        result = subprocess.run([options["DUBHE_LIVE_NODE"], "--import", "tsx", "scripts/pay-testnet-order.ts", str(payer_key), chain.origin],
+                                cwd=workdir, input=token, text=True, capture_output=True, env={**os.environ, **cfg}, timeout=120, check=False)
+        print(result.stdout, flush=True) # Script emits only public digests and checkpoints.
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = next(item for item in chain.request("/v1/merchant/receipts")["orders"] if item["merchantOrderId"] == order["merchantOrderId"])
+        request = chain.request
+        def lose_ack(path, data=None):
+            if path == "/v1/merchant/ack":
+                raise OSError("lost acknowledgement")
+            return request(path, data)
+        with patch.object(chain, "request", side_effect=lose_ack):
+            self.assertEqual(chain.drain(), {"delivered": 0, "deferred": 1})
+        self.assertEqual(self.credits(account)["save_credit"], 100)
+        self.assertEqual(chain.drain(), {"delivered": 1, "deferred": 0})
+        self.assertEqual(chain.drain(), {"delivered": 0, "deferred": 0})
+        self.assertEqual(self.credits(account)["save_credit"], 100)
+        with self.db() as db:
+            row = db.execute("SELECT balance_after,balance_before,sui_digest FROM dubhe_sandbox_chain_receipts").fetchone()
+            self.assertEqual(row, {"balance_before": 0, "balance_after": 100, "sui_digest": receipt["digest"]})
+        print(json.dumps({"stage": "qa_credit_confirmed", "digest": receipt["digest"], "checkpoint": receipt["checkpoint"],
+                          "credits": 100, "character": order["characterId"], "ack_replay": "no_second_credit"}), flush=True)
+
     def test_restricted_candidate_check_cannot_adopt_unowned_qa_account(self):
         candidate = "dq" + "a" * 14
         original = {"unowned_qa": True, "characters": [], "saves": {}}

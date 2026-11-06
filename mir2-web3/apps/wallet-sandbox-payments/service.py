@@ -194,28 +194,7 @@ class Receiver:
         owner = body["ownerAddress"]
         self.reserve(owner)
         with self.connect() as db:
-            binding = db.execute("SELECT * FROM dubhe_sandbox_wallets WHERE owner_address=%s FOR UPDATE", (owner,)).fetchone()
-            if binding["state"] != "ready":
-                existing = db.execute("SELECT created_at FROM accounts WHERE account_id=%s", (binding["account_id"],)).fetchone()
-                if existing and existing["created_at"] < binding["created_at"]:
-                    raise Rejected("sandbox_account_collision")
-                index = self.provision(self.config, binding, existing is not None)
-                if type(index) is not int or not 0 <= index <= 2147483647:
-                    raise Rejected("sandbox_character_invalid")
-                account = db.execute("SELECT raw_json FROM accounts WHERE account_id=%s FOR UPDATE", (binding["account_id"],)).fetchone()
-                save = db.execute("SELECT credit,snapshot_json FROM character_saves WHERE account_id=%s AND character_index=%s FOR UPDATE", (binding["account_id"], index)).fetchone()
-                raw = account["raw_json"] if account else {}
-                characters = raw.get("characters", [])
-                if not save or len(characters) != 1 or characters[0].get("name") != binding["character_name"] or characters[0].get("index") != index or save["credit"] != 0 or save["snapshot_json"].get("credit") != 0 or raw.get("saves", {}).get(str(index), {}).get("credit") != 0:
-                    raise Rejected("sandbox_new_recipient_invalid")
-                # This recipient has never entered the world. Lock it before
-                # accepting payments, so gameplay and payment writers cannot race.
-                if self.active_lease(db, binding["account_id"]):
-                    raise Rejected("sandbox_recipient_online")
-                db.execute("UPDATE accounts SET is_banned=true,ban_reason=%s,ban_until_ms=NULL,banned_at_ms=%s,store_version=store_version+1,updated_at=now(),raw_json=jsonb_set(jsonb_set(jsonb_set(jsonb_set(raw_json,'{is_banned}','true'::jsonb),'{ban_reason}',to_jsonb(%s::text)),'{ban_until_ms}','null'::jsonb),'{banned_at_ms}',to_jsonb(%s::bigint)) WHERE account_id=%s", (LOCK_MARKER, int(time.time() * 1000), LOCK_MARKER, int(time.time() * 1000), binding["account_id"]))
-                db.execute("UPDATE dubhe_sandbox_wallets SET state='ready',character_index=%s,ready_at=now() WHERE owner_address=%s", (index, owner))
-                binding.update(state="ready", character_index=index)
-            self.locked_recipient(db, binding)
+            binding = self.ready_binding(db, owner)
             previous = db.execute("SELECT * FROM dubhe_sandbox_payment_orders WHERE request_id=%s", (body["requestId"],)).fetchone()
             if previous:
                 if previous["owner_address"] != owner or previous["network"] != body["network"]:
@@ -224,6 +203,31 @@ class Receiver:
             merchant = "numqa_" + uuid.uuid4().hex
             row = db.execute("INSERT INTO dubhe_sandbox_payment_orders(merchant_order_id,request_id,owner_address,account_id,character_index,server_id,network,sku,amount,currency,credits) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *", (merchant, body["requestId"], owner, binding["account_id"], binding["character_index"], self.config.server_id, body["network"], *CATALOG.values())).fetchone()
             return self.public_order(row)
+
+    def ready_binding(self, db, owner):
+        binding = db.execute("SELECT * FROM dubhe_sandbox_wallets WHERE owner_address=%s FOR UPDATE", (owner,)).fetchone()
+        if binding["state"] != "ready":
+            existing = db.execute("SELECT created_at FROM accounts WHERE account_id=%s", (binding["account_id"],)).fetchone()
+            if existing and existing["created_at"] < binding["created_at"]:
+                raise Rejected("sandbox_account_collision")
+            index = self.provision(self.config, binding, existing is not None)
+            if type(index) is not int or not 0 <= index <= 2147483647:
+                raise Rejected("sandbox_character_invalid")
+            account = db.execute("SELECT raw_json FROM accounts WHERE account_id=%s FOR UPDATE", (binding["account_id"],)).fetchone()
+            save = db.execute("SELECT credit,snapshot_json FROM character_saves WHERE account_id=%s AND character_index=%s FOR UPDATE", (binding["account_id"], index)).fetchone()
+            raw = account["raw_json"] if account else {}
+            characters = raw.get("characters", [])
+            if not save or len(characters) != 1 or characters[0].get("name") != binding["character_name"] or characters[0].get("index") != index or save["credit"] != 0 or save["snapshot_json"].get("credit") != 0 or raw.get("saves", {}).get(str(index), {}).get("credit") != 0:
+                raise Rejected("sandbox_new_recipient_invalid")
+            # This recipient has never entered the world. Lock it before
+            # accepting payments, so gameplay and payment writers cannot race.
+            if self.active_lease(db, binding["account_id"]):
+                raise Rejected("sandbox_recipient_online")
+            db.execute("UPDATE accounts SET is_banned=true,ban_reason=%s,ban_until_ms=NULL,banned_at_ms=%s,store_version=store_version+1,updated_at=now(),raw_json=jsonb_set(jsonb_set(jsonb_set(jsonb_set(raw_json,'{is_banned}','true'::jsonb),'{ban_reason}',to_jsonb(%s::text)),'{ban_until_ms}','null'::jsonb),'{banned_at_ms}',to_jsonb(%s::bigint)) WHERE account_id=%s", (LOCK_MARKER, int(time.time() * 1000), LOCK_MARKER, int(time.time() * 1000), binding["account_id"]))
+            db.execute("UPDATE dubhe_sandbox_wallets SET state='ready',character_index=%s,ready_at=now() WHERE owner_address=%s", (index, owner))
+            binding.update(state="ready", character_index=index)
+        self.locked_recipient(db, binding)
+        return binding
 
     @staticmethod
     def public_order(row):
@@ -267,26 +271,32 @@ class Receiver:
                     if receipt["order_id"] != body["orderId"] or receipt["payload_hash"] != digest:
                         raise Rejected("sandbox_payment_already_used")
                     return self.receipt(body, receipt["balance_after"], True)
-                account = self.locked_recipient(db, binding)
-                args = (binding["account_id"], binding["character_index"])
-                save = db.execute("SELECT credit,snapshot_json,save_version FROM character_saves WHERE account_id=%s AND character_index=%s FOR UPDATE", args).fetchone()
-                projection = db.execute("SELECT credit,save_version FROM character_state WHERE account_id=%s AND character_index=%s FOR UPDATE", args).fetchone()
-                if not save or not projection:
-                    raise Rejected("sandbox_projection_missing")
-                raw_credit = account["raw_json"].get("saves", {}).get(str(binding["character_index"]), {}).get("credit")
-                values = [raw_credit, save["snapshot_json"].get("credit"), save["credit"], projection["credit"]]
-                if any(type(value) is not int or value < 0 for value in values) or len(set(values)) != 1 or save["save_version"] != projection["save_version"]:
-                    raise Rejected("sandbox_projection_mismatch")
-                before, after = values[0], values[0] + CATALOG["credits"]
-                if after > 4294967295:
-                    raise Rejected("sandbox_credit_overflow")
-                db.execute("INSERT INTO dubhe_sandbox_payment_receipts(order_id,merchant_order_id,payment_intent_id,payload_hash,account_id,character_index,credits,balance_before,balance_after) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)", (body["orderId"], body["merchantOrderId"], body["paymentIntentId"], digest, *args, CATALOG["credits"], before, after))
-                db.execute("UPDATE accounts SET raw_json=jsonb_set(raw_json,%s,to_jsonb(%s::bigint),false),store_version=store_version+1,updated_at=now() WHERE account_id=%s", (["saves", str(binding["character_index"]), "credit"], after, binding["account_id"]))
-                db.execute("UPDATE character_saves SET credit=%s,snapshot_json=jsonb_set(snapshot_json,'{credit}',to_jsonb(%s::bigint),false),save_version=save_version+1,updated_at=now() WHERE account_id=%s AND character_index=%s", (after, after, *args))
-                db.execute("UPDATE character_state SET credit=%s,save_version=save_version+1,updated_at_ms=%s,updated_at=now() WHERE account_id=%s AND character_index=%s", (after, int(time.time() * 1000), *args))
+                def record(args, before, after):
+                    db.execute("INSERT INTO dubhe_sandbox_payment_receipts(order_id,merchant_order_id,payment_intent_id,payload_hash,account_id,character_index,credits,balance_before,balance_after) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)", (body["orderId"], body["merchantOrderId"], body["paymentIntentId"], digest, *args, CATALOG["credits"], before, after))
+                after = self.grant_locked_credits(db, binding, CATALOG["credits"], record)
                 return self.receipt(body, after, False)
         except psycopg.errors.UniqueViolation as error:
             raise Rejected("sandbox_payment_already_used") from error
+
+    def grant_locked_credits(self, db, binding, credits, record):
+        account = self.locked_recipient(db, binding)
+        args = (binding["account_id"], binding["character_index"])
+        save = db.execute("SELECT credit,snapshot_json,save_version FROM character_saves WHERE account_id=%s AND character_index=%s FOR UPDATE", args).fetchone()
+        projection = db.execute("SELECT credit,save_version FROM character_state WHERE account_id=%s AND character_index=%s FOR UPDATE", args).fetchone()
+        if not save or not projection:
+            raise Rejected("sandbox_projection_missing")
+        raw_credit = account["raw_json"].get("saves", {}).get(str(binding["character_index"]), {}).get("credit")
+        values = [raw_credit, save["snapshot_json"].get("credit"), save["credit"], projection["credit"]]
+        if any(type(value) is not int or value < 0 for value in values) or len(set(values)) != 1 or save["save_version"] != projection["save_version"]:
+            raise Rejected("sandbox_projection_mismatch")
+        before, after = values[0], values[0] + credits
+        if after > 4294967295:
+            raise Rejected("sandbox_credit_overflow")
+        record(args, before, after)
+        db.execute("UPDATE accounts SET raw_json=jsonb_set(raw_json,%s,to_jsonb(%s::bigint),false),store_version=store_version+1,updated_at=now() WHERE account_id=%s", (["saves", str(binding["character_index"]), "credit"], after, binding["account_id"]))
+        db.execute("UPDATE character_saves SET credit=%s,snapshot_json=jsonb_set(snapshot_json,'{credit}',to_jsonb(%s::bigint),false),save_version=save_version+1,updated_at=now() WHERE account_id=%s AND character_index=%s", (after, after, *args))
+        db.execute("UPDATE character_state SET credit=%s,save_version=save_version+1,updated_at_ms=%s,updated_at=now() WHERE account_id=%s AND character_index=%s", (after, int(time.time() * 1000), *args))
+        return after
 
     @staticmethod
     def receipt(body, after, duplicate):
